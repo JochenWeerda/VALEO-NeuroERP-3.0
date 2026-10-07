@@ -42,6 +42,10 @@ def _mock_existing_bin(db, qty: float, cost: float | None = None):
             row.id = "BIN-STOCK-1"
             row.quantity_kg = Decimal(str(qty))
             result.fetchone.return_value = row
+        elif "FROM domain_inventory.warehouse_bins wb" in sql_str and "SELECT wb.warehouse_id" in sql_str:
+            row = MagicMock()
+            row.warehouse_id = "WH-1"
+            result.fetchone.return_value = row
         elif "SELECT unit_cost FROM domain_inventory.bin_stock" in sql_str:
             row = MagicMock()
             row.unit_cost = Decimal(str(cost)) if cost is not None else None

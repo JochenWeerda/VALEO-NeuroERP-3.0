@@ -101,38 +101,68 @@ class InventoryService:
         storage_fee_last_charged_until: Optional[date] = None,
         tenant_id: str = None
     ):
-        """Process a stock movement and update article stock levels."""
+        """Eine Lagerbewegung buchen: Bestandsbuch und Artikelbestand in einem Commit.
 
-        # Get current article
-        article = self.db.query(ArticleModel).filter(ArticleModel.id == article_id).first()
+        Die Richtung kommt aus ``inventory_movement_direction`` — derselben Tabelle,
+        mit der jede Auswertung den Bestand liest:
+
+        * ``in`` / ``out``: Die Menge ist **positiv**, das Vorzeichen traegt der Typ.
+          Bis 07.10.2026 verlangte dieser Dienst fuer ``out`` eine negative Menge und
+          schrieb sie so; die Richtungstabelle rechnet ``out`` als ``-quantity`` —
+          ein Abgang haette den Bestand in jeder Auswertung **erhoeht**. Die
+          Erfassungsmaske schickt positive Mengen und bekam deshalb immer
+          "Invalid movement type". Eine negative ``out``-Eingabe wird als Betrag
+          gelesen.
+        * ``adjustment``: vorzeichenbehaftet (positiv = Zugang).
+        * ``transfer``: steht in keiner Richtungstabelle und waere in jeder
+          Auswertung mit 0 verschwunden; gebucht wird er als ``umbuchung``
+          (vorzeichenbehaftet).
+
+        Artikel und Lager muessen dem Mandanten gehoeren. Vorher-/Nachher-Bestand
+        stammen aus dem Bestandsbuch je Lager; der Artikelbestand laeuft um dieselbe
+        Menge mit. Kein Abgang macht den Lagerbestand negativ.
+        """
+        from app.services.inventory_movement_direction import signed_quantity
+        from app.services.inventory_stock_balance import current_stock
+
+        if not tenant_id:
+            raise ValueError("Mandant fehlt")
+        typ = (movement_type or "").strip().lower()
+        menge = Decimal(str(quantity or 0))
+        if menge == 0:
+            raise ValueError("Menge 0 bewegt nichts")
+        if typ in ("in", "out"):
+            menge = abs(menge)
+        elif typ == "transfer":
+            typ = "umbuchung"
+        elif typ != "adjustment":
+            raise ValueError(f"Invalid movement type: {movement_type}")
+        movement_type = typ
+        quantity = menge
+
+        article = (
+            self.db.query(ArticleModel)
+            .filter(ArticleModel.id == article_id, ArticleModel.tenant_id == tenant_id)
+            .first()
+        )
         if not article:
             raise ValueError(f"Article {article_id} not found")
 
-        # Get current warehouse
         warehouse = (
             self.db.query(WarehouseModel.id)
-            .filter(WarehouseModel.id == warehouse_id)
+            .filter(WarehouseModel.id == warehouse_id, WarehouseModel.tenant_id == tenant_id)
             .first()
         )
         if not warehouse:
             raise ValueError(f"Warehouse {warehouse_id} not found")
 
-        previous_stock = article.current_stock or Decimal(0)
-
-        # Calculate new stock based on movement type
-        if movement_type in ['in', 'adjustment'] and quantity > 0:
-            new_stock = previous_stock + quantity
-        elif movement_type in ['out', 'adjustment'] and quantity < 0:
-            new_stock = previous_stock + quantity  # quantity is negative
-        elif movement_type == 'transfer':
-            # For transfers, quantity can be positive (incoming) or negative (outgoing)
-            new_stock = previous_stock + quantity
-        else:
-            raise ValueError(f"Invalid movement type: {movement_type}")
-
-        # Ensure stock doesn't go negative for outbound movements
-        if movement_type == 'out' and new_stock < 0:
-            raise ValueError(f"Insufficient stock. Current: {previous_stock}, Requested: {abs(quantity)}")
+        delta = Decimal(str(signed_quantity(movement_type, float(quantity))))
+        previous_stock = Decimal(str(current_stock(
+            self.db, tenant_id=tenant_id, article_id=str(article_id), warehouse_id=str(warehouse_id),
+        )))
+        new_stock = previous_stock + delta
+        if delta < 0 and new_stock < 0:
+            raise ValueError(f"Insufficient stock. Current: {previous_stock}, Requested: {abs(delta)}")
         if ownership_type == "consigned" and not owner_partner_id:
             raise ValueError("owner_partner_id is required for consigned stock movements")
 
@@ -171,12 +201,12 @@ class InventoryService:
             previous_stock=previous_stock,
             new_stock=new_stock,
             total_cost=total_cost,
-            tenant_id=tenant_id or article.tenant_id
+            tenant_id=tenant_id
         )
 
-        # Update article stock
-        article.current_stock = new_stock
-        article.available_stock = new_stock - (article.reserved_stock or Decimal(0))
+        # Der Artikelbestand laeuft um dieselbe Menge mit (er summiert alle Lager).
+        article.current_stock = (article.current_stock or Decimal(0)) + delta
+        article.available_stock = article.current_stock - (article.reserved_stock or Decimal(0))
         article.updated_at = datetime.utcnow()
 
         # Save changes

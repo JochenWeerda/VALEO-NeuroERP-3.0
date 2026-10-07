@@ -150533,12 +150533,11 @@
         "type": "object"
       },
       "StockMovement": {
-        "description": "Full stock movement schema",
+        "description": "Eine gebuchte Lagerbewegung, so wie sie im Bestandsbuch steht.\n\nDie Schreibregeln der Basisklasse gelten hier nicht: Das Bestandsbuch fuehrt\nsieben Bewegungsvokabulare (``wareneingang``, ``EINLAGERUNG``, ``ABGANG`` …)\nund Altwerte wie ``ownership_type = 'eigen'``. Bis 07.10.2026 erbte das\nLesemodell die Muster des Anlegens, und eine einzige solche Zeile liess die\nganze Liste mit 500 scheitern.",
         "properties": {
           "agrar_contract_id": {
             "anyOf": [
               {
-                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -150562,7 +150561,6 @@
           "booking_user": {
             "anyOf": [
               {
-                "maxLength": 100,
                 "type": "string"
               },
               {
@@ -150575,7 +150573,6 @@
           "charge": {
             "anyOf": [
               {
-                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -150631,7 +150628,6 @@
           "movement_number": {
             "anyOf": [
               {
-                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -150655,20 +150651,25 @@
             "title": "Movement Time"
           },
           "movement_type": {
-            "description": "Movement type",
-            "pattern": "^(in|out|transfer|adjustment)$",
+            "description": "Movement type as booked (any vocabulary)",
             "title": "Movement Type",
             "type": "string"
           },
           "new_stock": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "Stock after movement",
-            "title": "New Stock",
-            "type": "string"
+            "title": "New Stock"
           },
           "notes": {
             "anyOf": [
               {
-                "maxLength": 200,
                 "type": "string"
               },
               {
@@ -150681,7 +150682,6 @@
           "owner_partner_id": {
             "anyOf": [
               {
-                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -150692,16 +150692,29 @@
             "title": "Owner Partner Id"
           },
           "ownership_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "default": "owned",
-            "description": "Stock ownership type",
-            "pattern": "^(owned|consigned)$",
-            "title": "Ownership Type",
-            "type": "string"
+            "description": "Stock ownership type as booked",
+            "title": "Ownership Type"
           },
           "previous_stock": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "Stock before movement",
-            "title": "Previous Stock",
-            "type": "string"
+            "title": "Previous Stock"
           },
           "process_type": {
             "anyOf": [
@@ -150724,7 +150737,6 @@
           "reference_number": {
             "anyOf": [
               {
-                "maxLength": 50,
                 "type": "string"
               },
               {
@@ -150798,14 +150810,13 @@
           "unit": {
             "anyOf": [
               {
-                "maxLength": 10,
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Unit of measure for booking",
+            "description": "Unit of measure",
             "title": "Unit"
           },
           "unit_cost": {
@@ -150841,7 +150852,6 @@
           "warehouse_location": {
             "anyOf": [
               {
-                "maxLength": 120,
                 "type": "string"
               },
               {
@@ -150866,7 +150876,6 @@
           "weighing_ticket_id": {
             "anyOf": [
               {
-                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -150883,9 +150892,7 @@
           "movement_type",
           "quantity",
           "id",
-          "tenant_id",
-          "previous_stock",
-          "new_stock"
+          "tenant_id"
         ],
         "title": "StockMovement",
         "type": "object"
@@ -288613,13 +288620,19 @@
         "operationId": "list_frachtauftraege_api_v1_einkauf_frachtauftraege_get",
         "parameters": [
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -288665,13 +288678,19 @@
         "operationId": "create_frachtauftrag_api_v1_einkauf_frachtauftraege_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -288734,13 +288753,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -288784,13 +288809,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -290715,16 +290746,6 @@
         "parameters": [
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "search",
             "required": false,
             "schema": {
@@ -290737,6 +290758,22 @@
                 }
               ],
               "title": "Search"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -290782,13 +290819,19 @@
         "operationId": "create_lieferschein_api_v1_einkauf_lieferscheine_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -290861,13 +290904,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -290928,13 +290977,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -290978,13 +291033,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -291035,13 +291096,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -291092,7 +291159,7 @@
     },
     "/api/v1/einkauf/lieferscheine/{ls_id}/bestellung-abgleich": {
       "post": {
-        "description": "Positionsabgleich Eingangslieferschein ↔ Einkaufsbestellung (per artikel_nr,\nFallback Lieferanten-Artikelnummer). Schreibt menge_geliefert/menge_offen und\nPositionsstatus auf der Bestellung fort und setzt den Bestellstatus auf\nteilgeliefert/geliefert. Meldet UNTER-/UEBERLIEFERUNG, UNBESTELLT, UNGELIEFERT.",
+        "description": "Positionsabgleich Eingangslieferschein ↔ Einkaufsbestellung (per artikel_nr,\nFallback Lieferanten-Artikelnummer). Schreibt menge_geliefert/menge_offen und\nPositionsstatus auf der Bestellung fort und setzt den Bestellstatus auf\nteilgeliefert/geliefert. Meldet UNTER-/UEBERLIEFERUNG, UNBESTELLT, UNGELIEFERT.\n\nEin Lieferschein wird **einmal** abgeglichen, und erst, wenn seine Ware\neingebucht ist. Bis 07.10.2026 zaehlte jeder weitere Abgleich die Menge erneut\nauf die Bestellung, und eine Bestellung stand auf \"geliefert\", ohne dass ein\nKilo im Lager war.",
         "operationId": "abgleich_lieferschein_bestellung_api_v1_einkauf_lieferscheine__ls_id__bestellung_abgleich_post",
         "parameters": [
           {
@@ -291105,13 +291172,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -291162,7 +291235,7 @@
     },
     "/api/v1/einkauf/lieferscheine/{ls_id}/einbuchen": {
       "post": {
-        "description": "Bucht alle Positionen des Einkauf-Lieferscheins als Einlagerung\n(EINLAGERUNG) in domain_inventory.inventory_stock_movements und bin_stock.\nVoraussetzung: Lieferschein muss existieren; kann auch nicht-erledigte LSe verbuchen,\naber jede Position kann nur einmal verbucht werden (idempotent via movement_reference_check).",
+        "description": "Bucht die Positionen des Einkauf-Lieferscheins als Einlagerung — ganz oder gar nicht.\n\nLagerplatz, Bestandsbuch und Artikelbestand laufen in **einem** Commit. Bis\n07.10.2026 committete jede Position einzeln: Scheiterte die dritte, waren zwei\ngebucht und der Lieferschein \"erledigt\"; ein zweiter Aufruf buchte alles noch\neinmal (der versprochene Wiederholungsschutz existierte nicht), und Artikel,\nLager und Lagerplatz wurden nicht auf den Mandanten geprueft.\n\nPositionen ohne Menge bewegen nichts und werden uebersprungen. Eine Position,\ndie sich nicht einlagern laesst (Artikel unbekannt, kein Lagerplatz), verhindert\ndie ganze Buchung — die Antwort nennt jede.",
         "operationId": "einbuchen_lieferschein_api_v1_einkauf_lieferscheine__ls_id__einbuchen_post",
         "parameters": [
           {
@@ -291175,13 +291248,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -291244,13 +291323,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -291322,13 +291407,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -291381,13 +291472,19 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -338203,22 +338300,6 @@
         "parameters": [
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "in": "query",
             "name": "charge",
             "required": false,
             "schema": {
@@ -338301,24 +338382,6 @@
       },
       "post": {
         "operationId": "create_charge_lineage_api_v1_inventory_charge_lineage__post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -339456,24 +339519,6 @@
       "get": {
         "description": "Get total inventory value and statistics.",
         "operationId": "get_inventory_value_api_v1_inventory_reports_inventory_value_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -339482,16 +339527,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -339511,22 +339546,6 @@
         "description": "Get purchase order suggestions grouped by supplier.",
         "operationId": "get_purchase_order_suggestions_api_v1_inventory_reports_purchase_order_suggestions_get",
         "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
           {
             "in": "query",
             "name": "supplier_filter",
@@ -339583,22 +339602,6 @@
         "parameters": [
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "in": "query",
             "name": "days_ahead",
             "required": false,
             "schema": {
@@ -339649,22 +339652,6 @@
         "parameters": [
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "in": "query",
             "name": "days_threshold",
             "required": false,
             "schema": {
@@ -339712,24 +339699,6 @@
       "get": {
         "description": "Get low stock alerts for all articles.",
         "operationId": "get_stock_alerts_api_v1_inventory_reports_stock_alerts_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -339738,16 +339707,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -339767,22 +339726,6 @@
         "description": "Get comprehensive stock levels report.",
         "operationId": "get_stock_levels_report_api_v1_inventory_reports_stock_levels_get",
         "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
           {
             "in": "query",
             "name": "category_filter",
@@ -339853,22 +339796,6 @@
         "description": "Get inventory turnover analysis.",
         "operationId": "get_turnover_analysis_api_v1_inventory_reports_turnover_analysis_get",
         "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
           {
             "in": "query",
             "name": "period_days",
@@ -339973,24 +339900,6 @@
         "description": "Return a paginated list of stock movements.",
         "operationId": "list_stock_movements_api_v1_inventory_stock_movements__get",
         "parameters": [
-          {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
           {
             "description": "Filter by article ID",
             "in": "query",
@@ -340127,24 +340036,6 @@
       "post": {
         "description": "Create a new stock movement.",
         "operationId": "create_stock_movement_api_v1_inventory_stock_movements__post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -340204,22 +340095,6 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Number of days to look back",
             "in": "query",
             "name": "days",
@@ -340268,7 +340143,7 @@
     },
     "/api/v1/inventory/stock-movements/{movement_id}": {
       "delete": {
-        "description": "Delete a stock movement record.",
+        "description": "Eine gebuchte Lagerbewegung wird nicht geloescht, sondern storniert.\n\nBis 07.10.2026 loeschte dieser Weg die Zeile aus dem Bestandsbuch — ohne\nGegenbuchung und ohne den Artikelbestand zu korrigieren: Der Bestand im Buch\nsprang, der am Artikel nicht, und die Buchung war spurlos weg (GoBD: keine\nLoeschung gebuchter Vorgaenge). Der Weg bleibt, damit Altaufrufer eine klare\nAntwort bekommen statt eines 405.",
         "operationId": "delete_stock_movement_api_v1_inventory_stock_movements__movement_id__delete",
         "parameters": [
           {
@@ -340279,26 +340154,10 @@
               "title": "Movement Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
-          "204": {
+          "409": {
             "description": "Successful Response"
           },
           "422": {
@@ -340334,22 +340193,6 @@
             "schema": {
               "title": "Movement Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -340397,22 +340240,6 @@
             "schema": {
               "title": "Movement Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -340464,24 +340291,6 @@
       "post": {
         "description": "Run monthly storage-fee calculation for consigned stock.",
         "operationId": "run_storage_fee_engine_api_v1_inventory_storage_fees_run_post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -340530,22 +340339,6 @@
       "get": {
         "operationId": "list_storage_fee_runs_api_v1_inventory_storage_fees_runs_get",
         "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
           {
             "in": "query",
             "name": "limit",
@@ -340602,22 +340395,6 @@
             "schema": {
               "title": "Run Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -340804,24 +340581,6 @@
       "post": {
         "description": "Create a new warehouse.",
         "operationId": "create_warehouse_api_v1_inventory_warehouses__post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -340879,22 +340638,6 @@
               "title": "Warehouse Id",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
           }
         ],
         "responses": {
@@ -340934,22 +340677,6 @@
             "schema": {
               "title": "Warehouse Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -340997,22 +340724,6 @@
             "schema": {
               "title": "Warehouse Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -349425,8 +349136,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -349437,7 +349148,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -349486,8 +349197,8 @@
         "operationId": "create_bestandskorrektur_api_v1_lager_bestandskorrektur_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -349498,7 +349209,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -349553,8 +349264,8 @@
         "operationId": "create_lagerbewegung_api_v1_lager_bewegungen_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -349565,7 +349276,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -349751,8 +349462,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "x_tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -349763,7 +349474,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -349809,22 +349520,6 @@
         "description": "Korrektur-Bewegungen auflisten (gefiltert nach Grund-Code).",
         "operationId": "list_korrekturen_api_v1_lager_korrekturen_get",
         "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
           {
             "in": "query",
             "name": "article_id",
@@ -349879,6 +349574,22 @@
               "title": "Limit",
               "type": "integer"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -349931,8 +349642,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -349943,7 +349654,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -350108,8 +349819,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "x_tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -350120,7 +349831,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -350169,8 +349880,8 @@
         "operationId": "create_inventory_lot_api_v1_lager_lots_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "x_tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -350181,7 +349892,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -350247,8 +349958,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "x_tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -350259,7 +349970,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -350316,8 +350027,8 @@
         "operationId": "create_mhd_abschreibung_api_v1_lager_mhd_abschreibung_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -350328,7 +350039,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -351363,8 +351074,8 @@
         "operationId": "create_schwund_api_v1_lager_schwund_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -351375,7 +351086,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -422157,12 +421868,12 @@
     },
     "/api/v1/scan/barcode": {
       "post": {
-        "description": "Barcode-Lookup: sucht Artikel per EAN, Artikelnummer oder internem Code.\n\nRückgabe enthält Artikel-Stammdaten + aktuellen Bestand im angegebenen Lager.\nFalls der Artikel nicht gefunden wird, wird `gefunden=False` zurückgegeben\n(kein 404) — das ermöglicht Fremdware-Erkennung im Frontend.",
+        "description": "Barcode-Lookup: sucht Artikel per EAN, Artikelnummer oder internem Code.\n\nRückgabe enthält Artikel-Stammdaten + aktuellen Bestand im angegebenen Lager.\nFalls der Artikel nicht gefunden wird, wird `gefunden=False` zurückgegeben\n(kein 404) — das ermöglicht Fremdware-Erkennung im Frontend.\n\nDer Mandant kommt aus dem Kontext; bis 07.10.2026 aus einem Query-Parameter,\nsonst aus dem Standardmandanten — der Scanner fand fremde Artikel samt Bestand.",
         "operationId": "scan_barcode_api_v1_scan_barcode_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -422173,7 +421884,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],

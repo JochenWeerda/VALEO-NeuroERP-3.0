@@ -323,13 +323,11 @@ def _post_storage_fee_journal(
 @router.post("/run", response_model=StorageFeeRunOut)
 async def run_storage_fee_engine(
     payload: StorageFeeRunRequest,
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_admin),
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Run monthly storage-fee calculation for consigned stock."""
-    effective_tenant = tenant_id or effective_tenant
     period_start, period_end = _period_bounds(payload.period)
     posting_date = payload.posting_date or period_end
     charges = _collect_charge_candidates(db, effective_tenant, period_end, payload.currency.upper())
@@ -538,13 +536,11 @@ async def run_storage_fee_engine(
 
 @router.get("/runs")
 async def list_storage_fee_runs(
-    tenant_id: Optional[str] = Query(None),
     limit: int = Query(20, ge=1, le=200),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_access),
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
-    effective_tenant = tenant_id or effective_tenant
     rows = db.execute(
         text(
             """
@@ -579,12 +575,10 @@ async def list_storage_fee_runs(
 @router.get("/runs/{run_id}")
 async def get_storage_fee_run(
     run_id: str,
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_access),
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
-    effective_tenant = tenant_id or effective_tenant
     run = db.execute(
         text(
             """

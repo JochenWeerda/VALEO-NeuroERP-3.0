@@ -85,8 +85,8 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `procurement.edi.message.ack` | outbox | `app/services/einkauf_compat_service.py` |
 | `procurement.edi.message.created` | outbox | `app/services/einkauf_compat_service.py` |
 | `procurement.return.created` | outbox | `app/services/einkauf_compat_service.py` |
-| `purchase_order.approved` | outbox | `app/api/v1/endpoints/compat.py` |
-| `purchase_order.cancelled` | outbox | `app/api/v1/endpoints/compat.py` |
+| `purchase_order.approved` | outbox | `app/services/purchase_order_service.py` |
+| `purchase_order.cancelled` | outbox | `app/services/purchase_order_service.py` |
 | `purchase_order.communication.sent` | outbox | `app/api/v1/endpoints/compat.py` |
 | `purchase_order.created` | outbox | `app/api/v1/endpoints/compat.py` |
 | `service_entry_sheet.created` | outbox | `app/services/einkauf_compat_service.py` |

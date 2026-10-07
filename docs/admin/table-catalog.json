@@ -9547,6 +9547,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "opportunity_id",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
@@ -9565,12 +9570,15 @@
             "app/api/v1/endpoints/compliance_dsgvo.py",
             "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/crm_360_reads.py",
+            "app/api/v1/endpoints/opportunities.py",
             "app/infrastructure/models/__init__.py",
-            "app/services/calendar_projection_service.py"
+            "app/services/calendar_projection_service.py",
+            "app/services/mask_rollout_summary_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/compliance_dsgvo.py",
-            "app/api/v1/endpoints/crm_360.py"
+            "app/api/v1/endpoints/crm_360.py",
+            "app/api/v1/endpoints/opportunities.py"
           ]
         },
         "business_partner_addresses": {
@@ -12875,6 +12883,9 @@
             "app/api/v1/endpoints/opportunities.py",
             "app/domains/crm/models.py",
             "app/services/mask_rollout_summary_service.py"
+          ],
+          "written_by": [
+            "app/services/crm_lead_service.py"
           ]
         },
         "crm_segment_members": {
@@ -13288,6 +13299,7 @@
             "app/infrastructure/models/agrar_models.py",
             "app/infrastructure/models/l3c_models.py",
             "app/services/business_partner_service.py",
+            "app/services/crm_lead_service.py",
             "app/services/customer_reference.py",
             "app/services/customer_sales_eligibility.py",
             "app/services/customer_service.py",
@@ -14614,6 +14626,11 @@
               "name": "freigegeben_by",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "content_bytes",
+              "nullable": true,
+              "type": "bytea"
             }
           ],
           "foreign_keys": [
@@ -14634,12 +14651,14 @@
             "app/core/gobd_artifact.py",
             "app/services/docflow_artifact_service.py",
             "app/services/docflow_evidence_service.py",
-            "app/services/docflow_return_service.py"
+            "app/services/docflow_return_service.py",
+            "app/services/settlement_document_archive_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/gobd_archiv.py",
             "app/core/gobd_artifact.py",
-            "app/services/docflow_artifact_service.py"
+            "app/services/docflow_artifact_service.py",
+            "app/services/settlement_document_archive_service.py"
           ]
         },
         "document_followups": {
@@ -14919,15 +14938,19 @@
             "app/api/v1/endpoints/admin_pos.py",
             "app/api/v1/endpoints/gobd_archiv.py",
             "app/core/dms_ocr_contracts.py",
+            "app/core/gobd_artifact.py",
             "app/services/docflow_artifact_service.py",
             "app/services/docflow_evidence_service.py",
             "app/services/docflow_followup_service.py",
             "app/services/docflow_return_service.py",
-            "app/services/docflow_service.py"
+            "app/services/docflow_service.py",
+            "app/services/settlement_document_archive_service.py"
           ],
           "written_by": [
+            "app/core/gobd_artifact.py",
             "app/services/docflow_gobd_service.py",
-            "app/services/docflow_service.py"
+            "app/services/docflow_service.py",
+            "app/services/settlement_document_archive_service.py"
           ]
         },
         "document_items": {
@@ -16889,12 +16912,14 @@
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/procurement_match_service.py",
-            "app/services/procurement_service.py"
+            "app/services/procurement_service.py",
+            "app/services/wareneingang_avis_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/einkauf_lieferschein.py",
             "app/services/einkauf_compat_service.py",
-            "app/services/rfq_service.py"
+            "app/services/rfq_service.py",
+            "app/services/wareneingang_avis_service.py"
           ]
         },
         "bestellungen": {
@@ -17275,12 +17300,14 @@
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/procurement_match_service.py",
-            "app/services/procurement_service.py"
+            "app/services/procurement_service.py",
+            "app/services/wareneingang_avis_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/einkauf_lieferschein.py",
             "app/services/einkauf_compat_service.py",
-            "app/services/rfq_service.py"
+            "app/services/rfq_service.py",
+            "app/services/wareneingang_avis_service.py"
           ]
         },
         "bestellvorschlaege": {
@@ -18316,6 +18343,7 @@
             "app/api/v1/endpoints/crm_partner_suche.py",
             "app/infrastructure/models/einkauf_models.py",
             "app/services/customer_reference.py",
+            "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py"
           ]
         },
@@ -22075,6 +22103,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "created_by",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -22085,8 +22118,10 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/mask_actions.py",
             "app/api/v1/endpoints/payment_runs.py",
-            "app/services/mask_rollout_summary_service.py"
+            "app/services/mask_rollout_summary_service.py",
+            "app/services/payment_run_freigabe.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/payment_runs.py"
@@ -23127,6 +23162,93 @@
             "app/infrastructure/models/l3c_models.py"
           ]
         },
+        "ebilanz_exports": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "wirtschaftsjahr",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "bilanzart",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "berichtsperiode_von",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "berichtsperiode_bis",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "steuernummer",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "finanzamt_nr",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "status",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "taxonomie_version",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "xbrl_paketgroesse_kb",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "elster_transfer_ticket",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "uebertragen_am",
+              "nullable": true,
+              "type": "timestamp without time zone"
+            },
+            {
+              "name": "erstellt_am",
+              "nullable": true,
+              "type": "timestamp without time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/ebilanz_elster.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/ebilanz_elster.py"
+          ]
+        },
         "finance_mahnstufen_audit": {
           "columns": [
             {
@@ -24128,9 +24250,6 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/ebilanz_elster.py"
-          ],
-          "written_by": [
             "app/api/v1/endpoints/ebilanz_elster.py"
           ]
         }
@@ -27578,6 +27697,7 @@
             "app/core/database.py",
             "app/infrastructure/models/l3c_models.py",
             "app/services/mask_rollout_summary_service.py",
+            "app/services/settlement_document_archive_service.py",
             "app/services/supply_chain_trace_service.py"
           ]
         },
@@ -28721,6 +28841,7 @@
             "app/services/mask_rollout_summary_service.py",
             "app/services/preisfindung_service.py",
             "app/services/procurement_service.py",
+            "app/services/warehouse_service.py",
             "app/services/whatsapp_intake_service.py"
           ],
           "written_by": [
@@ -28729,7 +28850,10 @@
             "app/seeds/inventory_seed.py",
             "app/services/feed_inventory_link_service.py",
             "app/services/inventory_auxiliary_service.py",
-            "app/services/inventory_compat_service.py"
+            "app/services/inventory_compat_service.py",
+            "app/services/inventory_correction_service.py",
+            "app/services/warehouse_service.py",
+            "app/services/wareneingang_avis_service.py"
           ]
         },
         "bin_locations": {
@@ -30865,6 +30989,7 @@
             "app/api/v1/endpoints/health.py",
             "app/api/v1/endpoints/inventory_counts.py",
             "app/api/v1/endpoints/inventory_operations.py",
+            "app/api/v1/endpoints/mask_actions.py",
             "app/domains/inventory/api/storage_fees.py",
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/l3c_models.py",
@@ -30893,7 +31018,8 @@
             "app/services/inventory_correction_service.py",
             "app/services/inventory_count_close_service.py",
             "app/services/mobile_sync_service.py",
-            "app/services/warehouse_service.py"
+            "app/services/warehouse_service.py",
+            "app/services/wareneingang_avis_service.py"
           ]
         },
         "lkw_annahme_queue": {
@@ -33398,6 +33524,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/einkauf_lieferschein.py",
             "app/api/v1/endpoints/pos_retoure.py",
             "app/infrastructure/models/wms_models.py",
             "app/services/mask_rollout_summary_service.py",
@@ -33717,6 +33844,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/einkauf_lieferschein.py",
             "app/api/v1/endpoints/inventory_operations.py",
             "app/api/v1/endpoints/pos_retoure.py",
             "app/infrastructure/models/__init__.py",
@@ -33726,7 +33854,8 @@
             "app/seeds/inventory_seed.py",
             "app/services/customer_reference.py",
             "app/services/feed_inventory_link_service.py",
-            "app/services/mask_rollout_summary_service.py"
+            "app/services/mask_rollout_summary_service.py",
+            "app/services/wareneingang_avis_service.py"
           ],
           "written_by": [
             "app/seeds/inventory_seed.py"
@@ -44370,6 +44499,7 @@
             "app/api/v1/endpoints/branches.py",
             "app/api/v1/endpoints/collective_documents.py",
             "app/api/v1/endpoints/logistics_tours.py",
+            "app/api/v1/endpoints/mask_actions.py",
             "app/api/v1/endpoints/sales_delivery_notes.py",
             "app/api/v1/endpoints/sales_invoices.py",
             "app/api/v1/endpoints/sales_orders.py",

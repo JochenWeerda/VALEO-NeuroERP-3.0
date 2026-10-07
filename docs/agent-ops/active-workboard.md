@@ -11,7 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BESTANDSBUCH-EINKAUF-20261007 — in Arbeit, Claude Code
+## BESTANDSBUCH-EINKAUF-20261007 — abgeschlossen, Claude Code
+
+**Abnahme (07.10.2026):** alle fuenf Befunde behoben, dazu gleichartige Funde:
+`/lager/*` + Barcode-Scan mit Query-Mandant, WMS-`book_stock_movement` mit
+Vorzeichenfehler, Lesemodell `StockMovement` (Liste dauerhaft 500 in der Dev-DB),
+`register_artifact` archivierte wegen des Belegkopf-Fremdschluessels **nie** etwas,
+Bestellstatistik nie erreichbar. 41 neue Vertraege, 671 Bereichstests gruen, Live-Probe
+am gewachsenen Bestand. Migration `lieferschein_abgleich_20261007` (Probe + Dev). QA:
+[bestandsbuch-einkauf-20261007.md](../quality-assurance/bestandsbuch-einkauf-20261007.md).
+
 
 **Owner:** Claude Code. **Stand:** 2026-10-07. **Ziel:** die fuenf benannten Befunde aus
 MANDANT-FINANZ-CRM-EINKAUF-20261007 beheben: (1) Inventar-API nimmt den Mandanten aus

@@ -104,7 +104,6 @@ export const stockMovementService = {
     return response.data
   },
 
-  async deleteStockMovement(id: string) {
-    await apiClient.delete(`/api/v1/inventory/stock-movements/${id}`)
-  },
+  // Kein deleteStockMovement: gebuchte Bewegungen werden storniert (Detailmaske
+  // lager/stock-movement), das Backend beantwortet DELETE mit 409.
 }

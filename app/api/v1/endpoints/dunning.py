@@ -767,13 +767,15 @@ async def send_dunning(
         if not row:
             raise HTTPException(status_code=404, detail="Dunning notice not found")
         
-        db.commit()
         canonical = f"Mahnung|{dunning_id}|{row[1]}|{row[3]}|{row[6]}|{row[9]}"
         content_hash = sha256_hex(canonical.encode("utf-8"))
+        # Versandstatus und Archiveintrag gemeinsam: ohne Archiv kein "versandt".
         register_artifact(
             db, tenant_id, dunning_id, "other",
-            content_hash, f"dunning/sent/{dunning_id}", file_name=f"Mahnung_{dunning_id}.pdf", created_by=None,
+            content_hash, f"dunning/sent/{dunning_id}", file_name=f"Mahnung_{dunning_id}_versanddaten.txt",
+            created_by=None, doc_type="dunning_notice", content=canonical.encode("utf-8"),
         )
+        db.commit()
         
         return DunningResponse(
             id=str(row[0]),

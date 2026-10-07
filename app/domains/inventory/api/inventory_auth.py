@@ -103,19 +103,26 @@ def get_current_tenant_id(
     request: Request,
     token: str = Depends(require_inventory_access)
 ) -> str:
-    """
-    Extract tenant ID from authenticated user.
-    """
-    claims = getattr(request.state, 'token_claims', {})
+    """Der Mandant dieses Requests: der von der Middleware gepruefte ``X-Tenant-ID``.
 
-    # For development token, return default tenant
-    if claims.get('token_type') == 'dev':
-        return settings.DEFAULT_TENANT_ID
+    Bis 07.10.2026 lieferte diese Funktion beim Dev-Token immer den
+    Standardmandanten und ignorierte den Header; jeder Inventar-Weg nahm zudem einen
+    ``tenant_id``-Query-Parameter, der den Mandanten ueberschrieb. Wer eine fremde
+    Kennung in die URL schrieb, las und buchte im fremden Lager.
 
-    # Extract tenant ID from JWT claims
-    tenant_id = claims.get('tenant_id')
-    if not tenant_id:
-        raise HTTPException(status_code=400, detail="Tenant ID not found in token")
+    Traegt ein echtes Token einen Mandanten, muss er mit dem Kontext uebereinstimmen.
+    """
+    tenant_id = (
+        getattr(request.state, "tenant_id", None)
+        or request.headers.get("X-Tenant-ID")
+        or ""
+    ).strip() or settings.DEFAULT_TENANT_ID
+
+    claims = getattr(request.state, 'token_claims', {}) or {}
+    if claims.get('token_type') != 'dev':
+        token_tenant = claims.get('tenant_id')
+        if token_tenant and token_tenant != tenant_id:
+            raise HTTPException(status_code=403, detail="Access denied: tenant mismatch")
 
     return tenant_id
 

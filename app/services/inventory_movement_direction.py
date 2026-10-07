@@ -51,6 +51,10 @@ INBOUND_TYPES: tuple[str, ...] = (
     "umbuchung",
 )
 
+#: Zugangsarten, deren Menge das Vorzeichen selbst traegt (siehe oben). Schreiber
+#: buchen sie mit Vorzeichen, alle anderen Arten mit positiver Menge.
+SIGNED_TYPES: frozenset[str] = frozenset({"inventur", "adjustment", "umbuchung", "opening_balance"})
+
 #: Bewegungstypen, die den Bestand senken.
 OUTBOUND_TYPES: tuple[str, ...] = (
     "out",

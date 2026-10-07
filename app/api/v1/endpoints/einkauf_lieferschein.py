@@ -1,4 +1,9 @@
-"""Einkauf Lieferschein + Frachtauftrag CRUD endpoints."""
+"""Einkauf Lieferschein + Frachtauftrag CRUD endpoints.
+
+Der Mandant kommt aus dem Kontext. Bis 07.10.2026 nahm jeder Weg ihn aus einem
+Query-Parameter mit dem Vorgabewert ``"system"`` — ohne Parameter landete jeder
+Lieferschein im selben Topf, mit Parameter in jedem beliebigen Mandanten.
+"""
 
 from __future__ import annotations
 
@@ -12,7 +17,9 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_today
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 
 
 from app.api.v1.schemas.base import BaseSchema
@@ -168,7 +175,7 @@ def _list_positions(db: Session, ls_id: str) -> list[LieferscheinPosition]:
 
 @router.get("/lieferscheine", response_model=list[Lieferschein], summary="Lieferscheine auflisten")
 async def list_lieferscheine(
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     search: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
@@ -190,7 +197,7 @@ async def list_lieferscheine(
 @router.post("/lieferscheine", response_model=Lieferschein, status_code=201, summary="Lieferschein anlegen")
 async def create_lieferschein(
     payload: LieferscheinCreate,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     ls_id = uuid7()
@@ -237,7 +244,7 @@ async def create_lieferschein(
 @router.get("/lieferscheine/last", response_model=Optional[Lieferschein], summary="Last lieferschein abrufen")
 async def get_last_lieferschein(
     lieferant_id: Optional[str] = Query(None, description="Filter by supplier (last LS for this supplier)"),
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Last (most recent) Lieferschein for F11 'Wie vorheriger Beleg'."""
@@ -259,13 +266,13 @@ async def get_last_lieferschein(
 
 
 @router.get("/lieferscheine/{ls_id}", response_model=Lieferschein, summary="Lieferschein abrufen")
-async def get_lieferschein(ls_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+async def get_lieferschein(ls_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     row = _get_lieferschein_or_404(db, ls_id, tenant_id)
     return Lieferschein(**dict(row), positionen=_list_positions(db, ls_id))
 
 
 @router.patch("/lieferscheine/{ls_id}", response_model=Lieferschein, summary="Lieferschein aktualisieren")
-async def patch_lieferschein(ls_id: str, payload: LieferscheinUpdate, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+async def patch_lieferschein(ls_id: str, payload: LieferscheinUpdate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
     values = payload.model_dump(exclude_unset=True)
     if values:
@@ -278,7 +285,7 @@ async def patch_lieferschein(ls_id: str, payload: LieferscheinUpdate, tenant_id:
 
 
 @router.delete("/lieferscheine/{ls_id}", status_code=204, response_class=Response, response_model=None, summary="Lieferschein löschen")
-async def delete_lieferschein(ls_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+async def delete_lieferschein(ls_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
     db.execute(text("DELETE FROM einkauf_lieferscheine WHERE id = :id AND tenant_id = :tenant_id"), {"id": ls_id, "tenant_id": tenant_id})
     db.commit()
@@ -286,7 +293,7 @@ async def delete_lieferschein(ls_id: str, tenant_id: str = Query("system"), db: 
 
 
 @router.post("/lieferscheine/{ls_id}/positionen", response_model=LieferscheinPosition, status_code=201, summary="Lieferschein position hinzufügen")
-async def add_lieferschein_position(ls_id: str, payload: LieferscheinPositionCreate, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+async def add_lieferschein_position(ls_id: str, payload: LieferscheinPositionCreate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
     pos_id = uuid7()
     db.execute(
@@ -315,7 +322,7 @@ async def patch_lieferschein_position(
     ls_id: str,
     pos_id: str,
     payload: LieferscheinPositionCreate,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
@@ -331,7 +338,7 @@ async def patch_lieferschein_position(
 
 
 @router.delete("/lieferscheine/{ls_id}/positionen/{pos_id}", status_code=204, response_class=Response, response_model=None, summary="Lieferschein position löschen")
-async def delete_lieferschein_position(ls_id: str, pos_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+async def delete_lieferschein_position(ls_id: str, pos_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _get_lieferschein_or_404(db, ls_id, tenant_id)
     row = db.execute(text("SELECT id FROM einkauf_lieferschein_positionen WHERE id = :id AND lieferschein_id = :ls_id"), {"id": pos_id, "ls_id": ls_id}).first()
     if not row:
@@ -342,7 +349,7 @@ async def delete_lieferschein_position(ls_id: str, pos_id: str, tenant_id: str =
 
 
 @router.get("/frachtauftraege", response_model=list[Frachtauftrag], summary="Frachtauftraege auflisten")
-async def list_frachtauftraege(tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+async def list_frachtauftraege(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         rows = db.execute(
             text("SELECT * FROM einkauf_frachtauftraege WHERE tenant_id = :tenant_id ORDER BY created_at DESC LIMIT 500"),
@@ -355,7 +362,7 @@ async def list_frachtauftraege(tenant_id: str = Query("system"), db: Session = D
 
 
 @router.post("/frachtauftraege", response_model=Frachtauftrag, status_code=201, summary="Frachtauftrag anlegen")
-async def create_frachtauftrag(payload: FrachtauftragCreate, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+async def create_frachtauftrag(payload: FrachtauftragCreate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     fa_id = uuid7()
     db.execute(
         text(
@@ -380,7 +387,7 @@ async def create_frachtauftrag(payload: FrachtauftragCreate, tenant_id: str = Qu
 async def patch_frachtauftrag(
     fa_id: str,
     payload: FrachtauftragUpdate,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     row = db.execute(text("SELECT id FROM einkauf_frachtauftraege WHERE id = :id AND tenant_id = :tenant_id"), {"id": fa_id, "tenant_id": tenant_id}).first()
@@ -399,7 +406,7 @@ async def patch_frachtauftrag(
 
 
 @router.delete("/frachtauftraege/{fa_id}", status_code=204, response_class=Response, response_model=None, summary="Frachtauftrag löschen")
-async def delete_frachtauftrag(fa_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
+async def delete_frachtauftrag(fa_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     row = db.execute(text("SELECT id FROM einkauf_frachtauftraege WHERE id = :id AND tenant_id = :tenant_id"), {"id": fa_id, "tenant_id": tenant_id}).first()
     if not row:
         raise HTTPException(status_code=404, detail="Frachtauftrag not found")
@@ -410,24 +417,38 @@ async def delete_frachtauftrag(fa_id: str, tenant_id: str = Query("system"), db:
 
 # ── Wareneingang buchen (Belegbruch: Einkauf-LS → Lager) ──────────────────
 
-def _resolve_article_id(db: Session, artikel_nr: Optional[str]) -> Optional[str]:
-    """Löst eine Positions-Artikelnummer auf articles.id auf.
+def _resolve_article_id(db: Session, tenant_id: str, artikel_nr: Optional[str]) -> Optional[str]:
+    """Löst eine Positions-Artikelnummer auf articles.id auf — im Mandanten.
 
     Reihenfolge: exakte article_number im Artikelstamm, dann direkte id
-    (Bestandstests übergeben teils bereits UUIDs in artikel_nr)."""
+    (Bestandstests übergeben teils bereits UUIDs in artikel_nr). Bis 07.10.2026
+    ohne Mandant: die Nummer eines fremden Artikelstamms wurde eingelagert."""
     if not artikel_nr:
         return None
     row = db.execute(
-        text("SELECT id FROM domain_inventory.articles WHERE article_number = :nr LIMIT 1"),
-        {"nr": artikel_nr},
+        text("SELECT id FROM domain_inventory.articles WHERE tenant_id = :tid AND article_number = :nr LIMIT 1"),
+        {"tid": tenant_id, "nr": artikel_nr},
     ).first()
     if row:
         return row[0]
     row = db.execute(
-        text("SELECT id FROM domain_inventory.articles WHERE id = :nr LIMIT 1"),
-        {"nr": artikel_nr},
+        text("SELECT id FROM domain_inventory.articles WHERE tenant_id = :tid AND id = :nr LIMIT 1"),
+        {"tid": tenant_id, "nr": artikel_nr},
     ).first()
     return row[0] if row else None
+
+
+def _referenz(lieferschein_nr: str) -> str:
+    return f"LS-EK-{lieferschein_nr}"
+
+
+def _ist_eingebucht(db: Session, tenant_id: str, lieferschein_nr: str) -> bool:
+    """Gibt es schon Lagerbewegungen zu diesem Lieferschein? (die Tatsache, nicht ein Flag)"""
+    return bool(db.execute(
+        text("SELECT 1 FROM domain_inventory.inventory_stock_movements "
+             "WHERE tenant_id = :tid AND reference_number = :ref LIMIT 1"),
+        {"tid": tenant_id, "ref": _referenz(lieferschein_nr)},
+    ).scalar())
 
 
 class EinbuchenPayload(BaseModel):
@@ -448,52 +469,68 @@ class EinbuchenResult(BaseModel):
 async def einbuchen_lieferschein(
     ls_id: str,
     payload: EinbuchenPayload,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Bucht alle Positionen des Einkauf-Lieferscheins als Einlagerung
-    (EINLAGERUNG) in domain_inventory.inventory_stock_movements und bin_stock.
-    Voraussetzung: Lieferschein muss existieren; kann auch nicht-erledigte LSe verbuchen,
-    aber jede Position kann nur einmal verbucht werden (idempotent via movement_reference_check).
+    """Bucht die Positionen des Einkauf-Lieferscheins als Einlagerung — ganz oder gar nicht.
+
+    Lagerplatz, Bestandsbuch und Artikelbestand laufen in **einem** Commit. Bis
+    07.10.2026 committete jede Position einzeln: Scheiterte die dritte, waren zwei
+    gebucht und der Lieferschein "erledigt"; ein zweiter Aufruf buchte alles noch
+    einmal (der versprochene Wiederholungsschutz existierte nicht), und Artikel,
+    Lager und Lagerplatz wurden nicht auf den Mandanten geprueft.
+
+    Positionen ohne Menge bewegen nichts und werden uebersprungen. Eine Position,
+    die sich nicht einlagern laesst (Artikel unbekannt, kein Lagerplatz), verhindert
+    die ganze Buchung — die Antwort nennt jede.
     """
     ls = db.execute(
-        text("SELECT id, lieferschein_nr, erledigt FROM einkauf_lieferscheine WHERE id = :id AND tenant_id = :tid"),
+        text("SELECT id, lieferschein_nr FROM einkauf_lieferscheine "
+             "WHERE id = :id AND tenant_id = :tid FOR UPDATE"),
         {"id": ls_id, "tid": tenant_id},
     ).mappings().first()
     if not ls:
         raise HTTPException(status_code=404, detail="Lieferschein nicht gefunden")
+    if _ist_eingebucht(db, tenant_id, ls["lieferschein_nr"]):
+        raise HTTPException(status_code=409, detail=f"Lieferschein {ls['lieferschein_nr']} ist bereits eingebucht.")
+    if not db.execute(
+        text("SELECT 1 FROM domain_inventory.warehouses WHERE id = :id AND tenant_id = :tid"),
+        {"id": payload.warehouse_id, "tid": tenant_id},
+    ).scalar():
+        raise HTTPException(status_code=422, detail="Lager nicht gefunden")
 
     positions = db.execute(
         text("SELECT * FROM einkauf_lieferschein_positionen WHERE lieferschein_id = :id ORDER BY pos_nr ASC"),
         {"id": ls_id},
     ).mappings().all()
-
     if not positions:
         raise HTTPException(status_code=422, detail="Lieferschein hat keine Positionen")
 
     from app.services.warehouse_service import WarehouseService
     svc = WarehouseService(db, tenant_id)
 
-    movements_created = 0
-    positions_skipped = 0
-    detail = []
-    reference = f"LS-EK-{ls['lieferschein_nr']}"
-
+    plan: list[dict] = []
+    hindernisse: list[str] = []
+    detail: list[dict] = []
     for pos in positions:
-        # artikel_nr kann Lieferanten-/Stammdaten-Artikelnummer ODER direkt eine
-        # Artikel-UUID sein — für die Lagerbuchung immer auf articles.id auflösen.
-        artikel_id = _resolve_article_id(db, pos.get("artikel_nr"))
         menge = Decimal(str(pos.get("menge") or 0))
-        if not artikel_id or menge <= 0:
-            positions_skipped += 1
-            reason = "menge=0" if artikel_id else f"Artikel '{pos.get('artikel_nr')}' nicht im Artikelstamm"
-            detail.append({"pos_nr": pos.get("pos_nr"), "skipped": True, "reason": reason})
+        if menge <= 0:
+            detail.append({"pos_nr": pos.get("pos_nr"), "skipped": True, "reason": "menge=0"})
             continue
-
-        # Resolve bin: prefer position's lagerfach, then payload default_bin_id
+        # artikel_nr kann Stammdaten-Artikelnummer ODER direkt eine Artikel-UUID sein.
+        artikel_id = _resolve_article_id(db, tenant_id, pos.get("artikel_nr"))
+        if not artikel_id:
+            hindernisse.append(f"Pos. {pos.get('pos_nr')}: Artikel '{pos.get('artikel_nr')}' nicht im Artikelstamm")
+            continue
         bin_id = pos.get("lagerfach") or payload.default_bin_id
+        if bin_id and not db.execute(
+            text("SELECT 1 FROM domain_inventory.warehouse_bins "
+                 "WHERE id = :b AND warehouse_id = :w AND tenant_id = :tid"),
+            {"b": bin_id, "w": payload.warehouse_id, "tid": tenant_id},
+        ).scalar():
+            hindernisse.append(f"Pos. {pos.get('pos_nr')}: Lagerplatz {bin_id} gehoert nicht zu diesem Lager")
+            continue
         if not bin_id:
-            # Auto-suggest best bin via CAPACITY strategy
             suggestions = svc.suggest_putaway_bin(
                 warehouse_id=payload.warehouse_id,
                 article_id=artikel_id,
@@ -501,44 +538,50 @@ async def einbuchen_lieferschein(
                 strategy="CAPACITY",
             )
             if not suggestions:
-                positions_skipped += 1
-                detail.append({"pos_nr": pos.get("pos_nr"), "skipped": True, "reason": "kein Bin mit ausreichend Kapazität"})
+                hindernisse.append(f"Pos. {pos.get('pos_nr')}: kein Lagerplatz mit ausreichend Kapazität")
                 continue
             bin_id = suggestions[0]["bin_id"]
-
         unit_cost = payload.unit_cost_override or pos.get("einzelpreis")
-        if unit_cost is not None:
-            unit_cost = Decimal(str(unit_cost))
+        plan.append({
+            "pos_nr": pos.get("pos_nr"), "artikel_id": artikel_id, "bin_id": bin_id, "menge": menge,
+            "charge": pos.get("charge"),
+            "unit_cost": Decimal(str(unit_cost)) if unit_cost is not None else None,
+        })
 
-        try:
+    if hindernisse:
+        raise HTTPException(status_code=422, detail="Nichts eingebucht. " + "; ".join(hindernisse))
+    if not plan:
+        raise HTTPException(status_code=422, detail="Keine Position mit Menge; nichts einzubuchen.")
+
+    try:
+        for schritt in plan:
             mv_id = svc.book_stock_movement(
-                bin_id=bin_id,
-                article_id=artikel_id,
-                batch_number=pos.get("charge"),
+                bin_id=schritt["bin_id"],
+                article_id=schritt["artikel_id"],
+                batch_number=schritt["charge"],
                 best_before_date=None,
-                quantity_kg=menge,
-                unit_cost=unit_cost,
+                quantity_kg=schritt["menge"],
+                unit_cost=schritt["unit_cost"],
                 movement_type="EINLAGERUNG",
-                reference=reference,
+                reference=_referenz(ls["lieferschein_nr"]),
+                commit=False,
             )
-            movements_created += 1
-            detail.append({"pos_nr": pos.get("pos_nr"), "bin_id": bin_id, "menge": float(menge), "mv_id": mv_id})
-        except ValueError as exc:
-            positions_skipped += 1
-            detail.append({"pos_nr": pos.get("pos_nr"), "skipped": True, "reason": str(exc)})
-
-    # Mark lieferschein as erledigt
-    if movements_created > 0:
+            detail.append({"pos_nr": schritt["pos_nr"], "bin_id": schritt["bin_id"],
+                           "menge": float(schritt["menge"]), "mv_id": mv_id})
         db.execute(
-            text("UPDATE einkauf_lieferscheine SET erledigt = TRUE WHERE id = :id AND tenant_id = :tid"),
+            text("UPDATE einkauf_lieferscheine SET erledigt = TRUE, updated_at = NOW() "
+                 "WHERE id = :id AND tenant_id = :tid"),
             {"id": ls_id, "tid": tenant_id},
         )
         db.commit()
+    except ValueError as exc:
+        db.rollback()
+        raise HTTPException(status_code=422, detail=f"Nichts eingebucht. {exc}") from exc
 
     return EinbuchenResult(
         lieferschein_id=ls_id,
-        movements_created=movements_created,
-        positions_skipped=positions_skipped,
+        movements_created=len(plan),
+        positions_skipped=len(positions) - len(plan),
         detail=detail,
     )
 
@@ -573,27 +616,46 @@ class AbgleichResult(BaseModel):
 async def abgleich_lieferschein_bestellung(
     ls_id: str,
     payload: AbgleichPayload,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Positionsabgleich Eingangslieferschein ↔ Einkaufsbestellung (per artikel_nr,
     Fallback Lieferanten-Artikelnummer). Schreibt menge_geliefert/menge_offen und
     Positionsstatus auf der Bestellung fort und setzt den Bestellstatus auf
-    teilgeliefert/geliefert. Meldet UNTER-/UEBERLIEFERUNG, UNBESTELLT, UNGELIEFERT."""
+    teilgeliefert/geliefert. Meldet UNTER-/UEBERLIEFERUNG, UNBESTELLT, UNGELIEFERT.
+
+    Ein Lieferschein wird **einmal** abgeglichen, und erst, wenn seine Ware
+    eingebucht ist. Bis 07.10.2026 zaehlte jeder weitere Abgleich die Menge erneut
+    auf die Bestellung, und eine Bestellung stand auf "geliefert", ohne dass ein
+    Kilo im Lager war."""
     ls = db.execute(
-        text("SELECT id FROM einkauf_lieferscheine WHERE id = :id AND tenant_id = :tid"),
+        text("SELECT id, lieferschein_nr, abgleich_bestellung_id FROM einkauf_lieferscheine "
+             "WHERE id = :id AND tenant_id = :tid FOR UPDATE"),
         {"id": ls_id, "tid": tenant_id},
     ).mappings().first()
     if not ls:
         raise HTTPException(status_code=404, detail="Lieferschein nicht gefunden")
+    if ls["abgleich_bestellung_id"]:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Lieferschein {ls['lieferschein_nr']} ist bereits gegen eine Bestellung abgeglichen.",
+        )
+    if not _ist_eingebucht(db, tenant_id, ls["lieferschein_nr"]):
+        raise HTTPException(
+            status_code=409,
+            detail=(f"Lieferschein {ls['lieferschein_nr']} ist noch nicht eingebucht. Erst die Ware "
+                    "einlagern, dann gegen die Bestellung abgleichen."),
+        )
 
     bestellung = db.execute(
         text("SELECT id, bestellnummer, status FROM domain_einkauf.bestellungen "
-             "WHERE id = :id AND tenant_id = :tid"),
+             "WHERE id = :id AND tenant_id = :tid FOR UPDATE"),
         {"id": payload.bestellung_id, "tid": tenant_id},
     ).mappings().first()
     if not bestellung:
         raise HTTPException(status_code=404, detail="Bestellung nicht gefunden")
+    if str(bestellung["status"] or "").lower() == "storniert":
+        raise HTTPException(status_code=409, detail=f"Bestellung {bestellung['bestellnummer']} ist storniert.")
 
     ls_positionen = db.execute(
         text("SELECT artikel_nr, lieferant_artikel_nr, bezeichnung, menge "
@@ -684,8 +746,13 @@ async def abgleich_lieferschein_bestellung(
     db.execute(
         text("UPDATE domain_einkauf.bestellungen SET status = :status, lieferdatum_ist = :heute "
              "WHERE id = :id AND tenant_id = :tid"),
-        {"status": bestellung_status, "heute": date.today(),
+        {"status": bestellung_status, "heute": business_today(),
          "id": payload.bestellung_id, "tid": tenant_id},
+    )
+    db.execute(
+        text("UPDATE einkauf_lieferscheine SET abgleich_bestellung_id = :b, abgeglichen_am = NOW(), "
+             "updated_at = NOW() WHERE id = :id AND tenant_id = :tid"),
+        {"b": payload.bestellung_id, "id": ls_id, "tid": tenant_id},
     )
     db.commit()
 

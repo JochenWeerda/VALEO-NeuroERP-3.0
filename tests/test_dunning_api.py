@@ -407,16 +407,39 @@ class TestListDunnings:
 # ---------------------------------------------------------------------------
 
 class TestSendDunning:
-    def test_send_ok(self):
+    def test_send_ok(self, monkeypatch):
+        from app.api.v1.endpoints import dunning as modul
+
         db = FakeDb()
         db._exec_results = [
             _FakeResult(fetchone=_notice_row(notice_id="n-1", status="created")),
             _FakeResult(fetchone=_notice_row(notice_id="n-1", status="sent")),
         ]
+        archiviert: list[tuple[str, int]] = []
+        # Der Archiveintrag laeuft in derselben Transaktion: vor dem Commit.
+        monkeypatch.setattr(modul, "register_artifact",
+                            lambda *a, **k: archiviert.append((k["doc_type"], db.commit_count)) or "art-1")
         client = _make_app(db)
         r = client.put("/dunning/n-1/send")
         assert r.status_code == 200
-        assert db.commit_count >= 1
+        assert archiviert == [("dunning_notice", 0)]
+        assert db.commit_count == 1
+
+    def test_ohne_archiveintrag_kein_versand(self, monkeypatch):
+        from app.api.v1.endpoints import dunning as modul
+        from app.core.gobd_artifact import GobdArtifactError
+
+        db = FakeDb()
+        db._exec_results = [_FakeResult(fetchone=_notice_row(notice_id="n-1", status="sent"))]
+
+        def scheitert(*_a, **_k):
+            raise GobdArtifactError("Archiv nicht erreichbar")
+
+        monkeypatch.setattr(modul, "register_artifact", scheitert)
+        r = _make_app(db).put("/dunning/n-1/send")
+        assert r.status_code == 500
+        assert db.commit_count == 0
+        assert db.rollback_count >= 1
 
     def test_send_not_found_returns_404(self):
         db = FakeDb()

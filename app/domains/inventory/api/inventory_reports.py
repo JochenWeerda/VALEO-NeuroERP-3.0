@@ -7,7 +7,6 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.database import get_db
 from ..application.services.inventory_service import InventoryService
 from ..application.services.replenishment_service import ReplenishmentService
@@ -15,18 +14,15 @@ from .inventory_auth import require_inventory_access, get_current_tenant_id
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 @router.get("/stock-alerts")
 async def get_stock_alerts(
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_access),
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Get low stock alerts for all articles."""
-    effective_tenant = tenant_id or effective_tenant
 
     service = InventoryService(db)
     alerts = service.check_low_stock_alerts(effective_tenant)
@@ -40,13 +36,11 @@ async def get_stock_alerts(
 
 @router.get("/inventory-value")
 async def get_inventory_value(
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_access),
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Get total inventory value and statistics."""
-    effective_tenant = tenant_id or effective_tenant
 
     service = InventoryService(db)
     value_data = service.calculate_inventory_value(effective_tenant)
@@ -56,14 +50,12 @@ async def get_inventory_value(
 
 @router.get("/replenishment-suggestions")
 async def get_replenishment_suggestions(
-    tenant_id: Optional[str] = Query(None),
     days_ahead: int = Query(30, ge=1, le=365),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_access),
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Get automated replenishment suggestions."""
-    effective_tenant = tenant_id or effective_tenant
 
     service = ReplenishmentService(db)
     suggestions = service.get_replenishment_suggestions(effective_tenant, days_ahead)
@@ -86,14 +78,12 @@ async def get_replenishment_suggestions(
 
 @router.get("/slow-moving-inventory")
 async def get_slow_moving_inventory(
-    tenant_id: Optional[str] = Query(None),
     days_threshold: int = Query(90, ge=30, le=365),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_access),
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Get slow-moving inventory report."""
-    effective_tenant = tenant_id or effective_tenant
 
     service = ReplenishmentService(db)
     slow_moving = service.get_slow_moving_inventory(effective_tenant, days_threshold)
@@ -107,14 +97,12 @@ async def get_slow_moving_inventory(
 
 @router.get("/purchase-order-suggestions")
 async def get_purchase_order_suggestions(
-    tenant_id: Optional[str] = Query(None),
     supplier_filter: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_access),
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Get purchase order suggestions grouped by supplier."""
-    effective_tenant = tenant_id or effective_tenant
 
     service = ReplenishmentService(db)
     suggestions_by_supplier = service.generate_purchase_order_suggestions(
@@ -138,14 +126,12 @@ async def get_purchase_order_suggestions(
 
 @router.get("/turnover-analysis")
 async def get_turnover_analysis(
-    tenant_id: Optional[str] = Query(None),
     period_days: int = Query(30, ge=7, le=365),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_access),
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Get inventory turnover analysis."""
-    effective_tenant = tenant_id or effective_tenant
 
     service = ReplenishmentService(db)
     analysis = service.get_inventory_turnover_report(effective_tenant, period_days)
@@ -155,7 +141,6 @@ async def get_turnover_analysis(
 
 @router.get("/stock-levels")
 async def get_stock_levels_report(
-    tenant_id: Optional[str] = Query(None),
     category_filter: Optional[str] = Query(None),
     warehouse_filter: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -165,7 +150,6 @@ async def get_stock_levels_report(
     """Get comprehensive stock levels report."""
     from ....infrastructure.models import Article as ArticleModel
 
-    effective_tenant = tenant_id or effective_tenant
 
     query = (
         db.query(ArticleModel)

@@ -16,6 +16,21 @@ def make_service():
     return WarehouseService(db, "tenant-test")
 
 
+def _buchungs_db(svc, bestand=None):
+    """Lagerplatz gehoert dem Mandanten; ``bestand`` ist die vorhandene Bin-Zeile."""
+    def ausfuehren(sql, params=None):
+        ergebnis = MagicMock()
+        text_ = str(sql)
+        if "SELECT wb.warehouse_id" in text_:
+            ergebnis.fetchone.return_value = _row(warehouse_id="wh-1")
+        elif "SELECT id, quantity_kg FROM domain_inventory.bin_stock" in text_:
+            ergebnis.fetchone.return_value = bestand
+        else:
+            ergebnis.fetchone.return_value = None
+        return ergebnis
+    svc.db.execute.side_effect = ausfuehren
+
+
 def _row(**kwargs):
     """Einfache Namespace-Row für fetchall()-Mocks."""
     obj = MagicMock()
@@ -262,12 +277,12 @@ def test_fefo_pick_suggestion_exact_coverage():
 def test_book_stock_movement_insert_new_position():
     svc = make_service()
     # kein bestehender Bestand
-    svc.db.execute.return_value.fetchone.return_value = None
+    _buchungs_db(svc)
 
     mv_id = svc.book_stock_movement(
         bin_id="b1", article_id="art-1", batch_number="CH1",
         best_before_date=None, quantity_kg=Decimal("50"),
-        unit_cost=Decimal("1.20"), movement_type="inbound",
+        unit_cost=Decimal("1.20"), movement_type="EINLAGERUNG",
     )
     assert mv_id is not None
     svc.db.commit.assert_called_once()
@@ -279,12 +294,12 @@ def test_book_stock_movement_update_existing():
     existing = MagicMock()
     existing.id = "stock-1"
     existing.quantity_kg = Decimal("100")
-    svc.db.execute.return_value.fetchone.return_value = existing
+    _buchungs_db(svc, existing)
 
     mv_id = svc.book_stock_movement(
         bin_id="b1", article_id="art-1", batch_number=None,
         best_before_date=None, quantity_kg=Decimal("30"),
-        unit_cost=None, movement_type="inbound",
+        unit_cost=None, movement_type="EINLAGERUNG",
     )
     assert mv_id is not None
 
@@ -295,7 +310,7 @@ def test_book_stock_movement_raises_on_understock():
     existing = MagicMock()
     existing.id = "stock-1"
     existing.quantity_kg = Decimal("10")
-    svc.db.execute.return_value.fetchone.return_value = existing
+    _buchungs_db(svc, existing)
 
     with pytest.raises(ValueError, match="Unterdeckung"):
         svc.book_stock_movement(
@@ -308,7 +323,7 @@ def test_book_stock_movement_raises_on_understock():
 @pytest.mark.unit
 def test_book_stock_movement_raises_on_outbound_without_stock():
     svc = make_service()
-    svc.db.execute.return_value.fetchone.return_value = None
+    _buchungs_db(svc)
 
     with pytest.raises(ValueError, match="ohne vorhandenen Bestand"):
         svc.book_stock_movement(

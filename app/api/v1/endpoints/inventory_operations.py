@@ -16,7 +16,6 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.database import get_db
 import logging
 
@@ -35,7 +34,6 @@ from app.api.v1.schemas.inventory_lot_bundle_schemas import (
 
 
 router = APIRouter()
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 # ── Reason Codes ────────────────────────────────────────────────
@@ -262,14 +260,14 @@ async def list_reason_codes():
 @router.post("/bestandskorrektur", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Bestandskorrektur anlegen")
 async def create_bestandskorrektur(
     payload: BestandskorrekturIn,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Bestandskorrektur buchen — StockMovement + automatische GL-Buchung.
 
     Positiver Betrag = Zugang (adjustment_in), negativer = Abgang (adjustment_out).
     """
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     if payload.grund not in REASON_CODES:
         raise HTTPException(400, f"Unbekannter Grund-Code: {payload.grund}. Erlaubt: {list(REASON_CODES.keys())}")
 
@@ -392,7 +390,7 @@ async def create_bestandskorrektur(
 @router.post("/schwund", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Schwund anlegen")
 async def create_schwund(
     payload: SchwundBuchungIn,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Lagerschwund buchen — Kurzform für Bestandskorrektur mit Grund 'schwund'.
@@ -414,7 +412,7 @@ async def create_schwund(
 @router.post("/mhd-abschreibung", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Mhd abschreibung anlegen")
 async def create_mhd_abschreibung(
     payload: MhdAbschreibungIn,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """MHD-Abschreibung — Charge mit abgelaufenem Haltbarkeitsdatum ausbuchen.
@@ -432,7 +430,7 @@ async def create_mhd_abschreibung(
                 SET quantity = GREATEST(0, quantity - :menge)
                 WHERE tenant_id = :tid AND batch_number = :charge AND article_id = :article_id
             """),
-            {"menge": payload.menge, "tid": tenant_id or DEFAULT_TENANT, "charge": payload.charge, "article_id": payload.article_id},
+            {"menge": payload.menge, "tid": tenant_id, "charge": payload.charge, "article_id": payload.article_id},
         )
     except Exception as e:  # noqa: BLE001
         logger.warning("Chargen-UPDATE fehlgeschlagen (Tabelle evtl. nicht vorhanden): %s", e)
@@ -453,7 +451,7 @@ async def create_mhd_abschreibung(
     response_model=InventoryOperationsOut
 )
 async def list_korrekturen(
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     article_id: Optional[str] = Query(None),
     grund: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
@@ -461,7 +459,7 @@ async def list_korrekturen(
     db: Session = Depends(get_db),
 ):
     """Korrektur-Bewegungen auflisten (gefiltert nach Grund-Code)."""
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     conditions = ["tenant_id = :tid", "movement_type = 'adjustment'"]
     params: dict = {"tid": tid, "skip": skip, "limit": limit}
 
@@ -514,11 +512,11 @@ async def list_korrekturen(
 )
 async def get_korrektur(
     korrektur_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Einzelne Bestandskorrektur abrufen."""
-    tid = tenant_id or DEFAULT_TENANT
+    tid = tenant_id
     try:
         row = db.execute(
             text("""
@@ -578,11 +576,10 @@ class LotConsumeIn(BaseModel):
 )
 async def create_inventory_lot(
     body: LotCreateIn,
-    x_tenant_id: Optional[str] = None,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     """Neuen Chargen-/MHD-Eintrag anlegen."""
-    tenant_id = x_tenant_id or DEFAULT_TENANT
     from app.services.inventory_lot_trace_service import create_lot, LotTraceError
     try:
         return create_lot(
@@ -611,11 +608,10 @@ async def list_inventory_lots(
     article_id: Optional[str] = None,
     warehouse_id: Optional[str] = None,
     include_exhausted: bool = False,
-    x_tenant_id: Optional[str] = None,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> list:
     """FEFO-sortierte Lot-Liste (frühestes MHD zuerst)."""
-    tenant_id = x_tenant_id or DEFAULT_TENANT
     from app.services.inventory_lot_trace_service import list_lots_fefo
     try:
         return list_lots_fefo(
@@ -638,11 +634,10 @@ async def list_inventory_lots(
 async def consume_inventory_lot(
     lot_id: str,
     body: LotConsumeIn,
-    x_tenant_id: Optional[str] = None,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     """Menge aus einem Lot verbrauchen (fail-closed bei MHD-Ablauf oder Unterdeckung)."""
-    tenant_id = x_tenant_id or DEFAULT_TENANT
     from app.services.inventory_lot_trace_service import consume_lot, LotTraceError
     try:
         return consume_lot(
@@ -672,14 +667,13 @@ async def consume_inventory_lot(
 )
 async def inventur_differenz_buchen(
     count_id: str,
-    x_tenant_id: Optional[str] = None,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     """Für jede Zähldifferenz (gezählt vs. Buchbestand) automatisch Bestandskorrektur anlegen.
 
     Nur für Inventuren mit status='posted'. Idempotent.
     """
-    tenant_id = x_tenant_id or DEFAULT_TENANT
     from app.services.inventory_count_close_service import differenz_buchen, CountCloseError
     try:
         return differenz_buchen(db=db, count_id=count_id, tenant_id=tenant_id)
@@ -756,11 +750,11 @@ async def get_bestaende(
     article_number: Optional[str] = Query(None, description="Filter auf Artikelnummer"),
     charge: Optional[str] = Query(None, description="Filter auf Charge"),
     only_positive: bool = Query(True, description="Nur positive Bestände"),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> list[BestandItem]:
     """Aggregierte Lagerbestände aus StockMovements (Zugang - Abgang)."""
-    t_id = tenant_id or DEFAULT_TENANT
+    t_id = tenant_id
 
     filters = ["sm.tenant_id = :tenant_id"]
     params: dict[str, Any] = {"tenant_id": t_id}
@@ -871,11 +865,11 @@ class LagerbewegungOut(BaseModel):
 )
 async def create_lagerbewegung(
     payload: LagerbewegungIn,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> LagerbewegungOut:
     """Generische Lagerbuchung: Wareneingang, -ausgang, Umbuchung oder Inventur."""
-    t_id = tenant_id or DEFAULT_TENANT
+    t_id = tenant_id
     from datetime import date as date_type
 
     allowed_types = {"wareneingang", "warenausgang", "umbuchung", "inventur"}

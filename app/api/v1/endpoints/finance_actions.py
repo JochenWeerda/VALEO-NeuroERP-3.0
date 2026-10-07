@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from pydantic import BaseModel, Field
 
 from app.api.v1.schemas.finance_actions_schemas import (
@@ -503,8 +504,11 @@ async def buchungsuebergabe_export(
             """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).fetchall()
-    except Exception:
-        rows = []
+    except SQLAlchemyError as exc:
+        # Bis 07.10.2026: rows = [] — ein Datenbankfehler ergab eine leere, aber
+        # als erfolgreich gemeldete und archivierte Buchungsuebergabe.
+        db.rollback()
+        raise HTTPException(status_code=503, detail=f"Buchungen nicht lesbar: {exc}") from exc
 
     # ASC-Format Spalten (tab-delimited, Windows-1252):
     # Datum | Belegart | Belegnr | Buchungstext | Soll | Haben | Konto | Steuerschl. | Kostenstelle
@@ -549,7 +553,10 @@ async def buchungsuebergabe_export(
         storage_key_export,
         file_name=dateiname,
         created_by=body.bediener,
+        doc_type="fibu_export",
+        content=content_bytes,
     )
+    db.commit()
 
     if body.download:
         return StreamingResponse(

@@ -391,6 +391,22 @@ async def po_list(
     return {"data": items, "page": page, "pageSize": pageSize, "total": total, "totalPages": total_pages}
 
 
+@router.get("/purchase-orders/statistics", response_model=CompatBridgeOut, summary="Statistics po")
+async def po_statistics(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    # Steht vor /purchase-orders/{po_id}: dahinter war dieser Weg nie erreichbar
+    # ("statistics" wurde als Bestellnummer gesucht -> 404).
+    # Beide Quellen wie in der Liste; bis 07.10.2026 zaehlte die Statistik nur die
+    # Altbelege und verschwieg jede kanonische Bestellung.
+    docs = [*_list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id), *_bestellungen_als_compat(db, tenant_id)]
+    by_status: dict[str, int] = {}
+    total_value = 0.0
+    for d in docs:
+        st = str(d.get("status") or "ENTWURF")
+        by_status[st] = by_status.get(st, 0) + 1
+        total_value += float(d.get("totalAmount") or 0)
+    return {"totalOrders": len(docs), "totalValue": round(total_value, 2), "byStatus": by_status}
+
+
 @router.get("/purchase-orders/{po_id}", response_model=PurchaseOrderOut, summary="Get po")
 async def po_get(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     docs = _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id)
@@ -512,66 +528,22 @@ async def _create_compat_purchase_order(
     return _compat_zeile(db, tenant_id, angelegt["id"])
 
 
-async def _create_compat_purchase_order_dokument(
-    db: Session,
-    *,
-    tenant_id: str,
-    payload: dict[str, Any],
-) -> dict[str, Any]:
-    """Der alte Weg — bleibt lesbar, wird aber nicht mehr gerufen."""
-    now = _now_iso()
-    po_number = payload.get("purchaseOrderNumber") or f"PO-{datetime.utcnow().strftime('%Y%m%d')}-{str(uuid4())[:6].upper()}"
-    item_list = payload.get("items", [])
-    subtotal = float(sum((float(i.get("quantity", 0)) * float(i.get("unitPrice", 0))) for i in item_list))
-    tax_rate = float(payload.get("taxRate", 19))
-    tax_amount = round(subtotal * tax_rate / 100, 2)
-    doc = {
-        "id": str(uuid4()),
-        "purchaseOrderNumber": po_number,
-        "supplierId": payload.get("supplierId"),
-        "subject": payload.get("subject") or "",
-        "description": payload.get("description") or "",
-        "status": "ENTWURF",
-        "orderDate": payload.get("orderDate") or now[:10],
-        "deliveryDate": payload.get("deliveryDate"),
-        "contactPerson": payload.get("contactPerson"),
-        "paymentTerms": payload.get("paymentTerms"),
-        "currency": payload.get("currency") or "EUR",
-        "incoterms": payload.get("incoterms"),
-        "deliveryTerms": payload.get("deliveryTerms"),
-        "externalReference": payload.get("externalReference"),
-        "items": item_list,
-        "subtotal": round(subtotal, 2),
-        "taxRate": tax_rate,
-        "taxAmount": tax_amount,
-        "totalAmount": round(subtotal + tax_amount, 2),
-        "shippingAddress": payload.get("shippingAddress"),
-        "notes": payload.get("notes"),
-        "createdBy": "system",
-        "createdAt": now,
-        "updatedAt": now,
-        "tenantId": tenant_id,
-        "version": 1,
-        "changelog": [{"id": str(uuid4()), "changeType": "CREATED", "changedBy": "system", "changedAt": now, "fieldChanges": []}],
-    }
-    repo = _doc_repo(db)
-    save_to_store("purchase_order", po_number, doc, repo)
-    await _enqueue_event(
-        db,
-        event_type="purchase_order.created",
-        aggregate_id=doc["id"],
-        payload={
-            "purchaseOrderNumber": po_number,
-            "supplierId": doc.get("supplierId"),
-            "status": doc.get("status"),
-            "totalAmount": doc.get("totalAmount"),
-            "createdAt": doc.get("createdAt"),
-        },
-        tenant_id=tenant_id,
+def _altbeleg_schreibgeschuetzt(po_id: str) -> HTTPException:
+    """Bestellungen aus dem frueheren Dokumentspeicher werden nicht mehr fortgeschrieben.
+
+    Bis 07.10.2026 aenderten, gaben frei und stornierten diese Wege Altbelege im
+    Dokumentspeicher — mit ``approvedBy = "system"`` statt eines Freigebers, ohne
+    Rolle und ausserhalb der kanonischen Bestellung, die Wareneingang, Abgleich und
+    Rechnungspruefung lesen. Angelegt wird seit 25.09.2026 nur noch kanonisch;
+    ein Altbeleg bleibt lesbar und wird bei Bedarf als Bestellung neu erfasst.
+    """
+    return HTTPException(
+        status_code=409,
+        detail=(
+            f"Bestellung {po_id} stammt aus dem frueheren Dokumentspeicher und ist "
+            "schreibgeschuetzt. Bitte als Bestellung neu erfassen (Einkauf > Bestellungen)."
+        ),
     )
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    db.commit()
-    return doc
 
 
 @router.post("/purchase-orders", response_model=PurchaseOrderOut, status_code=201, summary="Create po")
@@ -602,26 +574,8 @@ async def po_patch(po_id: str, payload: dict[str, Any], tenant_id: str = Depends
         cache_delete_prefix(f"compat:procurement:{tenant_id}:")
         return _compat_zeile(db, tenant_id, beleg["id"])
 
-    doc = await po_get(po_id, tenant_id, db)
-    now = _now_iso()
-    changes = []
-    for key, value in payload.items():
-        if key in {"id", "purchaseOrderNumber", "createdAt", "createdBy"}:
-            continue
-        old = doc.get(key)
-        if old != value:
-            doc[key] = value
-            changes.append({"field": key, "oldValue": str(old), "newValue": str(value)})
-
-    doc["updatedAt"] = now
-    doc["version"] = int(doc.get("version", 1)) + 1
-    doc.setdefault("changelog", []).append(
-        {"id": str(uuid4()), "changeType": "UPDATED", "changedBy": "system", "changedAt": now, "fieldChanges": changes}
-    )
-    repo = _doc_repo(db)
-    save_to_store("purchase_order", doc["purchaseOrderNumber"], doc, repo)
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    return doc
+    await po_get(po_id, tenant_id, db)  # 404, wenn es auch keinen Altbeleg gibt
+    raise _altbeleg_schreibgeschuetzt(po_id)
 
 
 @router.post("/purchase-orders/{po_id}/approve", response_model=PurchaseOrderOut, summary="Approve po")
@@ -638,32 +592,8 @@ async def po_approve(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Se
         cache_delete_prefix(f"compat:procurement:{tenant_id}:")
         return _compat_zeile(db, tenant_id, beleg["id"])
 
-    doc = await po_get(po_id, tenant_id, db)
-    now = _now_iso()
-    doc["status"] = "FREIGEGEBEN"
-    doc["approvedAt"] = now
-    doc["approvedBy"] = "system"
-    doc["updatedAt"] = now
-    doc.setdefault("changelog", []).append(
-        {"id": str(uuid4()), "changeType": "APPROVED", "changedBy": "system", "changedAt": now, "fieldChanges": []}
-    )
-    repo = _doc_repo(db)
-    save_to_store("purchase_order", doc["purchaseOrderNumber"], doc, repo)
-    await _enqueue_event(
-        db,
-        event_type="purchase_order.approved",
-        aggregate_id=doc["id"],
-        payload={
-            "purchaseOrderNumber": doc.get("purchaseOrderNumber"),
-            "approvedAt": doc.get("approvedAt"),
-            "approvedBy": doc.get("approvedBy"),
-            "status": doc.get("status"),
-        },
-        tenant_id=tenant_id,
-    )
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    db.commit()
-    return doc
+    await po_get(po_id, tenant_id, db)  # 404, wenn es auch keinen Altbeleg gibt
+    raise _altbeleg_schreibgeschuetzt(po_id)
 
 
 @router.post("/purchase-orders/{po_id}/cancel-with-reason", response_model=PurchaseOrderOut, summary="Cancel po")
@@ -682,50 +612,8 @@ async def po_cancel(po_id: str, payload: dict[str, Any], tenant_id: str = Depend
         cache_delete_prefix(f"compat:procurement:{tenant_id}:")
         return _compat_zeile(db, tenant_id, beleg["id"])
 
-    doc = await po_get(po_id, tenant_id, db)
-    now = _now_iso()
-    reason = payload.get("reason") or ""
-    doc["status"] = "STORNIERT"
-    doc["notes"] = (doc.get("notes") or "") + f"\nStorno: {reason}"
-    doc["updatedAt"] = now
-    doc.setdefault("changelog", []).append(
-        {
-            "id": str(uuid4()),
-            "changeType": "CANCELLED",
-            "changedBy": "system",
-            "changedAt": now,
-            "fieldChanges": [{"field": "status", "oldValue": "", "newValue": "STORNIERT"}],
-        }
-    )
-    repo = _doc_repo(db)
-    save_to_store("purchase_order", doc["purchaseOrderNumber"], doc, repo)
-    await _enqueue_event(
-        db,
-        event_type="purchase_order.cancelled",
-        aggregate_id=doc["id"],
-        payload={
-            "purchaseOrderNumber": doc.get("purchaseOrderNumber"),
-            "status": doc.get("status"),
-            "reason": reason,
-            "updatedAt": doc.get("updatedAt"),
-        },
-        tenant_id=tenant_id,
-    )
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    db.commit()
-    return doc
-
-
-@router.get("/purchase-orders/statistics", response_model=CompatBridgeOut, summary="Statistics po")
-async def po_statistics(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
-    docs = _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id)
-    by_status: dict[str, int] = {}
-    total_value = 0.0
-    for d in docs:
-        st = str(d.get("status") or "ENTWURF")
-        by_status[st] = by_status.get(st, 0) + 1
-        total_value += float(d.get("totalAmount") or 0)
-    return {"totalOrders": len(docs), "totalValue": round(total_value, 2), "byStatus": by_status}
+    await po_get(po_id, tenant_id, db)  # 404, wenn es auch keinen Altbeleg gibt
+    raise _altbeleg_schreibgeschuetzt(po_id)
 
 
 @router.get("/purchase-orders/{po_id}/changelog", response_model=list[CompatBridgeOut], summary="Changelog po")

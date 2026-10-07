@@ -13,17 +13,16 @@ from sqlalchemy.orm import Session
 
 from ....api.v1.schemas.base import PaginatedResponse
 from ....api.v1.schemas.inventory import StockMovement, StockMovementCreate, StockMovementUpdate
-from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import StockMovement as StockMovementModel
 from ....core.module_registry import registry
 from ....services.customer_reference import resolve_reference
+from ....services.inventory_movement_direction import signed_quantity
 from modules.bootstrap import initialize_module_registry
 from .inventory_auth import get_current_tenant_id, require_inventory_access
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 def _is_agrar_enabled(db: Session, tenant_id: str) -> bool:
@@ -106,7 +105,6 @@ def _to_schema(row: StockMovementModel) -> StockMovement:
 
 @router.get("/", response_model=PaginatedResponse[StockMovement])
 async def list_stock_movements(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     article_id: Optional[str] = Query(None, description="Filter by article ID"),
     warehouse_id: Optional[str] = Query(None, description="Filter by warehouse ID"),
     movement_type: Optional[str] = Query(None, description="Filter by movement type"),
@@ -118,7 +116,6 @@ async def list_stock_movements(
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Return a paginated list of stock movements."""
-    effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
 
     query = db.query(StockMovementModel).filter(StockMovementModel.tenant_id == effective_tenant)
 
@@ -160,13 +157,11 @@ async def list_stock_movements(
 @router.get("/{movement_id}", response_model=StockMovement)
 async def get_stock_movement(
     movement_id: str,
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_access),
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Get a single stock movement by ID."""
-    effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
 
     movement = (
         db.query(StockMovementModel)
@@ -187,7 +182,6 @@ async def get_stock_movement(
 @router.post("/", response_model=StockMovement, status_code=201)
 async def create_stock_movement(
     movement_data: StockMovementCreate,
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_access),
     effective_tenant: str = Depends(get_current_tenant_id),
@@ -195,7 +189,6 @@ async def create_stock_movement(
     """Create a new stock movement."""
     from ..application.services.inventory_service import InventoryService
 
-    effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
 
     service = InventoryService(db)
     _assert_agrar_fields_allowed(
@@ -281,13 +274,11 @@ async def create_stock_movement(
 async def update_stock_movement(
     movement_id: str,
     movement_data: StockMovementUpdate,
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_access),
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Update stock movement metadata (non-stock impacting fields)."""
-    effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
 
     movement = (
         db.query(StockMovementModel)
@@ -317,19 +308,23 @@ async def update_stock_movement(
     return _to_schema(movement)
 
 
-@router.delete("/{movement_id}", status_code=204, response_class=Response)
+@router.delete("/{movement_id}", status_code=409, response_class=Response)
 async def delete_stock_movement(
     movement_id: str,
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_access),
     effective_tenant: str = Depends(get_current_tenant_id),
 ) -> Response:
-    """Delete a stock movement record."""
-    effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
+    """Eine gebuchte Lagerbewegung wird nicht geloescht, sondern storniert.
 
+    Bis 07.10.2026 loeschte dieser Weg die Zeile aus dem Bestandsbuch — ohne
+    Gegenbuchung und ohne den Artikelbestand zu korrigieren: Der Bestand im Buch
+    sprang, der am Artikel nicht, und die Buchung war spurlos weg (GoBD: keine
+    Loeschung gebuchter Vorgaenge). Der Weg bleibt, damit Altaufrufer eine klare
+    Antwort bekommen statt eines 405.
+    """
     movement = (
-        db.query(StockMovementModel)
+        db.query(StockMovementModel.id)
         .filter(
             StockMovementModel.id == movement_id,
             StockMovementModel.tenant_id == effective_tenant,
@@ -338,16 +333,19 @@ async def delete_stock_movement(
     )
     if not movement:
         raise HTTPException(status_code=404, detail="Stock movement not found")
-
-    db.delete(movement)
-    db.commit()
-    return Response(status_code=204)
+    raise HTTPException(
+        status_code=409,
+        detail=(
+            "Gebuchte Lagerbewegungen werden nicht geloescht, sondern storniert: "
+            f"POST /api/v1/lager/stock-movements/{movement_id}/actions/stornieren "
+            "(Gegenbuchung mit Begruendung)."
+        ),
+    )
 
 
 @router.get("/summary/article/{article_id}")
 async def get_article_movement_summary(
     article_id: str,
-    tenant_id: Optional[str] = Query(None),
     days: int = Query(30, ge=1, le=365, description="Number of days to look back"),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_access),
@@ -356,7 +354,6 @@ async def get_article_movement_summary(
     """Get movement summary for a specific article."""
     from datetime import datetime, timedelta
 
-    effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
     cutoff_date = datetime.utcnow() - timedelta(days=days)
 
     movements = (
@@ -379,8 +376,11 @@ async def get_article_movement_summary(
         "net_quantity_change": 0,
     }
 
+    # Die Richtung kommt aus der Richtungstabelle, nicht aus dem Vorzeichen: Ein
+    # Abgang steht mit positiver Menge im Bestandsbuch. Bis 07.10.2026 zaehlte
+    # diese Summe jeden Abgang als Zugang.
     for movement in movements:
-        qty = float(movement.quantity)
+        qty = signed_quantity(movement.movement_type, float(movement.quantity or 0))
         movement_type = movement.movement_type
 
         if movement_type not in summary["movements_by_type"]:

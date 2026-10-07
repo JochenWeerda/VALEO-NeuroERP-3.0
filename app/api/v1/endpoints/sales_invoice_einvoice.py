@@ -19,7 +19,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.gobd_artifact import register_artifact, sha256_hex
+from app.core.gobd_artifact import GobdArtifactError, register_artifact, sha256_hex
 from app.core.tenant import get_tenant_id
 from app.documents.router_helpers import get_from_store, get_repository
 from app.services.einvoice_generator import (
@@ -164,19 +164,28 @@ def _register_xml_artifact(
     file_name: str,
     artifact_subtype: str,
 ) -> None:
-    """GoBD-Persistenz im document_artifacts-Archiv."""
+    """GoBD-Persistenz im document_artifacts-Archiv — vor der Auslieferung festgeschrieben.
+
+    Bis 07.10.2026 "best-effort": Ein gescheiterter Archiveintrag wurde protokolliert
+    und die E-Rechnung trotzdem ausgeliefert — ein versandfaehiger Beleg ohne
+    Archivnachweis. Jetzt gibt es ohne Archiveintrag keine Datei (503).
+    """
     try:
         register_artifact(
             db=db,
             tenant_id=tenant_id,
-            header_id=invoice_number,
+            doc_number=invoice_number,
             artifact_type="xml",
             content_hash_sha256=sha256_hex(xml.encode("utf-8")),
             storage_key=f"einvoice/{artifact_subtype}/{invoice_number}",
             file_name=file_name,
+            doc_type="sales_invoice",
+            content=xml.encode("utf-8"),
         )
-    except Exception as e:  # noqa: BLE001 — GoBD-Archivierung ist best-effort
-        logger.warning("E-Invoice GoBD artifact registration failed: %s", e)
+        db.commit()
+    except GobdArtifactError as e:
+        db.rollback()
+        raise HTTPException(status_code=503, detail=str(e)) from e
 
 
 @router.post(

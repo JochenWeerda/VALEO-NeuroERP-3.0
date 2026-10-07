@@ -9,6 +9,7 @@ from typing import Optional
 
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -141,27 +142,35 @@ async def create_invoice(
                 "other",
                 content_hash,
                 f"invoice/ar/{invoice.number}",
-                file_name=f"Rechnung_{invoice.number}.pdf",
+                file_name=f"Rechnung_{invoice.number}_buchungsdaten.txt",
                 created_by=None,
+                doc_type="sales_invoice",
+                content=canonical.encode("utf-8"),
             )
 
         # Belegbruch schließen: Lieferschein invoice_number befüllen wenn sourceDelivery gesetzt
         if invoice.sourceDelivery:
             try:
-                db.execute(
-                    text("""
-                        UPDATE domain_sales.delivery_notes
-                        SET invoice_number = :inv_nr, updated_at = NOW()
-                        WHERE (id = :dn_ref OR delivery_note_number = :dn_ref)
-                          AND tenant_id = :tid
-                          AND (invoice_number IS NULL OR invoice_number = '')
-                    """),
-                    {"inv_nr": invoice.number, "dn_ref": invoice.sourceDelivery, "tid": tenant_id},
-                )
-                db.flush()
-            except Exception:  # noqa: BLE001 — non-blocking
-                pass
+                # Savepoint: ein Fehler hier bricht die Transaktion nicht ab. Bis
+                # 07.10.2026 lief das UPDATE nach dem letzten Commit und wurde nie
+                # festgeschrieben; ein Fehler liess die Transaktion tot zurueck.
+                with db.begin_nested():
+                    db.execute(
+                        text("""
+                            UPDATE domain_sales.delivery_notes
+                            SET invoice_number = :inv_nr, updated_at = NOW()
+                            WHERE (id = :dn_ref OR delivery_note_number = :dn_ref)
+                              AND tenant_id = :tid
+                              AND (invoice_number IS NULL OR invoice_number = '')
+                        """),
+                        {"inv_nr": invoice.number, "dn_ref": invoice.sourceDelivery, "tid": tenant_id},
+                    )
+            except SQLAlchemyError as exc:  # Lieferscheinbezug ist Nebeninformation
+                logger.warning("Lieferschein %s nicht mit Rechnung %s verknuepft: %s",
+                               invoice.sourceDelivery, invoice.number, exc)
 
+        # Archiveintrag und Lieferscheinbezug gemeinsam festschreiben.
+        db.commit()
         logger.info("Invoice created: %s", invoice.number)
         return {
             "ok": True,

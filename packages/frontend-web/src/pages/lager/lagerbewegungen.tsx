@@ -1,5 +1,5 @@
 import { type FormEvent, useMemo, useState } from 'react'
-import { useSearchParams } from '@/app/routing/typed-router'
+import { useNavigate, useSearchParams } from '@/app/routing/typed-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -68,6 +68,7 @@ const MOVEMENT_TYPE_LABEL: Record<MovementFormState['movement_type'], string> = 
 export default function LagerbewegungenPage(): JSX.Element {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const navigate = useNavigate()
   const isTouch = useTouchDevice()
   const [searchParams] = useSearchParams()
   const workflowInstanceId = searchParams.get('workflowInstanceId')
@@ -78,7 +79,6 @@ export default function LagerbewegungenPage(): JSX.Element {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<StockMovement | null>(null)
   const [form, setForm] = useState<MovementFormState>(EMPTY_FORM)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const { data: movementsData, isLoading } = useQuery({
     queryKey: ['stock-movements', { search, movementTypeFilter }],
@@ -122,17 +122,6 @@ export default function LagerbewegungenPage(): JSX.Element {
     }
   }, [movements])
 
-  const handleDelete = async (id: string) => {
-    if (deletingId) return
-    setDeletingId(id)
-    try {
-      await deleteMutation.mutateAsync(id)
-    } catch {
-      // onError in mutation definition shows toast
-    } finally {
-      setDeletingId(null)
-    }
-  }
 
   const resetDialog = () => {
     setEditing(null)
@@ -193,14 +182,6 @@ export default function LagerbewegungenPage(): JSX.Element {
     onError: () => toast({ title: 'Fehler beim Aktualisieren', variant: 'destructive' }),
   })
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => stockMovementService.deleteStockMovement(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stock-movements'] })
-      toast({ title: 'Lagerbewegung geloescht' })
-    },
-    onError: () => toast({ title: 'Loeschen fehlgeschlagen', variant: 'destructive' }),
-  })
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -246,7 +227,7 @@ export default function LagerbewegungenPage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-4 p-3 md:p-6" data-density="dense">
+    <div className="space-y-4 p-3 md:p-6" data-density="expertDense">
       {!isTouch ? (
       <>
       {workflowInstanceId && (
@@ -267,8 +248,8 @@ export default function LagerbewegungenPage(): JSX.Element {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold md:text-3xl">Lagerbewegungen</h1>
-          <p className="text-muted-foreground">Buchungen suchen, erfassen und loeschen</p>
+          <h1 className="text-xl font-semibold tracking-tight">Lagerbewegungen</h1>
+          <p className="text-muted-foreground">Buchungen suchen, erfassen und stornieren</p>
         </div>
         <Button onClick={openCreateDialog} className="min-h-touch touch-manipulation">
           <Plus className="mr-2 h-4 w-4" />
@@ -356,13 +337,15 @@ export default function LagerbewegungenPage(): JSX.Element {
                       >
                         Bearbeiten
                       </Button>
+                      {/* Gebuchte Bewegungen werden storniert, nicht geloescht: die
+                          Stornoaktion (Gegenbuchung mit Begruendung) liegt in der
+                          Detailmaske aus der ScreenDefinition lager/stock-movement. */}
                       <Button
                         variant="outline"
                         className="min-h-touch touch-manipulation"
-                        onClick={() => void handleDelete(movement.id)}
-                        disabled={deletingId === movement.id}
+                        onClick={() => navigate(`/lager/stock-movement/${movement.id}`)}
                       >
-                        {deletingId === movement.id ? 'Loeschen...' : 'Loeschen'}
+                        Stornieren…
                       </Button>
                     </div>
                   </TableCell>
