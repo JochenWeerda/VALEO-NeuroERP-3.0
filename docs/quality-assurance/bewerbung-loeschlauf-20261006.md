@@ -153,10 +153,7 @@ gemeldet.
 2. **Keine Maske.** Frist, Trockenlauf und Lauf sind heute nur über die API
    erreichbar. Eine Maske braucht beides: die Frist als Stammdatum und den
    Trockenlauf als Vorschau vor der Freigabe.
-3. **Kein Rechteschutz über den Mandanten hinaus.** Jeder, der ein gültiges Token
-   und den Mandantenkopf hat, kann den Lauf anstoßen. Die Zurechenbarkeit steht im
-   Protokoll (`durchgefuehrt_durch`), aber sie ist eine **Angabe**, keine geprüfte
-   Identität. Ein eigener Slice sollte den Weg an eine Rolle binden.
+3. **Rollenbindung geschlossen am 07.10.2026** — [Rollenschutz vom 07.10.2026](personal-bewerbungen-rollenschutz-20261007.md). Endgueltige Loeschung und Aufbewahrungsregeln verlangen PERSONAL_ADMIN/admin. Die Protokollangabe durchgefuehrt_durch ersetzt weiterhin keine gepruefte Akteursidentitaet; deren Ableitung aus dem Token bleibt ein eigener Folgebefund.
 4. ~~**Die Einwilligung hat keinen Weg.**~~ **Gebaut am 06.10.2026** —
    [Die Einwilligung zur längeren Aufbewahrung](bewerbung-einwilligung-20261006.md):
    Erteilen, Widerrufen (ohne Rumpf, ohne Grund — Art. 7 Abs. 3) und ein

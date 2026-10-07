@@ -160,3 +160,8 @@ Tabellenverweis-Ratsche seit dem Nachweislauf.
    der Nachweis. Eine **versionierte** Einwilligungserklärung (eine Fassung, viele
    Erteilungen) wäre das nächste Stück Ordnung; heute kann jede Erteilung einen
    anderen Text tragen, und niemand merkt es.
+
+
+## Rollenschutz nachgezogen am 07.10.2026
+
+[Rollenschutz vom 07.10.2026](personal-bewerbungen-rollenschutz-20261007.md): Erteilung und interner Widerruf verlangen dieselbe Bearbeitungsrolle. Kein Pflichtbody beim Widerruf; Bewerber-Selbstzugang bleibt offen.

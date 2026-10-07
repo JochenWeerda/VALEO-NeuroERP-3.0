@@ -100,17 +100,13 @@ bleibt; die Tabelle trägt keine Personenspalte.
 * **Der Rückweg trimmt.** Ein Altvorgang, dessen Text sich nur im Randleerraum
   unterschied, erhält nach downgrade den getrimmten Wortlaut seiner Fassung, nicht
   den ursprünglichen Leerraum. Inhaltlich derselbe Text; byte-genau ist er es nicht.
-* **Kein Rollenschutz.** Wie alle Wege in `personal_bewerbungen.py` (offener Punkt 3
-  des Löschlauf-Slices) prüfen auch diese nur Token und Mandant. Das Anlegen einer
-  Fassung ist eine Verwaltungshandlung und gehört an eine Rolle; das ist ein
-  gemeinsamer Folgeslice für die ganze Datei, nicht ein halber hier.
+* **Rollenschutz geschlossen am 07.10.2026** — [Rollenschutz vom 07.10.2026](personal-bewerbungen-rollenschutz-20261007.md). Alle Wege rollenbezogen, Fassung anlegen nur PERSONAL_ADMIN/admin.
 * **OpenAPI und Inventare** sind nicht in diesem Commit; sie werden wie bei den
   Vorslices aus dem committeten Stand integriert.
 
 ## Offene Punkte (Handshake)
 
-1. **Rollenbindung** für Fassung anlegen, Löschlauf und Aufbewahrungsregel — ein
-   Slice für die ganze Datei.
+1. **Rollenbindung geschlossen am 07.10.2026** — [Rollenschutz vom 07.10.2026](personal-bewerbungen-rollenschutz-20261007.md).
 2. **Maske** (Punkt 2 der Einwilligungs-QA-Doku): Sie kann jetzt auf Fassungen bauen
    — Auswahlliste statt Textfeld, Wortlaut zur Ansicht.
 3. **Selbstwiderruf** durch den Bewerbenden (Punkt 3 dort) bleibt offen.

@@ -111,6 +111,6 @@ etwas, das nicht geschehen ist. Eigener Slice.
 ## Offene Punkte (Handshake)
 
 1. ~~**Sichtprüfung**~~ — gelaufen, siehe oben.
-2. **Rollenbindung** für die ganze Datei `personal_bewerbungen.py` (aus dem Vorslice).
+2. **Serverseitige Rollenbindung geschlossen am 07.10.2026** — [Rollenschutz vom 07.10.2026](personal-bewerbungen-rollenschutz-20261007.md). Rollenbezogene Maskensteuerung bleibt separat.
 3. **Selbstwiderruf** durch den Bewerbenden (Punkt 3 der Einwilligungs-Doku).
 4. **Erfolg ohne Wirkung** in `mask_actions.py` (Nebenbefund oben).

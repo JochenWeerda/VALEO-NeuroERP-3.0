@@ -39,6 +39,7 @@ file_ownership:
   - Sharp-Override und Procurement-Pin nur Herstellerfix 0.35.5 mit nativer Lockfamilie
   - shell-quote exakt 1.11.0 mit Kommentar-Injection-Regression und Voll-Audit
   - Fassungsintegration nur committed-source Artefakte und bestehender lokaler Probe-Katalog
+  - Alle 16 Bewerbungswege Rollen-Dependencies, Dispatch-Tests und QA-Handshakes
 acceptance:
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.

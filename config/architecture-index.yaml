@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-07
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-07T09:04:23Z'
+generated_at: '2026-10-07T10:48:57Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1336,7 +1336,10 @@ domains:
     - domain_hrm
     - domain_shared
     frontend_routes:
+    - /personal/bewerbung-einwilligung
+    - /personal/bewerbung/:id/einwilligung
     - /personal/bewerbungen
+    - /personal/einwilligungserklaerungen
     - /personal/hrm-freigaben
     - /personal/hrm-operations-gates
     - /personal/mitarbeiter
@@ -2052,8 +2055,8 @@ domains:
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 932
-  frontend_routes_mapped: 932
+  frontend_routes_total: 935
+  frontend_routes_mapped: 935
   backend_services_total: 273
   backend_services_mapped: 273
   backend_endpoints_total: 454
