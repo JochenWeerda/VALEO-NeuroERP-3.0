@@ -3,6 +3,7 @@ AP Approval Workflow API
 FIBU-AP-03: Prüf-/Freigabeworkflow
 """
 
+import json
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -13,6 +14,7 @@ import logging
 from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
 from app.core.tenant import get_tenant_id
 from app.core.ap_approval_status import (
     APPROVAL_STATUS_TO_DOCUMENT_STATUS,
@@ -169,17 +171,30 @@ def _write_approval_audit_log(
     db.add(entry)
 
 
-def _ensure_invoice_tenant_access(invoice: dict[str, Any] | None, tenant_id: str) -> dict[str, Any]:
-    if not invoice:
-        raise HTTPException(status_code=404, detail="AP Invoice not found")
+def _json_wert(wert: Any) -> Any:
+    """JSONB kommt vom Treiber schon als Liste/Dict, TEXT als String.
 
-    invoice_tenant = str(invoice.get("tenantId") or invoice.get("tenant_id") or "").strip()
-    if invoice_tenant and invoice_tenant != tenant_id:
-        raise HTTPException(status_code=403, detail="Invoice belongs to a different tenant")
+    Bis 07.10.2026 rief jeder Lesepfad ``json.loads`` auf — auf einer frischen
+    Datenbank (JSONB) scheiterte damit schon das Anlegen einer Freigaberegel mit 500.
+    """
+    return json.loads(wert) if isinstance(wert, (str, bytes, bytearray)) else wert
+
+
+def _ensure_invoice_tenant_access(invoice: dict[str, Any] | None, tenant_id: str) -> dict[str, Any]:
+    """Die Rechnung gehoert diesem Mandanten — sonst gibt es sie nicht.
+
+    Bis 07.10.2026 liess dieser Helfer Rechnungen **ohne** Mandant durch; weil keine
+    gespeicherte AP-Rechnung je einen trug, liess er alles durch. Fremd und
+    mandantenlos sind jetzt gleich: 404, ohne die Existenz zu verraten.
+    """
+    invoice_tenant = str((invoice or {}).get("tenantId") or (invoice or {}).get("tenant_id") or "").strip()
+    if not invoice or invoice_tenant != tenant_id:
+        raise HTTPException(status_code=404, detail="AP Invoice not found")
     return invoice
 
 
-@router.get("/rules", response_model=List[ApprovalRuleResponse], summary="Approval rules auflisten")
+@router.get("/rules", response_model=List[ApprovalRuleResponse], summary="Approval rules auflisten",
+            dependencies=[Depends(finance_read)])
 async def list_approval_rules(
     active_only: bool = Query(True, description="Show only active rules"),
     tenant_id: str = Depends(get_tenant_id),
@@ -207,9 +222,8 @@ async def list_approval_rules(
         
         result = []
         for row in rows:
-            import json
-            conditions_data = json.loads(row[3]) if row[3] else []
-            roles_data = json.loads(row[5]) if row[5] else []
+            conditions_data = _json_wert(row[3]) if row[3] else []
+            roles_data = _json_wert(row[5]) if row[5] else []
             
             result.append(ApprovalRuleResponse(
                 id=str(row[0]),
@@ -275,7 +289,8 @@ async def list_approval_rules(
         ]
 
 
-@router.post("/rules", response_model=ApprovalRuleResponse, status_code=201, summary="Approval rule anlegen")
+@router.post("/rules", response_model=ApprovalRuleResponse, status_code=201, summary="Approval rule anlegen",
+             dependencies=[Depends(finance_admin)])
 async def create_approval_rule(
     rule: ApprovalRuleCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -287,7 +302,6 @@ async def create_approval_rule(
     try:
         rule_id = uuid7()
         
-        import json
         conditions_json = json.dumps([c.model_dump() for c in rule.conditions])
         roles_json = json.dumps(rule.approval_roles)
         
@@ -316,9 +330,8 @@ async def create_approval_rule(
         
         db.commit()
         
-        import json
-        conditions_data = json.loads(row[3]) if row[3] else []
-        roles_data = json.loads(row[5]) if row[5] else []
+        conditions_data = _json_wert(row[3]) if row[3] else []
+        roles_data = _json_wert(row[5]) if row[5] else []
         
         return ApprovalRuleResponse(
             id=str(row[0]),
@@ -339,7 +352,8 @@ async def create_approval_rule(
         raise HTTPException(status_code=500, detail=f"Failed to create approval rule: {str(e)}")
 
 
-@router.post("/request", response_model=ApprovalStatusResponse, summary="Approval request")
+@router.post("/request", response_model=ApprovalStatusResponse, summary="Approval request",
+             dependencies=[Depends(finance_write)])
 async def request_approval(
     request: ApprovalRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -412,7 +426,6 @@ async def request_approval(
         # Create approval request
         approval_id = uuid7()
         
-        import json
         rule_data = {
             "id": applicable_rule.id,
             "name": applicable_rule.name,
@@ -467,15 +480,22 @@ async def request_approval(
         raise HTTPException(status_code=500, detail=f"Failed to request approval: {str(e)}")
 
 
-@router.post("/approve", response_model=ApprovalStatusResponse, summary="Invoice genehmigen")
+@router.post("/approve", response_model=ApprovalStatusResponse, summary="Invoice genehmigen",
+             dependencies=[Depends(finance_admin)])
 async def approve_invoice(
     action: ApprovalAction,
     tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(finance_admin),
 ):
     """
     Approve or reject an AP invoice.
+
+    Freigeber ist der **angemeldete Nutzer**. Bis 07.10.2026 zaehlte der Workflow
+    verschiedene Freigeber ueber ``approved_by`` aus dem Rumpf — eine Person konnte
+    eine Zwei-Stufen-Freigabe mit zwei Namen erfuellen.
     """
+    action.approved_by = str(user.get("sub") or "").strip()
     try:
         # Get approval request
         query = text("""
@@ -496,8 +516,7 @@ async def approve_invoice(
         
         approval_request_id = str(row[0])
         required_approvals = int(row[2])
-        import json
-        applicable_rule = json.loads(row[3]) if row[3] else None
+        applicable_rule = _json_wert(row[3]) if row[3] else None
         current_status = str(row[4])
         
         if current_status in ["approved", "rejected"]:
@@ -505,10 +524,10 @@ async def approve_invoice(
         
         # Get existing approvals/rejections
         approvals_query = text("""
-            SELECT approved_by, approved_at, comment
+            SELECT approved_by, created_at, comment
             FROM domain_erp.ap_approvals
-            WHERE approval_request_id = :approval_request_id AND action = 'approve'
-            ORDER BY approved_at
+            WHERE request_id = :approval_request_id AND action = 'approve'
+            ORDER BY created_at
         """)
         
         approvals_rows = db.execute(approvals_query, {
@@ -516,10 +535,10 @@ async def approve_invoice(
         }).fetchall()
         
         rejections_query = text("""
-            SELECT approved_by, approved_at, comment
+            SELECT approved_by, created_at, comment
             FROM domain_erp.ap_approvals
-            WHERE approval_request_id = :approval_request_id AND action = 'reject'
-            ORDER BY approved_at
+            WHERE request_id = :approval_request_id AND action = 'reject'
+            ORDER BY created_at
         """)
         
         rejections_rows = db.execute(rejections_query, {
@@ -529,7 +548,7 @@ async def approve_invoice(
         # Check if user already approved/rejected
         existing_approval = db.execute(text("""
             SELECT id FROM domain_erp.ap_approvals
-            WHERE approval_request_id = :approval_request_id AND approved_by = :approved_by
+            WHERE request_id = :approval_request_id AND approved_by = :approved_by
         """), {
             "approval_request_id": approval_request_id,
             "approved_by": action.approved_by
@@ -542,12 +561,13 @@ async def approve_invoice(
         approval_id = uuid7()
         insert_approval = text("""
             INSERT INTO domain_erp.ap_approvals
-            (id, approval_request_id, approved_by, action, comment, approved_at)
-            VALUES (:id, :approval_request_id, :approved_by, :action, :comment, NOW())
+            (id, tenant_id, request_id, approved_by, action, comment, created_at)
+            VALUES (:id, :tenant_id, :approval_request_id, :approved_by, :action, :comment, NOW())
         """)
         
         db.execute(insert_approval, {
             "id": approval_id,
+            "tenant_id": tenant_id,
             "approval_request_id": approval_request_id,
             "approved_by": action.approved_by,
             "action": action.action,
@@ -634,7 +654,8 @@ async def approve_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to approve invoice: {str(e)}")
 
 
-@router.get("/status/{invoice_id}", response_model=ApprovalStatusResponse, summary="Approval status abrufen")
+@router.get("/status/{invoice_id}", response_model=ApprovalStatusResponse, summary="Approval status abrufen",
+            dependencies=[Depends(finance_read)])
 async def get_approval_status(
     invoice_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -681,16 +702,15 @@ async def get_approval_status(
         
         approval_request_id = str(row[0])
         required_approvals = int(row[2])
-        import json
-        applicable_rule = json.loads(row[3]) if row[3] else None
+        applicable_rule = _json_wert(row[3]) if row[3] else None
         current_status = str(row[4])
         
         # Get approvals/rejections
         approvals_query = text("""
-            SELECT approved_by, approved_at, comment
+            SELECT approved_by, created_at, comment
             FROM domain_erp.ap_approvals
-            WHERE approval_request_id = :approval_request_id AND action = 'approve'
-            ORDER BY approved_at
+            WHERE request_id = :approval_request_id AND action = 'approve'
+            ORDER BY created_at
         """)
         
         approvals_rows = db.execute(approvals_query, {
@@ -698,10 +718,10 @@ async def get_approval_status(
         }).fetchall()
         
         rejections_query = text("""
-            SELECT approved_by, approved_at, comment
+            SELECT approved_by, created_at, comment
             FROM domain_erp.ap_approvals
-            WHERE approval_request_id = :approval_request_id AND action = 'reject'
-            ORDER BY approved_at
+            WHERE request_id = :approval_request_id AND action = 'reject'
+            ORDER BY created_at
         """)
         
         rejections_rows = db.execute(rejections_query, {

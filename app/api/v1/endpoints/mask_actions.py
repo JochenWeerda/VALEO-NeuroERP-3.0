@@ -23,6 +23,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.auth.finance_roles import finance_admin
 from app.core.tenant import get_tenant_id
 from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
 
@@ -41,12 +42,14 @@ def _fehler(nachricht: str, feld: str = "_entity") -> list[dict[str, Any]]:
     "/finance/payment-runs/{entity_id}/actions/freigeben",
     response_model=MaskActionResult,
     summary="Zahlungslauf freigeben (SPEC-P1-04)",
+    dependencies=[Depends(finance_admin)],
 )
 async def action_payment_run_freigeben(
     entity_id: str,
     body: dict[str, Any] = Body(default_factory=dict),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    user: dict = Depends(finance_admin),
 ) -> MaskActionResult:
     async def pruefen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> list[dict[str, Any]]:
         status = db_.execute(
@@ -62,14 +65,9 @@ async def action_payment_run_freigeben(
     async def freigeben(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> str:
         from app.api.v1.endpoints.payment_runs import ApprovePaymentRunRequest, approve_payment_run
 
-        # Der Mandant kommt aus dem geprueften Kontext, nicht aus dem Query-Parameter
-        # des Fachwegs.
-        await approve_payment_run(
-            eid,
-            ApprovePaymentRunRequest(approved_by=str(payload.get("freigegeben_von") or "Maske")),
-            tenant_id=tid,
-            db=db_,
-        )
+        # Mandant aus dem Kontext, Freigeber = angemeldeter Nutzer; der Fachweg
+        # prueft das Vier-Augen-Prinzip.
+        await approve_payment_run(eid, ApprovePaymentRunRequest(), tenant_id=tid, db=db_, user=user)
         return "Zahlungslauf freigegeben."
 
     return await run_delegated_mask_action(

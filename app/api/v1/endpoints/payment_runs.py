@@ -16,6 +16,9 @@ from app.core.uuid7 import uuid7
 from xml.dom import minidom
 
 from ....core.database import get_db
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
+from app.services.payment_run_freigabe import pruefe_freigabe
+from app.core.tenant import get_tenant_id
 from app.core.explainability import ExplainabilityView
 from app.core.policy_decisions import PolicyOverrideResolution
 from app.domains.shared.events import IntegrationEvent, get_event_publisher
@@ -29,6 +32,9 @@ from app.documents.repository import DocumentRepository
 
 
 router = APIRouter(prefix="/payment-runs", tags=["finance", "ap", "sepa"])
+
+# Seit 07.10.2026: Mandant aus dem Kontext (vorher Query-Vorgabe "system"), Rollen vor
+# der Datenbank (app/auth/finance_roles.py), Vier-Augen bei der Freigabe.
 
 
 class PaymentItem(BaseModel):
@@ -195,7 +201,6 @@ class PaymentRunPlanRequest(BaseModel):
     """Request to plan a payment run (suggest payments from open items)"""
     execution_date: date = Field(..., description="Geplantes Ausführungsdatum")
     creditor_ids: Optional[List[str]] = Field(None, description="Nur diese Kreditoren (optional)")
-    tenant_id: str = Field(default="system")
 
 
 class PaymentRunPlanResponse(BaseModel):
@@ -337,9 +342,11 @@ class SEPAXMLGenerator:
         return reparsed.toprettyxml(indent="  ", encoding='utf-8').decode('utf-8')
 
 
-@router.post("/plan", response_model=PaymentRunPlanResponse, summary="Payment run plan")
+@router.post("/plan", response_model=PaymentRunPlanResponse, summary="Payment run plan",
+             dependencies=[Depends(finance_write)])
 async def plan_payment_run(
     request: PaymentRunPlanRequest,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """
@@ -353,7 +360,7 @@ async def plan_payment_run(
             FROM domain_erp.offene_posten
             WHERE tenant_id = :tenant_id AND konto_typ = 'kreditoren' AND offen > 0
         """)
-        params = {"tenant_id": request.tenant_id}
+        params = {"tenant_id": tenant_id}
         if request.creditor_ids:
             q = text(str(q) + " AND lieferant_id = ANY(:creditor_ids)")  # nosec B608  # reviewed-safe: angehaengte SQL-Fragmente sind Code-Literale, Werte sind gebunden
             params["creditor_ids"] = request.creditor_ids
@@ -407,11 +414,13 @@ async def plan_payment_run(
     )
 
 
-@router.post("", response_model=PaymentRunResponse, status_code=201, summary="Payment run anlegen")
+@router.post("", response_model=PaymentRunResponse, status_code=201, summary="Payment run anlegen",
+             dependencies=[Depends(finance_write)])
 async def create_payment_run(
     payment_run: PaymentRunCreate,
-    tenant_id: str = Query("system", description="Tenant ID"),
-    db: Session = Depends(get_db)
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    user: dict = Depends(finance_write),
 ):
     """
     Create a new payment run.
@@ -427,10 +436,10 @@ async def create_payment_run(
         insert_query = text("""
             INSERT INTO domain_erp.payment_runs
             (id, tenant_id, run_number, execution_date, initiator_name, initiator_iban, initiator_bic,
-             total_amount, payment_count, status, notes, created_at, updated_at)
+             total_amount, payment_count, status, notes, created_by, created_at, updated_at)
             VALUES
             (:id, :tenant_id, :run_number, :execution_date, :initiator_name, :initiator_iban, :initiator_bic,
-             :total_amount, :payment_count, :status, :notes, NOW(), NOW())
+             :total_amount, :payment_count, :status, :notes, :created_by, NOW(), NOW())
             RETURNING id, run_number, execution_date, initiator_name, initiator_iban, initiator_bic,
                       total_amount, payment_count, status, approved_at, approved_by, executed_at,
                       sepa_file_id, notes, created_at, updated_at
@@ -447,7 +456,8 @@ async def create_payment_run(
             "total_amount": total_amount,
             "payment_count": len(payment_run.payments),
             "status": "draft",
-            "notes": payment_run.notes
+            "notes": payment_run.notes,
+            "created_by": str(user.get("sub") or ""),  # Vier-Augen bei der Freigabe
         }).fetchone()
 
         # Insert payment items
@@ -521,10 +531,11 @@ async def create_payment_run(
         raise HTTPException(status_code=500, detail=f"Failed to create payment run: {str(e)}")
 
 
-@router.get("", response_model=List[PaymentRunResponse], summary="Payment runs auflisten")
+@router.get("", response_model=List[PaymentRunResponse], summary="Payment runs auflisten",
+            dependencies=[Depends(finance_read)])
 async def list_payment_runs(
     status: Optional[str] = Query(None, description="Filter by status"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -590,10 +601,11 @@ async def list_payment_runs(
         raise HTTPException(status_code=500, detail="Failed to list payment runs") from e
 
 
-@router.get("/{run_id}", response_model=PaymentRunResponse, summary="Payment run abrufen")
+@router.get("/{run_id}", response_model=PaymentRunResponse, summary="Payment run abrufen",
+            dependencies=[Depends(finance_read)])
 async def get_payment_run(
     run_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -655,17 +667,19 @@ async def get_payment_run(
         raise HTTPException(status_code=500, detail="Failed to get payment run") from e
 
 
-@router.post("/{run_id}/approve", response_model=PaymentRunResponse, summary="Payment run genehmigen")
+@router.post("/{run_id}/approve", response_model=PaymentRunResponse, summary="Payment run genehmigen",
+             dependencies=[Depends(finance_admin)])
 async def approve_payment_run(
     run_id: str,
-    request: ApprovePaymentRunRequest,
-    tenant_id: str = Query("system", description="Tenant ID"),
-    db: Session = Depends(get_db)
+    request: Optional[ApprovePaymentRunRequest] = None,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    user: dict = Depends(finance_admin),
 ):
-    """
-    Approve a payment run.
-    """
+    """Gibt frei. Freigeber = angemeldeter Nutzer (nicht ``approved_by``); Vier-Augen-Prinzip."""
+    freigeber = str(user.get("sub") or "").strip()
     try:
+        pruefe_freigabe(db, run_id, tenant_id, freigeber)
         update_query = text("""
             UPDATE domain_erp.payment_runs
             SET status = 'approved', approved_at = NOW(), approved_by = :approved_by, updated_at = NOW()
@@ -676,7 +690,7 @@ async def approve_payment_run(
         row = db.execute(update_query, {
             "run_id": run_id,
             "tenant_id": tenant_id,
-            "approved_by": request.approved_by
+            "approved_by": freigeber,
         }).fetchone()
 
         if not row:
@@ -694,11 +708,12 @@ async def approve_payment_run(
         raise HTTPException(status_code=500, detail=f"Failed to approve payment run: {str(e)}")
 
 
-@router.post("/{run_id}/execute", response_model=PaymentRunResponse, summary="Payment run ausführen")
+@router.post("/{run_id}/execute", response_model=PaymentRunResponse, summary="Payment run ausführen",
+             dependencies=[Depends(finance_admin)])
 async def execute_payment_run(
     run_id: str,
     request: ExecutePaymentRunRequest,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -828,11 +843,11 @@ async def execute_payment_run(
 
 
 @router.get("/{run_id}/sepa-xml", summary="Sepa xml abrufen",
-    response_model=PaymentRunsOut
+    response_model=PaymentRunsOut, dependencies=[Depends(finance_read)]
 )
 async def get_sepa_xml(
     run_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -877,12 +892,12 @@ async def get_sepa_xml(
 
 
 @router.post("/{run_id}/return-payment", summary="Payment return",
-    response_model=PaymentRunsOut
+    response_model=PaymentRunsOut, dependencies=[Depends(finance_write)]
 )
 async def return_payment(
     run_id: str,
     request: ReturnPaymentRequest,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """

@@ -135,5 +135,6 @@ async def test_request_approval_rejects_cross_tenant_invoice(monkeypatch):
             db=db,
         )
 
-    assert exc_info.value.status_code == 403
-    assert "different tenant" in str(exc_info.value.detail)
+    # Seit 07.10.2026: fremd ist wie nicht vorhanden (404) — die Existenz einer
+    # fremden Rechnung wird nicht verraten.
+    assert exc_info.value.status_code == 404

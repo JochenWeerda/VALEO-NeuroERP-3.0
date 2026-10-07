@@ -2034,6 +2034,17 @@ Query braucht, neue Vertraege, eigene QA-Doku.
 genau einmal zur Bestellung, Opportunity-Aktivitaet erscheint im Reiter; Migration
 hin/zurueck/hin; bestehende Fachsuiten und Ratschen gruen.
 
+**Zwischenstand (07.10.2026): Befunde 1 und 2 fertig.** Zahlungslaeufe: alle acht
+Wege mit Mandant aus dem Kontext und Rollenmatrix; `created_by` + Vier-Augen
+(`app/services/payment_run_freigabe.py`); Freigeber = angemeldeter Nutzer.
+Eingangsrechnungen: alle Wege mandantengebunden (`tenantId` im Dokument, fremd und
+mandantenlos = 404, kein Ueberschreiben fremder Nummern = 409); Freigabe-Workflow mit
+Rollen, Freigeber = angemeldeter Nutzer (eine Person erfuellte vorher eine
+Zwei-Stufen-Freigabe mit zwei Namen). Dabei behoben, weil sonst nichts davon wirkt:
+Workflow las/schrieb `ap_approvals` mit Spalten, die es in **keiner** DB gibt
+(`approval_request_id`, `approved_at`), und `json.loads` auf JSONB liess schon das
+Anlegen einer Regel scheitern. 265 Tests gruen, Ratschen gruen. Befunde 3 und 4 folgen.
+
 ## MASK-AKTIONEN-WIRKUNG-20261007 — abgeschlossen, Claude Code
 
 **Auftrag (User 07.10.2026: "Befunde beheben"):** Keine der neun `execute`-Funktionen

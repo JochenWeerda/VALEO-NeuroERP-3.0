@@ -218,7 +218,8 @@ class TestZahlungslauf:
         ).json()
         assert antwort["success"] is True, antwort
         assert wert(engine, "SELECT status FROM domain_erp.payment_runs WHERE id = :i", i=lauf) == "approved"
-        assert wert(engine, "SELECT approved_by FROM domain_erp.payment_runs WHERE id = :i", i=lauf) == "Kasse"
+        # Freigeber ist der angemeldete Nutzer (Dev-Token), nicht "freigegeben_von" im Rumpf.
+        assert wert(engine, "SELECT approved_by FROM domain_erp.payment_runs WHERE id = :i", i=lauf) == "dev"
         assert spuren(engine, HAUS_A, "freigeben") == (1, 1)
 
     def test_ein_freigegebener_lauf_wird_nicht_nochmals_freigegeben(self, client, engine):

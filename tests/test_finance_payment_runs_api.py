@@ -7,6 +7,8 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from app.auth.deps import get_current_user
+
 from app.api.v1.endpoints import payment_runs
 from app.core.database import get_db
 
@@ -167,6 +169,12 @@ class FakeDb:
                 rows = [run for run in rows if run["status"] == params["status"]]
             return _FakeResult(fetchall=[self._run_tuple(run) for run in rows])
 
+        if "SELECT status, created_by FROM domain_erp.payment_runs" in sql:
+            run = self.runs.get(params["run_id"])
+            if run and run["tenant_id"] == params["tenant_id"]:
+                return _FakeResult(fetchone=(run["status"], run.get("created_by")))
+            return _FakeResult(fetchone=None)
+
         if "FROM domain_erp.payment_runs WHERE id = :run_id AND tenant_id = :tenant_id" in sql:
             run = self.runs.get(params["run_id"])
             if run and run["tenant_id"] == params["tenant_id"]:
@@ -237,7 +245,10 @@ def _build_client(db: FakeDb) -> TestClient:
     app = FastAPI()
     app.include_router(payment_runs.router, prefix="/finance")
     app.dependency_overrides[get_db] = lambda: db
-    return TestClient(app)
+    # Seit 07.10.2026 verlangen die Wege eine Finanzrolle (Rollenmatrix:
+    # tests/test_zahlungslauf_mandant.py); hier spricht ein Finanz-Admin.
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "tester", "roles": ["FINANCE_ADMIN"]}
+    return TestClient(app, headers={"X-Tenant-ID": "system"})
 
 
 def test_list_and_plan_payment_runs():
