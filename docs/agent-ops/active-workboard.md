@@ -2050,7 +2050,7 @@ weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
 ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
 waren.
 
-## MANDANT-FINANZ-CRM-EINKAUF-20261007 — in Arbeit, Claude Code
+## MANDANT-FINANZ-CRM-EINKAUF-20261007 — abgeschlossen, Claude Code
 
 **Auftrag (User 07.10.2026: "alle 4 Befunde fertig bearbeiten"):** die vier Befunde aus
 [Mask-Aktionen-Wirkung](../quality-assurance/mask-aktionen-wirkung-20261007.md).
@@ -2142,6 +2142,12 @@ Abrechnung drucken — PDF existiert, aber kein Archiv speichert Inhalte: Artefa
 tragen nur Hash+Schluessel, `register_artifact` verschluckt Fehler, `archive_service`
 schreibt nach `data/` (kein Volume). Ablageort ist eine Betriebsentscheidung.
 (3) Acht Logistik-Aktionen ohne `command`-Deklaration (Codex-Masken).
+
+**Abnahme (07.10.2026):** Alle vier Befunde behoben (`42f8fe6c3`, `5db4b4944`), alle
+fruehere Luecken mit echtem Fachweg (Storno `71aecf2ae`, `inputFields`/Opportunity
+`54a659699`, Wareneingang + kanonische Bestellung `28e6133ed`, Lead + PDF-Archiv und
+Logistik von Codex `e71e0731e`/`b2a63f451`). Gate: 0 bekannte Luecken. QA:
+[mandant-finanz-crm-einkauf-20261007.md](../quality-assurance/mandant-finanz-crm-einkauf-20261007.md).
 
 ## MASK-AKTIONEN-WIRKUNG-20261007 — abgeschlossen, Claude Code
 
