@@ -150,7 +150,10 @@ Tabellenverweis-Ratsche seit dem Nachweislauf.
    Token voraus; der Mensch, dem die Daten gehören, kann heute nur anrufen. Ein
    Selbstbedienungsweg (Token im Bestätigungs-Mail) ist ein eigener Slice und
    dieselbe Lücke wie bei den Art.-17-Wegen.
-4. **Der Wortlaut ist freier Text.** Je Erteilung wird er mitgeschrieben — das ist
+4. ~~**Der Wortlaut ist freier Text.**~~ **Geschlossen am 06.10.2026** —
+   [Die Einwilligungserklärung in Fassungen](bewerbung-erklaerung-fassung-20261006.md):
+   Erteilt wird gegen eine unveränderliche Fassung, der freie Text ist entfallen.
+   Ursprünglicher Befund: Je Erteilung wird er mitgeschrieben — das ist
    der Nachweis. Eine **versionierte** Einwilligungserklärung (eine Fassung, viele
    Erteilungen) wäre das nächste Stück Ordnung; heute kann jede Erteilung einen
    anderen Text tragen, und niemand merkt es.

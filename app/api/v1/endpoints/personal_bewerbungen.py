@@ -35,6 +35,8 @@ from app.api.v1.schemas.personal_bewerbung_schemas import (
     EinwilligungIn,
     EinwilligungStandOut,
     EinwilligungVorgangOut,
+    ErklaerungIn,
+    ErklaerungOut,
     LoeschlaufIn,
     LoeschlaufOut,
     StufeIn,
@@ -239,6 +241,71 @@ async def post_loeschlauf(
         ergebnis["uebersprungen_sperre"], ergebnis["uebersprungen_einwilligung"],
     )
     return ergebnis
+
+
+# ── Die Einwilligungserklaerung in Fassungen ─────────────────────────────────
+# Erteilt wird gegen eine **Fassung**, nicht gegen freien Text. Eine Fassung ist
+# unveraenderlich (die Datenbank haelt das), deshalb gibt es kein PUT, PATCH oder
+# DELETE: Ein neuer Wortlaut ist eine neue Fassung.
+#
+# Auch diese Wege stehen **vor** ``/applications/{application_id}``; sonst laese
+# der Platzhalter "einwilligungserklaerungen" als Bewerbungskennung.
+
+
+@router.get("/applications/einwilligungserklaerungen", response_model=List[ErklaerungOut],
+            summary="Fassungen der Einwilligungserklärung")
+async def list_erklaerungen(
+    limit: int = Query(200, ge=1, le=1000),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    """Die Fassungen des Mandanten, neueste zuerst."""
+    try:
+        return einwilligung.erklaerungen_auflisten(db, tenant_id, limit)
+    except HTTPException:
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        raise dienst.fehler_deuten(db, fehler, "Erklaerungen lesen", tenant_id) from fehler
+
+
+@router.post("/applications/einwilligungserklaerungen", status_code=201,
+             response_model=ErklaerungOut, summary="Neue Fassung der Einwilligungserklärung")
+async def post_erklaerung(
+    payload: ErklaerungIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Legt die naechste Fassung an.
+
+    Derselbe Wortlaut ist **eine** Fassung: Ein zweites Anlegen antwortet 409 und
+    nennt die vorhandene Nummer.
+    """
+    try:
+        ergebnis = einwilligung.erklaerung_anlegen(
+            db, tenant_id, str(uuid7()), payload.wortlaut, payload.erstellt_durch
+        )
+        db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        raise dienst.fehler_deuten(db, fehler, "Erklaerung anlegen", tenant_id) from fehler
+    return ergebnis
+
+
+@router.get("/applications/einwilligungserklaerungen/{fassung}", response_model=ErklaerungOut,
+            summary="Eine Fassung der Einwilligungserklärung")
+async def get_erklaerung(
+    fassung: int,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        return einwilligung.erklaerung_lesen(db, tenant_id, fassung)
+    except HTTPException:
+        raise
+    except Exception as fehler:  # noqa: BLE001
+        raise dienst.fehler_deuten(db, fehler, "Erklaerung lesen", tenant_id) from fehler
 
 
 @router.get("/applications/{application_id}", response_model=BewerbungOut,

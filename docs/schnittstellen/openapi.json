@@ -57812,11 +57812,6 @@
       "EinwilligungIn": {
         "additionalProperties": false,
         "properties": {
-          "einwilligungstext": {
-            "minLength": 1,
-            "title": "Einwilligungstext",
-            "type": "string"
-          },
           "erfasst_durch": {
             "anyOf": [
               {
@@ -57828,6 +57823,11 @@
               }
             ],
             "title": "Erfasst Durch"
+          },
+          "fassung": {
+            "minimum": 1.0,
+            "title": "Fassung",
+            "type": "integer"
           },
           "gueltig_bis": {
             "format": "date",
@@ -57848,7 +57848,7 @@
         "required": [
           "gueltig_bis",
           "kanal",
-          "einwilligungstext"
+          "fassung"
         ],
         "title": "EinwilligungIn",
         "type": "object"
@@ -57939,6 +57939,17 @@
               }
             ],
             "title": "Erfolgt Am"
+          },
+          "fassung": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fassung"
           },
           "gueltig_bis": {
             "anyOf": [
@@ -59992,6 +60003,83 @@
           "next_action"
         ],
         "title": "EricReadinessOut",
+        "type": "object"
+      },
+      "ErklaerungIn": {
+        "additionalProperties": false,
+        "properties": {
+          "erstellt_durch": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erstellt Durch"
+          },
+          "wortlaut": {
+            "minLength": 1,
+            "title": "Wortlaut",
+            "type": "string"
+          }
+        },
+        "required": [
+          "wortlaut"
+        ],
+        "title": "ErklaerungIn",
+        "type": "object"
+      },
+      "ErklaerungOut": {
+        "properties": {
+          "erstellt_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erstellt Am"
+          },
+          "erstellt_durch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erstellt Durch"
+          },
+          "fassung": {
+            "title": "Fassung",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "wortlaut": {
+            "title": "Wortlaut",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "fassung",
+          "wortlaut"
+        ],
+        "title": "ErklaerungOut",
         "type": "object"
       },
       "ErledigtIn": {
@@ -374032,6 +374120,218 @@
           }
         ],
         "summary": "Aufbewahrungsfrist für Bewerberdaten festlegen",
+        "tags": [
+          "personal",
+          "hr",
+          "recruiting",
+          "personal",
+          "hr",
+          "recruiting"
+        ]
+      }
+    },
+    "/api/v1/personal/applications/einwilligungserklaerungen": {
+      "get": {
+        "description": "Die Fassungen des Mandanten, neueste zuerst.",
+        "operationId": "list_erklaerungen_api_v1_personal_applications_einwilligungserklaerungen_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ErklaerungOut"
+                  },
+                  "title": "Response List Erklaerungen Api V1 Personal Applications Einwilligungserklaerungen Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fassungen der Einwilligungserklärung",
+        "tags": [
+          "personal",
+          "hr",
+          "recruiting",
+          "personal",
+          "hr",
+          "recruiting"
+        ]
+      },
+      "post": {
+        "description": "Legt die naechste Fassung an.\n\nDerselbe Wortlaut ist **eine** Fassung: Ein zweites Anlegen antwortet 409 und\nnennt die vorhandene Nummer.",
+        "operationId": "post_erklaerung_api_v1_personal_applications_einwilligungserklaerungen_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErklaerungIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErklaerungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neue Fassung der Einwilligungserklärung",
+        "tags": [
+          "personal",
+          "hr",
+          "recruiting",
+          "personal",
+          "hr",
+          "recruiting"
+        ]
+      }
+    },
+    "/api/v1/personal/applications/einwilligungserklaerungen/{fassung}": {
+      "get": {
+        "operationId": "get_erklaerung_api_v1_personal_applications_einwilligungserklaerungen__fassung__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fassung",
+            "required": true,
+            "schema": {
+              "title": "Fassung",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErklaerungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eine Fassung der Einwilligungserklärung",
         "tags": [
           "personal",
           "hr",

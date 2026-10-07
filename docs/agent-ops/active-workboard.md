@@ -13,6 +13,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
 
+**Fassungs-Integrationsclaim (2026-10-07, abgeschlossen):** Owner Codex-01a0f3fc; committed-source OpenAPI, drei Code-Inventare und Architekturindex fuer ac69c26f0; eigene QA/Slice/Workboard. Docs Build 37512887149 scheitert am Migrationsinventar, OpenAPI 37512887459 an fehlender Fassungsintegration. Fremder Fachcode, Migration, Tests und Frontend-WIP bleiben unveraendert. Abnahme: alle bisherigen Pfade/Methoden erhalten, exakt neue Erklaerungswege und kanonischer fassung-Vertrag, Generatoren --check. Bestehender Katalogclaim bleibt lesend auf gemeinsamem Probe; keine Migration/Reset, neue DB/Container oder CI-Schema-Upload.
+
+**Fassungs-/Katalog-Abnahme:** Fassungsintegration 2026-10-07: Spec/Inventare aus committed 0dbd76e6f (Backend ac69c26f0) ohne fremde Arbeitsbaumquellen. Alle 3101 bisherigen Pfade/Methoden erhalten; genau zwei neue Erklaerungspfade mit GET/POST und GET {fassung}, jetzt 3103 Pfade. EinwilligungIn verlangt fassung >=1 statt freiem einwilligungstext; render(build_spec()) kanonisch. 41 bestehende Routerkonflikte bleiben offen. Drei Code-Inventare --check und Architekturindex --check --require-complete bestanden: 932 Routen/273 Services/454 Endpoint-Module. Gemeinsamer Probe lesend auf bewerbung_erklaerung_fassung_20261006; Katalog aus committed Generator/Backend zweimal geerntet und --check bestanden, 659 Tabellen (vorher 641), 41 neue und 23 entfallene Tabellennamen gegen altes Artefakt. Keine Datenbankaenderung, Migration, Reset, neue DB/Container oder CI-Schema-Upload. Lokal bestandener Katalogabgleich ist keine frische CI-Schemaabnahme; diese folgt im neuen Lauf. Fremde Frontend-/Generator-/Spec-WIP erhalten. GitHub ac69c26f0: PG/Service Security/Full Security Agent/kritische E2E/Doku-Governance/Erntepeak erfolgreich; Docs Build wegen Migration-Inventar, OpenAPI und Quality wegen fehlender Specintegration rot. Zwei Frontend-Testbefunde, Security, Smoke/UAT/Gesamt-CI bleiben offen.
+
 **Shell-Quote-Sicherheitsclaim (2026-10-06, abgeschlossen):** Owner Codex-01a0f3fc; package.json nur bestehende shell-quote-Untergrenze auf Herstellerfix 1.11.0; pnpm-lock.yaml nur shell-quote-Aufloesung, eigene QA/Slice/Workboard. Voll-Audit nach Sharp-Fix meldet neuen critical GHSA-pqg4-j6r4-53mv fuer aufgeloestes 1.10.0; Hersteller korrigiert Kommentar/Zeilenumbruch-Injection in 1.11.0. Kein aktiver fremder Paketclaim/WIP. Abnahme: vier Zeilentrenner nach Kommentartoken abgewiesen, regulaeres Quoting/Parsing erhalten, Lock/Audit; keine Ausnahme, neue DB/Container oder fremde Frontendarbeit.
 
 **Shell-Quote-Abnahme:** Shell-Quote-Abnahme 2026-10-06: Zentraler Override exakt 1.11.0 statt ^1.9.0; Lock ersetzt 1.10.0 durch geprueften Herstellerfix mit neuer Integritaet und drei Verbraucherreferenzen (React-Native CLI, Detox, React-Devtools). Keine anderen Pakete/Importer/Overrides geaendert; automatische lightningcss/detect-libc-Nebenaenderung entfernt. Isolierter Herstellertest bestanden: acht Injection-Versuche (LF, CR, U+2028, U+2029 jeweils unmittelbar und spaeter nach Kommentar) werfen TypeError; zwei normale quote/parse-Roundtrips mit Sonderzeichen, gueltiger Kommentar und Ablehnung ungueltigen Kommentars bestanden. Frozen-Lock aller 36 Workspaces offline bestanden. Finaler vollstaendiger Production-Audit auf exakt 1.11.0: 0 critical, 2 high (node-forge/braces), 14 moderate, 1 low; Sharp und Shell-Quote nicht mehr betroffen. Audit weiterhin Exit 1 wegen verbleibender Befunde; keine Ausnahme oder Gate-Abschwaechung. Keine neue Datenbank/Container, Reset, Migration oder fremde Fach-/Frontend-WIP. Neue GitHub-Abnahme ausstehend.
@@ -1967,7 +1971,7 @@ weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
 ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
 waren.
 
-## BEWERBUNG-ERKLAERUNG-FASSUNG-20261006 — in Arbeit, Claude Code
+## BEWERBUNG-ERKLAERUNG-FASSUNG-20261006 — abgeschlossen, Claude Code
 
 **Auftrag:** Offenen Punkt 4 aus
 [Die Einwilligung zur laengeren Aufbewahrung](../quality-assurance/bewerbung-einwilligung-20261006.md)
@@ -2015,6 +2019,17 @@ Anlegen; gleicher Wortlaut ergibt 409 mit Verweis auf die vorhandene Fassung; ei
 UPDATE des Wortlauts scheitert in der Datenbank; eine benutzte Fassung ist nicht
 loeschbar; Bestandszeilen ueberfuehrt; Migration hin/zurueck/hin auf `valeo_probe`;
 alle bisherigen Einwilligungs- und Loeschlaufvertraege gruen; fuenf Ratschen gruen.
+
+**Abnahme (06.10.2026):** Migration, Dienst, drei neue Wege, Erteilen gegen
+`fassung`. Bestandsueberfuehrung auf `valeo_probe` mit vier Altvorgaengen geprueft
+(upgrade → downgrade → upgrade): zwei Fassungen in Reihenfolge der ersten Verwendung,
+Randleerraum-Dublette zusammengefuehrt, Rueckweg stellt den Text wieder her (getrimmt).
+`valeo_probe` und `valeo_neuro_erp` auf Head, Bedingungen und Trigger identisch.
+**126/126 Vertraege** gruen (32 neu, 42 Einwilligung angepasst, 52 Loeschlauf); alle
+fuenf Ratschen gruen. OpenAPI/Inventare nicht enthalten — Integration aus committed
+source wie bei den Vorslices. Offen: Rollenbindung fuer die ganze Datei
+`personal_bewerbungen.py`, Maske, Selbstwiderruf. QA:
+[bewerbung-erklaerung-fassung-20261006.md](../quality-assurance/bewerbung-erklaerung-fassung-20261006.md).
 
 ## BEWERBUNG-EINWILLIGUNG-20261006 — abgeschlossen, Claude Code
 
