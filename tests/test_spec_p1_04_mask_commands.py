@@ -16,12 +16,12 @@ class TestSpecP104CommandInventory:
 
         assert main() == 0
 
-    # Ernte-Abrechnung drucken und Opportunity-Aktivitaet sind seit 07.10.2026 ehrliche
-    # Luecken (BEKANNTE_LUECKEN im Gate) statt Endpunkte ohne Wirkung.
     @pytest.mark.parametrize("screen_id,action_key", [
         ("sales/delivery-note", "drucken"),
         ("finance/payment-run", "freigeben"),
         ("einkauf/angebot", "bestellen"),
+        ("crm/opportunity", "create_activity"),
+        ("lager/stock-movement", "stornieren"),
     ])
     def test_new_endpoints_wired(self, screen_id: str, action_key: str):
         sd = get_screen_definition(screen_id)

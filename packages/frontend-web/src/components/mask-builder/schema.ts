@@ -151,6 +151,21 @@ export type ScreenCondition =
   | { any: ScreenCondition[] }
   | { not: ScreenCondition }
 
+/** Optionen eines Eingabefelds aus einem Endpunkt (Liste oder ``{items}``). */
+export interface ScreenFieldOptionsSource {
+  endpoint: string
+  valueKey: string
+  labelKey: string
+}
+
+/**
+ * Eingabe einer Aktion. Der Mask-Builder zeichnet sie vor der Ausfuehrung
+ * (``ActionInputDialog``); die Werte gehen in die Nutzlast des ``commandEndpoint``.
+ */
+export interface ScreenActionInputField extends ScreenFieldDefinition {
+  optionsSource?: ScreenFieldOptionsSource
+}
+
 export interface ScreenActionDefinition {
   key: string
   label: string
@@ -165,6 +180,8 @@ export interface ScreenActionDefinition {
   commandEndpoint?: string
   /** Navigates instead of mutating. Placeholders: {entity_id}, {business_partner_id}. */
   navigationRoute?: string
+  /** Eingaben, die die Aktion braucht — deklarativ, vom Mask-Builder gezeichnet. */
+  inputFields?: ScreenActionInputField[]
   /** Opens an existing human input flow; submitEndpoint is documentation, never auto-dispatched. */
   inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
   stubReason?: string

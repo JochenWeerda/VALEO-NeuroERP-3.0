@@ -937,11 +937,16 @@ def build_crm_opportunity_screen_definition() -> dict[str, Any]:
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "permission": "crm.activity.create",
-                "stubReason": (
-                    "Noch nicht in der Maske: Betreff und Typ kann die native Maske noch nicht "
-                    "erfassen. Der Fachweg POST /crm/opportunities/{id}/activities ist "
-                    "mandantengebunden und schreibt in den Reiter Aktivitaeten."
-                ),
+                "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/create_activity",
+                "method": "POST",
+                # Die Maske fragt die Angaben deklarativ (ActionInputDialog).
+                "inputFields": [
+                    {"key": "subject", "label": "Betreff", "type": "text", "required": True},
+                    {"key": "activity_type", "label": "Typ", "type": "select", "required": True,
+                     "options": [{"value": "CALL", "label": "Anruf"}, {"value": "EMAIL", "label": "E-Mail"},
+                                 {"value": "MEETING", "label": "Termin"}, {"value": "NOTE", "label": "Notiz"}]},
+                    {"key": "notes", "label": "Notiz", "type": "textarea"},
+                ],
             },
         ],
         "noWorkflowReason": "Opportunity-Phasen werden manuell gesteuert — kein automatischer Prozess-Lebenszyklus erforderlich.",

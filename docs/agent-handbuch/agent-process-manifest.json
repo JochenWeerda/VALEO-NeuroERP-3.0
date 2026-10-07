@@ -1791,9 +1791,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.activity.create",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Noch nicht in der Maske: Betreff und Typ kann die native Maske noch nicht erfassen. Der Fachweg POST /crm/opportunities/{id}/activities ist mandantengebunden und schreibt in den Reiter Aktivitaeten."
+          "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/create_activity",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
@@ -4197,5 +4197,5 @@
       "endpoint": "GET /api/v1/agent/proposals"
     }
   ],
-  "event_count": 70
+  "event_count": 71
 }

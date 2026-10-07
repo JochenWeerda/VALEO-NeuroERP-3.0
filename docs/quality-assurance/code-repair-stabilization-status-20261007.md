@@ -18,6 +18,12 @@ Wave-Statusdateien. Aktiver Dateibesitz steht im
 
 ## Aktuelle Abnahme statt historischer Testzahlen
 
+Der [KIM-Navigations-Smoke](kim-navigation-smoke-20261007.md) ist lokal repariert:
+gueltige isolierte Kunden-Lesefixture statt nicht existierendem PERF-K1;
+native Identitaetsanzeige/Registerwahl und fehlender Kunde separat geprueft,
+zwei Chromium-Vertraege gruen. Kein Produkt- oder Persistenz-Scheinerfolg;
+frischer GitHub-Lauf bleibt erforderlich.
+
 Weitere Teilabnahme: [CPython-Herstellerfix](cpython-upstream-security-20261007.md)
 hebt das Backend-Image auf echtes 3.13.16, entfernt drei ueberholte Backports und
 erhaelt den nachweislich notwendigen POP3-Schutz. Fuenf Runtime-Sicherheitstests

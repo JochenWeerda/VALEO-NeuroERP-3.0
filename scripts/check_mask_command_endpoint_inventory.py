@@ -28,7 +28,6 @@ from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_d
 BEKANNTE_LUECKEN = {
     "agrar/harvest-settlement/drucken",
     "crm/lead/qualifizieren",
-    "crm/opportunity/create_activity",
     "einkauf/anlieferavis/wareneingang",
 }
 

@@ -1104,7 +1104,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
-| `create_activity` | Aktivitaet anlegen | safe | nein | `Noch nicht in der Maske: Betreff und Typ kann die native Maske noch nicht erfassen. Der Fachweg POST /crm/opportunities/{id}/activities ist mandantengebunden und schreibt in den Reiter Aktivitaeten.` |
+| `create_activity` | Aktivitaet anlegen | safe | nein | `/api/v1/crm/opportunities/{entity_id}/actions/create_activity` |
 
 ---
 
