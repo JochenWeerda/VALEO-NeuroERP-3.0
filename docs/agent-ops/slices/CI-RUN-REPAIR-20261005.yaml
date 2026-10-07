@@ -47,6 +47,7 @@ file_ownership:
   - Eindeutige typisierte Historien, echte Praesente-Route/DTO und isolierter Schema-/HTTP-Vertrag
   - Exakte Finance-Zuordnung payment_run_freigabe und committed Inventar-/Handbuch-Nachzug
 acceptance:
+  - Backend echtes CPython 3.13.16, nur weiterhin erforderlicher POP3-Backport; fuenf Runtime-Vertraege lokal gruen, Linux-/Grype-Abnahme separat offen.
   - Pflichtgates behalten Baselines und Schwellwerte.
   - Gemeinsamer Probe wird ohne Reset oder neue Datenbank lesend geprueft.
   - Neue Actions-Laufe verifizieren die Lieferung; Restbefunde bleiben explizit offen.

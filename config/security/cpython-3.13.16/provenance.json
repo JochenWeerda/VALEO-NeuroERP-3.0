@@ -1,0 +1,11 @@
+{
+  "python": "3.13.16",
+  "patches": [
+    {
+      "cve": "CVE-2025-15367",
+      "source": "https://github.com/python/cpython/commit/b234a2b67539f787e191d2ef19a7cbdce32874e7",
+      "upstream_status": "main; two-line guard still required and behavior-tested on 3.13.16",
+      "sha256": "efec029f5da02b71f709ec26a2b1abb45ab5e754f230d4bebc0f6a21192c23a5"
+    }
+  ]
+}

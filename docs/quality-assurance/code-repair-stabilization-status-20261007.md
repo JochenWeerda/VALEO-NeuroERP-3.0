@@ -18,6 +18,12 @@ Wave-Statusdateien. Aktiver Dateibesitz steht im
 
 ## Aktuelle Abnahme statt historischer Testzahlen
 
+Weitere Teilabnahme: [CPython-Herstellerfix](cpython-upstream-security-20261007.md)
+hebt das Backend-Image auf echtes 3.13.16, entfernt drei ueberholte Backports und
+erhaelt den nachweislich notwendigen POP3-Schutz. Fuenf Runtime-Sicherheitstests
+bestanden; neuer Tarfile-Vertrag auf 3.13.15 bewusst rot. Linux-/Grype-Abnahme
+und Node-Audit bleiben offen.
+
 Teilabnahme dieser Abarbeitung: [Native Vertragsreparaturen](native-mask-contract-repairs-20261007.md)
 schliessen sechs der elf Backend-Fehler auf `3e7142c48` und beide Frontendbefunde
 lokal: 813 Pythonvertraege, 23 Architekturvertraege, 38 Frontendtests und TypeScript

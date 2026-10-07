@@ -1,12 +1,33 @@
 """Offline behavior regressions for the CPython runtime security backports."""
 import io
+import os
 import poplib
+import tarfile
 import unittest
+from unittest import mock
 import urllib.request
 import zipfile
 
 
 class RuntimeSecurityTests(unittest.TestCase):
+    def test_tar_hardlink_resolves_symlink_target_before_linking(self):
+        # Copying a symlink inode to a shallower directory changes the meaning
+        # of its relative target and can escape the extraction destination.
+        archive = object.__new__(tarfile.TarFile)
+        member = tarfile.TarInfo("copy")
+        member.type = tarfile.LNKTYPE
+        member.linkname = "nested/link"
+        member._link_target = os.path.abspath("extraction/nested/link")
+        resolved = os.path.abspath("extraction/data")
+        destination = os.path.abspath("extraction/copy")
+        with mock.patch.object(tarfile.os.path, "exists", return_value=True), \
+                mock.patch.object(tarfile.os.path, "lexists", return_value=False), \
+                mock.patch.object(tarfile.os.path, "realpath", return_value=resolved) as resolve, \
+                mock.patch.object(tarfile.os, "link") as link:
+            archive.makelink(member, destination)
+        resolve.assert_called_once_with(member._link_target)
+        link.assert_called_once_with(resolved, destination)
+
     def test_pop3_rejects_control_characters_before_writing(self):
         client = object.__new__(poplib.POP3)
         client._debugging = 0
