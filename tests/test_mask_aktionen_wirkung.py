@@ -48,7 +48,6 @@ AP_FREIGABE = "/api/v1/finance/ap/invoices/{}/actions/freigeben"
 #: Aktionen ohne Fachweg — Pfad und warum.
 OHNE_FACHWEG = {
     "/api/v1/crm/leads/{entity_id}/actions/qualifizieren": "crm/lead",
-    "/api/v1/crm/opportunities/{entity_id}/actions/create_activity": "crm/opportunity",
     "/api/v1/lager/artikel/{entity_id}/actions/wareneingang": "einkauf/anlieferavis",
     "/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken": "agrar/harvest-settlement",
 }
@@ -429,3 +428,21 @@ class TestStatisch:
         # Der alte Baustein baute nur ein Ergebnis-Dict.
         assert "_status_mutation" not in quelle
         assert quelle.count("delegate_fn=") == quelle.count("@router.post(")
+
+    def test_eingaben_brauchen_einen_befehl_und_gueltige_felder(self):
+        from app.core.screen_governance import governance_errors
+
+        from app.core.screen_definitions import get_screen_definition
+
+        sd = get_screen_definition("crm/opportunity")
+        assert governance_errors(sd) == []
+        kaputt = dict(sd)
+        kaputt["actions"] = [dict(a) for a in sd["actions"]]
+        aktion = next(a for a in kaputt["actions"] if a["key"] == "create_activity")
+        aktion.pop("commandEndpoint")
+        aktion["inputFields"] = [{"key": "subject", "label": "Betreff", "type": "zauberfeld"},
+                                 {"key": "subject", "label": "Doppelt", "type": "text"}]
+        fehler = " | ".join(governance_errors(kaputt))
+        assert "inputFields without commandEndpoint" in fehler
+        assert "unknown component: zauberfeld" in fehler
+        assert "input field is duplicated: subject" in fehler

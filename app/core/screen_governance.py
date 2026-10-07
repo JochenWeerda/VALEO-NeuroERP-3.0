@@ -209,6 +209,30 @@ def validate_screen_definition(definition: dict[str, Any]) -> list[str]:
                 commands.append(str(command))
         if action.get("enabledWhen") is not None:
             errors.extend(_condition_errors(action.get("enabledWhen"), label))
+        # Eingaben einer Aktion: dieselben Feldregeln wie in der Maske, und nur dort,
+        # wo ein Befehl sie entgegennimmt.
+        eingaben = action.get("inputFields")
+        if eingaben is not None:
+            if not action.get("commandEndpoint"):
+                errors.append(f"{label} inputFields without commandEndpoint")
+            eingabe_keys: set[str] = set()
+            for feld in eingaben if isinstance(eingaben, list) else []:
+                feld_key = str((feld or {}).get("key") or "").strip()
+                if not feld_key:
+                    errors.append(f"{label} input field key is required")
+                    continue
+                if feld_key in eingabe_keys:
+                    errors.append(f"{label} input field is duplicated: {feld_key}")
+                eingabe_keys.add(feld_key)
+                if feld.get("type") not in FIELD_TYPES:
+                    errors.append(f"{label} input field {feld_key} has unknown component: {feld.get('type')}")
+                quelle = feld.get("optionsSource")
+                if quelle is not None and not (
+                    isinstance(quelle, dict)
+                    and str(quelle.get("endpoint") or "").startswith("/api/v1/")
+                    and quelle.get("valueKey") and quelle.get("labelKey")
+                ):
+                    errors.append(f"{label} input field {feld_key} has invalid optionsSource")
         permission = action.get("permission")
         if permission is not None and not str(permission).strip():
             errors.append(f"{label} permission is empty")

@@ -58,7 +58,6 @@ class TestUIX051DryRunFormat:
         "action_einkauf_bestellen",
         "action_lager_wareneingang",
         "action_crm_qualifizieren",
-        "action_opportunity_create_activity",
         "action_harvest_settlement_drucken",
     ])
     def test_kein_handler_ohne_fachweg(self, fn_name: str):

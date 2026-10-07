@@ -41,6 +41,7 @@ import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { useScreenDefinition } from '@/lib/api/masks'
 import { useToast } from '@/hooks/use-toast'
 import type { ActionResult } from '@/components/mask-builder/runtime/useActionRuntime'
+import { ActionInputDialog } from '@/components/mask-builder/renderers/ActionInputDialog'
 
 interface UniversalNativeDetailPageProps {
   screenId: string
@@ -103,7 +104,7 @@ export function UniversalNativeDetailPage({
 
   // Multi-step dialog state
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null)
-  const [stage, setStage] = useState<'confirm' | 'preview' | 'audit' | null>(null)
+  const [stage, setStage] = useState<'input' | 'confirm' | 'preview' | 'audit' | null>(null)
   const [dryRunResult, setDryRunResult] = useState<ActionResult | null>(null)
   const [auditReason, setAuditReason] = useState('')
 
@@ -210,6 +211,17 @@ export function UniversalNativeDetailPage({
       hasDryRun,
     }
 
+    // Deklarierte Eingaben zuerst (Screen Definition -> ActionInputDialog).
+    if (actionDef?.inputFields?.length) {
+      setPendingAction(pending)
+      setStage('input')
+      return
+    }
+    await advanceFromInput(pending)
+  }
+
+  // --- Step 0: after ActionInputDialog (or directly, without inputs) ---
+  async function advanceFromInput(pending: PendingAction): Promise<void> {
     if (pending.requiresConfirmation) {
       setPendingAction(pending)
       setStage('confirm')
@@ -375,6 +387,18 @@ export function UniversalNativeDetailPage({
           requestedSectionKey={requestedSectionKey}
         />
       </div>
+
+      {stage === 'input' && pendingAction && (() => {
+        const actionDef = schemaQuery.data?.actions?.find((a) => a.key === pendingAction.actionKey)
+        return actionDef ? (
+          <ActionInputDialog
+            action={actionDef}
+            open
+            onCancel={resetDialogs}
+            onSubmit={(werte) => { void advanceFromInput({ ...pendingAction, payload: { ...pendingAction.payload, ...werte } }) }}
+          />
+        ) : null
+      })()}
 
       {/* UIX-047: Confirmation Dialog — danger-aware styling */}
       <AlertDialog

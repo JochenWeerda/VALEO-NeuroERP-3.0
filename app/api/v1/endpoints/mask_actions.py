@@ -309,3 +309,67 @@ async def action_lager_stornieren(
         outbox_event_type="lager.stock_movement.storniert",
         require_audit_reason=True,
     )
+
+
+# ---------------------------------------------------------------------------
+# crm/opportunity → create_activity
+# ---------------------------------------------------------------------------
+
+_AKTIVITAETSARTEN = {"CALL", "EMAIL", "MEETING", "NOTE"}
+
+
+@router.post(
+    "/crm/opportunities/{entity_id}/actions/create_activity",
+    response_model=MaskActionResult,
+    summary="CRM-Aktivitaet fuer Opportunity anlegen (SPEC-P1-04)",
+)
+async def action_opportunity_create_activity(
+    entity_id: str,
+    body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    """Legt die Aktivitaet ueber den mandantengebundenen Fachweg an.
+
+    Betreff und Typ fragt die Maske deklarativ (``inputFields`` der Aktion).
+    """
+
+    async def pruefen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> list[dict[str, Any]]:
+        from app.api.v1.endpoints.opportunities import _opportunity_im_mandanten
+
+        fehler: list[dict[str, Any]] = []
+        if not str(payload.get("subject") or "").strip():
+            fehler += _fehler("Betreff fehlt.", "subject")
+        if str(payload.get("activity_type") or "").upper() not in _AKTIVITAETSARTEN:
+            fehler += _fehler("Typ muss Anruf, E-Mail, Termin oder Notiz sein.", "activity_type")
+        try:
+            await _opportunity_im_mandanten(db_, eid, tid)
+        except HTTPException:
+            fehler += _fehler("Opportunity nicht gefunden.")
+        return fehler
+
+    async def anlegen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> str:
+        from app.api.v1.endpoints.opportunities import add_opportunity_activity
+
+        await add_opportunity_activity(
+            eid,
+            activity_type=str(payload["activity_type"]).upper(),
+            subject=str(payload["subject"]).strip(),
+            notes=payload.get("notes"),
+            assigned_to=None,
+            db=db_,
+            tenant_id=tid,
+        )
+        return f"Aktivitaet '{str(payload['subject']).strip()}' angelegt."
+
+    return await run_delegated_mask_action(
+        db,
+        action_key="create_activity",
+        entity_type="opportunity",
+        entity_id=entity_id,
+        tenant_id=tenant_id,
+        body=body,
+        check_fn=pruefen,
+        delegate_fn=anlegen,
+        outbox_event_type="crm.opportunity.activity_created",
+    )
