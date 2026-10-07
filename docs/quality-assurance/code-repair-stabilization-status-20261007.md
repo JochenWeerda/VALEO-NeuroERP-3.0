@@ -18,6 +18,8 @@ Wave-Statusdateien. Aktiver Dateibesitz steht im
 
 ## Aktuelle Abnahme statt historischer Testzahlen
 
+[Geschaeftstag-CI-Reparaturen](business-day-ci-repairs-20261007.md): fuenf neue direkte Kalenderquellen beseitigt, SQL-Stand/Loeschsperre/Stichtag harmonisiert und je ein Tageswert fuer Loeschlauf/Protokoll sowie Avis/Bestellung. 209 Tests ohne Skip, fuenf Ratschenvertraege und alle neun Improvement-Checks auf stabilem Arbeitsbaum gruen; Baseline ausschliesslich abgesenkt. Frische GitHub-Abnahme steht aus.
+
 [Kanonische Einkaufsrouten](einkauf-canonical-route-contracts-20261007.md): acht verdeckte Alt-Handler entfernt, alle 3974 Pfad-/Methodenvertraege erhalten; 89 Tests gruen, ein bestehender leerer Default-Listen-Test ehrlich uebersprungen. Doppelgruppen jetzt 33. Einzigartige historische DELETE-Wege und unechter Bestellimport bleiben offen. Aktuelles Quality auf `b2a63f451`: Frontend/WCAG gruen; Business-Time-Inventur und physischer Tabellenkatalog rot, Node-Audit bekannte zwei High.
 
 [Logistik-Aktionsdeklarationen](logistics-action-declarations-20261007.md): alle

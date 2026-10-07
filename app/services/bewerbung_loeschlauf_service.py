@@ -32,6 +32,8 @@ from fastapi import HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_today
+
 logger = logging.getLogger(__name__)
 
 BEWERBUNGEN = "domain_hr.applications"
@@ -130,28 +132,32 @@ def ohne_regel(tenant_id: str) -> HTTPException:
 
 def stichtag(tage: int, heute: Optional[date] = None) -> date:
     """Der Tag, bis zu dem eine Entscheidung gefallen sein muss, damit sie faellig ist."""
-    return (heute or date.today()) - timedelta(days=int(tage))
+    return (heute or business_today()) - timedelta(days=int(tage))
 
 
-def faellige(db: Session, tenant_id: str, tage: int, limit: int = 1000) -> list[dict]:
+def faellige(
+    db: Session, tenant_id: str, tage: int, limit: int = 1000,
+    *, heute: Optional[date] = None,
+) -> list[dict]:
     """Die faelligen Bewerbungen — mit Grund, warum sie stehen bleiben.
 
     Die Liste traegt den Namen noch, weil sie ein **Trockenlauf** ist: Wer
     personenbezogene Daten vernichtet, soll vorher sehen koennen, welche. Ins
     Protokoll kommt der Name nicht.
     """
-    tag = stichtag(tage)
+    heute = heute if heute is not None else business_today()
+    tag = stichtag(tage, heute)
     zeilen = db.execute(
         text(
             "SELECT b.id, b.applicant_name, b.applicant_email, b.status, "
             "       b.entschieden_am, b.aufbewahrung_einwilligung_bis, "
             "       (b.aufbewahrung_einwilligung_bis IS NOT NULL "
-            "        AND b.aufbewahrung_einwilligung_bis >= CURRENT_DATE) AS einwilligung_laeuft, "
+            "        AND b.aufbewahrung_einwilligung_bis >= CAST(:heute AS date)) AS einwilligung_laeuft, "
             "       EXISTS (SELECT 1 FROM " + SPERREN + " s "
             "               WHERE s.dokument_id = b.id AND s.tenant_id = b.tenant_id "
             "                 AND s.dokument_typ = :sperrtyp AND s.status = :sperraktiv "
             "                 AND (s.hold_end_date IS NULL "
-            "                      OR s.hold_end_date >= CURRENT_DATE)) AS gesperrt "
+            "                      OR s.hold_end_date >= CAST(:heute AS date))) AS gesperrt "
             f"FROM {BEWERBUNGEN} b "  # nosec B608  # reviewed-safe: Tabellennamen sind Code-Literale
             "WHERE b.tenant_id = :tid AND b.status = ANY(:entschieden) "
             "  AND b.entschieden_am IS NOT NULL "
@@ -162,6 +168,7 @@ def faellige(db: Session, tenant_id: str, tage: int, limit: int = 1000) -> list[
             "tid": tenant_id,
             "entschieden": list(ENTSCHIEDEN),
             "stichtag": tag,
+            "heute": heute,
             "sperrtyp": SPERRE_TYP,
             "sperraktiv": SPERRE_AKTIV,
             "limit": limit,
@@ -208,8 +215,9 @@ def lauf_ausfuehren(
     falsche Zusage, eine Loeschung ohne Protokoll ein unbelegter Eingriff.
     """
     tage = int(regelsatz["aufbewahrung_tage"])
-    tag = stichtag(tage)
-    kandidaten = faellige(db, tenant_id, tage, limit)
+    heute = business_today()
+    tag = stichtag(tage, heute)
+    kandidaten = faellige(db, tenant_id, tage, limit, heute=heute)
 
     zu_loeschen = [k["id"] for k in kandidaten if k["wird_geloescht"]]
     gesperrt = sum(1 for k in kandidaten if k["bleibt_wegen"] == "LOESCHSPERRE")
