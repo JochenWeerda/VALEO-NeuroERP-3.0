@@ -48,13 +48,15 @@ class TestUIX046CommandEndpoints:
         assert "stubReason" not in a, "create_activity darf keinen stubReason mehr haben"
         assert "/crm/customers/" in a["commandEndpoint"]
 
-    def test_einkauf_supplier_neue_bestellung_has_command_endpoint(self):
+    def test_einkauf_supplier_neue_bestellung_springt_in_die_erfassung(self):
+        # Bis 07.10.2026 zeigte die Aktion auf einen Befehl, der "Bestellvorgang
+        # angelegt" meldete, ohne einen anzulegen. Eine Bestellung braucht Positionen;
+        # die Aktion fuehrt deshalb in die Bestellerfassung.
         actions = self._get_actions("einkauf/supplier")
         a = actions["neue_bestellung"]
-        assert "commandEndpoint" in a, "neue_bestellung muss commandEndpoint haben"
-        assert "stubReason" not in a, "neue_bestellung darf keinen stubReason mehr haben"
-        assert "/einkauf/lieferanten/" in a["commandEndpoint"]
-        assert "{entity_id}" in a["commandEndpoint"]
+        assert a.get("navigationRoute") == "/einkauf/bestellungen/neu"
+        assert "commandEndpoint" not in a
+        assert "stubReason" not in a, "neue_bestellung darf keinen stubReason haben"
 
     def test_finance_ar_open_item_mahnen_has_command_endpoint(self):
         actions = self._get_actions("finance/ar-open-item")

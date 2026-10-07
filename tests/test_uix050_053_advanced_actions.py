@@ -49,24 +49,33 @@ class TestUIX050AuditReason:
 # ---------------------------------------------------------------------------
 
 class TestUIX051DryRunFormat:
-    """Prüft dass Action-Stub-Responses proposedChanges enthalten (Coroutine-Inspection)."""
+    """Die frueheren Stubs meldeten im Trockenlauf Erfolg und in der Ausfuehrung
+    ebenso — ohne fachliche Wirkung (Befund 07.10.2026). Sie sind entfernt; die
+    Aktionen mit Fachweg pruefen im Trockenlauf gegen die Datenbank
+    (``tests/test_mask_aktionen_wirkung.py``)."""
 
-    @pytest.mark.parametrize("screen_id,action_key,fn_name", [
-        ("lager/stock-movement", "stornieren", "action_lager_stornieren"),
-        ("einkauf/purchase-order", "bestellen", "action_einkauf_bestellen"),
-        ("lager/article-stock", "wareneingang", "action_lager_wareneingang"),
-        ("qualitaet/reklamation", "abschliessen", "action_reklamation_abschliessen"),
-        ("crm/lead", "qualifizieren", "action_crm_qualifizieren"),
+    @pytest.mark.parametrize("fn_name", [
+        "action_lager_stornieren",
+        "action_einkauf_bestellen",
+        "action_lager_wareneingang",
+        "action_crm_qualifizieren",
+        "action_opportunity_create_activity",
+        "action_harvest_settlement_drucken",
     ])
-    @pytest.mark.asyncio
-    async def test_stub_returns_proposed_changes(self, screen_id: str, action_key: str, fn_name: str):
+    def test_kein_handler_ohne_fachweg(self, fn_name: str):
         from app.api.v1.endpoints import mask_actions
-        fn = getattr(mask_actions, fn_name)
+        assert not hasattr(mask_actions, fn_name)
+
+    @pytest.mark.asyncio
+    async def test_trockenlauf_erfindet_keinen_erfolg(self):
+        from app.api.v1.endpoints import mask_actions
         db = MagicMock()
-        result = await fn("test-id-123", body={"_mode": "dryRun"}, db=db, tenant_id="test")
-        assert result.success is True
-        assert result.proposedChanges is not None
-        assert result.actionKey == action_key
+        db.query.return_value.filter.return_value.first.return_value = None
+        result = await mask_actions.action_reklamation_abschliessen(
+            "gibt-es-nicht", body={"_mode": "dryRun"}, db=db, tenant_id="test"
+        )
+        assert result.success is False
+        assert result.proposedChanges is None
 
 
 # ---------------------------------------------------------------------------
@@ -108,10 +117,7 @@ class TestUIX053CommandEndpoints:
         return {a["key"]: a for a in sd.get("actions", [])}
 
     @pytest.mark.parametrize("screen_id,action_key,endpoint_fragment", [
-        ("lager/stock-movement", "stornieren", "/lager/stock-movements/"),
-        ("einkauf/angebot", "bestellen", "/einkauf/bestellungen/"),
         ("qualitaet/reklamation", "abschliessen", "/reklamationen/"),
-        ("crm/lead", "qualifizieren", "/crm/leads/"),
     ])
     def test_command_endpoint_activated(self, screen_id: str, action_key: str, endpoint_fragment: str):
         actions = self._get_actions(screen_id)
@@ -128,15 +134,15 @@ class TestUIX053CommandEndpoints:
         assert actions["stornieren"].get("humanApprovalRequired") is True
         assert actions["stornieren"].get("requiresConfirmation") is True
 
-    def test_wareneingang_anlieferavis_command_endpoint(self):
-        # anlieferavis-SD (falls vorhanden) — wareneingang aktiviert
-        from app.core.screen_definitions import _SCREEN_DEFINITIONS
-        # wareneingang ist in einkauf/anlieferavis-SD definiert
-        sd_keys = list(_SCREEN_DEFINITIONS.keys())
-        avis_key = next((k for k in sd_keys if "anlieferavis" in k or "avis" in k), None)
-        if avis_key:
-            actions = self._get_actions(avis_key)
-            if "wareneingang" in actions:
-                a = actions["wareneingang"]
-                assert "commandEndpoint" in a
-                assert "stubReason" not in a
+    @pytest.mark.parametrize("screen_id,action_key", [
+        ("lager/stock-movement", "stornieren"),
+        ("einkauf/angebot", "bestellen"),
+        ("crm/lead", "qualifizieren"),
+        ("einkauf/anlieferavis", "wareneingang"),
+    ])
+    def test_ohne_fachweg_sagt_die_maske_nicht_verfuegbar(self, screen_id: str, action_key: str):
+        # Diese Aktionen waren "aktiviert" und meldeten Erfolg ohne Wirkung
+        # (Befund 07.10.2026). Ohne Fachweg: stubReason, kein Endpunkt.
+        a = self._get_actions(screen_id)[action_key]
+        assert "commandEndpoint" not in a
+        assert a.get("stubReason", "").startswith("Noch kein Fachweg")

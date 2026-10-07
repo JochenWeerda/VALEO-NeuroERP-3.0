@@ -965,24 +965,29 @@ async def action_mahnen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    from app.services.mask_action_runtime_service import run_mask_action
+    # Bis 07.10.2026 meldete diese Aktion "Mahnung erstellt", ohne etwas zu erstellen.
+    from app.services.finance_mahnstufe_service import eskaliere_mahnstufe
+    from app.services.mask_action_runtime_service import run_delegated_mask_action
 
-    def execute(db_: Session, payload: dict, eid: str, tid: str) -> dict:
-        return {
-            "summary": "Mahnung erstellt.",
-            "affectedIds": [eid],
-            "mutation": {"mahnstatus": payload.get("mahnstufe", "erste_mahnung"), "op_id": eid},
-        }
+    async def nummer(db_: Session, eid: str, tid: str) -> str:
+        posten = await get_open_item(eid, tenant_id=tid, db=db_)
+        return str((posten if isinstance(posten, dict) else posten.model_dump()).get("rechnungsnr") or "").strip()
 
-    result = run_mask_action(
-        db,
-        action_key="mahnen",
-        entity_type="ar_open_item",
-        entity_id=entity_id,
-        tenant_id=tenant_id,
-        body=body,
-        execute_fn=execute,
-        outbox_event_type="finance.ar_open_item.dunning_created",
+    async def pruefen(db_: Session, payload: dict, eid: str, tid: str) -> list[dict]:
+        try:
+            ok = bool(await nummer(db_, eid, tid))
+            grund = "Der Posten hat keine Rechnungsnummer; ohne sie keine Mahnstufe."
+        except HTTPException:
+            ok, grund = False, "Offener Posten nicht gefunden."
+        return [] if ok else [{"field": "_entity", "message": grund, "severity": "blocking"}]
+
+    async def mahnen(db_: Session, payload: dict, eid: str, tid: str) -> str:
+        stufe = eskaliere_mahnstufe(db_, await nummer(db_, eid, tid), tid, str(payload.get("operator") or "Maske"))
+        return f"Mahnstufe {stufe.get('stufe')} gesetzt."
+
+    result = await run_delegated_mask_action(
+        db, action_key="mahnen", entity_type="ar_open_item", entity_id=entity_id, tenant_id=tenant_id,
+        body=body, check_fn=pruefen, delegate_fn=mahnen, outbox_event_type="finance.ar_open_item.dunning_created",
     )
     return result.model_dump()
 

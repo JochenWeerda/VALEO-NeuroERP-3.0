@@ -1236,9 +1236,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "agrar.abrechnung.drucken",
-          "commandEndpoint": "/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken",
-          "method": "POST",
-          "stubReason": null
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Noch kein Fachweg: Fuer Ernte-Abrechnungen gibt es keinen Druckdienst."
         }
       ],
       "sensitive_fields": [
@@ -1710,9 +1710,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.lead.qualify",
-          "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/qualifizieren",
-          "method": "POST",
-          "stubReason": null
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Noch kein Fachweg: Es gibt keinen Uebergang Lead -> Opportunity; die vorhandene Konvertierung erzeugt einen Kunden."
         }
       ],
       "sensitive_fields": [
@@ -1791,9 +1791,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.activity.create",
-          "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/create_activity",
-          "method": "POST",
-          "stubReason": null
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Noch kein Fachweg: Der Aktivitaeten-Weg der Opportunity schreibt in eine Tabelle, die keine Migration anlegt, und prueft den Mandanten nicht."
         }
       ],
       "sensitive_fields": [
@@ -1888,9 +1888,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "einkauf.angebot.order",
-          "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen",
-          "method": "POST",
-          "stubReason": null
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Noch kein Fachweg: Die Umwandlung Angebot -> Bestellung liest Spalten, die keine Migration anlegt."
         }
       ],
       "sensitive_fields": [
@@ -1919,9 +1919,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": true,
           "permission": "lager.wareneingang.create",
-          "commandEndpoint": "/api/v1/lager/artikel/{entity_id}/actions/wareneingang",
-          "method": "POST",
-          "stubReason": null
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Noch kein Fachweg: Ein Wareneingang wird gegen die Bestellung gebucht; vom Avis aus fehlt diese Verbindung."
         }
       ],
       "sensitive_fields": [],
@@ -2047,8 +2047,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "einkauf.bestellung.create",
-          "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/neue_bestellung",
-          "method": "POST",
+          "commandEndpoint": null,
+          "method": null,
           "stubReason": null
         }
       ],
@@ -3007,9 +3007,9 @@
           "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "lager.bewegung.stornieren",
-          "commandEndpoint": "/api/v1/lager/stock-movements/{entity_id}/actions/stornieren",
-          "method": "POST",
-          "stubReason": null
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Noch kein Fachweg: Fuer Lagerbewegungen gibt es keinen Storno-Dienst."
         }
       ],
       "sensitive_fields": [],
@@ -4197,5 +4197,5 @@
       "endpoint": "GET /api/v1/agent/proposals"
     }
   ],
-  "event_count": 75
+  "event_count": 68
 }

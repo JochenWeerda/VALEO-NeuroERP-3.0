@@ -1975,7 +1975,7 @@ weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
 ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
 waren.
 
-## MASK-AKTIONEN-WIRKUNG-20261007 — in Arbeit, Claude Code
+## MASK-AKTIONEN-WIRKUNG-20261007 — abgeschlossen, Claude Code
 
 **Auftrag (User 07.10.2026: "Befunde beheben"):** Keine der neun `execute`-Funktionen
 in `app/api/v1/endpoints/mask_actions.py` schreibt fachlich — sie bauen ein
@@ -2023,6 +2023,23 @@ meldet den Grund; fremder Mandant 404/abgewiesen; dryRun schreibt nichts und mel
 fehlendes Objekt/falschen Zustand. Statisch: kein Handler in `mask_actions.py`
 meldet Erfolg ohne Fachaufruf; jede SD-Aktion mit `commandEndpoint` zeigt auf einen
 existierenden Weg. Bestehende SD-/UIX-Vertraege gruen.
+
+**Abnahme (07.10.2026):** Es waren **zwoelf**, nicht neun: auch `ap_invoices`
+(Eingangsrechnung freigeben), `open_items` (Mahnen) und `einkauf_kpis` (neue
+Bestellung) meldeten Erfolg ohne Wirkung. Fuenf delegieren jetzt an den Fachweg
+(Zahlungslauf, Lieferschein-Druck, Reklamation, Eingangsrechnung, Mahnstufe), eine
+springt in die Bestellerfassung, sechs sind ehrlich nicht verfuegbar (`stubReason`,
+Handler entfernt). `run_delegated_mask_action`: Pruefung gegen die DB in jedem Modus,
+Mutation+Audit+Ereignis in einem Commit, fachlicher Grund statt Pauschalmeldung.
+Drei Tests, die den Fake festschrieben, umgestellt. **29** neue Vertraege gegen
+`valeo_probe`, **1035** Fach-/SD-/UIX-Tests gruen (1 rot vorbestehend:
+`fahrzeug-stamm` `destructive`), fuenf Ratschen gruen. Neue Befunde (eigene Slices,
+Finanz/CRM/Einkauf): Mandant aus Query bei `approve_payment_run`, ohne Filter bei
+`approve_ap_invoice`, `add_opportunity_activity` ohne Mandant und gegen fehlende
+Tabelle, `convert_angebot_to_order` liest nicht existierende Spalten (nie
+funktioniert), `eskaliere_mahnstufe` ohne Existenzpruefung. OpenAPI/Inventare: 7
+Pfade entfallen, Integration aus committed source. QA:
+[mask-aktionen-wirkung-20261007.md](../quality-assurance/mask-aktionen-wirkung-20261007.md).
 
 ## BEWERBUNG-EINWILLIGUNG-MASKE-20261007 — abgeschlossen, Claude Code
 

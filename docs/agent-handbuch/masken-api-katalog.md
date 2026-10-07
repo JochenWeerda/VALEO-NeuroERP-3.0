@@ -519,7 +519,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `drucken` | Abrechnung drucken | safe | nein | `/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken` |
+| `drucken` | Abrechnung drucken | safe | nein | `Noch kein Fachweg: Fuer Ernte-Abrechnungen gibt es keinen Druckdienst.` |
 
 ---
 
@@ -1023,7 +1023,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
-| `qualifizieren` | Als Opportunity qualifizieren | safe | nein | `/api/v1/crm/leads/{entity_id}/actions/qualifizieren` |
+| `qualifizieren` | Als Opportunity qualifizieren | safe | nein | `Noch kein Fachweg: Es gibt keinen Uebergang Lead -> Opportunity; die vorhandene Konvertierung erzeugt einen Kunden.` |
 
 ---
 
@@ -1104,7 +1104,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
-| `create_activity` | Aktivitaet anlegen | safe | nein | `/api/v1/crm/opportunities/{entity_id}/actions/create_activity` |
+| `create_activity` | Aktivitaet anlegen | safe | nein | `Noch kein Fachweg: Der Aktivitaeten-Weg der Opportunity schreibt in eine Tabelle, die keine Migration anlegt, und prueft den Mandanten nicht.` |
 
 ---
 
@@ -1232,7 +1232,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `bestellen` | Bestellung erstellen | safe | nein | `/api/v1/einkauf/bestellungen/{entity_id}/actions/bestellen` |
+| `bestellen` | Bestellung erstellen | safe | nein | `Noch kein Fachweg: Die Umwandlung Angebot -> Bestellung liest Spalten, die keine Migration anlegt.` |
 
 ---
 
@@ -1266,7 +1266,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `wareneingang` | Wareneingang buchen | moderate | nein | `/api/v1/lager/artikel/{entity_id}/actions/wareneingang` |
+| `wareneingang` | Wareneingang buchen | moderate | nein | `Noch kein Fachweg: Ein Wareneingang wird gegen die Bestellung gebucht; vom Avis aus fehlt diese Verbindung.` |
 
 ---
 
@@ -1386,7 +1386,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
-| `neue_bestellung` | Bestellung anlegen | safe | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/neue_bestellung` |
+| `neue_bestellung` | Bestellung anlegen | safe | nein | `—` |
 
 ---
 
@@ -2386,7 +2386,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `stornieren` | Stornieren | high | ja | `/api/v1/lager/stock-movements/{entity_id}/actions/stornieren` |
+| `stornieren` | Stornieren | high | ja | `Noch kein Fachweg: Fuer Lagerbewegungen gibt es keinen Storno-Dienst.` |
 
 ---
 
