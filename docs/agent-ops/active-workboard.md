@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BESTANDSBUCH-EINKAUF-20261007 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-07. **Ziel:** die fuenf benannten Befunde aus
+MANDANT-FINANZ-CRM-EINKAUF-20261007 beheben: (1) Inventar-API nimmt den Mandanten aus
+Query/Standardmandant, (2) `InventoryService` verlangt fuer `out` eine negative Menge
+gegen die Richtungstabelle, (3) `DELETE /inventory/stock-movements/{id}` loescht
+Buchungen ohne Bestandskorrektur, (4) Bestell-Altbelege im Dokumentspeicher +
+`register_artifact` verschluckt Fehler und committet fremde Arbeit, (5)
+Lieferschein-Abgleich/-Einbuchen mit `Query("system")`, ohne Wiederholungsschutz und
+ohne Lagerbezug. **Dateibesitz:** `app/domains/inventory/api/*`,
+`app/domains/inventory/application/services/inventory_service.py`,
+`app/services/inventory_correction_service.py`, `app/core/gobd_artifact.py` + die vier
+Aufrufer, `app/api/v1/endpoints/einkauf_lieferschein.py`, Bestell-Compat-Wege in
+`compat.py`, `app/services/warehouse_service.py::book_stock_movement`,
+`pages/lager/lagerbewegungen.tsx`, `lib/services/stock-movement-service.ts`, eine additive
+Migration, neue Tests. Fremde WIP (eBilanz, CI-Repair) unberuehrt.
+
+
 ## USABILITY-SYSTEMAUDIT-20261007 — abgeschlossen, Cursor
 
 **Owner:** Cursor. **Stand:** abgeschlossen 2026-10-07 (Stufe-1 Experten-Systemaudit).
