@@ -821,10 +821,7 @@ async def einkauf_anfragen_list(
 
 
 def _load_einkauf_anfrage(db: Session, anfrage_id: str, tenant_id: str):
-    """Module-level loader so tests can monkeypatch it.
-
-    Bis 07.10.2026 lasen diese vier Lader fest mit dem Mandanten "default".
-    """
+    """Module-level loader so tests can monkeypatch it (Mandant seit 07.10.2026 aus dem Kontext)."""
     from app.services.einkauf_compat_service import EinkaufCompatService as _Svc  # local to avoid circular
     try:
         return _Svc(db, tenant_id).get_anfrage(anfrage_id)

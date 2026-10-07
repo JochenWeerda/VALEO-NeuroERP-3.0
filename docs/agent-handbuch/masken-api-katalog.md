@@ -2386,7 +2386,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `stornieren` | Stornieren | high | ja | `Noch kein Fachweg: Fuer Lagerbewegungen gibt es keinen Storno-Dienst.` |
+| `stornieren` | Stornieren | high | ja | `/api/v1/lager/stock-movements/{entity_id}/actions/stornieren` |
 
 ---
 

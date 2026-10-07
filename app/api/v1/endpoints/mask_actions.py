@@ -10,8 +10,7 @@ ohne fachliche Wirkung. Das Ereignis ``finance.payment_run.approved`` speiste di
 Projektion ``payment_run_cockpit``: Ein nicht freigegebener Zahlungslauf erschien im
 Lesemodell als freigegeben. Jetzt delegiert jeder Handler an den echten Fachweg
 (``run_delegated_mask_action``). Die sechs Aktionen ohne Fachweg (Lead qualifizieren,
-Opportunity-Aktivitaet, Wareneingang am Artikel, Lagerbewegung
-stornieren, Ernteabrechnung drucken) haben keinen Endpunkt mehr; ihre Maske nennt
+Opportunity-Aktivitaet, Wareneingang am Artikel, Ernteabrechnung drucken) haben keinen Endpunkt mehr; ihre Maske nennt
 den ``stubReason``. Siehe ``docs/quality-assurance/mask-aktionen-wirkung-20261007.md``.
 """
 from __future__ import annotations
@@ -242,4 +241,71 @@ async def action_angebot_bestellen(
         check_fn=pruefen,
         delegate_fn=bestellen,
         outbox_event_type="einkauf.bestellung.created_from_angebot",
+    )
+
+
+# ---------------------------------------------------------------------------
+# lager/stock-movement → stornieren
+# ---------------------------------------------------------------------------
+
+@router.post(
+    "/lager/stock-movements/{entity_id}/actions/stornieren",
+    response_model=MaskActionResult,
+    summary="Lagerbewegung stornieren (SPEC-P1-04)",
+)
+async def action_lager_stornieren(
+    entity_id: str,
+    body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    """Gegenbuchung ueber den Storno-Dienst; die Begruendung wird zur Bemerkung."""
+
+    async def pruefen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> list[dict[str, Any]]:
+        from app.services.inventory_movement_direction import signed_quantity
+        from app.services.inventory_stock_balance import current_stock
+
+        zeile = db_.execute(
+            text(
+                "SELECT movement_type, quantity, source_document_type, article_id, warehouse_id "
+                "FROM domain_inventory.inventory_stock_movements WHERE id = :id AND tenant_id = :tid"
+            ),
+            {"id": eid, "tid": tid},
+        ).mappings().first()
+        if zeile is None:
+            return _fehler("Lagerbewegung nicht gefunden.")
+        if str(zeile["source_document_type"] or "").upper() == "STORNO":
+            return _fehler("Ein Storno wird nicht storniert.")
+        wirkung = signed_quantity(zeile["movement_type"], float(zeile["quantity"] or 0))
+        if wirkung == 0:
+            return _fehler("Die Bewegung ist bestandsneutral; es gibt nichts zu stornieren.")
+        bestand = current_stock(db_, tenant_id=tid, article_id=str(zeile["article_id"]),
+                                warehouse_id=str(zeile["warehouse_id"]))
+        if bestand - wirkung < 0:
+            return _fehler("Der Storno machte den Bestand negativ; die Ware ist bereits weiter gebucht.")
+        return []
+
+    async def stornieren(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> str:
+        from app.services.inventory_correction_service import CorrectionError, storno_korrektur
+
+        try:
+            ergebnis = storno_korrektur(db_, eid, tid, bemerkung=payload.get("_begruendung"))
+        except CorrectionError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        return f"Gegenbuchung {ergebnis['movement_type']} {ergebnis['quantity']:g} gebucht."
+
+    # Die Begruendung des Stornos ist die Bemerkung der Gegenbuchung.
+    nutzlast = dict(body)
+    nutzlast["_begruendung"] = body.get("_auditReason")
+    return await run_delegated_mask_action(
+        db,
+        action_key="stornieren",
+        entity_type="stock_movement",
+        entity_id=entity_id,
+        tenant_id=tenant_id,
+        body=nutzlast,
+        check_fn=pruefen,
+        delegate_fn=stornieren,
+        outbox_event_type="lager.stock_movement.storniert",
+        require_audit_reason=True,
     )

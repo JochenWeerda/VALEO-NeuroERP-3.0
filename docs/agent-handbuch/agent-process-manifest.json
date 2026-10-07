@@ -3007,9 +3007,9 @@
           "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "lager.bewegung.stornieren",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Noch kein Fachweg: Fuer Lagerbewegungen gibt es keinen Storno-Dienst."
+          "commandEndpoint": "/api/v1/lager/stock-movements/{entity_id}/actions/stornieren",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -4197,5 +4197,5 @@
       "endpoint": "GET /api/v1/agent/proposals"
     }
   ],
-  "event_count": 69
+  "event_count": 70
 }

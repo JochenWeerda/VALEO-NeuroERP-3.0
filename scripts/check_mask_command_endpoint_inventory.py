@@ -30,7 +30,6 @@ BEKANNTE_LUECKEN = {
     "crm/lead/qualifizieren",
     "crm/opportunity/create_activity",
     "einkauf/anlieferavis/wareneingang",
-    "lager/stock-movement/stornieren",
 }
 
 

@@ -1772,7 +1772,7 @@ def build_lager_stock_movement_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "stornieren", "label": "Stornieren", "kind": "primary", "dangerLevel": "high", "permission": "lager.bewegung.stornieren", "requiresConfirmation": True, "humanApprovalRequired": True, "stubReason": "Noch kein Fachweg: Fuer Lagerbewegungen gibt es keinen Storno-Dienst."},
+            {"key": "stornieren", "label": "Stornieren", "kind": "primary", "dangerLevel": "high", "permission": "lager.bewegung.stornieren", "requiresConfirmation": True, "humanApprovalRequired": True, "auditReasonRequired": True, "commandEndpoint": "/api/v1/lager/stock-movements/{entity_id}/actions/stornieren", "method": "POST"},
         ],
         "noWorkflowReason": "Lagerbewegungen sind Buchungsbelege ohne eigenstaendigen Workflow — Storno ist die einzige Mutation.",
         "agentContract": {

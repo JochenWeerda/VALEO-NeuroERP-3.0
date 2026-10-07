@@ -100,6 +100,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 |---|---|---|
 | `lager.auslagerung.created` | outbox | `app/services/inventory_compat_service.py` |
 | `lager.einlagerung.created` | outbox | `app/services/inventory_compat_service.py` |
+| `lager.stock_movement.storniert` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 
 ### Lager / Materialfluss
 

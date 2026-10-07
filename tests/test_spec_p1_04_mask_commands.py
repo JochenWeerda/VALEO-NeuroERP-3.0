@@ -32,12 +32,15 @@ class TestSpecP104CommandInventory:
 
 
 class TestSpecP104ActionRuntimeModes:
-    def test_stornieren_hat_keinen_vorgetaeuschten_handler(self):
+    def test_stornieren_delegiert_an_den_storno_dienst(self):
         # Bis 07.10.2026 meldete der Trockenlauf Erfolg und die Ausfuehrung auch —
-        # ohne Storno. Es gibt keinen Storno-Dienst; die Maske nennt die Luecke.
+        # ohne Storno. Jetzt bucht der Storno-Dienst gegen
+        # (tests/test_lagerbewegung_storno.py).
+        import inspect
+
         from app.api.v1.endpoints import mask_actions
 
-        assert not hasattr(mask_actions, "action_lager_stornieren")
+        assert "storno_korrektur" in inspect.getsource(mask_actions.action_lager_stornieren)
 
     @pytest.mark.asyncio
     async def test_payment_run_requires_audit_reason(self):
