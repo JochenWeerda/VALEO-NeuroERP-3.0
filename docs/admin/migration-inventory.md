@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-06
+last_reviewed: 2026-10-07
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -111,6 +111,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `bank_legacy_retirement_20261001` | Remove the competing bank model and its development-only legacy records. |
 | `beleg_vordrucke_20260702` | admin: beleg_vordrucke — Druckvorlagen-Editor für Papier/PDF-Ausdrucke |
 | `bewerbung_einwilligung_20261006` | Das Verzeichnis der Aufbewahrungs-Einwilligungen — Nachweis und Widerruf. |
+| `bewerbung_erklaerung_fassung_20261006` | Die Einwilligungserklaerung in Fassungen — welchem Wortlaut zugestimmt wurde. |
 | `bewerbung_loeschlauf_20261006` | Der Loeschlauf fuer Bewerberdaten — Frist, Einwilligung und Nachweis. |
 | `bewerbung_statuswoerterbuch_20261006` | Die Bewerbungspipeline bekommt ein Woerterbuch — in der Datenbank. |
 | `billing_batch_20260821` | Billing batch orchestration and audit. |
