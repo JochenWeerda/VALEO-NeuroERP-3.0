@@ -18,6 +18,12 @@ Wave-Statusdateien. Aktiver Dateibesitz steht im
 
 ## Aktuelle Abnahme statt historischer Testzahlen
 
+[Schnittstellenintegration](domain-interface-integration-20261007.md): vier echte
+Fachaktionspfade nachgezogen, keine Pfade entfernt; OpenAPI 3101 Pfade, drei
+Inventare und kompletter Architekturindex (935/275/454) aktuell. 24
+Architekturvertraege und fuenf fremde Handbuchartefakte lesend geprueft.
+Die 41 doppelten API-Pfad-/Methodengruppen sind dabei erneut bestaetigt.
+
 [NPM-Herstellerfixes](npm-security-releases-20261007.md): zwoelf Paketpins,
 frozen Lockfile auf 36 committed Workspaces und sechs reale Offline-Vertraege
 gruen. Production-Audit jetzt 2 High, 0 Moderate/Low/Critical; die beiden High
@@ -60,9 +66,9 @@ Dies schliesst andere rote Gates nicht automatisch.
 | Prioritaet | Offen / naechster Nachweis | Evidenz / Besitz |
 |---|---|---|
 | P0 | Security Scan: Production-Audit und Backend-Grype | [Run 37610643700](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/37610643700): node-forge/braces weiter high, Grype `--only-fixed --fail-on high` rot. Kein Ignore oder abgesenkter Schwellwert. |
-| P0 | Mandanten-, Rollen-, Vier-Augen- und atomare Mutationsfehler in Zahlungslaeufen, Eingangsrechnungen, Opportunities und Angebotsumwandlung | `MANDANT-FINANZ-CRM-EINKAUF-20261007`, Claude Code, in Arbeit; acht Zahlungswege betroffen. Nicht doppelt bearbeiten. Globale `documents.doc_number`-Eindeutigkeit und Opportunity-Pipeline/Forecast ausserhalb seines Claims weiter offen. |
-| P1 | Backend-Vollsuite wieder gruen | [Run 37610643394](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/37610643394): acht Fehler, 16025 bestanden, 324 Skip, ein xfail. Interessenten-Anlagevertrag in diesem Slice korrigiert; die sieben anderen Fehler unten. Neue Actions-Abnahme erforderlich. |
-| P1 | Frontend-Quality Gate wieder gruen | [Run 37610643941](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/37610643941): zwei Fehler, 969 bestanden; Schulungen-Test erwartet alte lokale Filtervariablen, Worklist-Titeltest findet drei H1. Ursache am committed Code pruefen; Renderer-WIP nicht blind uebernehmen. |
+| P0 | Verbleibende echte Fachaktionswege und globale Belegnummernkanonisierung | Die vier Mandanten-/Mutationsbefunde sind laut Workboard geliefert; Opportunities einschliesslich Pipeline/Forecast tenantgebunden. Lokale Teilintegration 71 Tests gruen. `MANDANT-FINANZ-CRM-EINKAUF-20261007` bleibt bei Claude fuer Lead-Qualifizierung und echte Ernte-PDF-Ablage offen; nicht doppelt bearbeiten. Globale `documents.doc_number`-Eindeutigkeit bleibt ausserhalb dieses Fachclaims offen. |
+| P1 | Frische Backend-Vollsuite abnehmen | Die historischen elf Fehler sind lokal durch 813 plus 71 gezielte Vertraege abgedeckt. [PostgreSQL-Lauf auf c466af7de](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/37644389765) gruen; dies ersetzt die weiterhin ausstehende komplette Pipeline-Abnahme nicht. |
+| P1 | Frisches Frontend-Quality Gate abnehmen | Schulungen-Delegation und Titelduplikate lokal mit 38 Tests plus TypeScript geschlossen. [Quality auf c466af7de](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/37644390353) wegen Folgepush abgebrochen; kein neuer erfolgreicher Vollnachweis. Fremde Renderer-WIP erhalten. |
 | P1 | Frisches CI-Schema und physischer Tabellenkatalog harmonisieren | Lokal 659 Tabellen geprueft; kein Ersatz fuer frische CI-Abnahme. Generator, Test und Quality-Workflow sind fremde WIP. Kein Reset oder neue Testdatenbank. |
 | P1 | 41 doppelte API-Pfad-/Methodenregistrierungen beseitigen | Letzter main.app-/OpenAPI-Abgleich im Personal-Rollenschutz: ausgefuehrten Handler, DTO und Verbraucher gemeinsam kanonisieren, keine pauschale Compat-Loeschung. |
 | P1 | Finanzbuchungen durchgehend zentral und atomar | [Open Gaps](../project-context/open-gaps-and-known-issues.md): echter Kassenabschluss, Consumer der commit-freien Journaltransaktion, weitere Rohschreiber/Periodensperren, Anlage-/Schema-/Bewertungskanonisierung und Hauptbuch-/Bankintegrationsnachweise. `L3-JOURNAL-SOURCE-20260910` hat fremden aktiven Besitz. |
@@ -72,7 +78,7 @@ Dies schliesst andere rote Gates nicht automatisch.
 | P2 | CRM-Persistenz und kanonisches Lead-Schema | `INTERESSENT-IST-LEAD`-Handshake: Umzug `public.crm_leads` mit Verbrauchern, Begriffsentscheidung `domain_crm.leads`, fluechtiger Portal-Interessentenspeicher. Nicht mit diesem Headerfix geschlossen. |
 | P2 | Laufzeit-, Abdeckungs- und Betriebsnachweise erneuern | Alte GET-5xx-Liste, Nightly/UAT und Abdeckungszahlen sind keine aktuelle Vollabnahme. Kritische Kernpfade vor Flaechenabdeckung; Performance und Importkosten messen. Externe Go-live-Gates bleiben Betriebsverantwortung. |
 
-Die sieben weiteren Fehler des genannten Backendlaufs:
+Historische Fehler des Ausgangs-Backendlaufs, inzwischen lokal nachgeprueft:
 
 - `fuhrpark/fahrzeug-stamm/loeschen`: ungueltiges `dangerLevel=destructive`
   in zwei Governance-/Safetytests; Schema und native Definition gemeinsam pruefen.
