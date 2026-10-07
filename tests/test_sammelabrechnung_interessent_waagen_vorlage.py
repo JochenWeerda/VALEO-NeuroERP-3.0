@@ -61,6 +61,8 @@ def _app_ebilanz():
     app = FastAPI()
     app.include_router(router)
     db = _mock_db()
+    from app.auth.deps import get_current_user
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "test", "roles": ["admin"]}
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_tenant_id] = lambda: TENANT_ID
     return app, db
@@ -387,29 +389,20 @@ def test_ebilanz_export_taxonomie_67():
 
 
 @pytest.mark.unit
-def test_ebilanz_validieren_returns_hinweise():
-    app, _ = _app_ebilanz()
-    client = TestClient(app)
-    resp = client.post("/ebilanz/export/some-export-id/validieren")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["status"] == "VALIDIERT"
-    assert "hinweise" in data
-    assert len(data["hinweise"]) > 0
+def test_ebilanz_validation_requires_existing_export():
+    app, db = _app_ebilanz()
+    response = TestClient(app).post("/ebilanz/export/some-export-id/validieren")
+    assert response.status_code == 404
+    db.commit.assert_not_called()
 
 
 @pytest.mark.unit
-def test_ebilanz_uebertragen_returns_ticket():
-    app, _ = _app_ebilanz()
-    client = TestClient(app)
-    resp = client.post("/ebilanz/export/some-export-id/uebertragen")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["status"] == "UEBERTRAGEN"
-    ticket = data["elster_transfer_ticket"]
-    assert len(ticket) == 16
-    assert ticket == ticket.upper()
-    assert ticket.isalnum()
+def test_ebilanz_transmission_cannot_invent_a_ticket():
+    app, db = _app_ebilanz()
+    response = TestClient(app).post("/ebilanz/export/some-export-id/uebertragen")
+    assert response.status_code == 404
+    assert "elster_transfer_ticket" not in response.json()
+    db.commit.assert_not_called()
 
 
 @pytest.mark.unit
@@ -419,8 +412,8 @@ def test_ebilanz_eric_readiness_declares_external_gates():
     resp = client.get("/ebilanz/eric-readiness")
     assert resp.status_code == 200
     data = resp.json()
-    assert data["repo_contract_ready"] is True
-    assert data["status"] == "REPO_READY_EXTERNAL_GATE"
+    assert data["repo_contract_ready"] is False
+    assert data["status"] == "NOT_READY_EXTERNAL_GATE"
     assert data["xbrl_taxonomie_version"] == "6.7"
     assert any("ERiC" in gate for gate in data["external_gates"])
 

@@ -11,6 +11,10 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## EBILANZ-HONEST-PERSISTENCE — Scheinwirkung und Laufzeit-DDL geschlossen (2026-10-07)
+
+Reale tenantgebundene Entwurfsmetadaten, Alembic-Schema statt Request-DDL, 503/Rollback statt verschluckter DB-Fehler. Fehlende/fremde IDs 404; vollständige XBRL-Validierung und echte ELSTER-/UStVA-Übertragung fehlen und liefern ausdrücklich 409. Simulationsservice entfernt, Readiness nicht bereit, historische Tickets niemals als ANGENOMMEN dargestellt; fremde Zeilen erhalten. [QA/Betrieb](../quality-assurance/ebilanz-honest-persistence-20261007.md). Die Implementierung des vollständigen XBRL-/ERiC-Fachwegs bleibt offen, ebenso die separate Gesamtkatalog-Abnahme. SQL-Gate prüft neue und verbleibende Dateien; Baselines nur abgesenkt.
+
 ## GAP-HUB — Archiv 2025 ersetzt (2026-10-07)
 
 Kanonische Gap-Übersicht: [docs/gap/README.md](../gap/README.md),

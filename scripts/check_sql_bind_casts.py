@@ -58,10 +58,15 @@ def read_text(path: str) -> str:
 
 
 def find_hits(roots):
-    files = subprocess.check_output(["git", "ls-files", *roots], text=True).split()
+    files = subprocess.check_output(
+        ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", *roots], text=True
+    ).split("\0")
+    deleted = set(subprocess.check_output(
+        ["git", "ls-files", "-z", "--deleted", "--", *roots], text=True
+    ).split("\0"))
     hits = []
     for path in files:
-        if not path.endswith(".py") or path.replace("\\", "/") == SELBSTAUSNAHME:
+        if not path.endswith(".py") or path in deleted or path.replace("\\", "/") == SELBSTAUSNAHME:
             continue
         for number, line in enumerate(read_text(path).split("\n"), 1):
             for match in PATTERN.finditer(line):

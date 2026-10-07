@@ -6,26 +6,24 @@ import uuid
 from datetime import date
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-from app.services.eric_submission_service import ERICSubmissionService
+from app.auth.finance_roles import finance_read, finance_write, finance_admin
 
-from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.ebilanz_elster_schemas import EbilanzElsterOut
 
 
-router = APIRouter(prefix="/ebilanz", tags=["finance", "ebilanz", "elster"])
+router = APIRouter(prefix="/ebilanz", tags=["finance", "ebilanz", "elster"], dependencies=[Depends(finance_read)])
 
 # ---------------------------------------------------------------------------
 # XBRL taxonomy helpers
 # ---------------------------------------------------------------------------
-
-XBRL_NAMESPACE = "http://www.xbrl.de/taxonomies/de-gaap-ci/role/link"
 
 # Subset of GCD / DE-GAAP taxonomy fields with their classification.
 # Source: XBRL Deutschland eBilanz Taxonomie 6.7
@@ -53,34 +51,46 @@ _TAXONOMY_FELDER: list[dict[str, str]] = [
 _GCD_PFLICHTFELDER = [f["element"] for f in _TAXONOMY_FELDER if f["pflicht"] == "ja"]
 
 
-# ---------------------------------------------------------------------------
-# Ensure table helper
-# ---------------------------------------------------------------------------
+# Schema ownership belongs to Alembic, never to a request handler.
+_NOT_READY = "Keine echte ELSTER-Anbindung konfiguriert; es wurde nichts uebertragen."
 
-def _ensure_table(db: Session) -> None:
-    """Create ebilanz_exports table if not present (best-effort)."""
+
+def _unavailable(db):
+    db.rollback()
+    return HTTPException(503, "eBilanz-Datenbank nicht verfuegbar; kein Erfolg bestaetigt.")
+
+
+def _export(db, tenant_id, export_id):
     try:
-        db.execute(text(
-            "CREATE TABLE IF NOT EXISTS domain_finance.ebilanz_exports ("
-            "  id TEXT PRIMARY KEY,"
-            "  tenant_id TEXT NOT NULL,"
-            "  wirtschaftsjahr INT,"
-            "  bilanzart TEXT,"
-            "  berichtsperiode_von TEXT,"
-            "  berichtsperiode_bis TEXT,"
-            "  steuernummer TEXT,"
-            "  finanzamt_nr TEXT,"
-            "  status TEXT DEFAULT 'ERSTELLT',"
-            "  taxonomie_version TEXT DEFAULT '6.7',"
-            "  xbrl_paketgroesse_kb INT DEFAULT 42,"
-            "  elster_transfer_ticket TEXT,"
-            "  uebertragen_am TIMESTAMP,"
-            "  erstellt_am TIMESTAMP DEFAULT NOW()"
-            ")"
-        ))
-        db.commit()
-    except Exception:
-        db.rollback()
+        row = db.execute(text("SELECT * FROM domain_finance.ebilanz_exports WHERE id = :id AND tenant_id = :tid"),
+                         {"id": export_id, "tid": tenant_id}).mappings().first()
+    except SQLAlchemyError as exc:
+        raise _unavailable(db) from exc
+    if row is None:
+        raise HTTPException(404, "Export nicht gefunden")
+    return dict(row)
+
+
+def _projection(row):
+    result = dict(row)
+    result["export_id"] = str(result.pop("id"))
+    # Historical records came from the removed simulator, never from ERiC.
+    uncertain = result.get("status") in ("VALIDIERT", "UEBERTRAGEN", "ANGENOMMEN") or bool(result.get("elster_transfer_ticket"))
+    result["status"] = "NICHT_BESTAETIGT" if uncertain else result.get("status", "ERSTELLT")
+    result["elster_transfer_ticket"] = None
+    result["uebertragen_am"] = None
+    result["xbrl_paketgroesse_kb"] = 0  # No complete XBRL document is stored here.
+    result["uebertragung_bestaetigt"] = False
+    return result
+
+
+def _list_exports(db, tenant_id, limit, skip):
+    try:
+        rows = db.execute(text("SELECT * FROM domain_finance.ebilanz_exports WHERE tenant_id = :tid ORDER BY erstellt_am DESC, id LIMIT :limit OFFSET :skip"),
+                          {"tid": tenant_id, "limit": limit, "skip": skip}).mappings().fetchmany(limit)
+    except SQLAlchemyError as exc:
+        raise _unavailable(db) from exc
+    return [_projection(row) for row in rows]
 
 
 # ---------------------------------------------------------------------------
@@ -88,20 +98,31 @@ def _ensure_table(db: Session) -> None:
 # ---------------------------------------------------------------------------
 
 class EBilanzExportRequest(BaseModel):
-    wirtschaftsjahr: int
-    bilanzart: str  # HGB / IFRS / EStG
-    berichtsperiode_von: str  # ISO date
-    berichtsperiode_bis: str  # ISO date
-    steuernummer: str
-    finanzamt_nr: str
+    wirtschaftsjahr: int = Field(ge=1900, le=9999)
+    bilanzart: str = Field(min_length=1, max_length=20)
+    berichtsperiode_von: date
+    berichtsperiode_bis: date
+    steuernummer: str = Field(min_length=1, max_length=40)
+    finanzamt_nr: str = Field(min_length=1, max_length=20)
+
+    @model_validator(mode="after")
+    def valid_period(self):
+        if self.berichtsperiode_von > self.berichtsperiode_bis:
+            raise ValueError("Berichtsperiode beginnt nach ihrem Ende")
+        if self.bilanzart not in ("HGB", "IFRS", "EStG"):
+            raise ValueError("Unbekannte Bilanzart")
+        if not self.steuernummer.strip() or not self.finanzamt_nr.strip():
+            raise ValueError("Steuernummer und Finanzamt duerfen nicht leer sein")
+        return self
 
 
 class EBilanzExportResult(BaseModel):
     export_id: str
     status: str  # ERSTELLT / VALIDIERT / UEBERTRAGEN / FEHLER
-    xbrl_paketgroesse_kb: int = 42
+    xbrl_paketgroesse_kb: int = 0
     taxonomie_version: str = "6.7"
-    validierungsfehler: list[str] = []
+    validierungsfehler: list[str] = Field(default_factory=list)
+    hinweise: list[str] = Field(default_factory=list)
 
 
 class EBilanzValidierungsRequest(BaseModel):
@@ -138,306 +159,85 @@ def taxonomie_felder() -> list[dict]:
 
 @router.get("/eric-readiness", response_model=EricReadinessOut, summary="Readiness eric")
 def eric_readiness() -> dict:
-    """Repo-side readiness view for the external ELSTER ERiC runtime."""
-    return {
-        "status": "REPO_READY_EXTERNAL_GATE",
-        "repo_contract_ready": True,
-        "xbrl_taxonomie_version": "6.7",
-        "supported_paths": [
-            "Taxonomie-Feldkatalog",
-            "GCD-Pflichtfeldvalidierung",
-            "XBRL-Exportpaket-Erzeugung",
-            "Validierungsstatus",
-            "ELSTER-Transfer-Ticket-Projektion",
-        ],
-        "external_gates": [
-            "ERiC-Bibliothek/Zertifikat im Zielsystem installieren",
-            "Finanzamt-/Steuernummern-Mapping fachlich freigeben",
-            "Testuebermittlung mit ELSTER-Pruefumgebung protokollieren",
-            "Steuerberaterabnahme fuer Produktivuebermittlung dokumentieren",
-        ],
-        "next_action": "ERiC-Credentials und Testzertifikat im Zieltenant hinterlegen",
-    }
+    """Report actual repository capabilities; external transmission is unavailable."""
+    return {"status": "NOT_READY_EXTERNAL_GATE", "repo_contract_ready": False,
+            "xbrl_taxonomie_version": "6.7",
+            "supported_paths": ["Taxonomie-Feldkatalog (Teilmenge)", "Lokale GCD-Pflichtfeldpruefung", "Export-Entwurfsmetadaten", "Unbestaetigter lokaler Status"],
+            "external_gates": ["Vollstaendiges XBRL-Dokument und echte Taxonomievalidierung fehlen",
+                               "ERiC-Bibliothek/Zertifikat und echte Empfangsquittung fehlen"],
+            "next_action": "Vollstaendigen XBRL- und ERiC-Fachweg implementieren und extern abnehmen"}
 
 
 @router.post("/validieren", response_model=EBilanzValidierungsResult, summary="Ebilanz validieren")
-def validieren_ebilanz(
-    payload: EBilanzValidierungsRequest,
-) -> dict:
-    """Validate a submitted eBilanz dict against required GCD Pflichtfelder."""
-    eingereichte_felder = set(payload.felder.keys())
-    fehlende = [f for f in _GCD_PFLICHTFELDER if f not in eingereichte_felder]
-    warnungen: list[str] = []
-
-    # Warn about empty string values for present fields
-    for key, val in payload.felder.items():
-        if val == "" or val is None:
-            warnungen.append(f"Feld '{key}' ist vorhanden aber leer")
-
-    # Warn about unknown fields that are not in taxonomy
-    bekannte_felder = {f["element"] for f in _TAXONOMY_FELDER}
-    for key in eingereichte_felder:
-        if key not in bekannte_felder:
-            warnungen.append(f"Unbekanntes Taxonomie-Feld: '{key}'")
-
-    return {
-        "valid": len(fehlende) == 0,
-        "fehlende_felder": fehlende,
-        "warnungen": warnungen,
-    }
+def validieren_ebilanz(payload: EBilanzValidierungsRequest) -> dict:
+    """Local presence checks only, never official XBRL/ERiC validation."""
+    fehlende = [key for key in _GCD_PFLICHTFELDER if payload.felder.get(key) is None or str(payload.felder[key]).strip() == ""]
+    bekannte = {field["element"] for field in _TAXONOMY_FELDER}
+    warnungen = [f"Unbekanntes Taxonomie-Feld: '{key}'" for key in sorted(payload.felder) if key not in bekannte]
+    warnungen.append("Nur lokale Pflichtfeldpruefung; keine vollstaendige XBRL-/ERiC-Validierung.")
+    return {"valid": not fehlende, "fehlende_felder": fehlende, "warnungen": warnungen}
 
 
 @router.get("/meldungen", summary="Meldungen auflisten",
     response_model=list[EbilanzElsterOut]
 )
-def list_meldungen(
-    limit: int = 100,
-    skip: int = 0,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> list[dict]:
-    """List all submitted eBilanz declarations for this tenant."""
-    _ensure_table(db)
-    try:
-        rows = db.execute(
-            text(
-                "SELECT id AS export_id, status, taxonomie_version, xbrl_paketgroesse_kb, "
-                "wirtschaftsjahr, bilanzart, berichtsperiode_von, berichtsperiode_bis, "
-                "steuernummer, finanzamt_nr, elster_transfer_ticket, uebertragen_am, erstellt_am "
-                "FROM domain_finance.ebilanz_exports WHERE tenant_id=:tenant_id "
-                "ORDER BY erstellt_am DESC LIMIT :limit OFFSET :skip"
-            ),
-            {"tenant_id": tenant_id, "limit": limit, "skip": skip},
-        ).mappings().all()
-        return [dict(r) for r in rows]
-    except Exception:
-        return []
+def list_meldungen(limit: int = Query(100, ge=1, le=1000), skip: int = Query(0, ge=0),
+                   db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> list[dict]:
+    return _list_exports(db, tenant_id, limit, skip)
 
 
-@router.post("/export/erstellen", response_model=EBilanzExportResult, status_code=201, summary="Erstellen")
-def erstellen(
-    payload: EBilanzExportRequest,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> dict:
+@router.post("/export/erstellen", response_model=EBilanzExportResult, status_code=201, summary="Export-Entwurfsmetadaten speichern", dependencies=[Depends(finance_write)])
+def erstellen(payload: EBilanzExportRequest, db: Session = Depends(get_db),
+              tenant_id: str = Depends(get_tenant_id)) -> dict:
+    """Persist draft metadata. No XBRL generation or transmission is claimed."""
     export_id = str(uuid.uuid4())
-    _ensure_table(db)
-
-    # Persist best-effort
     try:
-        db.execute(
-            text(
-                "INSERT INTO domain_finance.ebilanz_exports "
-                "(id, tenant_id, wirtschaftsjahr, bilanzart, berichtsperiode_von, "
-                "berichtsperiode_bis, steuernummer, finanzamt_nr, status, "
-                "taxonomie_version, xbrl_paketgroesse_kb, erstellt_am) "
-                "VALUES (:id, :tenant_id, :wj, :bilanzart, :von, :bis, :stnr, :fanr, "
-                "'ERSTELLT', '6.7', 42, NOW())"
-            ),
-            {
-                "id": export_id,
-                "tenant_id": tenant_id,
-                "wj": payload.wirtschaftsjahr,
-                "bilanzart": payload.bilanzart,
-                "von": payload.berichtsperiode_von,
-                "bis": payload.berichtsperiode_bis,
-                "stnr": payload.steuernummer,
-                "fanr": payload.finanzamt_nr,
-            },
-        )
+        db.execute(text("""INSERT INTO domain_finance.ebilanz_exports
+            (id, tenant_id, wirtschaftsjahr, bilanzart, berichtsperiode_von, berichtsperiode_bis,
+             steuernummer, finanzamt_nr, status, taxonomie_version, xbrl_paketgroesse_kb)
+            VALUES (:id, :tid, :wj, :art, :von, :bis, :stnr, :fanr, 'ERSTELLT', '6.7', 0)"""),
+            {"id": export_id, "tid": tenant_id, "wj": payload.wirtschaftsjahr, "art": payload.bilanzart,
+             "von": payload.berichtsperiode_von.isoformat(), "bis": payload.berichtsperiode_bis.isoformat(),
+             "stnr": payload.steuernummer, "fanr": payload.finanzamt_nr})
         db.commit()
-    except Exception:
-        db.rollback()
-
-    # Build a realistic XBRL stub with proper taxonomy namespace
-    xbrl_stub = (
-        f'<?xml version="1.0" encoding="UTF-8"?>\n'
-        f'<xbrl xmlns="http://www.xbrl.org/2003/instance"\n'
-        f'      xmlns:link="{XBRL_NAMESPACE}"\n'
-        f'      xmlns:de-gcd="http://www.xbrl.de/taxonomies/de-gcd"\n'
-        f'      xmlns:de-gaap-ci="http://www.xbrl.de/taxonomies/de-gaap-ci">\n'
-        f'  <!-- eBilanz Taxonomie 6.7 — Wirtschaftsjahr {payload.wirtschaftsjahr} -->\n'
-        f'  <!-- Bilanzart: {payload.bilanzart} | Steuernummer: {payload.steuernummer} -->\n'
-        f'  <de-gcd:genInfo.doc.period.fiscalYearBegin contextRef="D-{payload.wirtschaftsjahr}">'
-        f'{payload.berichtsperiode_von}</de-gcd:genInfo.doc.period.fiscalYearBegin>\n'
-        f'  <de-gcd:genInfo.doc.period.fiscalYearEnd contextRef="D-{payload.wirtschaftsjahr}">'
-        f'{payload.berichtsperiode_bis}</de-gcd:genInfo.doc.period.fiscalYearEnd>\n'
-        f'</xbrl>'
-    )
-    xbrl_kb = max(1, len(xbrl_stub) // 1024) or 1
-
-    return {
-        "export_id": export_id,
-        "status": "ERSTELLT",
-        "xbrl_paketgroesse_kb": xbrl_kb,
-        "taxonomie_version": "6.7",
-        "validierungsfehler": [],
-    }
+    except SQLAlchemyError as exc:
+        raise _unavailable(db) from exc
+    return {"export_id": export_id, "status": "ERSTELLT", "xbrl_paketgroesse_kb": 0,
+            "taxonomie_version": "6.7", "validierungsfehler": [],
+            "hinweise": ["Entwurfsmetadaten gespeichert; vollstaendiges XBRL-Dokument und ELSTER-Uebertragung fehlen."]}
 
 
-@router.post("/export/{export_id}/validieren", summary="Validieren",
+@router.post("/export/{export_id}/validieren", summary="Export-Validierungsverfuegbarkeit pruefen", dependencies=[Depends(finance_write)],
     response_model=EbilanzElsterOut
 )
-def validieren(
-    export_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> dict:
-    # Check existence (best-effort)
-    try:
-        db.execute(
-            text(
-                "SELECT id FROM domain_finance.ebilanz_exports WHERE id=:id AND tenant_id=:tenant_id"
-            ),
-            {"id": export_id, "tenant_id": tenant_id},
-        ).first()
-        db.execute(
-            text(
-                "UPDATE domain_finance.ebilanz_exports SET status='VALIDIERT' "
-                "WHERE id=:id AND tenant_id=:tenant_id"
-            ),
-            {"id": export_id, "tenant_id": tenant_id},
-        )
-        db.commit()
-    except Exception:
-        db.rollback()
-
-    return {
-        "export_id": export_id,
-        "status": "VALIDIERT",
-        "validierungsfehler": [],
-        "hinweise": [
-            "Taxonomie-Version 6.7 gültig",
-            "Pflichtfelder vollständig",
-        ],
-    }
+def validieren(export_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict:
+    _export(db, tenant_id, export_id)
+    raise HTTPException(409, "Kein vollstaendiges XBRL-Dokument vorhanden; Export wurde nicht validiert.")
 
 
-@router.post("/export/{export_id}/uebertragen", summary="Uebertragen",
+@router.post("/export/{export_id}/uebertragen", summary="ELSTER-Verfuegbarkeit pruefen", dependencies=[Depends(finance_admin)],
     response_model=EbilanzElsterOut
 )
-def uebertragen(
-    export_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> dict:
-    """
-    Vollständige ELSTER eBilanz-Übertragung via ERiC-Simulation.
-
-    1. Erstellt XBRL-Dokument (HGB-Taxonomie 6.7) aus Export-Daten
-    2. Simuliert ERiC-Übertragung (Produktiv: echter ERiC API-Call)
-    3. Persistiert Transfer-Ticket und Status
-    """
-    svc = ERICSubmissionService(db=db, tenant_id=tenant_id)
-
-    # XBRL-Payload erstellen
-    try:
-        xbrl_str = svc.prepare_xbrl_payload(export_id, db=db)
-    except Exception:
-        # Export not found or table missing — generate minimal XBRL stub
-        xbrl_str = (
-            '<?xml version="1.0" encoding="UTF-8"?>'
-            f'<xbrl xmlns="http://www.xbrl.org/2003/instance"'
-            f'      xmlns:de-gcd="http://www.xbrl.de/taxonomies/de-gcd">'
-            f'  <!-- Export-ID: {export_id} -->'
-            f'  <de-gcd:genInfo.doc.id.companyId.taxNumber contextRef="D">000000000</de-gcd:genInfo.doc.id.companyId.taxNumber>'
-            f'</xbrl>'
-        )
-
-    # ERiC-Übertragung simulieren
-    eric_result = svc.simulate_eric_transmission(xbrl_str)
-
-    if eric_result.get("eric_status") == "FEHLER":
-        return {
-            "export_id": export_id,
-            "status": "FEHLER",
-            "elster_transfer_ticket": None,
-            "uebertragen_am": None,
-            "eric_ergebnis": eric_result,
-        }
-
-    ticket = eric_result.get("ticketnummer", uuid.uuid4().hex[:16].upper())
-
-    # DB-Update
-    try:
-        db.execute(
-            text(
-                "UPDATE domain_finance.ebilanz_exports SET status='UEBERTRAGEN', "
-                "elster_transfer_ticket=:ticket, uebertragen_am=NOW() "
-                "WHERE id=:id AND tenant_id=:tenant_id"
-            ),
-            {"ticket": ticket, "id": export_id, "tenant_id": tenant_id},
-        )
-        db.commit()
-    except Exception:
-        db.rollback()
-
-    return {
-        "export_id": export_id,
-        "status": "UEBERTRAGEN",
-        "elster_transfer_ticket": ticket,
-        "uebertragen_am": date.today().isoformat(),
-        "eric_ergebnis": eric_result,
-        "xbrl_paketgroesse_kb": max(1, len(xbrl_str) // 1024),
-    }
+def uebertragen(export_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict:
+    _export(db, tenant_id, export_id)
+    raise HTTPException(409, _NOT_READY)
 
 
 @router.get("/export/{export_id}/uebertragungsstatus", summary="Uebertragungsstatus",
     response_model=EbilanzElsterOut
 )
-def uebertragungsstatus(
-    export_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> dict:
-    """Prüft den Übertragungsstatus eines Exports (Polling für ERiC-Antwort)."""
-    _ensure_table(db)
-    try:
-        row = db.execute(
-            text(
-                "SELECT elster_transfer_ticket, status, uebertragen_am "
-                "FROM domain_finance.ebilanz_exports "
-                "WHERE id=:id AND tenant_id=:tenant_id"
-            ),
-            {"id": export_id, "tenant_id": tenant_id},
-        ).fetchone()
-    except Exception:
-        row = None
-
-    if not row:
-        raise HTTPException(status_code=404, detail=f"Export '{export_id}' nicht gefunden")
-
-    ticket = row[0]
-    if not ticket:
-        return {"export_id": export_id, "status": row[1], "ticket": None,
-                "hinweis": "Noch nicht übertragen"}
-
-    svc = ERICSubmissionService(db=db, tenant_id=tenant_id)
-    return svc.get_transmission_status(ticket, db=db)
+def uebertragungsstatus(export_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict:
+    row = _projection(_export(db, tenant_id, export_id))
+    return {"export_id": export_id, "status": row["status"], "ticket": None,
+            "uebertragung_bestaetigt": False, "hinweis": _NOT_READY}
 
 
 @router.get("/exports", summary="Exports auflisten",
     response_model=list[EbilanzElsterOut]
 )
-def list_exports(
-    limit: int = 100,
-    skip: int = 0,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> list[dict]:
-    try:
-        rows = db.execute(
-            text(
-                "SELECT id AS export_id, status, taxonomie_version, xbrl_paketgroesse_kb, "
-                "wirtschaftsjahr, bilanzart, erstellt_am "
-                "FROM domain_finance.ebilanz_exports WHERE tenant_id=:tenant_id "
-                "ORDER BY erstellt_am DESC LIMIT :limit OFFSET :skip"
-            ),
-            {"tenant_id": tenant_id, "limit": limit, "skip": skip},
-        ).mappings().all()
-        return [dict(r) for r in rows]
-    except Exception:
-        return []
+def list_exports(limit: int = Query(100, ge=1, le=1000), skip: int = Query(0, ge=0),
+                 db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> list[dict]:
+    return _list_exports(db, tenant_id, limit, skip)
 
 
 # ── UStVA (Umsatzsteuervoranmeldung § 18 UStG) ───────────────────────────────
@@ -467,117 +267,21 @@ class UStVAErgebnis(BaseModel):
     hinweis: str
 
 
-@router.post("/elster/ustva", response_model=UStVAErgebnis, summary="UStVA erstellen und übermitteln (§ 18 UStG)")
-async def submit_ustva(
-    body: UStVARequest,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> UStVAErgebnis:
-    """
-    Erstellt Umsatzsteuervoranmeldung (UStVA) nach § 18 UStG und übermittelt
-    via ERiC-Simulation an ELSTER.
-
-    Berechnet:
-    - Umsatzsteuer 19 % (KZ 81) + 7 % (KZ 86)
-    - Abzug Vorsteuer (KZ 66, 61, 67)
-    - Zahllast / Erstattungsbetrag
-
-    In Produktion: ERiC-SDK-Aufruf mit ELSTER-Organisationszertifikat erforderlich.
-    """
-    # Steuerberechnung
-    ust_19 = round(body.kz_81_steuerpflichtige_ums_19 * 0.19, 2)
-    ust_7  = round(body.kz_86_steuerpflichtige_ums_7  * 0.07, 2)
-    ust_gesamt = ust_19 + ust_7
-
-    vorsteuer = (
-        body.kz_66_vorsteuer_rechnungen
-        + body.kz_61_einfuhrvorsteuer
-        + body.kz_67_innergemeinschaftlicher_erwerb_vorsteuer
-    )
-
-    zahllast = round(ust_gesamt - vorsteuer, 2)
-    erstattung = round(-zahllast, 2) if zahllast < 0 else 0.0
-    zahllast_pos = max(0.0, zahllast)
-
-    # ERiC-Simulation via bestehenden Service
-    from app.services.eric_submission_service import ERICSubmissionService
-    eric = ERICSubmissionService(db=db, tenant_id=tenant_id)
-
-    xbrl_mini = (
-        f'<?xml version="1.0" encoding="UTF-8"?>'
-        f'<xbrl xmlns="http://www.xbrl.org/2003/instance">'
-        f'<!-- UStVA {body.voranmeldungszeitraum} | Stnr: {body.steuernummer} | '
-        f'KZ81: {body.kz_81_steuerpflichtige_ums_19:.2f} KZ86: {body.kz_86_steuerpflichtige_ums_7:.2f} '
-        f'Zahllast: {zahllast_pos:.2f} -->'
-        f'<taxNumber>{body.steuernummer}</taxNumber>'
-        f'</xbrl>'
-    )
-    eric_result = eric.simulate_eric_transmission(xbrl_mini)
-
-    # In DB persistieren (domain_finance.ustva_voranmeldungen)
-    try:
-        import uuid as _uuid, json as _json
-        db.execute(
-            text("""
-                INSERT INTO domain_finance.ustva_voranmeldungen
-                    (id, tenant_id, steuernummer, finanzamt_nr, voranmeldungszeitraum,
-                     zahllast_eur, erstattung_eur, elster_status, transfer_ticket,
-                     payload_json, erstellt_am)
-                VALUES
-                    (:id, :tid, :stnr, :fanr, :zeitraum,
-                     :zahllast, :erstattung, :status, :ticket,
-                     CAST(:payload AS jsonb), NOW())
-                ON CONFLICT DO NOTHING
-            """),
-            {
-                "id": str(_uuid.uuid4()),
-                "tid": tenant_id,
-                "stnr": body.steuernummer,
-                "fanr": body.finanzamt_nr,
-                "zeitraum": body.voranmeldungszeitraum,
-                "zahllast": zahllast_pos,
-                "erstattung": erstattung,
-                "status": eric_result.get("eric_status", "FEHLER"),
-                "ticket": eric_result.get("transfer_ticket"),
-                "payload": _json.dumps(body.model_dump()),
-            },
-        )
-        db.commit()
-    except Exception:
-        db.rollback()  # Tabelle ggf. noch nicht migriert — non-blocking
-
-    return UStVAErgebnis(
-        voranmeldungszeitraum=body.voranmeldungszeitraum,
-        steuernummer=body.steuernummer,
-        finanzamt_nr=body.finanzamt_nr,
-        zahllast_eur=zahllast_pos,
-        erstattung_eur=erstattung,
-        elster_status=eric_result.get("eric_status", "FEHLER"),
-        transfer_ticket=eric_result.get("transfer_ticket"),
-        hinweis=eric_result.get("hinweis", "ERiC-Übertragung simuliert"),
-    )
+@router.post("/elster/ustva", response_model=UStVAErgebnis, summary="UStVA-Uebertragungsverfuegbarkeit pruefen", dependencies=[Depends(finance_admin)])
+async def submit_ustva(body: UStVARequest, db: Session = Depends(get_db),
+                       tenant_id: str = Depends(get_tenant_id)) -> UStVAErgebnis:
+    """Transmission is unavailable; never create simulated tickets or rows."""
+    raise HTTPException(409, _NOT_READY)
 
 
 @router.get("/elster/ustva", summary="UStVA-Übermittlungen auflisten",
     response_model=list[EbilanzElsterOut]
 )
-async def list_ustva(
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> list[dict]:
-    """Listet alle UStVA-Übermittlungen des Mandanten."""
+async def list_ustva(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict]:
     try:
-        rows = db.execute(
-            text("""
-                SELECT id, steuernummer, finanzamt_nr, voranmeldungszeitraum,
-                       zahllast_eur, erstattung_eur, elster_status, transfer_ticket, erstellt_am
-                FROM domain_finance.ustva_voranmeldungen
-                WHERE tenant_id = :tid
-                ORDER BY erstellt_am DESC
-                LIMIT 100
-            """),
-            {"tid": tenant_id},
-        ).mappings().all()
-        return [dict(r) for r in rows]
-    except Exception:
-        return []
+        rows = db.execute(text("""SELECT id, steuernummer, finanzamt_nr, voranmeldungszeitraum,
+            zahllast_eur, erstattung_eur, erstellt_am FROM domain_finance.ustva_voranmeldungen
+            WHERE tenant_id = :tid ORDER BY erstellt_am DESC, id LIMIT 100"""), {"tid": tenant_id}).mappings().fetchmany(100)
+    except SQLAlchemyError as exc:
+        raise _unavailable(db) from exc
+    return [{**dict(row), "elster_status": "NICHT_BESTAETIGT", "transfer_ticket": None} for row in rows]

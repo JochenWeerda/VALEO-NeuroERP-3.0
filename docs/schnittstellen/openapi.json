@@ -56103,26 +56103,36 @@
       "EBilanzExportRequest": {
         "properties": {
           "berichtsperiode_bis": {
+            "format": "date",
             "title": "Berichtsperiode Bis",
             "type": "string"
           },
           "berichtsperiode_von": {
+            "format": "date",
             "title": "Berichtsperiode Von",
             "type": "string"
           },
           "bilanzart": {
+            "maxLength": 20,
+            "minLength": 1,
             "title": "Bilanzart",
             "type": "string"
           },
           "finanzamt_nr": {
+            "maxLength": 20,
+            "minLength": 1,
             "title": "Finanzamt Nr",
             "type": "string"
           },
           "steuernummer": {
+            "maxLength": 40,
+            "minLength": 1,
             "title": "Steuernummer",
             "type": "string"
           },
           "wirtschaftsjahr": {
+            "maximum": 9999.0,
+            "minimum": 1900.0,
             "title": "Wirtschaftsjahr",
             "type": "integer"
           }
@@ -56144,6 +56154,13 @@
             "title": "Export Id",
             "type": "string"
           },
+          "hinweise": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Hinweise",
+            "type": "array"
+          },
           "status": {
             "title": "Status",
             "type": "string"
@@ -56154,7 +56171,6 @@
             "type": "string"
           },
           "validierungsfehler": {
-            "default": [],
             "items": {
               "type": "string"
             },
@@ -56162,7 +56178,7 @@
             "type": "array"
           },
           "xbrl_paketgroesse_kb": {
-            "default": 42,
+            "default": 0,
             "title": "Xbrl Paketgroesse Kb",
             "type": "integer"
           }
@@ -282866,7 +282882,6 @@
     },
     "/api/v1/ebilanz/elster/ustva": {
       "get": {
-        "description": "Listet alle UStVA-Übermittlungen des Mandanten.",
         "operationId": "list_ustva_api_v1_ebilanz_elster_ustva_get",
         "parameters": [
           {
@@ -282928,7 +282943,7 @@
         ]
       },
       "post": {
-        "description": "Erstellt Umsatzsteuervoranmeldung (UStVA) nach § 18 UStG und übermittelt\nvia ERiC-Simulation an ELSTER.\n\nBerechnet:\n- Umsatzsteuer 19 % (KZ 81) + 7 % (KZ 86)\n- Abzug Vorsteuer (KZ 66, 61, 67)\n- Zahllast / Erstattungsbetrag\n\nIn Produktion: ERiC-SDK-Aufruf mit ELSTER-Organisationszertifikat erforderlich.",
+        "description": "Transmission is unavailable; never create simulated tickets or rows.",
         "operationId": "submit_ustva_api_v1_ebilanz_elster_ustva_post",
         "parameters": [
           {
@@ -282985,7 +283000,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "UStVA erstellen und übermitteln (§ 18 UStG)",
+        "summary": "UStVA-Uebertragungsverfuegbarkeit pruefen",
         "tags": [
           "finance",
           "ebilanz",
@@ -282998,7 +283013,7 @@
     },
     "/api/v1/ebilanz/eric-readiness": {
       "get": {
-        "description": "Repo-side readiness view for the external ELSTER ERiC runtime.",
+        "description": "Report actual repository capabilities; external transmission is unavailable.",
         "operationId": "eric_readiness_api_v1_ebilanz_eric_readiness_get",
         "responses": {
           "200": {
@@ -283030,6 +283045,7 @@
     },
     "/api/v1/ebilanz/export/erstellen": {
       "post": {
+        "description": "Persist draft metadata. No XBRL generation or transmission is claimed.",
         "operationId": "erstellen_api_v1_ebilanz_export_erstellen_post",
         "parameters": [
           {
@@ -283086,7 +283102,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Erstellen",
+        "summary": "Export-Entwurfsmetadaten speichern",
         "tags": [
           "finance",
           "ebilanz",
@@ -283099,7 +283115,6 @@
     },
     "/api/v1/ebilanz/export/{export_id}/uebertragen": {
       "post": {
-        "description": "Vollständige ELSTER eBilanz-Übertragung via ERiC-Simulation.\n\n1. Erstellt XBRL-Dokument (HGB-Taxonomie 6.7) aus Export-Daten\n2. Simuliert ERiC-Übertragung (Produktiv: echter ERiC API-Call)\n3. Persistiert Transfer-Ticket und Status",
         "operationId": "uebertragen_api_v1_ebilanz_export__export_id__uebertragen_post",
         "parameters": [
           {
@@ -283155,7 +283170,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Uebertragen",
+        "summary": "ELSTER-Verfuegbarkeit pruefen",
         "tags": [
           "finance",
           "ebilanz",
@@ -283168,7 +283183,6 @@
     },
     "/api/v1/ebilanz/export/{export_id}/uebertragungsstatus": {
       "get": {
-        "description": "Prüft den Übertragungsstatus eines Exports (Polling für ERiC-Antwort).",
         "operationId": "uebertragungsstatus_api_v1_ebilanz_export__export_id__uebertragungsstatus_get",
         "parameters": [
           {
@@ -283292,7 +283306,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Validieren",
+        "summary": "Export-Validierungsverfuegbarkeit pruefen",
         "tags": [
           "finance",
           "ebilanz",
@@ -283313,6 +283327,8 @@
             "required": false,
             "schema": {
               "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
               "title": "Limit",
               "type": "integer"
             }
@@ -283323,6 +283339,7 @@
             "required": false,
             "schema": {
               "default": 0,
+              "minimum": 0,
               "title": "Skip",
               "type": "integer"
             }
@@ -283388,7 +283405,6 @@
     },
     "/api/v1/ebilanz/meldungen": {
       "get": {
-        "description": "List all submitted eBilanz declarations for this tenant.",
         "operationId": "list_meldungen_api_v1_ebilanz_meldungen_get",
         "parameters": [
           {
@@ -283397,6 +283413,8 @@
             "required": false,
             "schema": {
               "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
               "title": "Limit",
               "type": "integer"
             }
@@ -283407,6 +283425,7 @@
             "required": false,
             "schema": {
               "default": 0,
+              "minimum": 0,
               "title": "Skip",
               "type": "integer"
             }
@@ -283508,7 +283527,7 @@
     },
     "/api/v1/ebilanz/validieren": {
       "post": {
-        "description": "Validate a submitted eBilanz dict against required GCD Pflichtfelder.",
+        "description": "Local presence checks only, never official XBRL/ERiC validation.",
         "operationId": "validieren_ebilanz_api_v1_ebilanz_validieren_post",
         "requestBody": {
           "content": {

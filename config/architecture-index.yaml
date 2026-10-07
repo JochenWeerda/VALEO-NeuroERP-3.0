@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-07
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-07T17:57:43Z'
+generated_at: '2026-10-07T20:32:12Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1194,7 +1194,6 @@ domains:
     - controlling_kostenstellen_abschluss_service
     - controlling_service
     - einvoice_generator
-    - eric_submission_service
     - finance_clearing_service
     - finance_closing_service
     - finance_datev_service
@@ -2061,8 +2060,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 935
   frontend_routes_mapped: 935
-  backend_services_total: 277
-  backend_services_mapped: 277
+  backend_services_total: 276
+  backend_services_mapped: 276
   backend_endpoints_total: 454
   backend_endpoints_mapped: 454
 unmapped:
