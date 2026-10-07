@@ -1973,6 +1973,55 @@ weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
 ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
 waren.
 
+## MASK-AKTIONEN-WIRKUNG-20261007 — in Arbeit, Claude Code
+
+**Auftrag (User 07.10.2026: "Befunde beheben"):** Keine der neun `execute`-Funktionen
+in `app/api/v1/endpoints/mask_actions.py` schreibt fachlich — sie bauen ein
+Ergebnis-Dict, schreiben Audit und Outbox und antworten `success: true`. Die Masken
+bestaetigen damit Freigaben, Bestellungen, Stornos, die nie stattfanden. Schlimmer:
+Das Ereignis `finance.payment_run.approved` speist die Projektion
+`payment_run_cockpit` — ein nicht freigegebener Zahlungslauf erscheint im Lesemodell
+als freigegeben. Gegenprobe: Alle neun Pfade sind die einzigen aktiven Handler; kein
+Outbox-Konsument fuehrt die Mutation nach (nur Projektionen).
+
+**Behebung je Aktion:**
+
+| Aktion | Weg |
+|---|---|
+| Zahlungslauf freigeben | Delegation an `payment_runs.approve_payment_run` |
+| Lieferschein drucken | Delegation an `sales_delivery_notes.print_delivery_note` |
+| Reklamation abschliessen | Delegation an `reklamation_api.transition_status` (Ziel `geschlossen`, Zustandsmaschine) |
+| Angebot → Bestellung | Delegation an `EinkaufCompatService.convert_angebot_to_order` |
+| Opportunity-Aktivitaet, Lead qualifizieren, Lagerbewegung stornieren, Wareneingang am Artikel, Ernteabrechnung drucken | **kein echter Fachweg** → Fake-Handler entfernt, SD-Aktion `stubReason` ohne `commandEndpoint` (Projektkonvention) |
+
+**Transaktion:** `run_mask_action` erhaelt einen Delegationsmodus — Audit- und
+Outbox-Zeilen werden in die Sitzung gelegt, dann ruft er den Fachweg, dessen eigener
+Commit Mutation, Audit und Ereignis **atomar** schreibt. Scheitert der Fachweg:
+Rollback, und die Maske zeigt den **fachlichen** Grund (`HTTPException.detail`)
+statt einer Pauschalmeldung. dryRun prueft gegen die Datenbank (Objekt da, Zustand
+passt), statt "Validierung erfolgreich" ohne Pruefung zu melden.
+
+**Nicht Teil (Befunde, benannt):** `approve_payment_run` nimmt den Mandanten aus
+einem Query-Parameter (Vorgabe `"system"`) statt aus dem geprueften Kontext und
+prueft keine Rolle; `add_opportunity_activity` prueft den Mandanten nicht und
+schreibt in eine Tabelle, die keine Migration anlegt (500 auf frischer DB). Beides
+Finanz-/CRM-Bereich, eigene Slices. Rollenpruefung der Bewerbungswege: Codex
+(`cf87267da`).
+
+**Dateibesitz:** `app/api/v1/endpoints/mask_actions.py`,
+`app/services/mask_action_runtime_service.py`, die betroffenen Aktions-Eintraege in
+`app/core/screen_definitions.py` (nur `commandEndpoint`/`stubReason` dieser neun
+Aktionen), neuer Vertrag `tests/test_mask_aktionen_wirkung.py`, eigene QA-Doku.
+Keine Aenderung an den vier Fach-Endpunkten.
+
+**Abnahme:** Gegen `valeo_probe`: jede delegierte Aktion aendert den Fachdatensatz
+(Status/Bestellung) und schreibt Audit+Outbox in derselben Transaktion; ein
+gescheiterter Fachweg hinterlaesst weder Mutation noch Audit noch Ereignis und
+meldet den Grund; fremder Mandant 404/abgewiesen; dryRun schreibt nichts und meldet
+fehlendes Objekt/falschen Zustand. Statisch: kein Handler in `mask_actions.py`
+meldet Erfolg ohne Fachaufruf; jede SD-Aktion mit `commandEndpoint` zeigt auf einen
+existierenden Weg. Bestehende SD-/UIX-Vertraege gruen.
+
 ## BEWERBUNG-EINWILLIGUNG-MASKE-20261007 — abgeschlossen, Claude Code
 
 **Auftrag:** Offenen Punkt 2 aus
