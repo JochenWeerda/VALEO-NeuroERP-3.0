@@ -41,7 +41,7 @@
       "date.today": 1
     },
     "app/api/v1/endpoints/customers.py": {
-      "date.today": 3
+      "date.today": 2
     },
     "app/api/v1/endpoints/dauerauftraege.py": {
       "date.today": 4

@@ -47,6 +47,7 @@ file_ownership:
   - Eindeutige typisierte Historien, echte Praesente-Route/DTO und isolierter Schema-/HTTP-Vertrag
   - Exakte Finance-Zuordnung payment_run_freigabe und committed Inventar-/Handbuch-Nachzug
 acceptance:
+  - Fuenf neue Kalenderquellen zentralisiert, Einwilligungs- und Retention-SQL harmonisiert, Tageswert pro Avis/Loeschlauf; 209 Tests und neun Improvement-Checks gruen, Baseline nur abgesenkt.
   - Acht verdeckte Einkaufs-GET-POST-PUT-Altpfade entfernt; 3974 Vertraege erhalten, 89 Tests gruen, ein ehrlicher Bestelllisten-Skip, Doppelgruppen noch 33.
   - Acht Logistik-Deklarationsluecken geschlossen, acht historische Ausnahmen entfernt; 791 Backend-/33 Frontend-Vertraege und Handbuch gruen, Fachrestwege fremd erhalten.
   - Auf 79a0ed571 sechs Node-Behavior-Vertraege und Linux-Grype-Trivy-ZAP-Bandit gruen; Security ausschliesslich fuer zwei ungepatchte Node-High-Befunde rot.

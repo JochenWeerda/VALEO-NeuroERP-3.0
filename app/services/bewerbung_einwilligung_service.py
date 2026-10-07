@@ -41,6 +41,8 @@ from fastapi import HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_today
+
 logger = logging.getLogger(__name__)
 
 BEWERBUNGEN = "domain_hr.applications"
@@ -136,11 +138,11 @@ def stand(db: Session, tenant_id: str, bewerbung_id: str) -> dict:
             "SELECT aufbewahrung_einwilligung_bis AS gueltig_bis, "
             "       aufbewahrung_einwilligung_am AS erteilt_am, "
             "       (aufbewahrung_einwilligung_bis IS NOT NULL "
-            "        AND aufbewahrung_einwilligung_bis >= CURRENT_DATE) AS laeuft "
+            "        AND aufbewahrung_einwilligung_bis >= CAST(:heute AS date)) AS laeuft "
             f"FROM {BEWERBUNGEN} "  # nosec B608  # reviewed-safe: Tabellenname ist ein Code-Literal
             "WHERE id = :id AND tenant_id = :tid"
         ),
-        {"id": bewerbung_id, "tid": tenant_id},
+        {"id": bewerbung_id, "tid": tenant_id, "heute": business_today()},
     ).mappings().first()
     if not bewerbung:
         raise HTTPException(status_code=404, detail="Bewerbung nicht gefunden")
@@ -307,7 +309,7 @@ def erteilen(
             ),
         )
 
-    heute = date.today()
+    heute = business_today()
     if payload.gueltig_bis <= heute:
         raise HTTPException(
             status_code=422,

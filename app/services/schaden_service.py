@@ -30,6 +30,8 @@ from fastapi import HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_today
+
 logger = logging.getLogger(__name__)
 
 VERSICHERUNGEN = "domain_erp.versicherungen"
@@ -211,7 +213,7 @@ def anreichern(zeile: dict, frist_tage: Optional[int]) -> dict:
     d["meldefrist_tage"] = frist_tage
     d["melden_bis"] = melden_bis(zeile.get("schadendatum"), frist_tage)
     if d["melden_bis"] and d["status"] == "ENTWURF":
-        d["frist_ueberschritten"] = d["melden_bis"] < date.today().isoformat()
+        d["frist_ueberschritten"] = d["melden_bis"] < business_today().isoformat()
     else:
         d["frist_ueberschritten"] = False
     return d

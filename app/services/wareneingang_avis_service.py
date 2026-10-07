@@ -24,12 +24,13 @@ Eingangslieferschein ↔ Bestellung.
 from __future__ import annotations
 
 import uuid
-from datetime import date
 from decimal import Decimal
 from typing import Any
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+
+from app.core.business_time import business_today
 
 from app.services.inventory_stock_balance import current_stock
 
@@ -92,6 +93,7 @@ def buche_wareneingang_aus_avis(
     """Bucht den Wareneingang; der Aufrufer committet nicht — dieser Dienst schon."""
     avis, bestellung = _avis_und_bestellung(db, avis_id, tenant_id)
     positionen = pruefe_wareneingang(db, avis_id, tenant_id, lager_id, lieferschein_nr)
+    heute = business_today()
     for pos in positionen:
         menge = Decimal(str(pos["menge_offen"]))
         artikel = str(pos["article_id"])
@@ -109,7 +111,7 @@ def buche_wareneingang_aus_avis(
             """),
             {
                 "id": str(uuid.uuid4()), "tid": tenant_id, "artikel": artikel, "lager": lager_id,
-                "menge": menge, "einheit": pos["einheit"], "datum": date.today(), "ls": lieferschein_nr.strip(),
+                "menge": menge, "einheit": pos["einheit"], "datum": heute, "ls": lieferschein_nr.strip(),
                 "avis": avis_id, "notiz": f"Wareneingang Avis {avis['avis_nummer']}, Bestellung "
                                          f"{bestellung['bestellnummer']} Pos. {pos['pos_nr']}",
                 "vorher": vorher, "nachher": vorher + float(menge), "wer": operator,
@@ -130,7 +132,7 @@ def buche_wareneingang_aus_avis(
     db.execute(
         text("UPDATE domain_einkauf.bestellungen SET status = 'geliefert', lieferdatum_ist = :heute "
              "WHERE id = :id AND tenant_id = :tid"),
-        {"heute": date.today(), "id": bestellung["id"], "tid": tenant_id},
+        {"heute": heute, "id": bestellung["id"], "tid": tenant_id},
     )
     db.execute(
         text("UPDATE einkauf_anlieferavis SET status = 'ERHALTEN', updated_at = NOW() "
