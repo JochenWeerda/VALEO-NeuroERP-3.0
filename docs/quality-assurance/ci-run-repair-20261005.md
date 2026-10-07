@@ -9,6 +9,21 @@ last_reviewed: 2026-10-05
 
 # CI-Reparatur 2026-10-05
 
+## Gesamtziel-Abgleich 2026-10-07
+
+[Priorisierter Reparaturstand](code-repair-stabilization-status-20261007.md):
+`00de664df` besteht PostgreSQL, OpenAPI, Docs, beide E2E und Service Security;
+Quality, Security Scan und Gesamt-CI weiter rot. Backend acht Fehler bei
+16025 bestandenen Tests, Frontend zwei bei 969. Mandant-Finanz/CRM/Einkauf ist
+fremd aktiv geclaimt. Historische Bank-/Journalnummer-/Waage-Entscheidungspunkte
+geschlossen; technische Waage- und Journalintegration weiter offen.
+
+Interessenten-Fehlerheader korrigiert: echter HTTP-Absturz auf GET/POST vor Fix
+zweimal reproduziert; ASCII-Hinweis erhaelt 503/409 mit Rollback ohne Commit.
+Alter COUNT-Mock prueft jetzt Jahres-/Maximalnummer und gespeicherten Lead samt
+Tenant. Alle 18 Vertraege des Moduls bestanden, null Skip, Exit 0, keine
+DB-Verbindung oder neue Ressourcen. Neue Actions-Abnahme noch erforderlich.
+
 ## Fortsetzung 2026-10-06
 
 Run 37374442374 auf 1784c66b1: 15355 bestanden, 19 fehlgeschlagen und
