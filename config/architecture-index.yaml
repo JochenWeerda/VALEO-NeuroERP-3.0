@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-07
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-07T15:57:43Z'
+generated_at: '2026-10-07T17:57:43Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -340,6 +340,7 @@ domains:
     - rations_readiness_service
     - rations_reference_data_service
     - settlement_approval_service
+    - settlement_document_archive_service
     - settlement_drying_service
     - settlement_pdf_service
     - silo_rule_engine_service
@@ -712,6 +713,7 @@ domains:
     - crm_kontakt_service
     - crm_kunden_map_service
     - crm_lead_gen_service
+    - crm_lead_service
     - crm_merge_service
     - crm_notification_service
     - crm_ownership_service
@@ -2059,8 +2061,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 935
   frontend_routes_mapped: 935
-  backend_services_total: 275
-  backend_services_mapped: 275
+  backend_services_total: 277
+  backend_services_mapped: 277
   backend_endpoints_total: 454
   backend_endpoints_mapped: 454
 unmapped:

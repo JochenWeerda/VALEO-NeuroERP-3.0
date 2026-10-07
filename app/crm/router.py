@@ -162,41 +162,8 @@ async def get_contact_timeline(
 
 # --- LEADS ---
 
-@router.post("/leads", response_model=schemas.Lead, status_code=201)
-async def create_lead(
-    lead: schemas.LeadCreate,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """Create new lead"""
-    db_lead = models.Lead(
-        id=uuid7(),
-        **lead.model_dump(),
-        tenant_id=tenant_id
-    )
-    db.add(db_lead)
-    db.commit()
-    db.refresh(db_lead)
-    return db_lead
 
 
-@router.get("/leads", response_model=List[schemas.Lead])
-async def list_leads(
-    status: Optional[schemas.LeadStatus] = None,
-    priority: Optional[schemas.LeadPriority] = None,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """List all leads"""
-    query = db.query(models.Lead).filter(models.Lead.tenant_id == tenant_id)
-    
-    if status:
-        query = query.filter(models.Lead.status == status)
-    
-    if priority:
-        query = query.filter(models.Lead.priority == priority)
-    
-    return query.order_by(models.Lead.created_at.desc()).all()
 
 
 @router.post("/leads/route", response_model=dict)
@@ -219,66 +186,10 @@ async def route_unassigned_leads(
     return {"routed": routed, "message": f"{routed} Leads zugewiesen"}
 
 
-@router.get("/leads/{lead_id}", response_model=schemas.Lead)
-async def get_lead(
-    lead_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """Get lead by ID"""
-    lead = db.query(models.Lead).filter(
-        models.Lead.id == lead_id,
-        models.Lead.tenant_id == tenant_id
-    ).first()
-    
-    if not lead:
-        raise HTTPException(status_code=404, detail="Lead not found")
-    
-    return lead
 
 
-@router.put("/leads/{lead_id}", response_model=schemas.Lead)
-async def update_lead(
-    lead_id: str,
-    lead_update: schemas.LeadUpdate,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """Update lead"""
-    db_lead = db.query(models.Lead).filter(
-        models.Lead.id == lead_id,
-        models.Lead.tenant_id == tenant_id
-    ).first()
-    
-    if not db_lead:
-        raise HTTPException(status_code=404, detail="Lead not found")
-    
-    for field, value in lead_update.model_dump(exclude_unset=True).items():
-        setattr(db_lead, field, value)
-    
-    db.commit()
-    db.refresh(db_lead)
-    return db_lead
 
 
-@router.delete("/leads/{lead_id}", status_code=204)
-async def delete_lead(
-    lead_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id)
-):
-    """Delete lead"""
-    db_lead = db.query(models.Lead).filter(
-        models.Lead.id == lead_id,
-        models.Lead.tenant_id == tenant_id
-    ).first()
-    
-    if not db_lead:
-        raise HTTPException(status_code=404, detail="Lead not found")
-    
-    db.delete(db_lead)
-    db.commit()
-    return None
 
 
 @router.post("/leads/{lead_id}/assign", response_model=schemas.Lead)

@@ -74,3 +74,5 @@ ADR-030 ist **nicht vergeben** (Lücke in der Nummerierung).
 - [ADR-074 Bankvergleich ohne Direktbuchung](adr-074-bank-directbook-retirement.md)
 
 - [ADR-075 Explizite Bank-Hauptbuchverbindung und Saldennachweis](adr-075-bank-ledger-evidence.md)
+
+- [ADR-078 Kanonische Lead-Maske und PostgreSQL-PDF-Archiv](adr-078-canonical-lead-postgresql-pdf.md)

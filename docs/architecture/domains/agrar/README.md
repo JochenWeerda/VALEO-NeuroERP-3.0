@@ -55,3 +55,7 @@ Ernte-/Annahme- und Streckenkennzahlen werden ueber eine tenantgebundene
 Reporting-Projektion in festen Berichten aggregiert. CSV und Beleg-Drilldown
 verwenden dieselbe freigegebene Ergebnislogik; Agrar-Schreibmodelle bleiben
 kanonisch in ihrer Domaene.
+
+## Lead- und PDF-Entscheidung (2026-10-07)
+
+[ADR-078](../../../adr/adr-078-canonical-lead-postgresql-pdf.md) legt das lokale Leadregister, die echte Qualifizierung und das PostgreSQL-PDF-Archiv fest. [QA und Betriebsnachweis](../../../quality-assurance/user-decisions-lead-pdf-20261007.md).

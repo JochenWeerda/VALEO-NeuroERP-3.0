@@ -9,9 +9,9 @@ Ergebnis-Dict bauten, Audit und Outbox schrieben und ``success: true`` meldeten 
 ohne fachliche Wirkung. Das Ereignis ``finance.payment_run.approved`` speiste die
 Projektion ``payment_run_cockpit``: Ein nicht freigegebener Zahlungslauf erschien im
 Lesemodell als freigegeben. Jetzt delegiert jeder Handler an den echten Fachweg
-(``run_delegated_mask_action``). Die sechs Aktionen ohne Fachweg (Lead qualifizieren,
-Opportunity-Aktivitaet, Wareneingang am Artikel, Ernteabrechnung drucken) haben keinen Endpunkt mehr; ihre Maske nennt
-den ``stubReason``. Siehe ``docs/quality-assurance/mask-aktionen-wirkung-20261007.md``.
+(``run_delegated_mask_action``). Lead-Qualifizierung verwendet das kanonische
+Leadregister; Ernte-PDFs speichern ihren Inhalt im PostgreSQL-Archiv.
+Siehe ``docs/quality-assurance/user-decisions-lead-pdf-20261007.md``.
 """
 from __future__ import annotations
 
@@ -25,8 +25,41 @@ from app.core.database import get_db
 from app.auth.finance_roles import finance_admin
 from app.core.tenant import get_tenant_id
 from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
+from app.auth.deps import require_roles
 
 router = APIRouter(tags=["mask-actions"])
+
+
+@router.post("/agrar/settlements/{entity_id}/actions/drucken", response_model=MaskActionResult,
+             summary="Ernte-Abrechnung als PDF in PostgreSQL archivieren")
+async def action_settlement_drucken(
+    entity_id: str, body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
+    user: dict = Depends(require_roles("HARVEST_BEARBEITEN", "HARVEST_ADMIN", "AGRAR_BEARBEITEN", "AGRAR_ADMIN", "admin", "manager")),
+) -> MaskActionResult:
+    from app.services.agrar_settlement_service import AgrarSettlementService
+    from app.services.settlement_pdf_service import SettlementPdfService
+
+    async def check(session, payload, settlement_id, tenant):
+        AgrarSettlementService(session, tenant).get_settlement(settlement_id)
+        return []
+
+    async def execute(session, payload, settlement_id, tenant):
+        service = AgrarSettlementService(session, tenant)
+        settlement, deductions = service.get_settlement(settlement_id)
+        from app.infrastructure.models import BusinessPartner, Article
+        supplier = session.query(BusinessPartner).filter(BusinessPartner.partner_id == settlement.supplier_id,
+                                                        BusinessPartner.tenant_id == tenant).first()
+        article = session.query(Article).filter(Article.id == settlement.article_id,
+                                               Article.tenant_id == tenant).first() if settlement.article_id else None
+        meta = SettlementPdfService(session, tenant).generate_and_archive(
+            settlement, deductions, supplier, article, commit=False,
+            created_by=str(user.get("sub") or user.get("id") or user.get("username") or "")[:100] or None)
+        return f"PDF archiviert: {meta['download_url']} (SHA-256 {meta['sha256']})."
+
+    return await run_delegated_mask_action(db, action_key="drucken", entity_type="agrar_settlement",
+        entity_id=entity_id, tenant_id=tenant_id, body=body, check_fn=check, delegate_fn=execute,
+        outbox_event_type="agrar.settlement.pdf_archived")
 
 
 def _fehler(nachricht: str, feld: str = "_entity") -> list[dict[str, Any]]:

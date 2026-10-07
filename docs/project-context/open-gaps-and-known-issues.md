@@ -11,6 +11,10 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## USER-DECISIONS-LEAD-PDF — Entscheidungsrest geschlossen (2026-10-07)
+
+Lead-Maske/Qualifizierung verwenden public.crm_leads und einen ausgewaehlten eigenen Kunden; echte lokale Opportunity atomar mit Audit/Outbox. Ernte-PDFs liegen vollstaendig und versioniert in PostgreSQL, mit mandantengebundenem Download und Hashpruefung. Acht Logistikdeklarationen bereits b2a63f451 geliefert, erneut geprueft. [ADR-078](../adr/adr-078-canonical-lead-postgresql-pdf.md), [QA](../quality-assurance/user-decisions-lead-pdf-20261007.md). Die physische Domain-Verlagerung von Leads sowie Gesamtatomizitaet der FIBU-Verbuchung mit nachgelagerter Archivierung bleiben eigene offene Fach-Slices. Alte Hash-only-Belege enthalten kein PDF und werden nicht als wiederherstellbar bestaetigt. Die alte Round-robin-/Assign-Lead-API verwendet noch das Nebenmodell und bleibt ein gesonderter Altverbraucher.
+
 ## HANDSHAKE-GAP-CLOSURE — vier benannte Befunde (2026-10-05)
 
 Bank-Proof-Fixture korrigiert: migriertes Schema kopieren, nur fehlenden

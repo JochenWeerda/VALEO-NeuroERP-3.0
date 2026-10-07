@@ -266,7 +266,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `kundenbanken` | Kundenbanken — IBAN/BIC-Bankverbindungen pro Kunde. |
 | `l3_report_catalog` | Prioritized fixed L3 report catalog API. |
 | `labor` | Labor API - DB-backed endpoints. |
-| `leads` | CRM Lead endpoints proxied through crm-core. |
+| `leads` | Tenant-bound lead CRUD and qualification on public.crm_leads. |
 | `legacy_interface_adapters` | Governed L3 Standard and Unimet adapter API. |
 | `liquidity` | Liquidity Planning API -- Liquiditaetsplanung |
 | `liquidity_planning` | Liquiditätsplanung — 13-Wochen-Rolling-Forecast, thin-router pattern |
