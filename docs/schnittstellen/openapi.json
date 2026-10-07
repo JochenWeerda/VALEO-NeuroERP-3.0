@@ -183933,24 +183933,6 @@
         "operationId": "list_opportunities_api_crm_sales_opportunities__get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Filter by status",
             "in": "query",
             "name": "status",
@@ -184012,6 +183994,22 @@
               "title": "Limit",
               "type": "integer"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -184042,8 +184040,26 @@
         ]
       },
       "post": {
-        "description": "Create a new sales opportunity via crm-sales.",
+        "description": "Create a new sales opportunity via crm-sales.\n\nDer Mandant kommt aus dem Kontext; ein ``tenant_id`` im Rumpf waehlt keinen\nfremden Mandanten (bis 07.10.2026 tat er das).",
         "operationId": "create_opportunity_api_crm_sales_opportunities__post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -184088,22 +184104,6 @@
         "operationId": "get_forecast_api_crm_sales_opportunities_forecast_get",
         "parameters": [
           {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "YYYY-MM",
             "in": "query",
             "name": "period",
@@ -184119,6 +184119,22 @@
               ],
               "description": "YYYY-MM",
               "title": "Period"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -184156,8 +184172,8 @@
         "operationId": "get_pipeline_api_crm_sales_opportunities_pipeline_get",
         "parameters": [
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -184168,7 +184184,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -184230,7 +184246,7 @@
     },
     "/api/crm-sales/opportunities/{opportunity_id}": {
       "delete": {
-        "description": "Delete a sales opportunity via crm-sales.",
+        "description": "Delete a sales opportunity via crm-sales — nur im eigenen Mandanten.",
         "operationId": "delete_opportunity_api_crm_sales_opportunities__opportunity_id__delete",
         "parameters": [
           {
@@ -184240,6 +184256,22 @@
             "schema": {
               "title": "Opportunity Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -184264,7 +184296,7 @@
         ]
       },
       "get": {
-        "description": "Get a specific sales opportunity by ID.",
+        "description": "Get a specific sales opportunity by ID — nur im eigenen Mandanten.",
         "operationId": "get_opportunity_api_crm_sales_opportunities__opportunity_id__get",
         "parameters": [
           {
@@ -184274,6 +184306,22 @@
             "schema": {
               "title": "Opportunity Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -184305,7 +184353,7 @@
         ]
       },
       "put": {
-        "description": "Update a sales opportunity via crm-sales.",
+        "description": "Update a sales opportunity via crm-sales — nur im eigenen Mandanten.",
         "operationId": "update_opportunity_api_crm_sales_opportunities__opportunity_id__put",
         "parameters": [
           {
@@ -184315,6 +184363,22 @@
             "schema": {
               "title": "Opportunity Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -184358,7 +184422,7 @@
     },
     "/api/crm-sales/opportunities/{opportunity_id}/activities": {
       "post": {
-        "description": "Aktivität zur Opportunity hinzufügen.",
+        "description": "Aktivität zur Opportunity hinzufügen.\n\nBis 07.10.2026 ohne Mandant und in eine Tabelle ``activities`` mit\n``opportunity_id``, die keine Migration anlegt. Jetzt: nur im eigenen Mandanten,\nin ``domain_crm.activities`` — dort liest der Reiter der Opportunity-Maske.",
         "operationId": "add_opportunity_activity_api_crm_sales_opportunities__opportunity_id__activities_post",
         "parameters": [
           {
@@ -184424,6 +184488,22 @@
               ],
               "title": "Assigned To"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -184479,6 +184559,22 @@
               "description": "Target stage (LEAD/QUALIFIZIERT/ANGEBOT/VERHANDLUNG/GEWONNEN/VERLOREN)",
               "title": "New Stage",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -274200,24 +274296,6 @@
         "operationId": "list_opportunities_api_v1_crm_opportunities__get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Filter by status",
             "in": "query",
             "name": "status",
@@ -274279,6 +274357,22 @@
               "title": "Limit",
               "type": "integer"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -274315,8 +274409,26 @@
         ]
       },
       "post": {
-        "description": "Create a new sales opportunity via crm-sales.",
+        "description": "Create a new sales opportunity via crm-sales.\n\nDer Mandant kommt aus dem Kontext; ein ``tenant_id`` im Rumpf waehlt keinen\nfremden Mandanten (bis 07.10.2026 tat er das).",
         "operationId": "create_opportunity_api_v1_crm_opportunities__post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -274367,22 +274479,6 @@
         "operationId": "get_forecast_api_v1_crm_opportunities_forecast_get",
         "parameters": [
           {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "YYYY-MM",
             "in": "query",
             "name": "period",
@@ -274398,6 +274494,22 @@
               ],
               "description": "YYYY-MM",
               "title": "Period"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -274441,8 +274553,8 @@
         "operationId": "get_pipeline_api_v1_crm_opportunities_pipeline_get",
         "parameters": [
           {
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -274453,7 +274565,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -274570,6 +274682,81 @@
         "tags": [
           "CRM",
           "CRM"
+        ]
+      }
+    },
+    "/api/v1/crm/opportunities/{entity_id}/actions/create_activity": {
+      "post": {
+        "description": "Legt die Aktivitaet ueber den mandantengebundenen Fachweg an.\n\nBetreff und Typ fragt die Maske deklarativ (``inputFields`` der Aktion).",
+        "operationId": "action_opportunity_create_activity_api_v1_crm_opportunities__entity_id__actions_create_activity_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "CRM-Aktivitaet fuer Opportunity anlegen (SPEC-P1-04)",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
@@ -274886,7 +275073,7 @@
     },
     "/api/v1/crm/opportunities/{opportunity_id}": {
       "delete": {
-        "description": "Delete a sales opportunity via crm-sales.",
+        "description": "Delete a sales opportunity via crm-sales — nur im eigenen Mandanten.",
         "operationId": "delete_opportunity_api_v1_crm_opportunities__opportunity_id__delete",
         "parameters": [
           {
@@ -274896,6 +275083,22 @@
             "schema": {
               "title": "Opportunity Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -274926,7 +275129,7 @@
         ]
       },
       "get": {
-        "description": "Get a specific sales opportunity by ID.",
+        "description": "Get a specific sales opportunity by ID — nur im eigenen Mandanten.",
         "operationId": "get_opportunity_api_v1_crm_opportunities__opportunity_id__get",
         "parameters": [
           {
@@ -274936,6 +275139,22 @@
             "schema": {
               "title": "Opportunity Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -274973,7 +275192,7 @@
         ]
       },
       "put": {
-        "description": "Update a sales opportunity via crm-sales.",
+        "description": "Update a sales opportunity via crm-sales — nur im eigenen Mandanten.",
         "operationId": "update_opportunity_api_v1_crm_opportunities__opportunity_id__put",
         "parameters": [
           {
@@ -274983,6 +275202,22 @@
             "schema": {
               "title": "Opportunity Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -275032,7 +275267,7 @@
     },
     "/api/v1/crm/opportunities/{opportunity_id}/activities": {
       "post": {
-        "description": "Aktivität zur Opportunity hinzufügen.",
+        "description": "Aktivität zur Opportunity hinzufügen.\n\nBis 07.10.2026 ohne Mandant und in eine Tabelle ``activities`` mit\n``opportunity_id``, die keine Migration anlegt. Jetzt: nur im eigenen Mandanten,\nin ``domain_crm.activities`` — dort liest der Reiter der Opportunity-Maske.",
         "operationId": "add_opportunity_activity_api_v1_crm_opportunities__opportunity_id__activities_post",
         "parameters": [
           {
@@ -275097,6 +275332,22 @@
                 }
               ],
               "title": "Assigned To"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -275226,6 +275477,22 @@
               "description": "Target stage (LEAD/QUALIFIZIERT/ANGEBOT/VERHANDLUNG/GEWONNEN/VERLOREN)",
               "title": "New Stage",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -284842,6 +285109,80 @@
         ]
       }
     },
+    "/api/v1/einkauf/angebote/{entity_id}/actions/bestellen": {
+      "post": {
+        "operationId": "action_angebot_bestellen_api_v1_einkauf_angebote__entity_id__actions_bestellen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellung aus Angebot erstellen (SPEC-P1-04)",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/einkauf/anlieferavis": {
       "get": {
         "operationId": "einkauf_anlieferavis_list_api_v1_einkauf_anlieferavis_get",
@@ -285032,6 +285373,81 @@
         "summary": "Anlieferavis transition einkauf",
         "tags": [
           "compat"
+        ]
+      }
+    },
+    "/api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang": {
+      "post": {
+        "description": "Lieferschein-Nr. und Lager fragt die Maske deklarativ (``inputFields``).",
+        "operationId": "action_avis_wareneingang_api_v1_einkauf_anlieferavis__entity_id__actions_wareneingang_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Wareneingang aus dem Anlieferavis buchen (SPEC-P1-04)",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
@@ -340638,25 +341054,9 @@
     },
     "/api/v1/inventory/warehouses/": {
       "get": {
-        "description": "Return a paginated list of warehouses.",
+        "description": "Die Lager des Mandanten aus dem Kontext.\n\nBis 07.10.2026 aus einem Query-Parameter, sonst aus dem Standardmandanten — als\nAuswahl im Wareneingang haette das fremde Lager angeboten.",
         "operationId": "list_warehouses_api_v1_inventory_warehouses__get",
         "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
           {
             "in": "query",
             "name": "is_active",
@@ -340694,6 +341094,22 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -349913,7 +350329,7 @@
     },
     "/api/v1/lager/korrekturen/{korrektur_id}/storno": {
       "post": {
-        "description": "Storno-Gegenbuchung zur Bestandskorrektur (idempotent via storno_ref).",
+        "description": "Storno-Gegenbuchung zu einer Lagerbewegung (idempotent via storno_ref).\n\nDer Mandant kommt aus dem Kontext; bis 07.10.2026 aus einem Query-Parameter.",
         "operationId": "storno_bestandskorrektur_api_v1_lager_korrekturen__korrektur_id__storno_post",
         "parameters": [
           {
@@ -349926,8 +350342,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "x_tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -349938,7 +350354,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -351440,6 +351856,81 @@
           "lager",
           "silo",
           "twin"
+        ]
+      }
+    },
+    "/api/v1/lager/stock-movements/{entity_id}/actions/stornieren": {
+      "post": {
+        "description": "Gegenbuchung ueber den Storno-Dienst; die Begruendung wird zur Bemerkung.",
+        "operationId": "action_lager_stornieren_api_v1_lager_stock_movements__entity_id__actions_stornieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lagerbewegung stornieren (SPEC-P1-04)",
+        "tags": [
+          "mask-actions"
         ]
       }
     },

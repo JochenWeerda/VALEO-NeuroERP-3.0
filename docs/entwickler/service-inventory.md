@@ -280,6 +280,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `vies_service` | VIES Service |
 | `voice_adapter` | Voice Adapter Layer — NC-003 |
 | `warehouse_service` | — |
+| `wareneingang_avis_service` | Wareneingang aus dem Anlieferavis — Bestellung beliefert, Ware im Lager. |
 | `webfleet_connect` | Aktuelle Fahrzeugpositionen über WEBFLEET.connect. |
 | `webhook_service` | Ausgehende Webhooks — die einzige Stelle, die die Anbindungen anfasst. |
 | `webshop_integration_service` | Service layer for B2B webshop order imports. |

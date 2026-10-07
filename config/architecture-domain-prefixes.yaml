@@ -624,6 +624,7 @@ exact_service_stems:
   workflow_guards: platform
   workflow_cockpit_service: platform
   einkauf_compat_service: procurement
+  wareneingang_avis_service: procurement
   kaeufergruppe: crm
 
 exact_endpoint_stems:
