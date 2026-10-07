@@ -1971,6 +1971,52 @@ weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
 ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
 waren.
 
+## BEWERBUNG-EINWILLIGUNG-MASKE-20261007 — in Arbeit, Claude Code
+
+**Auftrag:** Offenen Punkt 2 aus
+[Die Einwilligung zur laengeren Aufbewahrung](../quality-assurance/bewerbung-einwilligung-20261006.md)
+schliessen: Erteilen und Widerrufen sind nur ueber die API erreichbar, Fassungen
+anlegen ebenso. Art. 7 Abs. 3 DSGVO meint auch die **Zugaenglichkeit** — der
+Widerruf gehoert an eine Stelle, die das Personalbuero ohne Umwege findet.
+**User-Vorgabe:** keine handgebaute Maske, sondern Mask-Builder und Screen
+Definitions.
+
+**Weg (geprueft, warum so):** `UniversalNativeDetailPage` sammelt fuer Aktionen
+keine Eingaben (`inputFlow` ist im Frontend nur Dokumentation) und erwartet
+`ActionResult`-Antworten. Deshalb das bestehende **Capture-Muster** wie bei der
+Bewerbungen-Arbeitsliste und dem Fahrzeug-Stamm: SD im Backend-Register
+(`screen_definitions_capture.py`) und als Kopie in `masks/capture-screens.ts`,
+gerendert von `UniversalMaskRenderer` mit Formularzustand; die Seite liefert nur
+Daten, Auswahloptionen und Aktions-Handler — kein eigenes Feld- oder Tabellen-JSX.
+
+**Was gebaut wird:**
+* SD `personal/bewerbung-einwilligung` (objectPage, Route
+  `personal/bewerbung/:id/einwilligung`): Stand (laeuft bis / erteilt am),
+  Erteilen (Fassung als Auswahl aus den Fassungen, gueltig bis, Kanal,
+  erfasst durch; Wortlaut der gewaehlten Fassung zur Ansicht), Verzeichnis als
+  Tabelle. Aktionen Erteilen und Widerrufen — Widerruf mit **einem** Klick plus
+  Bestaetigung, ohne Grund und ohne Eingabe.
+* SD `personal/einwilligungserklaerungen` (worklist): Fassungen mit Wortlaut,
+  neue Fassung anlegen. Kein Bearbeiten, kein Loeschen (unveraenderlich).
+* Bewerbungen-Arbeitsliste: Zeilenaktion "Einwilligung" und Weg zu den Fassungen.
+
+**Dateibesitz:** `app/core/screen_definitions_capture.py` (zwei neue Builder, eine
+Zeilen-/Fussaktion im Bewerbungen-Builder), `app/core/screen_definitions.py` (nur
+Register-, Synonym- und Listenrouten-Eintraege der zwei SDs),
+`packages/frontend-web/src/masks/capture-screens.ts` (entsprechend),
+`src/lib/api/bewerbung-einwilligung.ts`, `src/pages/personal/bewerbung-einwilligung.tsx`,
+`src/pages/personal/einwilligungserklaerungen.tsx` (neu),
+`src/pages/personal/bewerbungen.tsx`, `src/app/route-aliases.json` plus generierte
+Routendateien, Navigationseintrag in `domains/operations.tsx`, neue Tests
+(`tests/test_bewerbung_einwilligung_masken.py`, Vitest unter
+`__tests__/pages/personal/`), eigene QA-Doku, Punkt 2 der Einwilligungs-QA-Doku.
+
+**Abnahme:** beide SDs `generatorReady`, Advisory 1,0, Governance ohne Fehler,
+UX-Lint ohne Fehler, Meridian-Regeln (kein technischer Schluessel im Kopf);
+Vitest: Erteilen schickt Fassung/Ende/Kanal, Widerruf schickt **keinen** Rumpf,
+Doppelklick-Schutz, Fehler sichtbar, Fassungsoptionen aus der API; Fassung
+anlegen mit 409-Hinweis auf vorhandene Nummer; tsc und Lint der neuen Dateien gruen.
+
 ## BEWERBUNG-ERKLAERUNG-FASSUNG-20261006 — abgeschlossen, Claude Code
 
 **Auftrag:** Offenen Punkt 4 aus
