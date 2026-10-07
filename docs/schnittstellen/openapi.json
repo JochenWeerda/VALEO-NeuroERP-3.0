@@ -20665,6 +20665,562 @@
         "title": "BestellungAusAuftragOut",
         "type": "object"
       },
+      "BestellungCreate": {
+        "properties": {
+          "abverkauf_horizont": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abverkauf Horizont"
+          },
+          "anfrage_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anfrage Nr"
+          },
+          "angebot_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Angebot Nr"
+          },
+          "ansprechpartner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ansprechpartner"
+          },
+          "artikelgruppe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikelgruppe"
+          },
+          "auftrag_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auftrag Nr"
+          },
+          "bedarfsmenge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bedarfsmenge"
+          },
+          "bestelldatum": {
+            "format": "date",
+            "title": "Bestelldatum",
+            "type": "string"
+          },
+          "bestellfall": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "bestand_abgleich",
+            "title": "Bestellfall"
+          },
+          "direktlieferung": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Direktlieferung"
+          },
+          "fracht_opt": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fracht Opt"
+          },
+          "freitext_fuss": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Freitext Fuss"
+          },
+          "freitext_kopf": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Freitext Kopf"
+          },
+          "fremdwaehrung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fremdwaehrung"
+          },
+          "ihre_referenz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ihre Referenz"
+          },
+          "incoterms": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Incoterms"
+          },
+          "innovationshinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Innovationshinweis"
+          },
+          "kommission": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kommission"
+          },
+          "kontrakt_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontrakt Id"
+          },
+          "kostenstelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kostenstelle"
+          },
+          "kreditor_konto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kreditor Konto"
+          },
+          "kunden_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunden Id"
+          },
+          "lade_datum": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lade Datum"
+          },
+          "ladetermin": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ladetermin"
+          },
+          "ladetermin_ab": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ladetermin Ab"
+          },
+          "lagerkosten_satz": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lagerkosten Satz"
+          },
+          "lagerplatz_opt": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lagerplatz Opt"
+          },
+          "lieferadresse": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferadresse"
+          },
+          "lieferant_id": {
+            "title": "Lieferant Id",
+            "type": "string"
+          },
+          "lieferant_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Nr"
+          },
+          "lieferdatum_wunsch": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferdatum Wunsch"
+          },
+          "lieferdatum_zugesagt": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferdatum Zugesagt"
+          },
+          "maximalbestellmenge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maximalbestellmenge"
+          },
+          "mindestbestellmenge": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mindestbestellmenge"
+          },
+          "netto_tage": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Netto Tage"
+          },
+          "neuer_artikel": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Neuer Artikel"
+          },
+          "niederlassung_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Niederlassung Id"
+          },
+          "notiz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notiz"
+          },
+          "opportunitaetskostensatz": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opportunitaetskostensatz"
+          },
+          "palettenstellplatz_kosten": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Palettenstellplatz Kosten"
+          },
+          "positionen": {
+            "default": [],
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Positionen",
+            "type": "array"
+          },
+          "skonto1_prozent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skonto1 Prozent"
+          },
+          "skonto1_tage": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skonto1 Tage"
+          },
+          "skonto2_prozent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skonto2 Prozent"
+          },
+          "skonto2_tage": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skonto2 Tage"
+          },
+          "ueberschlag_lager": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ueberschlag Lager"
+          },
+          "umrechnungsfaktor": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Umrechnungsfaktor"
+          },
+          "unsere_referenz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unsere Referenz"
+          },
+          "verkaufsbeleg_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verkaufsbeleg Id"
+          },
+          "versand_art": {
+            "default": "email",
+            "title": "Versand Art",
+            "type": "string"
+          },
+          "zahlungsbedingung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zahlungsbedingung"
+          }
+        },
+        "required": [
+          "lieferant_id",
+          "bestelldatum"
+        ],
+        "title": "BestellungCreate",
+        "type": "object"
+      },
       "BestellungTransitionIn": {
         "properties": {
           "new_status": {
@@ -20699,100 +21255,6 @@
           "new_status"
         ],
         "title": "BestellungTransitionIn",
-        "type": "object"
-      },
-      "BestellungUpdate": {
-        "properties": {
-          "bestelldatum": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bestelldatum"
-          },
-          "brutto_summe": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Brutto Summe"
-          },
-          "gewuenschtes_lieferdatum": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gewuenschtes Lieferdatum"
-          },
-          "lieferant_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lieferant Id"
-          },
-          "mwst_betrag": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mwst Betrag"
-          },
-          "netto_summe": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Netto Summe"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Status"
-          }
-        },
-        "title": "BestellungUpdate",
         "type": "object"
       },
       "BestellvorschlagOut": {
@@ -94118,6 +94580,524 @@
           "menge"
         ],
         "title": "LieferankuendigungRequest",
+        "type": "object"
+      },
+      "LieferantCreate": {
+        "properties": {
+          "ansprechpartner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ansprechpartner"
+          },
+          "bewertung": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bewertung"
+          },
+          "edi_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edi Format"
+          },
+          "edi_kennung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edi Kennung"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "email_bestellung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email Bestellung"
+          },
+          "fax": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fax"
+          },
+          "fax_bestellung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fax Bestellung"
+          },
+          "firmenname": {
+            "title": "Firmenname",
+            "type": "string"
+          },
+          "land": {
+            "default": "Deutschland",
+            "title": "Land",
+            "type": "string"
+          },
+          "lieferantennummer": {
+            "title": "Lieferantennummer",
+            "type": "string"
+          },
+          "lieferzeit_tage": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferzeit Tage"
+          },
+          "mindestbestellwert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mindestbestellwert"
+          },
+          "notiz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notiz"
+          },
+          "ort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ort"
+          },
+          "partner_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Id"
+          },
+          "plz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plz"
+          },
+          "skonto_prozent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skonto Prozent"
+          },
+          "steuernummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuernummer"
+          },
+          "strasse": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strasse"
+          },
+          "telefon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefon"
+          },
+          "ust_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ust Id"
+          },
+          "zahlungsbedingungen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zahlungsbedingungen"
+          },
+          "zahlungsziel_tage": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zahlungsziel Tage"
+          }
+        },
+        "required": [
+          "lieferantennummer",
+          "firmenname"
+        ],
+        "title": "LieferantCreate",
+        "type": "object"
+      },
+      "LieferantUpdate": {
+        "properties": {
+          "ansprechpartner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ansprechpartner"
+          },
+          "bewertung": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bewertung"
+          },
+          "edi_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edi Format"
+          },
+          "edi_kennung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edi Kennung"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "email_bestellung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email Bestellung"
+          },
+          "fax": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fax"
+          },
+          "fax_bestellung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fax Bestellung"
+          },
+          "firmenname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Firmenname"
+          },
+          "land": {
+            "default": "Deutschland",
+            "title": "Land",
+            "type": "string"
+          },
+          "lieferantennummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferantennummer"
+          },
+          "lieferzeit_tage": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferzeit Tage"
+          },
+          "mindestbestellwert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mindestbestellwert"
+          },
+          "notiz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notiz"
+          },
+          "ort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ort"
+          },
+          "partner_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Id"
+          },
+          "plz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plz"
+          },
+          "skonto_prozent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skonto Prozent"
+          },
+          "steuernummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuernummer"
+          },
+          "strasse": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strasse"
+          },
+          "telefon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telefon"
+          },
+          "ust_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ust Id"
+          },
+          "zahlungsbedingungen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zahlungsbedingungen"
+          },
+          "zahlungsziel_tage": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zahlungsziel Tage"
+          }
+        },
+        "title": "LieferantUpdate",
         "type": "object"
       },
       "LieferavisCreate": {
@@ -174799,1080 +175779,6 @@
         "title": "TransitionIn",
         "type": "object"
       },
-      "app__api__v1__endpoints__einkauf_bestellvorschlag__BestellungCreate": {
-        "properties": {
-          "abverkauf_horizont": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Abverkauf Horizont"
-          },
-          "anfrage_nr": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Anfrage Nr"
-          },
-          "angebot_nr": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Angebot Nr"
-          },
-          "ansprechpartner": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ansprechpartner"
-          },
-          "artikelgruppe": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Artikelgruppe"
-          },
-          "auftrag_nr": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Auftrag Nr"
-          },
-          "bedarfsmenge": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bedarfsmenge"
-          },
-          "bestelldatum": {
-            "format": "date",
-            "title": "Bestelldatum",
-            "type": "string"
-          },
-          "bestellfall": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "bestand_abgleich",
-            "title": "Bestellfall"
-          },
-          "direktlieferung": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Direktlieferung"
-          },
-          "fracht_opt": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fracht Opt"
-          },
-          "freitext_fuss": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Freitext Fuss"
-          },
-          "freitext_kopf": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Freitext Kopf"
-          },
-          "fremdwaehrung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fremdwaehrung"
-          },
-          "ihre_referenz": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ihre Referenz"
-          },
-          "incoterms": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Incoterms"
-          },
-          "innovationshinweis": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Innovationshinweis"
-          },
-          "kommission": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kommission"
-          },
-          "kontrakt_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kontrakt Id"
-          },
-          "kostenstelle": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kostenstelle"
-          },
-          "kreditor_konto": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kreditor Konto"
-          },
-          "kunden_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kunden Id"
-          },
-          "lade_datum": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lade Datum"
-          },
-          "ladetermin": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ladetermin"
-          },
-          "ladetermin_ab": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ladetermin Ab"
-          },
-          "lagerkosten_satz": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lagerkosten Satz"
-          },
-          "lagerplatz_opt": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lagerplatz Opt"
-          },
-          "lieferadresse": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lieferadresse"
-          },
-          "lieferant_id": {
-            "title": "Lieferant Id",
-            "type": "string"
-          },
-          "lieferant_nr": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lieferant Nr"
-          },
-          "lieferdatum_wunsch": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lieferdatum Wunsch"
-          },
-          "lieferdatum_zugesagt": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lieferdatum Zugesagt"
-          },
-          "maximalbestellmenge": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Maximalbestellmenge"
-          },
-          "mindestbestellmenge": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mindestbestellmenge"
-          },
-          "netto_tage": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Netto Tage"
-          },
-          "neuer_artikel": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Neuer Artikel"
-          },
-          "niederlassung_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Niederlassung Id"
-          },
-          "notiz": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notiz"
-          },
-          "opportunitaetskostensatz": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Opportunitaetskostensatz"
-          },
-          "palettenstellplatz_kosten": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Palettenstellplatz Kosten"
-          },
-          "positionen": {
-            "default": [],
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Positionen",
-            "type": "array"
-          },
-          "skonto1_prozent": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skonto1 Prozent"
-          },
-          "skonto1_tage": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skonto1 Tage"
-          },
-          "skonto2_prozent": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skonto2 Prozent"
-          },
-          "skonto2_tage": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skonto2 Tage"
-          },
-          "ueberschlag_lager": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ueberschlag Lager"
-          },
-          "umrechnungsfaktor": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Umrechnungsfaktor"
-          },
-          "unsere_referenz": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Unsere Referenz"
-          },
-          "verkaufsbeleg_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Verkaufsbeleg Id"
-          },
-          "versand_art": {
-            "default": "email",
-            "title": "Versand Art",
-            "type": "string"
-          },
-          "zahlungsbedingung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Zahlungsbedingung"
-          }
-        },
-        "required": [
-          "lieferant_id",
-          "bestelldatum"
-        ],
-        "title": "BestellungCreate",
-        "type": "object"
-      },
-      "app__api__v1__endpoints__einkauf_bestellvorschlag__LieferantCreate": {
-        "properties": {
-          "ansprechpartner": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ansprechpartner"
-          },
-          "bewertung": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bewertung"
-          },
-          "edi_format": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Edi Format"
-          },
-          "edi_kennung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Edi Kennung"
-          },
-          "email": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email"
-          },
-          "email_bestellung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email Bestellung"
-          },
-          "fax": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fax"
-          },
-          "fax_bestellung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fax Bestellung"
-          },
-          "firmenname": {
-            "title": "Firmenname",
-            "type": "string"
-          },
-          "land": {
-            "default": "Deutschland",
-            "title": "Land",
-            "type": "string"
-          },
-          "lieferantennummer": {
-            "title": "Lieferantennummer",
-            "type": "string"
-          },
-          "lieferzeit_tage": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lieferzeit Tage"
-          },
-          "mindestbestellwert": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mindestbestellwert"
-          },
-          "notiz": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notiz"
-          },
-          "ort": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ort"
-          },
-          "partner_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Partner Id"
-          },
-          "plz": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Plz"
-          },
-          "skonto_prozent": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skonto Prozent"
-          },
-          "steuernummer": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Steuernummer"
-          },
-          "strasse": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Strasse"
-          },
-          "telefon": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Telefon"
-          },
-          "ust_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ust Id"
-          },
-          "zahlungsbedingungen": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Zahlungsbedingungen"
-          },
-          "zahlungsziel_tage": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Zahlungsziel Tage"
-          }
-        },
-        "required": [
-          "lieferantennummer",
-          "firmenname"
-        ],
-        "title": "LieferantCreate",
-        "type": "object"
-      },
-      "app__api__v1__endpoints__einkauf_bestellvorschlag__LieferantUpdate": {
-        "properties": {
-          "ansprechpartner": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ansprechpartner"
-          },
-          "bewertung": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bewertung"
-          },
-          "edi_format": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Edi Format"
-          },
-          "edi_kennung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Edi Kennung"
-          },
-          "email": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email"
-          },
-          "email_bestellung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email Bestellung"
-          },
-          "fax": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fax"
-          },
-          "fax_bestellung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fax Bestellung"
-          },
-          "firmenname": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Firmenname"
-          },
-          "land": {
-            "default": "Deutschland",
-            "title": "Land",
-            "type": "string"
-          },
-          "lieferantennummer": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lieferantennummer"
-          },
-          "lieferzeit_tage": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lieferzeit Tage"
-          },
-          "mindestbestellwert": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mindestbestellwert"
-          },
-          "notiz": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notiz"
-          },
-          "ort": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ort"
-          },
-          "partner_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Partner Id"
-          },
-          "plz": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Plz"
-          },
-          "skonto_prozent": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skonto Prozent"
-          },
-          "steuernummer": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Steuernummer"
-          },
-          "strasse": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Strasse"
-          },
-          "telefon": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Telefon"
-          },
-          "ust_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ust Id"
-          },
-          "zahlungsbedingungen": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Zahlungsbedingungen"
-          },
-          "zahlungsziel_tage": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Zahlungsziel Tage"
-          }
-        },
-        "title": "LieferantUpdate",
-        "type": "object"
-      },
       "app__api__v1__endpoints__external_mock_harness__DsfinvkExportRequest": {
         "properties": {
           "abschluss_datum": {
@@ -182644,367 +182550,6 @@
           "payload"
         ],
         "title": "FollowRequest",
-        "type": "object"
-      },
-      "app__einkauf__schemas__BestellungCreate": {
-        "properties": {
-          "bestelldatum": {
-            "format": "date",
-            "title": "Bestelldatum",
-            "type": "string"
-          },
-          "bestellnummer": {
-            "title": "Bestellnummer",
-            "type": "string"
-          },
-          "brutto_summe": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Brutto Summe"
-          },
-          "erstellt_von": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Erstellt Von"
-          },
-          "gewuenschtes_lieferdatum": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gewuenschtes Lieferdatum"
-          },
-          "lieferant_id": {
-            "title": "Lieferant Id",
-            "type": "integer"
-          },
-          "mwst_betrag": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mwst Betrag"
-          },
-          "netto_summe": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Netto Summe"
-          },
-          "status": {
-            "default": "entwurf",
-            "title": "Status",
-            "type": "string"
-          }
-        },
-        "required": [
-          "bestellnummer",
-          "lieferant_id",
-          "bestelldatum"
-        ],
-        "title": "BestellungCreate",
-        "type": "object"
-      },
-      "app__einkauf__schemas__LieferantCreate": {
-        "properties": {
-          "aktiv": {
-            "default": true,
-            "title": "Aktiv",
-            "type": "boolean"
-          },
-          "ansprechpartner": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ansprechpartner"
-          },
-          "bewertung": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bewertung"
-          },
-          "email": {
-            "anyOf": [
-              {
-                "format": "email",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email"
-          },
-          "firmenname": {
-            "title": "Firmenname",
-            "type": "string"
-          },
-          "land": {
-            "default": "Deutschland",
-            "title": "Land",
-            "type": "string"
-          },
-          "lieferantennummer": {
-            "title": "Lieferantennummer",
-            "type": "string"
-          },
-          "lieferzeit_tage": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lieferzeit Tage"
-          },
-          "ort": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ort"
-          },
-          "plz": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Plz"
-          },
-          "strasse": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Strasse"
-          },
-          "telefon": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Telefon"
-          },
-          "zahlungsbedingungen": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Zahlungsbedingungen"
-          }
-        },
-        "required": [
-          "lieferantennummer",
-          "firmenname"
-        ],
-        "title": "LieferantCreate",
-        "type": "object"
-      },
-      "app__einkauf__schemas__LieferantUpdate": {
-        "properties": {
-          "aktiv": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Aktiv"
-          },
-          "ansprechpartner": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ansprechpartner"
-          },
-          "bewertung": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bewertung"
-          },
-          "email": {
-            "anyOf": [
-              {
-                "format": "email",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email"
-          },
-          "firmenname": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Firmenname"
-          },
-          "land": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Land"
-          },
-          "lieferzeit_tage": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lieferzeit Tage"
-          },
-          "ort": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ort"
-          },
-          "plz": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Plz"
-          },
-          "strasse": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Strasse"
-          },
-          "telefon": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Telefon"
-          },
-          "zahlungsbedingungen": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Zahlungsbedingungen"
-          }
-        },
-        "title": "LieferantUpdate",
         "type": "object"
       },
       "app__finance__schemas__KostenstelleCreate": {
@@ -286037,9 +285582,24 @@
     },
     "/api/v1/einkauf/bestellungen": {
       "get": {
-        "description": "Holt Bestellungsliste",
-        "operationId": "get_bestellungen_api_v1_einkauf_bestellungen_get",
+        "operationId": "list_bestellungen_api_v1_einkauf_bestellungen_get",
         "parameters": [
+          {
+            "in": "query",
+            "name": "lieferant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Lieferant Id"
+            }
+          },
           {
             "in": "query",
             "name": "status",
@@ -286058,38 +285618,36 @@
           },
           {
             "in": "query",
-            "name": "lieferant_id",
+            "name": "von",
             "required": false,
             "schema": {
               "anyOf": [
                 {
-                  "type": "integer"
+                  "format": "date",
+                  "type": "string"
                 },
                 {
                   "type": "null"
                 }
               ],
-              "title": "Lieferant Id"
+              "title": "Von"
             }
           },
           {
             "in": "query",
-            "name": "skip",
+            "name": "bis",
             "required": false,
             "schema": {
-              "default": 0,
-              "title": "Skip",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 100,
-              "title": "Limit",
-              "type": "integer"
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Bis"
             }
           },
           {
@@ -286114,9 +285672,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Bestellungen Api V1 Einkauf Bestellungen Get",
-                  "type": "object"
+                  "items": {
+                    "$ref": "#/components/schemas/BestellvorschlagOut"
+                  },
+                  "title": "Response List Bestellungen Api V1 Einkauf Bestellungen Get",
+                  "type": "array"
                 }
               }
             },
@@ -286133,14 +285693,22 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Get Bestellungen",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellungen auflisten",
         "tags": [
-          "Einkauf",
-          "Einkauf"
+          "einkauf",
+          "bestellvorschlag",
+          "kontrakte",
+          "lager-konten",
+          "einkauf",
+          "bestellvorschlag"
         ]
       },
       "post": {
-        "description": "Erstellt neue Bestellung",
         "operationId": "create_bestellung_api_v1_einkauf_bestellungen_post",
         "parameters": [
           {
@@ -286164,7 +285732,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__einkauf__schemas__BestellungCreate"
+                "$ref": "#/components/schemas/BestellungCreate"
               }
             }
           },
@@ -286174,7 +285742,9 @@
           "201": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/BestellvorschlagOut"
+                }
               }
             },
             "description": "Successful Response"
@@ -286190,10 +285760,19 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Create Bestellung",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellung anlegen",
         "tags": [
-          "Einkauf",
-          "Einkauf"
+          "einkauf",
+          "bestellvorschlag",
+          "kontrakte",
+          "lager-konten",
+          "einkauf",
+          "bestellvorschlag"
         ]
       }
     },
@@ -286394,7 +285973,6 @@
         ]
       },
       "get": {
-        "description": "Holt einzelne Bestellung",
         "operationId": "get_bestellung_api_v1_einkauf_bestellungen__bestellung_id__get",
         "parameters": [
           {
@@ -286403,7 +285981,7 @@
             "required": true,
             "schema": {
               "title": "Bestellung Id",
-              "type": "integer"
+              "type": "string"
             }
           },
           {
@@ -286427,7 +286005,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/EinkaufBestellungOut"
+                }
               }
             },
             "description": "Successful Response"
@@ -286443,14 +286023,22 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Get Bestellung",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellung abrufen",
         "tags": [
-          "Einkauf",
-          "Einkauf"
+          "einkauf",
+          "bestellvorschlag",
+          "kontrakte",
+          "lager-konten",
+          "einkauf",
+          "bestellvorschlag"
         ]
       },
       "put": {
-        "description": "Aktualisiert Bestellung",
         "operationId": "update_bestellung_api_v1_einkauf_bestellungen__bestellung_id__put",
         "parameters": [
           {
@@ -286459,7 +286047,7 @@
             "required": true,
             "schema": {
               "title": "Bestellung Id",
-              "type": "integer"
+              "type": "string"
             }
           },
           {
@@ -286483,7 +286071,9 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BestellungUpdate"
+                "additionalProperties": true,
+                "title": "Data",
+                "type": "object"
               }
             }
           },
@@ -286493,7 +286083,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/BestellvorschlagOut"
+                }
               }
             },
             "description": "Successful Response"
@@ -286509,10 +286101,19 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Update Bestellung",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellung aktualisieren",
         "tags": [
-          "Einkauf",
-          "Einkauf"
+          "einkauf",
+          "bestellvorschlag",
+          "kontrakte",
+          "lager-konten",
+          "einkauf",
+          "bestellvorschlag"
         ]
       }
     },
@@ -290730,9 +290331,24 @@
     },
     "/api/v1/einkauf/lieferanten": {
       "get": {
-        "description": "Holt Lieferantenliste",
-        "operationId": "get_lieferanten_api_v1_einkauf_lieferanten_get",
+        "operationId": "list_lieferanten_api_v1_einkauf_lieferanten_get",
         "parameters": [
+          {
+            "in": "query",
+            "name": "suche",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Suche"
+            }
+          },
           {
             "in": "query",
             "name": "aktiv",
@@ -290747,26 +290363,6 @@
                 }
               ],
               "title": "Aktiv"
-            }
-          },
-          {
-            "in": "query",
-            "name": "skip",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "title": "Skip",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 100,
-              "title": "Limit",
-              "type": "integer"
             }
           },
           {
@@ -290791,9 +290387,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Lieferanten Api V1 Einkauf Lieferanten Get",
-                  "type": "object"
+                  "items": {
+                    "$ref": "#/components/schemas/BestellvorschlagOut"
+                  },
+                  "title": "Response List Lieferanten Api V1 Einkauf Lieferanten Get",
+                  "type": "array"
                 }
               }
             },
@@ -290810,14 +290408,22 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Get Lieferanten",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lieferanten auflisten",
         "tags": [
-          "Einkauf",
-          "Einkauf"
+          "einkauf",
+          "bestellvorschlag",
+          "kontrakte",
+          "lager-konten",
+          "einkauf",
+          "bestellvorschlag"
         ]
       },
       "post": {
-        "description": "Erstellt neuen Lieferanten",
         "operationId": "create_lieferant_api_v1_einkauf_lieferanten_post",
         "parameters": [
           {
@@ -290841,7 +290447,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__einkauf__schemas__LieferantCreate"
+                "$ref": "#/components/schemas/LieferantCreate"
               }
             }
           },
@@ -290851,7 +290457,9 @@
           "201": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/BestellvorschlagOut"
+                }
               }
             },
             "description": "Successful Response"
@@ -290867,10 +290475,19 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Create Lieferant",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lieferant anlegen",
         "tags": [
-          "Einkauf",
-          "Einkauf"
+          "einkauf",
+          "bestellvorschlag",
+          "kontrakte",
+          "lager-konten",
+          "einkauf",
+          "bestellvorschlag"
         ]
       }
     },
@@ -290932,7 +290549,6 @@
         ]
       },
       "get": {
-        "description": "Holt einzelnen Lieferanten",
         "operationId": "get_lieferant_api_v1_einkauf_lieferanten__lieferant_id__get",
         "parameters": [
           {
@@ -290941,7 +290557,7 @@
             "required": true,
             "schema": {
               "title": "Lieferant Id",
-              "type": "integer"
+              "type": "string"
             }
           },
           {
@@ -290965,7 +290581,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/EinkaufLieferantOut"
+                }
               }
             },
             "description": "Successful Response"
@@ -290981,14 +290599,22 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Get Lieferant",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lieferant abrufen",
         "tags": [
-          "Einkauf",
-          "Einkauf"
+          "einkauf",
+          "bestellvorschlag",
+          "kontrakte",
+          "lager-konten",
+          "einkauf",
+          "bestellvorschlag"
         ]
       },
       "put": {
-        "description": "Aktualisiert Lieferanten",
         "operationId": "update_lieferant_api_v1_einkauf_lieferanten__lieferant_id__put",
         "parameters": [
           {
@@ -290997,7 +290623,7 @@
             "required": true,
             "schema": {
               "title": "Lieferant Id",
-              "type": "integer"
+              "type": "string"
             }
           },
           {
@@ -291021,7 +290647,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__einkauf__schemas__LieferantUpdate"
+                "$ref": "#/components/schemas/LieferantUpdate"
               }
             }
           },
@@ -291031,7 +290657,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/BestellvorschlagOut"
+                }
               }
             },
             "description": "Successful Response"
@@ -291047,10 +290675,19 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Update Lieferant",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lieferant aktualisieren",
         "tags": [
-          "Einkauf",
-          "Einkauf"
+          "einkauf",
+          "bestellvorschlag",
+          "kontrakte",
+          "lager-konten",
+          "einkauf",
+          "bestellvorschlag"
         ]
       }
     },

@@ -56,3 +56,36 @@ def test_affected_modules_have_no_duplicate_method_paths():
                 grouped[(method, route.path)].append(route.endpoint.__qualname__)
     duplicates = {key: handlers for key, handlers in grouped.items() if len(handlers) > 1}
     assert duplicates == {}, duplicates
+
+
+@pytest.mark.parametrize("name", [
+    "list_lieferanten", "get_lieferant", "create_lieferant", "update_lieferant",
+    "list_bestellungen", "get_bestellung", "create_bestellung", "update_bestellung",
+])
+def test_purchasing_handlers_and_published_contract_are_canonical(name):
+    from fastapi.openapi.utils import get_openapi
+
+    module = import_module("app.api.v1.endpoints.einkauf_bestellvorschlag")
+    expected = next(r for r in module.router.routes if r.endpoint is getattr(module, name))
+    path = settings.API_V1_STR + expected.path
+    method, = expected.methods
+    matches = [r for r in app.routes if isinstance(r, APIRoute)
+               and r.path == path and method in r.methods]
+    assert len(matches) == 1, (method, path)
+    actual = matches[0]
+    assert actual.endpoint is expected.endpoint
+    assert actual.response_model == expected.response_model
+    assert actual.status_code == expected.status_code
+    assert dependency_calls(expected.dependant) <= dependency_calls(actual.dependant)
+    isolated = get_openapi(title="contract", version="1", routes=[actual])
+    assert app.openapi()["paths"][path][method.lower()] == isolated["paths"][path][method.lower()]
+
+
+@pytest.mark.parametrize("kind", ["lieferanten", "bestellungen"])
+def test_unique_purchasing_delete_routes_remain_mounted(kind):
+    singular = {"lieferanten": "lieferant", "bestellungen": "bestellung"}[kind]
+    path = settings.API_V1_STR + f"/einkauf/{kind}/{{{singular}_id}}"
+    matches = [r for r in app.routes if isinstance(r, APIRoute)
+               and r.path == path and "DELETE" in r.methods]
+    assert len(matches) == 1
+    assert matches[0].endpoint is getattr(import_module("app.einkauf.router"), f"delete_{singular}")
