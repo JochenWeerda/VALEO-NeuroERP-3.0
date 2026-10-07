@@ -409,7 +409,7 @@ export const logistikFrachtbriefScreen = {
     kind: 'primary',
     dangerLevel: 'safe',
     zone: 'header',
-    stubReason: 'Oeffnet die Verladung. Dort entsteht der Frachtbrief.',
+    navigationRoute: '/verladung',
   }],
   tables: [{
     key: 'list',
@@ -450,7 +450,7 @@ export const logistikVerladungScreen = {
     kind: 'primary',
     dangerLevel: 'safe',
     zone: 'header',
-    stubReason: 'Oeffnet die bestehende LKW-Beladung.',
+    navigationRoute: '/verladung/lkw-beladung',
   }],
   tables: [{
     key: 'list',
@@ -684,10 +684,10 @@ export const tourFrachtArbeitsraumScreen = {
   ],
   workflow: { processKey: 'logistik.tour-fracht-arbeitsraum' },
   actions: [
-    { key: 'touren', label: 'Zur Tourenplanung', kind: 'secondary', dangerLevel: 'safe', zone: 'header', stubReason: 'Wechselt in die Tourenplanung.' },
-    { key: 'fracht', label: 'Zu Frachtbriefen', kind: 'secondary', dangerLevel: 'safe', zone: 'header', stubReason: 'Wechselt zu den Frachtbriefen.' },
-    { key: 'tabellen', label: 'Frachttabellen', kind: 'secondary', dangerLevel: 'safe', zone: 'header', stubReason: 'Oeffnet die Frachttabellen.' },
-    { key: 'probe', label: 'Probe berechnen', kind: 'primary', dangerLevel: 'safe', zone: 'footer', stubReason: 'Simuliert die Frachtkosten des ersten aktiven Tarifs.' },
+    { key: 'touren', label: 'Zur Tourenplanung', kind: 'secondary', dangerLevel: 'safe', zone: 'header', navigationRoute: '/logistik/tourenplanung' },
+    { key: 'fracht', label: 'Zu Frachtbriefen', kind: 'secondary', dangerLevel: 'safe', zone: 'header', navigationRoute: '/logistik/frachtbriefe' },
+    { key: 'tabellen', label: 'Frachttabellen', kind: 'secondary', dangerLevel: 'safe', zone: 'header', navigationRoute: '/logistik/frachttabellen' },
+    { key: 'probe', label: 'Probe berechnen', kind: 'primary', dangerLevel: 'safe', zone: 'footer', command: 'fracht.calculateProbe', forbiddenForAgents: true },
   ],
   tables: [
     {
@@ -781,8 +781,8 @@ export const frachttabellenScreen = {
     { key: 'positionen', label: 'Positionen', value: '0' },
   ],
   actions: [
-    { key: 'anlegen', label: 'Tabelle speichern', kind: 'primary', dangerLevel: 'safe', zone: 'header', stubReason: 'Legt die Frachttabelle an.' },
-    { key: 'position', label: 'Position anlegen', kind: 'secondary', dangerLevel: 'safe', zone: 'footer', stubReason: 'Haengt eine Staffelposition an die gewaehlte Tabelle.' },
+    { key: 'anlegen', label: 'Tabelle speichern', kind: 'primary', dangerLevel: 'safe', zone: 'header', command: 'fracht.createTable', forbiddenForAgents: true },
+    { key: 'position', label: 'Position anlegen', kind: 'secondary', dangerLevel: 'safe', zone: 'footer', command: 'fracht.addPosition', forbiddenForAgents: true },
   ],
   tables: [
     {

@@ -31,21 +31,6 @@ BEKANNTE_LUECKEN = {
 }
 
 
-#: Vorbestehend: Die Seite fuehrt diese Aktionen ueber ihren Schluessel aus
-#: (``if key === ...``), die SD deklariert aber kein ``command``. Keine Luecke im
-#: Fachweg, eine in der Deklaration. Nur schrumpfen (``command`` nachtragen).
-SEITENAKTIONEN_OHNE_BEFEHL = {
-    "logistik/frachtbrief/verladung",
-    "logistik/frachttabellen/anlegen",
-    "logistik/frachttabellen/position",
-    "logistik/tour-fracht-arbeitsraum/fracht",
-    "logistik/tour-fracht-arbeitsraum/probe",
-    "logistik/tour-fracht-arbeitsraum/tabellen",
-    "logistik/tour-fracht-arbeitsraum/touren",
-    "logistik/verladung/neu",
-}
-
-
 def valid_input_flow(action: dict) -> bool:
     flow = action.get("inputFlow")
     return bool(
@@ -75,7 +60,7 @@ def main() -> int:
                 action.get("commandEndpoint") or action.get("command")
                 or action.get("navigationRoute") or valid_input_flow(action)
             )
-            erlaubt = BEKANNTE_LUECKEN | SEITENAKTIONEN_OHNE_BEFEHL
+            erlaubt = BEKANNTE_LUECKEN
             if action.get("stubReason") and not hat_weg and f"{screen_id}/{key}" not in erlaubt:
                 violations.append(f"{screen_id}/{key}: neue Luecke ohne Weg, stubReason={action['stubReason']!r}")
             if f"{screen_id}/{key}" in erlaubt and hat_weg:

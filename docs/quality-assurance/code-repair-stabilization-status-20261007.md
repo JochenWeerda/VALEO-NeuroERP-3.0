@@ -18,6 +18,18 @@ Wave-Statusdateien. Aktiver Dateibesitz steht im
 
 ## Aktuelle Abnahme statt historischer Testzahlen
 
+[Logistik-Aktionsdeklarationen](logistics-action-declarations-20261007.md): alle
+acht Seitenaktionen mit echten Navigations-/Callback-Wegen im Backend und
+Fallback versehen; acht historische Ausnahmen entfernt. 791 Backendvertraege,
+33 Frontendpruefungen und Handbuch gruen. Zwei echte Fachluecken bleiben fremd.
+
+Neue GitHub-Evidenz: auf `79a0ed571` E2E-Smoke, PostgreSQL und kritische Pfade
+gruen, alle sechs neuen Node-Behavior-Vertraege sowie Grype/Trivy/ZAP/Bandit
+gruen. Security bleibt ausschliesslich wegen der zwei Node-High-Befunde rot.
+Docs-Inventardrift dieses Laufs mit `d482809de` geschlossen: OpenAPI-Drift,
+Docs Build/Governance und PostgreSQL dort bereits gruen. Vollpipeline/Quality
+weiter nachweisen; kein pauschaler Gruenstatus.
+
 [Schnittstellenintegration](domain-interface-integration-20261007.md): vier echte
 Fachaktionspfade nachgezogen, keine Pfade entfernt; OpenAPI 3101 Pfade, drei
 Inventare und kompletter Architekturindex (935/275/454) aktuell. 24
@@ -65,7 +77,7 @@ Dies schliesst andere rote Gates nicht automatisch.
 
 | Prioritaet | Offen / naechster Nachweis | Evidenz / Besitz |
 |---|---|---|
-| P0 | Security Scan: Production-Audit und Backend-Grype | [Run 37610643700](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/37610643700): node-forge/braces weiter high, Grype `--only-fixed --fail-on high` rot. Kein Ignore oder abgesenkter Schwellwert. |
+| P0 | Security Scan: zwei Node-High-Befunde ohne Herstellerfix | [Run 37647442109](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/37647442109): sechs Behavior-Vertraege, Grype/Trivy/ZAP/Bandit gruen; Audit bleibt fuer node-forge/braces rot. Kein Ignore oder abgesenkter Schwellwert. |
 | P0 | Verbleibende echte Fachaktionswege und globale Belegnummernkanonisierung | Die vier Mandanten-/Mutationsbefunde sind laut Workboard geliefert; Opportunities einschliesslich Pipeline/Forecast tenantgebunden. Lokale Teilintegration 71 Tests gruen. `MANDANT-FINANZ-CRM-EINKAUF-20261007` bleibt bei Claude fuer Lead-Qualifizierung und echte Ernte-PDF-Ablage offen; nicht doppelt bearbeiten. Globale `documents.doc_number`-Eindeutigkeit bleibt ausserhalb dieses Fachclaims offen. |
 | P1 | Frische Backend-Vollsuite abnehmen | Die historischen elf Fehler sind lokal durch 813 plus 71 gezielte Vertraege abgedeckt. [PostgreSQL-Lauf auf c466af7de](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/37644389765) gruen; dies ersetzt die weiterhin ausstehende komplette Pipeline-Abnahme nicht. |
 | P1 | Frisches Frontend-Quality Gate abnehmen | Schulungen-Delegation und Titelduplikate lokal mit 38 Tests plus TypeScript geschlossen. [Quality auf c466af7de](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/37644390353) wegen Folgepush abgebrochen; kein neuer erfolgreicher Vollnachweis. Fremde Renderer-WIP erhalten. |
