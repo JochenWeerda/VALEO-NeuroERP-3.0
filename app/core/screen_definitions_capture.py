@@ -626,7 +626,7 @@ def build_logistik_frachtbrief_screen_definition() -> dict[str, Any]:
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
-                "stubReason": "Oeffnet die Verladung. Dort entsteht der Frachtbrief.",
+                "navigationRoute": "/verladung",
             },
         ],
         "tables": [
@@ -689,7 +689,7 @@ def build_logistik_verladung_screen_definition() -> dict[str, Any]:
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
-                "stubReason": "Oeffnet die bestehende LKW-Beladung.",
+                "navigationRoute": "/verladung/lkw-beladung",
             },
         ],
         "tables": [
@@ -997,7 +997,7 @@ def build_logistik_tour_fracht_arbeitsraum_screen_definition() -> dict[str, Any]
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "header",
-                "stubReason": "Wechselt in die Tourenplanung.",
+                "navigationRoute": "/logistik/tourenplanung",
             },
             {
                 "key": "fracht",
@@ -1005,7 +1005,7 @@ def build_logistik_tour_fracht_arbeitsraum_screen_definition() -> dict[str, Any]
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "header",
-                "stubReason": "Wechselt zu den Frachtbriefen.",
+                "navigationRoute": "/logistik/frachtbriefe",
             },
             {
                 "key": "tabellen",
@@ -1013,7 +1013,7 @@ def build_logistik_tour_fracht_arbeitsraum_screen_definition() -> dict[str, Any]
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "header",
-                "stubReason": "Oeffnet die Frachttabellen.",
+                "navigationRoute": "/logistik/frachttabellen",
             },
             {
                 "key": "probe",
@@ -1021,7 +1021,8 @@ def build_logistik_tour_fracht_arbeitsraum_screen_definition() -> dict[str, Any]
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "footer",
-                "stubReason": "Simuliert die Frachtkosten des ersten aktiven Tarifs.",
+                "command": "fracht.calculateProbe",
+                "forbiddenForAgents": True,
             },
         ],
         "tables": [
@@ -1147,7 +1148,8 @@ def build_logistik_frachttabellen_screen_definition() -> dict[str, Any]:
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
-                "stubReason": "Legt die Frachttabelle an.",
+                "command": "fracht.createTable",
+                "forbiddenForAgents": True,
             },
             {
                 "key": "position",
@@ -1155,7 +1157,8 @@ def build_logistik_frachttabellen_screen_definition() -> dict[str, Any]:
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "footer",
-                "stubReason": "Haengt eine Staffelposition an die gewaehlte Tabelle.",
+                "command": "fracht.addPosition",
+                "forbiddenForAgents": True,
             },
         ],
         "tables": [

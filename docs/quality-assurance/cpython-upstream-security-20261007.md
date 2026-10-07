@@ -46,7 +46,10 @@ fuehren die vollstaendige Behavior-Pruefung aus.
   3.13.16-Quelle; SHA256 `efec029f5da02b71f709ec26a2b1abb45ab5e754f230d4bebc0f6a21192c23a5`.
 - Kein Image-Pull, Docker-Build, neuer Container, DB-Test, Reset oder Migration.
 
-Linux-Imagebau und aktueller Grype-Scan bleiben im bestehenden Security-Workflow
-nachzuweisen. Die lokale Windows-Abnahme ersetzt diese nicht. Ein offener alter
+Linux-Imagebau und aktueller Grype-Scan sind inzwischen im
+[Security-Lauf auf 79a0ed571](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/37647442109)
+gruen; auch Trivy, ZAP und Bandit bestanden. Der Build fuehrt die fuenf
+Runtime-Vertraege in beiden Stages aus. Der Gesamtstatus bleibt wegen der
+zwei ungepatchten Node-High-Befunde rot. Ein offener alter
 Code-Scanning-Alert ist kein Nachweis fuer das neu gebaute Image. Node-Audit und
 weitere Security-Befunde sind mit diesem Interpreterfix nicht geschlossen.

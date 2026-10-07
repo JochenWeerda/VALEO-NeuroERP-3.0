@@ -71,6 +71,12 @@ bleibt im bestehenden CI. Keine neue Datenbank, Dockerinstanz oder Imagekopie.
 
 ## Offen: zwei High-Befunde
 
+Im [Security-CI auf 79a0ed571](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/37647442109)
+bestanden frozen Installation und alle sechs neuen Behavior-Vertraege. Node-Audit
+scheitert ausschliesslich an den zwei folgenden High-Befunden; Linux-Imagebau,
+Grype, Trivy, ZAP und Bandit sind gruen. Der Gesamtstatus wird weiterhin rot
+ausgewiesen. Damit ist auch die pnpm-Aufloesung im echten CI belegt.
+
 [node-forge](https://github.com/advisories/GHSA-86w9-cpqp-85rv) bis 1.4.0 und
 [braces](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) bis 3.0.3 haben
 laut aktuell abgefragtem Advisory keinen Herstellerfix. Die zwei High-Befunde

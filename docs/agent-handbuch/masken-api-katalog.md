@@ -2606,7 +2606,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `verladung` | Zur Verladung | safe | nein | `Oeffnet die Verladung. Dort entsteht der Frachtbrief.` |
+| `verladung` | Zur Verladung | safe | nein | `—` |
 
 ---
 
@@ -2634,8 +2634,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `anlegen` | Tabelle speichern | safe | nein | `Legt die Frachttabelle an.` |
-| `position` | Position anlegen | safe | nein | `Haengt eine Staffelposition an die gewaehlte Tabelle.` |
+| `anlegen` | Tabelle speichern | safe | nein | `—` |
+| `position` | Position anlegen | safe | nein | `—` |
 
 ---
 
@@ -2665,10 +2665,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `touren` | Zur Tourenplanung | safe | nein | `Wechselt in die Tourenplanung.` |
-| `fracht` | Zu Frachtbriefen | safe | nein | `Wechselt zu den Frachtbriefen.` |
-| `tabellen` | Frachttabellen | safe | nein | `Oeffnet die Frachttabellen.` |
-| `probe` | Probe berechnen | safe | nein | `Simuliert die Frachtkosten des ersten aktiven Tarifs.` |
+| `touren` | Zur Tourenplanung | safe | nein | `—` |
+| `fracht` | Zu Frachtbriefen | safe | nein | `—` |
+| `tabellen` | Frachttabellen | safe | nein | `—` |
+| `probe` | Probe berechnen | safe | nein | `—` |
 
 ---
 
@@ -2728,7 +2728,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `neu` | Neue Beladung | safe | nein | `Oeffnet die bestehende LKW-Beladung.` |
+| `neu` | Neue Beladung | safe | nein | `—` |
 
 ---
 

@@ -3287,7 +3287,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Oeffnet die Verladung. Dort entsteht der Frachtbrief."
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -3313,7 +3313,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Legt die Frachttabelle an."
+          "stubReason": null
         },
         {
           "key": "position",
@@ -3324,7 +3324,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Haengt eine Staffelposition an die gewaehlte Tabelle."
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -3350,7 +3350,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Wechselt in die Tourenplanung."
+          "stubReason": null
         },
         {
           "key": "fracht",
@@ -3361,7 +3361,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Wechselt zu den Frachtbriefen."
+          "stubReason": null
         },
         {
           "key": "tabellen",
@@ -3372,7 +3372,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Oeffnet die Frachttabellen."
+          "stubReason": null
         },
         {
           "key": "probe",
@@ -3383,7 +3383,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Simuliert die Frachtkosten des ersten aktiven Tarifs."
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -3457,7 +3457,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Oeffnet die bestehende LKW-Beladung."
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
