@@ -253,6 +253,7 @@ jobs:
       - name: Run Node dependency audit
         run: |
           pnpm install --frozen-lockfile
+          node --test scripts/verify_node_security_releases.cjs
           pnpm audit --prod --audit-level high
 
       - name: Upload dependency report

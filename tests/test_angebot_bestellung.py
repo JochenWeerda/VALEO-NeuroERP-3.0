@@ -28,6 +28,7 @@ os.environ.setdefault("API_DEV_TOKEN", "dev-token")
 
 HAUS_A = f"an-a-{uuid.uuid4().hex[:6]}"
 HAUS_B = f"an-b-{uuid.uuid4().hex[:6]}"
+LIEFERANT = str(uuid.uuid4())
 WEG = "/api/v1/einkauf/angebote"
 AKTION = "/api/v1/einkauf/angebote/{}/actions/bestellen"
 
@@ -50,8 +51,10 @@ def aufraeumen(engine):
 
     with engine.begin() as v:
         v.execute(text(
-            "DELETE FROM documents WHERE doc_type = 'purchase_order' AND data::jsonb->>'tenantId' = ANY(:h)"
+            "DELETE FROM domain_einkauf.bestellung_positionen WHERE bestellung_id IN "
+            "(SELECT id FROM domain_einkauf.bestellungen WHERE tenant_id = ANY(:h))"
         ), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text(
             "DELETE FROM einkauf_angebote_positionen WHERE angebot_id IN "
             "(SELECT id FROM einkauf_angebote WHERE tenant_id = ANY(:h))"
@@ -69,8 +72,12 @@ def haeuser(engine):
         for haus in (HAUS_A, HAUS_B):
             v.execute(text("INSERT INTO domain_shared.tenants (id, name) VALUES (:i, :n) ON CONFLICT (id) DO NOTHING"),
                       {"i": haus, "n": f"Pruefbetrieb {haus}"})
+        v.execute(text("INSERT INTO domain_einkauf.lieferanten (id, tenant_id, lieferantennummer, firmenname) "
+                       "VALUES (:i, :h, :n, 'Saatzucht Nord')"), {"i": LIEFERANT, "h": HAUS_A, "n": f"LF-{LIEFERANT[:6]}"})
     yield
     aufraeumen(engine)
+    with engine.begin() as v:
+        v.execute(text("DELETE FROM domain_einkauf.lieferanten WHERE id = :i"), {"i": LIEFERANT})
 
 
 @pytest.fixture(autouse=True)
@@ -100,8 +107,8 @@ def angebot(engine, haus: str, status: str = "offen", positionen: int = 2) -> st
         v.execute(text(
             "INSERT INTO einkauf_angebote (id, tenant_id, lieferant_id, lieferant_name, angebotsnummer, "
             " gueltig_bis, gesamtbetrag, status) "
-            "VALUES (:i, :h, 'L-7', 'Saatzucht Nord', :nr, CURRENT_DATE + 30, 1250, :s)"
-        ), {"i": kennung, "h": haus, "nr": f"AN-{kennung[:6]}", "s": status})
+            "VALUES (:i, :h, :l, 'Saatzucht Nord', :nr, CURRENT_DATE + 30, 1250, :s)"
+        ), {"i": kennung, "h": haus, "l": LIEFERANT, "nr": f"AN-{kennung[:6]}", "s": status})
         for nr in range(1, positionen + 1):
             v.execute(text(
                 "INSERT INTO einkauf_angebote_positionen (id, angebot_id, pos_nr, artikel_nr, bezeichnung, "
@@ -113,13 +120,21 @@ def angebot(engine, haus: str, status: str = "offen", positionen: int = 2) -> st
 
 
 def bestellungen(engine, haus: str) -> list[dict]:
+    """Die kanonischen Bestellungen (domain_einkauf) - dort liest die Bestellungs-Maske."""
     from sqlalchemy import text
 
     with engine.connect() as v:
-        zeilen = v.execute(text(
-            "SELECT data FROM documents WHERE doc_type = 'purchase_order' AND data::jsonb->>'tenantId' = :h"
-        ), {"h": haus}).scalars().all()
-    return [z if isinstance(z, dict) else json.loads(z) for z in zeilen]
+        koepfe = v.execute(text(
+            "SELECT id, lieferant_id, angebot_nr FROM domain_einkauf.bestellungen WHERE tenant_id = :h"
+        ), {"h": haus}).mappings().all()
+        ergebnis = []
+        for kopf in koepfe:
+            posten = v.execute(text(
+                "SELECT artikel_bezeichnung AS description, menge AS quantity, einzelpreis AS \"unitPrice\", "
+                "menge_offen FROM domain_einkauf.bestellung_positionen WHERE bestellung_id = :b ORDER BY pos_nr"
+            ), {"b": kopf["id"]}).mappings().all()
+            ergebnis.append({**dict(kopf), "items": [dict(p) for p in posten]})
+    return ergebnis
 
 
 def status(engine, kennung: str) -> str:
@@ -154,6 +169,10 @@ class TestUmwandlung:
         (bestellung,) = bestellungen(engine, HAUS_A)
         posten = [(i["description"], float(i["quantity"]), float(i["unitPrice"])) for i in bestellung["items"]]
         assert posten == [("Saatweizen Sorte 1", 10.0, 25.0), ("Saatweizen Sorte 2", 20.0, 25.0)]
+        # Kanonisch: mit Lieferant, Angebotsbezug und offener Menge fuer den Wareneingang.
+        assert str(bestellung["lieferant_id"]) == LIEFERANT
+        assert bestellung["angebot_nr"] == f"AN-{kennung[:6]}"
+        assert [float(p["menge_offen"]) for p in bestellung["items"]] == [10.0, 20.0]
         assert status(engine, kennung) == "IN_BESTELLUNG"
 
     def test_kein_zweites_mal(self, engine, client):
@@ -219,3 +238,15 @@ def test_nicht_gefunden_hat_immer_entitaet_und_kennung():
                     == "EntityNotFoundError" and len(knoten.args) + len(knoten.keywords) != 2):
                 falsch.append(f"{datei}:{knoten.lineno}")
     assert falsch == []
+
+
+class TestOhneLieferant:
+    def test_ohne_lieferant_keine_bestellung(self, engine, client):
+        from sqlalchemy import text
+
+        kennung = angebot(engine, HAUS_A)
+        with engine.begin() as v:
+            v.execute(text("UPDATE einkauf_angebote SET lieferant_id = NULL WHERE id = :i"), {"i": kennung})
+        antwort = client.post(f"{WEG}/{kennung}/convert-to-order", headers=kopf(HAUS_A))
+        assert antwort.status_code == 422, antwort.text
+        assert bestellungen(engine, HAUS_A) == []

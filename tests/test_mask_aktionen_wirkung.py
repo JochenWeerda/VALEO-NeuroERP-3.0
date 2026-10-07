@@ -48,7 +48,6 @@ AP_FREIGABE = "/api/v1/finance/ap/invoices/{}/actions/freigeben"
 #: Aktionen ohne Fachweg — Pfad und warum.
 OHNE_FACHWEG = {
     "/api/v1/crm/leads/{entity_id}/actions/qualifizieren": "crm/lead",
-    "/api/v1/lager/artikel/{entity_id}/actions/wareneingang": "einkauf/anlieferavis",
     "/api/v1/agrar/harvest-settlements/{entity_id}/actions/drucken": "agrar/harvest-settlement",
 }
 

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from ....core.config import settings
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....infrastructure.models import Warehouse as WarehouseModel
 from ....api.v1.schemas.base import PaginatedResponse
 from ....api.v1.schemas.inventory import Warehouse, WarehouseCreate, WarehouseUpdate
@@ -20,14 +21,17 @@ DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 @router.get("/", response_model=PaginatedResponse[Warehouse])
 async def list_warehouses(
-    tenant_id: Optional[str] = Query(None),
     is_active: Optional[bool] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=200),
     db: Session = Depends(get_db),
+    effective_tenant: str = Depends(get_tenant_id),
 ):
-    """Return a paginated list of warehouses."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    """Die Lager des Mandanten aus dem Kontext.
+
+    Bis 07.10.2026 aus einem Query-Parameter, sonst aus dem Standardmandanten — als
+    Auswahl im Wareneingang haette das fremde Lager angeboten.
+    """
 
     query = db.query(WarehouseModel).filter(WarehouseModel.tenant_id == effective_tenant)
     

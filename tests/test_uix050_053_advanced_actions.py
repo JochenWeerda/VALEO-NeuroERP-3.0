@@ -134,7 +134,6 @@ class TestUIX053CommandEndpoints:
 
     @pytest.mark.parametrize("screen_id,action_key", [
         ("crm/lead", "qualifizieren"),
-        ("einkauf/anlieferavis", "wareneingang"),
     ])
     def test_ohne_fachweg_sagt_die_maske_nicht_verfuegbar(self, screen_id: str, action_key: str):
         # Diese Aktionen waren "aktiviert" und meldeten Erfolg ohne Wirkung

@@ -18,6 +18,19 @@ Wave-Statusdateien. Aktiver Dateibesitz steht im
 
 ## Aktuelle Abnahme statt historischer Testzahlen
 
+[NPM-Herstellerfixes](npm-security-releases-20261007.md): zwoelf Paketpins,
+frozen Lockfile auf 36 committed Workspaces und sechs reale Offline-Vertraege
+gruen. Production-Audit jetzt 2 High, 0 Moderate/Low/Critical; die beiden High
+haben weiterhin keinen Herstellerfix. Behavior-Vertraege laufen fortan vor
+dem unveraenderten CI-Audit. Frischer Workspace-Build bleibt erforderlich.
+
+Fachliche Integrations-Teilabnahme auf `c466af7de`: 71 Tests ohne Skip gruen
+(66,35 s), einschliesslich SPEC-P1-04-Inventur, echten Maskenwirkungen,
+Lager-Gegenbuchung und Opportunity-Mandantenvertraegen. Gemeinsamer Probe
+vorher lesend vorhanden auf `mandant_finanz_crm_20261007`; kein Reset/neue DB.
+Isolierte committed Pakete fuer `app` und `scripts`; keine Arbeitsbaum-Mischung.
+Die bekannten echten Action-Luecken bleiben aktiv beim fremden Fachclaim.
+
 Der [KIM-Navigations-Smoke](kim-navigation-smoke-20261007.md) ist lokal repariert:
 gueltige isolierte Kunden-Lesefixture statt nicht existierendem PERF-K1;
 native Identitaetsanzeige/Registerwahl und fehlender Kunde separat geprueft,
@@ -35,8 +48,9 @@ schliessen sechs der elf Backend-Fehler auf `3e7142c48` und beide Frontendbefund
 lokal: 813 Pythonvertraege, 23 Architekturvertraege, 38 Frontendtests und TypeScript
 gruen. OpenAPI/Inventare/Handbuch folgen den bereits committeten sieben ehrlichen
 Action-Loeschungen; Praesente neu typisiert. Neue Actions-Abnahme bleibt erforderlich.
-Fuenf SPEC-P1-04-Befunde, KIM-Smoke, Security und die fachlichen Integrationen
-sind weiterhin offen; die historische Liste unten dokumentiert ihren Ausgangspunkt.
+SPEC-P1-04 und KIM sind inzwischen lokal nachgeprueft; neue CI-Gesamtabnahme,
+verbleibende Security-Befunde und weitere fachliche Integrationen bleiben offen.
+Die historische Liste unten dokumentiert ihren Ausgangspunkt.
 
 Auf `00de664df` erfolgreich: PostgreSQL `require_db` (37610643657), OpenAPI
 (37610643398), Docs Build/Governance, Service Security, Full Security Agent,

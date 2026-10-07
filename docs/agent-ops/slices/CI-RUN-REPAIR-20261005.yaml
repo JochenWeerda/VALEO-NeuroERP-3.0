@@ -47,6 +47,8 @@ file_ownership:
   - Eindeutige typisierte Historien, echte Praesente-Route/DTO und isolierter Schema-/HTTP-Vertrag
   - Exakte Finance-Zuordnung payment_run_freigabe und committed Inventar-/Handbuch-Nachzug
 acceptance:
+  - Zwoelf NPM-Herstellerfix-Pins, frozen Lockfile und sechs fortlaufende Behavior-Vertraege gruen; Production-Audit 2 High ohne Fix, 0 Moderate/Low/Critical.
+  - Fachliche Masken-/Lager-/Opportunity-Integration einschliesslich SPEC-P1-04 auf committed Quelle mit 71 Tests ohne Skip gruen.
   - KIM-Smoke mit konkreter Kunden-Lesefixture und ehrlichem 404-Zustand; native Identitaet und Stammdatenregister in zwei Chromium-Vertraegen gruen.
   - Backend echtes CPython 3.13.16, nur weiterhin erforderlicher POP3-Backport; fuenf Runtime-Vertraege lokal gruen, Linux-/Grype-Abnahme separat offen.
   - Pflichtgates behalten Baselines und Schwellwerte.

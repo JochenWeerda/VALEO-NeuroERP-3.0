@@ -888,7 +888,8 @@ class ProcurementService:
             ergebnis["uebersprungen"] = uebersprungen
         return ergebnis
 
-    def create_bestellung(self, data: dict) -> dict:
+    def create_bestellung(self, data: dict, *, commit: bool = True) -> dict:
+        # commit=False: der Aufrufer schliesst die Einheit (Angebot -> Bestellung + Status).
         ts = datetime.now().strftime("%y%m%d%H%M%S")
         header = _clean_fields(data, BESTELLUNG_HEADER_KEYS)
         if not header.get("bestelldatum"):
@@ -924,8 +925,11 @@ class ProcurementService:
             self.db.add(pos)
         self.db.flush()
         _summen_rechnen(bestellung)
-        self.db.commit()
-        self.db.refresh(bestellung)
+        if commit:
+            self.db.commit()
+            self.db.refresh(bestellung)
+        else:
+            self.db.flush()
         return {
             "id": str(bestellung.id),
             "bestellnummer": bestellung.bestellnummer,
