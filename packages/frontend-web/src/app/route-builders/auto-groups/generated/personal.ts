@@ -43,4 +43,6 @@ export const entries: AutoGroupRouteEntry[] = [
   },
   { "module": "@/pages/personal/bewerbungen", "path": "bewerbungen" },
   { "module": "@/pages/personal/organigramm", "path": "organigramm" },
+  { "module": "@/pages/personal/bewerbung-einwilligung", "path": "bewerbung-einwilligung" },
+  { "module": "@/pages/personal/einwilligungserklaerungen", "path": "einwilligungserklaerungen" },
 ]

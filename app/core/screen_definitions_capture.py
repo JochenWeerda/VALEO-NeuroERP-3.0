@@ -2273,6 +2273,15 @@ def build_personal_bewerbungen_screen_definition() -> dict[str, Any]:
                 "zone": "footer",
                 "stubReason": "Leert die Eingabe fuer eine neue Bewerbung.",
             },
+            {
+                "key": "erklaerungen",
+                "label": "Einwilligungserklärungen",
+                "command": "personal.openErklaerungen",
+                "kind": "secondary",
+                "dangerLevel": "safe",
+                "zone": "footer",
+                "stubReason": "Oeffnet die Fassungen der Einwilligungserklaerung.",
+            },
         ],
         "tables": [
             {
@@ -2285,6 +2294,12 @@ def build_personal_bewerbungen_screen_definition() -> dict[str, Any]:
                 "rowHeight": 44,
                 "rowDetail": False,
                 "rowActions": [
+                    {
+                        "key": "einwilligung",
+                        "label": "Einwilligung",
+                        "command": "personal.openEinwilligung",
+                        "dangerLevel": "safe",
+                    },
                     {
                         "key": "loeschen",
                         "label": "Löschen",
@@ -2327,6 +2342,271 @@ def build_personal_bewerbungen_screen_definition() -> dict[str, Any]:
             "initialPayloadBudgetKb": 32,
             "requiresLazyTabs": False,
             "requiresVirtualTables": True,
+            "lookupMinChars": 2,
+            "bundleGroup": "hr",
+        },
+    }
+
+
+#: Deckungsgleich mit ``bewerbung_einwilligung_service.KANAELE`` und ``ck_beweinw_kanal``.
+_EINWILLIGUNG_KANAELE = [
+    {"value": "WEB", "label": "Web"},
+    {"value": "E_MAIL", "label": "E-Mail"},
+    {"value": "PAPIER", "label": "Papier"},
+    {"value": "MUENDLICH", "label": "Mündlich"},
+]
+
+
+def build_personal_bewerbung_einwilligung_screen_definition() -> dict[str, Any]:
+    """Einwilligung zur laengeren Aufbewahrung einer Bewerbung (Talentpool).
+
+    Die Seite laedt und schreibt, der Builder zeichnet. Erteilt wird gegen eine
+    **Fassung** der Einwilligungserklaerung; der Wortlaut ist Anzeige, keine
+    Eingabe. Der Widerruf ist **ein** Klick mit Bestaetigung — kein Grund, kein
+    Feld, keine Freigabe (Art. 7 Abs. 3 DSGVO: nicht schwerer als die Erteilung).
+    """
+    return {
+        "schemaVersion": 1,
+        "id": "personal/bewerbung-einwilligung",
+        "domain": "hr",
+        "mode": "detail",
+        "title": "Einwilligung zur Aufbewahrung",
+        "subtitle": "Talentpool — Art. 6 Abs. 1 lit. a, Art. 7 DSGVO",
+        "identityField": "applicant_name",
+        "adapter": {"type": "native", "sourceId": "personal/bewerbung-einwilligung", "temporary": False},
+        "dataSources": [
+            {"key": "bewerbung", "endpoint": "/api/v1/personal/applications/{entity_id}", "pageSize": 1},
+            {"key": "einwilligung", "endpoint": "/api/v1/personal/applications/{entity_id}/einwilligung", "pageSize": 200},
+            {"key": "fassungen", "endpoint": "/api/v1/personal/applications/einwilligungserklaerungen", "pageSize": 200},
+        ],
+        "summary": [
+            {"key": "stand", "label": "Stand", "value": "keine"},
+            {"key": "laeuft_bis", "label": "Läuft bis", "value": "–"},
+        ],
+        "workflow": {"processKey": "personal.bewerbung-einwilligung"},
+        "actions": [
+            {
+                "key": "erteilen",
+                "label": "Einwilligung erteilen",
+                "command": "personal.erteileEinwilligung",
+                "kind": "primary",
+                "dangerLevel": "safe",
+                "zone": "header",
+                "stubReason": "Erteilt die Einwilligung gegen die gewaehlte Fassung.",
+            },
+            {
+                # Gleich weit vorn wie das Erteilen und ohne Eingabe. Die Bestaetigung
+                # bleibt, weil der Widerruf die Bewerbung wieder loeschfaehig macht —
+                # ein Grund oder eine Freigabe waere schwerer als die Erteilung.
+                "key": "widerrufen",
+                "label": "Einwilligung widerrufen",
+                "command": "personal.widerrufeEinwilligung",
+                "kind": "secondary",
+                "dangerLevel": "moderate",
+                "zone": "header",
+                "requiresConfirmation": True,
+                "stubReason": "Widerruft die Einwilligung sofort, ohne Grund.",
+            },
+            {
+                "key": "zurueck",
+                "label": "Zu den Bewerbungen",
+                "command": "personal.openBewerbungen",
+                "kind": "secondary",
+                "dangerLevel": "safe",
+                "zone": "footer",
+                "stubReason": "Wechselt zur Bewerbungsliste.",
+            },
+            {
+                "key": "erklaerungen",
+                "label": "Einwilligungserklärungen",
+                "command": "personal.openErklaerungen",
+                "kind": "secondary",
+                "dangerLevel": "safe",
+                "zone": "footer",
+                "stubReason": "Oeffnet die Fassungen der Einwilligungserklaerung.",
+            },
+        ],
+        "tabs": [
+            {
+                "key": "einwilligung",
+                "label": "Einwilligung",
+                "fields": [
+                    {"key": "applicant_name", "label": "Bewerber", "type": "text", "readOnly": True},
+                    {"key": "position_title", "label": "Stelle", "type": "text", "readOnly": True},
+                    {"key": "stand_gueltig_bis", "label": "Läuft bis", "type": "date", "readOnly": True},
+                    {"key": "stand_erteilt_am", "label": "Erteilt am", "type": "text", "readOnly": True},
+                    {
+                        "key": "fassung",
+                        "label": "Fassung der Erklärung",
+                        "type": "select",
+                        "required": True,
+                        "dataSourceKey": "fassungen",
+                        "helpText": "Die Nummer auf dem Formular, das unterschrieben wurde.",
+                    },
+                    {"key": "gueltig_bis", "label": "Gültig bis", "type": "date", "required": True,
+                     "helpText": "Höchstens drei Jahre ab heute."},
+                    {"key": "kanal", "label": "Eingegangen über", "type": "select", "required": True,
+                     "options": _EINWILLIGUNG_KANAELE},
+                    {"key": "erfasst_durch", "label": "Erfasst durch", "type": "text"},
+                    {"key": "wortlaut", "label": "Wortlaut der Fassung", "type": "textarea", "readOnly": True},
+                ],
+            },
+            {
+                "key": "verzeichnis",
+                "label": "Verzeichnis",
+                "tables": [
+                    {
+                        "key": "vorgaenge",
+                        "label": "Erteilungen und Widerrufe",
+                        "dataSourceKey": "einwilligung",
+                        "serverPagination": False,
+                        "pageSize": 50,
+                        "virtualized": False,
+                        "rowHeight": 44,
+                        "rowDetail": False,
+                        "columns": [
+                            {"key": "erfolgt_am", "label": "Erfolgt am", "renderKind": "datetime", "sortable": True, "priority": "primary"},
+                            {"key": "vorgang", "label": "Vorgang", "renderKind": "status", "filterable": True, "priority": "primary"},
+                            {"key": "fassung", "label": "Fassung", "renderKind": "number", "priority": "secondary"},
+                            {"key": "gueltig_bis", "label": "Gültig bis", "renderKind": "date", "priority": "secondary"},
+                            {"key": "kanal", "label": "Kanal", "priority": "tertiary"},
+                            {"key": "erfasst_durch", "label": "Erfasst durch", "priority": "tertiary"},
+                        ],
+                    },
+                ],
+            },
+        ],
+        "noWorkflowReason": "Der Stand folgt der letzten Zeile des Verzeichnisses.",
+        "noProcessChainReason": "Keine Belegkette: Die Einwilligung haengt an einer Bewerbung.",
+        "agentContract": {
+            "businessPurpose": (
+                "Einwilligung zur laengeren Aufbewahrung einer Bewerbung erteilen oder "
+                "widerrufen; das Verzeichnis ist der Nachweis nach Art. 7 Abs. 1 DSGVO."
+            ),
+            "examplePrompts": ["Bis wann darf die Bewerbung {entity_id} aufbewahrt werden?"],
+            "sensitiveFields": ["applicant_name", "erfasst_durch"],
+            "testSelectors": {
+                "screenRoot": "[data-testid='screen-personal/bewerbung-einwilligung']",
+                "primaryAction": "[data-testid='action-erteilen']",
+            },
+        },
+        "layout": {
+            "floorplan": "objectPage",
+            "density": "compact",
+            "contextRail": "workflow",
+            "tableProfile": "standard",
+            "columnNavigation": "single",
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+            "summaryPlacement": "footer",
+            "statusPlacement": "afterFields",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 24,
+            "requiresLazyTabs": False,
+            "requiresVirtualTables": False,
+            "lookupMinChars": 2,
+            "bundleGroup": "hr",
+        },
+    }
+
+
+def build_personal_einwilligungserklaerungen_screen_definition() -> dict[str, Any]:
+    """Fassungen der Einwilligungserklaerung. Die Seite legt an, der Builder zeichnet.
+
+    Eine Fassung ist unveraenderlich (die Datenbank haelt das); deshalb gibt es hier
+    weder Bearbeiten noch Loeschen. Ein neuer Wortlaut ist eine neue Fassung.
+    """
+    return {
+        "schemaVersion": 1,
+        "id": "personal/einwilligungserklaerungen",
+        "domain": "hr",
+        "mode": "list",
+        "title": "Einwilligungserklärungen",
+        "subtitle": "Fassungen für die Aufbewahrung von Bewerbungen",
+        "adapter": {"type": "native", "sourceId": "personal/einwilligungserklaerungen", "temporary": False},
+        "dataSources": [
+            {"key": "fassungen", "endpoint": "/api/v1/personal/applications/einwilligungserklaerungen", "pageSize": 200},
+        ],
+        "summary": [
+            {"key": "fassungen", "label": "Fassungen", "value": "0"},
+            {"key": "aktuell", "label": "Neueste", "value": "–"},
+        ],
+        "fields": [
+            {"key": "wortlaut", "label": "Wortlaut", "type": "textarea", "required": True,
+             "helpText": "Genau der Text, der unterschrieben wird. Nach dem Anlegen nicht mehr änderbar."},
+            {"key": "erstellt_durch", "label": "Erstellt durch", "type": "text"},
+        ],
+        "workflow": {"processKey": "personal.einwilligungserklaerungen"},
+        "actions": [
+            {
+                "key": "anlegen",
+                "label": "Fassung anlegen",
+                "command": "personal.saveErklaerung",
+                "kind": "primary",
+                "dangerLevel": "safe",
+                "zone": "header",
+                "requiresConfirmation": True,
+                "stubReason": "Legt die naechste Fassung an; sie ist danach unveraenderlich.",
+            },
+            {
+                "key": "neu",
+                "label": "Neu",
+                "command": "personal.newErklaerung",
+                "kind": "secondary",
+                "dangerLevel": "safe",
+                "zone": "footer",
+                "stubReason": "Leert die Eingabe fuer eine neue Fassung.",
+            },
+        ],
+        "tables": [
+            {
+                "key": "fassungen",
+                "label": "Fassungen",
+                "dataSourceKey": "fassungen",
+                "serverPagination": False,
+                "pageSize": 50,
+                "virtualized": False,
+                "rowHeight": 44,
+                "rowDetail": False,
+                "columns": [
+                    {"key": "fassung", "label": "Fassung", "renderKind": "number", "sortable": True, "priority": "primary"},
+                    {"key": "wortlaut", "label": "Wortlaut", "filterable": True, "priority": "primary"},
+                    {"key": "erstellt_am", "label": "Angelegt", "renderKind": "date", "priority": "secondary"},
+                    {"key": "erstellt_durch", "label": "Erstellt durch", "priority": "tertiary"},
+                ],
+            },
+        ],
+        "noWorkflowReason": "Fassungen haben keinen Ablauf; sie werden angelegt und bleiben.",
+        "agentContract": {
+            "businessPurpose": (
+                "Fassungen der Einwilligungserklaerung fuer Bewerbungen fuehren; "
+                "erteilt wird immer gegen eine Fassung."
+            ),
+            "examplePrompts": ["Welche Fassung der Einwilligungserklaerung ist die neueste?"],
+            "sensitiveFields": [],
+            "testSelectors": {
+                "screenRoot": "[data-testid='screen-personal/einwilligungserklaerungen']",
+                "primaryAction": "[data-testid='action-anlegen']",
+            },
+        },
+        "layout": {
+            "floorplan": "worklist",
+            "density": "compact",
+            "contextRail": "none",
+            "tableProfile": "standard",
+            "columnNavigation": "single",
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+            "summaryPlacement": "footer",
+            "statusPlacement": "afterFields",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 24,
+            "requiresLazyTabs": False,
+            "requiresVirtualTables": False,
             "lookupMinChars": 2,
             "bundleGroup": "hr",
         },

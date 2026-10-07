@@ -142,6 +142,8 @@ _IDENTITAET = {
     "futtermittel/mischfuttermittel": "produkt_code",
     "lager/article-stock": "article_number",
     "lager/stock-movement": "movement_number",
+    # Die Einwilligung haengt an einer Person; ihr Name ist die Identitaet der Maske.
+    "personal/bewerbung-einwilligung": "applicant_name",
     "qualitaet/reklamation": "reklamation_nr",
     "sales/delivery-note": "delivery_note_number",
     "sales/invoice": "invoice_number",

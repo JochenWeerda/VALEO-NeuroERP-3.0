@@ -1529,6 +1529,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         keywords: ['bewerbung', 'rekrutierung', 'stelle', 'kandidat'],
         mcp: { businessDomain: 'hr', scope: 'hr:read' },
       },
+      {
+        id: 'einwilligungserklaerungen',
+        label: 'Einwilligungserklärungen',
+        icon: UserCog,
+        module: '@/pages/personal/einwilligungserklaerungen',
+        preferredPath: 'personal/einwilligungserklaerungen',
+        keywords: ['einwilligung', 'einwilligungserklärung', 'talentpool', 'fassung', 'dsgvo'],
+        mcp: { businessDomain: 'hr', scope: 'hr:read' },
+      },
     ],
   },
   {

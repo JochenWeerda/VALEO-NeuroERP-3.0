@@ -1971,7 +1971,7 @@ weiterhin **nach** dem ersten Laden. Wo eine Maske den Platzhalter als Endstand
 ansah, erscheinen jetzt echte Daten; das kann Zahlen aendern, die vorher falsch
 waren.
 
-## BEWERBUNG-EINWILLIGUNG-MASKE-20261007 — in Arbeit, Claude Code
+## BEWERBUNG-EINWILLIGUNG-MASKE-20261007 — abgeschlossen, Claude Code
 
 **Auftrag:** Offenen Punkt 2 aus
 [Die Einwilligung zur laengeren Aufbewahrung](../quality-assurance/bewerbung-einwilligung-20261006.md)
@@ -2016,6 +2016,19 @@ UX-Lint ohne Fehler, Meridian-Regeln (kein technischer Schluessel im Kopf);
 Vitest: Erteilen schickt Fassung/Ende/Kanal, Widerruf schickt **keinen** Rumpf,
 Doppelklick-Schutz, Fehler sichtbar, Fassungsoptionen aus der API; Fassung
 anlegen mit 409-Hinweis auf vorhandene Nummer; tsc und Lint der neuen Dateien gruen.
+
+**Abnahme (07.10.2026):** Zwei Screen Definitions im Register (Backend +
+`capture-screens.ts`), beide `generatorReady`, Advisory 1,0, Governance/UX-Lint ohne
+Fehler; Seiten liefern nur Daten, Optionen und Handler. Widerruf ein Klick mit
+Bestaetigung ohne Feld und ohne Rumpf; Fassungen ohne Aenderungsweg; Erteilen ohne
+Vorauswahl der Fassung. **20** SD-Vertraege, **131** systemweite SD-Vertraege (Meridian-
+Identitaet `applicant_name` eingetragen), **14** Vitest, **25** Frontend-Nachbarn gruen;
+`tsc` 0 Fehler, ESLint 0 Fehler, Routing-Integritaet und Navigationsziele bestanden.
+**Nicht gelaufen:** Sichtpruefung in der App (Backend-Image vor den Fassungs-Wegen,
+Frontend auf 3001 ohne Antwort; kein Neubau ungefragt). **Nebenbefund:** keiner der
+neun `execute`-Handler in `mask_actions.py` schreibt fachlich — Erfolg ohne Wirkung,
+eigener Slice. QA:
+[bewerbung-einwilligung-maske-20261007.md](../quality-assurance/bewerbung-einwilligung-maske-20261007.md).
 
 ## BEWERBUNG-ERKLAERUNG-FASSUNG-20261006 — abgeschlossen, Claude Code
 

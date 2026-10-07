@@ -8,6 +8,7 @@ import { createScreenContext } from '@/components/mask-builder/governance/screen
 import type { ScreenDefinition } from '@/components/mask-builder/schema'
 import type { WorkflowState } from '@/components/mask-builder/runtime/WorkflowRuntime'
 import { toast } from 'sonner'
+import { useNavigate } from '@/app/routing/typed-router'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { personalBewerbungenScreen } from '@/masks/capture-screens'
@@ -55,6 +56,7 @@ type BewerbungRow = {
 
 export default function PersonalBewerbungenPage(): JSX.Element {
   const isTouch = useTouchDevice()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const bewerbungen = useQuery({
     queryKey: ['bewerbungen'],
@@ -181,8 +183,17 @@ export default function PersonalBewerbungenPage(): JSX.Element {
       leeren()
       return
     }
+    if (key === 'einwilligung') {
+      const id = text(payload.id)
+      if (id) navigate(`/personal/bewerbung/${encodeURIComponent(id)}/einwilligung`)
+      return
+    }
+    if (key === 'erklaerungen') {
+      navigate('/personal/einwilligungserklaerungen')
+      return
+    }
     if (key === 'loeschen') await loeschen(text(payload.id), text(payload.applicant_name))
-  }, [leeren, loeschen, speichern])
+  }, [leeren, loeschen, navigate, speichern])
 
   const screenContext = useMemo(() => createScreenContext({
     data: { bewerbungen: rows },
@@ -192,6 +203,8 @@ export default function PersonalBewerbungenPage(): JSX.Element {
       'personal.saveBewerbung': () => handleAction('speichern'),
       'personal.newBewerbung': () => handleAction('neu'),
       'personal.deleteBewerbung': (payload) => handleAction('loeschen', payload),
+      'personal.openEinwilligung': (payload) => handleAction('einwilligung', payload),
+      'personal.openErklaerungen': () => handleAction('erklaerungen'),
     },
     navigation: { push: () => undefined },
   }), [form.values, handleAction, rows])

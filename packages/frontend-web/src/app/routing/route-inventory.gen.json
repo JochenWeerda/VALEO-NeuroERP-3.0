@@ -3356,8 +3356,23 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/personal/bewerbung-einwilligung",
+      "path": "personal/bewerbung-einwilligung",
+      "source": "auto"
+    },
+    {
+      "module": "@/pages/personal/bewerbung-einwilligung",
+      "path": "personal/bewerbung/:id/einwilligung",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/personal/bewerbungen",
       "path": "personal/bewerbungen",
+      "source": "auto"
+    },
+    {
+      "module": "@/pages/personal/einwilligungserklaerungen",
+      "path": "personal/einwilligungserklaerungen",
       "source": "auto"
     },
     {

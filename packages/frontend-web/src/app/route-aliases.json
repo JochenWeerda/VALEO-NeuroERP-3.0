@@ -517,6 +517,10 @@
       "path": "personal/bewerbungen"
     },
     {
+      "module": "@/pages/personal/bewerbung-einwilligung",
+      "path": "personal/bewerbung/:id/einwilligung"
+    },
+    {
       "module": "@/pages/personal/hrm-operations-gates",
       "path": "personal/hrm-operations-gates"
     },
