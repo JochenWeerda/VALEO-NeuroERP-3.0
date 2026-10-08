@@ -8,22 +8,22 @@
   },
   "actions": [
     {
-      "id": "mask:admin/postfaecher:google",
-      "label": "Mit Google verbinden",
-      "description": "Mit Google verbinden (admin/postfaecher)",
+      "id": "mask:admin/postfaecher:anmelden",
+      "label": "Beim Anbieter anmelden",
+      "description": "Beim Anbieter anmelden (admin/postfaecher)",
       "category": "mask-action",
       "domain": "platform",
       "mask": "admin/postfaecher",
       "intent_phrases": [
-        "Mit Google verbinden"
+        "Beim Anbieter anmelden"
       ],
       "required_data": [],
       "source": {
         "screenId": "admin/postfaecher",
-        "actionKey": "google",
+        "actionKey": "anmelden",
         "commandEndpoint": null,
         "navigationRoute": null,
-        "command": "admin.postfachGoogle",
+        "command": "admin.postfachAnmelden",
         "method": null
       }
     },
