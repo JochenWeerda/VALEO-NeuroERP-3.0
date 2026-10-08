@@ -201,8 +201,9 @@ class IstAggregationService:
             text(
                 "SELECT article_number, name, warengruppe, category, "
                 "pflanzenschutzmittel, duengemittel_inhalte_bezeichnung "
-                "FROM domain_inventory.articles WHERE article_number IS NOT NULL"
-            )
+                "FROM domain_inventory.articles WHERE article_number IS NOT NULL AND tenant_id = :t"
+            ),
+            {"t": self.tenant_id},
         ).mappings().all()
         idx: dict[str, Optional[str]] = {}
         for a in rows:

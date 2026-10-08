@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-07",
+  "generatedAt": "2026-10-08",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -3284,7 +3284,7 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "logistics:read",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -3310,7 +3310,7 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "logistics:write",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -3321,7 +3321,7 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "logistics:write",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -3347,7 +3347,7 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "logistics:read",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -3358,7 +3358,7 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "logistics:read",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -3369,7 +3369,7 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "logistics:read",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -3380,7 +3380,7 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "logistics:read",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -3454,7 +3454,7 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "logistics:write",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null

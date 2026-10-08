@@ -1,3 +1,4 @@
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 import { AlertCircle } from 'lucide-react'
 import { UniversalMaskRenderer, useUniversalMaskRuntime } from '@/components/mask-builder'
 import type { ScreenContext } from '@/components/mask-builder/governance/screen-context'
@@ -27,10 +28,11 @@ export function CaptureScreenHost({
 }): JSX.Element {
   const schemaQuery = useScreenDefinition(screenId)
   const schema = schemaQuery.data ?? fallback
+  const effectivePermissions = useScreenPermissions(schema, permissions)
   const runtime = useUniversalMaskRuntime({
     screenId,
     schema,
-    permissions,
+    permissions: effectivePermissions,
     enabled: Boolean(schema),
   })
 
@@ -49,6 +51,7 @@ export function CaptureScreenHost({
   return (
     <UniversalMaskRenderer
       plan={runtime.plan}
+      allowedPermissions={effectivePermissions}
       data={runtime.entityData}
       tables={runtime.tableRows}
       messages={runtime.messages}

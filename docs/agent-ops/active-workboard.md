@@ -11,7 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## RESTBEFUNDE-BESTANDSBUCH-20261008 — in Arbeit, Claude Code
+## RESTBEFUNDE-BESTANDSBUCH-20261008 — abgeschlossen, Claude Code
+
+**Abnahme (08.10.2026):** alle vier Restbefunde geschlossen: Mahnwesen-Mandant aus dem
+Kontext, Rechnung + Buchung + Archiv in einem Commit, Artikelnummer je Mandant
+(Migration `artikelnummer_mandant_20261008`, Probe + Dev; Seed haengte fremde Artikel um),
+`_list_docs` ohne Prozessspeicher. 12 neue Vertraege, 1090 Regressionstests gruen.
+QA: [restbefunde-bestandsbuch-20261008.md](../quality-assurance/restbefunde-bestandsbuch-20261008.md).
+
 
 **Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** die vier benannten Restbefunde aus
 BESTANDSBUCH-EINKAUF-20261007 schliessen: (1) `dunning.py` mit `Query("system")`, (2)
@@ -73,7 +80,9 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
 
-**CI-Vertrag Meilenstein 1 (2026-10-08):** [QA](../quality-assurance/ci-contract-closure-20261008.md). Lead-Aliase vollstaendig dokumentiert, zwei bereits typisierte eBilanz-Dekoratoren scannerkompatibel angeordnet; Schwellen unveraendert 0/20. Isolierte HEAD-Quelle: 3590/3590 Beschreibungen, 20 verbleibende untypisierte Routen, 24 Kalendervertraege gruen. Secret-Scan-Fund eigenes kuenstliches Kalenderfixture, Argumente aufgeteilt statt Allowlist: offizielles Gitleaks 8.30.1, 62,66 MB HEAD-Snapshot, null Funde ohne Docker. OpenAPI deterministisch 3104 Pfade, nur Lead-Aliasbeschreibung geaendert. Weitere Claim-Punkte weiter in Arbeit. ELSTER-Registrierung geoeffnet, Begruendung vorbereitet, Pflicht-Kontaktdaten angefragt; nichts abgesendet/angenommen.
+**MASK-CONTRACT-CREATE-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Beim Claim CI-CONTRACT-CLOSURE erkannter echter CRM-Smoke-Fehler: /crm/lead/new wird als vorhandene ID gelesen und zeigt 404 statt Anlageformular. Besitz eigener minimaler Hunk app/core/screen_definitions.py crm/lead: deklarativer Anlagevertrag, BE/FE Capture-Aktionsberechtigungen, schema.ts nur Anlagevertrag, neue zentrale NativeCreate-Komponente und Berechtigungsprojektion, UniversalNativeDetailPage nur delegierender Wrapper, CaptureScreenHost nur effektive Berechtigungen, Logistikseiten nur Auth-/Compiler-/Renderer-Weitergabe, fokussierte HTTP-/React-/Chromium-Regressionen. Bestehende fremde Renderer-/Usability-Hunks erhalten, isolierte committed-source-Abnahme. Keine individuellen Ersatzmasken, keine erfundenen Daten/404-Fallbacks, Rechte aus Auth-Kontext; Serverrollen bleiben massgeblich. Handbuch, QA, Open-Gaps, Slice und Workboard nachziehen. Gemeinsamer Probe nur mit eigenen Testdaten/Savepoints, keine neue DB/Container/Reset. Abnahme: 834 Backend-Vertraege, 12 React-Vertraege, bestehender Chromium-Lead-Anlagesmoke und Frontend-Typpruefung gruen. 99 native Masken ohne Command-Luecken, Godfile-Ratsche unveraendert, Handbuch generiert und geprueft. UI-Rechteprojektion ersetzt keine serverseitige Logistik-Sicherheitsabnahme.
+
+**CI-Vertrag Meilenstein 1 (2026-10-08):** [QA](../quality-assurance/ci-contract-closure-20261008.md). Lead-Aliase vollstaendig dokumentiert, zwei bereits typisierte eBilanz-Dekoratoren scannerkompatibel angeordnet; Schwellen unveraendert 0/20. Isolierte HEAD-Quelle: 3590/3590 Beschreibungen, 20 verbleibende untypisierte Routen, 24 Kalendervertraege gruen. Secret-Scan-Fund eigenes kuenstliches Kalenderfixture, Argumente aufgeteilt statt Allowlist: offizielles Gitleaks 8.30.1, 62,66 MB HEAD-Snapshot, null Funde ohne Docker. OpenAPI deterministisch 3104 Pfade, nur Lead-Aliasbeschreibung geaendert. Weitere Claim-Punkte weiter in Arbeit. ELSTER-Registrierung vom Nutzer abgesendet, echtes Bestaetigungs-PDF und Screenshot lokal unter ignoriertem artifacts/elster gesichert. SDK-Zugang/Freischaltung und Lizenzannahme noch ausstehend; keine personenbezogenen Registrierungsdaten versioniert.
 
 **CI-CONTRACT-CLOSURE-20261008 (reserviert):** Owner Codex-01a0f3fc. User-Claim: OpenAPI-Doku-Schwelle und untypisierte Routen auf HEAD, Masken-Berechtigungsvertrag, CRM-Smoke sowie Security-/Secret-Scan. Zuerst Leads-Slash-Aliase dokumentieren und tatsaechlich typisierte eBilanz-Dekoratoren im bestehenden Scanner korrekt erkennen, ohne Schwellen/Schutzregeln abzusenken; Secret-Befund auf eigenes Kalender-Testfixture pruefen und Ursache entfernen. Besitz eigene fokussierte Hunks leads.py, ebilanz_elster.py, bestehende CI-Scanner/Regressionen, test_business_day_service_boundaries.py, Capture-Screen-Aktionsmetadaten BE/FE nach Skill und Berechtigungsanalyse, betroffene CRM-Smoke-Testhunks nach Loganalyse, Security-Pins nur nach aktueller Advisory-Pruefung. Fremde Arbeitsbaum-/Workflow-/Bestandsbuchhunks geschuetzt. QA/Workboard/Open-Gaps und getestete generierte Artefakte nachziehen; bestehender gemeinsamer Probe, keine neue DB/Container/Reset. XBRL-/ERiC-Integration nach OSS-/Lizenz-/SDK-Recherche als gesonderter Fachclaim.
 

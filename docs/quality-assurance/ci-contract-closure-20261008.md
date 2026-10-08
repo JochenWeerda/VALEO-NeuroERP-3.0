@@ -42,6 +42,38 @@ durch diesen Meilenstein nicht als behoben ausgegeben. Maskenvertrag,
 CRM-Smoke, Dependency-Security und XBRL/ERiC bleiben bis zu ihrer eigenen
 Abnahme offen. Kein Datenbankzugriff für diese Tests, kein Reset, keine neue DB.
 
+## Meilenstein: native Lead-Anlage und Maskenberechtigungen
+
+Der CRM-Smoke rief `/crm/lead/new` auf. Der Detail-Lader behandelte `new`
+als vorhandene ID und erhielt 404. Der zentrale NativeDetail-Einstieg delegiert
+`new` und `neu` jetzt an eine gemeinsame NativeCreate-Komponente. Der
+ScreenDefinition-Vertrag deklariert den kanonischen POST `/api/v1/crm/leads`,
+Defaults und die Detailroute. RenderPlan, UniversalMaskRenderer und
+UniversalFormState bleiben die zentrale Kette; keine individuelle Ersatzmaske.
+Ungespeicherte Datensätze laden keine Detailregister. Das Formular sendet nur
+editierbare deklarierte Felder; Fehler bleiben sichtbar, Navigation erfolgt erst
+nach einer echten Antwort mit ID. Mandant und Berechtigungen prüft der Server.
+
+Die acht Logistik-Aktionen tragen in Backend und Frontend `logistics:read`
+beziehungsweise `logistics:write`. Zentraler Capture-Host, NativeDetail und die
+beiden Logistik-Seiten geben aus dem Auth-Kontext projizierte Rechte an Compiler,
+Dispatcher und Renderer weiter. Schema-Metadaten verleihen keine Rechte.
+Administratoren und die bestehenden CRM-Schreibrollen werden berücksichtigt;
+unberechtigte Anlage wird gesperrt. Diese UI-Projektion ersetzt keine serverseitige
+Autorisierung und behauptet keine neue Logistik-API-Sicherheitsabnahme.
+
+Abnahme auf isolierter Quelle von `83a32d91f` plus eigenen Masken-Hunks:
+
+- 834 bestehende Backend-Vertragstests bestanden (8,29 Sekunden).
+- 12 React-Verträge für Neuanlage, Speicherfehler, Rechte und Detail-Ladezustände
+  bestanden. Tatsächlicher Renderer und Form-State, kein Ersatzformular.
+- Bestehender Chromium-Smoke zur Lead-Neuanlage unverändert bestanden;
+  tatsächlicher Backend-ScreenDefinition-Vertrag im lokalen HTTP-Fixture.
+- Command-Inventar: 99 native ScreenDefinitions, null bekannte Lücken.
+- Godfile-Ratsche unverändert bestanden; keine Baseline angehoben.
+- Keine neue Datenbank, kein Container, kein Reset. Windows-Prüfungen benötigen
+  für lokale Sockets die üblichen Dateirechte außerhalb der Sandbox.
+
 ## ELSTER und Open-Source-Recherche
 
 [Arelle](https://github.com/Arelle/Arelle) stellt einen XBRL-Prozessor mit
@@ -55,8 +87,14 @@ Prüfung der tatsächlichen Schnittstellen und aktuellen Version festgelegt.
 Der Nutzer hat am 08.10.2026 die Entwicklerregistrierung und elektronische
 Lizenzannahme beauftragt. Das
 [Registrierungsformular](https://www.elster.de/elsterweb/registrierung-entwickler/form)
-ist geöffnet und die Projektbegründung vorbereitet. Pflicht-Kontaktdaten
-wurden angefragt; nichts abgesendet, keine Lizenz angenommen. Laut
+hat der Nutzer selbst abgesendet; die Versandbestätigung wurde am 08.10.2026
+als echtes PDF über „PDF speichern“ heruntergeladen und zusammen mit einem
+Browser-Screenshot ausschließlich unter dem ignorierten lokalen
+`artifacts/elster/` gesichert. Personenbezogene Formulardaten werden nicht
+versioniert. Der ERiC-Bereich leitet zur Entwickleranmeldung weiter;
+freigeschaltete Zugangsdaten liegen noch nicht vor. Kein Lizenzvertrag wurde
+angezeigt oder angenommen, kein SDK heruntergeladen oder als eingebunden
+ausgegeben. Laut
 [ELSTER](https://www.elster.de/elsterweb/infoseite/entwickler) folgt eine
 Herstellerprüfung und Einrichtung des Zugangs innerhalb einiger Tage per
 E-Mail. SDK und echte Empfangsquittung bleiben externe Voraussetzungen.

@@ -219,13 +219,13 @@ class AnnahmeService:
         if candidate_id:
             article = base.filter(ArticleModel.id == candidate_id).first()
             if article is None:
-                article = base.filter(ArticleModel.article_number == candidate_id).first()
+                article = base.filter(ArticleModel.article_number == candidate_id).order_by(ArticleModel.tenant_id.is_(None)).first()
         if article is None and candidate_label:
             article = (
                 base.filter(
                     (ArticleModel.article_number == candidate_label) | (ArticleModel.name == candidate_label)
                 )
-                .order_by(ArticleModel.name.asc())
+                .order_by(ArticleModel.tenant_id.is_(None), ArticleModel.name.asc())
                 .first()
             )
         if article is None:

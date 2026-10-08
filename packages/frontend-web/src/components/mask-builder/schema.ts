@@ -408,6 +408,13 @@ export interface ScreenProcessChainCatalogEntry {
 }
 
 export interface ScreenDefinition {
+  /** Declared native creation; new/neu are never fetched as entity IDs. */
+  creation?: {
+    endpoint: string
+    permission: string
+    detailRoute: string
+    defaults?: Record<string, unknown>
+  }
   schemaVersion: 1
   id: string
   domain: ScreenDomain

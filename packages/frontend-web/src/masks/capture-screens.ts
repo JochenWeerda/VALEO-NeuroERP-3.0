@@ -409,7 +409,7 @@ export const logistikFrachtbriefScreen = {
     kind: 'primary',
     dangerLevel: 'safe',
     zone: 'header',
-    navigationRoute: '/verladung',
+    permission: 'logistics:read', navigationRoute: '/verladung',
   }],
   tables: [{
     key: 'list',
@@ -450,7 +450,7 @@ export const logistikVerladungScreen = {
     kind: 'primary',
     dangerLevel: 'safe',
     zone: 'header',
-    navigationRoute: '/verladung/lkw-beladung',
+    permission: 'logistics:write', navigationRoute: '/verladung/lkw-beladung',
   }],
   tables: [{
     key: 'list',
@@ -684,10 +684,10 @@ export const tourFrachtArbeitsraumScreen = {
   ],
   workflow: { processKey: 'logistik.tour-fracht-arbeitsraum' },
   actions: [
-    { key: 'touren', label: 'Zur Tourenplanung', kind: 'secondary', dangerLevel: 'safe', zone: 'header', navigationRoute: '/logistik/tourenplanung' },
-    { key: 'fracht', label: 'Zu Frachtbriefen', kind: 'secondary', dangerLevel: 'safe', zone: 'header', navigationRoute: '/logistik/frachtbriefe' },
-    { key: 'tabellen', label: 'Frachttabellen', kind: 'secondary', dangerLevel: 'safe', zone: 'header', navigationRoute: '/logistik/frachttabellen' },
-    { key: 'probe', label: 'Probe berechnen', kind: 'primary', dangerLevel: 'safe', zone: 'footer', command: 'fracht.calculateProbe', forbiddenForAgents: true },
+    { key: 'touren', label: 'Zur Tourenplanung', kind: 'secondary', dangerLevel: 'safe', zone: 'header', permission: 'logistics:read', navigationRoute: '/logistik/tourenplanung' },
+    { key: 'fracht', label: 'Zu Frachtbriefen', kind: 'secondary', dangerLevel: 'safe', zone: 'header', permission: 'logistics:read', navigationRoute: '/logistik/frachtbriefe' },
+    { key: 'tabellen', label: 'Frachttabellen', kind: 'secondary', dangerLevel: 'safe', zone: 'header', permission: 'logistics:read', navigationRoute: '/logistik/frachttabellen' },
+    { key: 'probe', label: 'Probe berechnen', kind: 'primary', dangerLevel: 'safe', zone: 'footer', permission: 'logistics:read', command: 'fracht.calculateProbe', forbiddenForAgents: true },
   ],
   tables: [
     {
@@ -781,8 +781,8 @@ export const frachttabellenScreen = {
     { key: 'positionen', label: 'Positionen', value: '0' },
   ],
   actions: [
-    { key: 'anlegen', label: 'Tabelle speichern', kind: 'primary', dangerLevel: 'safe', zone: 'header', command: 'fracht.createTable', forbiddenForAgents: true },
-    { key: 'position', label: 'Position anlegen', kind: 'secondary', dangerLevel: 'safe', zone: 'footer', command: 'fracht.addPosition', forbiddenForAgents: true },
+    { key: 'anlegen', label: 'Tabelle speichern', kind: 'primary', dangerLevel: 'safe', zone: 'header', permission: 'logistics:write', command: 'fracht.createTable', forbiddenForAgents: true },
+    { key: 'position', label: 'Position anlegen', kind: 'secondary', dangerLevel: 'safe', zone: 'footer', permission: 'logistics:write', command: 'fracht.addPosition', forbiddenForAgents: true },
   ],
   tables: [
     {

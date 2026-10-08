@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-07
+last_reviewed: 2026-10-08
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -105,6 +105,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `articles_image_url_20260322` | Add image_url to articles |
 | `articles_master_fields_gap_83_20260215` | Close 8.3 article master-data field gaps. |
 | `articles_model_alignment_20260214` | align domain_inventory.articles with Article model |
+| `artikelnummer_mandant_20261008` | Artikelnummer je Mandant eindeutig statt systemweit. |
 | `audit_attestations_20260917` | Die Attestierung bekommt ihre Tabelle. |
 | `b38680c2f581_add_harvest_acceptance_with_nuts2_` | add_harvest_acceptance_with_nuts2_20260217 |
 | `bank_gl_binding_20261001` | Persist an explicit tenant-bound bank-to-ledger link; no inferred backfill. |

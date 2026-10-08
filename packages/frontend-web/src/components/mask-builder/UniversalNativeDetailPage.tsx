@@ -34,6 +34,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { UniversalMaskRenderer, useHumanActionDispatch, useUniversalMaskRuntime } from '@/components/mask-builder'
+import { UniversalNativeCreatePage } from './UniversalNativeCreatePage'
+import { useScreenPermissions } from './runtime/screen-permissions'
 import { nativeDetailLoadState } from '@/components/mask-builder/native-detail-load-state'
 import { resolveNavigationRoute } from '@/components/mask-builder/runtime/navigation-route'
 import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
@@ -89,7 +91,14 @@ function renderProposedChange(change: unknown, index: number): string {
 
 const MODERATE_OR_ABOVE = new Set(['moderate', 'high', 'critical'])
 
-export function UniversalNativeDetailPage({
+export function UniversalNativeDetailPage(props: UniversalNativeDetailPageProps): JSX.Element {
+  if (props.entityId === 'new' || props.entityId === 'neu') {
+    return <UniversalNativeCreatePage screenId={props.screenId} testId={props.testId} />
+  }
+  return <NativeExistingDetailPage {...props} />
+}
+
+function NativeExistingDetailPage({
   screenId,
   entityId,
   testId,
@@ -108,10 +117,12 @@ export function UniversalNativeDetailPage({
   const [dryRunResult, setDryRunResult] = useState<ActionResult | null>(null)
   const [auditReason, setAuditReason] = useState('')
 
+  const permissions = useScreenPermissions(schemaQuery.data)
   const runtime = useUniversalMaskRuntime({
     screenId,
     entityId,
     schema: schemaQuery.data,
+    permissions,
     enabled: Boolean(entityId) && schemaQuery.data?.adapter?.temporary === false,
   })
   const trackedRecentKey = useRef<string | null>(null)
@@ -142,7 +153,7 @@ export function UniversalNativeDetailPage({
   const actionRuntime = useHumanActionDispatch(schemaQuery.data?.actions ?? [], {
     screenId,
     entityId,
-    permissions: schemaQuery.data?.permissions ?? [],
+    permissions,
   })
 
   // --- Worker: final execute (no UI state ownership) ---
@@ -366,6 +377,7 @@ export function UniversalNativeDetailPage({
         )}
         <UniversalMaskRenderer
           plan={runtime.plan}
+          allowedPermissions={permissions}
           data={runtime.entityData}
           entityId={entityId}
           tables={runtime.tableRows}

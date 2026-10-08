@@ -1,3 +1,4 @@
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 /**
  * Kombinierter Dispo-Arbeitsraum Tour + Frachtbrief.
  * Die Definition zeichnet die Lage. Die Seite laedt Daten und loest Aktionen aus.
@@ -158,7 +159,8 @@ export default function TourFrachtArbeitsraumPage(): JSX.Element {
     })),
   }), [activeTariffs.length, firstCarrierId, isTouch, list.length, probeBusy, probeText, tariffsLoading, touren])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const permissions = useScreenPermissions(schema)
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions }), [schema, permissions])
 
   const handleFreightProbe = useCallback(async () => {
     if (!firstCarrierId) {
@@ -257,6 +259,7 @@ export default function TourFrachtArbeitsraumPage(): JSX.Element {
     <div className="space-y-6 p-3 md:p-6">
       <UniversalMaskRenderer
         plan={plan}
+        allowedPermissions={permissions}
         workflowState={workflow}
         tables={{
           touren: touren.tourenListe.map((tour) => ({

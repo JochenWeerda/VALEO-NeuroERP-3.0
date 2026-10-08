@@ -91,7 +91,7 @@ def test_finance_invoice_endpoint_delegates_to_shared_posting_service(monkeypatc
     }
     monkeypatch.setattr(
         "app.api.v1.endpoints.finance_invoices.SalesPostingService",
-        lambda _db, _tenant_id: posting,
+        lambda _db, _tenant_id, commit=True: posting if commit is False else None,
     )
     invoice = SalesInvoice(
         number="SIV-UAT-002",

@@ -627,6 +627,7 @@ def build_logistik_frachtbrief_screen_definition() -> dict[str, Any]:
                 "dangerLevel": "safe",
                 "zone": "header",
                 "navigationRoute": "/verladung",
+                "permission": "logistics:read",
             },
         ],
         "tables": [
@@ -690,6 +691,7 @@ def build_logistik_verladung_screen_definition() -> dict[str, Any]:
                 "dangerLevel": "safe",
                 "zone": "header",
                 "navigationRoute": "/verladung/lkw-beladung",
+                "permission": "logistics:write",
             },
         ],
         "tables": [
@@ -998,6 +1000,7 @@ def build_logistik_tour_fracht_arbeitsraum_screen_definition() -> dict[str, Any]
                 "dangerLevel": "safe",
                 "zone": "header",
                 "navigationRoute": "/logistik/tourenplanung",
+                "permission": "logistics:read",
             },
             {
                 "key": "fracht",
@@ -1006,6 +1009,7 @@ def build_logistik_tour_fracht_arbeitsraum_screen_definition() -> dict[str, Any]
                 "dangerLevel": "safe",
                 "zone": "header",
                 "navigationRoute": "/logistik/frachtbriefe",
+                "permission": "logistics:read",
             },
             {
                 "key": "tabellen",
@@ -1014,6 +1018,7 @@ def build_logistik_tour_fracht_arbeitsraum_screen_definition() -> dict[str, Any]
                 "dangerLevel": "safe",
                 "zone": "header",
                 "navigationRoute": "/logistik/frachttabellen",
+                "permission": "logistics:read",
             },
             {
                 "key": "probe",
@@ -1022,6 +1027,7 @@ def build_logistik_tour_fracht_arbeitsraum_screen_definition() -> dict[str, Any]
                 "dangerLevel": "safe",
                 "zone": "footer",
                 "command": "fracht.calculateProbe",
+                "permission": "logistics:read",
                 "forbiddenForAgents": True,
             },
         ],
@@ -1149,6 +1155,7 @@ def build_logistik_frachttabellen_screen_definition() -> dict[str, Any]:
                 "dangerLevel": "safe",
                 "zone": "header",
                 "command": "fracht.createTable",
+                "permission": "logistics:write",
                 "forbiddenForAgents": True,
             },
             {
@@ -1158,6 +1165,7 @@ def build_logistik_frachttabellen_screen_definition() -> dict[str, Any]:
                 "dangerLevel": "safe",
                 "zone": "footer",
                 "command": "fracht.addPosition",
+                "permission": "logistics:write",
                 "forbiddenForAgents": True,
             },
         ],
