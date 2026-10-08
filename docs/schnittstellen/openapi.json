@@ -166037,7 +166037,7 @@
         "type": "object"
       },
       "WarehouseCreate": {
-        "description": "Schema for creating a warehouse",
+        "description": "Schema for creating a warehouse.\n\n``tenant_id`` wird nicht mehr verwendet: der Mandant kommt aus dem Kontext.\nDas Feld bleibt optional, damit Altaufrufer nicht an der Validierung scheitern.",
         "properties": {
           "address": {
             "anyOf": [
@@ -166139,9 +166139,16 @@
             "title": "Postal Code"
           },
           "tenant_id": {
-            "description": "Tenant ID",
-            "title": "Tenant Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Ignoriert; Mandant aus dem Kontext",
+            "title": "Tenant Id"
           },
           "warehouse_code": {
             "description": "Unique warehouse code",
@@ -166167,8 +166174,7 @@
         },
         "required": [
           "warehouse_code",
-          "name",
-          "tenant_id"
+          "name"
         ],
         "title": "WarehouseCreate",
         "type": "object"
@@ -440001,24 +440007,6 @@
         "operationId": "list_warehouses_api_v1_warehouses__get",
         "parameters": [
           {
-            "description": "Filter by tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tenant ID",
-              "title": "Tenant Id"
-            }
-          },
-          {
             "description": "Search in warehouse code or name",
             "in": "query",
             "name": "search",
@@ -440062,6 +440050,22 @@
               "title": "Limit",
               "type": "integer"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -440098,7 +440102,7 @@
         ]
       },
       "post": {
-        "description": "Neues Lager anlegen.",
+        "description": "Neues Lager anlegen — im Mandanten aus dem Kontext, nicht aus dem Payload.",
         "operationId": "create_warehouse_api_v1_warehouses__post",
         "requestBody": {
           "content": {
@@ -440150,9 +440154,8 @@
         "operationId": "get_superglue_carrier_rollout_api_v1_warehouses_integrations_superglue_carrier_rollout_get",
         "parameters": [
           {
-            "description": "Tenant ID for rollout summary",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
               "anyOf": [
@@ -440163,8 +440166,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Tenant ID for rollout summary",
-              "title": "Tenant Id"
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -441376,6 +441378,22 @@
             "schema": {
               "title": "Warehouse Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],

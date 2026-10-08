@@ -12,6 +12,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from decimal import Decimal
 from datetime import date, datetime, timedelta
 from pydantic import BaseModel, Field
@@ -184,59 +185,14 @@ async def list_dunning_rules(
         
         return result
         
-    except Exception as e:
-        logger.error(f"Error listing dunning rules: {e}")
-        # Return default rules if table doesn't exist
-        return [
-            DunningRuleResponse(
-                id="1",
-                level=1,
-                days_overdue_min=14,
-                days_overdue_max=29,
-                fee_amount=Decimal("5.00"),
-                fee_percentage=Decimal("0.00"),
-                interest_rate=Decimal("9.00"),
-                payment_deadline_days=14,
-                block_customer=False,
-                escalate_to_collection=False,
-                description_template="Erste Mahnung: Ihre Rechnung ist seit {{days_overdue}} Tagen überfällig.",
-                active=True,
-                created_at=datetime.now(),
-                updated_at=datetime.now()
-            ),
-            DunningRuleResponse(
-                id="2",
-                level=2,
-                days_overdue_min=30,
-                days_overdue_max=59,
-                fee_amount=Decimal("10.00"),
-                fee_percentage=Decimal("0.00"),
-                interest_rate=Decimal("9.00"),
-                payment_deadline_days=14,
-                block_customer=True,
-                escalate_to_collection=False,
-                description_template="Zweite Mahnung: Ihre Rechnung ist seit {{days_overdue}} Tagen überfällig. Bitte zahlen Sie umgehend.",
-                active=True,
-                created_at=datetime.now(),
-                updated_at=datetime.now()
-            ),
-            DunningRuleResponse(
-                id="3",
-                level=3,
-                days_overdue_min=60,
-                days_overdue_max=None,
-                fee_amount=Decimal("15.00"),
-                fee_percentage=Decimal("0.00"),
-                interest_rate=Decimal("9.00"),
-                payment_deadline_days=7,
-                block_customer=True,
-                escalate_to_collection=True,
-                description_template="Letzte Mahnung: Ihre Rechnung ist seit {{days_overdue}} Tagen überfällig. Bei Nichtzahlung werden wir rechtliche Schritte einleiten.",
-                active=True,
-                created_at=datetime.now(),
-                updated_at=datetime.now()
-            )
-        ]
+    except SQLAlchemyError as e:
+        # Bis 08.10.2026 lieferte dieser Weg bei jedem Datenbankfehler drei
+        # erfundene Mahnstufen (Gebuehren 5/10/15 EUR, Ids "1".."3") — und der
+        # Mahnlauf, der diese Funktion nutzt, haette damit echte Mahnungen mit
+        # Gebuehren erzeugt, die kein Mandant je festgelegt hat.
+        db.rollback()
+        logger.error("Error listing dunning rules: %s", e)
+        raise HTTPException(status_code=503, detail="Mahnregeln nicht lesbar") from e
 
 
 @router.post("/rules", response_model=DunningRuleResponse, status_code=201, summary="Dunning rule anlegen")
@@ -737,9 +693,11 @@ async def list_dunnings(
         
         return result
         
-    except Exception as e:
-        logger.error(f"Error listing dunnings: {e}")
-        return []
+    except SQLAlchemyError as e:
+        # Bis 08.10.2026: leere Liste — ein Datenbankfehler sah aus wie "keine Mahnungen".
+        db.rollback()
+        logger.error("Error listing dunnings: %s", e)
+        raise HTTPException(status_code=503, detail="Mahnungen nicht lesbar") from e
 
 
 @router.put("/{dunning_id}/send", response_model=DunningResponse, summary="Dunning senden")

@@ -11,7 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## FOLGEFUNDE-RESTBEFUNDE-20261008 — in Arbeit, Claude Code
+## FOLGEFUNDE-RESTBEFUNDE-20261008 — abgeschlossen, Claude Code
+
+**Abnahme (08.10.2026):** erfundene Mahnregeln/leere Mahnliste bei DB-Fehler -> 503;
+Lager-Seed im Mandanten + kollisionsfreie Seed-Ids; Lagercode je Mandant (Migration
+`lagercode_mandant_20261008`, Probe + Dev); zweiter Lager-Router `/api/v1/warehouses`
+im Mandanten mit Adminrolle; `POST /inventory/warehouses` scheiterte immer (behoben).
+`journal_entries.entry_number` war bereits durch Codex behoben (05.10.). QA:
+[folgefunde-restbefunde-20261008.md](../quality-assurance/folgefunde-restbefunde-20261008.md).
+
 
 **Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** die drei Folgefunde aus
 RESTBEFUNDE-BESTANDSBUCH-20261008 beheben: (1) `GET /dunning/rules` erfindet bei

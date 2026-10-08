@@ -9,6 +9,7 @@ stable article numbers, prices, stock and tenant ownership.
 from __future__ import annotations
 
 import json
+from uuid import NAMESPACE_URL, uuid5
 from decimal import Decimal
 
 from sqlalchemy import text
@@ -256,16 +257,32 @@ def ensure_tenant(conn) -> str:
     return TENANT_ID
 
 
+_SEED_TABELLEN = {"warehouses": "domain_inventory.warehouses", "articles": "domain_inventory.articles"}
+
+
+def _seed_id(conn, tabelle: str, wunsch: str, tenant_id: str) -> str:
+    """Die feste Seed-Id, solange sie frei ist; sonst eine je Mandant abgeleitete.
+
+    Bis 08.10.2026 bekam jeder Mandant dieselbe Id — der zweite seedende Mandant
+    lief auf den Primaerschluessel (oder hatte zuvor den Datensatz uebernommen).
+    """
+    belegt = conn.execute(
+        text(f"SELECT 1 FROM {_SEED_TABELLEN[tabelle]} WHERE id = :id"),  # nosec B608 - Tabellenname aus Konstante
+        {"id": wunsch},
+    ).scalar()
+    return str(uuid5(NAMESPACE_URL, f"valeo-seed:{tabelle}:{tenant_id}:{wunsch}")) if belegt else wunsch
+
+
 def ensure_warehouses(conn, tenant_id: str) -> None:
     for wh in WAREHOUSES:
         exists = conn.execute(
             text(
                 """
                 SELECT 1 FROM domain_inventory.warehouses
-                WHERE warehouse_code = :code
+                WHERE warehouse_code = :code AND tenant_id = :tenant_id
                 """
             ),
-            {"code": wh["warehouse_code"]},
+            {"code": wh["warehouse_code"], "tenant_id": tenant_id},
         ).scalar()
 
         params = {
@@ -284,20 +301,20 @@ def ensure_warehouses(conn, tenant_id: str) -> None:
                 text(
                     """
                     UPDATE domain_inventory.warehouses
-                    SET tenant_id = :tenant_id,
-                        name = :name,
+                    SET name = :name,
                         address = :address,
                         city = :city,
                         postal_code = :postal_code,
                         country = :country,
                         is_active = true
-                    WHERE warehouse_code = :code
+                    WHERE warehouse_code = :code AND tenant_id = :tenant_id
                     """
                 ),
                 params,
             )
             continue
 
+        params["id"] = _seed_id(conn, "warehouses", params["id"], tenant_id)
         conn.execute(
             text(
                 """
@@ -361,6 +378,7 @@ def ensure_articles(conn, tenant_id: str) -> None:
             )
             continue
 
+        params["id"] = _seed_id(conn, "articles", str(params["id"]), tenant_id)
         conn.execute(
             text(
                 """

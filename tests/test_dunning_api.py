@@ -153,16 +153,32 @@ class TestListDunningRules:
         assert data[0]["level"] == 1
         assert data[1]["level"] == 2
 
-    def test_fallback_default_rules_on_db_error(self):
+    def test_db_fehler_erfindet_keine_regeln(self):
+        """Bis 08.10.2026 kamen hier drei erfundene Mahnstufen mit Gebuehren zurueck."""
+        from sqlalchemy.exc import OperationalError
+
         db = FakeDb()
-        db._raise_on_execute = RuntimeError("table missing")
+        db._raise_on_execute = OperationalError("SELECT", {}, Exception("table missing"))
         client = _make_app(db)
         r = client.get("/dunning/rules")
-        assert r.status_code == 200
-        data = r.json()
-        assert len(data) == 3
-        levels = [d["level"] for d in data]
-        assert levels == [1, 2, 3]
+        assert r.status_code == 503
+        assert db.rollback_count >= 1
+
+    def test_mahnlauf_mahnt_nicht_mit_erfundenen_regeln(self):
+        from sqlalchemy.exc import OperationalError
+
+        db = FakeDb()
+        db._raise_on_execute = OperationalError("SELECT", {}, Exception("table missing"))
+        r = _make_app(db).post("/dunning/process", json={})
+        assert r.status_code == 503
+        assert db.commit_count == 0
+
+    def test_db_fehler_ist_keine_leere_mahnliste(self):
+        from sqlalchemy.exc import OperationalError
+
+        db = FakeDb()
+        db._raise_on_execute = OperationalError("SELECT", {}, Exception("table missing"))
+        assert _make_app(db).get("/dunning").status_code == 503
 
     def test_active_only_false_passes_param(self):
         db = FakeDb()
@@ -288,7 +304,7 @@ class TestProcessDunning:
         # über aktiven DB-Return mit leerer Liste UND active_only=False-Weg:
         # process_dunning ruft list_dunning_rules(active_only=True) → wenn DB leer, Fallback greift.
         # => dieser Pfad ist in der Praxis nicht erreichbar; wir testen ihn indirekt.
-        pass  # covered by fallback behavior — see test_fallback_default_rules_on_db_error
+        pass  # DB-Fehler -> 503, siehe test_mahnlauf_mahnt_nicht_mit_erfundenen_regeln
 
     def test_interest_calculation(self):
         """20 Tage überfällig, 9% p.a., 1000€ → 1000 * 0.09 * 20/365 = 4.93"""

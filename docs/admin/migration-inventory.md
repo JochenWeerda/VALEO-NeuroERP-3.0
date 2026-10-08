@@ -307,6 +307,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `l3_recent_documents_20260821` | Personal authorized recent-document projection. |
 | `l3_report_catalog_20260821` | Governed L3 report catalog fact projection. |
 | `l3_runtime_hardening_20260822` | L3 runtime tenant and uniqueness hardening. |
+| `lagercode_mandant_20261008` | Lagercode je Mandant eindeutig statt systemweit. |
 | `lastschrift_mandant_20260930` | Eine Lastschrift gehoert einem Haus. |
 | `lead_pdf_archive_20261007` | Lead qualification reference and persistent PDF content in PostgreSQL. |
 | `lieferschein_abgleich_20261007` | Eingangslieferschein: gegen welche Bestellung abgeglichen, und wann. |

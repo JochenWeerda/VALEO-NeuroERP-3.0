@@ -91,7 +91,7 @@ async def create_warehouse(
     """Create a new warehouse."""
     
     warehouse = WarehouseModel(
-        **warehouse_data.model_dump(),
+        **warehouse_data.model_dump(exclude={"tenant_id"}),
         tenant_id=effective_tenant
     )
     
