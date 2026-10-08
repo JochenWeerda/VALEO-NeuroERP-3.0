@@ -40,7 +40,7 @@ wurden. Der korrigierte Ablauf trennt die 20 isolierten Tests vom realen
 lesenden Schema-Vertrag; keine Produkt- oder Testaussage abgeschwaecht.
 
 Das bestehende Quality Gate bleibt verbindlich rot bei Schemaabweichung.
-Nach konkreter Freigabefrage durch das anschliessende Nutzer-weiter autorisiert:
+Nach ausdruecklicher Nutzer-Freigabe autorisiert:
 Nur nach einem fehlgeschlagenen
 Katalogvergleich erntet derselbe Job seine
 bereits migrierte Datenbank und speichert beide Katalogdateien im Artefakt
@@ -53,8 +53,10 @@ Freigabepruefung hat den Commit mit Upload zweimal abgelehnt, weil der
 frische Schemakatalog zusaetzliche bisher nicht veroeffentlichte Metadaten
 enthalten koennte. Auch die belegte oeffentliche Version der bisherigen
 Katalogdateien ersetzt diese Freigabe laut Pruefung nicht. Die Erweiterung
-war lokal reviewbar in `.github/workflows/quality-gate.yml` und wurde erst
-nach der konkreten Nutzer-Freigabefrage und dem anschliessenden weiter aktiviert.
+war lokal reviewbar in `.github/workflows/quality-gate.yml`. Auch ein erneuter
+Versuch nach weiter wurde von der automatischen Pruefung abgelehnt. Erst die
+anschliessende ausdrueckliche Nachricht "ich erlaube dir den Upload" hat die
+Aktivierung freigegeben; der Commit wurde danach zugelassen.
 Der lokale Pruefstand liefert
 bisher keinen Beleg fuer die genaue Ursache des frischen Schema-Drifts.
 
