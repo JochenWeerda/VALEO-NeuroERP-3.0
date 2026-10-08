@@ -64,7 +64,7 @@ jobs:
         run: kubectl apply -f superglue-rendered.yaml
 
       - name: Upload rendered manifests
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: superglue-rendered-${{ inputs.environment }}
           path: superglue-rendered.yaml

@@ -32,7 +32,7 @@ jobs:
             --output artifacts/docs-drift-report.json
 
       - name: Upload documentation drift report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: docs-drift-report
           path: artifacts/docs-drift-report.json
