@@ -82,6 +82,7 @@ def test_build_index_has_logistics_and_hr_domains() -> None:
     ("bewerbung_einwilligung_service", "hr"),
     ("interessent_service", "crm"),
     ("payment_run_freigabe", "finance"),
+    ("ebilanz_xbrl_service", "finance"),
     ("wareneingang_avis_service", "procurement"),
     ("etikettendruck_service", "inventory"),
     ("schaden_service", "dms-compliance"),

@@ -219,7 +219,9 @@ class TestSuperglueRolloutUnit:
         _app.dependency_overrides[get_db] = lambda: _FakeDb()
         c = TestClient(_app)
 
-        r = c.get("/warehouses/integrations/superglue/carrier-rollout?tenant_id=my-tenant")
+        # Der Mandant kommt aus dem Header; ein Query-Parameter waehlt keinen (08.10.2026).
+        r = c.get("/warehouses/integrations/superglue/carrier-rollout?tenant_id=fremd",
+                  headers={"X-Tenant-ID": "my-tenant"})
         assert r.json()["tenant_id"] == "my-tenant"
 
 
@@ -257,27 +259,29 @@ class TestWarehouseCrudUnit:
                 used_capacity=getattr(item, "used_capacity", 0) or 0,
             )
 
-        payload = WarehouseCreate(warehouse_code="WH-NEW", name="Neu", tenant_id="unit")
+        # Der Mandant kommt aus dem Kontext (Argument), nicht aus dem Payload.
+        payload = WarehouseCreate(warehouse_code="WH-NEW", name="Neu", tenant_id="fremd")
         with patch.object(Warehouse, "model_validate", side_effect=_mv):
             db = _CrudDb()
-            result = asyncio.run(create_warehouse(payload=payload, db=db))
+            result = asyncio.run(create_warehouse(payload=payload, db=db, _="t", tenant_id="unit"))
             assert result.warehouse_code == "WH-NEW"
+            assert db.added.tenant_id == "unit"
             assert db.commit_count == 1
 
             existing = _make_warehouse_mock("WH-1", "WH-NEW", "Neu")
             with pytest.raises(HTTPException) as conflict:
-                asyncio.run(create_warehouse(payload=payload, db=_CrudDb(existing)))
+                asyncio.run(create_warehouse(payload=payload, db=_CrudDb(existing), _="t", tenant_id="unit"))
             assert conflict.value.status_code == 409
 
             existing.name = "Alt"
-            updated = asyncio.run(update_warehouse("WH-1", WarehouseUpdate(name="Aktualisiert"), db=_CrudDb(existing)))
+            updated = asyncio.run(update_warehouse("WH-1", WarehouseUpdate(name="Aktualisiert"), db=_CrudDb(existing), _="t", tenant_id="unit"))
             assert updated.name == "Aktualisiert"
 
             delete_db = _CrudDb(existing)
-            asyncio.run(delete_warehouse("WH-1", db=delete_db))
+            asyncio.run(delete_warehouse("WH-1", db=delete_db, _="t", tenant_id="unit"))
             assert existing.is_active is False
             assert delete_db.commit_count == 1
 
             with pytest.raises(HTTPException) as missing:
-                asyncio.run(update_warehouse("missing", WarehouseUpdate(name="X"), db=_CrudDb()))
+                asyncio.run(update_warehouse("missing", WarehouseUpdate(name="X"), db=_CrudDb(), _="t", tenant_id="unit"))
             assert missing.value.status_code == 404

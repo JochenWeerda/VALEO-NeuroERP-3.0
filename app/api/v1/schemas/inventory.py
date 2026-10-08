@@ -209,8 +209,12 @@ class WarehouseBase(BaseSchema):
 
 
 class WarehouseCreate(WarehouseBase):
-    """Schema for creating a warehouse"""
-    tenant_id: str = Field(..., description="Tenant ID")
+    """Schema for creating a warehouse.
+
+    ``tenant_id`` wird nicht mehr verwendet: der Mandant kommt aus dem Kontext.
+    Das Feld bleibt optional, damit Altaufrufer nicht an der Validierung scheitern.
+    """
+    tenant_id: Optional[str] = Field(None, description="Ignoriert; Mandant aus dem Kontext")
 
 
 class WarehouseUpdate(BaseSchema):

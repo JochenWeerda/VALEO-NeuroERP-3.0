@@ -10,6 +10,11 @@ version: 1.0.0
 
 # Finance — Workflows
 
+eBilanz: Exportmetadaten anlegen, einfache amtliche 6.9-Fakten explizit liefern,
+XML-Entwurf am vorhandenen Export herunterladen. Der Download schreibt keinen
+Status und ersetzt keine amtliche Validierung oder Uebertragung.
+[Betriebsvertrag und offene Fachabnahmen](../../../quality-assurance/ebilanz-xbrl-draft-20261008.md).
+
 Rechnungstapel: kanonische Belegreferenzen sammeln -> Datenqualitaet pruefen ->
 durch abweichenden Benutzer freigeben -> idempotent ausfuehren -> Fehlerzeilen
 mit Quellbeleg und Nachweis klaeren -> begruendet wiederholen.

@@ -5,6 +5,9 @@ from __future__ import annotations
 import uuid
 from datetime import date
 from typing import Any, Optional
+from uuid import UUID
+from fastapi.responses import Response
+from app.services.ebilanz_xbrl_service import VERSION, CORE_FIELDS, catalog_page, fact_text, build_draft
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field, model_validator
@@ -25,30 +28,8 @@ router = APIRouter(prefix="/ebilanz", tags=["finance", "ebilanz", "elster"], dep
 # XBRL taxonomy helpers
 # ---------------------------------------------------------------------------
 
-# Subset of GCD / DE-GAAP taxonomy fields with their classification.
-# Source: XBRL Deutschland eBilanz Taxonomie 6.7
-_TAXONOMY_FELDER: list[dict[str, str]] = [
-    # GCD — Generelle Classified Data
-    {"element": "de-gcd:genInfo.doc.id.companyId.companyName", "klasse": "GCD", "pflicht": "ja", "typ": "string", "label": "Firmenname"},
-    {"element": "de-gcd:genInfo.doc.id.companyId.location.country", "klasse": "GCD", "pflicht": "ja", "typ": "string", "label": "Sitzland"},
-    {"element": "de-gcd:genInfo.doc.period.fiscalYearBegin", "klasse": "GCD", "pflicht": "ja", "typ": "date", "label": "Beginn Wirtschaftsjahr"},
-    {"element": "de-gcd:genInfo.doc.period.fiscalYearEnd", "klasse": "GCD", "pflicht": "ja", "typ": "date", "label": "Ende Wirtschaftsjahr"},
-    {"element": "de-gcd:genInfo.doc.id.reportElement.statementType", "klasse": "GCD", "pflicht": "ja", "typ": "string", "label": "Berichtsart"},
-    {"element": "de-gcd:genInfo.doc.id.companyId.taxNumber", "klasse": "GCD", "pflicht": "ja", "typ": "string", "label": "Steuernummer"},
-    {"element": "de-gcd:genInfo.doc.id.companyId.financialAuthority", "klasse": "GCD", "pflicht": "ja", "typ": "string", "label": "Finanzamt-Nummer"},
-    # GAAP — Bilanzpositionen (DE-HGB)
-    {"element": "de-gaap-ci:bs.ass.fixAss", "klasse": "GAAP", "pflicht": "nein", "typ": "monetary", "label": "Anlagevermögen"},
-    {"element": "de-gaap-ci:bs.ass.currAss", "klasse": "GAAP", "pflicht": "nein", "typ": "monetary", "label": "Umlaufvermögen"},
-    {"element": "de-gaap-ci:bs.ass.currAss.receiv.tradeReceiv", "klasse": "GAAP", "pflicht": "nein", "typ": "monetary", "label": "Forderungen aus L+L"},
-    {"element": "de-gaap-ci:bs.ass.currAss.cashInHand", "klasse": "GAAP", "pflicht": "nein", "typ": "monetary", "label": "Kassenbestand/Bank"},
-    {"element": "de-gaap-ci:bs.eqLiab.equity", "klasse": "GAAP", "pflicht": "nein", "typ": "monetary", "label": "Eigenkapital"},
-    {"element": "de-gaap-ci:bs.eqLiab.liab.notesPayable.tradeAccPayable", "klasse": "GAAP", "pflicht": "nein", "typ": "monetary", "label": "Verbindlichkeiten aus L+L"},
-    {"element": "de-gaap-ci:is.netIncome", "klasse": "GAAP", "pflicht": "nein", "typ": "monetary", "label": "Jahresüberschuss/-fehlbetrag"},
-    {"element": "de-gaap-ci:is.grossProfit", "klasse": "GAAP", "pflicht": "nein", "typ": "monetary", "label": "Rohergebnis"},
-]
-
-# Pflichtfelder aus GCD-Taxonomie
-_GCD_PFLICHTFELDER = [f["element"] for f in _TAXONOMY_FELDER if f["pflicht"] == "ja"]
+# Local application draft prerequisites, not an official Mussfeld matrix.
+_GCD_PFLICHTFELDER = list(CORE_FIELDS)
 
 
 # Schema ownership belongs to Alembic, never to a request handler.
@@ -113,6 +94,10 @@ class EBilanzExportRequest(BaseModel):
             raise ValueError("Unbekannte Bilanzart")
         if not self.steuernummer.strip() or not self.finanzamt_nr.strip():
             raise ValueError("Steuernummer und Finanzamt duerfen nicht leer sein")
+        if self.berichtsperiode_von.year not in (2025, 2026):
+            raise ValueError("Taxonomie 6.9 nur fuer Periodenbeginn 2025/2026 abgenommen")
+        if self.wirtschaftsjahr != self.berichtsperiode_von.year:
+            raise ValueError("Wirtschaftsjahr und Periodenbeginn widersprechen sich")
         return self
 
 
@@ -120,7 +105,7 @@ class EBilanzExportResult(BaseModel):
     export_id: str
     status: str  # ERSTELLT / VALIDIERT / UEBERTRAGEN / FEHLER
     xbrl_paketgroesse_kb: int = 0
-    taxonomie_version: str = "6.7"
+    taxonomie_version: str = VERSION
     validierungsfehler: list[str] = Field(default_factory=list)
     hinweise: list[str] = Field(default_factory=list)
 
@@ -152,18 +137,18 @@ class EricReadinessOut(BaseModel):
 @router.get("/taxonomie-felder", summary="Felder taxonomie",
     response_model=list[EbilanzElsterOut]
 )
-def taxonomie_felder() -> list[dict]:
-    """Return the list of XBRL taxonomy fields with GCD/GAAP classification."""
-    return _TAXONOMY_FELDER
+def taxonomie_felder(limit: int = Query(100, ge=1, le=1000), skip: int = Query(0, ge=0)) -> list[dict]:
+    """Paged official 6.9 GCD/core concepts, not industry or ERiC rule coverage."""
+    return catalog_page(limit, skip)
 
 
 @router.get("/eric-readiness", response_model=EricReadinessOut, summary="Readiness eric")
 def eric_readiness() -> dict:
     """Report actual repository capabilities; external transmission is unavailable."""
     return {"status": "NOT_READY_EXTERNAL_GATE", "repo_contract_ready": False,
-            "xbrl_taxonomie_version": "6.7",
-            "supported_paths": ["Taxonomie-Feldkatalog (Teilmenge)", "Lokale GCD-Pflichtfeldpruefung", "Export-Entwurfsmetadaten", "Unbestaetigter lokaler Status"],
-            "external_gates": ["Vollstaendiges XBRL-Dokument und echte Taxonomievalidierung fehlen",
+            "xbrl_taxonomie_version": VERSION,
+            "supported_paths": ["Amtlicher 6.9 GCD-/Kernkonzeptkatalog", "Lokale Entwurfsvorpruefung", "XML-Entwurf einfacher expliziter Fakten (unvalidiert)", "Export-Entwurfsmetadaten", "Unbestaetigter lokaler Status"],
+            "external_gates": ["Steuerliche Tupel-/Dimensions-/Kontenzuordnung und amtliche Validierung fehlen",
                                "ERiC-Bibliothek/Zertifikat und echte Empfangsquittung fehlen"],
             "next_action": "Vollstaendigen XBRL- und ERiC-Fachweg implementieren und extern abnehmen"}
 
@@ -172,10 +157,15 @@ def eric_readiness() -> dict:
 def validieren_ebilanz(payload: EBilanzValidierungsRequest) -> dict:
     """Local presence checks only, never official XBRL/ERiC validation."""
     fehlende = [key for key in _GCD_PFLICHTFELDER if payload.felder.get(key) is None or str(payload.felder[key]).strip() == ""]
-    bekannte = {field["element"] for field in _TAXONOMY_FELDER}
-    warnungen = [f"Unbekanntes Taxonomie-Feld: '{key}'" for key in sorted(payload.felder) if key not in bekannte]
+    warnungen = []
+    for key, value in sorted(payload.felder.items()):
+        try:
+            fact_text(key, value)
+        except ValueError as exc:
+            warnungen.append(str(exc))
+    lokale_fehler = bool(warnungen)
     warnungen.append("Nur lokale Pflichtfeldpruefung; keine vollstaendige XBRL-/ERiC-Validierung.")
-    return {"valid": not fehlende, "fehlende_felder": fehlende, "warnungen": warnungen}
+    return {"valid": not fehlende and not lokale_fehler, "fehlende_felder": fehlende, "warnungen": warnungen}
 
 
 @router.get("/meldungen", summary="Meldungen auflisten",
@@ -195,16 +185,44 @@ def erstellen(payload: EBilanzExportRequest, db: Session = Depends(get_db),
         db.execute(text("""INSERT INTO domain_finance.ebilanz_exports
             (id, tenant_id, wirtschaftsjahr, bilanzart, berichtsperiode_von, berichtsperiode_bis,
              steuernummer, finanzamt_nr, status, taxonomie_version, xbrl_paketgroesse_kb)
-            VALUES (:id, :tid, :wj, :art, :von, :bis, :stnr, :fanr, 'ERSTELLT', '6.7', 0)"""),
-            {"id": export_id, "tid": tenant_id, "wj": payload.wirtschaftsjahr, "art": payload.bilanzart,
+            VALUES (:id, :tid, :wj, :art, :von, :bis, :stnr, :fanr, 'ERSTELLT', :taxonomie, 0)"""),
+            {"taxonomie": VERSION, "id": export_id, "tid": tenant_id, "wj": payload.wirtschaftsjahr, "art": payload.bilanzart,
              "von": payload.berichtsperiode_von.isoformat(), "bis": payload.berichtsperiode_bis.isoformat(),
              "stnr": payload.steuernummer, "fanr": payload.finanzamt_nr})
         db.commit()
     except SQLAlchemyError as exc:
         raise _unavailable(db) from exc
     return {"export_id": export_id, "status": "ERSTELLT", "xbrl_paketgroesse_kb": 0,
-            "taxonomie_version": "6.7", "validierungsfehler": [],
-            "hinweise": ["Entwurfsmetadaten gespeichert; vollstaendiges XBRL-Dokument und ELSTER-Uebertragung fehlen."]}
+            "taxonomie_version": VERSION, "validierungsfehler": [],
+            "hinweise": ["Entwurfsmetadaten gespeichert; einfacher XML-Entwurf separat abrufbar, amtliche Validierung und ELSTER-Uebertragung fehlen."]}
+
+
+class XbrlDraftRequest(BaseModel):
+    entity_identifier: str = Field(min_length=1, max_length=100)
+    entity_scheme: str = Field(min_length=1, max_length=500)
+    facts: dict[str, str | None] = Field(min_length=1, max_length=2000)
+
+
+@router.post("/export/{export_id}/xbrl-entwurf", response_class=Response,
+             summary="Unvalidierten XBRL-Entwurf als XML herunterladen",
+             responses={200: {"content": {"application/xml": {"schema": {"type": "string"}}}}},
+             dependencies=[Depends(finance_write)])
+def xbrl_entwurf(export_id: UUID, payload: XbrlDraftRequest, db: Session = Depends(get_db),
+                 tenant_id: str = Depends(get_tenant_id)) -> Response:
+    row = _export(db, tenant_id, str(export_id))
+    if row["taxonomie_version"] != VERSION or row["bilanzart"] not in ("HGB", "EStG"):
+        raise HTTPException(409, "Exportversion nicht im amtlichen 6.9-Entwurfsweg abgenommen")
+    try:
+        content = build_draft(payload.facts, date.fromisoformat(str(row["berichtsperiode_von"])),
+                              date.fromisoformat(str(row["berichtsperiode_bis"])),
+                              payload.entity_identifier, payload.entity_scheme)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return Response(content, media_type="application/xml", headers={
+        "Content-Disposition": f'attachment; filename="ebilanz-{export_id}-entwurf.xml"',
+        "X-XBRL-Status": "DRAFT_UNVALIDATED", "X-XBRL-Taxonomy": VERSION,
+        "Cache-Control": "no-store",
+    })
 
 
 @router.post("/export/{export_id}/validieren", response_model=EbilanzElsterOut,

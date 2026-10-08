@@ -10,6 +10,9 @@ version: 1.0.0
 
 # Finance — Entscheidungen
 
+- [ADR-079 Proposed](../../../adr/adr-079-ebilanz-xbrl-drafts.md): amtlicher
+  Konzeptkatalog und expliziter unvalidierter XML-Entwurf, kein neuer Kontext.
+
 - [ADR-061](../../../adr/adr-061-billing-batch-orchestration.md) - Rechnungstapel als Orchestrierung kanonischer Belege
 
 | ADR | Titel |

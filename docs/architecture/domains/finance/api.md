@@ -10,6 +10,17 @@ version: 1.0.0
 
 # Finance — API
 
+## eBilanz XML-Entwurf (2026-10-08)
+
+GET /api/v1/ebilanz/taxonomie-felder: amtliche 6.9 GCD-/Kernkonzepte mit limit
+1..1000 (Default 100) und skip ab 0. POST /api/v1/ebilanz/export/{export_id}/xbrl-entwurf:
+entity_identifier, entity_scheme und facts als Konzeptname -> Dezimal-/Textstring
+oder nil. Echte application/xml-Antwort, DRAFT_UNVALIDATED, no-store; Finance-
+Schreibrecht und vorhandener Export im Request-Mandanten erforderlich.
+Version/IFRS 409, Fakten-/Periodenfehler 422, fehlender/fremder Export 404.
+Kein Persistenz-/Amtlichkeits-/Uebertragungserfolg.
+[Vertrag und Grenzen](../../../quality-assurance/ebilanz-xbrl-draft-20261008.md).
+
 ## Kassen-Tagesabschluss: unbewerteten Direktbuchungsweg gesperrt
 
 POST /api/v1/finance/cash/close-day antwortet mit HTTP 409 und fachlichem

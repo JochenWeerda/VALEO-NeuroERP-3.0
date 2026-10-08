@@ -1,0 +1,25 @@
+slice_id: EBILANZ-XBRL-DRAFT-20261008
+title: Amtlicher Konzeptkatalog und echter unvalidierter XML-Entwurf
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-08
+goal: Falsche GCD-Konzepte entfernen und einen pruefbaren echten XML-Download integrieren.
+file_ownership:
+  - scripts/build_ebilanz_taxonomy_catalog.py
+  - app/data/ebilanz/taxonomy-6.9.json
+  - app/services/ebilanz_xbrl_service.py
+  - app/api/v1/endpoints/ebilanz_elster.py nur Katalog, Vorpruefung, Version und Download
+  - tests/test_ebilanz_xbrl_draft.py
+  - tests/test_ebilanz_honest_persistence.py nur XBRL-Vertraege
+  - Eigene QA, ADR Proposed, Finance-Domain-Pack und generierte committed-source Artefakte
+acceptance_criteria:
+  - Amtlicher SHA256 und deterministische 3944 Konzepte
+  - Echte qualified XML-Bytes und sichtbarer DRAFT_UNVALIDATED-Status
+  - Rollen, Mandant, Perioden, Typen und fehlende Konzepte pruefen
+  - Keine Statusmutation, externe Uebertragung oder fingierte Annahme
+risks:
+  - Vollvalidierung, Kontenzuordnung, Tupel und Dimensionen offen
+  - ERiC-SDK/Zertifikate/Empfangsquittung fehlen
+  - Alte andere Taxonomieversionen im neuen Download nicht abgenommen
+test_database: Vorhandener valeo_probe; eigene Transaktionen/Savepoints, keine neue DB/Container.
+validation: 49 XML/HTTP/PostgreSQL-Vertraege und 25 Architekturvertraege gruen; komplette Zuordnung und deterministische Inventare/OpenAPI.

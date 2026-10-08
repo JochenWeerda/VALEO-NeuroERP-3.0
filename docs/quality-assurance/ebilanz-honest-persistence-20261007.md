@@ -75,6 +75,11 @@ date.today-Stellen entfernt. Keine neue Ausnahme oder erhoehter Schwellwert.
 
 ## Explizit offen
 
+Ergaenzung 2026-10-08: Der historische Teilkatalog und neue Entwurfsmetadaten
+verwenden inzwischen amtlich abgeleitete Taxonomie 6.9. Ein echter einfacher
+XML-Entwurf ist verfuegbar; die nachfolgenden Grenzen fuer Vollvalidierung und
+ERiC gelten weiterhin. [Aktueller Nachweis](ebilanz-xbrl-draft-20261008.md).
+
 Vollstaendiges, versioniertes XBRL mit Bilanz-/GuV-Daten, echte amtliche
 Taxonomievalidierung und ERiC mit Zertifikat und nachweisbarer Empfangsquittung
 sind noch nicht implementiert. Eine brauchbare steuerliche Meldung wird daher

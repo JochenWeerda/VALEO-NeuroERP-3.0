@@ -11,7 +11,29 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## FOLGEFUNDE-RESTBEFUNDE-20261008 — in Arbeit, Claude Code
+## OFFENES-SCHLIESSEN-20261008 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** offene Punkte schliessen: (1)
+Gelangensbestaetigung: Dublette antwortet 503 statt 409, UAT-Vertrag mit fester
+Lieferschein-Nr. nicht wiederholbar; (2) `/purchase-orders/{id}/communications` schreibt in
+den Dokumentspeicher; (3) `domain_erp.bank_accounts.account_number` systemweit eindeutig;
+(4) `domain_ops.ops_bankkonten` ohne `tenant_id` — `/banken/konten` zeigt und aendert
+Bankkonten aller Mandanten; `/konten/iban-validate` hinter `/konten/{id}` unerreichbar.
+**Dateibesitz:** Gelangensbestaetigung-Endpoint + UAT-Test, PO-Kommunikationswege in
+`compat.py`, `banken.py`, `domain_operations` BankKonto-Modell/-Repository, eine additive
+Migration, neue Tests, QA-Doku. BANK-RECONCILIATION-PROOF (Codex) betrifft
+`domain_erp.bank_accounts`-Abgleich, nicht diese Constraints/`ops_bankkonten` — unberuehrt.
+
+
+## FOLGEFUNDE-RESTBEFUNDE-20261008 — abgeschlossen, Claude Code
+
+**Abnahme (08.10.2026):** erfundene Mahnregeln/leere Mahnliste bei DB-Fehler -> 503;
+Lager-Seed im Mandanten + kollisionsfreie Seed-Ids; Lagercode je Mandant (Migration
+`lagercode_mandant_20261008`, Probe + Dev); zweiter Lager-Router `/api/v1/warehouses`
+im Mandanten mit Adminrolle; `POST /inventory/warehouses` scheiterte immer (behoben).
+`journal_entries.entry_number` war bereits durch Codex behoben (05.10.). QA:
+[folgefunde-restbefunde-20261008.md](../quality-assurance/folgefunde-restbefunde-20261008.md).
+
 
 **Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** die drei Folgefunde aus
 RESTBEFUNDE-BESTANDSBUCH-20261008 beheben: (1) `GET /dunning/rules` erfindet bei
@@ -91,6 +113,10 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 `docs/README.md` und Domain-Depth-Plan verweisen auf den Hub.
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
+
+**EBILANZ-XBRL-MAPPING-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Erweiterung des eigenen XML-Claims: config/architecture-domain-prefixes.yaml ausschliesslich exact_service_stems ebilanz_xbrl_service -> finance; tests/test_generate_architecture_index.py ein genau passender Regressionsfall. Complete-Generator hat genau diesen neuen Service ungemappt gemeldet. Kein generischer Prefix, keine fremden Maps, kein neuer Kontext/Container. Abnahme vorhandene Architekturvertraege und complete/check; gemeinsame QA/Slice/Workboard. Abnahme: 25 Architekturvertraege gruen, complete/check: 935/935 Routen, 277/277 Services, 454/454 Endpoints. Exakter Finance-Override und ADR-079 Proposed dokumentiert; drei Codeinventare aktuell. Kein neuer Kontext/Container.
+
+**EBILANZ-XBRL-DRAFT-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Amtliches Taxonomiepaket 6.9 geladen, SHA256 accd62202d73c036910fee118b30730f0392934afc9730617788e30a0480df87; bisheriger 6.7-Teilfeldkatalog mit falschen GCD-Pfaden. Besitz neuer deterministischer Kataloggenerator/amtlich abgeleiteter Daten, ebilanz_xbrl_service nur echte XML-Entwuerfe aus expliziten einfachen Fakten (QName/Typ/Context/Unit, keine geratenen Kontenzuordnungen), ebilanz_elster.py nur Katalog/Paging, ehrliche lokale Vorpruefung, Taxonomie-6.9-Entwurfsmetadaten und rollen-/tenantgeschuetzter XML-Download am bestehenden Export. Neue Parser/XML/HTTP-Vertraege, bestehender lokaler eBilanz-Testvertrag, ADR Proposed, Finance-Domain-Pack, QA/Slice/Open-Gaps/Workboard und committed-source Inventare/OpenAPI/Architektur. Kein neuer Container/DB/Reset/Migration, keine Uebertragung, keine vorgetaeuschte offizielle Validierung, historische Exportdaten erhalten. Taxonomie 6.9 fuer Periodenbeginn 2025/2026; 6.10 zukuenftiger ERiC-Fachweg, andere Perioden explizit nicht abgenommen. Arelle-/ERiC-Vollvalidierung, Tuple-/Dimension-/Kontenmapping und Empfang bleiben offen. Fremde Workflow-/Frontend-/Restbefundhunks geschuetzt. Abnahme: 49 Katalog-/XML-/HTTP-/PostgreSQL-Vertraege gruen (4,78 s). Echte amtlich abgeleitete 3944 Konzepte und unvalidierte XML-Bytes, keine Status-/Ticketmutation, keine neue DB/Container/Migration. 3591/3591 API-Beschreibungen und Antwortvertraege bei Schwelle 0; 3105 OpenAPI-Pfade deterministisch, nur XML-Pfad neu; vorhandene 30 Doppelgruppen bleiben offen. Vollvalidierung, Kontenzuordnung, Tupel/Dimensionen und ERiC bleiben offen bis SDK/Zertifikate/Empfang. Handshake: Architektur-Generator versehentlich im geteilten Baum ausgefuehrt; fremder gestagter Index erhalten, vorheriger ungestagter Inhalt ohne gesicherte Kopie nicht blind restauriert. Lieferung ausschliesslich isoliert generiert, siehe eigene QA.
 
 **CI-DECLARED-CONTRACTS-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Offene belegte Deklarationsdrift: neun direkte Workspace-Manifeste nennen verwundbare i18next-http-backend-/instrumentation-pg-Versionen trotz reparierter zentraler Overrides und Lock-Aufloesung. Besitz ausschliesslich diese neun direkten Versionsfelder, unveraenderte Lock-Aufloesung/frozen-Pruefung und bestehende echte Runtime-Vertraege. Response-Gate zaehlt verschachtelte Dependencies, typisierte Studio-Returnwerte und Datei-/204-Antworten falsch: scripts/check_response_models.py nur AST-basierte routenbezogene Erkennung, neue reine Parser-Vertraege, quality-gate.yml nur Schwelle 20 auf 0 nach echter Bestandsabnahme. Kein Any-/None-Ausnahmehunk in Endpoints, keine Security-Ausnahme, kein Versions-Spoof. Fremde Workflow-/Frontend-/Manifesthunks erhalten. QA/Open-Gaps/Workboard nachziehen; keine neue DB/Container/Reset. Ungepatchte node-forge/braces und echter XBRL-/ERiC-Weg bleiben separate offene Befunde. Abnahme: 3590/3590 Antwortvertraege, Schwelle/default 0; 15 neue Parser-Regressionen und bestehende Policy-/Studio-Vertraege zusammen 45 gruen. Echte FastAPI-Modelle Studio 9/9 und Policy 8/8 bestaetigt. Neun direkte Manifeste mit vorhandenen Herstellerfix-Overrides harmonisiert; Lockfile byteidentisch, frozen/offline alle 36 Workspaces, sechs echte Runtime-Tests gruen. Production-Audit 2053 Abhaengigkeiten: 0 critical/moderate/low, 2 high ohne Herstellerfix weiterhin Exit 1. GitHub-Smoke des Masken-Meilensteins c59df8391 in allen fuenf Domaenen gruen; Quality durch Folgepush abgebrochen. Geteilter Baum unter fremden Folgefund-Aenderungen, Kalender-/Baseline-Drift kein eigener Befund; keine pauschale Gesamtabnahme.
 

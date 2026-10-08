@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-07
+last_reviewed: 2026-10-08
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -100,6 +100,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `document_allocation_service` | FSX-MENGENMODELL — Zuordnen von Teilmengen zwischen Belegpositionen. |
 | `document_control_projection` | Project document-control exceptions from canonical source documents. |
 | `document_control_service` | Central document-control exception worklist (Beleg-Kontrolle). |
+| `ebilanz_xbrl_service` | Real simple-fact XBRL drafts; neither tax-rule validation nor ELSTER submission. |
 | `einkauf_compat_service` | Service layer for compat einkauf domain routes. |
 | `einvoice_generator` | E-Rechnung XRechnung/ZUGFeRD Generator (EN 16931). |
 | `esg_footprint_service` | ESG-CO2e-Fussabdruck je Charge (UIX-082) — auditierbarer Berechnungskern. |

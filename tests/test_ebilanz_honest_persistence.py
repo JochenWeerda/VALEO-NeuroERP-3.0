@@ -58,6 +58,51 @@ def create(context):
     return response.json()['export_id']
 
 
+def _xbrl_payload():
+    return {'entity_identifier': 'Test-Entity', 'entity_scheme': 'https://example.invalid/entity',
+            'facts': dict(zip(ebilanz_elster.CORE_FIELDS,
+                             ['Test & Betrieb', 'Deutschland', '2025-01-01', '2025-12-31']))}
+
+
+def test_xbrl_real_download_with_tenant_roles_and_no_status_mutation(context):
+    from xml.etree import ElementTree as ET
+    db, client, tenant, foreign, user, queries = context
+    export_id = create(context)
+    row = db.execute(text('SELECT taxonomie_version FROM domain_finance.ebilanz_exports WHERE id=:id'), {'id':export_id}).scalar()
+    assert row == '6.9'
+    url = f'/ebilanz/export/{export_id}/xbrl-entwurf'
+    response = client.post(url, json=_xbrl_payload())
+    assert response.status_code == 200, response.text
+    assert response.headers['x-xbrl-status'] == 'DRAFT_UNVALIDATED'
+    assert response.headers['cache-control'] == 'no-store'
+    assert ET.fromstring(response.content).tag == '{http://www.xbrl.org/2003/instance}xbrl'
+    assert client.post(url, json=_xbrl_payload(), headers={'X-Tenant-ID':foreign}).status_code == 404
+    user['roles'] = ['FINANCE_READ']
+    assert client.post(url, json=_xbrl_payload()).status_code == 403
+    user['roles'] = ['FINANCE_ADMIN']
+    assert db.execute(text('SELECT status,elster_transfer_ticket,xbrl_paketgroesse_kb FROM domain_finance.ebilanz_exports WHERE id=:id'), {'id':export_id}).one() == ('ERSTELLT', None, 0)
+
+
+def test_xbrl_conflicting_period_and_historical_version_are_rejected(context):
+    db, client, tenant, foreign, user, queries = context
+    export_id = create(context); payload = _xbrl_payload()
+    payload['facts'][ebilanz_elster.CORE_FIELDS[3]] = '2025-12-30'
+    url = f'/ebilanz/export/{export_id}/xbrl-entwurf'
+    assert client.post(url, json=payload).status_code == 422
+    db.execute(text("UPDATE domain_finance.ebilanz_exports SET taxonomie_version='6.7' WHERE id=:id"), {'id':export_id})
+    assert client.post(url, json=_xbrl_payload()).status_code == 409
+
+
+def test_official_catalog_paging_and_unknown_fact_precheck(context):
+    client = context[1]
+    assert len(client.get('/ebilanz/taxonomie-felder?limit=2&skip=2').json()) == 2
+    assert client.get('/ebilanz/taxonomie-felder?limit=1001').status_code == 422
+    assert client.get('/ebilanz/taxonomie-felder?skip=3944').json() == []
+    fields = _xbrl_payload()['facts']; fields['de-gcd:invented'] = 'value'
+    body = client.post('/ebilanz/validieren', json={'felder':fields}).json()
+    assert body['valid'] is False and any('Unbekanntes Konzept' in text for text in body['warnungen'])
+
+
 def test_real_draft_no_request_ddl_or_invented_package(context):
     db, client, tenant, foreign, user, queries = context
     export_id = create(context)
@@ -153,6 +198,6 @@ def test_invalid_draft_never_persists(context,changes):
 
 def test_missing_and_blank_required_fields_are_not_valid(context):
     result = context[1].post('/ebilanz/validieren',json={'felder':{key:' ' for key in ebilanz_elster._GCD_PFLICHTFELDER}}).json()
-    assert result['valid'] is False and len(result['fehlende_felder']) == 7
+    assert result['valid'] is False and set(result['fehlende_felder']) == set(ebilanz_elster.CORE_FIELDS)
     ready = context[1].get('/ebilanz/eric-readiness').json()
     assert ready['repo_contract_ready'] is False and ready['status'] == 'NOT_READY_EXTERNAL_GATE'
