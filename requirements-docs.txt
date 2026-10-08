@@ -7,3 +7,10 @@
 mkdocs-material==9.7.7
 mike==2.1.3
 mkdocs-swagger-ui-tag==0.8.0
+
+# Native ScreenDefinition builders import the canonical mailbox usage contract.
+# Keep its import dependencies explicit; docs do not need the full backend stack.
+httpx==0.28.1
+SQLAlchemy==2.0.41
+cryptography==50.0.1
+fastapi==0.136.3
