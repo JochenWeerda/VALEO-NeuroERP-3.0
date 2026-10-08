@@ -83,7 +83,8 @@ def _post_sales_invoice_financials(
     invoice: SalesInvoice,
     tenant_id: str,
 ) -> dict[str, str]:
-    return SalesPostingService(db, tenant_id).post_ausgangsrechnung_with_op(
+    """Buchung + offener Posten in der Transaktion des Aufrufers (kein eigener Commit)."""
+    return SalesPostingService(db, tenant_id, commit=False).post_ausgangsrechnung_with_op(
         invoice_number=invoice.number,
         invoice_date=invoice.date,
         customer_id=invoice.customerId,
@@ -92,6 +93,13 @@ def _post_sales_invoice_financials(
         gross_amount=invoice.totalGross,
         due_date=invoice.dueDate,
     )
+
+
+def _beleg_speichern(repo, number: str, data: dict) -> dict:
+    """Rechnungsbeleg ohne eigenen Commit; ohne Datenbank (kein Repository) der Prozessspeicher."""
+    if repo is None:
+        return save_to_store("sales_invoice", number, data, repo)
+    return repo.save_document("sales_invoice", number, data, commit=False)
 
 
 @router.post("", response_model=FinanceInvoicesOut, summary="Invoice anlegen")
@@ -129,7 +137,10 @@ async def create_invoice(
             invoice.dueDate = (invoice_date + timedelta(days=payment_days)).strftime("%Y-%m-%d")
 
         doc_data = invoice.model_dump()
-        result = save_to_store("sales_invoice", invoice.number, doc_data, repo)
+        # Beleg, Buchung, offener Posten, Archiv und Lieferscheinbezug: ein Commit am
+        # Ende. Bis 08.10.2026 committete der Dokumentspeicher zuerst; scheiterte die
+        # Buchung, stand die Rechnung ohne Buchung und ohne offenen Posten da.
+        result = _beleg_speichern(repo, invoice.number, doc_data)
 
         if invoice.status != "ENTWURF":
             _post_sales_invoice_financials(db, invoice, tenant_id)
@@ -180,8 +191,10 @@ async def create_invoice(
         }
 
     except HTTPException:
+        db.rollback()
         raise
     except Exception as e:
+        db.rollback()
         logger.error("Error creating invoice: %s", str(e), exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to create invoice: {str(e)}")
 
@@ -231,11 +244,13 @@ async def update_invoice(
         if invoice.totalGross == 0.0:
             invoice.totalGross = invoice.subtotalNet + invoice.totalTax
 
-        result = save_to_store("sales_invoice", invoice_number, invoice.model_dump(), repo)
+        result = _beleg_speichern(repo, invoice_number, invoice.model_dump())
 
         old_status = existing.get("status", "ENTWURF")
         if old_status == "ENTWURF" and invoice.status != "ENTWURF":
             _post_sales_invoice_financials(db, invoice, tenant_id)
+        # Beleg und Buchung gemeinsam (wie beim Anlegen).
+        db.commit()
 
         logger.info("Invoice updated: %s", invoice_number)
         return {
@@ -246,8 +261,10 @@ async def update_invoice(
         }
 
     except HTTPException:
+        db.rollback()
         raise
     except Exception as e:
+        db.rollback()
         logger.error("Error updating invoice: %s", str(e), exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to update invoice: {str(e)}")
 

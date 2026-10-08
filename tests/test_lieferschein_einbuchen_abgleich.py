@@ -65,11 +65,11 @@ def stamm(engine):
                       {"i": haus, "n": f"Pruefbetrieb {haus}"})
         v.execute(text("INSERT INTO domain_einkauf.lieferanten (id, tenant_id, lieferantennummer, firmenname) "
                        "VALUES (:i, :h, :n, 'Saatzucht Nord')"), {"i": LIEFERANT, "h": HAUS_A, "n": f"LF-{LIEFERANT[:6]}"})
-        # Artikelnummern sind (noch) systemweit eindeutig; ueber Mandanten greift nur die
-        # Artikel-Id, die eine Position ebenfalls tragen darf.
+        # Gleiche Artikelnummer in beiden Mandanten (je Mandant eindeutig seit
+        # 08.10.2026): aufgeloest werden darf nur der eigene Artikel.
         for a, haus in ((artikel, HAUS_A), (fremdartikel, HAUS_B)):
             v.execute(text("INSERT INTO domain_inventory.articles (id, article_number, name, tenant_id, current_stock) "
-                           "VALUES (:i, :n, 'Saatweizen', :h, 0)"), {"i": a, "n": f"SW-{a[:8]}-{haus}", "h": haus})
+                           "VALUES (:i, :n, 'Saatweizen', :h, 0)"), {"i": a, "n": f"SW-{HAUS_A}", "h": haus})
         v.execute(text("INSERT INTO domain_inventory.warehouses (id, warehouse_code, name, tenant_id, is_active) "
                        "VALUES (:i, :c, 'Halle 2', :h, true)"), {"i": lager, "c": f"H-{lager[:8]}", "h": HAUS_A})
         v.execute(text("INSERT INTO domain_inventory.warehouse_zones (id, warehouse_id, zone_code, name, tenant_id) "
@@ -77,7 +77,7 @@ def stamm(engine):
         v.execute(text("INSERT INTO domain_inventory.warehouse_bins (id, zone_id, warehouse_id, bin_code, tenant_id, "
                        " capacity_kg) VALUES (:i, :z, :w, 'B-01', :h, 100000)"),
                   {"i": platz, "z": zone, "w": lager, "h": HAUS_A})
-    yield {"artikel": artikel, "fremdartikel": fremdartikel, "lager": lager, "platz": platz, "nummer": f"SW-{artikel[:8]}-{HAUS_A}"}
+    yield {"artikel": artikel, "fremdartikel": fremdartikel, "lager": lager, "platz": platz, "nummer": f"SW-{HAUS_A}"}
     with engine.begin() as v:
         aufraeumen(v)
         v.execute(text("DELETE FROM domain_inventory.warehouse_bins WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
@@ -195,6 +195,9 @@ class TestEinbuchen:
         assert buchbestand(stamm) == 25
         assert float(wert(engine, "SELECT current_stock FROM domain_inventory.articles WHERE id = :i",
                           i=stamm["artikel"])) == 25
+        # Der gleichnamige Artikel des fremden Mandanten blieb unberuehrt.
+        assert float(wert(engine, "SELECT current_stock FROM domain_inventory.articles WHERE id = :i",
+                          i=stamm["fremdartikel"])) == 0
 
     def test_die_id_eines_fremden_artikels_wird_nicht_aufgeloest(self, engine, client, stamm):
         kennung = lieferschein(engine, stamm, [(stamm["fremdartikel"], 10)])

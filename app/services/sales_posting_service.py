@@ -40,10 +40,19 @@ class SalesPostingService:
     ACCOUNT_RECEIVABLES = "1400"  # Forderungen aus Lieferungen und Leistungen
     ACCOUNT_TAX = "1776"          # Umsatzsteuer 19%
 
-    def __init__(self, db: Session, tenant_id: str) -> None:
+    def __init__(self, db: Session, tenant_id: str, *, commit: bool = True) -> None:
+        """``commit=False``: der Aufrufer besitzt die Transaktion (Beleg + Buchung + Archiv
+        in einem Commit); hier wird dann nur geflusht."""
         self.db = db
         self.tenant_id = tenant_id
-        self._fin = FinanceTransactionService(db, tenant_id)
+        self._commit = commit
+        self._fin = FinanceTransactionService(db, tenant_id, commit_on_success=commit)
+
+    def _abschliessen(self) -> None:
+        if self._commit:
+            self.db.commit()
+        else:
+            self.db.flush()
 
     # ── Delivery note posted → Warenabgang ────────────────────────────────────
 
@@ -320,7 +329,7 @@ class SalesPostingService:
                     "amount": gross,
                 },
             )
-        self.db.commit()
+        self._abschliessen()
         return {
             "journal_entry_id": journal_entry_id,
             "open_item_id": open_item_id,

@@ -133,7 +133,8 @@ def _make_app(db: FakeDb) -> TestClient:
     app = FastAPI()
     app.include_router(dunning.router)  # router already has prefix="/dunning"
     app.dependency_overrides[get_db] = lambda: db
-    return TestClient(app)
+    # Der Mandant kommt aus dem Header (seit 08.10.2026), nicht aus Query/Rumpf.
+    return TestClient(app, headers={"X-Tenant-ID": "system"})
 
 
 # ---------------------------------------------------------------------------
@@ -483,3 +484,42 @@ class TestMoneyHelper:
         assert _money(Decimal("1.999")) == Decimal("2.00")
         assert _money(Decimal("0.001")) == Decimal("0.00")
         assert _money(Decimal("5.006")) == Decimal("5.01")
+
+
+# ---------------------------------------------------------------------------
+# Mandant aus dem Kontext (08.10.2026)
+# ---------------------------------------------------------------------------
+
+class _MandantenSpion(FakeDb):
+    def __init__(self):
+        super().__init__()
+        self.mandanten: list[str] = []
+
+    def execute(self, query, params=None):
+        if params and "tenant_id" in params:
+            self.mandanten.append(params["tenant_id"])
+        return super().execute(query, params)
+
+
+class TestMandantAusDemKontext:
+    def test_query_parameter_waehlt_keinen_mandanten(self):
+        db = _MandantenSpion()
+        client = _make_app(db)
+        client.get("/dunning/rules?tenant_id=fremd", headers={"X-Tenant-ID": "haus-a"})
+        client.get("/dunning?tenant_id=fremd", headers={"X-Tenant-ID": "haus-a"})
+        assert db.mandanten and set(db.mandanten) == {"haus-a"}
+
+    def test_rumpf_waehlt_keinen_mandanten(self):
+        db = _MandantenSpion()
+        client = _make_app(db)
+        client.post("/dunning/process", json={"tenant_id": "fremd"}, headers={"X-Tenant-ID": "haus-a"})
+        client.post("/dunning/run", json={"tenant_id": "fremd", "as_of_date": "2026-10-08"},
+                    headers={"X-Tenant-ID": "haus-a"})
+        assert db.mandanten and set(db.mandanten) == {"haus-a"}
+
+    def test_kein_weg_nimmt_den_mandanten_aus_query_oder_rumpf(self):
+        from pathlib import Path
+
+        quelle = Path("app/api/v1/endpoints/dunning.py").read_text(encoding="utf-8-sig")
+        assert 'tenant_id: str = Query(' not in quelle
+        assert "request.tenant_id" not in quelle

@@ -1,6 +1,11 @@
 """
 Dunning System API
 FIBU-AR-04: Mahnwesen vervollständigen
+
+Der Mandant kommt aus dem Kontext. Bis 08.10.2026 nahmen sechs Wege ihn aus
+``Query("system")`` und Mahnlauf/Verarbeitung aus dem Request-Rumpf (Vorgabe
+``"system"``): ohne Parameter mahnte jeder Mandant im selben Topf, mit Parameter
+in jedem beliebigen.
 """
 
 from typing import List, Optional
@@ -14,6 +19,7 @@ import logging
 from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....core.gobd_artifact import register_artifact, sha256_hex
 
 logger = logging.getLogger(__name__)
@@ -116,14 +122,12 @@ class ProcessDunningRequest(BaseModel):
     debtor_id: Optional[str] = Field(None, description="Process for specific debtor")
     op_ids: Optional[List[str]] = Field(None, description="Process for specific open items")
     auto_apply_rules: bool = Field(default=True, description="Automatically apply dunning rules")
-    tenant_id: str = Field(default="system")
     as_of_date: Optional[date] = Field(None, description="Stichtag für Überfälligkeit (default: heute)")
 
 
 class DunningRunRequest(BaseModel):
     """Request to start a dunning run (all overdue items as of date)"""
     as_of_date: date = Field(..., description="Stichtag (YYYY-MM-DD)")
-    tenant_id: Optional[str] = Field(None, description="Tenant ID (default: system)")
 
 
 class DunningRunResponse(BaseModel):
@@ -135,7 +139,7 @@ class DunningRunResponse(BaseModel):
 @router.get("/rules", response_model=List[DunningRuleResponse], summary="Dunning rules auflisten")
 async def list_dunning_rules(
     active_only: bool = Query(True, description="Show only active rules"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -238,7 +242,7 @@ async def list_dunning_rules(
 @router.post("/rules", response_model=DunningRuleResponse, status_code=201, summary="Dunning rule anlegen")
 async def create_dunning_rule(
     rule: DunningRuleCreate,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -325,14 +329,15 @@ async def create_dunning_rule(
 @router.post("/process", response_model=List[DunningResponse], summary="Dunning verarbeiten")
 async def process_dunning(
     request: ProcessDunningRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """
     Process dunning for overdue open items based on rules.
     """
     try:
         # Get active dunning rules
-        rules = await list_dunning_rules(active_only=True, tenant_id=request.tenant_id, db=db)
+        rules = await list_dunning_rules(active_only=True, tenant_id=tenant_id, db=db)
         
         if not rules:
             raise HTTPException(status_code=400, detail="No active dunning rules found")
@@ -348,7 +353,7 @@ async def process_dunning(
             """)
             op_rows = db.execute(op_query, {
                 "op_ids": request.op_ids,
-                "tenant_id": request.tenant_id
+                "tenant_id": tenant_id
             }).fetchall()
         elif request.debtor_id:
             op_query = text("""
@@ -359,7 +364,7 @@ async def process_dunning(
             """)
             op_rows = db.execute(op_query, {
                 "debtor_id": request.debtor_id,
-                "tenant_id": request.tenant_id
+                "tenant_id": tenant_id
             }).fetchall()
         else:
             op_query = text("""
@@ -371,7 +376,7 @@ async def process_dunning(
                 AND due_date < CURRENT_DATE
             """)
             op_rows = db.execute(op_query, {
-                "tenant_id": request.tenant_id
+                "tenant_id": tenant_id
             }).fetchall()
         
         created_dunnings = []
@@ -439,7 +444,7 @@ async def process_dunning(
             
             row = db.execute(dunning_insert, {
                 "id": dunning_id,
-                "tenant_id": request.tenant_id,
+                "tenant_id": tenant_id,
                 "op_id": op_id,
                 "debtor_id": debtor_id,
                 "dunning_level": applicable_rule.level,
@@ -467,7 +472,7 @@ async def process_dunning(
             db.execute(update_op_query, {
                 "dunning_level": applicable_rule.level,
                 "op_id": op_id,
-                "tenant_id": request.tenant_id
+                "tenant_id": tenant_id
             })
             
             # Block customer if rule requires it
@@ -480,7 +485,7 @@ async def process_dunning(
                 
                 db.execute(block_debtor_query, {
                     "debtor_id": debtor_id,
-                    "tenant_id": request.tenant_id
+                    "tenant_id": tenant_id
                 })
             
             created_dunnings.append(DunningResponse(
@@ -519,18 +524,15 @@ async def process_dunning(
 async def run_dunning(
     request: DunningRunRequest,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """
     Start a dunning run for all overdue open items as of the given date.
     Returns run_id and number of dunning notices created.
     """
-    tenant_id = request.tenant_id or "system"
     run_id = str(uuid7())
-    process_request = ProcessDunningRequest(
-        tenant_id=tenant_id,
-        as_of_date=request.as_of_date,
-    )
-    created = await process_dunning(process_request, db)
+    process_request = ProcessDunningRequest(as_of_date=request.as_of_date)
+    created = await process_dunning(process_request, db, tenant_id)
     return DunningRunResponse(
         run_id=run_id,
         notices_created=len(created),
@@ -540,7 +542,7 @@ async def run_dunning(
 @router.post("", response_model=DunningResponse, status_code=201, summary="Dunning anlegen")
 async def create_dunning(
     dunning: DunningCreate,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -674,7 +676,7 @@ async def list_dunnings(
     debtor_id: Optional[str] = Query(None, description="Filter by debtor ID"),
     op_id: Optional[str] = Query(None, description="Filter by open item ID"),
     status: Optional[str] = Query(None, description="Filter by status"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -743,7 +745,7 @@ async def list_dunnings(
 @router.put("/{dunning_id}/send", response_model=DunningResponse, summary="Dunning senden")
 async def send_dunning(
     dunning_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -808,7 +810,7 @@ async def send_dunning(
 @router.put("/{dunning_id}/paid", response_model=DunningResponse, summary="Dunning paid markieren")
 async def mark_dunning_paid(
     dunning_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """

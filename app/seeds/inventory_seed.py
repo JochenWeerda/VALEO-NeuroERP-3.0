@@ -316,10 +316,10 @@ def ensure_articles(conn, tenant_id: str) -> None:
             text(
                 """
                 SELECT 1 FROM domain_inventory.articles
-                WHERE article_number = :number
+                WHERE article_number = :number AND tenant_id = :tenant_id
                 """
             ),
-            {"number": article["article_number"]},
+            {"number": article["article_number"], "tenant_id": tenant_id},
         ).scalar()
 
         params = _article_params(article, tenant_id)
@@ -329,8 +329,7 @@ def ensure_articles(conn, tenant_id: str) -> None:
                 text(
                     """
                     UPDATE domain_inventory.articles
-                    SET tenant_id = :tenant_id,
-                        name = :name,
+                    SET name = :name,
                         description = :description,
                         category = :category,
                         subcategory = :subcategory,
@@ -355,7 +354,7 @@ def ensure_articles(conn, tenant_id: str) -> None:
                         lager_silo = :lager_silo,
                         is_active = true,
                         deleted_at = NULL
-                    WHERE article_number = :article_number
+                    WHERE article_number = :article_number AND tenant_id = :tenant_id
                     """
                 ),
                 params,

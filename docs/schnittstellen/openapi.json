@@ -55954,18 +55954,6 @@
             "format": "date",
             "title": "As Of Date",
             "type": "string"
-          },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Tenant ID (default: system)",
-            "title": "Tenant Id"
           }
         },
         "required": [
@@ -124137,11 +124125,6 @@
             ],
             "description": "Process for specific open items",
             "title": "Op Ids"
-          },
-          "tenant_id": {
-            "default": "system",
-            "title": "Tenant Id",
-            "type": "string"
           }
         },
         "title": "ProcessDunningRequest",
@@ -311812,15 +311795,19 @@
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -311868,15 +311855,19 @@
         "operationId": "create_dunning_api_v1_finance_dunning_post",
         "parameters": [
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -311930,6 +311921,24 @@
       "post": {
         "description": "Process dunning for overdue open items based on rules.",
         "operationId": "process_dunning_api_v1_finance_dunning_process_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -311998,15 +312007,19 @@
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -312054,15 +312067,19 @@
         "operationId": "create_dunning_rule_api_v1_finance_dunning_rules_post",
         "parameters": [
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -312116,6 +312133,24 @@
       "post": {
         "description": "Start a dunning run for all overdue open items as of the given date.\nReturns run_id and number of dunning notices created.",
         "operationId": "run_dunning_api_v1_finance_dunning_run_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -312177,15 +312212,19 @@
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -312240,15 +312279,19 @@
             }
           },
           {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
+            "in": "header",
+            "name": "X-Tenant-ID",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],

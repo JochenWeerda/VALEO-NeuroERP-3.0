@@ -218,7 +218,8 @@ def _build_client(db: FakeDb) -> TestClient:
     app = FastAPI()
     app.include_router(dunning.router, prefix="/finance")
     app.dependency_overrides[get_db] = lambda: db
-    return TestClient(app)
+    # Der Mandant kommt aus dem Header (seit 08.10.2026), nicht aus Query/Rumpf.
+    return TestClient(app, headers={"X-Tenant-ID": "system"})
 
 
 def test_list_and_create_dunning_rule():

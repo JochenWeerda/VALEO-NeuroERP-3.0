@@ -166,10 +166,11 @@ class WhatsAppIntakeService:
             r = self.db.execute(
                 text(
                     "SELECT article_number, name FROM domain_inventory.articles "
-                    "WHERE is_active IS NOT FALSE AND (name ILIKE :q OR article_number ILIKE :q) "
+                    "WHERE tenant_id = :t AND is_active IS NOT FALSE "
+                    "AND (name ILIKE :q OR article_number ILIKE :q) "
                     "ORDER BY length(name) LIMIT 1"
                 ),
-                {"q": f"%{token}%"},
+                {"q": f"%{token}%", "t": self.tenant_id},
             ).mappings().first()
         except Exception:
             self.db.rollback()

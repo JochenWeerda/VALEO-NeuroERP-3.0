@@ -11,7 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## RESTBEFUNDE-BESTANDSBUCH-20261008 — in Arbeit, Claude Code
+## RESTBEFUNDE-BESTANDSBUCH-20261008 — abgeschlossen, Claude Code
+
+**Abnahme (08.10.2026):** alle vier Restbefunde geschlossen: Mahnwesen-Mandant aus dem
+Kontext, Rechnung + Buchung + Archiv in einem Commit, Artikelnummer je Mandant
+(Migration `artikelnummer_mandant_20261008`, Probe + Dev; Seed haengte fremde Artikel um),
+`_list_docs` ohne Prozessspeicher. 12 neue Vertraege, 1090 Regressionstests gruen.
+QA: [restbefunde-bestandsbuch-20261008.md](../quality-assurance/restbefunde-bestandsbuch-20261008.md).
+
 
 **Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** die vier benannten Restbefunde aus
 BESTANDSBUCH-EINKAUF-20261007 schliessen: (1) `dunning.py` mit `Query("system")`, (2)

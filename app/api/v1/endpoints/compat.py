@@ -159,15 +159,12 @@ def _doc_repo(db: Session):
 
 
 def _list_docs(db: Session, doc_type: str, limit: int = 1000, tenant_id: Optional[str] = None) -> list[dict[str, Any]]:
+    """Belege nur aus dem DB-Dokumentspeicher. Bis 08.10.2026 fiel ein leerer Mandant auf den
+    Prozessspeicher zurueck (fluechtig, aus beliebigen Requests); leer ist die richtige Antwort."""
     repo = _doc_repo(db)
     filters = {"tenantId": tenant_id} if tenant_id else None
     payload = list_from_store(doc_type, skip=0, limit=limit, filters=filters, repo=repo)
-    docs = payload.get("data", []) if isinstance(payload, dict) else []
-    if docs:
-        return docs
-    # Fallback to in-memory store when DB-backed document store is empty or unavailable.
-    payload_mem = list_from_store(doc_type, skip=0, limit=limit, filters=filters, repo=None)
-    return payload_mem.get("data", []) if isinstance(payload_mem, dict) else []
+    return payload.get("data", []) if isinstance(payload, dict) else []
 
 
 def _cache_key(*parts: Any) -> str:
@@ -1910,14 +1907,14 @@ def _resolve_lkw_article_reference(
     if candidate_id:
         article = base_query.filter(ArticleModel.id == candidate_id).first()
         if article is None:
-            article = base_query.filter(ArticleModel.article_number == candidate_id).first()
+            article = base_query.filter(ArticleModel.article_number == candidate_id).order_by(ArticleModel.tenant_id.is_(None)).first()
 
     if article is None and candidate_label:
         article = (
             base_query.filter(
                 (ArticleModel.article_number == candidate_label) | (ArticleModel.name == candidate_label)
             )
-            .order_by(ArticleModel.name.asc())
+            .order_by(ArticleModel.tenant_id.is_(None), ArticleModel.name.asc())
             .first()
         )
 
