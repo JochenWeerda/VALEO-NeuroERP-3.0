@@ -80,8 +80,8 @@ export function VarietySelectionDialog({
       return (
         variety.variety_number?.toLowerCase().includes(searchLower) ||
         variety.name?.toLowerCase().includes(searchLower) ||
-        (variety.description && variety.description.toLowerCase().includes(searchLower)) ||
-        (variety.crop_type && variety.crop_type.toLowerCase().includes(searchLower))
+        (variety.description?.toLowerCase().includes(searchLower)) ||
+        (variety.crop_type?.toLowerCase().includes(searchLower))
       )
     })
   }, [varieties, searchTerm])
