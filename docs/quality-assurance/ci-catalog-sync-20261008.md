@@ -94,3 +94,9 @@ Die fremden lokalen Katalog-Arbeitsfassungen bleiben erhalten.
 Der lokale 661er-Pruefstand kann nach dieser Korrektur den physischen
 670er-Katalog nicht mehr bestaetigen. Die Nachabnahme erfolgt deshalb im
 bestehenden frischen GitHub-Job; sein Gate bleibt verbindlich.
+
+Nachabnahme auf cbcd52b84: Quality Gate37828122495 bestaetigt Backend und
+670er-Tabellenkatalog erfolgreich, ebenso Frontend, Docker und alle
+vorgelagerten Gates. Katalog-Slice damit abgeschlossen. Das Gesamtgate
+scheitert erst an SonarCloud; dessen getrennte Bedingungen und Reparaturen
+sind in sonar-runtime-blockers-20261008.md dokumentiert.

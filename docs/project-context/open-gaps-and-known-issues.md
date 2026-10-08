@@ -11,6 +11,22 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## SonarCloud — Runtime-Blocker und verbleibende Gatebedingungen (2026-10-08)
+
+Quality Gate37828122495 aufcbcd52b84 bestaetigt den frischen 670er-Katalog,
+Backend, Frontend, Docker und Sicherheitspruefungen. Der nachgelagerte
+SonarCloud-Scan laeuft technisch durch; sein Qualitaetsgate bleibt rot.
+Zehn deklarierte Agrar-Exporte an bestehende Fachfunktionen gebunden,
+zwei defekte NUTS-Altexporte samt unbrauchbarem Service/Beispiel-Seed entfernt.
+Fehlender Audit-Filter, falscher Erfolgsquotenaufruf und zusaetzlich echte
+MaintenanceWindow-Konstruktorfehler behoben. Original20 Fehler/1 gruen;
+repariert43 neue und bestehende Fachvertraege ohne Skip gruen (3,99s),
+keine DB/Container/Reset. [QA und Handshake](../quality-assurance/sonar-runtime-blockers-20261008.md).
+Offen: weitere Sonar-Bugs/Sicherheitsklassifikation, Hotspot-Reviews,
+Coverage55,2 unter80 und Duplikate3,3 ueber3. Keine Schwelle/Baseline oder
+Scanner-Ausnahme geaendert. Kein vollstaendiges ISO27001-Persistenzversprechen
+fuer die bestehenden In-Memory-Dienste; NUTS-PLZ-Heuristik nicht amtlich abgenommen.
+
 ## Sortenregister — kanonischer Lesevertrag (2026-10-08)
 
 Agrar-Smoke zeigte dreimal404 auf einem nicht vorhandenen Sortenpfad.

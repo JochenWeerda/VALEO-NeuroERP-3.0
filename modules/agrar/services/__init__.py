@@ -52,6 +52,23 @@ from modules.agrar.services.self_billing_service import (
     SelfBillingRepository,
 )
 
+from modules.agrar.services.tax_profile_service import get_taxation_type_for_supplier
+from modules.agrar.services.partie_service import (
+    generate_lot_number,
+    create_harvest_acceptance_lines,
+)
+from modules.agrar.services.price_adjustment_service import (
+    apply_price_adjustments,
+    calculate_price_adjustment,
+)
+from modules.agrar.services.vat_service import (
+    determine_ownership_type,
+    can_create_credit_note_for_vat,
+    create_provisional_credit_note,
+    create_advance_payment_credit_note,
+    create_correction_credit_note,
+)
+
 __all__ = [
     # Drying Rule Engine
     "compute_settlement",
@@ -103,9 +120,6 @@ __all__ = [
     # Price Adjustment Service
     "apply_price_adjustments",
     "calculate_price_adjustment",
-    # NUTS-2 Service
-    "derive_nuts2_from_postal_code",
-    "bulk_import_nuts2_postal_codes",
     # VAT Service
     "determine_ownership_type",
     "can_create_credit_note_for_vat",

@@ -334,7 +334,7 @@ class ISO27001OperationsSecurity:
         ]
 
         for window_data in default_windows:
-            window = MaintenanceWindow(**window_data)
+            window = MaintenanceWindow(id=uuid7(), **window_data)
             self.maintenance_windows[window.id] = window
 
     def create_change_request(self, change_data: Dict[str, Any]) -> str:
@@ -863,7 +863,7 @@ class ISO27001OperationsSecurity:
             'completed_changes': len([c for c in changes if c.status == ChangeStatus.DEPLOYED]),
             'failed_changes': len([c for c in changes if c.status in [ChangeStatus.ROLLED_BACK, ChangeStatus.REJECTED]]),
             'pending_approvals': len([c for c in changes if c.status == ChangeStatus.SUBMITTED]),
-            'success_rate': self._calculate_change_success_rate(changes)
+            'success_rate': self._calculate_change_success_rate()
         }
 
     def _calculate_change_success_rate(self) -> float:

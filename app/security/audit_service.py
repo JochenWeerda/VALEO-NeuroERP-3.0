@@ -371,7 +371,7 @@ class ISMSAuditService:
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=days)
 
-        entries = self._get_filtered_audit_entries(tenant_id, start_date, end_date)
+        entries = self._get_filtered_audit_entries(tenant_id, start_date, end_date, None)
 
         return {
             'period_days': days,
