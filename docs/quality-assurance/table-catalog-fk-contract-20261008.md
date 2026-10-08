@@ -60,3 +60,10 @@ waehrend der gemeinsame Pruefstand seine Migrationsrevision meldet. Die
 Revision allein beweist daher keine identische physische Tabellenmenge.
 Ohne frische Ernte wird weder eine zusaetzliche Tabelle angenommen noch
 eine fremde gemeinsame Datenbank zur Angleichung veraendert.
+
+Nachweis der frischen Ernte: Quality Gate37825542282 auf 3f3927045 liefert
+670 Tabellen. Alle bisherigen 661 Definitionen einschliesslich der
+reparierten zusammengesetzten Fremdschluessel stimmen exakt ueberein.
+Neun zuvor lesend identifizierte additive ORM-Tabellen werden separat im
+CI-Katalog-Sync integriert; siehe ci-catalog-sync-20261008.md. Der gemeinsame
+Pruefstand wurde nicht veraendert.

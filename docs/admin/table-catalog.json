@@ -12006,6 +12006,89 @@
             "id"
           ]
         },
+        "contacts": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "first_name",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "last_name",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "email",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "phone",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "position",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "department",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "customer_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "is_active",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "name": "created_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "deleted_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "customer_id",
+              "references": "domain_crm.customers.id"
+            }
+          ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_crm / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/compliance_dsgvo.py",
+            "app/infrastructure/models/__init__.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/compliance_dsgvo.py"
+          ]
+        },
         "credit_limits": {
           "columns": [
             {
@@ -27702,6 +27785,124 @@
             "app/services/supply_chain_trace_service.py"
           ]
         },
+        "article_alternative_eans": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "article_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "ean_code",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "bezeichnung",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "is_primary",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "name": "created_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "article_id",
+              "references": "domain_inventory.articles.id"
+            }
+          ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/infrastructure/models/__init__.py"
+          ]
+        },
+        "article_analyses": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "article_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "analyse_typ",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "bezeichnung",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "analyse_text",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "bild_datei",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "bild_vorschau",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "article_id",
+              "references": "domain_inventory.articles.id"
+            }
+          ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/infrastructure/models/__init__.py"
+          ]
+        },
         "article_batches": {
           "columns": [
             {
@@ -27946,6 +28147,65 @@
             "app/infrastructure/models/l3c_models.py"
           ]
         },
+        "article_print_settings": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "article_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "belegart",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "drucken",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "name": "druck_statt_artikel",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "name": "druck_zusaetzlich",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "name": "created_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "article_id",
+              "references": "domain_inventory.articles.id"
+            }
+          ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/infrastructure/models/__init__.py"
+          ]
+        },
         "article_selections": {
           "columns": [
             {
@@ -28106,6 +28366,75 @@
           "read_by": [
             "app/infrastructure/models/__init__.py",
             "app/services/rations_readiness_service.py"
+          ]
+        },
+        "article_units": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "article_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "einheit",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "umrechnungsfaktor",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "preiseinheit",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "gebinde_groesse",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "gebinde_einheit",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "is_primary",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "name": "created_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "article_id",
+              "references": "domain_inventory.articles.id"
+            }
+          ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/infrastructure/models/__init__.py"
           ]
         },
         "articles": {
@@ -31371,6 +31700,114 @@
             "app/services/agri_silo_material_flow_service.py"
           ]
         },
+        "nawaro_area_sheet_rows": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "sheet_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "customer_name",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "name_1",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "name_2",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "postal_code",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "city",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "phone",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "fax",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "area_2022",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "area_2023",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "area_2024",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "area_2025",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "area_2026",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "row_order",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "sheet_id",
+              "references": "domain_inventory.nawaro_area_sheets.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.tenants.id"
+            }
+          ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/infrastructure/models/l3c_models.py"
+          ]
+        },
         "nawaro_area_sheets": {
           "columns": [
             {
@@ -31425,6 +31862,99 @@
             }
           ],
           "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.tenants.id"
+            }
+          ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/infrastructure/models/l3c_models.py"
+          ]
+        },
+        "nawaro_contract_sheet_rows": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "sheet_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "contract_number",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "customer_name",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "name_1",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "total_area",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "standard_quantity",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "delivery_count",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "delivery_resource",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "quantity_b",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "harvest_declaration",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "row_order",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "sheet_id",
+              "references": "domain_inventory.nawaro_contract_sheets.id"
+            },
             {
               "column": "tenant_id",
               "references": "domain_shared.tenants.id"
@@ -31568,6 +32098,172 @@
             }
           ],
           "foreign_keys": [],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/infrastructure/models/l3c_models.py"
+          ]
+        },
+        "nawaro_raps_balances": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "profile_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "booking_period",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "input_seed_tons",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "output_oil_tons",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "output_meal_tons",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "output_other_tons",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "allocation_oil_pct",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "allocation_meal_pct",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "heap_location",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "logistics_note",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "profile_id",
+              "references": "domain_inventory.nawaro_raps_profiles.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.tenants.id"
+            }
+          ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/infrastructure/models/l3c_models.py"
+          ]
+        },
+        "nawaro_raps_certificates": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "profile_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "scheme",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "certificate_number",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "chain_stage",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "valid_from",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "valid_until",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "issuer",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "profile_id",
+              "references": "domain_inventory.nawaro_raps_profiles.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.tenants.id"
+            }
+          ],
           "owner_domain": "inventory",
           "ownership_reason": "Custodian domain_inventory / Domain inventory.",
           "placement": "native",
