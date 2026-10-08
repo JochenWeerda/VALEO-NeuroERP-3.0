@@ -11,6 +11,17 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## CI-CONTRACT-CLOSURE — erster Meilenstein (2026-10-08)
+
+OpenAPI-Beschreibungen der Lead-Aliase nachgetragen; zwei bereits typisierte
+eBilanz-Dekoratoren für den bestehenden Scanner korrekt angeordnet.
+Schwellen bleiben 0 fehlende Beschreibungen und 20 untypisierte Routen.
+Secret-Scan-Fehlalarm im künstlichen Kalenderfixture beseitigt, keine neue
+Ausnahme; Gitleaks 8.30.1 auf HEAD-Snapshot null Funde. 24 Kalenderverträge grün.
+[Abnahme und ELSTER-Registrierungsstand](../quality-assurance/ci-contract-closure-20261008.md).
+Maskenvertrag, CRM-Smoke, Dependency-Security und vollständiges XBRL/ERiC
+bleiben bis zur eigenen Abnahme offen.
+
 ## EBILANZ-HONEST-PERSISTENCE — Scheinwirkung und Laufzeit-DDL geschlossen (2026-10-07)
 
 Reale tenantgebundene Entwurfsmetadaten, Alembic-Schema statt Request-DDL, 503/Rollback statt verschluckter DB-Fehler. Fehlende/fremde IDs 404; vollständige XBRL-Validierung und echte ELSTER-/UStVA-Übertragung fehlen und liefern ausdrücklich 409. Simulationsservice entfernt, Readiness nicht bereit, historische Tickets niemals als ANGENOMMEN dargestellt; fremde Zeilen erhalten. [QA/Betrieb](../quality-assurance/ebilanz-honest-persistence-20261007.md). Die Implementierung des vollständigen XBRL-/ERiC-Fachwegs bleibt offen, ebenso die separate Gesamtkatalog-Abnahme. SQL-Gate prüft neue und verbleibende Dateien; Baselines nur abgesenkt.

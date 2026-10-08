@@ -273019,7 +273019,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Leads",
+        "summary": "Leads auflisten",
         "tags": [
           "crm",
           "leads"
@@ -273082,7 +273082,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Lead",
+        "summary": "Lead anlegen",
         "tags": [
           "crm",
           "leads"

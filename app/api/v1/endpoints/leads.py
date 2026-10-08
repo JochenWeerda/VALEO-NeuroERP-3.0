@@ -61,7 +61,7 @@ def unavailable(db):
     return HTTPException(503, "Lead-Daten konnten nicht gespeichert oder gelesen werden.")
 
 
-@router.get("", response_model=PaginatedResponse[Lead], dependencies=[Depends(read_leads)], include_in_schema=True)
+@router.get("", response_model=PaginatedResponse[Lead], summary="Leads auflisten", dependencies=[Depends(read_leads)], include_in_schema=True)
 @router.get("/", response_model=PaginatedResponse[Lead], summary="Leads auflisten", dependencies=[Depends(read_leads)])
 async def list_leads(status_filter: str | None = Query(None, alias="status"), search: str | None = None,
                      skip: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000),
@@ -82,7 +82,7 @@ async def get_lead(lead_id: str, db: Session = Depends(get_db), tenant_id: str =
         raise unavailable(db) from exc
 
 
-@router.post("", response_model=Lead, status_code=201, dependencies=[Depends(write_leads)], include_in_schema=True)
+@router.post("", response_model=Lead, status_code=201, summary="Lead anlegen", dependencies=[Depends(write_leads)], include_in_schema=True)
 @router.post("/", response_model=Lead, status_code=201, summary="Lead anlegen", dependencies=[Depends(write_leads)])
 async def create_lead(payload: LeadCreate, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     try:
