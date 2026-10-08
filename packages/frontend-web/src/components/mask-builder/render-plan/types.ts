@@ -32,6 +32,7 @@ export type RenderComponentKind =
   | 'lookup'
   | 'currency'
   | 'percentage'
+  | 'password'
 
 export interface RenderShellPlan {
   title: string

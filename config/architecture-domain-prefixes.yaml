@@ -628,6 +628,7 @@ exact_service_stems:
   wareneingang_avis_service: procurement
   bestell_kommunikation_service: procurement
   mail_versand: platform
+  mailkonto_service: platform
   kaeufergruppe: crm
 
 exact_endpoint_stems:
@@ -635,6 +636,7 @@ exact_endpoint_stems:
   eudr_chargen: dms-compliance
   eudr_register: dms-compliance
   document_allocations: platform
+  mailkonto: platform
   studio_drafts: platform
   billing_batch: finance
   document_control: dms-compliance

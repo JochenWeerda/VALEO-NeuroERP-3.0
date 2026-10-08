@@ -11,7 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## MAILKONTO-MANDANT-20261008 — in Arbeit, Claude Code
+## MAILKONTO-MANDANT-20261008 — abgeschlossen, Claude Code
+
+**Abnahme (08.10.2026):** Postfaecher je Mandant (info@, dispo@, fibu@, persoenlich) mit
+IONOS, Google (App-Passwort oder OAuth2/XOAUTH2), SMTP und Alias; Verwendung je Postfach,
+Freigabe je Rolle/Benutzer; Geheimnisse AES-GCM (ohne VALEO_SECRET_KEY kein Speichern);
+Maske `admin/postfaecher` ueber Mask Builder inkl. neuem Feldtyp `password`. Mit behoben:
+IMAP-Passwort/STT-Key im Klartext, Connector-Admin ohne Rollenpruefung. Migration
+`mailkonto_mandant_20261008` (Probe + Dev). Microsoft 365 offen. QA:
+[mailkonto-mandant-20261008.md](../quality-assurance/mailkonto-mandant-20261008.md).
+
 
 **Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** Mailversand ueber das Konto des
 Mandanten statt ueber Umgebungsvariablen: Mailkonto je Mandant (SMTP allgemein, IONOS-Vorlage,

@@ -3667,6 +3667,67 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "admin/postfaecher",
+      "title": "Postfächer",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__postfaecher/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/postfaecher/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/postfaecher/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/postfaecher/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Postfach speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Legt das Postfach an oder aendert das geladene."
+        },
+        {
+          "key": "testen",
+          "label": "Testmail senden",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.postfach.testen",
+          "commandEndpoint": "/api/v1/admin/postfaecher/{entity_id}/testen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "google",
+          "label": "Mit Google verbinden",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Fuehrt zur Google-Anmeldung fuer das geladene Google-Postfach."
+        },
+        {
+          "key": "neu",
+          "label": "Neues Postfach",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Leert die Eingabe fuer ein neues Postfach."
+        }
+      ],
+      "sensitive_fields": [
+        "passwort"
+      ],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "planung/kalender",
       "title": "Planungskalender",
       "domain": "platform",

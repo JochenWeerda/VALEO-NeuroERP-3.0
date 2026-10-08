@@ -89,7 +89,7 @@ def _lieferanten_mail(db: Session, tenant_id: str, bestellung_id: str) -> Option
 
 
 def erfassen(db: Session, tenant_id: str, beleg: dict[str, Any], payload: dict[str, Any],
-             von: Optional[str] = None) -> dict[str, Any]:
+             von: Optional[str] = None, nutzer: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     """Eine Kommunikation protokollieren (kein Versand)."""
     return _eintragen(
         db, tenant_id, beleg["id"], kanal=str(payload.get("channel") or "notiz"), status="erfasst",
@@ -99,20 +99,21 @@ def erfassen(db: Session, tenant_id: str, beleg: dict[str, Any], payload: dict[s
 
 
 def per_mail_senden(db: Session, tenant_id: str, beleg: dict[str, Any], payload: dict[str, Any],
-                    von: Optional[str] = None) -> dict[str, Any]:
-    """Versendet ueber SMTP und traegt erst danach ein. Wirft bei jedem Scheitern."""
+                    von: Optional[str] = None, nutzer: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+    """Versendet ueber das Einkaufs-Postfach (oder ``payload.postfach_id``) und traegt erst danach ein."""
     empfaenger = (payload.get("recipient") or "").strip() or _lieferanten_mail(db, tenant_id, beleg["id"])
     if not empfaenger:
         raise ValueError("Kein Empfaenger: weder angegeben noch beim Lieferanten hinterlegt.")
     betreff = str(payload.get("subject") or f"Bestellung {beleg['bestellnummer']}")
     nachricht = str(payload.get("message") or "")
-    sende_mail(empfaenger, betreff, nachricht)
+    sende_mail(empfaenger, betreff, nachricht, db=db, tenant_id=tenant_id, verwendung="einkauf",
+               nutzer=nutzer, postfach_id=payload.get("postfach_id") or None)
     return _eintragen(db, tenant_id, beleg["id"], kanal="email", status="versendet", empfaenger=empfaenger,
-                      betreff=betreff, nachricht=nachricht, versendet=True, von=von)
+                      betreff=betreff, nachricht=nachricht, versendet=True, von=von or (nutzer or {}).get("sub"))
 
 
 def im_portal_veroeffentlichen(db: Session, tenant_id: str, beleg: dict[str, Any], payload: dict[str, Any],
-                               von: Optional[str] = None) -> dict[str, Any]:
+                               von: Optional[str] = None, nutzer: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     """Macht die Bestellung im Lieferantenportal sichtbar."""
     if str(beleg.get("status") or "").lower() in ("entwurf", "storniert"):
         raise ValueError(f"Bestellung {beleg['bestellnummer']} ist {beleg['status']} und wird nicht veroeffentlicht.")

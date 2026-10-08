@@ -11,13 +11,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (99 Masken).
+> Generiert aus `app/core/screen_definitions.py` (100 Masken).
 
 ## Übersicht
 
 | mask_id | Titel | Domäne | Risiko | Prozessketten | Agent-Contract |
 |---|---|---|---|---|---|
 | `abrechnung/eb-lieferschein-kontrolle` | EB-Lieferschein-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/abrechnung/eb-lieferschein-kontrolle/agent-contract` |
+| `admin/postfaecher` | Postfächer | platform | niedrig | — | `GET /api/v1/masks/admin/postfaecher/agent-contract` |
 | `agrar/duenger` | Duenger | agrar | niedrig | — | `GET /api/v1/masks/agrar/duenger/agent-contract` |
 | `agrar/feed-advice` | Fuetterungsberatung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
 | `agrar/feed-controlling` | Fuetterungscontrolling | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-controlling/agent-contract` |
@@ -2930,6 +2931,40 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 ---
 
 ## Domäne: platform
+
+### `admin/postfaecher` — Postfächer
+
+**Zweck:** Postfaecher des Hauses fuer den E-Mail-Versand einrichten, pruefen und freigeben; Bestellungen, Mahnungen, Avise und Newsletter gehen ueber das passende Postfach.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/postfaecher/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/postfaecher/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/postfaecher/readiness` |
+| Rollout-Route | `/mask-rollout/admin__postfaecher/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `postfaecher` → `/api/v1/admin/postfaecher`
+
+**Beispiel-Prompts:**
+
+- Welches Postfach verschickt Bestellungen?
+- Wer darf aus fibu@ senden?
+
+**Sensible Felder:** `passwort`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Postfach speichern | safe | nein | `Legt das Postfach an oder aendert das geladene.` |
+| `testen` | Testmail senden | safe | nein | `/api/v1/admin/postfaecher/{entity_id}/testen` |
+| `google` | Mit Google verbinden | safe | nein | `Fuehrt zur Google-Anmeldung fuer das geladene Google-Postfach.` |
+| `neu` | Neues Postfach | safe | nein | `Leert die Eingabe fuer ein neues Postfach.` |
+
+---
 
 ### `planung/kalender` — Planungskalender
 

@@ -301,6 +301,7 @@ from app.api.v1.endpoints import (
     betriebsstaetten,
     individuelle_artikelnummern,
     versandprofile,
+    mailkonto,
 )
 
 # Fachliche Vertiefung Wave 10 — Warengruppen, Erlöskennziffern, Zahlungsbedingungen
@@ -2179,6 +2180,7 @@ api_router.include_router(rohwarengruppen.router)
 api_router.include_router(betriebsstaetten.router)
 api_router.include_router(individuelle_artikelnummern.router)
 api_router.include_router(versandprofile.router)
+api_router.include_router(mailkonto.router)
 
 # Fachliche Vertiefung Wave 10
 api_router.include_router(warengruppen.router)

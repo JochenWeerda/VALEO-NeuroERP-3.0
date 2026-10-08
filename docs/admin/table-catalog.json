@@ -19164,10 +19164,14 @@
           "foreign_keys": [
             {
               "column": "gl_account_id",
-              "references": "domain_erp.chart_of_accounts.tenant_id"
+              "references": "domain_erp.chart_of_accounts.id"
             },
             {
               "column": "gl_account_id",
+              "references": "domain_erp.chart_of_accounts.tenant_id"
+            },
+            {
+              "column": "tenant_id",
               "references": "domain_erp.chart_of_accounts.id"
             },
             {
@@ -19177,10 +19181,6 @@
             {
               "column": "tenant_id",
               "references": "domain_erp.chart_of_accounts.tenant_id"
-            },
-            {
-              "column": "tenant_id",
-              "references": "domain_erp.chart_of_accounts.id"
             }
           ],
           "owner_domain": "finance",
@@ -25707,19 +25707,19 @@
           "foreign_keys": [
             {
               "column": "gate_id",
-              "references": "domain_hr.hrm_operations_gates.gate_id"
+              "references": "domain_hr.hrm_operations_gates.tenant_id"
             },
             {
               "column": "gate_id",
-              "references": "domain_hr.hrm_operations_gates.tenant_id"
-            },
-            {
-              "column": "tenant_id",
               "references": "domain_hr.hrm_operations_gates.gate_id"
             },
             {
               "column": "tenant_id",
               "references": "domain_hr.hrm_operations_gates.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_hr.hrm_operations_gates.gate_id"
             }
           ],
           "owner_domain": "hr",
@@ -25786,11 +25786,11 @@
           "foreign_keys": [
             {
               "column": "gate_id",
-              "references": "domain_hr.hrm_operations_gates.gate_id"
+              "references": "domain_hr.hrm_operations_gates.tenant_id"
             },
             {
               "column": "gate_id",
-              "references": "domain_hr.hrm_operations_gates.tenant_id"
+              "references": "domain_hr.hrm_operations_gates.gate_id"
             },
             {
               "column": "tenant_id",
@@ -52990,6 +52990,163 @@
             "app/api/v1/endpoints/logistik_frachttabellen.py"
           ]
         },
+        "mailkonten": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "kennung",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "bezeichnung",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "anbieter",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "anmeldung",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "smtp_host",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "smtp_port",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "sicherheit",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "benutzer",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "absender_email",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "absender_name",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "geheimnis",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "zugang_von",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "ist_standard",
+              "nullable": false,
+              "type": "boolean"
+            },
+            {
+              "name": "verwendungen",
+              "nullable": false,
+              "type": "ARRAY"
+            },
+            {
+              "name": "rollen",
+              "nullable": false,
+              "type": "ARRAY"
+            },
+            {
+              "name": "benutzer_freigabe",
+              "nullable": false,
+              "type": "ARRAY"
+            },
+            {
+              "name": "persoenlich_fuer",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "geprueft_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "letzter_fehler",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "aktiv",
+              "nullable": false,
+              "type": "boolean"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "geaendert_von",
+              "nullable": true,
+              "type": "character varying"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.tenants.id"
+            },
+            {
+              "column": "zugang_von",
+              "references": "domain_shared.mailkonten.id"
+            }
+          ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/core/screen_definitions_capture.py",
+            "app/services/mailkonto_service.py"
+          ],
+          "written_by": [
+            "app/services/mailkonto_service.py"
+          ]
+        },
         "master_data_entries": {
           "columns": [
             {
@@ -55902,6 +56059,7 @@
             "app/api/v1/endpoints/admin_suite.py",
             "app/api/v1/endpoints/health.py",
             "app/api/v1/endpoints/sales_invoice_einvoice.py",
+            "app/core/geheimnis.py",
             "app/core/policy_overrides.py",
             "app/core/process_config.py",
             "app/core/workflow_template_marketplace.py",

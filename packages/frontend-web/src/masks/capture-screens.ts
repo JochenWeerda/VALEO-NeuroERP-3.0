@@ -1991,3 +1991,305 @@ export const personalEinwilligungserklaerungenScreen = {
     statusPlacement: 'afterFields',
   },
 } satisfies ScreenDefinition
+
+// Erzeugt aus build_admin_postfaecher_screen_definition (app/core/screen_definitions_capture.py);
+// agentContract und performance stehen nur im Backend.
+export const adminPostfaecherScreen = {
+  "schemaVersion": 1,
+  "id": "admin/postfaecher",
+  "domain": "platform",
+  "mode": "list",
+  "title": "Postfächer",
+  "subtitle": "E-Mail-Versand über die Postfächer des Hauses",
+  "adapter": {
+    "type": "native",
+    "sourceId": "admin/postfaecher",
+    "temporary": false
+  },
+  "dataSources": [
+    {
+      "key": "postfaecher",
+      "endpoint": "/api/v1/admin/postfaecher",
+      "pageSize": 200,
+      "table": "domain_shared.mailkonten"
+    }
+  ],
+  "summary": [
+    {
+      "key": "postfaecher",
+      "label": "Postfächer",
+      "value": "0"
+    },
+    {
+      "key": "standard",
+      "label": "Standard",
+      "value": "–"
+    }
+  ],
+  "fields": [
+    {
+      "key": "kennung",
+      "label": "Kennung",
+      "type": "text",
+      "required": true,
+      "helpText": "Kurzname, z. B. info, dispo, fibu, zentrale oder m.meier."
+    },
+    {
+      "key": "bezeichnung",
+      "label": "Bezeichnung",
+      "type": "text"
+    },
+    {
+      "key": "absender_email",
+      "label": "Absender-Adresse",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "absender_name",
+      "label": "Absender-Name",
+      "type": "text",
+      "helpText": "Erscheint beim Empfänger, z. B. Raiffeisen Disposition."
+    },
+    {
+      "key": "anbieter",
+      "label": "Anbieter",
+      "type": "select",
+      "required": true,
+      "options": [
+        {
+          "value": "ionos",
+          "label": "IONOS"
+        },
+        {
+          "value": "google",
+          "label": "Google / Gmail"
+        },
+        {
+          "value": "smtp",
+          "label": "Anderer Anbieter (SMTP)"
+        },
+        {
+          "value": "alias",
+          "label": "Alias eines anderen Postfachs"
+        }
+      ]
+    },
+    {
+      "key": "anmeldung",
+      "label": "Anmeldung",
+      "type": "select",
+      "options": [
+        {
+          "value": "passwort",
+          "label": "Passwort / App-Passwort"
+        },
+        {
+          "value": "oauth2",
+          "label": "Mit Google anmelden"
+        }
+      ],
+      "helpText": "Google: App-Passwort (Bestätigung in zwei Schritten) oder Anmeldung über Google."
+    },
+    {
+      "key": "passwort",
+      "label": "Passwort",
+      "type": "password",
+      "helpText": "Leer lassen, um das hinterlegte Passwort zu behalten. Wird nie angezeigt."
+    },
+    {
+      "key": "benutzer",
+      "label": "Benutzername",
+      "type": "text",
+      "helpText": "Leer = Absender-Adresse (IONOS, Google)."
+    },
+    {
+      "key": "smtp_host",
+      "label": "SMTP-Server",
+      "type": "text",
+      "helpText": "Nur bei Anderer Anbieter; IONOS und Google sind vorbelegt."
+    },
+    {
+      "key": "smtp_port",
+      "label": "SMTP-Port",
+      "type": "number"
+    },
+    {
+      "key": "sicherheit",
+      "label": "Verschlüsselung",
+      "type": "select",
+      "options": [
+        {
+          "value": "starttls",
+          "label": "STARTTLS (587)"
+        },
+        {
+          "value": "ssl",
+          "label": "SSL (465)"
+        }
+      ]
+    },
+    {
+      "key": "zugang_von",
+      "label": "Anmeldung von Postfach",
+      "type": "select",
+      "options": [],
+      "helpText": "Nur bei Alias: Postfach, dessen Anmeldung genutzt wird. Die Adresse muss dort als Absender erlaubt sein."
+    },
+    {
+      "key": "verwendungen",
+      "label": "Verwendung",
+      "type": "text",
+      "helpText": "Kommagetrennt: einkauf, verkauf, fibu, dispo, newsletter, allgemein. Dafür wird das Postfach automatisch genommen."
+    },
+    {
+      "key": "rollen",
+      "label": "Freigegeben für Rollen",
+      "type": "text",
+      "helpText": "Kommagetrennt, z. B. FINANCE_ADMIN. Leer und ohne Benutzer = alle im Haus."
+    },
+    {
+      "key": "benutzer_freigabe",
+      "label": "Freigegeben für Benutzer",
+      "type": "text",
+      "helpText": "Kommagetrennte Benutzerkennungen."
+    },
+    {
+      "key": "persoenlich_fuer",
+      "label": "Persönliches Postfach von",
+      "type": "text",
+      "helpText": "Benutzerkennung; dann darf nur diese Person daraus senden."
+    },
+    {
+      "key": "ist_standard",
+      "label": "Standard-Postfach",
+      "type": "boolean",
+      "helpText": "Wird genommen, wenn kein Postfach für die Verwendung passt."
+    }
+  ],
+  "workflow": {
+    "processKey": "admin.postfaecher"
+  },
+  "actions": [
+    {
+      "key": "speichern",
+      "label": "Postfach speichern",
+      "command": "admin.postfachSpeichern",
+      "kind": "primary",
+      "dangerLevel": "safe",
+      "zone": "header",
+      "stubReason": "Legt das Postfach an oder aendert das geladene."
+    },
+    {
+      "key": "testen",
+      "label": "Testmail senden",
+      "command": "admin.postfachTesten",
+      "kind": "secondary",
+      "dangerLevel": "safe",
+      "zone": "header",
+      "commandEndpoint": "/api/v1/admin/postfaecher/{entity_id}/testen",
+      "method": "POST",
+      "permission": "admin.postfach.testen",
+      "inputFields": [
+        {
+          "key": "empfaenger",
+          "label": "Empfänger",
+          "type": "text",
+          "helpText": "Leer = an die Absender-Adresse selbst."
+        }
+      ]
+    },
+    {
+      "key": "google",
+      "label": "Mit Google verbinden",
+      "command": "admin.postfachGoogle",
+      "kind": "secondary",
+      "dangerLevel": "safe",
+      "zone": "header",
+      "stubReason": "Fuehrt zur Google-Anmeldung fuer das geladene Google-Postfach."
+    },
+    {
+      "key": "neu",
+      "label": "Neues Postfach",
+      "command": "admin.postfachNeu",
+      "kind": "secondary",
+      "dangerLevel": "safe",
+      "zone": "footer",
+      "stubReason": "Leert die Eingabe fuer ein neues Postfach."
+    }
+  ],
+  "tables": [
+    {
+      "key": "postfaecher",
+      "label": "Postfächer",
+      "dataSourceKey": "postfaecher",
+      "serverPagination": false,
+      "pageSize": 50,
+      "virtualized": false,
+      "rowHeight": 44,
+      "rowDetail": false,
+      "columns": [
+        {
+          "key": "kennung",
+          "label": "Kennung",
+          "sortable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "absender_email",
+          "label": "Absender",
+          "filterable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "anbieter_text",
+          "label": "Anbieter",
+          "priority": "secondary"
+        },
+        {
+          "key": "verwendung_text",
+          "label": "Verwendung",
+          "priority": "secondary"
+        },
+        {
+          "key": "freigabe_text",
+          "label": "Freigabe",
+          "priority": "secondary"
+        },
+        {
+          "key": "status_text",
+          "label": "Status",
+          "priority": "primary"
+        }
+      ],
+      "rowActions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "command": "admin.postfachBearbeiten",
+          "dangerLevel": "safe"
+        },
+        {
+          "key": "entfernen",
+          "label": "Entfernen",
+          "command": "admin.postfachEntfernen",
+          "dangerLevel": "high",
+          "requiresConfirmation": true
+        }
+      ]
+    }
+  ],
+  "noWorkflowReason": "Postfaecher werden eingerichtet, geprueft und genutzt; es gibt keinen Belegablauf.",
+  "layout": {
+    "floorplan": "worklist",
+    "density": "compact",
+    "contextRail": "none",
+    "tableProfile": "standard",
+    "columnNavigation": "single",
+    "preferredMode": "desktopDense",
+    "mobileMode": "mobileStack",
+    "touchTargetPx": 44,
+    "summaryPlacement": "footer",
+    "statusPlacement": "afterFields"
+  }
+} satisfies ScreenDefinition

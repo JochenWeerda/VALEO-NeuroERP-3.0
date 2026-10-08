@@ -34,6 +34,7 @@ FIELD_TYPES = frozenset({
     "table",
     "currency",
     "percentage",
+    "password",
 })
 
 PRIMITIVE_BY_FIELD_TYPE = {
@@ -50,6 +51,7 @@ PRIMITIVE_BY_FIELD_TYPE = {
     "boolean": "Checkbox",
     "file": "FileField",
     "table": "DataTable",
+    "password": "TextField",
 }
 
 REJECTED_KEYS = ("screenType", "listReport", "form")

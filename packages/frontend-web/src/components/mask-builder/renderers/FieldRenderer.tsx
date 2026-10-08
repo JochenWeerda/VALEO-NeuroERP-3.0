@@ -124,6 +124,16 @@ export function FieldRenderer({
           options={(field.options ?? []).map((option) => ({ value: String(option.value), label: option.label }))}
           onValueChange={onChange ? (v) => onChange(v) : () => undefined}
         />
+      ) : field.type === 'password' ? (
+        // Geheimnisse werden nur geschrieben, nie zurueckgegeben oder angezeigt;
+        // ein leeres Feld heisst "unveraendert lassen".
+        <Input
+          {...commonProps}
+          ref={inputRef}
+          type="password"
+          autoComplete="new-password"
+          readOnly={isReadOnly}
+        />
       ) : isReadOnly ? (
         <Input
           {...commonProps}

@@ -316,6 +316,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
       {
+        id: 'postfaecher',
+        label: 'Postfächer',
+        icon: Hash,
+        module: '@/pages/admin/postfaecher',
+        preferredPath: 'admin/postfaecher',
+        keywords: ['postfach', 'e-mail', 'mailkonto', 'smtp', 'ionos', 'gmail', 'absender', 'info@', 'fibu@', 'dispo@'],
+        mcp: { businessDomain: 'admin', scope: 'admin:write' },
+      },
+      {
         id: 'nummernkreise',
         label: 'Nummernkreise',
         icon: Hash,
