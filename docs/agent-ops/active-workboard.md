@@ -11,7 +11,28 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BESTANDSBUCH-EINKAUF-20261007 — in Arbeit, Claude Code
+## RESTBEFUNDE-BESTANDSBUCH-20261008 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** die vier benannten Restbefunde aus
+BESTANDSBUCH-EINKAUF-20261007 schliessen: (1) `dunning.py` mit `Query("system")`, (2)
+Rechnungsanlage committet den Dokumentspeicher vor der Buchung, (3) Artikelnummern
+systemweit statt je Mandant eindeutig, (4) `_list_docs` faellt auf einen In-Memory-Speicher
+zurueck. **Dateibesitz:** `app/api/v1/endpoints/dunning.py`, `finance_invoices.py`,
+`app/services/sales_posting_service.py` (nur Commit-Steuerung), `compat.py::_list_docs`,
+eine additive Migration fuer `domain_inventory.articles`, Artikel-Nummernabfragen ohne
+Mandant, neue/angepasste Tests, QA-Doku. Fremde WIP (eBilanz, CI-Repair) unberuehrt.
+
+
+## BESTANDSBUCH-EINKAUF-20261007 — abgeschlossen, Claude Code
+
+**Abnahme (07.10.2026):** alle fuenf Befunde behoben, dazu gleichartige Funde:
+`/lager/*` + Barcode-Scan mit Query-Mandant, WMS-`book_stock_movement` mit
+Vorzeichenfehler, Lesemodell `StockMovement` (Liste dauerhaft 500 in der Dev-DB),
+`register_artifact` archivierte wegen des Belegkopf-Fremdschluessels **nie** etwas,
+Bestellstatistik nie erreichbar. 41 neue Vertraege, 671 Bereichstests gruen, Live-Probe
+am gewachsenen Bestand. Migration `lieferschein_abgleich_20261007` (Probe + Dev). QA:
+[bestandsbuch-einkauf-20261007.md](../quality-assurance/bestandsbuch-einkauf-20261007.md).
+
 
 **Owner:** Claude Code. **Stand:** 2026-10-07. **Ziel:** die fuenf benannten Befunde aus
 MANDANT-FINANZ-CRM-EINKAUF-20261007 beheben: (1) Inventar-API nimmt den Mandanten aus
@@ -51,6 +72,10 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 `docs/README.md` und Domain-Depth-Plan verweisen auf den Hub.
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
+
+**CI-Vertrag Meilenstein 1 (2026-10-08):** [QA](../quality-assurance/ci-contract-closure-20261008.md). Lead-Aliase vollstaendig dokumentiert, zwei bereits typisierte eBilanz-Dekoratoren scannerkompatibel angeordnet; Schwellen unveraendert 0/20. Isolierte HEAD-Quelle: 3590/3590 Beschreibungen, 20 verbleibende untypisierte Routen, 24 Kalendervertraege gruen. Secret-Scan-Fund eigenes kuenstliches Kalenderfixture, Argumente aufgeteilt statt Allowlist: offizielles Gitleaks 8.30.1, 62,66 MB HEAD-Snapshot, null Funde ohne Docker. OpenAPI deterministisch 3104 Pfade, nur Lead-Aliasbeschreibung geaendert. Weitere Claim-Punkte weiter in Arbeit. ELSTER-Registrierung geoeffnet, Begruendung vorbereitet, Pflicht-Kontaktdaten angefragt; nichts abgesendet/angenommen.
+
+**CI-CONTRACT-CLOSURE-20261008 (reserviert):** Owner Codex-01a0f3fc. User-Claim: OpenAPI-Doku-Schwelle und untypisierte Routen auf HEAD, Masken-Berechtigungsvertrag, CRM-Smoke sowie Security-/Secret-Scan. Zuerst Leads-Slash-Aliase dokumentieren und tatsaechlich typisierte eBilanz-Dekoratoren im bestehenden Scanner korrekt erkennen, ohne Schwellen/Schutzregeln abzusenken; Secret-Befund auf eigenes Kalender-Testfixture pruefen und Ursache entfernen. Besitz eigene fokussierte Hunks leads.py, ebilanz_elster.py, bestehende CI-Scanner/Regressionen, test_business_day_service_boundaries.py, Capture-Screen-Aktionsmetadaten BE/FE nach Skill und Berechtigungsanalyse, betroffene CRM-Smoke-Testhunks nach Loganalyse, Security-Pins nur nach aktueller Advisory-Pruefung. Fremde Arbeitsbaum-/Workflow-/Bestandsbuchhunks geschuetzt. QA/Workboard/Open-Gaps und getestete generierte Artefakte nachziehen; bestehender gemeinsamer Probe, keine neue DB/Container/Reset. XBRL-/ERiC-Integration nach OSS-/Lizenz-/SDK-Recherche als gesonderter Fachclaim.
 
 **eBilanz-Scheinwirkung/Schema (2026-10-07):** [QA](../quality-assurance/ebilanz-honest-persistence-20261007.md). Echte tenantgebundene Entwurfsmetadaten statt XML-/Paket-Scheinerfolg; Datenbankfehler 503/Rollback, fremde/fehlende Export-IDs 404, Listen SQL-LIMIT/fetchmany. Request-DDL entfernt, additive Migration uebernimmt bestehenden Entwicklungsstand ohne Zeilen zu loeschen/umzuschreiben. Zentraler Finance-Rollenschutz vor DB-Zugriff. Ausschliesslich dort konsumierter ERIC-Simulator entfernt; ohne vollstaendiges XBRL/echt bestaetigte externe ERIC-Anbindung bleiben Validieren/Uebertragen/UStVA 409, keine fingierten Tickets oder ANGENOMMEN-Projektion. Readiness offen statt falschem repo_ready; historische Tickets nur NICHT_BESTAETIGT, Daten erhalten. 84 neue/bestehende PG-/HTTP-/Scanner-Vertraege ohne Skip gruen (12,22 s), davor Phase-23-Gesamtpfade mit 38 Vertraegen gruen; alle neun Improvement-Checks stabil gruen (26,0 s). SQL-Bind-Gate prueft neue/getrackte Quelldateien mit Nullpfaden und gezielt Git-Loeschstatus, echte temporaere Git-Vertraege; unberechtigte Lesefehler bleiben hart. Baselines nur -3 .all-Abfragen/-2 Kalenderstellen, keine neuen Ausnahmen. Gemeinsamer valeo_probe unter Migrationclaim/Nutzungspruefung, eigene Testdaten ueber Transaktionen/Savepoints; keine neue DB/Container/Reset. OpenAPI, drei Inventare und Architektur 935/276/454 komplett nachgezogen. Vollstaendiges XBRL/amtliche Taxonomie/realer ERIC-Empfang bleiben echte offene Fachwege; Gesamtkatalog, Security und weitere globale Restbefunde separat, kein pauschaler Gruenstatus. Vorheriger Lead/PDF-PostgreSQL-GitHub-Lauf 37663669984 erfolgreich.
 

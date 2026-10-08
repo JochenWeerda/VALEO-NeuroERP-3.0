@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-07
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-07T20:32:12Z'
+generated_at: '2026-10-07T20:58:37Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -482,6 +482,7 @@ domains:
     - docs/adr/adr-066-tank-adapter-intake-outbox.md
     - docs/adr/adr-067-governed-l3-report-catalog.md
     - docs/adr/adr-077-leading-weighing-ticket.md
+    - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     status: active
   crm:
     owner: domain/crm
@@ -838,6 +839,7 @@ domains:
     - docs/adr/adr-069-gated-l3-standard-unimet-adapters.md
     - docs/adr/adr-071-security-dependency-gate.md
     - docs/adr/adr-072-mcp-execution-adapters.md
+    - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     status: pilot
   dms-compliance:
     owner: domain/dms-compliance
@@ -1320,6 +1322,7 @@ domains:
     - docs/adr/adr-074-bank-directbook-retirement.md
     - docs/adr/adr-075-bank-ledger-evidence.md
     - docs/adr/adr-076-cash-close-retirement.md
+    - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     status: active
   hr:
     owner: domain/hr
@@ -1536,6 +1539,7 @@ domains:
     - docs/adr/adr-060-governed-inventory-auxiliary-batches.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
     - docs/adr/adr-077-leading-weighing-ticket.md
+    - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     status: active
   logistics:
     owner: domain/logistics
@@ -1622,6 +1626,7 @@ domains:
     - docs/adr/adr-040-contract-gated-herd-data-connectors.md
     - docs/adr/adr-056-vendor-neutral-erp-habit-contract.md
     - docs/adr/adr-072-mcp-execution-adapters.md
+    - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
   platform:
     owner: platform
     frontend_route_prefixes:

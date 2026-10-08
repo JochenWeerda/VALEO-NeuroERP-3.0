@@ -308,12 +308,33 @@ class StockMovementUpdate(BaseSchema):
 
 
 class StockMovement(StockMovementBase, TimestampMixin):
-    """Full stock movement schema"""
+    """Eine gebuchte Lagerbewegung, so wie sie im Bestandsbuch steht.
+
+    Die Schreibregeln der Basisklasse gelten hier nicht: Das Bestandsbuch fuehrt
+    sieben Bewegungsvokabulare (``wareneingang``, ``EINLAGERUNG``, ``ABGANG`` …)
+    und Altwerte wie ``ownership_type = 'eigen'``. Bis 07.10.2026 erbte das
+    Lesemodell die Muster des Anlegens, und eine einzige solche Zeile liess die
+    ganze Liste mit 500 scheitern.
+    """
     id: str = Field(..., description="Movement ID")
     tenant_id: str = Field(..., description="Tenant ID")
-    previous_stock: Decimal = Field(..., ge=0, description="Stock before movement")
-    new_stock: Decimal = Field(..., ge=0, description="Stock after movement")
-    total_cost: Optional[Decimal] = Field(None, ge=0, description="Total movement cost")
+    movement_type: str = Field(..., description="Movement type as booked (any vocabulary)")
+    ownership_type: Optional[str] = Field(default="owned", description="Stock ownership type as booked")
+    unit_cost: Optional[Decimal] = Field(None, description="Unit cost")
+    unit: Optional[str] = Field(None, description="Unit of measure")
+    movement_number: Optional[str] = Field(None, description="Movement number")
+    reference_number: Optional[str] = Field(None, description="Reference document number")
+    notes: Optional[str] = Field(None, description="Movement notes")
+    warehouse_location: Optional[str] = Field(None, description="Location text")
+    charge: Optional[str] = Field(None, description="Batch/charge")
+    booking_user: Optional[str] = Field(None, description="Booking user")
+    owner_partner_id: Optional[str] = Field(None, description="Owner partner for consigned stock")
+    agrar_contract_id: Optional[str] = Field(None, description="Linked agrar contract")
+    weighing_ticket_id: Optional[str] = Field(None, description="Linked weighing ticket")
+    storage_fee_monthly_rate: Optional[Decimal] = Field(None, description="Monthly storage fee rate")
+    previous_stock: Optional[Decimal] = Field(None, description="Stock before movement")
+    new_stock: Optional[Decimal] = Field(None, description="Stock after movement")
+    total_cost: Optional[Decimal] = Field(None, description="Total movement cost")
     warehouse_name: Optional[str] = Field(None, description="Warehouse name; filled by the single-movement GET")
 
 

@@ -124,6 +124,19 @@ def storno_korrektur(
             "ownership_type": orig.get("ownership_type") or "owned",
         },
     )
+    # Der Artikelbestand laeuft mit, wie beim Buchen (InventoryService). Bis
+    # 07.10.2026 korrigierte der Storno nur das Bestandsbuch; der Artikel behielt
+    # den alten Bestand — zwei Wahrheiten fuer dieselbe Ware.
+    db.execute(
+        text(
+            "UPDATE domain_inventory.articles "
+            "SET current_stock = COALESCE(current_stock, 0) + :delta, "
+            "    available_stock = COALESCE(current_stock, 0) + :delta - COALESCE(reserved_stock, 0), "
+            "    updated_at = NOW() "
+            "WHERE id = :id AND tenant_id = :tid"
+        ),
+        {"delta": -wirkung, "id": article_id, "tid": tenant_id},
+    )
     # mark original as storniert
     db.execute(
         text(

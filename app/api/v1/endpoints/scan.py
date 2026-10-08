@@ -9,18 +9,17 @@ from __future__ import annotations
 from typing import Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.services.inventory_stock_balance import current_stock
 
 router = APIRouter(prefix="/scan", tags=["scan", "mobile"])
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class BarcodeScanRequest(BaseModel):
@@ -64,7 +63,7 @@ class BarcodeScanResponse(BaseModel):
 )
 async def scan_barcode(
     payload: BarcodeScanRequest,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> BarcodeScanResponse:
     """Barcode-Lookup: sucht Artikel per EAN, Artikelnummer oder internem Code.
@@ -72,8 +71,11 @@ async def scan_barcode(
     Rückgabe enthält Artikel-Stammdaten + aktuellen Bestand im angegebenen Lager.
     Falls der Artikel nicht gefunden wird, wird `gefunden=False` zurückgegeben
     (kein 404) — das ermöglicht Fremdware-Erkennung im Frontend.
+
+    Der Mandant kommt aus dem Kontext; bis 07.10.2026 aus einem Query-Parameter,
+    sonst aus dem Standardmandanten — der Scanner fand fremde Artikel samt Bestand.
     """
-    t_id = tenant_id or DEFAULT_TENANT
+    t_id = tenant_id
     scan_id = str(uuid4())
     barcode = payload.barcode.strip()
 

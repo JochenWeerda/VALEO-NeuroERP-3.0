@@ -5,7 +5,7 @@
     "app/api/v1/endpoints/admin_suite.py": 1038,
     "app/api/v1/endpoints/agrar_feldbuch.py": 1103,
     "app/api/v1/endpoints/business_partners.py": 2719,
-    "app/api/v1/endpoints/compat.py": 3589,
+    "app/api/v1/endpoints/compat.py": 3477,
     "app/api/v1/endpoints/compliance.py": 1127,
     "app/api/v1/endpoints/einkauf_bestellvorschlag.py": 1058,
     "app/api/v1/endpoints/flow_spines.py": 1499,

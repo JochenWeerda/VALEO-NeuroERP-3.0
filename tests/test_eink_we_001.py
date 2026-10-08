@@ -37,6 +37,15 @@ def _mock_db(ls_row=None, positions=None, warehouse_bins=None) -> MagicMock:
             result.mappings.return_value.all.return_value = positions or []
         elif "UPDATE einkauf_lieferscheine SET erledigt" in sql_str:
             pass
+        elif "reference_number = :ref" in sql_str:
+            result.scalar.return_value = None  # noch nicht eingebucht
+        elif "FROM domain_inventory.warehouses WHERE id" in sql_str:
+            result.scalar.return_value = 1
+        elif "FROM domain_inventory.warehouse_bins" in sql_str:
+            result.scalar.return_value = 1
+        elif "FROM domain_inventory.articles" in sql_str:
+            artikel = (params or {}).get("nr")
+            result.first.return_value = (f"ID-{artikel}",) if artikel else None
         elif "bin_stock" in sql_str or "warehouse_bins" in sql_str or "inventory_stock_movements" in sql_str:
             result.fetchone.return_value = None
             result.fetchall.return_value = []
@@ -92,20 +101,23 @@ class TestEinbuchenLieferschein:
         assert exc.value.status_code == 422
 
     @pytest.mark.asyncio
-    async def test_position_ohne_artikel_nr_wird_uebersprungen(self):
+    async def test_position_ohne_artikel_verhindert_die_ganze_buchung(self):
+        """Seit 07.10.2026 ganz oder gar nicht: Frueher wurde die Position still
+        uebersprungen, der Rest gebucht und der Lieferschein "erledigt"."""
         from app.api.v1.endpoints.einkauf_lieferschein import einbuchen_lieferschein, EinbuchenPayload
 
-        positions = [_pos(1, None, 100.0)]
+        positions = [_pos(1, "ART-001", 50.0), _pos(2, None, 100.0)]
         db = _mock_db(ls_row=_ls_row(), positions=positions)
 
         with patch("app.services.warehouse_service.WarehouseService.book_stock_movement") as mock_book:
-            with patch("app.services.warehouse_service.WarehouseService.suggest_putaway_bin", return_value=[]):
-                result = await einbuchen_lieferschein(
+            with pytest.raises(HTTPException) as exc:
+                await einbuchen_lieferschein(
                     ls_id=LS_ID, payload=EinbuchenPayload(warehouse_id="WH-1", default_bin_id="BIN-1"),
                     tenant_id=TENANT, db=db,
                 )
-        assert result.movements_created == 0
-        assert result.positions_skipped == 1
+        assert exc.value.status_code == 422
+        assert "Pos. 2" in exc.value.detail
+        mock_book.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_einlagerung_wird_gebucht(self):
@@ -123,6 +135,9 @@ class TestEinbuchenLieferschein:
                 )
         assert result.movements_created == 2
         assert mock_book.call_count == 2
-        # verify movement_type is EINLAGERUNG
+        # verify movement_type is EINLAGERUNG, alles in einem Commit
         call_kwargs = mock_book.call_args_list[0][1]
         assert call_kwargs["movement_type"] == "EINLAGERUNG"
+        assert call_kwargs["commit"] is False
+        assert call_kwargs["article_id"] == "ID-ART-001"
+        db.commit.assert_called_once()

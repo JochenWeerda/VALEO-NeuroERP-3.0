@@ -1,22 +1,25 @@
 """
 Warehouse API endpoints
 Full CRUD for warehouse management
+
+Der Mandant kommt aus dem Kontext. Bis 07.10.2026 nahmen Lesen, Anlegen, Aendern
+und Stilllegen ihn aus einem Query-Parameter, sonst aus dem Standardmandanten —
+ohne jede Berechtigungspruefung. Schreiben verlangt jetzt die Lager-Adminrolle.
 """
 
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
+from .inventory_auth import get_current_tenant_id, require_inventory_admin
 from ....infrastructure.models import Warehouse as WarehouseModel
 from ....api.v1.schemas.base import PaginatedResponse
 from ....api.v1.schemas.inventory import Warehouse, WarehouseCreate, WarehouseUpdate
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 @router.get("/", response_model=PaginatedResponse[Warehouse])
@@ -58,11 +61,10 @@ async def list_warehouses(
 @router.get("/{warehouse_id}", response_model=Warehouse)
 async def get_warehouse(
     warehouse_id: str,
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Get a single warehouse by ID."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
     
     warehouse = (
         db.query(WarehouseModel)
@@ -82,11 +84,11 @@ async def get_warehouse(
 @router.post("/", response_model=Warehouse, status_code=201)
 async def create_warehouse(
     warehouse_data: WarehouseCreate,
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_admin),
+    effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Create a new warehouse."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
     
     warehouse = WarehouseModel(
         **warehouse_data.model_dump(),
@@ -104,11 +106,11 @@ async def create_warehouse(
 async def update_warehouse(
     warehouse_id: str,
     warehouse_data: WarehouseUpdate,
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_admin),
+    effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Update an existing warehouse."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
     
     warehouse = (
         db.query(WarehouseModel)
@@ -135,11 +137,11 @@ async def update_warehouse(
 @router.delete("/{warehouse_id}", status_code=204)
 async def delete_warehouse(
     warehouse_id: str,
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_admin),
+    effective_tenant: str = Depends(get_current_tenant_id),
 ):
     """Delete a warehouse (soft delete)."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
     
     warehouse = (
         db.query(WarehouseModel)

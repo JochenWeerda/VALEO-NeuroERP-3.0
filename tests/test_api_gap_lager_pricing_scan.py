@@ -107,8 +107,7 @@ def seeded_article(require_db):
 def test_bestaende_happy_path_reflects_booked_movement(client, seeded_article):
     booking = client.post(
         "/api/v1/lager/bewegungen",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
         json={
             "article_id": seeded_article["article_id"],
             "warehouse_id": seeded_article["warehouse_id"],
@@ -120,8 +119,8 @@ def test_bestaende_happy_path_reflects_booked_movement(client, seeded_article):
 
     resp = client.get(
         "/api/v1/lager/bestaende",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_A, "article_id": seeded_article["article_id"]},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
+        params={"article_id": seeded_article["article_id"]},
     )
     assert resp.status_code == 200, resp.text
     rows = resp.json()
@@ -134,8 +133,7 @@ def test_bestaende_happy_path_reflects_booked_movement(client, seeded_article):
 def test_bestaende_tenant_isolation(client, seeded_article):
     client.post(
         "/api/v1/lager/bewegungen",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
         json={
             "article_id": seeded_article["article_id"],
             "warehouse_id": seeded_article["warehouse_id"],
@@ -146,8 +144,8 @@ def test_bestaende_tenant_isolation(client, seeded_article):
 
     resp = client.get(
         "/api/v1/lager/bestaende",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_B, "article_id": seeded_article["article_id"]},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_B},
+        params={"article_id": seeded_article["article_id"]},
     )
     assert resp.status_code == 200, resp.text
     assert resp.json() == []
@@ -158,8 +156,7 @@ def test_bestaende_missing_optional_filters_defaults_to_positive_only(client, se
     """Ohne warehouse_id/charge/article_number darf die Query nicht 500en."""
     resp = client.get(
         "/api/v1/lager/bestaende",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
     )
     assert resp.status_code == 200, resp.text
     assert isinstance(resp.json(), list)
@@ -173,8 +170,7 @@ def test_bestaende_missing_optional_filters_defaults_to_positive_only(client, se
 def test_bewegungen_happy_path_wareneingang(client, seeded_article):
     resp = client.post(
         "/api/v1/lager/bewegungen",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
         json={
             "article_id": seeded_article["article_id"],
             "warehouse_id": seeded_article["warehouse_id"],
@@ -192,8 +188,7 @@ def test_bewegungen_happy_path_wareneingang(client, seeded_article):
 def test_bewegungen_negative_invalid_movement_type(client, seeded_article):
     resp = client.post(
         "/api/v1/lager/bewegungen",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
         json={
             "article_id": seeded_article["article_id"],
             "warehouse_id": seeded_article["warehouse_id"],
@@ -208,8 +203,7 @@ def test_bewegungen_negative_invalid_movement_type(client, seeded_article):
 def test_bewegungen_negative_unknown_article_returns_404(client, seeded_article):
     resp = client.post(
         "/api/v1/lager/bewegungen",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
         json={
             "article_id": "does-not-exist",
             "warehouse_id": seeded_article["warehouse_id"],
@@ -225,8 +219,7 @@ def test_bewegungen_tenant_isolation_article_lookup(client, seeded_article):
     """Artikel gehoert TENANT_A -> Buchung unter TENANT_B muss 404 liefern."""
     resp = client.post(
         "/api/v1/lager/bewegungen",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_B},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_B},
         json={
             "article_id": seeded_article["article_id"],
             "warehouse_id": seeded_article["warehouse_id"],
@@ -245,8 +238,7 @@ def test_bewegungen_tenant_isolation_article_lookup(client, seeded_article):
 def test_scan_barcode_happy_path_found_by_ean(client, seeded_article):
     resp = client.post(
         "/api/v1/scan/barcode",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
         json={"barcode": seeded_article["ean_code"]},
     )
     assert resp.status_code == 200, resp.text
@@ -259,8 +251,7 @@ def test_scan_barcode_happy_path_found_by_ean(client, seeded_article):
 def test_scan_barcode_unknown_returns_200_not_found_flag(client, seeded_article):
     resp = client.post(
         "/api/v1/scan/barcode",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
         json={"barcode": f"unbekannt-{uuid.uuid4().hex[:8]}"},
     )
     assert resp.status_code == 200, resp.text
@@ -274,8 +265,7 @@ def test_scan_barcode_unknown_returns_200_not_found_flag(client, seeded_article)
 def test_scan_barcode_negative_missing_barcode_field(client):
     resp = client.post(
         "/api/v1/scan/barcode",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
         json={},
     )
     assert resp.status_code == 422, resp.text
@@ -285,8 +275,7 @@ def test_scan_barcode_negative_missing_barcode_field(client):
 def test_scan_barcode_tenant_isolation(client, seeded_article):
     resp = client.post(
         "/api/v1/scan/barcode",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_B},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_B},
         json={"barcode": seeded_article["ean_code"]},
     )
     assert resp.status_code == 200, resp.text
@@ -301,13 +290,13 @@ def test_scan_barcode_tenant_isolation(client, seeded_article):
 def test_pricing_find_matches_calculate_alias(client, seeded_article):
     find_resp = client.get(
         "/api/v1/pricing/find",
-        headers=HEADERS,
-        params={"article_id": seeded_article["article_id"], "tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
+        params={"article_id": seeded_article["article_id"]},
     )
     calc_resp = client.get(
         "/api/v1/pricing/calculate",
-        headers=HEADERS,
-        params={"article_id": seeded_article["article_id"], "tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
+        params={"article_id": seeded_article["article_id"]},
     )
     assert find_resp.status_code == 200, find_resp.text
     assert calc_resp.status_code == 200, calc_resp.text
@@ -318,8 +307,8 @@ def test_pricing_find_matches_calculate_alias(client, seeded_article):
 def test_pricing_find_missing_optional_params_still_resolves_base_price(client, seeded_article):
     resp = client.get(
         "/api/v1/pricing/find",
-        headers=HEADERS,
-        params={"article_id": seeded_article["article_id"], "tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
+        params={"article_id": seeded_article["article_id"]},
     )
     assert resp.status_code == 200, resp.text
     body = resp.json()
@@ -331,8 +320,8 @@ def test_pricing_find_missing_optional_params_still_resolves_base_price(client, 
 def test_pricing_find_negative_unknown_article_returns_404(client):
     resp = client.get(
         "/api/v1/pricing/find",
-        headers=HEADERS,
-        params={"article_id": "does-not-exist", "tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
+        params={"article_id": "does-not-exist"},
     )
     assert resp.status_code == 404, resp.text
 
@@ -391,8 +380,7 @@ def cleanup_staffelrabatt(require_db):
 def test_staffelrabatte_create_and_list_happy_path(client, seeded_article, cleanup_staffelrabatt):
     create_resp = client.post(
         "/api/v1/pricing/staffelrabatte",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
         json={
             "artikel_id": seeded_article["article_id"],
             "stufen": [
@@ -410,8 +398,8 @@ def test_staffelrabatte_create_and_list_happy_path(client, seeded_article, clean
 
     list_resp = client.get(
         "/api/v1/pricing/staffelrabatte",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_A, "artikel_id": seeded_article["article_id"]},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
+        params={"artikel_id": seeded_article["article_id"]},
     )
     assert list_resp.status_code == 200, list_resp.text
     ids = [row["id"] for row in list_resp.json()]
@@ -422,8 +410,7 @@ def test_staffelrabatte_create_and_list_happy_path(client, seeded_article, clean
 def test_staffelrabatte_negative_missing_artikel_and_gruppe(client):
     resp = client.post(
         "/api/v1/pricing/staffelrabatte",
-        headers=HEADERS,
-        params={"tenant_id": TENANT_A},
+        headers={**HEADERS, "X-Tenant-ID": TENANT_A},
         json={"stufen": [{"ab_menge": 1, "rabatt_prozent": 1}]},
     )
     assert resp.status_code == 422, resp.text

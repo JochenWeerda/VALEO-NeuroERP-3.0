@@ -13,7 +13,6 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.database import get_db
 from ....core.module_registry import registry
 from modules.bootstrap import initialize_module_registry
@@ -21,7 +20,6 @@ from .inventory_auth import get_current_tenant_id, require_inventory_access
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class ChargeLineageCreate(BaseModel):
@@ -93,7 +91,6 @@ def _to_out(row: dict) -> ChargeLineageOut:
 
 @router.get("/", response_model=list[ChargeLineageOut])
 async def list_charge_lineage(
-    tenant_id: Optional[str] = Query(None),
     charge: Optional[str] = Query(None),
     article_id: Optional[str] = Query(None),
     limit: int = Query(200, ge=1, le=1000),
@@ -101,7 +98,6 @@ async def list_charge_lineage(
     _: str = Depends(require_inventory_access),
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
-    effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
     _ensure_agrar_enabled(db, effective_tenant)
 
     where = ["tenant_id = :tenant_id"]
@@ -131,12 +127,10 @@ async def list_charge_lineage(
 @router.post("/", response_model=ChargeLineageOut, status_code=201)
 async def create_charge_lineage(
     payload: ChargeLineageCreate,
-    tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     _: str = Depends(require_inventory_access),
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
-    effective_tenant = tenant_id or effective_tenant or DEFAULT_TENANT
     _ensure_agrar_enabled(db, effective_tenant)
 
     item_id = str(uuid4())

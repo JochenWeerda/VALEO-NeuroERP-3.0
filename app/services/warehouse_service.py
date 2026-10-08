@@ -244,17 +244,63 @@ class WarehouseService:
 
     # ── Bestandsbuchung ────────────────────────────────────────
 
+    #: Umlagerungsseiten heissen im Bestandsbuch so, wie die Richtungstabelle sie kennt.
+    _BUCHUNGSART = {"transfer_out": "umbuchung_ausgang", "transfer_in": "umbuchung_eingang"}
+
     def book_stock_movement(self, bin_id: str, article_id: str, batch_number: str | None,
                              best_before_date: date | None, quantity_kg: Decimal,
                              unit_cost: Decimal | None, movement_type: str,
-                             reference: str | None = None) -> str:
-        """Einlagerung (positiv) oder Auslagerung (negativ) auf Bin-Ebene buchen."""
+                             reference: str | None = None, *, commit: bool = True) -> str:
+        """Einlagerung (positiv) oder Auslagerung (negativ) auf Bin-Ebene buchen.
+
+        Lagerplatz, Bestandsbuch und Artikelbestand laufen gemeinsam. Ins Bestandsbuch
+        geht die Menge so, wie die Richtungstabelle sie liest: Zugangs- und
+        Abgangsarten mit positiver Menge, vorzeichenbehaftete Arten (``inventur``,
+        ``adjustment`` …) mit Vorzeichen. Bis 07.10.2026 stand hier die Bin-Menge
+        mit Vorzeichen: ``pick_out`` mit ``-5`` zaehlte in jeder Auswertung als
+        Zugang, ``transfer_in``/``transfer_out`` kennt die Tabelle nicht (0). Und
+        weder der Lagerplatz noch der Artikelbestand wurden auf den Mandanten
+        geprueft bzw. mitgefuehrt.
+
+        ``commit=False`` laesst die Transaktion beim Aufrufer (mehrere Positionen in
+        einem Commit).
+        """
+        from app.services.inventory_movement_direction import SIGNED_TYPES, direction_of
+
+        buchungsart = self._BUCHUNGSART.get((movement_type or "").lower(), movement_type)
+        richtung = direction_of(buchungsart)
+        if quantity_kg == 0:
+            raise ValueError("Menge 0 bewegt nichts")
+        if richtung == 0:
+            raise ValueError(f"Bewegungsart {movement_type} hat keine Bestandsrichtung")
+        if (buchungsart or "").lower() in SIGNED_TYPES:
+            buch_menge = quantity_kg
+        elif (quantity_kg > 0) != (richtung > 0):
+            raise ValueError(
+                f"Bewegungsart {movement_type} ist ein {'Zugang' if richtung > 0 else 'Abgang'}; "
+                f"Menge {quantity_kg} passt nicht dazu"
+            )
+        else:
+            buch_menge = abs(quantity_kg)
+
+        lagerplatz = self.db.execute(text("""
+            SELECT wb.warehouse_id FROM domain_inventory.warehouse_bins wb
+            WHERE wb.id = :bid AND wb.tenant_id = :tid
+        """), {"bid": bin_id, "tid": self.tenant_id}).fetchone()
+        if not lagerplatz:
+            raise ValueError(f"Lagerplatz {bin_id} nicht gefunden")
+        if not self.db.execute(text(
+            "SELECT 1 FROM domain_inventory.articles WHERE id = :aid AND tenant_id = :tid"
+        ), {"aid": article_id, "tid": self.tenant_id}).scalar():
+            raise ValueError(f"Artikel {article_id} nicht gefunden")
+
         # Upsert bin_stock
         existing = self.db.execute(text("""
             SELECT id, quantity_kg FROM domain_inventory.bin_stock
             WHERE bin_id = :bid AND article_id = :aid
               AND COALESCE(batch_number,'') = COALESCE(:batch,'')
               AND tenant_id = :tid
+            FOR UPDATE
         """), {"bid": bin_id, "aid": article_id, "batch": batch_number, "tid": self.tenant_id}).fetchone()
 
         if existing:
@@ -300,7 +346,7 @@ class WarehouseService:
                reference_number, movement_date, movement_time, notes, tenant_id, auto_created,
                ownership_type, storage_fee_relevant, previous_stock, new_stock)
             SELECT :id, :aid, wb.warehouse_id,
-                   :bid, :mtype, :qty, :cost, :ref, CURRENT_DATE, CURRENT_TIME, NULL, :tid, false,
+                   :bid, :mtype, :buch_menge, :cost, :ref, CURRENT_DATE, CURRENT_TIME, NULL, :tid, false,
                    'owned', false,
                    -- bin_stock ist an dieser Stelle bereits fortgeschrieben:
                    -- aktueller Lagersummenstand = new_stock, davor = new_stock - qty
@@ -314,10 +360,20 @@ class WarehouseService:
                 WHERE wb2.warehouse_id = wb.warehouse_id
                   AND bs.article_id = :aid AND bs.tenant_id = :tid
             ) ws ON true
-            WHERE wb.id = :bid
-        """), {"id": mv_id, "aid": article_id, "bid": bin_id, "mtype": movement_type,
-               "qty": quantity_kg, "cost": unit_cost, "ref": reference, "tid": self.tenant_id})
-        self.db.commit()
+            WHERE wb.id = :bid AND wb.tenant_id = :tid
+        """), {"id": mv_id, "aid": article_id, "bid": bin_id, "mtype": buchungsart,
+               "buch_menge": buch_menge, "qty": quantity_kg, "cost": unit_cost, "ref": reference,
+               "tid": self.tenant_id})
+        # Der Artikelbestand laeuft mit, wie im Buchungsdienst (InventoryService).
+        self.db.execute(text("""
+            UPDATE domain_inventory.articles
+            SET current_stock = COALESCE(current_stock, 0) + :qty,
+                available_stock = COALESCE(current_stock, 0) + :qty - COALESCE(reserved_stock, 0),
+                updated_at = NOW()
+            WHERE id = :aid AND tenant_id = :tid
+        """), {"qty": quantity_kg, "aid": article_id, "tid": self.tenant_id})
+        if commit:
+            self.db.commit()
         return mv_id
 
     # ── FEFO-Picking ───────────────────────────────────────────

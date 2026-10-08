@@ -308,6 +308,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `l3_runtime_hardening_20260822` | L3 runtime tenant and uniqueness hardening. |
 | `lastschrift_mandant_20260930` | Eine Lastschrift gehoert einem Haus. |
 | `lead_pdf_archive_20261007` | Lead qualification reference and persistent PDF content in PostgreSQL. |
+| `lieferschein_abgleich_20261007` | Eingangslieferschein: gegen welche Bestellung abgeglichen, und wann. |
 | `lieferschein_status_bedingung_20260929` | Die Statusbedingung des Lieferscheins kennt die Zustaende, die es gibt. |
 | `lkw_annahme_queue_article_reference_20260328` | LKW-Annahme-Queue article reference |
 | `lkw_annahme_queue_klaerung_20260328` | LKW-Annahme-Queue Klaerungsdaten |

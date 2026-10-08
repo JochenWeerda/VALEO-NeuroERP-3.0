@@ -207,16 +207,16 @@ def erstellen(payload: EBilanzExportRequest, db: Session = Depends(get_db),
             "hinweise": ["Entwurfsmetadaten gespeichert; vollstaendiges XBRL-Dokument und ELSTER-Uebertragung fehlen."]}
 
 
-@router.post("/export/{export_id}/validieren", summary="Export-Validierungsverfuegbarkeit pruefen", dependencies=[Depends(finance_write)],
-    response_model=EbilanzElsterOut
+@router.post("/export/{export_id}/validieren", response_model=EbilanzElsterOut,
+    summary="Export-Validierungsverfuegbarkeit pruefen", dependencies=[Depends(finance_write)]
 )
 def validieren(export_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict:
     _export(db, tenant_id, export_id)
     raise HTTPException(409, "Kein vollstaendiges XBRL-Dokument vorhanden; Export wurde nicht validiert.")
 
 
-@router.post("/export/{export_id}/uebertragen", summary="ELSTER-Verfuegbarkeit pruefen", dependencies=[Depends(finance_admin)],
-    response_model=EbilanzElsterOut
+@router.post("/export/{export_id}/uebertragen", response_model=EbilanzElsterOut,
+    summary="ELSTER-Verfuegbarkeit pruefen", dependencies=[Depends(finance_admin)]
 )
 def uebertragen(export_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict:
     _export(db, tenant_id, export_id)

@@ -52,9 +52,6 @@
     "app/api/v1/endpoints/dunning.py": {
       "date.today": 1
     },
-    "app/api/v1/endpoints/einkauf_lieferschein.py": {
-      "date.today": 1
-    },
     "app/api/v1/endpoints/erloeskennziffern.py": {
       "date.today": 1
     },

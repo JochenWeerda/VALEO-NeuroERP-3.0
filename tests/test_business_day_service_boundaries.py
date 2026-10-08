@@ -77,7 +77,12 @@ def test_consent_validity_uses_business_day_and_preserves_limits(day, offset, al
     write = MagicMock(return_value={"id": "event"})
     monkeypatch.setattr(consent, "_vorgang_schreiben", write)
     db = MagicMock()
-    payload = SimpleNamespace(fassung=1, gueltig_bis=day + timedelta(days=offset), kanal="PAPIER", erfasst_durch="actor")
+    payload = SimpleNamespace(
+        fassung=1,
+        gueltig_bis=day + timedelta(days=offset),
+        kanal="PAPIER",
+        erfasst_durch="actor",
+    )
     if allowed:
         assert consent.erteilen(db, "tenant-a", "application", "event", payload) == {"id": "event"}
         assert write.call_args.args[5] == payload.gueltig_bis
