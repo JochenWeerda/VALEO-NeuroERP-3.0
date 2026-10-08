@@ -2253,6 +2253,10 @@
       "path": "admin/nummernkreise"
     },
     {
+      "module": "@/pages/admin/postfaecher-google-rueckruf",
+      "path": "admin/postfaecher/google-rueckruf"
+    },
+    {
       "module": "@/pages/admin/webhooks",
       "path": "admin/webhooks"
     },

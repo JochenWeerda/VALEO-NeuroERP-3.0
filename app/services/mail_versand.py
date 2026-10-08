@@ -5,12 +5,20 @@ verschickte: ``ProductionEmailService.send_email`` protokollierte und meldete
 ``True``, der Newsletter meldete ``in_queue`` ohne Warteschlange, die
 Bestellkommunikation ``status: "sent"``. Jeder dieser Erfolge war erfunden.
 
-Hier gilt: Versendet wird ueber den konfigurierten SMTP-Server
-(``EMAIL_SMTP_SERVER``/``EMAIL_SMTP_PORT``/``EMAIL_USERNAME``/``EMAIL_PASSWORD``,
-Absender ``EMAIL_FROM`` oder der Benutzername). Fehlt die Einrichtung, wirft
-:func:`sende_mail` :class:`MailVersandNichtEingerichtet`; scheitert der Server,
-:class:`MailVersandFehler`. Ein Erfolg wird nur gemeldet, wenn der Server die
-Nachricht angenommen hat.
+Welches Konto:
+
+1. Ein **Postfach des Mandanten** (:mod:`app.services.mailkonto_service`; IONOS,
+   Google mit App-Passwort oder Google-Anmeldung, allgemeines SMTP, Alias), wenn der
+   Aufrufer ``db`` und ``tenant_id`` mitgibt und der Mandant Postfaecher fuehrt —
+   gewaehlt nach ``postfach_id`` > ``verwendung`` > Standard, nur unter den
+   Postfaechern, aus denen ``nutzer`` senden darf.
+2. Sonst das **Plattformkonto** aus ``EMAIL_SMTP_*``/``EMAIL_FROM`` (Installationen
+   mit einem Mandanten).
+3. Sonst :class:`MailVersandNichtEingerichtet`.
+
+Zugangsdaten gehen nie unverschluesselt ueber die Leitung: SSL (Port 465) oder
+STARTTLS; bietet der Server kein STARTTLS, wird nicht angemeldet und nichts gesendet.
+Ein Erfolg wird nur gemeldet, wenn der Server die Nachricht angenommen hat.
 """
 
 from __future__ import annotations
@@ -18,17 +26,22 @@ from __future__ import annotations
 import smtplib
 from dataclasses import dataclass
 from email.message import EmailMessage
-from email.utils import make_msgid
+from email.utils import formataddr, make_msgid
+from typing import Any, Optional
 
 from app.core.config import settings
 
 
 class MailVersandNichtEingerichtet(RuntimeError):
-    """Kein SMTP-Server konfiguriert; es wird nichts versendet."""
+    """Kein SMTP-Zugang (weder Mandant noch Plattform); es wird nichts versendet."""
 
 
 class MailVersandFehler(RuntimeError):
     """Der SMTP-Server hat die Nachricht nicht angenommen."""
+
+
+class MailVersandVerweigert(MailVersandFehler):
+    """Der Nutzer darf aus dem gewaehlten Postfach nicht senden (bzw. aus keinem passenden)."""
 
 
 @dataclass(frozen=True)
@@ -38,50 +51,97 @@ class SmtpEinrichtung:
     benutzer: str | None
     passwort: str | None
     absender: str
+    sicherheit: str = "starttls"
+    absender_name: str | None = None
+    oauth_token: str | None = None
 
 
 def einrichtung() -> SmtpEinrichtung:
+    """Das Plattformkonto aus den Umgebungsvariablen."""
     server = (settings.EMAIL_SMTP_SERVER or "").strip()
     benutzer = (settings.EMAIL_USERNAME or "").strip() or None
     absender = (settings.EMAIL_FROM or "").strip() or benutzer
     if not server or not absender:
         raise MailVersandNichtEingerichtet(
-            "E-Mail-Versand ist nicht eingerichtet (EMAIL_SMTP_SERVER und Absender fehlen)."
+            "E-Mail-Versand ist nicht eingerichtet: kein Mailkonto des Mandanten und kein Plattformkonto "
+            "(EMAIL_SMTP_SERVER und Absender)."
         )
+    port = int(settings.EMAIL_SMTP_PORT or 587)
     return SmtpEinrichtung(
         server=server,
-        port=int(settings.EMAIL_SMTP_PORT or 587),
+        port=port,
         benutzer=benutzer,
         passwort=settings.EMAIL_PASSWORD or None,
         absender=absender,
+        sicherheit="ssl" if port == 465 else "starttls",
     )
 
 
-def sende_mail(empfaenger: str, betreff: str, text: str, *, html: str | None = None) -> str:
+def zugang(db: Any, tenant_id: Optional[str], *, verwendung: Optional[str] = None,
+           nutzer: Optional[dict] = None, postfach_id: Optional[str] = None) -> SmtpEinrichtung:
+    """Der Zugang fuer diesen Mandanten (eigenes Konto vor Plattformkonto); wirft, wenn keiner da ist."""
+    if db is not None and tenant_id:
+        from app.core.geheimnis import GeheimnisNichtEingerichtet, GeheimnisUngueltig
+        from app.services.mailkonto_service import KeinZugriff, MailkontoFehler, smtp_zugang
+
+        try:
+            z = smtp_zugang(db, tenant_id, verwendung=verwendung, nutzer=nutzer, postfach_id=postfach_id)
+        except KeinZugriff as fehler:
+            raise MailVersandVerweigert(str(fehler)) from fehler
+        except (MailkontoFehler, GeheimnisUngueltig, GeheimnisNichtEingerichtet) as fehler:
+            raise MailVersandFehler(f"Postfach des Mandanten nicht nutzbar: {fehler}") from fehler
+        if z is not None:
+            return SmtpEinrichtung(
+                server=z.server, port=z.port, benutzer=z.benutzer, passwort=z.passwort, absender=z.absender,
+                sicherheit=z.sicherheit, absender_name=z.absender_name, oauth_token=z.oauth_token,
+            )
+    return einrichtung()
+
+
+def sende_mail(
+    empfaenger: str,
+    betreff: str,
+    text: str,
+    *,
+    html: str | None = None,
+    db: Any = None,
+    tenant_id: Optional[str] = None,
+    verwendung: Optional[str] = None,
+    nutzer: Optional[dict] = None,
+    postfach_id: Optional[str] = None,
+) -> str:
     """Versendet eine Nachricht und liefert ihre Message-ID; wirft bei jedem Scheitern."""
     if not empfaenger or "@" not in empfaenger:
         raise MailVersandFehler(f"Ungueltige Empfaengeradresse: {empfaenger!r}")
-    e = einrichtung()
+    e = zugang(db, tenant_id, verwendung=verwendung, nutzer=nutzer, postfach_id=postfach_id)
     nachricht = EmailMessage()
-    nachricht["From"] = e.absender
+    nachricht["From"] = formataddr((e.absender_name, e.absender)) if e.absender_name else e.absender
     nachricht["To"] = empfaenger
     nachricht["Subject"] = betreff
     nachricht["Message-ID"] = make_msgid(domain=e.absender.split("@")[-1])
     nachricht.set_content(text or "")
     if html:
         nachricht.add_alternative(html, subtype="html")
+    anmelden = bool(e.oauth_token or (e.benutzer and e.passwort))
     try:
-        if e.port == 465:
+        if e.sicherheit == "ssl":
             verbindung: smtplib.SMTP = smtplib.SMTP_SSL(e.server, e.port, timeout=20)
         else:
             verbindung = smtplib.SMTP(e.server, e.port, timeout=20)
         with verbindung:
-            if e.port != 465:
+            if e.sicherheit != "ssl":
                 verbindung.ehlo()
                 if verbindung.has_extn("starttls"):
                     verbindung.starttls()
                     verbindung.ehlo()
-            if e.benutzer and e.passwort:
+                elif anmelden:
+                    raise MailVersandFehler(
+                        f"{e.server} bietet kein STARTTLS; Zugangsdaten werden nicht unverschluesselt gesendet."
+                    )
+            if e.oauth_token:
+                anmeldung = f"user={e.benutzer}\x01auth=Bearer {e.oauth_token}\x01\x01"
+                verbindung.auth("XOAUTH2", lambda _herausforderung=None: anmeldung)
+            elif e.benutzer and e.passwort:
                 verbindung.login(e.benutzer, e.passwort)
             abgelehnt = verbindung.send_message(nachricht)
     except (smtplib.SMTPException, OSError) as fehler:

@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 660 Tabellen, 8704 Spalten.**
+**31 Schemas, 661 Tabellen, 8730 Spalten.**
 
 ## Schemas
 
@@ -52,7 +52,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_procurement` | `procurement` | 5 | 50 |
 | `domain_reporting` | `finance` | 6 | 80 |
 | `domain_sales` | `crm` | 11 | 152 |
-| `domain_shared` | `platform` | 151 | 1788 |
+| `domain_shared` | `platform` | 152 | 1814 |
 | `domain_workflow` | `platform` | 3 | 37 |
 
 ## Geschwister-Modelle
@@ -655,6 +655,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.logistik_frachttabellen` | `app/api/v1/endpoints/logistik_frachttabellen.py` | `app/api/v1/endpoints/logistik_frachttabellen.py` | — |
 | `domain_shared.logistik_frachttabellen_positionen` | `app/api/v1/endpoints/logistik_frachttabellen.py` | `app/api/v1/endpoints/logistik_frachttabellen.py` | — |
 | `domain_shared.logistik_frachttabellen_zuordnung` | `app/api/v1/endpoints/logistik_frachttabellen.py` | `app/api/v1/endpoints/logistik_frachttabellen.py` | — |
+| `domain_shared.mailkonten` | `app/core/screen_definitions_capture.py`, `app/services/mailkonto_service.py` | `app/services/mailkonto_service.py` | — |
 | `domain_shared.master_data_entries` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_shared.neuro_step_audit_trace` | `app/api/v1/endpoints/neuro_audit.py`, `app/services/action_execution_mutations.py` | `app/services/action_execution_mutations.py`, `app/services/neuro_tool_broker.py` | — |
 | `domain_shared.neuroassist_confidence_ledger` | `app/infrastructure/models/neuro_state_models.py` | — | — |
@@ -691,7 +692,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.stuecklisten` | `app/api/v1/endpoints/stuecklisten.py` | `app/api/v1/endpoints/stuecklisten.py` | — |
 | `domain_shared.stuecklisten_positionen` | `app/api/v1/endpoints/stuecklisten.py` | `app/api/v1/endpoints/stuecklisten.py` | — |
 | `domain_shared.system_properties` | `app/api/v1/endpoints/compat.py`, `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/compat.py` | — |
-| `domain_shared.tenants` | `app/api/v1/endpoints/admin_monitoring.py`, `app/api/v1/endpoints/admin_suite.py`, `app/api/v1/endpoints/health.py`, `app/api/v1/endpoints/sales_invoice_einvoice.py`, `app/core/policy_overrides.py`, `app/core/process_config.py`, `app/core/workflow_template_marketplace.py`, `app/domains/crm/models.py`, `app/domains/inventory/api/charge_lineage.py`, `app/domains/inventory/api/stock_movements.py`, `app/finance/gobd.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/agrar_models.py`, `app/infrastructure/models/journal.py`, `app/infrastructure/models/l3c_models.py`, `app/infrastructure/models/studio_models.py`, `app/models/blockchain_anchors.py`, `app/models/channel_threads.py`, `app/models/knowledge.py`, `app/seeds/inventory_seed.py`, `app/services/admin_core_service.py`, `app/services/connector_config.py`, `app/services/finance_read_model_service.py`, `app/services/llm_gateway.py`, `app/workers/mail_poll_worker.py`, `app/workers/rag_indexer.py` | `app/api/v1/endpoints/admin_monitoring.py`, `app/api/v1/endpoints/admin_suite.py`, `app/core/workflow_template_marketplace.py`, `app/seeds/inventory_seed.py`, `app/services/admin_core_service.py`, `app/services/connector_config.py` | `sales/invoice` |
+| `domain_shared.tenants` | `app/api/v1/endpoints/admin_monitoring.py`, `app/api/v1/endpoints/admin_suite.py`, `app/api/v1/endpoints/health.py`, `app/api/v1/endpoints/sales_invoice_einvoice.py`, `app/core/geheimnis.py`, `app/core/policy_overrides.py`, `app/core/process_config.py`, `app/core/workflow_template_marketplace.py`, `app/domains/crm/models.py`, `app/domains/inventory/api/charge_lineage.py`, `app/domains/inventory/api/stock_movements.py`, `app/finance/gobd.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/agrar_models.py`, `app/infrastructure/models/journal.py`, `app/infrastructure/models/l3c_models.py`, `app/infrastructure/models/studio_models.py`, `app/models/blockchain_anchors.py`, `app/models/channel_threads.py`, `app/models/knowledge.py`, `app/seeds/inventory_seed.py`, `app/services/admin_core_service.py`, `app/services/connector_config.py`, `app/services/finance_read_model_service.py`, `app/services/llm_gateway.py`, `app/workers/mail_poll_worker.py`, `app/workers/rag_indexer.py` | `app/api/v1/endpoints/admin_monitoring.py`, `app/api/v1/endpoints/admin_suite.py`, `app/core/workflow_template_marketplace.py`, `app/seeds/inventory_seed.py`, `app/services/admin_core_service.py`, `app/services/connector_config.py` | `sales/invoice` |
 | `domain_shared.user_screen_overlays` | `app/api/v1/endpoints/ux_overlays.py` | `app/api/v1/endpoints/ux_overlays.py` | — |
 | `domain_shared.users` | `app/api/v1/endpoints/collab_notes.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/personal.py`, `app/core/fibu_audit.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/journal.py`, `app/infrastructure/models/l3c_models.py`, `app/services/admin_core_service.py`, `app/services/einkauf_compat_service.py`, `app/services/finance_transaction_service.py`, `app/services/personal_service.py` | `app/services/admin_core_service.py`, `app/services/personal_service.py` | — |
 | `domain_shared.versandprofile` | `app/api/v1/endpoints/versandprofile.py` | `app/api/v1/endpoints/versandprofile.py` | — |
@@ -1462,6 +1463,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `logistik_frachttabellen` | `platform` | native | `id` | id, tenant_id, tabelle_nr, bezeichnung, einheit, waehrung, aktiv, created_at |
 | `logistik_frachttabellen_positionen` | `platform` | native | `id` | id, tenant_id, tabelle_nr, ab_menge, frachtsatz_eur, mindestfracht_eur, created_at |
 | `logistik_frachttabellen_zuordnung` | `platform` | native | `id` | id, tenant_id, frachtklasse, frachtgruppe, versandart, tabelle_nr, sperre, gueltig_ab, gueltig_bis, created_at |
+| `mailkonten` | `platform` | native | `id` | id, tenant_id, kennung, bezeichnung, anbieter, anmeldung, smtp_host, smtp_port, sicherheit, benutzer, absender_email, absender_name, geheimnis, zugang_von, ist_standard, verwendungen, rollen, benutzer_freigabe, persoenlich_fuer, status, geprueft_am, letzter_fehler, aktiv, created_at, updated_at, geaendert_von |
 | `master_data_entries` | `platform` | native | `id` | id, category, code, label, extra, sort_order, is_active, tenant_id, created_at, updated_at |
 | `neuro_step_audit_trace` | `platform` | native | `id` | id, tenant_id, plan_id, step_id, step_order, action, step_type, binding_kind, binding_target, step_status, execution_detail, recorded_at |
 | `neuroassist_confidence_ledger` | `platform` | native | `entry_id` | entry_id, tenant_id, case_run_id, state_node_id, confidence_score, risk_level, source, model_id, model_version, input_hash, reason, evidence_refs, context_data, previous_hash, chain_hash, recorded_at, schema_version |

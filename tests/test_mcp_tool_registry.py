@@ -57,8 +57,40 @@ def test_summary_structure(svc: McpToolRegistryService) -> None:
     assert summary["validation_errors"] == []
 
 
-def test_registry_has_18_tools(svc: McpToolRegistryService) -> None:
-    assert len(svc.list_tools()) == 18
+def test_registry_has_35_tools(svc: McpToolRegistryService) -> None:
+    assert len(svc.list_tools()) == 35
+
+
+def test_lead_qualify_and_po_send_are_catalogued(svc: McpToolRegistryService) -> None:
+    lead = svc.get_tool("crm.lead.qualify")
+    assert lead["scope"] == "crm:write"
+    assert lead["audit"] == "write"
+    assert lead["risk_class"] == "medium"
+    po = svc.get_tool("einkauf.bestellung.versenden")
+    assert po["scope"] == "einkauf:write"
+    assert po["audit"] == "write"
+    assert po["risk_class"] == "medium"
+
+
+def test_customer_open_is_catalogued(svc: McpToolRegistryService) -> None:
+    tool = svc.get_tool("crm.customer.open")
+    assert tool["scope"] == "crm:read"
+    assert tool["risk_class"] == "low"
+    assert tool["idempotent"] is True
+    assert tool["audit"] == "read"
+
+
+def test_remaining_ops_writes_are_catalogued(svc: McpToolRegistryService) -> None:
+    sync = svc.get_tool("produktion.control.sync")
+    assert sync["scope"] == "ops:write"
+    assert sync["audit"] == "write"
+    assert sync["risk_class"] == "medium"
+    cal = svc.get_tool("planung.calendar.reproject")
+    assert cal["scope"] == "planung:write"
+    assert cal["audit"] == "write"
+    mde = svc.get_tool("mobile.sync.process_pending")
+    assert mde["scope"] == "mobile:write"
+    assert mde["audit"] == "write"
 
 
 def test_all_tools_have_data_classification(svc: McpToolRegistryService) -> None:

@@ -1,0 +1,51 @@
+slice_id: MCP-MASK-WRITES-BATCH5-20261008
+id: MCP-MASK-WRITES-BATCH5-20261008
+title: Threshold Feed-Analyse Reklamation MCP-Writes
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+completed_at: 2026-10-08
+goal: >
+  configure_threshold verdrahten; Feed-Analyse release/reject und Reklamation
+  abschliessen; Map mapped; kein FIN-CLOSE/FIBU; kein Commit/DB.
+file_ownership:
+  - config/mcp_erp_tools.yaml
+  - app/services/mcp_execution_service.py
+  - scripts/generate_mcp_mask_action_map.py
+  - config/mcp_mask_action_map.yaml
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - docs/quality-assurance/mcp-mask-writes-batch5-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/gap/executive-summary-20261007.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - agrar.feeding.configure_threshold Adapter
+  - agrar.feed_analysis.transition (release/reject)
+  - qualitaet.reklamation.abschliessen (Token-Mandant)
+  - Map mapped; Generator --check; MCP-Tests gruen
+  - Personal/Fuhrpark bewusst nicht (keine HTTP-Command-Endpoints)
+tests:
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - tests/test_mcp_mask_action_map.py
+risks:
+  - Personal/Fuhrpark nur Command-Namen ohne HTTP/Mandantenpfad
+ai_harness:
+  fachlicher_vertrag: >
+    Agent setzt Schwellen, Futteranalyse-Status und Reklamationsabschluss.
+  architektur_vertrag: >
+    Bestehende Services/Endpoints; Map SoT.
+  daten_vertrag: >
+    Tenant/Actor aus Token; Savepoint bei Service-Commit.
+  test_vertrag: >
+    dryRun/Guards/Execute; Registry 32; Map --check.
+  security_vertrag: >
+    Scopes agrar:write / quality:write; kein ADR-076/FIBU.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration/Commit-Pflicht.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice, Handbook/mcp-tools via Generator.
+external_gates:
+  - not_applicable

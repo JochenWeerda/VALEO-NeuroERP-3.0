@@ -1,0 +1,52 @@
+slice_id: MCP-MASK-WRITES-TOP-20261008
+id: MCP-MASK-WRITES-TOP-20261008
+title: Top medium Mask-Writes Lead-Qualify und EK-Versenden
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+completed_at: 2026-10-08
+goal: >
+  Medium-Mask-Mutationen Lead qualifizieren und Bestellung versenden als
+  MCP-Write-Tools verdrahten (Token-Mandant, Scope, Idempotenz, Audit);
+  Map open_medium→mapped; kein FIN-CLOSE/ADR-076/Obligo-Journal; kein Commit/DB.
+file_ownership:
+  - config/mcp_erp_tools.yaml
+  - app/services/mcp_execution_service.py
+  - scripts/generate_mcp_mask_action_map.py
+  - config/mcp_mask_action_map.yaml
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - docs/quality-assurance/mcp-mask-writes-top-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/gap/executive-summary-20261007.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - crm.lead.qualify und einkauf.bestellung.versenden im Katalog + Adapter
+  - dryRun default; execute braucht idempotency_key; Audit + mcp_tool_executions
+  - Mask-Map Coverage mapped fuer lead:qualifizieren und purchase-order:versenden
+  - Generator --check und MCP-Tests gruen
+  - Kein FIN-CLOSE / kein Obligo-Journal
+tests:
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - tests/test_mcp_mask_action_map.py
+risks:
+  - open_medium bleibt ~43 (Personal/Fuhrpark/Logistik/weitere EK)
+ai_harness:
+  fachlicher_vertrag: >
+    Agent kann Lead→Opportunity und Bestellversand wie Maske ausfuehren.
+  architektur_vertrag: >
+    Gleiches Write-Muster wie contact.log/activity.create; Map SoT.
+  daten_vertrag: >
+    Tenant nur aus Token; keine tenant_id-Parameter; bestehende CRM/EK-Services.
+  test_vertrag: >
+    dryRun/Guards/Idempotenz/Service-Mock-Execute; Map --check.
+  security_vertrag: >
+    Scopes crm:write / einkauf:write; kein ADR-076-Bypass; kein Obligo.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration/Commit-Pflicht.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice, Handbook/mcp-tools via Generator.
+external_gates:
+  - not_applicable

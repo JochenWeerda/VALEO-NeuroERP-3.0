@@ -1,0 +1,50 @@
+slice_id: MCP-MASK-WRITES-BATCH4-20261008
+id: MCP-MASK-WRITES-BATCH4-20261008
+title: Ration retire/archive plus Feeding Handoff/Massnahme
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+completed_at: 2026-10-08
+goal: >
+  agrar.ration.transition um retire/archive erweitern; create_handoff und
+  create_measure als MCP-Writes; Map mapped; kein FIN-CLOSE/FIBU; kein Commit/DB.
+file_ownership:
+  - config/mcp_erp_tools.yaml
+  - app/services/mcp_execution_service.py
+  - scripts/generate_mcp_mask_action_map.py
+  - config/mcp_mask_action_map.yaml
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - docs/quality-assurance/mcp-mask-writes-batch4-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/gap/executive-summary-20261007.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - retire/archive in agrar.ration.transition
+  - agrar.feeding.supply_handoff und agrar.feeding.actual_measure verdrahtet
+  - Map mapped fuer retire/archive/create_handoff/create_measure
+  - Generator --check und MCP-Tests gruen
+tests:
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - tests/test_mcp_mask_action_map.py
+risks:
+  - configure_threshold und viele Personal/Fuhrpark-Mutationen ohne Endpoint
+ai_harness:
+  fachlicher_vertrag: >
+    Agent schliesst Rations-Lifecycle und Feeding-Handoff/Massnahme ab.
+  architektur_vertrag: >
+    Bestehende Agrar-Services; Map SoT.
+  daten_vertrag: >
+    Tenant/Actor aus Token; Service-Commit hinter Savepoint.
+  test_vertrag: >
+    dryRun/Guards/Execute; Registry 29; Map --check.
+  security_vertrag: >
+    Scope agrar:write; kein ADR-076/FIBU.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration/Commit-Pflicht.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice, Handbook/mcp-tools via Generator.
+external_gates:
+  - not_applicable

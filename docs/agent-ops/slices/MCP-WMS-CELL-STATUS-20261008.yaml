@@ -1,0 +1,47 @@
+slice_id: MCP-WMS-CELL-STATUS-20261008
+id: MCP-WMS-CELL-STATUS-20261008
+title: MCP Silozellen-Status (Read-Adapter)
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+completed_at: 2026-10-08
+goal: >
+  wms.cell.status an MCP-Execution anbinden: Mandanten-Silozelle,
+  Fuellstand kg, Material, QS-Status, flush_required. Read-only.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - tests/test_mcp_execution.py
+  - docs/quality-assurance/mcp-wms-cell-status-20261008.md
+  - docs/schnittstellen/mcp-tools.md
+  - docs/agent-handbuch/
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Scope inventory:read; Mandanten-Parameter → 422; propose → 422
+  - dryRun/execute schreiben nicht
+  - Zelle nur domain_inventory.silo_cells des Token-Mandanten → sonst 404
+  - Antwort: cell_code, current_stock_kg, qs_status, current_material, flush_required
+tests:
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+risks:
+  - fehlendes Material → current_material null ehrlich
+ai_harness:
+  fachlicher_vertrag: >
+    Agent liest Silozellen-Status wie WMS, ohne Transfer oder QS-Aenderung.
+  architektur_vertrag: >
+    Adapter in mcp_execution_service; Quelle silo_cells (wie Lot-Trace).
+  daten_vertrag: >
+    Tenant aus Token; Zelle per cell_code oder UUID.
+  test_vertrag: >
+    Scope, 404, 422 und Read-only.
+  security_vertrag: >
+    inventory:read; Header=Claim; kein FIN-CLOSE.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, mcp-tools, Handbuch.
+external_gates:
+  - not_applicable

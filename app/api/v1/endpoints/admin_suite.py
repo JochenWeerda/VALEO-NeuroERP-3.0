@@ -875,13 +875,10 @@ async def test_llm_gateway(
 
 
 # ── Connector-Konfiguration (Auto-Capture: STT + IMAP) ──────────────────────────
-from app.services.connector_config import (  # noqa: E402
-    load_imap_config,
-    load_stt_config,
-    save_connectors,
-)
+from app.services.connector_config import load_imap_config, load_stt_config, save_connectors  # noqa: E402
 from app.services.mail_ingest_service import MailIngestService  # noqa: E402
 from app.services.stt_client import SttClient  # noqa: E402
+from app.auth.deps import require_roles  # noqa: E402  (Connector-Wege: nur admin; bis 08.10.2026 ohne Rolle)
 
 
 class ConnectorSttOut(BaseModel):
@@ -987,13 +984,13 @@ async def get_connectors(
     return _connectors_out(db, tenant_id)
 
 
-@router.put("/capture-connectors", response_model=ConnectorsConfigOut, summary="Connector-Konfiguration speichern")
+@router.put("/capture-connectors", response_model=ConnectorsConfigOut, summary="Connector-Konfiguration speichern", dependencies=[Depends(require_roles("admin"))])
 async def update_connectors(
     payload: ConnectorsUpdateIn,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> ConnectorsConfigOut:
-    """Speichert STT-/IMAP-Konfiguration (Key/Passwort nur bei Angabe ersetzt)."""
+    """Speichert STT-/IMAP-Konfiguration (Key/Passwort nur bei Angabe ersetzt, AES-GCM-verschluesselt)."""
     save_connectors(
         db,
         tenant_id,
@@ -1003,7 +1000,7 @@ async def update_connectors(
     return _connectors_out(db, tenant_id)
 
 
-@router.post("/capture-connectors/stt/test", response_model=ConnectorTestOut, summary="STT-Server testen")
+@router.post("/capture-connectors/stt/test", response_model=ConnectorTestOut, summary="STT-Server testen", dependencies=[Depends(require_roles("admin"))])
 async def test_connector_stt(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -1013,7 +1010,7 @@ async def test_connector_stt(
     return ConnectorTestOut(ok=bool(res.get("ok")), detail=str(res.get("detail", "")))
 
 
-@router.post("/capture-connectors/imap/test", response_model=ConnectorTestOut, summary="IMAP-Postfach testen")
+@router.post("/capture-connectors/imap/test", response_model=ConnectorTestOut, summary="IMAP-Postfach testen", dependencies=[Depends(require_roles("admin"))])
 async def test_connector_imap(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -1023,7 +1020,7 @@ async def test_connector_imap(
     return ConnectorTestOut(ok=bool(res.get("ok")), detail=str(res.get("detail", "")))
 
 
-@router.post("/capture-connectors/imap/poll", response_model=ConnectorPollOut, summary="IMAP jetzt abrufen")
+@router.post("/capture-connectors/imap/poll", response_model=ConnectorPollOut, summary="IMAP jetzt abrufen", dependencies=[Depends(require_roles("admin"))])
 async def poll_connector_imap(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

@@ -11,81 +11,205 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## MAILKONTO-MANDANT-20261008 — in Arbeit, Claude Code
+## POSTFACH-MICROSOFT365-20261008 — in Arbeit, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** Mailversand ueber das Konto des
-Mandanten statt ueber Umgebungsvariablen: Mailkonto je Mandant (SMTP allgemein, IONOS-Vorlage,
-Google mit App-Passwort oder OAuth2/XOAUTH2), Geheimnisse AES-256-GCM-verschluesselt und
-nie zurueckgegeben, Testmail als Pruefung, Einrichtungsmaske ueber Mask Builder/Screen
-Definition; `mail_versand` nimmt das Konto des Mandanten. Dazu: IMAP-Passwort des
-CRM-Connectors liegt im Klartext in `tenants.settings` — ebenfalls verschluesseln.
-**Dateibesitz:** `app/services/mail_versand.py`, neues Mailkonto-Modul (Service, Endpunkte,
-Geheimnis-Verschluesselung), `app/services/connector_config.py` (nur Passwortfeld), Aufrufer
-von `sende_mail`, eine additive Migration, Screen Definition + Frontend-Wrapper, Tests,
-QA-Doku. Microsoft 365 folgt separat. Fremde WIP unberuehrt.
+**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** Postfaecher mit Microsoft 365:
+Anmeldung per OAuth2 (Microsoft Identity Platform, delegiert, `Mail.Send` + `offline_access`),
+Versand ueber Microsoft Graph `sendMail` (landet in "Gesendete Elemente"; kein SMTP AUTH noetig),
+Alias ueber `from`. OAuth-Ablauf fuer Google und Microsoft vereinheitlicht. **Dateibesitz:**
+`app/services/mailkonto_service.py`, `app/services/mail_versand.py`,
+`app/api/v1/endpoints/mailkonto.py`, Screen Definition `admin/postfaecher` + TS-Spiegel,
+`pages/admin/postfaecher*.tsx`, `lib/api/postfaecher.ts`, eine additive Migration,
+`tests/test_postfaecher.py`, QA-Doku. Fremde WIP unberuehrt.
 
 
-## OFFENES-SCHLIESSEN-20261008 — abgeschlossen, Claude Code
+## MCP-MASK-WRITES-REMAINING-20261008 — abgeschlossen, Cursor
 
-**Abnahme (08.10.2026):** Gelangensbestaetigung-Dublette 409 statt 503 (UAT wiederholbar);
-echter SMTP-Versand (`mail_versand`) statt vorgetaeuschter Erfolge in ProductionEmailService,
-Newsletter und Bestellkommunikation; Bestellkommunikation am kanonischen Beleg + Portal-Lesepfad;
-`ops_bankkonten` erstmals mit Mandant, IBAN-Pruefung echt und erreichbar; Bankkontonummer je
-Mandant; Lieferantenportal fragte nicht existierende Spalten ab (zeigte nie etwas) - korrigiert.
-Migration `offenes_schliessen_20261008` (Probe + Dev). QA:
-[offenes-schliessen-20261008.md](../quality-assurance/offenes-schliessen-20261008.md).
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `produktion.control.sync`, `planung.calendar.reproject`,
+`mobile.sync.process_pending`. Rest: `blocked_no_endpoint` (Personal/Fuhrpark
+u. a.), Inventur-Opening `open_high`. Map: mapped 22 / open_medium **0**;
+`classification_complete`; Registry 35. Kein FIN-CLOSE/FIBU.
+**Nachweis:** MCP-Tests; Generator `--check`; QA `mcp-mask-writes-remaining-20261008.md`.
+**Weiter:** FIN-CLOSE/ADR-076; Parent Goal-Audit (medium-Parität ohne Backend-Erfindung erledigt).
 
+## MCP-MASK-WRITES-BATCH5-20261008 — abgeschlossen, Cursor
 
-**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** offene Punkte schliessen: (1)
-Gelangensbestaetigung: Dublette antwortet 503 statt 409, UAT-Vertrag mit fester
-Lieferschein-Nr. nicht wiederholbar; (2) `/purchase-orders/{id}/communications` schreibt in
-den Dokumentspeicher; (3) `domain_erp.bank_accounts.account_number` systemweit eindeutig;
-(4) `domain_ops.ops_bankkonten` ohne `tenant_id` — `/banken/konten` zeigt und aendert
-Bankkonten aller Mandanten; `/konten/iban-validate` hinter `/konten/{id}` unerreichbar.
-**Dateibesitz:** Gelangensbestaetigung-Endpoint + UAT-Test, PO-Kommunikationswege in
-`compat.py`, `banken.py`, `domain_operations` BankKonto-Modell/-Repository, eine additive
-Migration, neue Tests, QA-Doku. BANK-RECONCILIATION-PROOF (Codex) betrifft
-`domain_erp.bank_accounts`-Abgleich, nicht diese Constraints/`ops_bankkonten` — unberuehrt.
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `agrar.feeding.configure_threshold`,
+`agrar.feed_analysis.transition` (release/reject),
+`qualitaet.reklamation.abschliessen`. Map: mapped 19 / open_medium 32;
+Registry 32. Personal/Fuhrpark bewusst nicht. Kein FIN-CLOSE/FIBU.
+**Nachweis:** 112 MCP-Tests; Generator `--check`; QA `mcp-mask-writes-batch5-20261008.md`.
+**Weiter:** ~32 medium; Produktionsleitstand-Sync; FIN-CLOSE offen.
 
+## MCP-MASK-WRITES-BATCH4-20261008 — abgeschlossen, Cursor
 
-## FOLGEFUNDE-RESTBEFUNDE-20261008 — abgeschlossen, Claude Code
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `agrar.ration.transition` +retire/archive;
+`agrar.feeding.supply_handoff`, `agrar.feeding.actual_measure`.
+Map: mapped 15 / open_medium 33; Registry 29. Kein FIN-CLOSE/FIBU.
+**Nachweis:** 109 MCP-Tests; Generator `--check`; QA `mcp-mask-writes-batch4-20261008.md`.
+**Weiter:** ~33 medium; configure_threshold; FIN-CLOSE offen.
 
-**Abnahme (08.10.2026):** erfundene Mahnregeln/leere Mahnliste bei DB-Fehler -> 503;
-Lager-Seed im Mandanten + kollisionsfreie Seed-Ids; Lagercode je Mandant (Migration
-`lagercode_mandant_20261008`, Probe + Dev); zweiter Lager-Router `/api/v1/warehouses`
-im Mandanten mit Adminrolle; `POST /inventory/warehouses` scheiterte immer (behoben).
-`journal_entries.entry_number` war bereits durch Codex behoben (05.10.). QA:
-[folgefunde-restbefunde-20261008.md](../quality-assurance/folgefunde-restbefunde-20261008.md).
+## MCP-MASK-WRITES-BATCH3-20261008 — abgeschlossen, Cursor
 
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `agrar.ration.transition` (submit_review/approve/schedule/activate).
+Map: mapped 11 / open_medium 37; Registry 27. Kein FIN-CLOSE/FIBU.
+**Nachweis:** 105 MCP-Tests; Generator `--check`; QA `mcp-mask-writes-batch3-20261008.md`.
+**Weiter:** retire/archive; ~37 medium; FIN-CLOSE offen.
 
-**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** die drei Folgefunde aus
-RESTBEFUNDE-BESTANDSBUCH-20261008 beheben: (1) `GET /dunning/rules` erfindet bei
-Datenbankfehler Standardregeln, (2) Inventar-Seed haengt Lager per `warehouse_code` dem
-seedenden Mandanten um, (3) `journal_entries.entry_number` systemweit statt je Mandant
-eindeutig. **Dateibesitz:** `app/api/v1/endpoints/dunning.py`, `app/seeds/inventory_seed.py`,
-eine additive Migration fuer `domain_erp.journal_entries`, Nummernabfragen auf
-`entry_number` ohne Mandant, betroffene Tests, QA-Doku. L3-JOURNAL-SOURCE (Quellspalten)
-und fremde WIP unberuehrt.
+## MCP-MASK-WRITES-NEXT-20261008 — abgeschlossen, Cursor
 
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `einkauf.angebot.bestellen`, `einkauf.anlieferavis.wareneingang`,
+`lager.stock_movement.stornieren`. Map: mapped 7 / open_medium 41; Registry 26.
+Kein FIN-CLOSE/Obligo/FIBU.
+**Nachweis:** 103 MCP-Tests; Generator `--check`; QA `mcp-mask-writes-next-20261008.md`.
+**Weiter:** ~41 medium Mask-Writes; Agrar-Lifecycle-Kandidaten; FIN-CLOSE offen.
 
-## RESTBEFUNDE-BESTANDSBUCH-20261008 — abgeschlossen, Claude Code
+## MCP-MASK-WRITES-TOP-20261008 — abgeschlossen, Cursor
 
-**Abnahme (08.10.2026):** alle vier Restbefunde geschlossen: Mahnwesen-Mandant aus dem
-Kontext, Rechnung + Buchung + Archiv in einem Commit, Artikelnummer je Mandant
-(Migration `artikelnummer_mandant_20261008`, Probe + Dev; Seed haengte fremde Artikel um),
-`_list_docs` ohne Prozessspeicher. 12 neue Vertraege, 1090 Regressionstests gruen.
-QA: [restbefunde-bestandsbuch-20261008.md](../quality-assurance/restbefunde-bestandsbuch-20261008.md).
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `crm.lead.qualify` + `einkauf.bestellung.versenden` (Write-Adapter,
+Token-Mandant, Scope, Idempotenz, Audit). Map: mapped 4 / open_medium 43;
+Registry 23 Tools. Kein FIN-CLOSE/Obligo.
+**Nachweis:** 97 MCP-Tests; Generator `--check`; QA `mcp-mask-writes-top-20261008.md`.
+**Weiter:** ~43 medium Mask-Writes; FIN-CLOSE/ADR-076 bewusst offen.
 
+## MCP-MASK-WRITE-PARITY-20261008 — abgeschlossen, Cursor
 
-**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** die vier benannten Restbefunde aus
-BESTANDSBUCH-EINKAUF-20261007 schliessen: (1) `dunning.py` mit `Query("system")`, (2)
-Rechnungsanlage committet den Dokumentspeicher vor der Buchung, (3) Artikelnummern
-systemweit statt je Mandant eindeutig, (4) `_list_docs` faellt auf einen In-Memory-Speicher
-zurueck. **Dateibesitz:** `app/api/v1/endpoints/dunning.py`, `finance_invoices.py`,
-`app/services/sales_posting_service.py` (nur Commit-Steuerung), `compat.py::_list_docs`,
-eine additive Migration fuer `domain_inventory.articles`, Artikel-Nummernabfragen ohne
-Mandant, neue/angepasste Tests, QA-Doku. Fremde WIP (eBilanz, CI-Repair) unberuehrt.
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `config/mcp_mask_action_map.yaml` (52 Mask-Mutationen;
+Baseline mapped 2 / open_medium 45 → nach MCP-MASK-WRITES-TOP mapped 4 /
+open_medium 43); FIN-CLOSE `blocked_adr_076`.
+**Nachweis:** Generator `--check` + `tests/test_mcp_mask_action_map.py`.
+**Weiter:** open_medium-Parität; FIN-CLOSE/SUS-Live; Parent-Completion.
 
+## MCP-CATALOG-READS-REST-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** 9 Rest-Reads verdrahtet (DMS/Agrar/Lager/Einkauf/Compliance/
+Proposals); Token-Mandant; ehrliche Quellen; kein Write/FIN-CLOSE.
+**Nachweis:** 90 MCP-Tests; QA `mcp-catalog-reads-rest-20261008.md`.
+**Weiter:** Mask-Write-Rest; FIN-CLOSE bewusst offen.
+
+## MCP-WMS-CELL-STATUS-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `wms.cell.status` Read-Adapter — Fuellstand kg, Material,
+QS-Status, flush_required (Reinigung oder Materialfluss-Kante).
+Scope `inventory:read`; dryRun/execute nur Lesen; kein Transfer/QS-Write.
+**Nachweis:** 83 MCP-Tests; QA `mcp-wms-cell-status-20261008.md`.
+**Weiter:** DMS/Agrar/Lager-Reads, Mask-Write-Rest; FIN-CLOSE offen.
+
+## MCP-WMS-LOT-TRACE-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `wms.lot.trace` Read-Adapter — Silo-Lot (bevorzugt) oder
+Inventory-Lot; Menge kg, Status, QS, Silozelle, Bewegungen.
+Scope `inventory:read`; dryRun/execute nur Lesen; keine Buchung/QS-Aenderung.
+**Nachweis:** 78 MCP-Tests; QA `mcp-wms-lot-trace-20261008.md`.
+**Weiter:** `wms.cell.status`, DMS/Agrar-Reads, Mask-Write-Rest; FIN-CLOSE offen.
+
+## MCP-FIBU-DUNNING-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `fibu.dunning.status` Read-Adapter — Mandanten-Kunde,
+max. Mahnstufe (OP + Notice), letzte Mahnung, Debitoren-OP-Saldo.
+Scope `finance:read`; dryRun/execute nur Lesen; kein Mahnlauf/FIN-CLOSE.
+**Nachweis:** 73 MCP-Tests; QA `mcp-fibu-dunning-20261008.md`.
+**Weiter:** WMS/DMS-Reads, Mask-Write-Rest, FIN-CLOSE bewusst offen.
+
+## MCP-FIBU-OPEN-ITEMS-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** Read-Adapter `fibu.open_items.list` (bisher 501).
+**Lieferung:** forderung→debitoren / verbindlichkeit→kreditoren; 68 MCP-Tests
+gruen; kein FIN-CLOSE; Katalog/Handbuch aktualisiert.
+**QA:** [mcp-fibu-open-items-20261008.md](../quality-assurance/mcp-fibu-open-items-20261008.md).
+**Offen:** `fibu.dunning.status`, WMS/DMS-Reads; Mask-Write; FIN-CLOSE; Stufe-2-SUS.
+
+## MCP-ORDER-STATUS-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** Read-Adapter `sales.order.status` (bisher 501).
+**Lieferung:** Mandanten-Lifecycle + offene Positionen + naechster Schritt;
+63 MCP-Tests gruen; Katalog/Handbuch aktualisiert.
+**QA:** [mcp-order-status-20261008.md](../quality-assurance/mcp-order-status-20261008.md).
+**Nachzug:** `fibu.open_items.list` → Slice MCP-FIBU-OPEN-ITEMS-20261008.
+**Offen:** `fibu.dunning.status`, WMS/DMS-Reads; Mask-Write; FIN-CLOSE; Stufe-2-SUS.
+
+## MCP-CUSTOMER-SUMMARY360-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** Read-Adapter `crm.customer.summary360` (bisher 501).
+**Lieferung:** Mandanten-Stamm + Aggregates; kein `public.kunden`-Fallback;
+57 MCP-Tests gruen; Katalog/Handbuch aktualisiert.
+**QA:** [mcp-customer-summary360-20261008.md](../quality-assurance/mcp-customer-summary360-20261008.md).
+**Nachzug:** `sales.order.status` → Slice MCP-ORDER-STATUS-20261008.
+**Offen:** FIBU/WMS/DMS-Reads; Mask-Write; FIN-CLOSE; Stufe-2-SUS.
+
+## MCP-CUSTOMER-SEARCH-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** Read-Adapter `crm.customer.search` (bisher 501) — Mandanten-Suche
+inkl. `route_path` fuer Open-Kette.
+**Lieferung:** Adapter read-only; Katalog-Beschreibung/Endpoint auf MCP-Call;
+52 MCP-Tests gruen; Handbuch/mcp-tools aktuell.
+**QA:** [mcp-customer-search-20261008.md](../quality-assurance/mcp-customer-search-20261008.md).
+**Nachzug:** `summary360` → Slice MCP-CUSTOMER-SUMMARY360-20261008.
+**Offen:** `order.status`, weitere Katalog-Reads; Mask-Write; FIN-CLOSE;
+Stufe-2-SUS.
+
+## MCP-CUSTOMER-NAV-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** Folge zu `crm.customer.open` — Voice/Dispatch Deep-Link auf sicheren
+`route_path`; sonst Kundenliste.
+**Lieferung:** `mcp-customer-open.ts` Guard + MCP-Call; Dispatch-Sonderfall
+`nav-customers`; Intent `kunden_nr` aus „öffne Kunde …“; 9 FE- + 26 Voice-Tests.
+**QA:** [mcp-customer-nav-20261008.md](../quality-assurance/mcp-customer-nav-20261008.md).
+**Offen:** übrige MCP-Adapter, Mask-Write-Parität, FIN-CLOSE, Stufe-2-SUS.
+
+## MCP-CUSTOMER-OPEN-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** P1 Rest-MCP — `crm.customer.open` („öffne Kunde“): Mandanten-Aufloesung
+und kanonische Masken-Route `/crm/customers/{id}` + Screen `crm/customer-360`;
+kein Schreiben, kein FIBU/Journal (kein ADR-076).
+**Lieferung:** 21 Katalog-Tools; Adapter read-only; Voice-Phrasen
+„öffne Kunde(n)“ → `nav-customers`; 47 MCP- + 24 Voice-CRM-Tests gruen.
+**QA:** [mcp-customer-open-20261008.md](../quality-assurance/mcp-customer-open-20261008.md).
+**Nachzug:** Deep-Link → Slice MCP-CUSTOMER-NAV-20261008.
+**Offen (eigene Slices):** übrige Read-/Write-Adapter, FIN-CLOSE/Journal,
+Stufe-2-SUS.
+
+## MCP-WRITE-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** P1 MCP-WRITE — `crm.activity.create` und `sales.invoice.post`
+(nur nach freigegebenem `rechnung_vorschlag`); Mandanten-ID aus Token
+(`tenant_id`/`mandanten_id`), nie aus Parametern.
+**Lieferung:** 20 Katalog-Tools; 40 MCP-Tests gruen; FIBU-Journal bewusst
+nicht im MCP-Pfad (`fibu_journal=false`).
+**QA:** [mcp-write-20261008.md](../quality-assurance/mcp-write-20261008.md).
+**Nachzug:** `crm.customer.open` → Slice MCP-CUSTOMER-OPEN-20261008.
+**Offen (eigene Slices):** weitere Katalog-Adapter, Mask-ID→MCP-Parität,
+FIN-CLOSE/Journal.
+
+## USABILITY-ACTION-REGISTRY-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** P1 ACTION-DEN — Maskenaktionen aus ScreenDefinitions in ki-usability
+Action-Registry (IDs `mask:{screen}:{key}`); Builtin-Shortcuts unverändert;
+Drift-Gate `--check`.
+**Lieferung:** 85 Maskenaktionen / 45 Screens; Registry = Builtin (~78) + 85;
+`python scripts/generate_screen_action_catalog.py --check` gruen; 4+1 Tests gruen.
+**QA:** [usability-action-registry-20261008.md](../quality-assurance/usability-action-registry-20261008.md).
+**Offen (eigene Slices):** MCP-WRITE der neuen IDs; Intent-Phrase-Feinabstimmung;
+FIN-CLOSE bleibt ADR-076/409.
 
 ## BESTANDSBUCH-EINKAUF-20261007 — abgeschlossen, Claude Code
 
@@ -136,6 +260,8 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 `docs/README.md` und Domain-Depth-Plan verweisen auf den Hub.
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
+
+**SORTEN-CANONICAL-READ-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. GitHub Agrar-Smoketraces dreimal404 am nichtexistenten /agrar/saatgut/sortenregister; bestehender kanonischer /agrar/varieties-Vertrag und AgrarSorte bereits vorhanden. Besitz agrar.ts nur Sorten-Typ/Hook, VarietySelectionDialog.tsx nur kanonischer Typimport, sortenregister.tsx und bestellung.tsx ausschliesslich bestehende Datenfeldverwendung; fremde UI-WIP geschuetzt durch eigene Hunks aus HEAD. Kein neuer API/DB/Adapter oder UI-Neudesign, keine erfundenen Zulassungs-/Verfuegbarkeitswerte. Fokussierte echte Query-/React-/Browservertraege und bestehender Agrar-API-Vertrag; Smoke prueft exakte Maske statt beliebiger Ueberschrift. QA/Meridian/Open-Gaps/Workboard nachziehen. Abnahme kanonische Daten und Fehlerfall, kein404-Verstecken, keine DB/Container/Reset. Abnahme: Vier echte React-Query-Vertraege, zwei Chromium-Faelle (Daten/Filter + retrybarer Fehler),18 Schema-/HTTP-Mockvertraege73,41s und vollstaendige finale Frontend-Typpruefung gruen. Originaltraces3x404; bestehender kanonischer VarietyOut samt nullable Feldern/Aktivstatus, keine Phantomdaten, keine neue API/DB/Container. Fuenf reale DB-Tests ohne konfigurierte DB nicht abgenommen; danach nur isolierte Schema-/Mockvertraege. SecurityScan37739699012 und grosser CI37739698939 b47 gruen; Sorten-Folge-CI offen. Handelsbestand/-preise und Ernte-Standardfallback separat offen. Workboard-Rennen sofort aus Vorgaenger repariert; Integration atomar nach Staged-Gates, fremde UI-Hunks und Microsoft365-Claim erhalten.
 
 **CI-FOUR-REGRESSIONS-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. GitHub CI9176: 16499 gruen, vier konkrete Fehler. Besitz ausschliesslich tests/test_sammelabrechnung_interessent_waagen_vorlage.py (zwei alte 6.7-Erwartungen gegen kanonische 6.9), tests/test_wms_pick_link.py (vorhandenen Lager-/Artikel-/Bestandsvertrag in Mock nachziehen), QA/Open-Gaps/Workboard. Fachschutz und Versandbedingungen bleiben erhalten; keine neue DB/Container, keine Abschwaechung oder Skip. Abnahme komplette betroffene Module plus Lager-Vertragsnachweise auf isoliertem Lieferstand. Abnahme: GitHub9176 genau4 Fehler bei16499 bestandenen Tests; Taxonomieassertions und Name6.9, WMS-Mocks Lager/Artikel/Bestands-ID nachgezogen, kein Fachschutz geschwaecht. Komplette2 Module plus Lager-Sicherheits-/Kanonikvertraege auf isoliertem Code30/30 in50,54s. Keine lokale DB konfiguriert, ausschliesslich Mockinteraktionen; kein neuer Pruefstand/Container/Reset. QA/Handshake dokumentiert. Globales Coverage-Gate60 unveraendert; GitHub-Folgeabnahme nach Push erforderlich. Sicherheitsmeilenstein a9d993e2f separat abgeschlossen.
 

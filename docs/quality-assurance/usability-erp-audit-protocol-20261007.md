@@ -120,5 +120,7 @@ Aus [uix-anwender-bedienwege.md](../design/uix-anwender-bedienwege.md):
 | Inventur Cluster | erledigt | Matrix CSV |
 | Heuristik-Scoring | erledigt | Matrix CSV |
 | Tiefen-Tasks | erledigt | Dossier §3 |
-| Vergleich Tier-1 + Light + Peer-Stack | erledigt | Dossier §4–6 |
+| Vergleich Tier-1 + Light + Peer-Stack | erledigt | Dossier §4–6; Peer-CSV |
 | Open-Gaps-Verweis | erledigt | open-gaps-and-known-issues.md |
+| Gap-Hub / Archiv-Banner | erledigt | `docs/gap/`, `docs/_internal/archive/gap/` |
+| ACTION-DEN Nachzug | erledigt | 85 mask:*; Generator `--check`; QA 20261008 |

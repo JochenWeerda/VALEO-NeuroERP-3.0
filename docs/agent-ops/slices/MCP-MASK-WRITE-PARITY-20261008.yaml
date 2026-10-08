@@ -1,0 +1,47 @@
+slice_id: MCP-MASK-WRITE-PARITY-20261008
+id: MCP-MASK-WRITE-PARITY-20261008
+title: Mask-ID zu MCP-Write-Paritaet inventarisieren
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+completed_at: 2026-10-08
+goal: >
+  Top-Mask-Mutationen gegen MCP-Tools mappen; maschinenlesbares Artefakt;
+  HIGH/FIBU und ADR-076 ehrlich offen; keine neuen Writes ohne klaren Slice;
+  kein FIN-CLOSE.
+file_ownership:
+  - config/mcp_mask_action_map.yaml
+  - scripts/generate_mcp_mask_action_map.py
+  - tests/test_mcp_mask_action_map.py
+  - docs/quality-assurance/mcp-mask-write-parity-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/gap/executive-summary-20261007.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Mapping aus screen_mask_actions + mcp_erp_tools
+  - Coverage mapped|mapped_read|adjacent|open_medium|open_high|mcp_native
+  - fin_close blocked_adr_076 ohne mcp_tool_id
+  - Generator --check und Unit-Tests gruen
+  - Kein neuer FIN-CLOSE/Journal-Write
+tests:
+  - tests/test_mcp_mask_action_map.py
+risks:
+  - open_medium bleibt gross (Personal/Fuhrpark/Logistik)
+ai_harness:
+  fachlicher_vertrag: >
+    Agent sieht welche Mask-Aktionen MCP-faehig sind und was bewusst fehlt.
+  architektur_vertrag: >
+    config/mcp_mask_action_map.yaml als SoT fuer Paritaet; Generator drift-sicher.
+  daten_vertrag: >
+    Keine DB; nur Katalogdateien.
+  test_vertrag: >
+    --check und Mapping-Vertragsasserts.
+  security_vertrag: >
+    Kein Bypass von ADR-076; HIGH/FIBU nicht als mapped deklariert.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration/Commit-Pflicht.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Executive-Summary, Completion-Audit-Text.
+external_gates:
+  - not_applicable

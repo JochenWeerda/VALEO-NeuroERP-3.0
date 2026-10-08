@@ -176,6 +176,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin/postfaecher-google-rueckruf",
+      "path": "admin/postfaecher/google-rueckruf",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/admin/qualitaets-cockpit",
       "path": "admin/qualitaets-cockpit",
       "source": "alias"

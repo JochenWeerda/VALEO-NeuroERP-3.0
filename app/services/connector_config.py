@@ -38,6 +38,26 @@ def _reject_imap_control_chars(value: str, field_name: str) -> None:
         raise ValueError(f"IMAP-Konfiguration enthaelt unzulaessige Steuerzeichen: {field_name}")
 
 
+# ── Geheimnisse ──────────────────────────────────────────────────────────────────
+# Bis 08.10.2026 lagen IMAP-Passwort und STT-API-Schluessel im Klartext in
+# tenants.settings. Jetzt AES-GCM (app.core.geheimnis), an Mandant und Zweck
+# gebunden; ein Altwert im Klartext bleibt lesbar und wird beim naechsten
+# Speichern verschluesselt.
+def _geheim_lesen(wert: object, tenant_id: Optional[str], zweck: str) -> str:
+    from app.core import geheimnis
+
+    roh = str(wert or "").strip()
+    if not roh or not geheimnis.ist_chiffrat(roh):
+        return roh
+    return geheimnis.entschluesseln(roh, tenant_id=tenant_id or "", zweck=zweck)
+
+
+def _geheim_schreiben(wert: str, tenant_id: str, zweck: str) -> str:
+    from app.core import geheimnis
+
+    return geheimnis.verschluesseln(wert, tenant_id=tenant_id, zweck=zweck)
+
+
 # ── Tenant-Settings I/O ──────────────────────────────────────────────────────────
 def _read_settings(db: Optional[Session], tenant_id: Optional[str]) -> dict:
     if db is None or not tenant_id:
@@ -100,7 +120,7 @@ def load_stt_config(db: Optional[Session] = None, tenant_id: Optional[str] = Non
         enabled=bool(stored.get("enabled", True)),
         base_url=(stored.get("base_url") or "").strip(),
         model=(stored.get("model") or "").strip(),
-        api_key=(stored.get("api_key") or "").strip(),
+        api_key=_geheim_lesen(stored.get("api_key"), tenant_id, "stt"),
         language=(stored.get("language") or "").strip() or "de",
     )
 
@@ -161,7 +181,7 @@ def load_imap_config(db: Optional[Session] = None, tenant_id: Optional[str] = No
         port=int(stored.get("port", 993) or 993),
         ssl=bool(stored.get("ssl", True)),
         user=(stored.get("user") or "").strip(),
-        password=(stored.get("password") or "").strip(),
+        password=_geheim_lesen(stored.get("password"), tenant_id, "imap"),
         inbox=(stored.get("inbox") or "INBOX").strip() or "INBOX",
         sent=(stored.get("sent") or "").strip(),
         own_addresses=_split_addresses(own),
@@ -188,7 +208,9 @@ def save_connectors(
             if k in stt and stt[k] is not None:
                 cur[k] = stt[k]
         if stt.get("api_key"):  # nur nicht-leeren Key überschreiben
-            cur["api_key"] = stt["api_key"]
+            cur["api_key"] = _geheim_schreiben(stt["api_key"], tenant_id, "stt")
+        elif cur.get("api_key") and not str(cur["api_key"]).startswith("v1:"):
+            cur["api_key"] = _geheim_schreiben(str(cur["api_key"]), tenant_id, "stt")  # Altwert
         store["stt"] = cur
 
     if imap is not None:
@@ -198,7 +220,9 @@ def save_connectors(
             if k in imap and imap[k] is not None:
                 cur[k] = imap[k]
         if imap.get("password"):  # nur nicht-leeres Passwort überschreiben
-            cur["password"] = imap["password"]
+            cur["password"] = _geheim_schreiben(imap["password"], tenant_id, "imap")
+        elif cur.get("password") and not str(cur["password"]).startswith("v1:"):
+            cur["password"] = _geheim_schreiben(str(cur["password"]), tenant_id, "imap")  # Altwert
         store["imap"] = cur
 
     settings[SETTINGS_KEY] = store

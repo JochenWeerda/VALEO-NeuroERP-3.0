@@ -28,7 +28,7 @@ from app.agrar.rations.authz import WRITE_ROLES, require_roles
 from app.auth.deps import User, get_current_user
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import AuditLog, LkwAnnahmeQueue
-from app.documents.router_helpers import get_repository, list_from_store, get_from_store, save_to_store
+from app.documents.router_helpers import get_repository, list_from_store, get_from_store
 from app.domains.operations.models import Charge, Dokument, Rahmenvertrag, ZertifikatEintrag
 from app.domains.shared.events import IntegrationEvent, get_event_publisher
 from app.infrastructure.models import Article as ArticleModel, InventoryCount
@@ -1295,12 +1295,12 @@ class NewsletterRequest(BaseModel):
 
 
 @router.post("/crm/kommunikation/newsletter", response_model=NewsletterOut, summary="Newsletter crm")
-async def crm_newsletter(body: NewsletterRequest) -> dict:
+async def crm_newsletter(body: NewsletterRequest, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db), nutzer: dict = Depends(get_current_user)) -> dict:
     """Newsletter per SMTP an jeden gueltigen Empfaenger. Bis 08.10.2026 meldete dieser Weg
     "in_queue" ohne Warteschlange und versandte nichts; jetzt zaehlt, was der Server annahm."""
     import logging
 
-    from app.services.mail_versand import MailVersandFehler, MailVersandNichtEingerichtet, einrichtung, sende_mail
+    from app.services.mail_versand import MailVersandFehler, MailVersandNichtEingerichtet, MailVersandVerweigert, sende_mail, zugang
 
     valid = [e for e in body.empfaenger if "@" in e and "." in e.split("@")[-1]]
     if not valid:
@@ -1308,13 +1308,13 @@ async def crm_newsletter(body: NewsletterRequest) -> dict:
     if not (body.text or "").strip():
         raise HTTPException(status_code=422, detail="Newsletter-Text fehlt.")
     try:
-        einrichtung()
-    except MailVersandNichtEingerichtet as fehler:
-        raise HTTPException(status_code=503, detail=str(fehler)) from fehler
+        zugang(db, tenant_id, verwendung="newsletter", nutzer=nutzer)  # Postfach des Mandanten, sonst Plattform
+    except (MailVersandNichtEingerichtet, MailVersandFehler) as fehler:
+        raise HTTPException(status_code=403 if isinstance(fehler, MailVersandVerweigert) else 503, detail=str(fehler)) from fehler
     versendet, fehlgeschlagen = 0, 0
     for adresse in valid:
         try:
-            sende_mail(adresse, body.betreff, body.text or "")
+            sende_mail(adresse, body.betreff, body.text or "", db=db, tenant_id=tenant_id, verwendung="newsletter", nutzer=nutzer)
             versendet += 1
         except MailVersandFehler as fehler:
             fehlgeschlagen += 1
@@ -2292,24 +2292,24 @@ async def po_communications(po_id: str, tenant_id: str = Depends(get_tenant_id),
     return _find_po_by_id(db, po_id, tenant_id=tenant_id).get("communications", [])  # Altbeleg, nur lesend
 
 
-async def _po_kommunikation(po_id: str, payload: dict[str, Any], tenant_id: str, db: Session, weg: str) -> dict:
+async def _po_kommunikation(po_id: str, payload: dict[str, Any], tenant_id: str, db: Session, weg: str, nutzer: Optional[dict] = None) -> dict:
     """Kommunikation am fuehrenden Beleg; siehe ``bestell_kommunikation_service`` (bis 08.10.2026:
     Dokumentspeicher, nur Altbelege, "sent"/"published" ohne Versand)."""
     from app.services import bestell_kommunikation_service as komm
-    from app.services.mail_versand import MailVersandFehler, MailVersandNichtEingerichtet
+    from app.services.mail_versand import MailVersandFehler, MailVersandNichtEingerichtet, MailVersandVerweigert
 
     beleg = _bestellung_finden(db, tenant_id, po_id)
     if not beleg:
         _find_po_by_id(db, po_id, tenant_id=tenant_id)  # 404, wenn es auch keinen Altbeleg gibt
         raise _altbeleg_schreibgeschuetzt(po_id)
     try:
-        item = getattr(komm, weg)(db, tenant_id, beleg, payload)
+        item = getattr(komm, weg)(db, tenant_id, beleg, payload, nutzer=nutzer)
     except MailVersandNichtEingerichtet as fehler:
         db.rollback()
         raise HTTPException(status_code=503, detail=str(fehler)) from fehler
     except MailVersandFehler as fehler:
         db.rollback()
-        raise HTTPException(status_code=502, detail=str(fehler)) from fehler
+        raise HTTPException(status_code=403 if isinstance(fehler, MailVersandVerweigert) else 502, detail=str(fehler)) from fehler
     except ValueError as fehler:
         db.rollback()
         raise HTTPException(status_code=422, detail=str(fehler)) from fehler
@@ -2326,8 +2326,8 @@ async def po_add_communication(po_id: str, payload: dict[str, Any], tenant_id: s
 
 
 @router.post("/purchase-orders/{po_id}/communications/email", response_model=EinkaufDocOut, status_code=201, summary="Send email po")
-async def po_send_email(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
-    return await _po_kommunikation(po_id, payload, tenant_id, db, "per_mail_senden")
+async def po_send_email(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db), nutzer: dict = Depends(get_current_user)) -> dict:
+    return await _po_kommunikation(po_id, payload, tenant_id, db, "per_mail_senden", nutzer)
 
 
 @router.post("/purchase-orders/{po_id}/communications/portal", response_model=EinkaufDocOut, status_code=201, summary="Send portal po")

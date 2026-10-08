@@ -1,0 +1,685 @@
+schema_version: '1.0'
+slice_id: MCP-MASK-WRITE-PARITY-20261008
+generated_on: '2026-10-08'
+sources:
+  screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
+  mcp_erp_tools: config/mcp_erp_tools.yaml
+  action_stats:
+    actions: 85
+    screens_with_actions: 45
+    domains: 14
+mcp_write_tools:
+- crm.contact.log
+- crm.activity.create
+- crm.lead.qualify
+- sales.invoice.propose
+- sales.invoice.post
+- agrar.ration.transition
+- agrar.feeding.supply_handoff
+- agrar.feeding.actual_measure
+- agrar.feeding.configure_threshold
+- agrar.feed_analysis.transition
+- qualitaet.reklamation.abschliessen
+- einkauf.bestellung.versenden
+- einkauf.angebot.bestellen
+- einkauf.anlieferavis.wareneingang
+- lager.stock_movement.stornieren
+- produktion.control.sync
+- planung.calendar.reproject
+- mobile.sync.process_pending
+mcp_read_tools_count: 17
+mcp_native_writes:
+- mcp_tool_id: crm.contact.log
+  mask_action_id: null
+  coverage: mcp_native
+  notes: Kein mask:* Eintrag; MCP-Write ohne Mask-ID-Parität.
+- mcp_tool_id: sales.invoice.propose
+  mask_action_id: null
+  coverage: mcp_native
+  notes: Belegkette MCP; keine 1:1-Mask-Action create-invoice in Katalog.
+- mcp_tool_id: sales.invoice.post
+  mask_action_id: null
+  coverage: mcp_native
+  notes: Post nur nach approved Proposal; kein Mask-ID.
+fin_close:
+  status: blocked_adr_076
+  adr: docs/adr/adr-076-cash-close-retirement.md
+  http: POST finance/cash/close-day → 409, kein Journal-DML
+  mcp_tool_id: null
+  notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
+    Fachvertrag ausserhalb Mask-Write-Parität.
+stats:
+  mask_mutations_considered: 59
+  by_coverage:
+    adjacent: 1
+    blocked_no_endpoint: 31
+    mapped: 22
+    mapped_read: 2
+    open_high: 3
+mappings:
+- mask_action_id: mask:admin/postfaecher:neu
+  mask: admin/postfaecher
+  domain: platform
+  action_key: neu
+  label: Neues Postfach
+  command_endpoint: null
+  command: admin.postfachNeu
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:admin/postfaecher:speichern
+  mask: admin/postfaecher
+  domain: platform
+  action_key: speichern
+  label: Postfach speichern
+  command_endpoint: null
+  command: admin.postfachSpeichern
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:agrar/feed-readiness:create_handoff
+  mask: agrar/feed-readiness
+  domain: agrar
+  action_key: create_handoff
+  label: An Einkauf uebergeben
+  command_endpoint: null
+  command: null
+  mcp_tool_id: agrar.feeding.supply_handoff
+  coverage: mapped
+  notes: MCP-MASK-WRITES-BATCH4-20261008; FeedingSupplyService.create_handoff.
+- mask_action_id: mask:agrar/feeding-actuals:configure_threshold
+  mask: agrar/feeding-actuals
+  domain: agrar
+  action_key: configure_threshold
+  label: Schwellen konfigurieren
+  command_endpoint: null
+  command: null
+  mcp_tool_id: agrar.feeding.configure_threshold
+  coverage: mapped
+  notes: MCP-MASK-WRITES-BATCH5-20261008; FeedingActualMeasureService.create_policy.
+- mask_action_id: mask:agrar/feeding-actuals:create_measure
+  mask: agrar/feeding-actuals
+  domain: agrar
+  action_key: create_measure
+  label: Massnahme aus Abweichung
+  command_endpoint: null
+  command: null
+  mcp_tool_id: agrar.feeding.actual_measure
+  coverage: mapped
+  notes: MCP-MASK-WRITES-BATCH4-20261008; FeedingActualMeasureService.create_measure.
+- mask_action_id: mask:agrar/ration:activate
+  mask: agrar/ration
+  domain: agrar
+  action_key: activate
+  label: Jetzt aktivieren
+  command_endpoint: /api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/activate
+  command: null
+  mcp_tool_id: agrar.ration.transition
+  coverage: mapped
+  notes: MCP-MASK-WRITES-BATCH3-20261008; action_key=activate.
+- mask_action_id: mask:agrar/ration:approve
+  mask: agrar/ration
+  domain: agrar
+  action_key: approve
+  label: Freigeben
+  command_endpoint: /api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/approve
+  command: null
+  mcp_tool_id: agrar.ration.transition
+  coverage: mapped
+  notes: MCP-MASK-WRITES-BATCH3-20261008; action_key=approve.
+- mask_action_id: mask:agrar/ration:archive
+  mask: agrar/ration
+  domain: agrar
+  action_key: archive
+  label: Archivieren
+  command_endpoint: /api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/archive
+  command: null
+  mcp_tool_id: agrar.ration.transition
+  coverage: mapped
+  notes: MCP-MASK-WRITES-BATCH4-20261008; action_key=archive (reason Pflicht).
+- mask_action_id: mask:agrar/ration:retire
+  mask: agrar/ration
+  domain: agrar
+  action_key: retire
+  label: Fuetterung beenden
+  command_endpoint: /api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/retire
+  command: null
+  mcp_tool_id: agrar.ration.transition
+  coverage: mapped
+  notes: MCP-MASK-WRITES-BATCH4-20261008; action_key=retire (reason Pflicht).
+- mask_action_id: mask:agrar/ration:schedule
+  mask: agrar/ration
+  domain: agrar
+  action_key: schedule
+  label: Fuetterungsbeginn planen
+  command_endpoint: /api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/schedule
+  command: null
+  mcp_tool_id: agrar.ration.transition
+  coverage: mapped
+  notes: MCP-MASK-WRITES-BATCH3-20261008; action_key=schedule + feeding_start.
+- mask_action_id: mask:agrar/ration:submit_review
+  mask: agrar/ration
+  domain: agrar
+  action_key: submit_review
+  label: Zur Pruefung
+  command_endpoint: /api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/submit_review
+  command: null
+  mcp_tool_id: agrar.ration.transition
+  coverage: mapped
+  notes: MCP-MASK-WRITES-BATCH3-20261008; action_key=submit_review.
+- mask_action_id: mask:auswertungen/abfrage-center:import
+  mask: auswertungen/abfrage-center
+  domain: reporting
+  action_key: import
+  label: Signiert importieren
+  command_endpoint: null
+  command: null
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:auswertungen/bonus-berechnung:calculate
+  mask: auswertungen/bonus-berechnung
+  domain: reporting
+  action_key: calculate
+  label: Bonuslauf berechnen
+  command_endpoint: null
+  command: null
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:auswertungen/sanktionspruefung-kunden:check
+  mask: auswertungen/sanktionspruefung-kunden
+  domain: compliance
+  action_key: check
+  label: Kunden pruefen
+  command_endpoint: null
+  command: null
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:auswertungen/sanktionspruefung-personal:check
+  mask: auswertungen/sanktionspruefung-personal
+  domain: compliance
+  action_key: check
+  label: Personal pruefen
+  command_endpoint: null
+  command: null
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:crm/customer-360:create_activity
+  mask: crm/customer-360
+  domain: crm
+  action_key: create_activity
+  label: Aktivitaet anlegen
+  command_endpoint: /api/v1/crm/customers/{entity_id}/actions/create_activity
+  command: null
+  mcp_tool_id: crm.activity.create
+  coverage: mapped
+  notes: Top-Write MCP-WRITE-20261008; Kunden-Aktivität aus Token-Mandant.
+- mask_action_id: mask:crm/customer-360:edit
+  mask: crm/customer-360
+  domain: crm
+  action_key: edit
+  label: Bearbeiten
+  command_endpoint: null
+  command: null
+  mcp_tool_id: crm.customer.open
+  coverage: mapped_read
+  notes: Kein Write-Tool; Deep-Link/open + summary360 für Agent-Navigation.
+- mask_action_id: mask:crm/lead:qualifizieren
+  mask: crm/lead
+  domain: crm
+  action_key: qualifizieren
+  label: Als Opportunity qualifizieren
+  command_endpoint: /api/v1/crm/leads/{entity_id}/actions/qualifizieren
+  command: null
+  mcp_tool_id: crm.lead.qualify
+  coverage: mapped
+  notes: MCP-MASK-WRITES-TOP-20261008; crm_lead_service.qualify, Token-Mandant.
+- mask_action_id: mask:crm/opportunity:create_activity
+  mask: crm/opportunity
+  domain: crm
+  action_key: create_activity
+  label: Aktivitaet anlegen
+  command_endpoint: /api/v1/crm/opportunities/{entity_id}/actions/create_activity
+  command: null
+  mcp_tool_id: crm.activity.create
+  coverage: mapped
+  notes: Gleicher Activity-Adapter; Opportunity-Kontext via kunden_nr/entity.
+- mask_action_id: mask:einkauf/angebot:bestellen
+  mask: einkauf/angebot
+  domain: einkauf
+  action_key: bestellen
+  label: Bestellung erstellen
+  command_endpoint: /api/v1/einkauf/angebote/{entity_id}/actions/bestellen
+  command: null
+  mcp_tool_id: einkauf.angebot.bestellen
+  coverage: mapped
+  notes: MCP-MASK-WRITES-NEXT-20261008; Angebot→Bestellung via EinkaufCompatService.
+- mask_action_id: mask:einkauf/anlieferavis:wareneingang
+  mask: einkauf/anlieferavis
+  domain: einkauf
+  action_key: wareneingang
+  label: Wareneingang buchen
+  command_endpoint: /api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang
+  command: null
+  mcp_tool_id: einkauf.anlieferavis.wareneingang
+  coverage: mapped
+  notes: MCP-MASK-WRITES-NEXT-20261008; WE aus Avis, Lagerzugang ohne FIBU.
+- mask_action_id: mask:einkauf/purchase-order:speichern
+  mask: einkauf/purchase-order
+  domain: einkauf
+  action_key: speichern
+  label: Speichern
+  command_endpoint: null
+  command: null
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:einkauf/purchase-order:versenden
+  mask: einkauf/purchase-order
+  domain: einkauf
+  action_key: versenden
+  label: Versenden
+  command_endpoint: /api/v1/einkauf/bestellungen/{entity_id}/versenden
+  command: null
+  mcp_tool_id: einkauf.bestellung.versenden
+  coverage: mapped
+  notes: MCP-MASK-WRITES-TOP-20261008; Versand ohne Obligo-Journal.
+- mask_action_id: mask:einkauf/supplier:neue_bestellung
+  mask: einkauf/supplier
+  domain: einkauf
+  action_key: neue_bestellung
+  label: Bestellung anlegen
+  command_endpoint: null
+  command: null
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:finance/ap-invoice:freigeben
+  mask: finance/ap-invoice
+  domain: finance
+  action_key: freigeben
+  label: Freigeben
+  command_endpoint: /api/v1/finance/ap/invoices/{entity_id}/actions/freigeben
+  command: null
+  coverage: open_high
+  notes: FIBU AP-Freigabe — Journal-/Zahlungspfad; kein MCP-Write.
+  mcp_tool_id: null
+- mask_action_id: mask:finance/ar-open-item:mahnen
+  mask: finance/ar-open-item
+  domain: finance
+  action_key: mahnen
+  label: Mahnung erstellen
+  command_endpoint: /api/v1/finance/open-items/{entity_id}/actions/mahnen
+  command: null
+  mcp_tool_id: fibu.dunning.status
+  coverage: mapped_read
+  notes: Mahnlauf-Write bewusst nicht; Status-Read vorhanden.
+- mask_action_id: mask:finance/payment-run:freigeben
+  mask: finance/payment-run
+  domain: finance
+  action_key: freigeben
+  label: Zahlungslauf freigeben
+  command_endpoint: /api/v1/finance/payment-runs/{entity_id}/actions/freigeben
+  command: null
+  coverage: open_high
+  notes: Zahlauf-Freigabe HIGH; nahe Journal/Kasse — ADR-076-Umfeld.
+  mcp_tool_id: null
+- mask_action_id: mask:fuhrpark/ausgehende-dokumente:neu
+  mask: fuhrpark/ausgehende-dokumente
+  domain: logistics
+  action_key: neu
+  label: Neu
+  command_endpoint: null
+  command: fuhrpark.newDokument
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:fuhrpark/ausgehende-dokumente:speichern
+  mask: fuhrpark/ausgehende-dokumente
+  domain: logistics
+  action_key: speichern
+  label: Speichern
+  command_endpoint: null
+  command: fuhrpark.saveDokument
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:fuhrpark/fahrzeug-stamm:loeschen
+  mask: fuhrpark/fahrzeug-stamm
+  domain: logistics
+  action_key: loeschen
+  label: Fahrzeug löschen
+  command_endpoint: null
+  command: fuhrpark.deleteFahrzeug
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:fuhrpark/fahrzeug-stamm:speichern
+  mask: fuhrpark/fahrzeug-stamm
+  domain: logistics
+  action_key: speichern
+  label: Speichern
+  command_endpoint: null
+  command: fuhrpark.saveFahrzeug
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:fuhrpark/fahrzeuge:neu
+  mask: fuhrpark/fahrzeuge
+  domain: logistics
+  action_key: neu
+  label: Neues Fahrzeug
+  command_endpoint: null
+  command: vehicle.create
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:fuhrpark/rechnungen:neu
+  mask: fuhrpark/rechnungen
+  domain: logistics
+  action_key: neu
+  label: Neu
+  command_endpoint: null
+  command: fuhrpark.newRechnung
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:fuhrpark/rechnungen:speichern
+  mask: fuhrpark/rechnungen
+  domain: logistics
+  action_key: speichern
+  label: Speichern
+  command_endpoint: null
+  command: fuhrpark.saveRechnung
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:fuhrpark/terminarten:neu
+  mask: fuhrpark/terminarten
+  domain: logistics
+  action_key: neu
+  label: Neu
+  command_endpoint: null
+  command: fuhrpark.newTerminart
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:fuhrpark/terminarten:speichern
+  mask: fuhrpark/terminarten
+  domain: logistics
+  action_key: speichern
+  label: Speichern
+  command_endpoint: null
+  command: fuhrpark.saveTerminart
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:futtermittel/analyse:reject
+  mask: futtermittel/analyse
+  domain: futtermittel
+  action_key: reject
+  label: Zurueckweisen
+  command_endpoint: /api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/reject
+  command: null
+  mcp_tool_id: agrar.feed_analysis.transition
+  coverage: mapped
+  notes: MCP-MASK-WRITES-BATCH5-20261008; action_key=reject.
+- mask_action_id: mask:futtermittel/analyse:release
+  mask: futtermittel/analyse
+  domain: futtermittel
+  action_key: release
+  label: Analyse freigeben
+  command_endpoint: /api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/release
+  command: null
+  mcp_tool_id: agrar.feed_analysis.transition
+  coverage: mapped
+  notes: MCP-MASK-WRITES-BATCH5-20261008; action_key=release.
+- mask_action_id: mask:lager/inventur-nebenlaeufe:create_opening
+  mask: lager/inventur-nebenlaeufe
+  domain: inventory
+  action_key: create_opening
+  label: Bestandsvortrag
+  command_endpoint: null
+  command: null
+  coverage: open_high
+  notes: Inventur-Bestandsvortrag danger=high / Vier-Augen; kein MCP-Write ohne eigene Freigabe.
+  mcp_tool_id: null
+- mask_action_id: mask:lager/stock-movement:stornieren
+  mask: lager/stock-movement
+  domain: lager
+  action_key: stornieren
+  label: Stornieren
+  command_endpoint: /api/v1/lager/stock-movements/{entity_id}/actions/stornieren
+  command: null
+  mcp_tool_id: lager.stock_movement.stornieren
+  coverage: mapped
+  notes: MCP-MASK-WRITES-NEXT-20261008; Gegenbuchung via storno_korrektur.
+- mask_action_id: mask:logistik/frachttabellen:anlegen
+  mask: logistik/frachttabellen
+  domain: logistics
+  action_key: anlegen
+  label: Tabelle speichern
+  command_endpoint: null
+  command: fracht.createTable
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:logistik/tourenplanung:anlegen
+  mask: logistik/tourenplanung
+  domain: logistics
+  action_key: anlegen
+  label: Tour anlegen
+  command_endpoint: null
+  command: tour.create
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:logistik/verladung:neu
+  mask: logistik/verladung
+  domain: logistics
+  action_key: neu
+  label: Neue Beladung
+  command_endpoint: null
+  command: null
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:personal/bewerbungen:neu
+  mask: personal/bewerbungen
+  domain: hr
+  action_key: neu
+  label: Neu
+  command_endpoint: null
+  command: personal.newBewerbung
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:personal/bewerbungen:speichern
+  mask: personal/bewerbungen
+  domain: hr
+  action_key: speichern
+  label: Speichern
+  command_endpoint: null
+  command: personal.saveBewerbung
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:personal/einwilligungserklaerungen:anlegen
+  mask: personal/einwilligungserklaerungen
+  domain: hr
+  action_key: anlegen
+  label: Fassung anlegen
+  command_endpoint: null
+  command: personal.saveErklaerung
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:personal/einwilligungserklaerungen:neu
+  mask: personal/einwilligungserklaerungen
+  domain: hr
+  action_key: neu
+  label: Neu
+  command_endpoint: null
+  command: personal.newErklaerung
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:personal/onboarding:neu
+  mask: personal/onboarding
+  domain: hr
+  action_key: neu
+  label: Neu
+  command_endpoint: null
+  command: personal.newOnboarding
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:personal/onboarding:speichern
+  mask: personal/onboarding
+  domain: hr
+  action_key: speichern
+  label: Speichern
+  command_endpoint: null
+  command: personal.saveOnboarding
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:personal/qualifikationen:neu
+  mask: personal/qualifikationen
+  domain: hr
+  action_key: neu
+  label: Neu
+  command_endpoint: null
+  command: personal.newQualifikation
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:personal/qualifikationen:speichern
+  mask: personal/qualifikationen
+  domain: hr
+  action_key: speichern
+  label: Speichern
+  command_endpoint: null
+  command: personal.saveQualifikation
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:personal/schulungen:neu
+  mask: personal/schulungen
+  domain: hr
+  action_key: neu
+  label: Neu
+  command_endpoint: null
+  command: personal.newSchulung
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:personal/schulungen:speichern
+  mask: personal/schulungen
+  domain: hr
+  action_key: speichern
+  label: Speichern
+  command_endpoint: null
+  command: personal.saveSchulung
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+- mask_action_id: mask:planung/kalender:reproject
+  mask: planung/kalender
+  domain: platform
+  action_key: reproject
+  label: Neu projizieren
+  command_endpoint: /api/v1/planung/kalender/reproject
+  command: null
+  mcp_tool_id: planung.calendar.reproject
+  coverage: mapped
+  notes: MCP-MASK-WRITES-REMAINING-20261008; CalendarProjectionService.reproject.
+- mask_action_id: mask:produktion/produktionsleitstand:sync
+  mask: produktion/produktionsleitstand
+  domain: agrar
+  action_key: sync
+  label: Auftraege synchronisieren
+  command_endpoint: /api/v1/production-control/sync
+  command: null
+  mcp_tool_id: produktion.control.sync
+  coverage: mapped
+  notes: MCP-MASK-WRITES-REMAINING-20261008; ProductionControlService.sync_production_orders.
+- mask_action_id: mask:qualitaet/reklamation:abschliessen
+  mask: qualitaet/reklamation
+  domain: qualitaet
+  action_key: abschliessen
+  label: Abschliessen
+  command_endpoint: /api/v1/reklamationen/{entity_id}/actions/abschliessen
+  command: null
+  mcp_tool_id: qualitaet.reklamation.abschliessen
+  coverage: mapped
+  notes: MCP-MASK-WRITES-BATCH5-20261008; Status→geschlossen, Token-Mandant.
+- mask_action_id: mask:sales/delivery-note:drucken
+  mask: sales/delivery-note
+  domain: sales
+  action_key: drucken
+  label: Lieferschein drucken
+  command_endpoint: /api/v1/sales/delivery-notes/{entity_id}/actions/drucken
+  command: null
+  mcp_tool_id: sales.invoice.propose
+  coverage: adjacent
+  notes: Druck ≠ Rechnung; Invoice-Propose/Post sind MCP-Writes der Belegkette.
+- mask_action_id: mask:schnittstelle/mde-inbox:process_pending
+  mask: schnittstelle/mde-inbox
+  domain: platform
+  action_key: process_pending
+  label: Ausstehende verarbeiten
+  command_endpoint: /api/v1/mobile/sync-process
+  command: null
+  mcp_tool_id: mobile.sync.process_pending
+  coverage: mapped
+  notes: MCP-MASK-WRITES-REMAINING-20261008; MobileSyncService.process_pending.
+- mask_action_id: mask:transporte/fahrer:neu
+  mask: transporte/fahrer
+  domain: logistics
+  action_key: neu
+  label: Neuer Fahrer
+  command_endpoint: null
+  command: driver.create
+  coverage: blocked_no_endpoint
+  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
+    — MCP-MASK-WRITES-REMAINING-20261008.
+  mcp_tool_id: null
+next_medium_candidates: []
+classification_complete: true
+classification_notes: 'MCP-MASK-WRITES-REMAINING-20261008: alle Mask-Mutationen mapped, mapped_read, adjacent,
+  open_high, blocked_no_endpoint oder mcp_native. Keine weiteren open_medium ohne Backend-Erfindung. FIN-CLOSE
+  bleibt blocked_adr_076.'

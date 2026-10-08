@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-08
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-08T05:54:55Z'
+generated_at: '2026-10-08T07:03:05Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1690,6 +1690,7 @@ domains:
     - /admin/monitoring/alerts
     - /admin/monitoring/regeln
     - /admin/nummernkreise
+    - /admin/postfaecher/google-rueckruf
     - /admin/qualitaets-cockpit
     - /admin/report-berechtigungen
     - /admin/rolle/:id
@@ -1800,6 +1801,7 @@ domains:
     - llm_gateway
     - mail_ingest_service
     - mail_versand
+    - mailkonto_service
     - mask_action_runtime_service
     - mask_rollout_summary_service
     - mcp_execution_service
@@ -1880,6 +1882,7 @@ domains:
     - ki_usability
     - knowledge_api
     - legacy_interface_adapters
+    - mailkonto
     - mask_actions
     - mask_frontend_bridges
     - mask_registry
@@ -2068,12 +2071,12 @@ domains:
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 935
-  frontend_routes_mapped: 935
-  backend_services_total: 279
-  backend_services_mapped: 279
-  backend_endpoints_total: 454
-  backend_endpoints_mapped: 454
+  frontend_routes_total: 936
+  frontend_routes_mapped: 936
+  backend_services_total: 280
+  backend_services_mapped: 280
+  backend_endpoints_total: 455
+  backend_endpoints_mapped: 455
 unmapped:
   frontend_routes: []
   backend_services: []

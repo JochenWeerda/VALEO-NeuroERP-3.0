@@ -1,0 +1,1755 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/generate_screen_action_catalog.py",
+  "stats": {
+    "actions": 85,
+    "screens_with_actions": 45,
+    "domains": 14
+  },
+  "actions": [
+    {
+      "id": "mask:admin/postfaecher:google",
+      "label": "Mit Google verbinden",
+      "description": "Mit Google verbinden (admin/postfaecher)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/postfaecher",
+      "intent_phrases": [
+        "Mit Google verbinden"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/postfaecher",
+        "actionKey": "google",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "admin.postfachGoogle",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:admin/postfaecher:neu",
+      "label": "Neues Postfach",
+      "description": "Neues Postfach (admin/postfaecher)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/postfaecher",
+      "intent_phrases": [
+        "Neues Postfach"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/postfaecher",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "admin.postfachNeu",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:admin/postfaecher:speichern",
+      "label": "Postfach speichern",
+      "description": "Postfach speichern (admin/postfaecher)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/postfaecher",
+      "intent_phrases": [
+        "Postfach speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/postfaecher",
+        "actionKey": "speichern",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "admin.postfachSpeichern",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:admin/postfaecher:testen",
+      "label": "Testmail senden",
+      "description": "Testmail senden (admin/postfaecher)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/postfaecher",
+      "intent_phrases": [
+        "Testmail senden"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/postfaecher",
+        "actionKey": "testen",
+        "commandEndpoint": "/api/v1/admin/postfaecher/{entity_id}/testen",
+        "navigationRoute": null,
+        "command": "admin.postfachTesten",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:agrar/feed-readiness:create_handoff",
+      "label": "An Einkauf uebergeben",
+      "description": "An Einkauf uebergeben (agrar/feed-readiness)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/feed-readiness",
+      "intent_phrases": [
+        "An Einkauf uebergeben"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/feed-readiness",
+        "actionKey": "create_handoff",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/feeding-actuals:configure_threshold",
+      "label": "Schwellen konfigurieren",
+      "description": "Schwellen konfigurieren (agrar/feeding-actuals)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/feeding-actuals",
+      "intent_phrases": [
+        "Schwellen konfigurieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/feeding-actuals",
+        "actionKey": "configure_threshold",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/feeding-actuals:create_measure",
+      "label": "Massnahme aus Abweichung",
+      "description": "Massnahme aus Abweichung (agrar/feeding-actuals)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/feeding-actuals",
+      "intent_phrases": [
+        "Massnahme aus Abweichung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/feeding-actuals",
+        "actionKey": "create_measure",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/harvest-settlement:drucken",
+      "label": "Abrechnung drucken",
+      "description": "Abrechnung drucken (agrar/harvest-settlement)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/harvest-settlement",
+      "intent_phrases": [
+        "Abrechnung drucken"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/harvest-settlement",
+        "actionKey": "drucken",
+        "commandEndpoint": "/api/v1/agrar/settlements/{entity_id}/actions/drucken",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:agrar/ration:activate",
+      "label": "Jetzt aktivieren",
+      "description": "Jetzt aktivieren (agrar/ration)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/ration",
+      "intent_phrases": [
+        "Jetzt aktivieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/ration",
+        "actionKey": "activate",
+        "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/activate",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:agrar/ration:approve",
+      "label": "Freigeben",
+      "description": "Freigeben (agrar/ration)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/ration",
+      "intent_phrases": [
+        "Freigeben"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/ration",
+        "actionKey": "approve",
+        "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/approve",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:agrar/ration:archive",
+      "label": "Archivieren",
+      "description": "Archivieren (agrar/ration)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/ration",
+      "intent_phrases": [
+        "Archivieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/ration",
+        "actionKey": "archive",
+        "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/archive",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:agrar/ration:retire",
+      "label": "Fuetterung beenden",
+      "description": "Fuetterung beenden (agrar/ration)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/ration",
+      "intent_phrases": [
+        "Fuetterung beenden"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/ration",
+        "actionKey": "retire",
+        "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/retire",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:agrar/ration:schedule",
+      "label": "Fuetterungsbeginn planen",
+      "description": "Fuetterungsbeginn planen (agrar/ration)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/ration",
+      "intent_phrases": [
+        "Fuetterungsbeginn planen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/ration",
+        "actionKey": "schedule",
+        "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/schedule",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:agrar/ration:submit_review",
+      "label": "Zur Pruefung",
+      "description": "Zur Pruefung (agrar/ration)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/ration",
+      "intent_phrases": [
+        "Zur Pruefung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/ration",
+        "actionKey": "submit_review",
+        "commandEndpoint": "/api/v1/agrar/rations-optimization/lifecycle/rations/{entity_id}/actions/submit_review",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:auswertungen/abfrage-center:import",
+      "label": "Signiert importieren",
+      "description": "Signiert importieren (auswertungen/abfrage-center)",
+      "category": "mask-action",
+      "domain": "reporting",
+      "mask": "auswertungen/abfrage-center",
+      "intent_phrases": [
+        "Signiert importieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "auswertungen/abfrage-center",
+        "actionKey": "import",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:auswertungen/bonus-berechnung:calculate",
+      "label": "Bonuslauf berechnen",
+      "description": "Bonuslauf berechnen (auswertungen/bonus-berechnung)",
+      "category": "mask-action",
+      "domain": "reporting",
+      "mask": "auswertungen/bonus-berechnung",
+      "intent_phrases": [
+        "Bonuslauf berechnen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "auswertungen/bonus-berechnung",
+        "actionKey": "calculate",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:auswertungen/sanktionspruefung-kunden:check",
+      "label": "Kunden pruefen",
+      "description": "Kunden pruefen (auswertungen/sanktionspruefung-kunden)",
+      "category": "mask-action",
+      "domain": "compliance",
+      "mask": "auswertungen/sanktionspruefung-kunden",
+      "intent_phrases": [
+        "Kunden pruefen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "auswertungen/sanktionspruefung-kunden",
+        "actionKey": "check",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:auswertungen/sanktionspruefung-personal:check",
+      "label": "Personal pruefen",
+      "description": "Personal pruefen (auswertungen/sanktionspruefung-personal)",
+      "category": "mask-action",
+      "domain": "compliance",
+      "mask": "auswertungen/sanktionspruefung-personal",
+      "intent_phrases": [
+        "Personal pruefen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "auswertungen/sanktionspruefung-personal",
+        "actionKey": "check",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/customer-360:create_activity",
+      "label": "Aktivitaet anlegen",
+      "description": "Aktivitaet anlegen (crm/customer-360)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/customer-360",
+      "intent_phrases": [
+        "Aktivitaet anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/customer-360",
+        "actionKey": "create_activity",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/create_activity",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/customer-360:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (crm/customer-360)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/customer-360",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/customer-360",
+        "actionKey": "edit",
+        "commandEndpoint": null,
+        "navigationRoute": "/verkauf/kunden-stamm/{business_partner_id}?pflege=1",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/lead:qualifizieren",
+      "label": "Als Opportunity qualifizieren",
+      "description": "Als Opportunity qualifizieren (crm/lead)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/lead",
+      "intent_phrases": [
+        "Als Opportunity qualifizieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/lead",
+        "actionKey": "qualifizieren",
+        "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/qualifizieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/opportunity:create_activity",
+      "label": "Aktivitaet anlegen",
+      "description": "Aktivitaet anlegen (crm/opportunity)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/opportunity",
+      "intent_phrases": [
+        "Aktivitaet anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/opportunity",
+        "actionKey": "create_activity",
+        "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/create_activity",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/angebot:bestellen",
+      "label": "Bestellung erstellen",
+      "description": "Bestellung erstellen (einkauf/angebot)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/angebot",
+      "intent_phrases": [
+        "Bestellung erstellen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/angebot",
+        "actionKey": "bestellen",
+        "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/actions/bestellen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/anlieferavis:wareneingang",
+      "label": "Wareneingang buchen",
+      "description": "Wareneingang buchen (einkauf/anlieferavis)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/anlieferavis",
+      "intent_phrases": [
+        "Wareneingang buchen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/anlieferavis",
+        "actionKey": "wareneingang",
+        "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/purchase-order:speichern",
+      "label": "Speichern",
+      "description": "Speichern (einkauf/purchase-order)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/purchase-order",
+      "intent_phrases": [
+        "Speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/purchase-order",
+        "actionKey": "speichern",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:einkauf/purchase-order:versenden",
+      "label": "Versenden",
+      "description": "Versenden (einkauf/purchase-order)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/purchase-order",
+      "intent_phrases": [
+        "Versenden"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/purchase-order",
+        "actionKey": "versenden",
+        "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/versenden",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/supplier:neue_bestellung",
+      "label": "Bestellung anlegen",
+      "description": "Bestellung anlegen (einkauf/supplier)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/supplier",
+      "intent_phrases": [
+        "Bestellung anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/supplier",
+        "actionKey": "neue_bestellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellungen/neu",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:finance/ap-invoice:freigeben",
+      "label": "Freigeben",
+      "description": "Freigeben (finance/ap-invoice)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/ap-invoice",
+      "intent_phrases": [
+        "Freigeben"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "finance/ap-invoice",
+        "actionKey": "freigeben",
+        "commandEndpoint": "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:finance/ar-open-item:mahnen",
+      "label": "Mahnung erstellen",
+      "description": "Mahnung erstellen (finance/ar-open-item)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/ar-open-item",
+      "intent_phrases": [
+        "Mahnung erstellen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "finance/ar-open-item",
+        "actionKey": "mahnen",
+        "commandEndpoint": "/api/v1/finance/open-items/{entity_id}/actions/mahnen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:finance/payment-run:freigeben",
+      "label": "Zahlungslauf freigeben",
+      "description": "Zahlungslauf freigeben (finance/payment-run)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/payment-run",
+      "intent_phrases": [
+        "Zahlungslauf freigeben"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "finance/payment-run",
+        "actionKey": "freigeben",
+        "commandEndpoint": "/api/v1/finance/payment-runs/{entity_id}/actions/freigeben",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:fuhrpark/ausgehende-dokumente:neu",
+      "label": "Neu",
+      "description": "Neu (fuhrpark/ausgehende-dokumente)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "fuhrpark/ausgehende-dokumente",
+      "intent_phrases": [
+        "Neu"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/ausgehende-dokumente",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fuhrpark.newDokument",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:fuhrpark/ausgehende-dokumente:speichern",
+      "label": "Speichern",
+      "description": "Speichern (fuhrpark/ausgehende-dokumente)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "fuhrpark/ausgehende-dokumente",
+      "intent_phrases": [
+        "Speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/ausgehende-dokumente",
+        "actionKey": "speichern",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fuhrpark.saveDokument",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:fuhrpark/fahrzeug-stamm:drucken",
+      "label": "Drucken",
+      "description": "Drucken (fuhrpark/fahrzeug-stamm)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "fuhrpark/fahrzeug-stamm",
+      "intent_phrases": [
+        "Drucken"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/fahrzeug-stamm",
+        "actionKey": "drucken",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fuhrpark.printAkte",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:fuhrpark/fahrzeug-stamm:drucker",
+      "label": "Drucker einrichten",
+      "description": "Drucker einrichten (fuhrpark/fahrzeug-stamm)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "fuhrpark/fahrzeug-stamm",
+      "intent_phrases": [
+        "Drucker einrichten"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/fahrzeug-stamm",
+        "actionKey": "drucker",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fuhrpark.setupDrucker",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:fuhrpark/fahrzeug-stamm:liste",
+      "label": "Zur Liste",
+      "description": "Zur Liste (fuhrpark/fahrzeug-stamm)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "fuhrpark/fahrzeug-stamm",
+      "intent_phrases": [
+        "Zur Liste"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/fahrzeug-stamm",
+        "actionKey": "liste",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fuhrpark.openFahrzeugListe",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:fuhrpark/fahrzeug-stamm:loeschen",
+      "label": "Fahrzeug löschen",
+      "description": "Fahrzeug löschen (fuhrpark/fahrzeug-stamm)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "fuhrpark/fahrzeug-stamm",
+      "intent_phrases": [
+        "Fahrzeug löschen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/fahrzeug-stamm",
+        "actionKey": "loeschen",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fuhrpark.deleteFahrzeug",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:fuhrpark/fahrzeug-stamm:speichern",
+      "label": "Speichern",
+      "description": "Speichern (fuhrpark/fahrzeug-stamm)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "fuhrpark/fahrzeug-stamm",
+      "intent_phrases": [
+        "Speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/fahrzeug-stamm",
+        "actionKey": "speichern",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fuhrpark.saveFahrzeug",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:fuhrpark/fahrzeug-stamm:unfall",
+      "label": "Unfall-Anzeige",
+      "description": "Unfall-Anzeige (fuhrpark/fahrzeug-stamm)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "fuhrpark/fahrzeug-stamm",
+      "intent_phrases": [
+        "Unfall-Anzeige"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/fahrzeug-stamm",
+        "actionKey": "unfall",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fuhrpark.reportUnfall",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:fuhrpark/fahrzeuge:neu",
+      "label": "Neues Fahrzeug",
+      "description": "Neues Fahrzeug (fuhrpark/fahrzeuge)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "fuhrpark/fahrzeuge",
+      "intent_phrases": [
+        "Neues Fahrzeug"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/fahrzeuge",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "vehicle.create",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:fuhrpark/rechnungen:neu",
+      "label": "Neu",
+      "description": "Neu (fuhrpark/rechnungen)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "fuhrpark/rechnungen",
+      "intent_phrases": [
+        "Neu"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/rechnungen",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fuhrpark.newRechnung",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:fuhrpark/rechnungen:speichern",
+      "label": "Speichern",
+      "description": "Speichern (fuhrpark/rechnungen)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "fuhrpark/rechnungen",
+      "intent_phrases": [
+        "Speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/rechnungen",
+        "actionKey": "speichern",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fuhrpark.saveRechnung",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:fuhrpark/terminarten:neu",
+      "label": "Neu",
+      "description": "Neu (fuhrpark/terminarten)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "fuhrpark/terminarten",
+      "intent_phrases": [
+        "Neu"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/terminarten",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fuhrpark.newTerminart",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:fuhrpark/terminarten:speichern",
+      "label": "Speichern",
+      "description": "Speichern (fuhrpark/terminarten)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "fuhrpark/terminarten",
+      "intent_phrases": [
+        "Speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/terminarten",
+        "actionKey": "speichern",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fuhrpark.saveTerminart",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:futtermittel/analyse:reject",
+      "label": "Zurueckweisen",
+      "description": "Zurueckweisen (futtermittel/analyse)",
+      "category": "mask-action",
+      "domain": "futtermittel",
+      "mask": "futtermittel/analyse",
+      "intent_phrases": [
+        "Zurueckweisen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "futtermittel/analyse",
+        "actionKey": "reject",
+        "commandEndpoint": "/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/reject",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:futtermittel/analyse:release",
+      "label": "Analyse freigeben",
+      "description": "Analyse freigeben (futtermittel/analyse)",
+      "category": "mask-action",
+      "domain": "futtermittel",
+      "mask": "futtermittel/analyse",
+      "intent_phrases": [
+        "Analyse freigeben"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "futtermittel/analyse",
+        "actionKey": "release",
+        "commandEndpoint": "/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/release",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:lager/inventur-nebenlaeufe:create_opening",
+      "label": "Bestandsvortrag",
+      "description": "Bestandsvortrag (lager/inventur-nebenlaeufe)",
+      "category": "mask-action",
+      "domain": "inventory",
+      "mask": "lager/inventur-nebenlaeufe",
+      "intent_phrases": [
+        "Bestandsvortrag"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "lager/inventur-nebenlaeufe",
+        "actionKey": "create_opening",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:lager/stock-movement:stornieren",
+      "label": "Stornieren",
+      "description": "Stornieren (lager/stock-movement)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "lager/stock-movement",
+      "intent_phrases": [
+        "Stornieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "lager/stock-movement",
+        "actionKey": "stornieren",
+        "commandEndpoint": "/api/v1/lager/stock-movements/{entity_id}/actions/stornieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:logistik/frachtbrief:verladung",
+      "label": "Zur Verladung",
+      "description": "Zur Verladung (logistik/frachtbrief)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "logistik/frachtbrief",
+      "intent_phrases": [
+        "Zur Verladung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "logistik/frachtbrief",
+        "actionKey": "verladung",
+        "commandEndpoint": null,
+        "navigationRoute": "/verladung",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:logistik/frachttabellen:anlegen",
+      "label": "Tabelle speichern",
+      "description": "Tabelle speichern (logistik/frachttabellen)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "logistik/frachttabellen",
+      "intent_phrases": [
+        "Tabelle speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "logistik/frachttabellen",
+        "actionKey": "anlegen",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fracht.createTable",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:logistik/frachttabellen:position",
+      "label": "Position anlegen",
+      "description": "Position anlegen (logistik/frachttabellen)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "logistik/frachttabellen",
+      "intent_phrases": [
+        "Position anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "logistik/frachttabellen",
+        "actionKey": "position",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fracht.addPosition",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:logistik/tour-fracht-arbeitsraum:fracht",
+      "label": "Zu Frachtbriefen",
+      "description": "Zu Frachtbriefen (logistik/tour-fracht-arbeitsraum)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "logistik/tour-fracht-arbeitsraum",
+      "intent_phrases": [
+        "Zu Frachtbriefen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "logistik/tour-fracht-arbeitsraum",
+        "actionKey": "fracht",
+        "commandEndpoint": null,
+        "navigationRoute": "/logistik/frachtbriefe",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:logistik/tour-fracht-arbeitsraum:probe",
+      "label": "Probe berechnen",
+      "description": "Probe berechnen (logistik/tour-fracht-arbeitsraum)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "logistik/tour-fracht-arbeitsraum",
+      "intent_phrases": [
+        "Probe berechnen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "logistik/tour-fracht-arbeitsraum",
+        "actionKey": "probe",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "fracht.calculateProbe",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:logistik/tour-fracht-arbeitsraum:tabellen",
+      "label": "Frachttabellen",
+      "description": "Frachttabellen (logistik/tour-fracht-arbeitsraum)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "logistik/tour-fracht-arbeitsraum",
+      "intent_phrases": [
+        "Frachttabellen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "logistik/tour-fracht-arbeitsraum",
+        "actionKey": "tabellen",
+        "commandEndpoint": null,
+        "navigationRoute": "/logistik/frachttabellen",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:logistik/tour-fracht-arbeitsraum:touren",
+      "label": "Zur Tourenplanung",
+      "description": "Zur Tourenplanung (logistik/tour-fracht-arbeitsraum)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "logistik/tour-fracht-arbeitsraum",
+      "intent_phrases": [
+        "Zur Tourenplanung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "logistik/tour-fracht-arbeitsraum",
+        "actionKey": "touren",
+        "commandEndpoint": null,
+        "navigationRoute": "/logistik/tourenplanung",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:logistik/tourenplanung:anlegen",
+      "label": "Tour anlegen",
+      "description": "Tour anlegen (logistik/tourenplanung)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "logistik/tourenplanung",
+      "intent_phrases": [
+        "Tour anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "logistik/tourenplanung",
+        "actionKey": "anlegen",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "tour.create",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:logistik/tourenplanung:aufloesen",
+      "label": "Auflösen",
+      "description": "Auflösen (logistik/tourenplanung)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "logistik/tourenplanung",
+      "intent_phrases": [
+        "Auflösen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "logistik/tourenplanung",
+        "actionKey": "aufloesen",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "tour.resolveDeliveryNote",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:logistik/tourenplanung:dispo",
+      "label": "Dispo-Arbeitsraum",
+      "description": "Dispo-Arbeitsraum (logistik/tourenplanung)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "logistik/tourenplanung",
+      "intent_phrases": [
+        "Dispo-Arbeitsraum"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "logistik/tourenplanung",
+        "actionKey": "dispo",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "tour.openWorkspace",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:logistik/verladung:neu",
+      "label": "Neue Beladung",
+      "description": "Neue Beladung (logistik/verladung)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "logistik/verladung",
+      "intent_phrases": [
+        "Neue Beladung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "logistik/verladung",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/verladung/lkw-beladung",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:logistik/versandprofile:avis",
+      "label": "Avis speichern",
+      "description": "Avis speichern (logistik/versandprofile)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "logistik/versandprofile",
+      "intent_phrases": [
+        "Avis speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "logistik/versandprofile",
+        "actionKey": "avis",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "versand.saveAvis",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:logistik/versandprofile:profil",
+      "label": "Profil speichern",
+      "description": "Profil speichern (logistik/versandprofile)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "logistik/versandprofile",
+      "intent_phrases": [
+        "Profil speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "logistik/versandprofile",
+        "actionKey": "profil",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "versand.saveProfile",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/bewerbung-einwilligung:erklaerungen",
+      "label": "Einwilligungserklärungen",
+      "description": "Einwilligungserklärungen (personal/bewerbung-einwilligung)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/bewerbung-einwilligung",
+      "intent_phrases": [
+        "Einwilligungserklärungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/bewerbung-einwilligung",
+        "actionKey": "erklaerungen",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.openErklaerungen",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/bewerbung-einwilligung:erteilen",
+      "label": "Einwilligung erteilen",
+      "description": "Einwilligung erteilen (personal/bewerbung-einwilligung)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/bewerbung-einwilligung",
+      "intent_phrases": [
+        "Einwilligung erteilen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/bewerbung-einwilligung",
+        "actionKey": "erteilen",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.erteileEinwilligung",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/bewerbung-einwilligung:widerrufen",
+      "label": "Einwilligung widerrufen",
+      "description": "Einwilligung widerrufen (personal/bewerbung-einwilligung)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/bewerbung-einwilligung",
+      "intent_phrases": [
+        "Einwilligung widerrufen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/bewerbung-einwilligung",
+        "actionKey": "widerrufen",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.widerrufeEinwilligung",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/bewerbung-einwilligung:zurueck",
+      "label": "Zu den Bewerbungen",
+      "description": "Zu den Bewerbungen (personal/bewerbung-einwilligung)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/bewerbung-einwilligung",
+      "intent_phrases": [
+        "Zu den Bewerbungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/bewerbung-einwilligung",
+        "actionKey": "zurueck",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.openBewerbungen",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/bewerbungen:erklaerungen",
+      "label": "Einwilligungserklärungen",
+      "description": "Einwilligungserklärungen (personal/bewerbungen)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/bewerbungen",
+      "intent_phrases": [
+        "Einwilligungserklärungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/bewerbungen",
+        "actionKey": "erklaerungen",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.openErklaerungen",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/bewerbungen:neu",
+      "label": "Neu",
+      "description": "Neu (personal/bewerbungen)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/bewerbungen",
+      "intent_phrases": [
+        "Neu"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/bewerbungen",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.newBewerbung",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/bewerbungen:speichern",
+      "label": "Speichern",
+      "description": "Speichern (personal/bewerbungen)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/bewerbungen",
+      "intent_phrases": [
+        "Speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/bewerbungen",
+        "actionKey": "speichern",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.saveBewerbung",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/einwilligungserklaerungen:anlegen",
+      "label": "Fassung anlegen",
+      "description": "Fassung anlegen (personal/einwilligungserklaerungen)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/einwilligungserklaerungen",
+      "intent_phrases": [
+        "Fassung anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/einwilligungserklaerungen",
+        "actionKey": "anlegen",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.saveErklaerung",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/einwilligungserklaerungen:neu",
+      "label": "Neu",
+      "description": "Neu (personal/einwilligungserklaerungen)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/einwilligungserklaerungen",
+      "intent_phrases": [
+        "Neu"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/einwilligungserklaerungen",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.newErklaerung",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/onboarding:neu",
+      "label": "Neu",
+      "description": "Neu (personal/onboarding)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/onboarding",
+      "intent_phrases": [
+        "Neu"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/onboarding",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.newOnboarding",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/onboarding:speichern",
+      "label": "Speichern",
+      "description": "Speichern (personal/onboarding)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/onboarding",
+      "intent_phrases": [
+        "Speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/onboarding",
+        "actionKey": "speichern",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.saveOnboarding",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/qualifikationen:neu",
+      "label": "Neu",
+      "description": "Neu (personal/qualifikationen)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/qualifikationen",
+      "intent_phrases": [
+        "Neu"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/qualifikationen",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.newQualifikation",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/qualifikationen:speichern",
+      "label": "Speichern",
+      "description": "Speichern (personal/qualifikationen)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/qualifikationen",
+      "intent_phrases": [
+        "Speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/qualifikationen",
+        "actionKey": "speichern",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.saveQualifikation",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/schulungen:neu",
+      "label": "Neu",
+      "description": "Neu (personal/schulungen)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/schulungen",
+      "intent_phrases": [
+        "Neu"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/schulungen",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.newSchulung",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/schulungen:speichern",
+      "label": "Speichern",
+      "description": "Speichern (personal/schulungen)",
+      "category": "mask-action",
+      "domain": "hr",
+      "mask": "personal/schulungen",
+      "intent_phrases": [
+        "Speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/schulungen",
+        "actionKey": "speichern",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "personal.saveSchulung",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:planung/kalender:reproject",
+      "label": "Neu projizieren",
+      "description": "Neu projizieren (planung/kalender)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "planung/kalender",
+      "intent_phrases": [
+        "Neu projizieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "planung/kalender",
+        "actionKey": "reproject",
+        "commandEndpoint": "/api/v1/planung/kalender/reproject",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:produktion/produktionsleitstand:sync",
+      "label": "Auftraege synchronisieren",
+      "description": "Auftraege synchronisieren (produktion/produktionsleitstand)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "produktion/produktionsleitstand",
+      "intent_phrases": [
+        "Auftraege synchronisieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "produktion/produktionsleitstand",
+        "actionKey": "sync",
+        "commandEndpoint": "/api/v1/production-control/sync",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:qualitaet/reklamation:abschliessen",
+      "label": "Abschliessen",
+      "description": "Abschliessen (qualitaet/reklamation)",
+      "category": "mask-action",
+      "domain": "qualitaet",
+      "mask": "qualitaet/reklamation",
+      "intent_phrases": [
+        "Abschliessen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "qualitaet/reklamation",
+        "actionKey": "abschliessen",
+        "commandEndpoint": "/api/v1/reklamationen/{entity_id}/actions/abschliessen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:sales/delivery-note:drucken",
+      "label": "Lieferschein drucken",
+      "description": "Lieferschein drucken (sales/delivery-note)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "sales/delivery-note",
+      "intent_phrases": [
+        "Lieferschein drucken"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "sales/delivery-note",
+        "actionKey": "drucken",
+        "commandEndpoint": "/api/v1/sales/delivery-notes/{entity_id}/actions/drucken",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:schnittstelle/mde-inbox:process_pending",
+      "label": "Ausstehende verarbeiten",
+      "description": "Ausstehende verarbeiten (schnittstelle/mde-inbox)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "schnittstelle/mde-inbox",
+      "intent_phrases": [
+        "Ausstehende verarbeiten"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "schnittstelle/mde-inbox",
+        "actionKey": "process_pending",
+        "commandEndpoint": "/api/v1/mobile/sync-process",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:transporte/fahrer:dokumente",
+      "label": "Dokumente",
+      "description": "Dokumente (transporte/fahrer)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "transporte/fahrer",
+      "intent_phrases": [
+        "Dokumente"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "transporte/fahrer",
+        "actionKey": "dokumente",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "driver.openDocuments",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:transporte/fahrer:export",
+      "label": "Export",
+      "description": "Export (transporte/fahrer)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "transporte/fahrer",
+      "intent_phrases": [
+        "Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "transporte/fahrer",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "driver.export",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:transporte/fahrer:neu",
+      "label": "Neuer Fahrer",
+      "description": "Neuer Fahrer (transporte/fahrer)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "transporte/fahrer",
+      "intent_phrases": [
+        "Neuer Fahrer"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "transporte/fahrer",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "driver.create",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:transporte/fahrer:touren",
+      "label": "Tourenplanung",
+      "description": "Tourenplanung (transporte/fahrer)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "transporte/fahrer",
+      "intent_phrases": [
+        "Tourenplanung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "transporte/fahrer",
+        "actionKey": "touren",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "driver.openTours",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:transporte/fahrer:verfuegbar",
+      "label": "Verfügbaren Fahrer öffnen",
+      "description": "Verfügbaren Fahrer öffnen (transporte/fahrer)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "transporte/fahrer",
+      "intent_phrases": [
+        "Verfügbaren Fahrer öffnen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "transporte/fahrer",
+        "actionKey": "verfuegbar",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "driver.openAvailable",
+        "method": null
+      }
+    }
+  ]
+}

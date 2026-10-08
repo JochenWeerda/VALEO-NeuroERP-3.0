@@ -11,13 +11,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (99 Masken).
+> Generiert aus `app/core/screen_definitions.py` (100 Masken).
 
 ## Übersicht
 
 | mask_id | Titel | Domäne | Risiko | Prozessketten | Agent-Contract |
 |---|---|---|---|---|---|
 | `abrechnung/eb-lieferschein-kontrolle` | EB-Lieferschein-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/abrechnung/eb-lieferschein-kontrolle/agent-contract` |
+| `admin/postfaecher` | Postfächer | platform | niedrig | — | `GET /api/v1/masks/admin/postfaecher/agent-contract` |
 | `agrar/duenger` | Duenger | agrar | niedrig | — | `GET /api/v1/masks/agrar/duenger/agent-contract` |
 | `agrar/feed-advice` | Fuetterungsberatung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
 | `agrar/feed-controlling` | Fuetterungscontrolling | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-controlling/agent-contract` |
@@ -143,6 +144,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -175,6 +181,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -206,6 +217,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -242,6 +258,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -281,6 +302,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -324,6 +350,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -362,6 +393,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -399,6 +435,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -436,6 +477,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -475,6 +521,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -507,6 +558,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -547,6 +603,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -586,6 +647,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -628,6 +694,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -667,6 +738,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -702,6 +778,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -733,6 +814,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -765,6 +851,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -792,6 +883,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -820,6 +916,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
 - `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -967,7 +1068,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `crm.customer.search` — scope `crm:read`, Risiko niedrig
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -1008,7 +1112,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `crm.customer.search` — scope `crm:read`, Risiko niedrig
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -1048,7 +1155,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `crm.customer.search` — scope `crm:read`, Risiko niedrig
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -1089,7 +1199,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `crm.customer.search` — scope `crm:read`, Risiko niedrig
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -1186,6 +1299,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -1220,6 +1336,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -1256,6 +1375,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -1290,6 +1412,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -1329,6 +1454,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -1372,6 +1500,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -1405,6 +1536,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2305,6 +2439,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `lager.bestand.get` — scope `lager:read`, Risiko niedrig
 - `lager.inventur.status` — scope `lager:read`, Risiko niedrig
+- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2338,6 +2473,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `lager.bestand.get` — scope `lager:read`, Risiko niedrig
 - `lager.inventur.status` — scope `lager:read`, Risiko niedrig
+- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2376,6 +2512,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `lager.bestand.get` — scope `lager:read`, Risiko niedrig
 - `lager.inventur.status` — scope `lager:read`, Risiko niedrig
+- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2406,6 +2543,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `lager.bestand.get` — scope `lager:read`, Risiko niedrig
 - `lager.inventur.status` — scope `lager:read`, Risiko niedrig
+- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2931,6 +3069,40 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ## Domäne: platform
 
+### `admin/postfaecher` — Postfächer
+
+**Zweck:** Postfaecher des Hauses fuer den E-Mail-Versand einrichten, pruefen und freigeben; Bestellungen, Mahnungen, Avise und Newsletter gehen ueber das passende Postfach.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/postfaecher/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/postfaecher/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/postfaecher/readiness` |
+| Rollout-Route | `/mask-rollout/admin__postfaecher/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `postfaecher` → `/api/v1/admin/postfaecher`
+
+**Beispiel-Prompts:**
+
+- Welches Postfach verschickt Bestellungen?
+- Wer darf aus fibu@ senden?
+
+**Sensible Felder:** `passwort`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Postfach speichern | safe | nein | `Legt das Postfach an oder aendert das geladene.` |
+| `testen` | Testmail senden | safe | nein | `/api/v1/admin/postfaecher/{entity_id}/testen` |
+| `anmelden` | Beim Anbieter anmelden | safe | nein | `Fuehrt zur Anmeldung bei Google bzw. Microsoft fuer das geladene Postfach.` |
+| `neu` | Neues Postfach | safe | nein | `Leert die Eingabe fuer ein neues Postfach.` |
+
+---
+
 ### `planung/kalender` — Planungskalender
 
 **Zweck:** Zeitbezogene Fristen, Wiedervorlagen und Laeufe ohne Doppelpflege als Planungscockpit sichtbar machen.
@@ -3014,6 +3186,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `massnahmen` → `/api/v1/masks/qualitaet/reklamationen/entity/{entity_id}/tabs/massnahmen`
 - `dokumente` → `/api/v1/masks/qualitaet/reklamationen/entity/{entity_id}/tabs/dokumente`
 
+**MCP-Tools (Domäne):**
+
+- `qualitaet.reklamation.abschliessen` — scope `quality:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Was ist der Status von Reklamation {entity_id}?
@@ -3043,6 +3219,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Data Sources:**
 
 - `list` → `/api/v1/qualitaet/reklamationen`
+
+**MCP-Tools (Domäne):**
+
+- `qualitaet.reklamation.abschliessen` — scope `quality:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -3169,6 +3349,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
 **Beispiel-Prompts:**
 
@@ -3209,6 +3390,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
 **Beispiel-Prompts:**
 
@@ -3238,6 +3420,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
 **Beispiel-Prompts:**
 
@@ -3278,6 +3461,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
 **Beispiel-Prompts:**
 
@@ -3315,6 +3499,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
 **Beispiel-Prompts:**
 
@@ -3338,6 +3523,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
 **Beispiel-Prompts:**
 

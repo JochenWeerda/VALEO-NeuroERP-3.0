@@ -1,0 +1,47 @@
+slice_id: MCP-FIBU-DUNNING-20261008
+id: MCP-FIBU-DUNNING-20261008
+title: MCP Mahnstatus abfragen (Read-Adapter)
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+completed_at: 2026-10-08
+goal: >
+  fibu.dunning.status an MCP-Execution anbinden: Mandanten-Kunde,
+  max. Mahnstufe, letzte Mahnung, Summe offener Debitoren-OP. Read-only.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - tests/test_mcp_execution.py
+  - docs/quality-assurance/mcp-fibu-dunning-20261008.md
+  - docs/schnittstellen/mcp-tools.md
+  - docs/agent-handbuch/
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Scope finance:read; Mandanten-Parameter → 422; propose → 422
+  - dryRun/execute schreiben nicht
+  - Kunde nur domain_crm.customers des Token-Mandanten → sonst 404
+  - Antwort: kunden_nr, mahnstufe, letzte_mahnung, gesamt_offen_eur
+tests:
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+risks:
+  - fehlende dunning_notices → letzte_mahnung null ehrlich
+ai_harness:
+  fachlicher_vertrag: >
+    Agent liest Mahnstatus wie FiBu, ohne Mahnlauf oder Abschluss.
+  architektur_vertrag: >
+    Adapter in mcp_execution_service; Quellen offene_posten + dunning_notices.
+  daten_vertrag: >
+    Tenant aus Token; Debitoren-OP des Kunden.
+  test_vertrag: >
+    Scope, 404, 422 und Read-only.
+  security_vertrag: >
+    finance:read; Header=Claim; kein FIN-CLOSE.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, mcp-tools, Handbuch.
+external_gates:
+  - not_applicable

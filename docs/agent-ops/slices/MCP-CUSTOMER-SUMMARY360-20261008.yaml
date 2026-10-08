@@ -1,0 +1,50 @@
+slice_id: MCP-CUSTOMER-SUMMARY360-20261008
+id: MCP-CUSTOMER-SUMMARY360-20261008
+title: MCP Kunden-360-Zusammenfassung (Read-Adapter)
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+closed_at: 2026-10-08
+goal: >
+  crm.customer.summary360 an MCP-Execution anbinden: Mandanten-Stamm plus
+  Aggregates (offene Auftraege, OP-Saldo, letzte Kontakte, Segment). Read-only.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - tests/test_mcp_execution.py
+  - docs/quality-assurance/mcp-customer-summary360-20261008.md
+  - docs/schnittstellen/mcp-tools.md
+  - docs/agent-handbuch/
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - dryRun/execute schreiben nicht; propose → 422
+  - Scope crm:read; Mandanten-Parameter → 422
+  - Kunde nur domain_crm.customers des Token-Mandanten → sonst 404
+  - Antwort: kunden_nr, name, offene_auftraege, op_saldo_eur, letzte_kontakte, segment, route_path
+tests:
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+risks:
+  - OP-/Auftrags-Tabellen können leer sein → 0 / [] ehrlich, kein Fake
+ai_harness:
+  fachlicher_vertrag: >
+    Agent liest 360-Kennzahlen wie die CRM-Maske, ohne Mutation.
+  architektur_vertrag: >
+    Adapter in mcp_execution_service; SQL analog Screen-Summary/360.
+  daten_vertrag: >
+    Tenant aus Token; kein public.kunden-Fallback.
+  test_vertrag: >
+    Scope, 404, 422, Aggregates und Read-only.
+  security_vertrag: >
+    crm:read; Header=Claim.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, mcp-tools, Handbuch.
+external_gates:
+  - not_applicable
+result: >
+  57 MCP-Tests gruen. crm.customer.summary360 verdrahtet (read-only Kennzahlen
+  + route_path); kein Cross-Tenant-Fallback; Handbuch/mcp-tools aktuell.

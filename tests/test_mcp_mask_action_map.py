@@ -1,0 +1,49 @@
+"""Contract: mcp_mask_action_map stays aligned with generator rules."""
+from __future__ import annotations
+
+from pathlib import Path
+
+import yaml
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_mcp_mask_action_map_check_passes():
+    import subprocess
+    import sys
+
+    proc = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/generate_mcp_mask_action_map.py"), "--check"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode == 0, proc.stderr or proc.stdout
+
+
+def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
+    data = yaml.safe_load((ROOT / "config/mcp_mask_action_map.yaml").read_text(encoding="utf-8"))
+    assert "crm.activity.create" in data["mcp_write_tools"]
+    assert "crm.contact.log" in data["mcp_write_tools"]
+    assert data["fin_close"]["status"] == "blocked_adr_076"
+    assert data["fin_close"]["mcp_tool_id"] is None
+
+    by_id = {m["mask_action_id"]: m for m in data["mappings"]}
+    assert by_id["mask:crm/customer-360:create_activity"]["mcp_tool_id"] == "crm.activity.create"
+    assert by_id["mask:crm/opportunity:create_activity"]["mcp_tool_id"] == "crm.activity.create"
+    assert by_id["mask:finance/payment-run:freigeben"]["coverage"] == "open_high"
+    assert by_id["mask:finance/ap-invoice:freigeben"]["coverage"] == "open_high"
+
+    native = {n["mcp_tool_id"] for n in data["mcp_native_writes"]}
+    assert native >= {"crm.contact.log", "sales.invoice.propose", "sales.invoice.post"}
+
+    assert by_id["mask:produktion/produktionsleitstand:sync"]["mcp_tool_id"] == "produktion.control.sync"
+    assert by_id["mask:planung/kalender:reproject"]["mcp_tool_id"] == "planung.calendar.reproject"
+    assert by_id["mask:schnittstelle/mde-inbox:process_pending"]["mcp_tool_id"] == (
+        "mobile.sync.process_pending"
+    )
+    assert by_id["mask:lager/inventur-nebenlaeufe:create_opening"]["coverage"] == "open_high"
+    assert by_id["mask:personal/bewerbungen:neu"]["coverage"] == "blocked_no_endpoint"
+    assert data.get("classification_complete") is True
+    assert data["stats"]["by_coverage"].get("open_medium", 0) == 0

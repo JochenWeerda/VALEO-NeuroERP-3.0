@@ -1,3 +1,4 @@
+﻿> **HISTORISCH — nicht zitieren.** Aktuelle Gap-Source-of-Truth: [`docs/gap/README.md`](../../gap/README.md) und [`executive-summary-20261007.md`](../../gap/executive-summary-20261007.md). Archiv-Maturity (~38 %) und „fehlt komplett“-Aussagen nicht fortschreiben.
 # ERP Capability Model - Reference Taxonomy
 
 Dieses Dokument definiert die Referenz-Taxonomie fÃ¼r ERP-FunktionalitÃ¤ten, basierend auf SAP, Oracle, Community ERP und anderen fÃ¼hrenden ERP-Systemen.

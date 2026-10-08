@@ -1,0 +1,52 @@
+slice_id: MCP-MASK-WRITES-NEXT-20261008
+id: MCP-MASK-WRITES-NEXT-20261008
+title: Naechste medium Mask-Writes Angebot WE Storno
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+completed_at: 2026-10-08
+goal: >
+  2–4 open_medium mit Command-Endpoint verdrahten (Angebot→Bestellung,
+  Avis→Wareneingang, Lager-Storno); Token-Mandant, Idempotenz, Audit;
+  Map open_medium→mapped; kein FIN-CLOSE/Obligo/FIBU; kein Commit/DB.
+file_ownership:
+  - config/mcp_erp_tools.yaml
+  - app/services/mcp_execution_service.py
+  - scripts/generate_mcp_mask_action_map.py
+  - config/mcp_mask_action_map.yaml
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - docs/quality-assurance/mcp-mask-writes-next-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/gap/executive-summary-20261007.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Drei Write-Tools im Katalog + Adapter
+  - dryRun default; execute braucht idempotency_key; Audit
+  - Map mapped fuer angebot:bestellen, anlieferavis:wareneingang, stock-movement:stornieren
+  - Generator --check und MCP-Tests gruen
+  - Kein FIN-CLOSE / kein Obligo-Journal
+tests:
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - tests/test_mcp_mask_action_map.py
+risks:
+  - open_medium bleibt ~41 (Personal/Fuhrpark/Agrar-Lifecycle)
+ai_harness:
+  fachlicher_vertrag: >
+    Agent kann Angebot bestellen, WE aus Avis und Lager-Storno wie Maske.
+  architektur_vertrag: >
+    Bestehende Services (EinkaufCompat, wareneingang_avis, storno_korrektur); Map SoT.
+  daten_vertrag: >
+    Tenant nur aus Token; Services committen hinter Savepoint wo noetig.
+  test_vertrag: >
+    dryRun/Guards/Execute-Mocks; Map --check; Registry 26.
+  security_vertrag: >
+    Scopes einkauf:write / lager:write; kein ADR-076/FIBU-Bypass.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration/Commit-Pflicht.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice, Handbook/mcp-tools via Generator.
+external_gates:
+  - not_applicable

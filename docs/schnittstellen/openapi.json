@@ -757,6 +757,50 @@
         "title": "AbsenceOut",
         "type": "object"
       },
+      "AbsenderOut": {
+        "properties": {
+          "absender_email": {
+            "title": "Absender Email",
+            "type": "string"
+          },
+          "absender_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Absender Name"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "ist_standard": {
+            "title": "Ist Standard",
+            "type": "boolean"
+          },
+          "kennung": {
+            "title": "Kennung",
+            "type": "string"
+          },
+          "passt": {
+            "title": "Passt",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "kennung",
+          "absender_email",
+          "ist_standard",
+          "passt"
+        ],
+        "title": "AbsenderOut",
+        "type": "object"
+      },
       "AbwesenheitCreateRequest": {
         "properties": {
           "abwesenheit_typ": {
@@ -75050,6 +75094,37 @@
         "title": "GoodsReceiptOut",
         "type": "object"
       },
+      "GoogleAbschlussIn": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "state"
+        ],
+        "title": "GoogleAbschlussIn",
+        "type": "object"
+      },
+      "GoogleStartOut": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "GoogleStartOut",
+        "type": "object"
+      },
       "GrantIn": {
         "properties": {
           "scope": {
@@ -121893,6 +121968,366 @@
         "title": "PositionRulesOut",
         "type": "object"
       },
+      "PostfachIn": {
+        "properties": {
+          "absender_email": {
+            "title": "Absender Email",
+            "type": "string"
+          },
+          "absender_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Absender Name"
+          },
+          "anbieter": {
+            "default": "smtp",
+            "description": "ionos | google | smtp | alias",
+            "title": "Anbieter",
+            "type": "string"
+          },
+          "anmeldung": {
+            "default": "passwort",
+            "description": "passwort (auch App-Passwort) | oauth2 (nur Google)",
+            "title": "Anmeldung",
+            "type": "string"
+          },
+          "benutzer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Benutzer"
+          },
+          "benutzer_freigabe": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Benutzer Freigabe",
+            "type": "array"
+          },
+          "bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezeichnung"
+          },
+          "ist_standard": {
+            "default": false,
+            "title": "Ist Standard",
+            "type": "boolean"
+          },
+          "kennung": {
+            "description": "z. B. info, dispo, fibu, zentrale",
+            "title": "Kennung",
+            "type": "string"
+          },
+          "passwort": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Nur schreiben; leer laesst das bisherige stehen",
+            "title": "Passwort"
+          },
+          "persoenlich_fuer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Persoenlich Fuer"
+          },
+          "rollen": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Rollen",
+            "type": "array"
+          },
+          "sicherheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "starttls | ssl",
+            "title": "Sicherheit"
+          },
+          "smtp_host": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Smtp Host"
+          },
+          "smtp_port": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Smtp Port"
+          },
+          "verwendungen": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Verwendungen",
+            "type": "array"
+          },
+          "zugang_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Bei Alias: Postfach, dessen Anmeldung genutzt wird",
+            "title": "Zugang Von"
+          }
+        },
+        "required": [
+          "kennung",
+          "absender_email"
+        ],
+        "title": "PostfachIn",
+        "type": "object"
+      },
+      "PostfachOut": {
+        "properties": {
+          "absender_email": {
+            "title": "Absender Email",
+            "type": "string"
+          },
+          "absender_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Absender Name"
+          },
+          "anbieter": {
+            "title": "Anbieter",
+            "type": "string"
+          },
+          "anmeldung": {
+            "title": "Anmeldung",
+            "type": "string"
+          },
+          "benutzer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Benutzer"
+          },
+          "benutzer_freigabe": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Benutzer Freigabe",
+            "type": "array"
+          },
+          "bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezeichnung"
+          },
+          "geprueft_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geprueft Am"
+          },
+          "hat_geheimnis": {
+            "default": false,
+            "title": "Hat Geheimnis",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "ist_standard": {
+            "default": false,
+            "title": "Ist Standard",
+            "type": "boolean"
+          },
+          "kennung": {
+            "title": "Kennung",
+            "type": "string"
+          },
+          "letzter_fehler": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Letzter Fehler"
+          },
+          "persoenlich_fuer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Persoenlich Fuer"
+          },
+          "rollen": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Rollen",
+            "type": "array"
+          },
+          "sicherheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sicherheit"
+          },
+          "smtp_host": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Smtp Host"
+          },
+          "smtp_port": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Smtp Port"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "testmail_an": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Testmail An"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "verwendungen": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Verwendungen",
+            "type": "array"
+          },
+          "zugang_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zugang Von"
+          }
+        },
+        "required": [
+          "id",
+          "kennung",
+          "anbieter",
+          "anmeldung",
+          "absender_email",
+          "status"
+        ],
+        "title": "PostfachOut",
+        "type": "object"
+      },
       "PregnancyStatus": {
         "enum": [
           "unknown",
@@ -157050,6 +157485,23 @@
         "title": "TestResponse",
         "type": "object"
       },
+      "TestmailIn": {
+        "properties": {
+          "empfaenger": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Empfaenger"
+          }
+        },
+        "title": "TestmailIn",
+        "type": "object"
+      },
       "TextRequest": {
         "properties": {
           "text": {
@@ -164679,6 +165131,24 @@
           "created_at"
         ],
         "title": "VertretergruppeOut",
+        "type": "object"
+      },
+      "VerwendungOut": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label"
+        ],
+        "title": "VerwendungOut",
         "type": "object"
       },
       "ViolationOut": {
@@ -188863,7 +189333,7 @@
         ]
       },
       "put": {
-        "description": "Speichert STT-/IMAP-Konfiguration (Key/Passwort nur bei Angabe ersetzt).",
+        "description": "Speichert STT-/IMAP-Konfiguration (Key/Passwort nur bei Angabe ersetzt, AES-GCM-verschluesselt).",
         "operationId": "update_connectors_api_v1_admin_suite_capture_connectors_put",
         "parameters": [
           {
@@ -197537,6 +198007,566 @@
           "pos",
           "tse",
           "dsfinvk"
+        ]
+      }
+    },
+    "/api/v1/admin/postfaecher": {
+      "get": {
+        "operationId": "postfaecher_api_v1_admin_postfaecher_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PostfachOut"
+                  },
+                  "title": "Response Postfaecher Api V1 Admin Postfaecher Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Postfaecher des Mandanten",
+        "tags": [
+          "admin",
+          "mailkonto"
+        ]
+      },
+      "post": {
+        "operationId": "postfach_anlegen_api_v1_admin_postfaecher_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostfachIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostfachOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Postfach anlegen",
+        "tags": [
+          "admin",
+          "mailkonto"
+        ]
+      }
+    },
+    "/api/v1/admin/postfaecher/google/abschluss": {
+      "post": {
+        "operationId": "google_abschluss_api_v1_admin_postfaecher_google_abschluss_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoogleAbschlussIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostfachOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Google-Anmeldung abschliessen",
+        "tags": [
+          "admin",
+          "mailkonto"
+        ]
+      }
+    },
+    "/api/v1/admin/postfaecher/verfuegbar": {
+      "get": {
+        "operationId": "verfuegbar_api_v1_admin_postfaecher_verfuegbar_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "verwendung",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Verwendung"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AbsenderOut"
+                  },
+                  "title": "Response Verfuegbar Api V1 Admin Postfaecher Verfuegbar Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Postfaecher, aus denen ich senden darf",
+        "tags": [
+          "admin",
+          "mailkonto"
+        ]
+      }
+    },
+    "/api/v1/admin/postfaecher/verwendungen": {
+      "get": {
+        "operationId": "verwendungen_api_v1_admin_postfaecher_verwendungen_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VerwendungOut"
+                  },
+                  "title": "Response Verwendungen Api V1 Admin Postfaecher Verwendungen Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Moegliche Verwendungen",
+        "tags": [
+          "admin",
+          "mailkonto"
+        ]
+      }
+    },
+    "/api/v1/admin/postfaecher/{postfach_id}": {
+      "delete": {
+        "operationId": "postfach_entfernen_api_v1_admin_postfaecher__postfach_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postfach_id",
+            "required": true,
+            "schema": {
+              "title": "Postfach Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Postfach entfernen",
+        "tags": [
+          "admin",
+          "mailkonto"
+        ]
+      },
+      "put": {
+        "operationId": "postfach_aendern_api_v1_admin_postfaecher__postfach_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postfach_id",
+            "required": true,
+            "schema": {
+              "title": "Postfach Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostfachIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostfachOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Postfach aendern",
+        "tags": [
+          "admin",
+          "mailkonto"
+        ]
+      }
+    },
+    "/api/v1/admin/postfaecher/{postfach_id}/google/start": {
+      "post": {
+        "operationId": "google_start_api_v1_admin_postfaecher__postfach_id__google_start_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postfach_id",
+            "required": true,
+            "schema": {
+              "title": "Postfach Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleStartOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Google-Anmeldung starten",
+        "tags": [
+          "admin",
+          "mailkonto"
+        ]
+      }
+    },
+    "/api/v1/admin/postfaecher/{postfach_id}/testen": {
+      "post": {
+        "operationId": "postfach_testen_api_v1_admin_postfaecher__postfach_id__testen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postfach_id",
+            "required": true,
+            "schema": {
+              "title": "Postfach Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestmailIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostfachOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Testmail ueber das Postfach senden",
+        "tags": [
+          "admin",
+          "mailkonto"
         ]
       }
     },
@@ -272154,6 +273184,24 @@
       "post": {
         "description": "Newsletter per SMTP an jeden gueltigen Empfaenger. Bis 08.10.2026 meldete dieser Weg\n\"in_queue\" ohne Warteschlange und versandte nichts; jetzt zaehlt, was der Server annahm.",
         "operationId": "crm_newsletter_api_v1_crm_kommunikation_newsletter_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {

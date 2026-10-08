@@ -119,6 +119,24 @@ class TestResolverCrm:
         assert result is not None
         assert result.action_id == "nav-crm"
 
+    def test_oeffne_kunde(self):
+        result = intent_resolver.resolve("öffne Kunde")
+        assert result is not None
+        assert result.action_id == "nav-customers"
+        assert result.params.get("kunden_nr") is None
+
+    def test_oeffne_kunde_mit_nummer(self):
+        result = intent_resolver.resolve("öffne Kunde TEST")
+        assert result is not None
+        assert result.action_id == "nav-customers"
+        assert result.params.get("kunden_nr") == "TEST"
+
+    def test_kunde_oeffnen_mit_nummer(self):
+        result = intent_resolver.resolve("Kunde öffnen K-1001")
+        assert result is not None
+        assert result.action_id == "nav-customers"
+        assert result.params.get("kunden_nr") == "K-1001"
+
     def test_datum_extraktion(self):
         result = intent_resolver.resolve("Neue Aktivität am 20.08.2026")
         assert result is not None

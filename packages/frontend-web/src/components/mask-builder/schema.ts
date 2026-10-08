@@ -46,6 +46,8 @@ export type ScreenFieldType =
   | 'table'
   | 'currency'
   | 'percentage'
+  /** Geheimnis (Passwort, Token): wird verdeckt eingegeben und nie angezeigt. */
+  | 'password'
 
 export interface ScreenDataSource {
   key: string

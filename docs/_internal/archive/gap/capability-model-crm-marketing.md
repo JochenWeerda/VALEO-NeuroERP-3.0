@@ -1,3 +1,4 @@
+﻿> **HISTORISCH — nicht zitieren.** Aktuelle Gap-Source-of-Truth: [`docs/gap/README.md`](../../gap/README.md) und [`executive-summary-20261007.md`](../../gap/executive-summary-20261007.md). Archiv-Maturity (~38 %) und „fehlt komplett“-Aussagen nicht fortschreiben.
 # CRM & Marketing Capability Model (Referenz fÃ¼r GAP-Analyse)
 
 Version: 1.0
