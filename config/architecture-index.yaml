@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-10-07
+# Architecture Index — generiert 2026-10-08
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-07T20:58:37Z'
+generated_at: '2026-10-08T05:47:04Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -483,6 +483,7 @@ domains:
     - docs/adr/adr-067-governed-l3-report-catalog.md
     - docs/adr/adr-077-leading-weighing-ticket.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
+    - docs/adr/adr-079-ebilanz-xbrl-drafts.md
     status: active
   crm:
     owner: domain/crm
@@ -1195,6 +1196,7 @@ domains:
     - controlling_budget_lifecycle_service
     - controlling_kostenstellen_abschluss_service
     - controlling_service
+    - ebilanz_xbrl_service
     - einvoice_generator
     - finance_clearing_service
     - finance_closing_service
@@ -1323,6 +1325,7 @@ domains:
     - docs/adr/adr-075-bank-ledger-evidence.md
     - docs/adr/adr-076-cash-close-retirement.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
+    - docs/adr/adr-079-ebilanz-xbrl-drafts.md
     status: active
   hr:
     owner: domain/hr
@@ -2065,8 +2068,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 935
   frontend_routes_mapped: 935
-  backend_services_total: 276
-  backend_services_mapped: 276
+  backend_services_total: 277
+  backend_services_mapped: 277
   backend_endpoints_total: 454
   backend_endpoints_mapped: 454
 unmapped:

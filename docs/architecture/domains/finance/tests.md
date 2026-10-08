@@ -10,6 +10,11 @@ version: 1.0.0
 
 # Finance — Tests
 
+eBilanz: `tests/test_ebilanz_xbrl_draft.py` und
+`tests/test_ebilanz_honest_persistence.py`; 49 Katalog-/XML-/HTTP-/PostgreSQL-
+Vertraege. Gemeinsamer Pruefstand mit eigenen Transaktionen/Savepoints, keine
+neue Datenbank. [Abnahme und Grenzen](../../../quality-assurance/ebilanz-xbrl-draft-20261008.md).
+
 Rechnungstapel: `pytest tests/test_billing_batch.py -q --no-cov` und
 `vitest run src/__tests__/pages/finance/rechnungstapel.test.tsx`.
 

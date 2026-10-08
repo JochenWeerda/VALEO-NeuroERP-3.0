@@ -11,6 +11,16 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## EBILANZ-XBRL-DRAFT — amtlicher Katalog und XML-Entwurf (2026-10-08)
+
+Falscher historischer GCD-Teilkatalog durch 3944 amtlich abgeleitete 6.9 GCD-/
+Kernkonzepte ersetzt; hashgebunden und deterministisch, Requests ohne Netzabruf.
+Echter rollen-/tenantgeschuetzter XML-Download einfacher expliziter Fakten am
+vorhandenen Export, DRAFT_UNVALIDATED und keine Status-/Ticketmutation.
+49 XML-/HTTP-/PostgreSQL-Vertraege gruen. [QA und Betrieb](../quality-assurance/ebilanz-xbrl-draft-20261008.md).
+Offen bleiben Arelle-/amtliche Vollvalidierung, Bilanz-/GuV-Kontenzuordnung,
+Tupel/Dimensionen und echter ERiC-Empfang; keine vollstaendige Steuerabnahme.
+
 ## CI-CONTRACT-CLOSURE — erster Meilenstein (2026-10-08)
 
 OpenAPI-Beschreibungen der Lead-Aliase nachgetragen; zwei bereits typisierte

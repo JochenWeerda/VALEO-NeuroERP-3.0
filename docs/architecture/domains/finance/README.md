@@ -65,4 +65,10 @@ fachliche Pilotfreigabe vorliegen.
 
 ## eBilanz-Persistenz und ELSTER-Grenze (2026-10-07)
 
+Erweiterung 08.10.2026: [amtlicher Katalog und echter XML-Entwurf](../../../quality-assurance/ebilanz-xbrl-draft-20261008.md),
+[ADR-079 Proposed](../../../adr/adr-079-ebilanz-xbrl-drafts.md). 3944 GCD-/Kernkonzepte
+aus 6.9 ersetzen den falschen Teilkatalog. Ein tenant-/rollengepruefter Download
+erzeugt einfache explizite Fakten als DRAFT_UNVALIDATED, ohne Status-/Ticket-
+Mutation. Vollvalidierung, Kontenzuordnung, Tupel/Dimensionen und ERiC bleiben offen.
+
 [QA und Betriebsnachweis](../../../quality-assurance/ebilanz-honest-persistence-20261007.md): Entwurfsmetadaten liegen im Alembic-geführten domain_finance.ebilanz_exports; keine Request-DDL. Validierung und Übertragung bleiben ohne vollständiges XBRL/echten ERiC-Nachweis gesperrt. Der entfernte Simulator und historische Tickets begründen keinen behördlichen Empfang.

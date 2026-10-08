@@ -56154,7 +56154,7 @@
             "type": "string"
           },
           "taxonomie_version": {
-            "default": "6.7",
+            "default": "6.9",
             "title": "Taxonomie Version",
             "type": "string"
           },
@@ -170413,6 +170413,45 @@
         "title": "WorkspaceStartpageOut",
         "type": "object"
       },
+      "XbrlDraftRequest": {
+        "properties": {
+          "entity_identifier": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Entity Identifier",
+            "type": "string"
+          },
+          "entity_scheme": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Entity Scheme",
+            "type": "string"
+          },
+          "facts": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "maxProperties": 2000,
+            "minProperties": 1,
+            "title": "Facts",
+            "type": "object"
+          }
+        },
+        "required": [
+          "entity_identifier",
+          "entity_scheme",
+          "facts"
+        ],
+        "title": "XbrlDraftRequest",
+        "type": "object"
+      },
       "ZaStaffelCreate": {
         "properties": {
           "abrechnung_typ": {
@@ -283313,6 +283352,85 @@
         ]
       }
     },
+    "/api/v1/ebilanz/export/{export_id}/xbrl-entwurf": {
+      "post": {
+        "operationId": "xbrl_entwurf_api_v1_ebilanz_export__export_id__xbrl_entwurf_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "export_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Export Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/XbrlDraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unvalidierten XBRL-Entwurf als XML herunterladen",
+        "tags": [
+          "finance",
+          "ebilanz",
+          "elster",
+          "finance",
+          "ebilanz",
+          "elster"
+        ]
+      }
+    },
     "/api/v1/ebilanz/exports": {
       "get": {
         "operationId": "list_exports_api_v1_ebilanz_exports_get",
@@ -283487,8 +283605,33 @@
     },
     "/api/v1/ebilanz/taxonomie-felder": {
       "get": {
-        "description": "Return the list of XBRL taxonomy fields with GCD/GAAP classification.",
+        "description": "Paged official 6.9 GCD/core concepts, not industry or ERiC rule coverage.",
         "operationId": "taxonomie_felder_api_v1_ebilanz_taxonomie_felder_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -283503,6 +283646,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
