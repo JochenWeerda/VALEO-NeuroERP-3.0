@@ -11,18 +11,6 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## POSTFACH-MICROSOFT365-20261008 — in Arbeit, Claude Code
-
-**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** Postfaecher mit Microsoft 365:
-Anmeldung per OAuth2 (Microsoft Identity Platform, delegiert, `Mail.Send` + `offline_access`),
-Versand ueber Microsoft Graph `sendMail` (landet in "Gesendete Elemente"; kein SMTP AUTH noetig),
-Alias ueber `from`. OAuth-Ablauf fuer Google und Microsoft vereinheitlicht. **Dateibesitz:**
-`app/services/mailkonto_service.py`, `app/services/mail_versand.py`,
-`app/api/v1/endpoints/mailkonto.py`, Screen Definition `admin/postfaecher` + TS-Spiegel,
-`pages/admin/postfaecher*.tsx`, `lib/api/postfaecher.ts`, eine additive Migration,
-`tests/test_postfaecher.py`, QA-Doku. Fremde WIP unberuehrt.
-
-
 ## MCP-WRITE-20261008 — abgeschlossen, Cursor
 
 **Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
@@ -96,6 +84,8 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 `docs/README.md` und Domain-Depth-Plan verweisen auf den Hub.
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
+
+**SORTEN-CANONICAL-READ-20261008 (reserviert):** Owner Codex-01a0f3fc. GitHub Agrar-Smoketraces dreimal404 am nichtexistenten /agrar/saatgut/sortenregister; bestehender kanonischer /agrar/varieties-Vertrag und AgrarSorte bereits vorhanden. Besitz agrar.ts nur Sorten-Typ/Hook, VarietySelectionDialog.tsx nur kanonischer Typimport, sortenregister.tsx und bestellung.tsx ausschliesslich bestehende Datenfeldverwendung; fremde UI-WIP geschuetzt durch eigene Hunks aus HEAD. Kein neuer API/DB/Adapter oder UI-Neudesign, keine erfundenen Zulassungs-/Verfuegbarkeitswerte. Fokussierte echte Query-/React-/Browservertraege und bestehender Agrar-API-Vertrag; Smoke prueft exakte Maske statt beliebiger Ueberschrift. QA/Meridian/Open-Gaps/Workboard nachziehen. Abnahme kanonische Daten und Fehlerfall, kein404-Verstecken, keine DB/Container/Reset.
 
 **CI-FOUR-REGRESSIONS-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. GitHub CI9176: 16499 gruen, vier konkrete Fehler. Besitz ausschliesslich tests/test_sammelabrechnung_interessent_waagen_vorlage.py (zwei alte 6.7-Erwartungen gegen kanonische 6.9), tests/test_wms_pick_link.py (vorhandenen Lager-/Artikel-/Bestandsvertrag in Mock nachziehen), QA/Open-Gaps/Workboard. Fachschutz und Versandbedingungen bleiben erhalten; keine neue DB/Container, keine Abschwaechung oder Skip. Abnahme komplette betroffene Module plus Lager-Vertragsnachweise auf isoliertem Lieferstand. Abnahme: GitHub9176 genau4 Fehler bei16499 bestandenen Tests; Taxonomieassertions und Name6.9, WMS-Mocks Lager/Artikel/Bestands-ID nachgezogen, kein Fachschutz geschwaecht. Komplette2 Module plus Lager-Sicherheits-/Kanonikvertraege auf isoliertem Code30/30 in50,54s. Keine lokale DB konfiguriert, ausschliesslich Mockinteraktionen; kein neuer Pruefstand/Container/Reset. QA/Handshake dokumentiert. Globales Coverage-Gate60 unveraendert; GitHub-Folgeabnahme nach Push erforderlich. Sicherheitsmeilenstein a9d993e2f separat abgeschlossen.
 
