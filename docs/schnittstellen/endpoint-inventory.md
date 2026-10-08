@@ -276,7 +276,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `logistik_frachttabellen` | Frachttabellen — Frachtkosten-Stammdaten und Zuordnungen. |
 | `lohn_connector` | Lohn-Connector API – Lohn-Import-Läufe (LEXWARE / externe Lohnbuchhaltung). |
 | `mail_workspace` | Role-scoped ERP mail workspace API. |
-| `mailkonto` | Postfaecher des Mandanten — Einrichtung, Freigaben, Testmail, Google-Anmeldung. |
+| `mailkonto` | Postfaecher des Mandanten — Einrichtung, Freigaben, Testmail, Anmeldung bei Google/Microsoft. |
 | `marketing` | Marketing API - DB-backed endpoints. |
 | `mask_actions` | SPEC-P1-04 / UIX-053+: Mask Action CommandEndpoints mit ActionRuntime. |
 | `mask_frontend_bridges` | Frontend-Pfade, die der Maskengenerator und die Fachmasken schon rufen. |

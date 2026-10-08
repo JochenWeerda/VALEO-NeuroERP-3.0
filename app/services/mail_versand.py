@@ -18,6 +18,8 @@ Welches Konto:
 
 Zugangsdaten gehen nie unverschluesselt ueber die Leitung: SSL (Port 465) oder
 STARTTLS; bietet der Server kein STARTTLS, wird nicht angemeldet und nichts gesendet.
+Microsoft-365-Postfaecher senden ueber Microsoft Graph (``sendMail``, HTTPS); Erfolg
+heisst dort: Graph hat mit 202 angenommen.
 Ein Erfolg wird nur gemeldet, wenn der Server die Nachricht angenommen hat.
 """
 
@@ -54,6 +56,7 @@ class SmtpEinrichtung:
     sicherheit: str = "starttls"
     absender_name: str | None = None
     oauth_token: str | None = None
+    transport: str = "smtp"
 
 
 def einrichtung() -> SmtpEinrichtung:
@@ -94,6 +97,7 @@ def zugang(db: Any, tenant_id: Optional[str], *, verwendung: Optional[str] = Non
             return SmtpEinrichtung(
                 server=z.server, port=z.port, benutzer=z.benutzer, passwort=z.passwort, absender=z.absender,
                 sicherheit=z.sicherheit, absender_name=z.absender_name, oauth_token=z.oauth_token,
+                transport=z.transport,
             )
     return einrichtung()
 
@@ -114,6 +118,8 @@ def sende_mail(
     if not empfaenger or "@" not in empfaenger:
         raise MailVersandFehler(f"Ungueltige Empfaengeradresse: {empfaenger!r}")
     e = zugang(db, tenant_id, verwendung=verwendung, nutzer=nutzer, postfach_id=postfach_id)
+    if e.transport == "graph":
+        return _sende_ueber_graph(e, empfaenger, betreff, text, html)
     nachricht = EmailMessage()
     nachricht["From"] = formataddr((e.absender_name, e.absender)) if e.absender_name else e.absender
     nachricht["To"] = empfaenger
@@ -149,3 +155,34 @@ def sende_mail(
     if abgelehnt:
         raise MailVersandFehler(f"SMTP-Server lehnte {empfaenger} ab: {abgelehnt}")
     return str(nachricht["Message-ID"])
+
+
+def _sende_ueber_graph(e: SmtpEinrichtung, empfaenger: str, betreff: str, text: str, html: str | None) -> str:
+    """Microsoft 365: ``POST /me/sendMail``. Ein abweichender Absender (Alias) braucht in
+    Exchange "Senden als" fuer das angemeldete Postfach, sonst lehnt Graph ab."""
+    import uuid
+
+    import httpx
+
+    from app.services.mailkonto_service import GRAPH_SENDMAIL_URL
+
+    nachricht: dict[str, Any] = {
+        "subject": betreff,
+        "body": {"contentType": "HTML", "content": html} if html else {"contentType": "Text", "content": text or ""},
+        "toRecipients": [{"emailAddress": {"address": empfaenger}}],
+    }
+    if e.benutzer and e.absender.lower() != e.benutzer.lower():
+        nachricht["from"] = {"emailAddress": {"address": e.absender, "name": e.absender_name or e.absender}}
+    try:
+        antwort = httpx.post(
+            GRAPH_SENDMAIL_URL,
+            json={"message": nachricht, "saveToSentItems": True},
+            headers={"Authorization": f"Bearer {e.oauth_token}"},
+            timeout=20,
+        )
+    except httpx.HTTPError as fehler:
+        raise MailVersandFehler(f"Microsoft Graph nicht erreichbar: {fehler}") from fehler
+    if antwort.status_code != 202:
+        raise MailVersandFehler(f"Microsoft Graph lehnte den Versand an {empfaenger} ab: {antwort.text[:300]}")
+    # Graph liefert fuer sendMail keine Nachrichten-ID; eine eigene macht den Versand nachvollziehbar.
+    return f"<{uuid.uuid4()}@graph.valeo>"

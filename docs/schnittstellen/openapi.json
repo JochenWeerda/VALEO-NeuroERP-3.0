@@ -10903,6 +10903,37 @@
         "title": "AnlagePayload",
         "type": "object"
       },
+      "AnmeldungAbschlussIn": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "state"
+        ],
+        "title": "AnmeldungAbschlussIn",
+        "type": "object"
+      },
+      "AnmeldungStartOut": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "AnmeldungStartOut",
+        "type": "object"
+      },
       "AnnahmeEntryOut": {
         "additionalProperties": true,
         "properties": {
@@ -75094,37 +75125,6 @@
         "title": "GoodsReceiptOut",
         "type": "object"
       },
-      "GoogleAbschlussIn": {
-        "properties": {
-          "code": {
-            "title": "Code",
-            "type": "string"
-          },
-          "state": {
-            "title": "State",
-            "type": "string"
-          }
-        },
-        "required": [
-          "code",
-          "state"
-        ],
-        "title": "GoogleAbschlussIn",
-        "type": "object"
-      },
-      "GoogleStartOut": {
-        "properties": {
-          "url": {
-            "title": "Url",
-            "type": "string"
-          }
-        },
-        "required": [
-          "url"
-        ],
-        "title": "GoogleStartOut",
-        "type": "object"
-      },
       "GrantIn": {
         "properties": {
           "scope": {
@@ -121987,13 +121987,13 @@
           },
           "anbieter": {
             "default": "smtp",
-            "description": "ionos | google | smtp | alias",
+            "description": "ionos | google | microsoft | smtp | alias",
             "title": "Anbieter",
             "type": "string"
           },
           "anmeldung": {
             "default": "passwort",
-            "description": "passwort (auch App-Passwort) | oauth2 (nur Google)",
+            "description": "passwort (auch App-Passwort) | oauth2 (Google, Microsoft 365)",
             "title": "Anmeldung",
             "type": "string"
           },
@@ -198132,9 +198132,9 @@
         ]
       }
     },
-    "/api/v1/admin/postfaecher/google/abschluss": {
+    "/api/v1/admin/postfaecher/anmeldung/abschluss": {
       "post": {
-        "operationId": "google_abschluss_api_v1_admin_postfaecher_google_abschluss_post",
+        "operationId": "anmeldung_abschluss_api_v1_admin_postfaecher_anmeldung_abschluss_post",
         "parameters": [
           {
             "in": "header",
@@ -198157,7 +198157,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/GoogleAbschlussIn"
+                "$ref": "#/components/schemas/AnmeldungAbschlussIn"
               }
             }
           },
@@ -198190,7 +198190,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Google-Anmeldung abschliessen",
+        "summary": "Anmeldung beim Anbieter abschliessen",
         "tags": [
           "admin",
           "mailkonto"
@@ -198432,9 +198432,9 @@
         ]
       }
     },
-    "/api/v1/admin/postfaecher/{postfach_id}/google/start": {
+    "/api/v1/admin/postfaecher/{postfach_id}/anmeldung/start": {
       "post": {
-        "operationId": "google_start_api_v1_admin_postfaecher__postfach_id__google_start_post",
+        "operationId": "anmeldung_start_api_v1_admin_postfaecher__postfach_id__anmeldung_start_post",
         "parameters": [
           {
             "in": "path",
@@ -198467,7 +198467,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GoogleStartOut"
+                  "$ref": "#/components/schemas/AnmeldungStartOut"
                 }
               }
             },
@@ -198489,7 +198489,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Google-Anmeldung starten",
+        "summary": "Anmeldung bei Google oder Microsoft starten",
         "tags": [
           "admin",
           "mailkonto"

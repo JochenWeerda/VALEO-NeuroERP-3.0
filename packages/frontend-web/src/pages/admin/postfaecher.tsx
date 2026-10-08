@@ -26,7 +26,7 @@ import {
   entfernePostfach,
   listePostfaecher,
   speicherePostfach,
-  starteGoogleAnmeldung,
+  starteAnmeldung,
   testePostfach,
   type Postfach,
 } from '@/lib/api/postfaecher'
@@ -34,6 +34,7 @@ import {
 const ANBIETER: Record<string, string> = {
   ionos: 'IONOS',
   google: 'Google',
+  microsoft: 'Microsoft 365',
   smtp: 'SMTP',
   alias: 'Alias',
 }
@@ -107,7 +108,7 @@ export default function AdminPostfaecherPage(): JSX.Element {
       ...action,
       disabled: laeuft !== null
         || (action.key === 'testen' && !aktuell)
-        || (action.key === 'google' && !(aktuell?.anbieter === 'google' && aktuell.anmeldung === 'oauth2')),
+        || (action.key === 'anmelden' && !(aktuell && ['google', 'microsoft'].includes(aktuell.anbieter) && aktuell.anmeldung === 'oauth2')),
     })),
   }), [aktuell, geladen, isTouch, laeuft, postfaecher, standard])
 
@@ -186,12 +187,12 @@ export default function AdminPostfaecherPage(): JSX.Element {
     }
   }), [geladen, mitSperre, neuLaden])
 
-  const google = useCallback(() => mitSperre('google', async () => {
+  const anmelden = useCallback(() => mitSperre('anmelden', async () => {
     if (!geladen) return
     try {
-      window.location.assign(await starteGoogleAnmeldung(geladen))
+      window.location.assign(await starteAnmeldung(geladen))
     } catch (fehler) {
-      toast.error('Google-Anmeldung nicht gestartet', { description: getAxiosErrorMessage(fehler) })
+      toast.error('Anmeldung beim Anbieter nicht gestartet', { description: getAxiosErrorMessage(fehler) })
     }
   }), [geladen, mitSperre])
 
@@ -220,12 +221,12 @@ export default function AdminPostfaecherPage(): JSX.Element {
       'admin.postfachSpeichern': () => speichern(),
       'admin.postfachNeu': () => laden(null),
       'admin.postfachTesten': () => setTestFragen(true),
-      'admin.postfachGoogle': () => google(),
+      'admin.postfachAnmelden': () => anmelden(),
       'admin.postfachBearbeiten': (payload) => laden(zeile(payload)),
       'admin.postfachEntfernen': (payload) => setEntfernenFragen(zeile(payload)),
     },
     navigation: { push: () => undefined },
-  }), [form.values, google, laden, postfaecher, speichern, zeile])
+  }), [anmelden, form.values, laden, postfaecher, speichern, zeile])
 
   const workflow = useMemo<WorkflowState>(() => {
     const keins = postfaecher.length === 0

@@ -51,6 +51,10 @@ Das ist keine lokale Fachabnahme. Danach ausschliesslich Schema- und
 HTTP-Mockvertraege; keine Ersatzdatenbank, Container, Migration oder Reset.
 GitHub-Folgeabnahme des echten vorhandenen Agrar-Smokes bleibt offen.
 
+Die beiden vom Pflichtformatter vereinfachten optionalen Suchketten des
+Auswahldialogs werden ebenfalls geliefert; gepruefter Arbeitsinhalt und
+Commitinhalt werden nach den Checks nochmals auf Gleichheit verglichen.
+
 ## Handshake
 
 Beim Claim-Rennen entfiel der parallel committete Microsoft365-Workboard-

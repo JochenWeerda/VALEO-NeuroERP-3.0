@@ -12,7 +12,7 @@ export type Postfach = {
   id: string
   kennung: string
   bezeichnung?: string | null
-  anbieter: 'ionos' | 'google' | 'smtp' | 'alias'
+  anbieter: 'ionos' | 'google' | 'microsoft' | 'smtp' | 'alias'
   anmeldung: 'passwort' | 'oauth2' | 'alias'
   smtp_host?: string | null
   smtp_port?: number | null
@@ -71,10 +71,11 @@ export async function entfernePostfach(id: string): Promise<void> {
   await apiClient.delete(`${WEG}/${encodeURIComponent(id)}`)
 }
 
-export async function starteGoogleAnmeldung(id: string): Promise<string> {
-  return (await apiClient.post<{ url: string }>(`${WEG}/${encodeURIComponent(id)}/google/start`)).data.url
+/** Anmeldung bei Google oder Microsoft 365 (je nach Anbieter des Postfachs). */
+export async function starteAnmeldung(id: string): Promise<string> {
+  return (await apiClient.post<{ url: string }>(`${WEG}/${encodeURIComponent(id)}/anmeldung/start`)).data.url
 }
 
-export async function schliesseGoogleAnmeldungAb(code: string, state: string): Promise<Postfach> {
-  return (await apiClient.post<Postfach>(`${WEG}/google/abschluss`, { code, state })).data
+export async function schliesseAnmeldungAb(code: string, state: string): Promise<Postfach> {
+  return (await apiClient.post<Postfach>(`${WEG}/anmeldung/abschluss`, { code, state })).data
 }

@@ -3484,6 +3484,7 @@
             "app/services/feeding_reports_service.py",
             "app/services/feeding_requirements_service.py",
             "app/services/feeding_supply_service.py",
+            "app/services/mcp_execution_service.py",
             "app/services/rations_controlling_service.py",
             "app/services/rations_lifecycle_service.py"
           ],
@@ -9573,12 +9574,14 @@
             "app/api/v1/endpoints/opportunities.py",
             "app/infrastructure/models/__init__.py",
             "app/services/calendar_projection_service.py",
-            "app/services/mask_rollout_summary_service.py"
+            "app/services/mask_rollout_summary_service.py",
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/compliance_dsgvo.py",
             "app/api/v1/endpoints/crm_360.py",
-            "app/api/v1/endpoints/opportunities.py"
+            "app/api/v1/endpoints/opportunities.py",
+            "app/services/mcp_execution_service.py"
           ]
         },
         "business_partner_addresses": {
@@ -13304,6 +13307,7 @@
             "app/services/customer_sales_eligibility.py",
             "app/services/customer_service.py",
             "app/services/kunden_merge.py",
+            "app/services/mcp_execution_service.py",
             "app/services/sales_credit_service.py",
             "app/services/sales_posting_service.py",
             "app/services/whatsapp_agent_service.py"
@@ -14142,6 +14146,7 @@
             "app/api/v1/endpoints/sales_reports.py",
             "app/services/docflow_service.py",
             "app/services/ist_aggregation_service.py",
+            "app/services/mcp_execution_service.py",
             "app/services/procurement_service.py",
             "app/services/sales_match_service.py"
           ],
@@ -14310,6 +14315,7 @@
             "app/services/customer_reference.py",
             "app/services/docflow_service.py",
             "app/services/ist_aggregation_service.py",
+            "app/services/mcp_execution_service.py",
             "app/services/o2c_chain_service.py",
             "app/services/procurement_service.py",
             "app/services/sales_credit_service.py",
@@ -17319,6 +17325,7 @@
             "app/services/bestell_kommunikation_service.py",
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py",
+            "app/services/mcp_execution_service.py",
             "app/services/procurement_match_service.py",
             "app/services/procurement_service.py",
             "app/services/wareneingang_avis_service.py"
@@ -18365,7 +18372,8 @@
             "app/services/bestell_kommunikation_service.py",
             "app/services/customer_reference.py",
             "app/services/einkauf_compat_service.py",
-            "app/services/mask_rollout_summary_service.py"
+            "app/services/mask_rollout_summary_service.py",
+            "app/services/mcp_execution_service.py"
           ]
         },
         "paletten_konto_buchungen": {
@@ -20629,7 +20637,8 @@
           "read_by": [
             "app/api/v1/endpoints/dunning.py",
             "app/api/v1/endpoints/export_service.py",
-            "app/services/finance_dunning_service.py"
+            "app/services/finance_dunning_service.py",
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/dunning.py",
@@ -21781,6 +21790,7 @@
             "app/services/finance_dunning_service.py",
             "app/services/finance_op_service.py",
             "app/services/finance_period_service.py",
+            "app/services/mcp_execution_service.py",
             "app/services/sales_posting_service.py",
             "app/services/scheduler_service.py",
             "app/services/wf_trigger_service.py"
@@ -23264,7 +23274,8 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/ebilanz_elster.py"
+            "app/api/v1/endpoints/ebilanz_elster.py",
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/ebilanz_elster.py"
@@ -27493,7 +27504,8 @@
             "app/api/v1/endpoints/supplier_portal.py",
             "app/core/database.py",
             "app/infrastructure/models/l3c_models.py",
-            "app/services/customer_reference.py"
+            "app/services/customer_reference.py",
+            "app/services/mcp_execution_service.py"
           ]
         },
         "agrar_settlement_deductions": {
@@ -28861,6 +28873,7 @@
             "app/services/inventory_auxiliary_service.py",
             "app/services/ist_aggregation_service.py",
             "app/services/mask_rollout_summary_service.py",
+            "app/services/mcp_execution_service.py",
             "app/services/preisfindung_service.py",
             "app/services/procurement_service.py",
             "app/services/warehouse_service.py",
@@ -30486,7 +30499,8 @@
           "read_by": [
             "app/infrastructure/models/l3c_models.py",
             "app/services/inventory_auxiliary_service.py",
-            "app/services/inventory_count_close_service.py"
+            "app/services/inventory_count_close_service.py",
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/services/inventory_auxiliary_service.py"
@@ -30584,7 +30598,8 @@
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/l3c_models.py",
             "app/services/inventory_auxiliary_service.py",
-            "app/services/inventory_count_close_service.py"
+            "app/services/inventory_count_close_service.py",
+            "app/services/mcp_execution_service.py"
           ]
         },
         "inventory_lot_movements": {
@@ -30636,6 +30651,9 @@
           "placement": "native",
           "primary_key": [
             "id"
+          ],
+          "read_by": [
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/services/inventory_lot_trace_service.py"
@@ -30734,7 +30752,8 @@
           "read_by": [
             "app/api/v1/schemas/inventory_lot_bundle_schemas.py",
             "app/services/eudr_register_service.py",
-            "app/services/inventory_lot_trace_service.py"
+            "app/services/inventory_lot_trace_service.py",
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/services/inventory_lot_trace_service.py",
@@ -31024,6 +31043,7 @@
             "app/services/inventory_document_reference.py",
             "app/services/inventory_movement_direction.py",
             "app/services/inventory_stock_balance.py",
+            "app/services/mcp_execution_service.py",
             "app/services/procurement_service.py"
           ],
           "written_by": [
@@ -31276,7 +31296,8 @@
           "read_by": [
             "app/api/v1/schemas/silo_material_flow_schemas.py",
             "app/infrastructure/models/wms_models.py",
-            "app/services/agri_silo_material_flow_service.py"
+            "app/services/agri_silo_material_flow_service.py",
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/services/agri_silo_material_flow_service.py"
@@ -31375,7 +31396,8 @@
           "read_by": [
             "app/api/v1/schemas/silo_material_flow_schemas.py",
             "app/infrastructure/models/wms_models.py",
-            "app/services/agri_silo_material_flow_service.py"
+            "app/services/agri_silo_material_flow_service.py",
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/services/agri_silo_material_flow_service.py"
@@ -32468,6 +32490,7 @@
             "app/services/agri_qs_workflow_service.py",
             "app/services/agri_silo_lot_link_service.py",
             "app/services/agri_silo_material_flow_service.py",
+            "app/services/mcp_execution_service.py",
             "app/services/silo_rule_engine_service.py"
           ],
           "written_by": [
@@ -32535,6 +32558,7 @@
           "read_by": [
             "app/core/database.py",
             "app/infrastructure/models/l3c_models.py",
+            "app/services/mcp_execution_service.py",
             "app/services/supply_chain_trace_service.py"
           ],
           "written_by": [
@@ -32648,6 +32672,7 @@
             "app/services/agri_lot_link_booking_service.py",
             "app/services/agri_qs_workflow_service.py",
             "app/services/agri_silo_lot_link_service.py",
+            "app/services/mcp_execution_service.py",
             "app/services/silo_rule_engine_service.py",
             "app/services/supply_chain_lot_service.py",
             "app/services/supply_chain_trace_service.py"
@@ -34211,6 +34236,7 @@
             "app/services/agri_lot_link_booking_service.py",
             "app/services/kontrakt_disposition_service.py",
             "app/services/mask_rollout_summary_service.py",
+            "app/services/mcp_execution_service.py",
             "app/services/supply_chain_trace_service.py",
             "app/services/wiegung_service.py"
           ]
@@ -35534,7 +35560,8 @@
           ],
           "read_by": [
             "app/api/v1/schemas/docflow_bundle_schemas.py",
-            "app/services/doc_nachweisraum_lifecycle_service.py"
+            "app/services/doc_nachweisraum_lifecycle_service.py",
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/services/doc_nachweisraum_lifecycle_service.py"
@@ -35671,7 +35698,8 @@
           ],
           "read_by": [
             "app/api/v1/schemas/docflow_bundle_schemas.py",
-            "app/services/doc_nachweisraum_lifecycle_service.py"
+            "app/services/doc_nachweisraum_lifecycle_service.py",
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/services/doc_nachweisraum_lifecycle_service.py"
@@ -44560,6 +44588,7 @@
             "app/api/v1/endpoints/sales_credit_notes.py",
             "app/api/v1/endpoints/sales_delivery_notes.py",
             "app/api/v1/endpoints/sales_orders.py",
+            "app/services/mcp_execution_service.py",
             "app/services/sales_storno_service.py",
             "app/services/warehouse_service.py"
           ]

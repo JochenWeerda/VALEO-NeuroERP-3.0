@@ -2066,6 +2066,10 @@ export const adminPostfaecherScreen = {
           "label": "Google / Gmail"
         },
         {
+          "value": "microsoft",
+          "label": "Microsoft 365 / Outlook"
+        },
+        {
           "value": "smtp",
           "label": "Anderer Anbieter (SMTP)"
         },
@@ -2086,10 +2090,10 @@ export const adminPostfaecherScreen = {
         },
         {
           "value": "oauth2",
-          "label": "Mit Google anmelden"
+          "label": "Beim Anbieter anmelden (Google, Microsoft)"
         }
       ],
-      "helpText": "Google: App-Passwort (Bestätigung in zwei Schritten) oder Anmeldung über Google."
+      "helpText": "Google: App-Passwort oder Anmeldung über Google. Microsoft 365: immer Anmeldung über Microsoft."
     },
     {
       "key": "passwort",
@@ -2200,13 +2204,13 @@ export const adminPostfaecherScreen = {
       ]
     },
     {
-      "key": "google",
-      "label": "Mit Google verbinden",
-      "command": "admin.postfachGoogle",
+      "key": "anmelden",
+      "label": "Beim Anbieter anmelden",
+      "command": "admin.postfachAnmelden",
       "kind": "secondary",
       "dangerLevel": "safe",
       "zone": "header",
-      "stubReason": "Fuehrt zur Google-Anmeldung fuer das geladene Google-Postfach."
+      "stubReason": "Fuehrt zur Anmeldung bei Google bzw. Microsoft fuer das geladene Postfach."
     },
     {
       "key": "neu",

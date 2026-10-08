@@ -2253,8 +2253,8 @@
       "path": "admin/nummernkreise"
     },
     {
-      "module": "@/pages/admin/postfaecher-google-rueckruf",
-      "path": "admin/postfaecher/google-rueckruf"
+      "module": "@/pages/admin/postfaecher-anmeldung-rueckruf",
+      "path": "admin/postfaecher/anmeldung-rueckruf"
     },
     {
       "module": "@/pages/admin/webhooks",
