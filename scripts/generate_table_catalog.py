@@ -70,22 +70,30 @@ ORDER BY tc.table_schema, tc.table_name, kcu.ordinal_position
 
 _FK_SQL = """
 SELECT
-  tc.table_schema,
-  tc.table_name,
-  kcu.column_name,
-  ccu.table_schema AS foreign_schema,
-  ccu.table_name AS foreign_table,
-  ccu.column_name AS foreign_column
-FROM information_schema.table_constraints AS tc
-JOIN information_schema.key_column_usage AS kcu
-  ON tc.constraint_schema = kcu.constraint_schema
- AND tc.constraint_name = kcu.constraint_name
-JOIN information_schema.constraint_column_usage AS ccu
-  ON ccu.constraint_schema = tc.constraint_schema
- AND ccu.constraint_name = tc.constraint_name
-WHERE tc.constraint_type = 'FOREIGN KEY'
-  AND tc.table_schema LIKE 'domain\\_%' ESCAPE '\\'
-ORDER BY tc.table_schema, tc.table_name, kcu.column_name
+  source_namespace.nspname,
+  source_table.relname,
+  source_column.attname,
+  target_namespace.nspname,
+  target_table.relname,
+  target_column.attname
+FROM pg_catalog.pg_constraint AS foreign_key
+JOIN pg_catalog.pg_class AS source_table ON source_table.oid = foreign_key.conrelid
+JOIN pg_catalog.pg_namespace AS source_namespace ON source_namespace.oid = source_table.relnamespace
+JOIN pg_catalog.pg_class AS target_table ON target_table.oid = foreign_key.confrelid
+JOIN pg_catalog.pg_namespace AS target_namespace ON target_namespace.oid = target_table.relnamespace
+-- Pair both arrays by their constraint position; a column-usage join produces
+-- a Cartesian product for composite keys and can confuse reused FK names.
+CROSS JOIN LATERAL unnest(foreign_key.conkey, foreign_key.confkey)
+  WITH ORDINALITY AS key_pair(source_number, target_number, position)
+JOIN pg_catalog.pg_attribute AS source_column
+  ON source_column.attrelid = source_table.oid AND source_column.attnum = key_pair.source_number
+JOIN pg_catalog.pg_attribute AS target_column
+  ON target_column.attrelid = target_table.oid AND target_column.attnum = key_pair.target_number
+WHERE foreign_key.contype = 'f'
+  AND source_namespace.nspname LIKE 'domain\\_%' ESCAPE '\\'
+ORDER BY source_namespace.nspname, source_table.relname, source_column.attname,
+         target_namespace.nspname, target_table.relname, target_column.attname,
+         foreign_key.conname, key_pair.position
 """
 
 

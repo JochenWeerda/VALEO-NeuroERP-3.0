@@ -19175,20 +19175,12 @@
               "references": "domain_erp.chart_of_accounts.id"
             },
             {
-              "column": "gl_account_id",
-              "references": "domain_erp.chart_of_accounts.tenant_id"
-            },
-            {
               "column": "tenant_id",
-              "references": "domain_erp.chart_of_accounts.id"
+              "references": "domain_erp.chart_of_accounts.tenant_id"
             },
             {
               "column": "tenant_id",
               "references": "domain_shared.tenants.id"
-            },
-            {
-              "column": "tenant_id",
-              "references": "domain_erp.chart_of_accounts.tenant_id"
             }
           ],
           "owner_domain": "finance",
@@ -24758,19 +24750,11 @@
             },
             {
               "column": "erklaerung_id",
-              "references": "domain_hr.bewerbung_einwilligungserklaerungen.tenant_id"
-            },
-            {
-              "column": "erklaerung_id",
               "references": "domain_hr.bewerbung_einwilligungserklaerungen.id"
             },
             {
               "column": "tenant_id",
               "references": "domain_hr.bewerbung_einwilligungserklaerungen.tenant_id"
-            },
-            {
-              "column": "tenant_id",
-              "references": "domain_hr.bewerbung_einwilligungserklaerungen.id"
             }
           ],
           "owner_domain": "hr",
@@ -25718,19 +25702,11 @@
           "foreign_keys": [
             {
               "column": "gate_id",
-              "references": "domain_hr.hrm_operations_gates.tenant_id"
-            },
-            {
-              "column": "gate_id",
               "references": "domain_hr.hrm_operations_gates.gate_id"
             },
             {
               "column": "tenant_id",
               "references": "domain_hr.hrm_operations_gates.tenant_id"
-            },
-            {
-              "column": "tenant_id",
-              "references": "domain_hr.hrm_operations_gates.gate_id"
             }
           ],
           "owner_domain": "hr",
@@ -25797,14 +25773,6 @@
           "foreign_keys": [
             {
               "column": "gate_id",
-              "references": "domain_hr.hrm_operations_gates.tenant_id"
-            },
-            {
-              "column": "gate_id",
-              "references": "domain_hr.hrm_operations_gates.gate_id"
-            },
-            {
-              "column": "tenant_id",
               "references": "domain_hr.hrm_operations_gates.gate_id"
             },
             {
