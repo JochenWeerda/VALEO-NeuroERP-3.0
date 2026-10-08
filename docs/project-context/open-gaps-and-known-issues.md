@@ -17,6 +17,9 @@ Unabhaengiger stream-json-Assembler-Befund GHSA-mjw6-4jj6-33hc durch
 provenienzgebundenen pnpm-Backport geschlossen; Original-Negativkontrolle und
 gepatchte normale/Reviver-/Array-Parservertraege. Kein 3.x-API-Wechsel oder
 neue Audit-Ausnahme. [QA und verbleibende Alerts](../quality-assurance/stream-json-prototype-20261008.md).
+Der bestehende CI-Security-Einstieg prueft jetzt automatisch alle 18 Paket-/
+Parservertraege; exakt derselbe Aufruf lokal gruen. Docs Governance auf GitHub
+fuer e4487188d ebenfalls gruen, weitere Folgepruefungen laufen.
 ChromaDB-Evidenz erneut unveraendert bestaetigt, Review endet weiterhin 15.10.
 Die beiden eigenen XBRL-Doku-CI-Ursachen (Slice-Harness und ADR-Nav) korrigiert;
 alle lokalen Doku-Gates inklusive vollstaendigem Build bestanden. GitHub-

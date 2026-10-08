@@ -104,3 +104,6 @@ test('all eight database instrumentations retain their public constructors', () 
     assert.equal(instance.isEnabled(), false);
   }
 });
+
+// Keep parser backport regressions in the existing CI security entry point.
+require('./verify_node_dependency_security.cjs');

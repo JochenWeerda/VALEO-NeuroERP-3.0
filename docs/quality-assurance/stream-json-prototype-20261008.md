@@ -63,3 +63,13 @@ node-forge GHSA-86w9-cpqp-85rv und braces GHSA-vfj7-8cjw-p6xm (je High, kein
 Herstellerfix). ZAP, Trivy, Grype und Bandit waren erfolgreich. Diese beiden
 Production-Befunde bleiben fuer einen gezielten Folgeclaim offen; sie sind nicht
 mit den acht GitHub-Alerts gleichzusetzen.
+
+## Fortlaufende CI-Abnahme
+
+Der bestehende Security-Einstieg `node --test scripts/verify_node_security_releases.cjs`
+laedt jetzt auch die Parser-Regressionsvertraege. Genau dieser Workflow-Aufruf
+besteht lokal mit allen 18 Tests (6,61 s); keine neuen Jobs oder Datenbanken,
+keine Absenkung des anschliessenden Production-Audits. Ein kuenftiger Rueckbau
+des Parser-Patches wird dadurch automatisch durch dieselben fachlichen
+Prototype-/Tiefenpruefungen erkannt. GitHub Docs Governance des Meilensteins
+e4487188d erfolgreich (Run 37736018075); Docs Build war beim Nachtrag noch offen.
