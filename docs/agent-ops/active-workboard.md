@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FOLGEFUNDE-RESTBEFUNDE-20261008 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** die drei Folgefunde aus
+RESTBEFUNDE-BESTANDSBUCH-20261008 beheben: (1) `GET /dunning/rules` erfindet bei
+Datenbankfehler Standardregeln, (2) Inventar-Seed haengt Lager per `warehouse_code` dem
+seedenden Mandanten um, (3) `journal_entries.entry_number` systemweit statt je Mandant
+eindeutig. **Dateibesitz:** `app/api/v1/endpoints/dunning.py`, `app/seeds/inventory_seed.py`,
+eine additive Migration fuer `domain_erp.journal_entries`, Nummernabfragen auf
+`entry_number` ohne Mandant, betroffene Tests, QA-Doku. L3-JOURNAL-SOURCE (Quellspalten)
+und fremde WIP unberuehrt.
+
+
 ## RESTBEFUNDE-BESTANDSBUCH-20261008 — abgeschlossen, Claude Code
 
 **Abnahme (08.10.2026):** alle vier Restbefunde geschlossen: Mahnwesen-Mandant aus dem
