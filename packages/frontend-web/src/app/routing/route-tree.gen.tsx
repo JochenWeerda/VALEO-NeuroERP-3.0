@@ -272,9 +272,9 @@ const appRoute0034 = createRoute({
 
 const appRoute0035 = createRoute({
   getParentRoute: () => appLayoutRoute,
-  path: "admin/postfaecher/google-rueckruf",
-  component: () => renderPage("@/pages/admin/postfaecher-google-rueckruf"),
-  staticData: {"breadcrumb":"Google Rueckruf","module":"@/pages/admin/postfaecher-google-rueckruf","legacyPath":"/admin/postfaecher/google-rueckruf"},
+  path: "admin/postfaecher/anmeldung-rueckruf",
+  component: () => renderPage("@/pages/admin/postfaecher-anmeldung-rueckruf"),
+  staticData: {"breadcrumb":"Anmeldung Rueckruf","module":"@/pages/admin/postfaecher-anmeldung-rueckruf","legacyPath":"/admin/postfaecher/anmeldung-rueckruf"},
 })
 
 const appRoute0036 = createRoute({
@@ -7799,8 +7799,8 @@ export const generatedRouteInventory = [
     "source": "auto"
   },
   {
-    "module": "@/pages/admin/postfaecher-google-rueckruf",
-    "path": "admin/postfaecher/google-rueckruf",
+    "module": "@/pages/admin/postfaecher-anmeldung-rueckruf",
+    "path": "admin/postfaecher/anmeldung-rueckruf",
     "source": "alias"
   },
   {

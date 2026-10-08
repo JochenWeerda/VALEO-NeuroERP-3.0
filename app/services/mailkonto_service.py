@@ -8,6 +8,9 @@ Zugang je Postfach:
 * ``ionos`` — smtp.ionos.de:587 STARTTLS, Benutzer = E-Mail-Adresse.
 * ``google`` — smtp.gmail.com:587 STARTTLS, mit **App-Passwort** (``anmeldung =
   passwort``) oder **Google-Anmeldung** (``anmeldung = oauth2``, SMTP XOAUTH2).
+* ``microsoft`` — Microsoft 365: Anmeldung ueber Microsoft (OAuth2, ``Mail.Send``),
+  Versand ueber Microsoft Graph ``sendMail``. Kein SMTP AUTH noetig (das Microsoft
+  abbaut); die Nachricht liegt danach in "Gesendete Elemente" des Postfachs.
 * ``smtp`` — beliebiger Server (Strato, Hetzner, eigener Exchange …).
 * ``alias`` — nutzt die Anmeldung eines anderen Postfachs (``zugang_von``) und
   sendet mit eigener Absenderadresse. Beim Anbieter muss die Adresse als Absender
@@ -45,14 +48,36 @@ from sqlalchemy.orm import Session
 from app.core import geheimnis
 
 ZWECK = "mailkonto"
-GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
-GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"  # nosec B105 - Endpunkt, kein Geheimnis
-GOOGLE_SCOPES = "https://mail.google.com/ openid email"
 STATE_GUELTIG_SEKUNDEN = 600
+
+#: OAuth je Anbieter. ``{tenant}`` (Microsoft) aus ``MICROSOFT_OAUTH_TENANT``, sonst
+#: ``organizations`` (jedes Geschaeftskonto). Zugangsdaten des OAuth-Clients aus
+#: ``<PRAEFIX>_CLIENT_ID``/``_CLIENT_SECRET``/``_REDIRECT_URI``.
+OAUTH: dict[str, dict[str, Any]] = {
+    "google": {
+        "name": "Google",
+        "praefix": "GOOGLE_OAUTH",
+        "auth_url": "https://accounts.google.com/o/oauth2/v2/auth",
+        "token_url": "https://oauth2.googleapis.com/token",  # nosec B105 - Endpunkt, kein Geheimnis
+        "scopes": "https://mail.google.com/ openid email",
+        "extra": {"access_type": "offline", "prompt": "consent"},
+    },
+    "microsoft": {
+        "name": "Microsoft",
+        "praefix": "MICROSOFT_OAUTH",
+        "auth_url": "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize",
+        "token_url": "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token",  # nosec B105
+        "scopes": "offline_access openid email https://graph.microsoft.com/Mail.Send",
+        "extra": {"response_mode": "query", "prompt": "select_account"},
+    },
+}
+GRAPH_SENDMAIL_URL = "https://graph.microsoft.com/v1.0/me/sendMail"
 
 VORLAGEN: dict[str, dict[str, Any]] = {
     "ionos": {"smtp_host": "smtp.ionos.de", "smtp_port": 587, "sicherheit": "starttls"},
     "google": {"smtp_host": "smtp.gmail.com", "smtp_port": 587, "sicherheit": "starttls"},
+    # Kein SMTP: Versand ueber Microsoft Graph (HTTPS); Host/Port nur zur Anzeige.
+    "microsoft": {"smtp_host": "graph.microsoft.com", "smtp_port": 443, "sicherheit": "ssl"},
     "smtp": {},
     "alias": {},
 }
@@ -89,6 +114,8 @@ class SmtpZugang:
     absender_name: Optional[str] = None
     oauth_token: Optional[str] = None
     postfach_id: Optional[str] = None
+    #: ``smtp`` oder ``graph`` (Microsoft 365).
+    transport: str = "smtp"
 
 
 # ── Lesen ─────────────────────────────────────────────────────────────────────
@@ -239,11 +266,13 @@ def speichern(db: Session, tenant_id: str, daten: dict[str, Any], *, postfach_id
         werte.update({"anmeldung": "alias", "host": None, "port": None, "sicherheit": "starttls",
                       "benutzer": None, "geheimnis": None, "zugang_von": quelle["id"]})
     else:
-        anmeldung = (_text(daten, "anmeldung") or "passwort").lower()
+        anmeldung = (_text(daten, "anmeldung") or ("oauth2" if anbieter == "microsoft" else "passwort")).lower()
         if anmeldung not in ("passwort", "oauth2"):
             raise MailkontoFehler(f"Unbekannte Anmeldung: {anmeldung}")
-        if anmeldung == "oauth2" and anbieter != "google":
-            raise MailkontoFehler("Die Anmeldung per OAuth gibt es hier nur fuer Google.")
+        if anmeldung == "oauth2" and anbieter not in OAUTH:
+            raise MailkontoFehler("Die Anmeldung per OAuth gibt es fuer Google und Microsoft 365.")
+        if anbieter == "microsoft" and anmeldung != "oauth2":
+            raise MailkontoFehler("Microsoft 365 nur mit Anmeldung ueber Microsoft (kein Passwort-SMTP).")
         vorlage = VORLAGEN[anbieter]
         host = vorlage.get("smtp_host") or _text(daten, "smtp_host")
         if not host:
@@ -327,13 +356,14 @@ def smtp_zugang(db: Session, tenant_id: str, *, verwendung: Optional[str] = None
         return None
     anmeldung = _zeile(db, tenant_id, z["zugang_von"]) if z["anbieter"] == "alias" else z
     if not anmeldung["geheimnis"]:
-        raise MailkontoFehler(f"Postfach {anmeldung['kennung']} ohne Passwort bzw. Google-Anmeldung.")
+        raise MailkontoFehler(f"Postfach {anmeldung['kennung']} ohne Passwort bzw. Anmeldung beim Anbieter.")
     klar = geheimnis.entschluesseln(anmeldung["geheimnis"], tenant_id=tenant_id, zweck=ZWECK)
-    oauth = _google_zugriffstoken(klar) if anmeldung["anmeldung"] == "oauth2" else None
+    oauth = _zugriffstoken(anmeldung["anbieter"], klar) if anmeldung["anmeldung"] == "oauth2" else None
     return SmtpZugang(
         server=anmeldung["smtp_host"], port=anmeldung["smtp_port"], sicherheit=anmeldung["sicherheit"],
         benutzer=anmeldung["benutzer"], passwort=None if oauth else klar,
         absender=z["absender_email"], absender_name=z["absender_name"], oauth_token=oauth, postfach_id=z["id"],
+        transport="graph" if anmeldung["anbieter"] == "microsoft" else "smtp",
     )
 
 
@@ -363,59 +393,69 @@ def pruefen(db: Session, tenant_id: str, postfach_id: str, empfaenger: Optional[
     return {**lesen(db, tenant_id, z["id"]), "testmail_an": ziel}
 
 
-# ── Google-Anmeldung ──────────────────────────────────────────────────────────
-def _google_client() -> tuple[str, str, str]:
-    client_id = (os.getenv("GOOGLE_OAUTH_CLIENT_ID") or "").strip()
-    client_secret = (os.getenv("GOOGLE_OAUTH_CLIENT_SECRET") or "").strip()
-    redirect = (os.getenv("GOOGLE_OAUTH_REDIRECT_URI") or "").strip()
+# ── Anmeldung beim Anbieter (Google, Microsoft) ───────────────────────────────
+def _client(anbieter: str) -> tuple[str, str, str]:
+    konf = OAUTH[anbieter]
+    praefix = konf["praefix"]
+    client_id = (os.getenv(f"{praefix}_CLIENT_ID") or "").strip()
+    client_secret = (os.getenv(f"{praefix}_CLIENT_SECRET") or "").strip()
+    redirect = (os.getenv(f"{praefix}_REDIRECT_URI") or "").strip()
     if not (client_id and client_secret and redirect):
+        alternative = " Alternativ ein App-Passwort verwenden." if anbieter == "google" else ""
         raise MailkontoFehler(
-            "Die Google-Anmeldung ist auf dieser Plattform nicht eingerichtet "
-            "(GOOGLE_OAUTH_CLIENT_ID/_SECRET/_REDIRECT_URI). Alternativ ein App-Passwort verwenden."
+            f"Die Anmeldung ueber {konf['name']} ist auf dieser Plattform nicht eingerichtet "
+            f"({praefix}_CLIENT_ID/_SECRET/_REDIRECT_URI).{alternative}"
         )
     return client_id, client_secret, redirect
 
 
-def _state(tenant_id: str, postfach_id: str) -> str:
+def _url(anbieter: str, schluessel: str) -> str:
+    tenant = (os.getenv("MICROSOFT_OAUTH_TENANT") or "organizations").strip()
+    return OAUTH[anbieter][schluessel].replace("{tenant}", tenant)
+
+
+def _state(tenant_id: str, postfach_id: str, anbieter: str) -> str:
     inhalt = base64.urlsafe_b64encode(json.dumps({
-        "t": tenant_id, "p": postfach_id, "n": secrets.token_urlsafe(12),
+        "t": tenant_id, "p": postfach_id, "a": anbieter, "n": secrets.token_urlsafe(12),
         "e": int(time.time()) + STATE_GUELTIG_SEKUNDEN,
     }).encode("utf-8")).decode("ascii")
     return f"{inhalt}.{geheimnis.signieren(inhalt)}"
 
 
-def _state_pruefen(state: str, tenant_id: str) -> str:
+def _state_pruefen(state: str, tenant_id: str) -> tuple[str, str]:
     inhalt, _, signatur = (state or "").partition(".")
     if not inhalt or not geheimnis.signatur_gueltig(inhalt, signatur):
-        raise MailkontoFehler("Ungueltige Rueckmeldung von Google (Signatur).")
+        raise MailkontoFehler("Ungueltige Rueckmeldung des Anbieters (Signatur).")
     daten = json.loads(base64.urlsafe_b64decode(inhalt.encode("ascii")))
     if daten.get("t") != tenant_id:
-        raise MailkontoFehler("Die Google-Anmeldung gehoert zu einem anderen Mandanten.")
+        raise MailkontoFehler("Die Anmeldung gehoert zu einem anderen Mandanten.")
     if int(daten.get("e") or 0) < time.time():
-        raise MailkontoFehler("Die Google-Anmeldung ist abgelaufen; bitte erneut starten.")
-    return str(daten.get("p") or "")
+        raise MailkontoFehler("Die Anmeldung ist abgelaufen; bitte erneut starten.")
+    return str(daten.get("p") or ""), str(daten.get("a") or "google")
 
 
-def google_anmeldung_starten(db: Session, tenant_id: str, postfach_id: str) -> dict[str, str]:
+def anmeldung_starten(db: Session, tenant_id: str, postfach_id: str) -> dict[str, str]:
+    """URL der Anmeldeseite des Anbieters (Google oder Microsoft) fuer dieses Postfach."""
     z = _zeile(db, tenant_id, postfach_id)
-    if z["anbieter"] != "google" or z["anmeldung"] != "oauth2":
-        raise MailkontoFehler("Zuerst das Postfach mit Anbieter Google und Anmeldung 'Mit Google anmelden' speichern.")
-    client_id, _, redirect = _google_client()
+    if z["anbieter"] not in OAUTH or z["anmeldung"] != "oauth2":
+        raise MailkontoFehler("Zuerst das Postfach mit Google oder Microsoft 365 und Anmeldung beim Anbieter speichern.")
+    client_id, _, redirect = _client(z["anbieter"])
     parameter = {
-        "client_id": client_id, "redirect_uri": redirect, "response_type": "code", "scope": GOOGLE_SCOPES,
-        "access_type": "offline", "prompt": "consent", "state": _state(tenant_id, z["id"]),
-        "login_hint": z["absender_email"],
+        "client_id": client_id, "redirect_uri": redirect, "response_type": "code",
+        "scope": OAUTH[z["anbieter"]]["scopes"], "state": _state(tenant_id, z["id"], z["anbieter"]),
+        "login_hint": z["absender_email"], **OAUTH[z["anbieter"]]["extra"],
     }
-    return {"url": f"{GOOGLE_AUTH_URL}?{urlencode(parameter)}"}
+    return {"url": f"{_url(z['anbieter'], 'auth_url')}?{urlencode(parameter)}"}
 
 
-def _token_anfrage(daten: dict[str, str]) -> dict[str, Any]:
+def _token_anfrage(anbieter: str, daten: dict[str, str]) -> dict[str, Any]:
+    name = OAUTH[anbieter]["name"]
     try:
-        antwort = httpx.post(GOOGLE_TOKEN_URL, data=daten, timeout=20)
+        antwort = httpx.post(_url(anbieter, "token_url"), data=daten, timeout=20)
     except httpx.HTTPError as fehler:
-        raise MailkontoFehler(f"Google nicht erreichbar: {fehler}") from fehler
+        raise MailkontoFehler(f"{name} nicht erreichbar: {fehler}") from fehler
     if antwort.status_code != 200:
-        raise MailkontoFehler(f"Google lehnte ab: {antwort.text[:300]}")
+        raise MailkontoFehler(f"{name} lehnte ab: {antwort.text[:300]}")
     return antwort.json()
 
 
@@ -424,25 +464,27 @@ def _email_aus_id_token(id_token: str) -> Optional[str]:
     try:
         nutzlast = id_token.split(".")[1]
         nutzlast += "=" * (-len(nutzlast) % 4)
-        return json.loads(base64.urlsafe_b64decode(nutzlast)).get("email")
+        daten = json.loads(base64.urlsafe_b64decode(nutzlast))
+        return daten.get("email") or daten.get("preferred_username")
     except (IndexError, ValueError):
         return None
 
 
-def google_anmeldung_abschliessen(db: Session, tenant_id: str, code: str, state: str,
-                                  von: Optional[str] = None) -> dict[str, Any]:
-    postfach_id = _state_pruefen(state, tenant_id)
+def anmeldung_abschliessen(db: Session, tenant_id: str, code: str, state: str,
+                           von: Optional[str] = None) -> dict[str, Any]:
+    postfach_id, anbieter = _state_pruefen(state, tenant_id)
     z = _zeile(db, tenant_id, postfach_id)
-    if z["anbieter"] != "google":
-        raise MailkontoFehler("Das Postfach ist kein Google-Postfach.")
-    client_id, client_secret, redirect = _google_client()
-    token = _token_anfrage({
-        "code": code, "client_id": client_id, "client_secret": client_secret,
-        "redirect_uri": redirect, "grant_type": "authorization_code",
-    })
+    if z["anbieter"] != anbieter or anbieter not in OAUTH:
+        raise MailkontoFehler("Das Postfach passt nicht zur Anmeldung.")
+    client_id, client_secret, redirect = _client(anbieter)
+    daten = {"code": code, "client_id": client_id, "client_secret": client_secret,
+             "redirect_uri": redirect, "grant_type": "authorization_code"}
+    if anbieter == "microsoft":
+        daten["scope"] = OAUTH[anbieter]["scopes"]
+    token = _token_anfrage(anbieter, daten)
     refresh = token.get("refresh_token")
     if not refresh:
-        raise MailkontoFehler("Google hat keinen dauerhaften Zugang erteilt (kein Refresh-Token).")
+        raise MailkontoFehler(f"{OAUTH[anbieter]['name']} hat keinen dauerhaften Zugang erteilt (kein Refresh-Token).")
     email = _email_aus_id_token(token.get("id_token") or "") or z["benutzer"]
     db.execute(text(
         "UPDATE domain_shared.mailkonten SET anmeldung = 'oauth2', benutzer = :b, geheimnis = :g, "
@@ -453,13 +495,18 @@ def google_anmeldung_abschliessen(db: Session, tenant_id: str, code: str, state:
     return lesen(db, tenant_id, z["id"])
 
 
-def _google_zugriffstoken(refresh_token: str) -> str:
-    client_id, client_secret, _ = _google_client()
-    token = _token_anfrage({
-        "client_id": client_id, "client_secret": client_secret,
-        "refresh_token": refresh_token, "grant_type": "refresh_token",
-    })
-    zugriff = token.get("access_token")
+def _zugriffstoken(anbieter: str, refresh_token: str) -> str:
+    client_id, client_secret, _ = _client(anbieter)
+    daten = {"client_id": client_id, "client_secret": client_secret,
+             "refresh_token": refresh_token, "grant_type": "refresh_token"}
+    if anbieter == "microsoft":
+        daten["scope"] = OAUTH[anbieter]["scopes"]
+    zugriff = _token_anfrage(anbieter, daten).get("access_token")
     if not zugriff:
-        raise MailkontoFehler("Google lieferte kein Zugriffstoken.")
+        raise MailkontoFehler(f"{OAUTH[anbieter]['name']} lieferte kein Zugriffstoken.")
     return zugriff
+
+
+# Bisherige Namen (Google) bleiben fuer Aufrufer erhalten.
+google_anmeldung_starten = anmeldung_starten
+google_anmeldung_abschliessen = anmeldung_abschliessen

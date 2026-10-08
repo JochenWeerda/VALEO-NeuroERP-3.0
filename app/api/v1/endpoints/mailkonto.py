@@ -1,4 +1,4 @@
-"""Postfaecher des Mandanten — Einrichtung, Freigaben, Testmail, Google-Anmeldung.
+"""Postfaecher des Mandanten — Einrichtung, Freigaben, Testmail, Anmeldung bei Google/Microsoft.
 
 Fachlogik in :mod:`app.services.mailkonto_service`. Einrichten nur ``admin``; die
 Absenderwahl (``/verfuegbar``) darf jeder angemeldete Nutzer abfragen — sie zeigt
@@ -54,8 +54,8 @@ class PostfachOut(BaseModel):
 class PostfachIn(BaseModel):
     kennung: str = Field(..., description="z. B. info, dispo, fibu, zentrale")
     bezeichnung: Optional[str] = None
-    anbieter: str = Field("smtp", description="ionos | google | smtp | alias")
-    anmeldung: str = Field("passwort", description="passwort (auch App-Passwort) | oauth2 (nur Google)")
+    anbieter: str = Field("smtp", description="ionos | google | microsoft | smtp | alias")
+    anmeldung: str = Field("passwort", description="passwort (auch App-Passwort) | oauth2 (Google, Microsoft 365)")
     smtp_host: Optional[str] = None
     smtp_port: Optional[int] = None
     sicherheit: Optional[str] = Field(None, description="starttls | ssl")
@@ -89,11 +89,11 @@ class TestmailIn(BaseModel):
     empfaenger: Optional[str] = None
 
 
-class GoogleStartOut(BaseModel):
+class AnmeldungStartOut(BaseModel):
     url: str
 
 
-class GoogleAbschlussIn(BaseModel):
+class AnmeldungAbschlussIn(BaseModel):
     code: str
     state: str
 
@@ -158,20 +158,21 @@ def postfach_testen(postfach_id: str, daten: TestmailIn, tenant_id: str = Depend
         raise HTTPException(status_code=502, detail=str(fehler)) from fehler
 
 
-@router.post("/{postfach_id}/google/start", response_model=GoogleStartOut, summary="Google-Anmeldung starten")
-def google_start(postfach_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
-                 _: dict = Depends(verwaltung)) -> dict:
+@router.post("/{postfach_id}/anmeldung/start", response_model=AnmeldungStartOut,
+             summary="Anmeldung bei Google oder Microsoft starten")
+def anmeldung_start(postfach_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+                    _: dict = Depends(verwaltung)) -> dict:
     try:
-        return konto.google_anmeldung_starten(db, tenant_id, postfach_id)
+        return konto.anmeldung_starten(db, tenant_id, postfach_id)
     except (konto.MailkontoFehler, GeheimnisNichtEingerichtet) as fehler:
         raise _fachfehler(fehler) from fehler
 
 
-@router.post("/google/abschluss", response_model=PostfachOut, summary="Google-Anmeldung abschliessen")
-def google_abschluss(daten: GoogleAbschlussIn, tenant_id: str = Depends(get_tenant_id),
-                     db: Session = Depends(get_db), nutzer: dict = Depends(verwaltung)) -> dict:
+@router.post("/anmeldung/abschluss", response_model=PostfachOut, summary="Anmeldung beim Anbieter abschliessen")
+def anmeldung_abschluss(daten: AnmeldungAbschlussIn, tenant_id: str = Depends(get_tenant_id),
+                        db: Session = Depends(get_db), nutzer: dict = Depends(verwaltung)) -> dict:
     try:
-        return konto.google_anmeldung_abschliessen(db, tenant_id, daten.code, daten.state, von=nutzer.get("sub"))
+        return konto.anmeldung_abschliessen(db, tenant_id, daten.code, daten.state, von=nutzer.get("sub"))
     except (konto.MailkontoFehler, GeheimnisNichtEingerichtet) as fehler:
         db.rollback()
         raise _fachfehler(fehler) from fehler

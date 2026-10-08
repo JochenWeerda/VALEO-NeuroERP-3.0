@@ -317,7 +317,10 @@ def google(monkeypatch):
 
     monkeypatch.setenv("GOOGLE_OAUTH_CLIENT_ID", "client-123")
     monkeypatch.setenv("GOOGLE_OAUTH_CLIENT_SECRET", "secret-456")
-    monkeypatch.setenv("GOOGLE_OAUTH_REDIRECT_URI", "https://erp.example/admin/postfaecher/google-rueckruf")
+    monkeypatch.setenv("GOOGLE_OAUTH_REDIRECT_URI", "https://erp.example/admin/postfaecher/anmeldung-rueckruf")
+    monkeypatch.setenv("MICROSOFT_OAUTH_CLIENT_ID", "ms-client")
+    monkeypatch.setenv("MICROSOFT_OAUTH_CLIENT_SECRET", "ms-secret")
+    monkeypatch.setenv("MICROSOFT_OAUTH_REDIRECT_URI", "https://erp.example/admin/postfaecher/anmeldung-rueckruf")
     anfragen: list[dict] = []
     nutzlast = base64.urlsafe_b64encode(json.dumps({"email": "zentrale@gmail.example"}).encode()).decode().rstrip("=")
 
@@ -328,8 +331,12 @@ def google(monkeypatch):
         def json(self):
             return self._daten
 
-    def post(url, data=None, timeout=None):
-        anfragen.append(data)
+    def post(url, data=None, timeout=None, json=None, headers=None):
+        anfragen.append({"url": url, "data": data, "json": json, "headers": headers})
+        if "graph.microsoft.com" in url:
+            antwort = Antwort({})
+            antwort.status_code = 202
+            return antwort
         if data["grant_type"] == "authorization_code":
             return Antwort({"refresh_token": "refresh-xyz", "access_token": "a1", "id_token": f"h.{nutzlast}.s"})
         return Antwort({"access_token": "frisch-789"})
@@ -349,7 +356,7 @@ class TestGoogle:
 
         pf = anlegen(db, kennung="zentrale", anbieter="google", anmeldung="oauth2", passwort=None,
                      absender_email="zentrale@gmail.example", ist_standard=True)
-        url = konto.google_anmeldung_starten(db, HAUS_A, pf["id"])["url"]
+        url = konto.anmeldung_starten(db, HAUS_A, pf["id"])["url"]
         parameter = parse_qs(urlparse(url).query)
         assert parameter["client_id"] == ["client-123"] and parameter["access_type"] == ["offline"]
         konto.google_anmeldung_abschliessen(db, HAUS_A, "code-1", parameter["state"][0], von="chefin")
@@ -375,6 +382,105 @@ class TestGoogle:
             konto.google_anmeldung_abschliessen(db, HAUS_B, "code-1", state)
         with pytest.raises(konto.MailkontoFehler, match="Signatur"):
             konto.google_anmeldung_abschliessen(db, HAUS_A, "code-1", state[:-2] + "00")
+
+
+class TestMicrosoft:
+    def test_nur_mit_anmeldung_ueber_microsoft(self, engine, db):
+        from sqlalchemy import text
+        from sqlalchemy.exc import IntegrityError
+
+        from app.services.mailkonto_service import MailkontoFehler
+
+        with pytest.raises(MailkontoFehler, match="Microsoft 365 nur"):
+            anlegen(db, kennung="zentrale", anbieter="microsoft", anmeldung="passwort")
+        pf = anlegen(db, kennung="zentrale", anbieter="microsoft", passwort=None,
+                     absender_email="zentrale@haus.onmicrosoft.example")
+        assert pf["anmeldung"] == "oauth2"
+        with pytest.raises(IntegrityError), engine.begin() as v:
+            v.execute(text("UPDATE domain_shared.mailkonten SET anmeldung = 'passwort' WHERE id = :i"), {"i": pf["id"]})
+
+    def test_anmeldung_bis_zum_versand_ueber_graph(self, engine, db, google, monkeypatch):
+        from urllib.parse import parse_qs, urlparse
+
+        from sqlalchemy import text
+
+        from app.services import mailkonto_service as konto
+        from app.services.mail_versand import sende_mail
+
+        monkeypatch.setenv("MICROSOFT_OAUTH_TENANT", "contoso-id")
+        pf = anlegen(db, kennung="zentrale", anbieter="microsoft", passwort=None,
+                     absender_email="zentrale@gmail.example", ist_standard=True, absender_name="Zentrale")
+        url = konto.anmeldung_starten(db, HAUS_A, pf["id"])["url"]
+        assert url.startswith("https://login.microsoftonline.com/contoso-id/oauth2/v2.0/authorize?")
+        parameter = parse_qs(urlparse(url).query)
+        assert "Mail.Send" in parameter["scope"][0] and "offline_access" in parameter["scope"][0]
+        konto.anmeldung_abschliessen(db, HAUS_A, "code-ms", parameter["state"][0], von="chefin")
+        with engine.connect() as v:
+            gespeichert = v.execute(text("SELECT geheimnis FROM domain_shared.mailkonten WHERE id = :i"),
+                                    {"i": pf["id"]}).scalar()
+        assert gespeichert.startswith("v1:") and "refresh-xyz" not in gespeichert
+        assert google[0]["url"] == "https://login.microsoftonline.com/contoso-id/oauth2/v2.0/token"
+
+        sende_mail("kunde@example.org", "Hallo", "Text", db=db, tenant_id=HAUS_A, nutzer=LAGER)
+        graph = google[-1]
+        assert graph["url"] == "https://graph.microsoft.com/v1.0/me/sendMail"
+        assert graph["headers"] == {"Authorization": "Bearer frisch-789"}
+        assert graph["json"]["saveToSentItems"] is True
+        assert graph["json"]["message"]["toRecipients"] == [{"emailAddress": {"address": "kunde@example.org"}}]
+        assert "from" not in graph["json"]["message"]  # angemeldet als die Absenderadresse
+
+    def test_alias_sendet_ueber_graph_mit_eigenem_absender(self, db, google):
+        from urllib.parse import parse_qs, urlparse
+
+        from app.services import mailkonto_service as konto
+        from app.services.mail_versand import sende_mail
+
+        haupt = anlegen(db, kennung="zentrale", anbieter="microsoft", passwort=None,
+                        absender_email="zentrale@gmail.example")
+        state = parse_qs(urlparse(konto.anmeldung_starten(db, HAUS_A, haupt["id"])["url"]).query)["state"][0]
+        konto.anmeldung_abschliessen(db, HAUS_A, "code-ms", state)
+        anlegen(db, kennung="fibu", anbieter="alias", zugang_von=haupt["id"], passwort=None,
+                absender_email="fibu@haus.example", absender_name="Buchhaltung", verwendungen=["fibu"])
+        sende_mail("kunde@example.org", "Mahnung", "x", db=db, tenant_id=HAUS_A, verwendung="fibu", nutzer=LAGER)
+        assert google[-1]["json"]["message"]["from"] == {
+            "emailAddress": {"address": "fibu@haus.example", "name": "Buchhaltung"}}
+
+    def test_graph_ablehnung_ist_kein_erfolg(self, db, google, monkeypatch):
+        import httpx
+        from urllib.parse import parse_qs, urlparse
+
+        from app.services import mailkonto_service as konto
+        from app.services.mail_versand import MailVersandFehler, sende_mail
+
+        pf = anlegen(db, kennung="zentrale", anbieter="microsoft", passwort=None,
+                     absender_email="zentrale@gmail.example", ist_standard=True)
+        state = parse_qs(urlparse(konto.anmeldung_starten(db, HAUS_A, pf["id"])["url"]).query)["state"][0]
+        konto.anmeldung_abschliessen(db, HAUS_A, "code-ms", state)
+        echt = httpx.post
+
+        class Abgelehnt:
+            status_code = 403
+            text = "ErrorSendAsDenied"
+
+        def ablehnen(url, **kw):
+            return Abgelehnt() if "graph.microsoft.com" in url else echt(url, **kw)
+
+        monkeypatch.setattr(httpx, "post", ablehnen)
+        with pytest.raises(MailVersandFehler, match="ErrorSendAsDenied"):
+            sende_mail("kunde@example.org", "x", "y", db=db, tenant_id=HAUS_A, nutzer=LAGER)
+
+    def test_state_traegt_den_anbieter(self, db, google):
+        from urllib.parse import parse_qs, urlparse
+
+        from app.services import mailkonto_service as konto
+
+        g = anlegen(db, kennung="gmail", anbieter="google", anmeldung="oauth2", passwort=None,
+                    absender_email="g@gmail.example")
+        m = anlegen(db, kennung="m365", anbieter="microsoft", passwort=None, absender_email="m@haus.example")
+        state_g = parse_qs(urlparse(konto.anmeldung_starten(db, HAUS_A, g["id"])["url"]).query)["state"][0]
+        assert konto._state_pruefen(state_g, HAUS_A) == (g["id"], "google")
+        state_m = parse_qs(urlparse(konto.anmeldung_starten(db, HAUS_A, m["id"])["url"]).query)["state"][0]
+        assert konto._state_pruefen(state_m, HAUS_A) == (m["id"], "microsoft")
 
 
 # ── HTTP ──────────────────────────────────────────────────────────────────────

@@ -11,7 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## POSTFACH-MICROSOFT365-20261008 — in Arbeit, Claude Code
+## POSTFACH-MICROSOFT365-20261008 — abgeschlossen, Claude Code
+
+**Abnahme (08.10.2026):** Anbieter Microsoft 365 (nur OAuth, DB-Pruefbedingung), Versand ueber
+Microsoft Graph sendMail (202 = angenommen, Gesendete Elemente), Alias per `from`; Anmeldeweg fuer
+Google und Microsoft vereinheitlicht (`/anmeldung/start|abschluss`, Rueckruf
+`/admin/postfaecher/anmeldung-rueckruf`). Migration `postfach_microsoft_20261008` (Probe + Dev).
+QA: [postfach-microsoft365-20261008.md](../quality-assurance/postfach-microsoft365-20261008.md).
+
 
 **Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** Postfaecher mit Microsoft 365:
 Anmeldung per OAuth2 (Microsoft Identity Platform, delegiert, `Mail.Send` + `offline_access`),
