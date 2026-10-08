@@ -11,6 +11,18 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## Zahlungslauf-Freigabenachweis (2026-10-08)
+
+Fehlende authentifizierte Freigeber, fehlende Ersteller und Selbstfreigaben
+zentral gesperrt; tenantgebundener FOR-UPDATE-Guard fordert draft in allen
+Command-Modi. Echte Freigabe/Audit/Outbox atomar, Vorschauen schreibfrei.
+Original 18 Fehler/7 gruen; final 36 Guard-/HTTP-/API-/echte PG-Vertraege
+ohne Skip gruen (61,43s). Gemeinsamer valeo_probe, nur eigene Testdaten;
+keine neue DB/Container/Schema/Migration/Reset. Menschlicher Rollenschutz und
+forbiddenForAgents bleiben verpflichtend. Zahlauf-MCP open_high, FIN-CLOSE
+gegen ADR-076 und die 31 fehlenden HTTP-Commandvertraege bleiben offen.
+[QA und Handshake](../quality-assurance/payment-run-evidence-20261008.md).
+
 ## SonarCloud — Runtime-Blocker und verbleibende Gatebedingungen (2026-10-08)
 
 Quality Gate37828122495 aufcbcd52b84 bestaetigt den frischen 670er-Katalog,

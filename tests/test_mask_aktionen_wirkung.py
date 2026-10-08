@@ -147,8 +147,8 @@ def zahlungslauf(engine, haus: str, status: str = "draft") -> str:
         v.execute(
             text(
                 "INSERT INTO domain_erp.payment_runs (id, tenant_id, run_number, execution_date, "
-                " initiator_name, initiator_iban, status) "
-                "VALUES (:id, :h, :nr, :d, 'Pruefbetrieb', 'DE02120300000000202051', :s)"
+                " initiator_name, initiator_iban, status, created_by) "
+                "VALUES (:id, :h, :nr, :d, 'Pruefbetrieb', 'DE02120300000000202051', :s, 'maker')"
             ),
             {"id": kennung, "h": haus, "nr": f"ZL-{kennung[:8]}", "d": date.today(), "s": status},
         )

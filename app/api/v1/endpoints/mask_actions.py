@@ -84,14 +84,9 @@ async def action_payment_run_freigeben(
     user: dict = Depends(finance_admin),
 ) -> MaskActionResult:
     async def pruefen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> list[dict[str, Any]]:
-        status = db_.execute(
-            text("SELECT status FROM domain_erp.payment_runs WHERE id = :id AND tenant_id = :tid"),
-            {"id": eid, "tid": tid},
-        ).scalar()
-        if status is None:
-            return _fehler("Zahlungslauf nicht gefunden.")
-        if status != "draft":
-            return _fehler(f"Zahlungslauf ist nicht im Entwurf und kann nicht freigegeben werden (Status: {status}).")
+        from app.services.payment_run_freigabe import pruefe_freigabe
+
+        pruefe_freigabe(db_, eid, tid, str(user.get("sub") or "").strip())
         return []
 
     async def freigeben(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> str:
