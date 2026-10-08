@@ -623,7 +623,9 @@ class TestMaske:
 
         felder = {f["key"]: f for f in get_screen_definition("admin/postfaecher")["fields"]}
         assert {o["value"] for o in felder["anbieter"]["options"]} == set(VORLAGEN)
-        assert all(v in felder["verwendungen"]["helpText"] for v in VERWENDUNGEN)
+        assert felder["verwendungen"]["type"] == "multiselect"
+        assert [o["value"] for o in felder["verwendungen"]["options"]] == list(VERWENDUNGEN)
+        assert felder["rollen"]["type"] == "multiselect"  # Optionen: Rollen des Hauses, von der Seite geladen
 
     def test_jede_aktion_hat_einen_befehl(self):
         from app.core.screen_definitions import get_screen_definition

@@ -11,7 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## ADMIN-RECHTE-MULTISELECT-20261008 — in Arbeit, Claude Code
+## ADMIN-RECHTE-MULTISELECT-20261008 — abgeschlossen, Claude Code
+
+**Abnahme (08.10.2026):** `/api/v1/admin/*` hatte keine Rollenpruefung (Benutzer/Rollen/API-Schluessel
+fuer jeden angemeldeten Nutzer) — Schreiben jetzt nur `admin`, Lesen von Benutzern/Rollen/Audit/
+Schluesseln `admin`/`manager`; Strukturtest gegen neue offene Schreibwege. Mask Builder zeichnet
+`multiselect` als Checkbox-Gruppe (Liste, Altwert lesbar); Postfach-Maske: Verwendung und Rollen als
+Mehrfachauswahl. QA: [admin-rechte-multiselect-20261008.md](../quality-assurance/admin-rechte-multiselect-20261008.md).
+
 
 **Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** (1) `/api/v1/admin/*` (admin_core) ohne
 Rollenpruefung: jeder angemeldete Nutzer kann Benutzer anlegen, Rollen aendern, API-Schluessel

@@ -11,6 +11,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
+from app.auth.deps import require_roles
 from app.core.database import get_db
 from app.core.workflow_definitions import merge_workflow_variants
 from app.core.tenant import get_tenant_id
@@ -42,6 +43,12 @@ from app.services.admin_core_service import AdminCoreService
 
 router = APIRouter()
 
+# Bis 08.10.2026 ohne jede Rollenpruefung: jeder angemeldete Nutzer konnte Benutzer
+# anlegen, sich Rollen geben und API-Schluessel erzeugen. Schreiben nur ``admin``;
+# Benutzer, Rollen, Audit-Log und Schluessel lesen ``admin``/``manager``.
+_NUR_ADMIN = [Depends(require_roles("admin"))]
+_LEITUNG = [Depends(require_roles("admin", "manager"))]
+
 
 def _service(tenant_id: str, db: Session) -> AdminCoreService:
     return AdminCoreService(db, tenant_id)
@@ -55,7 +62,7 @@ def _load_tenant_settings(db: Session, tenant_id: str):
 # ── Users ────────────────────────────────────────────────────────────────────
 
 
-@router.get("/benutzer", response_model=list[AdminUserOut], summary="Admin users auflisten")
+@router.get("/benutzer", response_model=list[AdminUserOut], summary="Admin users auflisten", dependencies=_LEITUNG)
 async def list_admin_users(
     search: str | None = Query(default=None),
     tenant_id: str = Depends(get_tenant_id),
@@ -64,7 +71,7 @@ async def list_admin_users(
     return _service(tenant_id, db).list_users(search)
 
 
-@router.get("/benutzer/{user_id}", response_model=AdminUserOut, summary="Admin user abrufen")
+@router.get("/benutzer/{user_id}", response_model=AdminUserOut, summary="Admin user abrufen", dependencies=_LEITUNG)
 async def get_admin_user(
     user_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -73,7 +80,7 @@ async def get_admin_user(
     return _service(tenant_id, db).get_user(user_id)
 
 
-@router.post("/benutzer", response_model=AdminUserOut, status_code=201, summary="Admin user anlegen")
+@router.post("/benutzer", response_model=AdminUserOut, status_code=201, summary="Admin user anlegen", dependencies=_NUR_ADMIN)
 async def create_admin_user(
     payload: AdminUserCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -82,7 +89,7 @@ async def create_admin_user(
     return _service(tenant_id, db).create_user(payload)
 
 
-@router.put("/benutzer/{user_id}", response_model=AdminUserOut, summary="Admin user aktualisieren")
+@router.put("/benutzer/{user_id}", response_model=AdminUserOut, summary="Admin user aktualisieren", dependencies=_NUR_ADMIN)
 async def update_admin_user(
     user_id: str,
     payload: AdminUserUpdate,
@@ -92,7 +99,7 @@ async def update_admin_user(
     return _service(tenant_id, db).update_user(user_id, payload)
 
 
-@router.delete("/benutzer/{user_id}", status_code=204, response_class=Response, response_model=None, summary="Admin user löschen")
+@router.delete("/benutzer/{user_id}", status_code=204, response_class=Response, response_model=None, summary="Admin user löschen", dependencies=_NUR_ADMIN)
 async def delete_admin_user(
     user_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -104,7 +111,7 @@ async def delete_admin_user(
 # ── Roles ────────────────────────────────────────────────────────────────────
 
 
-@router.get("/rollen", response_model=list[AdminRoleOut], summary="Admin roles auflisten")
+@router.get("/rollen", response_model=list[AdminRoleOut], summary="Admin roles auflisten", dependencies=_LEITUNG)
 async def list_admin_roles(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -112,7 +119,7 @@ async def list_admin_roles(
     return _service(tenant_id, db).list_roles()
 
 
-@router.post("/rollen", response_model=AdminRoleOut, status_code=201, summary="Admin role anlegen")
+@router.post("/rollen", response_model=AdminRoleOut, status_code=201, summary="Admin role anlegen", dependencies=_NUR_ADMIN)
 async def create_admin_role(
     payload: AdminRoleCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -121,7 +128,7 @@ async def create_admin_role(
     return _service(tenant_id, db).create_role(payload)
 
 
-@router.put("/rollen/{role_id}", response_model=AdminRoleOut, summary="Admin role aktualisieren")
+@router.put("/rollen/{role_id}", response_model=AdminRoleOut, summary="Admin role aktualisieren", dependencies=_NUR_ADMIN)
 async def update_admin_role(
     role_id: str,
     payload: AdminRoleUpdate,
@@ -131,7 +138,7 @@ async def update_admin_role(
     return _service(tenant_id, db).update_role(role_id, payload)
 
 
-@router.delete("/rollen/{role_id}", status_code=204, response_class=Response, response_model=None, summary="Admin role löschen")
+@router.delete("/rollen/{role_id}", status_code=204, response_class=Response, response_model=None, summary="Admin role löschen", dependencies=_NUR_ADMIN)
 async def delete_admin_role(
     role_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -143,7 +150,7 @@ async def delete_admin_role(
 # ── Audit log ─────────────────────────────────────────────────────────────────
 
 
-@router.get("/audit-log", response_model=list[AdminAuditOut], summary="Admin audit log auflisten")
+@router.get("/audit-log", response_model=list[AdminAuditOut], summary="Admin audit log auflisten", dependencies=_LEITUNG)
 async def list_admin_audit_log(
     search: str | None = Query(default=None),
     limit: int = Query(default=250, ge=1, le=1000),
@@ -156,7 +163,7 @@ async def list_admin_audit_log(
 # ── API keys ──────────────────────────────────────────────────────────────────
 
 
-@router.get("/api-keys", response_model=list[AdminApiKeyOut], summary="Admin api keys auflisten")
+@router.get("/api-keys", response_model=list[AdminApiKeyOut], summary="Admin api keys auflisten", dependencies=_LEITUNG)
 async def list_admin_api_keys(
     include_revoked: bool = Query(default=False),
     tenant_id: str = Depends(get_tenant_id),
@@ -171,7 +178,7 @@ async def get_agent_manifest() -> AgentManifestOut:
     return AdminCoreService.agent_manifest()
 
 
-@router.post("/api-keys", response_model=AdminApiKeySecretOut, status_code=201, summary="Admin api key anlegen")
+@router.post("/api-keys", response_model=AdminApiKeySecretOut, status_code=201, summary="Admin api key anlegen", dependencies=_NUR_ADMIN)
 async def create_admin_api_key(
     payload: AdminApiKeyCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -180,7 +187,7 @@ async def create_admin_api_key(
     return _service(tenant_id, db).create_api_key(payload)
 
 
-@router.put("/api-keys/{key_id}", response_model=AdminApiKeyOut, summary="Admin api key aktualisieren")
+@router.put("/api-keys/{key_id}", response_model=AdminApiKeyOut, summary="Admin api key aktualisieren", dependencies=_NUR_ADMIN)
 async def update_admin_api_key(
     key_id: str,
     payload: AdminApiKeyUpdate,
@@ -190,7 +197,7 @@ async def update_admin_api_key(
     return _service(tenant_id, db).update_api_key(key_id, payload)
 
 
-@router.post("/api-keys/{key_id}/rotate", response_model=AdminApiKeySecretOut, summary="Admin api key rotate")
+@router.post("/api-keys/{key_id}/rotate", response_model=AdminApiKeySecretOut, summary="Admin api key rotate", dependencies=_NUR_ADMIN)
 async def rotate_admin_api_key(
     key_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -199,7 +206,7 @@ async def rotate_admin_api_key(
     return _service(tenant_id, db).rotate_api_key(key_id)
 
 
-@router.post("/api-keys/{key_id}/revoke", status_code=204, response_class=Response, response_model=None, summary="Admin api key revoke")
+@router.post("/api-keys/{key_id}/revoke", status_code=204, response_class=Response, response_model=None, summary="Admin api key revoke", dependencies=_NUR_ADMIN)
 async def revoke_admin_api_key(
     key_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -219,7 +226,7 @@ async def get_process_variants(
     return _service(tenant_id, db).get_process_variants()
 
 
-@router.put("/process-variants", response_model=ProcessVariantsOut, summary="Process variants put")
+@router.put("/process-variants", response_model=ProcessVariantsOut, summary="Process variants put", dependencies=_NUR_ADMIN)
 async def put_process_variants(
     payload: ProcessVariantsOut,
     tenant_id: str = Depends(get_tenant_id),
@@ -239,7 +246,7 @@ async def get_policy_overrides(
     return _service(tenant_id, db).get_policy_overrides()
 
 
-@router.put("/policy-overrides", response_model=PolicyOverridesOut, summary="Policy overrides put")
+@router.put("/policy-overrides", response_model=PolicyOverridesOut, summary="Policy overrides put", dependencies=_NUR_ADMIN)
 async def put_policy_overrides(
     payload: PolicyOverridesOut,
     tenant_id: str = Depends(get_tenant_id),
@@ -264,7 +271,7 @@ async def get_erntefenster_campaigns(
     return _service(tenant_id, db).get_erntefenster_campaigns()
 
 
-@router.post("/erntefenster-from-template", response_model=ErntefensterCampaignOut, status_code=201, summary="Erntefenster from template anlegen")
+@router.post("/erntefenster-from-template", response_model=ErntefensterCampaignOut, status_code=201, summary="Erntefenster from template anlegen", dependencies=_LEITUNG)
 async def create_erntefenster_from_template(
     payload: ErntefensterFromTemplateIn,
     tenant_id: str = Depends(get_tenant_id),

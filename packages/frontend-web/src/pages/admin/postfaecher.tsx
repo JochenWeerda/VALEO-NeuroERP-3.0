@@ -20,6 +20,7 @@ import { createScreenContext } from '@/components/mask-builder/governance/screen
 import type { ScreenActionDefinition, ScreenDefinition } from '@/components/mask-builder/schema'
 import type { WorkflowState } from '@/components/mask-builder/runtime/WorkflowRuntime'
 import { getAxiosErrorMessage } from '@/lib/api-client'
+import { useRollen } from '@/lib/api/admin'
 import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { adminPostfaecherScreen } from '@/masks/capture-screens'
 import {
@@ -43,7 +44,7 @@ const STATUS: Record<string, string> = { neu: 'Ungeprüft', geprueft: 'Geprüft'
 const leer: Record<string, unknown> = {
   kennung: '', bezeichnung: '', absender_email: '', absender_name: '', anbieter: 'ionos', anmeldung: 'passwort',
   passwort: '', benutzer: '', smtp_host: '', smtp_port: '', sicherheit: 'starttls', zugang_von: '',
-  verwendungen: '', rollen: '', benutzer_freigabe: '', persoenlich_fuer: '', ist_standard: false,
+  verwendungen: [], rollen: [], benutzer_freigabe: '', persoenlich_fuer: '', ist_standard: false,
 }
 
 function text(wert: unknown): string {
@@ -51,6 +52,7 @@ function text(wert: unknown): string {
 }
 
 function liste(wert: unknown): string[] {
+  if (Array.isArray(wert)) return wert.map(String).filter(Boolean)
   return text(wert).split(',').map((teil) => teil.trim()).filter(Boolean)
 }
 
@@ -61,8 +63,8 @@ function alsFormular(postfach: Postfach): Record<string, unknown> {
     passwort: '',
     smtp_port: postfach.smtp_port ?? '',
     zugang_von: postfach.zugang_von ?? '',
-    verwendungen: postfach.verwendungen.join(', '),
-    rollen: postfach.rollen.join(', '),
+    verwendungen: [...postfach.verwendungen],
+    rollen: [...postfach.rollen],
     benutzer_freigabe: postfach.benutzer_freigabe.join(', '),
   }
 }
@@ -72,6 +74,8 @@ export default function AdminPostfaecherPage(): JSX.Element {
   const queryClient = useQueryClient()
   const abfrage = useQuery({ queryKey: ['admin-postfaecher'], queryFn: listePostfaecher })
   const postfaecher = useMemo(() => abfrage.data ?? [], [abfrage.data])
+  // Rollen des Hauses als Auswahl; eine schon vergebene, unbekannte Rolle bleibt waehlbar.
+  const rollen = useRollen()
   const [geladen, setGeladen] = useState<string | null>(null)
   const [laeuft, setLaeuft] = useState<string | null>(null)
   const sperre = useRef(false)
@@ -101,6 +105,16 @@ export default function AdminPostfaecherPage(): JSX.Element {
             .filter((p) => p.anbieter !== 'alias' && p.id !== geladen)
             .map((p) => ({ value: p.id, label: `${p.kennung} (${p.absender_email})` })),
         }
+      : feld.key === 'rollen'
+        ? {
+            ...feld,
+            options: [
+              ...(rollen.data ?? []).map((r) => ({ value: r.id, label: r.name || r.id })),
+              ...(aktuell?.rollen ?? [])
+                .filter((id) => !(rollen.data ?? []).some((r) => r.id === id))
+                .map((id) => ({ value: id, label: id })),
+            ],
+          }
       : feld.key === 'passwort' && aktuell?.hat_geheimnis
         ? { ...feld, placeholder: 'hinterlegt – leer lassen zum Behalten' }
         : feld),
@@ -110,7 +124,7 @@ export default function AdminPostfaecherPage(): JSX.Element {
         || (action.key === 'testen' && !aktuell)
         || (action.key === 'anmelden' && !(aktuell && ['google', 'microsoft'].includes(aktuell.anbieter) && aktuell.anmeldung === 'oauth2')),
     })),
-  }), [aktuell, geladen, isTouch, laeuft, postfaecher, standard])
+  }), [aktuell, geladen, isTouch, laeuft, postfaecher, rollen.data, standard])
 
   const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: ['admin.postfach.testen'] }), [schema])
   const form = useUniversalFormState({ screen: schema, initialValues: leer })
