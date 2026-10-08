@@ -11,6 +11,19 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## ADMIN-RECHTE-MULTISELECT-20261008 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** (1) `/api/v1/admin/*` (admin_core) ohne
+Rollenpruefung: jeder angemeldete Nutzer kann Benutzer anlegen, Rollen aendern, API-Schluessel
+erzeugen — Rechteausweitung schliessen (Schreiben nur `admin`, Lesen von Benutzern/Rollen/
+Audit/Schluesseln `admin`/`manager`). (2) Mask Builder: `multiselect` als echte Mehrfachauswahl
+(Checkbox-Gruppe, Werte als Liste) und in `admin/postfaecher` fuer Verwendung und Rollen
+(Optionen aus `/admin/postfaecher/verwendungen` bzw. `/admin/rollen`). **Dateibesitz:**
+`app/api/v1/endpoints/admin_core.py` (nur Abhaengigkeiten), Mask-Builder `FieldRenderer`/
+`validation`, Screen Definition + TS-Spiegel `admin/postfaecher`, `pages/admin/postfaecher.tsx`,
+Tests, QA-Doku. Fremde WIP unberuehrt.
+
+
 ## POSTFACH-MICROSOFT365-20261008 — abgeschlossen, Claude Code
 
 **Abnahme (08.10.2026):** Anbieter Microsoft 365 (nur OAuth, DB-Pruefbedingung), Versand ueber
