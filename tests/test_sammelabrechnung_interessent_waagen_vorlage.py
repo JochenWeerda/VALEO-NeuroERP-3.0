@@ -370,7 +370,7 @@ def test_interessent_konvertieren_returns_kunden_nr():
 # ===========================================================================
 
 @pytest.mark.unit
-def test_ebilanz_export_taxonomie_67():
+def test_ebilanz_export_taxonomie_69():
     app, _ = _app_ebilanz()
     client = TestClient(app)
     resp = client.post("/ebilanz/export/erstellen", json={
@@ -383,7 +383,7 @@ def test_ebilanz_export_taxonomie_67():
     })
     assert resp.status_code == 201
     data = resp.json()
-    assert data["taxonomie_version"] == "6.7"
+    assert data["taxonomie_version"] == "6.9"
     assert "export_id" in data
     assert data["status"] == "ERSTELLT"
 
@@ -414,7 +414,7 @@ def test_ebilanz_eric_readiness_declares_external_gates():
     data = resp.json()
     assert data["repo_contract_ready"] is False
     assert data["status"] == "NOT_READY_EXTERNAL_GATE"
-    assert data["xbrl_taxonomie_version"] == "6.7"
+    assert data["xbrl_taxonomie_version"] == "6.9"
     assert any("ERiC" in gate for gate in data["external_gates"])
 
 

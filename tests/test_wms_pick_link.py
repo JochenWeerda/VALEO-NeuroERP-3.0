@@ -154,8 +154,12 @@ class TestConfirmPickListShipsDeliveryNote:
             elif "FROM domain_inventory.pick_list_lines WHERE pick_list_id" in sql_str:
                 mock_result.fetchall.return_value = [_row(status="DONE")]
             elif "FROM domain_inventory.bin_stock" in sql_str:
-                mock_result.fetchone.return_value = _row(quantity_kg=Decimal("100"))
+                mock_result.fetchone.return_value = _row(id="STOCK-1", quantity_kg=Decimal("100"))
                 mock_result.fetchall.return_value = [_row(quantity_kg=Decimal("100"))]
+            elif "FROM domain_inventory.warehouse_bins" in sql_str:
+                mock_result.fetchone.return_value = _row(warehouse_id="WH-1")
+            elif "FROM domain_inventory.articles" in sql_str:
+                mock_result.scalar.return_value = 1
             else:
                 mock_result.fetchone.return_value = None
                 mock_result.fetchall.return_value = []
