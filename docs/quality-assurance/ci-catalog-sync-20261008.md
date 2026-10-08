@@ -40,19 +40,27 @@ wurden. Der korrigierte Ablauf trennt die 20 isolierten Tests vom realen
 lesenden Schema-Vertrag; keine Produkt- oder Testaussage abgeschwaecht.
 
 Das bestehende Quality Gate bleibt verbindlich rot bei Schemaabweichung.
-Vorbereitet, noch nicht veroeffentlicht: Nur nach einem fehlgeschlagenen
+Nach ausdruecklicher Nutzer-Freigabe autorisiert:
+Nur nach einem fehlgeschlagenen
 Katalogvergleich erntet derselbe Job seine
 bereits migrierte Datenbank und speichert beide Katalogdateien im Artefakt
 `fresh-schema-table-catalog` fuer 14 Tage. Ein fehlgeschlagener Ernteschritt
 laedt keinen alten Katalog als neuen Nachweis hoch. Daraus muss der genaue
 Schemaunterschied geprueft werden, bevor ein neuer Katalog integriert wird.
 
-Offen: ausdrueckliche Freigabe des GitHub-Artefaktuploads, danach frische
-CI-Ernte auswerten und den bestaetigten Drift schliessen. Die automatische
+Offen: frische CI-Ernte auswerten und den bestaetigten Drift schliessen. Die automatische
 Freigabepruefung hat den Commit mit Upload zweimal abgelehnt, weil der
 frische Schemakatalog zusaetzliche bisher nicht veroeffentlichte Metadaten
 enthalten koennte. Auch die belegte oeffentliche Version der bisherigen
 Katalogdateien ersetzt diese Freigabe laut Pruefung nicht. Die Erweiterung
-bleibt lokal reviewbar in `.github/workflows/quality-gate.yml`; sie wird
-ohne Freigabe weder committet noch aktiviert. Der lokale Pruefstand liefert
+war lokal reviewbar in `.github/workflows/quality-gate.yml`. Auch ein erneuter
+Versuch nach weiter wurde von der automatischen Pruefung abgelehnt. Erst die
+anschliessende ausdrueckliche Nachricht "ich erlaube dir den Upload" hat die
+Aktivierung freigegeben; der Commit wurde danach zugelassen.
+Der lokale Pruefstand liefert
 bisher keinen Beleg fuer die genaue Ursache des frischen Schema-Drifts.
+
+Auf 02ce0879c sind grosser CI37788113807, Docs Build37788113871,
+Security Scan37788113995 und Smokes gruen. Quality Gate37788114327
+bleibt am Tabellenkatalog rot. Die Diagnose erweitert nur dessen Nachweis;
+kein Gate abgeschwaecht und keine weitere Datenbank erzeugt.

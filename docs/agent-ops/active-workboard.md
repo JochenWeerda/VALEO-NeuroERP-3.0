@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## VERSANDWEGE-ECHT-20261008 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** Versandwege, die "versendet" melden ohne
+zu senden, auf die Postfaecher umstellen: (1) Einkauf `bestellungen/{id}/versenden` simuliert E-Mail
+ohne SMTP und setzt bei nicht eingerichtetem Fax/EDI "versandt"; (2) RFQ `send` meldet
+`suppliers_notified` ohne Nachricht; (3) Bridge `einkauf/anfragen/{id}/send` antwortet `sent: true`
+ohne Versand und ohne Speichern; (4) "Mahnung senden" setzt `sent` ohne Mail; Mahnlauf findet
+Rechnungs-OPs nicht (`kunde_id` statt `debtor_id`). Dazu Anhaenge/HTML in `mail_versand`.
+**Dateibesitz:** `app/services/mail_versand.py`, `modules/einkauf/services/versand_service.py`,
+`app/services/rfq_service.py`, `app/api/v1/endpoints/{rfq,dunning,einkauf_bestellvorschlag}.py`,
+`mask_frontend_bridges.py::send_anfrage`, eine additive Migration (dunning_notices), Tests, QA.
+Double-Opt-In-Mail (crm_consents) folgt separat. Fremde WIP unberuehrt.
+
+
 ## ADMIN-RECHTE-MULTISELECT-20261008 — abgeschlossen, Claude Code
 
 **Abnahme (08.10.2026):** `/api/v1/admin/*` hatte keine Rollenpruefung (Benutzer/Rollen/API-Schluessel
@@ -290,7 +304,7 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 
 **DOCS-MAIL-IMPORT-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Docs Build37786113441 scheiterte beim kanonischen Postfach-Screenimport an fehlendem httpx. requirements-docs.txt deklariert die vier belegten Importabhaengigkeiten httpx0.28.1, SQLAlchemy2.0.41, cryptography50.0.1, FastAPI0.136.3; keine vollstaendige Backendinstallation oder fremde Mail-/Maskenaenderung. Bestehender Handbuch-Driftcheck und kompletter MkDocs-Build aus committed Quelle mit frischer isolierter Docs-Umgebung gruen. Keine DB/Container/Versand/OAuth. QA docs-mail-import-20261008.md. Schema-Artefaktupload weiterhin separate nicht aktivierte Vorlage, ausdrueckliche Freigabe offen.
 
-**CI-CATALOG-SYNC-20261008 (in arbeit):** Owner Codex-01a0f3fc. Aktionsdrift geschlossen: kanonisches Postfach-anmelden statt google, 85 Aktionen/45 Masken, Generator --check und 20 isolierte Tests plus vorhandener Consent-Schema-Vertrag lesend bestanden. Quality Gate37758811757 Tabellenkatalog offen: lokale valeo_probe auf postfach_microsoft_20261008 stimmt unveraendert mit 661 Tabellen ueberein. Upload-Erweiterung lokal vorbereitet, nicht aktiviert: automatische Freigabepruefung zweimal abgelehnt wegen moeglicher bisher unveroeffentlichter Strukturmetadaten. Ausdrueckliche Upload-Freigabe offen; rotes Gate unveraendert. Keine fremden Katalog-WIP uebernommen, keine neue DB/Container/Reset/Migration. QA ci-catalog-sync-20261008.md. Weiter: frische CI-Ernte auswerten, nur belegte Katalogabweichung integrieren.
+**CI-CATALOG-SYNC-20261008 (in arbeit):** Owner Codex-01a0f3fc. Aktionskatalog geschlossen; grosser CI37788113807, Docs Build37788113871, Security Scan37788113995 und Smokes auf 02ce0879c gruen. Quality Gate37788114327 weiterhin Tabellenkatalog-Drift. Nutzer hat nach erneuter automatischer Ablehnung ausdruecklich ich erlaube dir den Upload erklaert; vorbereitete 14-Tage-Ernte der bestehenden frischen Job-DB jetzt aktiviert. Nur Strukturmetadaten/Codepfade, keine Geschaeftsdaten/Secrets; unveraendert rotes Gate bei Drift, kein Upload bei fehlgeschlagener Ernte. Lokale valeo_probe stimmt mit 661 Tabellen ueberein, ersetzt keine frische Schemaabnahme. Fremde Katalog-WIP geschuetzt; keine neue DB/Container/Reset/Migration. Weiter: exaktes GitHub-Artefakt auswerten und bestaetigten Drift integrieren. QA ci-catalog-sync-20261008.md.
 
 **SORTEN-CANONICAL-READ-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. GitHub Agrar-Smoketraces dreimal404 am nichtexistenten /agrar/saatgut/sortenregister; bestehender kanonischer /agrar/varieties-Vertrag und AgrarSorte bereits vorhanden. Besitz agrar.ts nur Sorten-Typ/Hook, VarietySelectionDialog.tsx nur kanonischer Typimport, sortenregister.tsx und bestellung.tsx ausschliesslich bestehende Datenfeldverwendung; fremde UI-WIP geschuetzt durch eigene Hunks aus HEAD. Kein neuer API/DB/Adapter oder UI-Neudesign, keine erfundenen Zulassungs-/Verfuegbarkeitswerte. Fokussierte echte Query-/React-/Browservertraege und bestehender Agrar-API-Vertrag; Smoke prueft exakte Maske statt beliebiger Ueberschrift. QA/Meridian/Open-Gaps/Workboard nachziehen. Abnahme kanonische Daten und Fehlerfall, kein404-Verstecken, keine DB/Container/Reset. Abnahme: Vier echte React-Query-Vertraege, zwei Chromium-Faelle (Daten/Filter + retrybarer Fehler),18 Schema-/HTTP-Mockvertraege73,41s und vollstaendige finale Frontend-Typpruefung gruen. Originaltraces3x404; bestehender kanonischer VarietyOut samt nullable Feldern/Aktivstatus, keine Phantomdaten, keine neue API/DB/Container. Fuenf reale DB-Tests ohne konfigurierte DB nicht abgenommen; danach nur isolierte Schema-/Mockvertraege. SecurityScan37739699012 und grosser CI37739698939 b47 gruen; Sorten-Folge-CI offen. Handelsbestand/-preise und Ernte-Standardfallback separat offen. Workboard-Rennen sofort aus Vorgaenger repariert; Integration atomar nach Staged-Gates, fremde UI-Hunks und Microsoft365-Claim erhalten. Pflichtformatter-Finalisierung: zwei optionale Suchketten mitgeliefert, gepruefter Arbeits-/Commitinhalt explizit gleich; Staged-Gates erneut gruen.
 
