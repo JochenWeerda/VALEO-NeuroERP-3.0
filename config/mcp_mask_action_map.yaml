@@ -14,12 +14,15 @@ mcp_write_tools:
 - crm.lead.qualify
 - sales.invoice.propose
 - sales.invoice.post
+- finance.ap_invoice.propose
+- finance.ap_invoice.freigeben
 - agrar.ration.transition
 - agrar.feeding.supply_handoff
 - agrar.feeding.actual_measure
 - agrar.feeding.configure_threshold
 - agrar.feed_analysis.transition
 - qualitaet.reklamation.abschliessen
+- lager.inventur.propose_opening
 - einkauf.bestellung.versenden
 - einkauf.angebot.bestellen
 - einkauf.anlieferavis.wareneingang
@@ -27,7 +30,7 @@ mcp_write_tools:
 - produktion.control.sync
 - planung.calendar.reproject
 - mobile.sync.process_pending
-mcp_read_tools_count: 17
+mcp_read_tools_count: 18
 mcp_native_writes:
 - mcp_tool_id: crm.contact.log
   mask_action_id: null
@@ -41,6 +44,10 @@ mcp_native_writes:
   mask_action_id: null
   coverage: mcp_native
   notes: Post nur nach approved Proposal; kein Mask-ID.
+- mcp_tool_id: finance.ap_invoice.propose
+  mask_action_id: null
+  coverage: mcp_native
+  notes: AP-Freigabe-Vorschlag; Freigeben ist mask:finance/ap-invoice:freigeben.
 fin_close:
   status: blocked_adr_076
   adr: docs/adr/adr-076-cash-close-retirement.md
@@ -53,9 +60,10 @@ stats:
   by_coverage:
     adjacent: 1
     blocked_no_endpoint: 31
-    mapped: 22
+    mapped: 23
+    mapped_propose_only: 1
     mapped_read: 2
-    open_high: 3
+    open_high: 1
 mappings:
 - mask_action_id: mask:admin/postfaecher:neu
   mask: admin/postfaecher
@@ -312,9 +320,10 @@ mappings:
   label: Freigeben
   command_endpoint: /api/v1/finance/ap/invoices/{entity_id}/actions/freigeben
   command: null
-  coverage: open_high
-  notes: FIBU AP-Freigabe — Journal-/Zahlungspfad; kein MCP-Write.
-  mcp_tool_id: null
+  mcp_tool_id: finance.ap_invoice.freigeben
+  coverage: mapped
+  notes: MCP-AP-FREIGABE-20261008; Freigabe nur nach approved Proposal (finance.ap_invoice.propose); echter
+    CommandEndpoint; kein Journal/FIN-CLOSE.
 - mask_action_id: mask:finance/ar-open-item:mahnen
   mask: finance/ar-open-item
   domain: finance
@@ -333,7 +342,7 @@ mappings:
   command_endpoint: /api/v1/finance/payment-runs/{entity_id}/actions/freigeben
   command: null
   coverage: open_high
-  notes: Zahlauf-Freigabe HIGH; nahe Journal/Kasse — ADR-076-Umfeld.
+  notes: Zahlauf-Freigabe HIGH; nahe Journal/Kasse — ADR-076-Umfeld; forbiddenForAgents.
   mcp_tool_id: null
 - mask_action_id: mask:fuhrpark/ausgehende-dokumente:neu
   mask: fuhrpark/ausgehende-dokumente
@@ -461,9 +470,10 @@ mappings:
   label: Bestandsvortrag
   command_endpoint: null
   command: null
-  coverage: open_high
-  notes: Inventur-Bestandsvortrag danger=high / Vier-Augen; kein MCP-Write ohne eigene Freigabe.
-  mcp_tool_id: null
+  mcp_tool_id: lager.inventur.propose_opening
+  coverage: mapped_propose_only
+  notes: MCP-INVENTUR-OPENING-PROPOSE-20261008; propose-only (pending, execute 501); kein CommandEndpoint,
+    kein Booking/Journal — Uebernahme nur UI Vier-Augen.
 - mask_action_id: mask:lager/stock-movement:stornieren
   mask: lager/stock-movement
   domain: lager
@@ -680,6 +690,5 @@ mappings:
   mcp_tool_id: null
 next_medium_candidates: []
 classification_complete: true
-classification_notes: 'MCP-MASK-WRITES-REMAINING-20261008: alle Mask-Mutationen mapped, mapped_read, adjacent,
-  open_high, blocked_no_endpoint oder mcp_native. Keine weiteren open_medium ohne Backend-Erfindung. FIN-CLOSE
-  bleibt blocked_adr_076.'
+classification_notes: 'MCP-INVENTUR-OPENING-PROPOSE-20261008: Inventur-Opening mapped_propose_only. Rest:
+  open_high nur Zahlauf; blocked_no_endpoint 31; FIN-CLOSE blocked_adr_076.'

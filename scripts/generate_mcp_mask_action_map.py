@@ -157,20 +157,28 @@ MAPPED_RULES: dict[str, dict[str, str]] = {
         "coverage": "adjacent",
         "notes": "Druck ≠ Rechnung; Invoice-Propose/Post sind MCP-Writes der Belegkette.",
     },
+    "mask:finance/ap-invoice:freigeben": {
+        "mcp_tool_id": "finance.ap_invoice.freigeben",
+        "coverage": "mapped",
+        "notes": (
+            "MCP-AP-FREIGABE-20261008; Freigabe nur nach approved Proposal "
+            "(finance.ap_invoice.propose); echter CommandEndpoint; kein Journal/FIN-CLOSE."
+        ),
+    },
+    "mask:lager/inventur-nebenlaeufe:create_opening": {
+        "mcp_tool_id": "lager.inventur.propose_opening",
+        "coverage": "mapped_propose_only",
+        "notes": (
+            "MCP-INVENTUR-OPENING-PROPOSE-20261008; propose-only (pending, execute 501); "
+            "kein CommandEndpoint, kein Booking/Journal — Uebernahme nur UI Vier-Augen."
+        ),
+    },
 }
 
 BLOCKED_RULES: dict[str, dict[str, str]] = {
-    "mask:finance/ap-invoice:freigeben": {
-        "coverage": "open_high",
-        "notes": "FIBU AP-Freigabe — Journal-/Zahlungspfad; kein MCP-Write.",
-    },
     "mask:finance/payment-run:freigeben": {
         "coverage": "open_high",
-        "notes": "Zahlauf-Freigabe HIGH; nahe Journal/Kasse — ADR-076-Umfeld.",
-    },
-    "mask:lager/inventur-nebenlaeufe:create_opening": {
-        "coverage": "open_high",
-        "notes": "Inventur-Bestandsvortrag danger=high / Vier-Augen; kein MCP-Write ohne eigene Freigabe.",
+        "notes": "Zahlauf-Freigabe HIGH; nahe Journal/Kasse — ADR-076-Umfeld; forbiddenForAgents.",
     },
     # Restliche medium ohne HTTP-CommandEndpoint: nur ActionRuntime-Command-Namen
     # oder Human-Input-Flow ohne kanonischen MCP-Write-Vertrag — nicht fingieren.
@@ -237,6 +245,12 @@ MCP_NATIVE_WRITES = (
         "mask_action_id": None,
         "coverage": "mcp_native",
         "notes": "Post nur nach approved Proposal; kein Mask-ID.",
+    },
+    {
+        "mcp_tool_id": "finance.ap_invoice.propose",
+        "mask_action_id": None,
+        "coverage": "mcp_native",
+        "notes": "AP-Freigabe-Vorschlag; Freigeben ist mask:finance/ap-invoice:freigeben.",
     },
 )
 
@@ -333,9 +347,8 @@ def build_map() -> dict[str, Any]:
         "next_medium_candidates": [],
         "classification_complete": True,
         "classification_notes": (
-            "MCP-MASK-WRITES-REMAINING-20261008: alle Mask-Mutationen mapped, "
-            "mapped_read, adjacent, open_high, blocked_no_endpoint oder mcp_native. "
-            "Keine weiteren open_medium ohne Backend-Erfindung. FIN-CLOSE bleibt blocked_adr_076."
+            "MCP-INVENTUR-OPENING-PROPOSE-20261008: Inventur-Opening mapped_propose_only. "
+            "Rest: open_high nur Zahlauf; blocked_no_endpoint 31; FIN-CLOSE blocked_adr_076."
         ),
     }
 

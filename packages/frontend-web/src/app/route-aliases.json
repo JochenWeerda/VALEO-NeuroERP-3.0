@@ -1429,6 +1429,10 @@
       "path": "docflow/nachweisraum"
     },
     {
+      "module": "@/pages/docflow/nachweisraum",
+      "path": "docflow/nachweisraum/:id"
+    },
+    {
       "module": "@/pages/docflow/artefakt-freigabe",
       "path": "docflow/artefakt-freigabe"
     },
@@ -1439,6 +1443,10 @@
     {
       "module": "@/pages/docflow/gobd-export",
       "path": "docflow/gobd-export"
+    },
+    {
+      "module": "@/pages/docflow/gobd-export",
+      "path": "docflow/gobd-export/:id"
     },
     {
       "module": "@/pages/einkauf/wareneingangsabgleich",

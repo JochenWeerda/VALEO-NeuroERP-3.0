@@ -20,6 +20,7 @@ from ....core.ki_action_registry import (
     list_action_definitions,
     resolve_actions_for_context,
 )
+from ....core.ki_voice_deep_link_params import extract_deep_link_params
 
 
 class ActionOut(BaseModel):
@@ -58,14 +59,20 @@ class VoiceResolveOut(BaseModel):
 
 
 def _norm(text: str) -> str:
-    return " ".join((text or "").lower().strip().split())
+    normalized = " ".join((text or "").lower().strip().split())
+    return (
+        normalized.replace("ä", "ae")
+        .replace("ö", "oe")
+        .replace("ü", "ue")
+        .replace("ß", "ss")
+    )
 
 
 def _match_phrases(text: str, phrases: list[str]) -> bool:
     normalized = _norm(text)
     for phrase in phrases:
         phrase_normalized = _norm(phrase)
-        if phrase_normalized in normalized or normalized in phrase_normalized:
+        if phrase_normalized and (phrase_normalized in normalized or normalized in phrase_normalized):
             return True
     return False
 
@@ -77,6 +84,7 @@ def _resolve_intent(text: str) -> VoiceResolveOut | None:
     for action in list_action_definitions():
         if _match_phrases(text, action.intent_phrases):
             params: dict[str, Any] = dict(action.default_params)
+            params.update(extract_deep_link_params(action.id, text))
             amount_match = re.search(r"betrag\s+([\d,.]+)\s*(?:eur|euro)?", text, re.I)
             if amount_match:
                 params["amount"] = amount_match.group(1).replace(",", ".")

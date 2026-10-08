@@ -2251,7 +2251,9 @@ from app.api.v1.endpoints import kontrakte  # noqa: E402
 api_router.include_router(kontrakte.router, tags=["kontrakte"])
 
 # Previously unregistered endpoints — now reachable
+# /ki = Legacy; ohne Prefix = Vite-Proxy /api/ki-usability → /api/v1/voice|/actions
 api_router.include_router(ki_usability.router, prefix="/ki", tags=["ki", "usability"])
+api_router.include_router(ki_usability.router, tags=["ki", "usability"])
 api_router.include_router(pos_payments_promotions.router, tags=["pos", "payments", "promotions"])
 api_router.include_router(system_metrics.router, prefix="/system", tags=["system", "metrics", "agents"])
 ws_router.include_router(websocket.router, tags=["websocket", "realtime"])

@@ -49,10 +49,14 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `einkauf.angebot.bestellen` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `einkauf.anlieferavis.wareneingang` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `einkauf.bestellung.list` | einkauf | `einkauf:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `einkauf.bestellung.status` | einkauf | `einkauf:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `einkauf.bestellung.versenden` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `finance.ap_invoice.freigeben` | finance | `finance:write` | ja | hoch | ja | `POST /api/v1/mcp/tools/call` |
+| `finance.ap_invoice.propose` | finance | `finance:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `lager.bestand.get` | lager | `lager:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `lager.inventur.propose_opening` | lager | `lager:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `lager.stock_movement.stornieren` | lager | `lager:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |

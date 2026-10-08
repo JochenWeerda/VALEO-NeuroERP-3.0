@@ -1,0 +1,57 @@
+slice_id: MCP-AP-FREIGABE-20261008
+id: MCP-AP-FREIGABE-20261008
+title: AP-Freigabe Vier-Augen analog sales.invoice.post
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+closed_at: 2026-10-08
+goal: >
+  open_high mask:finance/ap-invoice:freigeben mit Proposal/Freigabe-Muster
+  analog sales.invoice.propose/post verdrahten; echter CommandEndpoint;
+  kein Journal/FIN-CLOSE/ADR-076-Schein.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - config/mcp_mask_action_map.yaml
+  - scripts/generate_mcp_mask_action_map.py
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - tests/test_mcp_mask_action_map.py
+  - docs/quality-assurance/mcp-ap-freigabe-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - finance.ap_invoice.propose speichert pending, execute bleibt 501
+  - finance.ap_invoice.freigeben nur bei approval_status=approved
+  - execute ruft approve_ap_invoice (CommandEndpoint-Fachweg); fibu_journal=false
+  - Kein Client-Freigabe-Boolean; Scope finance:write; Token-Mandant
+  - Map: ap-invoice freigeben mapped; open_high 2 (Zahlauf+Inventur)
+  - Registry 38 Tools
+tests:
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - tests/test_mcp_mask_action_map.py
+risks:
+  - Zahlauf bleibt open_high / forbiddenForAgents / ADR-076-nah
+  - Inventur-Opening ohne HTTP-CommandEndpoint
+ai_harness:
+  fachlicher_vertrag: >
+    AP-Freigabe nur nach menschlicher Proposal-Freigabe; kein Journal-Post.
+  architektur_vertrag: >
+    Adapter in mcp_execution_service; Katalog allein schreibt nie.
+  daten_vertrag: >
+    Mandant aus Token; agent_proposals + Document-Store AP; Replay-Journal.
+  test_vertrag: >
+    dryRun/propose/execute, 403/409/422/501, Freigabe-Flag abgewiesen.
+  security_vertrag: >
+    finance:write; human_approval_required; kein Client-Approval-Boolean.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice, Map-Generator.
+external_gates:
+  - not_applicable
+result: >
+  131 MCP-Tests gruen. AP propose/freigeben verdrahtet; Map mapped 23 /
+  open_high 2; Registry 38. FIN-CLOSE/Zahlauf/Inventur bewusst offen.

@@ -1,0 +1,59 @@
+slice_id: MCP-DEEP-LINK-CELL-20261008
+id: MCP-DEEP-LINK-CELL-20261008
+title: Voice/Dispatch Deep-Link aus wms.cell.status
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+closed_at: 2026-10-08
+goal: >
+  nav-silo-cell mit cell_code ruft wms.cell.status und navigiert nur auf
+  /lager/silo-zellen/{id}; ohne Kennung bleibt /lager/silo-uebersicht.
+  Intent liefert cell_code aus „öffne Zelle/Silozelle …“.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - packages/frontend-web/src/lib/mcp-cell-open.ts
+  - packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx
+  - packages/frontend-web/src/__tests__/lib/mcp-cell-open.test.ts
+  - packages/frontend-web/src/__tests__/features/ki-usability/ActionDispatchContext.test.tsx
+  - services/ki-usability/app/services/intent_resolver.py
+  - services/ki-usability/app/services/action_registry.py
+  - services/ki-usability/tests/test_voice_intent_lager_einkauf_hr.py
+  - app/core/ki_action_registry.py
+  - tests/test_mcp_execution.py
+  - docs/quality-assurance/mcp-deep-link-cell-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - isSafeCellRoutePath akzeptiert nur /lager/silo-zellen/{id}
+  - nav-silo-cell ohne cell_code → /lager/silo-uebersicht
+  - nav-silo-cell mit cell_code → MCP + Navigate
+  - Intent „öffne Zelle ZELLE-A1“ liefert cell_code
+  - wms.cell.status Response enthaelt cell_id, route_path, screen_id
+tests:
+  - packages/frontend-web/src/__tests__/lib/mcp-cell-open.test.ts
+  - packages/frontend-web/src/__tests__/features/ki-usability/ActionDispatchContext.test.tsx
+  - services/ki-usability/tests/test_voice_intent_lager_einkauf_hr.py
+  - tests/test_mcp_execution.py
+risks:
+  - Token ohne inventory:read → Deep-Link schlaegt fehl
+ai_harness:
+  fachlicher_vertrag: >
+    Sprache/Agent oeffnet konkrete Silozelle nur nach Mandanten-Aufloesung.
+  architektur_vertrag: >
+    Zentraler ActionDispatch; Status-Read bleibt Backend-Wahrheit fuer Route.
+  daten_vertrag: >
+    Keine neuen Persistenzwege; nur Lesen via bestehendem MCP-Call.
+  test_vertrag: >
+    Route-Guard, Dispatch-Mocks, Status-Read-Assertion, Voice-Intent.
+  security_vertrag: >
+    Open-Redirect-Schutz: nur /lager/silo-zellen/{id}.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice nachgezogen.
+external_gates:
+  - not_applicable
+result: >
+  5 Cell-Status-, Registry-, 18 Frontend- und 16 Voice-Lager-Tests gruen.

@@ -1,0 +1,60 @@
+slice_id: MCP-DEEP-LINK-PO-20261008
+id: MCP-DEEP-LINK-PO-20261008
+title: Voice/Dispatch Deep-Link aus einkauf.bestellung.status
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+closed_at: 2026-10-08
+goal: >
+  nav-einkauf mit bestellung_id ruft einkauf.bestellung.status und navigiert nur
+  auf /einkauf/bestellung/{id}; ohne Kennung bleibt /einkauf/bestellungen.
+  List-Items tragen route_path. Intent liefert bestellung_id aus „öffne Bestellung …“.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - packages/frontend-web/src/lib/mcp-po-open.ts
+  - packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx
+  - packages/frontend-web/src/__tests__/lib/mcp-po-open.test.ts
+  - packages/frontend-web/src/__tests__/features/ki-usability/ActionDispatchContext.test.tsx
+  - services/ki-usability/app/services/intent_resolver.py
+  - services/ki-usability/app/services/action_registry.py
+  - services/ki-usability/tests/test_voice_intent_lager_einkauf_hr.py
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - docs/quality-assurance/mcp-deep-link-po-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - isSafePoRoutePath akzeptiert nur /einkauf/bestellung/{id}
+  - nav-einkauf ohne bestellung_id → /einkauf/bestellungen
+  - nav-einkauf mit bestellung_id → MCP + Navigate
+  - Intent „öffne Bestellung BE-100“ liefert bestellung_id
+  - Status- und List-Response enthalten route_path/screen_id
+tests:
+  - packages/frontend-web/src/__tests__/lib/mcp-po-open.test.ts
+  - packages/frontend-web/src/__tests__/features/ki-usability/ActionDispatchContext.test.tsx
+  - services/ki-usability/tests/test_voice_intent_lager_einkauf_hr.py
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+risks:
+  - Token ohne einkauf:read → Deep-Link schlaegt fehl
+ai_harness:
+  fachlicher_vertrag: >
+    Sprache/Agent oeffnet konkrete Bestellung nur nach Mandanten-Aufloesung.
+  architektur_vertrag: >
+    Zentraler ActionDispatch; Status-Read bleibt Backend-Wahrheit fuer Route.
+  daten_vertrag: >
+    Keine neuen Persistenzwege; nur Lesen via bestehendem MCP-Call.
+  test_vertrag: >
+    Route-Guard, Dispatch-Mocks, Status-Read-Assertion, Voice-Intent, Registry-Count.
+  security_vertrag: >
+    Open-Redirect-Schutz: nur /einkauf/bestellung/{id}.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice nachgezogen.
+external_gates:
+  - not_applicable
+result: >
+  4 Bestellung-, 14 Registry-, 21 Frontend- und 12 Voice-Einkauf-Tests gruen.

@@ -1,0 +1,53 @@
+slice_id: MCP-DEEP-LINK-AGRAR-20261008
+id: MCP-DEEP-LINK-AGRAR-20261008
+title: Voice/Dispatch Deep-Link aus agrar.contract.get / weighing_ticket.list
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+closed_at: 2026-10-08
+goal: >
+  nav-agrar-vertraege mit kontrakt_id und nav-wiegeschein mit ticket_id navigieren
+  nur auf sichere Agrar-/Waage-Routen; Listen-Fallback ohne Kennung.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - packages/frontend-web/src/lib/mcp-agrar-open.ts
+  - packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx
+  - services/ki-usability/app/services/intent_resolver.py
+  - services/ki-usability/app/services/action_registry.py
+  - app/core/ki_action_registry.py
+  - tests/test_mcp_execution.py
+  - docs/quality-assurance/mcp-deep-link-agrar-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Guard akzeptiert nur /agrar/kontrakt/{id} und /waage/wiegeschein/{id}
+  - Intent „öffne Kontrakt …“ / „öffne Wiegeschein …“ liefert IDs
+  - Responses enthalten route_path/screen_id
+tests:
+  - packages/frontend-web/src/__tests__/lib/mcp-agrar-open.test.ts
+  - packages/frontend-web/src/__tests__/features/ki-usability/ActionDispatchContext.test.tsx
+  - services/ki-usability/tests/test_voice_intent_fibu_compliance_agrar_logistik.py
+  - tests/test_mcp_execution.py
+risks:
+  - Token ohne agrar:read → Deep-Link schlaegt fehl
+ai_harness:
+  fachlicher_vertrag: >
+    Sprache/Agent oeffnet Kontrakt/Wiegeschein nur nach Mandanten-Aufloesung.
+  architektur_vertrag: >
+    Zentraler ActionDispatch; Read bleibt Backend-Wahrheit fuer Route.
+  daten_vertrag: >
+    Keine neuen Persistenzwege; nur Lesen via bestehendem MCP-Call.
+  test_vertrag: >
+    Route-Guard, Dispatch-Mocks, Read-Assertion, Voice-Intent.
+  security_vertrag: >
+    Open-Redirect-Schutz: nur erlaubte Agrar-/Waage-Pfade.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice nachgezogen.
+external_gates:
+  - not_applicable
+result: >
+  1 Agrar-MCP-, 27 Frontend- und 7 Voice-Agrar-Tests gruen. Kernkette Deep-Links fertig.

@@ -53,3 +53,28 @@ def test_voice_resolve_uses_registry_intent_phrases() -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["action_id"] == "action-new-order"
+
+
+def test_voice_resolve_deep_link_nav_ids_extract_params() -> None:
+    client = _build_client()
+
+    cases = [
+        ("öffne Bestellung BE-100", "nav-einkauf", "bestellung_id", "BE-100"),
+        ("öffne Bestand ART-WEIZEN", "nav-lager", "artikel_id", "ART-WEIZEN"),
+        ("öffne Kontrakt K-9", "nav-agrar-vertraege", "kontrakt_id", "K-9"),
+        ("öffne Auftrag SO-42", "nav-orders", "auftrag_nr", "SO-42"),
+        ("öffne Lot LOT-7", "nav-lot", "lot_id", "LOT-7"),
+    ]
+    for text, action_id, param_key, param_value in cases:
+        response = client.post("/api/v1/voice/resolve", json={"text": text})
+        assert response.status_code == 200, text
+        payload = response.json()
+        assert payload["action_id"] == action_id, text
+        assert payload["params"].get(param_key) == param_value, text
+
+
+def test_registry_includes_deep_link_nav_ids() -> None:
+    from app.core.ki_action_registry import get_action_definition
+
+    for action_id in ("nav-einkauf", "nav-lager", "nav-agrar-vertraege", "nav-orders", "nav-lot"):
+        assert get_action_definition(action_id) is not None, action_id

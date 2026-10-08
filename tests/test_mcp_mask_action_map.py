@@ -33,17 +33,30 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
     assert by_id["mask:crm/customer-360:create_activity"]["mcp_tool_id"] == "crm.activity.create"
     assert by_id["mask:crm/opportunity:create_activity"]["mcp_tool_id"] == "crm.activity.create"
     assert by_id["mask:finance/payment-run:freigeben"]["coverage"] == "open_high"
-    assert by_id["mask:finance/ap-invoice:freigeben"]["coverage"] == "open_high"
+    assert by_id["mask:finance/ap-invoice:freigeben"]["coverage"] == "mapped"
+    assert by_id["mask:finance/ap-invoice:freigeben"]["mcp_tool_id"] == "finance.ap_invoice.freigeben"
 
     native = {n["mcp_tool_id"] for n in data["mcp_native_writes"]}
-    assert native >= {"crm.contact.log", "sales.invoice.propose", "sales.invoice.post"}
+    assert native >= {
+        "crm.contact.log",
+        "sales.invoice.propose",
+        "sales.invoice.post",
+        "finance.ap_invoice.propose",
+    }
 
     assert by_id["mask:produktion/produktionsleitstand:sync"]["mcp_tool_id"] == "produktion.control.sync"
     assert by_id["mask:planung/kalender:reproject"]["mcp_tool_id"] == "planung.calendar.reproject"
     assert by_id["mask:schnittstelle/mde-inbox:process_pending"]["mcp_tool_id"] == (
         "mobile.sync.process_pending"
     )
-    assert by_id["mask:lager/inventur-nebenlaeufe:create_opening"]["coverage"] == "open_high"
+    assert by_id["mask:lager/inventur-nebenlaeufe:create_opening"]["coverage"] == (
+        "mapped_propose_only"
+    )
+    assert by_id["mask:lager/inventur-nebenlaeufe:create_opening"]["mcp_tool_id"] == (
+        "lager.inventur.propose_opening"
+    )
     assert by_id["mask:personal/bewerbungen:neu"]["coverage"] == "blocked_no_endpoint"
     assert data.get("classification_complete") is True
     assert data["stats"]["by_coverage"].get("open_medium", 0) == 0
+    assert data["stats"]["by_coverage"].get("open_high", 0) == 1
+    assert data["stats"]["by_coverage"].get("mapped_propose_only", 0) == 1

@@ -116,6 +116,11 @@ class LeadQualifyInput(BaseModel):
         return self
 
 
+class BestellungStatusInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    bestellung_id: str = Field(min_length=1, max_length=64)
+
+
 class BestellungVersendenInput(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     bestellung_id: str = Field(min_length=1, max_length=64)
@@ -227,6 +232,22 @@ class InvoicePostInput(BaseModel):
     proposal_id: str = Field(min_length=1, max_length=36)
 
 
+class ApInvoiceProposeInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    invoice_id: str = Field(min_length=1, max_length=64)
+
+
+class ApInvoiceFreigebenInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    proposal_id: str = Field(min_length=1, max_length=36)
+
+
+class InventurOpeningProposeInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    count_id: str = Field(min_length=1, max_length=64)
+    reason: str | None = Field(default=None, max_length=500)
+
+
 class CustomerOpenInput(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     kunden_nr: str = Field(min_length=1, max_length=64)
@@ -262,6 +283,7 @@ class CellStatusInput(BaseModel):
 
 class DocumentSearchInput(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    dokument_id: str | None = Field(default=None, max_length=64)
     beleg_ref: str | None = Field(default=None, max_length=120)
     dokument_typ: str | None = Field(default=None, max_length=64)
     von: date | None = None
@@ -286,6 +308,7 @@ class AgrarContractInput(BaseModel):
 
 class WeighingTicketListInput(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    ticket_id: str | None = Field(default=None, max_length=64)
     partie_id: str | None = Field(default=None, max_length=64)
     von: date | None = None
     bis: date | None = None
@@ -324,6 +347,24 @@ _PO_STATUS_FILTER = {
 
 _CUSTOMER_SCREEN_ID = "crm/customer-360"
 _CUSTOMER_ROUTE_PREFIX = "/crm/customers"
+_ORDER_SCREEN_ID = "sales/sales-order"
+_ORDER_ROUTE_PREFIX = "/sales/order-editor"
+_LOT_SCREEN_ID = "charge/stamm"
+_LOT_ROUTE_PREFIX = "/charge/stamm"
+_CELL_SCREEN_ID = "lager/silo-cell"
+_CELL_ROUTE_PREFIX = "/lager/silo-zellen"
+_PO_SCREEN_ID = "einkauf/purchase-order"
+_PO_ROUTE_PREFIX = "/einkauf/bestellung"
+_DMS_SCREEN_ID = "docflow/nachweisraum"
+_DMS_ROUTE_PREFIX = "/docflow/nachweisraum"
+_GOBD_SCREEN_ID = "docflow/gobd-export"
+_GOBD_ROUTE_PREFIX = "/docflow/gobd-export"
+_AGRAR_CONTRACT_SCREEN_ID = "agrar/kontrakte"
+_AGRAR_CONTRACT_ROUTE_PREFIX = "/agrar/kontrakt"
+_WEIGHING_SCREEN_ID = "waage/wiegeschein"
+_WEIGHING_ROUTE_PREFIX = "/waage/wiegeschein"
+_STOCK_SCREEN_ID = "lager/article-stock"
+_STOCK_ROUTE_PREFIX = "/lager/artikel"
 _BILLABLE_DELIVERY_STATUSES = ("posted", "printed", "gebucht")
 _ORDER_NEXT_STEP = {
     "open": "Auftrag bestätigen",
@@ -434,6 +475,10 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _propose_invoice(db, request, actor, tenant)
     if request.tool_name == "sales.invoice.post":
         return _post_invoice(db, request, actor, tenant)
+    if request.tool_name == "finance.ap_invoice.propose":
+        return _propose_ap_freigabe(db, request, actor, tenant)
+    if request.tool_name == "finance.ap_invoice.freigeben":
+        return _freigeben_ap_invoice(db, request, actor, tenant)
     if request.tool_name == "fibu.open_items.list":
         return _list_open_items(db, request, actor, tenant)
     if request.tool_name == "fibu.dunning.status":
@@ -474,8 +519,12 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _lager_bestand_get(db, request, actor, tenant)
     if request.tool_name == "lager.inventur.status":
         return _inventur_status(db, request, actor, tenant)
+    if request.tool_name == "lager.inventur.propose_opening":
+        return _propose_inventur_opening(db, request, actor, tenant)
     if request.tool_name == "einkauf.bestellung.list":
         return _bestellung_list(db, request, actor, tenant)
+    if request.tool_name == "einkauf.bestellung.status":
+        return _bestellung_status(db, request, actor, tenant)
     if request.tool_name == "einkauf.bestellung.versenden":
         return _bestellung_versenden(db, request, actor, tenant)
     if request.tool_name == "einkauf.angebot.bestellen":
@@ -625,6 +674,7 @@ def _document_search(db: Session, request: ToolExecutionRequest, actor: str, ten
     params: dict[str, Any] = {
         "tenant": tenant,
         "lim": opened.limit,
+        "dok": opened.dokument_id,
         "beleg": opened.beleg_ref,
         "typ": opened.dokument_typ,
         "von": opened.von.isoformat() if opened.von else None,
@@ -638,6 +688,12 @@ def _document_search(db: Session, request: ToolExecutionRequest, actor: str, ten
                    created_at::text AS erstellt_am
             FROM domain_nachweisraum.nachweisraum_dokumente
             WHERE tenant_id::text = :tenant
+              AND (
+                    :dok IS NULL
+                    OR id::text = :dok
+                    OR bezeichnung = :dok
+                    OR referenz_id = :dok
+              )
               AND (:beleg IS NULL OR referenz_id = :beleg OR referenz_typ = :beleg)
               AND (:typ IS NULL OR dokument_typ = :typ)
               AND (:von IS NULL OR created_at::date >= CAST(:von AS date))
@@ -645,12 +701,19 @@ def _document_search(db: Session, request: ToolExecutionRequest, actor: str, ten
             ORDER BY created_at DESC NULLS LAST
             LIMIT :lim
         """, params)
-        items = [{
-            "dokument_id": str(r.get("dokument_id") or ""),
-            "titel": str(r.get("titel") or ""),
-            "status": str(r.get("status") or ""),
-            "erstellt_am": (str(r["erstellt_am"]) if r.get("erstellt_am") is not None else None),
-        } for r in rows]
+        items = []
+        for r in rows:
+            dok_id = str(r.get("dokument_id") or "")
+            items.append({
+                "dokument_id": dok_id,
+                "titel": str(r.get("titel") or ""),
+                "status": str(r.get("status") or ""),
+                "erstellt_am": (str(r["erstellt_am"]) if r.get("erstellt_am") is not None else None),
+                "route_path": f"{_DMS_ROUTE_PREFIX}/{dok_id}" if dok_id else None,
+                "screen_id": _DMS_SCREEN_ID,
+            })
+        if opened.dokument_id and not items:
+            raise HTTPException(404, "Document not found in the authenticated tenant")
         result = {"success": True, "mode": request.mode, "items": items, "count": len(items)}
         db.rollback()
         return result
@@ -682,13 +745,16 @@ def _gobd_export_status(db: Session, request: ToolExecutionRequest, actor: str, 
         """, {"tenant": tenant, "export_id": opened.export_id})
         if not row:
             raise HTTPException(404, "GoBD export not found in the authenticated tenant")
+        export_id = str(row["export_id"])
         result = {
             "success": True,
             "mode": request.mode,
-            "export_id": str(row["export_id"]),
+            "export_id": export_id,
             "status": str(row.get("status") or ""),
             "dokument_anzahl": int(row.get("dokument_anzahl") or 0),
             "pruefprotokoll": (str(row["pruefprotokoll"]) if row.get("pruefprotokoll") is not None else None),
+            "route_path": f"{_GOBD_ROUTE_PREFIX}/{export_id}",
+            "screen_id": _GOBD_SCREEN_ID,
         }
         db.rollback()
         return result
@@ -803,14 +869,17 @@ def _agrar_contract_get(db: Session, request: ToolExecutionRequest, actor: str, 
         """, {"tenant": tenant, "kid": opened.kontrakt_id})
         if not row:
             raise HTTPException(404, "Agrar contract not found in the authenticated tenant")
+        kontrakt_id = str(row["kontrakt_id"])
         result = {
             "success": True,
             "mode": request.mode,
-            "kontrakt_id": str(row["kontrakt_id"]),
+            "kontrakt_id": kontrakt_id,
             "ware": (str(row["ware"]) if row.get("ware") is not None else None),
             "menge_t": round(float(row.get("menge_t") or 0.0), 3),
             "preis_eur": (round(float(row["preis_eur"]), 2) if row.get("preis_eur") is not None else None),
             "status": str(row.get("status") or ""),
+            "route_path": f"{_AGRAR_CONTRACT_ROUTE_PREFIX}/{kontrakt_id}",
+            "screen_id": _AGRAR_CONTRACT_SCREEN_ID,
         }
         db.rollback()
         return result
@@ -832,6 +901,7 @@ def _weighing_ticket_list(db: Session, request: ToolExecutionRequest, actor: str
     params: dict[str, Any] = {
         "tenant": tenant,
         "lim": opened.limit,
+        "ticket": opened.ticket_id,
         "partie": opened.partie_id,
         "von": opened.von.isoformat() if opened.von else None,
         "bis": opened.bis.isoformat() if opened.bis else None,
@@ -845,6 +915,7 @@ def _weighing_ticket_list(db: Session, request: ToolExecutionRequest, actor: str
                    COALESCE(weighing_date, created_at)::text AS erstellt_am
             FROM domain_inventory.weighing_tickets
             WHERE tenant_id::text = :tenant
+              AND (:ticket IS NULL OR id::text = :ticket)
               AND (
                     :partie IS NULL
                  OR contract_id::text = :partie
@@ -855,13 +926,20 @@ def _weighing_ticket_list(db: Session, request: ToolExecutionRequest, actor: str
             ORDER BY COALESCE(weighing_date, created_at) DESC NULLS LAST
             LIMIT :lim
         """, params)
-        items = [{
-            "ticket_id": str(r.get("ticket_id") or ""),
-            "partie_id": str(r.get("partie_id") or ""),
-            "brutto_kg": round(float(r.get("brutto_kg") or 0.0), 3),
-            "netto_kg": round(float(r.get("netto_kg") or 0.0), 3),
-            "erstellt_am": (str(r["erstellt_am"]) if r.get("erstellt_am") is not None else None),
-        } for r in rows]
+        items = []
+        for r in rows:
+            tid = str(r.get("ticket_id") or "")
+            items.append({
+                "ticket_id": tid,
+                "partie_id": str(r.get("partie_id") or ""),
+                "brutto_kg": round(float(r.get("brutto_kg") or 0.0), 3),
+                "netto_kg": round(float(r.get("netto_kg") or 0.0), 3),
+                "erstellt_am": (str(r["erstellt_am"]) if r.get("erstellt_am") is not None else None),
+                "route_path": f"{_WEIGHING_ROUTE_PREFIX}/{tid}" if tid else None,
+                "screen_id": _WEIGHING_SCREEN_ID,
+            })
+        if opened.ticket_id and not items:
+            raise HTTPException(404, "Weighing ticket not found in the authenticated tenant")
         result = {"success": True, "mode": request.mode, "items": items, "count": len(items)}
         db.rollback()
         return result
@@ -901,16 +979,156 @@ def _lager_bestand_get(db: Session, request: ToolExecutionRequest, actor: str, t
         """, {"tenant": tenant, "aid": opened.artikel_id})
         if not row:
             raise HTTPException(404, "Article not found in the authenticated tenant")
+        artikel_id = str(row["artikel_id"])
         result = {
             "success": True,
             "mode": request.mode,
-            "artikel_id": str(row["artikel_id"]),
+            "artikel_id": artikel_id,
             "menge": round(float(row.get("menge") or 0.0), 3),
             "einheit": str(row.get("einheit") or "Stk"),
             "reserviert": round(float(row.get("reserviert") or 0.0), 3),
             "verfuegbar": round(float(row.get("verfuegbar") or 0.0), 3),
+            "route_path": f"{_STOCK_ROUTE_PREFIX}/{artikel_id}",
+            "screen_id": _STOCK_SCREEN_ID,
         }
         db.rollback()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+_INVENTUR_OPENING_ROUTE = "/lager/inventur-nebenlaeufe"
+_INVENTUR_OPENING_SCREEN = "lager/inventur-nebenlaeufe"
+
+
+def _inventur_opening_preview(db: Session, count_id: str, tenant: str) -> dict[str, Any]:
+    """Read-only snapshot from inventory_counts + lines (same source as auxiliary create)."""
+    count = db.execute(text("""
+        SELECT c.id::text AS count_id,
+               c.warehouse_id::text AS warehouse_id,
+               COALESCE(c.status, '') AS status
+          FROM domain_inventory.inventory_counts c
+         WHERE c.id::text = :id AND c.tenant_id::text = :tenant
+         FOR SHARE OF c
+    """), {"id": count_id, "tenant": tenant}).mappings().first()
+    if not count:
+        raise HTTPException(404, "Inventur not found in the authenticated tenant")
+    agg = db.execute(text("""
+        SELECT COUNT(*)::int AS line_count,
+               COALESCE(SUM(CASE
+                 WHEN ABS(COALESCE(l.counted_qty, 0) - COALESCE(l.expected_qty, 0)) >= 0.001
+                 THEN 1 ELSE 0 END), 0)::int AS difference_count,
+               COALESCE(SUM(
+                 COALESCE(l.counted_qty, 0) * COALESCE(a.purchase_price, 0)
+               ), 0)::float AS preliminary_value
+          FROM domain_inventory.inventory_count_lines l
+          LEFT JOIN domain_inventory.articles a
+            ON a.id = l.article_id AND a.tenant_id::text = l.tenant_id::text
+         WHERE l.inventory_count_id::text = :id AND l.tenant_id::text = :tenant
+    """), {"id": count_id, "tenant": tenant}).mappings().first() or {}
+    return {
+        "count_id": str(count["count_id"]),
+        "warehouse_id": (str(count["warehouse_id"]) if count.get("warehouse_id") else None),
+        "status": str(count.get("status") or ""),
+        "line_count": int(agg.get("line_count") or 0),
+        "difference_count": int(agg.get("difference_count") or 0),
+        "preliminary_value": round(float(agg.get("preliminary_value") or 0.0), 2),
+        "batch_type": "opening_balance",
+        "route_path": _INVENTUR_OPENING_ROUTE,
+        "screen_id": _INVENTUR_OPENING_SCREEN,
+        "source_route": f"/lager/inventur?count={count['count_id']}",
+    }
+
+
+def _propose_inventur_opening(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Store a pending Bestandsvortrag proposal. Never creates or applies a batch."""
+    try:
+        opened = InventurOpeningProposeInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid inventur opening propose parameters") from exc
+    if request.mode == "execute":
+        raise HTTPException(
+            501,
+            "Inventur opening booking is not an MCP execution; no CommandEndpoint — human UI only",
+        )
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "propose" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "propose requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        if request.mode == "propose":
+            lock_bytes = hashlib.sha256(
+                json.dumps([tenant, request.tool_name, request.idempotency_key]).encode()
+            ).digest()[:8]
+            db.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": int.from_bytes(lock_bytes, "big", signed=True)})
+            previous = db.execute(text("""
+                SELECT actor_id, payload_hash, result FROM public.mcp_tool_executions
+                WHERE tenant_id=:tenant AND tool_name=:tool AND idempotency_key=:key
+            """), {"tenant": tenant, "tool": request.tool_name, "key": request.idempotency_key}).mappings().first()
+            if previous:
+                if previous["actor_id"] != actor or previous["payload_hash"] != fingerprint:
+                    raise HTTPException(409, "Idempotency key is already bound to another request")
+                result = previous["result"]
+                if isinstance(result, str):
+                    result = json.loads(result)
+                db.rollback()
+                return {**result, "replayed": True}
+        preview = _inventur_opening_preview(db, opened.count_id, tenant)
+        if request.mode != "propose":
+            return {"success": True, "mode": request.mode, "booked": False, **preview}
+        proposal_id = str(uuid4())
+        now = datetime.now(timezone.utc).isoformat()
+        rationale = (opened.reason or "").strip() or "MCP lager.inventur.propose_opening"
+        db.execute(text("""
+            INSERT INTO public.agent_proposals
+                (proposal_id, tenant_id, action_type, risk_level, approval_status,
+                 context_snapshot, rationale, idempotency_key, created_at)
+            VALUES
+                (:id, :tenant, 'inventur_opening', 'high', 'pending',
+                 CAST(:snapshot AS json), :rationale, :key, :now)
+        """), {
+            "id": proposal_id,
+            "tenant": tenant,
+            "snapshot": json.dumps({
+                "context_summary": f"Bestandsvortrag Inventur {preview['count_id']}",
+                "proposed_action": (
+                    "Bestandsvortrag vorschlagen — kein Booking; "
+                    "Uebernahme nur ueber menschliche UI (Vier-Augen)"
+                ),
+                "human_approval_required": True,
+                "audit_events": [{"event": "proposal_created", "occurred_at": now}],
+                "actor_id": actor,
+                "payload_hash": fingerprint,
+                **preview,
+            }),
+            "rationale": rationale[:500],
+            "key": hashlib.sha256(f"{tenant}|{request.tool_name}|{request.idempotency_key}".encode()).hexdigest(),
+            "now": now,
+        })
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="inventur_opening_proposal", entity_id=proposal_id,
+            audit_reason="MCP inventur opening proposal", idempotency_key=request.idempotency_key,
+            summary=f"Inventur opening proposal for {opened.count_id} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "propose", "replayed": False, "booked": False,
+            "entwurf_id": proposal_id, "approval_status": "pending", "auditEntryId": audit_id,
+            **preview,
+        }
+        db.execute(text("""
+            INSERT INTO public.mcp_tool_executions
+                (tenant_id, tool_name, idempotency_key, actor_id, payload_hash, result)
+            VALUES (:tenant, :tool, :key, :actor, :hash, CAST(:result AS jsonb))
+        """), {
+            "tenant": tenant, "tool": request.tool_name, "key": request.idempotency_key,
+            "actor": actor, "hash": fingerprint, "result": json.dumps(result),
+        })
+        db.commit()
         return result
     except HTTPException:
         db.rollback()
@@ -1000,14 +1218,64 @@ def _bestellung_list(db: Session, request: ToolExecutionRequest, actor: str, ten
             ORDER BY b.bestelldatum DESC NULLS LAST, b.created_at DESC NULLS LAST
             LIMIT :lim
         """, params)
-        items = [{
-            "bestellung_id": str(r.get("bestellung_id") or ""),
-            "lieferant": str(r.get("lieferant") or ""),
-            "status": str(r.get("status") or ""),
-            "liefertermin": (str(r["liefertermin"]) if r.get("liefertermin") is not None else None),
-            "wert_eur": round(float(r.get("wert_eur") or 0.0), 2),
-        } for r in rows]
+        items = []
+        for r in rows:
+            bid = str(r.get("bestellung_id") or "")
+            items.append({
+                "bestellung_id": bid,
+                "lieferant": str(r.get("lieferant") or ""),
+                "status": str(r.get("status") or ""),
+                "liefertermin": (str(r["liefertermin"]) if r.get("liefertermin") is not None else None),
+                "wert_eur": round(float(r.get("wert_eur") or 0.0), 2),
+                "route_path": f"{_PO_ROUTE_PREFIX}/{bid}" if bid else None,
+                "screen_id": _PO_SCREEN_ID,
+            })
         result = {"success": True, "mode": request.mode, "items": items, "count": len(items)}
+        db.rollback()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _bestellung_status(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Tenant-scoped purchase order status + canonical mask route. Read-only."""
+    del actor
+    try:
+        opened = BestellungStatusInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid purchase order status parameters") from exc
+    if request.mode == "propose":
+        raise HTTPException(422, "einkauf.bestellung.status does not support propose")
+    try:
+        row = db.execute(text("""
+            SELECT b.id::text AS bestellung_id,
+                   COALESCE(b.bestellnummer, b.id::text) AS bestellnummer,
+                   COALESCE(b.status, '') AS status,
+                   COALESCE(l.firmenname, b.lieferant_id::text, '') AS lieferant
+            FROM domain_einkauf.bestellungen b
+            LEFT JOIN domain_einkauf.lieferanten l
+              ON l.id = b.lieferant_id AND l.tenant_id::text = b.tenant_id::text
+            WHERE b.tenant_id::text = :tenant
+              AND (b.id::text = :bid OR b.bestellnummer = :bid)
+            LIMIT 1
+        """), {"tenant": tenant, "bid": opened.bestellung_id}).mappings().first()
+        if not row:
+            raise HTTPException(404, "Purchase order not found in the authenticated tenant")
+        bestellung_id = str(row["bestellung_id"])
+        result = {
+            "success": True,
+            "mode": request.mode,
+            "bestellung_id": bestellung_id,
+            "bestellnummer": str(row.get("bestellnummer") or opened.bestellung_id),
+            "status": str(row.get("status") or ""),
+            "lieferant": str(row.get("lieferant") or ""),
+            "route_path": f"{_PO_ROUTE_PREFIX}/{bestellung_id}",
+            "screen_id": _PO_SCREEN_ID,
+        }
         db.rollback()
         return result
     except HTTPException:
@@ -1097,14 +1365,18 @@ def _cell_status(db: Session, request: ToolExecutionRequest, actor: str, tenant:
         flush_required = bool(flush_edge) or qs == "reinigung"
 
         material = cell.get("current_material")
+        cell_id = str(cell["id"])
         result = {
             "success": True,
             "mode": request.mode,
+            "cell_id": cell_id,
             "cell_code": str(cell.get("cell_code") or opened.cell_code),
             "current_stock_kg": round(float(cell.get("current_stock_kg") or 0.0), 3),
             "qs_status": qs,
             "current_material": str(material) if material is not None else None,
             "flush_required": flush_required,
+            "route_path": f"{_CELL_ROUTE_PREFIX}/{cell_id}",
+            "screen_id": _CELL_SCREEN_ID,
         }
         db.rollback()
         return result
@@ -1190,6 +1462,8 @@ def _lot_trace(db: Session, request: ToolExecutionRequest, actor: str, tenant: s
                     }
                     for row in movements
                 ],
+                "route_path": f"{_LOT_ROUTE_PREFIX}/{lot_id}",
+                "screen_id": _LOT_SCREEN_ID,
             }
             db.rollback()
             return result
@@ -1249,6 +1523,8 @@ def _lot_trace(db: Session, request: ToolExecutionRequest, actor: str, tenant: s
                 }
                 for row in movements
             ],
+            "route_path": f"{_LOT_ROUTE_PREFIX}/{lot_id}",
+            "screen_id": _LOT_SCREEN_ID,
         }
         db.rollback()
         return result
@@ -1436,14 +1712,17 @@ def _order_status(db: Session, request: ToolExecutionRequest, actor: str, tenant
                   AND tenant_id::text = :tenant
                   AND COALESCE(quantity, 0) > 0
             """, {"oid": order["id"], "tenant": tenant}, "offene_positionen", 0) or 0)
+        order_id = str(order["id"])
         result = {
             "success": True,
             "mode": request.mode,
-            "order_id": str(order["id"]),
+            "order_id": order_id,
             "auftrag_nr": str(order["auftrag_nr"] or opened.auftrag_nr),
             "status": status_value,
             "offene_positionen": offene_positionen,
             "naechster_schritt": _order_next_step(status_value),
+            "route_path": f"{_ORDER_ROUTE_PREFIX}/{order_id}",
+            "screen_id": _ORDER_SCREEN_ID,
         }
         db.rollback()
         return result
@@ -1658,6 +1937,248 @@ def _money(totals: Any, key: str) -> float:
     if not isinstance(totals, dict) or totals.get(key) is None:
         raise HTTPException(409, "Delivery note has no stored totals")
     return round(float(totals[key]), 2)
+
+
+_AP_INVOICE_ROUTE_PREFIX = "/finance/ap-invoice"
+_AP_INVOICE_SCREEN_ID = "finance/ap-invoice"
+_AP_FREIGABE_ACTION_TYPE = "ap_invoice_freigabe"
+_AP_FREIGABE_BLOCKED_STATUSES = frozenset({
+    "FREIGEGEBEN", "VERBUCHT", "BEZAHLT", "ABGELEHNT", "posted", "approved", "paid",
+})
+
+
+def _load_ap_invoice(db: Session, invoice_id: str, tenant: str) -> dict[str, Any]:
+    """Tenant-scoped AP invoice from the document store (same path as mask freigeben)."""
+    from app.api.v1.endpoints.ap_approval_workflow import _ensure_invoice_tenant_access
+    from app.documents.router_helpers import get_from_store, get_repository
+
+    return _ensure_invoice_tenant_access(
+        get_from_store("ap_invoice", invoice_id, get_repository(db)),
+        tenant,
+    )
+
+
+def _ap_invoice_preview(invoice: dict[str, Any], invoice_id: str) -> dict[str, Any]:
+    status = str(invoice.get("status") or invoice.get("semantic_status") or "")
+    brutto = invoice.get("totalGross")
+    if brutto is None:
+        brutto = invoice.get("brutto")
+    try:
+        brutto_eur = round(float(brutto), 2) if brutto is not None else None
+    except (TypeError, ValueError):
+        brutto_eur = None
+    return {
+        "invoice_id": invoice_id,
+        "invoice_number": str(invoice.get("number") or invoice_id),
+        "status": status,
+        "brutto_eur": brutto_eur,
+        "route_path": f"{_AP_INVOICE_ROUTE_PREFIX}/{invoice_id}",
+        "screen_id": _AP_INVOICE_SCREEN_ID,
+    }
+
+
+def _propose_ap_freigabe(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Store a pending AP-freigabe proposal. Never calls the freigeben endpoint."""
+    try:
+        opened = ApInvoiceProposeInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid AP invoice propose parameters") from exc
+    if request.mode == "execute":
+        raise HTTPException(501, "AP freigabe is not an MCP execution on propose; use finance.ap_invoice.freigeben")
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "propose" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "propose requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        if request.mode == "propose":
+            lock_bytes = hashlib.sha256(
+                json.dumps([tenant, request.tool_name, request.idempotency_key]).encode()
+            ).digest()[:8]
+            db.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": int.from_bytes(lock_bytes, "big", signed=True)})
+            previous = db.execute(text("""
+                SELECT actor_id, payload_hash, result FROM public.mcp_tool_executions
+                WHERE tenant_id=:tenant AND tool_name=:tool AND idempotency_key=:key
+            """), {"tenant": tenant, "tool": request.tool_name, "key": request.idempotency_key}).mappings().first()
+            if previous:
+                if previous["actor_id"] != actor or previous["payload_hash"] != fingerprint:
+                    raise HTTPException(409, "Idempotency key is already bound to another request")
+                result = previous["result"]
+                if isinstance(result, str):
+                    result = json.loads(result)
+                db.rollback()
+                return {**result, "replayed": True}
+        invoice = _load_ap_invoice(db, opened.invoice_id, tenant)
+        preview = _ap_invoice_preview(invoice, opened.invoice_id)
+        status_upper = str(preview["status"] or "").upper()
+        if status_upper in {s.upper() for s in _AP_FREIGABE_BLOCKED_STATUSES}:
+            raise HTTPException(409, f"AP invoice status {preview['status']} cannot be proposed for freigabe")
+        if request.mode != "propose":
+            return {"success": True, "mode": request.mode, "approved": False, **preview}
+        proposal_id = str(uuid4())
+        now = datetime.now(timezone.utc).isoformat()
+        db.execute(text("""
+            INSERT INTO public.agent_proposals
+                (proposal_id, tenant_id, action_type, risk_level, approval_status,
+                 context_snapshot, rationale, idempotency_key, created_at)
+            VALUES
+                (:id, :tenant, 'ap_invoice_freigabe', 'high', 'pending',
+                 CAST(:snapshot AS json), :rationale, :key, :now)
+        """), {
+            "id": proposal_id,
+            "tenant": tenant,
+            "snapshot": json.dumps({
+                "context_summary": f"AP-Freigabe {preview['invoice_number']}",
+                "proposed_action": "Eingangsrechnung freigeben (nach menschlicher Freigabe)",
+                "human_approval_required": True,
+                "audit_events": [{"event": "proposal_created", "occurred_at": now}],
+                "invoice_id": opened.invoice_id,
+                "actor_id": actor,
+                "payload_hash": fingerprint,
+                **preview,
+            }),
+            "rationale": "MCP finance.ap_invoice.propose",
+            "key": hashlib.sha256(f"{tenant}|{request.tool_name}|{request.idempotency_key}".encode()).hexdigest(),
+            "now": now,
+        })
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="ap_invoice_proposal", entity_id=proposal_id,
+            audit_reason="MCP AP freigabe proposal", idempotency_key=request.idempotency_key,
+            summary=f"AP freigabe proposal for {opened.invoice_id} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "propose", "replayed": False, "approved": False,
+            "entwurf_id": proposal_id, "approval_status": "pending", "auditEntryId": audit_id,
+            **preview,
+        }
+        db.execute(text("""
+            INSERT INTO public.mcp_tool_executions
+                (tenant_id, tool_name, idempotency_key, actor_id, payload_hash, result)
+            VALUES (:tenant, :tool, :key, :actor, :hash, CAST(:result AS jsonb))
+        """), {
+            "tenant": tenant, "tool": request.tool_name, "key": request.idempotency_key,
+            "actor": actor, "hash": fingerprint, "result": json.dumps(result),
+        })
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _freigeben_ap_invoice(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Call the real AP freigeben CommandEndpoint only after an approved proposal."""
+    try:
+        payload = ApInvoiceFreigebenInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid AP invoice freigeben parameters") from exc
+    if request.mode == "propose":
+        raise HTTPException(422, "finance.ap_invoice.freigeben does not accept propose; use finance.ap_invoice.propose")
+    parameters = payload.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        proposal = db.execute(text("""
+            SELECT proposal_id, action_type, approval_status, risk_level,
+                   context_snapshot, execution_result
+            FROM public.agent_proposals
+            WHERE proposal_id=:id AND tenant_id=:tenant
+            FOR UPDATE OF agent_proposals
+        """), {"id": payload.proposal_id, "tenant": tenant}).mappings().first()
+        if not proposal:
+            raise HTTPException(404, "Proposal not found in the authenticated tenant")
+        if proposal["action_type"] != _AP_FREIGABE_ACTION_TYPE:
+            raise HTTPException(409, "Proposal is not an AP freigabe proposal")
+        if proposal["approval_status"] != "approved":
+            raise HTTPException(409, "Proposal is not approved")
+        if proposal["execution_result"] is not None:
+            existing = proposal["execution_result"]
+            if isinstance(existing, str):
+                existing = json.loads(existing)
+            if isinstance(existing, dict) and existing.get("invoice_id"):
+                if request.mode != "execute":
+                    return {
+                        "success": True, "mode": request.mode, "approved": False,
+                        "already_executed": True,
+                        **{k: existing[k] for k in ("invoice_id", "invoice_number", "status") if k in existing},
+                    }
+                raise HTTPException(409, "Proposal was already executed")
+        snapshot = proposal["context_snapshot"] or {}
+        if isinstance(snapshot, str):
+            snapshot = json.loads(snapshot)
+        if not isinstance(snapshot, dict):
+            raise HTTPException(409, "Proposal snapshot is unusable")
+        invoice_id = snapshot.get("invoice_id")
+        if not isinstance(invoice_id, str) or not invoice_id.strip():
+            raise HTTPException(409, "Proposal snapshot lacks invoice_id")
+        invoice = _load_ap_invoice(db, invoice_id, tenant)
+        preview = _ap_invoice_preview(invoice, invoice_id)
+        preview["proposal_id"] = payload.proposal_id
+        if request.mode != "execute":
+            return {"success": True, "mode": request.mode, "approved": False, **preview}
+        from app.api.v1.endpoints.ap_invoices import approve_ap_invoice
+
+        user = {"sub": actor}
+        with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as child:
+            asyncio.run(
+                approve_ap_invoice(
+                    invoice_id,
+                    approved_by=None,
+                    db=child,
+                    tenant_id=tenant,
+                    user=user,
+                )
+            )
+        refreshed = _load_ap_invoice(db, invoice_id, tenant)
+        final_preview = _ap_invoice_preview(refreshed, invoice_id)
+        execution_result = {
+            "invoice_id": invoice_id,
+            "invoice_number": final_preview["invoice_number"],
+            "status": final_preview["status"],
+            "executed_by": actor,
+            "executed_at": datetime.now(timezone.utc).isoformat(),
+        }
+        db.execute(text("""
+            UPDATE public.agent_proposals
+            SET execution_result = CAST(:result AS json)
+            WHERE proposal_id = :id AND tenant_id = :tenant
+        """), {"result": json.dumps(execution_result), "id": payload.proposal_id, "tenant": tenant})
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="ap_invoice", entity_id=invoice_id,
+            audit_reason="MCP AP freigabe from approved proposal",
+            idempotency_key=request.idempotency_key,
+            summary=f"AP freigabe {invoice_id} from proposal {payload.proposal_id} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False, "approved": True,
+            "proposal_id": payload.proposal_id, "auditEntryId": audit_id,
+            "fibu_journal": False,
+            **final_preview,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
 
 
 def _propose_invoice(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:

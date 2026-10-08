@@ -137,6 +137,24 @@ class TestResolverCrm:
         assert result.action_id == "nav-customers"
         assert result.params.get("kunden_nr") == "K-1001"
 
+    def test_oeffne_auftrag(self):
+        result = intent_resolver.resolve("öffne Auftrag")
+        assert result is not None
+        assert result.action_id == "nav-orders"
+        assert result.params.get("auftrag_nr") is None
+
+    def test_oeffne_auftrag_mit_nummer(self):
+        result = intent_resolver.resolve("öffne Auftrag SO-100")
+        assert result is not None
+        assert result.action_id == "nav-orders"
+        assert result.params.get("auftrag_nr") == "SO-100"
+
+    def test_auftrag_oeffnen_mit_nummer(self):
+        result = intent_resolver.resolve("Auftrag öffnen A-42")
+        assert result is not None
+        assert result.action_id == "nav-orders"
+        assert result.params.get("auftrag_nr") == "A-42"
+
     def test_datum_extraktion(self):
         result = intent_resolver.resolve("Neue Aktivität am 20.08.2026")
         assert result is not None

@@ -1,0 +1,56 @@
+slice_id: MCP-INVENTUR-OPENING-PROPOSE-20261008
+id: MCP-INVENTUR-OPENING-PROPOSE-20261008
+title: Inventur-Bestandsvortrag propose-only (kein Booking)
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+closed_at: 2026-10-08
+goal: >
+  mask:lager/inventur-nebenlaeufe:create_opening ehrlich als propose-only
+  verdrahten (kein CommandEndpoint); Snapshot aus inventory_counts/lines;
+  execute 501; kein Booking/Journal. Zahlauf/FIN-CLOSE unberuehrt.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - config/mcp_mask_action_map.yaml
+  - scripts/generate_mcp_mask_action_map.py
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - tests/test_mcp_mask_action_map.py
+  - docs/quality-assurance/mcp-inventur-opening-propose-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - lager.inventur.propose_opening dryRun liest Inventur-Snapshot
+  - propose speichert agent_proposals inventur_opening pending
+  - execute → 501; kein opening_balance-Batch, kein Journal
+  - Map coverage mapped_propose_only; open_high nur noch Zahlauf
+  - Registry 39 Tools
+tests:
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - tests/test_mcp_mask_action_map.py
+risks:
+  - Kein Freigabe-Execute-Tool (bewusst; kein Endpoint)
+  - Zahlauf bleibt open_high
+ai_harness:
+  fachlicher_vertrag: >
+    Bestandsvortrag nur als Vorschlag; Uebernahme bleibt UI Vier-Augen.
+  architektur_vertrag: >
+    Adapter in mcp_execution_service; Katalog allein schreibt nie.
+  daten_vertrag: >
+    Snapshot aus inventory_counts/lines; agent_proposals; Token-Mandant.
+  test_vertrag: >
+    dryRun/propose/501/403/422; kein Booking in SQL-Pfad.
+  security_vertrag: >
+    lager:write; human_approval_required; kein Client-Approval-Boolean.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice, Map-Generator.
+external_gates:
+  - not_applicable
+result: >
+  137 MCP-Tests gruen. propose_opening verdrahtet; Map mapped_propose_only 1 /
+  open_high 1 (Zahlauf); Registry 39.

@@ -116,6 +116,63 @@ def _extract_customer_open_params(text: str) -> Dict[str, str]:
     return params
 
 
+def _extract_order_open_params(text: str) -> Dict[str, str]:
+    """Auftragsnummer/UUID nach „öffne Auftrag …“ / „Auftrag öffnen …“."""
+    params: Dict[str, str] = {}
+    match = re.search(
+        r"(?:oeffne|öffne|zeige|gehe\s+zu)\s+auftrag\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+        text,
+        re.I,
+    )
+    if not match:
+        match = re.search(
+            r"auftrag\s+(?:oeffnen|öffnen)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+            text,
+            re.I,
+        )
+    if match:
+        params["auftrag_nr"] = match.group(1).strip()
+    return params
+
+
+def _extract_lot_open_params(text: str) -> Dict[str, str]:
+    """Lot-ID nach „öffne Lot …“ / „Lot öffnen …“ / Charge."""
+    params: Dict[str, str] = {}
+    match = re.search(
+        r"(?:oeffne|öffne|zeige|gehe\s+zu)\s+(?:lot|charge|partie)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+        text,
+        re.I,
+    )
+    if not match:
+        match = re.search(
+            r"(?:lot|charge|partie)\s+(?:oeffnen|öffnen)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+            text,
+            re.I,
+        )
+    if match:
+        params["lot_id"] = match.group(1).strip()
+    return params
+
+
+def _extract_cell_open_params(text: str) -> Dict[str, str]:
+    """Zellencode nach „öffne Zelle …“ / „Silozelle öffnen …“."""
+    params: Dict[str, str] = {}
+    match = re.search(
+        r"(?:oeffne|öffne|zeige|gehe\s+zu)\s+(?:silo)?zelle\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+        text,
+        re.I,
+    )
+    if not match:
+        match = re.search(
+            r"(?:silo)?zelle\s+(?:oeffnen|öffnen)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+            text,
+            re.I,
+        )
+    if match:
+        params["cell_code"] = match.group(1).strip()
+    return params
+
+
 def _extract_lager_params(text: str) -> Dict[str, str]:
     params: Dict[str, str] = {}
     match = re.search(r"\b(\d{8,14})\b", text)
@@ -131,6 +188,63 @@ def _extract_lager_params(text: str) -> Dict[str, str]:
     match = re.search(r"stellplatz\s+([a-z0-9\-]+)", text, re.I)
     if match:
         params["location"] = match.group(1).upper()
+    return params
+
+
+def _extract_stock_open_params(text: str) -> Dict[str, str]:
+    """Artikel-ID nach „öffne Bestand …“ / „öffne Artikel …“."""
+    params: Dict[str, str] = {}
+    match = re.search(
+        r"(?:oeffne|öffne|zeige|gehe\s+zu)\s+(?:bestand|artikel|lagerartikel)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+        text,
+        re.I,
+    )
+    if not match:
+        match = re.search(
+            r"(?:bestand|artikel|lagerartikel)\s+(?:oeffnen|öffnen)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+            text,
+            re.I,
+        )
+    if match:
+        params["artikel_id"] = match.group(1).strip()
+    return params
+
+
+def _extract_po_open_params(text: str) -> Dict[str, str]:
+    """Bestellung-ID/Nummer nach „öffne Bestellung …“ / „Bestellung öffnen …“."""
+    params: Dict[str, str] = {}
+    match = re.search(
+        r"(?:oeffne|öffne|zeige|gehe\s+zu)\s+bestellung\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+        text,
+        re.I,
+    )
+    if not match:
+        match = re.search(
+            r"bestellung\s+(?:oeffnen|öffnen)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+            text,
+            re.I,
+        )
+    if match:
+        params["bestellung_id"] = match.group(1).strip()
+    return params
+
+
+def _extract_document_open_params(text: str) -> Dict[str, str]:
+    """Dokument-ID nach „öffne Dokument …“ / „Nachweisraum öffnen …“."""
+    params: Dict[str, str] = {}
+    match = re.search(
+        r"(?:oeffne|öffne|zeige|gehe\s+zu)\s+(?:dokument|nachweis)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+        text,
+        re.I,
+    )
+    if not match:
+        match = re.search(
+            r"(?:dokument|nachweis)\s+(?:oeffnen|öffnen)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+            text,
+            re.I,
+        )
+    if match:
+        params["dokument_id"] = match.group(1).strip()
     return params
 
 
@@ -224,6 +338,44 @@ def _extract_agrar_params(text: str) -> Dict[str, str]:
     return params
 
 
+def _extract_kontrakt_open_params(text: str) -> Dict[str, str]:
+    """Kontrakt-ID nach „öffne Kontrakt …“ / „Vertrag öffnen …“."""
+    params: Dict[str, str] = {}
+    match = re.search(
+        r"(?:oeffne|öffne|zeige|gehe\s+zu)\s+(?:kontrakt|vertrag)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+        text,
+        re.I,
+    )
+    if not match:
+        match = re.search(
+            r"(?:kontrakt|vertrag)\s+(?:oeffnen|öffnen)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+            text,
+            re.I,
+        )
+    if match:
+        params["kontrakt_id"] = match.group(1).strip()
+    return params
+
+
+def _extract_wiegeschein_open_params(text: str) -> Dict[str, str]:
+    """Ticket-ID nach „öffne Wiegeschein …“."""
+    params: Dict[str, str] = {}
+    match = re.search(
+        r"(?:oeffne|öffne|zeige|gehe\s+zu)\s+wiegeschein\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+        text,
+        re.I,
+    )
+    if not match:
+        match = re.search(
+            r"wiegeschein\s+(?:oeffnen|öffnen)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+            text,
+            re.I,
+        )
+    if match:
+        params["ticket_id"] = match.group(1).strip()
+    return params
+
+
 def _extract_logistik_params(text: str) -> Dict[str, str]:
     params: Dict[str, str] = {}
     match = re.search(r"tour\s+([a-z0-9\-]+)", text, re.I)
@@ -255,11 +407,31 @@ def _domain_specific(text: str, normalized: str) -> Optional[VoiceResolveOut]:
         "artikel" in normalized and any(word in normalized for word in ["suchen", "finden", "lager", "wo"])
     ):
         return _voice_out("lager-artikel-suche", text, _extract_lager_params(text), 0.85)
+    if any(word in normalized for word in ["bestand", "lagerartikel"]) and any(
+        word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"]
+    ):
+        return _voice_out("nav-lager", text, _extract_stock_open_params(text))
+    if (
+        "artikel" in normalized
+        and any(word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"])
+        and not any(word in normalized for word in ["suchen", "finden", "neu", "anlegen"])
+    ):
+        return _voice_out("nav-lager", text, _extract_stock_open_params(text))
     if any(word in normalized for word in ["lager", "lagerverwaltung"]) and any(
         word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"]
     ):
         return _voice_out("nav-lager", text)
 
+    if (
+        "bestellung" in normalized
+        and any(word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"])
+        and not any(word in normalized for word in ["neue", "anlegen", "aufgeben", "erstellen"])
+    ):
+        return _voice_out("nav-einkauf", text, _extract_po_open_params(text))
+    if any(word in normalized for word in ["dokument", "nachweisraum", "nachweis"]) and any(
+        word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"]
+    ):
+        return _voice_out("nav-nachweisraum", text, _extract_document_open_params(text))
     if any(word in normalized for word in ["neue bestellung", "bestellung anlegen", "bestellung aufgeben", "bestellen"]):
         return _voice_out("einkauf-bestellung-neu", text, _extract_einkauf_params(text), 0.88)
     if any(word in normalized for word in ["lieferantenrechnung", "eingangsrechnung"]):
@@ -356,6 +528,14 @@ def _domain_specific(text: str, normalized: str) -> Optional[VoiceResolveOut]:
         return _voice_out("nav-ernte-annahme", text, _extract_agrar_params(text))
     if "rohware annahme" in normalized or "rohstoff annahme" in normalized:
         return _voice_out("nav-rohware-annahme", text, _extract_agrar_params(text))
+    if any(word in normalized for word in ["kontrakt", "vertrag"]) and any(
+        word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"]
+    ):
+        return _voice_out("nav-agrar-vertraege", text, _extract_kontrakt_open_params(text))
+    if "wiegeschein" in normalized and any(
+        word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"]
+    ):
+        return _voice_out("nav-wiegeschein", text, _extract_wiegeschein_open_params(text))
     if "agrar vertraege" in normalized or "agrarvertraegen" in normalized:
         return _voice_out("nav-agrar-vertraege", text)
     if "schlagkartei" in normalized or ("schlaege" in normalized and any(word in normalized for word in ["oeffnen", "zeigen", "gehe"])):
@@ -412,6 +592,22 @@ class IntentResolver:
                 params = _extract_params(text)
                 if action_id == "nav-customers":
                     params.update(_extract_customer_open_params(text))
+                elif action_id == "nav-orders":
+                    params.update(_extract_order_open_params(text))
+                elif action_id == "nav-lot":
+                    params.update(_extract_lot_open_params(text))
+                elif action_id == "nav-silo-cell":
+                    params.update(_extract_cell_open_params(text))
+                elif action_id == "nav-einkauf":
+                    params.update(_extract_po_open_params(text))
+                elif action_id == "nav-nachweisraum":
+                    params.update(_extract_document_open_params(text))
+                elif action_id == "nav-agrar-vertraege":
+                    params.update(_extract_kontrakt_open_params(text))
+                elif action_id == "nav-wiegeschein":
+                    params.update(_extract_wiegeschein_open_params(text))
+                elif action_id == "nav-lager":
+                    params.update(_extract_stock_open_params(text))
                 elif action_id.startswith("lager-"):
                     params.update(_extract_lager_params(text))
                 elif action_id.startswith("einkauf-"):
@@ -441,11 +637,19 @@ class IntentResolver:
         if any(word in normalized for word in ["auftrag", "auftraege"]) and any(
             word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"]
         ):
-            return _voice_out("nav-orders", text)
+            return _voice_out("nav-orders", text, _extract_order_open_params(text))
         if any(word in normalized for word in ["kunden", "kunde"]) and any(
             word in normalized for word in ["oeffnen", "zeigen", "gehe", "stamm"]
         ):
             return _voice_out("nav-customers", text, _extract_customer_open_params(text))
+        if any(word in normalized for word in ["lot", "charge", "partie", "chargen"]) and any(
+            word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"]
+        ):
+            return _voice_out("nav-lot", text, _extract_lot_open_params(text))
+        if any(word in normalized for word in ["zelle", "silozelle", "silozellen"]) and any(
+            word in normalized for word in ["oeffnen", "zeigen", "gehe", "geh"]
+        ):
+            return _voice_out("nav-silo-cell", text, _extract_cell_open_params(text))
         if any(word in normalized for word in ["dashboard", "start", "uebersicht", "hauptseite"]):
             return _voice_out("nav-dashboard", text)
 

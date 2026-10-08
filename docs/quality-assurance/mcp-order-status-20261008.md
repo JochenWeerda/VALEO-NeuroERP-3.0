@@ -34,3 +34,6 @@ python -m pytest tests/test_mcp_execution.py tests/test_mcp_tool_registry.py --n
 ## Grenzen
 
 Weitere Katalog-Reads (FIBU/WMS/DMS/…) und Mask-Write bleiben offen. FIN-CLOSE unberührt.
+
+**Nachzug:** Deep-Link Voice/Dispatch → Slice MCP-ORDER-NAV-20261008
+(`route_path` / `screen_id` am Status-Read).

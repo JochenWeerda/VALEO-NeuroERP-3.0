@@ -1,0 +1,63 @@
+slice_id: MCP-ORDER-NAV-20261008
+id: MCP-ORDER-NAV-20261008
+title: Voice/Dispatch Deep-Link aus sales.order.status
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+closed_at: 2026-10-08
+goal: >
+  nav-orders mit auftrag_nr ruft sales.order.status und navigiert nur auf
+  einen sicheren route_path (/sales/order-editor/{id}); ohne Nummer bleibt die Liste.
+  Intent-Resolver liefert auftrag_nr aus „öffne Auftrag …“. Status-Read erhaelt
+  route_path/screen_id analog crm.customer.open.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - packages/frontend-web/src/lib/mcp-order-open.ts
+  - packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx
+  - packages/frontend-web/src/__tests__/lib/mcp-order-open.test.ts
+  - packages/frontend-web/src/__tests__/features/ki-usability/ActionDispatchContext.test.tsx
+  - services/ki-usability/app/services/intent_resolver.py
+  - services/ki-usability/app/services/action_registry.py
+  - services/ki-usability/tests/test_voice_intent_verkauf_crm.py
+  - app/core/ki_action_registry.py
+  - tests/test_mcp_execution.py
+  - docs/quality-assurance/mcp-order-nav-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - isSafeOrderRoutePath akzeptiert nur /sales/order-editor/{id} ohne Query/Host
+  - nav-orders ohne auftrag_nr → /sales/auftraege-liste
+  - nav-orders mit auftrag_nr → MCP call + Navigate auf route_path
+  - nav-orders mit fertigem sicherem route_path → Navigate ohne MCP
+  - Intent „öffne Auftrag SO-100“ liefert action nav-orders + auftrag_nr=SO-100
+  - sales.order.status Response enthaelt route_path und screen_id
+tests:
+  - packages/frontend-web/src/__tests__/lib/mcp-order-open.test.ts
+  - packages/frontend-web/src/__tests__/features/ki-usability/ActionDispatchContext.test.tsx
+  - services/ki-usability/tests/test_voice_intent_verkauf_crm.py
+  - tests/test_mcp_execution.py
+risks:
+  - Token ohne sales:read → Deep-Link schlaegt fehl; Liste bleibt Fallback nur ohne Nummer
+ai_harness:
+  fachlicher_vertrag: >
+    Sprache/Agent oeffnet konkreten Auftrag nur nach Mandanten-Aufloesung;
+    Listen-Fallback ohne Kennung bleibt.
+  architektur_vertrag: >
+    Zentraler ActionDispatch; bestehender Status-Read bleibt Backend-Wahrheit fuer Route.
+  daten_vertrag: >
+    Keine neuen Persistenzwege; nur Lesen via bestehendem MCP-Call.
+  test_vertrag: >
+    Pure Route-Guard-Tests und Dispatch mit gemocktem MCP-Call; Status-Read-Assertion.
+  security_vertrag: >
+    Open-Redirect-Schutz: nur relative /sales/order-editor/{id}.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice nachgezogen.
+external_gates:
+  - not_applicable
+result: >
+  17 MCP-, 12 Frontend- und 30 Voice-CRM-Tests gruen. Deep-Link aus
+  auftrag_nr/route_path mit Open-Redirect-Guard; Listen-Fallback ohne Kennung.

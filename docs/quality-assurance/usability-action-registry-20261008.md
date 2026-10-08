@@ -35,8 +35,9 @@ IDs: `mask:{screenId}:{actionKey}` — keine Kollision mit Shortcuts wie `save-d
 ## Abgrenzung
 
 - FIN-CLOSE bleibt HTTP 409 (ADR-076); nicht in diesem Slice.
-- MCP-WRITE-20261008: Top-Adapter `crm.activity.create` /
-  `sales.invoice.post` (nach Freigabe); übrige Mask-IDs noch ohne Write-Tool.
+- MCP-WRITE + MASK-WRITE-PARITY-20261008: Top-Adapter + Mapping
+  `config/mcp_mask_action_map.yaml`; Activity mapped; Invoice mcp_native;
+  ~45 medium + HIGH/FIBU offen; FIN-CLOSE ADR-076 blockiert.
 - Stub-Aktionen ohne Endpoint/Route/Command werden nicht exportiert.
 
 ## Tests
