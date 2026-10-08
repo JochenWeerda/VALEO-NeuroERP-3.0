@@ -1,3 +1,4 @@
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 import { useCallback, useMemo, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
@@ -55,7 +56,8 @@ export default function FrachttabellenPage(): JSX.Element {
     })),
   }), [isTouch, positionen.length, savingPosition, savingTabelle, staffelNr, tabellen.length])
 
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema), [schema])
+  const permissions = useScreenPermissions(schema)
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions }), [schema, permissions])
   const form = useUniversalFormState({
     screen: schema,
     initialValues: {
@@ -208,6 +210,7 @@ export default function FrachttabellenPage(): JSX.Element {
     <div className="space-y-6 p-3 md:p-6">
       <UniversalMaskRenderer
         plan={plan}
+        allowedPermissions={permissions}
         formState={form}
         hideFormSubmit
         workflowState={workflow}

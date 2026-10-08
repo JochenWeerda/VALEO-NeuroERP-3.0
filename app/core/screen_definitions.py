@@ -2726,6 +2726,9 @@ def build_crm_lead_screen_definition() -> dict[str, Any]:
         "title": "Kundenakte", "subtitle": "CRM / Interessent",
         "identityField": "company_name",
         "adapter": {"type": "native", "sourceId": "crm/lead", "temporary": False},
+        "creation": {"endpoint": "/api/v1/crm/leads", "permission": "crm.lead.create",
+                     "detailRoute": "/crm/lead/{entity_id}",
+                     "defaults": {"source": "unknown", "status": "NEW", "priority": "medium"}},
         "summary": [
             {"key": "status", "label": "Status", "value": "Interessent", "kind": "status", "tone": "warning"},
             {"key": "estimated_value", "label": "Geschaetzter Wert", "value": None, "kind": "kpi"},

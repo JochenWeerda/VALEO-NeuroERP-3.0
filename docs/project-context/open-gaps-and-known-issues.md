@@ -19,8 +19,14 @@ Schwellen bleiben 0 fehlende Beschreibungen und 20 untypisierte Routen.
 Secret-Scan-Fehlalarm im künstlichen Kalenderfixture beseitigt, keine neue
 Ausnahme; Gitleaks 8.30.1 auf HEAD-Snapshot null Funde. 24 Kalenderverträge grün.
 [Abnahme und ELSTER-Registrierungsstand](../quality-assurance/ci-contract-closure-20261008.md).
-Maskenvertrag, CRM-Smoke, Dependency-Security und vollständiges XBRL/ERiC
-bleiben bis zur eigenen Abnahme offen.
+Native Lead-Neuanlage und Berechtigungsprojektion im zentralen Maskenweg
+abgenommen: 834 Backend-Verträge, 12 React-Verträge und bestehender Chromium-
+Smoke zur Lead-Anlage grün. Acht Logistik-Berechtigungen in BE/FE deklariert.
+Das schließt die geprüfte Lead-Smoke-Ursache und den UI-Berechtigungsvertrag;
+eine vollständige serverseitige Logistik-Sicherheitsabnahme wird nicht behauptet.
+Dependency-Security, weitere Smoke-Befunde und vollständiges XBRL/ERiC bleiben
+offen. ELSTER-Registrierung durch Nutzer abgesendet, Bestätigungs-PDF lokal
+gesichert; SDK-Zugang und Lizenzannahme noch ausstehend.
 
 ## EBILANZ-HONEST-PERSISTENCE — Scheinwirkung und Laufzeit-DDL geschlossen (2026-10-07)
 
