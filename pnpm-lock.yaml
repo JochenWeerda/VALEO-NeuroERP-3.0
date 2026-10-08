@@ -102,6 +102,12 @@ patchedDependencies:
   artillery@2.0.33:
     hash: 5ddcc4lhor327uuhv7ridkfp6i
     path: config/security/npm-patches/artillery@2.0.33.patch
+  braces@3.0.3:
+    hash: tf7mioebotwwnxnvjextir2bz4
+    path: config/security/npm-patches/braces@3.0.3.patch
+  node-forge@1.4.0:
+    hash: pf2wpljp7dfekelaa6otxbiq6q
+    path: config/security/npm-patches/node-forge@1.4.0.patch
   stream-json@1.9.1:
     hash: nihfv5dpc5nm53u2lvd3dagsee
     path: config/security/npm-patches/stream-json@1.9.1.patch
@@ -19107,7 +19113,7 @@ snapshots:
       md5hex: 1.0.0
       minipass: 3.1.6
       node-fetch: 2.7.0
-      node-forge: 1.4.0
+      node-forge: 1.4.0(patch_hash=pf2wpljp7dfekelaa6otxbiq6q)
       npm-package-arg: 7.0.0
       ora: 3.4.0
       pretty-bytes: 5.6.0
@@ -19137,7 +19143,7 @@ snapshots:
 
   '@expo/code-signing-certificates@0.0.5':
     dependencies:
-      node-forge: 1.4.0
+      node-forge: 1.4.0(patch_hash=pf2wpljp7dfekelaa6otxbiq6q)
       nullthrows: 1.1.1
 
   '@expo/config-plugins@6.0.2':
@@ -25120,7 +25126,7 @@ snapshots:
     dependencies:
       balanced-match: 1.0.2
 
-  braces@3.0.3:
+  braces@3.0.3(patch_hash=tf7mioebotwwnxnvjextir2bz4):
     dependencies:
       fill-range: 7.1.1
 
@@ -25415,7 +25421,7 @@ snapshots:
   chokidar@3.6.0:
     dependencies:
       anymatch: 3.1.3
-      braces: 3.0.3
+      braces: 3.0.3(patch_hash=tf7mioebotwwnxnvjextir2bz4)
       glob-parent: 5.1.2
       is-binary-path: 2.1.0
       is-glob: 4.0.3
@@ -30174,7 +30180,7 @@ snapshots:
 
   micromatch@4.0.8:
     dependencies:
-      braces: 3.0.3
+      braces: 3.0.3(patch_hash=tf7mioebotwwnxnvjextir2bz4)
       picomatch: 4.0.4
 
   mime-db@1.52.0: {}
@@ -30422,7 +30428,7 @@ snapshots:
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
 
-  node-forge@1.4.0: {}
+  node-forge@1.4.0(patch_hash=pf2wpljp7dfekelaa6otxbiq6q): {}
 
   node-ical@0.16.1:
     dependencies:

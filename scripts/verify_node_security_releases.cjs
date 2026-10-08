@@ -107,3 +107,5 @@ test('all eight database instrumentations retain their public constructors', () 
 
 // Keep parser backport regressions in the existing CI security entry point.
 require('./verify_node_dependency_security.cjs');
+require('./verify_node_high_backports.cjs');
+require('./test_npm_backport_audit.cjs');

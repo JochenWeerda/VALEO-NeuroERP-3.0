@@ -35,6 +35,22 @@ the already configured js-yaml 4 override; safeLoad was removed in that API.
 Test preparation reads a real quoted CSV fixture without issuing requests.
 No load-test scenarios or assertions are weakened.
 
+## node-forge 1.4.0 and braces 3.0.3
+
+Local source repairs for GHSA-86w9-cpqp-85rv and GHSA-vfj7-8cjw-p6xm;
+neither has a vendor release at the 2026-10-08 review. Forge validates the
+complete nested DigestAlgorithm. Brace parsing and all recursive walkers
+reject nesting beyond 128; ordinary ranges, escaping and malformed-pattern
+behavior remain covered. Each visit adds only a constant-time depth check.
+Very deep previously accepted patterns intentionally become errors.
+
+Run `node --test scripts/verify_node_security_releases.cjs` for the complete
+runtime and audit-control suite. The original negative control for the new
+suite uses SECURITY_HIGH_RUNTIME; the release CLI always removes this override.
+Raw audits remain visible. Exact installed-source, patch, manifest and lock
+hashes and an expiring review are required by check_npm_backport_audit.cjs.
+See ../../../docs/quality-assurance/node-high-backports-20261008.md.
+
 ## Verification
 
 Run `node --test scripts/verify_node_dependency_security.cjs` from the root.

@@ -11,6 +11,18 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## Node Production High — Quellreparaturen und Betrieb (2026-10-08)
+
+node-forge GHSA-86w9-cpqp-85rv und braces GHSA-vfj7-8cjw-p6xm durch
+gezielte pnpm-Quellbackports behandelt. Die Originalgegenprobe reproduziert
+neun Angriffspfade; drei normale Vertraege bestehen bereits im Original.
+Roh-Audit und versionsbasierte Alerts bleiben sichtbar. Der getrennte Gate
+verlangt exakt gepruefte Patches und installierte Quellen, Manifest-/Lockhashes,
+reale Laufzeittests und befristete Review; unbekannte oder geaenderte Befunde
+sperren. [QA und Wiedervorlage](../quality-assurance/node-high-backports-20261008.md).
+Review vor 15.10.2026 erforderlich. Herstellerreleases und GitHub-Folgeabnahme
+bleiben offen, andere Security-Alerts sind nicht pauschal geschlossen.
+
 ## Parser-Sicherheit und XBRL-Doku-CI (2026-10-08)
 
 Unabhaengiger stream-json-Assembler-Befund GHSA-mjw6-4jj6-33hc durch

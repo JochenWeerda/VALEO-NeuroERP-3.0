@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MAILKONTO-MANDANT-20261008 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** Mailversand ueber das Konto des
+Mandanten statt ueber Umgebungsvariablen: Mailkonto je Mandant (SMTP allgemein, IONOS-Vorlage,
+Google mit App-Passwort oder OAuth2/XOAUTH2), Geheimnisse AES-256-GCM-verschluesselt und
+nie zurueckgegeben, Testmail als Pruefung, Einrichtungsmaske ueber Mask Builder/Screen
+Definition; `mail_versand` nimmt das Konto des Mandanten. Dazu: IMAP-Passwort des
+CRM-Connectors liegt im Klartext in `tenants.settings` — ebenfalls verschluesseln.
+**Dateibesitz:** `app/services/mail_versand.py`, neues Mailkonto-Modul (Service, Endpunkte,
+Geheimnis-Verschluesselung), `app/services/connector_config.py` (nur Passwortfeld), Aufrufer
+von `sende_mail`, eine additive Migration, Screen Definition + Frontend-Wrapper, Tests,
+QA-Doku. Microsoft 365 folgt separat. Fremde WIP unberuehrt.
+
+
 ## OFFENES-SCHLIESSEN-20261008 — abgeschlossen, Claude Code
 
 **Abnahme (08.10.2026):** Gelangensbestaetigung-Dublette 409 statt 503 (UAT wiederholbar);
@@ -122,6 +136,10 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 `docs/README.md` und Domain-Depth-Plan verweisen auf den Hub.
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
+
+**CI-FOUR-REGRESSIONS-20261008 (reserviert):** Owner Codex-01a0f3fc. GitHub CI9176: 16499 gruen, vier konkrete Fehler. Besitz ausschliesslich tests/test_sammelabrechnung_interessent_waagen_vorlage.py (zwei alte 6.7-Erwartungen gegen kanonische 6.9), tests/test_wms_pick_link.py (vorhandenen Lager-/Artikel-/Bestandsvertrag in Mock nachziehen), QA/Open-Gaps/Workboard. Fachschutz und Versandbedingungen bleiben erhalten; keine neue DB/Container, keine Abschwaechung oder Skip. Abnahme komplette betroffene Module plus Lager-Vertragsnachweise auf isoliertem Lieferstand.
+
+**NODE-HIGH-BACKPORT-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Zwei belegte Production-High-Befunde ohne Herstellerrelease: node-forge GHSA-86w9-cpqp-85rv (gezielter offener Upstream-PR1152), braces GHSA-vfj7-8cjw-p6xm (rekursive AST-Walker). Besitz zwei neue reproduzierbare pnpm-Patches, root package.json nur patchedDependencies, Lockfile nur Patchreferenzen, Patch-Provenienz, neue echte Original-/Patch-Regressionen im bestehenden CI-Einstieg. Versionssensor bleibt sichtbar; neuer eng gebundener maschinenpruefbarer Backport-Auditkontrolltyp mit Originalbericht, Paket-/Patch-/Installationshashes, Ablauf und fail-closed fuer unbekannte/geaenderte Befunde; minimale eigene Audit-Hunks in security-scan.yml/quality-gate.yml, ADR Proposed, QA/Open-Gaps/Workboard. Keine Versionserfindung, keine Severity-Ausnahme oder Abschaltung von Scanner/Tests; keine neue DB/Container. Fremde Frontend-/Fach-/Workflowhunks geschuetzt. Abnahme Originalpakete reproduzieren Angriffsweg, reparierte Pakete normale und boesartige Eingaben, echtes Production-Audit plus Entscheidungsbericht und frozen 36 Workspaces. Abnahme: Original npm-SHA512 geprueft: 3 Normalvertraege bestehen, 9 Angriffstests scheitern; reparierte Quellen 12/12. Regulaer installierter Workspace 45/45 (30 Laufzeit + 15 fail-closed Kontrollen), echte Production-Audit-Rohbefunde weiterhin 2 High, getrennte Quellbewertung 2 source_backported/0 blocked plus CLI12/12. Anfangs lokale Installationsdrift durch Hash-/Runtimekontrolle erkannt; Frozen/offline Neuverknuepfung vorhandener Installation bestaetigt reparierte Quellen. 36 isolierte Manifeste frozen/offline; Lock nur 2 Patchdatensaetze/6 Referenzen. Workflow-YAML gueltig. Doku-Governance/Inventare/Handbuch/Architekturindex und voller Build66,58s gruen, ADR080 Proposed. Review vor15.10., Herstellerrelease/GitHub-Folgeabnahme und weitere Alerts offen. Letzter9176: DocsBuild/Gov/PG/Smoke/critical gruen; vier getrennt reservierte Backend-CI-Regressionen, keine pauschale Projektfreigabe. Keine DB/Container angelegt.
 
 **STREAM-JSON-CI-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Fortlaufender Betrieb des Parser-Schutzes: Security-Workflow ruft bisher nur verify_node_security_releases.cjs auf. Besitz dort ausschliesslich Einbindung der vorhandenen verify_node_dependency_security.cjs-Regressionsvertraege, eigene QA/Open-Gaps/Workboard-Ergaenzung. Abnahme exakter CI-Aufruf mit allen 18 Runtime-Vertraegen; kein Workflow-Umbau, keine neue Ausnahme/Schwelle/DB/Container. Beide bisherigen Paket- und Parser-Pruefungen automatisch vor dem bestehenden Production-Audit. Abnahme: Exakter bestehender CI-Aufruf prueft automatisch Paket- und Parservertraege: 18/18 lokal gruen (6,61 s), keine neue DB/Container/Jobs oder Schutzregelabsenkung. Docs Governance auf e4487188d GitHub Run 37736018075 gruen, Docs Build dort noch offen; Production-Audit zwei High node-forge/braces weiterhin gezielt zu beheben.
 
