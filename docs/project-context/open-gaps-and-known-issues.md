@@ -11,6 +11,20 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## MCP-Maskenaktionen: lokaler Bedienweg und Fachcommand (2026-10-08)
+
+Zehn der bisherigen31 blocked_no_endpoint sind nach konkreter Handlerpruefung
+lokale Bedienaktionen: acht Formular-Resets und zwei Navigationen. Neue
+local_ui-Klassifikation ohne erfundenes Tool/Endpoint; alle59 Aktionen
+bleiben sichtbar,49 Mutationskandidaten getrennt gezaehlt. 21 fehlende
+HTTP-Fachcommands bleiben offen, Speichern weiter gesperrt/unabgedeckt;
+unbekanntes neu wird nicht pauschal lokal. Neuer commandEndpoint an lokaler
+Aktion fordert hart Review. Zahlauf open_high/forbiddenForAgents und
+FIN-CLOSE blocked_adr_076 bleiben unveraendert. Original11 Fehler/11 gruen;
+final160 neue/bestehende MCP-Vertraege ohne Skip in12,78s gruen, Map --check
+gruen. Keine API/SD/Frontend/Schemaaenderung, DB/Container/Migration/Reset.
+[QA, genaue Aufteilung und Handshake](../quality-assurance/mcp-local-action-classification-20261008.md).
+
 ## Zahlungslauf-Freigabenachweis (2026-10-08)
 
 Fehlende authentifizierte Freigeber, fehlende Ersteller und Selbstfreigaben

@@ -56,10 +56,12 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_mutations_considered: 59
+  mask_actions_considered: 59
+  mask_mutations_considered: 49
   by_coverage:
     adjacent: 1
-    blocked_no_endpoint: 31
+    blocked_no_endpoint: 21
+    local_ui: 10
     mapped: 23
     mapped_propose_only: 1
     mapped_read: 2
@@ -351,9 +353,10 @@ mappings:
   label: Neu
   command_endpoint: null
   command: fuhrpark.newDokument
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: local_ui
+  local_effect: form_reset
+  notes: 'Neues Formular: setzt ausschliesslich lokale Eingabefelder zurueck. Speichern bleibt separater
+    Fachcommand; kein HTTP-Mutationsendpoint fuer Reset erforderlich.'
   mcp_tool_id: null
 - mask_action_id: mask:fuhrpark/ausgehende-dokumente:speichern
   mask: fuhrpark/ausgehende-dokumente
@@ -395,9 +398,10 @@ mappings:
   label: Neues Fahrzeug
   command_endpoint: null
   command: vehicle.create
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: local_ui
+  local_effect: navigation
+  notes: Oeffnet /fuhrpark/fahrzeug/neu; legt kein Fahrzeug an. Der separate Speichervorgang braucht seinen
+    Fachvertrag.
   mcp_tool_id: null
 - mask_action_id: mask:fuhrpark/rechnungen:neu
   mask: fuhrpark/rechnungen
@@ -406,9 +410,10 @@ mappings:
   label: Neu
   command_endpoint: null
   command: fuhrpark.newRechnung
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: local_ui
+  local_effect: form_reset
+  notes: 'Neues Formular: setzt ausschliesslich lokale Eingabefelder zurueck. Speichern bleibt separater
+    Fachcommand; kein HTTP-Mutationsendpoint fuer Reset erforderlich.'
   mcp_tool_id: null
 - mask_action_id: mask:fuhrpark/rechnungen:speichern
   mask: fuhrpark/rechnungen
@@ -428,9 +433,10 @@ mappings:
   label: Neu
   command_endpoint: null
   command: fuhrpark.newTerminart
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: local_ui
+  local_effect: form_reset
+  notes: 'Neues Formular: setzt ausschliesslich lokale Eingabefelder zurueck. Speichern bleibt separater
+    Fachcommand; kein HTTP-Mutationsendpoint fuer Reset erforderlich.'
   mcp_tool_id: null
 - mask_action_id: mask:fuhrpark/terminarten:speichern
   mask: fuhrpark/terminarten
@@ -524,9 +530,10 @@ mappings:
   label: Neu
   command_endpoint: null
   command: personal.newBewerbung
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: local_ui
+  local_effect: form_reset
+  notes: 'Neues Formular: setzt ausschliesslich lokale Eingabefelder zurueck. Speichern bleibt separater
+    Fachcommand; kein HTTP-Mutationsendpoint fuer Reset erforderlich.'
   mcp_tool_id: null
 - mask_action_id: mask:personal/bewerbungen:speichern
   mask: personal/bewerbungen
@@ -557,9 +564,10 @@ mappings:
   label: Neu
   command_endpoint: null
   command: personal.newErklaerung
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: local_ui
+  local_effect: form_reset
+  notes: 'Neues Formular: setzt ausschliesslich lokale Eingabefelder zurueck. Speichern bleibt separater
+    Fachcommand; kein HTTP-Mutationsendpoint fuer Reset erforderlich.'
   mcp_tool_id: null
 - mask_action_id: mask:personal/onboarding:neu
   mask: personal/onboarding
@@ -568,9 +576,10 @@ mappings:
   label: Neu
   command_endpoint: null
   command: personal.newOnboarding
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: local_ui
+  local_effect: form_reset
+  notes: 'Neues Formular: setzt ausschliesslich lokale Eingabefelder zurueck. Speichern bleibt separater
+    Fachcommand; kein HTTP-Mutationsendpoint fuer Reset erforderlich.'
   mcp_tool_id: null
 - mask_action_id: mask:personal/onboarding:speichern
   mask: personal/onboarding
@@ -590,9 +599,10 @@ mappings:
   label: Neu
   command_endpoint: null
   command: personal.newQualifikation
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: local_ui
+  local_effect: form_reset
+  notes: 'Neues Formular: setzt ausschliesslich lokale Eingabefelder zurueck. Speichern bleibt separater
+    Fachcommand; kein HTTP-Mutationsendpoint fuer Reset erforderlich.'
   mcp_tool_id: null
 - mask_action_id: mask:personal/qualifikationen:speichern
   mask: personal/qualifikationen
@@ -612,9 +622,10 @@ mappings:
   label: Neu
   command_endpoint: null
   command: personal.newSchulung
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: local_ui
+  local_effect: form_reset
+  notes: 'Neues Formular: setzt ausschliesslich lokale Eingabefelder zurueck. Speichern bleibt separater
+    Fachcommand; kein HTTP-Mutationsendpoint fuer Reset erforderlich.'
   mcp_tool_id: null
 - mask_action_id: mask:personal/schulungen:speichern
   mask: personal/schulungen
@@ -684,11 +695,12 @@ mappings:
   label: Neuer Fahrer
   command_endpoint: null
   command: driver.create
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: local_ui
+  local_effect: navigation
+  notes: Oeffnet /transporte/fahrer/neu; legt keinen Fahrer an. Der separate Speichervorgang braucht seinen
+    Fachvertrag.
   mcp_tool_id: null
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'MCP-INVENTUR-OPENING-PROPOSE-20261008: Inventur-Opening mapped_propose_only. Rest:
-  open_high nur Zahlauf; blocked_no_endpoint 31; FIN-CLOSE blocked_adr_076.'
+  open_high nur Zahlauf; blocked_no_endpoint 21; local_ui 10; FIN-CLOSE blocked_adr_076.'
