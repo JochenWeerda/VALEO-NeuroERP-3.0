@@ -46,6 +46,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `atlas_customs_service` | ATLAS Zollausfuhr Service — Implementierung nach Zollkodex der Union (UZK). |
 | `audit_hardening` | Audit Hardening Service — NC-D1/D2 |
 | `bedarfsdeckung_service` | Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — „Die Lücke ist das Vertriebsobjekt". |
+| `bestell_kommunikation_service` | Kommunikation zu einer Bestellung — wirklich versendet, am fuehrenden Beleg. |
 | `bewerbung_einwilligung_service` | Erteilen und Widerrufen der Aufbewahrungs-Einwilligung. |
 | `bewerbung_loeschlauf_service` | Der Loeschlauf fuer Bewerberdaten. |
 | `bewerbung_service` | Bewerbungspipeline — ein Woerterbuch mit Uebergaengen und ein ehrlicher Fehler. |
@@ -190,6 +191,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `logistics_epod_service` | DOM-LOG-004.3 — ePOD-Lifecycle-Service (Ablieferungsbeleg → Settlement). |
 | `lohn_service` | Payroll calculation and closeout contracts. |
 | `mail_ingest_service` | Server-seitiger IMAP-Mail-Ingest (per Tenant konfiguriert). |
+| `mail_versand` | E-Mail-Versand ueber SMTP — wirklich, oder mit klarer Absage. |
 | `mail_workspace_service` | Role-scoped ERP mail workspace on top of the canonical IMAP ingest. |
 | `mask_action_runtime_service` | SPEC-P1-04 — gemeinsame ActionRuntime für Mask-CommandEndpoints. |
 | `mask_rollout_summary_service` | Data service for batch mask rollout screen-summary endpoints (Waves 42–51). |

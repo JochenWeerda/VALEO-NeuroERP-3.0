@@ -12,11 +12,27 @@ file_ownership:
   - tests/test_ebilanz_xbrl_draft.py
   - tests/test_ebilanz_honest_persistence.py nur XBRL-Vertraege
   - Eigene QA, ADR Proposed, Finance-Domain-Pack und generierte committed-source Artefakte
-acceptance_criteria:
+acceptance:
   - Amtlicher SHA256 und deterministische 3944 Konzepte
   - Echte qualified XML-Bytes und sichtbarer DRAFT_UNVALIDATED-Status
   - Rollen, Mandant, Perioden, Typen und fehlende Konzepte pruefen
   - Keine Statusmutation, externe Uebertragung oder fingierte Annahme
+tests:
+  - tests/test_ebilanz_xbrl_draft.py (28 Vertraege)
+  - tests/test_ebilanz_honest_persistence.py (21 HTTP/PostgreSQL-Vertraege)
+  - tests/test_generate_architecture_index.py (25 Architekturvertraege)
+  - API-Gates bei Schwelle 0 und deterministische Inventare/OpenAPI
+ai_harness:
+  fachlicher_vertrag: Einfache explizite Fakten als unvalidierter Entwurf; keine amtliche Annahme.
+  architektur_vertrag: Bestehender Finance-Servicekontext, exakter Prefix und ADR-079 Proposed.
+  daten_vertrag: Amtlicher hashgebundener 6.9-Katalog; Exportmandant und Periode unveraendert.
+  test_vertrag: Echte XML-Bytes und HTTP/PostgreSQL-Vertraege auf gemeinsamem Probe.
+  security_vertrag: Finance-Schreibrecht, Tenantpruefung, Typ-/XML-Pruefung und no-store.
+  betriebs_vertrag: Lokaler gecachter Katalog ohne Netzabruf; kein DB-Write beim Download.
+  dokumentations_vertrag: Finance-Domain-Pack, ADR, QA, Workboard, Open-Gaps und Inventare.
+external_gates:
+  - Arelle-/amtliche Vollvalidierung, Tupel-/Dimensions-/Kontenzuordnung offen.
+  - ERiC-SDK/Zertifikat und echte Empfangsquittung nach Zugangserhalt offen.
 risks:
   - Vollvalidierung, Kontenzuordnung, Tupel und Dimensionen offen
   - ERiC-SDK/Zertifikate/Empfangsquittung fehlen

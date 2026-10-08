@@ -11,7 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## OFFENES-SCHLIESSEN-20261008 — in Arbeit, Claude Code
+## OFFENES-SCHLIESSEN-20261008 — abgeschlossen, Claude Code
+
+**Abnahme (08.10.2026):** Gelangensbestaetigung-Dublette 409 statt 503 (UAT wiederholbar);
+echter SMTP-Versand (`mail_versand`) statt vorgetaeuschter Erfolge in ProductionEmailService,
+Newsletter und Bestellkommunikation; Bestellkommunikation am kanonischen Beleg + Portal-Lesepfad;
+`ops_bankkonten` erstmals mit Mandant, IBAN-Pruefung echt und erreichbar; Bankkontonummer je
+Mandant; Lieferantenportal fragte nicht existierende Spalten ab (zeigte nie etwas) - korrigiert.
+Migration `offenes_schliessen_20261008` (Probe + Dev). QA:
+[offenes-schliessen-20261008.md](../quality-assurance/offenes-schliessen-20261008.md).
+
 
 **Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** offene Punkte schliessen: (1)
 Gelangensbestaetigung: Dublette antwortet 503 statt 409, UAT-Vertrag mit fester
@@ -113,6 +122,10 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 `docs/README.md` und Domain-Depth-Plan verweisen auf den Hub.
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
+
+**STREAM-JSON-PROTOTYPE-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Neuer echter GHSA-mjw6-4jj6-33hc/CVE-2026-104183 in verwendetem stream-json 1.9.1: Assembler schreibt __proto__ per Zuweisung. Besitz bestehender pnpm-Patch nur Assembler-Schutz neben erhaltenem Tiefenlimit, provenienzgebundener Hash/Lock-Patchreferenzen, verify_node_dependency_security.cjs nur echte Parser/Reviver/StreamObject-Regressionen, eigene QA/Workboard/Open-Gaps. Abnahme Originalpaket als Negativkontrolle, gepatchte CommonJS/Detox/Artillery-Vertraege und frozen Install; kein blinder 3.x-API-Sprung, kein Audit-Ignore, keine neuen Ressourcen. JSONC-Advisory separat pruefen, Chroma-Policy nicht automatisch erneuern. Abnahme: Originalpaket sha512-verifiziert: vier neue Prototype- und vier alte Tiefenvertraege scheitern, zwei normale bestehen. Gepatchtes Original 10/10, regulaerer pnpm-Workspace 12/12 inklusive StreamObject/Artillery/Bildverarbeitung; neun Policy-Vertraege gruen. Lockfile nur vier Hashreferenzen, frozen/offline alle 36 Workspaces. Chroma-Policy unveraendert aktuell 3 not_affected/0 blocked, Review endet 15.10.; nicht pauschal freigegeben. GitHub d81a86b38: Service Security/Agent/PostgreSQL/Smoke/critical/OpenAPI/Lasttest gruen. Production-Security-Scan weiterhin zwei High node-forge/braces ohne Herstellerfix, gezielte Abhilfe offen; acht GitHub-Versionalerts weiter sichtbar. JSONC-Pfad fehlt im Original 1.9.1, keine Audit-Ausnahme.
+
+**EBILANZ-CI-DOCFIX-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Eigene Folgefehler aus d81a86b38: Slice-Pflichtfelder acceptance/tests/ai_harness/external_gates fehlen und ADR-079-MkDocs-Navigation driftet. Besitz ausschliesslich eigener XBRL-Slice-Vertrag, amtlich generierter ADR-Nav-Block in isolierter mkdocs.yml, eigene QA/Workboard/Open-Gaps-Ergaenzung. Abnahme exakter AI-Harness, ADR-Nav-check, alle nachgelagerten Docs-Gates auf committed-source; keine Schutzregelabsenkung, keine fremden Doc-Hunks, kein neuer DB/Container. Security nur erneute Bestands-/Evidenzpruefung, keine blinden Pin-/Policy-Aenderungen. Abnahme: Alle Doku-Gates auf isoliertem Lieferstand gruen: Harness, ADR-Nav 84 ADRs, Markdown 121 Dateien, Governance 101 Dateien, Staleness 88 Seiten, drei Codeinventare, Containerinventar, fuenf Handbuchartefakte; vollstaendiger MkDocs-Build 57,19 s. Eigene CI-Ursachen behoben, vorhandene Linkwarnungen offen. Folge-CI erforderlich.
 
 **EBILANZ-XBRL-MAPPING-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Erweiterung des eigenen XML-Claims: config/architecture-domain-prefixes.yaml ausschliesslich exact_service_stems ebilanz_xbrl_service -> finance; tests/test_generate_architecture_index.py ein genau passender Regressionsfall. Complete-Generator hat genau diesen neuen Service ungemappt gemeldet. Kein generischer Prefix, keine fremden Maps, kein neuer Kontext/Container. Abnahme vorhandene Architekturvertraege und complete/check; gemeinsame QA/Slice/Workboard. Abnahme: 25 Architekturvertraege gruen, complete/check: 935/935 Routen, 277/277 Services, 454/454 Endpoints. Exakter Finance-Override und ADR-079 Proposed dokumentiert; drei Codeinventare aktuell. Kein neuer Kontext/Container.
 

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
+import { useNewsletterVersand } from '@/features/crm/newsletter-versand'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge, type BadgeVariant } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
@@ -287,6 +288,7 @@ export default function KundenListePage(): JSX.Element {
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'kunden'] })
 
+  const newsletter = useNewsletterVersand('kunden')
   const kundenListConfig = useMemo(() => {
     const onNewsletter = async (items: Record<string, unknown>[]) => {
       if (items.length === 0) { toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) }); return }
@@ -295,20 +297,7 @@ export default function KundenListePage(): JSX.Element {
         toast({ title: 'Keine E-Mail-Adressen', description: 'Für die ausgewählten Kunden sind keine E-Mail-Adressen hinterlegt.', variant: 'destructive' })
         return
       }
-      try {
-        await apiClient.post('/api/v1/crm/kommunikation/newsletter', {
-          empfaenger: emails,
-          typ: 'kunden',
-          betreff: 'Information von VALEO',
-        })
-        toast({ title: 'Newsletter versendet', description: `Versand an ${emails.length} Empfänger initiiert.` })
-      } catch (e: unknown) {
-        toast({
-          title: 'Versand fehlgeschlagen',
-          description: getAxiosErrorMessage(e),
-          variant: 'destructive',
-        })
-      }
+      newsletter.starten(emails.map(String))
     }
     const onBlock = async (items: Record<string, unknown>[]) => {
       if (items.length === 0) { toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) }); return }
@@ -336,7 +325,7 @@ export default function KundenListePage(): JSX.Element {
         { ...baseConfig.bulkActions[2], onClick: onBlock },
       ],
     }
-  }, [t, data])
+  }, [t, data, newsletter.starten])
 
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -419,6 +408,7 @@ export default function KundenListePage(): JSX.Element {
 
   return (
     <>
+      {newsletter.dialog}
       <input ref={importInputRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleImportFile} />
       <ListReport
         config={kundenListConfig}

@@ -454,6 +454,7 @@ nav:
           - ADR-076 Kassenabschluss ohne Scheinbuchung: adr/adr-076-cash-close-retirement.md
           - ADR-077 Fuehrender Wiegeschein im Inventory-Kern: adr/adr-077-leading-weighing-ticket.md
           - ADR-078 Kanonische Lead-Maske und PostgreSQL-PDF-Archiv: adr/adr-078-canonical-lead-postgresql-pdf.md
+          - "ADR-079: eBilanz-Entwurf und externe Bestaetigung": adr/adr-079-ebilanz-xbrl-drafts.md
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
           - UIX-034 - CRM 360 Native Parity Matrix: adr/uix-034-crm360-native-parity-matrix.md
       # adr-nav:end

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
+import { useNewsletterVersand } from '@/features/crm/newsletter-versand'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
@@ -286,6 +287,7 @@ export default function LieferantenListePage(): JSX.Element {
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'lieferanten'] })
 
+  const newsletter = useNewsletterVersand('lieferanten')
   const lieferantenListConfig = useMemo(() => {
     const onExportBulk = async (items: Record<string, unknown>[]) => {
       const exportData = items.length > 0 ? items : data
@@ -317,20 +319,7 @@ export default function LieferantenListePage(): JSX.Element {
         toast({ title: 'Keine E-Mail-Adressen', description: 'Für die ausgewählten Lieferanten sind keine E-Mail-Adressen hinterlegt.', variant: 'destructive' })
         return
       }
-      try {
-        await apiClient.post('/api/v1/crm/kommunikation/newsletter', {
-          empfaenger: emails,
-          typ: 'lieferanten',
-          betreff: 'Information von VALEO',
-        })
-        toast({ title: 'Newsletter versendet', description: `Versand an ${emails.length} Empfänger initiiert.` })
-      } catch (e: unknown) {
-        toast({
-          title: 'Versand fehlgeschlagen',
-          description: getAxiosErrorMessage(e),
-          variant: 'destructive',
-        })
-      }
+      newsletter.starten(emails.map(String))
     }
 
     const onAudit = async (items: Record<string, unknown>[]) => {
@@ -374,7 +363,7 @@ export default function LieferantenListePage(): JSX.Element {
         { ...baseConfig.bulkActions[3], onClick: onBlock },
       ],
     }
-  }, [t, data])
+  }, [t, data, newsletter.starten])
 
   const handleCreate = () => {
     navigate('/crm/lieferanten/stamm/new')
@@ -459,6 +448,7 @@ export default function LieferantenListePage(): JSX.Element {
 
   return (
     <>
+      {newsletter.dialog}
       <input ref={importInputRef} type="file" accept=".csv" className="hidden" onChange={handleImportFile} />
       <ListReport
         config={lieferantenListConfig}

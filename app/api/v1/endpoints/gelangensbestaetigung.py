@@ -14,6 +14,7 @@ from uuid import uuid4
 from fastapi import Body, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -249,6 +250,17 @@ def create_gelangensbestaetigung(
             "erinnerung_am": erinnerung_am.isoformat(),
             "status": "AUSSTEHEND",
         }
+    except IntegrityError as exc:
+        # Bis 08.10.2026 landete eine Dublette (ux_gelangensbestaetigung_tenant_lieferschein)
+        # im allgemeinen Zweig: 503 "Dienst nicht verfuegbar" samt rohem SQL-Text.
+        db.rollback()
+        if "ux_gelangensbestaetigung_tenant_lieferschein" in str(exc.orig):
+            raise HTTPException(
+                status_code=409,
+                detail=f"Zu Lieferschein {payload.lieferschein_nr} gibt es bereits eine Gelangensbestätigung.",
+            ) from exc
+        logger.error("Gelangensbestätigung verletzt eine Datenregel: %s", exc)
+        raise HTTPException(status_code=422, detail="Gelangensbestätigung verletzt eine Datenregel.") from exc
     except Exception as exc:
         db.rollback()
         logger.error("Fehler beim Erstellen der Gelangensbestätigung: %s", exc)

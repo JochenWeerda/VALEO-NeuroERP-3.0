@@ -234,6 +234,7 @@ class Settings(BaseSettings):
     EMAIL_SMTP_PORT: Optional[int] = None
     EMAIL_USERNAME: Optional[str] = None
     EMAIL_PASSWORD: Optional[str] = None
+    EMAIL_FROM: Optional[str] = None  # Absender; ohne ihn gilt EMAIL_USERNAME
 
     # VIES (EU USt-ID-Prüfung) – bei True ruft der Compliance-Worker den VIES-Service auf
     ENABLE_VIES_CHECK: bool = False

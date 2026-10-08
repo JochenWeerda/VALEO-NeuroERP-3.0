@@ -6,9 +6,14 @@
     },
     {
       "patch": "stream-json@1.9.1.patch",
-      "sha256": "23ac8cba3cd9d7ec6572fc07c538c9726b43f457033247283426c5efc5019a23"
+      "sha256": "6d8395e07dfdb6fab2faacfc7a1e7b78ef0b46d2acb292d58df8c96a66b4ad7a"
     }
   ],
   "advisory": "https://github.com/uhop/stream-json/security/advisories/GHSA-528h-pc64-c93x",
-  "backport": "Locally adapted depth guard; not an upstream 1.x release"
+  "backport": "Locally adapted depth guard; not an upstream 1.x release",
+  "prototype_fix": {
+    "advisory": "https://github.com/advisories/GHSA-mjw6-4jj6-33hc",
+    "source_tarball_integrity": "sha512-uWkjJ+2Nt/LO9Z/JyKZbMusL8Dkh97uUBTv3AJQ74y07lVahLY4eEFsPsE97pxYBwr8nnjMAIch5eqI0gPShyw==",
+    "backport": "Local CreateDataProperty-equivalent writes in both Assembler paths; preserves plain object and reviver APIs"
+  }
 }

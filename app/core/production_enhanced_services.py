@@ -12,32 +12,38 @@ logger = logging.getLogger(__name__)
 
 
 class ProductionEmailService:
-    """Production Email Service with SMTP integration."""
-    
+    """E-Mail-Dienst ueber den konfigurierten SMTP-Server (``app.services.mail_versand``).
+
+    Bis 08.10.2026 protokollierte ``send_email`` nur und meldete ``True`` — ein
+    Versand, der nie stattfand. Jetzt ``True`` nur, wenn der Server die Nachricht
+    angenommen hat; sonst ``False`` mit Protokolleintrag des Grundes.
+    """
+
     def __init__(self):
-        self.smtp_enabled = True
-        logger.info("ProductionEmailService initialized with SMTP support")
+        from app.services.mail_versand import MailVersandNichtEingerichtet, einrichtung
+
+        try:
+            einrichtung()
+            self.smtp_enabled = True
+        except MailVersandNichtEingerichtet:
+            self.smtp_enabled = False
+        logger.info("ProductionEmailService: SMTP %s", "eingerichtet" if self.smtp_enabled else "nicht eingerichtet")
 
     async def send_email(self, to: str, subject: str, body: str, html: Optional[str] = None) -> bool:
-        """Send email with production SMTP integration."""
+        """Versendet ueber SMTP; ``False``, wenn nicht eingerichtet oder abgelehnt."""
+        from app.services.mail_versand import MailVersandFehler, MailVersandNichtEingerichtet, sende_mail
+
         try:
-            logger.info(f"Production Email Service: Sending email to {to}")
-            # Production SMTP implementation here
+            sende_mail(to, subject, body, html=html)
             return True
-        except Exception as e:
-            logger.error(f"Failed to send email to {to}: {e}")
+        except (MailVersandNichtEingerichtet, MailVersandFehler) as e:
+            logger.error("E-Mail an %s nicht versendet: %s", to, e)
             return False
 
     async def send_template_email(self, to: str, template: str, context: dict) -> bool:
-        """Send templated email with context."""
-        try:
-            logger.info(f"Production Email Service: Sending template '{template}' to {to}")
-            # Production template engine implementation
-            return True
-        except Exception as e:
-            logger.error(f"Failed to send template email to {to}: {e}")
-            return False
-
+        """Es gibt keine Vorlagen-Engine; statt Erfolg vorzutaeuschen, wird abgelehnt."""
+        logger.error("Vorlagen-E-Mail '%s' an %s nicht versendet: keine Vorlagen-Engine", template, to)
+        return False
 
 class ProductionNotificationService:
     """Production Notification Service with database persistence."""
