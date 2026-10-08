@@ -31,6 +31,9 @@ class TestActionRegistry:
         for expected in ("nav-einkauf", "einkauf-bestellung-neu", "einkauf-lieferantenrechnung", "einkauf-angebot", "einkauf-lieferant-suche"):
             assert expected in ids, f"Einkauf-Intent '{expected}' fehlt in registry"
 
+    def test_nachweisraum_intent_registered(self):
+        assert "nav-nachweisraum" in action_registry.all_ids()
+
     def test_hr_intents_registered(self):
         ids = action_registry.all_ids()
         for expected in ("nav-hr", "hr-abwesenheit", "hr-mitarbeiter-neu", "hr-lohnlauf"):
@@ -106,6 +109,66 @@ class TestResolverLager:
         assert result is not None
         assert result.action_id == "nav-lager"
 
+    def test_oeffne_bestand(self):
+        result = intent_resolver.resolve("öffne Bestand")
+        assert result is not None
+        assert result.action_id == "nav-lager"
+        assert result.params.get("artikel_id") is None
+
+    def test_oeffne_bestand_mit_artikel(self):
+        result = intent_resolver.resolve("öffne Bestand ART-WEIZEN")
+        assert result is not None
+        assert result.action_id == "nav-lager"
+        assert result.params.get("artikel_id") == "ART-WEIZEN"
+
+    def test_oeffne_artikel_mit_id(self):
+        result = intent_resolver.resolve("öffne Artikel A-9")
+        assert result is not None
+        assert result.action_id == "nav-lager"
+        assert result.params.get("artikel_id") == "A-9"
+
+    def test_oeffne_lot(self):
+        result = intent_resolver.resolve("öffne Lot")
+        assert result is not None
+        assert result.action_id == "nav-lot"
+        assert result.params.get("lot_id") is None
+
+    def test_oeffne_lot_mit_id(self):
+        result = intent_resolver.resolve("öffne Lot LOT-42")
+        assert result is not None
+        assert result.action_id == "nav-lot"
+        assert result.params.get("lot_id") == "LOT-42"
+
+    def test_lot_oeffnen_mit_id(self):
+        result = intent_resolver.resolve("Lot öffnen silo-1")
+        assert result is not None
+        assert result.action_id == "nav-lot"
+        assert result.params.get("lot_id") == "silo-1"
+
+    def test_oeffne_charge_mit_id(self):
+        result = intent_resolver.resolve("öffne Charge CH-9")
+        assert result is not None
+        assert result.action_id == "nav-lot"
+        assert result.params.get("lot_id") == "CH-9"
+
+    def test_oeffne_zelle(self):
+        result = intent_resolver.resolve("öffne Zelle")
+        assert result is not None
+        assert result.action_id == "nav-silo-cell"
+        assert result.params.get("cell_code") is None
+
+    def test_oeffne_zelle_mit_code(self):
+        result = intent_resolver.resolve("öffne Zelle ZELLE-A1")
+        assert result is not None
+        assert result.action_id == "nav-silo-cell"
+        assert result.params.get("cell_code") == "ZELLE-A1"
+
+    def test_silozelle_oeffnen_mit_code(self):
+        result = intent_resolver.resolve("Silozelle öffnen S1")
+        assert result is not None
+        assert result.action_id == "nav-silo-cell"
+        assert result.params.get("cell_code") == "S1"
+
 
 # ---------------------------------------------------------------------------
 # IntentResolver — Einkauf
@@ -152,11 +215,48 @@ class TestResolverEinkauf:
         assert result is not None
         assert result.action_id == "nav-einkauf"
 
+    def test_oeffne_bestellung(self):
+        result = intent_resolver.resolve("öffne Bestellung")
+        assert result is not None
+        assert result.action_id == "nav-einkauf"
+        assert result.params.get("bestellung_id") is None
+
+    def test_oeffne_bestellung_mit_id(self):
+        result = intent_resolver.resolve("öffne Bestellung BE-100")
+        assert result is not None
+        assert result.action_id == "nav-einkauf"
+        assert result.params.get("bestellung_id") == "BE-100"
+
+    def test_bestellung_oeffnen_mit_id(self):
+        result = intent_resolver.resolve("Bestellung öffnen PO-9")
+        assert result is not None
+        assert result.action_id == "nav-einkauf"
+        assert result.params.get("bestellung_id") == "PO-9"
+
     def test_bestellung_betrag_extraktion(self):
         result = intent_resolver.resolve("Neue Bestellung Betrag 1500 Euro")
         assert result is not None
         assert result.action_id == "einkauf-bestellung-neu"
         assert result.params.get("amount") == "1500"
+
+
+class TestResolverNachweisraum:
+    def test_oeffne_dokument(self):
+        result = intent_resolver.resolve("öffne Dokument")
+        assert result is not None
+        assert result.action_id == "nav-nachweisraum"
+        assert result.params.get("dokument_id") is None
+
+    def test_oeffne_dokument_mit_id(self):
+        result = intent_resolver.resolve("öffne Dokument DOC-42")
+        assert result is not None
+        assert result.action_id == "nav-nachweisraum"
+        assert result.params.get("dokument_id") == "DOC-42"
+
+    def test_nachweisraum_oeffnen(self):
+        result = intent_resolver.resolve("Nachweisraum öffnen")
+        assert result is not None
+        assert result.action_id == "nav-nachweisraum"
 
 
 # ---------------------------------------------------------------------------

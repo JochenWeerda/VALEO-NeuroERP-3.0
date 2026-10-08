@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 35 Tools in 14 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 39 Tools in 14 Domaenen.
 
 ## Uebersicht
 
@@ -38,10 +38,14 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 35 Tools in 14 Domaenen.
 | `einkauf.angebot.bestellen` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `einkauf.anlieferavis.wareneingang` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `einkauf.bestellung.list` | einkauf | `einkauf:read` | ja | niedrig | nein |
+| `einkauf.bestellung.status` | einkauf | `einkauf:read` | ja | niedrig | nein |
 | `einkauf.bestellung.versenden` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein |
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein |
+| `finance.ap_invoice.freigeben` | finance | `finance:write` | ja | hoch | ja |
+| `finance.ap_invoice.propose` | finance | `finance:write` | nein | hoch | ja |
 | `lager.bestand.get` | lager | `lager:read` | ja | niedrig | nein |
+| `lager.inventur.propose_opening` | lager | `lager:write` | nein | hoch | ja |
 | `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein |
 | `lager.stock_movement.stornieren` | lager | `lager:write` | ja | mittel | nein |
 | `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein |
@@ -112,7 +116,7 @@ Listet Agent-Proposals des Authentifizierungs-Mandanten (Supervisor-Scope agent:
 
 ### `agrar.contract.get` — Agrar-Kontrakt abrufen
 
-Gibt Agrar-Kontrakt (Menge, Preis, Status) im Authentifizierungs-Mandanten zurueck. parameters.kontrakt_id (UUID oder Vertragsnummer). Kein tenant_id-Parameter. Scope agrar:read; nur Lesen.
+Gibt Agrar-Kontrakt (Menge, Preis, Status) und kanonische Masken-Route (/agrar/kontrakt/{id}, Screen agrar/kontrakte) im Authentifizierungs-Mandanten zurueck. parameters.kontrakt_id (UUID oder Vertragsnummer). Kein tenant_id-Parameter. Scope agrar:read; nur Lesen.
 
 - **Scope:** `agrar:read`
 - **Idempotent:** ja
@@ -159,6 +163,12 @@ Gibt Agrar-Kontrakt (Menge, Preis, Status) im Authentifizierungs-Mandanten zurue
       "nullable": true
     },
     "status": {
+      "type": "string"
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "screen_id": {
       "type": "string"
     }
   }
@@ -516,7 +526,7 @@ Fuehrt einen Lifecycle-Schritt der aktuellen Rationsversion aus (submit_review/a
 
 ### `agrar.weighing_ticket.list` — Wiegescheine auflisten
 
-Listet Wiegescheine des Authentifizierungs-Mandanten optional nach Kontrakt-/Partie-Referenz und Zeitraum. Scope agrar:read; nur Lesen.
+Listet Wiegescheine des Authentifizierungs-Mandanten optional nach ticket_id, Kontrakt-/Partie-Referenz und Zeitraum. Items tragen kanonische Masken-Route (/waage/wiegeschein/{id}, Screen waage/wiegeschein). Scope agrar:read; nur Lesen.
 
 - **Scope:** `agrar:read`
 - **Idempotent:** ja
@@ -531,6 +541,11 @@ Listet Wiegescheine des Authentifizierungs-Mandanten optional nach Kontrakt-/Par
 {
   "type": "object",
   "properties": {
+    "ticket_id": {
+      "type": "string",
+      "nullable": true,
+      "description": "Wiegeschein-UUID"
+    },
     "partie_id": {
       "type": "string",
       "nullable": true,
@@ -1126,7 +1141,7 @@ Bucht Wareneingang aus Anlieferavis (Bestellpositionen + Lagerzugang; Maske eink
 
 ### `einkauf.bestellung.list` — Offene Bestellungen auflisten
 
-Listet Bestellungen des Authentifizierungs-Mandanten mit Status und Liefertermin. Scope einkauf:read; nur Lesen.
+Listet Bestellungen des Authentifizierungs-Mandanten mit Status, Liefertermin und kanonischer Masken-Route (/einkauf/bestellung/{id}, Screen einkauf/purchase-order). Scope einkauf:read; nur Lesen.
 
 - **Scope:** `einkauf:read`
 - **Idempotent:** ja
@@ -1170,6 +1185,62 @@ Listet Bestellungen des Authentifizierungs-Mandanten mit Status und Liefertermin
     },
     "count": {
       "type": "integer"
+    }
+  }
+}
+```
+
+### `einkauf.bestellung.status` — Bestellungs-Status
+
+Gibt Status, Lieferant und kanonische Masken-Route (/einkauf/bestellung/{id}, Screen einkauf/purchase-order) einer Bestellung im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=einkauf.bestellung.status, parameters.bestellung_id (UUID oder Bestellnummer). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit einkauf:read und tenant_id erforderlich. Kein Versand, kein Obligo.
+
+- **Scope:** `einkauf:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "bestellung_id": {
+      "type": "string",
+      "description": "Bestellungs-UUID oder Bestellnummer"
+    }
+  },
+  "required": [
+    "bestellung_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "bestellung_id": {
+      "type": "string"
+    },
+    "bestellnummer": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "lieferant": {
+      "type": "string"
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "screen_id": {
+      "type": "string"
     }
   }
 }
@@ -1379,11 +1450,130 @@ Listet offene Forderungen oder Verbindlichkeiten im Authentifizierungs-Mandanten
 }
 ```
 
+### `finance.ap_invoice.freigeben` — AP-Rechnung aus freigegebenem Vorschlag freigeben
+
+Ruft den echten CommandEndpoint POST /api/v1/finance/ap/invoices/{id}/actions/freigeben nur nach freigegebenem agent_proposals-Datensatz (ap_invoice_freigabe) auf. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved. Kein Freigabe-Boolean im Aufruf. Kein Journal-Post/FIN-CLOSE (fibu_journal=false). OIDC-Token mit finance:write und tenant_id erforderlich.
+
+- **Scope:** `finance:write`
+- **Idempotent:** ja
+- **Risikoklasse:** hoch
+- **Audit:** write
+- **Human-Approval erforderlich:** ja
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "proposal_id": {
+      "type": "string",
+      "description": "entwurf_id aus finance.ap_invoice.propose"
+    }
+  },
+  "required": [
+    "proposal_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "invoice_id": {
+      "type": "string"
+    },
+    "invoice_number": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "approved": {
+      "type": "boolean"
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "screen_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `finance.ap_invoice.propose` — AP-Freigabe vorschlagen
+
+Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id. Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist nicht angebunden (nutze finance.ap_invoice.freigeben nach Freigabe). Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE.
+
+- **Scope:** `finance:write`
+- **Idempotent:** nein
+- **Risikoklasse:** hoch
+- **Audit:** write
+- **Human-Approval erforderlich:** ja
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "invoice_id": {
+      "type": "string",
+      "description": "AP-Rechnungs-ID bzw. Belegnummer"
+    }
+  },
+  "required": [
+    "invoice_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "entwurf_id": {
+      "type": "string"
+    },
+    "invoice_id": {
+      "type": "string"
+    },
+    "invoice_number": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "brutto_eur": {
+      "type": "number",
+      "nullable": true
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "screen_id": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string"
+    }
+  }
+}
+```
+
 ## Domaene: inventory
 
 ### `wms.cell.status` — Silozellen-Status
 
-Gibt Fuellstand kg, aktuelles Material, QS-Status und Flush-/Reinigungsbedarf einer Silozelle im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=wms.cell.status, parameters.cell_code (Zellencode oder UUID). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit inventory:read und tenant_id erforderlich. Kein Transfer, keine QS-Aenderung.
+Gibt Fuellstand kg, aktuelles Material, QS-Status, Flush-/Reinigungsbedarf und kanonische Masken-Route (/lager/silo-zellen/{id}, Screen lager/silo-cell) einer Silozelle im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=wms.cell.status, parameters.cell_code (Zellencode oder UUID). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit inventory:read und tenant_id erforderlich. Kein Transfer, keine QS-Aenderung.
 
 - **Scope:** `inventory:read`
 - **Idempotent:** ja
@@ -1415,6 +1605,9 @@ Gibt Fuellstand kg, aktuelles Material, QS-Status und Flush-/Reinigungsbedarf ei
 {
   "type": "object",
   "properties": {
+    "cell_id": {
+      "type": "string"
+    },
     "cell_code": {
       "type": "string"
     },
@@ -1430,6 +1623,12 @@ Gibt Fuellstand kg, aktuelles Material, QS-Status und Flush-/Reinigungsbedarf ei
     },
     "flush_required": {
       "type": "boolean"
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "screen_id": {
+      "type": "string"
     }
   }
 }
@@ -1437,7 +1636,7 @@ Gibt Fuellstand kg, aktuelles Material, QS-Status und Flush-/Reinigungsbedarf ei
 
 ### `wms.lot.trace` — Lot verfolgen
 
-Gibt Artikel, Menge kg, Status, QS-Status, Silozelle und Bewegungshistorie eines Lots im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=wms.lot.trace, parameters.lot_id (Lot-UUID oder Virtual-/Lotnummer). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit inventory:read und tenant_id erforderlich. Keine Buchung, keine QS-Aenderung.
+Gibt Artikel, Menge kg, Status, QS-Status, Silozelle, Bewegungshistorie und kanonische Masken-Route (/charge/stamm/{id}, Screen charge/stamm) eines Lots im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=wms.lot.trace, parameters.lot_id (Lot-UUID oder Virtual-/Lotnummer). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit inventory:read und tenant_id erforderlich. Keine Buchung, keine QS-Aenderung.
 
 - **Scope:** `inventory:read`
 - **Idempotent:** ja
@@ -1491,6 +1690,12 @@ Gibt Artikel, Menge kg, Status, QS-Status, Silozelle und Bewegungshistorie eines
     },
     "bewegungen": {
       "type": "array"
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "screen_id": {
+      "type": "string"
     }
   }
 }
@@ -1500,7 +1705,7 @@ Gibt Artikel, Menge kg, Status, QS-Status, Silozelle und Bewegungshistorie eines
 
 ### `lager.bestand.get` — Lagerbestand abfragen
 
-Gibt Artikelbestand (Menge/reserviert/verfuegbar) im Authentifizierungs-Mandanten zurueck. parameters.artikel_id; lager_id optional (Hinweis, Bestand ist artikelbezogen). Scope lager:read; nur Lesen.
+Gibt Artikelbestand (Menge/reserviert/verfuegbar) und kanonische Masken-Route (/lager/artikel/{id}, Screen lager/article-stock) im Authentifizierungs-Mandanten zurueck. parameters.artikel_id (UUID oder Artikelnummer); lager_id optional (Hinweis, Bestand ist artikelbezogen). Scope lager:read; nur Lesen.
 
 - **Scope:** `lager:read`
 - **Idempotent:** ja
@@ -1549,6 +1754,82 @@ Gibt Artikelbestand (Menge/reserviert/verfuegbar) im Authentifizierungs-Mandante
     },
     "verfuegbar": {
       "type": "number"
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "screen_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `lager.inventur.propose_opening` — Bestandsvortrag vorschlagen
+
+Legt einen ausstehenden Bestandsvortrag-Vorschlag zu einer Inventur (inventory_counts) im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=lager.inventur.propose_opening, parameters.count_id. Default dryRun liest Zeilen/Differenzen/vorlaeufigen Wert aus Inventurzeilen (gleiche Quelle wie InventoryAuxiliaryService). propose speichert agent_proposals (inventur_opening) mit approval_status pending und erzeugt keinen opening_balance-Batch. execute ist nicht angebunden (501) — kein CommandEndpoint, kein Booking/Journal. Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit lager:write und tenant_id erforderlich.
+
+- **Scope:** `lager:write`
+- **Idempotent:** nein
+- **Risikoklasse:** hoch
+- **Audit:** write
+- **Human-Approval erforderlich:** ja
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "count_id": {
+      "type": "string",
+      "description": "Inventur-UUID (inventory_counts.id)"
+    },
+    "reason": {
+      "type": "string",
+      "nullable": true,
+      "description": "Optionale Begruendung fuer den Vorschlag"
+    }
+  },
+  "required": [
+    "count_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "entwurf_id": {
+      "type": "string"
+    },
+    "count_id": {
+      "type": "string"
+    },
+    "line_count": {
+      "type": "integer"
+    },
+    "difference_count": {
+      "type": "integer"
+    },
+    "preliminary_value": {
+      "type": "number"
+    },
+    "approval_status": {
+      "type": "string"
+    },
+    "booked": {
+      "type": "boolean"
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "screen_id": {
+      "type": "string"
     }
   }
 }
@@ -1717,7 +1998,7 @@ Verarbeitet pending Events der Mobile/MDE-Queue des Authentifizierungs-Mandanten
 
 ### `dms.document.search` — Dokument suchen
 
-Sucht Nachweisraum-Dokumente im Authentifizierungs-Mandanten nach Typ, Zeitraum oder Beleg-Referenz. HTTP tool_name=dms.document.search. Default dryRun; execute nur Lesen. Scope nachweisraum:read.
+Sucht Nachweisraum-Dokumente im Authentifizierungs-Mandanten nach Typ, Zeitraum, Beleg-Referenz oder dokument_id (UUID/Bezeichnung/Referenz). Items tragen kanonische Masken-Route (/docflow/nachweisraum/{id}, Screen docflow/nachweisraum). HTTP tool_name=dms.document.search. Default dryRun; execute nur Lesen. Scope nachweisraum:read.
 
 - **Scope:** `nachweisraum:read`
 - **Idempotent:** ja
@@ -1732,6 +2013,11 @@ Sucht Nachweisraum-Dokumente im Authentifizierungs-Mandanten nach Typ, Zeitraum 
 {
   "type": "object",
   "properties": {
+    "dokument_id": {
+      "type": "string",
+      "nullable": true,
+      "description": "Dokument-UUID, Bezeichnung oder referenz_id"
+    },
     "beleg_ref": {
       "type": "string",
       "nullable": true
@@ -1776,7 +2062,7 @@ Sucht Nachweisraum-Dokumente im Authentifizierungs-Mandanten nach Typ, Zeitraum 
 
 ### `dms.gobd.export_status` — GoBD-Export-Status
 
-Gibt Status und Pruefhinweis eines GoBD-Exports im Authentifizierungs-Mandanten zurueck. HTTP tool_name=dms.gobd.export_status, parameters.export_id. Scope nachweisraum:read; nur Lesen.
+Gibt Status, Pruefhinweis und kanonische Masken-Route (/docflow/gobd-export/{id}, Screen docflow/gobd-export) eines GoBD-Exports im Authentifizierungs-Mandanten zurueck. HTTP tool_name=dms.gobd.export_status, parameters.export_id. Scope nachweisraum:read; nur Lesen.
 
 - **Scope:** `nachweisraum:read`
 - **Idempotent:** ja
@@ -1819,6 +2105,12 @@ Gibt Status und Pruefhinweis eines GoBD-Exports im Authentifizierungs-Mandanten 
     "pruefprotokoll": {
       "type": "string",
       "nullable": true
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "screen_id": {
+      "type": "string"
     }
   }
 }
@@ -2078,7 +2370,7 @@ Legt einen ausstehenden Rechnungsvorschlag zu einem gebuchten Lieferschein an. H
 
 ### `sales.order.status` — Auftragsstatus pruefen
 
-Gibt Lifecycle-Status, offene Positionen und naechsten Schritt eines Auftrags im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=sales.order.status, parameters.auftrag_nr (Auftragsnummer oder UUID). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit sales:read und tenant_id erforderlich.
+Gibt Lifecycle-Status, offene Positionen, naechsten Schritt und kanonische Masken-Route (/sales/order-editor/{id}, Screen sales/sales-order) eines Auftrags im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=sales.order.status, parameters.auftrag_nr (Auftragsnummer oder UUID). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit sales:read und tenant_id erforderlich.
 
 - **Scope:** `sales:read`
 - **Idempotent:** ja
@@ -2123,6 +2415,12 @@ Gibt Lifecycle-Status, offene Positionen und naechsten Schritt eines Auftrags im
       "type": "integer"
     },
     "naechster_schritt": {
+      "type": "string"
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "screen_id": {
       "type": "string"
     }
   }

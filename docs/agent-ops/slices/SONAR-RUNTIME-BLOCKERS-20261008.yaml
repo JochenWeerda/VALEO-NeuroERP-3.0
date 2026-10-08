@@ -1,0 +1,38 @@
+slice_id: SONAR-RUNTIME-BLOCKERS-20261008
+title: Reale Agrar-Import- und Sicherheitsdashboard-Blocker
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-08
+goal: Reproduzierte Sonar-Laufzeitfehler schliessen und defekten NUTS-Altweg entfernen.
+file_ownership:
+  - modules/agrar/services/__init__.py
+  - modules/agrar/services/nuts2_service.py nur Rueckbau
+  - scripts/seed_nuts2_postal_codes.py nur Rueckbau
+  - app/security/audit_service.py nur Dashboard-Filteraufruf
+  - app/operations_security/management.py nur Maintenance-ID und Erfolgsquotenaufruf
+  - tests/test_sonar_runtime_blockers.py
+  - Eigene QA, Open-Gaps-Hunks und Workboard
+acceptance:
+  - Alle oeffentlichen Agrar-Exporte sind wirklich importierbar.
+  - Echte Dashboards funktionieren ohne Aufruf- oder Konstruktorfehler.
+  - Audit-Tenant-/Zeitfilter und Statusquoten bleiben korrekt.
+  - Keine neue Datenbank, Container, Persistenz oder Scanner-Ausnahme.
+tests:
+  - Original-Gegenprobe gegen unveraenderten committed Code
+  - Neue isolierte Runtime-Vertraege mit gesperrtem Engine.connect
+  - Bestehende Ernte-, Trocknungs-, Preis- und Qualitaetsvertraege
+ai_harness:
+  fachlicher_vertrag: Bestehende Fachfunktionen und Statusberechnung erhalten, keine Scheinwirkung.
+  architektur_vertrag: Keine neue API, Servicegrenze oder konkurrierendes Modell.
+  daten_vertrag: Keine Schemaaenderung oder Fachschreibtests; lesende Imports und In-Memory-Zustand.
+  test_vertrag: Originalfehler reproduzieren, reale Methoden statt nachgebauter Algorithmen pruefen.
+  security_vertrag: Audit-Tenant-/Zeitfilter erhalten; DB-Verbindungen im neuen Test gesperrt.
+  betriebs_vertrag: Bestehende CI testet Regressionen, Sonar-Schwellen unveraendert.
+  dokumentations_vertrag: QA, Slice, Workboard und Open-Gaps zusammen aktualisieren.
+external_gates:
+  - GitHub Quality Gate einschliesslich SonarCloud-Nachscan; weitere Sonar-Befunde offen.
+risks:
+  - Bestehende In-Memory-Dienste sind keine vollstaendige ISO27001-Persistenzabnahme.
+  - Coverage, Duplikate, Hotspot-Reviews und weitere Sonar-Bugs bleiben offen.
+test_database: Keine Datenbankverbindung, neue Tests sperren Engine.connect.
+validation: Original 20 Fehler und ein bestandener Vertrag; final 43 neue und bestehende Vertraege ohne Skip in 3,99 Sekunden gruen. Sonar-Folgeabnahme und weitere Befunde offen.

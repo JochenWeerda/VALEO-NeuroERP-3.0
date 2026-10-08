@@ -1,0 +1,60 @@
+slice_id: MCP-DEEP-LINK-DMS-20261008
+id: MCP-DEEP-LINK-DMS-20261008
+title: Voice/Dispatch Deep-Link aus dms.document.search
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+closed_at: 2026-10-08
+goal: >
+  nav-nachweisraum mit dokument_id ruft dms.document.search und navigiert nur
+  auf /docflow/nachweisraum/{id}; ohne Kennung bleibt /docflow/nachweisraum.
+  GoBD-Status traegt route_path. Intent liefert dokument_id aus „öffne Dokument …“.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - packages/frontend-web/src/lib/mcp-dms-open.ts
+  - packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx
+  - packages/frontend-web/src/pages/docflow/nachweisraum.tsx
+  - packages/frontend-web/src/pages/docflow/gobd-export.tsx
+  - packages/frontend-web/src/app/route-aliases.json
+  - packages/frontend-web/src/app/routing/route-tree.gen.tsx
+  - services/ki-usability/app/services/intent_resolver.py
+  - services/ki-usability/app/services/action_registry.py
+  - app/core/ki_action_registry.py
+  - tests/test_mcp_execution.py
+  - docs/quality-assurance/mcp-deep-link-dms-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - isSafeDmsRoutePath akzeptiert nur Nachweisraum-/GoBD-Detailpfade
+  - nav-nachweisraum ohne dokument_id → /docflow/nachweisraum
+  - nav-nachweisraum mit dokument_id → MCP + Navigate
+  - Intent „öffne Dokument DOC-42“ liefert dokument_id
+  - Search-Items und GoBD-Status enthalten route_path/screen_id
+tests:
+  - packages/frontend-web/src/__tests__/lib/mcp-dms-open.test.ts
+  - packages/frontend-web/src/__tests__/features/ki-usability/ActionDispatchContext.test.tsx
+  - services/ki-usability/tests/test_voice_intent_lager_einkauf_hr.py
+  - tests/test_mcp_execution.py
+risks:
+  - Token ohne nachweisraum:read → Deep-Link schlaegt fehl
+ai_harness:
+  fachlicher_vertrag: >
+    Sprache/Agent oeffnet konkrete Nachweisraum-Dokumente nur nach Mandanten-Aufloesung.
+  architektur_vertrag: >
+    Zentraler ActionDispatch; Search-Read bleibt Backend-Wahrheit fuer Route.
+  daten_vertrag: >
+    Keine neuen Persistenzwege; nur Lesen via bestehendem MCP-Call.
+  test_vertrag: >
+    Route-Guard, Dispatch-Mocks, Search/GoBD-Assertion, Voice-Intent.
+  security_vertrag: >
+    Open-Redirect-Schutz: nur /docflow/nachweisraum/{id} und /docflow/gobd-export/{id}.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice nachgezogen.
+external_gates:
+  - not_applicable
+result: >
+  4 DMS/GoBD-MCP-, 24 Frontend- und Voice-Nachweisraum-Tests gruen.

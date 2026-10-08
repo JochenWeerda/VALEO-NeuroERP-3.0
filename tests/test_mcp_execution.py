@@ -583,6 +583,8 @@ def test_order_status_dry_run_returns_lifecycle_without_writing(client):
     assert body["status"] == "confirmed"
     assert body["offene_positionen"] == 3
     assert body["naechster_schritt"] == "Lieferschein erstellen"
+    assert body["route_path"] == "/sales/order-editor/ord-1"
+    assert body["screen_id"] == "sales/sales-order"
     db.commit.assert_not_called()
 
 
@@ -920,6 +922,8 @@ def test_lot_trace_dry_run_returns_silo_lot_without_writing(client):
     assert body["qs_status"] == "frei"
     assert body["silozelle"] == "ZELLE-A1"
     assert body["bewegungen"][0]["typ"] == "in"
+    assert body["route_path"] == "/charge/stamm/lot-uuid-1"
+    assert body["screen_id"] == "charge/stamm"
     joined = "\n".join(str(call.args[0]) for call in db.execute.call_args_list)
     assert "domain_inventory.silo_lots" in joined
     assert all(call.args[1].get("tenant") == "tenant-a" for call in db.execute.call_args_list)
@@ -1018,6 +1022,9 @@ def test_cell_status_dry_run_returns_cell_without_writing(client):
     assert body["qs_status"] == "frei"
     assert body["current_material"] == "ART-WEIZEN"
     assert body["flush_required"] is True
+    assert body["cell_id"] == "cell-uuid-1"
+    assert body["route_path"] == "/lager/silo-zellen/cell-uuid-1"
+    assert body["screen_id"] == "lager/silo-cell"
     joined = "\n".join(str(call.args[0]) for call in db.execute.call_args_list)
     assert "domain_inventory.silo_cells" in joined
     assert all(call.args[1].get("tenant") == "tenant-a" for call in db.execute.call_args_list)
@@ -1105,6 +1112,8 @@ def test_document_search_happy_and_guards(client):
     assert ok.status_code == 200
     assert ok.json()["count"] == 1
     assert ok.json()["items"][0]["dokument_id"] == "d1"
+    assert ok.json()["items"][0]["route_path"] == "/docflow/nachweisraum/d1"
+    assert ok.json()["items"][0]["screen_id"] == "docflow/nachweisraum"
     db.commit.assert_not_called()
     http2, db2 = _as_scopes(client, ["crm:read"])
     assert http2.post("/mcp/tools/call", json={
@@ -1119,6 +1128,34 @@ def test_document_search_happy_and_guards(client):
     db3.execute.assert_not_called()
 
 
+def test_document_search_by_dokument_id_returns_route(client):
+    http, db = _as_scopes(client, ["nachweisraum:read"])
+    db.execute.side_effect = _rows_execute([
+        {"dokument_id": "doc-1", "titel": "Rechnung", "status": "EINGEGANGEN", "erstellt_am": "2026-10-01"},
+    ])
+    ok = http.post("/mcp/tools/call", json={
+        "tool_name": "dms.document.search",
+        "parameters": {"dokument_id": "doc-1", "limit": 1},
+    })
+    assert ok.status_code == 200
+    body = ok.json()
+    assert body["items"][0]["dokument_id"] == "doc-1"
+    assert body["items"][0]["route_path"] == "/docflow/nachweisraum/doc-1"
+    assert body["items"][0]["screen_id"] == "docflow/nachweisraum"
+    db.commit.assert_not_called()
+
+
+def test_document_search_missing_dokument_id_is_404(client):
+    http, db = _as_scopes(client, ["nachweisraum:read"])
+    db.execute.side_effect = _rows_execute([])
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "dms.document.search",
+        "parameters": {"dokument_id": "missing"},
+    })
+    assert response.status_code == 404
+    db.commit.assert_not_called()
+
+
 def test_gobd_export_status_happy_and_404(client):
     http, db = _as_scopes(client, ["nachweisraum:read"])
     db.execute.side_effect = _rows_execute([{
@@ -1131,6 +1168,8 @@ def test_gobd_export_status_happy_and_404(client):
     assert ok.status_code == 200
     assert ok.json()["export_id"] == "ex1"
     assert ok.json()["dokument_anzahl"] == 3
+    assert ok.json()["route_path"] == "/docflow/gobd-export/ex1"
+    assert ok.json()["screen_id"] == "docflow/gobd-export"
     db.commit.assert_not_called()
     db.execute.side_effect = None
     db.execute.return_value.mappings.return_value.first.return_value = None
@@ -1152,6 +1191,8 @@ def test_agrar_contract_and_weighing_happy_and_guards(client):
     assert ok.status_code == 200
     assert ok.json()["kontrakt_id"] == "c1"
     assert ok.json()["menge_t"] == 12.5
+    assert ok.json()["route_path"] == "/agrar/kontrakt/c1"
+    assert ok.json()["screen_id"] == "agrar/kontrakte"
     assert http.post("/mcp/tools/call", json={
         "tool_name": "agrar.contract.get",
         "parameters": {"kontrakt_id": "K-1", "tenant_id": "other"},
@@ -1165,6 +1206,20 @@ def test_agrar_contract_and_weighing_happy_and_guards(client):
     })
     assert tickets.status_code == 200
     assert tickets.json()["count"] == 1
+    assert tickets.json()["items"][0]["route_path"] == "/waage/wiegeschein/t1"
+    assert tickets.json()["items"][0]["screen_id"] == "waage/wiegeschein"
+    by_id = http.post("/mcp/tools/call", json={
+        "tool_name": "agrar.weighing_ticket.list",
+        "parameters": {"ticket_id": "t1", "limit": 1},
+    })
+    assert by_id.status_code == 200
+    assert by_id.json()["items"][0]["ticket_id"] == "t1"
+    db.execute.side_effect = _rows_execute([])
+    missing = http.post("/mcp/tools/call", json={
+        "tool_name": "agrar.weighing_ticket.list",
+        "parameters": {"ticket_id": "missing"},
+    })
+    assert missing.status_code == 404
     db.commit.assert_not_called()
     http2, _ = _as_scopes(client, ["lager:read"])
     assert http2.post("/mcp/tools/call", json={
@@ -1183,6 +1238,9 @@ def test_lager_bestand_and_inventur_happy_and_guards(client):
     })
     assert ok.status_code == 200
     assert ok.json()["verfuegbar"] == 35.0
+    assert ok.json()["artikel_id"] == "a1"
+    assert ok.json()["route_path"] == "/lager/artikel/a1"
+    assert ok.json()["screen_id"] == "lager/article-stock"
     db.commit.assert_not_called()
 
     def inventur_execute(sql, params=None):
@@ -1212,6 +1270,49 @@ def test_lager_bestand_and_inventur_happy_and_guards(client):
     }).status_code == 422
 
 
+def test_bestellung_status_dry_run_returns_route(client):
+    http, db = _as_scopes(client, ["einkauf:read"])
+    db.execute.return_value.mappings.return_value.first.return_value = {
+        "bestellung_id": "po-uuid-1",
+        "bestellnummer": "BE-100",
+        "status": "offen",
+        "lieferant": "Mueller",
+    }
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "einkauf.bestellung.status",
+        "parameters": {"bestellung_id": "BE-100"},
+    })
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mode"] == "dryRun"
+    assert body["bestellung_id"] == "po-uuid-1"
+    assert body["bestellnummer"] == "BE-100"
+    assert body["route_path"] == "/einkauf/bestellung/po-uuid-1"
+    assert body["screen_id"] == "einkauf/purchase-order"
+    db.commit.assert_not_called()
+
+
+def test_bestellung_status_missing_is_404(client):
+    http, db = _as_scopes(client, ["einkauf:read"])
+    db.execute.return_value.mappings.return_value.first.return_value = None
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "einkauf.bestellung.status",
+        "parameters": {"bestellung_id": "missing"},
+    })
+    assert response.status_code == 404
+    db.commit.assert_not_called()
+
+
+def test_bestellung_status_requires_einkauf_read(client):
+    http, _, db = client
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "einkauf.bestellung.status",
+        "parameters": {"bestellung_id": "BE-100"},
+    })
+    assert response.status_code == 403
+    db.execute.assert_not_called()
+
+
 def test_bestellung_list_happy_and_guards(client):
     http, db = _as_scopes(client, ["einkauf:read"])
     db.execute.side_effect = _rows_execute([{
@@ -1224,6 +1325,8 @@ def test_bestellung_list_happy_and_guards(client):
     })
     assert ok.status_code == 200
     assert ok.json()["items"][0]["bestellung_id"] == "b1"
+    assert ok.json()["items"][0]["route_path"] == "/einkauf/bestellung/b1"
+    assert ok.json()["items"][0]["screen_id"] == "einkauf/purchase-order"
     db.commit.assert_not_called()
     http2, _ = _as_scopes(client, ["crm:read"])
     assert http2.post("/mcp/tools/call", json={
@@ -2065,3 +2168,306 @@ def test_invoice_post_rejects_client_approval_flag(client):
     })
     assert response.status_code == 422
     db.execute.assert_not_called()
+
+
+AP_INVOICE = {"invoice_id": "AP-100"}
+AP_INVOICE_ROW = {
+    "number": "AP-100",
+    "status": "ZUR_FREIGABE",
+    "totalGross": 120.5,
+    "tenantId": "tenant-a",
+}
+
+
+def _as_finance_write(client):
+    http, app, db = client
+    app.dependency_overrides[get_current_user] = lambda: {
+        **USER,
+        "scopes": ["finance:write"],
+    }
+    return http, db
+
+
+def test_ap_propose_scope_is_required(client):
+    http, _, db = client
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "finance.ap_invoice.propose",
+        "parameters": AP_INVOICE,
+    })
+    assert response.status_code == 403
+    db.execute.assert_not_called()
+
+
+def test_ap_propose_execute_is_not_wired(client):
+    http, db = _as_finance_write(client)
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "finance.ap_invoice.propose",
+        "parameters": AP_INVOICE,
+        "mode": "execute",
+    })
+    assert response.status_code == 501
+    db.commit.assert_not_called()
+
+
+def test_ap_propose_rejects_client_approval_flag(client):
+    http, db = _as_finance_write(client)
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "finance.ap_invoice.propose",
+        "parameters": {**AP_INVOICE, "approval_granted": True},
+    })
+    assert response.status_code == 422
+    db.execute.assert_not_called()
+
+
+def test_ap_propose_dry_run_reads_invoice_without_writing(client):
+    http, db = _as_finance_write(client)
+    with patch("app.services.mcp_execution_service._load_ap_invoice", return_value=AP_INVOICE_ROW):
+        response = http.post("/mcp/tools/call", json={
+            "tool_name": "finance.ap_invoice.propose",
+            "parameters": AP_INVOICE,
+        })
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mode"] == "dryRun"
+    assert body["approved"] is False
+    assert body["invoice_id"] == "AP-100"
+    assert body["brutto_eur"] == 120.5
+    assert body["route_path"] == "/finance/ap-invoice/AP-100"
+    assert body["screen_id"] == "finance/ap-invoice"
+    assert "entwurf_id" not in body
+    db.commit.assert_not_called()
+
+
+def test_ap_propose_stores_pending_proposal_and_does_not_freigeben(client):
+    http, db = _as_finance_write(client)
+    statements: list[str] = []
+
+    def execute(sql, params=None):
+        statements.append(str(sql))
+        result = Mock()
+        result.mappings.return_value.first.return_value = None
+        return result
+
+    db.execute.side_effect = execute
+    with patch("app.services.mcp_execution_service._load_ap_invoice", return_value=AP_INVOICE_ROW), \
+         patch("app.services.mcp_execution_service._write_audit", return_value="audit-ap"):
+        response = http.post("/mcp/tools/call", json={
+            "tool_name": "finance.ap_invoice.propose",
+            "parameters": AP_INVOICE,
+            "mode": "propose",
+            "idempotency_key": "ap-once",
+        })
+    assert response.status_code == 200
+    body = response.json()
+    assert body["approved"] is False
+    assert body["approval_status"] == "pending"
+    assert body["entwurf_id"]
+    joined = "\n".join(statements)
+    assert "agent_proposals" in joined
+    assert "ap_invoice_freigabe" in joined
+    assert "'pending'" in joined
+    db.commit.assert_called_once()
+
+
+def test_ap_freigeben_requires_approved_proposal(client):
+    http, db = _as_finance_write(client)
+    db.execute.return_value.mappings.return_value.first.return_value = {
+        "proposal_id": "p-ap",
+        "action_type": "ap_invoice_freigabe",
+        "approval_status": "pending",
+        "risk_level": "high",
+        "context_snapshot": {"invoice_id": "AP-100"},
+        "execution_result": None,
+    }
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "finance.ap_invoice.freigeben",
+        "parameters": {"proposal_id": "p-ap"},
+    })
+    assert response.status_code == 409
+    db.commit.assert_not_called()
+
+
+def test_ap_freigeben_dry_run_reads_approved_proposal_without_writing(client):
+    http, db = _as_finance_write(client)
+    db.execute.return_value.mappings.return_value.first.return_value = {
+        "proposal_id": "p-ap",
+        "action_type": "ap_invoice_freigabe",
+        "approval_status": "approved",
+        "risk_level": "high",
+        "context_snapshot": {"invoice_id": "AP-100"},
+        "execution_result": None,
+    }
+    with patch("app.services.mcp_execution_service._load_ap_invoice", return_value=AP_INVOICE_ROW):
+        response = http.post("/mcp/tools/call", json={
+            "tool_name": "finance.ap_invoice.freigeben",
+            "parameters": {"proposal_id": "p-ap"},
+        })
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mode"] == "dryRun"
+    assert body["approved"] is False
+    assert body["invoice_id"] == "AP-100"
+    assert body["route_path"] == "/finance/ap-invoice/AP-100"
+    db.commit.assert_not_called()
+
+
+def test_ap_freigeben_execute_calls_real_endpoint_after_approval(client):
+    http, db = _as_finance_write(client)
+    db.execute.return_value.mappings.return_value.first.return_value = {
+        "proposal_id": "p-ap",
+        "action_type": "ap_invoice_freigabe",
+        "approval_status": "approved",
+        "risk_level": "high",
+        "context_snapshot": {"invoice_id": "AP-100"},
+        "execution_result": None,
+    }
+    approved_row = {**AP_INVOICE_ROW, "status": "FREIGEGEBEN"}
+
+    async def fake_approve(invoice_id, approved_by=None, db=None, tenant_id=None, user=None):
+        assert invoice_id == "AP-100"
+        assert tenant_id == "tenant-a"
+        assert user["sub"] == USER["sub"]
+        return {"status": "ok"}
+
+    with patch("app.services.mcp_execution_service._load_ap_invoice", side_effect=[AP_INVOICE_ROW, approved_row]), \
+         patch("app.services.mcp_execution_service.Session"), \
+         patch("app.api.v1.endpoints.ap_invoices.approve_ap_invoice", side_effect=fake_approve), \
+         patch("app.services.mcp_execution_service._write_audit", return_value="audit-ap-f"), \
+         patch("app.services.mcp_execution_service._store_execution"), \
+         patch("app.services.mcp_execution_service._advisory_lock"), \
+         patch("app.services.mcp_execution_service._replay_or_none", return_value=None):
+        response = http.post("/mcp/tools/call", json={
+            "tool_name": "finance.ap_invoice.freigeben",
+            "parameters": {"proposal_id": "p-ap"},
+            "mode": "execute",
+            "idempotency_key": "ap-freigabe-1",
+        })
+    assert response.status_code == 200
+    body = response.json()
+    assert body["approved"] is True
+    assert body["fibu_journal"] is False
+    assert body["status"] == "FREIGEGEBEN"
+    assert body["auditEntryId"] == "audit-ap-f"
+    db.commit.assert_called_once()
+
+
+def test_ap_freigeben_rejects_client_approval_flag(client):
+    http, db = _as_finance_write(client)
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "finance.ap_invoice.freigeben",
+        "parameters": {"proposal_id": "p-ap", "approval_granted": True},
+    })
+    assert response.status_code == 422
+    db.execute.assert_not_called()
+
+
+INVENTUR_OPENING = {"count_id": "inv-count-1"}
+INVENTUR_OPENING_PREVIEW = {
+    "count_id": "inv-count-1",
+    "warehouse_id": "wh-1",
+    "status": "in_progress",
+    "line_count": 3,
+    "difference_count": 1,
+    "preliminary_value": 450.0,
+    "batch_type": "opening_balance",
+    "route_path": "/lager/inventur-nebenlaeufe",
+    "screen_id": "lager/inventur-nebenlaeufe",
+    "source_route": "/lager/inventur?count=inv-count-1",
+}
+
+
+def _as_lager_write(client):
+    http, app, db = client
+    app.dependency_overrides[get_current_user] = lambda: {
+        **USER,
+        "scopes": ["lager:write"],
+    }
+    return http, db
+
+
+def test_inventur_propose_opening_scope_is_required(client):
+    http, _, db = client
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "lager.inventur.propose_opening",
+        "parameters": INVENTUR_OPENING,
+    })
+    assert response.status_code == 403
+    db.execute.assert_not_called()
+
+
+def test_inventur_propose_opening_execute_is_not_wired(client):
+    http, db = _as_lager_write(client)
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "lager.inventur.propose_opening",
+        "parameters": INVENTUR_OPENING,
+        "mode": "execute",
+    })
+    assert response.status_code == 501
+    db.commit.assert_not_called()
+
+
+def test_inventur_propose_opening_rejects_client_approval_flag(client):
+    http, db = _as_lager_write(client)
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "lager.inventur.propose_opening",
+        "parameters": {**INVENTUR_OPENING, "approval_granted": True},
+    })
+    assert response.status_code == 422
+    db.execute.assert_not_called()
+
+
+def test_inventur_propose_opening_dry_run_reads_without_booking(client):
+    http, db = _as_lager_write(client)
+    with patch(
+        "app.services.mcp_execution_service._inventur_opening_preview",
+        return_value=INVENTUR_OPENING_PREVIEW,
+    ):
+        response = http.post("/mcp/tools/call", json={
+            "tool_name": "lager.inventur.propose_opening",
+            "parameters": INVENTUR_OPENING,
+        })
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mode"] == "dryRun"
+    assert body["booked"] is False
+    assert body["count_id"] == "inv-count-1"
+    assert body["line_count"] == 3
+    assert body["preliminary_value"] == 450.0
+    assert body["route_path"] == "/lager/inventur-nebenlaeufe"
+    assert "entwurf_id" not in body
+    db.commit.assert_not_called()
+
+
+def test_inventur_propose_opening_stores_pending_and_does_not_book(client):
+    http, db = _as_lager_write(client)
+    statements: list[str] = []
+
+    def execute(sql, params=None):
+        statements.append(str(sql))
+        result = Mock()
+        result.mappings.return_value.first.return_value = None
+        return result
+
+    db.execute.side_effect = execute
+    with patch(
+        "app.services.mcp_execution_service._inventur_opening_preview",
+        return_value=INVENTUR_OPENING_PREVIEW,
+    ), patch("app.services.mcp_execution_service._write_audit", return_value="audit-inv"):
+        response = http.post("/mcp/tools/call", json={
+            "tool_name": "lager.inventur.propose_opening",
+            "parameters": INVENTUR_OPENING,
+            "mode": "propose",
+            "idempotency_key": "inv-open-1",
+        })
+    assert response.status_code == 200
+    body = response.json()
+    assert body["booked"] is False
+    assert body["approval_status"] == "pending"
+    assert body["entwurf_id"]
+    joined = "\n".join(statements)
+    assert "agent_proposals" in joined
+    assert "inventur_opening" in joined
+    assert "'pending'" in joined
+    assert "inventory_stock_movements" not in joined
+    assert "opening_balance" not in joined or "batch_type" in body
+    db.commit.assert_called_once()

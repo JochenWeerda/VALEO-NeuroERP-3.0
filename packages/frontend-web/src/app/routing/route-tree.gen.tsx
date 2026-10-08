@@ -2328,11 +2328,25 @@ const appRoute0322 = createRoute({
   staticData: {"breadcrumb":"Gobd Export","module":"@/pages/docflow/gobd-export","legacyPath":"/docflow/gobd-export"},
 })
 
+const appRoute0322b = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: "docflow/gobd-export/$id",
+  component: () => renderPage("@/pages/docflow/gobd-export"),
+  staticData: {"breadcrumb":"Gobd Export Detail","module":"@/pages/docflow/gobd-export","legacyPath":"/docflow/gobd-export/:id"},
+})
+
 const appRoute0323 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "docflow/nachweisraum",
   component: () => renderPage("@/pages/docflow/nachweisraum"),
   staticData: {"breadcrumb":"Nachweisraum","module":"@/pages/docflow/nachweisraum","legacyPath":"/docflow/nachweisraum"},
+})
+
+const appRoute0323b = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: "docflow/nachweisraum/$id",
+  component: () => renderPage("@/pages/docflow/nachweisraum"),
+  staticData: {"breadcrumb":"Nachweisraum Detail","module":"@/pages/docflow/nachweisraum","legacyPath":"/docflow/nachweisraum/:id"},
 })
 
 const appRoute0324 = createRoute({
@@ -7004,7 +7018,9 @@ export const routeTree = rootRoute.addChildren([
     appRoute0320,
     appRoute0321,
     appRoute0322,
+    appRoute0322b,
     appRoute0323,
+    appRoute0323b,
     appRoute0324,
     appRoute0325,
     appRoute0326,

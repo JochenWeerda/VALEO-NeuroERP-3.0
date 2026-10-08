@@ -1,0 +1,61 @@
+slice_id: MCP-DEEP-LINK-LOT-20261008
+id: MCP-DEEP-LINK-LOT-20261008
+title: Voice/Dispatch Deep-Link aus wms.lot.trace
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+closed_at: 2026-10-08
+goal: >
+  nav-lot mit lot_id ruft wms.lot.trace und navigiert nur auf einen sicheren
+  route_path (/charge/stamm/{id}); ohne Kennung bleibt /charge/rueckverfolgung.
+  Intent liefert lot_id aus „öffne Lot/Charge …“. Trace-Read erhaelt route_path/screen_id.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - packages/frontend-web/src/lib/mcp-lot-open.ts
+  - packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx
+  - packages/frontend-web/src/__tests__/lib/mcp-lot-open.test.ts
+  - packages/frontend-web/src/__tests__/features/ki-usability/ActionDispatchContext.test.tsx
+  - services/ki-usability/app/services/intent_resolver.py
+  - services/ki-usability/app/services/action_registry.py
+  - services/ki-usability/tests/test_voice_intent_lager_einkauf_hr.py
+  - app/core/ki_action_registry.py
+  - tests/test_mcp_execution.py
+  - docs/quality-assurance/mcp-deep-link-lot-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - isSafeLotRoutePath akzeptiert nur /charge/stamm/{id} ohne Query/Host
+  - nav-lot ohne lot_id → /charge/rueckverfolgung
+  - nav-lot mit lot_id → MCP call + Navigate auf route_path
+  - Intent „öffne Lot LOT-42“ liefert nav-lot + lot_id=LOT-42
+  - wms.lot.trace Response enthaelt route_path und screen_id
+tests:
+  - packages/frontend-web/src/__tests__/lib/mcp-lot-open.test.ts
+  - packages/frontend-web/src/__tests__/features/ki-usability/ActionDispatchContext.test.tsx
+  - services/ki-usability/tests/test_voice_intent_lager_einkauf_hr.py
+  - tests/test_mcp_execution.py
+risks:
+  - Token ohne inventory:read → Deep-Link schlaegt fehl; Liste bleibt Fallback nur ohne Kennung
+ai_harness:
+  fachlicher_vertrag: >
+    Sprache/Agent oeffnet konkretes Lot nur nach Mandanten-Aufloesung;
+    Listen-Fallback ohne Kennung bleibt.
+  architektur_vertrag: >
+    Zentraler ActionDispatch; bestehender Trace-Read bleibt Backend-Wahrheit fuer Route.
+  daten_vertrag: >
+    Keine neuen Persistenzwege; nur Lesen via bestehendem MCP-Call.
+  test_vertrag: >
+    Pure Route-Guard-Tests und Dispatch mit gemocktem MCP-Call; Trace-Read-Assertion.
+  security_vertrag: >
+    Open-Redirect-Schutz: nur relative /charge/stamm/{id}.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice nachgezogen.
+external_gates:
+  - not_applicable
+result: >
+  5 Lot-Trace-, 14 Registry-, 15 Frontend- und 13 Voice-Lager-Tests gruen.
+  Deep-Link aus lot_id/route_path mit Open-Redirect-Guard.

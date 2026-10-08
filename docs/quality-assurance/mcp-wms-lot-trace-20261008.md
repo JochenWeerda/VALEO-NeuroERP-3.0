@@ -38,3 +38,6 @@ python -m pytest tests/test_mcp_execution.py tests/test_mcp_tool_registry.py --n
 
 DMS/Agrar/Lager-Reads und Mask-Write bleiben offen;
 `wms.cell.status` → Slice MCP-WMS-CELL-STATUS-20261008; FIN-CLOSE bewusst nicht.
+
+**Nachzug:** Deep-Link Voice/Dispatch → Slice MCP-DEEP-LINK-LOT-20261008
+(`route_path` `/charge/stamm/{id}` / `screen_id` `charge/stamm`).

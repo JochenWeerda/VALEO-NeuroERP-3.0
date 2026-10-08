@@ -40,6 +40,7 @@ class TestActionRegistrySlice012:
             "nav-ernte-annahme",
             "agrar-ernte-erfassen",
             "nav-agrar-vertraege",
+            "nav-wiegeschein",
             "nav-schlaege",
             "nav-silos",
             "nav-rohware-annahme",
@@ -136,6 +137,18 @@ class TestResolverAgrar:
         result = intent_resolver.resolve("Ernte erfassen 12 t Weizen")
         assert result is not None
         assert result.params.get("quantity") == "12"
+
+    def test_oeffne_kontrakt_mit_id(self):
+        result = intent_resolver.resolve("öffne Kontrakt K-42")
+        assert result is not None
+        assert result.action_id == "nav-agrar-vertraege"
+        assert result.params.get("kontrakt_id") == "K-42"
+
+    def test_oeffne_wiegeschein_mit_id(self):
+        result = intent_resolver.resolve("öffne Wiegeschein WS-9")
+        assert result is not None
+        assert result.action_id == "nav-wiegeschein"
+        assert result.params.get("ticket_id") == "WS-9"
 
 
 class TestResolverLogistik:

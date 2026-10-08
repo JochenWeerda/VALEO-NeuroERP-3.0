@@ -33,6 +33,12 @@ python scripts/generate_adr_nav.py --check
 echo "== MCP-Tool-Referenz"
 python scripts/generate_mcp_tool_reference.py --check
 
+echo "== MCP-Mask-Action-Map"
+python scripts/generate_mcp_mask_action_map.py --check
+
+echo "== Screen-Action-Katalog (Usability)"
+python scripts/generate_screen_action_catalog.py --check
+
 echo "== Action-Matrix-Report"
 python scripts/generate_action_matrix_report.py --check
 

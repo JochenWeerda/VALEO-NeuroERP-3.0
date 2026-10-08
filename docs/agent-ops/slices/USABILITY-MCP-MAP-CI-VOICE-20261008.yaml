@@ -1,0 +1,54 @@
+slice_id: USABILITY-MCP-MAP-CI-VOICE-20261008
+id: USABILITY-MCP-MAP-CI-VOICE-20261008
+title: MCP-Mask-Map CI-Drift-Gate + Voice Deep-Link Nav-Sync
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+completed_at: 2026-10-08
+goal: >
+  Nach ehrlicher blocked_no_endpoint-Pruefung (31× ohne commandEndpoint):
+  Mask-Map- und Screen-Action-Katalog-Drift in CI; fehlende Deep-Link-Nav-IDs
+  in der Haupt-App-Registry inkl. Param-Extraktion und Vite-Proxy-Mount.
+  Kein FIN-CLOSE, kein Zahlauf, keine Personal/Fuhrpark-MCP-Writes, keine DB.
+file_ownership:
+  - scripts/check_all_doc_generators.sh
+  - app/core/ki_action_registry.py
+  - app/core/ki_voice_deep_link_params.py
+  - app/api/v1/endpoints/ki_usability.py
+  - app/api/v1/api.py
+  - tests/test_process_kernel_wave25_quick_actions.py
+  - tests/test_ki_voice_deep_link_params.py
+  - docs/quality-assurance/usability-mcp-map-ci-voice-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - generate_mcp_mask_action_map.py --check und generate_screen_action_catalog.py --check in check_all_doc_generators.sh
+  - nav-einkauf / nav-lager / nav-agrar-vertraege in app/core/ki_action_registry.py
+  - Voice-Resolve extrahiert Deep-Link-Kennungen; Umlaut-Normalisierung
+  - ki_usability auch unter /api/v1/voice und /api/v1/actions (Vite-Proxy)
+  - Gezielte Tests gruen; kein FIN-CLOSE/Zahlauf/Personal-MCP-Write
+tests:
+  - tests/test_ki_voice_deep_link_params.py
+  - tests/test_process_kernel_wave25_quick_actions.py
+  - tests/test_mcp_mask_action_map.py
+risks:
+  - Dual-Mount kann OpenAPI-Operation-IDs duplizieren (akzeptiert fuer Proxy-Kompat)
+ai_harness:
+  fachlicher_vertrag: >
+    Usability-P1 ohne Backend-Erfindung: CI schuetzt Mask-Map-Paritaet;
+    Voice auf bestehenden Nav-IDs liefert Kennungen fuer FE-Deep-Links.
+  architektur_vertrag: >
+    Keine neuen MCP-Write-Adapter; blocked_no_endpoint bleibt bis SD-commandEndpoint.
+  daten_vertrag: >
+    Keine DB/Migration/Container.
+  test_vertrag: >
+    Pure Param-Extraktion + Voice-Resolve-Vertraege ohne require_db.
+  security_vertrag: >
+    Keine Open-Redirect-Lockerung; Kennungen nur als Params, Guard im FE.
+  betriebs_vertrag: >
+    Quality-Gate Doc-Generator-Meta-Check deckt Mask-Map und Screen-Katalog ab.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice-YAML.
+external_gates:
+  - not_applicable

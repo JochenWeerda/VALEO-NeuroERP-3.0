@@ -1980,6 +1980,7 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
         "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
@@ -2014,6 +2015,7 @@
       ],
       "mcp_tool_ids": [
         "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
         "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
@@ -2045,6 +2047,7 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
         "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
@@ -2078,6 +2081,7 @@
       ],
       "mcp_tool_ids": [
         "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
         "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
@@ -2138,6 +2142,7 @@
       ],
       "mcp_tool_ids": [
         "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
         "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
@@ -2185,6 +2190,7 @@
       ],
       "mcp_tool_ids": [
         "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
         "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
@@ -2204,6 +2210,7 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
         "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
@@ -2226,6 +2233,8 @@
         "notes"
       ],
       "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -2247,6 +2256,8 @@
         "notes"
       ],
       "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -2268,6 +2279,8 @@
         "notes"
       ],
       "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -2289,6 +2302,8 @@
         "notes"
       ],
       "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -2324,6 +2339,8 @@
         "faellig_am"
       ],
       "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -2360,6 +2377,8 @@
         "faellig_am"
       ],
       "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -2393,6 +2412,8 @@
         "saldo"
       ],
       "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -2426,6 +2447,8 @@
         "ust_id"
       ],
       "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -2458,6 +2481,8 @@
         "ust_id"
       ],
       "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -2495,6 +2520,8 @@
         "bank"
       ],
       "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -2517,6 +2544,8 @@
         "checker"
       ],
       "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -2534,6 +2563,8 @@
       "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -3089,6 +3120,7 @@
       "mcp_tool_ids": [
         "lager.bestand.get",
         "lager.inventur.status",
+        "lager.inventur.propose_opening",
         "lager.stock_movement.stornieren"
       ]
     },
@@ -3119,6 +3151,7 @@
       "mcp_tool_ids": [
         "lager.bestand.get",
         "lager.inventur.status",
+        "lager.inventur.propose_opening",
         "lager.stock_movement.stornieren"
       ]
     },
@@ -3151,6 +3184,7 @@
       "mcp_tool_ids": [
         "lager.bestand.get",
         "lager.inventur.status",
+        "lager.inventur.propose_opening",
         "lager.stock_movement.stornieren"
       ]
     },
@@ -3169,6 +3203,7 @@
       "mcp_tool_ids": [
         "lager.bestand.get",
         "lager.inventur.status",
+        "lager.inventur.propose_opening",
         "lager.stock_movement.stornieren"
       ]
     },
@@ -4324,6 +4359,24 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
+      "tool_id": "finance.ap_invoice.propose",
+      "domain": "finance",
+      "scope": "finance:write",
+      "idempotent": false,
+      "risk_class": "high",
+      "human_approval_required": true,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "finance.ap_invoice.freigeben",
+      "domain": "finance",
+      "scope": "finance:write",
+      "idempotent": true,
+      "risk_class": "high",
+      "human_approval_required": true,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
       "tool_id": "fibu.open_items.list",
       "domain": "finance",
       "scope": "finance:read",
@@ -4477,7 +4530,25 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
+      "tool_id": "lager.inventur.propose_opening",
+      "domain": "lager",
+      "scope": "lager:write",
+      "idempotent": false,
+      "risk_class": "high",
+      "human_approval_required": true,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
       "tool_id": "einkauf.bestellung.list",
+      "domain": "einkauf",
+      "scope": "einkauf:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "einkauf.bestellung.status",
       "domain": "einkauf",
       "scope": "einkauf:read",
       "idempotent": true,

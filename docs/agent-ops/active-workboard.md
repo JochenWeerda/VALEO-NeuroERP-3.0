@@ -1,4 +1,4 @@
----
+﻿---
 title: Active Workboard
 type: reference
 audience: [agent, entwickler]
@@ -11,48 +11,145 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## VERSANDWEGE-ECHT-20261008 — in Arbeit, Claude Code
+## MCP-CONSOLIDATE-COMMIT-20261008 — abgeschlossen, Cursor
 
-**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** Versandwege, die "versendet" melden ohne
-zu senden, auf die Postfaecher umstellen: (1) Einkauf `bestellungen/{id}/versenden` simuliert E-Mail
-ohne SMTP und setzt bei nicht eingerichtetem Fax/EDI "versandt"; (2) RFQ `send` meldet
-`suppliers_notified` ohne Nachricht; (3) Bridge `einkauf/anfragen/{id}/send` antwortet `sent: true`
-ohne Versand und ohne Speichern; (4) "Mahnung senden" setzt `sent` ohne Mail; Mahnlauf findet
-Rechnungs-OPs nicht (`kunde_id` statt `debtor_id`). Dazu Anhaenge/HTML in `mail_versand`.
-**Dateibesitz:** `app/services/mail_versand.py`, `modules/einkauf/services/versand_service.py`,
-`app/services/rfq_service.py`, `app/api/v1/endpoints/{rfq,dunning,einkauf_bestellvorschlag}.py`,
-`mask_frontend_bridges.py::send_anfrage`, eine additive Migration (dunning_notices), Tests, QA.
-Double-Opt-In-Mail (crm_consents) folgt separat. Fremde WIP unberuehrt.
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08 (in-scope Commit+Push).
+**Ziel:** Uncommitted MCP/Deep-Link/AP/Inventur/Usability-Map-Lieferungen
+konsolidieren; Restluecken-Audit; Tests; Push `origin main`.
+**Audit:** 31× `blocked_no_endpoint` weiterhin ohne SMA-`commandEndpoint`
+(0 Treffer CE); open_high nur Zahlauf; FIN-CLOSE ADR-076 — Non-Goals.
+Keine Doppelarbeit / keine Backend-Erfindung. Fremde WIP (Postfach Claude,
+Frontend-Massen, Inventare, Coverage) unberuehrt.
+**Nachweis:** Map `--check`; 145 pytest MCP/Voice-Param; 53 Vitest Deep-Link;
+Voice-Intent unter `services/ki-usability`.
+**Weiter offen:** FIN-CLOSE ADR-076; Zahlauf `open_high`; 31× blocked_no_endpoint
+erst nach HTTP-CE; Stufe-2-SUS live.
 
+## USABILITY-MCP-MAP-CI-VOICE-20261008 — abgeschlossen, Cursor
 
-## ADMIN-RECHTE-MULTISELECT-20261008 — abgeschlossen, Claude Code
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08 (mit Konsolidierungs-Commit).
+**Audit:** 31× `blocked_no_endpoint` — alle ohne `commandEndpoint` in SMA;
+REST-CRUD (Personal/Fuhrpark/Postfach/PO-Save) reicht nicht fuer MCP-Write ohne
+SD-Vertrag; Zahlauf/FIN-CLOSE unberuehrt; Postfach-WIP Claude.
+**Lieferung:** Mask-Map + Screen-Action-Katalog `--check` in
+`check_all_doc_generators.sh`; `nav-einkauf`/`nav-lager`/`nav-agrar-vertraege`
++ Deep-Link-Param-Extraktion + Umlaut-Norm in Haupt-App; Dual-Mount
+`/api/v1/voice|/actions` fuer Vite-Proxy.
+**Nachweis:** QA `usability-mcp-map-ci-voice-20261008.md`; gezielte Tests.
+**Weiter offen:** FIN-CLOSE ADR-076; Zahlauf `open_high`; 31× blocked_no_endpoint;
+Stufe-2-SUS. Optional: HTTP-CE Personal/Fuhrpark; ADR-076 Review.
 
-**Abnahme (08.10.2026):** `/api/v1/admin/*` hatte keine Rollenpruefung (Benutzer/Rollen/API-Schluessel
-fuer jeden angemeldeten Nutzer) — Schreiben jetzt nur `admin`, Lesen von Benutzern/Rollen/Audit/
-Schluesseln `admin`/`manager`; Strukturtest gegen neue offene Schreibwege. Mask Builder zeichnet
-`multiselect` als Checkbox-Gruppe (Liste, Altwert lesbar); Postfach-Maske: Verwendung und Rollen als
-Mehrfachauswahl. QA: [admin-rechte-multiselect-20261008.md](../quality-assurance/admin-rechte-multiselect-20261008.md).
+## MCP-INVENTUR-OPENING-PROPOSE-20261008 — abgeschlossen, Cursor
 
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `lager.inventur.propose_opening` — dryRun-Snapshot aus
+`inventory_counts`/Zeilen; propose → `agent_proposals` (`inventur_opening`, pending);
+execute → 501. Kein Booking/Journal/CommandEndpoint. Map:
+`create_opening` → **`mapped_propose_only`**; open_high **1** (nur Zahlauf);
+Registry **39**. Zahlauf/FIN-CLOSE unberuehrt.
+**Nachweis:** 137 MCP-Tests; Generator `--check`;
+QA `mcp-inventur-opening-propose-20261008.md`.
+**Weiter offen:** FIN-CLOSE `blocked_adr_076`; Zahlauf `open_high`
+(forbiddenForAgents — nicht verdrahten); 31× `blocked_no_endpoint`; Stufe-2-SUS.
+Empfohlen: FIN-CLOSE-Doku ohne Adapter ODER blocked_no_endpoint erst nach
+neuem HTTP-CommandEndpoint.
 
-**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** (1) `/api/v1/admin/*` (admin_core) ohne
-Rollenpruefung: jeder angemeldete Nutzer kann Benutzer anlegen, Rollen aendern, API-Schluessel
-erzeugen — Rechteausweitung schliessen (Schreiben nur `admin`, Lesen von Benutzern/Rollen/
-Audit/Schluesseln `admin`/`manager`). (2) Mask Builder: `multiselect` als echte Mehrfachauswahl
-(Checkbox-Gruppe, Werte als Liste) und in `admin/postfaecher` fuer Verwendung und Rollen
-(Optionen aus `/admin/postfaecher/verwendungen` bzw. `/admin/rollen`). **Dateibesitz:**
-`app/api/v1/endpoints/admin_core.py` (nur Abhaengigkeiten), Mask-Builder `FieldRenderer`/
-`validation`, Screen Definition + TS-Spiegel `admin/postfaecher`, `pages/admin/postfaecher.tsx`,
-Tests, QA-Doku. Fremde WIP unberuehrt.
+## MCP-AP-FREIGABE-20261008 — abgeschlossen, Cursor
 
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `finance.ap_invoice.propose` + `finance.ap_invoice.freigeben`
+(Vier-Augen analog `sales.invoice.post`); echter CommandEndpoint
+`/api/v1/finance/ap/invoices/{id}/actions/freigeben`; `fibu_journal=false`.
+Map: `ap-invoice:freigeben` → mapped; danach Inventur propose-only nachgezogen.
+**Nachweis:** 131 MCP-Tests; Generator `--check`; QA `mcp-ap-freigabe-20261008.md`.
+**Weiter:** siehe `MCP-INVENTUR-OPENING-PROPOSE-20261008`.
 
-## POSTFACH-MICROSOFT365-20261008 — abgeschlossen, Claude Code
+## MCP-ORDER-NAV-20261008 — abgeschlossen, Cursor
 
-**Abnahme (08.10.2026):** Anbieter Microsoft 365 (nur OAuth, DB-Pruefbedingung), Versand ueber
-Microsoft Graph sendMail (202 = angenommen, Gesendete Elemente), Alias per `from`; Anmeldeweg fuer
-Google und Microsoft vereinheitlicht (`/anmeldung/start|abschluss`, Rueckruf
-`/admin/postfaecher/anmeldung-rueckruf`). Migration `postfach_microsoft_20261008` (Probe + Dev).
-QA: [postfach-microsoft365-20261008.md](../quality-assurance/postfach-microsoft365-20261008.md).
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `sales.order.status` liefert `route_path`/`screen_id`;
+Voice/Dispatch Deep-Link `nav-orders` + `auftrag_nr` auf sicheren
+`/sales/order-editor/{id}`; Listen-Fallback ohne Kennung. Analog Customer-Nav.
+Kein Write/FIN-CLOSE/ADR-076; Postfach unberuehrt.
+**Nachweis:** 17 MCP- + 12 FE- + 30 Voice-Tests; QA `mcp-order-nav-20261008.md`.
+**Weiter offen:** FIN-CLOSE `blocked_adr_076` (kein Scheinabschluss; Claim frei
+nur fuer Doku/ADR-Pruefung); 3× `open_high` (Vier-Augen); 31× `blocked_no_endpoint`;
+Stufe-2-SUS live. Empfohlen naechster Slice: `MCP-DEEP-LINK-LOT-20261008` offen
+(`wms.lot.trace` Voice/Dispatch wenn `route_path` vorhanden) ODER ehrliche
+FIN-CLOSE-Dokumentation ohne Adapter.
 
+## MCP-DEEP-LINK-LOT-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `wms.lot.trace` liefert `route_path`/`screen_id`
+(`/charge/stamm/{id}`); Voice/Dispatch `nav-lot` + `lot_id`; Listen-Fallback
+`/charge/rueckverfolgung`; Open-Redirect-Guard streng. Kein FIN-CLOSE/ADR-076.
+**Nachweis:** 5 Lot-Trace- + 14 Registry- + 15 FE- + 13 Voice-Tests;
+QA `mcp-deep-link-lot-20261008.md`.
+**Weiter:** `MCP-DEEP-LINK-CELL-20261008` (`wms.cell.status`) empfohlen offen;
+FIN-CLOSE/open_high/blocked_no_endpoint/SUS unveraendert.
+
+## MCP-DEEP-LINK-CELL-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `wms.cell.status` liefert `cell_id`/`route_path`/`screen_id`
+(`/lager/silo-zellen/{id}`, `lager/silo-cell`); Voice/Dispatch `nav-silo-cell`
++ `cell_code`; Listen-Fallback `/lager/silo-uebersicht`; Guard streng.
+Kein FIN-CLOSE/ADR-076.
+**Nachweis:** 5 Cell- + 14 Registry- + 18 FE- + 16 Voice-Tests;
+QA `mcp-deep-link-cell-20261008.md`.
+**Weiter:** `MCP-DEEP-LINK-PO-20261008` (Einkauf-Bestellung) empfohlen offen.
+
+## MCP-DEEP-LINK-PO-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** neues Read `einkauf.bestellung.status` + List-Items mit
+`route_path`/`screen_id` (`/einkauf/bestellung/{id}`,
+`einkauf/purchase-order`); Voice/Dispatch `nav-einkauf` + `bestellung_id`;
+Listen-Fallback `/einkauf/bestellungen`; Guard streng. Kein FIN-CLOSE/Obligo.
+**Nachweis:** 4 Bestellung- + 14 Registry- + 21 FE- + 12 Voice-Tests;
+QA `mcp-deep-link-po-20261008.md`. Registry 36 Tools.
+**Weiter:** `MCP-DEEP-LINK-DMS-20261008` (Nachweisraum-Dokument) empfohlen offen.
+
+## MCP-DEEP-LINK-DMS-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `dms.document.search`-Items + optional `dokument_id` mit
+`route_path`/`screen_id` (`/docflow/nachweisraum/{id}`);
+`dms.gobd.export_status` mit `/docflow/gobd-export/{id}`;
+Voice/Dispatch `nav-nachweisraum`; Guard streng; Detail-Routen verdrahtet.
+Kein FIN-CLOSE.
+**Nachweis:** 4 DMS/GoBD-MCP- + 24 FE- + 12 Voice-Tests;
+QA `mcp-deep-link-dms-20261008.md`.
+**Weiter:** `MCP-DEEP-LINK-AGRAR-20261008` (`agrar.contract.get`) empfohlen offen.
+
+## MCP-DEEP-LINK-AGRAR-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `agrar.contract.get` + `agrar.weighing_ticket.list` mit
+`route_path`/`screen_id`; Voice/Dispatch `nav-agrar-vertraege` /
+`nav-wiegeschein`; Guard streng. Kernkette Deep-Links fertig.
+Kein FIN-CLOSE.
+**Nachweis:** 1 Agrar-MCP- + 27 FE- + 7 Voice-Tests;
+QA `mcp-deep-link-agrar-20261008.md`.
+**Weiter:** optional `MCP-DEEP-LINK-STOCK-20261008` (`lager.bestand.get`) offen;
+FIN-CLOSE/open_high/blocked_no_endpoint/SUS unveraendert.
+
+## MCP-DEEP-LINK-STOCK-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `lager.bestand.get` liefert `route_path`/`screen_id`
+(`/lager/artikel/{id}`, `lager/article-stock`); Voice/Dispatch `nav-lager`
++ `artikel_id`; Listen-Fallback `/lager/bestandsuebersicht`; Guard streng.
+**Deep-Link-Serie abgeschlossen** (Kunde→Auftrag→Lot→Zelle→Bestellung→DMS→
+Agrar→Bestand). Kein weiterer klarer Read-Deep-Link ohne Backend-Erfindung.
+Kein FIN-CLOSE.
+**Nachweis:** 1 Bestand-MCP- + 28 FE- + 19 Voice-Lager-Tests;
+QA `mcp-deep-link-stock-20261008.md`.
+**Weiter:** Deep-Link-Serie abgeschlossen; AP-Freigabe nachgezogen
+(`MCP-AP-FREIGABE-20261008`). Offen: FIN-CLOSE; 2× open_high; 31× blocked_no_endpoint; SUS.
+
+## POSTFACH-MICROSOFT365-20261008 — in Arbeit, Claude Code
 
 **Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** Postfaecher mit Microsoft 365:
 Anmeldung per OAuth2 (Microsoft Identity Platform, delegiert, `Mail.Send` + `offline_access`),
@@ -302,13 +399,15 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
 
+**SONAR-RUNTIME-BLOCKERS-20261008 (abgeschlossen, weitere Sonar-Befunde offen):** Owner Codex-01a0f3fc. Sonar14 Import-/Aufrufblocker konkret behandelt: zehn bestehende Agrar-Fachfunktionen wirklich exportiert, zwei unbrauchbare NUTS-Altexporte samt defektem Service/alleinigem Beispiel-Seed nach Verbraucherpruefung entfernt; kanonischer Erntepfad erhalten, keine Schema-/Migrationsaenderung. Audit-Dashboard reicht Filter korrekt weiter, Operations-Erfolgsquote korrekt aufgerufen; echte Konstruktorprobe fand zusaetzlich fehlende MaintenanceWindow-ID, nun eigene UUIDv7 je Fenster. Original20 Fehler/1 gruen; isolierte finale Abnahme43 neue und bestehende Ernte-/Trocknungs-/Tagespreis-/Qualitaetsvertraege ohne Skip gruen (3,99s),21 neue echte Runtime-Vertraege. Sandbox-Asyncio-Socketpair-Haenger vor Produktcode diagnostiziert, begrenzt verworfen und unveraenderter freigegebener lokaler Lauf gruen. Keine DB/Container/Reset, Scanner-Ausnahme oder Schwellenabsenkung. QA/Slice/Open-Gaps nachgezogen. Fremder Workboard-Commit0ca20b814 entfernte Claimcd6492a00; gezielt8083bf9b6 wiederhergestellt, fremde Aktualisierungen erhalten. Gesamter Sonar-Gate bleibt offen: weitere Bugs/Sicherheitsklassifikation, Coverage55,2 unter80, Duplikate3,3 ueber3 und Hotspots0 statt100; In-Memory-Dienste keine ISO27001-Persistenzabnahme. Folge-CI abwarten.
+
 **HANDLEBARS-RELEASE-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Offizielles4.7.10 schliesst die drei neu gemeldeten GHSA-8r5x-fm3f-whwj/p8wg-vrv2-v86f/xw65-4hp5-5hc7 (2 kritisch/1 mittel). Original4.7.9: 3 normale Faelle gruen, 3 reale Sicherheitsfaelle rot inkl. ausgefuehrtem lokalem AST-Marker. Herstellerrelease: insgesamt51 Sicherheitsvertraege gruen/0 Skips (34,11s), bestehender CI-Einstieg erweitert. Alle36 frozen Workspaces gruen, Lockdelta nur Handlebars, regulaere Offline-Installation. Echtes Production-Audit ohne Handlebars-Befunde; vorhandene2 High source_backported/0 blockiert, weitere12 Audit-Runtime-Vertraege bestanden. Bestehende Patch-/Runtime-Hashes geprueft unveraendert, Reviewdatum/Ablauf unveraendert; nur an neuen Manifest-/Lockhash gebunden. Keine Scanner-Ausnahme oder neue DB/Container. QA handlebars-security-release-20261008.md. SecurityScan37825541453 erfolgreich, offene Handlebars-Dependabot-Meldungen681/682/683 nach Graph-Neuscan geschlossen; frische Katalogernte separat integriert.
 
 **TABLE-CATALOG-FK-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Echte positionsgleiche pg_constraint-FK-Ernte statt Kreuzprodukt ueber Namen: 542 -> 534 reale Beziehungen, acht falsche Paare in vier Tabellen entfernt. Original 4 reale PG-Regressionen rot (15,48 s), repariert zusammen 24 Tests gruen (5,05 s), expliziter needs_live_db-Vertrag/lesende Transaktion an bestehender valeo_probe. Beide Katalogchecks gruen, 661 Tabellen unveraendert; nur foreign_keys der vier Bank-/HR-Tabellen geaendert. Keine Fach-/Schema-/Migrationsaenderung, keine neue DB/Container/Testdaten; fremde Katalog-WIP erhalten. QA table-catalog-fk-contract-20261008.md. Frische Ernte37825542282 bestaetigt alle661 bestehenden Definitionen samt FK-Korrektur; exakt9 additive ORM-Tabellen separat im Katalog-Sync integriert, Folge-CI offen.
 
 **DOCS-MAIL-IMPORT-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Docs Build37786113441 scheiterte beim kanonischen Postfach-Screenimport an fehlendem httpx. requirements-docs.txt deklariert die vier belegten Importabhaengigkeiten httpx0.28.1, SQLAlchemy2.0.41, cryptography50.0.1, FastAPI0.136.3; keine vollstaendige Backendinstallation oder fremde Mail-/Maskenaenderung. Bestehender Handbuch-Driftcheck und kompletter MkDocs-Build aus committed Quelle mit frischer isolierter Docs-Umgebung gruen. Keine DB/Container/Versand/OAuth. QA docs-mail-import-20261008.md. Schema-Artefaktupload anschliessend ausdruecklich freigegeben; frische Ernte separat integriert. DocsBuild37788113871 erfolgreich.
 
-**CI-CATALOG-SYNC-20261008 (integriert, Folge-CI offen):** Owner Codex-01a0f3fc. Ausdruecklich autorisierte frische Ernte von Quality Gate37825542282 auf3f3927045 / Artefakt11572410712 geprueft: 670 statt661 Tabellen, exakt9 zuvor lesend identifizierte additive ORM-Tabellen, keine entfernte oder geaenderte bestehende Definition. Beide kanonischen Kataloge aus exakt diesem Artefakt integriert, JSON-/Markdown-Generatorvergleich gruen. Ursache: bestehender CI-Aufbau initialisiert nach Alembic additive ORM-Tabellen; lokale Revisionsgleichheit beweist keine physische Gleichheit. Bestehendes Drift-Gate unveraendert, keine neue DB/Container/Reset/Migration. Fremde Katalog-WIP geschuetzt. SecurityScan37825541453 gruen, Handlebars681/682/683 geschlossen. QA ci-catalog-sync-20261008.md. Folge-Quality-Gate auf neuem Commit abwarten.
+**CI-CATALOG-SYNC-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Ausdruecklich autorisierte frische Ernte von Quality Gate37825542282 auf3f3927045 / Artefakt11572410712 geprueft: 670 statt661 Tabellen, exakt9 zuvor lesend identifizierte additive ORM-Tabellen, keine entfernte oder geaenderte bestehende Definition. Beide kanonischen Kataloge aus exakt diesem Artefakt integriert, JSON-/Markdown-Generatorvergleich gruen. Ursache: bestehender CI-Aufbau initialisiert nach Alembic additive ORM-Tabellen; lokale Revisionsgleichheit beweist keine physische Gleichheit. Bestehendes Drift-Gate unveraendert, keine neue DB/Container/Reset/Migration. Fremde Katalog-WIP geschuetzt. SecurityScan37825541453 gruen, Handlebars681/682/683 geschlossen. QA ci-catalog-sync-20261008.md. Quality Gate37828122495 aufcbcd52b84 bestaetigt Backend und670er-Katalog erfolgreich; Gesamtgate erst im getrennten SonarCloud-Scan rot.
 
 **SORTEN-CANONICAL-READ-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. GitHub Agrar-Smoketraces dreimal404 am nichtexistenten /agrar/saatgut/sortenregister; bestehender kanonischer /agrar/varieties-Vertrag und AgrarSorte bereits vorhanden. Besitz agrar.ts nur Sorten-Typ/Hook, VarietySelectionDialog.tsx nur kanonischer Typimport, sortenregister.tsx und bestellung.tsx ausschliesslich bestehende Datenfeldverwendung; fremde UI-WIP geschuetzt durch eigene Hunks aus HEAD. Kein neuer API/DB/Adapter oder UI-Neudesign, keine erfundenen Zulassungs-/Verfuegbarkeitswerte. Fokussierte echte Query-/React-/Browservertraege und bestehender Agrar-API-Vertrag; Smoke prueft exakte Maske statt beliebiger Ueberschrift. QA/Meridian/Open-Gaps/Workboard nachziehen. Abnahme kanonische Daten und Fehlerfall, kein404-Verstecken, keine DB/Container/Reset. Abnahme: Vier echte React-Query-Vertraege, zwei Chromium-Faelle (Daten/Filter + retrybarer Fehler),18 Schema-/HTTP-Mockvertraege73,41s und vollstaendige finale Frontend-Typpruefung gruen. Originaltraces3x404; bestehender kanonischer VarietyOut samt nullable Feldern/Aktivstatus, keine Phantomdaten, keine neue API/DB/Container. Fuenf reale DB-Tests ohne konfigurierte DB nicht abgenommen; danach nur isolierte Schema-/Mockvertraege. SecurityScan37739699012 und grosser CI37739698939 b47 gruen; Sorten-Folge-CI offen. Handelsbestand/-preise und Ernte-Standardfallback separat offen. Workboard-Rennen sofort aus Vorgaenger repariert; Integration atomar nach Staged-Gates, fremde UI-Hunks und Microsoft365-Claim erhalten. Pflichtformatter-Finalisierung: zwei optionale Suchketten mitgeliefert, gepruefter Arbeits-/Commitinhalt explizit gleich; Staged-Gates erneut gruen.
 

@@ -57,8 +57,29 @@ def test_summary_structure(svc: McpToolRegistryService) -> None:
     assert summary["validation_errors"] == []
 
 
-def test_registry_has_35_tools(svc: McpToolRegistryService) -> None:
-    assert len(svc.list_tools()) == 35
+def test_registry_has_39_tools(svc: McpToolRegistryService) -> None:
+    assert len(svc.list_tools()) == 39
+
+
+def test_ap_freigabe_tools_are_catalogued(svc: McpToolRegistryService) -> None:
+    propose = svc.get_tool("finance.ap_invoice.propose")
+    assert propose["scope"] == "finance:write"
+    assert propose["risk_class"] == "high"
+    assert propose["human_approval_required"] is True
+    freigeben = svc.get_tool("finance.ap_invoice.freigeben")
+    assert freigeben["scope"] == "finance:write"
+    assert freigeben["risk_class"] == "high"
+    assert freigeben["human_approval_required"] is True
+    assert freigeben["idempotent"] is True
+
+
+def test_inventur_propose_opening_is_catalogued(svc: McpToolRegistryService) -> None:
+    tool = svc.get_tool("lager.inventur.propose_opening")
+    assert tool["scope"] == "lager:write"
+    assert tool["risk_class"] == "high"
+    assert tool["human_approval_required"] is True
+    assert tool["idempotent"] is False
+    assert tool["audit"] == "write"
 
 
 def test_lead_qualify_and_po_send_are_catalogued(svc: McpToolRegistryService) -> None:

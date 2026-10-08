@@ -10,7 +10,19 @@ import {
   type ReactNode,
 } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
+import {
+  callAgrarContractOpen,
+  callWeighingTicketOpen,
+  pickSafeAgrarContractRoutePath,
+  pickSafeWeighingRoutePath,
+} from '@/lib/mcp-agrar-open'
+import { callCellStatusOpen, pickSafeCellRoutePath } from '@/lib/mcp-cell-open'
 import { callCustomerOpen, pickSafeCustomerRoutePath } from '@/lib/mcp-customer-open'
+import { callDocumentSearchOpen, pickSafeDmsDocumentRoutePath } from '@/lib/mcp-dms-open'
+import { callLotTraceOpen, pickSafeLotRoutePath } from '@/lib/mcp-lot-open'
+import { callOrderStatusOpen, pickSafeOrderRoutePath } from '@/lib/mcp-order-open'
+import { callPoStatusOpen, pickSafePoRoutePath } from '@/lib/mcp-po-open'
+import { callStockBestandOpen, pickSafeStockRoutePath } from '@/lib/mcp-stock-open'
 import { globalShortcutManager, type GlobalShortcutAction } from '@/lib/shortcuts/global-shortcuts'
 
 type ActionHandler = (params: Record<string, unknown>) => void | Promise<void>
@@ -28,6 +40,10 @@ const NAV_ACTIONS: Record<string, string> = {
   'nav-orders': '/sales/auftraege-liste',
   'nav-invoices': '/verkauf/rechnungen',
   'nav-inventory': '/lager/bestandsuebersicht',
+  'nav-lot': '/charge/rueckverfolgung',
+  'nav-silo-cell': '/lager/silo-uebersicht',
+  'nav-nachweisraum': '/docflow/nachweisraum',
+  'nav-wiegeschein': '/waage/wiegeschein-detail',
   'nav-fibu': '/fibu-suite',
   'action-new-order': '/sales/order-editor',
   'action-new-invoice': '/finance/invoices/new',
@@ -164,6 +180,162 @@ export function ActionDispatchProvider({ children }: { children: ReactNode }): J
           }
         }
         navigate(NAV_ACTIONS['nav-customers'])
+        return true
+      }
+      if (actionId === 'nav-orders') {
+        const direct = pickSafeOrderRoutePath(params?.route_path)
+        if (direct) {
+          navigate(direct)
+          return true
+        }
+        const auftragNr = typeof params?.auftrag_nr === 'string' ? params.auftrag_nr.trim() : ''
+        if (auftragNr) {
+          try {
+            const opened = await callOrderStatusOpen(auftragNr)
+            navigate(opened.route_path)
+            return true
+          } catch {
+            return false
+          }
+        }
+        navigate(NAV_ACTIONS['nav-orders'])
+        return true
+      }
+      if (actionId === 'nav-lot') {
+        const direct = pickSafeLotRoutePath(params?.route_path)
+        if (direct) {
+          navigate(direct)
+          return true
+        }
+        const lotId = typeof params?.lot_id === 'string' ? params.lot_id.trim() : ''
+        if (lotId) {
+          try {
+            const opened = await callLotTraceOpen(lotId)
+            navigate(opened.route_path)
+            return true
+          } catch {
+            return false
+          }
+        }
+        navigate(NAV_ACTIONS['nav-lot'])
+        return true
+      }
+      if (actionId === 'nav-silo-cell') {
+        const direct = pickSafeCellRoutePath(params?.route_path)
+        if (direct) {
+          navigate(direct)
+          return true
+        }
+        const cellCode = typeof params?.cell_code === 'string' ? params.cell_code.trim() : ''
+        if (cellCode) {
+          try {
+            const opened = await callCellStatusOpen(cellCode)
+            navigate(opened.route_path)
+            return true
+          } catch {
+            return false
+          }
+        }
+        navigate(NAV_ACTIONS['nav-silo-cell'])
+        return true
+      }
+      if (actionId === 'nav-einkauf') {
+        const direct = pickSafePoRoutePath(params?.route_path)
+        if (direct) {
+          navigate(direct)
+          return true
+        }
+        const bestellungId =
+          typeof params?.bestellung_id === 'string' ? params.bestellung_id.trim() : ''
+        if (bestellungId) {
+          try {
+            const opened = await callPoStatusOpen(bestellungId)
+            navigate(opened.route_path)
+            return true
+          } catch {
+            return false
+          }
+        }
+        navigate(NAV_ACTIONS['nav-einkauf'])
+        return true
+      }
+      if (actionId === 'nav-nachweisraum') {
+        const direct = pickSafeDmsDocumentRoutePath(params?.route_path)
+        if (direct) {
+          navigate(direct)
+          return true
+        }
+        const dokumentId =
+          typeof params?.dokument_id === 'string' ? params.dokument_id.trim() : ''
+        if (dokumentId) {
+          try {
+            const opened = await callDocumentSearchOpen(dokumentId)
+            navigate(opened.route_path)
+            return true
+          } catch {
+            return false
+          }
+        }
+        navigate(NAV_ACTIONS['nav-nachweisraum'])
+        return true
+      }
+      if (actionId === 'nav-agrar-vertraege') {
+        const direct = pickSafeAgrarContractRoutePath(params?.route_path)
+        if (direct) {
+          navigate(direct)
+          return true
+        }
+        const kontraktId =
+          typeof params?.kontrakt_id === 'string' ? params.kontrakt_id.trim() : ''
+        if (kontraktId) {
+          try {
+            const opened = await callAgrarContractOpen(kontraktId)
+            navigate(opened.route_path)
+            return true
+          } catch {
+            return false
+          }
+        }
+        navigate(NAV_ACTIONS['nav-agrar-vertraege'])
+        return true
+      }
+      if (actionId === 'nav-wiegeschein') {
+        const direct = pickSafeWeighingRoutePath(params?.route_path)
+        if (direct) {
+          navigate(direct)
+          return true
+        }
+        const ticketId = typeof params?.ticket_id === 'string' ? params.ticket_id.trim() : ''
+        if (ticketId) {
+          try {
+            const opened = await callWeighingTicketOpen(ticketId)
+            navigate(opened.route_path)
+            return true
+          } catch {
+            return false
+          }
+        }
+        navigate(NAV_ACTIONS['nav-wiegeschein'])
+        return true
+      }
+      if (actionId === 'nav-lager') {
+        const direct = pickSafeStockRoutePath(params?.route_path)
+        if (direct) {
+          navigate(direct)
+          return true
+        }
+        const artikelId =
+          typeof params?.artikel_id === 'string' ? params.artikel_id.trim() : ''
+        if (artikelId) {
+          try {
+            const opened = await callStockBestandOpen(artikelId)
+            navigate(opened.route_path)
+            return true
+          } catch {
+            return false
+          }
+        }
+        navigate(NAV_ACTIONS['nav-lager'])
         return true
       }
       const path = NAV_ACTIONS[actionId]

@@ -1,0 +1,54 @@
+slice_id: MCP-DEEP-LINK-STOCK-20261008
+id: MCP-DEEP-LINK-STOCK-20261008
+title: Voice/Dispatch Deep-Link aus lager.bestand.get
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+closed_at: 2026-10-08
+goal: >
+  nav-lager mit artikel_id ruft lager.bestand.get und navigiert nur auf
+  /lager/artikel/{id}; ohne Kennung bleibt /lager/bestandsuebersicht.
+  Deep-Link-Serie danach als abgeschlossen markieren.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - packages/frontend-web/src/lib/mcp-stock-open.ts
+  - packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx
+  - services/ki-usability/app/services/intent_resolver.py
+  - services/ki-usability/app/services/action_registry.py
+  - tests/test_mcp_execution.py
+  - docs/quality-assurance/mcp-deep-link-stock-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Guard akzeptiert nur /lager/artikel/{id}
+  - Intent „öffne Bestand/Artikel …“ liefert artikel_id
+  - Response enthaelt route_path/screen_id
+  - Deep-Link-Serie als abgeschlossen dokumentiert
+tests:
+  - packages/frontend-web/src/__tests__/lib/mcp-stock-open.test.ts
+  - packages/frontend-web/src/__tests__/features/ki-usability/ActionDispatchContext.test.tsx
+  - services/ki-usability/tests/test_voice_intent_lager_einkauf_hr.py
+  - tests/test_mcp_execution.py
+risks:
+  - Token ohne lager:read → Deep-Link schlaegt fehl
+ai_harness:
+  fachlicher_vertrag: >
+    Sprache/Agent oeffnet Artikelbestand nur nach Mandanten-Aufloesung.
+  architektur_vertrag: >
+    Zentraler ActionDispatch; Bestand-Read bleibt Backend-Wahrheit fuer Route.
+  daten_vertrag: >
+    Keine neuen Persistenzwege; nur Lesen via bestehendem MCP-Call.
+  test_vertrag: >
+    Route-Guard, Dispatch-Mocks, Bestand-Assertion, Voice-Intent.
+  security_vertrag: >
+    Open-Redirect-Schutz: nur /lager/artikel/{id}.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice; Serie abgeschlossen.
+external_gates:
+  - not_applicable
+result: >
+  1 Bestand-MCP-, 28 Frontend-, 19 Voice-Lager-Tests gruen. Deep-Link-Serie abgeschlossen.

@@ -11,6 +11,22 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## SonarCloud — Runtime-Blocker und verbleibende Gatebedingungen (2026-10-08)
+
+Quality Gate37828122495 aufcbcd52b84 bestaetigt den frischen 670er-Katalog,
+Backend, Frontend, Docker und Sicherheitspruefungen. Der nachgelagerte
+SonarCloud-Scan laeuft technisch durch; sein Qualitaetsgate bleibt rot.
+Zehn deklarierte Agrar-Exporte an bestehende Fachfunktionen gebunden,
+zwei defekte NUTS-Altexporte samt unbrauchbarem Service/Beispiel-Seed entfernt.
+Fehlender Audit-Filter, falscher Erfolgsquotenaufruf und zusaetzlich echte
+MaintenanceWindow-Konstruktorfehler behoben. Original20 Fehler/1 gruen;
+repariert43 neue und bestehende Fachvertraege ohne Skip gruen (3,99s),
+keine DB/Container/Reset. [QA und Handshake](../quality-assurance/sonar-runtime-blockers-20261008.md).
+Offen: weitere Sonar-Bugs/Sicherheitsklassifikation, Hotspot-Reviews,
+Coverage55,2 unter80 und Duplikate3,3 ueber3. Keine Schwelle/Baseline oder
+Scanner-Ausnahme geaendert. Kein vollstaendiges ISO27001-Persistenzversprechen
+fuer die bestehenden In-Memory-Dienste; NUTS-PLZ-Heuristik nicht amtlich abgenommen.
+
 ## Sortenregister — kanonischer Lesevertrag (2026-10-08)
 
 Agrar-Smoke zeigte dreimal404 auf einem nicht vorhandenen Sortenpfad.
@@ -149,8 +165,54 @@ Map mapped 19 / open_medium 32. [QA](../quality-assurance/mcp-mask-writes-batch5
 MDE `process_pending`; Rest `blocked_no_endpoint` / Inventur `open_high`;
 Map mapped 22 / open_medium **0**, `classification_complete`.
 [QA](../quality-assurance/mcp-mask-writes-remaining-20261008.md).
-**Weiter offen:** FIN-CLOSE/agentic Finance (P0, ADR-076); Stufe-2-SUS;
-Personal/Fuhrpark erst nach HTTP-CommandEndpoints.
+**Geschlossen (MCP-ORDER-NAV-20261008):** Voice/Dispatch Deep-Link aus
+`sales.order.status` (`route_path` `/sales/order-editor/{id}`); Listen-Fallback
+ohne `auftrag_nr`. [QA](../quality-assurance/mcp-order-nav-20261008.md).
+**Geschlossen (MCP-DEEP-LINK-LOT-20261008):** Voice/Dispatch Deep-Link aus
+`wms.lot.trace` (`route_path` `/charge/stamm/{id}`); Listen-Fallback
+`/charge/rueckverfolgung`. [QA](../quality-assurance/mcp-deep-link-lot-20261008.md).
+**Geschlossen (MCP-DEEP-LINK-CELL-20261008):** Voice/Dispatch Deep-Link aus
+`wms.cell.status` (`route_path` `/lager/silo-zellen/{id}`); Listen-Fallback
+`/lager/silo-uebersicht`. [QA](../quality-assurance/mcp-deep-link-cell-20261008.md).
+**Geschlossen (MCP-DEEP-LINK-PO-20261008):** Voice/Dispatch Deep-Link aus
+`einkauf.bestellung.status` (`route_path` `/einkauf/bestellung/{id}`);
+Listen-Fallback `/einkauf/bestellungen`; List-Items mit `route_path`.
+[QA](../quality-assurance/mcp-deep-link-po-20261008.md).
+**Geschlossen (MCP-DEEP-LINK-DMS-20261008):** Voice/Dispatch Deep-Link aus
+`dms.document.search` (`route_path` `/docflow/nachweisraum/{id}`); GoBD-Status
+mit `/docflow/gobd-export/{id}`; Listen-Fallback `/docflow/nachweisraum`.
+[QA](../quality-assurance/mcp-deep-link-dms-20261008.md).
+**Geschlossen (MCP-DEEP-LINK-AGRAR-20261008):** Voice/Dispatch Deep-Link aus
+`agrar.contract.get` (`/agrar/kontrakt/{id}`) und `agrar.weighing_ticket.list`
+(`/waage/wiegeschein/{id}`).
+[QA](../quality-assurance/mcp-deep-link-agrar-20261008.md).
+**Geschlossen (MCP-DEEP-LINK-STOCK-20261008):** Voice/Dispatch Deep-Link aus
+`lager.bestand.get` (`/lager/artikel/{id}`); Listen-Fallback Bestandsuebersicht.
+[QA](../quality-assurance/mcp-deep-link-stock-20261008.md).
+**Deep-Link-Serie abgeschlossen:** Kunde → Auftrag → Lot → Zelle → Bestellung →
+DMS → Agrar/Wiegeschein → Bestand. Keine weiteren klaren Einzel-Read-Deep-Links
+ohne Backend-/UI-Erfindung (`inventur.status`/`compliance.gate`/`proposal.list`).
+**Geschlossen (MCP-AP-FREIGABE-20261008):** `finance.ap_invoice.propose` +
+`finance.ap_invoice.freigeben` (Vier-Augen analog `sales.invoice.post`;
+CommandEndpoint; kein Journal/FIN-CLOSE). Map mapped 23.
+[QA](../quality-assurance/mcp-ap-freigabe-20261008.md).
+**Geschlossen (MCP-INVENTUR-OPENING-PROPOSE-20261008):**
+`lager.inventur.propose_opening` propose-only (Snapshot aus Inventurzeilen;
+execute 501; kein Booking). Map `mapped_propose_only` 1 / open_high **1**
+(nur Zahlauf). [QA](../quality-assurance/mcp-inventur-opening-propose-20261008.md).
+**Geschlossen (USABILITY-MCP-MAP-CI-VOICE-20261008):** Audit bestaetigt 31×
+`blocked_no_endpoint` ohne SD-`commandEndpoint` (REST-CRUD allein reicht nicht);
+CI-Drift-Gate Mask-Map + Screen-Action-Katalog; Haupt-App Voice Deep-Link
+Nav-IDs (`nav-einkauf`/`nav-lager`/`nav-agrar-vertraege`) + Param-Extraktion +
+Vite-Proxy-Mount. [QA](../quality-assurance/usability-mcp-map-ci-voice-20261008.md).
+**Konsolidiert (MCP-CONSOLIDATE-COMMIT-20261008):** Deep-Link-Serie, AP-Freigabe,
+Inventur propose-only und Usability-Map-CI lokal committed/pushed; Re-Audit
+31× blocked ohne CE; keine weiteren umsetzbaren Mask-Writes ohne Backend-Erfindung.
+**Weiter offen:** FIN-CLOSE/agentic Finance (P0, ADR-076 — kein Scheinabschluss;
+Claim frei nur fuer Doku/Pruefung); 1× Mask `open_high` (Zahlauf-Freigabe
+forbiddenForAgents/ADR-076-nah — nicht verdrahten); 31× `blocked_no_endpoint`
+(Personal/Fuhrpark/Admin/Reporting/Speichern) erst nach HTTP-CommandEndpoint;
+Stufe-2-SUS live.
 
 ## GAP-HUB — Archiv 2025 ersetzt (2026-10-07)
 
@@ -803,7 +865,7 @@ ausstehenden Vorschlag an und bucht keine Rechnung. Weitere MCP-Schreibadapter b
 | Chargen/Futter/Zertifikate/Versicherungen/Projekte/Förderung/Schäden Hover-Blau | P1 Betrieb | geschlossen |
 | Listen als Karten statt Horizontal-Scroll | P2 | geschlossen in DataTable + ListReport + FastTable/VirtualDataTable (Touch); KIM/FSX unangetastet |
 | Sprache steuert keine Waage/Queue | P2 | Navigation geschlossen (öffne Warteschlange/Wiegungen); Wiegen bleibt Voice-Gate UIX-072 |
-| MCP 18 Tools, kein Masken-Schreiben, kein „öffne Kunde“ | P1 Agent | 21 Tools verdrahtet; Mask→MCP-Map (Top-Activity mapped); medium-Rest + FIN-CLOSE (ADR-076) offen |
+| MCP 18 Tools, kein Masken-Schreiben, kein „öffne Kunde“ | P1 Agent | Registry 39; Mask-Write medium 0; Deep-Link + AP-Freigabe + Inventur propose-only; CI Mask-Map-Drift + Haupt-App Voice-Nav-Sync 2026-10-08; FIN-CLOSE ADR-076 / 1× open_high (Zahlauf) / 31× blocked_no_endpoint / SUS offen |
 | KIM Object Page | P1 | geschlossen 2026-09-30 (`MERIDIAN-PARTY-OBJECTPAGE`) |
 | Listen-Hover-Blau (ohne FSX/Auftrag/Rechnung) | P1 | geschlossen 2026-09-18 |
 | Benachrichtigungen toter Als-gelesen-CTA | P1 | geschlossen (lokales Overlay, kein Write-API) |

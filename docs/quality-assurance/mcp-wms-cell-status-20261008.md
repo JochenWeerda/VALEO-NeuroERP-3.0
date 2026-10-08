@@ -36,3 +36,6 @@ python -m pytest tests/test_mcp_execution.py tests/test_mcp_tool_registry.py --n
 
 Mask-Write-Rest und FIN-CLOSE bleiben offen;
 Rest-Reads → Slice MCP-CATALOG-READS-REST-20261008.
+
+**Nachzug:** Deep-Link Voice/Dispatch → Slice MCP-DEEP-LINK-CELL-20261008
+(`route_path` `/lager/silo-zellen/{id}` / `screen_id` `lager/silo-cell`).
