@@ -37,10 +37,50 @@ Abnahme auf isolierter HEAD-Quelle mit ausschließlich diesen Reparaturen:
 - OpenAPI zweimal deterministisch generiert: 3104 Pfade erhalten,
   ausschließlich die Beschreibung von `/api/v1/crm/leads` geändert.
 
-Die übrigen 20 untypisierten Routen sind bestehender Restbestand und werden
-durch diesen Meilenstein nicht als behoben ausgegeben. Maskenvertrag,
-CRM-Smoke, Dependency-Security und XBRL/ERiC bleiben bis zu ihrer eigenen
-Abnahme offen. Kein Datenbankzugriff für diese Tests, kein Reset, keine neue DB.
+Die damals noch gezählten 20 Routen wurden im folgenden Meilenstein einzeln
+untersucht. Maskenvertrag, CRM-Smoke, Dependency-Security und XBRL/ERiC bleiben
+bis zu ihrer eigenen Abnahme offen. Kein Datenbankzugriff für diese Tests,
+kein Reset, keine neue DB.
+
+## Meilenstein: Antwortvertrags-Gate und Manifest-Konsistenz
+
+Der Regex-Scanner meldete neun Studio-Routen mit bereits von FastAPI aus dem
+Returntyp abgeleiteten Modellen, sechs Policy-Dekoratoren mit verschachtelten
+Dependencies sowie fünf Datei-/Text-/204-Antworten als untypisiert. Die
+AST-Erkennung prüft jetzt jeden Dekorator einzeln. Importierte Response-Aliase,
+typisierte Rückgaben und HTTP-Antworten ohne Body werden korrekt erkannt;
+untypisierte JSON-Routen, Any/object/None-Rückgaben ohne expliziten Vertrag und
+Syntaxfehler bleiben Fehler. Eine explizite response_model=None-Deklaration
+behält den bisherigen technischen Ausnahmevertrag, gilt aber nur für ihre Route.
+Kommentare und Ausnahmen benachbarter Routen können keine Lücken mehr verdecken.
+Keine Endpoint-Modelle durch None oder Any ersetzt, kein Antwortinhalt verändert.
+
+Abnahme: 3590/3590 Antwortverträge, null Lücken. Default und CI-Schwelle von
+historisch 916 beziehungsweise 20 auf **0** verschärft. Tatsächliche FastAPI-
+Registrierung bestätigt 9/9 Studio- und 8/8 Policy-Modelle. 15 neue Parser-
+Regressionen plus bestehende Policy-/Studio-Verträge: 45 Tests grün (2,45 s).
+OpenAPI-Beschreibungen weiterhin 3590/3590, null fehlend.
+
+Neun direkte Manifeste deklarieren jetzt dieselben reparierten Versionen wie
+die seit 07.10.2026 vorhandenen Overrides: i18next-http-backend 4.0.2 im
+Frontend und instrumentation-pg 0.73.0 in acht Domänen. Der Lockfile bleibt
+byteidentisch; frozen/offline-Prüfung aller 36 Workspaces bestanden. Sechs
+bestehende Tests auf tatsächlichen Herstellerpaketen grün (4,54 s).
+Production-Audit aller 2053 aufgelösten Abhängigkeiten: null Critical/Moderate/Low,
+zwei High (node-forge und braces); Audit weiterhin Exit 1. Keine neue Ausnahme.
+[node-forge](https://github.com/advisories/GHSA-86w9-cpqp-85rv) und
+[braces](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) nennen am 08.10.2026
+weiterhin keinen Herstellerfix. Versionsbasierte weitere Dependabot-Meldungen
+sind keine Abnahme der tatsächlich gepatchten Laufzeit; Graph-Refresh ausstehend.
+
+GitHub-Smoke des Masken-Meilensteins c59df8391, Lauf 37730263363: **alle fünf
+Domänen einschließlich CRM erfolgreich**. OpenAPI, PostgreSQL, kritische E2E
+und Doku ebenfalls erfolgreich. Quality-Lauf 37730263705 durch nachfolgenden
+Push abgebrochen; das ist keine vollständige Quality-Abnahme.
+Neun Improvement-Checks im geteilten Baum wurden wegen gleichzeitiger fremder
+Änderungen nicht als Gesamtabnahme gewertet. Kalender-/Baseline-Drift betrifft
+einkauf_lieferschein.py und den aktiven fremden Folgefund-Slice; kein Blind-Revert
+oder Baseline-Anhebung. Eigene Parser-, Manifest- und Runtime-Abnahme isoliert.
 
 ## Meilenstein: native Lead-Anlage und Maskenberechtigungen
 
