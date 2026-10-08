@@ -11,7 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## OFFENES-SCHLIESSEN-20261008 — in Arbeit, Claude Code
+## OFFENES-SCHLIESSEN-20261008 — abgeschlossen, Claude Code
+
+**Abnahme (08.10.2026):** Gelangensbestaetigung-Dublette 409 statt 503 (UAT wiederholbar);
+echter SMTP-Versand (`mail_versand`) statt vorgetaeuschter Erfolge in ProductionEmailService,
+Newsletter und Bestellkommunikation; Bestellkommunikation am kanonischen Beleg + Portal-Lesepfad;
+`ops_bankkonten` erstmals mit Mandant, IBAN-Pruefung echt und erreichbar; Bankkontonummer je
+Mandant; Lieferantenportal fragte nicht existierende Spalten ab (zeigte nie etwas) - korrigiert.
+Migration `offenes_schliessen_20261008` (Probe + Dev). QA:
+[offenes-schliessen-20261008.md](../quality-assurance/offenes-schliessen-20261008.md).
+
 
 **Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** offene Punkte schliessen: (1)
 Gelangensbestaetigung: Dublette antwortet 503 statt 409, UAT-Vertrag mit fester

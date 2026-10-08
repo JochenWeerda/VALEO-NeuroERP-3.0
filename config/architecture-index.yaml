@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-08
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-08T05:47:04Z'
+generated_at: '2026-10-08T05:54:55Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1799,6 +1799,7 @@ domains:
     - legacy_interface_adapter_service
     - llm_gateway
     - mail_ingest_service
+    - mail_versand
     - mask_action_runtime_service
     - mask_rollout_summary_service
     - mcp_execution_service
@@ -2040,6 +2041,7 @@ domains:
     - /einkauf/warengruppen
     - /einkauf/zahlungsbedingungen
     backend_services:
+    - bestell_kommunikation_service
     - command_handlers_procurement
     - einkauf_compat_service
     - proc_bestellung_lifecycle_service
@@ -2068,8 +2070,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 935
   frontend_routes_mapped: 935
-  backend_services_total: 277
-  backend_services_mapped: 277
+  backend_services_total: 279
+  backend_services_mapped: 279
   backend_endpoints_total: 454
   backend_endpoints_mapped: 454
 unmapped:

@@ -550,7 +550,9 @@ class BankKonto(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("BK"))
-    iban = Column(String(50), nullable=False, unique=True)
+    # Seit 08.10.2026 (offenes_schliessen_20261008): je Mandant; IBAN je Mandant eindeutig.
+    tenant_id = Column(String(64), nullable=False, index=True)
+    iban = Column(String(50), nullable=False)
     bic = Column(String(20), nullable=False)
     bank = Column(String(255), nullable=False)
     kontoart = Column(String(100), nullable=False)

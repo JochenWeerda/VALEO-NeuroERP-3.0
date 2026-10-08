@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
@@ -58,26 +59,31 @@ def get_lieferant_lieferungen(
 ):
     """Lieferungen eines Lieferanten aus harvest_acceptances."""
     try:
+        # Bis 08.10.2026 fragte dieser Weg Spalten ab, die es nicht gibt
+        # (acceptance_date, article_name, net_weight_kg, quality_grade); der Fehler
+        # wurde zu einer leeren Liste — das Portal zeigte nie eine Lieferung.
         params: dict = {"lieferant_id": lieferant_id, "tenant_id": tenant_id}
         where_clauses = [
             "ha.customer_id = :lieferant_id",
             "ha.tenant_id = :tenant_id",
         ]
         if von:
-            where_clauses.append("ha.acceptance_date >= :von")
+            where_clauses.append("ha.delivery_date >= :von")
             params["von"] = von
         if bis:
-            where_clauses.append("ha.acceptance_date <= :bis")
+            where_clauses.append("ha.delivery_date <= :bis")
             params["bis"] = bis
 
         rows = db.execute(text("""
-            SELECT ha.id, ha.acceptance_date, ha.article_name,
-                   COALESCE(ha.net_weight_kg, 0) / 1000.0 AS menge_t,
-                   COALESCE(ha.quality_grade, '') AS qualitaet,
+            SELECT ha.id, ha.delivery_date AS acceptance_date, a.name AS article_name,
+                   COALESCE(wt.net_weight, 0) / 1000.0 AS menge_t,
+                   '' AS qualitaet,
                    ha.release_status, ha.invoice_id
             FROM domain_inventory.harvest_acceptances ha
+            LEFT JOIN domain_inventory.articles a ON a.id = ha.article_id AND a.tenant_id = ha.tenant_id
+            LEFT JOIN domain_inventory.weighing_tickets wt ON wt.id = ha.weighing_ticket_id AND wt.tenant_id = ha.tenant_id
             WHERE {where_clause}
-            ORDER BY ha.acceptance_date DESC
+            ORDER BY ha.delivery_date DESC
             LIMIT 100
         """.format(where_clause=" AND ".join(where_clauses))), params).fetchall()  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
 
@@ -93,8 +99,9 @@ def get_lieferant_lieferungen(
             )
             for r in rows
         ]
-    except Exception:
-        return []
+    except SQLAlchemyError as fehler:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Portaldaten nicht lesbar") from fehler
 
 
 @router.get("/lieferanten/{lieferant_id}/kontrakte", response_model=list[SupplierKontraktView], summary="Lieferant kontrakte abrufen")
@@ -106,12 +113,14 @@ def get_lieferant_kontrakte(
     """Kontrakte eines Lieferanten mit Erfuellungsstand."""
     try:
         rows = db.execute(text("""
-            SELECT ac.id, ac.article_name,
-                   COALESCE(ac.quantity_contracted, 0) AS menge_soll,
-                   COALESCE(ac.quantity_delivered, 0) AS menge_geliefert,
+            SELECT ac.id, a.name AS article_name,
+                   COALESCE(ac.total_quantity_kg, 0) / 1000.0 AS menge_soll,
+                   (COALESCE(ac.total_quantity_kg, 0) - COALESCE(ac.remaining_quantity_kg, ac.total_quantity_kg, 0)) / 1000.0
+                       AS menge_geliefert,
                    COALESCE(ac.fixed_price, 0) AS preis,
                    ac.status
             FROM domain_inventory.agrar_contracts ac
+            LEFT JOIN domain_inventory.articles a ON a.id = ac.article_id AND a.tenant_id = ac.tenant_id
             WHERE ac.partner_id = :lieferant_id
               AND ac.tenant_id = :tenant_id
             ORDER BY ac.created_at DESC
@@ -131,8 +140,9 @@ def get_lieferant_kontrakte(
             )
             for r in rows
         ]
-    except Exception:
-        return []
+    except SQLAlchemyError as fehler:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Portaldaten nicht lesbar") from fehler
 
 
 @router.get("/preisauskunft", response_model=SupplierPreisauskunft, summary="Preisauskunft abrufen")
@@ -148,7 +158,8 @@ def get_preisauskunft(
         row = db.execute(text("""
             SELECT ac.fixed_price
             FROM domain_inventory.agrar_contracts ac
-            WHERE LOWER(ac.article_name) = LOWER(:sorte)
+            JOIN domain_inventory.articles a ON a.id = ac.article_id AND a.tenant_id = ac.tenant_id
+            WHERE LOWER(a.name) = LOWER(:sorte)
               AND ac.tenant_id = :tenant_id
               AND ac.status IN ('active', 'aktiv')
             ORDER BY ac.created_at DESC
@@ -160,8 +171,10 @@ def get_preisauskunft(
                 sorte=sorte, qualitaet=qualitaet, stichtag=stichtag,
                 preis_eur_t=float(row.fixed_price), verfuegbar=True,
             )
-    except Exception:  # noqa: BLE001 — optionale DB-Abfrage; Fallback greift
-        pass
+    except SQLAlchemyError as fehler:
+        # Bis 08.10.2026 still: ein Datenbankfehler sah aus wie "kein Preis verfuegbar".
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Preisauskunft nicht lesbar") from fehler
 
     return SupplierPreisauskunft(
         sorte=sorte, qualitaet=qualitaet, stichtag=stichtag,
@@ -181,16 +194,17 @@ def get_silo_bestaende(
     try:
         params = {"tenant_id": tenant_id, "lieferant_id": lieferant_id}
         rows = db.execute(text("""
-            SELECT s.silo_number, s.article_name,
-                   COALESCE(SUM(sl.current_quantity_kg), 0) / 1000.0 AS bestand_t,
-                   s.capacity_kg / 1000.0 AS kapazitaet_t
+            SELECT s.silo_number, a.name AS article_name,
+                   COALESCE(SUM(sl.quantity_tons), 0) AS bestand_t,
+                   s.capacity_tons AS kapazitaet_t
             FROM domain_inventory.silos s
+            LEFT JOIN domain_inventory.articles a ON a.id = s.article_id AND a.tenant_id = s.tenant_id
             LEFT JOIN domain_inventory.silo_lots sl
               ON sl.silo_id = s.id
              AND sl.tenant_id = :tenant_id
-             AND (:lieferant_id IS NULL OR sl.source_partner_id = :lieferant_id)
+             AND (CAST(:lieferant_id AS TEXT) IS NULL OR sl.source_partner_id = :lieferant_id)
             WHERE s.tenant_id = :tenant_id
-            GROUP BY s.id, s.silo_number, s.article_name, s.capacity_kg
+            GROUP BY s.id, s.silo_number, a.name, s.capacity_tons
             ORDER BY s.silo_number
         """), params).fetchall()
 
@@ -211,5 +225,23 @@ def get_silo_bestaende(
             "zellen": zellen,
             "schema_version": 1,
         }
-    except Exception:
-        return {"tenant_id": tenant_id, "gesamtbestand_t": 0.0, "zellen": [], "schema_version": 1}
+    except SQLAlchemyError as fehler:
+        # Bis 08.10.2026: Bestand 0 t — ein Datenbankfehler sah aus wie ein leeres Silo.
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Silobestand nicht lesbar") from fehler
+
+
+@router.get("/lieferanten/{lieferant_id}/bestellungen", summary="Im Portal veroeffentlichte Bestellungen")
+def get_lieferant_bestellungen(
+    lieferant_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    """Bestellungen, die der Einkauf diesem Lieferanten im Portal veroeffentlicht hat.
+
+    Gegenstueck zu ``POST /purchase-orders/{id}/communications/portal``: bis
+    08.10.2026 meldete jener Weg "published", ohne dass es hier etwas zu sehen gab.
+    """
+    from app.services.bestell_kommunikation_service import veroeffentlichte_fuer_lieferant
+
+    return veroeffentlichte_fuer_lieferant(db, tenant_id, lieferant_id)

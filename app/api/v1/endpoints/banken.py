@@ -1,5 +1,7 @@
 """
 Bank Accounts API - Bankkonto Management (SQLAlchemy)
+
+Je Mandant (seit 08.10.2026); vorher ohne tenant_id: jeder sah und aenderte alle Bankkonten.
 """
 
 from typing import Optional
@@ -9,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.core.validation_contracts import validate_iban
 from app.domains.operations.repository import BankKontoRepository
 
 from app.api.v1.schemas.base import BaseSchema
@@ -65,16 +68,35 @@ async def list_bankkonten(
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
-    repo = BankKontoRepository(db)
+    repo = BankKontoRepository(db, tenant_id)
     items = repo.get_all(skip=offset, limit=limit, kontoart=kontoart, ist_aktiv=ist_aktiv)
     total = repo.count(kontoart=kontoart, ist_aktiv=ist_aktiv)
     return {"items": [_to_dict(i) for i in items], "total": total, "limit": limit, "offset": offset}
 
 
+@router.get("/konten/iban-validate", response_model=BankenOut, summary="Iban validieren")
+async def validate_iban_weg(iban: str = Query(..., description="IBAN to validate")) -> dict:
+    """IBAN nach ISO 13616 pruefen (Laenge je Land, Mod-97).
+
+    Bis 08.10.2026 stand dieser Weg hinter ``/konten/{konto_id}`` und war nie
+    erreichbar; "gueltig" hiess dort nur "mindestens 15 Zeichen", die BIC war
+    ``"UNKNOWN"``. Eine BIC ergibt sich aus der IBAN nicht — sie bleibt leer.
+    """
+    pruefung = validate_iban(iban)
+    return {
+        "iban": iban.replace(" ", "").upper(),
+        "valid": pruefung.is_valid,
+        "meldungen": [m.title for m in pruefung.messages],
+        "bic": None,
+        "bank": None,
+    }
+
+
 @router.get("/konten/{konto_id}", response_model=FinanceBankkontoOut, summary="Bankkonto abrufen")
-async def get_bankkonto(konto_id: str, db: Session = Depends(get_db)) -> dict:
-    repo = BankKontoRepository(db)
+async def get_bankkonto(konto_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict:
+    repo = BankKontoRepository(db, tenant_id)
     konto = repo.get_by_id(konto_id)
     if not konto:
         raise HTTPException(status_code=404, detail="Bankkonto not found")
@@ -82,13 +104,19 @@ async def get_bankkonto(konto_id: str, db: Session = Depends(get_db)) -> dict:
 
 
 @router.post("/konten", response_model=BankenOut, status_code=201, summary="Bankkonto anlegen")
-async def create_bankkonto(data: BankKontoCreate, db: Session = Depends(get_db)) -> dict:
-    repo = BankKontoRepository(db)
-    if repo.get_by_iban(data.iban):
+async def create_bankkonto(data: BankKontoCreate, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict:
+    repo = BankKontoRepository(db, tenant_id)
+    iban = data.iban.replace(" ", "").upper()
+    pruefung = validate_iban(iban)
+    if not pruefung.is_valid:
+        raise HTTPException(status_code=422, detail=pruefung.messages[0].title if pruefung.messages else "IBAN ungueltig")
+    # Bis 08.10.2026 wurde die Rohform geprueft und die normalisierte gespeichert:
+    # "DE89 3704 ..." und "DE893704..." galten als verschiedene Konten.
+    if repo.get_by_iban(iban):
         raise HTTPException(status_code=409, detail="IBAN already exists")
 
     payload = {
-        "iban": data.iban.replace(" ", "").upper(),
+        "iban": iban,
         "bic": data.bic.upper(),
         "bank": data.bank_name,
         "kontoart": data.kontoart,
@@ -102,8 +130,10 @@ async def create_bankkonto(data: BankKontoCreate, db: Session = Depends(get_db))
 
 
 @router.patch("/konten/{konto_id}", response_model=BankenOut, summary="Bankkonto aktualisieren")
-async def update_bankkonto(konto_id: str, data: BankKontoUpdate, db: Session = Depends(get_db)) -> dict:
-    repo = BankKontoRepository(db)
+async def update_bankkonto(
+    konto_id: str, data: BankKontoUpdate, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+) -> dict:
+    repo = BankKontoRepository(db, tenant_id)
     payload = data.model_dump(exclude_unset=True)
     if "bank_name" in payload:
         payload["bank"] = payload.pop("bank_name")
@@ -114,28 +144,16 @@ async def update_bankkonto(konto_id: str, data: BankKontoUpdate, db: Session = D
 
 
 @router.delete("/konten/{konto_id}", status_code=204, response_class=Response, response_model=None, summary="Bankkonto löschen")
-async def delete_bankkonto(konto_id: str, db: Session = Depends(get_db)):
-    repo = BankKontoRepository(db)
+async def delete_bankkonto(konto_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    repo = BankKontoRepository(db, tenant_id)
     if not repo.deactivate(konto_id):
         raise HTTPException(status_code=404, detail="Bankkonto not found")
 
 
 @router.get("/salden", response_model=BankenOut, summary="Salden abrufen")
-async def get_salden(db: Session = Depends(get_db)) -> dict:
-    repo = BankKontoRepository(db)
+async def get_salden(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict:
+    repo = BankKontoRepository(db, tenant_id)
     return repo.get_salden()
-
-
-@router.get("/konten/iban-validate", response_model=BankenOut, summary="Iban validieren")
-async def validate_iban(iban: str = Query(..., description="IBAN to validate")) -> dict:
-    normalized = iban.replace(" ", "").upper()
-    is_valid = len(normalized) >= 15 and normalized[:2].isalpha()
-    return {
-        "iban": iban,
-        "valid": is_valid,
-        "bic": "UNKNOWN",
-        "bank": None,
-    }
 
 
 # ── FinTS/HBCI Online-Banking Endpoints (PSD2 / § 25a KWG) ───────────────────

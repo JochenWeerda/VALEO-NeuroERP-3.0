@@ -637,10 +637,18 @@ class ChargeRepository:
 
 
 class BankKontoRepository:
-    """Repository for operational bank account CRUD."""
+    """Bankkonten eines Mandanten (domain_ops.ops_bankkonten).
 
-    def __init__(self, db: Session):
+    Bis 08.10.2026 hatte die Tabelle keine ``tenant_id``, und dieses Repository las,
+    aenderte und summierte die Bankkonten **aller** Mandanten.
+    """
+
+    def __init__(self, db: Session, tenant_id: str):
         self.db = db
+        self.tenant_id = tenant_id
+
+    def _basis(self):
+        return self.db.query(BankKonto).filter(BankKonto.tenant_id == self.tenant_id)
 
     def get_all(
         self,
@@ -649,7 +657,7 @@ class BankKontoRepository:
         kontoart: Optional[str] = None,
         ist_aktiv: Optional[bool] = None,
     ) -> List[BankKonto]:
-        query = self.db.query(BankKonto)
+        query = self._basis()
         if kontoart:
             query = query.filter(BankKonto.kontoart == kontoart)
         if ist_aktiv is not None:
@@ -657,7 +665,7 @@ class BankKontoRepository:
         return query.order_by(BankKonto.bank.asc()).offset(skip).limit(limit).all()
 
     def count(self, kontoart: Optional[str] = None, ist_aktiv: Optional[bool] = None) -> int:
-        query = self.db.query(BankKonto)
+        query = self._basis()
         if kontoart:
             query = query.filter(BankKonto.kontoart == kontoart)
         if ist_aktiv is not None:
@@ -665,13 +673,13 @@ class BankKontoRepository:
         return query.count()
 
     def get_by_id(self, konto_id: str) -> Optional[BankKonto]:
-        return self.db.query(BankKonto).filter(BankKonto.id == konto_id).first()
+        return self._basis().filter(BankKonto.id == konto_id).first()
 
     def get_by_iban(self, iban: str) -> Optional[BankKonto]:
-        return self.db.query(BankKonto).filter(BankKonto.iban == iban).first()
+        return self._basis().filter(BankKonto.iban == iban).first()
 
     def create(self, konto_data: dict) -> BankKonto:
-        konto = BankKonto(id=prefixed_id("BK"), **konto_data)
+        konto = BankKonto(id=prefixed_id("BK"), **konto_data, tenant_id=self.tenant_id)
         self.db.add(konto)
         self.db.commit()
         self.db.refresh(konto)
@@ -696,7 +704,7 @@ class BankKontoRepository:
         return True
 
     def get_salden(self) -> dict:
-        active = self.db.query(BankKonto).filter(BankKonto.ist_aktiv == True).all()  # noqa: E712
+        active = self._basis().filter(BankKonto.ist_aktiv == True).all()  # noqa: E712
         gesamt_saldo = sum(float(k.saldo or 0) for k in active)
         nach_kontoart: dict[str, float] = {}
         for konto in active:

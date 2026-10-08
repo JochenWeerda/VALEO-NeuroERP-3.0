@@ -143,6 +143,8 @@ class NewsletterOut(BaseSchema):
     betreff: str = ""
     typ: str = ""
     status: str = ""
+    versendet: int = 0
+    fehlgeschlagen: int = 0
     hinweis: str = ""
 
 
@@ -1294,29 +1296,36 @@ class NewsletterRequest(BaseModel):
 
 @router.post("/crm/kommunikation/newsletter", response_model=NewsletterOut, summary="Newsletter crm")
 async def crm_newsletter(body: NewsletterRequest) -> dict:
-    """
-    Initiiert Newsletter-Versand an Lieferanten/Kunden.
-    In der Produktionsumgebung: SMTP-Service oder E-Mail-Anbieter.
-    """
-    # Grundlegende E-Mail-Validierung
+    """Newsletter per SMTP an jeden gueltigen Empfaenger. Bis 08.10.2026 meldete dieser Weg
+    "in_queue" ohne Warteschlange und versandte nichts; jetzt zaehlt, was der Server annahm."""
+    import logging
+
+    from app.services.mail_versand import MailVersandFehler, MailVersandNichtEingerichtet, einrichtung, sende_mail
+
     valid = [e for e in body.empfaenger if "@" in e and "." in e.split("@")[-1]]
-    invalid = len(body.empfaenger) - len(valid)
-
     if not valid:
-        raise HTTPException(status_code=400, detail="Keine gÃ¼ltigen E-Mail-Adressen angegeben.")
-
-    # In Produktion: Ãœbergabe an SMTP-Worker / E-Mail-Queue
-    # Aktuell: Log + strukturierte RÃ¼ckmeldung
-    return {
-        "initiiert": True,
-        "empfaenger_gesamt": len(body.empfaenger),
-        "empfaenger_gueltig": len(valid),
-        "empfaenger_ungueltig": invalid,
-        "betreff": body.betreff,
-        "typ": body.typ,
-        "status": "in_queue",
-        "hinweis": "E-Mails werden asynchron Ã¼ber den Benachrichtigungs-Service versendet.",
-    }
+        raise HTTPException(status_code=400, detail="Keine gültigen E-Mail-Adressen angegeben.")
+    if not (body.text or "").strip():
+        raise HTTPException(status_code=422, detail="Newsletter-Text fehlt.")
+    try:
+        einrichtung()
+    except MailVersandNichtEingerichtet as fehler:
+        raise HTTPException(status_code=503, detail=str(fehler)) from fehler
+    versendet, fehlgeschlagen = 0, 0
+    for adresse in valid:
+        try:
+            sende_mail(adresse, body.betreff, body.text or "")
+            versendet += 1
+        except MailVersandFehler as fehler:
+            fehlgeschlagen += 1
+            logging.getLogger(__name__).warning("Newsletter an %s nicht versendet: %s", adresse, fehler)
+    if not versendet:
+        raise HTTPException(status_code=502, detail="Der SMTP-Server hat keinen Empfänger angenommen.")
+    return {"initiiert": True, "empfaenger_gesamt": len(body.empfaenger), "empfaenger_gueltig": len(valid),
+            "empfaenger_ungueltig": len(body.empfaenger) - len(valid), "betreff": body.betreff, "typ": body.typ,
+            "status": "versendet" if not fehlgeschlagen else "teilweise_versendet",
+            "versendet": versendet, "fehlgeschlagen": fehlgeschlagen,
+            "hinweis": f"{versendet} von {len(valid)} Empfängern vom SMTP-Server angenommen."}
 
 
 @router.patch("/crm/lieferanten/{lieferant_id}", response_model=CrmOut, summary="Lieferant aktualisieren")
@@ -2275,64 +2284,55 @@ def _find_po_by_id(db: Session, po_id: str, tenant_id: Optional[str] = None) -> 
 
 @router.get("/purchase-orders/{po_id}/communications", response_model=list[CompatBridgeOut], summary="Communications po")
 async def po_communications(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict[str, Any]]:
-    po = _find_po_by_id(db, po_id, tenant_id=tenant_id)
-    return po.get("communications", [])
+    from app.services import bestell_kommunikation_service as komm
+
+    beleg = _bestellung_finden(db, tenant_id, po_id)
+    if beleg:
+        return komm.liste(db, tenant_id, beleg["id"])
+    return _find_po_by_id(db, po_id, tenant_id=tenant_id).get("communications", [])  # Altbeleg, nur lesend
 
 
-@router.post("/purchase-orders/{po_id}/communications", response_model=EinkaufDocOut, status_code=201, summary="Add communication po")
-async def po_add_communication(
-    po_id: str,
-    payload: dict[str, Any],
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict:
-    po = _find_po_by_id(db, po_id, tenant_id=tenant_id)
-    item = {
-        "id": str(uuid4()),
-        "channel": payload.get("channel") or "email",
-        "subject": payload.get("subject") or f"PO {po.get('purchaseOrderNumber')}",
-        "message": payload.get("message") or "",
-        "recipient": payload.get("recipient"),
-        "status": payload.get("status") or "sent",
-        "createdAt": _now_iso(),
-    }
-    po.setdefault("communications", []).append(item)
-    po.setdefault("changelog", []).append(
-        {"id": str(uuid4()), "changeType": "COMMUNICATION", "changedBy": "system", "changedAt": _now_iso(), "fieldChanges": []}
-    )
-    save_to_store("purchase_order", po["purchaseOrderNumber"], po, _doc_repo(db))
-    await _enqueue_event(
-        db,
-        event_type="purchase_order.communication.sent",
-        aggregate_id=str(po.get("id") or po_id),
-        payload={"purchaseOrderNumber": po.get("purchaseOrderNumber"), "channel": item["channel"], "recipient": item.get("recipient")},
-        tenant_id=tenant_id,
-    )
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+async def _po_kommunikation(po_id: str, payload: dict[str, Any], tenant_id: str, db: Session, weg: str) -> dict:
+    """Kommunikation am fuehrenden Beleg; siehe ``bestell_kommunikation_service`` (bis 08.10.2026:
+    Dokumentspeicher, nur Altbelege, "sent"/"published" ohne Versand)."""
+    from app.services import bestell_kommunikation_service as komm
+    from app.services.mail_versand import MailVersandFehler, MailVersandNichtEingerichtet
+
+    beleg = _bestellung_finden(db, tenant_id, po_id)
+    if not beleg:
+        _find_po_by_id(db, po_id, tenant_id=tenant_id)  # 404, wenn es auch keinen Altbeleg gibt
+        raise _altbeleg_schreibgeschuetzt(po_id)
+    try:
+        item = getattr(komm, weg)(db, tenant_id, beleg, payload)
+    except MailVersandNichtEingerichtet as fehler:
+        db.rollback()
+        raise HTTPException(status_code=503, detail=str(fehler)) from fehler
+    except MailVersandFehler as fehler:
+        db.rollback()
+        raise HTTPException(status_code=502, detail=str(fehler)) from fehler
+    except ValueError as fehler:
+        db.rollback()
+        raise HTTPException(status_code=422, detail=str(fehler)) from fehler
+    await _enqueue_event(db, event_type="purchase_order.communication.sent", aggregate_id=beleg["id"], tenant_id=tenant_id,
+                         payload={"purchaseOrderNumber": beleg["bestellnummer"], "channel": item["channel"], "status": item["status"]})
     db.commit()
+    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
     return item
 
 
+@router.post("/purchase-orders/{po_id}/communications", response_model=EinkaufDocOut, status_code=201, summary="Add communication po")
+async def po_add_communication(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    return await _po_kommunikation(po_id, payload, tenant_id, db, "erfassen")
+
+
 @router.post("/purchase-orders/{po_id}/communications/email", response_model=EinkaufDocOut, status_code=201, summary="Send email po")
-async def po_send_email(
-    po_id: str,
-    payload: dict[str, Any],
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict:
-    payload = {**payload, "channel": "email", "status": "sent"}
-    return await po_add_communication(po_id, payload, tenant_id, db)
+async def po_send_email(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    return await _po_kommunikation(po_id, payload, tenant_id, db, "per_mail_senden")
 
 
 @router.post("/purchase-orders/{po_id}/communications/portal", response_model=EinkaufDocOut, status_code=201, summary="Send portal po")
-async def po_send_portal(
-    po_id: str,
-    payload: dict[str, Any],
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict:
-    payload = {**payload, "channel": "portal", "status": "published"}
-    return await po_add_communication(po_id, payload, tenant_id, db)
+async def po_send_portal(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    return await _po_kommunikation(po_id, payload, tenant_id, db, "im_portal_veroeffentlichen")
 
 
 @router.get("/einkauf/retouren/{retour_id}", response_model=EinkaufDocOut, summary="Retoure get einkauf")

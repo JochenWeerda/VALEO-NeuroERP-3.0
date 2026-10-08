@@ -350,6 +350,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `neuroassist_state_graph_confidence_ledger_20260329` | Neuro State Graph + Confidence Ledger tables |
 | `normalize_finance_hr_contracts_20260610` | Normalize finance account values and restore HR shift schema. |
 | `offene_posten_fields_crud_20260214` | Extend offene_posten with L3 fields for full CRUD. |
+| `offenes_schliessen_20261008` | Bestellkommunikation mit Inhalt; Bankkonten im Mandanten. |
 | `ops_chargen_add_mhd_20260215` | add mhd to ops_chargen |
 | `ops_chargen_qs_fields_20260214` | add qs fields to ops_chargen |
 | `ops_domain_initial` | Operations Domain Models Migration |

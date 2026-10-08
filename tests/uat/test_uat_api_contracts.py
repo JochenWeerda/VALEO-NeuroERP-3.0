@@ -440,10 +440,16 @@ class TestComplianceEndpoints:
         )
 
     def test_gelangensbestaetigung_valid_create(self):
-        """TC-API-006d: POST /gelangensbestaetigung — vollständige Payload → 201/200."""
+        """TC-API-006d: POST /gelangensbestaetigung — vollständige Payload → 201/200.
+
+        Eindeutige Lieferschein-Nr. je Lauf: die feste "LS-UAT-001" machte den
+        Vertrag nach dem ersten Lauf dauerhaft rot (Dublette je Mandant).
+        """
         import datetime
+        import uuid
+        lieferschein_nr = f"LS-UAT-{uuid.uuid4().hex[:8]}"
         payload = {
-            "lieferschein_nr": "LS-UAT-001",
+            "lieferschein_nr": lieferschein_nr,
             "rechnung_nr": "RE-UAT-001",
             "kunde_nr": "KD-001",
             "bestimmungsland_code": "FR",
@@ -460,6 +466,8 @@ class TestComplianceEndpoints:
         data = resp.json()
         assert isinstance(data, dict), "TC-API-006d: Response muss ein Objekt sein"
         assert "id" in data, f"TC-API-006d: 'id' fehlt in Response. Keys: {list(data.keys())}"
+        dublette = _CLIENT.post("/api/v1/gelangensbestaetigung", json=payload, headers=_AUTH_HEADERS)
+        assert dublette.status_code == 409, f"TC-API-006d: Dublette erwartet 409, bekam {dublette.status_code}"
 
 
 # ===========================================================================

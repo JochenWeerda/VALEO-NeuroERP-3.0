@@ -16712,6 +16712,21 @@
               "name": "betreff",
               "nullable": true,
               "type": "text"
+            },
+            {
+              "name": "nachricht",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "erfasst_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "erfasst_von",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -16722,7 +16737,11 @@
             "id"
           ],
           "read_by": [
+            "app/services/bestell_kommunikation_service.py",
             "app/services/mask_rollout_summary_service.py"
+          ],
+          "written_by": [
+            "app/services/bestell_kommunikation_service.py"
           ]
         },
         "bestellung_positionen": {
@@ -17297,6 +17316,7 @@
             "app/api/v1/endpoints/einkauf_lieferschein.py",
             "app/api/v1/endpoints/purchase_invoice_verification.py",
             "app/infrastructure/models/einkauf_models.py",
+            "app/services/bestell_kommunikation_service.py",
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/procurement_match_service.py",
@@ -18342,6 +18362,7 @@
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/crm_partner_suche.py",
             "app/infrastructure/models/einkauf_models.py",
+            "app/services/bestell_kommunikation_service.py",
             "app/services/customer_reference.py",
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py"
@@ -19151,15 +19172,15 @@
             },
             {
               "column": "tenant_id",
-              "references": "domain_erp.chart_of_accounts.id"
-            },
-            {
-              "column": "tenant_id",
               "references": "domain_shared.tenants.id"
             },
             {
               "column": "tenant_id",
               "references": "domain_erp.chart_of_accounts.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_erp.chart_of_accounts.id"
             }
           ],
           "owner_domain": "finance",
@@ -24734,11 +24755,11 @@
             },
             {
               "column": "tenant_id",
-              "references": "domain_hr.bewerbung_einwilligungserklaerungen.id"
+              "references": "domain_hr.bewerbung_einwilligungserklaerungen.tenant_id"
             },
             {
               "column": "tenant_id",
-              "references": "domain_hr.bewerbung_einwilligungserklaerungen.tenant_id"
+              "references": "domain_hr.bewerbung_einwilligungserklaerungen.id"
             }
           ],
           "owner_domain": "hr",
@@ -25694,11 +25715,11 @@
             },
             {
               "column": "tenant_id",
-              "references": "domain_hr.hrm_operations_gates.tenant_id"
+              "references": "domain_hr.hrm_operations_gates.gate_id"
             },
             {
               "column": "tenant_id",
-              "references": "domain_hr.hrm_operations_gates.gate_id"
+              "references": "domain_hr.hrm_operations_gates.tenant_id"
             }
           ],
           "owner_domain": "hr",
@@ -25765,11 +25786,11 @@
           "foreign_keys": [
             {
               "column": "gate_id",
-              "references": "domain_hr.hrm_operations_gates.tenant_id"
+              "references": "domain_hr.hrm_operations_gates.gate_id"
             },
             {
               "column": "gate_id",
-              "references": "domain_hr.hrm_operations_gates.gate_id"
+              "references": "domain_hr.hrm_operations_gates.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -28829,6 +28850,7 @@
             "app/api/v1/endpoints/pos_retoure.py",
             "app/api/v1/endpoints/scan.py",
             "app/api/v1/endpoints/stmd_duplikat.py",
+            "app/api/v1/endpoints/supplier_portal.py",
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/einkauf_models.py",
             "app/infrastructure/models/futtermittel_models.py",
@@ -34181,6 +34203,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/supplier_portal.py",
             "app/api/v1/endpoints/waage.py",
             "app/core/database.py",
             "app/infrastructure/models/l3c_models.py",
@@ -37010,9 +37033,19 @@
               "name": "updated_by",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
-          "foreign_keys": [],
+          "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.tenants.id"
+            }
+          ],
           "owner_domain": "inventory",
           "ownership_reason": "Praefix 'ops_' → domain_ops.",
           "placement": "prefix",
@@ -37020,7 +37053,8 @@
             "id"
           ],
           "read_by": [
-            "app/domains/operations/models.py"
+            "app/domains/operations/models.py",
+            "app/domains/operations/repository.py"
           ]
         },
         "ops_chargen": {

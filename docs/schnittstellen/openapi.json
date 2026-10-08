@@ -107755,6 +107755,11 @@
             "title": "Empfaenger Ungueltig",
             "type": "integer"
           },
+          "fehlgeschlagen": {
+            "default": 0,
+            "title": "Fehlgeschlagen",
+            "type": "integer"
+          },
           "hinweis": {
             "default": "",
             "title": "Hinweis",
@@ -107774,6 +107779,11 @@
             "default": "",
             "title": "Typ",
             "type": "string"
+          },
+          "versendet": {
+            "default": 0,
+            "title": "Versendet",
+            "type": "integer"
           }
         },
         "title": "NewsletterOut",
@@ -241613,6 +241623,22 @@
               "title": "Offset",
               "type": "integer"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -241649,6 +241675,24 @@
       },
       "post": {
         "operationId": "create_bankkonto_api_v1_banken_konten_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -241694,7 +241738,8 @@
     },
     "/api/v1/banken/konten/iban-validate": {
       "get": {
-        "operationId": "validate_iban_api_v1_banken_konten_iban_validate_get",
+        "description": "IBAN nach ISO 13616 pruefen (Laenge je Land, Mod-97).\n\nBis 08.10.2026 stand dieser Weg hinter ``/konten/{konto_id}`` und war nie\nerreichbar; \"gueltig\" hiess dort nur \"mindestens 15 Zeichen\", die BIC war\n``\"UNKNOWN\"``. Eine BIC ergibt sich aus der IBAN nicht — sie bleibt leer.",
+        "operationId": "validate_iban_weg_api_v1_banken_konten_iban_validate_get",
         "parameters": [
           {
             "description": "IBAN to validate",
@@ -241753,6 +241798,22 @@
               "title": "Konto Id",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
           }
         ],
         "responses": {
@@ -241790,6 +241851,22 @@
             "schema": {
               "title": "Konto Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -241835,6 +241912,22 @@
             "schema": {
               "title": "Konto Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -241884,6 +241977,24 @@
     "/api/v1/banken/salden": {
       "get": {
         "operationId": "get_salden_api_v1_banken_salden_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -241894,6 +242005,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -272031,7 +272152,7 @@
     },
     "/api/v1/crm/kommunikation/newsletter": {
       "post": {
-        "description": "Initiiert Newsletter-Versand an Lieferanten/Kunden.\nIn der Produktionsumgebung: SMTP-Service oder E-Mail-Anbieter.",
+        "description": "Newsletter per SMTP an jeden gueltigen Empfaenger. Bis 08.10.2026 meldete dieser Weg\n\"in_queue\" ohne Warteschlange und versandte nichts; jetzt zaehlt, was der Server annahm.",
         "operationId": "crm_newsletter_api_v1_crm_kommunikation_newsletter_post",
         "requestBody": {
           "content": {
@@ -427737,6 +427858,75 @@
           "ui",
           "studio",
           "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/supplier-portal/lieferanten/{lieferant_id}/bestellungen": {
+      "get": {
+        "description": "Bestellungen, die der Einkauf diesem Lieferanten im Portal veroeffentlicht hat.\n\nGegenstueck zu ``POST /purchase-orders/{id}/communications/portal``: bis\n08.10.2026 meldete jener Weg \"published\", ohne dass es hier etwas zu sehen gab.",
+        "operationId": "get_lieferant_bestellungen_api_v1_supplier_portal_lieferanten__lieferant_id__bestellungen_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lieferant_id",
+            "required": true,
+            "schema": {
+              "title": "Lieferant Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Get Lieferant Bestellungen Api V1 Supplier Portal Lieferanten  Lieferant Id  Bestellungen Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Im Portal veroeffentlichte Bestellungen",
+        "tags": [
+          "supplier-portal"
         ]
       }
     },

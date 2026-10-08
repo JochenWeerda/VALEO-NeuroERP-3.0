@@ -246,7 +246,7 @@ def test_zwei_nachweise_zum_selben_lieferschein_sind_abgewiesen(client):
         },
         headers=kopf(HAUS_A),
     )
-    assert zweiter.status_code == 503, zweiter.text
+    assert zweiter.status_code == 409, zweiter.text  # Dublette; bis 08.10.2026 faelschlich 503
 
     # Ein anderes Haus darf denselben Lieferscheinnummernkreis benutzen.
     anderes = _gb_anlegen(client, HAUS_B, lieferschein="LS-DOPPELT")
