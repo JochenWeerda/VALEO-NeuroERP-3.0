@@ -175,6 +175,38 @@ MAPPED_RULES: dict[str, dict[str, str]] = {
     },
 }
 
+# Verified UI-only actions; "neu" alone never proves absence of a mutation.
+# The inventory retains these entries, but excludes them from mutation counts.
+LOCAL_UI_RULES: dict[str, dict[str, str]] = {
+    **{
+        f"mask:{screen}:neu": {
+            "coverage": "local_ui",
+            "local_effect": "form_reset",
+            "notes": "Neues Formular: setzt ausschliesslich lokale Eingabefelder zurueck. Speichern bleibt separater Fachcommand; kein HTTP-Mutationsendpoint fuer Reset erforderlich.",
+        }
+        for screen in (
+            "personal/bewerbungen",
+            "personal/einwilligungserklaerungen",
+            "personal/onboarding",
+            "personal/qualifikationen",
+            "personal/schulungen",
+            "fuhrpark/ausgehende-dokumente",
+            "fuhrpark/rechnungen",
+            "fuhrpark/terminarten",
+        )
+    },
+    "mask:fuhrpark/fahrzeuge:neu": {
+        "coverage": "local_ui",
+        "local_effect": "navigation",
+        "notes": "Oeffnet /fuhrpark/fahrzeug/neu; legt kein Fahrzeug an. Der separate Speichervorgang braucht seinen Fachvertrag.",
+    },
+    "mask:transporte/fahrer:neu": {
+        "coverage": "local_ui",
+        "local_effect": "navigation",
+        "notes": "Oeffnet /transporte/fahrer/neu; legt keinen Fahrer an. Der separate Speichervorgang braucht seinen Fachvertrag.",
+    },
+}
+
 BLOCKED_RULES: dict[str, dict[str, str]] = {
     "mask:finance/payment-run:freigeben": {
         "coverage": "open_high",
@@ -199,29 +231,19 @@ BLOCKED_RULES: dict[str, dict[str, str]] = {
             "mask:auswertungen/sanktionspruefung-personal:check",
             "mask:einkauf/purchase-order:speichern",
             "mask:einkauf/supplier:neue_bestellung",
-            "mask:fuhrpark/ausgehende-dokumente:neu",
             "mask:fuhrpark/ausgehende-dokumente:speichern",
             "mask:fuhrpark/fahrzeug-stamm:loeschen",
             "mask:fuhrpark/fahrzeug-stamm:speichern",
-            "mask:fuhrpark/fahrzeuge:neu",
-            "mask:fuhrpark/rechnungen:neu",
             "mask:fuhrpark/rechnungen:speichern",
-            "mask:fuhrpark/terminarten:neu",
             "mask:fuhrpark/terminarten:speichern",
             "mask:logistik/frachttabellen:anlegen",
             "mask:logistik/tourenplanung:anlegen",
             "mask:logistik/verladung:neu",
-            "mask:personal/bewerbungen:neu",
             "mask:personal/bewerbungen:speichern",
             "mask:personal/einwilligungserklaerungen:anlegen",
-            "mask:personal/einwilligungserklaerungen:neu",
-            "mask:personal/onboarding:neu",
             "mask:personal/onboarding:speichern",
-            "mask:personal/qualifikationen:neu",
             "mask:personal/qualifikationen:speichern",
-            "mask:personal/schulungen:neu",
             "mask:personal/schulungen:speichern",
-            "mask:transporte/fahrer:neu",
         )
     },
 }
@@ -292,7 +314,7 @@ def build_map() -> dict[str, Any]:
     include_ids = {
         a["id"]
         for a in actions
-        if _is_mutation(a) or a["id"] in MAPPED_RULES or a["id"] in BLOCKED_RULES
+        if _is_mutation(a) or a["id"] in MAPPED_RULES or a["id"] in BLOCKED_RULES or a["id"] in LOCAL_UI_RULES
     }
     mappings: list[dict[str, Any]] = []
     for mid in sorted(include_ids):
@@ -308,7 +330,12 @@ def build_map() -> dict[str, Any]:
             "command_endpoint": src.get("commandEndpoint"),
             "command": src.get("command"),
         }
-        if mid in MAPPED_RULES:
+        if mid in LOCAL_UI_RULES:
+            if src.get("commandEndpoint"):
+                raise ValueError(f"Local UI action {mid} gained a commandEndpoint; review its business classification")
+            entry.update(LOCAL_UI_RULES[mid])
+            entry["mcp_tool_id"] = None
+        elif mid in MAPPED_RULES:
             entry.update(MAPPED_RULES[mid])
         elif mid in BLOCKED_RULES:
             entry.update(BLOCKED_RULES[mid])
@@ -340,7 +367,8 @@ def build_map() -> dict[str, Any]:
         "mcp_native_writes": list(MCP_NATIVE_WRITES),
         "fin_close": FIN_CLOSE,
         "stats": {
-            "mask_mutations_considered": len(mappings),
+            "mask_actions_considered": len(mappings),
+            "mask_mutations_considered": len(mappings) - by_cov.get("local_ui", 0),
             "by_coverage": dict(sorted(by_cov.items())),
         },
         "mappings": mappings,
@@ -348,7 +376,8 @@ def build_map() -> dict[str, Any]:
         "classification_complete": True,
         "classification_notes": (
             "MCP-INVENTUR-OPENING-PROPOSE-20261008: Inventur-Opening mapped_propose_only. "
-            "Rest: open_high nur Zahlauf; blocked_no_endpoint 31; FIN-CLOSE blocked_adr_076."
+            f"Rest: open_high nur Zahlauf; blocked_no_endpoint {by_cov.get('blocked_no_endpoint', 0)}; "
+            f"local_ui {by_cov.get('local_ui', 0)}; FIN-CLOSE blocked_adr_076."
         ),
     }
 

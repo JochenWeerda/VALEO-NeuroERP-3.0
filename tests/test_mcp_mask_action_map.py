@@ -55,7 +55,7 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
     assert by_id["mask:lager/inventur-nebenlaeufe:create_opening"]["mcp_tool_id"] == (
         "lager.inventur.propose_opening"
     )
-    assert by_id["mask:personal/bewerbungen:neu"]["coverage"] == "blocked_no_endpoint"
+    assert by_id["mask:personal/bewerbungen:neu"]["coverage"] == "local_ui"
     assert data.get("classification_complete") is True
     assert data["stats"]["by_coverage"].get("open_medium", 0) == 0
     assert data["stats"]["by_coverage"].get("open_high", 0) == 1
