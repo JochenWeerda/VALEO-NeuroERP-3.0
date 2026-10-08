@@ -109,3 +109,4 @@ test('all eight database instrumentations retain their public constructors', () 
 require('./verify_node_dependency_security.cjs');
 require('./verify_node_high_backports.cjs');
 require('./test_npm_backport_audit.cjs');
+require('./verify_handlebars_security_release.cjs');
