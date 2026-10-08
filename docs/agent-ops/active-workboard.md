@@ -11,7 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## ADMIN-RECHTE-MULTISELECT-20261008 — in Arbeit, Claude Code
+## ADMIN-RECHTE-MULTISELECT-20261008 — abgeschlossen, Claude Code
+
+**Abnahme (08.10.2026):** `/api/v1/admin/*` hatte keine Rollenpruefung (Benutzer/Rollen/API-Schluessel
+fuer jeden angemeldeten Nutzer) — Schreiben jetzt nur `admin`, Lesen von Benutzern/Rollen/Audit/
+Schluesseln `admin`/`manager`; Strukturtest gegen neue offene Schreibwege. Mask Builder zeichnet
+`multiselect` als Checkbox-Gruppe (Liste, Altwert lesbar); Postfach-Maske: Verwendung und Rollen als
+Mehrfachauswahl. QA: [admin-rechte-multiselect-20261008.md](../quality-assurance/admin-rechte-multiselect-20261008.md).
+
 
 **Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** (1) `/api/v1/admin/*` (admin_core) ohne
 Rollenpruefung: jeder angemeldete Nutzer kann Benutzer anlegen, Rollen aendern, API-Schluessel
@@ -280,6 +287,8 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 `docs/README.md` und Domain-Depth-Plan verweisen auf den Hub.
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
+
+**DOCS-MAIL-IMPORT-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Docs Build37786113441 scheiterte beim kanonischen Postfach-Screenimport an fehlendem httpx. requirements-docs.txt deklariert die vier belegten Importabhaengigkeiten httpx0.28.1, SQLAlchemy2.0.41, cryptography50.0.1, FastAPI0.136.3; keine vollstaendige Backendinstallation oder fremde Mail-/Maskenaenderung. Bestehender Handbuch-Driftcheck und kompletter MkDocs-Build aus committed Quelle mit frischer isolierter Docs-Umgebung gruen. Keine DB/Container/Versand/OAuth. QA docs-mail-import-20261008.md. Schema-Artefaktupload weiterhin separate nicht aktivierte Vorlage, ausdrueckliche Freigabe offen.
 
 **CI-CATALOG-SYNC-20261008 (in arbeit):** Owner Codex-01a0f3fc. Aktionsdrift geschlossen: kanonisches Postfach-anmelden statt google, 85 Aktionen/45 Masken, Generator --check und 20 isolierte Tests plus vorhandener Consent-Schema-Vertrag lesend bestanden. Quality Gate37758811757 Tabellenkatalog offen: lokale valeo_probe auf postfach_microsoft_20261008 stimmt unveraendert mit 661 Tabellen ueberein. Upload-Erweiterung lokal vorbereitet, nicht aktiviert: automatische Freigabepruefung zweimal abgelehnt wegen moeglicher bisher unveroeffentlichter Strukturmetadaten. Ausdrueckliche Upload-Freigabe offen; rotes Gate unveraendert. Keine fremden Katalog-WIP uebernommen, keine neue DB/Container/Reset/Migration. QA ci-catalog-sync-20261008.md. Weiter: frische CI-Ernte auswerten, nur belegte Katalogabweichung integrieren.
 

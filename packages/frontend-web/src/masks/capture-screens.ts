@@ -2143,14 +2143,41 @@ export const adminPostfaecherScreen = {
     {
       "key": "verwendungen",
       "label": "Verwendung",
-      "type": "text",
-      "helpText": "Kommagetrennt: einkauf, verkauf, fibu, dispo, newsletter, allgemein. Dafür wird das Postfach automatisch genommen."
+      "type": "multiselect",
+      "options": [
+        {
+          "value": "einkauf",
+          "label": "Einkauf (Bestellungen, Anfragen)"
+        },
+        {
+          "value": "verkauf",
+          "label": "Verkauf (Angebote, Auftragsbestätigungen)"
+        },
+        {
+          "value": "fibu",
+          "label": "Finanzbuchhaltung (Rechnungen, Mahnungen)"
+        },
+        {
+          "value": "dispo",
+          "label": "Disposition (Lieferavise, Touren)"
+        },
+        {
+          "value": "newsletter",
+          "label": "Newsletter und Rundschreiben"
+        },
+        {
+          "value": "allgemein",
+          "label": "Allgemeine Korrespondenz"
+        }
+      ],
+      "helpText": "Dafür wird das Postfach automatisch genommen."
     },
     {
       "key": "rollen",
       "label": "Freigegeben für Rollen",
-      "type": "text",
-      "helpText": "Kommagetrennt, z. B. FINANCE_ADMIN. Leer und ohne Benutzer = alle im Haus."
+      "type": "multiselect",
+      "options": [],
+      "helpText": "Keine Rolle und kein Benutzer gewählt = alle im Haus. Die Rollen des Hauses lädt die Seite."
     },
     {
       "key": "benutzer_freigabe",

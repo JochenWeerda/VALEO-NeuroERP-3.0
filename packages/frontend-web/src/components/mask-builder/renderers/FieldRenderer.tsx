@@ -12,6 +12,12 @@ import { createDefaultSttProvider, type SttProvider } from '@/lib/voice/stt-prov
 
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})/
 
+/** Mehrfachauswahl-Wert als Liste (auch aus einem kommagetrennten Altwert). */
+function alsListe(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map(String)
+  return renderValue(value).split(',').map((teil) => teil.trim()).filter(Boolean)
+}
+
 /**
  * Anzeige eines Nur-Lese-Werts im deutschen Format. Ohne Formatregel oder bei
  * unlesbarem Wert bleibt der Rohwert stehen, damit nichts verschluckt wird.
@@ -90,6 +96,44 @@ export function FieldRenderer({
     onChange: onChange
       ? (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(e.target.value)
       : undefined,
+  }
+
+  if (field.type === 'multiselect' && field.options?.length) {
+    // Mehrfachauswahl: eine Checkbox je Option, Wert ist die Liste der gewaehlten
+    // Schluessel. Bis 08.10.2026 fiel `multiselect` in das Textfeld durch.
+    const gewaehlt = new Set(alsListe(value))
+    const umschalten = (option: string, an: boolean) => {
+      const neu = (field.options ?? [])
+        .map((o) => String(o.value))
+        .filter((o) => (o === option ? an : gewaehlt.has(o)))
+      onChange?.(neu)
+    }
+    return (
+      <fieldset className="space-y-2" aria-label={field.label}>
+        <legend className="text-sm font-medium leading-none">
+          {field.label}
+          {field.required && <span className="ml-1 text-destructive">*</span>}
+        </legend>
+        <div className="flex flex-wrap gap-x-4 gap-y-2">
+          {(field.options ?? []).map((option) => {
+            const schluessel = String(option.value)
+            const id = `${field.key}-${schluessel}`
+            return (
+              <div key={schluessel} className="flex min-h-touch items-center gap-2">
+                <Checkbox
+                  id={id}
+                  checked={gewaehlt.has(schluessel)}
+                  disabled={isReadOnly}
+                  onCheckedChange={(an) => umschalten(schluessel, an === true)}
+                />
+                <Label htmlFor={id} className="font-normal">{option.label}</Label>
+              </div>
+            )
+          })}
+        </div>
+        {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
+      </fieldset>
+    )
   }
 
   if (field.type === 'lookup') {

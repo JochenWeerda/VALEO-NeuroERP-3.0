@@ -29,6 +29,12 @@ vi.mock('@/lib/api-client', () => ({
   getAxiosErrorMessage: (e: unknown) => String((e as Error).message),
 }))
 vi.mock('@/hooks/useTouchDevice', () => ({ useTouchDevice: () => false }))
+vi.mock('@/lib/api/admin', () => ({
+  useRollen: () => ({ data: [
+    { id: 'FINANCE_ADMIN', name: 'Finanzleitung', beschreibung: '', benutzer: 1, rechte: 3 },
+    { id: 'FINANCE_BEARBEITEN', name: 'Finanzbuchhaltung', beschreibung: '', benutzer: 2, rechte: 2 },
+  ] }),
+}))
 
 const FIBU = {
   id: 'p-fibu', kennung: 'fibu', anbieter: 'ionos', anmeldung: 'passwort', absender_email: 'fibu@haus.example',
@@ -63,7 +69,10 @@ describe('Postfächer', () => {
     fireEvent.click(screen.getByTestId('row-action-bearbeiten'))
     await waitFor(() => expect(screen.getByLabelText(/^Kennung/)).toHaveValue('fibu'))
     expect(screen.getByLabelText(/^Passwort/)).toHaveValue('')
-    fireEvent.change(screen.getByLabelText(/Freigegeben für Rollen/), { target: { value: 'FINANCE_ADMIN, FINANCE_BEARBEITEN' } })
+    // Rollen und Verwendung sind Mehrfachauswahlen aus dem Mask Builder.
+    expect(screen.getByRole('checkbox', { name: 'Finanzleitung' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Finanzbuchhaltung (Rechnungen, Mahnungen)' })).toBeChecked()
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Finanzbuchhaltung' }))
     fireEvent.click(screen.getByTestId('action-speichern'))
     await waitFor(() => expect(mocks.speichern).toHaveBeenCalledTimes(1))
     const [daten, id] = mocks.speichern.mock.calls[0]
