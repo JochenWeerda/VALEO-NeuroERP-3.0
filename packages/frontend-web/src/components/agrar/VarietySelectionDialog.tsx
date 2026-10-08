@@ -4,6 +4,7 @@
  */
 
 import { useState, useMemo } from 'react'
+import type { AgrarVariety } from '@/lib/api/agrar'
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import {
@@ -19,13 +20,7 @@ import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { nullableStringValue, recordArrayFromResponse, stringValue, type UnknownRecord } from '@/lib/record-utils'
 
-export type Variety = {
-  id: string
-  variety_number: string
-  name: string
-  description: string | null
-  crop_type: string | null
-}
+export type Variety = Pick<AgrarVariety, 'id' | 'variety_number' | 'name' | 'description' | 'crop_type'>
 
 type VarietySelectionDialogProps = {
   open: boolean

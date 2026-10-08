@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
-import { useSorten, type Sorte } from '@/lib/api/agrar'
+import { useSorten, type AgrarVariety } from '@/lib/api/agrar'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,11 +18,11 @@ export default function SortenregisterPage(): JSX.Element {
   const [exporting, setExporting] = useState(false)
   const { data, isLoading, isError, error, refetch } = useSorten()
 
-  const sorten: Sorte[] = data ?? []
+  const sorten: AgrarVariety[] = data ?? []
 
   const filteredData = useMemo(
     () => sorten.filter((s) =>
-      [s.name, s.art, s.zuechter].some((v) => (v ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
+      [s.name, s.crop_type, s.zuechter].some((v) => (v ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
     ),
     [sorten, searchTerm]
   )
@@ -41,9 +41,9 @@ export default function SortenregisterPage(): JSX.Element {
   }
 
   function persistExport(): void {
-    const header = 'Sorte;Art;Zuechter;Zulassung;Eigenschaften;Status\n'
+    const header = 'Sorte;Art;Zuechter;Zulassungsjahr;Qualitaetsgruppe;Status\n'
     const rows = filteredData.map((s) =>
-      [s.name, s.art ?? '', s.zuechter ?? '', s.zulassung ?? '', (s.eigenschaft ?? []).join(';'), s.status ?? ''].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')
+      [s.name, s.crop_type ?? '', s.zuechter ?? '', s.zulassungsjahr ?? '', s.qualitaetsgruppe ?? '', s.aktiv ? 'Aktiv' : 'Inaktiv'].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')
     )
     const blob = new Blob([header + rows.join('\n')], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
@@ -71,7 +71,7 @@ export default function SortenregisterPage(): JSX.Element {
     {
       key: 'name' as const,
       label: 'Sorte',
-      render: (s: Sorte) => (
+      render: (s: AgrarVariety) => (
         <button
           type="button"
           onClick={() => navigate(`/agrar/saatgut/sorte/${s.id}`)}
@@ -81,27 +81,16 @@ export default function SortenregisterPage(): JSX.Element {
         </button>
       ),
     },
-    { key: 'art' as const, label: 'Art' },
+    { key: 'crop_type' as const, label: 'Art' },
     { key: 'zuechter' as const, label: 'Züchter' },
-    { key: 'zulassung' as const, label: 'Zulassung' },
+    { key: 'zulassungsjahr' as const, label: 'Zulassungsjahr' },
+    { key: 'qualitaetsgruppe' as const, label: 'Qualitätsgruppe' },
     {
-      key: 'eigenschaft' as const,
-      label: 'Eigenschaften',
-      render: (s: Sorte) => (
-        <div className="flex flex-wrap gap-1">
-          {s.eigenschaft.slice(0, 2).map((e, i) => (
-            <Badge key={i} variant="outline">{e}</Badge>
-          ))}
-          {s.eigenschaft.length > 2 && <Badge variant="secondary">+{s.eigenschaft.length - 2}</Badge>}
-        </div>
-      ),
-    },
-    {
-      key: 'status' as const,
+      key: 'aktiv' as const,
       label: 'Status',
-      render: (s: Sorte) => (
-        <Badge variant={s.status === 'aktiv' ? 'outline' : 'secondary'}>
-          {s.status === 'aktiv' ? 'Aktiv' : 'Auslaufend'}
+      render: (s: AgrarVariety) => (
+        <Badge variant={s.aktiv ? 'outline' : 'secondary'}>
+          {s.aktiv ? 'Aktiv' : 'Inaktiv'}
         </Badge>
       ),
     },

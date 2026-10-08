@@ -11,6 +11,17 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## Sortenregister — kanonischer Lesevertrag (2026-10-08)
+
+Agrar-Smoke zeigte dreimal404 auf einem nicht vorhandenen Sortenpfad.
+Hook und Datenfelder auf den vorhandenen `/agrar/varieties/`-Vertrag
+umgestellt, nullable Metadaten und Aktivstatus ohne Phantomfelder.
+Vier React-, zwei Browser-,18 Schema-/HTTP-Vertraege und Frontend-Typpruefung
+gruen. [QA und Handshake](../quality-assurance/sorten-canonical-read-20261008.md).
+Handelsbestand/-preise der Saatgutbestellung und alter Ernte-Sortenfallback
+bleiben separat offen. Voller GitHub-Security-Scan und vorheriger grosser
+Backend-CI-Lauf b47cd87be inzwischen gruen; neue Agrar-Folgeabnahme offen.
+
 ## Vier verbleibende Backend-CI-Regressionen (2026-10-08)
 
 Im grossen CI-Lauf9176 standen 16499 bestandenen Tests vier konkrete Fehler

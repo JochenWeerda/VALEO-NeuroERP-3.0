@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { useMutation } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
-import { useKulturen, useSorten, useKunden, useSchlaege } from '@/lib/api/agrar'
+import { useKulturen, useSorten, useKunden, useSchlaege, varietyCropLabel } from '@/lib/api/agrar'
 import { Callout } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -83,7 +83,7 @@ export default function SaatgutBestellungPage(): JSX.Element {
       id: s.id,
       name: s.name,
       sorte: s.name,
-      kultur: s.art.toLowerCase(),
+      kultur: varietyCropLabel(s.crop_type).toLowerCase(),
       verfuegbar: Number(ext.verfuegbar ?? 0),
       preis: Number(ext.preis ?? 0),
     }

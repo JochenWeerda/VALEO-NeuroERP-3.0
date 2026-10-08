@@ -11,6 +11,12 @@ description: Meridian als Design-, Layout- und Governance-Vertrag des Single Mas
 
 # VALEO Meridian Experience
 
+Stand 2026-10-08: Das Agrar-Sortenregister liest den bestehenden kanonischen
+VarietyOut-Vertrag statt eines Phantom-Endpunkts. Nullable Metadaten und
+Aktivstatus werden unverfaelscht dargestellt; Query- und Fehlervertrag sind
+zentral geprueft. Diese Vertragsreparatur erzeugt kein neues Seitenlayout
+oder paralleles Maskensystem. [QA](../quality-assurance/sorten-canonical-read-20261008.md).
+
 Stand 2026-09-10: Der zentrale ActionRuntime-Vertrag unterscheidet direkte
 Commands von `inputFlow.kind=humanForm`. Solche Eingabeflows werden nicht
 automatisch ueber ihren dokumentierten Submit-Endpoint ausgefuehrt;

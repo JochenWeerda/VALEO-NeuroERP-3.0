@@ -28,7 +28,8 @@ test.describe('Agrar - Saatgut @smoke', () => {
     await adminPage.goto('/agrar/saatgut/sortenregister');
     await waitForAppReady(adminPage);
     
-    await expect(adminPage.locator('h1, h2').first()).toBeVisible();
+    await expect(adminPage.getByRole('heading', { name: 'Sortenregister', exact: true })).toBeVisible({ timeout: 15000 });
+    await expect(adminPage.getByLabel('Suche Sorten')).toBeVisible();
   });
 });
 

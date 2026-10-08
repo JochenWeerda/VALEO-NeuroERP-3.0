@@ -113,14 +113,25 @@ export type Ernte = {
   status: 'geplant' | 'laufend' | 'abgeschlossen'
 }
 
-export type Sorte = {
+export type AgrarVariety = {
   id: string
+  variety_number: string
   name: string
-  art: string
-  zuechter: string
-  zulassung: string
-  eigenschaft: string[]
-  status: 'aktiv' | 'auslaufend'
+  description: string | null
+  crop_type: string | null
+  zuechter: string | null
+  zulassungsjahr: number | null
+  reifezahl: string | null
+  qualitaetsgruppe: string | null
+  aktiv: boolean
+}
+
+// Presentation labels for the crop codes in the existing variety register.
+export function varietyCropLabel(cropType: string | null): string {
+  const labels: Record<string, string> = {
+    WHEAT: 'Weizen', MAIZE: 'Mais', BARLEY: 'Gerste', OATS: 'Hafer', RAPESEED: 'Raps',
+  }
+  return cropType ? labels[cropType] ?? cropType : ''
 }
 
 export type DuengerKomponente = {
@@ -601,7 +612,7 @@ export function useCreateErnte() {
 export function useSorten() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'sorten'],
-    queryFn: () => fetchList<Sorte>('/api/v1/agrar/saatgut/sortenregister'),
+    queryFn: () => fetchList<AgrarVariety>('/api/v1/agrar/varieties/?aktiv=false'),
     initialData: [],
     // Sofort veraltet: Sonst gilt der Platzhalter als frisch geladen und
     // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
