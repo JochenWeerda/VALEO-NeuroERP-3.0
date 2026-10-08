@@ -321,26 +321,7 @@ jobs:
         run: python scripts/check_domain_table_ownership.py
 
       - name: Check physical table catalog
-        id: table_catalog
         run: python scripts/generate_table_catalog.py --check
-
-      # Retain the exact fresh-schema evidence when the committed catalog drifts.
-      # The check above still fails; this reads the existing job DB, never resets it.
-      - name: Harvest failed catalog comparison evidence
-        id: table_catalog_harvest
-        if: failure() && steps.table_catalog.outcome == 'failure'
-        run: python scripts/generate_table_catalog.py
-
-      - name: Upload fresh-schema catalog evidence
-        if: failure() && steps.table_catalog_harvest.outcome == 'success'
-        uses: actions/upload-artifact@v4
-        with:
-          name: fresh-schema-table-catalog
-          path: |
-            docs/admin/table-catalog.json
-            docs/admin/table-catalog.md
-          if-no-files-found: error
-          retention-days: 14
 
       - name: Run tests
         run: pytest -q
