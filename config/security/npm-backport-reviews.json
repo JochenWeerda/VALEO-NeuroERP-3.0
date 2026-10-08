@@ -16,8 +16,8 @@
       "installed_sha256": {
         "lib/rsa.js": "c9b1e3799e230528b6d6815c1f6cd3c6058b9d45975264b55d995abb976589af"
       },
-      "lock_sha256": "5620565cef19eb6d53643a04c7d54b2c37271fe6d613ecf1d4323a0cc33b8051",
-      "manifest_sha256": "08e8cb063c3f58a3877699b73b63abfb3448c988a5d75b70a1f147d7a97e23f5"
+      "lock_sha256": "caa5a465fcf4d80f4c2821de2ed7f61d0a7d33ae030e029bcd5fed7f6cd309fa",
+      "manifest_sha256": "bbced867646598eb648b02ce1fdbb6b8f4522d9e9ac116d8d2c6df43ab6890ea"
     },
     {
       "package": "braces",
@@ -37,8 +37,8 @@
         "lib/stringify.js": "1d059d40df3eea35ccecc8fafcd64fca67e02dcfb1edaf1e8e0c94fd88338fc9",
         "lib/parse.js": "540c920c9186405e6d059b468a2a440c247f5c9aa0fdbdae5cd3d0a021697549"
       },
-      "lock_sha256": "5620565cef19eb6d53643a04c7d54b2c37271fe6d613ecf1d4323a0cc33b8051",
-      "manifest_sha256": "08e8cb063c3f58a3877699b73b63abfb3448c988a5d75b70a1f147d7a97e23f5"
+      "lock_sha256": "caa5a465fcf4d80f4c2821de2ed7f61d0a7d33ae030e029bcd5fed7f6cd309fa",
+      "manifest_sha256": "bbced867646598eb648b02ce1fdbb6b8f4522d9e9ac116d8d2c6df43ab6890ea"
     }
   ]
 }
