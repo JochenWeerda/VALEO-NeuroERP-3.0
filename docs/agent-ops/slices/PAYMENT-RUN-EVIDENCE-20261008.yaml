@@ -1,0 +1,37 @@
+slice_id: PAYMENT-RUN-EVIDENCE-20261008
+title: Belegte menschliche Zahlungslauf-Freigabe in allen Modi
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-08
+goal: Unbelegte Freigaben sperren und Vorschauen am echten Fachvertrag ausrichten.
+file_ownership:
+  - app/services/payment_run_freigabe.py nur Identitaets- und Statusnachweis
+  - app/api/v1/endpoints/mask_actions.py nur Zahlungslauf-Pruefung
+  - tests/test_payment_run_approval_evidence.py
+  - tests/test_mask_aktionen_wirkung.py nur Zahlungslauf-Testersteller
+  - Eigene QA, Finance-Testdoku, Open-Gaps-Hunks und Workboard
+acceptance:
+  - Fehlende Freigeber, Ersteller und Selbstfreigaben bleiben gesperrt.
+  - Alle Modi pruefen denselben tenantgebundenen gesperrten Entwurf.
+  - Echte Freigabe, Audit und Ereignis bleiben atomar; Vorschauen schreiben nichts.
+  - Menschlicher Rollenschutz und forbiddenForAgents bleiben erhalten.
+tests:
+  - Original-Gegenprobe 18 Fehler und sieben bestandene neue Vertraege
+  - 25 neue Guard- und HTTP-Vertraege ohne Datenbankverbindung
+  - Sechs bestehende Payment-API-Vertraege
+  - Fuenf echte PG-Zahlungsablaeufe auf vorhandenem valeo_probe
+ai_harness:
+  fachlicher_vertrag: Belegter fremder Ersteller und authentifizierter Freigeber, nur draft.
+  architektur_vertrag: Vorhandener zentraler Guard und HTTP-CommandEndpoint, kein neuer Service.
+  daten_vertrag: Nur eigene Testmandanten im gemeinsamen Pruefstand, keine Schemaaenderung.
+  test_vertrag: Originalbypasses und echten Handler samt PG-Wirkung pruefen.
+  security_vertrag: Tenant, Rollen, Rowlock und Vier-Augen bleiben verpflichtend.
+  betriebs_vertrag: Bestehende CI testet Regressionen, keine neue DB oder Container.
+  dokumentations_vertrag: QA, Finance-Doku, Slice, Workboard und Open-Gaps nachziehen.
+external_gates:
+  - GitHub-Folgeabnahme nach Push
+risks:
+  - FIN-CLOSE und 31 fehlende HTTP-Commandvertraege bleiben offen.
+  - Zahlauf-MCP bleibt open_high unter forbiddenForAgents.
+test_database: Vorhandener valeo_probe; ausschliesslich eigene Testmandanten aufraeumen.
+validation: 36 Tests ohne Skip in 61,43 Sekunden gruen; keine Migration oder Ruecksetzung.

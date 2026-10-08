@@ -16,9 +16,12 @@ def pruefe_freigabe(db: Session, run_id: str, tenant_id: str, freigeber: str) ->
     """Sperrt den Lauf und prueft, ob dieser Freigeber ihn freigeben darf.
 
     404, wenn der Lauf nicht diesem Mandanten gehoert; 409, wenn der Freigeber ihn
-    angelegt hat. Ein Altlauf ohne Ersteller bleibt freigebbar — erfinden waere
-    schlimmer als offen lassen.
+    angelegt hat. Ohne belegten Ersteller und authentifizierten Freigeber ist
+    das Vier-Augen-Prinzip nicht nachgewiesen; solche Laeufe bleiben gesperrt.
     """
+    freigeber = str(freigeber or "").strip()
+    if not freigeber:
+        raise HTTPException(status_code=403, detail="Authentifizierter Freigeber fehlt.")
     lauf = db.execute(
         text(
             "SELECT status, created_by FROM domain_erp.payment_runs "
@@ -28,8 +31,12 @@ def pruefe_freigabe(db: Session, run_id: str, tenant_id: str, freigeber: str) ->
     ).fetchone()
     if lauf is None:
         raise HTTPException(status_code=404, detail="Payment run not found")
-    ersteller = lauf[1]
-    if ersteller and ersteller == freigeber:
+    if lauf[0] != "draft":
+        raise HTTPException(status_code=409, detail="Zahlungslauf ist nicht im Entwurf und kann nicht freigegeben werden.")
+    ersteller = str(lauf[1] or "").strip()
+    if not ersteller:
+        raise HTTPException(status_code=409, detail="Ersteller des Zahlungslaufs nicht nachgewiesen; Vier-Augen-Freigabe gesperrt.")
+    if ersteller == freigeber:
         raise HTTPException(
             status_code=409,
             detail="Vier-Augen-Prinzip: Wer den Zahlungslauf angelegt hat, gibt ihn nicht frei.",

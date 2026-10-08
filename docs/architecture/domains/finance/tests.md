@@ -42,3 +42,12 @@ Abhaengigkeiten, Transaktionsrollback und explizit irreversiblen Downgrade.
 Ein eigenes kleines Schema auf vorhandenem valeo_probe, gezieltes Cleanup;
 keine neue Testdatenbank/Dockerinstanz und kein gemeinsam genutzter Reset.
 Bestehende Import-/Replay-/Zahlungsvertraege bleiben verbindlich.
+
+## Zahlungslauf: belegte Vier-Augen-Freigabe
+
+25 neue Guard-/HTTP-Vertraege in tests/test_payment_run_approval_evidence.py,
+sechs bestehende Payment-API-Vertraege und fuenf echte PG-Vertraege in
+TestZahlungslauf: insgesamt36 ohne Skip gruen. Fehlende Identitaetsnachweise
+werden in allen Modi gesperrt; Tenant, Rowlock, Rollen und atomare Wirkung
+bleiben erhalten. Bestehender gemeinsamer valeo_probe, nur eigene Testdaten,
+keine Migration oder Ruecksetzung. [QA/Handshake](../../../quality-assurance/payment-run-evidence-20261008.md).
