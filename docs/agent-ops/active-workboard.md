@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MAILKONTO-MANDANT-20261008 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** Mailversand ueber das Konto des
+Mandanten statt ueber Umgebungsvariablen: Mailkonto je Mandant (SMTP allgemein, IONOS-Vorlage,
+Google mit App-Passwort oder OAuth2/XOAUTH2), Geheimnisse AES-256-GCM-verschluesselt und
+nie zurueckgegeben, Testmail als Pruefung, Einrichtungsmaske ueber Mask Builder/Screen
+Definition; `mail_versand` nimmt das Konto des Mandanten. Dazu: IMAP-Passwort des
+CRM-Connectors liegt im Klartext in `tenants.settings` — ebenfalls verschluesseln.
+**Dateibesitz:** `app/services/mail_versand.py`, neues Mailkonto-Modul (Service, Endpunkte,
+Geheimnis-Verschluesselung), `app/services/connector_config.py` (nur Passwortfeld), Aufrufer
+von `sende_mail`, eine additive Migration, Screen Definition + Frontend-Wrapper, Tests,
+QA-Doku. Microsoft 365 folgt separat. Fremde WIP unberuehrt.
+
+
 ## OFFENES-SCHLIESSEN-20261008 — abgeschlossen, Claude Code
 
 **Abnahme (08.10.2026):** Gelangensbestaetigung-Dublette 409 statt 503 (UAT wiederholbar);
