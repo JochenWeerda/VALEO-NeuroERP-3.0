@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## POSTFACH-MICROSOFT365-20261008 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** Postfaecher mit Microsoft 365:
+Anmeldung per OAuth2 (Microsoft Identity Platform, delegiert, `Mail.Send` + `offline_access`),
+Versand ueber Microsoft Graph `sendMail` (landet in "Gesendete Elemente"; kein SMTP AUTH noetig),
+Alias ueber `from`. OAuth-Ablauf fuer Google und Microsoft vereinheitlicht. **Dateibesitz:**
+`app/services/mailkonto_service.py`, `app/services/mail_versand.py`,
+`app/api/v1/endpoints/mailkonto.py`, Screen Definition `admin/postfaecher` + TS-Spiegel,
+`pages/admin/postfaecher*.tsx`, `lib/api/postfaecher.ts`, eine additive Migration,
+`tests/test_postfaecher.py`, QA-Doku. Fremde WIP unberuehrt.
+
+
 ## MCP-WRITE-20261008 — abgeschlossen, Cursor
 
 **Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
