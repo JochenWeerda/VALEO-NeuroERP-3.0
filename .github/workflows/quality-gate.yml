@@ -260,7 +260,7 @@ jobs:
         run: python scripts/check_alembic_single_head.py
 
       - name: Response model coverage (regression check)
-        run: python scripts/check_response_models.py --threshold 20
+        run: python scripts/check_response_models.py --threshold 0
 
       - name: Process chains registry (UIX-091)
         run: python scripts/check_process_chains.py

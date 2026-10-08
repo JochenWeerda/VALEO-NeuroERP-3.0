@@ -45,7 +45,7 @@
     "@opentelemetry/exporter-trace-otlp-http": "^0.53.0",
     "@opentelemetry/instrumentation": "^0.53.0",
     "@opentelemetry/instrumentation-http": "^0.53.0",
-    "@opentelemetry/instrumentation-pg": "^0.44.0",
+    "@opentelemetry/instrumentation-pg": "0.73.0",
     "@opentelemetry/instrumentation-ioredis": "^0.43.0",
     "@opentelemetry/semantic-conventions": "^1.27.0",
     "@opentelemetry/resources": "^1.26.0",

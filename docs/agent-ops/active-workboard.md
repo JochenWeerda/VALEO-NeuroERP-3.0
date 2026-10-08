@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FOLGEFUNDE-RESTBEFUNDE-20261008 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** die drei Folgefunde aus
+RESTBEFUNDE-BESTANDSBUCH-20261008 beheben: (1) `GET /dunning/rules` erfindet bei
+Datenbankfehler Standardregeln, (2) Inventar-Seed haengt Lager per `warehouse_code` dem
+seedenden Mandanten um, (3) `journal_entries.entry_number` systemweit statt je Mandant
+eindeutig. **Dateibesitz:** `app/api/v1/endpoints/dunning.py`, `app/seeds/inventory_seed.py`,
+eine additive Migration fuer `domain_erp.journal_entries`, Nummernabfragen auf
+`entry_number` ohne Mandant, betroffene Tests, QA-Doku. L3-JOURNAL-SOURCE (Quellspalten)
+und fremde WIP unberuehrt.
+
+
 ## RESTBEFUNDE-BESTANDSBUCH-20261008 — abgeschlossen, Claude Code
 
 **Abnahme (08.10.2026):** alle vier Restbefunde geschlossen: Mahnwesen-Mandant aus dem
@@ -79,6 +91,8 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 `docs/README.md` und Domain-Depth-Plan verweisen auf den Hub.
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
+
+**CI-DECLARED-CONTRACTS-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Offene belegte Deklarationsdrift: neun direkte Workspace-Manifeste nennen verwundbare i18next-http-backend-/instrumentation-pg-Versionen trotz reparierter zentraler Overrides und Lock-Aufloesung. Besitz ausschliesslich diese neun direkten Versionsfelder, unveraenderte Lock-Aufloesung/frozen-Pruefung und bestehende echte Runtime-Vertraege. Response-Gate zaehlt verschachtelte Dependencies, typisierte Studio-Returnwerte und Datei-/204-Antworten falsch: scripts/check_response_models.py nur AST-basierte routenbezogene Erkennung, neue reine Parser-Vertraege, quality-gate.yml nur Schwelle 20 auf 0 nach echter Bestandsabnahme. Kein Any-/None-Ausnahmehunk in Endpoints, keine Security-Ausnahme, kein Versions-Spoof. Fremde Workflow-/Frontend-/Manifesthunks erhalten. QA/Open-Gaps/Workboard nachziehen; keine neue DB/Container/Reset. Ungepatchte node-forge/braces und echter XBRL-/ERiC-Weg bleiben separate offene Befunde. Abnahme: 3590/3590 Antwortvertraege, Schwelle/default 0; 15 neue Parser-Regressionen und bestehende Policy-/Studio-Vertraege zusammen 45 gruen. Echte FastAPI-Modelle Studio 9/9 und Policy 8/8 bestaetigt. Neun direkte Manifeste mit vorhandenen Herstellerfix-Overrides harmonisiert; Lockfile byteidentisch, frozen/offline alle 36 Workspaces, sechs echte Runtime-Tests gruen. Production-Audit 2053 Abhaengigkeiten: 0 critical/moderate/low, 2 high ohne Herstellerfix weiterhin Exit 1. GitHub-Smoke des Masken-Meilensteins c59df8391 in allen fuenf Domaenen gruen; Quality durch Folgepush abgebrochen. Geteilter Baum unter fremden Folgefund-Aenderungen, Kalender-/Baseline-Drift kein eigener Befund; keine pauschale Gesamtabnahme.
 
 **MASK-CONTRACT-CREATE-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Beim Claim CI-CONTRACT-CLOSURE erkannter echter CRM-Smoke-Fehler: /crm/lead/new wird als vorhandene ID gelesen und zeigt 404 statt Anlageformular. Besitz eigener minimaler Hunk app/core/screen_definitions.py crm/lead: deklarativer Anlagevertrag, BE/FE Capture-Aktionsberechtigungen, schema.ts nur Anlagevertrag, neue zentrale NativeCreate-Komponente und Berechtigungsprojektion, UniversalNativeDetailPage nur delegierender Wrapper, CaptureScreenHost nur effektive Berechtigungen, Logistikseiten nur Auth-/Compiler-/Renderer-Weitergabe, fokussierte HTTP-/React-/Chromium-Regressionen. Bestehende fremde Renderer-/Usability-Hunks erhalten, isolierte committed-source-Abnahme. Keine individuellen Ersatzmasken, keine erfundenen Daten/404-Fallbacks, Rechte aus Auth-Kontext; Serverrollen bleiben massgeblich. Handbuch, QA, Open-Gaps, Slice und Workboard nachziehen. Gemeinsamer Probe nur mit eigenen Testdaten/Savepoints, keine neue DB/Container/Reset. Abnahme: 834 Backend-Vertraege, 12 React-Vertraege, bestehender Chromium-Lead-Anlagesmoke und Frontend-Typpruefung gruen. 99 native Masken ohne Command-Luecken, Godfile-Ratsche unveraendert, Handbuch generiert und geprueft. UI-Rechteprojektion ersetzt keine serverseitige Logistik-Sicherheitsabnahme.
 

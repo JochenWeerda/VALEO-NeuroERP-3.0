@@ -1,54 +1,72 @@
 #!/usr/bin/env python3
-"""
-CI reporting tool: Routes without response_model in FastAPI endpoint files.
+"""Gate FastAPI routes without a declared response contract.
 
-Does NOT fail CI — reports counts and tracks progress over time.
-Run:  python scripts/check_response_models.py [--threshold N]
-      N = max allowed untyped routes (default: 916 — current baseline)
-
-Raises exit code 1 only if the count INCREASES beyond the threshold,
-preventing regressions while allowing gradual improvement.
+Inspect each decorator structurally, including FastAPI's inferred return models
+and native file/text responses. Malformed source fails rather than hiding gaps.
 """
 
 from __future__ import annotations
 
 import argparse
+import ast
 import os
-import re
 import sys
 
 ENDPOINTS_DIR = "app/api/v1/endpoints"
 
-# Files where response_model is intentionally absent for technical reasons:
-# - 204 No Content routes (response_class=Response, response_model=None)
-# - File-download routes (StreamingResponse)
-# These are NOT counted as gaps.
-EXEMPT_PATTERNS = [
-    r"response_class\s*=\s*Response",  # 204 No Content
-    r"response_model\s*=\s*None",
-]
+_METHODS = {"get", "post", "put", "patch", "delete"}
+_NATIVE_RESPONSES = {
+    "Response", "StreamingResponse", "FileResponse", "PlainTextResponse",
+    "HTMLResponse", "RedirectResponse",
+}
+
+
+def _symbol(node: ast.expr | None) -> str:
+    return ast.unparse(node) if node is not None else ""
+
+
+def _has_model(node: ast.expr | None) -> bool:
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        # FastAPI resolves postponed/quoted return annotations too.
+        node = ast.parse(node.value, mode="eval").body
+    return node is not None and _symbol(node) not in {"None", "Any", "typing.Any", "object"}
 
 
 def _count_untyped(content: str) -> tuple[int, int]:
-    """Return (untyped_routes, total_routes)."""
-    routes_with = len(re.findall(
-        r"@router\.(get|post|put|patch|delete)[^)]*response_model",
-        content, re.DOTALL,
-    ))
-    total = len(re.findall(r"@router\.(get|post|put|patch|delete)", content))
-    # Count exempt patterns (204 + None)
-    exempt = sum(
-        len(re.findall(p, content)) for p in EXEMPT_PATTERNS
-    )
-    untyped = max(0, total - routes_with - exempt)
+    """Return (untyped, total); exemptions never affect another route."""
+    tree = ast.parse(content.removeprefix("\ufeff"))
+    native = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module in {"fastapi", "fastapi.responses", "starlette.responses"}:
+            native.update(alias.asname or alias.name for alias in node.names if alias.name in _NATIVE_RESPONSES)
+    untyped = total = 0
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        for decorator in node.decorator_list:
+            if not (isinstance(decorator, ast.Call) and isinstance(decorator.func, ast.Attribute)
+                    and isinstance(decorator.func.value, ast.Name) and decorator.func.value.id == "router"
+                    and decorator.func.attr in _METHODS):
+                continue
+            total += 1
+            options = {kw.arg: kw.value for kw in decorator.keywords}
+            if "response_model" in options:
+                # Explicit None is FastAPI's intentional disabled-model contract.
+                covered = _symbol(options["response_model"]) == "None" or _has_model(options["response_model"])
+            else:
+                status = options.get("status_code")
+                no_body = isinstance(status, ast.Constant) and status.value in {204, 205, 304}
+                covered = (no_body or _symbol(options.get("response_class")) in native
+                           or _symbol(node.returns) in native or _has_model(node.returns))
+            untyped += not covered
     return untyped, total
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--threshold", type=int, default=916,
-        help="Max allowed untyped routes (baseline: 916)",
+        "--threshold", type=int, default=0,
+        help="Max allowed routes without a response contract (default: 0)",
     )
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args()
@@ -85,7 +103,7 @@ def main() -> int:
             file=sys.stderr,
         )
         print(
-            "Response model coverage REGRESSED. Add response_model= to new routes.",
+            "Response contract coverage REGRESSED. Declare response_model or a valid return/response contract.",
             file=sys.stderr,
         )
         return 1

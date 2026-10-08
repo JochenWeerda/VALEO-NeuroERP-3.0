@@ -15,7 +15,9 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 OpenAPI-Beschreibungen der Lead-Aliase nachgetragen; zwei bereits typisierte
 eBilanz-Dekoratoren für den bestehenden Scanner korrekt angeordnet.
-Schwellen bleiben 0 fehlende Beschreibungen und 20 untypisierte Routen.
+OpenAPI-Schwelle bleibt 0. Der nachfolgende AST-Vertragscheck erkennt die
+20 fälschlich als untypisiert gezählten Routen korrekt; nun 3590/3590 Verträge,
+Default und CI-Schwelle 0, 45 Parser-/Policy-/Studio-Tests grün.
 Secret-Scan-Fehlalarm im künstlichen Kalenderfixture beseitigt, keine neue
 Ausnahme; Gitleaks 8.30.1 auf HEAD-Snapshot null Funde. 24 Kalenderverträge grün.
 [Abnahme und ELSTER-Registrierungsstand](../quality-assurance/ci-contract-closure-20261008.md).
@@ -24,7 +26,11 @@ abgenommen: 834 Backend-Verträge, 12 React-Verträge und bestehender Chromium-
 Smoke zur Lead-Anlage grün. Acht Logistik-Berechtigungen in BE/FE deklariert.
 Das schließt die geprüfte Lead-Smoke-Ursache und den UI-Berechtigungsvertrag;
 eine vollständige serverseitige Logistik-Sicherheitsabnahme wird nicht behauptet.
-Dependency-Security, weitere Smoke-Befunde und vollständiges XBRL/ERiC bleiben
+Neun direkte Security-Pins mit vorhandenen Overrides abgeglichen, Lockfile
+unverändert, alle 36 Workspaces frozen/offline geprüft; sechs echte Runtime-
+Verträge grün. Zwei High ohne Herstellerfix bleiben audit-blockierend.
+GitHub-Smoke 37730263363 auf c59df8391 in allen fünf Domänen erfolgreich.
+Vollständiges XBRL/ERiC, ungepatchte Security-Befunde und Gesamt-Quality bleiben
 offen. ELSTER-Registrierung durch Nutzer abgesendet, Bestätigungs-PDF lokal
 gesichert; SDK-Zugang und Lizenzannahme noch ausstehend.
 
