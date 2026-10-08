@@ -8,3 +8,27 @@
 +      return callback(new RangeError('JSON filter nesting depth exceeds 1024'));
 +    }
      // update the last stack key
+--- a/Assembler.js
++++ b/Assembler.js
+@@ -120,7 +120,9 @@
+       if (this.current instanceof Array) {
+         this.current.push(value);
+       } else {
+-        this.current[this.key] = value;
++        Object.defineProperty(this.current, this.key, {
++          value, writable: true, enumerable: true, configurable: true
++        });
+         this.key = null;
+       }
+     }
+@@ -138,7 +140,9 @@
+       } else {
+         value = this.reviver(this.key, value);
+         if (value !== undefined) {
+-          this.current[this.key] = value;
++          Object.defineProperty(this.current, this.key, {
++          value, writable: true, enumerable: true, configurable: true
++        });
+         }
+         this.key = null;
+       }

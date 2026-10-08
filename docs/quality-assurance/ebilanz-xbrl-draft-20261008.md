@@ -75,6 +75,17 @@ Die Lieferung verwendet ausschliesslich den isoliert generierten Index.
 
 ## Offene externe und fachliche Abnahmen
 
+CI-Nachtrag 2026-10-08: Die ersten GitHub-Doku-Laeufe auf d81a86b38 waren rot,
+weil der neue Slice Pflichtfelder des AI-Harness vermisste und ADR-079 noch
+nicht im generierten MkDocs-Nav stand. Eigene Lieferfehler korrigiert, kein Gate
+abgeschwaecht. Isolierte committed-source-Abnahme: Harness, ADR-Nav (84 ADRs),
+Markdown (121 Dateien), Governance (101 Dateien), Staleness (88 Seiten), drei
+Codeinventare, Containerinventar und fuenf Handbuchartefakte gruen. Vollstaendiger
+MkDocs-Build erfolgreich in 57,19 s; vorhandene Linkwarnungen sind weiterhin
+offen und werden nicht als fehlerfreie Gesamtdokumentation ausgegeben.
+Nach dem fremden Meilenstein a2a71801c erneut auf dessen vollstaendigem
+committed Stand geprueft: alle genannten Gates und MkDocs-Build gruen (53,81 s).
+
 XML ist ein **Entwurf**, Header `X-XBRL-Status: DRAFT_UNVALIDATED`. Die lokale
 Vorpruefung bestaetigt weder vollstaendige XBRL-/Rechenregelgueltigkeit noch
 amtliche Annahme. Bilanz-/GuV-Kontenzuordnung, Tupel/Dimensionen, Arelle-

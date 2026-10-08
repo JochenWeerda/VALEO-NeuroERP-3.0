@@ -39,6 +39,36 @@ test('ordinary path extraction remains usable', async () => {
   assert.ok(tokens.some(token => token.name === 'numberValue' && token.value === '42'));
 });
 
+for (const reviver of [undefined, (key, value) => value]) {
+  test(`object prototypes remain intact${reviver ? ' with reviver' : ''}`, async () => {
+    const source = '{"__proto__":{"isAdmin":true},"nested":{"__proto__":{"marker":"nested"}},"constructor":{"prototype":{"unsafe":true}}}';
+    const [{ value }] = await collect(source, json('./streamers/StreamValues').withParser({ reviver }));
+    assert.equal(Object.getPrototypeOf(value), Object.prototype);
+    assert.equal(Object.getPrototypeOf(value.nested), Object.prototype);
+    assert.equal(Object.hasOwn(value, '__proto__'), true);
+    assert.equal(value.isAdmin, undefined);
+    assert.equal(value.nested.marker, undefined);
+    assert.deepEqual(value, JSON.parse(source));
+  });
+}
+
+test('array consumer preserves duplicate and prototype keys as ordinary data', async () => {
+  const source = '[{"__proto__":{"unsafe":true},"__proto__":{"latest":true},"normal":42}]';
+  const [{ value }] = await collect(source, json('./streamers/StreamArray').withParser());
+  assert.equal(Object.getPrototypeOf(value), Object.prototype);
+  assert.equal(value.latest, undefined);
+  assert.deepEqual(value, JSON.parse(source)[0]);
+});
+
+test('object streamer preserves prototype keys in emitted values', async () => {
+  const source = '{"item":{"__proto__":{"isAdmin":true},"value":42}}';
+  const [{ key, value }] = await collect(source, json('./streamers/StreamObject').withParser());
+  assert.equal(key, 'item');
+  assert.equal(Object.getPrototypeOf(value), Object.prototype);
+  assert.equal(value.isAdmin, undefined);
+  assert.deepEqual(value, JSON.parse(source).item);
+});
+
 if (!process.env.STREAM_JSON_TEST_ROOT) {
   test('procurement image processing and seeded test data remain usable', async () => {
     const procurement = createRequire(path.join(root, 'packages/procurement-domain/package.json'));
