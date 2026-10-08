@@ -227,6 +227,8 @@ exakte Repo-Wahl festnageln.
 
 ### 6.1 Peer-Matrix vs VALEO `ki-usability`
 
+Maschinenlesbar: [`docs/gap/usability-peer-matrix-20261007.csv`](../gap/usability-peer-matrix-20261007.csv).
+
 | Kriterium | ERPClaw | OpenLedger | TaxHacker | OpenAccountants | VALEO heute |
 |---|---|---|---|---|---|
 | Scope | Voll-ERP | Nur GL | Docs/OCR/Expenses | Tax Knowledge | Landhandel-Vollsuite |
@@ -344,7 +346,10 @@ Agentic AI ERP Vergleiche 2026 (Joule/Copilot/Oracle/Odoo).
 | 10 Cluster gescored | ja |
 | Tiefen-Tasks bewertet | ja |
 | Tier-1 + Light + 4 Peers | ja |
-| Matrix CSV | ja |
-| Stufe-2 Protokoll | ja |
-| Produktcode geändert | nein (Doku-only) |
+| Matrix + Findings CSV | ja |
+| Peer-Matrix CSV | ja (`docs/gap/usability-peer-matrix-20261007.csv`) |
+| Gap-Hub ersetzt 2025-Archive | ja |
+| Stufe-2 Protokoll | ja (Protokoll §8 / Dossier §9) |
+| ACTION-DEN Nachzug | ja (2026-10-08; Generator `--check` + Tests) |
+| Produktcode Stufe-1 | nein (Doku-only); ACTION-DEN/MCP-WRITE Folge-Slices separat |
 | Fremde Claims angefasst | nein |

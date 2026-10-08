@@ -969,6 +969,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.search` — scope `crm:read`, Risiko niedrig
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -1010,6 +1011,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.search` — scope `crm:read`, Risiko niedrig
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -1050,6 +1052,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.search` — scope `crm:read`, Risiko niedrig
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -1091,6 +1094,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `crm.customer.search` — scope `crm:read`, Risiko niedrig
 - `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
 - `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -3204,6 +3208,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
 **Beispiel-Prompts:**
 
@@ -3244,6 +3249,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
 **Beispiel-Prompts:**
 
@@ -3273,6 +3279,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
 **Beispiel-Prompts:**
 
@@ -3313,6 +3320,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
 **Beispiel-Prompts:**
 
@@ -3350,6 +3358,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
 **Beispiel-Prompts:**
 
@@ -3373,6 +3382,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
 **Beispiel-Prompts:**
 

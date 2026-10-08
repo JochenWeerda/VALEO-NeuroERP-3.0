@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 18 Tools in 10 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 20 Tools in 10 Domaenen.
 
 ## Uebersicht
 
@@ -22,6 +22,7 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 18 Tools in 10 Domaenen.
 | `agrar.contract.get` | agrar | `agrar:read` | ja | niedrig | nein |
 | `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein |
 | `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein |
+| `crm.activity.create` | crm | `crm:write` | ja | mittel | nein |
 | `crm.contact.log` | crm | `crm:write` | ja | mittel | nein |
 | `crm.customer.search` | crm | `crm:read` | ja | niedrig | nein |
 | `crm.customer.summary360` | crm | `crm:read` | ja | niedrig | nein |
@@ -32,6 +33,7 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 18 Tools in 10 Domaenen.
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein |
 | `lager.bestand.get` | lager | `lager:read` | ja | niedrig | nein |
 | `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein |
+| `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein |
 | `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein |
@@ -287,6 +289,78 @@ Gibt Status ausstehender externer Abnahmen (ELSTER, DATEV, TSE, Auditor) zurueck
 ```
 
 ## Domaene: crm
+
+### `crm.activity.create` — CRM-Aktivitaet anlegen
+
+Legt eine CRM-Aktivitaet zum Kunden an (gleicher Fachpfad wie ActionRuntime create_activity). HTTP-Aufruf mit tool_name=crm.activity.create. Default dryRun; execute erfordert idempotency_key. OIDC-Token mit crm:write und tenant_id erforderlich.
+
+- **Scope:** `crm:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "kunden_nr": {
+      "type": "string"
+    },
+    "betreff": {
+      "type": "string"
+    },
+    "typ": {
+      "type": "string",
+      "enum": [
+        "Anruf",
+        "Besuch",
+        "E-Mail",
+        "Aufgabe",
+        "Meeting",
+        "Sonstiges"
+      ]
+    },
+    "datum": {
+      "type": "string",
+      "format": "date",
+      "nullable": true
+    },
+    "notiz": {
+      "type": "string",
+      "nullable": true
+    },
+    "verantwortlich": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "required": [
+    "kunden_nr",
+    "betreff",
+    "typ"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "activity_id": {
+      "type": "string"
+    },
+    "erfasst_am": {
+      "type": "string"
+    }
+  }
+}
+```
 
 ### `crm.contact.log` — Kontaktprotokoll erfassen
 
@@ -986,6 +1060,56 @@ Gibt Status und Pruefprotokoll eines GoBD-Exports zurueck.
 ```
 
 ## Domaene: sales
+
+### `sales.invoice.post` — Rechnung aus freigegebenem Vorschlag anlegen
+
+Legt eine Verkaufsrechnung (Status entwurf) aus einem freigegebenen agent_proposals-Datensatz (rechnung_vorschlag) an. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved. Kein Freigabe-Boolean im Aufruf. FIBU-Journal/OP bleiben im UI-Pfad create-invoice. OIDC-Token mit sales:write und tenant_id erforderlich.
+
+- **Scope:** `sales:write`
+- **Idempotent:** ja
+- **Risikoklasse:** hoch
+- **Audit:** write
+- **Human-Approval erforderlich:** ja
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "proposal_id": {
+      "type": "string",
+      "description": "entwurf_id aus sales.invoice.propose"
+    }
+  },
+  "required": [
+    "proposal_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "invoice_id": {
+      "type": "string"
+    },
+    "invoice_number": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "posted": {
+      "type": "boolean"
+    }
+  }
+}
+```
 
 ### `sales.invoice.propose` — Rechnungsvorschlag aus Lieferschein
 

@@ -1678,7 +1678,8 @@
       "mcp_tool_ids": [
         "crm.customer.search",
         "crm.customer.summary360",
-        "crm.contact.log"
+        "crm.contact.log",
+        "crm.activity.create"
       ]
     },
     {
@@ -1721,7 +1722,8 @@
       "mcp_tool_ids": [
         "crm.customer.search",
         "crm.customer.summary360",
-        "crm.contact.log"
+        "crm.contact.log",
+        "crm.activity.create"
       ]
     },
     {
@@ -1757,7 +1759,8 @@
       "mcp_tool_ids": [
         "crm.customer.search",
         "crm.customer.summary360",
-        "crm.contact.log"
+        "crm.contact.log",
+        "crm.activity.create"
       ]
     },
     {
@@ -1803,7 +1806,8 @@
       "mcp_tool_ids": [
         "crm.customer.search",
         "crm.customer.summary360",
-        "crm.contact.log"
+        "crm.contact.log",
+        "crm.activity.create"
       ]
     },
     {
@@ -3958,7 +3962,8 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",
-        "sales.invoice.propose"
+        "sales.invoice.propose",
+        "sales.invoice.post"
       ]
     },
     {
@@ -3975,7 +3980,8 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",
-        "sales.invoice.propose"
+        "sales.invoice.propose",
+        "sales.invoice.post"
       ]
     },
     {
@@ -4004,7 +4010,8 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",
-        "sales.invoice.propose"
+        "sales.invoice.propose",
+        "sales.invoice.post"
       ]
     },
     {
@@ -4038,7 +4045,8 @@
       ],
       "mcp_tool_ids": [
         "sales.order.status",
-        "sales.invoice.propose"
+        "sales.invoice.propose",
+        "sales.invoice.post"
       ]
     },
     {
@@ -4055,7 +4063,8 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",
-        "sales.invoice.propose"
+        "sales.invoice.propose",
+        "sales.invoice.post"
       ]
     },
     {
@@ -4072,7 +4081,8 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",
-        "sales.invoice.propose"
+        "sales.invoice.propose",
+        "sales.invoice.post"
       ]
     },
     {
@@ -4123,6 +4133,15 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
+      "tool_id": "crm.activity.create",
+      "domain": "crm",
+      "scope": "crm:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
       "tool_id": "sales.order.status",
       "domain": "sales",
       "scope": "sales:read",
@@ -4136,6 +4155,15 @@
       "domain": "sales",
       "scope": "sales:write",
       "idempotent": false,
+      "risk_class": "high",
+      "human_approval_required": true,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "sales.invoice.post",
+      "domain": "sales",
+      "scope": "sales:write",
+      "idempotent": true,
       "risk_class": "high",
       "human_approval_required": true,
       "endpoint": "POST /api/v1/mcp/tools/call"

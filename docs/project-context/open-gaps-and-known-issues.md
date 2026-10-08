@@ -84,6 +84,19 @@ gesichert; SDK-Zugang und Lizenzannahme noch ausstehend.
 
 Reale tenantgebundene Entwurfsmetadaten, Alembic-Schema statt Request-DDL, 503/Rollback statt verschluckter DB-Fehler. Fehlende/fremde IDs 404; vollständige XBRL-Validierung und echte ELSTER-/UStVA-Übertragung fehlen und liefern ausdrücklich 409. Simulationsservice entfernt, Readiness nicht bereit, historische Tickets niemals als ANGENOMMEN dargestellt; fremde Zeilen erhalten. [QA/Betrieb](../quality-assurance/ebilanz-honest-persistence-20261007.md). Die Implementierung des vollständigen XBRL-/ERiC-Fachwegs bleibt offen, ebenso die separate Gesamtkatalog-Abnahme. SQL-Gate prüft neue und verbleibende Dateien; Baselines nur abgesenkt.
 
+## ACTION-DEN — ScreenDefinition→Registry (2026-10-08)
+
+U-C10-01 teilweise geschlossen: 85 Maskenaktionen mit Ausführungspfad werden aus
+ScreenDefinitions nach `services/ki-usability/app/data/screen_mask_actions.json`
+generiert und in die Action-Registry gemerged (`mask:{screen}:{key}`).
+Drift-Gate und Tests gruen.
+[QA](../quality-assurance/usability-action-registry-20261008.md).
+**Teilweise geschlossen (MCP-WRITE-20261008):** `crm.activity.create` und
+`sales.invoice.post` (nur nach freigegebenem Vorschlag; Mandanten-ID aus
+Token). [QA](../quality-assurance/mcp-write-20261008.md).
+**Weiter offen:** MCP-Schreibausführung der übrigen Mask-IDs, Voice-Phrase-
+Tuning, FIN-CLOSE/agentic Finance (P0).
+
 ## GAP-HUB — Archiv 2025 ersetzt (2026-10-07)
 
 Kanonische Gap-Übersicht: [docs/gap/README.md](../gap/README.md),
@@ -100,14 +113,17 @@ Systemweites Experten-Usability-Audit und Vergleichsdossier geliefert:
 [Protokoll](../quality-assurance/usability-erp-audit-protocol-20261007.md),
 [Dossier](../quality-assurance/usability-erp-vergleichsdossier-20261007.md),
 [Matrix](../gap/usability-systemaudit-matrix-20261007.csv),
-[Findings](../gap/usability-systemaudit-findings-20261007.csv). SUS-Experten-Schnitt
-~66 (±8). **Neue priorisierte UX/Future-Gaps (nicht als erledigt werten):**
+[Findings](../gap/usability-systemaudit-findings-20261007.csv),
+[Peer-Matrix](../gap/usability-peer-matrix-20261007.csv). SUS-Experten-Schnitt
+~66 (±8). Gap-Hub ersetzt 2025-Archive; Stufe-2-SUS-Protokoll vorbereitet
+(Durchführung mit Endnutzern steht aus). ACTION-DEN (85 mask:*) und
+MCP-WRITE Top-Adapter 2026-10-08 nachgezogen.
+**Weiter priorisierte UX/Future-Gaps (nicht als erledigt werten):**
 U-C06-01/02/04 (agentic Finance, immutable Agent-Ledger-Muster, echter
-Kassenabschluss) P0; Action-Dichte/MCP-Schreiben, Local-OCR (TaxHacker-Muster),
+Kassenabschluss) P0; Rest-MCP-Schreibparität, Local-OCR (TaxHacker-Muster),
 Steuer-Skill-MCP (OpenAccountants), Masken-Framework-Abschmelzung,
 Finance-IA-Konsolidierung P1. Light (light.inc) und Peers ERPClaw/OpenLedger
-sind Zukunftsspiegel, kein Ersatz der Landhandel-SoR. Stufe-2 SUS mit
-Endnutzern steht aus.
+sind Zukunftsspiegel, kein Ersatz der Landhandel-SoR.
 
 ## USER-DECISIONS-LEAD-PDF — Entscheidungsrest geschlossen (2026-10-07)
 
@@ -732,7 +748,7 @@ ausstehenden Vorschlag an und bucht keine Rechnung. Weitere MCP-Schreibadapter b
 | Chargen/Futter/Zertifikate/Versicherungen/Projekte/Förderung/Schäden Hover-Blau | P1 Betrieb | geschlossen |
 | Listen als Karten statt Horizontal-Scroll | P2 | geschlossen in DataTable + ListReport + FastTable/VirtualDataTable (Touch); KIM/FSX unangetastet |
 | Sprache steuert keine Waage/Queue | P2 | Navigation geschlossen (öffne Warteschlange/Wiegungen); Wiegen bleibt Voice-Gate UIX-072 |
-| MCP 18 Tools, kein Masken-Schreiben, kein „öffne Kunde“ | P1 Agent | Kontakt-Log und Rechnungsvorschlag angebunden; Rechnung buchen und übrige Schreibtools offen |
+| MCP 18 Tools, kein Masken-Schreiben, kein „öffne Kunde“ | P1 Agent | Kontakt-Log, Aktivität, Rechnungsvorschlag und Post-nach-Freigabe angebunden (20 Tools); FIBU-Journal/übrige Adapter/„öffne Kunde“ offen |
 | KIM Object Page | P1 | geschlossen 2026-09-30 (`MERIDIAN-PARTY-OBJECTPAGE`) |
 | Listen-Hover-Blau (ohne FSX/Auftrag/Rechnung) | P1 | geschlossen 2026-09-18 |
 | Benachrichtigungen toter Als-gelesen-CTA | P1 | geschlossen (lokales Overlay, kein Write-API) |

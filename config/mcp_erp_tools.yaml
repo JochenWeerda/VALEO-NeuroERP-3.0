@@ -81,6 +81,33 @@ tools:
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false
 
+  - tool_id: crm.activity.create
+    domain: crm
+    name: "CRM-Aktivitaet anlegen"
+    description: "Legt eine CRM-Aktivitaet zum Kunden an (gleicher Fachpfad wie ActionRuntime create_activity). HTTP-Aufruf mit tool_name=crm.activity.create. Default dryRun; execute erfordert idempotency_key. OIDC-Token mit crm:write und tenant_id erforderlich."
+    scope: crm:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        kunden_nr: { type: string }
+        betreff: { type: string }
+        typ: { type: string, enum: [Anruf, Besuch, E-Mail, Aufgabe, Meeting, Sonstiges] }
+        datum: { type: string, format: date, nullable: true }
+        notiz: { type: string, nullable: true }
+        verantwortlich: { type: string, nullable: true }
+      required: [kunden_nr, betreff, typ]
+    output_schema:
+      type: object
+      properties:
+        activity_id: { type: string }
+        erfasst_am: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
   # ── Sales / O2C ────────────────────────────────────────────────────────────
   - tool_id: sales.order.status
     domain: sales
@@ -126,6 +153,30 @@ tools:
         betrag_netto: { type: number }
         mwst: { type: number }
         positionen: { type: integer }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: true
+
+  - tool_id: sales.invoice.post
+    domain: sales
+    name: "Rechnung aus freigegebenem Vorschlag anlegen"
+    description: "Legt eine Verkaufsrechnung (Status entwurf) aus einem freigegebenen agent_proposals-Datensatz (rechnung_vorschlag) an. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved. Kein Freigabe-Boolean im Aufruf. FIBU-Journal/OP bleiben im UI-Pfad create-invoice. OIDC-Token mit sales:write und tenant_id erforderlich."
+    scope: sales:write
+    idempotent: true
+    risk_class: high
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        proposal_id: { type: string, description: "entwurf_id aus sales.invoice.propose" }
+      required: [proposal_id]
+    output_schema:
+      type: object
+      properties:
+        invoice_id: { type: string }
+        invoice_number: { type: string }
+        status: { type: string }
+        posted: { type: boolean }
     audit: write
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: true

@@ -1,3 +1,4 @@
+﻿> **HISTORISCH — nicht zitieren.** Aktuelle Gap-Source-of-Truth: [`docs/gap/README.md`](../../gap/README.md) und [`executive-summary-20261007.md`](../../gap/executive-summary-20261007.md). Archiv-Maturity (~38 %) und „fehlt komplett“-Aussagen nicht fortschreiben.
 # Sales & Order-to-Cash Capability Model - Reference Taxonomy
 
 Dieses Dokument definiert die Referenz-Taxonomie fÃ¼r Sales/Order-to-Cash-FunktionalitÃ¤ten, basierend auf SAP SD, Oracle Sales Cloud, Community ERP Sales und anderen fÃ¼hrenden ERP-Systemen.

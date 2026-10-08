@@ -33,6 +33,7 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `agrar.contract.get` | agrar | `agrar:read` | ja | niedrig | nein | `GET /api/v1/agrar/contracts/{kontrakt_id}` |
 | `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein | `GET /api/v1/agrar/weighing-tickets` |
 | `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein | `GET /api/v1/compliance/external-gates` |
+| `crm.activity.create` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.contact.log` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.customer.search` | crm | `crm:read` | ja | niedrig | nein | `GET /api/v1/kunden?search={query}&limit={limit}` |
 | `crm.customer.summary360` | crm | `crm:read` | ja | niedrig | nein | `GET /api/v1/crm/kunden/{kunden_nr}/360` |
@@ -43,6 +44,7 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein | `GET /api/v1/open-items?typ={typ}&faellig_bis={faellig_bis}&limit={limit}` |
 | `lager.bestand.get` | lager | `lager:read` | ja | niedrig | nein | `GET /api/v1/lager/bestand` |
 | `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein | `GET /api/v1/lager/inventuren/status` |
+| `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein | `GET /api/v1/sales-orders/{auftrag_nr}/status` |
 | `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein | `GET /api/v1/silo/cells/{cell_code}/status` |

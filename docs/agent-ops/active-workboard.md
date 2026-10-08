@@ -11,90 +11,29 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## MAILKONTO-MANDANT-20261008 — abgeschlossen, Claude Code
+## MCP-WRITE-20261008 — abgeschlossen, Cursor
 
-**Abnahme (08.10.2026):** Postfaecher je Mandant (info@, dispo@, fibu@, persoenlich) mit
-IONOS, Google (App-Passwort oder OAuth2/XOAUTH2), SMTP und Alias; Verwendung je Postfach,
-Freigabe je Rolle/Benutzer; Geheimnisse AES-GCM (ohne VALEO_SECRET_KEY kein Speichern);
-Maske `admin/postfaecher` ueber Mask Builder inkl. neuem Feldtyp `password`. Mit behoben:
-IMAP-Passwort/STT-Key im Klartext, Connector-Admin ohne Rollenpruefung. Migration
-`mailkonto_mandant_20261008` (Probe + Dev). Microsoft 365 offen. QA:
-[mailkonto-mandant-20261008.md](../quality-assurance/mailkonto-mandant-20261008.md).
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** P1 MCP-WRITE — `crm.activity.create` und `sales.invoice.post`
+(nur nach freigegebenem `rechnung_vorschlag`); Mandanten-ID aus Token
+(`tenant_id`/`mandanten_id`), nie aus Parametern.
+**Lieferung:** 20 Katalog-Tools; 40 MCP-Tests gruen; FIBU-Journal bewusst
+nicht im MCP-Pfad (`fibu_journal=false`).
+**QA:** [mcp-write-20261008.md](../quality-assurance/mcp-write-20261008.md).
+**Offen (eigene Slices):** weitere Katalog-Adapter, Mask-ID→MCP-Parität,
+FIN-CLOSE/Journal.
 
+## USABILITY-ACTION-REGISTRY-20261008 — abgeschlossen, Cursor
 
-**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** Mailversand ueber das Konto des
-Mandanten statt ueber Umgebungsvariablen: Mailkonto je Mandant (SMTP allgemein, IONOS-Vorlage,
-Google mit App-Passwort oder OAuth2/XOAUTH2), Geheimnisse AES-256-GCM-verschluesselt und
-nie zurueckgegeben, Testmail als Pruefung, Einrichtungsmaske ueber Mask Builder/Screen
-Definition; `mail_versand` nimmt das Konto des Mandanten. Dazu: IMAP-Passwort des
-CRM-Connectors liegt im Klartext in `tenants.settings` — ebenfalls verschluesseln.
-**Dateibesitz:** `app/services/mail_versand.py`, neues Mailkonto-Modul (Service, Endpunkte,
-Geheimnis-Verschluesselung), `app/services/connector_config.py` (nur Passwortfeld), Aufrufer
-von `sende_mail`, eine additive Migration, Screen Definition + Frontend-Wrapper, Tests,
-QA-Doku. Microsoft 365 folgt separat. Fremde WIP unberuehrt.
-
-
-## OFFENES-SCHLIESSEN-20261008 — abgeschlossen, Claude Code
-
-**Abnahme (08.10.2026):** Gelangensbestaetigung-Dublette 409 statt 503 (UAT wiederholbar);
-echter SMTP-Versand (`mail_versand`) statt vorgetaeuschter Erfolge in ProductionEmailService,
-Newsletter und Bestellkommunikation; Bestellkommunikation am kanonischen Beleg + Portal-Lesepfad;
-`ops_bankkonten` erstmals mit Mandant, IBAN-Pruefung echt und erreichbar; Bankkontonummer je
-Mandant; Lieferantenportal fragte nicht existierende Spalten ab (zeigte nie etwas) - korrigiert.
-Migration `offenes_schliessen_20261008` (Probe + Dev). QA:
-[offenes-schliessen-20261008.md](../quality-assurance/offenes-schliessen-20261008.md).
-
-
-**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** offene Punkte schliessen: (1)
-Gelangensbestaetigung: Dublette antwortet 503 statt 409, UAT-Vertrag mit fester
-Lieferschein-Nr. nicht wiederholbar; (2) `/purchase-orders/{id}/communications` schreibt in
-den Dokumentspeicher; (3) `domain_erp.bank_accounts.account_number` systemweit eindeutig;
-(4) `domain_ops.ops_bankkonten` ohne `tenant_id` — `/banken/konten` zeigt und aendert
-Bankkonten aller Mandanten; `/konten/iban-validate` hinter `/konten/{id}` unerreichbar.
-**Dateibesitz:** Gelangensbestaetigung-Endpoint + UAT-Test, PO-Kommunikationswege in
-`compat.py`, `banken.py`, `domain_operations` BankKonto-Modell/-Repository, eine additive
-Migration, neue Tests, QA-Doku. BANK-RECONCILIATION-PROOF (Codex) betrifft
-`domain_erp.bank_accounts`-Abgleich, nicht diese Constraints/`ops_bankkonten` — unberuehrt.
-
-
-## FOLGEFUNDE-RESTBEFUNDE-20261008 — abgeschlossen, Claude Code
-
-**Abnahme (08.10.2026):** erfundene Mahnregeln/leere Mahnliste bei DB-Fehler -> 503;
-Lager-Seed im Mandanten + kollisionsfreie Seed-Ids; Lagercode je Mandant (Migration
-`lagercode_mandant_20261008`, Probe + Dev); zweiter Lager-Router `/api/v1/warehouses`
-im Mandanten mit Adminrolle; `POST /inventory/warehouses` scheiterte immer (behoben).
-`journal_entries.entry_number` war bereits durch Codex behoben (05.10.). QA:
-[folgefunde-restbefunde-20261008.md](../quality-assurance/folgefunde-restbefunde-20261008.md).
-
-
-**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** die drei Folgefunde aus
-RESTBEFUNDE-BESTANDSBUCH-20261008 beheben: (1) `GET /dunning/rules` erfindet bei
-Datenbankfehler Standardregeln, (2) Inventar-Seed haengt Lager per `warehouse_code` dem
-seedenden Mandanten um, (3) `journal_entries.entry_number` systemweit statt je Mandant
-eindeutig. **Dateibesitz:** `app/api/v1/endpoints/dunning.py`, `app/seeds/inventory_seed.py`,
-eine additive Migration fuer `domain_erp.journal_entries`, Nummernabfragen auf
-`entry_number` ohne Mandant, betroffene Tests, QA-Doku. L3-JOURNAL-SOURCE (Quellspalten)
-und fremde WIP unberuehrt.
-
-
-## RESTBEFUNDE-BESTANDSBUCH-20261008 — abgeschlossen, Claude Code
-
-**Abnahme (08.10.2026):** alle vier Restbefunde geschlossen: Mahnwesen-Mandant aus dem
-Kontext, Rechnung + Buchung + Archiv in einem Commit, Artikelnummer je Mandant
-(Migration `artikelnummer_mandant_20261008`, Probe + Dev; Seed haengte fremde Artikel um),
-`_list_docs` ohne Prozessspeicher. 12 neue Vertraege, 1090 Regressionstests gruen.
-QA: [restbefunde-bestandsbuch-20261008.md](../quality-assurance/restbefunde-bestandsbuch-20261008.md).
-
-
-**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** die vier benannten Restbefunde aus
-BESTANDSBUCH-EINKAUF-20261007 schliessen: (1) `dunning.py` mit `Query("system")`, (2)
-Rechnungsanlage committet den Dokumentspeicher vor der Buchung, (3) Artikelnummern
-systemweit statt je Mandant eindeutig, (4) `_list_docs` faellt auf einen In-Memory-Speicher
-zurueck. **Dateibesitz:** `app/api/v1/endpoints/dunning.py`, `finance_invoices.py`,
-`app/services/sales_posting_service.py` (nur Commit-Steuerung), `compat.py::_list_docs`,
-eine additive Migration fuer `domain_inventory.articles`, Artikel-Nummernabfragen ohne
-Mandant, neue/angepasste Tests, QA-Doku. Fremde WIP (eBilanz, CI-Repair) unberuehrt.
-
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** P1 ACTION-DEN — Maskenaktionen aus ScreenDefinitions in ki-usability
+Action-Registry (IDs `mask:{screen}:{key}`); Builtin-Shortcuts unverändert;
+Drift-Gate `--check`.
+**Lieferung:** 85 Maskenaktionen / 45 Screens; Registry = Builtin (~78) + 85;
+`python scripts/generate_screen_action_catalog.py --check` gruen; 4+1 Tests gruen.
+**QA:** [usability-action-registry-20261008.md](../quality-assurance/usability-action-registry-20261008.md).
+**Offen (eigene Slices):** MCP-WRITE der neuen IDs; Intent-Phrase-Feinabstimmung;
+FIN-CLOSE bleibt ADR-076/409.
 
 ## BESTANDSBUCH-EINKAUF-20261007 — abgeschlossen, Claude Code
 

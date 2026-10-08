@@ -1,11 +1,21 @@
 """
 Central action registry: same IDs as frontend PageToolbar, Command Palette, global-shortcuts.
 Used for GET /actions and for voice-to-intent resolution.
+
+Builtin ACTIONS keep stable IDs. Mask actions from ScreenDefinitions are loaded from
+``app/data/screen_mask_actions.json`` (generated) with IDs ``mask:{screen}:{key}``.
+Builtin IDs always win on conflict.
 """
 
+from __future__ import annotations
+
+import json
+from pathlib import Path
 from typing import Dict, List, Optional
 
 from app.schemas.actions import ActionOut
+
+_SCREEN_ACTIONS_PATH = Path(__file__).resolve().parents[1] / "data" / "screen_mask_actions.json"
 
 # Built-in actions: aligned with packages/frontend-web GLOBAL_SHORTCUTS + CommandPalette
 ACTIONS: List[ActionOut] = [
@@ -689,7 +699,55 @@ ACTIONS: List[ActionOut] = [
     ),
 ]
 
-_action_by_id: Dict[str, ActionOut] = {a.id: a for a in ACTIONS}
+
+def _load_screen_mask_actions() -> List[ActionOut]:
+    """Load generated mask actions; skip rows that collide with builtin IDs."""
+    if not _SCREEN_ACTIONS_PATH.is_file():
+        return []
+    try:
+        payload = json.loads(_SCREEN_ACTIONS_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    raw = payload.get("actions") if isinstance(payload, dict) else None
+    if not isinstance(raw, list):
+        return []
+    builtin_ids = {a.id for a in ACTIONS}
+    loaded: List[ActionOut] = []
+    for row in raw:
+        if not isinstance(row, dict):
+            continue
+        action_id = row.get("id")
+        label = row.get("label")
+        if not isinstance(action_id, str) or not action_id or action_id in builtin_ids:
+            continue
+        if not isinstance(label, str) or not label:
+            continue
+        phrases = row.get("intent_phrases") or []
+        if not isinstance(phrases, list):
+            phrases = []
+        required = row.get("required_data") or []
+        if not isinstance(required, list):
+            required = []
+        loaded.append(
+            ActionOut(
+                id=action_id,
+                label=label,
+                label_en=row.get("label_en"),
+                shortcut=row.get("shortcut"),
+                description=row.get("description"),
+                category=str(row.get("category") or "mask-action"),
+                domain=row.get("domain"),
+                mask=row.get("mask"),
+                intent_phrases=[str(p) for p in phrases if p],
+                required_data=[str(r) for r in required if r],
+            )
+        )
+    return loaded
+
+
+SCREEN_MASK_ACTIONS: List[ActionOut] = _load_screen_mask_actions()
+ALL_ACTIONS: List[ActionOut] = list(ACTIONS) + SCREEN_MASK_ACTIONS
+_action_by_id: Dict[str, ActionOut] = {a.id: a for a in ALL_ACTIONS}
 
 
 class ActionRegistry:
@@ -703,7 +761,7 @@ class ActionRegistry:
         domain: Optional[str] = None,
         mask: Optional[str] = None,
     ) -> List[ActionOut]:
-        result = list(ACTIONS)
+        result = list(ALL_ACTIONS)
         if domain:
             result = [a for a in result if a.domain is None or a.domain == domain]
         if mask:
@@ -716,6 +774,12 @@ class ActionRegistry:
     def intent_phrases_for_action(self, action_id: str) -> List[str]:
         a = _action_by_id.get(action_id)
         return list(a.intent_phrases) if a else []
+
+    def builtin_count(self) -> int:
+        return len(ACTIONS)
+
+    def screen_mask_count(self) -> int:
+        return len(SCREEN_MASK_ACTIONS)
 
 
 action_registry = ActionRegistry()

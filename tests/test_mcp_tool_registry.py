@@ -57,8 +57,8 @@ def test_summary_structure(svc: McpToolRegistryService) -> None:
     assert summary["validation_errors"] == []
 
 
-def test_registry_has_18_tools(svc: McpToolRegistryService) -> None:
-    assert len(svc.list_tools()) == 18
+def test_registry_has_20_tools(svc: McpToolRegistryService) -> None:
+    assert len(svc.list_tools()) == 20
 
 
 def test_all_tools_have_data_classification(svc: McpToolRegistryService) -> None:

@@ -54,12 +54,51 @@ def test_execute_requires_replay_key(client):
     db.execute.assert_not_called()
 
 
-@pytest.mark.parametrize("extra", [{"tenant_id": "tenant-b"}, {"bediener": "admin"}, {"approval_granted": True}])
+@pytest.mark.parametrize("extra", [
+    {"tenant_id": "tenant-b"},
+    {"mandanten_id": "tenant-b"},
+    {"bediener": "admin"},
+    {"approval_granted": True},
+])
 def test_arguments_cannot_override_identity_or_approval(client, extra):
     http, _, db = client
     result = http.post('/mcp/tools/call', json={"tool_name": "crm.contact.log", "parameters": {**PARAMETERS, **extra}})
     assert result.status_code == 422
     db.execute.assert_not_called()
+
+
+def test_mandanten_id_claim_is_accepted_as_tenant(client):
+    """IdP-Claim mandanten_id ist Alias der Mandanten-ID; Header muss passen."""
+    http, app, db = client
+    app.dependency_overrides[get_current_user] = lambda: {
+        "sub": "test-agent",
+        "scopes": ["crm:write"],
+        "raw": {"mandanten_id": "tenant-a"},
+    }
+    result = http.post(
+        "/mcp/tools/call",
+        json={"tool_name": "crm.contact.log", "parameters": PARAMETERS},
+        headers={"X-Tenant-ID": "tenant-a"},
+    )
+    assert result.status_code == 200
+    assert result.json()["mode"] == "dryRun"
+    db.commit.assert_not_called()
+
+
+def test_mandanten_id_claim_rejects_mismatched_header(client):
+    http, app, db = client
+    app.dependency_overrides[get_current_user] = lambda: {
+        "sub": "test-agent",
+        "scopes": ["crm:write"],
+        "raw": {"mandanten_id": "tenant-a"},
+    }
+    result = http.post(
+        "/mcp/tools/call",
+        json={"tool_name": "crm.contact.log", "parameters": PARAMETERS},
+        headers={"X-Tenant-ID": "tenant-b"},
+    )
+    assert result.status_code == 403
+    assert not db.mock_calls
 
 
 def test_cross_tenant_customer_does_not_validate(client):
@@ -214,3 +253,100 @@ def test_invoice_propose_stores_pending_proposal_and_does_not_post(client):
     assert "domain_erp" not in joined
     assert "sales_invoices" not in joined
     db.commit.assert_called_once()
+
+
+ACTIVITY = {"kunden_nr": "TEST", "betreff": "Rueckruf", "typ": "Anruf"}
+
+
+def test_activity_dry_run_is_tenant_scoped_and_non_mutating(client):
+    http, _, db = client
+    db.execute.return_value.mappings.return_value.first.return_value = {
+        "id": "c1", "name": "Test GmbH", "kunden_nr": "TEST",
+    }
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "crm.activity.create",
+        "parameters": ACTIVITY,
+    })
+    assert response.status_code == 200
+    assert response.json()["mode"] == "dryRun"
+    sql = str(db.execute.call_args[0][0])
+    assert "domain_crm.customers" in sql
+    assert "tenant_id" in sql
+    db.commit.assert_not_called()
+
+
+def test_activity_rejects_foreign_mandant_parameter(client):
+    http, _, db = client
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "crm.activity.create",
+        "parameters": {**ACTIVITY, "mandanten_id": "other"},
+    })
+    assert response.status_code == 422
+    db.execute.assert_not_called()
+
+
+def test_activity_cross_tenant_customer_is_not_found(client):
+    http, _, db = client
+    db.execute.return_value.mappings.return_value.first.return_value = None
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "crm.activity.create",
+        "parameters": ACTIVITY,
+    })
+    assert response.status_code == 404
+    db.commit.assert_not_called()
+
+
+def test_invoice_post_requires_approved_proposal(client):
+    http, db = _as_sales(client)
+    db.execute.return_value.mappings.return_value.first.return_value = {
+        "proposal_id": "p1",
+        "action_type": "rechnung_vorschlag",
+        "approval_status": "pending",
+        "risk_level": "high",
+        "context_snapshot": {"lieferschein_nr": "LS-1", "rechnungsdatum": "2026-09-29"},
+        "execution_result": None,
+    }
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "sales.invoice.post",
+        "parameters": {"proposal_id": "p1"},
+    })
+    assert response.status_code == 409
+    db.commit.assert_not_called()
+
+
+def test_invoice_post_dry_run_reads_approved_proposal_without_writing(client):
+    http, db = _as_sales(client)
+    db.execute.return_value.mappings.return_value.first.return_value = {
+        "proposal_id": "p1",
+        "action_type": "rechnung_vorschlag",
+        "approval_status": "approved",
+        "risk_level": "high",
+        "context_snapshot": {
+            "lieferschein_nr": "LS-1",
+            "rechnungsdatum": "2026-09-29",
+            "betrag_netto": 10.5,
+            "mwst": 2.0,
+            "positionen": 1,
+        },
+        "execution_result": None,
+    }
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "sales.invoice.post",
+        "parameters": {"proposal_id": "p1"},
+    })
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mode"] == "dryRun"
+    assert body["posted"] is False
+    assert body["lieferschein_nr"] == "LS-1"
+    db.commit.assert_not_called()
+
+
+def test_invoice_post_rejects_client_approval_flag(client):
+    http, db = _as_sales(client)
+    response = http.post("/mcp/tools/call", json={
+        "tool_name": "sales.invoice.post",
+        "parameters": {"proposal_id": "p1", "approval_granted": True},
+    })
+    assert response.status_code == 422
+    db.execute.assert_not_called()

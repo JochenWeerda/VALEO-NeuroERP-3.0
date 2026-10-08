@@ -23,6 +23,7 @@ Die Analysen unter [`docs/_internal/archive/gap/`](../_internal/archive/gap/) (u
 | [domain-maturity-matrix-20261007.csv](domain-maturity-matrix-20261007.csv) | Domänen × Reife × Evidenz |
 | [usability-systemaudit-matrix-20261007.csv](usability-systemaudit-matrix-20261007.csv) | Usability-Cluster-Scores |
 | [usability-systemaudit-findings-20261007.csv](usability-systemaudit-findings-20261007.csv) | Usability-/Future-Befunde |
+| [usability-peer-matrix-20261007.csv](usability-peer-matrix-20261007.csv) | Light-Peers ERPClaw/OpenLedger/TaxHacker/OpenAccountants vs VALEO |
 
 ## Lebende Tracker (weiterführend)
 

@@ -2,7 +2,7 @@ finding_id,cluster_id,severity,heuristic,title,evidence,recommendation,priority
 U-C01-01,C01,Minor,Learnability,Intent-Compiler unvollstaendig,uix-zukunft-masterplan Omnibox; CommandPalette vorhanden,NL→Screen/Filter/Command-Plan mit Vorschau vor Ausfuehrung,P1
 U-C01-02,C01,Nice,Task_Support,Voice steuert Queue Navigation nicht Wiegen,open-gaps Sprache Waage UIX-072,Voice-Mutation unter denselben Guards wie Toolbar,P2
 U-C02-01,C02,Major,Learnability,Parallele Masken-Frameworks,frontend-design-skill-audit; mask-builder vs patterns,Neue Masken nur Meridian-Kette; Legacy markieren/abschmelzen,P1
-U-C02-02,C02,Major,Task_Support,MCP Schreibtools unvollstaendig,open-gaps MCP Rechnung buchen offen,Dieselben Fachaktionen UI=MCP=Voice,P1
+U-C02-02,C02,Major,Task_Support,MCP Schreibtools unvollstaendig,2026-10-08: activity.create + invoice.post nach Freigabe; FIBU-Journal und uebrige Adapter offen,Dieselben Fachaktionen UI=MCP=Voice,P1
 U-C03-01,C03,Major,Navigation,Router-Doppelgruppen Restkonflikte,CI-RUN Einkauf Doppelrouten 33 Gruppen Rest,Weitere Kanonisierung First-Match = OpenAPI,P1
 U-C03-02,C03,Minor,Presentation,Compat-DTOs vs Frontend-Modelle Futter/Einkauf,Futter-Leseabnahme Open Gaps,Frontend auf kanonische DTOs ziehen,P2
 U-C04-01,C04,Minor,Customization,Dichte/Table-Profile nicht ueberall,Meridian table profiles,Profil-Varianten pro Rolle/Terminal,P2
@@ -16,7 +16,7 @@ U-C07-01,C07,Minor,Customization,UI-Rollensteuerung Bewerber offen,Personal-Roll
 U-C08-01,C08,Major,Task_Support,Kein MCP Tax-Skill-Layer,OpenAccountants docs; VALEO meldewesen lokal,DE-Steuer/Melde-Skills als MCP mit Quellenangabe,P1
 U-C08-02,C08,Minor,Presentation,Compliance-Masken Dichte unequally,pages/compliance count 18,Meridian Worklist-Standard flaechig,P2
 U-C09-01,C09,Major,Navigation,Portal/POS ausserhalb Kern-Gewohnheit,portal pages; POS terminal,Gewohnheits-Layout oder klarer Channel-Kontext,P1
-U-C10-01,C10,Major,Task_Support,Action-Dichte Agent unter ERPClaw,~78 ActionOut vs ~400 ERPClaw actions,Action-Registry aus ScreenDefinitions generieren,P1
+U-C10-01,C10,Major,Task_Support,Action-Dichte Agent unter ERPClaw,~78 ActionOut vs ~400 ERPClaw; +85 mask:* gemerged; MCP-WRITE Top-Adapter 2026-10-08 (Rest-Paritaet offen),Action-Registry aus ScreenDefinitions; weitere MCP-Write-Paritaet,P1
 U-C10-02,C10,Major,Task_Support,OCR nicht local-LLM-first,TaxHacker Ollama; Paperless/Docflow,Optional Ollama-Vision Provider fuer Belege On-Prem,P1
 U-SYS-01,C02,Major,Presentation,h1/Register/Token-Drift in Altmasken,frontend-design-skill-audit,Gate + Stichproben-Ratsche pages/,P1
 U-SYS-02,C01,Nice,Customization,Rollen-Workspaces unvollstaendig,uix-zukunft M1,Cockpit-Floorplans je Rolle,P2
