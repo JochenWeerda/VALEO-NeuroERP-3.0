@@ -11,6 +11,16 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## Vier verbleibende Backend-CI-Regressionen (2026-10-08)
+
+Im grossen CI-Lauf9176 standen 16499 bestandenen Tests vier konkrete Fehler
+gegenueber. Zwei veraltete 6.7-Taxonomieerwartungen auf kanonische 6.9
+nachgezogen, zwei WMS-Mocks um die bereits erforderlichen tenantgebundenen
+Lager-/Artikelabfragen und Bestands-ID ergaenzt. Fachschutz nicht veraendert.
+Komplette betroffene Module plus Lager-Schutzvertraege lokal isoliert
+30/30 gruen. [QA und Handshake](../quality-assurance/ci-four-regressions-20261008.md).
+GitHub-Folgeabnahme offen; keine pauschale Meldung, alle CI-Laeufe seien gruen.
+
 ## Node Production High — Quellreparaturen und Betrieb (2026-10-08)
 
 node-forge GHSA-86w9-cpqp-85rv und braces GHSA-vfj7-8cjw-p6xm durch
