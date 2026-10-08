@@ -94,8 +94,52 @@ Drift-Gate und Tests gruen.
 **Teilweise geschlossen (MCP-WRITE-20261008):** `crm.activity.create` und
 `sales.invoice.post` (nur nach freigegebenem Vorschlag; Mandanten-ID aus
 Token). [QA](../quality-assurance/mcp-write-20261008.md).
-**Weiter offen:** MCP-Schreibausführung der übrigen Mask-IDs, Voice-Phrase-
-Tuning, FIN-CLOSE/agentic Finance (P0).
+**Teilweise geschlossen (MCP-CUSTOMER-OPEN-20261008):** `crm.customer.open`
+liefert Mandanten-Route `/crm/customers/{id}` (Screen `crm/customer-360`);
+Voice-Phrasen „öffne Kunde(n)“. [QA](../quality-assurance/mcp-customer-open-20261008.md).
+**Geschlossen (MCP-CUSTOMER-NAV-20261008):** Dispatch/Voice Deep-Link auf sicheren
+`route_path` bei `kunden_nr`; Listen-Fallback ohne Kennung.
+[QA](../quality-assurance/mcp-customer-nav-20261008.md).
+**Geschlossen (MCP-CUSTOMER-SEARCH-20261008):** `crm.customer.search` Read-Adapter
+(Trefferliste + `route_path`). [QA](../quality-assurance/mcp-customer-search-20261008.md).
+**Geschlossen (MCP-CUSTOMER-SUMMARY360-20261008):** `crm.customer.summary360`
+Read-Adapter. [QA](../quality-assurance/mcp-customer-summary360-20261008.md).
+**Geschlossen (MCP-ORDER-STATUS-20261008):** `sales.order.status` Read-Adapter.
+[QA](../quality-assurance/mcp-order-status-20261008.md).
+**Geschlossen (MCP-FIBU-OPEN-ITEMS-20261008):** `fibu.open_items.list` Read-Adapter
+(kein FIN-CLOSE). [QA](../quality-assurance/mcp-fibu-open-items-20261008.md).
+**Geschlossen (MCP-FIBU-DUNNING-20261008):** `fibu.dunning.status` Read-Adapter
+(kein Mahnlauf/FIN-CLOSE). [QA](../quality-assurance/mcp-fibu-dunning-20261008.md).
+**Geschlossen (MCP-WMS-LOT-TRACE-20261008):** `wms.lot.trace` Read-Adapter
+(keine Buchung/QS-Änderung). [QA](../quality-assurance/mcp-wms-lot-trace-20261008.md).
+**Geschlossen (MCP-WMS-CELL-STATUS-20261008):** `wms.cell.status` Read-Adapter
+(kein Transfer/QS-Write). [QA](../quality-assurance/mcp-wms-cell-status-20261008.md).
+**Geschlossen (MCP-CATALOG-READS-REST-20261008):** Rest-Katalog-Reads
+(DMS/Agrar/Lager/Einkauf/Compliance/Proposals). [QA](../quality-assurance/mcp-catalog-reads-rest-20261008.md).
+**Geschlossen (MCP-MASK-WRITE-PARITY-20261008):** Mask→MCP Mapping
+(`config/mcp_mask_action_map.yaml`); FIN-CLOSE `blocked_adr_076`.
+[QA](../quality-assurance/mcp-mask-write-parity-20261008.md).
+**Geschlossen (MCP-MASK-WRITES-TOP-20261008):** `crm.lead.qualify` und
+`einkauf.bestellung.versenden` (Token-Mandant, Idempotenz, Audit);
+Map mapped 4 / open_medium 43. [QA](../quality-assurance/mcp-mask-writes-top-20261008.md).
+**Geschlossen (MCP-MASK-WRITES-NEXT-20261008):** `einkauf.angebot.bestellen`,
+`einkauf.anlieferavis.wareneingang`, `lager.stock_movement.stornieren`;
+Map mapped 7 / open_medium 41. [QA](../quality-assurance/mcp-mask-writes-next-20261008.md).
+**Geschlossen (MCP-MASK-WRITES-BATCH3-20261008):** `agrar.ration.transition`
+(submit_review/approve/schedule/activate); Map mapped 11 / open_medium 37.
+[QA](../quality-assurance/mcp-mask-writes-batch3-20261008.md).
+**Geschlossen (MCP-MASK-WRITES-BATCH4-20261008):** Lifecycle retire/archive;
+`agrar.feeding.supply_handoff`, `agrar.feeding.actual_measure`;
+Map mapped 15 / open_medium 33. [QA](../quality-assurance/mcp-mask-writes-batch4-20261008.md).
+**Geschlossen (MCP-MASK-WRITES-BATCH5-20261008):** `configure_threshold`,
+Feed-Analyse release/reject, Reklamation abschliessen;
+Map mapped 19 / open_medium 32. [QA](../quality-assurance/mcp-mask-writes-batch5-20261008.md).
+**Geschlossen (MCP-MASK-WRITES-REMAINING-20261008):** Leitstand-Sync, Kalender-Reproject,
+MDE `process_pending`; Rest `blocked_no_endpoint` / Inventur `open_high`;
+Map mapped 22 / open_medium **0**, `classification_complete`.
+[QA](../quality-assurance/mcp-mask-writes-remaining-20261008.md).
+**Weiter offen:** FIN-CLOSE/agentic Finance (P0, ADR-076); Stufe-2-SUS;
+Personal/Fuhrpark erst nach HTTP-CommandEndpoints.
 
 ## GAP-HUB — Archiv 2025 ersetzt (2026-10-07)
 
@@ -117,13 +161,13 @@ Systemweites Experten-Usability-Audit und Vergleichsdossier geliefert:
 [Peer-Matrix](../gap/usability-peer-matrix-20261007.csv). SUS-Experten-Schnitt
 ~66 (±8). Gap-Hub ersetzt 2025-Archive; Stufe-2-SUS-Protokoll vorbereitet
 (Durchführung mit Endnutzern steht aus). ACTION-DEN (85 mask:*) und
-MCP-WRITE Top-Adapter 2026-10-08 nachgezogen.
+MCP-WRITE Top-Adapter und `crm.customer.open` 2026-10-08 nachgezogen.
 **Weiter priorisierte UX/Future-Gaps (nicht als erledigt werten):**
 U-C06-01/02/04 (agentic Finance, immutable Agent-Ledger-Muster, echter
-Kassenabschluss) P0; Rest-MCP-Schreibparität, Local-OCR (TaxHacker-Muster),
-Steuer-Skill-MCP (OpenAccountants), Masken-Framework-Abschmelzung,
-Finance-IA-Konsolidierung P1. Light (light.inc) und Peers ERPClaw/OpenLedger
-sind Zukunftsspiegel, kein Ersatz der Landhandel-SoR.
+Kassenabschluss) P0; Rest-MCP-Schreibparität (übrige Mask-IDs/Read-Adapter),
+Local-OCR (TaxHacker-Muster), Steuer-Skill-MCP (OpenAccountants),
+Masken-Framework-Abschmelzung, Finance-IA-Konsolidierung P1. Light (light.inc)
+und Peers ERPClaw/OpenLedger sind Zukunftsspiegel, kein Ersatz der Landhandel-SoR.
 
 ## USER-DECISIONS-LEAD-PDF — Entscheidungsrest geschlossen (2026-10-07)
 
@@ -748,7 +792,7 @@ ausstehenden Vorschlag an und bucht keine Rechnung. Weitere MCP-Schreibadapter b
 | Chargen/Futter/Zertifikate/Versicherungen/Projekte/Förderung/Schäden Hover-Blau | P1 Betrieb | geschlossen |
 | Listen als Karten statt Horizontal-Scroll | P2 | geschlossen in DataTable + ListReport + FastTable/VirtualDataTable (Touch); KIM/FSX unangetastet |
 | Sprache steuert keine Waage/Queue | P2 | Navigation geschlossen (öffne Warteschlange/Wiegungen); Wiegen bleibt Voice-Gate UIX-072 |
-| MCP 18 Tools, kein Masken-Schreiben, kein „öffne Kunde“ | P1 Agent | Kontakt-Log, Aktivität, Rechnungsvorschlag und Post-nach-Freigabe angebunden (20 Tools); FIBU-Journal/übrige Adapter/„öffne Kunde“ offen |
+| MCP 18 Tools, kein Masken-Schreiben, kein „öffne Kunde“ | P1 Agent | 21 Tools verdrahtet; Mask→MCP-Map (Top-Activity mapped); medium-Rest + FIN-CLOSE (ADR-076) offen |
 | KIM Object Page | P1 | geschlossen 2026-09-30 (`MERIDIAN-PARTY-OBJECTPAGE`) |
 | Listen-Hover-Blau (ohne FSX/Auftrag/Rechnung) | P1 | geschlossen 2026-09-18 |
 | Benachrichtigungen toter Als-gelesen-CTA | P1 | geschlossen (lokales Overlay, kein Write-API) |

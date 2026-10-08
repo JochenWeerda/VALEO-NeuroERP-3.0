@@ -2,7 +2,7 @@ finding_id,cluster_id,severity,heuristic,title,evidence,recommendation,priority
 U-C01-01,C01,Minor,Learnability,Intent-Compiler unvollstaendig,uix-zukunft-masterplan Omnibox; CommandPalette vorhanden,NL→Screen/Filter/Command-Plan mit Vorschau vor Ausfuehrung,P1
 U-C01-02,C01,Nice,Task_Support,Voice steuert Queue Navigation nicht Wiegen,open-gaps Sprache Waage UIX-072,Voice-Mutation unter denselben Guards wie Toolbar,P2
 U-C02-01,C02,Major,Learnability,Parallele Masken-Frameworks,frontend-design-skill-audit; mask-builder vs patterns,Neue Masken nur Meridian-Kette; Legacy markieren/abschmelzen,P1
-U-C02-02,C02,Major,Task_Support,MCP Schreibtools unvollstaendig,2026-10-08: activity.create + invoice.post nach Freigabe; FIBU-Journal und uebrige Adapter offen,Dieselben Fachaktionen UI=MCP=Voice,P1
+U-C02-02,C02,Major,Task_Support,MCP Schreibtools unvollstaendig,2026-10-08: 21 Tools + Mask-MCP-Map (Activity mapped); medium-Rest/FIN-CLOSE ADR-076 offen,Dieselben Fachaktionen UI=MCP=Voice,P1
 U-C03-01,C03,Major,Navigation,Router-Doppelgruppen Restkonflikte,CI-RUN Einkauf Doppelrouten 33 Gruppen Rest,Weitere Kanonisierung First-Match = OpenAPI,P1
 U-C03-02,C03,Minor,Presentation,Compat-DTOs vs Frontend-Modelle Futter/Einkauf,Futter-Leseabnahme Open Gaps,Frontend auf kanonische DTOs ziehen,P2
 U-C04-01,C04,Minor,Customization,Dichte/Table-Profile nicht ueberall,Meridian table profiles,Profil-Varianten pro Rolle/Terminal,P2

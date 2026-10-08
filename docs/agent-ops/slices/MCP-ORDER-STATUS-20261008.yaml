@@ -1,0 +1,50 @@
+slice_id: MCP-ORDER-STATUS-20261008
+id: MCP-ORDER-STATUS-20261008
+title: MCP Auftragsstatus (Read-Adapter)
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+closed_at: 2026-10-08
+goal: >
+  sales.order.status an MCP-Execution anbinden: Mandanten-Auftrag nach
+  auftrag_nr (Nummer oder UUID), Status, offene Positionen, naechster Schritt.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - tests/test_mcp_execution.py
+  - docs/quality-assurance/mcp-order-status-20261008.md
+  - docs/schnittstellen/mcp-tools.md
+  - docs/agent-handbuch/
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Scope sales:read; Mandanten-Parameter → 422; propose → 422
+  - dryRun/execute schreiben nicht
+  - Auftrag nur domain_crm.sales_orders des Token-Mandanten → sonst 404
+  - Antwort: auftrag_nr, status, offene_positionen, naechster_schritt, order_id
+tests:
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+risks:
+  - Positionstabelle kann fehlen → offene_positionen=0 ehrlich
+ai_harness:
+  fachlicher_vertrag: >
+    Agent liest Lifecycle-Status wie die Auftragsmaske, ohne Mutation.
+  architektur_vertrag: >
+    Adapter in mcp_execution_service; Quellen domain_crm.sales_orders/_items.
+  daten_vertrag: >
+    Tenant aus Token; deleted_at IS NULL.
+  test_vertrag: >
+    Scope, 404, 422, Status-Mapping und Read-only.
+  security_vertrag: >
+    sales:read; Header=Claim.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, mcp-tools, Handbuch.
+external_gates:
+  - not_applicable
+result: >
+  63 MCP-Tests gruen. sales.order.status verdrahtet (read-only Lifecycle);
+  Katalog-Endpoint auf tools/call; Handbuch aktuell.

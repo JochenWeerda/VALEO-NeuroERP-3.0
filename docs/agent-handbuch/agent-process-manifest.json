@@ -885,7 +885,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -905,7 +910,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -936,7 +946,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -978,7 +993,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1043,7 +1063,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1087,7 +1112,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1119,7 +1149,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1152,7 +1187,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1195,7 +1235,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1212,7 +1257,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1246,7 +1296,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1280,7 +1335,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1367,7 +1427,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1409,7 +1474,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1438,7 +1508,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1459,7 +1534,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1491,7 +1571,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1508,7 +1593,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1525,7 +1615,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1546,7 +1641,12 @@
       ],
       "mcp_tool_ids": [
         "agrar.contract.get",
-        "agrar.weighing_ticket.list"
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
       ]
     },
     {
@@ -1678,8 +1778,10 @@
       "mcp_tool_ids": [
         "crm.customer.search",
         "crm.customer.summary360",
+        "crm.customer.open",
         "crm.contact.log",
-        "crm.activity.create"
+        "crm.activity.create",
+        "crm.lead.qualify"
       ]
     },
     {
@@ -1722,8 +1824,10 @@
       "mcp_tool_ids": [
         "crm.customer.search",
         "crm.customer.summary360",
+        "crm.customer.open",
         "crm.contact.log",
-        "crm.activity.create"
+        "crm.activity.create",
+        "crm.lead.qualify"
       ]
     },
     {
@@ -1759,8 +1863,10 @@
       "mcp_tool_ids": [
         "crm.customer.search",
         "crm.customer.summary360",
+        "crm.customer.open",
         "crm.contact.log",
-        "crm.activity.create"
+        "crm.activity.create",
+        "crm.lead.qualify"
       ]
     },
     {
@@ -1806,8 +1912,10 @@
       "mcp_tool_ids": [
         "crm.customer.search",
         "crm.customer.summary360",
+        "crm.customer.open",
         "crm.contact.log",
-        "crm.activity.create"
+        "crm.activity.create",
+        "crm.lead.qualify"
       ]
     },
     {
@@ -1871,7 +1979,10 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.list"
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
       ]
     },
     {
@@ -1902,7 +2013,10 @@
         "einzelpreis"
       ],
       "mcp_tool_ids": [
-        "einkauf.bestellung.list"
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
       ]
     },
     {
@@ -1930,7 +2044,10 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.list"
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
       ]
     },
     {
@@ -1960,7 +2077,10 @@
         "einzelpreis"
       ],
       "mcp_tool_ids": [
-        "einkauf.bestellung.list"
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
       ]
     },
     {
@@ -2017,7 +2137,10 @@
         "betrag"
       ],
       "mcp_tool_ids": [
-        "einkauf.bestellung.list"
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
       ]
     },
     {
@@ -2061,7 +2184,10 @@
         "lieferzeit_tage"
       ],
       "mcp_tool_ids": [
-        "einkauf.bestellung.list"
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
       ]
     },
     {
@@ -2077,7 +2203,10 @@
       "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.list"
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
       ]
     },
     {
@@ -2959,7 +3088,8 @@
       ],
       "mcp_tool_ids": [
         "lager.bestand.get",
-        "lager.inventur.status"
+        "lager.inventur.status",
+        "lager.stock_movement.stornieren"
       ]
     },
     {
@@ -2988,7 +3118,8 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "lager.bestand.get",
-        "lager.inventur.status"
+        "lager.inventur.status",
+        "lager.stock_movement.stornieren"
       ]
     },
     {
@@ -3019,7 +3150,8 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "lager.bestand.get",
-        "lager.inventur.status"
+        "lager.inventur.status",
+        "lager.stock_movement.stornieren"
       ]
     },
     {
@@ -3036,7 +3168,8 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "lager.bestand.get",
-        "lager.inventur.status"
+        "lager.inventur.status",
+        "lager.stock_movement.stornieren"
       ]
     },
     {
@@ -3704,15 +3837,15 @@
           "stubReason": null
         },
         {
-          "key": "google",
-          "label": "Mit Google verbinden",
+          "key": "anmelden",
+          "label": "Beim Anbieter anmelden",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Fuehrt zur Google-Anmeldung fuer das geladene Google-Postfach."
+          "stubReason": "Fuehrt zur Anmeldung bei Google bzw. Microsoft fuer das geladene Postfach."
         },
         {
           "key": "neu",
@@ -3829,7 +3962,9 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "qualitaet.reklamation.abschliessen"
+      ]
     },
     {
       "mask_id": "strecke/qualitaets-abweichung",
@@ -3843,7 +3978,9 @@
       "risk_summary": "low",
       "actions": [],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "qualitaet.reklamation.abschliessen"
+      ]
     },
     {
       "mask_id": "auswertungen/abfrage-center",
@@ -4111,8 +4248,8 @@
       "scope": "crm:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/kunden?search={query}&limit={limit}"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "crm.customer.summary360",
@@ -4120,8 +4257,17 @@
       "scope": "crm:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/crm/kunden/{kunden_nr}/360"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "crm.customer.open",
+      "domain": "crm",
+      "scope": "crm:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "crm.contact.log",
@@ -4142,13 +4288,22 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
+      "tool_id": "crm.lead.qualify",
+      "domain": "crm",
+      "scope": "crm:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
       "tool_id": "sales.order.status",
       "domain": "sales",
       "scope": "sales:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/sales-orders/{auftrag_nr}/status"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "sales.invoice.propose",
@@ -4174,8 +4329,8 @@
       "scope": "finance:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/open-items?typ={typ}&faellig_bis={faellig_bis}&limit={limit}"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "fibu.dunning.status",
@@ -4183,8 +4338,8 @@
       "scope": "finance:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/dunning/status/{kunden_nr}"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "wms.lot.trace",
@@ -4192,8 +4347,8 @@
       "scope": "inventory:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/inventory/lots/{lot_id}/trace"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "wms.cell.status",
@@ -4201,8 +4356,8 @@
       "scope": "inventory:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/silo/cells/{cell_code}/status"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "dms.document.search",
@@ -4210,8 +4365,8 @@
       "scope": "nachweisraum:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/nachweisraum/dokumente"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "dms.gobd.export_status",
@@ -4219,8 +4374,8 @@
       "scope": "nachweisraum:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/nachweisraum/gobd-exporte/{export_id}"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "compliance.gate.status",
@@ -4228,8 +4383,8 @@
       "scope": "compliance:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/compliance/external-gates"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "agrar.contract.get",
@@ -4237,8 +4392,8 @@
       "scope": "agrar:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/agrar/contracts/{kontrakt_id}"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "agrar.weighing_ticket.list",
@@ -4246,8 +4401,62 @@
       "scope": "agrar:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/agrar/weighing-tickets"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "agrar.ration.transition",
+      "domain": "agrar",
+      "scope": "agrar:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "agrar.feeding.supply_handoff",
+      "domain": "agrar",
+      "scope": "agrar:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "agrar.feeding.actual_measure",
+      "domain": "agrar",
+      "scope": "agrar:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "agrar.feeding.configure_threshold",
+      "domain": "agrar",
+      "scope": "agrar:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "agrar.feed_analysis.transition",
+      "domain": "agrar",
+      "scope": "agrar:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "qualitaet.reklamation.abschliessen",
+      "domain": "qualitaet",
+      "scope": "quality:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "lager.bestand.get",
@@ -4255,8 +4464,8 @@
       "scope": "lager:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/lager/bestand"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "lager.inventur.status",
@@ -4264,8 +4473,8 @@
       "scope": "lager:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/lager/inventuren/status"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "einkauf.bestellung.list",
@@ -4273,8 +4482,71 @@
       "scope": "einkauf:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/einkauf/bestellungen"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "einkauf.bestellung.versenden",
+      "domain": "einkauf",
+      "scope": "einkauf:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "einkauf.angebot.bestellen",
+      "domain": "einkauf",
+      "scope": "einkauf:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "einkauf.anlieferavis.wareneingang",
+      "domain": "einkauf",
+      "scope": "einkauf:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "lager.stock_movement.stornieren",
+      "domain": "lager",
+      "scope": "lager:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "produktion.control.sync",
+      "domain": "produktion",
+      "scope": "ops:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "planung.calendar.reproject",
+      "domain": "planung",
+      "scope": "planung:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "mobile.sync.process_pending",
+      "domain": "mobile",
+      "scope": "mobile:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
       "tool_id": "agent.proposal.list",
@@ -4282,8 +4554,8 @@
       "scope": "agent:read",
       "idempotent": true,
       "risk_class": "low",
-      "human_approval_required": null,
-      "endpoint": "GET /api/v1/agent/proposals"
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
   "event_count": 74

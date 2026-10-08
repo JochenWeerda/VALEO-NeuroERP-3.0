@@ -94,7 +94,7 @@ Fazit: Die alten P0-„fehlt komplett“-Zeilen sind als aktuelle Wahrheit **ung
 |---|---|---|
 | API-DUP | ~30 Router-Doppelgruppen Rest | CI-RUN / OpenAPI |
 | MASK-FW | Parallele Masken-Frameworks abschmelzen | Usability U-C02-01 |
-| MCP-WRITE | Top-Adapter Aktivität + Post-nach-Freigabe (2026-10-08); Rest/FIBU/Voice offen | QA mcp-write-20261008 / U-C02-02 |
+| MCP-WRITE | 35 Tools; Map mapped 22 / open_medium 0 (`classification_complete`); Rest blocked_no_endpoint/open_high; FIN-CLOSE (ADR-076) offen | QA mcp-mask-writes-remaining / batch5 / mcp-mask-write-parity / U-C02-02 |
 | ACTION-DEN | Action-Registry-Dichte (SD→Actions) — **teilweise 2026-10-08** (+85 `mask:*`) | Usability U-C10-01; QA usability-action-registry-20261008 |
 | OCR-LOCAL | Lokale OCR/Vision (TaxHacker-Muster) | Usability U-C10-02 |
 | TAX-MCP | Zitierbare Steuer-/Melde-Skills | Usability U-C08-01 |

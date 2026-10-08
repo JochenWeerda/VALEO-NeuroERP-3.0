@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
+import { callCustomerOpen, pickSafeCustomerRoutePath } from '@/lib/mcp-customer-open'
 import { globalShortcutManager, type GlobalShortcutAction } from '@/lib/shortcuts/global-shortcuts'
 
 type ActionHandler = (params: Record<string, unknown>) => void | Promise<void>
@@ -25,7 +26,7 @@ const NAV_ACTIONS: Record<string, string> = {
   'nav-dashboard': '/',
   'nav-customers': '/verkauf/kunden-liste',
   'nav-orders': '/sales/auftraege-liste',
-  'nav-invoices': '/sales/rechnungen-liste',
+  'nav-invoices': '/verkauf/rechnungen',
   'nav-inventory': '/lager/bestandsuebersicht',
   'nav-fibu': '/fibu-suite',
   'action-new-order': '/sales/order-editor',
@@ -145,6 +146,25 @@ export function ActionDispatchProvider({ children }: { children: ReactNode }): J
         } catch {
           return false
         }
+      }
+      if (actionId === 'nav-customers') {
+        const direct = pickSafeCustomerRoutePath(params?.route_path)
+        if (direct) {
+          navigate(direct)
+          return true
+        }
+        const kundenNr = typeof params?.kunden_nr === 'string' ? params.kunden_nr.trim() : ''
+        if (kundenNr) {
+          try {
+            const opened = await callCustomerOpen(kundenNr)
+            navigate(opened.route_path)
+            return true
+          } catch {
+            return false
+          }
+        }
+        navigate(NAV_ACTIONS['nav-customers'])
+        return true
       }
       const path = NAV_ACTIONS[actionId]
       if (path) {

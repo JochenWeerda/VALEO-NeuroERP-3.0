@@ -1,0 +1,50 @@
+slice_id: MCP-CATALOG-READS-REST-20261008
+id: MCP-CATALOG-READS-REST-20261008
+title: MCP Rest-Katalog-Reads verdrahten
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+completed_at: 2026-10-08
+goal: >
+  Alle noch offenen Katalog-Read-Tools an MCP-Execution anbinden:
+  dms.document.search, dms.gobd.export_status, agrar.contract.get,
+  agrar.weighing_ticket.list, lager.bestand.get, lager.inventur.status,
+  einkauf.bestellung.list, compliance.gate.status, agent.proposal.list.
+  Read-only; Token-Mandant; ehrliche Quellen.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - tests/test_mcp_execution.py
+  - docs/quality-assurance/mcp-catalog-reads-rest-20261008.md
+  - docs/schnittstellen/mcp-tools.md
+  - docs/agent-handbuch/
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Jedes Tool hat Scope-Check und Forbidden-extra
+  - dryRun/execute schreiben nicht; propose → 422
+  - Mandanten-Parameter → 422; fehlende Entitaet → 404 (wo sinnvoll)
+  - Keine Fake-Erfolge; leere Listen ehrlich
+tests:
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+risks:
+  - Domänentabellen fehlen → leere Liste oder 404 nach Rollback
+ai_harness:
+  fachlicher_vertrag: >
+    Agent liest DMS/Agrar/Lager/Einkauf/Compliance/Proposals ohne Schreibwirkung.
+  architektur_vertrag: >
+    Adapter in mcp_execution_service; bestehende Domänentabellen.
+  daten_vertrag: >
+    Tenant aus Token; nie aus Parametern.
+  test_vertrag: >
+    Happy Path, Scope und Mandanten-Ablehnung je Tool-Familie.
+  security_vertrag: >
+    Katalog-Scopes; Header=Claim; kein FIN-CLOSE/Write.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, mcp-tools, Handbuch.
+external_gates:
+  - not_applicable

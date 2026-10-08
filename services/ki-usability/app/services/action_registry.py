@@ -154,7 +154,15 @@ ACTIONS: List[ActionOut] = [
         description="Kundenstamm öffnen",
         category="navigation",
         domain="crm",
-        intent_phrases=["Kunden", "Kundenstamm", "Kundenliste", "Gehe zu Kunden"],
+        intent_phrases=[
+            "Kunden",
+            "Kundenstamm",
+            "Kundenliste",
+            "Gehe zu Kunden",
+            "öffne Kunde",
+            "öffne Kunden",
+            "Kunde öffnen",
+        ],
     ),
     ActionOut(
         id="nav-orders",

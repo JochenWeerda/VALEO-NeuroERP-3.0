@@ -1,0 +1,51 @@
+slice_id: MCP-FIBU-OPEN-ITEMS-20261008
+id: MCP-FIBU-OPEN-ITEMS-20261008
+title: MCP Offene Posten listen (Read-Adapter)
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+closed_at: 2026-10-08
+goal: >
+  fibu.open_items.list an MCP-Execution anbinden: Mandanten-Liste offener
+  Forderungen/Verbindlichkeiten aus domain_erp.offene_posten. Read-only.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - tests/test_mcp_execution.py
+  - docs/quality-assurance/mcp-fibu-open-items-20261008.md
+  - docs/schnittstellen/mcp-tools.md
+  - docs/agent-handbuch/
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Scope finance:read; Mandanten-Parameter → 422; propose → 422
+  - dryRun/execute schreiben nicht
+  - typ forderung → konto_typ debitoren; verbindlichkeit → kreditoren
+  - faellig_bis filtert faelligkeit; bezahlt/storniert ausgeschlossen
+  - Antwort items mit beleg_nr, kunden_nr, betrag_eur, faellig_am, mahnstatus
+tests:
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+risks:
+  - Schema-Drift Spaltennamen → best-effort Defaults / leere Liste ehrlich
+ai_harness:
+  fachlicher_vertrag: >
+    Agent listet offene OP wie die FiBu-Maske, ohne Buchung/Abschluss.
+  architektur_vertrag: >
+    Adapter in mcp_execution_service; Quelle domain_erp.offene_posten.
+  daten_vertrag: >
+    Tenant aus Token; nur nicht bezahlte/stornierte Posten.
+  test_vertrag: >
+    Scope, 422, Typ-Mapping und Read-only.
+  security_vertrag: >
+    finance:read; Header=Claim; kein FIN-CLOSE.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, mcp-tools, Handbuch.
+external_gates:
+  - not_applicable
+result: >
+  68 MCP-Tests gruen. fibu.open_items.list verdrahtet (read-only OP-Liste);
+  kein FIN-CLOSE; Katalog/Handbuch aktuell.

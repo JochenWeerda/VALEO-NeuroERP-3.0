@@ -1,0 +1,56 @@
+slice_id: MCP-MASK-WRITES-REMAINING-20261008
+id: MCP-MASK-WRITES-REMAINING-20261008
+title: Restliche open_medium klassifizieren und verdrahten
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+completed_at: 2026-10-08
+goal: >
+  Alle restlichen open_medium klassifizieren; umsetzbare verdrahten
+  (Produktionsleitstand-Sync, Kalender-Reproject, MDE process_pending);
+  Rest blocked_no_endpoint / open_high; Completion-Audit wenn nichts mehr
+  ohne Backend-Erfindung. Kein FIN-CLOSE/DB/Commit.
+file_ownership:
+  - config/mcp_erp_tools.yaml
+  - app/services/mcp_execution_service.py
+  - scripts/generate_mcp_mask_action_map.py
+  - config/mcp_mask_action_map.yaml
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - tests/test_mcp_mask_action_map.py
+  - docs/quality-assurance/mcp-mask-writes-remaining-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/gap/executive-summary-20261007.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - produktion.control.sync / planung.calendar.reproject / mobile.sync.process_pending
+  - open_medium = 0; classification_complete; next_medium_candidates=[]
+  - Personal/Fuhrpark/admin/reporting → blocked_no_endpoint
+  - Inventur create_opening → open_high
+  - Generator --check; MCP-Tests gruen
+  - Completion-Audit-Text fuer Parent (Goal nicht selbst complete)
+tests:
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+  - tests/test_mcp_mask_action_map.py
+risks:
+  - blocked_no_endpoint bleibt bis HTTP-CommandEndpoints existieren
+  - FIN-CLOSE/ADR-076 bewusst ausserhalb
+ai_harness:
+  fachlicher_vertrag: >
+    Agent synchronisiert Leitstand, projiziert Kalender, verarbeitet MDE-Queue.
+  architektur_vertrag: >
+    Bestehende Services (ProductionControl/CalendarProjection/MobileSync); Map SoT.
+  daten_vertrag: >
+    Tenant/Actor aus Token; Savepoint bei Service-Commit.
+  test_vertrag: >
+    dryRun/Guards/Execute; Registry 35; Map --check; open_medium=0.
+  security_vertrag: >
+    Scopes ops:write / planung:write / mobile:write; kein ADR-076/FIBU.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration/Commit-Pflicht.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice, Completion-Audit fuer Parent.
+external_gates:
+  - not_applicable

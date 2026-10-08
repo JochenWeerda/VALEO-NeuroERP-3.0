@@ -23,6 +23,169 @@ Alias ueber `from`. OAuth-Ablauf fuer Google und Microsoft vereinheitlicht. **Da
 `tests/test_postfaecher.py`, QA-Doku. Fremde WIP unberuehrt.
 
 
+## MCP-MASK-WRITES-REMAINING-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `produktion.control.sync`, `planung.calendar.reproject`,
+`mobile.sync.process_pending`. Rest: `blocked_no_endpoint` (Personal/Fuhrpark
+u. a.), Inventur-Opening `open_high`. Map: mapped 22 / open_medium **0**;
+`classification_complete`; Registry 35. Kein FIN-CLOSE/FIBU.
+**Nachweis:** MCP-Tests; Generator `--check`; QA `mcp-mask-writes-remaining-20261008.md`.
+**Weiter:** FIN-CLOSE/ADR-076; Parent Goal-Audit (medium-Parität ohne Backend-Erfindung erledigt).
+
+## MCP-MASK-WRITES-BATCH5-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `agrar.feeding.configure_threshold`,
+`agrar.feed_analysis.transition` (release/reject),
+`qualitaet.reklamation.abschliessen`. Map: mapped 19 / open_medium 32;
+Registry 32. Personal/Fuhrpark bewusst nicht. Kein FIN-CLOSE/FIBU.
+**Nachweis:** 112 MCP-Tests; Generator `--check`; QA `mcp-mask-writes-batch5-20261008.md`.
+**Weiter:** ~32 medium; Produktionsleitstand-Sync; FIN-CLOSE offen.
+
+## MCP-MASK-WRITES-BATCH4-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `agrar.ration.transition` +retire/archive;
+`agrar.feeding.supply_handoff`, `agrar.feeding.actual_measure`.
+Map: mapped 15 / open_medium 33; Registry 29. Kein FIN-CLOSE/FIBU.
+**Nachweis:** 109 MCP-Tests; Generator `--check`; QA `mcp-mask-writes-batch4-20261008.md`.
+**Weiter:** ~33 medium; configure_threshold; FIN-CLOSE offen.
+
+## MCP-MASK-WRITES-BATCH3-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `agrar.ration.transition` (submit_review/approve/schedule/activate).
+Map: mapped 11 / open_medium 37; Registry 27. Kein FIN-CLOSE/FIBU.
+**Nachweis:** 105 MCP-Tests; Generator `--check`; QA `mcp-mask-writes-batch3-20261008.md`.
+**Weiter:** retire/archive; ~37 medium; FIN-CLOSE offen.
+
+## MCP-MASK-WRITES-NEXT-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `einkauf.angebot.bestellen`, `einkauf.anlieferavis.wareneingang`,
+`lager.stock_movement.stornieren`. Map: mapped 7 / open_medium 41; Registry 26.
+Kein FIN-CLOSE/Obligo/FIBU.
+**Nachweis:** 103 MCP-Tests; Generator `--check`; QA `mcp-mask-writes-next-20261008.md`.
+**Weiter:** ~41 medium Mask-Writes; Agrar-Lifecycle-Kandidaten; FIN-CLOSE offen.
+
+## MCP-MASK-WRITES-TOP-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `crm.lead.qualify` + `einkauf.bestellung.versenden` (Write-Adapter,
+Token-Mandant, Scope, Idempotenz, Audit). Map: mapped 4 / open_medium 43;
+Registry 23 Tools. Kein FIN-CLOSE/Obligo.
+**Nachweis:** 97 MCP-Tests; Generator `--check`; QA `mcp-mask-writes-top-20261008.md`.
+**Weiter:** ~43 medium Mask-Writes; FIN-CLOSE/ADR-076 bewusst offen.
+
+## MCP-MASK-WRITE-PARITY-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `config/mcp_mask_action_map.yaml` (52 Mask-Mutationen;
+Baseline mapped 2 / open_medium 45 → nach MCP-MASK-WRITES-TOP mapped 4 /
+open_medium 43); FIN-CLOSE `blocked_adr_076`.
+**Nachweis:** Generator `--check` + `tests/test_mcp_mask_action_map.py`.
+**Weiter:** open_medium-Parität; FIN-CLOSE/SUS-Live; Parent-Completion.
+
+## MCP-CATALOG-READS-REST-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** 9 Rest-Reads verdrahtet (DMS/Agrar/Lager/Einkauf/Compliance/
+Proposals); Token-Mandant; ehrliche Quellen; kein Write/FIN-CLOSE.
+**Nachweis:** 90 MCP-Tests; QA `mcp-catalog-reads-rest-20261008.md`.
+**Weiter:** Mask-Write-Rest; FIN-CLOSE bewusst offen.
+
+## MCP-WMS-CELL-STATUS-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `wms.cell.status` Read-Adapter — Fuellstand kg, Material,
+QS-Status, flush_required (Reinigung oder Materialfluss-Kante).
+Scope `inventory:read`; dryRun/execute nur Lesen; kein Transfer/QS-Write.
+**Nachweis:** 83 MCP-Tests; QA `mcp-wms-cell-status-20261008.md`.
+**Weiter:** DMS/Agrar/Lager-Reads, Mask-Write-Rest; FIN-CLOSE offen.
+
+## MCP-WMS-LOT-TRACE-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `wms.lot.trace` Read-Adapter — Silo-Lot (bevorzugt) oder
+Inventory-Lot; Menge kg, Status, QS, Silozelle, Bewegungen.
+Scope `inventory:read`; dryRun/execute nur Lesen; keine Buchung/QS-Aenderung.
+**Nachweis:** 78 MCP-Tests; QA `mcp-wms-lot-trace-20261008.md`.
+**Weiter:** `wms.cell.status`, DMS/Agrar-Reads, Mask-Write-Rest; FIN-CLOSE offen.
+
+## MCP-FIBU-DUNNING-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Lieferung:** `fibu.dunning.status` Read-Adapter — Mandanten-Kunde,
+max. Mahnstufe (OP + Notice), letzte Mahnung, Debitoren-OP-Saldo.
+Scope `finance:read`; dryRun/execute nur Lesen; kein Mahnlauf/FIN-CLOSE.
+**Nachweis:** 73 MCP-Tests; QA `mcp-fibu-dunning-20261008.md`.
+**Weiter:** WMS/DMS-Reads, Mask-Write-Rest, FIN-CLOSE bewusst offen.
+
+## MCP-FIBU-OPEN-ITEMS-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** Read-Adapter `fibu.open_items.list` (bisher 501).
+**Lieferung:** forderung→debitoren / verbindlichkeit→kreditoren; 68 MCP-Tests
+gruen; kein FIN-CLOSE; Katalog/Handbuch aktualisiert.
+**QA:** [mcp-fibu-open-items-20261008.md](../quality-assurance/mcp-fibu-open-items-20261008.md).
+**Offen:** `fibu.dunning.status`, WMS/DMS-Reads; Mask-Write; FIN-CLOSE; Stufe-2-SUS.
+
+## MCP-ORDER-STATUS-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** Read-Adapter `sales.order.status` (bisher 501).
+**Lieferung:** Mandanten-Lifecycle + offene Positionen + naechster Schritt;
+63 MCP-Tests gruen; Katalog/Handbuch aktualisiert.
+**QA:** [mcp-order-status-20261008.md](../quality-assurance/mcp-order-status-20261008.md).
+**Nachzug:** `fibu.open_items.list` → Slice MCP-FIBU-OPEN-ITEMS-20261008.
+**Offen:** `fibu.dunning.status`, WMS/DMS-Reads; Mask-Write; FIN-CLOSE; Stufe-2-SUS.
+
+## MCP-CUSTOMER-SUMMARY360-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** Read-Adapter `crm.customer.summary360` (bisher 501).
+**Lieferung:** Mandanten-Stamm + Aggregates; kein `public.kunden`-Fallback;
+57 MCP-Tests gruen; Katalog/Handbuch aktualisiert.
+**QA:** [mcp-customer-summary360-20261008.md](../quality-assurance/mcp-customer-summary360-20261008.md).
+**Nachzug:** `sales.order.status` → Slice MCP-ORDER-STATUS-20261008.
+**Offen:** FIBU/WMS/DMS-Reads; Mask-Write; FIN-CLOSE; Stufe-2-SUS.
+
+## MCP-CUSTOMER-SEARCH-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** Read-Adapter `crm.customer.search` (bisher 501) — Mandanten-Suche
+inkl. `route_path` fuer Open-Kette.
+**Lieferung:** Adapter read-only; Katalog-Beschreibung/Endpoint auf MCP-Call;
+52 MCP-Tests gruen; Handbuch/mcp-tools aktuell.
+**QA:** [mcp-customer-search-20261008.md](../quality-assurance/mcp-customer-search-20261008.md).
+**Nachzug:** `summary360` → Slice MCP-CUSTOMER-SUMMARY360-20261008.
+**Offen:** `order.status`, weitere Katalog-Reads; Mask-Write; FIN-CLOSE;
+Stufe-2-SUS.
+
+## MCP-CUSTOMER-NAV-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** Folge zu `crm.customer.open` — Voice/Dispatch Deep-Link auf sicheren
+`route_path`; sonst Kundenliste.
+**Lieferung:** `mcp-customer-open.ts` Guard + MCP-Call; Dispatch-Sonderfall
+`nav-customers`; Intent `kunden_nr` aus „öffne Kunde …“; 9 FE- + 26 Voice-Tests.
+**QA:** [mcp-customer-nav-20261008.md](../quality-assurance/mcp-customer-nav-20261008.md).
+**Offen:** übrige MCP-Adapter, Mask-Write-Parität, FIN-CLOSE, Stufe-2-SUS.
+
+## MCP-CUSTOMER-OPEN-20261008 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
+**Ziel:** P1 Rest-MCP — `crm.customer.open` („öffne Kunde“): Mandanten-Aufloesung
+und kanonische Masken-Route `/crm/customers/{id}` + Screen `crm/customer-360`;
+kein Schreiben, kein FIBU/Journal (kein ADR-076).
+**Lieferung:** 21 Katalog-Tools; Adapter read-only; Voice-Phrasen
+„öffne Kunde(n)“ → `nav-customers`; 47 MCP- + 24 Voice-CRM-Tests gruen.
+**QA:** [mcp-customer-open-20261008.md](../quality-assurance/mcp-customer-open-20261008.md).
+**Nachzug:** Deep-Link → Slice MCP-CUSTOMER-NAV-20261008.
+**Offen (eigene Slices):** übrige Read-/Write-Adapter, FIN-CLOSE/Journal,
+Stufe-2-SUS.
+
 ## MCP-WRITE-20261008 — abgeschlossen, Cursor
 
 **Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08.
@@ -32,6 +195,7 @@ Alias ueber `from`. OAuth-Ablauf fuer Google und Microsoft vereinheitlicht. **Da
 **Lieferung:** 20 Katalog-Tools; 40 MCP-Tests gruen; FIBU-Journal bewusst
 nicht im MCP-Pfad (`fibu_journal=false`).
 **QA:** [mcp-write-20261008.md](../quality-assurance/mcp-write-20261008.md).
+**Nachzug:** `crm.customer.open` → Slice MCP-CUSTOMER-OPEN-20261008.
 **Offen (eigene Slices):** weitere Katalog-Adapter, Mask-ID→MCP-Parität,
 FIN-CLOSE/Journal.
 

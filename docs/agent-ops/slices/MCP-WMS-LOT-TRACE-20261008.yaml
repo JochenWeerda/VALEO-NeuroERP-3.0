@@ -1,0 +1,48 @@
+slice_id: MCP-WMS-LOT-TRACE-20261008
+id: MCP-WMS-LOT-TRACE-20261008
+title: MCP Lot verfolgen (Read-Adapter)
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+completed_at: 2026-10-08
+goal: >
+  wms.lot.trace an MCP-Execution anbinden: Mandanten-Lot (Silo oder
+  Inventory), Menge kg, Status, QS, Silozelle, Bewegungen. Read-only.
+file_ownership:
+  - app/services/mcp_execution_service.py
+  - config/mcp_erp_tools.yaml
+  - tests/test_mcp_execution.py
+  - docs/quality-assurance/mcp-wms-lot-trace-20261008.md
+  - docs/schnittstellen/mcp-tools.md
+  - docs/agent-handbuch/
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - Scope inventory:read; Mandanten-Parameter → 422; propose → 422
+  - dryRun/execute schreiben nicht
+  - Lot nur im Token-Mandanten (silo_lots bzw. inventory_lots) → sonst 404
+  - Antwort: lot_id, artikel_id, menge_kg, status, qs_status, silozelle, bewegungen
+tests:
+  - tests/test_mcp_execution.py
+  - tests/test_mcp_tool_registry.py
+risks:
+  - fehlende Silozelle/QS → null bzw. Lot-Status ehrlich
+ai_harness:
+  fachlicher_vertrag: >
+    Agent liest Lot-Trace wie WMS, ohne Buchung oder QS-Aenderung.
+  architektur_vertrag: >
+    Adapter in mcp_execution_service; Quellen silo_lots/inventory_lots
+    plus Bewegungen und silo_cells.
+  daten_vertrag: >
+    Tenant aus Token; Lot per id oder Lotnummer.
+  test_vertrag: >
+    Scope, 404, 422 und Read-only.
+  security_vertrag: >
+    inventory:read; Header=Claim; kein FIN-CLOSE.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, mcp-tools, Handbuch.
+external_gates:
+  - not_applicable

@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 20 Tools in 10 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 35 Tools in 14 Domaenen.
 
 ## Uebersicht
 
@@ -20,19 +20,34 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 20 Tools in 10 Domaenen.
 |---|---|---|---|---|---|
 | `agent.proposal.list` | agent | `agent:read` | ja | niedrig | nein |
 | `agrar.contract.get` | agrar | `agrar:read` | ja | niedrig | nein |
+| `agrar.feed_analysis.transition` | agrar | `agrar:write` | ja | mittel | nein |
+| `agrar.feeding.actual_measure` | agrar | `agrar:write` | ja | mittel | nein |
+| `agrar.feeding.configure_threshold` | agrar | `agrar:write` | ja | mittel | nein |
+| `agrar.feeding.supply_handoff` | agrar | `agrar:write` | ja | mittel | nein |
+| `agrar.ration.transition` | agrar | `agrar:write` | ja | mittel | nein |
 | `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein |
 | `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein |
 | `crm.activity.create` | crm | `crm:write` | ja | mittel | nein |
 | `crm.contact.log` | crm | `crm:write` | ja | mittel | nein |
+| `crm.customer.open` | crm | `crm:read` | ja | niedrig | nein |
 | `crm.customer.search` | crm | `crm:read` | ja | niedrig | nein |
 | `crm.customer.summary360` | crm | `crm:read` | ja | niedrig | nein |
+| `crm.lead.qualify` | crm | `crm:write` | ja | mittel | nein |
 | `dms.document.search` | nachweisraum | `nachweisraum:read` | ja | niedrig | nein |
 | `dms.gobd.export_status` | nachweisraum | `nachweisraum:read` | ja | niedrig | nein |
+| `einkauf.angebot.bestellen` | einkauf | `einkauf:write` | ja | mittel | nein |
+| `einkauf.anlieferavis.wareneingang` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `einkauf.bestellung.list` | einkauf | `einkauf:read` | ja | niedrig | nein |
+| `einkauf.bestellung.versenden` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein |
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein |
 | `lager.bestand.get` | lager | `lager:read` | ja | niedrig | nein |
 | `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein |
+| `lager.stock_movement.stornieren` | lager | `lager:write` | ja | mittel | nein |
+| `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein |
+| `planung.calendar.reproject` | planung | `planung:write` | ja | mittel | nein |
+| `produktion.control.sync` | produktion | `ops:write` | ja | mittel | nein |
+| `qualitaet.reklamation.abschliessen` | qualitaet | `quality:write` | ja | mittel | nein |
 | `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein |
@@ -43,14 +58,14 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 20 Tools in 10 Domaenen.
 
 ### `agent.proposal.list` — Agent-Proposals auflisten
 
-Gibt ausstehende und abgeschlossene Agent-Proposals zurück. Nur für Supervisor-Rolle.
+Listet Agent-Proposals des Authentifizierungs-Mandanten (Supervisor-Scope agent:read). Nur Lesen; keine Approve/Reject-Aktion.
 
 - **Scope:** `agent:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/agent/proposals`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -81,22 +96,13 @@ Gibt ausstehende und abgeschlossene Agent-Proposals zurück. Nur für Supervisor
 
 ```json
 {
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "proposal_id": {
-        "type": "string"
-      },
-      "action_type": {
-        "type": "string"
-      },
-      "approval_status": {
-        "type": "string"
-      },
-      "created_at": {
-        "type": "string"
-      }
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array"
+    },
+    "count": {
+      "type": "integer"
     }
   }
 }
@@ -106,14 +112,14 @@ Gibt ausstehende und abgeschlossene Agent-Proposals zurück. Nur für Supervisor
 
 ### `agrar.contract.get` — Agrar-Kontrakt abrufen
 
-Gibt Details zu einem Agrar-Kontrakt zurück (Menge, Preis, Status).
+Gibt Agrar-Kontrakt (Menge, Preis, Status) im Authentifizierungs-Mandanten zurueck. parameters.kontrakt_id (UUID oder Vertragsnummer). Kein tenant_id-Parameter. Scope agrar:read; nur Lesen.
 
 - **Scope:** `agrar:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/agrar/contracts/{kontrakt_id}`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -122,10 +128,8 @@ Gibt Details zu einem Agrar-Kontrakt zurück (Menge, Preis, Status).
   "type": "object",
   "properties": {
     "kontrakt_id": {
-      "type": "string"
-    },
-    "tenant_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Kontrakt-UUID oder Vertragsnummer"
     }
   },
   "required": [
@@ -144,13 +148,15 @@ Gibt Details zu einem Agrar-Kontrakt zurück (Menge, Preis, Status).
       "type": "string"
     },
     "ware": {
-      "type": "string"
+      "type": "string",
+      "nullable": true
     },
     "menge_t": {
       "type": "number"
     },
     "preis_eur": {
-      "type": "number"
+      "type": "number",
+      "nullable": true
     },
     "status": {
       "type": "string"
@@ -159,16 +165,365 @@ Gibt Details zu einem Agrar-Kontrakt zurück (Menge, Preis, Status).
 }
 ```
 
+### `agrar.feed_analysis.transition` — Futteranalyse freigeben oder zurueckweisen
+
+Wechselt den Status einer Grundfutteranalyse (Maske futtermittel/analyse:release|reject). parameters.analysis_id, action_key (release|reject), reason. Default dryRun; execute erfordert idempotency_key. Scope agrar:write.
+
+- **Scope:** `agrar:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "analysis_id": {
+      "type": "string"
+    },
+    "action_key": {
+      "type": "string",
+      "enum": [
+        "release",
+        "reject"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "analysis_id",
+    "action_key",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "analysis_id": {
+      "type": "string"
+    },
+    "from_status": {
+      "type": "string"
+    },
+    "to_status": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `agrar.feeding.actual_measure` — Massnahme aus Futter-Abweichung
+
+Legt eine Massnahme zu einem Abweichungsbefund an (Maske agrar/feeding-actuals:create_measure). parameters.actual_component_id, title, reason, due_date. Default dryRun; execute erfordert idempotency_key. Scope agrar:write.
+
+- **Scope:** `agrar:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "actual_component_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "owner_subject": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "required": [
+    "actual_component_id",
+    "title",
+    "reason",
+    "due_date"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "measure_id": {
+      "type": "string"
+    },
+    "actual_component_id": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `agrar.feeding.configure_threshold` — Abweichungsschwellen konfigurieren
+
+Legt eine neue Version der Abweichungsregeln an (Maske agrar/feeding-actuals:configure_threshold). parameters.feed_class, warning_pct, critical_pct, valid_from, reason. critical_pct > warning_pct. Default dryRun; execute erfordert idempotency_key. Scope agrar:write.
+
+- **Scope:** `agrar:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "feed_class": {
+      "type": "string",
+      "enum": [
+        "forage",
+        "concentrate",
+        "mineral",
+        "additive",
+        "byproduct",
+        "liquid",
+        "other"
+      ]
+    },
+    "warning_pct": {
+      "type": "number"
+    },
+    "critical_pct": {
+      "type": "number"
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date"
+    },
+    "reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "feed_class",
+    "warning_pct",
+    "critical_pct",
+    "valid_from",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "policy_id": {
+      "type": "string"
+    },
+    "feed_class": {
+      "type": "string"
+    },
+    "version": {
+      "type": "integer"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `agrar.feeding.supply_handoff` — Futterbedarf an Einkauf uebergeben
+
+Erzeugt eine Einkaufs-Uebergabe aus Planbedarf (Maske agrar/feed-readiness:create_handoff). parameters.plan_version_id, feed_id, reason (min. 10 Zeichen). Default dryRun; execute erfordert idempotency_key (wird an den Fachdienst weitergereicht). Scope agrar:write.
+
+- **Scope:** `agrar:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "plan_version_id": {
+      "type": "string"
+    },
+    "feed_id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "horizon_days": {
+      "type": "integer",
+      "default": 30
+    },
+    "safety_pct": {
+      "type": "number",
+      "default": 10
+    }
+  },
+  "required": [
+    "plan_version_id",
+    "feed_id",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "handoff_id": {
+      "type": "string"
+    },
+    "plan_version_id": {
+      "type": "string"
+    },
+    "feed_id": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `agrar.ration.transition` — Rations-Lifecycle-Uebergang
+
+Fuehrt einen Lifecycle-Schritt der aktuellen Rationsversion aus (submit_review/approve/schedule/activate/retire/archive; Maske agrar/ration:*). Gleicher Fachpfad wie RationLifecycleService.transition. schedule braucht feeding_start; retire/archive brauchen reason. Default dryRun; execute erfordert idempotency_key. Scope agrar:write. Kein FIBU/FIN-CLOSE.
+
+- **Scope:** `agrar:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "ration_id": {
+      "type": "string",
+      "description": "Rations-UUID"
+    },
+    "action_key": {
+      "type": "string",
+      "enum": [
+        "submit_review",
+        "approve",
+        "schedule",
+        "activate",
+        "retire",
+        "archive"
+      ],
+      "description": "Masken-Aktionschluessel"
+    },
+    "reason": {
+      "type": "string",
+      "nullable": true,
+      "description": "Begruendung; Pflicht fuer retire/archive; OVERRIDE: bei Readiness-Blockern"
+    },
+    "feeding_start": {
+      "type": "string",
+      "format": "date-time",
+      "nullable": true,
+      "description": "Pflicht fuer schedule"
+    },
+    "expected_status": {
+      "type": "string",
+      "nullable": true,
+      "description": "Optionaler Optimistic-Lock-Status"
+    }
+  },
+  "required": [
+    "ration_id",
+    "action_key"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "ration_id": {
+      "type": "string"
+    },
+    "version_id": {
+      "type": "string"
+    },
+    "from_status": {
+      "type": "string"
+    },
+    "to_status": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
 ### `agrar.weighing_ticket.list` — Wiegescheine auflisten
 
-Listet Wiegescheine für eine Partie oder einen Zeitraum.
+Listet Wiegescheine des Authentifizierungs-Mandanten optional nach Kontrakt-/Partie-Referenz und Zeitraum. Scope agrar:read; nur Lesen.
 
 - **Scope:** `agrar:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/agrar/weighing-tickets`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -178,7 +533,8 @@ Listet Wiegescheine für eine Partie oder einen Zeitraum.
   "properties": {
     "partie_id": {
       "type": "string",
-      "nullable": true
+      "nullable": true,
+      "description": "Filter auf contract_id oder reference_doc"
     },
     "von": {
       "type": "string",
@@ -203,25 +559,13 @@ Listet Wiegescheine für eine Partie oder einen Zeitraum.
 
 ```json
 {
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "ticket_id": {
-        "type": "string"
-      },
-      "partie_id": {
-        "type": "string"
-      },
-      "brutto_kg": {
-        "type": "number"
-      },
-      "netto_kg": {
-        "type": "number"
-      },
-      "erstellt_am": {
-        "type": "string"
-      }
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array"
+    },
+    "count": {
+      "type": "integer"
     }
   }
 }
@@ -231,14 +575,14 @@ Listet Wiegescheine für eine Partie oder einen Zeitraum.
 
 ### `compliance.gate.status` — Externe Gate-Status abfragen
 
-Gibt Status ausstehender externer Abnahmen (ELSTER, DATEV, TSE, Auditor) zurueck.
+Liest ehrliche Statussignale fuer ELSTER/DATEV/TSE/Auditor aus vorhandenen Domänentabellen des Authentifizierungs-Mandanten (keine Fake-Freigaben). Scope compliance:read; nur Lesen.
 
 - **Scope:** `compliance:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/compliance/external-gates`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -266,23 +610,13 @@ Gibt Status ausstehender externer Abnahmen (ELSTER, DATEV, TSE, Auditor) zurueck
 
 ```json
 {
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "gate_id": {
-        "type": "string"
-      },
-      "gate_typ": {
-        "type": "string"
-      },
-      "status": {
-        "type": "string"
-      },
-      "faellig_am": {
-        "type": "string",
-        "nullable": true
-      }
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array"
+    },
+    "count": {
+      "type": "integer"
     }
   }
 }
@@ -424,16 +758,69 @@ Erfasst einen Kundenkontakt mit Ergebnis und Wiedervorlage. HTTP-Aufruf mit tool
 }
 ```
 
-### `crm.customer.search` — Kunden suchen
+### `crm.customer.open` — Kunde oeffnen
 
-Sucht Kunden anhand von Name, Kundennummer oder PLZ. Gibt eine Liste von Kunden zurueck.
+Loest einen Kunden im Authentifizierungs-Mandanten auf und liefert die kanonische Masken-Route (/crm/customers/{id}) sowie Screen-ID crm/customer-360. Kein Schreiben. HTTP-Aufruf mit tool_name=crm.customer.open, parameters.kunden_nr (Kundennummer oder UUID). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit crm:read und tenant_id erforderlich.
 
 - **Scope:** `crm:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/kunden?search={query}&limit={limit}`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "kunden_nr": {
+      "type": "string",
+      "description": "Kundennummer oder CRM-Kunden-UUID"
+    }
+  },
+  "required": [
+    "kunden_nr"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "customer_id": {
+      "type": "string"
+    },
+    "kunden_nr": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "screen_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `crm.customer.search` — Kunden suchen
+
+Sucht Kunden im Authentifizierungs-Mandanten nach Name, Kundennummer oder PLZ (domain_crm.customers, analog UI-Combobox). HTTP-Aufruf mit tool_name=crm.customer.search. Default dryRun; execute ist ebenfalls nur Lesen. Liefert items mit kunden_nr, name, ort, segment, customer_id und route_path. OIDC-Token mit crm:read und tenant_id erforderlich.
+
+- **Scope:** `crm:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -447,7 +834,9 @@ Sucht Kunden anhand von Name, Kundennummer oder PLZ. Gibt eine Liste von Kunden 
     },
     "limit": {
       "type": "integer",
-      "default": 20
+      "default": 20,
+      "minimum": 1,
+      "maximum": 50
     }
   },
   "required": [
@@ -460,22 +849,38 @@ Sucht Kunden anhand von Name, Kundennummer oder PLZ. Gibt eine Liste von Kunden 
 
 ```json
 {
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "kunden_nr": {
-        "type": "string"
-      },
-      "name": {
-        "type": "string"
-      },
-      "ort": {
-        "type": "string"
-      },
-      "segment": {
-        "type": "string"
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kunden_nr": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ort": {
+            "type": "string",
+            "nullable": true
+          },
+          "segment": {
+            "type": "string",
+            "nullable": true
+          },
+          "customer_id": {
+            "type": "string"
+          },
+          "route_path": {
+            "type": "string"
+          }
+        }
       }
+    },
+    "count": {
+      "type": "integer"
     }
   }
 }
@@ -483,14 +888,14 @@ Sucht Kunden anhand von Name, Kundennummer oder PLZ. Gibt eine Liste von Kunden 
 
 ### `crm.customer.summary360` — Kunden-360-Zusammenfassung
 
-Liefert 360-Grad-Zusammenfassung: offene Auftraege, letzte Kontakte, OP-Saldo, Segmentierung.
+Liefert 360-Grad-Zusammenfassung im Authentifizierungs-Mandanten: offene Auftraege, OP-Saldo, letzte Kontakte, Segment und route_path. HTTP-Aufruf mit tool_name=crm.customer.summary360, parameters.kunden_nr (Kundennummer oder UUID). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit crm:read und tenant_id erforderlich. Kein Cross-Tenant-Fallback.
 
 - **Scope:** `crm:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/crm/kunden/{kunden_nr}/360`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -499,7 +904,8 @@ Liefert 360-Grad-Zusammenfassung: offene Auftraege, letzte Kontakte, OP-Saldo, S
   "type": "object",
   "properties": {
     "kunden_nr": {
-      "type": "string"
+      "type": "string",
+      "description": "Kundennummer oder CRM-Kunden-UUID"
     }
   },
   "required": [
@@ -520,6 +926,9 @@ Liefert 360-Grad-Zusammenfassung: offene Auftraege, letzte Kontakte, OP-Saldo, S
     "name": {
       "type": "string"
     },
+    "customer_id": {
+      "type": "string"
+    },
     "offene_auftraege": {
       "type": "integer"
     },
@@ -530,6 +939,70 @@ Liefert 360-Grad-Zusammenfassung: offene Auftraege, letzte Kontakte, OP-Saldo, S
       "type": "array"
     },
     "segment": {
+      "type": "string",
+      "nullable": true
+    },
+    "route_path": {
+      "type": "string"
+    },
+    "screen_id": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `crm.lead.qualify` — Lead als Opportunity qualifizieren
+
+Qualifiziert einen Lead des Authentifizierungs-Mandanten zu einer Opportunity (gleicher Fachpfad wie Maske crm/lead:qualifizieren). parameters.lead_id und customer_id oder kunden_nr. Default dryRun; execute erfordert idempotency_key. Scope crm:write. Kein tenant_id-Parameter.
+
+- **Scope:** `crm:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "description": "Lead-UUID"
+    },
+    "customer_id": {
+      "type": "string",
+      "description": "CRM-Kunden-UUID des Mandanten",
+      "nullable": true
+    },
+    "kunden_nr": {
+      "type": "string",
+      "description": "Alternative Kundennummer statt customer_id",
+      "nullable": true
+    }
+  },
+  "required": [
+    "lead_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "lead_id": {
+      "type": "string"
+    },
+    "opportunity_id": {
+      "type": "string"
+    },
+    "auditEntryId": {
       "type": "string"
     }
   }
@@ -538,16 +1011,129 @@ Liefert 360-Grad-Zusammenfassung: offene Auftraege, letzte Kontakte, OP-Saldo, S
 
 ## Domaene: einkauf
 
+### `einkauf.angebot.bestellen` — Angebot in Bestellung ueberfuehren
+
+Erzeugt eine Bestellung aus einem Einkaufsangebot des Authentifizierungs-Mandanten (Maske einkauf/angebot:bestellen). Kein Obligo/FIN-CLOSE. Default dryRun; execute erfordert idempotency_key. Scope einkauf:write.
+
+- **Scope:** `einkauf:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "angebot_id": {
+      "type": "string",
+      "description": "Angebots-UUID oder Angebotsnummer"
+    }
+  },
+  "required": [
+    "angebot_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "angebot_id": {
+      "type": "string"
+    },
+    "bestellung_id": {
+      "type": "string"
+    },
+    "bestellnummer": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `einkauf.anlieferavis.wareneingang` — Wareneingang aus Anlieferavis buchen
+
+Bucht Wareneingang aus Anlieferavis (Bestellpositionen + Lagerzugang; Maske einkauf/anlieferavis:wareneingang). Kein FIBU-Journal. Default dryRun; execute erfordert idempotency_key. Scope einkauf:write. parameters.avis_id, lager_id, lieferschein_nr.
+
+- **Scope:** `einkauf:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "avis_id": {
+      "type": "string",
+      "description": "Anlieferavis-UUID"
+    },
+    "lager_id": {
+      "type": "string",
+      "description": "Lager-UUID des Mandanten"
+    },
+    "lieferschein_nr": {
+      "type": "string",
+      "description": "Lieferscheinnummer"
+    }
+  },
+  "required": [
+    "avis_id",
+    "lager_id",
+    "lieferschein_nr"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "avis_id": {
+      "type": "string"
+    },
+    "bestellung_id": {
+      "type": "string"
+    },
+    "bestellnummer": {
+      "type": "string"
+    },
+    "positionen": {
+      "type": "integer"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
 ### `einkauf.bestellung.list` — Offene Bestellungen auflisten
 
-Listet offene Bestellungen mit Status und Liefertermin.
+Listet Bestellungen des Authentifizierungs-Mandanten mit Status und Liefertermin. Scope einkauf:read; nur Lesen.
 
 - **Scope:** `einkauf:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/einkauf/bestellungen`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -577,25 +1163,78 @@ Listet offene Bestellungen mit Status und Liefertermin.
 
 ```json
 {
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "bestellung_id": {
-        "type": "string"
-      },
-      "lieferant": {
-        "type": "string"
-      },
-      "status": {
-        "type": "string"
-      },
-      "liefertermin": {
-        "type": "string"
-      },
-      "wert_eur": {
-        "type": "number"
-      }
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array"
+    },
+    "count": {
+      "type": "integer"
+    }
+  }
+}
+```
+
+### `einkauf.bestellung.versenden` — Bestellung versenden
+
+Versendet eine Bestellung des Authentifizierungs-Mandanten (E-Mail/Fax/EDI/manuell; Maske einkauf/purchase-order:versenden). Kein Obligo-Journal (Freigabe bleibt eigener Pfad). Default dryRun; execute erfordert idempotency_key. Scope einkauf:write.
+
+- **Scope:** `einkauf:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "bestellung_id": {
+      "type": "string",
+      "description": "Bestellungs-UUID oder Bestellnummer"
+    },
+    "versand_art": {
+      "type": "string",
+      "enum": [
+        "email",
+        "fax",
+        "edi",
+        "post",
+        "manuell"
+      ],
+      "default": "email"
+    },
+    "empfaenger": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "required": [
+    "bestellung_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "bestellung_id": {
+      "type": "string"
+    },
+    "bestellnummer": {
+      "type": "string"
+    },
+    "versand_status": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
     }
   }
 }
@@ -605,14 +1244,14 @@ Listet offene Bestellungen mit Status und Liefertermin.
 
 ### `fibu.dunning.status` — Mahnstatus abfragen
 
-Gibt Mahnstatus und letzte Mahnaktionen fuer einen Kunden zurueck.
+Gibt Mahnstufe, letzte Mahnung und offenen Debitoren-Saldo fuer einen Kunden im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=fibu.dunning.status, parameters.kunden_nr (Kundennummer oder UUID). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit finance:read und tenant_id erforderlich. Kein Mahnlauf, kein FIN-CLOSE.
 
 - **Scope:** `finance:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/dunning/status/{kunden_nr}`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -621,7 +1260,8 @@ Gibt Mahnstatus und letzte Mahnaktionen fuer einen Kunden zurueck.
   "type": "object",
   "properties": {
     "kunden_nr": {
-      "type": "string"
+      "type": "string",
+      "description": "Kundennummer oder CRM-Kunden-UUID"
     }
   },
   "required": [
@@ -637,6 +1277,9 @@ Gibt Mahnstatus und letzte Mahnaktionen fuer einen Kunden zurueck.
   "type": "object",
   "properties": {
     "kunden_nr": {
+      "type": "string"
+    },
+    "customer_id": {
       "type": "string"
     },
     "mahnstufe": {
@@ -655,14 +1298,14 @@ Gibt Mahnstatus und letzte Mahnaktionen fuer einen Kunden zurueck.
 
 ### `fibu.open_items.list` — Offene Posten auflisten
 
-Listet offene Forderungen oder Verbindlichkeiten nach Faelligkeit.
+Listet offene Forderungen oder Verbindlichkeiten im Authentifizierungs-Mandanten nach Faelligkeit (domain_erp.offene_posten). HTTP-Aufruf mit tool_name=fibu.open_items.list. typ=forderung|verbindlichkeit. Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit finance:read und tenant_id erforderlich. Kein Kassenabschluss/Journal.
 
 - **Scope:** `finance:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/open-items?typ={typ}&faellig_bis={faellig_bis}&limit={limit}`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -684,7 +1327,9 @@ Listet offene Forderungen oder Verbindlichkeiten nach Faelligkeit.
     },
     "limit": {
       "type": "integer",
-      "default": 50
+      "default": 50,
+      "minimum": 1,
+      "maximum": 200
     }
   },
   "required": [
@@ -697,25 +1342,38 @@ Listet offene Forderungen oder Verbindlichkeiten nach Faelligkeit.
 
 ```json
 {
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "beleg_nr": {
-        "type": "string"
-      },
-      "kunden_nr": {
-        "type": "string"
-      },
-      "betrag_eur": {
-        "type": "number"
-      },
-      "faellig_am": {
-        "type": "string"
-      },
-      "mahnstatus": {
-        "type": "string"
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "beleg_nr": {
+            "type": "string"
+          },
+          "kunden_nr": {
+            "type": "string",
+            "nullable": true
+          },
+          "betrag_eur": {
+            "type": "number"
+          },
+          "faellig_am": {
+            "type": "string",
+            "nullable": true
+          },
+          "mahnstatus": {
+            "type": "string"
+          }
+        }
       }
+    },
+    "count": {
+      "type": "integer"
+    },
+    "typ": {
+      "type": "string"
     }
   }
 }
@@ -725,14 +1383,14 @@ Listet offene Forderungen oder Verbindlichkeiten nach Faelligkeit.
 
 ### `wms.cell.status` — Silozellen-Status
 
-Gibt Fuellstand, Artikel, QS-Status und Sperren einer Silozelle zurueck.
+Gibt Fuellstand kg, aktuelles Material, QS-Status und Flush-/Reinigungsbedarf einer Silozelle im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=wms.cell.status, parameters.cell_code (Zellencode oder UUID). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit inventory:read und tenant_id erforderlich. Kein Transfer, keine QS-Aenderung.
 
 - **Scope:** `inventory:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/silo/cells/{cell_code}/status`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -741,7 +1399,8 @@ Gibt Fuellstand, Artikel, QS-Status und Sperren einer Silozelle zurueck.
   "type": "object",
   "properties": {
     "cell_code": {
-      "type": "string"
+      "type": "string",
+      "description": "Zellencode oder Silozellen-UUID"
     }
   },
   "required": [
@@ -778,14 +1437,14 @@ Gibt Fuellstand, Artikel, QS-Status und Sperren einer Silozelle zurueck.
 
 ### `wms.lot.trace` — Lot verfolgen
 
-Gibt Herkunft, Silozelle, QS-Status und Bewegungshistorie eines Lots zurueck.
+Gibt Artikel, Menge kg, Status, QS-Status, Silozelle und Bewegungshistorie eines Lots im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=wms.lot.trace, parameters.lot_id (Lot-UUID oder Virtual-/Lotnummer). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit inventory:read und tenant_id erforderlich. Keine Buchung, keine QS-Aenderung.
 
 - **Scope:** `inventory:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/inventory/lots/{lot_id}/trace`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -794,7 +1453,8 @@ Gibt Herkunft, Silozelle, QS-Status und Bewegungshistorie eines Lots zurueck.
   "type": "object",
   "properties": {
     "lot_id": {
-      "type": "string"
+      "type": "string",
+      "description": "Lot-UUID oder Virtual-/Lotnummer"
     }
   },
   "required": [
@@ -813,7 +1473,8 @@ Gibt Herkunft, Silozelle, QS-Status und Bewegungshistorie eines Lots zurueck.
       "type": "string"
     },
     "artikel_id": {
-      "type": "string"
+      "type": "string",
+      "nullable": true
     },
     "menge_kg": {
       "type": "number"
@@ -839,14 +1500,14 @@ Gibt Herkunft, Silozelle, QS-Status und Bewegungshistorie eines Lots zurueck.
 
 ### `lager.bestand.get` — Lagerbestand abfragen
 
-Gibt aktuellen Lagerbestand für ein Produkt / Lager zurück.
+Gibt Artikelbestand (Menge/reserviert/verfuegbar) im Authentifizierungs-Mandanten zurueck. parameters.artikel_id; lager_id optional (Hinweis, Bestand ist artikelbezogen). Scope lager:read; nur Lesen.
 
 - **Scope:** `lager:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/lager/bestand`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -895,14 +1556,14 @@ Gibt aktuellen Lagerbestand für ein Produkt / Lager zurück.
 
 ### `lager.inventur.status` — Inventurstatus abfragen
 
-Gibt offene Inventur-Aufträge und Zähldifferenzen zurück.
+Gibt offene Inventuren und Differenzwert-Schaetzung im Authentifizierungs-Mandanten zurueck. Scope lager:read; nur Lesen.
 
 - **Scope:** `lager:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/lager/inventuren/status`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -939,18 +1600,131 @@ Gibt offene Inventur-Aufträge und Zähldifferenzen zurück.
 }
 ```
 
+### `lager.stock_movement.stornieren` — Lagerbewegung stornieren
+
+Storniert eine Lagerbewegung des Authentifizierungs-Mandanten per Gegenbuchung (Maske lager/stock-movement:stornieren). Kein FIBU. Default dryRun; execute erfordert idempotency_key. Scope lager:write.
+
+- **Scope:** `lager:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "movement_id": {
+      "type": "string",
+      "description": "UUID der zu stornierenden Lagerbewegung"
+    },
+    "begruendung": {
+      "type": "string",
+      "nullable": true,
+      "maxLength": 500
+    }
+  },
+  "required": [
+    "movement_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "movement_id": {
+      "type": "string"
+    },
+    "storno_movement_id": {
+      "type": "string"
+    },
+    "movement_type": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "number"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+## Domaene: mobile
+
+### `mobile.sync.process_pending` — MDE-Queue verarbeiten
+
+Verarbeitet pending Events der Mobile/MDE-Queue des Authentifizierungs-Mandanten (Maske schnittstelle/mde-inbox:process_pending). parameters.limit optional, reason. Default dryRun; execute erfordert idempotency_key. Scope mobile:write.
+
+- **Scope:** `mobile:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "default": 50,
+      "minimum": 1,
+      "maximum": 500
+    },
+    "reason": {
+      "type": "string",
+      "default": "MCP MDE-Verarbeitung"
+    }
+  },
+  "required": []
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "processed": {
+      "type": "integer",
+      "nullable": true
+    },
+    "failed": {
+      "type": "integer",
+      "nullable": true
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
 ## Domaene: nachweisraum
 
 ### `dms.document.search` — Dokument suchen
 
-Sucht Dokumente im Nachweisraum nach Typ, Zeitraum oder Beleg-Referenz.
+Sucht Nachweisraum-Dokumente im Authentifizierungs-Mandanten nach Typ, Zeitraum oder Beleg-Referenz. HTTP tool_name=dms.document.search. Default dryRun; execute nur Lesen. Scope nachweisraum:read.
 
 - **Scope:** `nachweisraum:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/nachweisraum/dokumente`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -988,22 +1762,13 @@ Sucht Dokumente im Nachweisraum nach Typ, Zeitraum oder Beleg-Referenz.
 
 ```json
 {
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "dokument_id": {
-        "type": "string"
-      },
-      "titel": {
-        "type": "string"
-      },
-      "status": {
-        "type": "string"
-      },
-      "erstellt_am": {
-        "type": "string"
-      }
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array"
+    },
+    "count": {
+      "type": "integer"
     }
   }
 }
@@ -1011,14 +1776,14 @@ Sucht Dokumente im Nachweisraum nach Typ, Zeitraum oder Beleg-Referenz.
 
 ### `dms.gobd.export_status` — GoBD-Export-Status
 
-Gibt Status und Pruefprotokoll eines GoBD-Exports zurueck.
+Gibt Status und Pruefhinweis eines GoBD-Exports im Authentifizierungs-Mandanten zurueck. HTTP tool_name=dms.gobd.export_status, parameters.export_id. Scope nachweisraum:read; nur Lesen.
 
 - **Scope:** `nachweisraum:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/nachweisraum/gobd-exporte/{export_id}`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -1054,6 +1819,152 @@ Gibt Status und Pruefprotokoll eines GoBD-Exports zurueck.
     "pruefprotokoll": {
       "type": "string",
       "nullable": true
+    }
+  }
+}
+```
+
+## Domaene: planung
+
+### `planung.calendar.reproject` — Planungskalender neu projizieren
+
+Projiziert Kalender-Items des Authentifizierungs-Mandanten neu (Maske planung/kalender:reproject). parameters.horizon_days optional. Default dryRun; execute erfordert idempotency_key. Scope planung:write.
+
+- **Scope:** `planung:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "horizon_days": {
+      "type": "integer",
+      "default": 120,
+      "minimum": 1,
+      "maximum": 366
+    }
+  },
+  "required": []
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "projected": {
+      "type": "integer",
+      "nullable": true
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+## Domaene: produktion
+
+### `produktion.control.sync` — Produktionsleitstand synchronisieren
+
+Synchronisiert Mischfutter-Produktionsauftraege in den Leitstand (Maske produktion/produktionsleitstand:sync). parameters.reason. Default dryRun; execute erfordert idempotency_key. Scope ops:write. Kein FIBU/FIN-CLOSE.
+
+- **Scope:** `ops:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "reason": {
+      "type": "string",
+      "description": "Audit-/Sync-Grund",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "synchronized": {
+      "type": "integer"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+## Domaene: qualitaet
+
+### `qualitaet.reklamation.abschliessen` — Reklamation abschliessen
+
+Schliesst eine Reklamation des Authentifizierungs-Mandanten (Maske qualitaet/reklamation:abschliessen). parameters.reklamation_id, optional kommentar. Default dryRun; execute erfordert idempotency_key. Scope quality:write. Kein FIBU.
+
+- **Scope:** `quality:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "reklamation_id": {
+      "type": "string"
+    },
+    "kommentar": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "required": [
+    "reklamation_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "reklamation_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
     }
   }
 }
@@ -1167,14 +2078,14 @@ Legt einen ausstehenden Rechnungsvorschlag zu einem gebuchten Lieferschein an. H
 
 ### `sales.order.status` — Auftragsstatus pruefen
 
-Gibt Lifecycle-Status, offene Positionen und naechsten Schritt eines Auftrags zurueck.
+Gibt Lifecycle-Status, offene Positionen und naechsten Schritt eines Auftrags im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=sales.order.status, parameters.auftrag_nr (Auftragsnummer oder UUID). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit sales:read und tenant_id erforderlich.
 
 - **Scope:** `sales:read`
 - **Idempotent:** ja
 - **Risikoklasse:** niedrig
 - **Audit:** read
 - **Human-Approval erforderlich:** nein
-- **Endpoint:** `GET /api/v1/sales-orders/{auftrag_nr}/status`
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
 
 **Eingabe-Schema:**
 
@@ -1183,7 +2094,8 @@ Gibt Lifecycle-Status, offene Positionen und naechsten Schritt eines Auftrags zu
   "type": "object",
   "properties": {
     "auftrag_nr": {
-      "type": "string"
+      "type": "string",
+      "description": "Auftragsnummer oder Sales-Order-UUID"
     }
   },
   "required": [
@@ -1199,6 +2111,9 @@ Gibt Lifecycle-Status, offene Positionen und naechsten Schritt eines Auftrags zu
   "type": "object",
   "properties": {
     "auftrag_nr": {
+      "type": "string"
+    },
+    "order_id": {
       "type": "string"
     },
     "status": {

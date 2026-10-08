@@ -97,6 +97,25 @@ def _extract_params(text: str) -> Dict[str, str]:
     return params
 
 
+def _extract_customer_open_params(text: str) -> Dict[str, str]:
+    """Kundennummer/UUID nach „öffne Kunde …“ / „Kunde öffnen …“."""
+    params: Dict[str, str] = {}
+    match = re.search(
+        r"(?:oeffne|öffne|zeige|gehe\s+zu)\s+kunden?\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+        text,
+        re.I,
+    )
+    if not match:
+        match = re.search(
+            r"kunde(?:n)?\s+(?:oeffnen|öffnen)\s+([A-Za-z0-9][A-Za-z0-9._-]{0,63})\b",
+            text,
+            re.I,
+        )
+    if match:
+        params["kunden_nr"] = match.group(1).strip()
+    return params
+
+
 def _extract_lager_params(text: str) -> Dict[str, str]:
     params: Dict[str, str] = {}
     match = re.search(r"\b(\d{8,14})\b", text)
@@ -391,7 +410,9 @@ class IntentResolver:
             phrases = action_registry.intent_phrases_for_action(action_id)
             if _match_phrases(normalized, phrases):
                 params = _extract_params(text)
-                if action_id.startswith("lager-"):
+                if action_id == "nav-customers":
+                    params.update(_extract_customer_open_params(text))
+                elif action_id.startswith("lager-"):
                     params.update(_extract_lager_params(text))
                 elif action_id.startswith("einkauf-"):
                     params.update(_extract_einkauf_params(text))
@@ -424,7 +445,7 @@ class IntentResolver:
         if any(word in normalized for word in ["kunden", "kunde"]) and any(
             word in normalized for word in ["oeffnen", "zeigen", "gehe", "stamm"]
         ):
-            return _voice_out("nav-customers", text)
+            return _voice_out("nav-customers", text, _extract_customer_open_params(text))
         if any(word in normalized for word in ["dashboard", "start", "uebersicht", "hauptseite"]):
             return _voice_out("nav-dashboard", text)
 

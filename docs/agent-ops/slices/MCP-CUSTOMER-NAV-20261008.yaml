@@ -1,0 +1,56 @@
+slice_id: MCP-CUSTOMER-NAV-20261008
+id: MCP-CUSTOMER-NAV-20261008
+title: Voice/Dispatch Deep-Link aus crm.customer.open
+status: abgeschlossen
+owner: Cursor
+date: 2026-10-08
+created_at: 2026-10-08
+closed_at: 2026-10-08
+goal: >
+  nav-customers mit kunden_nr ruft crm.customer.open und navigiert nur auf
+  einen sicheren route_path (/crm/customers/{id}); ohne Nummer bleibt die Liste.
+  Intent-Resolver liefert kunden_nr aus „öffne Kunde …“.
+file_ownership:
+  - packages/frontend-web/src/lib/mcp-customer-open.ts
+  - packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx
+  - packages/frontend-web/src/__tests__/lib/mcp-customer-open.test.ts
+  - packages/frontend-web/src/__tests__/features/ki-usability/ActionDispatchContext.test.tsx
+  - services/ki-usability/app/services/intent_resolver.py
+  - services/ki-usability/tests/test_voice_intent_verkauf_crm.py
+  - docs/quality-assurance/mcp-customer-nav-20261008.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - isSafeCustomerRoutePath akzeptiert nur /crm/customers/{id} ohne Query/Host
+  - nav-customers ohne kunden_nr → /verkauf/kunden-liste
+  - nav-customers mit kunden_nr → MCP call + Navigate auf route_path
+  - nav-customers mit fertigem sicherem route_path → Navigate ohne MCP
+  - unsicherer route_path und MCP-Fehler → kein Navigate (false)
+  - Intent „öffne Kunde TEST“ liefert action nav-customers + kunden_nr=TEST
+tests:
+  - packages/frontend-web/src/__tests__/lib/mcp-customer-open.test.ts
+  - packages/frontend-web/src/__tests__/features/ki-usability/ActionDispatchContext.test.tsx
+  - services/ki-usability/tests/test_voice_intent_verkauf_crm.py
+risks:
+  - Token ohne crm:read → Deep-Link schlaegt fehl; Liste bleibt Fallback nur ohne Nummer
+ai_harness:
+  fachlicher_vertrag: >
+    Sprache/Agent oeffnet konkreten Kunden nur nach Mandanten-Aufloesung;
+    Listen-Fallback ohne Kennung bleibt.
+  architektur_vertrag: >
+    Zentraler ActionDispatch; MCP-Adapter bleibt Backend-Wahrheit fuer Route.
+  daten_vertrag: >
+    Keine neuen Persistenzwege; nur Lesen via bestehendem MCP-Call.
+  test_vertrag: >
+    Pure Route-Guard-Tests und Dispatch mit gemocktem MCP-Call.
+  security_vertrag: >
+    Open-Redirect-Schutz: nur relative /crm/customers/{id}.
+  betriebs_vertrag: >
+    Keine neue DB/Container/Migration.
+  dokumentations_vertrag: >
+    QA, Open-Gaps, Workboard, Slice nachgezogen.
+external_gates:
+  - not_applicable
+result: >
+  9 Frontend- und 26 Voice-CRM-Tests gruen. Deep-Link aus kunden_nr/route_path
+  mit Open-Redirect-Guard; Listen-Fallback ohne Kennung.

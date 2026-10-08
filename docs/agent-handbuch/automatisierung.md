@@ -29,26 +29,41 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 
 | tool_id | Domäne | scope | idempotent | Risiko | Human-Approval | endpoint |
 |---|---|---|---|---|---|---|
-| `agent.proposal.list` | agent | `agent:read` | ja | niedrig | nein | `GET /api/v1/agent/proposals` |
-| `agrar.contract.get` | agrar | `agrar:read` | ja | niedrig | nein | `GET /api/v1/agrar/contracts/{kontrakt_id}` |
-| `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein | `GET /api/v1/agrar/weighing-tickets` |
-| `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein | `GET /api/v1/compliance/external-gates` |
+| `agent.proposal.list` | agent | `agent:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `agrar.contract.get` | agrar | `agrar:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `agrar.feed_analysis.transition` | agrar | `agrar:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `agrar.feeding.actual_measure` | agrar | `agrar:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `agrar.feeding.configure_threshold` | agrar | `agrar:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `agrar.feeding.supply_handoff` | agrar | `agrar:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `agrar.ration.transition` | agrar | `agrar:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.activity.create` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.contact.log` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
-| `crm.customer.search` | crm | `crm:read` | ja | niedrig | nein | `GET /api/v1/kunden?search={query}&limit={limit}` |
-| `crm.customer.summary360` | crm | `crm:read` | ja | niedrig | nein | `GET /api/v1/crm/kunden/{kunden_nr}/360` |
-| `dms.document.search` | nachweisraum | `nachweisraum:read` | ja | niedrig | nein | `GET /api/v1/nachweisraum/dokumente` |
-| `dms.gobd.export_status` | nachweisraum | `nachweisraum:read` | ja | niedrig | nein | `GET /api/v1/nachweisraum/gobd-exporte/{export_id}` |
-| `einkauf.bestellung.list` | einkauf | `einkauf:read` | ja | niedrig | nein | `GET /api/v1/einkauf/bestellungen` |
-| `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein | `GET /api/v1/dunning/status/{kunden_nr}` |
-| `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein | `GET /api/v1/open-items?typ={typ}&faellig_bis={faellig_bis}&limit={limit}` |
-| `lager.bestand.get` | lager | `lager:read` | ja | niedrig | nein | `GET /api/v1/lager/bestand` |
-| `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein | `GET /api/v1/lager/inventuren/status` |
+| `crm.customer.open` | crm | `crm:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `crm.customer.search` | crm | `crm:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `crm.customer.summary360` | crm | `crm:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `crm.lead.qualify` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `dms.document.search` | nachweisraum | `nachweisraum:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `dms.gobd.export_status` | nachweisraum | `nachweisraum:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `einkauf.angebot.bestellen` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `einkauf.anlieferavis.wareneingang` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `einkauf.bestellung.list` | einkauf | `einkauf:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `einkauf.bestellung.versenden` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `lager.bestand.get` | lager | `lager:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `lager.stock_movement.stornieren` | lager | `lager:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `planung.calendar.reproject` | planung | `planung:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `produktion.control.sync` | produktion | `ops:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `qualitaet.reklamation.abschliessen` | qualitaet | `quality:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
-| `sales.order.status` | sales | `sales:read` | ja | niedrig | nein | `GET /api/v1/sales-orders/{auftrag_nr}/status` |
-| `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein | `GET /api/v1/silo/cells/{cell_code}/status` |
-| `wms.lot.trace` | inventory | `inventory:read` | ja | niedrig | nein | `GET /api/v1/inventory/lots/{lot_id}/trace` |
+| `sales.order.status` | sales | `sales:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `wms.lot.trace` | inventory | `inventory:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 
 ## Domain-Events (Auszug)
 
