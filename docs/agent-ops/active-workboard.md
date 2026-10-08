@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## RESTBEFUNDE-BESTANDSBUCH-20261008 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** die vier benannten Restbefunde aus
+BESTANDSBUCH-EINKAUF-20261007 schliessen: (1) `dunning.py` mit `Query("system")`, (2)
+Rechnungsanlage committet den Dokumentspeicher vor der Buchung, (3) Artikelnummern
+systemweit statt je Mandant eindeutig, (4) `_list_docs` faellt auf einen In-Memory-Speicher
+zurueck. **Dateibesitz:** `app/api/v1/endpoints/dunning.py`, `finance_invoices.py`,
+`app/services/sales_posting_service.py` (nur Commit-Steuerung), `compat.py::_list_docs`,
+eine additive Migration fuer `domain_inventory.articles`, Artikel-Nummernabfragen ohne
+Mandant, neue/angepasste Tests, QA-Doku. Fremde WIP (eBilanz, CI-Repair) unberuehrt.
+
+
 ## BESTANDSBUCH-EINKAUF-20261007 — abgeschlossen, Claude Code
 
 **Abnahme (07.10.2026):** alle fuenf Befunde behoben, dazu gleichartige Funde:
