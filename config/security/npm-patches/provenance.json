@@ -7,6 +7,22 @@
     {
       "patch": "stream-json@1.9.1.patch",
       "sha256": "6d8395e07dfdb6fab2faacfc7a1e7b78ef0b46d2acb292d58df8c96a66b4ad7a"
+    },
+    {
+      "patch": "node-forge@1.4.0.patch",
+      "sha256": "2798686e4488058ad81c3b8e32eb763c0feff21f4c717ce4d13b6ef2432cd5b8",
+      "source": "https://github.com/digitalbazaar/forge/pull/1152",
+      "source_tarball_integrity": "sha512-LarFH0+6VfriEhqMMcLX2F7SwSXeWwnEAJEsYm5QKWchiVYVvJyV9v7UDvUv+w5HO23ZpQTXDv/GxdDdMyOuoQ==",
+      "license": "(BSD-3-Clause OR GPL-2.0)",
+      "backport": "Local source repair; no vendor release; review and installed hashes in npm-backport-reviews.json"
+    },
+    {
+      "patch": "braces@3.0.3.patch",
+      "sha256": "803945b6b11ff5b6d9966ee59136eb23bf76953dbbcbc764740d0858c3eccb11",
+      "source": "https://github.com/micromatch/braces/issues/70",
+      "source_tarball_integrity": "sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==",
+      "license": "MIT",
+      "backport": "Local source repair; no vendor release; review and installed hashes in npm-backport-reviews.json"
     }
   ],
   "advisory": "https://github.com/uhop/stream-json/security/advisories/GHSA-528h-pc64-c93x",

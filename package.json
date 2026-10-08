@@ -106,7 +106,9 @@
     },
     "patchedDependencies": {
       "stream-json@1.9.1": "config/security/npm-patches/stream-json@1.9.1.patch",
-      "artillery@2.0.33": "config/security/npm-patches/artillery@2.0.33.patch"
+      "artillery@2.0.33": "config/security/npm-patches/artillery@2.0.33.patch",
+      "node-forge@1.4.0": "config/security/npm-patches/node-forge@1.4.0.patch",
+      "braces@3.0.3": "config/security/npm-patches/braces@3.0.3.patch"
     }
   },
   "scripts": {

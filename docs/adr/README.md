@@ -77,3 +77,4 @@ ADR-030 ist **nicht vergeben** (Lücke in der Nummerierung).
 
 - [ADR-078 Kanonische Lead-Maske und PostgreSQL-PDF-Archiv](adr-078-canonical-lead-postgresql-pdf.md)
 - [ADR-079 eBilanz XBRL-Entwuerfe (Proposed)](adr-079-ebilanz-xbrl-drafts.md)
+- [ADR-080 Nachweisgebundene Node-Sicherheitsbackports (Proposed)](adr-080-reviewed-node-source-backports.md)

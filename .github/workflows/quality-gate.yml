@@ -480,7 +480,21 @@ jobs:
       - name: pnpm audit
         run: |
           pnpm install --frozen-lockfile
-          pnpm audit --prod --audit-level high
+          node --test scripts/verify_node_security_releases.cjs
+          set +e
+          pnpm audit --prod --json > npm-audit-report.json
+          audit_exit=$?
+          set -e
+          node scripts/check_npm_backport_audit.cjs npm-audit-report.json "$audit_exit" npm-backport-decision.json
+
+      - name: Upload Node audit evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quality-node-audit-report
+          path: |
+            npm-audit-report.json
+            npm-backport-decision.json
 
   production-contract:
     name: Production contract and assessor simulation
