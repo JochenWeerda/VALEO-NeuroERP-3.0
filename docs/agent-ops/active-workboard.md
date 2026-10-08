@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## VERSANDWEGE-ECHT-20261008 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** Versandwege, die "versendet" melden ohne
+zu senden, auf die Postfaecher umstellen: (1) Einkauf `bestellungen/{id}/versenden` simuliert E-Mail
+ohne SMTP und setzt bei nicht eingerichtetem Fax/EDI "versandt"; (2) RFQ `send` meldet
+`suppliers_notified` ohne Nachricht; (3) Bridge `einkauf/anfragen/{id}/send` antwortet `sent: true`
+ohne Versand und ohne Speichern; (4) "Mahnung senden" setzt `sent` ohne Mail; Mahnlauf findet
+Rechnungs-OPs nicht (`kunde_id` statt `debtor_id`). Dazu Anhaenge/HTML in `mail_versand`.
+**Dateibesitz:** `app/services/mail_versand.py`, `modules/einkauf/services/versand_service.py`,
+`app/services/rfq_service.py`, `app/api/v1/endpoints/{rfq,dunning,einkauf_bestellvorschlag}.py`,
+`mask_frontend_bridges.py::send_anfrage`, eine additive Migration (dunning_notices), Tests, QA.
+Double-Opt-In-Mail (crm_consents) folgt separat. Fremde WIP unberuehrt.
+
+
 ## ADMIN-RECHTE-MULTISELECT-20261008 — abgeschlossen, Claude Code
 
 **Abnahme (08.10.2026):** `/api/v1/admin/*` hatte keine Rollenpruefung (Benutzer/Rollen/API-Schluessel
