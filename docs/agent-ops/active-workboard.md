@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## OFFENES-SCHLIESSEN-20261008 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** offene Punkte schliessen: (1)
+Gelangensbestaetigung: Dublette antwortet 503 statt 409, UAT-Vertrag mit fester
+Lieferschein-Nr. nicht wiederholbar; (2) `/purchase-orders/{id}/communications` schreibt in
+den Dokumentspeicher; (3) `domain_erp.bank_accounts.account_number` systemweit eindeutig;
+(4) `domain_ops.ops_bankkonten` ohne `tenant_id` — `/banken/konten` zeigt und aendert
+Bankkonten aller Mandanten; `/konten/iban-validate` hinter `/konten/{id}` unerreichbar.
+**Dateibesitz:** Gelangensbestaetigung-Endpoint + UAT-Test, PO-Kommunikationswege in
+`compat.py`, `banken.py`, `domain_operations` BankKonto-Modell/-Repository, eine additive
+Migration, neue Tests, QA-Doku. BANK-RECONCILIATION-PROOF (Codex) betrifft
+`domain_erp.bank_accounts`-Abgleich, nicht diese Constraints/`ops_bankkonten` — unberuehrt.
+
+
 ## FOLGEFUNDE-RESTBEFUNDE-20261008 — abgeschlossen, Claude Code
 
 **Abnahme (08.10.2026):** erfundene Mahnregeln/leere Mahnliste bei DB-Fehler -> 503;
