@@ -64,3 +64,7 @@ Die GitHub-Versionsmeldungen koennen erst nach dessen erneutem Graph-Scan
 als erledigt erscheinen. Der lokale Auditnachweis erklaert keinen kuenftigen
 GitHub-Lauf vorzeitig fuer gruen. Bestehende Chroma-/weitere Upstream-Befunde
 und die frische Tabellenkatalog-Abnahme bleiben eigene Nachweise.
+
+Nachverifikation auf 3f3927045: GitHub Security Scan37825541453 vollstaendig
+erfolgreich. Die offenen Dependabot-Meldungen681/682/683 fuer Handlebars
+sind nach dem Graph-Neuscan geschlossen.

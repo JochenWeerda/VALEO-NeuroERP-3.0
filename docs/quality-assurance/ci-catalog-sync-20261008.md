@@ -48,7 +48,7 @@ bereits migrierte Datenbank und speichert beide Katalogdateien im Artefakt
 laedt keinen alten Katalog als neuen Nachweis hoch. Daraus muss der genaue
 Schemaunterschied geprueft werden, bevor ein neuer Katalog integriert wird.
 
-Offen: frische CI-Ernte auswerten und den bestaetigten Drift schliessen. Die automatische
+Die automatische
 Freigabepruefung hat den Commit mit Upload zweimal abgelehnt, weil der
 frische Schemakatalog zusaetzliche bisher nicht veroeffentlichte Metadaten
 enthalten koennte. Auch die belegte oeffentliche Version der bisherigen
@@ -57,10 +57,40 @@ war lokal reviewbar in `.github/workflows/quality-gate.yml`. Auch ein erneuter
 Versuch nach weiter wurde von der automatischen Pruefung abgelehnt. Erst die
 anschliessende ausdrueckliche Nachricht "ich erlaube dir den Upload" hat die
 Aktivierung freigegeben; der Commit wurde danach zugelassen.
-Der lokale Pruefstand liefert
-bisher keinen Beleg fuer die genaue Ursache des frischen Schema-Drifts.
+Die genaue Ursache wurde anschliessend an der frischen Ernte nachgewiesen (siehe unten).
 
 Auf 02ce0879c sind grosser CI37788113807, Docs Build37788113871,
 Security Scan37788113995 und Smokes gruen. Quality Gate37788114327
 bleibt am Tabellenkatalog rot. Die Diagnose erweitert nur dessen Nachweis;
 kein Gate abgeschwaecht und keine weitere Datenbank erzeugt.
+
+## Frische Schema-Ernte und Integration
+
+Quality Gate37825542282 auf 3f3927045 hat den weiterhin roten Vergleich
+korrekt gemeldet und Artefakt11572410712 erzeugt. Die autorisierte Ernte
+enthaelt 670 Tabellen. Exakt neun Tabellen kommen gegenueber dem bisherigen
+661er-Katalog hinzu; keine Tabelle fehlt und keine bestehende Definition
+oder Verbraucherzuordnung unterscheidet sich:
+
+- `domain_crm.contacts`
+- `domain_inventory.article_alternative_eans`
+- `domain_inventory.article_analyses`
+- `domain_inventory.article_print_settings`
+- `domain_inventory.article_units`
+- `domain_inventory.nawaro_area_sheet_rows`
+- `domain_inventory.nawaro_contract_sheet_rows`
+- `domain_inventory.nawaro_raps_balances`
+- `domain_inventory.nawaro_raps_certificates`
+
+Dies sind exakt die zuvor rein lesend festgestellten ORM-Tabellen, die auf
+dem lokalen migrationsbasierten Pruefstand fehlen. Der frische CI-Aufbau
+fuehrt nach Alembic die vorhandene additive ORM-Initialisierung aus. Beide
+generierten Katalogdateien stammen unveraendert inhaltlich aus diesem
+Artefakt; JSON-Serialisierung und Markdown-Darstellung wurden erneut mit
+dem kanonischen Generator verglichen. Keine manuellen Schemaannahmen,
+keine Migration, kein Reset und keine zusaetzliche Datenbank oder Container.
+Die fremden lokalen Katalog-Arbeitsfassungen bleiben erhalten.
+
+Der lokale 661er-Pruefstand kann nach dieser Korrektur den physischen
+670er-Katalog nicht mehr bestaetigen. Die Nachabnahme erfolgt deshalb im
+bestehenden frischen GitHub-Job; sein Gate bleibt verbindlich.
