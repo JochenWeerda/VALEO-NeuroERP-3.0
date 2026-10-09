@@ -1,0 +1,27 @@
+slice_id: CI-COMMAND-INVENTORY-20261009
+title: Endpunkt-Inventar nach Command-Auslagerung aktualisieren
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-09
+goal: Den auf GitHub belegten Inventar-Drift ohne fremde Quell-WIP schliessen.
+file_ownership:
+  - docs/schnittstellen/endpoint-inventory.md isoliertes Generatorartefakt
+  - Eigener QA-Nachtrag, Slice und Workboard
+acceptance:
+  - Alle drei Code-Inventare bestehen --check.
+  - Fremde Arbeitsbaum-Inventare bleiben unveraendert.
+tests:
+  - generate_code_inventories.py --check im exakten isolierten Source-Snapshot
+ai_harness:
+  fachlicher_vertrag: Keine neue Fachwirkung, bestehende Command-Lieferung korrekt dokumentiert.
+  architektur_vertrag: Bestehendes Endpunkt-Inventar und bestehender CI-Integrationsclaim.
+  daten_vertrag: Keine Datenbankwirkung.
+  test_vertrag: Echter Generatorcheck statt manuell erfundener Inventarzeilen.
+  security_vertrag: Keine Auth- oder Freigabeaenderung.
+  betriebs_vertrag: Keine neue PG-Datenbank, Docker-Ressource, Migration oder Reset.
+  dokumentations_vertrag: Inventar, QA-Nachtrag, Slice und Workboard gemeinsam.
+external_gates:
+  - GitHub-Docs-Build nach Push
+risks:
+  - Gesamtabnahme und fuenf Fuhrpark-Fachcommands weiterhin separat offen.
+validation: Alle drei Inventarchecks im isolierten Snapshot gruen; andere Inventare nur datumsbedingt und unveraendert erhalten.

@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-08
+last_reviewed: 2026-10-09
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -432,7 +432,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `tenants` | Tenant API endpoints |
 | `terminology` | Terminology API for the Landhandel bilingual terminology registry. |
 | `tours` | Tours API - Verladung/Tour Management |
-| `training` | — |
+| `training` | Training, qualification and onboarding CRUD endpoints. |
 | `transporte` | Transporte — Fahrerverwaltung, vollständiges CRUD. |
 | `users` | User API endpoints |
 | `ux_overlays` | User-scoped ScreenDefinition overlays (UIX-071). |
