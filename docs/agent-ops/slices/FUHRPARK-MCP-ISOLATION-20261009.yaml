@@ -21,3 +21,17 @@ risks:
   - Keine externe OIDC-UAT oder Parallel-Lastabnahme.
   - Nicht jeder MCP-Fachhandler ist durch echte PG-E2E-Wirkungstests abgedeckt.
   - FIN-CLOSE und Zahlauf bleiben separat offen.
+tests:
+  - tests/test_fuhrpark_isolation_effects.py
+  - Bestehende Fuhrpark-Vertiefung und MCP-Tenant-Read-CRUD-Vertraege
+ai_harness:
+  fachlicher_vertrag: Fremde Fuhrpark-Datensaetze und Fahrzeugreferenzen werden abgewiesen.
+  architektur_vertrag: Bestehende Commands und kanonische OIDC-Mandantenclaims.
+  daten_vertrag: Eigene atomare Fachmutation und Audit mit unveraenderlicher Mandantenidentitaet.
+  test_vertrag: Original21 Fehler reproduziert und echte PG-Transaktionswirkungen geprueft.
+  security_vertrag: Token-Mandant und zentrale Override-Guards fuer alle56 MCP-Tools.
+  betriebs_vertrag: Gemeinsame valeo_probe lokal und bereitgestellte Jobdatenbank in GitHub.
+  dokumentations_vertrag: Slice und QA und Workboard und Gaps gemeinsam aktualisiert.
+external_gates:
+  - GitHub-Dokumentations- und API-Pruefungen nach Push
+  - Externe OIDC-UAT und Parallel-Lastabnahme separat

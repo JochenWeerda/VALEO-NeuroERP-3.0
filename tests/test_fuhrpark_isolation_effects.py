@@ -26,11 +26,18 @@ CASES = [
 
 @pytest.fixture
 def db():
-    from scripts.pruefstand_db import pruefstand_url
-    if not os.environ.get("TEST_DATABASE_URL"):
-        pytest.fail("Set TEST_DATABASE_URL to the existing shared probe; no development database fallback")
-    url=pruefstand_url()
-    assert url.database == "valeo_probe" or any(k in url.database for k in ("test", "probe", "pruefstand"))
+    from sqlalchemy.engine import make_url
+    is_github_job = os.environ.get("GITHUB_ACTIONS") == "true"
+    raw = os.environ.get("TEST_DATABASE_URL") or (
+        os.environ.get("DATABASE_URL") if is_github_job else None
+    )
+    if not raw:
+        pytest.fail("Set TEST_DATABASE_URL to the existing shared probe; no local development fallback")
+    url = make_url(raw)
+    assert url.database and (
+        any(k in url.database for k in ("test", "probe", "pruefstand"))
+        or (is_github_job and url.database == "valeo_neuro_erp")
+    ), "Use only the shared probe or the database already provided by the GitHub job"
     engine=create_engine(url, connect_args={"connect_timeout":5})
     with engine.connect() as connection:
         transaction=connection.begin()
@@ -59,6 +66,7 @@ def client(db, tenant):
 def body(data):
     return {k:v.isoformat() if isinstance(v,datetime) else v for k,v in data.items()}
 
+@pytest.mark.needs_live_db
 @pytest.mark.parametrize("case", CASES, ids=lambda c:c[0])
 def test_repository_crud_foreign_rows_are_invisible(db, seeded, case):
     tenant,foreign,ids=seeded
@@ -72,6 +80,7 @@ def test_repository_crud_foreign_rows_are_invisible(db, seeded, case):
     own=service.create(tenant,data,commit=False)
     assert own.tenant_id==tenant
 
+@pytest.mark.needs_live_db
 @pytest.mark.parametrize("case", CASES, ids=lambda c:c[0])
 @pytest.mark.parametrize("mode", ["validate","dryRun","propose","execute"])
 def test_http_command_rejects_foreign_entity_in_all_modes(db, seeded, case, mode):
@@ -83,6 +92,7 @@ def test_http_command_rejects_foreign_entity_in_all_modes(db, seeded, case, mode
     assert repo(db).get_by_id(foreign,ids[name]) is not None
     assert repo(db).get_all(tenant)==[]
 
+@pytest.mark.needs_live_db
 @pytest.mark.parametrize("case", CASES, ids=lambda c:c[0])
 @pytest.mark.parametrize("mode", ["validate","dryRun","propose","execute"])
 def test_mcp_command_rejects_foreign_entity_in_all_modes(db, seeded, case, mode):
@@ -94,12 +104,14 @@ def test_mcp_command_rejects_foreign_entity_in_all_modes(db, seeded, case, mode)
     assert error.value.status_code==404
     assert repo(db).get_by_id(foreign,ids[name]) is not None
 
+@pytest.mark.needs_live_db
 @pytest.mark.parametrize("case", CASES, ids=lambda c:c[0])
 def test_http_header_cannot_choose_foreign_tenant(db,seeded,case):
     tenant,foreign,ids=seeded
     response=client(db,tenant).get(f"/api/v1/fuhrpark/{case[0]}",headers={"X-Tenant-ID":foreign})
     assert response.status_code==403
 
+@pytest.mark.needs_live_db
 @pytest.mark.parametrize("mode", ["validate","dryRun","propose","execute"])
 def test_invoice_cannot_reference_foreign_vehicle(db,seeded,mode):
     tenant,foreign,ids=seeded
@@ -125,6 +137,7 @@ def test_conflicting_token_tenant_aliases_are_rejected():
     db.execute.assert_not_called()
 
 
+@pytest.mark.needs_live_db
 @pytest.mark.parametrize("case", CASES, ids=lambda c:c[0])
 @pytest.mark.parametrize("failure", [None,"audit"])
 @pytest.mark.parametrize("transport", ["http","mcp"])
@@ -159,6 +172,7 @@ def test_real_writes_and_audit_are_atomic(db,seeded,case,failure,transport):
     assert audits==(0 if failure else 1)
     assert repo(db).get_by_id(foreign,ids[name]) is not None
 
+@pytest.mark.needs_live_db
 @pytest.mark.parametrize("case", CASES, ids=lambda c:c[0])
 def test_repository_cannot_change_primary_key_or_tenant(db,seeded,case):
     tenant,foreign,ids=seeded
@@ -167,6 +181,7 @@ def test_repository_cannot_change_primary_key_or_tenant(db,seeded,case):
     row=service.update(foreign,ids[name],{"id":"injected-id","tenant_id":tenant,"mandanten_id":tenant},commit=False)
     assert row.id==ids[name] and row.tenant_id==foreign
 
+@pytest.mark.needs_live_db
 @pytest.mark.parametrize("mode", ["validate","dryRun","propose","execute"])
 def test_mcp_delete_rejects_actual_foreign_vehicle(db,seeded,mode):
     tenant,foreign,ids=seeded

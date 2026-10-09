@@ -73,3 +73,26 @@ FIN-CLOSE gegen ADR-076 und Zahlauf open_high bleiben eigene offene Themen.
 Die fuenf frueheren Fuhrpark blocked_missing_tenant-Eintraege sind geschlossen:
 41 mapped, 0 blocked_missing_tenant, 0 blocked_no_endpoint, 13 local_ui,
 1 open_high; Registry 56. GitHub-Folgeabnahme erfolgt nach Push.
+
+## CI-Nachintegration
+
+Auf GitHub 8c74b3b34 sind OpenAPI, Docs Build, require_db, semantische
+Kernpfade und Erntepeak gruen. DocsGovernance fand drei fehlende Slice-Pflichtfelder
+(tests, ai_harness, external_gates); diese sind ergaenzt, der gezielte Check
+besteht fuer genau eine Slice-Datei.
+
+Neue PG-Tests verwenden lokal nur explizite TEST_DATABASE_URL fuer den bestehenden
+Probe-Pruefstand. Auf GITHUB_ACTIONS=true wird alternativ exakt die bereits vom
+Job bereitgestellte DATABASE_URL verwendet, auch bei dessen historischem Namen
+valeo_neuro_erp. Lokal ist dieser Entwicklungsdatenbank-Fallback ausgeschlossen.
+Alle68 neuen PG-Vertraege tragen needs_live_db; die169 reinen Guards brauchen
+keine Datenbank. Der strenge require_db-Workflow nimmt damit die neuen Vertrage mit.
+
+Die12 bisherigen Fuhrpark-Vertiefungstests lesen/schreiben keine beliebigen
+Bestandsfahrzeuge mehr und benoetigen keine produktive SessionLocal-Verbindung.
+Sie verwenden eigene Probe-Fahrzeuge, verifizierte Testclaims auf einer lokalen
+Test-App und aeussere Rollback-Transaktionen; keine Seed-/Leasing-Skips.
+Finaler isolierter Lieferstand: **581 Tests ohne Skip in29,51s**.
+Ueber den CI-Verbindungspfad: **80 echte PostgreSQL-Vertraege bestanden**,
+169 reine Guards dort gezielt deselectiert. Keine neue DB/Container/Reset/Migration.
+GitHub-Folgeabnahme nach dem CI-Fix bleibt separat zu beobachten.

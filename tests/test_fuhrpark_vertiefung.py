@@ -6,11 +6,19 @@ Markers: integration, needs_live_db — nicht in CI-Smoke-Runs.
 from __future__ import annotations
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from uuid import uuid4
 from sqlalchemy import text
 
-from app.core.database import SessionLocal
-from main import app
+from app.api.v1.endpoints import fuhrpark
+from app.auth.deps_oidc import get_current_user
+from app.core.database import get_db
+from app.domains.operations.repository import FahrzeugRepository
+from test_fuhrpark_isolation_effects import db
+
+app = FastAPI()
+app.include_router(fuhrpark.router, prefix="/api/v1")
 
 pytestmark = [pytest.mark.integration, pytest.mark.needs_live_db]
 
@@ -19,41 +27,26 @@ HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": TENANT_ID}
 client = TestClient(app, raise_server_exceptions=False, base_url="http://localhost")
 
 
-def _vertiefung_tables_ready() -> bool:
-    db = SessionLocal()
-    try:
-        n = db.execute(
-            text(
-                "SELECT count(*) FROM information_schema.tables "
-                "WHERE table_schema = 'domain_ops' "
-                "AND table_name IN ('ops_fahrzeug_status_historie', 'ops_fahrzeug_schaeden', 'ops_fahrzeug_bussgeld')"
-            )
-        ).scalar()
-        return int(n or 0) == 3
-    finally:
-        db.close()
+@pytest.fixture(autouse=True)
+def isolated_client(db):
+    app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_current_user] = lambda: {
+        "sub": "fuhrpark-integration-test", "scopes": ["logistics:read", "logistics:write"],
+        "raw": {"tenant_id": TENANT_ID},
+    }
+    yield
+    app.dependency_overrides.clear()
 
 
-def _get_or_create_fahrzeug() -> str | None:
-    """Liefert eine Fahrzeug-ID aus ops_fahrzeuge, oder None wenn Tabelle leer."""
-    db = SessionLocal()
-    try:
-        row = db.execute(
-            text("SELECT id FROM domain_ops.ops_fahrzeuge LIMIT 1")
-        ).fetchone()
-        return str(row[0]) if row else None
-    finally:
-        db.close()
-
-
-@pytest.fixture(scope="module")
-def fahrzeug_id() -> str:
-    if not _vertiefung_tables_ready():
-        pytest.skip("Fuhrpark-Vertiefung-Tabellen fehlen — bitte alembic upgrade head ausführen.")
-    fid = _get_or_create_fahrzeug()
-    if fid is None:
-        pytest.skip("Keine Fahrzeuge in domain_ops.ops_fahrzeuge — Seed erforderlich.")
-    return fid
+@pytest.fixture
+def fahrzeug_id(db) -> str:
+    """Only our own vehicle; outer probe transaction rolls back every mutation."""
+    row = FahrzeugRepository(db).create(TENANT_ID, {
+        "kennzeichen": "TEST-" + uuid4().hex[:8], "typ": "LKW",
+        "leasinggesellschaft": None,
+    }, commit=False)
+    db.commit()
+    return row.id
 
 
 # ── Status-Historie ───────────────────────────────────────────────────────────
@@ -206,18 +199,6 @@ class TestWartungsVorhersage:
 class TestLeasingRueckgabe:
     def test_rueckgabe_ohne_leasing_schlaegt_fehl(self, fahrzeug_id: str) -> None:
         """Fahrzeuge ohne leasinggesellschaft müssen 422 liefern."""
-        db = SessionLocal()
-        try:
-            lsg = db.execute(
-                text("SELECT leasinggesellschaft FROM domain_ops.ops_fahrzeuge WHERE id = :id"),
-                {"id": fahrzeug_id},
-            ).scalar()
-        finally:
-            db.close()
-
-        if lsg:
-            pytest.skip("Test-Fahrzeug hat bereits eine Leasinggesellschaft — skip Fehlerfall.")
-
         r = client.post(
             f"/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/leasing-rueckgabe",
             json={"rueckgabedatum": "2026-06-16T12:00:00Z", "km_stand_bei_rueckgabe": 145000},
