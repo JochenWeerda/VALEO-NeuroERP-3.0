@@ -215,6 +215,119 @@ class MobileSyncProcessPendingInput(BaseModel):
     reason: str = Field(default="MCP MDE-Verarbeitung", min_length=3, max_length=500)
 
 
+class SanctionsCheckInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    name: str = Field(min_length=1, max_length=240)
+    scope: Literal["customers", "personal", "manual"]
+    entity_ref: str | None = Field(default=None, max_length=120)
+
+
+class FrachttabelleAnlegenInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    tabelle_nr: str = Field(min_length=1, max_length=20)
+    bezeichnung: str = Field(min_length=1, max_length=240)
+    einheit: str | None = Field(default=None, max_length=20)
+    waehrung: str = Field(default="EUR", min_length=1, max_length=3)
+
+
+class BonusCalculateInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    report_id: Literal["bonus-by-customer", "bonus-by-article-group"]
+    from_date: date
+    to_date: date
+    rate_pct: Decimal = Field(gt=0, le=100)
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class QueryImportSignedInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    bundle: dict[str, Any]
+    reason: str = Field(min_length=5, max_length=500)
+
+
+class TourAnlegenInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    date: datetime | None = None
+    vehicle_id: str | None = Field(default=None, max_length=64)
+    driver_id: str | None = Field(default=None, max_length=64)
+    notes: str | None = Field(default=None, max_length=2000)
+    delivery_note_ref: str | None = Field(default=None, max_length=80)
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class BestellungSpeichernInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    bestellung_id: str = Field(min_length=1, max_length=64)
+    lieferdatum_wunsch: date | None = None
+    lieferdatum_zugesagt: date | None = None
+    ladetermin: date | None = None
+    ladetermin_ab: date | None = None
+    versand_art: Literal["email", "fax", "edi", "post", "telefon", "manuell"] | None = None
+    unsere_referenz: str | None = Field(default=None, max_length=120)
+    ihre_referenz: str | None = Field(default=None, max_length=120)
+    notiz: str | None = Field(default=None, max_length=4000)
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class BewerbungSpeichernInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    applicant_name: str = Field(min_length=1, max_length=200)
+    applicant_email: str = Field(min_length=3, max_length=200)
+    position_title: str | None = Field(default=None, max_length=200)
+    source: str | None = Field(default=None, max_length=80)
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class EinwilligungAnlegenInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    wortlaut: str = Field(min_length=1, max_length=20000)
+    erstellt_durch: str | None = Field(default=None, max_length=120)
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class PostfachSpeichernInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    kennung: str = Field(min_length=1, max_length=80)
+    absender_email: str = Field(min_length=3, max_length=200)
+    anbieter: Literal["ionos", "google", "microsoft", "smtp", "alias"] = "smtp"
+    anmeldung: Literal["passwort", "oauth2"] = "passwort"
+    bezeichnung: str | None = Field(default=None, max_length=200)
+    absender_name: str | None = Field(default=None, max_length=200)
+    postfach_id: str | None = Field(default=None, max_length=64)
+    passwort: str | None = Field(default=None, max_length=500)
+    smtp_host: str | None = Field(default=None, max_length=200)
+    smtp_port: int | None = Field(default=None, ge=1, le=65535)
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class OnboardingSpeichernInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    employee_ref: str = Field(min_length=1, max_length=120)
+    checklist_id: str = Field(min_length=1, max_length=64)
+    assigned_by: str | None = Field(default=None, max_length=120)
+    due_date: str | None = Field(default=None, max_length=40)
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class QualifikationSpeichernInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    employee_ref: str = Field(min_length=1, max_length=120)
+    role_code: str = Field(min_length=1, max_length=80)
+    qualification_level: str = Field(default="basic", max_length=40)
+    skills: list[str] | None = None
+    valid_until: str | None = Field(default=None, max_length=40)
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class SchulungSpeichernInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    employee_ref: str = Field(min_length=1, max_length=120)
+    course_id: str = Field(min_length=1, max_length=64)
+    assigned_by: str | None = Field(default=None, max_length=120)
+    due_date: str | None = Field(default=None, max_length=40)
+    reason: str = Field(min_length=3, max_length=500)
+
+
 _FEED_ANALYSIS_TARGETS: dict[str, AnalysisStatus] = {
     "release": AnalysisStatus.RELEASED,
     "reject": AnalysisStatus.REJECTED,
@@ -380,12 +493,21 @@ _OPEN_ITEM_KONTO_TYP = {
 }
 
 
+# Nie aus Tool-Parametern akzeptieren — nur Token/Claims.
+_FORBIDDEN_PARAMETER_IDENTITY_KEYS = frozenset({
+    "tenant_id",
+    "mandanten_id",
+    "bediener",
+    "approval_granted",
+})
+
+
 def _tenant_from_claims(raw: object) -> str | None:
     """Mandanten-ID nur aus verifiziertem Token — nie aus Tool-Parametern.
 
     Akzeptiert ``tenant_id`` (kanonisch) und ``mandanten_id`` (Alias in manchen
     IdP-Claims). Ein Client-Parameter ``mandanten_id`` bleibt durch
-    ``extra=forbid`` abgewiesen.
+    ``extra=forbid`` und den zentralen Parameter-Guard abgewiesen.
     """
     if not isinstance(raw, dict):
         return None
@@ -394,6 +516,19 @@ def _tenant_from_claims(raw: object) -> str | None:
         if isinstance(value, str) and value.strip():
             return value.strip()
     return None
+
+
+def _reject_identity_parameters(parameters: dict[str, Any]) -> None:
+    """Top-Level-Identitaetsfelder in Tool-Parametern hart ablehnen (422)."""
+    if not isinstance(parameters, dict):
+        raise HTTPException(422, "Tool parameters must be an object")
+    hit = sorted(_FORBIDDEN_PARAMETER_IDENTITY_KEYS.intersection(parameters))
+    if hit:
+        raise HTTPException(
+            422,
+            "Identity or approval fields are not allowed in tool parameters: "
+            + ", ".join(hit),
+        )
 
 
 def _customer_in_tenant(db: Session, *, kunden_nr: str, tenant: str) -> dict | None:
@@ -450,6 +585,7 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         raise HTTPException(403, "Identity claims exceed the ERP field limits")
     if tenant_header is not None and tenant_header != tenant:
         raise HTTPException(403, "Tenant header does not match the verified token")
+    _reject_identity_parameters(request.parameters)
     try:
         tool = mcp_tool_registry_service.get_tool(request.tool_name)
     except KeyError as exc:
@@ -493,6 +629,30 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _gobd_export_status(db, request, actor, tenant)
     if request.tool_name == "compliance.gate.status":
         return _compliance_gate_status(db, request, actor, tenant)
+    if request.tool_name == "compliance.sanctions.check":
+        return _sanctions_check(db, request, actor, tenant)
+    if request.tool_name == "logistik.frachttabelle.anlegen":
+        return _frachttabelle_anlegen(db, request, actor, tenant)
+    if request.tool_name == "reporting.bonus.calculate":
+        return _bonus_calculate(db, request, actor, tenant)
+    if request.tool_name == "reporting.query.import_signed":
+        return _query_import_signed(db, request, actor, tenant)
+    if request.tool_name == "logistik.tour.anlegen":
+        return _tour_anlegen(db, request, actor, tenant)
+    if request.tool_name == "einkauf.bestellung.speichern":
+        return _bestellung_speichern(db, request, actor, tenant)
+    if request.tool_name == "hr.bewerbung.speichern":
+        return _bewerbung_speichern(db, request, actor, tenant)
+    if request.tool_name == "hr.einwilligung.anlegen":
+        return _einwilligung_anlegen(db, request, actor, tenant)
+    if request.tool_name == "hr.onboarding.speichern":
+        return _onboarding_speichern(db, request, actor, tenant)
+    if request.tool_name == "hr.qualifikation.speichern":
+        return _qualifikation_speichern(db, request, actor, tenant)
+    if request.tool_name == "hr.schulung.speichern":
+        return _schulung_speichern(db, request, actor, tenant)
+    if request.tool_name == "admin.postfach.speichern":
+        return _postfach_speichern(db, request, actor, tenant)
     if request.tool_name == "agrar.contract.get":
         return _agrar_contract_get(db, request, actor, tenant)
     if request.tool_name == "agrar.weighing_ticket.list":
@@ -839,6 +999,826 @@ def _compliance_gate_status(db: Session, request: ToolExecutionRequest, actor: s
 
         result = {"success": True, "mode": request.mode, "items": items, "count": len(items)}
         db.rollback()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _sanctions_check(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: sanctions check via existing list + protocol helpers."""
+    try:
+        opened = SanctionsCheckInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid compliance.sanctions.check parameters") from exc
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.api.v1.endpoints.sanctions_compliance import (
+            match_sanctions_name,
+            persist_sanctions_check,
+        )
+
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+
+        treffer, status, empfehlung = match_sanctions_name(db, opened.name)
+        treffer_payload = [t.model_dump() for t in treffer]
+        if request.mode != "execute":
+            db.rollback()
+            return {
+                "success": True,
+                "mode": request.mode,
+                "status": status,
+                "empfehlung": empfehlung,
+                "treffer": treffer_payload,
+                "proposedChanges": parameters,
+            }
+
+        check_id = persist_sanctions_check(
+            db,
+            tenant_id=tenant,
+            name=opened.name,
+            status=status,
+            scope=opened.scope,
+            entity_ref=opened.entity_ref,
+            checked_by=actor,
+            commit=False,
+        )
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant,
+            action_key=request.tool_name,
+            entity_type="sanctions_check",
+            entity_id=check_id,
+            audit_reason="MCP sanctions check",
+            idempotency_key=request.idempotency_key,
+            summary=f"Sanktionspruefung {opened.scope}: {status} fuer {opened.name} by {actor}",
+        )
+        result = {
+            "success": True,
+            "mode": "execute",
+            "replayed": False,
+            "status": status,
+            "empfehlung": empfehlung,
+            "treffer": treffer_payload,
+            "check_id": check_id,
+            "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _frachttabelle_anlegen(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: create freight table in authenticated tenant."""
+    try:
+        opened = FrachttabelleAnlegenInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid logistik.frachttabelle.anlegen parameters") from exc
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.api.v1.endpoints.logistik_frachttabellen import insert_frachttabelle
+
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+
+        if request.mode != "execute":
+            existing = db.execute(text("""
+                SELECT id FROM domain_shared.logistik_frachttabellen
+                WHERE tenant_id = :tid AND tabelle_nr = :nr
+            """), {"tid": tenant, "nr": opened.tabelle_nr}).fetchone()
+            db.rollback()
+            if existing:
+                raise HTTPException(409, f"Frachttabelle {opened.tabelle_nr} bereits vorhanden.")
+            return {
+                "success": True,
+                "mode": request.mode,
+                "proposedChanges": parameters,
+            }
+
+        row = insert_frachttabelle(
+            db,
+            tenant_id=tenant,
+            tabelle_nr=opened.tabelle_nr,
+            bezeichnung=opened.bezeichnung,
+            einheit=opened.einheit,
+            waehrung=opened.waehrung,
+            commit=False,
+        )
+        entity_id = str(row["id"])
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant,
+            action_key=request.tool_name,
+            entity_type="frachttabelle",
+            entity_id=entity_id,
+            audit_reason="MCP frachttabelle anlegen",
+            idempotency_key=request.idempotency_key,
+            summary=f"Frachttabelle {opened.tabelle_nr} angelegt by {actor}",
+        )
+        result = {
+            "success": True,
+            "mode": "execute",
+            "replayed": False,
+            "id": entity_id,
+            "tabelle_nr": opened.tabelle_nr,
+            "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _bonus_calculate(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: calculate immutable bonus run via L3ReportCatalogService."""
+    try:
+        opened = BonusCalculateInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid reporting.bonus.calculate parameters") from exc
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.services.l3_report_catalog_service import L3ReportCatalogService, ReportCatalogError
+
+        svc = L3ReportCatalogService(db, tenant)
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        try:
+            svc.validate_bonus_run_params(
+                report_id=opened.report_id,
+                from_date=opened.from_date,
+                to_date=opened.to_date,
+                rate_pct=opened.rate_pct,
+                reason=opened.reason,
+            )
+        except ReportCatalogError as exc:
+            raise HTTPException(422, str(exc)) from exc
+        if request.mode != "execute":
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": parameters}
+        created = svc.create_bonus_run(
+            report_id=opened.report_id,
+            from_date=opened.from_date,
+            to_date=opened.to_date,
+            rate_pct=opened.rate_pct,
+            actor=actor,
+            reason=opened.reason,
+        )
+        run_id = str(created["id"])
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant,
+            action_key=request.tool_name,
+            entity_type="bonus_run",
+            entity_id=run_id,
+            audit_reason="MCP bonus calculate",
+            idempotency_key=request.idempotency_key,
+            summary=f"Bonuslauf {opened.report_id} by {actor}",
+        )
+        result = {
+            "success": True,
+            "mode": "execute",
+            "replayed": False,
+            "run_id": run_id,
+            "lines": created.get("lines"),
+            "total_bonus": float(created.get("total_bonus") or 0),
+            "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _query_import_signed(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: import HMAC-signed query definition."""
+    try:
+        opened = QueryImportSignedInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid reporting.query.import_signed parameters") from exc
+    parameters = {"reason": opened.reason, "bundle_keys": sorted(opened.bundle.keys())}
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(
+        json.dumps({"reason": opened.reason, "bundle": opened.bundle}, sort_keys=True, ensure_ascii=False, default=str).encode()
+    ).hexdigest()
+    try:
+        from app.core.config import settings
+        from app.services.query_center_service import QueryCenterError, QueryCenterService
+
+        svc = QueryCenterService(db, tenant, signing_key=settings.SECRET_KEY)
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        try:
+            preview = svc.preview_import_signed(opened.bundle)
+        except QueryCenterError as exc:
+            raise HTTPException(422, str(exc)) from exc
+        if request.mode != "execute":
+            db.rollback()
+            return {
+                "success": True,
+                "mode": request.mode,
+                "proposedChanges": {**parameters, **preview},
+            }
+        saved = svc.import_signed(opened.bundle, actor=actor, reason=opened.reason)
+        def_id = str(saved.get("id") or "")
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant,
+            action_key=request.tool_name,
+            entity_type="query_definition",
+            entity_id=def_id or tenant,
+            audit_reason="MCP query import signed",
+            idempotency_key=request.idempotency_key,
+            summary=f"Abfrage importiert {preview.get('name')} by {actor}",
+        )
+        result = {
+            "success": True,
+            "mode": "execute",
+            "replayed": False,
+            "definition_id": def_id,
+            "name": preview.get("name"),
+            "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _tour_anlegen(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: create logistics tour in authenticated tenant."""
+    try:
+        opened = TourAnlegenInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid logistik.tour.anlegen parameters") from exc
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.api.v1.endpoints.logistics_tours import insert_tour
+
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        stops: list[dict[str, Any]] = []
+        if opened.delivery_note_ref:
+            stops.append({"delivery_note_ref": opened.delivery_note_ref, "stop_order": 0})
+        if request.mode != "execute":
+            if opened.delivery_note_ref:
+                from app.api.v1.endpoints.logistics_tours import _lookup_sales_delivery_note
+
+                if _lookup_sales_delivery_note(db, opened.delivery_note_ref, tenant) is None:
+                    raise HTTPException(404, "Delivery note not found in the authenticated tenant")
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": parameters}
+        row = insert_tour(
+            db,
+            tenant_id=tenant,
+            date_value=opened.date,
+            vehicle_id=opened.vehicle_id,
+            driver_id=opened.driver_id,
+            notes=opened.notes,
+            stops=stops,
+            commit=False,
+        )
+        tour_id = str(row["id"])
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant,
+            action_key=request.tool_name,
+            entity_type="logistics_tour",
+            entity_id=tour_id,
+            audit_reason=opened.reason,
+            idempotency_key=request.idempotency_key,
+            summary=f"Tour angelegt by {actor}",
+        )
+        result = {
+            "success": True,
+            "mode": "execute",
+            "replayed": False,
+            "tour_id": tour_id,
+            "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _bestellung_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: update PO header fields in authenticated tenant."""
+    try:
+        opened = BestellungSpeichernInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid einkauf.bestellung.speichern parameters") from exc
+    parameters = opened.model_dump(mode="json", exclude_none=True)
+    patch = {
+        k: v for k, v in parameters.items()
+        if k not in ("bestellung_id", "reason") and v is not None
+    }
+    if not patch:
+        raise HTTPException(422, "At least one purchase-order header field is required")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        resolved = db.execute(text("""
+            SELECT id::text AS id, bestellnummer, status
+            FROM domain_einkauf.bestellungen
+            WHERE tenant_id::text = :tenant
+              AND (id::text = :bid OR bestellnummer = :bid)
+            FOR SHARE
+            LIMIT 1
+        """), {"tenant": tenant, "bid": opened.bestellung_id}).mappings().first()
+        if not resolved:
+            raise HTTPException(404, "Purchase order not found in the authenticated tenant")
+        bestellung_id = str(resolved["id"])
+        if request.mode != "execute":
+            db.rollback()
+            return {
+                "success": True,
+                "mode": request.mode,
+                "proposedChanges": {
+                    **parameters,
+                    "bestellung_id": bestellung_id,
+                    "bestellnummer": resolved.get("bestellnummer"),
+                    "status": resolved.get("status"),
+                    "patch": patch,
+                },
+            }
+        with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as child:
+            updated = ProcurementService(child, tenant).update_bestellung(bestellung_id, patch)
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant,
+            action_key=request.tool_name,
+            entity_type="einkauf_bestellung",
+            entity_id=bestellung_id,
+            audit_reason=opened.reason,
+            idempotency_key=request.idempotency_key,
+            summary=f"Bestellung {resolved.get('bestellnummer') or bestellung_id} gespeichert by {actor}",
+        )
+        result = {
+            "success": True,
+            "mode": "execute",
+            "replayed": False,
+            "bestellung_id": bestellung_id,
+            "bestellnummer": resolved.get("bestellnummer"),
+            "status": updated.get("status"),
+            "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except EntityNotFoundError as exc:
+        db.rollback()
+        raise HTTPException(404, "Purchase order not found in the authenticated tenant") from exc
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _bewerbung_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: create HR application in authenticated tenant."""
+    try:
+        opened = BewerbungSpeichernInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid hr.bewerbung.speichern parameters") from exc
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.api.v1.schemas.personal_bewerbung_schemas import BewerbungIn
+        from app.core.uuid7 import uuid7
+        from app.services import bewerbung_service as dienst
+
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        payload = BewerbungIn(
+            applicant_name=opened.applicant_name,
+            applicant_email=opened.applicant_email,
+            position_title=opened.position_title,
+            source=opened.source,
+        )
+        if request.mode != "execute":
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": parameters}
+        created = dienst.anlegen(db, tenant, str(uuid7()), payload)
+        app_id = str(created["id"])
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="hr_application", entity_id=app_id,
+            audit_reason=opened.reason, idempotency_key=request.idempotency_key,
+            summary=f"Bewerbung {opened.applicant_name} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False,
+            "application_id": app_id, "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _einwilligung_anlegen(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: immutable consent text version in authenticated tenant."""
+    try:
+        opened = EinwilligungAnlegenInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid hr.einwilligung.anlegen parameters") from exc
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.core.uuid7 import uuid7
+        from app.services import bewerbung_einwilligung_service as einwilligung
+
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        if request.mode != "execute":
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": {
+                "wortlaut": opened.wortlaut[:120], "erstellt_durch": opened.erstellt_durch or actor,
+            }}
+        created = einwilligung.erklaerung_anlegen(
+            db, tenant, str(uuid7()), opened.wortlaut, opened.erstellt_durch or actor,
+        )
+        entity_id = str(created.get("id") or created.get("fassung") or "")
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="hr_consent_text", entity_id=entity_id or tenant,
+            audit_reason=opened.reason, idempotency_key=request.idempotency_key,
+            summary=f"Einwilligungsfassung by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False,
+            "erklaerung_id": entity_id, "fassung": created.get("fassung"),
+            "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _onboarding_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: onboarding run in authenticated tenant (checklist tenant-bound)."""
+    try:
+        opened = OnboardingSpeichernInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid hr.onboarding.speichern parameters") from exc
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.api.v1.endpoints.training import insert_onboarding_run
+
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        payload = {
+            "checklist_id": opened.checklist_id,
+            "employee_ref": opened.employee_ref,
+            "assigned_by": opened.assigned_by or actor,
+            "due_date": opened.due_date,
+            "status": "not_started",
+            "progress_percent": 0,
+            "state": {},
+        }
+        if request.mode != "execute":
+            from app.api.v1.endpoints.training import _require_tenant_row
+
+            _require_tenant_row(
+                db,
+                "SELECT id FROM domain_hr.onboarding_checklists WHERE tenant_id=:tenant_id AND id=:id",
+                {"tenant_id": tenant, "id": opened.checklist_id},
+                not_found_detail="Checklist not found",
+            )
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": payload}
+        created = insert_onboarding_run(db, tenant, payload)
+        run_id = str(created["id"])
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="hr_onboarding_run", entity_id=run_id,
+            audit_reason=opened.reason, idempotency_key=request.idempotency_key,
+            summary=f"Onboarding-Lauf {opened.employee_ref} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False,
+            "run_id": run_id, "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _qualifikation_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: qualification profile in authenticated tenant."""
+    try:
+        opened = QualifikationSpeichernInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid hr.qualifikation.speichern parameters") from exc
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.api.v1.endpoints.training import insert_qualification
+
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        payload = {
+            "employee_ref": opened.employee_ref,
+            "role_code": opened.role_code,
+            "qualification_level": opened.qualification_level,
+            "skills": opened.skills or [],
+            "valid_until": opened.valid_until,
+        }
+        if request.mode != "execute":
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": payload}
+        created = insert_qualification(db, tenant, payload)
+        entity_id = str(created["id"])
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="hr_qualification", entity_id=entity_id,
+            audit_reason=opened.reason, idempotency_key=request.idempotency_key,
+            summary=f"Qualifikation {opened.employee_ref}/{opened.role_code} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False,
+            "qualification_id": entity_id, "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _schulung_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: training assignment in authenticated tenant (course tenant-bound)."""
+    try:
+        opened = SchulungSpeichernInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid hr.schulung.speichern parameters") from exc
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.api.v1.endpoints.training import _require_tenant_row, insert_assignment
+
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        payload = {
+            "course_id": opened.course_id,
+            "employee_ref": opened.employee_ref,
+            "assigned_by": opened.assigned_by or actor,
+            "due_date": opened.due_date,
+            "status": "assigned",
+        }
+        if request.mode != "execute":
+            _require_tenant_row(
+                db,
+                "SELECT id FROM domain_hr.training_courses WHERE tenant_id=:tenant_id AND id=:id",
+                {"tenant_id": tenant, "id": opened.course_id},
+                not_found_detail="Course not found",
+            )
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": payload}
+        created = insert_assignment(db, tenant, payload)
+        entity_id = str(created["id"])
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="hr_training_assignment", entity_id=entity_id,
+            audit_reason=opened.reason, idempotency_key=request.idempotency_key,
+            summary=f"Schulung {opened.employee_ref} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False,
+            "assignment_id": entity_id, "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _postfach_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: create/update mailbox in authenticated tenant (no password in audit)."""
+    try:
+        opened = PostfachSpeichernInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid admin.postfach.speichern parameters") from exc
+    # Fingerprint ohne Klartext-Passwort.
+    parameters = opened.model_dump(mode="json", exclude={"passwort"})
+    parameters["hat_passwort"] = bool(opened.passwort)
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.services import mailkonto_service as konto
+
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        if opened.postfach_id:
+            try:
+                konto.lesen(db, tenant, opened.postfach_id)
+            except konto.MailkontoFehler as exc:
+                raise HTTPException(404, "Mailbox not found in the authenticated tenant") from exc
+        if request.mode != "execute":
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": parameters}
+        saved = konto.speichern(
+            db,
+            tenant,
+            opened.model_dump(exclude={"reason", "postfach_id"}),
+            postfach_id=opened.postfach_id,
+            von=actor,
+        )
+        entity_id = str(saved["id"])
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="mailkonto", entity_id=entity_id,
+            audit_reason=opened.reason, idempotency_key=request.idempotency_key,
+            summary=f"Postfach {opened.kennung} gespeichert by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False,
+            "postfach_id": entity_id, "kennung": opened.kennung, "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
         return result
     except HTTPException:
         db.rollback()
@@ -3557,9 +4537,13 @@ def _post_invoice(db: Session, request: ToolExecutionRequest, actor: str, tenant
             raise HTTPException(409, "Delivery note is not ready to invoice")
         positions = [
             dict(row) for row in db.execute(text("""
-                SELECT * FROM domain_sales.delivery_note_positions
-                WHERE delivery_note_id = :id ORDER BY pos_nr
-            """), {"id": note["id"]}).mappings().all()
+                SELECT p.*
+                FROM domain_sales.delivery_note_positions p
+                JOIN domain_sales.delivery_notes n ON n.id = p.delivery_note_id
+                WHERE p.delivery_note_id = :id
+                  AND n.tenant_id = :tenant
+                ORDER BY p.pos_nr
+            """), {"id": note["id"], "tenant": tenant}).mappings().all()
         ]
         sources = _invoice_sources_from_positions(str(note["id"]), positions)
         invoice_number = f"RE-{note['delivery_note_number'] or str(note['id'])[:8]}"

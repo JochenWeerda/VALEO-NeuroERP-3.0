@@ -1,3 +1,4 @@
+from decimal import Decimal
 from unittest.mock import Mock, patch
 
 from fastapi import FastAPI
@@ -2471,3 +2472,167 @@ def test_inventur_propose_opening_stores_pending_and_does_not_book(client):
     assert "inventory_stock_movements" not in joined
     assert "opening_balance" not in joined or "batch_type" in body
     db.commit.assert_called_once()
+
+
+SANCTIONS = {"name": "Muster GmbH", "scope": "customers", "entity_ref": "K-100"}
+FRACHT = {"tabelle_nr": "FT-99", "bezeichnung": "Staffel Test", "einheit": "t", "waehrung": "EUR"}
+
+
+def test_sanctions_check_dry_run_and_execute(client):
+    http, db = _as_scopes(client, ["compliance:write"])
+    with patch(
+        "app.api.v1.endpoints.sanctions_compliance.match_sanctions_name",
+        return_value=([], "KEIN_TREFFER", "Kein Sanktionstreffer — Freigabe unter Vorbehalt periodischer Neuprüfung."),
+    ):
+        ok = http.post("/mcp/tools/call", json={
+            "tool_name": "compliance.sanctions.check", "parameters": SANCTIONS,
+        })
+    assert ok.status_code == 200
+    assert ok.json()["mode"] == "dryRun"
+    assert ok.json()["status"] == "KEIN_TREFFER"
+    db.commit.assert_not_called()
+
+    assert http.post("/mcp/tools/call", json={
+        "tool_name": "compliance.sanctions.check",
+        "parameters": {**SANCTIONS, "tenant_id": "x"},
+    }).status_code == 422
+
+    with patch(
+        "app.api.v1.endpoints.sanctions_compliance.match_sanctions_name",
+        return_value=([], "KEIN_TREFFER", "ok"),
+    ), patch(
+        "app.api.v1.endpoints.sanctions_compliance.persist_sanctions_check",
+        return_value="chk-1",
+    ), patch("app.services.mcp_execution_service._write_audit", return_value="audit-s"), \
+         patch("app.services.mcp_execution_service._store_execution"), \
+         patch("app.services.mcp_execution_service._advisory_lock"), \
+         patch("app.services.mcp_execution_service._replay_or_none", return_value=None):
+        response = http.post("/mcp/tools/call", json={
+            "tool_name": "compliance.sanctions.check",
+            "parameters": SANCTIONS,
+            "mode": "execute",
+            "idempotency_key": "san-once",
+        })
+    assert response.status_code == 200
+    assert response.json()["check_id"] == "chk-1"
+    db.commit.assert_called()
+
+
+def test_frachttabelle_anlegen_dry_run_and_execute(client):
+    http, db = _as_scopes(client, ["logistics:write"])
+    db.execute.return_value.fetchone.return_value = None
+    ok = http.post("/mcp/tools/call", json={
+        "tool_name": "logistik.frachttabelle.anlegen", "parameters": FRACHT,
+    })
+    assert ok.status_code == 200
+    assert ok.json()["mode"] == "dryRun"
+    db.commit.assert_not_called()
+
+    with patch(
+        "app.api.v1.endpoints.logistik_frachttabellen.insert_frachttabelle",
+        return_value={"id": "ft-1", "tabelle_nr": "FT-99"},
+    ), patch("app.services.mcp_execution_service._write_audit", return_value="audit-f"), \
+         patch("app.services.mcp_execution_service._store_execution"), \
+         patch("app.services.mcp_execution_service._advisory_lock"), \
+         patch("app.services.mcp_execution_service._replay_or_none", return_value=None):
+        response = http.post("/mcp/tools/call", json={
+            "tool_name": "logistik.frachttabelle.anlegen",
+            "parameters": FRACHT,
+            "mode": "execute",
+            "idempotency_key": "ft-once",
+        })
+    assert response.status_code == 200
+    assert response.json()["id"] == "ft-1"
+    assert response.json()["tabelle_nr"] == "FT-99"
+    db.commit.assert_called()
+
+
+BONUS = {
+    "report_id": "bonus-by-customer",
+    "from_date": "2026-01-01",
+    "to_date": "2026-01-31",
+    "rate_pct": "2.5",
+    "reason": "Monatsbonus Test",
+}
+QUERY_IMP = {
+    "bundle": {"schema_version": 1, "definition": {"name": "OP"}, "signature": "deadbeef"},
+    "reason": "Import Testlauf",
+}
+
+
+def test_bonus_calculate_dry_run_and_execute(client):
+    http, db = _as_scopes(client, ["reporting:write"])
+    with patch(
+        "app.services.l3_report_catalog_service.L3ReportCatalogService.validate_bonus_run_params"
+    ):
+        ok = http.post("/mcp/tools/call", json={
+            "tool_name": "reporting.bonus.calculate", "parameters": BONUS,
+        })
+    assert ok.status_code == 200
+    assert ok.json()["mode"] == "dryRun"
+    db.commit.assert_not_called()
+
+    with patch(
+        "app.services.l3_report_catalog_service.L3ReportCatalogService.validate_bonus_run_params"
+    ), patch(
+        "app.services.l3_report_catalog_service.L3ReportCatalogService.create_bonus_run",
+        return_value={"id": "run-9", "lines": 2, "total_bonus": Decimal("5.00")},
+    ), patch("app.services.mcp_execution_service._write_audit", return_value="audit-b"), \
+         patch("app.services.mcp_execution_service._store_execution"), \
+         patch("app.services.mcp_execution_service._advisory_lock"), \
+         patch("app.services.mcp_execution_service._replay_or_none", return_value=None):
+        response = http.post("/mcp/tools/call", json={
+            "tool_name": "reporting.bonus.calculate",
+            "parameters": BONUS,
+            "mode": "execute",
+            "idempotency_key": "bonus-once",
+        })
+    assert response.status_code == 200
+    assert response.json()["run_id"] == "run-9"
+    db.commit.assert_called()
+
+
+def test_query_import_signed_dry_run_and_execute(client):
+    http, db = _as_scopes(client, ["reporting:write"])
+    with patch("app.services.mcp_execution_service.QueryCenterService") as Svc:
+        inst = Mock()
+        inst.preview_import_signed.return_value = {
+            "name": "OP (Import)", "data_product_id": "x", "selected_fields": [], "would_import": True,
+        }
+        Svc.return_value = inst
+        # patch where it's imported inside the function
+        pass
+    with patch(
+        "app.services.query_center_service.QueryCenterService.preview_import_signed",
+        return_value={
+            "name": "OP (Import)", "data_product_id": "x", "selected_fields": [], "would_import": True,
+        },
+    ):
+        ok = http.post("/mcp/tools/call", json={
+            "tool_name": "reporting.query.import_signed", "parameters": QUERY_IMP,
+        })
+    assert ok.status_code == 200
+    assert ok.json()["mode"] == "dryRun"
+    db.commit.assert_not_called()
+
+    with patch(
+        "app.services.query_center_service.QueryCenterService.preview_import_signed",
+        return_value={
+            "name": "OP (Import)", "data_product_id": "x", "selected_fields": [], "would_import": True,
+        },
+    ), patch(
+        "app.services.query_center_service.QueryCenterService.import_signed",
+        return_value={"id": "def-1", "name": "OP (Import)"},
+    ), patch("app.services.mcp_execution_service._write_audit", return_value="audit-q"), \
+         patch("app.services.mcp_execution_service._store_execution"), \
+         patch("app.services.mcp_execution_service._advisory_lock"), \
+         patch("app.services.mcp_execution_service._replay_or_none", return_value=None):
+        response = http.post("/mcp/tools/call", json={
+            "tool_name": "reporting.query.import_signed",
+            "parameters": QUERY_IMP,
+            "mode": "execute",
+            "idempotency_key": "qimp-once",
+        })
+    assert response.status_code == 200
+    assert response.json()["definition_id"] == "def-1"
+    db.commit.assert_called()

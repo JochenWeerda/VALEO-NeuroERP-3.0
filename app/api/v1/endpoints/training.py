@@ -1,4 +1,4 @@
-﻿"""Training, qualification and onboarding CRUD endpoints."""
+"""Training, qualification and onboarding CRUD endpoints."""
 
 from __future__ import annotations
 
@@ -7,7 +7,8 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID, uuid4
 
-from fastapi import Response, APIRouter, Depends, HTTPException, Query
+from fastapi import Body, Response, APIRouter, Depends, HTTPException, Query, Request
+from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -56,6 +57,155 @@ def _clean(row: dict[str, Any]) -> dict[str, Any]:
 
 def _list(db: Session, sql: str, params: dict[str, Any]) -> list[dict[str, Any]]:
     return [_clean(dict(r)) for r in db.execute(text(sql), params).mappings().all()]
+
+
+
+
+def _require_tenant_row(
+    db: Session,
+    sql: str,
+    params: dict[str, Any],
+    *,
+    not_found_detail: str,
+) -> None:
+    if not db.execute(text(sql), params).first():
+        raise HTTPException(status_code=404, detail=not_found_detail)
+
+
+def insert_onboarding_run(db: Session, tenant_id: str, d: dict[str, Any]) -> dict[str, Any]:
+    """Insert onboarding run for token tenant; no commit. Checklist must be tenant-owned."""
+    for key in ("checklist_id", "employee_ref"):
+        if not d.get(key):
+            raise HTTPException(status_code=400, detail=f"{key} is required")
+    _require_tenant_row(
+        db,
+        "SELECT id FROM domain_hr.onboarding_checklists WHERE tenant_id=:tenant_id AND id=:id",
+        {"tenant_id": tenant_id, "id": d["checklist_id"]},
+        not_found_detail="Checklist not found",
+    )
+    item_id = str(uuid4())
+    try:
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_hr.onboarding_runs
+                  (id, tenant_id, checklist_id, employee_ref, assigned_by, started_at, due_date, completed_at, status, progress_percent, state, created_at, updated_at)
+                VALUES
+                  (:id, :tenant_id, :checklist_id, :employee_ref, :assigned_by, :started_at, :due_date, :completed_at, :status, :progress_percent, CAST(:state AS jsonb), NOW(), NOW())
+                """
+            ),
+            {
+                "id": item_id,
+                "tenant_id": tenant_id,
+                "checklist_id": d["checklist_id"],
+                "employee_ref": d["employee_ref"],
+                "assigned_by": d.get("assigned_by"),
+                "started_at": d.get("started_at"),
+                "due_date": d.get("due_date"),
+                "completed_at": d.get("completed_at"),
+                "status": d.get("status", "not_started"),
+                "progress_percent": d.get("progress_percent", 0),
+                "state": json.dumps(d.get("state", {})),
+            },
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=409, detail=f"Onboarding run conflict: {exc}") from exc
+    row = db.execute(
+        text("SELECT * FROM domain_hr.onboarding_runs WHERE tenant_id=:tenant_id AND id=:id"),
+        {"tenant_id": tenant_id, "id": item_id},
+    ).mappings().first()
+    return _clean(dict(row))
+
+
+def insert_qualification(db: Session, tenant_id: str, d: dict[str, Any]) -> dict[str, Any]:
+    """Insert qualification profile for token tenant; no commit."""
+    for key in ("employee_ref", "role_code"):
+        if not d.get(key):
+            raise HTTPException(status_code=400, detail=f"{key} is required")
+    item_id = str(uuid4())
+    skills = d.get("skills", [])
+    if isinstance(skills, str):
+        skills = [part.strip() for part in skills.split(",") if part.strip()]
+    try:
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_hr.qualification_profiles
+                  (id, tenant_id, employee_ref, role_code, qualification_level, skills, notes, valid_until, created_at, updated_at)
+                VALUES
+                  (:id, :tenant_id, :employee_ref, :role_code, :qualification_level, CAST(:skills AS jsonb), :notes, :valid_until, NOW(), NOW())
+                """
+            ),
+            {
+                "id": item_id,
+                "tenant_id": tenant_id,
+                "employee_ref": d["employee_ref"],
+                "role_code": d["role_code"],
+                "qualification_level": d.get("qualification_level", "basic"),
+                "skills": json.dumps(skills),
+                "notes": d.get("notes"),
+                "valid_until": d.get("valid_until"),
+            },
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=409, detail=f"Qualification conflict: {exc}") from exc
+    row = db.execute(
+        text("SELECT * FROM domain_hr.qualification_profiles WHERE tenant_id=:tenant_id AND id=:id"),
+        {"tenant_id": tenant_id, "id": item_id},
+    ).mappings().first()
+    return _clean(dict(row))
+
+
+def insert_assignment(db: Session, tenant_id: str, d: dict[str, Any]) -> dict[str, Any]:
+    """Insert training assignment for token tenant; no commit. Course must be tenant-owned."""
+    for key in ("course_id", "employee_ref"):
+        if not d.get(key):
+            raise HTTPException(status_code=400, detail=f"{key} is required")
+    _require_tenant_row(
+        db,
+        "SELECT id FROM domain_hr.training_courses WHERE tenant_id=:tenant_id AND id=:id",
+        {"tenant_id": tenant_id, "id": d["course_id"]},
+        not_found_detail="Course not found",
+    )
+    item_id = str(uuid4())
+    try:
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_hr.training_assignments
+                  (id, tenant_id, course_id, employee_ref, assigned_by, assigned_at, due_date, status, score_percent, completed_at, evidence_url, notes, created_at, updated_at)
+                VALUES
+                  (:id, :tenant_id, :course_id, :employee_ref, :assigned_by, COALESCE(:assigned_at, NOW()), :due_date, :status, :score_percent, :completed_at, :evidence_url, :notes, NOW(), NOW())
+                """
+            ),
+            {
+                "id": item_id,
+                "tenant_id": tenant_id,
+                "course_id": d["course_id"],
+                "employee_ref": d["employee_ref"],
+                "assigned_by": d.get("assigned_by"),
+                "assigned_at": d.get("assigned_at"),
+                "due_date": d.get("due_date"),
+                "status": d.get("status", "assigned"),
+                "score_percent": d.get("score_percent"),
+                "completed_at": d.get("completed_at"),
+                "evidence_url": d.get("evidence_url"),
+                "notes": d.get("notes"),
+            },
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=409, detail=f"Assignment conflict: {exc}") from exc
+    row = db.execute(
+        text("SELECT * FROM domain_hr.training_assignments WHERE tenant_id=:tenant_id AND id=:id"),
+        {"tenant_id": tenant_id, "id": item_id},
+    ).mappings().first()
+    return _clean(dict(row))
 
 
 def _load_optional_row(
@@ -212,44 +362,13 @@ async def list_assignments(
 
 @router.post("/assignments", response_model=TrainingOut, status_code=201, summary="Assignment anlegen")
 async def create_assignment(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    d = payload.data
-    for key in ("course_id", "employee_ref"):
-        if not d.get(key):
-            raise HTTPException(status_code=400, detail=f"{key} is required")
-    item_id = str(uuid4())
     try:
-        db.execute(
-            text(
-                """
-                INSERT INTO domain_hr.training_assignments
-                  (id, tenant_id, course_id, employee_ref, assigned_by, assigned_at, due_date, status, score_percent, completed_at, evidence_url, notes, created_at, updated_at)
-                VALUES
-                  (:id, :tenant_id, :course_id, :employee_ref, :assigned_by, COALESCE(:assigned_at, NOW()), :due_date, :status, :score_percent, :completed_at, :evidence_url, :notes, NOW(), NOW())
-                """
-            ),
-            {
-                "id": item_id,
-                "tenant_id": tenant_id,
-                "course_id": d["course_id"],
-                "employee_ref": d["employee_ref"],
-                "assigned_by": d.get("assigned_by"),
-                "assigned_at": d.get("assigned_at"),
-                "due_date": d.get("due_date"),
-                "status": d.get("status", "assigned"),
-                "score_percent": d.get("score_percent"),
-                "completed_at": d.get("completed_at"),
-                "evidence_url": d.get("evidence_url"),
-                "notes": d.get("notes"),
-            },
-        )
-    except Exception as exc:
-        raise HTTPException(status_code=409, detail=f"Assignment conflict: {exc}") from exc
-    db.commit()
-    row = db.execute(
-        text("SELECT * FROM domain_hr.training_assignments WHERE tenant_id=:tenant_id AND id=:id"),
-        {"tenant_id": tenant_id, "id": item_id},
-    ).mappings().first()
-    return _clean(dict(row))
+        created = insert_assignment(db, tenant_id, payload.data)
+        db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
+    return created
 
 
 @router.put("/assignments/{item_id}", response_model=TrainingOut, summary="Assignment aktualisieren")
@@ -437,40 +556,13 @@ async def list_qualifications(
 
 @router.post("/qualifications", response_model=TrainingOut, status_code=201, summary="Qualification anlegen")
 async def create_qualification(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    d = payload.data
-    for key in ("employee_ref", "role_code"):
-        if not d.get(key):
-            raise HTTPException(status_code=400, detail=f"{key} is required")
-    item_id = str(uuid4())
     try:
-        db.execute(
-            text(
-                """
-                INSERT INTO domain_hr.qualification_profiles
-                  (id, tenant_id, employee_ref, role_code, qualification_level, skills, notes, valid_until, created_at, updated_at)
-                VALUES
-                  (:id, :tenant_id, :employee_ref, :role_code, :qualification_level, CAST(:skills AS jsonb), :notes, :valid_until, NOW(), NOW())
-                """
-            ),
-            {
-                "id": item_id,
-                "tenant_id": tenant_id,
-                "employee_ref": d["employee_ref"],
-                "role_code": d["role_code"],
-                "qualification_level": d.get("qualification_level", "basic"),
-                "skills": json.dumps(d.get("skills", [])),
-                "notes": d.get("notes"),
-                "valid_until": d.get("valid_until"),
-            },
-        )
-    except Exception as exc:
-        raise HTTPException(status_code=409, detail=f"Qualification conflict: {exc}") from exc
-    db.commit()
-    row = db.execute(
-        text("SELECT * FROM domain_hr.qualification_profiles WHERE tenant_id=:tenant_id AND id=:id"),
-        {"tenant_id": tenant_id, "id": item_id},
-    ).mappings().first()
-    return _clean(dict(row))
+        created = insert_qualification(db, tenant_id, payload.data)
+        db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
+    return created
 
 
 @router.put("/qualifications/{item_id}", response_model=TrainingOut, summary="Qualification aktualisieren")
@@ -653,43 +745,13 @@ async def list_runs(
 
 @router.post("/onboarding/runs", response_model=TrainingOut, status_code=201, summary="Run anlegen")
 async def create_run(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    d = payload.data
-    for key in ("checklist_id", "employee_ref"):
-        if not d.get(key):
-            raise HTTPException(status_code=400, detail=f"{key} is required")
-    item_id = str(uuid4())
     try:
-        db.execute(
-            text(
-                """
-                INSERT INTO domain_hr.onboarding_runs
-                  (id, tenant_id, checklist_id, employee_ref, assigned_by, started_at, due_date, completed_at, status, progress_percent, state, created_at, updated_at)
-                VALUES
-                  (:id, :tenant_id, :checklist_id, :employee_ref, :assigned_by, :started_at, :due_date, :completed_at, :status, :progress_percent, CAST(:state AS jsonb), NOW(), NOW())
-                """
-            ),
-            {
-                "id": item_id,
-                "tenant_id": tenant_id,
-                "checklist_id": d["checklist_id"],
-                "employee_ref": d["employee_ref"],
-                "assigned_by": d.get("assigned_by"),
-                "started_at": d.get("started_at"),
-                "due_date": d.get("due_date"),
-                "completed_at": d.get("completed_at"),
-                "status": d.get("status", "not_started"),
-                "progress_percent": d.get("progress_percent", 0),
-                "state": json.dumps(d.get("state", {})),
-            },
-        )
-    except Exception as exc:
-        raise HTTPException(status_code=409, detail=f"Onboarding run conflict: {exc}") from exc
-    db.commit()
-    row = db.execute(
-        text("SELECT * FROM domain_hr.onboarding_runs WHERE tenant_id=:tenant_id AND id=:id"),
-        {"tenant_id": tenant_id, "id": item_id},
-    ).mappings().first()
-    return _clean(dict(row))
+        created = insert_onboarding_run(db, tenant_id, payload.data)
+        db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
+    return created
 
 
 @router.put("/onboarding/runs/{item_id}", response_model=TrainingOut, summary="Run aktualisieren")
@@ -791,4 +853,302 @@ async def create_onboarding_workspace(
         onboarding_run=onboarding_run,
     )
     return workspace.as_dict()
+
+
+# ── Mask-CommandEndpoints (MCP-MASK-CE-BATCH4-20261009) ──────────────────────
+
+
+@router.post(
+    "/onboarding/runs/actions/speichern",
+    response_model=MaskActionResult,
+    summary="Onboarding-Lauf speichern als Masken-CommandEndpoint",
+)
+def action_onboarding_speichern(
+    request: Request,
+    body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    """CE fuer personal/onboarding:speichern — dryRun ohne INSERT; Token-Mandant."""
+    del request
+    try:
+        mode, audit_reason, idempotency_key, payload = parse_action_body(body)
+    except ValueError:
+        return MaskActionResult(
+            actionKey="speichern",
+            mode="invalid",
+            success=False,
+            error="Unbekannter Aktionsmodus.",
+            validationErrors=[
+                {"field": "_mode", "message": "Ungueltiger Aktionsmodus", "severity": "blocking"}
+            ],
+        )
+    data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
+    preview = {
+        "employee_ref": data.get("employee_ref"),
+        "checklist_id": data.get("checklist_id"),
+        "assigned_by": data.get("assigned_by"),
+        "due_date": data.get("due_date"),
+        "tenant_id": tenant_id,
+    }
+    if mode != "execute":
+        try:
+            if data.get("checklist_id"):
+                _require_tenant_row(
+                    db,
+                    "SELECT id FROM domain_hr.onboarding_checklists WHERE tenant_id=:tenant_id AND id=:id",
+                    {"tenant_id": tenant_id, "id": data["checklist_id"]},
+                    not_found_detail="Checklist not found",
+                )
+        except HTTPException:
+            db.rollback()
+            return MaskActionResult(
+                actionKey="speichern",
+                mode=mode,
+                success=False,
+                error="Checklist nicht im Authentifizierungs-Mandanten.",
+                validationErrors=[
+                    {"field": "checklist_id", "message": "Nicht im Authentifizierungs-Mandanten", "severity": "blocking"}
+                ],
+            )
+        db.rollback()
+        return MaskActionResult(
+            actionKey="speichern",
+            mode=mode,
+            success=True,
+            summary="Onboarding-Lauf wuerde angelegt — keine Aenderung geschrieben.",
+            proposedChanges=[preview],
+        )
+    try:
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+
+        created = insert_onboarding_run(db, tenant_id, dict(data))
+        entity_id = str(created["id"])
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant_id,
+            action_key="speichern",
+            entity_type="hr_onboarding_run",
+            entity_id=entity_id,
+            audit_reason=audit_reason,
+            idempotency_key=idempotency_key,
+            summary=f"Onboarding-Lauf {created.get('employee_ref')} erfasst",
+        )
+        outbox_id = _write_outbox(
+            db,
+            tenant_id=tenant_id,
+            event_type="personal.onboarding.created",
+            aggregate_id=entity_id,
+            payload={"id": entity_id, "tenant_id": tenant_id},
+        )
+        db.commit()
+    except HTTPException as exc:
+        db.rollback()
+        detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+        return MaskActionResult(actionKey="speichern", mode=mode, success=False, error=detail)
+    except Exception:  # noqa: BLE001
+        db.rollback()
+        return MaskActionResult(
+            actionKey="speichern", mode=mode, success=False, error="Onboarding-Lauf konnte nicht gespeichert werden."
+        )
+    return MaskActionResult(
+        actionKey="speichern",
+        mode=mode,
+        success=True,
+        summary=f"Onboarding-Lauf {created.get('employee_ref')} angelegt.",
+        affectedIds=[entity_id],
+        auditEntryId=audit_id,
+        outboxEventId=outbox_id,
+        proposedChanges=[preview],
+    )
+
+
+@router.post(
+    "/qualifications/actions/speichern",
+    response_model=MaskActionResult,
+    summary="Qualifikation speichern als Masken-CommandEndpoint",
+)
+def action_qualification_speichern(
+    request: Request,
+    body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    """CE fuer personal/qualifikationen:speichern — dryRun ohne INSERT; Token-Mandant."""
+    del request
+    try:
+        mode, audit_reason, idempotency_key, payload = parse_action_body(body)
+    except ValueError:
+        return MaskActionResult(
+            actionKey="speichern",
+            mode="invalid",
+            success=False,
+            error="Unbekannter Aktionsmodus.",
+            validationErrors=[
+                {"field": "_mode", "message": "Ungueltiger Aktionsmodus", "severity": "blocking"}
+            ],
+        )
+    data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
+    preview = {
+        "employee_ref": data.get("employee_ref"),
+        "role_code": data.get("role_code"),
+        "qualification_level": data.get("qualification_level", "basic"),
+        "tenant_id": tenant_id,
+    }
+    if mode != "execute":
+        db.rollback()
+        return MaskActionResult(
+            actionKey="speichern",
+            mode=mode,
+            success=True,
+            summary="Qualifikation wuerde angelegt — keine Aenderung geschrieben.",
+            proposedChanges=[preview],
+        )
+    try:
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+
+        created = insert_qualification(db, tenant_id, dict(data))
+        entity_id = str(created["id"])
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant_id,
+            action_key="speichern",
+            entity_type="hr_qualification",
+            entity_id=entity_id,
+            audit_reason=audit_reason,
+            idempotency_key=idempotency_key,
+            summary=f"Qualifikation {created.get('employee_ref')}/{created.get('role_code')} erfasst",
+        )
+        outbox_id = _write_outbox(
+            db,
+            tenant_id=tenant_id,
+            event_type="personal.qualifikation.created",
+            aggregate_id=entity_id,
+            payload={"id": entity_id, "tenant_id": tenant_id},
+        )
+        db.commit()
+    except HTTPException as exc:
+        db.rollback()
+        detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+        return MaskActionResult(actionKey="speichern", mode=mode, success=False, error=detail)
+    except Exception:  # noqa: BLE001
+        db.rollback()
+        return MaskActionResult(
+            actionKey="speichern", mode=mode, success=False, error="Qualifikation konnte nicht gespeichert werden."
+        )
+    return MaskActionResult(
+        actionKey="speichern",
+        mode=mode,
+        success=True,
+        summary=f"Qualifikation {created.get('employee_ref')} angelegt.",
+        affectedIds=[entity_id],
+        auditEntryId=audit_id,
+        outboxEventId=outbox_id,
+        proposedChanges=[preview],
+    )
+
+
+@router.post(
+    "/assignments/actions/speichern",
+    response_model=MaskActionResult,
+    summary="Schulungszuweisung speichern als Masken-CommandEndpoint",
+)
+def action_assignment_speichern(
+    request: Request,
+    body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    """CE fuer personal/schulungen:speichern — dryRun ohne INSERT; Token-Mandant."""
+    del request
+    try:
+        mode, audit_reason, idempotency_key, payload = parse_action_body(body)
+    except ValueError:
+        return MaskActionResult(
+            actionKey="speichern",
+            mode="invalid",
+            success=False,
+            error="Unbekannter Aktionsmodus.",
+            validationErrors=[
+                {"field": "_mode", "message": "Ungueltiger Aktionsmodus", "severity": "blocking"}
+            ],
+        )
+    data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
+    preview = {
+        "employee_ref": data.get("employee_ref"),
+        "course_id": data.get("course_id"),
+        "assigned_by": data.get("assigned_by"),
+        "due_date": data.get("due_date"),
+        "tenant_id": tenant_id,
+    }
+    if mode != "execute":
+        try:
+            if data.get("course_id"):
+                _require_tenant_row(
+                    db,
+                    "SELECT id FROM domain_hr.training_courses WHERE tenant_id=:tenant_id AND id=:id",
+                    {"tenant_id": tenant_id, "id": data["course_id"]},
+                    not_found_detail="Course not found",
+                )
+        except HTTPException:
+            db.rollback()
+            return MaskActionResult(
+                actionKey="speichern",
+                mode=mode,
+                success=False,
+                error="Kurs nicht im Authentifizierungs-Mandanten.",
+                validationErrors=[
+                    {"field": "course_id", "message": "Nicht im Authentifizierungs-Mandanten", "severity": "blocking"}
+                ],
+            )
+        db.rollback()
+        return MaskActionResult(
+            actionKey="speichern",
+            mode=mode,
+            success=True,
+            summary="Schulungszuweisung wuerde angelegt — keine Aenderung geschrieben.",
+            proposedChanges=[preview],
+        )
+    try:
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+
+        created = insert_assignment(db, tenant_id, dict(data))
+        entity_id = str(created["id"])
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant_id,
+            action_key="speichern",
+            entity_type="hr_training_assignment",
+            entity_id=entity_id,
+            audit_reason=audit_reason,
+            idempotency_key=idempotency_key,
+            summary=f"Schulung {created.get('employee_ref')} erfasst",
+        )
+        outbox_id = _write_outbox(
+            db,
+            tenant_id=tenant_id,
+            event_type="personal.schulung.created",
+            aggregate_id=entity_id,
+            payload={"id": entity_id, "tenant_id": tenant_id},
+        )
+        db.commit()
+    except HTTPException as exc:
+        db.rollback()
+        detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+        return MaskActionResult(actionKey="speichern", mode=mode, success=False, error=detail)
+    except Exception:  # noqa: BLE001
+        db.rollback()
+        return MaskActionResult(
+            actionKey="speichern", mode=mode, success=False, error="Schulung konnte nicht gespeichert werden."
+        )
+    return MaskActionResult(
+        actionKey="speichern",
+        mode=mode,
+        success=True,
+        summary=f"Schulung {created.get('employee_ref')} angelegt.",
+        affectedIds=[entity_id],
+        auditEntryId=audit_id,
+        outboxEventId=outbox_id,
+        proposedChanges=[preview],
+    )
 

@@ -22,9 +22,9 @@ Entscheidungen: ``docs/quality-assurance/bewerbermanagement-ordnung-20261006.md`
 from __future__ import annotations
 
 import logging
-from typing import List, Optional
+from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, Response
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.personal_bewerbung_schemas import (
@@ -49,6 +49,7 @@ from app.core.uuid7 import uuid7
 from app.services import bewerbung_einwilligung_service as einwilligung
 from app.services import bewerbung_loeschlauf_service as loeschlauf
 from app.services import bewerbung_service as dienst
+from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
 
 logger = logging.getLogger(__name__)
 
@@ -487,3 +488,202 @@ async def delete_einwilligung(
     except Exception as fehler:  # noqa: BLE001
         raise dienst.fehler_deuten(db, fehler, "Einwilligung widerrufen", tenant_id) from fehler
     return ergebnis
+
+
+@router.post(
+    "/applications/actions/speichern",
+    response_model=MaskActionResult,
+    summary="Bewerbung speichern als Masken-CommandEndpoint",
+    dependencies=[Depends(personal_write)],
+)
+def action_bewerbung_speichern(
+    request: Request,
+    body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    """CE fuer personal/bewerbungen:speichern — dryRun ohne INSERT; Token-Mandant."""
+    try:
+        mode, audit_reason, idempotency_key, payload = parse_action_body(body)
+    except ValueError:
+        return MaskActionResult(
+            actionKey="speichern",
+            mode="invalid",
+            success=False,
+            error="Unbekannter Aktionsmodus.",
+            validationErrors=[
+                {"field": "_mode", "message": "Ungueltiger Aktionsmodus", "severity": "blocking"}
+            ],
+        )
+    try:
+        opened = BewerbungIn.model_validate(payload)
+    except Exception as exc:  # noqa: BLE001
+        return MaskActionResult(
+            actionKey="speichern",
+            mode=mode,
+            success=False,
+            error="Ungueltige Bewerbungsdaten.",
+            validationErrors=[
+                {"field": "_entity", "message": str(exc), "severity": "blocking"}
+            ],
+        )
+    preview = {
+        "applicant_name": opened.applicant_name,
+        "applicant_email": opened.applicant_email,
+        "position_title": opened.position_title,
+        "source": opened.source,
+        "tenant_id": tenant_id,
+    }
+    if mode != "execute":
+        db.rollback()
+        return MaskActionResult(
+            actionKey="speichern",
+            mode=mode,
+            success=True,
+            summary="Bewerbung wuerde erfasst — keine Aenderung geschrieben.",
+            proposedChanges=[preview],
+        )
+    try:
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+
+        created = dienst.anlegen(db, tenant_id, str(uuid7()), opened)
+        entity_id = str(created["id"])
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant_id,
+            action_key="speichern",
+            entity_type="hr_application",
+            entity_id=entity_id,
+            audit_reason=audit_reason,
+            idempotency_key=idempotency_key,
+            summary=f"Bewerbung {opened.applicant_name} erfasst",
+        )
+        outbox_id = _write_outbox(
+            db,
+            tenant_id=tenant_id,
+            event_type="personal.bewerbung.created",
+            aggregate_id=entity_id,
+            payload={"id": entity_id, "tenant_id": tenant_id},
+        )
+        db.commit()
+    except HTTPException as exc:
+        db.rollback()
+        detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+        return MaskActionResult(actionKey="speichern", mode=mode, success=False, error=detail)
+    except Exception as fehler:  # noqa: BLE001
+        db.rollback()
+        try:
+            raise dienst.fehler_deuten(db, fehler, "Bewerbung anlegen", tenant_id) from fehler
+        except HTTPException as exc:
+            detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+            return MaskActionResult(actionKey="speichern", mode=mode, success=False, error=detail)
+    return MaskActionResult(
+        actionKey="speichern",
+        mode=mode,
+        success=True,
+        summary=f"Bewerbung {opened.applicant_name} erfasst.",
+        affectedIds=[entity_id],
+        auditEntryId=audit_id,
+        outboxEventId=outbox_id,
+        proposedChanges=[preview],
+    )
+
+
+@router.post(
+    "/applications/einwilligungserklaerungen/actions/anlegen",
+    response_model=MaskActionResult,
+    summary="Einwilligungserklaerung anlegen als Masken-CommandEndpoint",
+    dependencies=[Depends(personal_admin)],
+)
+def action_erklaerung_anlegen(
+    request: Request,
+    body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    """CE fuer personal/einwilligungserklaerungen:anlegen — dryRun ohne INSERT."""
+    try:
+        mode, audit_reason, idempotency_key, payload = parse_action_body(body)
+    except ValueError:
+        return MaskActionResult(
+            actionKey="anlegen",
+            mode="invalid",
+            success=False,
+            error="Unbekannter Aktionsmodus.",
+            validationErrors=[
+                {"field": "_mode", "message": "Ungueltiger Aktionsmodus", "severity": "blocking"}
+            ],
+        )
+    try:
+        opened = ErklaerungIn.model_validate(payload)
+    except Exception as exc:  # noqa: BLE001
+        return MaskActionResult(
+            actionKey="anlegen",
+            mode=mode,
+            success=False,
+            error="Ungueltiger Wortlaut.",
+            validationErrors=[
+                {"field": "wortlaut", "message": str(exc), "severity": "blocking"}
+            ],
+        )
+    actor = request.headers.get("X-User-ID") or opened.erstellt_durch or "personal-user"
+    preview = {
+        "wortlaut": opened.wortlaut[:120],
+        "erstellt_durch": actor,
+        "tenant_id": tenant_id,
+    }
+    if mode != "execute":
+        db.rollback()
+        return MaskActionResult(
+            actionKey="anlegen",
+            mode=mode,
+            success=True,
+            summary="Fassung wuerde angelegt — keine Aenderung geschrieben.",
+            proposedChanges=[preview],
+        )
+    try:
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+
+        created = einwilligung.erklaerung_anlegen(
+            db, tenant_id, str(uuid7()), opened.wortlaut, actor
+        )
+        entity_id = str(created.get("id") or created.get("fassung") or "")
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant_id,
+            action_key="anlegen",
+            entity_type="hr_consent_text",
+            entity_id=entity_id or tenant_id,
+            audit_reason=audit_reason,
+            idempotency_key=idempotency_key,
+            summary=f"Einwilligungsfassung angelegt by {actor}",
+        )
+        outbox_id = _write_outbox(
+            db,
+            tenant_id=tenant_id,
+            event_type="personal.einwilligungserklaerung.created",
+            aggregate_id=entity_id or tenant_id,
+            payload={"id": entity_id, "tenant_id": tenant_id, "fassung": created.get("fassung")},
+        )
+        db.commit()
+    except HTTPException as exc:
+        db.rollback()
+        detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+        return MaskActionResult(actionKey="anlegen", mode=mode, success=False, error=detail)
+    except Exception as fehler:  # noqa: BLE001
+        db.rollback()
+        try:
+            raise dienst.fehler_deuten(db, fehler, "Erklaerung anlegen", tenant_id) from fehler
+        except HTTPException as exc:
+            detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+            return MaskActionResult(actionKey="anlegen", mode=mode, success=False, error=detail)
+    return MaskActionResult(
+        actionKey="anlegen",
+        mode=mode,
+        success=True,
+        summary="Einwilligungsfassung angelegt.",
+        affectedIds=[entity_id] if entity_id else [],
+        auditEntryId=audit_id,
+        outboxEventId=outbox_id,
+        proposedChanges=[preview],
+    )

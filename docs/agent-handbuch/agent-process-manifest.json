@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-08",
+  "generatedAt": "2026-10-09",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -1683,10 +1683,10 @@
           "label": "Kunden pruefen",
           "dangerLevel": "moderate",
           "humanApprovalRequired": false,
-          "requiresConfirmation": false,
+          "requiresConfirmation": true,
           "permission": "compliance.sanctions.check",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/compliance/sanctions/actions/pruefen/customers",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -1696,7 +1696,8 @@
         "checked_by"
       ],
       "mcp_tool_ids": [
-        "compliance.gate.status"
+        "compliance.gate.status",
+        "compliance.sanctions.check"
       ]
     },
     {
@@ -1715,10 +1716,10 @@
           "label": "Personal pruefen",
           "dangerLevel": "moderate",
           "humanApprovalRequired": false,
-          "requiresConfirmation": false,
+          "requiresConfirmation": true,
           "permission": "compliance.sanctions.check",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/compliance/sanctions/actions/pruefen/personal",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -1728,7 +1729,8 @@
         "checked_by"
       ],
       "mcp_tool_ids": [
-        "compliance.gate.status"
+        "compliance.gate.status",
+        "compliance.sanctions.check"
       ]
     },
     {
@@ -1979,6 +1981,7 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
         "einkauf.bestellung.versenden",
@@ -2014,6 +2017,7 @@
         "einzelpreis"
       ],
       "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
         "einkauf.bestellung.versenden",
@@ -2046,6 +2050,7 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
         "einkauf.bestellung.versenden",
@@ -2080,6 +2085,7 @@
         "einzelpreis"
       ],
       "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
         "einkauf.bestellung.versenden",
@@ -2118,8 +2124,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "einkauf.bestellung.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/speichern",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -2141,6 +2147,7 @@
         "betrag"
       ],
       "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
         "einkauf.bestellung.versenden",
@@ -2189,6 +2196,7 @@
         "lieferzeit_tage"
       ],
       "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
         "einkauf.bestellung.versenden",
@@ -2209,6 +2217,7 @@
       "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
         "einkauf.bestellung.versenden",
@@ -2760,7 +2769,13 @@
         "applicant_name",
         "erfasst_durch"
       ],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "hr.bewerbung.speichern",
+        "hr.einwilligung.anlegen",
+        "hr.onboarding.speichern",
+        "hr.qualifikation.speichern",
+        "hr.schulung.speichern"
+      ]
     },
     {
       "mask_id": "personal/bewerbungen",
@@ -2779,10 +2794,10 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Legt eine Bewerbung im Eingang an."
+          "permission": "personal.bewerbung.write",
+          "commandEndpoint": "/api/v1/personal/applications/actions/speichern",
+          "method": "POST",
+          "stubReason": null
         },
         {
           "key": "neu",
@@ -2810,7 +2825,13 @@
       "sensitive_fields": [
         "applicant_email"
       ],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "hr.bewerbung.speichern",
+        "hr.einwilligung.anlegen",
+        "hr.onboarding.speichern",
+        "hr.qualifikation.speichern",
+        "hr.schulung.speichern"
+      ]
     },
     {
       "mask_id": "personal/einwilligungserklaerungen",
@@ -2829,10 +2850,10 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": true,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Legt die naechste Fassung an; sie ist danach unveraenderlich."
+          "permission": "personal.bewerbung.admin",
+          "commandEndpoint": "/api/v1/personal/applications/einwilligungserklaerungen/actions/anlegen",
+          "method": "POST",
+          "stubReason": null
         },
         {
           "key": "neu",
@@ -2847,7 +2868,13 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "hr.bewerbung.speichern",
+        "hr.einwilligung.anlegen",
+        "hr.onboarding.speichern",
+        "hr.qualifikation.speichern",
+        "hr.schulung.speichern"
+      ]
     },
     {
       "mask_id": "personal/onboarding",
@@ -2867,8 +2894,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": null,
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/training/onboarding/runs/actions/speichern",
+          "method": "POST",
           "stubReason": "Legt einen Einarbeitungslauf an."
         },
         {
@@ -2884,7 +2911,13 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "hr.bewerbung.speichern",
+        "hr.einwilligung.anlegen",
+        "hr.onboarding.speichern",
+        "hr.qualifikation.speichern",
+        "hr.schulung.speichern"
+      ]
     },
     {
       "mask_id": "personal/qualifikationen",
@@ -2904,8 +2937,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": null,
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/training/qualifications/actions/speichern",
+          "method": "POST",
           "stubReason": "Legt ein Qualifikationsprofil an."
         },
         {
@@ -2921,7 +2954,13 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "hr.bewerbung.speichern",
+        "hr.einwilligung.anlegen",
+        "hr.onboarding.speichern",
+        "hr.qualifikation.speichern",
+        "hr.schulung.speichern"
+      ]
     },
     {
       "mask_id": "personal/schulungen",
@@ -2941,8 +2980,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": null,
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/training/assignments/actions/speichern",
+          "method": "POST",
           "stubReason": "Legt eine Schulungszuweisung an."
         },
         {
@@ -2958,7 +2997,13 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "hr.bewerbung.speichern",
+        "hr.einwilligung.anlegen",
+        "hr.onboarding.speichern",
+        "hr.qualifikation.speichern",
+        "hr.schulung.speichern"
+      ]
     },
     {
       "mask_id": "schnittstelle/legacy-adapter-monitor",
@@ -3242,7 +3287,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "fuhrpark/fahrzeug-stamm",
@@ -3323,7 +3371,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "fuhrpark/fahrzeuge",
@@ -3349,7 +3400,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "fuhrpark/rechnungen",
@@ -3386,7 +3440,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "fuhrpark/terminarten",
@@ -3423,7 +3480,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "fuhrpark/uebersicht",
@@ -3437,7 +3497,10 @@
       "risk_summary": "low",
       "actions": [],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "logistik/frachtbrief",
@@ -3463,7 +3526,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "logistik/frachttabellen",
@@ -3483,8 +3549,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "logistics:write",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/logistik/frachttabellen/actions/anlegen",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -3500,7 +3566,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "logistik/tour-fracht-arbeitsraum",
@@ -3559,7 +3628,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "logistik/tourenplanung",
@@ -3600,14 +3672,17 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Legt die Tour aus dem aufgeloesten Lieferschein an."
+          "permission": "logistik.tour.create",
+          "commandEndpoint": "/api/v1/logistik/tours/actions/anlegen",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "logistik/verladung",
@@ -3633,7 +3708,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "logistik/versandprofile",
@@ -3670,7 +3748,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "strecke/disposition",
@@ -3696,7 +3777,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "strecke/dokumente-drucken",
@@ -3710,7 +3794,10 @@
       "risk_summary": "low",
       "actions": [],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "strecke/streckengeschaeft",
@@ -3724,7 +3811,10 @@
       "risk_summary": "low",
       "actions": [],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "strecke/vorlaeufig",
@@ -3738,7 +3828,10 @@
       "risk_summary": "low",
       "actions": [],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "transporte/fahrer",
@@ -3808,7 +3901,10 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "versand/versand-avis",
@@ -3822,7 +3918,10 @@
       "risk_summary": "low",
       "actions": [],
       "sensitive_fields": [],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "logistik.frachttabelle.anlegen",
+        "logistik.tour.anlegen"
+      ]
     },
     {
       "mask_id": "workspace/leitung",
@@ -3855,10 +3954,10 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Legt das Postfach an oder aendert das geladene."
+          "permission": "admin.postfach.write",
+          "commandEndpoint": "/api/v1/admin/postfaecher/actions/speichern",
+          "method": "POST",
+          "stubReason": null
         },
         {
           "key": "testen",
@@ -3897,7 +3996,9 @@
       "sensitive_fields": [
         "passwort"
       ],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
     },
     {
       "mask_id": "planung/kalender",
@@ -3929,7 +4030,9 @@
         "payload",
         "object_route"
       ],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
     },
     {
       "mask_id": "schnittstelle/mde-inbox",
@@ -3958,7 +4061,9 @@
         "error_message",
         "idempotency_key"
       ],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
     },
     {
       "mask_id": "qualitaet/reklamation",
@@ -4044,10 +4149,10 @@
           "label": "Signiert importieren",
           "dangerLevel": "moderate",
           "humanApprovalRequired": false,
-          "requiresConfirmation": false,
+          "requiresConfirmation": true,
           "permission": "reporting.query.write",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/query-center/actions/import",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -4055,7 +4160,10 @@
         "filter_spec",
         "selected_fields"
       ],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "reporting.bonus.calculate",
+        "reporting.query.import_signed"
+      ]
     },
     {
       "mask_id": "auswertungen/bonus-berechnung",
@@ -4073,10 +4181,10 @@
           "label": "Bonuslauf berechnen",
           "dangerLevel": "moderate",
           "humanApprovalRequired": false,
-          "requiresConfirmation": false,
+          "requiresConfirmation": true,
           "permission": "reporting.bonus.write",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/l3-report-catalog/bonus-runs/actions/calculate",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -4086,7 +4194,10 @@
         "dimension_id",
         "actor"
       ],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "reporting.bonus.calculate",
+        "reporting.query.import_signed"
+      ]
     },
     {
       "mask_id": "auswertungen/l3-berichtskatalog",
@@ -4104,7 +4215,10 @@
         "representative_id",
         "source_ref"
       ],
-      "mcp_tool_ids": []
+      "mcp_tool_ids": [
+        "reporting.bonus.calculate",
+        "reporting.query.import_signed"
+      ]
     },
     {
       "mask_id": "sales/delivery-note",
@@ -4440,6 +4554,114 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
+      "tool_id": "compliance.sanctions.check",
+      "domain": "compliance",
+      "scope": "compliance:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "logistik.frachttabelle.anlegen",
+      "domain": "logistics",
+      "scope": "logistics:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "reporting.bonus.calculate",
+      "domain": "reporting",
+      "scope": "reporting:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "reporting.query.import_signed",
+      "domain": "reporting",
+      "scope": "reporting:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "logistik.tour.anlegen",
+      "domain": "logistics",
+      "scope": "logistics:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "einkauf.bestellung.speichern",
+      "domain": "einkauf",
+      "scope": "einkauf:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "hr.bewerbung.speichern",
+      "domain": "hr",
+      "scope": "hr:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "hr.einwilligung.anlegen",
+      "domain": "hr",
+      "scope": "hr:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "hr.onboarding.speichern",
+      "domain": "hr",
+      "scope": "hr:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "hr.qualifikation.speichern",
+      "domain": "hr",
+      "scope": "hr:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "hr.schulung.speichern",
+      "domain": "hr",
+      "scope": "hr:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "admin.postfach.speichern",
+      "domain": "platform",
+      "scope": "admin:write",
+      "idempotent": true,
+      "risk_class": "high",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
       "tool_id": "agrar.contract.get",
       "domain": "agrar",
       "scope": "agrar:read",
@@ -4629,5 +4851,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 74
+  "event_count": 86
 }

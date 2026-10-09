@@ -55,8 +55,33 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
     assert by_id["mask:lager/inventur-nebenlaeufe:create_opening"]["mcp_tool_id"] == (
         "lager.inventur.propose_opening"
     )
+    assert by_id["mask:auswertungen/sanktionspruefung-kunden:check"]["mcp_tool_id"] == (
+        "compliance.sanctions.check"
+    )
+    assert by_id["mask:auswertungen/sanktionspruefung-personal:check"]["mcp_tool_id"] == (
+        "compliance.sanctions.check"
+    )
+    assert by_id["mask:logistik/frachttabellen:anlegen"]["mcp_tool_id"] == (
+        "logistik.frachttabelle.anlegen"
+    )
     assert by_id["mask:personal/bewerbungen:neu"]["coverage"] == "local_ui"
     assert data.get("classification_complete") is True
     assert data["stats"]["by_coverage"].get("open_medium", 0) == 0
     assert data["stats"]["by_coverage"].get("open_high", 0) == 1
     assert data["stats"]["by_coverage"].get("mapped_propose_only", 0) == 1
+    assert by_id["mask:auswertungen/bonus-berechnung:calculate"]["mcp_tool_id"] == (
+        "reporting.bonus.calculate"
+    )
+    assert by_id["mask:auswertungen/abfrage-center:import"]["mcp_tool_id"] == (
+        "reporting.query.import_signed"
+    )
+    assert by_id["mask:einkauf/supplier:neue_bestellung"]["coverage"] == "local_ui"
+    assert by_id["mask:admin/postfaecher:neu"]["coverage"] == "local_ui"
+    assert by_id["mask:logistik/tourenplanung:anlegen"]["mcp_tool_id"] == "logistik.tour.anlegen"
+    assert by_id["mask:einkauf/purchase-order:speichern"]["mcp_tool_id"] == (
+        "einkauf.bestellung.speichern"
+    )
+    assert data["stats"]["by_coverage"].get("mapped", 0) == 36
+    assert data["stats"]["by_coverage"].get("blocked_no_endpoint", 0) == 0
+    assert data["stats"]["by_coverage"].get("blocked_missing_tenant", 0) == 5
+    assert data["stats"]["by_coverage"].get("local_ui", 0) == 13

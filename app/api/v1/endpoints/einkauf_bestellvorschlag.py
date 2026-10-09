@@ -45,17 +45,19 @@ from __future__ import annotations
 from datetime import date
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import Response
 from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
-from app.api.v1.schemas.base import BaseSchema
-from app.services.procurement_service import ProcurementService
+from app.auth.deps import get_current_user
+from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
+from app.services.procurement_service import BESTELLUNG_UPDATE_KEYS, ProcurementService
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.einkauf_bestellvorschlag_schemas import EinkaufBestellvorschlagOut
@@ -864,6 +866,148 @@ async def update_bestellung(
         raise HTTPException(404, "Bestellung nicht gefunden")
 
 
+_PO_SAVE_ALLOWED = frozenset(BESTELLUNG_UPDATE_KEYS) - {
+    "status",
+    "netto_summe",
+    "mwst_betrag",
+    "brutto_summe",
+    "erstellt_von",
+}
+
+
+@router.post(
+    "/einkauf/bestellungen/{bestellung_id}/actions/speichern",
+    response_model=MaskActionResult,
+    summary="Bestellung speichern als Masken-CommandEndpoint",
+)
+def action_bestellung_speichern(
+    bestellung_id: str,
+    request: Request,
+    body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    """CE fuer einkauf/purchase-order:speichern — dryRun ohne UPDATE; Token-Mandant."""
+    try:
+        mode, audit_reason, idempotency_key, payload = parse_action_body(body)
+    except ValueError:
+        return MaskActionResult(
+            actionKey="speichern",
+            mode="invalid",
+            success=False,
+            error="Unbekannter Aktionsmodus.",
+            validationErrors=[
+                {"field": "_mode", "message": "Ungueltiger Aktionsmodus", "severity": "blocking"}
+            ],
+        )
+
+    # Fremde Identitaetsfelder aus Payload nie uebernehmen (parse_action_body strippt tenant_*).
+    patch = {k: v for k, v in payload.items() if k in _PO_SAVE_ALLOWED}
+    if not patch:
+        return MaskActionResult(
+            actionKey="speichern",
+            mode=mode,
+            success=False,
+            error="Keine erlaubten Bestellfelder zum Speichern.",
+            validationErrors=[
+                {"field": "_entity", "message": "Mindestens ein Kopf-Feld erforderlich", "severity": "blocking"}
+            ],
+        )
+
+    resolved = db.execute(
+        text("""
+            SELECT id::text AS id, bestellnummer, status
+            FROM domain_einkauf.bestellungen
+            WHERE tenant_id::text = :tenant
+              AND (id::text = :bid OR bestellnummer = :bid)
+            FOR SHARE
+            LIMIT 1
+        """),
+        {"tenant": tenant_id, "bid": bestellung_id},
+    ).mappings().first()
+    if not resolved:
+        db.rollback()
+        return MaskActionResult(
+            actionKey="speichern",
+            mode=mode,
+            success=False,
+            error="Bestellung nicht gefunden.",
+            validationErrors=[
+                {"field": "bestellung_id", "message": "Nicht im Authentifizierungs-Mandanten", "severity": "blocking"}
+            ],
+        )
+    entity_id = str(resolved["id"])
+    preview = {
+        "bestellung_id": entity_id,
+        "bestellnummer": resolved.get("bestellnummer"),
+        "status": resolved.get("status"),
+        "patch": patch,
+        "tenant_id": tenant_id,
+    }
+    db.rollback()
+
+    if mode != "execute":
+        return MaskActionResult(
+            actionKey="speichern",
+            mode=mode,
+            success=True,
+            summary="Bestellung wuerde gespeichert — keine Aenderung geschrieben.",
+            proposedChanges=[preview],
+        )
+
+    try:
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from sqlalchemy.orm import Session as SASession
+
+        with SASession(bind=db.connection(), join_transaction_mode="create_savepoint") as child:
+            updated = ProcurementService(child, tenant_id).update_bestellung(entity_id, patch)
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant_id,
+            action_key="speichern",
+            entity_type="einkauf_bestellung",
+            entity_id=entity_id,
+            audit_reason=audit_reason,
+            idempotency_key=idempotency_key,
+            summary=f"Bestellung {resolved.get('bestellnummer') or entity_id} gespeichert",
+        )
+        outbox_id = _write_outbox(
+            db,
+            tenant_id=tenant_id,
+            event_type="einkauf.bestellung.updated",
+            aggregate_id=entity_id,
+            payload={"id": entity_id, "tenant_id": tenant_id, "fields": sorted(patch)},
+        )
+        db.commit()
+    except EntityNotFoundError:
+        db.rollback()
+        return MaskActionResult(
+            actionKey="speichern",
+            mode=mode,
+            success=False,
+            error="Bestellung nicht gefunden.",
+        )
+    except Exception:
+        db.rollback()
+        return MaskActionResult(
+            actionKey="speichern",
+            mode=mode,
+            success=False,
+            error="Bestellung konnte nicht gespeichert werden.",
+        )
+
+    return MaskActionResult(
+        actionKey="speichern",
+        mode=mode,
+        success=True,
+        summary=f"Bestellung {resolved.get('bestellnummer') or entity_id} gespeichert.",
+        affectedIds=[entity_id],
+        auditEntryId=audit_id,
+        outboxEventId=outbox_id,
+        proposedChanges=[{**preview, "updated": updated}],
+    )
+
+
 @router.post("/einkauf/bestellungen/{bestellung_id}/versenden", summary="Versenden bestellung",
     response_model=BestellvorschlagOut
 )
@@ -872,10 +1016,10 @@ async def bestellung_versenden(
     versand_art: str = Query("email"),
     empfaenger: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
+    tenant_id: str = Depends(get_tenant_id), nutzer: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
-    try:
-        return _svc(db, tenant_id).versende_bestellung_svc(bestellung_id, versand_art, empfaenger)
+    try:  # Nicht versendet -> VersandNichtMoeglich (422/502/503), kein "versandt"
+        return _svc(db, tenant_id).versende_bestellung_svc(bestellung_id, versand_art, empfaenger, nutzer=nutzer)
     except EntityNotFoundError:
         raise HTTPException(404, "Bestellung nicht gefunden")
 

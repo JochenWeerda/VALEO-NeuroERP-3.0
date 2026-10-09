@@ -12,12 +12,13 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 39 Tools in 14 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 51 Tools in 18 Domaenen.
 
 ## Uebersicht
 
 | Tool | Domaene | Scope | Idempotent | Risiko | Human-Approval |
 |---|---|---|---|---|---|
+| `admin.postfach.speichern` | platform | `admin:write` | ja | hoch | nein |
 | `agent.proposal.list` | agent | `agent:read` | ja | niedrig | nein |
 | `agrar.contract.get` | agrar | `agrar:read` | ja | niedrig | nein |
 | `agrar.feed_analysis.transition` | agrar | `agrar:write` | ja | mittel | nein |
@@ -27,6 +28,7 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 39 Tools in 14 Domaenen.
 | `agrar.ration.transition` | agrar | `agrar:write` | ja | mittel | nein |
 | `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein |
 | `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein |
+| `compliance.sanctions.check` | compliance | `compliance:write` | ja | mittel | nein |
 | `crm.activity.create` | crm | `crm:write` | ja | mittel | nein |
 | `crm.contact.log` | crm | `crm:write` | ja | mittel | nein |
 | `crm.customer.open` | crm | `crm:read` | ja | niedrig | nein |
@@ -38,20 +40,30 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 39 Tools in 14 Domaenen.
 | `einkauf.angebot.bestellen` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `einkauf.anlieferavis.wareneingang` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `einkauf.bestellung.list` | einkauf | `einkauf:read` | ja | niedrig | nein |
+| `einkauf.bestellung.speichern` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `einkauf.bestellung.status` | einkauf | `einkauf:read` | ja | niedrig | nein |
 | `einkauf.bestellung.versenden` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein |
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein |
 | `finance.ap_invoice.freigeben` | finance | `finance:write` | ja | hoch | ja |
 | `finance.ap_invoice.propose` | finance | `finance:write` | nein | hoch | ja |
+| `hr.bewerbung.speichern` | hr | `hr:write` | ja | mittel | nein |
+| `hr.einwilligung.anlegen` | hr | `hr:write` | ja | mittel | nein |
+| `hr.onboarding.speichern` | hr | `hr:write` | ja | mittel | nein |
+| `hr.qualifikation.speichern` | hr | `hr:write` | ja | mittel | nein |
+| `hr.schulung.speichern` | hr | `hr:write` | ja | mittel | nein |
 | `lager.bestand.get` | lager | `lager:read` | ja | niedrig | nein |
 | `lager.inventur.propose_opening` | lager | `lager:write` | nein | hoch | ja |
 | `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein |
 | `lager.stock_movement.stornieren` | lager | `lager:write` | ja | mittel | nein |
+| `logistik.frachttabelle.anlegen` | logistics | `logistics:write` | ja | mittel | nein |
+| `logistik.tour.anlegen` | logistics | `logistics:write` | ja | mittel | nein |
 | `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein |
 | `planung.calendar.reproject` | planung | `planung:write` | ja | mittel | nein |
 | `produktion.control.sync` | produktion | `ops:write` | ja | mittel | nein |
 | `qualitaet.reklamation.abschliessen` | qualitaet | `quality:write` | ja | mittel | nein |
+| `reporting.bonus.calculate` | reporting | `reporting:write` | ja | mittel | nein |
+| `reporting.query.import_signed` | reporting | `reporting:write` | ja | mittel | nein |
 | `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein |
@@ -637,6 +649,76 @@ Liest ehrliche Statussignale fuer ELSTER/DATEV/TSE/Auditor aus vorhandenen Domä
 }
 ```
 
+### `compliance.sanctions.check` — Sanktionsliste pruefen
+
+Prueft einen Namen gegen die aktive Sanktionsliste und protokolliert bei execute mandantengebunden (Masken auswertungen/sanktionspruefung-kunden|personal:check; CE /api/v1/compliance/sanctions/actions/pruefen/{scope}). parameters.name, scope (customers|personal|manual), optional entity_ref. Default dryRun ohne Protokoll; execute erfordert idempotency_key. Scope compliance:write. Kein Auto-Freigeben von Treffern, kein FIBU/FIN-CLOSE.
+
+- **Scope:** `compliance:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Zu pruefender Name"
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "customers",
+        "personal",
+        "manual"
+      ],
+      "description": "Pruefumfang der Maske"
+    },
+    "entity_ref": {
+      "type": "string",
+      "nullable": true,
+      "description": "Personal-/Kunden-Nr."
+    }
+  },
+  "required": [
+    "name",
+    "scope"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string"
+    },
+    "empfehlung": {
+      "type": "string"
+    },
+    "treffer": {
+      "type": "array"
+    },
+    "check_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "auditEntryId": {
+      "type": "string",
+      "nullable": true
+    }
+  }
+}
+```
+
 ## Domaene: crm
 
 ### `crm.activity.create` — CRM-Aktivitaet anlegen
@@ -1190,6 +1272,89 @@ Listet Bestellungen des Authentifizierungs-Mandanten mit Status, Liefertermin un
 }
 ```
 
+### `einkauf.bestellung.speichern` — Bestellung speichern
+
+Aktualisiert erlaubte Bestell-Kopffelder im Authentifizierungs-Mandanten (Maske einkauf/purchase-order:speichern; CE /api/v1/einkauf/bestellungen/{id}/actions/speichern). parameters.bestellung_id plus optionale Felder (Liefer-/Ladetermine, Referenzen, Notiz, versand_art), reason. Status/Summen nicht aenderbar. Default dryRun; execute erfordert idempotency_key. Scope einkauf:write. Kein tenant_id-Parameter.
+
+- **Scope:** `einkauf:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "bestellung_id": {
+      "type": "string"
+    },
+    "lieferdatum_wunsch": {
+      "type": "string"
+    },
+    "lieferdatum_zugesagt": {
+      "type": "string"
+    },
+    "ladetermin": {
+      "type": "string"
+    },
+    "ladetermin_ab": {
+      "type": "string"
+    },
+    "versand_art": {
+      "type": "string",
+      "enum": [
+        "email",
+        "fax",
+        "edi",
+        "post",
+        "telefon",
+        "manuell"
+      ]
+    },
+    "unsere_referenz": {
+      "type": "string"
+    },
+    "ihre_referenz": {
+      "type": "string"
+    },
+    "notiz": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "bestellung_id",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "bestellung_id": {
+      "type": "string"
+    },
+    "bestellnummer": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
 ### `einkauf.bestellung.status` — Bestellungs-Status
 
 Gibt Status, Lieferant und kanonische Masken-Route (/einkauf/bestellung/{id}, Screen einkauf/purchase-order) einer Bestellung im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=einkauf.bestellung.status, parameters.bestellung_id (UUID oder Bestellnummer). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit einkauf:read und tenant_id erforderlich. Kein Versand, kein Obligo.
@@ -1569,6 +1734,300 @@ Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authent
 }
 ```
 
+## Domaene: hr
+
+### `hr.bewerbung.speichern` — Bewerbung speichern
+
+Erfasst eine Bewerbung im Authentifizierungs-Mandanten (Maske personal/bewerbungen:speichern; CE /api/v1/personal/applications/actions/speichern). parameters.applicant_name, applicant_email, optional position_title/source, reason. Default dryRun; execute erfordert idempotency_key. Scope hr:write. Kein tenant_id-Parameter.
+
+- **Scope:** `hr:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "applicant_name": {
+      "type": "string"
+    },
+    "applicant_email": {
+      "type": "string"
+    },
+    "position_title": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "applicant_name",
+    "applicant_email",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "application_id": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `hr.einwilligung.anlegen` — Einwilligungserklaerung anlegen
+
+Legt eine unveraenderliche Fassung der Einwilligungserklaerung im Authentifizierungs-Mandanten an (Maske personal/einwilligungserklaerungen:anlegen; CE /api/v1/personal/applications/einwilligungserklaerungen/actions/anlegen). parameters.wortlaut, optional erstellt_durch, reason. Default dryRun; execute erfordert idempotency_key. Scope hr:write.
+
+- **Scope:** `hr:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "wortlaut": {
+      "type": "string"
+    },
+    "erstellt_durch": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "wortlaut",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "erklaerung_id": {
+      "type": "string"
+    },
+    "fassung": {
+      "type": "integer"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `hr.onboarding.speichern` — Onboarding-Lauf speichern
+
+Legt einen Einarbeitungslauf im Authentifizierungs-Mandanten an (Maske personal/onboarding:speichern; CE /api/v1/training/onboarding/runs/actions/speichern). parameters.employee_ref, checklist_id, optional assigned_by/due_date, reason. Checkliste muss Mandant gehoeren (sonst 404). Default dryRun; execute erfordert idempotency_key. Scope hr:write.
+
+- **Scope:** `hr:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "employee_ref": {
+      "type": "string"
+    },
+    "checklist_id": {
+      "type": "string"
+    },
+    "assigned_by": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "employee_ref",
+    "checklist_id",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `hr.qualifikation.speichern` — Qualifikation speichern
+
+Legt ein Qualifikationsprofil im Authentifizierungs-Mandanten an (Maske personal/qualifikationen:speichern; CE /api/v1/training/qualifications/actions/speichern). parameters.employee_ref, role_code, optional qualification_level/skills/valid_until, reason. Default dryRun; execute erfordert idempotency_key. Scope hr:write.
+
+- **Scope:** `hr:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "employee_ref": {
+      "type": "string"
+    },
+    "role_code": {
+      "type": "string"
+    },
+    "qualification_level": {
+      "type": "string"
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "valid_until": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "employee_ref",
+    "role_code",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "qualification_id": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `hr.schulung.speichern` — Schulungszuweisung speichern
+
+Legt eine Schulungszuweisung im Authentifizierungs-Mandanten an (Maske personal/schulungen:speichern; CE /api/v1/training/assignments/actions/speichern). parameters.employee_ref, course_id, optional assigned_by/due_date, reason. Kurs muss Mandant gehoeren (sonst 404). Default dryRun; execute erfordert idempotency_key. Scope hr:write.
+
+- **Scope:** `hr:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "employee_ref": {
+      "type": "string"
+    },
+    "course_id": {
+      "type": "string"
+    },
+    "assigned_by": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "employee_ref",
+    "course_id",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "assignment_id": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
 ## Domaene: inventory
 
 ### `wms.cell.status` — Silozellen-Status
@@ -1939,6 +2398,127 @@ Storniert eine Lagerbewegung des Authentifizierungs-Mandanten per Gegenbuchung (
 }
 ```
 
+## Domaene: logistics
+
+### `logistik.frachttabelle.anlegen` — Frachttabelle anlegen
+
+Legt eine mandantengebundene Frachttabelle an (Maske logistik/frachttabellen:anlegen; CE /api/v1/logistik/frachttabellen/actions/anlegen). parameters.tabelle_nr, bezeichnung, optional einheit/waehrung. Default dryRun; execute erfordert idempotency_key. Scope logistics:write. Kein FIBU.
+
+- **Scope:** `logistics:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "tabelle_nr": {
+      "type": "string"
+    },
+    "bezeichnung": {
+      "type": "string"
+    },
+    "einheit": {
+      "type": "string",
+      "nullable": true
+    },
+    "waehrung": {
+      "type": "string",
+      "nullable": true,
+      "default": "EUR"
+    }
+  },
+  "required": [
+    "tabelle_nr",
+    "bezeichnung"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "tabelle_nr": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `logistik.tour.anlegen` — Tour anlegen
+
+Legt eine Tour im Authentifizierungs-Mandanten an (Maske logistik/tourenplanung:anlegen; CE /api/v1/logistik/tours/actions/anlegen). parameters.date, vehicle_id, driver_id, notes, optional delivery_note_ref (tenant-scoped Lookup), reason. Default dryRun; execute erfordert idempotency_key. Scope logistics:write. Kein tenant_id-Parameter.
+
+- **Scope:** `logistics:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "description": "ISO-Datum/Zeit"
+    },
+    "vehicle_id": {
+      "type": "string"
+    },
+    "driver_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "delivery_note_ref": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "tour_id": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
 ## Domaene: mobile
 
 ### `mobile.sync.process_pending` — MDE-Queue verarbeiten
@@ -2163,6 +2743,86 @@ Projiziert Kalender-Items des Authentifizierungs-Mandanten neu (Maske planung/ka
 }
 ```
 
+## Domaene: platform
+
+### `admin.postfach.speichern` — Postfach speichern
+
+Legt ein Mandanten-Postfach an oder aendert es (Maske admin/postfaecher:speichern; CE /api/v1/admin/postfaecher/actions/speichern). parameters.kennung, absender_email, anbieter, optional postfach_id/passwort/smtp_*, reason. Passwort nie im Audit. Default dryRun; execute erfordert idempotency_key. Scope admin:write. Cross-Tenant-ID → 404.
+
+- **Scope:** `admin:write`
+- **Idempotent:** ja
+- **Risikoklasse:** hoch
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "kennung": {
+      "type": "string"
+    },
+    "absender_email": {
+      "type": "string"
+    },
+    "anbieter": {
+      "type": "string",
+      "enum": [
+        "ionos",
+        "google",
+        "microsoft",
+        "smtp",
+        "alias"
+      ]
+    },
+    "anmeldung": {
+      "type": "string",
+      "enum": [
+        "passwort",
+        "oauth2"
+      ]
+    },
+    "postfach_id": {
+      "type": "string"
+    },
+    "passwort": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "kennung",
+    "absender_email",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "postfach_id": {
+      "type": "string"
+    },
+    "kennung": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
 ## Domaene: produktion
 
 ### `produktion.control.sync` — Produktionsleitstand synchronisieren
@@ -2253,6 +2913,132 @@ Schliesst eine Reklamation des Authentifizierungs-Mandanten (Maske qualitaet/rek
       "type": "string"
     },
     "status": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+## Domaene: reporting
+
+### `reporting.bonus.calculate` — Bonuslauf berechnen
+
+Berechnet einen immutable Bonuslauf im Authentifizierungs-Mandanten (Maske auswertungen/bonus-berechnung:calculate; CE /api/v1/l3-report-catalog/bonus-runs/actions/calculate). parameters.report_id (bonus-by-customer|bonus-by-article-group), from_date, to_date, rate_pct, reason. Default dryRun ohne INSERT; execute erfordert idempotency_key. Scope reporting:write. Kein FIBU/FIN-CLOSE.
+
+- **Scope:** `reporting:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "report_id": {
+      "type": "string",
+      "enum": [
+        "bonus-by-customer",
+        "bonus-by-article-group"
+      ]
+    },
+    "from_date": {
+      "type": "string",
+      "description": "ISO-Datum"
+    },
+    "to_date": {
+      "type": "string",
+      "description": "ISO-Datum"
+    },
+    "rate_pct": {
+      "type": "number"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "report_id",
+    "from_date",
+    "to_date",
+    "rate_pct",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "total_bonus": {
+      "type": "number"
+    },
+    "lines": {
+      "type": "integer"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `reporting.query.import_signed` — Signierte Abfrage importieren
+
+Importiert eine HMAC-signierte Abfragedefinition (Maske auswertungen/abfrage-center:import; CE /api/v1/query-center/actions/import). parameters.bundle (schema_version/definition/signature), reason. Default dryRun nur Signaturpruefung; execute erfordert idempotency_key. Scope reporting:write. Kein beliebiges SQL.
+
+- **Scope:** `reporting:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "bundle": {
+      "type": "object",
+      "description": "Signiertes Export-Bundle"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 5
+    }
+  },
+  "required": [
+    "bundle",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "definition_id": {
+      "type": "string"
+    },
+    "name": {
       "type": "string"
     },
     "auditEntryId": {

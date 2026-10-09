@@ -1,6 +1,6 @@
 schema_version: '1.0'
 slice_id: MCP-MASK-WRITE-PARITY-20261008
-generated_on: '2026-10-08'
+generated_on: '2026-10-09'
 sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
@@ -16,6 +16,18 @@ mcp_write_tools:
 - sales.invoice.post
 - finance.ap_invoice.propose
 - finance.ap_invoice.freigeben
+- compliance.sanctions.check
+- logistik.frachttabelle.anlegen
+- reporting.bonus.calculate
+- reporting.query.import_signed
+- logistik.tour.anlegen
+- einkauf.bestellung.speichern
+- hr.bewerbung.speichern
+- hr.einwilligung.anlegen
+- hr.onboarding.speichern
+- hr.qualifikation.speichern
+- hr.schulung.speichern
+- admin.postfach.speichern
 - agrar.ration.transition
 - agrar.feeding.supply_handoff
 - agrar.feeding.actual_measure
@@ -57,12 +69,12 @@ fin_close:
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
   mask_actions_considered: 59
-  mask_mutations_considered: 49
+  mask_mutations_considered: 46
   by_coverage:
     adjacent: 1
-    blocked_no_endpoint: 21
-    local_ui: 10
-    mapped: 23
+    blocked_missing_tenant: 5
+    local_ui: 13
+    mapped: 36
     mapped_propose_only: 1
     mapped_read: 2
     open_high: 1
@@ -74,21 +86,22 @@ mappings:
   label: Neues Postfach
   command_endpoint: null
   command: admin.postfachNeu
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: local_ui
+  local_effect: form_reset
+  notes: 'SD stubReason: leert Eingabe fuer neues Postfach; kein HTTP-Mutation. MCP-MASK-CE-BATCH2-20261009.
+    Speichern bleibt blocked (Postfach-WIP).'
   mcp_tool_id: null
 - mask_action_id: mask:admin/postfaecher:speichern
   mask: admin/postfaecher
   domain: platform
   action_key: speichern
   label: Postfach speichern
-  command_endpoint: null
+  command_endpoint: /api/v1/admin/postfaecher/actions/speichern
   command: admin.postfachSpeichern
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
-  mcp_tool_id: null
+  mcp_tool_id: admin.postfach.speichern
+  coverage: mapped
+  notes: MCP-MASK-CE-BATCH3-20261009; CE /api/v1/admin/postfaecher/actions/speichern; Token-Mandant; Passwort
+    nicht im Audit.
 - mask_action_id: mask:agrar/feed-readiness:create_handoff
   mask: agrar/feed-readiness
   domain: agrar
@@ -184,45 +197,43 @@ mappings:
   domain: reporting
   action_key: import
   label: Signiert importieren
-  command_endpoint: null
+  command_endpoint: /api/v1/query-center/actions/import
   command: null
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
-  mcp_tool_id: null
+  mcp_tool_id: reporting.query.import_signed
+  coverage: mapped
+  notes: MCP-MASK-CE-BATCH2-20261009; CE /api/v1/query-center/actions/import; signierter Import.
 - mask_action_id: mask:auswertungen/bonus-berechnung:calculate
   mask: auswertungen/bonus-berechnung
   domain: reporting
   action_key: calculate
   label: Bonuslauf berechnen
-  command_endpoint: null
+  command_endpoint: /api/v1/l3-report-catalog/bonus-runs/actions/calculate
   command: null
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
-  mcp_tool_id: null
+  mcp_tool_id: reporting.bonus.calculate
+  coverage: mapped
+  notes: MCP-MASK-CE-BATCH2-20261009; CE /api/v1/l3-report-catalog/bonus-runs/actions/calculate; L3ReportCatalogService.
 - mask_action_id: mask:auswertungen/sanktionspruefung-kunden:check
   mask: auswertungen/sanktionspruefung-kunden
   domain: compliance
   action_key: check
   label: Kunden pruefen
-  command_endpoint: null
+  command_endpoint: /api/v1/compliance/sanctions/actions/pruefen/customers
   command: null
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
-  mcp_tool_id: null
+  mcp_tool_id: compliance.sanctions.check
+  coverage: mapped
+  notes: MCP-MASK-CE-SANCTIONS-FRACHT-20261009; CE /api/v1/compliance/sanctions/actions/pruefen/customers;
+    kein Auto-Freigeben.
 - mask_action_id: mask:auswertungen/sanktionspruefung-personal:check
   mask: auswertungen/sanktionspruefung-personal
   domain: compliance
   action_key: check
   label: Personal pruefen
-  command_endpoint: null
+  command_endpoint: /api/v1/compliance/sanctions/actions/pruefen/personal
   command: null
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
-  mcp_tool_id: null
+  mcp_tool_id: compliance.sanctions.check
+  coverage: mapped
+  notes: MCP-MASK-CE-SANCTIONS-FRACHT-20261009; CE /api/v1/compliance/sanctions/actions/pruefen/personal;
+    kein Auto-Freigeben.
 - mask_action_id: mask:crm/customer-360:create_activity
   mask: crm/customer-360
   domain: crm
@@ -288,12 +299,12 @@ mappings:
   domain: einkauf
   action_key: speichern
   label: Speichern
-  command_endpoint: null
+  command_endpoint: /api/v1/einkauf/bestellungen/{entity_id}/actions/speichern
   command: null
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
-  mcp_tool_id: null
+  mcp_tool_id: einkauf.bestellung.speichern
+  coverage: mapped
+  notes: MCP-MASK-CE-BATCH2-20261009; CE /api/v1/einkauf/bestellungen/{entity_id}/actions/speichern; Kopf-Felder
+    ohne Status/Summen; Token-Mandant.
 - mask_action_id: mask:einkauf/purchase-order:versenden
   mask: einkauf/purchase-order
   domain: einkauf
@@ -311,9 +322,9 @@ mappings:
   label: Bestellung anlegen
   command_endpoint: null
   command: null
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: local_ui
+  local_effect: navigation
+  notes: SD navigationRoute /einkauf/bestellungen/neu; legt keine Bestellung an. MCP-MASK-CE-BATCH2-20261009.
   mcp_tool_id: null
 - mask_action_id: mask:finance/ap-invoice:freigeben
   mask: finance/ap-invoice
@@ -365,9 +376,9 @@ mappings:
   label: Speichern
   command_endpoint: null
   command: fuhrpark.saveDokument
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: blocked_missing_tenant
+  notes: 'blocked_missing_tenant: Fuhrpark-Repository ohne tenant_id-Spalte/Token-Filter. Folge-Claim:
+    additive tenant_id + Mandanten-SQL, dann CE+MCP. Kein Write ohne Isolation. MCP-MASK-CE-BATCH4-20261009.'
   mcp_tool_id: null
 - mask_action_id: mask:fuhrpark/fahrzeug-stamm:loeschen
   mask: fuhrpark/fahrzeug-stamm
@@ -376,9 +387,9 @@ mappings:
   label: Fahrzeug löschen
   command_endpoint: null
   command: fuhrpark.deleteFahrzeug
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: blocked_missing_tenant
+  notes: 'blocked_missing_tenant: Fuhrpark-Repository ohne tenant_id-Spalte/Token-Filter. Folge-Claim:
+    additive tenant_id + Mandanten-SQL, dann CE+MCP. Kein Write ohne Isolation. MCP-MASK-CE-BATCH4-20261009.'
   mcp_tool_id: null
 - mask_action_id: mask:fuhrpark/fahrzeug-stamm:speichern
   mask: fuhrpark/fahrzeug-stamm
@@ -387,9 +398,9 @@ mappings:
   label: Speichern
   command_endpoint: null
   command: fuhrpark.saveFahrzeug
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: blocked_missing_tenant
+  notes: 'blocked_missing_tenant: Fuhrpark-Repository ohne tenant_id-Spalte/Token-Filter. Folge-Claim:
+    additive tenant_id + Mandanten-SQL, dann CE+MCP. Kein Write ohne Isolation. MCP-MASK-CE-BATCH4-20261009.'
   mcp_tool_id: null
 - mask_action_id: mask:fuhrpark/fahrzeuge:neu
   mask: fuhrpark/fahrzeuge
@@ -422,9 +433,9 @@ mappings:
   label: Speichern
   command_endpoint: null
   command: fuhrpark.saveRechnung
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: blocked_missing_tenant
+  notes: 'blocked_missing_tenant: Fuhrpark-Repository ohne tenant_id-Spalte/Token-Filter. Folge-Claim:
+    additive tenant_id + Mandanten-SQL, dann CE+MCP. Kein Write ohne Isolation. MCP-MASK-CE-BATCH4-20261009.'
   mcp_tool_id: null
 - mask_action_id: mask:fuhrpark/terminarten:neu
   mask: fuhrpark/terminarten
@@ -445,9 +456,9 @@ mappings:
   label: Speichern
   command_endpoint: null
   command: fuhrpark.saveTerminart
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: blocked_missing_tenant
+  notes: 'blocked_missing_tenant: Fuhrpark-Repository ohne tenant_id-Spalte/Token-Filter. Folge-Claim:
+    additive tenant_id + Mandanten-SQL, dann CE+MCP. Kein Write ohne Isolation. MCP-MASK-CE-BATCH4-20261009.'
   mcp_tool_id: null
 - mask_action_id: mask:futtermittel/analyse:reject
   mask: futtermittel/analyse
@@ -495,23 +506,21 @@ mappings:
   domain: logistics
   action_key: anlegen
   label: Tabelle speichern
-  command_endpoint: null
-  command: fracht.createTable
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
-  mcp_tool_id: null
+  command_endpoint: /api/v1/logistik/frachttabellen/actions/anlegen
+  command: null
+  mcp_tool_id: logistik.frachttabelle.anlegen
+  coverage: mapped
+  notes: MCP-MASK-CE-SANCTIONS-FRACHT-20261009; CE /api/v1/logistik/frachttabellen/actions/anlegen; Token-Mandant.
 - mask_action_id: mask:logistik/tourenplanung:anlegen
   mask: logistik/tourenplanung
   domain: logistics
   action_key: anlegen
   label: Tour anlegen
-  command_endpoint: null
+  command_endpoint: /api/v1/logistik/tours/actions/anlegen
   command: tour.create
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
-  mcp_tool_id: null
+  mcp_tool_id: logistik.tour.anlegen
+  coverage: mapped
+  notes: MCP-MASK-CE-BATCH2-20261009; CE /api/v1/logistik/tours/actions/anlegen; Token-Mandant.
 - mask_action_id: mask:logistik/verladung:neu
   mask: logistik/verladung
   domain: logistics
@@ -519,9 +528,9 @@ mappings:
   label: Neue Beladung
   command_endpoint: null
   command: null
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
+  coverage: local_ui
+  local_effect: navigation
+  notes: SD navigationRoute /verladung/lkw-beladung; legt keine Beladung an. MCP-MASK-CE-SANCTIONS-FRACHT-20261009.
   mcp_tool_id: null
 - mask_action_id: mask:personal/bewerbungen:neu
   mask: personal/bewerbungen
@@ -540,23 +549,22 @@ mappings:
   domain: hr
   action_key: speichern
   label: Speichern
-  command_endpoint: null
+  command_endpoint: /api/v1/personal/applications/actions/speichern
   command: personal.saveBewerbung
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
-  mcp_tool_id: null
+  mcp_tool_id: hr.bewerbung.speichern
+  coverage: mapped
+  notes: MCP-MASK-CE-BATCH3-20261009; CE /api/v1/personal/applications/actions/speichern; Token-Mandant.
 - mask_action_id: mask:personal/einwilligungserklaerungen:anlegen
   mask: personal/einwilligungserklaerungen
   domain: hr
   action_key: anlegen
   label: Fassung anlegen
-  command_endpoint: null
+  command_endpoint: /api/v1/personal/applications/einwilligungserklaerungen/actions/anlegen
   command: personal.saveErklaerung
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
-  mcp_tool_id: null
+  mcp_tool_id: hr.einwilligung.anlegen
+  coverage: mapped
+  notes: MCP-MASK-CE-BATCH3-20261009; CE /api/v1/personal/applications/einwilligungserklaerungen/actions/anlegen;
+    Token-Mandant.
 - mask_action_id: mask:personal/einwilligungserklaerungen:neu
   mask: personal/einwilligungserklaerungen
   domain: hr
@@ -586,12 +594,12 @@ mappings:
   domain: hr
   action_key: speichern
   label: Speichern
-  command_endpoint: null
+  command_endpoint: /api/v1/training/onboarding/runs/actions/speichern
   command: personal.saveOnboarding
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
-  mcp_tool_id: null
+  mcp_tool_id: hr.onboarding.speichern
+  coverage: mapped
+  notes: MCP-MASK-CE-BATCH4-20261009; CE /api/v1/training/onboarding/runs/actions/speichern; Token-Mandant;
+    Checkliste tenant-gebunden.
 - mask_action_id: mask:personal/qualifikationen:neu
   mask: personal/qualifikationen
   domain: hr
@@ -609,12 +617,11 @@ mappings:
   domain: hr
   action_key: speichern
   label: Speichern
-  command_endpoint: null
+  command_endpoint: /api/v1/training/qualifications/actions/speichern
   command: personal.saveQualifikation
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
-  mcp_tool_id: null
+  mcp_tool_id: hr.qualifikation.speichern
+  coverage: mapped
+  notes: MCP-MASK-CE-BATCH4-20261009; CE /api/v1/training/qualifications/actions/speichern; Token-Mandant.
 - mask_action_id: mask:personal/schulungen:neu
   mask: personal/schulungen
   domain: hr
@@ -632,12 +639,12 @@ mappings:
   domain: hr
   action_key: speichern
   label: Speichern
-  command_endpoint: null
+  command_endpoint: /api/v1/training/assignments/actions/speichern
   command: personal.saveSchulung
-  coverage: blocked_no_endpoint
-  notes: Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; nur ActionRuntime-Command oder UI-Flow
-    — MCP-MASK-WRITES-REMAINING-20261008.
-  mcp_tool_id: null
+  mcp_tool_id: hr.schulung.speichern
+  coverage: mapped
+  notes: MCP-MASK-CE-BATCH4-20261009; CE /api/v1/training/assignments/actions/speichern; Token-Mandant;
+    Kurs tenant-gebunden.
 - mask_action_id: mask:planung/kalender:reproject
   mask: planung/kalender
   domain: platform
@@ -702,5 +709,6 @@ mappings:
   mcp_tool_id: null
 next_medium_candidates: []
 classification_complete: true
-classification_notes: 'MCP-INVENTUR-OPENING-PROPOSE-20261008: Inventur-Opening mapped_propose_only. Rest:
-  open_high nur Zahlauf; blocked_no_endpoint 21; local_ui 10; FIN-CLOSE blocked_adr_076.'
+classification_notes: 'MCP-MASK-CE-BATCH4-20261009: Personal onboarding/qualifikationen/schulungen mapped
+  (Training-REST+Mandant); Fuhrpark blocked_missing_tenant 5 (keine tenant_id). Rest: open_high nur Zahlauf;
+  blocked_no_endpoint 0; local_ui 13; FIN-CLOSE blocked_adr_076.'

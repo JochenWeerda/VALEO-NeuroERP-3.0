@@ -495,6 +495,329 @@ tools:
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false
 
+  - tool_id: compliance.sanctions.check
+    domain: compliance
+    name: "Sanktionsliste pruefen"
+    description: "Prueft einen Namen gegen die aktive Sanktionsliste und protokolliert bei execute mandantengebunden (Masken auswertungen/sanktionspruefung-kunden|personal:check; CE /api/v1/compliance/sanctions/actions/pruefen/{scope}). parameters.name, scope (customers|personal|manual), optional entity_ref. Default dryRun ohne Protokoll; execute erfordert idempotency_key. Scope compliance:write. Kein Auto-Freigeben von Treffern, kein FIBU/FIN-CLOSE."
+    scope: compliance:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        name: { type: string, description: "Zu pruefender Name" }
+        scope: { type: string, enum: [customers, personal, manual], description: "Pruefumfang der Maske" }
+        entity_ref: { type: string, nullable: true, description: "Personal-/Kunden-Nr." }
+      required: [name, scope]
+    output_schema:
+      type: object
+      properties:
+        status: { type: string }
+        empfehlung: { type: string }
+        treffer: { type: array }
+        check_id: { type: string, nullable: true }
+        auditEntryId: { type: string, nullable: true }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: logistik.frachttabelle.anlegen
+    domain: logistics
+    name: "Frachttabelle anlegen"
+    description: "Legt eine mandantengebundene Frachttabelle an (Maske logistik/frachttabellen:anlegen; CE /api/v1/logistik/frachttabellen/actions/anlegen). parameters.tabelle_nr, bezeichnung, optional einheit/waehrung. Default dryRun; execute erfordert idempotency_key. Scope logistics:write. Kein FIBU."
+    scope: logistics:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        tabelle_nr: { type: string }
+        bezeichnung: { type: string }
+        einheit: { type: string, nullable: true }
+        waehrung: { type: string, nullable: true, default: EUR }
+      required: [tabelle_nr, bezeichnung]
+    output_schema:
+      type: object
+      properties:
+        id: { type: string }
+        tabelle_nr: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: reporting.bonus.calculate
+    domain: reporting
+    name: "Bonuslauf berechnen"
+    description: "Berechnet einen immutable Bonuslauf im Authentifizierungs-Mandanten (Maske auswertungen/bonus-berechnung:calculate; CE /api/v1/l3-report-catalog/bonus-runs/actions/calculate). parameters.report_id (bonus-by-customer|bonus-by-article-group), from_date, to_date, rate_pct, reason. Default dryRun ohne INSERT; execute erfordert idempotency_key. Scope reporting:write. Kein FIBU/FIN-CLOSE."
+    scope: reporting:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        report_id: { type: string, enum: [bonus-by-customer, bonus-by-article-group] }
+        from_date: { type: string, description: "ISO-Datum" }
+        to_date: { type: string, description: "ISO-Datum" }
+        rate_pct: { type: number }
+        reason: { type: string, minLength: 3 }
+      required: [report_id, from_date, to_date, rate_pct, reason]
+    output_schema:
+      type: object
+      properties:
+        run_id: { type: string }
+        total_bonus: { type: number }
+        lines: { type: integer }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: reporting.query.import_signed
+    domain: reporting
+    name: "Signierte Abfrage importieren"
+    description: "Importiert eine HMAC-signierte Abfragedefinition (Maske auswertungen/abfrage-center:import; CE /api/v1/query-center/actions/import). parameters.bundle (schema_version/definition/signature), reason. Default dryRun nur Signaturpruefung; execute erfordert idempotency_key. Scope reporting:write. Kein beliebiges SQL."
+    scope: reporting:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        bundle: { type: object, description: "Signiertes Export-Bundle" }
+        reason: { type: string, minLength: 5 }
+      required: [bundle, reason]
+    output_schema:
+      type: object
+      properties:
+        definition_id: { type: string }
+        name: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: logistik.tour.anlegen
+    domain: logistics
+    name: "Tour anlegen"
+    description: "Legt eine Tour im Authentifizierungs-Mandanten an (Maske logistik/tourenplanung:anlegen; CE /api/v1/logistik/tours/actions/anlegen). parameters.date, vehicle_id, driver_id, notes, optional delivery_note_ref (tenant-scoped Lookup), reason. Default dryRun; execute erfordert idempotency_key. Scope logistics:write. Kein tenant_id-Parameter."
+    scope: logistics:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        date: { type: string, description: "ISO-Datum/Zeit" }
+        vehicle_id: { type: string }
+        driver_id: { type: string }
+        notes: { type: string }
+        delivery_note_ref: { type: string }
+        reason: { type: string, minLength: 3 }
+      required: [reason]
+    output_schema:
+      type: object
+      properties:
+        tour_id: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: einkauf.bestellung.speichern
+    domain: einkauf
+    name: "Bestellung speichern"
+    description: "Aktualisiert erlaubte Bestell-Kopffelder im Authentifizierungs-Mandanten (Maske einkauf/purchase-order:speichern; CE /api/v1/einkauf/bestellungen/{id}/actions/speichern). parameters.bestellung_id plus optionale Felder (Liefer-/Ladetermine, Referenzen, Notiz, versand_art), reason. Status/Summen nicht aenderbar. Default dryRun; execute erfordert idempotency_key. Scope einkauf:write. Kein tenant_id-Parameter."
+    scope: einkauf:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        bestellung_id: { type: string }
+        lieferdatum_wunsch: { type: string }
+        lieferdatum_zugesagt: { type: string }
+        ladetermin: { type: string }
+        ladetermin_ab: { type: string }
+        versand_art: { type: string, enum: [email, fax, edi, post, telefon, manuell] }
+        unsere_referenz: { type: string }
+        ihre_referenz: { type: string }
+        notiz: { type: string }
+        reason: { type: string, minLength: 3 }
+      required: [bestellung_id, reason]
+    output_schema:
+      type: object
+      properties:
+        bestellung_id: { type: string }
+        bestellnummer: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: hr.bewerbung.speichern
+    domain: hr
+    name: "Bewerbung speichern"
+    description: "Erfasst eine Bewerbung im Authentifizierungs-Mandanten (Maske personal/bewerbungen:speichern; CE /api/v1/personal/applications/actions/speichern). parameters.applicant_name, applicant_email, optional position_title/source, reason. Default dryRun; execute erfordert idempotency_key. Scope hr:write. Kein tenant_id-Parameter."
+    scope: hr:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        applicant_name: { type: string }
+        applicant_email: { type: string }
+        position_title: { type: string }
+        source: { type: string }
+        reason: { type: string, minLength: 3 }
+      required: [applicant_name, applicant_email, reason]
+    output_schema:
+      type: object
+      properties:
+        application_id: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: hr.einwilligung.anlegen
+    domain: hr
+    name: "Einwilligungserklaerung anlegen"
+    description: "Legt eine unveraenderliche Fassung der Einwilligungserklaerung im Authentifizierungs-Mandanten an (Maske personal/einwilligungserklaerungen:anlegen; CE /api/v1/personal/applications/einwilligungserklaerungen/actions/anlegen). parameters.wortlaut, optional erstellt_durch, reason. Default dryRun; execute erfordert idempotency_key. Scope hr:write."
+    scope: hr:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        wortlaut: { type: string }
+        erstellt_durch: { type: string }
+        reason: { type: string, minLength: 3 }
+      required: [wortlaut, reason]
+    output_schema:
+      type: object
+      properties:
+        erklaerung_id: { type: string }
+        fassung: { type: integer }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: hr.onboarding.speichern
+    domain: hr
+    name: "Onboarding-Lauf speichern"
+    description: "Legt einen Einarbeitungslauf im Authentifizierungs-Mandanten an (Maske personal/onboarding:speichern; CE /api/v1/training/onboarding/runs/actions/speichern). parameters.employee_ref, checklist_id, optional assigned_by/due_date, reason. Checkliste muss Mandant gehoeren (sonst 404). Default dryRun; execute erfordert idempotency_key. Scope hr:write."
+    scope: hr:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        employee_ref: { type: string }
+        checklist_id: { type: string }
+        assigned_by: { type: string }
+        due_date: { type: string }
+        reason: { type: string, minLength: 3 }
+      required: [employee_ref, checklist_id, reason]
+    output_schema:
+      type: object
+      properties:
+        run_id: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: hr.qualifikation.speichern
+    domain: hr
+    name: "Qualifikation speichern"
+    description: "Legt ein Qualifikationsprofil im Authentifizierungs-Mandanten an (Maske personal/qualifikationen:speichern; CE /api/v1/training/qualifications/actions/speichern). parameters.employee_ref, role_code, optional qualification_level/skills/valid_until, reason. Default dryRun; execute erfordert idempotency_key. Scope hr:write."
+    scope: hr:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        employee_ref: { type: string }
+        role_code: { type: string }
+        qualification_level: { type: string }
+        skills: { type: array, items: { type: string } }
+        valid_until: { type: string }
+        reason: { type: string, minLength: 3 }
+      required: [employee_ref, role_code, reason]
+    output_schema:
+      type: object
+      properties:
+        qualification_id: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: hr.schulung.speichern
+    domain: hr
+    name: "Schulungszuweisung speichern"
+    description: "Legt eine Schulungszuweisung im Authentifizierungs-Mandanten an (Maske personal/schulungen:speichern; CE /api/v1/training/assignments/actions/speichern). parameters.employee_ref, course_id, optional assigned_by/due_date, reason. Kurs muss Mandant gehoeren (sonst 404). Default dryRun; execute erfordert idempotency_key. Scope hr:write."
+    scope: hr:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        employee_ref: { type: string }
+        course_id: { type: string }
+        assigned_by: { type: string }
+        due_date: { type: string }
+        reason: { type: string, minLength: 3 }
+      required: [employee_ref, course_id, reason]
+    output_schema:
+      type: object
+      properties:
+        assignment_id: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: admin.postfach.speichern
+    domain: platform
+    name: "Postfach speichern"
+    description: "Legt ein Mandanten-Postfach an oder aendert es (Maske admin/postfaecher:speichern; CE /api/v1/admin/postfaecher/actions/speichern). parameters.kennung, absender_email, anbieter, optional postfach_id/passwort/smtp_*, reason. Passwort nie im Audit. Default dryRun; execute erfordert idempotency_key. Scope admin:write. Cross-Tenant-ID → 404."
+    scope: admin:write
+    idempotent: true
+    risk_class: high
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        kennung: { type: string }
+        absender_email: { type: string }
+        anbieter: { type: string, enum: [ionos, google, microsoft, smtp, alias] }
+        anmeldung: { type: string, enum: [passwort, oauth2] }
+        postfach_id: { type: string }
+        passwort: { type: string }
+        reason: { type: string, minLength: 3 }
+      required: [kennung, absender_email, reason]
+    output_schema:
+      type: object
+      properties:
+        postfach_id: { type: string }
+        kennung: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
   # ── Agrar / Ernte (MCP-ERP-TOOLS-002) ────────────────────────────────────
   - tool_id: agrar.contract.get
     domain: agrar

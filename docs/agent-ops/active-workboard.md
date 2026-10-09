@@ -11,6 +11,55 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MCP-MASK-CE-BATCH4-20261009 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-09 (kein Commit/Push).
+**Lieferung:** Onboarding/Qualifikation/Schulung CE+MCP (Training-REST+Mandant);
+5× Fuhrpark `blocked_missing_tenant` (Gap: additive tenant_id — Folge-Claim).
+Map mapped **36** / blocked_missing_tenant **5** / blocked_no_endpoint **0** /
+local_ui **13**; Registry **51**.
+**Nachweis:** QA `mcp-mask-ce-batch4-20261009.md`; Map `--check`; gezielte pytest.
+**Weiter offen:** FIN-CLOSE ADR-076; Zahlauf open_high; Fuhrpark-Tenant-Claim;
+Stufe-2-SUS. Kein Commit/Push.
+
+## MCP-MASK-CE-BATCH3-20261009 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-09 (kein Commit/Push).
+**Lieferung:** Bewerbung speichern + Einwilligung anlegen + Postfach speichern
+(CE+MCP, Token-Mandant, Override 422, MCP Cross-Tenant 404). Fuhrpark (5) ehrlich
+blocked (Repo ohne tenant_id); Personal onboarding/qualifikationen/schulungen (3)
+blocked ohne CE. Map mapped **33** / blocked **8** / local_ui **13**; Registry **48**.
+**Nachweis:** QA `mcp-mask-ce-batch3-20261009.md`; Map `--check`; gezielte pytest.
+**Weiter offen:** FIN-CLOSE ADR-076; Zahlauf open_high; 8× blocked_no_endpoint
+(Fuhrpark Isolation + Personal-Rest); Stufe-2-SUS. Kein Commit/Push.
+
+## MCP-MASK-CE-BATCH2-20261009 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-09 (kein Commit/Push).
+**Lieferung:** Bonus + Query-Import + Tour anlegen + PO speichern (CE+MCP);
+`supplier:neue_bestellung` + `postfaecher:neu` → `local_ui`. Isolation-Gate
+mitgeliefert. Map mapped **30** / blocked **11** / local_ui **13**; Registry **45**.
+**Nachweis:** QA `mcp-mask-ce-batch2-20261009.md`; Map `--check`; gezielte pytest.
+**Weiter offen:** siehe Batch3 (blocked jetzt 8). Kein Commit/Push.
+
+## MCP-TENANT-ISOLATION-RW-20261009 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-09 (kein Commit/Push).
+**Lieferung:** Isolation fuer alle MCP-Tools (Read+Write+CRUD); zentraler
+Identity-Guard; Invoice-Positions-JOIN. QA
+`mcp-tenant-isolation-read-write-20261009.md`.
+
+## MCP-MASK-CE-SANCTIONS-FRACHT-20261009 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-09 (kein Commit/Push auf User-Wunsch).
+**Lieferung:** CE + MCP fuer Sanktionspruefung Kunden/Personal und Frachttabelle
+anlegen; `logistik/verladung:neu` → `local_ui` (Navigation). Map mapped **26** /
+blocked_no_endpoint **17** / local_ui **11**; Registry **41**.
+**Nachweis:** 171 pytest MCP/Map/CE; Generator `--check`; QA
+`mcp-mask-ce-sanctions-fracht-20261009.md`.
+**Weiter offen:** FIN-CLOSE ADR-076; Zahlauf `open_high`; 17× blocked_no_endpoint
+(erst nach weiterem HTTP-CE); Stufe-2-SUS live. Postfach-WIP Claude unberuehrt.
+
 ## MCP-CONSOLIDATE-COMMIT-20261008 — abgeschlossen, Cursor
 
 **Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08 (in-scope Commit+Push).
@@ -398,6 +447,8 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 `docs/README.md` und Domain-Depth-Plan verweisen auf den Hub.
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
+
+**REPORTING-COMMAND-ATOMIC-20261009 (reserviert):** Owner Codex-01a0f3fc. User offene Fachcommands schliessen. Integration und Stabilisierung der abgeschlossenen Cursor-Batch2-Reporting-Commands Bonus/Query-Import; keine Uebernahme aktiver Batch4-Personal/Map/MCP-Claims. Besitz zwei Reporting-Endpunkte und zwei kanonische Reporting-Services, neue tests/test_reporting_command_atomic.py, eigener QA/Slice/Open-Gaps/WB. Explizite Ueberschneidung nur abgeschlossene Reporting-Batch2-Lieferung: deren vier Dateien und zwei SD-Action-Vertraege separat integrieren; aktuelle fremde MCP/Training/Map-Hunks erhalten. Abnahme: reale Transaktionen, Fachmutation/Audit/Outbox bei spaeterem Fehler gemeinsam rollback; Vorpruefung/Signatur/Allowlist in allen Modi; Legacy-REST speichert weiter explizit, MCP-Command besitzt aeusseren Commit. Keine Schema/DB/Container/Migration/Reset. Risiken: restliche fremde Commands und globale Inventare bleiben getrennt, FIN-CLOSE/Zahlauf/Fuhrpark nicht als geschlossen behaupten.
 
 **MASK-RUNTIME-LEGACY-RETIREMENT-20261009 (abgeschlossen, Folge-CI offen):** Owner Codex-01a0f3fc. Ungenutzten run_mask_action/ExecuteFn/_default_propose entfernt, echte Atomizitaetspruefungen auf produktiven delegierten Weg uebertragen. Original5 Fehler/18 gruen belegten SQL-Lecks/Altweg; zusaetzlich echter innerer Commit trotz spaeterer Ablehnung hinterliess after, nun eigene SAVEPOINT-Session auf gleicher Verbindung und aeusserer Commit kontrollieren Mutation/Audit/Outbox gemeinsam. Positive Wege mit/ohne inneren Commit und kanonischer echter PG-Zahlauf mit spaeterer Ablehnung gruen: draft, approved_by=NULL, Audit/Outbox leer. SQLAlchemy-/HTTP500/503-Details und Personalwerte in Antwort/Warnmeldung begrenzt, erwartete Fachablehnungen erhalten. CI37843747893 einziges altes Fixture rot bei16758 gruen; Wave-1-Fixture jetzt belegter draft/anderer Ersteller und authentifizierter Freigeber, kein Schutz geschwaecht. Final100 Tests ohne Skip gruen:63 Runtime/Wave-1 in6,35s,37 Zahlungs/Rations/PG in29,80s. Ein instrumentierter97er-Lauf mit nativer Windows-Access-Violation verworfen; finale getrennte Prozesse ohne Trace-Timer, keine Skips. Bestehender valeo_probe, nur eigene Testdaten und In-Memory-SQLite, keine neue DB/Container/Schema/Migration/Reset. Fremde parallele Tenant-Payload-WIP im Dateikopf erhalten, nur eigene isolierte Quellhunks integriert. QA/Slice/alte Handshake-Empfehlung/Open-Gaps korrigiert. FIN-CLOSE/Zahlauf-MCP/21 HTTP-Fachcommands getrennt weiter offen.
 
