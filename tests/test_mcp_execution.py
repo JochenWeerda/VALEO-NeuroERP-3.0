@@ -2594,7 +2594,7 @@ def test_bonus_calculate_dry_run_and_execute(client):
 
 def test_query_import_signed_dry_run_and_execute(client):
     http, db = _as_scopes(client, ["reporting:write"])
-    with patch("app.services.mcp_execution_service.QueryCenterService") as Svc:
+    with patch("app.services.query_center_service.QueryCenterService") as Svc:
         inst = Mock()
         inst.preview_import_signed.return_value = {
             "name": "OP (Import)", "data_product_id": "x", "selected_fields": [], "would_import": True,

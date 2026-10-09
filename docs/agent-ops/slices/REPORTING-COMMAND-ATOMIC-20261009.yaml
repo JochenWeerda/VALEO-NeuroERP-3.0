@@ -1,0 +1,35 @@
+slice_id: REPORTING-COMMAND-ATOMIC-20261009
+title: Atomare Reporting-Fachcommands mit konsistenter Vorschau
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-09
+goal: Bonus und signierten Query-Import samt Audit und Replay atomar abschliessen.
+file_ownership:
+  - Zwei Reporting-Endpunkte und zwei kanonische Reporting-Services
+  - tests/test_reporting_command_atomic.py
+  - tests/test_mcp_execution.py nur falsches Mockziel
+  - Eigene QA, Finance-API-Nachtrag, Workboard und Open-Gaps-Hunks
+acceptance:
+  - Fachmutation und Nachweise werden gemeinsam gespeichert oder zurueckgerollt.
+  - Vorschau und Execute pruefen dieselbe Query-Allowlist.
+  - Nicht endliche Bonussaetze werden in jedem Modus abgelehnt.
+  - Standalone-REST bleibt explizit persistent und MCP-Replay mutiert nicht doppelt.
+tests:
+  - 44 echte HTTP- und MCP-Wirkungstests mit In-Memory-SQLite
+  - Bestehende Reporting-, MCP-, Mandanten- und Batch2-4-Vertraege
+ai_harness:
+  fachlicher_vertrag: Keine Erfolgsmeldung bei unvollstaendiger Command-Einheit.
+  architektur_vertrag: Kanonische Services, bestehende Commands und Maskenvertraege.
+  daten_vertrag: Aeusserer Command-Commit fuer Fachmutation und Nachweise.
+  test_vertrag: Originalfehler und echte SQL-Rueckrollwirkungen, keine Skips.
+  security_vertrag: HMAC und Allowlist erhalten; Mandant aus bestehendem Tokenvertrag.
+  betriebs_vertrag: Keine neue PG-Datenbank, Docker-Ressource, Migration oder Reset.
+  dokumentations_vertrag: QA, Slice, Finance-API, Workboard und Open-Gaps gemeinsam.
+external_gates:
+  - GitHub-Folgeabnahme nach Push
+  - PostgreSQL-Konkurrenz und fachliche Gesamt-UAT nicht durch SQLite ersetzt
+risks:
+  - Fuenf Fuhrpark-Aktionen ohne Mandantentrennung bleiben offen.
+  - FIN-CLOSE und Zahlauf-Freigabevertrag bleiben unveraendert.
+test_database: Ausschliesslich SQLite im Arbeitsspeicher; keine weitere PostgreSQL-Datenbank.
+validation: 295 Tests gruen ohne Skip; drei Command-/Masken-/Handbuch-Generatorchecks gruen.

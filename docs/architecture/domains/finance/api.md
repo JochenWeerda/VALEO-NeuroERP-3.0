@@ -10,6 +10,17 @@ version: 1.0.0
 
 # Finance — API
 
+## Reporting-Fachcommands (2026-10-09)
+
+POST /api/v1/l3-report-catalog/bonus-runs/actions/calculate und
+POST /api/v1/query-center/actions/import verwenden validate/dryRun/propose
+ohne Persistenz und execute mit gemeinsamer Fachdaten-/Audit-/Outbox-Einheit.
+Die kanonischen Services committen im Command nicht vorzeitig; der direkte
+Standalone-REST-Aufruf optiert explizit in seinen Commit. MCP verwendet
+dieselbe Servicegrenze mit Audit und Wiederholungsnachweis. Signatur und
+Query-Allowlist gelten in jedem Modus, Bonussaetze muessen endlich sein.
+[Wirkungsnachweis und Grenzen](../../../quality-assurance/reporting-command-atomic-20261009.md).
+
 ## eBilanz XML-Entwurf (2026-10-08)
 
 GET /api/v1/ebilanz/taxonomie-felder: amtliche 6.9 GCD-/Kernkonzepte mit limit
