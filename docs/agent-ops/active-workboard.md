@@ -11,6 +11,55 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MCP-MASK-CE-BATCH4-20261009 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-09 (kein Commit/Push).
+**Lieferung:** Onboarding/Qualifikation/Schulung CE+MCP (Training-REST+Mandant);
+5× Fuhrpark `blocked_missing_tenant` (Gap: additive tenant_id — Folge-Claim).
+Map mapped **36** / blocked_missing_tenant **5** / blocked_no_endpoint **0** /
+local_ui **13**; Registry **51**.
+**Nachweis:** QA `mcp-mask-ce-batch4-20261009.md`; Map `--check`; gezielte pytest.
+**Weiter offen:** FIN-CLOSE ADR-076; Zahlauf open_high; Fuhrpark-Tenant-Claim;
+Stufe-2-SUS. Kein Commit/Push.
+
+## MCP-MASK-CE-BATCH3-20261009 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-09 (kein Commit/Push).
+**Lieferung:** Bewerbung speichern + Einwilligung anlegen + Postfach speichern
+(CE+MCP, Token-Mandant, Override 422, MCP Cross-Tenant 404). Fuhrpark (5) ehrlich
+blocked (Repo ohne tenant_id); Personal onboarding/qualifikationen/schulungen (3)
+blocked ohne CE. Map mapped **33** / blocked **8** / local_ui **13**; Registry **48**.
+**Nachweis:** QA `mcp-mask-ce-batch3-20261009.md`; Map `--check`; gezielte pytest.
+**Weiter offen:** FIN-CLOSE ADR-076; Zahlauf open_high; 8× blocked_no_endpoint
+(Fuhrpark Isolation + Personal-Rest); Stufe-2-SUS. Kein Commit/Push.
+
+## MCP-MASK-CE-BATCH2-20261009 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-09 (kein Commit/Push).
+**Lieferung:** Bonus + Query-Import + Tour anlegen + PO speichern (CE+MCP);
+`supplier:neue_bestellung` + `postfaecher:neu` → `local_ui`. Isolation-Gate
+mitgeliefert. Map mapped **30** / blocked **11** / local_ui **13**; Registry **45**.
+**Nachweis:** QA `mcp-mask-ce-batch2-20261009.md`; Map `--check`; gezielte pytest.
+**Weiter offen:** siehe Batch3 (blocked jetzt 8). Kein Commit/Push.
+
+## MCP-TENANT-ISOLATION-RW-20261009 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-09 (kein Commit/Push).
+**Lieferung:** Isolation fuer alle MCP-Tools (Read+Write+CRUD); zentraler
+Identity-Guard; Invoice-Positions-JOIN. QA
+`mcp-tenant-isolation-read-write-20261009.md`.
+
+## MCP-MASK-CE-SANCTIONS-FRACHT-20261009 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** abgeschlossen 2026-10-09 (kein Commit/Push auf User-Wunsch).
+**Lieferung:** CE + MCP fuer Sanktionspruefung Kunden/Personal und Frachttabelle
+anlegen; `logistik/verladung:neu` → `local_ui` (Navigation). Map mapped **26** /
+blocked_no_endpoint **17** / local_ui **11**; Registry **41**.
+**Nachweis:** 171 pytest MCP/Map/CE; Generator `--check`; QA
+`mcp-mask-ce-sanctions-fracht-20261009.md`.
+**Weiter offen:** FIN-CLOSE ADR-076; Zahlauf `open_high`; 17× blocked_no_endpoint
+(erst nach weiterem HTTP-CE); Stufe-2-SUS live. Postfach-WIP Claude unberuehrt.
+
 ## MCP-CONSOLIDATE-COMMIT-20261008 — abgeschlossen, Cursor
 
 **Owner:** Cursor. **Stand:** abgeschlossen 2026-10-08 (in-scope Commit+Push).

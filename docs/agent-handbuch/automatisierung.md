@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-08
+last_reviewed: 2026-10-09
 version: 3.0.0
 description: MCP-Tools, Domain-Events und Automatisierungsregeln für Agenten.
 ---
@@ -29,6 +29,7 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 
 | tool_id | Domäne | scope | idempotent | Risiko | Human-Approval | endpoint |
 |---|---|---|---|---|---|---|
+| `admin.postfach.speichern` | platform | `admin:write` | ja | hoch | nein | `POST /api/v1/mcp/tools/call` |
 | `agent.proposal.list` | agent | `agent:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `agrar.contract.get` | agrar | `agrar:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `agrar.feed_analysis.transition` | agrar | `agrar:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
@@ -38,6 +39,7 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `agrar.ration.transition` | agrar | `agrar:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `compliance.sanctions.check` | compliance | `compliance:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.activity.create` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.contact.log` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.customer.open` | crm | `crm:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
@@ -49,20 +51,30 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `einkauf.angebot.bestellen` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `einkauf.anlieferavis.wareneingang` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `einkauf.bestellung.list` | einkauf | `einkauf:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `einkauf.bestellung.speichern` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `einkauf.bestellung.status` | einkauf | `einkauf:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `einkauf.bestellung.versenden` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `finance.ap_invoice.freigeben` | finance | `finance:write` | ja | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `finance.ap_invoice.propose` | finance | `finance:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
+| `hr.bewerbung.speichern` | hr | `hr:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `hr.einwilligung.anlegen` | hr | `hr:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `hr.onboarding.speichern` | hr | `hr:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `hr.qualifikation.speichern` | hr | `hr:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `hr.schulung.speichern` | hr | `hr:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `lager.bestand.get` | lager | `lager:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `lager.inventur.propose_opening` | lager | `lager:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `lager.stock_movement.stornieren` | lager | `lager:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `logistik.frachttabelle.anlegen` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `logistik.tour.anlegen` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `planung.calendar.reproject` | planung | `planung:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `produktion.control.sync` | produktion | `ops:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `qualitaet.reklamation.abschliessen` | qualitaet | `quality:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `reporting.bonus.calculate` | reporting | `reporting:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `reporting.query.import_signed` | reporting | `reporting:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
@@ -167,16 +179,28 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | Event-ID | Kanal | Quelle |
 |---|---|---|
 | `...` | outbox | `scripts/extract_events.py` |
+| `admin.postfach.saved` | outbox | `app/api/v1/endpoints/mailkonto.py` |
 | `cash_closing.posted` | outbox | `app/api/v1/endpoints/compat.py` |
 | `collab.note.created` | outbox | `app/api/v1/endpoints/collab_notes.py` |
+| `compliance.sanctions.checked` | outbox | `app/api/v1/endpoints/sanctions_compliance.py` |
 | `compliance.violations_detected` | outbox | `app/workers/compliance_monitor.py` |
 | `einkauf.bestellung.created_from_angebot` | outbox | `app/api/v1/endpoints/mask_actions.py` |
+| `einkauf.bestellung.updated` | outbox | `app/api/v1/endpoints/einkauf_bestellvorschlag.py` |
 | `einkauf.wareneingang.gebucht` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `finance.ap_invoice.approved` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
 | `finance.ar_open_item.dunning_created` | outbox | `app/api/v1/endpoints/open_items.py` |
 | `finance.payment_run.approved` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `inventur.abgeschlossen` | outbox | `app/services/inventory_compat_service.py` |
+| `logistik.frachttabelle.created` | outbox | `app/api/v1/endpoints/logistik_frachttabellen.py` |
+| `logistik.tour.created` | outbox | `app/api/v1/endpoints/logistics_tours.py` |
+| `personal.bewerbung.created` | outbox | `app/api/v1/endpoints/personal_bewerbungen.py` |
+| `personal.einwilligungserklaerung.created` | outbox | `app/api/v1/endpoints/personal_bewerbungen.py` |
+| `personal.onboarding.created` | outbox | `app/api/v1/endpoints/training.py` |
+| `personal.qualifikation.created` | outbox | `app/api/v1/endpoints/training.py` |
+| `personal.schulung.created` | outbox | `app/api/v1/endpoints/training.py` |
 | `qualitaet.reklamation.closed` | outbox | `app/api/v1/endpoints/mask_actions.py` |
+| `reporting.bonus_run.calculated` | outbox | `app/api/v1/endpoints/l3_report_catalog.py` |
+| `reporting.query_definition.imported` | outbox | `app/api/v1/endpoints/query_center.py` |
 | `sales.delivery_note.print_requested` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `settlement.created` | outbox | `app/core/settlement_audit_chain.py` |
 

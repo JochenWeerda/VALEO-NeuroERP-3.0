@@ -16,15 +16,16 @@ Fachlicher Hintergrund (Referenz-ERP Wissensbasis, Domain 10 Logistik/Transport)
 """
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional
+from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 
 from app.core.database import get_db
 from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
+from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
 
 from app.api.v1.schemas.base import BaseSchema
 
@@ -106,18 +107,23 @@ def list_frachttabellen(
     return [FrachttabelleOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=FrachttabelleOut, status_code=201, summary="Frachttabelle anlegen")
-def create_frachttabelle(
-    payload: FrachttabelleCreate,
-    db=Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
+def insert_frachttabelle(
+    db,
+    *,
+    tenant_id: str,
+    tabelle_nr: str,
+    bezeichnung: str,
+    einheit: Optional[str],
+    waehrung: str,
+    commit: bool = True,
+) -> dict:
+    """Mandantengebundene Neuanlage; 409 bei Doppelnummer."""
     existing = db.execute(text("""
         SELECT id FROM domain_shared.logistik_frachttabellen
         WHERE tenant_id = :tid AND tabelle_nr = :nr
-    """), {"tid": tenant_id, "nr": payload.tabelle_nr}).fetchone()
+    """), {"tid": tenant_id, "nr": tabelle_nr}).fetchone()
     if existing:
-        raise HTTPException(409, f"Frachttabelle {payload.tabelle_nr} bereits vorhanden.")
+        raise HTTPException(409, f"Frachttabelle {tabelle_nr} bereits vorhanden.")
 
     new_id = uuid7()
     db.execute(text("""
@@ -125,14 +131,168 @@ def create_frachttabelle(
             (id, tenant_id, tabelle_nr, bezeichnung, einheit, waehrung, aktiv)
         VALUES (:id, :tid, :nr, :bez, :eh, :whr, true)
     """), {
-        "id": new_id, "tid": tenant_id, "nr": payload.tabelle_nr,
-        "bez": payload.bezeichnung, "eh": payload.einheit, "whr": payload.waehrung,
+        "id": new_id, "tid": tenant_id, "nr": tabelle_nr,
+        "bez": bezeichnung, "eh": einheit, "whr": waehrung,
     })
-    db.commit()
+    if commit:
+        db.commit()
     row = db.execute(text(
         "SELECT * FROM domain_shared.logistik_frachttabellen WHERE id = :id"
     ), {"id": new_id}).fetchone()
-    return FrachttabelleOut(**dict(row._mapping))
+    return dict(row._mapping)
+
+
+@router.post("", response_model=FrachttabelleOut, status_code=201, summary="Frachttabelle anlegen")
+def create_frachttabelle(
+    payload: FrachttabelleCreate,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    return FrachttabelleOut(**insert_frachttabelle(
+        db,
+        tenant_id=tenant_id,
+        tabelle_nr=payload.tabelle_nr,
+        bezeichnung=payload.bezeichnung,
+        einheit=payload.einheit,
+        waehrung=payload.waehrung,
+        commit=True,
+    ))
+
+
+@router.post(
+    "/actions/anlegen",
+    response_model=MaskActionResult,
+    summary="Frachttabelle anlegen als Masken-CommandEndpoint",
+)
+def action_anlegen(
+    body: dict[str, Any] = Body(default_factory=dict),
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    """CE fuer logistik/frachttabellen:anlegen — dryRun ohne INSERT."""
+    try:
+        mode, audit_reason, idempotency_key, payload = parse_action_body(body)
+    except ValueError:
+        return MaskActionResult(
+            actionKey="anlegen",
+            mode="invalid",
+            success=False,
+            error="Unbekannter Aktionsmodus.",
+            validationErrors=[
+                {"field": "_mode", "message": "Ungueltiger Aktionsmodus", "severity": "blocking"}
+            ],
+        )
+
+    tabelle_nr = str(payload.get("tabelle_nr") or "").strip()
+    bezeichnung = str(payload.get("bezeichnung") or "").strip()
+    einheit_raw = payload.get("einheit")
+    einheit = str(einheit_raw).strip() if einheit_raw not in (None, "") else None
+    waehrung = str(payload.get("waehrung") or "EUR").strip() or "EUR"
+    errors: list[dict[str, Any]] = []
+    if not tabelle_nr:
+        errors.append({"field": "tabelle_nr", "message": "Pflichtfeld", "severity": "blocking"})
+    if not bezeichnung:
+        errors.append({"field": "bezeichnung", "message": "Pflichtfeld", "severity": "blocking"})
+    if errors:
+        return MaskActionResult(
+            actionKey="anlegen",
+            mode=mode,
+            success=False,
+            error=errors[0]["message"],
+            validationErrors=errors,
+        )
+
+    preview = {
+        "tabelle_nr": tabelle_nr,
+        "bezeichnung": bezeichnung,
+        "einheit": einheit,
+        "waehrung": waehrung,
+        "tenant_id": tenant_id,
+    }
+
+    existing = db.execute(text("""
+        SELECT id FROM domain_shared.logistik_frachttabellen
+        WHERE tenant_id = :tid AND tabelle_nr = :nr
+    """), {"tid": tenant_id, "nr": tabelle_nr}).fetchone()
+    db.rollback()
+    if existing:
+        return MaskActionResult(
+            actionKey="anlegen",
+            mode=mode,
+            success=False,
+            error=f"Frachttabelle {tabelle_nr} bereits vorhanden.",
+            validationErrors=[{
+                "field": "tabelle_nr",
+                "message": f"Frachttabelle {tabelle_nr} bereits vorhanden.",
+                "severity": "blocking",
+            }],
+        )
+
+    if mode != "execute":
+        return MaskActionResult(
+            actionKey="anlegen",
+            mode=mode,
+            success=True,
+            summary="Frachttabelle wuerde angelegt — keine Aenderung geschrieben.",
+            proposedChanges=[preview],
+        )
+
+    try:
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+
+        row = insert_frachttabelle(
+            db,
+            tenant_id=tenant_id,
+            tabelle_nr=tabelle_nr,
+            bezeichnung=bezeichnung,
+            einheit=einheit,
+            waehrung=waehrung,
+            commit=False,
+        )
+        entity_id = str(row["id"])
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant_id,
+            action_key="anlegen",
+            entity_type="frachttabelle",
+            entity_id=entity_id,
+            audit_reason=audit_reason,
+            idempotency_key=idempotency_key,
+            summary=f"Frachttabelle {tabelle_nr} angelegt",
+        )
+        outbox_id = _write_outbox(
+            db,
+            tenant_id=tenant_id,
+            event_type="logistik.frachttabelle.created",
+            aggregate_id=entity_id,
+            payload={"tabelle_nr": tabelle_nr, "tenant_id": tenant_id, "id": entity_id},
+        )
+        db.commit()
+    except HTTPException as exc:
+        db.rollback()
+        detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+        return MaskActionResult(
+            actionKey="anlegen", mode=mode, success=False, error=detail,
+        )
+    except Exception as exc:  # noqa: BLE001
+        db.rollback()
+        return MaskActionResult(
+            actionKey="anlegen",
+            mode=mode,
+            success=False,
+            error="Frachttabelle konnte nicht angelegt werden.",
+        )
+
+    return MaskActionResult(
+        actionKey="anlegen",
+        mode=mode,
+        success=True,
+        summary=f"Frachttabelle {tabelle_nr} angelegt.",
+        affectedIds=[entity_id],
+        auditEntryId=audit_id,
+        outboxEventId=outbox_id,
+        proposedChanges=[preview],
+    )
 
 
 @router.delete("/{tabelle_nr}", summary="Frachttabelle löschen",

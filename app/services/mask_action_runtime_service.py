@@ -34,6 +34,9 @@ class MaskActionResult(BaseModel):
     error: str | None = None
 
 
+_FORBIDDEN_MASK_IDENTITY_KEYS = frozenset({"tenant_id", "mandanten_id"})
+
+
 def parse_action_body(body: dict[str, Any]) -> tuple[ActionMode, str | None, str | None, dict[str, Any]]:
     payload = dict(body)
     mode_raw = payload.pop("_mode", "execute")
@@ -42,6 +45,9 @@ def parse_action_body(body: dict[str, Any]) -> tuple[ActionMode, str | None, str
     mode: ActionMode = mode_raw
     audit_reason = payload.pop("_auditReason", None)
     idempotency_key = payload.pop("_idempotencyKey", None)
+    # Mandanten-ID nur aus Token/Depends — nie aus Masken-Payload mutieren.
+    for key in _FORBIDDEN_MASK_IDENTITY_KEYS:
+        payload.pop(key, None)
     return mode, audit_reason, idempotency_key, payload
 
 

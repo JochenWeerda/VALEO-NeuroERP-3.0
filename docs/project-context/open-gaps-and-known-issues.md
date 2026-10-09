@@ -29,18 +29,55 @@ Fremde gleichzeitige Tenant-Payload-WIP erhalten und getrennt; Folge-CI offen.
 FIN-CLOSE/ADR-076, Zahlauf-MCP und21 HTTP-Fachcommands bleiben offen.
 [QA, Gegenproben und Handshake](../quality-assurance/mask-runtime-legacy-retirement-20261009.md).
 
+## MCP Mandantenisolation Read+Write+CRUD (2026-10-09)
+
+User-Vorgabe: alle MCP-Tools (search/status/list/get/open/trace **und** Writes/CRUD)
+nur Token-Mandant. Entry-Guard `_reject_identity_parameters` (422), Claims-only
+Tenant, CE-Payload-Strip, Adapter-SQL Token-scoped; Positions-SELECT bei
+`sales.invoice.post` mit Parent-Tenant-JOIN nachgezogen. Cross-Tenant-Negativtests
+Reads+Writes in `tests/test_mcp_tenant_isolation_all.py`.
+[QA](../quality-assurance/mcp-tenant-isolation-read-write-20261009.md).
+
+## MCP Mask-CE Batch4 abgeschlossen (2026-10-09)
+
+Onboarding/Qualifikation/Schulung CE+MCP (Training+Mandant). Fuhrpark neu
+`blocked_missing_tenant` (5) — Gap: additive `tenant_id` + Mandanten-SQL, dann CE
+(Folge-Claim, keine Migration in Batch4). Map: mapped **36** /
+blocked_missing_tenant **5** / blocked_no_endpoint **0** / local_ui **13**;
+Registry **51**. [QA Batch4](../quality-assurance/mcp-mask-ce-batch4-20261009.md).
+**Weiter offen:** FIN-CLOSE ADR-076; Zahlauf open_high; Fuhrpark-Tenant-Claim;
+Stufe-2-SUS live.
+
+## MCP Mask-CE Batch3 abgeschlossen (2026-10-09)
+
+Bewerbung speichern + Einwilligung anlegen + Postfach speichern CE+MCP;
+Fuhrpark damals Isolation-Blocker / Personal-Rest blocked. Map: mapped **33** /
+blocked_no_endpoint **8** / local_ui **13**; Registry **48**.
+[QA Batch3](../quality-assurance/mcp-mask-ce-batch3-20261009.md).
+Historisch; Folgeschnitt Batch4.
+
+## MCP Mask-CE Batch2 abgeschlossen (2026-10-09)
+
+Bonus/Query-Import/Tour/PO-Speichern CE+MCP; `supplier:neue_bestellung` +
+`postfaecher:neu` local_ui. Map: mapped **30** / blocked_no_endpoint **11** /
+local_ui **13**; Registry **45**. Isolation mitgeliefert.
+[QA Batch2](../quality-assurance/mcp-mask-ce-batch2-20261009.md).
+Historisch; Folgeschnitt Batch3.
+
 ## MCP-Maskenaktionen: lokaler Bedienweg und Fachcommand (2026-10-08)
 
 Zehn der bisherigen31 blocked_no_endpoint sind nach konkreter Handlerpruefung
 lokale Bedienaktionen: acht Formular-Resets und zwei Navigationen. Neue
 local_ui-Klassifikation ohne erfundenes Tool/Endpoint; alle59 Aktionen
-bleiben sichtbar,49 Mutationskandidaten getrennt gezaehlt. 21 fehlende
-HTTP-Fachcommands bleiben offen, Speichern weiter gesperrt/unabgedeckt;
-unbekanntes neu wird nicht pauschal lokal. Neuer commandEndpoint an lokaler
-Aktion fordert hart Review. Zahlauf open_high/forbiddenForAgents und
-FIN-CLOSE blocked_adr_076 bleiben unveraendert. Original11 Fehler/11 gruen;
-final160 neue/bestehende MCP-Vertraege ohne Skip in12,78s gruen, Map --check
-gruen. Keine API/SD/Frontend/Schemaaenderung, DB/Container/Migration/Reset.
+bleiben sichtbar,49 Mutationskandidaten getrennt gezaehlt. Nachfolgend
+(2026-10-09) drei weitere Fachcommands + eine Navigation — siehe Eintrag oben;
+historisch hier 21 fehlende HTTP-Fachcommands. Speichern weiter
+gesperrt/unabgedeckt; unbekanntes neu wird nicht pauschal lokal. Neuer
+commandEndpoint an lokaler Aktion fordert hart Review. Zahlauf
+open_high/forbiddenForAgents und FIN-CLOSE blocked_adr_076 bleiben unveraendert.
+Original11 Fehler/11 gruen; final160 neue/bestehende MCP-Vertraege ohne Skip
+in12,78s gruen, Map --check gruen. Keine API/SD/Frontend/Schemaaenderung,
+DB/Container/Migration/Reset.
 [QA, genaue Aufteilung und Handshake](../quality-assurance/mcp-local-action-classification-20261008.md).
 
 ## Zahlungslauf-Freigabenachweis (2026-10-08)
@@ -251,12 +288,24 @@ Nav-IDs (`nav-einkauf`/`nav-lager`/`nav-agrar-vertraege`) + Param-Extraktion +
 Vite-Proxy-Mount. [QA](../quality-assurance/usability-mcp-map-ci-voice-20261008.md).
 **Konsolidiert (MCP-CONSOLIDATE-COMMIT-20261008):** Deep-Link-Serie, AP-Freigabe,
 Inventur propose-only und Usability-Map-CI lokal committed/pushed; Re-Audit
-31× blocked ohne CE; keine weiteren umsetzbaren Mask-Writes ohne Backend-Erfindung.
+damals 31× blocked ohne CE (spaeter local_ui 10 → 21).
+**Geschlossen (MCP-MASK-CE-SANCTIONS-FRACHT-20261009):** Sanktions-check ×2 +
+Frachttabelle anlegen mit CE+MCP; Verladung neu local_ui.
+**Härtung (MCP-TENANT-ISOLATION-RW-20261009):** Isolation gilt Read+Write+CRUD;
+[QA](../quality-assurance/mcp-tenant-isolation-read-write-20261009.md).
+**Geschlossen (MCP-MASK-CE-BATCH2-20261009):** Bonus/Query/Tour/PO-Speichern CE+MCP;
+local_ui supplier+postfach-neu; Map blocked **11**, mapped **30**, local_ui **13**,
+Registry **45**. [QA](../quality-assurance/mcp-mask-ce-batch2-20261009.md).
+**Geschlossen (MCP-MASK-CE-BATCH3-20261009):** Bewerbung/Einwilligung/Postfach
+CE+MCP; Fuhrpark Isolation-Blocker; Map blocked **8**, mapped **33**, local_ui **13**,
+Registry **48**. [QA](../quality-assurance/mcp-mask-ce-batch3-20261009.md).
+**Geschlossen (MCP-MASK-CE-BATCH4-20261009):** Personal Training CE+MCP;
+Fuhrpark `blocked_missing_tenant` ×5; Map mapped **36**, blocked_no_endpoint **0**,
+Registry **51**. [QA](../quality-assurance/mcp-mask-ce-batch4-20261009.md).
 **Weiter offen:** FIN-CLOSE/agentic Finance (P0, ADR-076 — kein Scheinabschluss;
 Claim frei nur fuer Doku/Pruefung); 1× Mask `open_high` (Zahlauf-Freigabe
-forbiddenForAgents/ADR-076-nah — nicht verdrahten); 31× `blocked_no_endpoint`
-(Personal/Fuhrpark/Admin/Reporting/Speichern) erst nach HTTP-CommandEndpoint;
-Stufe-2-SUS live.
+forbiddenForAgents/ADR-076-nah — nicht verdrahten); 5× `blocked_missing_tenant`
+(Fuhrpark tenant_id Folge-Claim); Stufe-2-SUS live.
 
 ## GAP-HUB — Archiv 2025 ersetzt (2026-10-07)
 
@@ -909,7 +958,7 @@ ausstehenden Vorschlag an und bucht keine Rechnung. Weitere MCP-Schreibadapter b
 | Chargen/Futter/Zertifikate/Versicherungen/Projekte/Förderung/Schäden Hover-Blau | P1 Betrieb | geschlossen |
 | Listen als Karten statt Horizontal-Scroll | P2 | geschlossen in DataTable + ListReport + FastTable/VirtualDataTable (Touch); KIM/FSX unangetastet |
 | Sprache steuert keine Waage/Queue | P2 | Navigation geschlossen (öffne Warteschlange/Wiegungen); Wiegen bleibt Voice-Gate UIX-072 |
-| MCP 18 Tools, kein Masken-Schreiben, kein „öffne Kunde“ | P1 Agent | Registry 39; Mask-Write medium 0; Deep-Link + AP-Freigabe + Inventur propose-only; CI Mask-Map-Drift + Haupt-App Voice-Nav-Sync 2026-10-08; FIN-CLOSE ADR-076 / 1× open_high (Zahlauf) / 31× blocked_no_endpoint / SUS offen |
+| MCP 18 Tools, kein Masken-Schreiben, kein „öffne Kunde“ | P1 Agent | Registry 41; Mask-Write medium 0; Deep-Link + AP-Freigabe + Inventur propose-only + Sanktionen/Fracht-CE 2026-10-09; CI Mask-Map-Drift + Haupt-App Voice-Nav-Sync; FIN-CLOSE ADR-076 / 1× open_high (Zahlauf) / 17× blocked_no_endpoint / SUS offen |
 | KIM Object Page | P1 | geschlossen 2026-09-30 (`MERIDIAN-PARTY-OBJECTPAGE`) |
 | Listen-Hover-Blau (ohne FSX/Auftrag/Rechnung) | P1 | geschlossen 2026-09-18 |
 | Benachrichtigungen toter Als-gelesen-CTA | P1 | geschlossen (lokales Overlay, kein Write-API) |

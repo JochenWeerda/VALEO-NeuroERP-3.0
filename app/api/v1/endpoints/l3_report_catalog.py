@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -23,6 +23,7 @@ from app.services.l3_report_catalog_service import (
     L3ReportCatalogService,
     ReportCatalogError,
 )
+from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
 
 router = APIRouter(prefix="/l3-report-catalog", tags=["reporting", "l3-parity"])
 
@@ -108,7 +109,143 @@ def create_bonus_run(
             rate_pct=body.rate_pct,
             actor=actor(request),
             reason=body.reason,
+            commit=True,
         )
+    )
+
+
+@router.post(
+    "/bonus-runs/actions/calculate",
+    response_model=MaskActionResult,
+    summary="Bonuslauf berechnen als Masken-CommandEndpoint",
+)
+def action_bonus_calculate(
+    request: Request,
+    body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    """CE fuer auswertungen/bonus-berechnung:calculate — dryRun ohne INSERT."""
+    try:
+        mode, audit_reason, idempotency_key, payload = parse_action_body(body)
+    except ValueError:
+        return MaskActionResult(
+            actionKey="calculate",
+            mode="invalid",
+            success=False,
+            error="Unbekannter Aktionsmodus.",
+            validationErrors=[
+                {"field": "_mode", "message": "Ungueltiger Aktionsmodus", "severity": "blocking"}
+            ],
+        )
+
+    report_id = str(payload.get("report_id") or "").strip()
+    reason = str(payload.get("reason") or audit_reason or "").strip()
+    try:
+        from_date = date.fromisoformat(str(payload.get("from_date") or ""))
+        to_date = date.fromisoformat(str(payload.get("to_date") or ""))
+        rate_pct = Decimal(str(payload.get("rate_pct")))
+    except Exception:
+        return MaskActionResult(
+            actionKey="calculate",
+            mode=mode,
+            success=False,
+            error="from_date, to_date und rate_pct sind erforderlich.",
+            validationErrors=[
+                {"field": "from_date", "message": "ISO-Datum/rate_pct Pflicht", "severity": "blocking"}
+            ],
+        )
+
+    preview = {
+        "report_id": report_id,
+        "from_date": from_date.isoformat(),
+        "to_date": to_date.isoformat(),
+        "rate_pct": str(rate_pct),
+        "reason": reason,
+        "tenant_id": tenant_id,
+    }
+    svc = L3ReportCatalogService(db, tenant_id)
+    try:
+        svc.validate_bonus_run_params(
+            report_id=report_id,
+            from_date=from_date,
+            to_date=to_date,
+            rate_pct=rate_pct,
+            reason=reason,
+        )
+    except ReportCatalogError as exc:
+        db.rollback()
+        return MaskActionResult(
+            actionKey="calculate",
+            mode=mode,
+            success=False,
+            error=str(exc),
+            validationErrors=[{"field": "_entity", "message": str(exc), "severity": "blocking"}],
+        )
+    db.rollback()
+
+    if mode != "execute":
+        return MaskActionResult(
+            actionKey="calculate",
+            mode=mode,
+            success=True,
+            summary="Bonuslauf wuerde berechnet — keine Aenderung geschrieben.",
+            proposedChanges=[preview],
+        )
+
+    try:
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+
+        created = svc.create_bonus_run(
+            report_id=report_id,
+            from_date=from_date,
+            to_date=to_date,
+            rate_pct=rate_pct,
+            actor=actor(request),
+            reason=reason,
+        )
+        run_id = str(created["id"])
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant_id,
+            action_key="calculate",
+            entity_type="bonus_run",
+            entity_id=run_id,
+            audit_reason=audit_reason or reason,
+            idempotency_key=idempotency_key,
+            summary=f"Bonuslauf {report_id} berechnet ({created.get('lines')} Zeilen)",
+        )
+        outbox_id = _write_outbox(
+            db,
+            tenant_id=tenant_id,
+            event_type="reporting.bonus_run.calculated",
+            aggregate_id=run_id,
+            payload={"run_id": run_id, "report_id": report_id, "tenant_id": tenant_id},
+        )
+        db.commit()
+    except ReportCatalogError as exc:
+        db.rollback()
+        return MaskActionResult(
+            actionKey="calculate", mode=mode, success=False, error=str(exc),
+        )
+    except Exception:
+        db.rollback()
+        return MaskActionResult(
+            actionKey="calculate",
+            mode=mode,
+            success=False,
+            error="Bonuslauf konnte nicht berechnet werden.",
+        )
+
+    return MaskActionResult(
+        actionKey="calculate",
+        mode=mode,
+        success=True,
+        summary=f"Bonuslauf berechnet: {created.get('total_bonus')} EUR.",
+        affectedIds=[run_id],
+        auditEntryId=audit_id,
+        outboxEventId=outbox_id,
+        proposedChanges=[{**preview, **{k: str(v) if isinstance(v, Decimal) else v for k, v in created.items()}}],
     )
 
 

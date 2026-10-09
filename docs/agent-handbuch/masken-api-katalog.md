@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-08
+last_reviewed: 2026-10-09
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -979,6 +979,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `compliance.gate.status` — scope `compliance:read`, Risiko niedrig
+- `compliance.sanctions.check` — scope `compliance:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -991,7 +992,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `check` | Kunden pruefen | moderate | nein | `—` |
+| `check` | Kunden pruefen | moderate | nein | `/api/v1/compliance/sanctions/actions/pruefen/customers` |
 
 ---
 
@@ -1014,6 +1015,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `compliance.gate.status` — scope `compliance:read`, Risiko niedrig
+- `compliance.sanctions.check` — scope `compliance:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -1026,7 +1028,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `check` | Personal pruefen | moderate | nein | `—` |
+| `check` | Personal pruefen | moderate | nein | `/api/v1/compliance/sanctions/actions/pruefen/personal` |
 
 ---
 
@@ -1298,6 +1300,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
@@ -1336,6 +1339,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
@@ -1376,6 +1380,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
@@ -1414,6 +1419,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
@@ -1457,6 +1463,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
@@ -1477,7 +1484,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
-| `speichern` | Speichern | safe | nein | `—` |
+| `speichern` | Speichern | safe | nein | `/api/v1/einkauf/bestellungen/{entity_id}/actions/speichern` |
 | `versenden` | Versenden | moderate | nein | `/api/v1/einkauf/bestellungen/{entity_id}/versenden` |
 
 ---
@@ -1504,6 +1511,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
@@ -1541,6 +1549,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
@@ -2147,6 +2156,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `einwilligung` → `/api/v1/personal/applications/{entity_id}/einwilligung`
 - `fassungen` → `/api/v1/personal/applications/einwilligungserklaerungen`
 
+**MCP-Tools (Domäne):**
+
+- `hr.bewerbung.speichern` — scope `hr:write`, Risiko mittel
+- `hr.einwilligung.anlegen` — scope `hr:write`, Risiko mittel
+- `hr.onboarding.speichern` — scope `hr:write`, Risiko mittel
+- `hr.qualifikation.speichern` — scope `hr:write`, Risiko mittel
+- `hr.schulung.speichern` — scope `hr:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Bis wann darf die Bewerbung {entity_id} aufbewahrt werden?
@@ -2180,6 +2197,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `bewerbungen` → `/api/v1/personal/applications`
 
+**MCP-Tools (Domäne):**
+
+- `hr.bewerbung.speichern` — scope `hr:write`, Risiko mittel
+- `hr.einwilligung.anlegen` — scope `hr:write`, Risiko mittel
+- `hr.onboarding.speichern` — scope `hr:write`, Risiko mittel
+- `hr.qualifikation.speichern` — scope `hr:write`, Risiko mittel
+- `hr.schulung.speichern` — scope `hr:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Welche Bewerbung steht noch im Eingang?
@@ -2190,7 +2215,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `speichern` | Speichern | safe | nein | `Legt eine Bewerbung im Eingang an.` |
+| `speichern` | Speichern | safe | nein | `/api/v1/personal/applications/actions/speichern` |
 | `neu` | Neu | safe | nein | `Leert die Eingabe fuer eine neue Bewerbung.` |
 | `erklaerungen` | Einwilligungserklärungen | safe | nein | `Oeffnet die Fassungen der Einwilligungserklaerung.` |
 
@@ -2212,6 +2237,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `fassungen` → `/api/v1/personal/applications/einwilligungserklaerungen`
 
+**MCP-Tools (Domäne):**
+
+- `hr.bewerbung.speichern` — scope `hr:write`, Risiko mittel
+- `hr.einwilligung.anlegen` — scope `hr:write`, Risiko mittel
+- `hr.onboarding.speichern` — scope `hr:write`, Risiko mittel
+- `hr.qualifikation.speichern` — scope `hr:write`, Risiko mittel
+- `hr.schulung.speichern` — scope `hr:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Welche Fassung der Einwilligungserklaerung ist die neueste?
@@ -2220,7 +2253,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `anlegen` | Fassung anlegen | safe | nein | `Legt die naechste Fassung an; sie ist danach unveraenderlich.` |
+| `anlegen` | Fassung anlegen | safe | nein | `/api/v1/personal/applications/einwilligungserklaerungen/actions/anlegen` |
 | `neu` | Neu | safe | nein | `Leert die Eingabe fuer eine neue Fassung.` |
 
 ---
@@ -2241,6 +2274,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `laeufe` → `/api/v1/training/onboarding/runs`
 
+**MCP-Tools (Domäne):**
+
+- `hr.bewerbung.speichern` — scope `hr:write`, Risiko mittel
+- `hr.einwilligung.anlegen` — scope `hr:write`, Risiko mittel
+- `hr.onboarding.speichern` — scope `hr:write`, Risiko mittel
+- `hr.qualifikation.speichern` — scope `hr:write`, Risiko mittel
+- `hr.schulung.speichern` — scope `hr:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Welcher Lauf ist noch nicht abgeschlossen?
@@ -2249,7 +2290,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `speichern` | Speichern | safe | nein | `Legt einen Einarbeitungslauf an.` |
+| `speichern` | Speichern | safe | nein | `/api/v1/training/onboarding/runs/actions/speichern` |
 | `neu` | Neu | safe | nein | `Leert die Eingabe fuer einen neuen Lauf.` |
 
 ---
@@ -2270,6 +2311,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `qualifikationen` → `/api/v1/training/qualifications`
 
+**MCP-Tools (Domäne):**
+
+- `hr.bewerbung.speichern` — scope `hr:write`, Risiko mittel
+- `hr.einwilligung.anlegen` — scope `hr:write`, Risiko mittel
+- `hr.onboarding.speichern` — scope `hr:write`, Risiko mittel
+- `hr.qualifikation.speichern` — scope `hr:write`, Risiko mittel
+- `hr.schulung.speichern` — scope `hr:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Welches Profil hat noch kein Gueltig-bis?
@@ -2278,7 +2327,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `speichern` | Speichern | safe | nein | `Legt ein Qualifikationsprofil an.` |
+| `speichern` | Speichern | safe | nein | `/api/v1/training/qualifications/actions/speichern` |
 | `neu` | Neu | safe | nein | `Leert die Eingabe fuer ein neues Profil.` |
 
 ---
@@ -2299,6 +2348,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `schulungen` → `/api/v1/training/assignments`
 
+**MCP-Tools (Domäne):**
+
+- `hr.bewerbung.speichern` — scope `hr:write`, Risiko mittel
+- `hr.einwilligung.anlegen` — scope `hr:write`, Risiko mittel
+- `hr.onboarding.speichern` — scope `hr:write`, Risiko mittel
+- `hr.qualifikation.speichern` — scope `hr:write`, Risiko mittel
+- `hr.schulung.speichern` — scope `hr:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Welche Schulung laeuft in den naechsten 60 Tagen ab?
@@ -2307,7 +2364,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `speichern` | Speichern | safe | nein | `Legt eine Schulungszuweisung an.` |
+| `speichern` | Speichern | safe | nein | `/api/v1/training/assignments/actions/speichern` |
 | `neu` | Neu | safe | nein | `Leert die Eingabe fuer eine neue Zuweisung.` |
 
 ---
@@ -2605,6 +2662,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `dokumente` → `/api/v1/fuhrpark/ausgehende-dokumente`
 
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Welcher Belegtyp hat noch kein Formular?
@@ -2633,6 +2695,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Data Sources:**
 
 - `fahrzeug` → `/api/v1/fuhrpark/fahrzeuge`
+
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2667,6 +2734,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `list` → `/api/v1/fuhrpark/fahrzeuge`
 
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Welche Fahrzeuge sind verfuegbar?
@@ -2694,6 +2766,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Data Sources:**
 
 - `rechnungen` → `/api/v1/fuhrpark/rechnungen`
+
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2724,6 +2801,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `terminarten` → `/api/v1/fuhrpark/terminarten`
 
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Welche Terminart hat noch kein Kilometerintervall?
@@ -2749,6 +2831,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/fuhrpark__uebersicht/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Oeffne Fuhrpark.
@@ -2770,6 +2857,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Data Sources:**
 
 - `list` → `/api/v1/logistik/frachtbriefe`
+
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2799,6 +2891,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `tabellen` → `/api/v1/logistik/frachttabellen`
 
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Welche Frachttabelle hat noch keine Staffel?
@@ -2807,7 +2904,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `anlegen` | Tabelle speichern | safe | nein | `—` |
+| `anlegen` | Tabelle speichern | safe | nein | `/api/v1/logistik/frachttabellen/actions/anlegen` |
 | `position` | Position anlegen | safe | nein | `—` |
 
 ---
@@ -2829,6 +2926,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `touren` → `/api/v1/logistik/tours`
 - `fracht` → `/api/v1/logistik/frachtbriefe`
 - `tarife` → `/api/v1/logistik/freight-tariffs`
+
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2863,6 +2965,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `fahrzeuge` → `/api/v1/fuhrpark/fahrzeuge`
 - `fahrer` → `/api/v1/transporte/fahrer`
 
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Welche Touren haben heute noch keinen Fahrer?
@@ -2873,7 +2980,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `dispo` | Dispo-Arbeitsraum | safe | nein | `Oeffnet den bestehenden Dispo-Arbeitsraum.` |
 | `aufloesen` | Auflösen | safe | nein | `Liest den Lieferschein und setzt das Ziel.` |
-| `anlegen` | Tour anlegen | safe | nein | `Legt die Tour aus dem aufgeloesten Lieferschein an.` |
+| `anlegen` | Tour anlegen | safe | nein | `/api/v1/logistik/tours/actions/anlegen` |
 
 ---
 
@@ -2892,6 +2999,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Data Sources:**
 
 - `list` → `/api/v1/verladung`
+
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2922,6 +3034,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `profile` → `/api/v1/logistik/versand/profile`
 - `avise` → `/api/v1/logistik/versand/avise`
 
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Welches Versandprofil fehlt noch?
@@ -2951,6 +3068,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `list` → `/api/v1/tours`
 
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Lege eine neue Strecke fuer heute an.
@@ -2975,6 +3097,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/strecke__dokumente-drucken/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Oeffne Strecken-Dokumente drucken.
@@ -2996,6 +3123,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Data Sources:**
 
 - `list` → `/api/v1/strecke/streckengeschaefte`
+
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -3020,6 +3152,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `list` → `/api/v1/tours`
 
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Welche Touren sind noch geplant?
@@ -3042,6 +3179,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `list` → `/api/v1/transporte/fahrer`
 - `touren` → `/api/v1/logistik/tours`
+
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -3074,6 +3216,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Data Sources:**
 
 - `list` → `/api/v1/logistik/versand/avise`
+
+**MCP-Tools (Domäne):**
+
+- `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -3120,6 +3267,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `postfaecher` → `/api/v1/admin/postfaecher`
 
+**MCP-Tools (Domäne):**
+
+- `admin.postfach.speichern` — scope `admin:write`, Risiko hoch
+
 **Beispiel-Prompts:**
 
 - Welches Postfach verschickt Bestellungen?
@@ -3131,7 +3282,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `speichern` | Postfach speichern | safe | nein | `Legt das Postfach an oder aendert das geladene.` |
+| `speichern` | Postfach speichern | safe | nein | `/api/v1/admin/postfaecher/actions/speichern` |
 | `testen` | Testmail senden | safe | nein | `/api/v1/admin/postfaecher/{entity_id}/testen` |
 | `anmelden` | Beim Anbieter anmelden | safe | nein | `Fuehrt zur Anmeldung bei Google bzw. Microsoft fuer das geladene Postfach.` |
 | `neu` | Neues Postfach | safe | nein | `Leert die Eingabe fuer ein neues Postfach.` |
@@ -3149,6 +3300,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Readiness | `GET /api/v1/masks/planung/kalender/readiness` |
 | Rollout-Route | `/mask-rollout/planung__kalender/:entityId` |
 | Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `admin.postfach.speichern` — scope `admin:write`, Risiko hoch
 
 **Beispiel-Prompts:**
 
@@ -3184,6 +3339,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `entity` → `/api/v1/mobile/sync-summary`
 - `queue` → `/api/v1/mobile/sync-queue`
+
+**MCP-Tools (Domäne):**
+
+- `admin.postfach.speichern` — scope `admin:write`, Risiko hoch
 
 **Beispiel-Prompts:**
 
@@ -3284,6 +3443,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `entity` → `/api/v1/query-center/catalog`
 - `definitions` → `/api/v1/query-center`
 
+**MCP-Tools (Domäne):**
+
+- `reporting.bonus.calculate` — scope `reporting:write`, Risiko mittel
+- `reporting.query.import_signed` — scope `reporting:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Zeige meine favorisierten Abfragen.
@@ -3296,7 +3460,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `create` | Neue Abfrage | low | nein | `—` |
-| `import` | Signiert importieren | moderate | nein | `—` |
+| `import` | Signiert importieren | moderate | nein | `/api/v1/query-center/actions/import` |
 
 ---
 
@@ -3317,6 +3481,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `entity` → `/api/v1/l3-report-catalog/bonus-runs`
 - `runs` → `/api/v1/l3-report-catalog/bonus-runs`
 
+**MCP-Tools (Domäne):**
+
+- `reporting.bonus.calculate` — scope `reporting:write`, Risiko mittel
+- `reporting.query.import_signed` — scope `reporting:write`, Risiko mittel
+
 **Beispiel-Prompts:**
 
 - Berechne den Kundenbonus fuer dieses Jahr.
@@ -3328,7 +3497,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `calculate` | Bonuslauf berechnen | moderate | nein | `—` |
+| `calculate` | Bonuslauf berechnen | moderate | nein | `/api/v1/l3-report-catalog/bonus-runs/actions/calculate` |
 
 ---
 
@@ -3348,6 +3517,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `entity` → `/api/v1/l3-report-catalog`
 - `reports` → `/api/v1/l3-report-catalog`
+
+**MCP-Tools (Domäne):**
+
+- `reporting.bonus.calculate` — scope `reporting:write`, Risiko mittel
+- `reporting.query.import_signed` — scope `reporting:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 

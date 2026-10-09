@@ -7,9 +7,9 @@ nur, woraus er senden darf. Passwort bzw. Google-Zugang wird nie zurueckgegeben.
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -19,6 +19,7 @@ from app.core.geheimnis import GeheimnisNichtEingerichtet, GeheimnisUngueltig
 from app.core.tenant import get_tenant_id
 from app.services import mailkonto_service as konto
 from app.services.mail_versand import MailVersandFehler, MailVersandNichtEingerichtet, MailVersandVerweigert
+from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
 
 router = APIRouter(prefix="/admin/postfaecher", tags=["admin", "mailkonto"])
 
@@ -131,6 +132,137 @@ def postfach_anlegen(daten: PostfachIn, tenant_id: str = Depends(get_tenant_id),
     except (konto.MailkontoFehler, GeheimnisNichtEingerichtet) as fehler:
         db.rollback()
         raise _fachfehler(fehler) from fehler
+
+
+@router.post(
+    "/actions/speichern",
+    response_model=MaskActionResult,
+    summary="Postfach speichern als Masken-CommandEndpoint",
+)
+def action_postfach_speichern(
+    request: Request,
+    body: dict[str, Any] = Body(default_factory=dict),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(verwaltung),
+) -> MaskActionResult:
+    """CE fuer admin/postfaecher:speichern — dryRun ohne INSERT/UPDATE; Token-Mandant."""
+    try:
+        mode, audit_reason, idempotency_key, payload = parse_action_body(body)
+    except ValueError:
+        return MaskActionResult(
+            actionKey="speichern",
+            mode="invalid",
+            success=False,
+            error="Unbekannter Aktionsmodus.",
+            validationErrors=[
+                {"field": "_mode", "message": "Ungueltiger Aktionsmodus", "severity": "blocking"}
+            ],
+        )
+    postfach_id = str(payload.pop("postfach_id", "") or "").strip() or None
+    try:
+        opened = PostfachIn.model_validate(payload)
+    except Exception as exc:  # noqa: BLE001
+        return MaskActionResult(
+            actionKey="speichern",
+            mode=mode,
+            success=False,
+            error="Ungueltige Postfachdaten.",
+            validationErrors=[
+                {"field": "_entity", "message": str(exc), "severity": "blocking"}
+            ],
+        )
+    preview = {
+        "kennung": opened.kennung,
+        "absender_email": opened.absender_email,
+        "anbieter": opened.anbieter,
+        "postfach_id": postfach_id,
+        "tenant_id": tenant_id,
+        "hat_passwort": bool(opened.passwort),
+    }
+    if postfach_id:
+        try:
+            konto.lesen(db, tenant_id, postfach_id)
+        except konto.MailkontoFehler:
+            db.rollback()
+            return MaskActionResult(
+                actionKey="speichern",
+                mode=mode,
+                success=False,
+                error="Postfach nicht gefunden.",
+                validationErrors=[
+                    {
+                        "field": "postfach_id",
+                        "message": "Nicht im Authentifizierungs-Mandanten",
+                        "severity": "blocking",
+                    }
+                ],
+            )
+    if mode != "execute":
+        db.rollback()
+        return MaskActionResult(
+            actionKey="speichern",
+            mode=mode,
+            success=True,
+            summary="Postfach wuerde gespeichert — keine Aenderung geschrieben.",
+            proposedChanges=[preview],
+        )
+    try:
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+
+        saved = konto.speichern(
+            db,
+            tenant_id,
+            opened.model_dump(),
+            postfach_id=postfach_id,
+            von=nutzer.get("sub") or request.headers.get("X-User-ID"),
+        )
+        entity_id = str(saved["id"])
+        audit_id = _write_audit(
+            db,
+            tenant_id=tenant_id,
+            action_key="speichern",
+            entity_type="mailkonto",
+            entity_id=entity_id,
+            audit_reason=audit_reason,
+            idempotency_key=idempotency_key,
+            summary=f"Postfach {opened.kennung} gespeichert",
+        )
+        outbox_id = _write_outbox(
+            db,
+            tenant_id=tenant_id,
+            event_type="admin.postfach.saved",
+            aggregate_id=entity_id,
+            payload={"id": entity_id, "kennung": opened.kennung, "tenant_id": tenant_id},
+        )
+        # speichern() committed already; audit/outbox need another commit
+        db.commit()
+    except (konto.MailkontoFehler, GeheimnisNichtEingerichtet) as fehler:
+        db.rollback()
+        return MaskActionResult(
+            actionKey="speichern",
+            mode=mode,
+            success=False,
+            error=str(fehler),
+        )
+    except Exception:
+        db.rollback()
+        return MaskActionResult(
+            actionKey="speichern",
+            mode=mode,
+            success=False,
+            error="Postfach konnte nicht gespeichert werden.",
+        )
+    return MaskActionResult(
+        actionKey="speichern",
+        mode=mode,
+        success=True,
+        summary=f"Postfach {opened.kennung} gespeichert.",
+        affectedIds=[entity_id],
+        auditEntryId=audit_id,
+        outboxEventId=outbox_id,
+        proposedChanges=[preview],
+    )
 
 
 @router.put("/{postfach_id}", response_model=PostfachOut, summary="Postfach aendern")

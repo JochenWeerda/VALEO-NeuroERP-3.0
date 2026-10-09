@@ -157,7 +157,7 @@ class QueryCenterService:
         }
 
     def save(
-        self, payload: dict[str, Any], *, actor: str, reason: str
+        self, payload: dict[str, Any], *, actor: str, reason: str, commit: bool = True
     ) -> dict[str, Any]:
         definition = self.validate(payload)
         definition_id = str(payload.get("id") or uuid7())
@@ -186,7 +186,8 @@ class QueryCenterService:
             },
         )
         self._audit(definition_id, "saved", actor, reason, self._hash(definition))
-        self.db.commit()
+        if commit:
+            self.db.commit()
         return {"id": definition_id, **definition}
 
     def list_page(
@@ -252,9 +253,8 @@ class QueryCenterService:
         self.db.commit()
         return {**payload, "algorithm": "HMAC-SHA256", "signature": signature}
 
-    def import_signed(
-        self, bundle: dict[str, Any], *, actor: str, reason: str
-    ) -> dict[str, Any]:
+    def preview_import_signed(self, bundle: dict[str, Any]) -> dict[str, Any]:
+        """Signatur pruefen und Importvorschau liefern — ohne Speichern."""
         if not self.signing_key:
             raise QueryCenterError("Signierschluessel ist nicht konfiguriert")
         signature = str(bundle.get("signature") or "")
@@ -273,9 +273,28 @@ class QueryCenterService:
         ):
             raise QueryCenterError("Signatur der Abfragedefinition ist ungueltig")
         imported = dict(payload["definition"] or {})
-        imported.pop("id", None)
-        imported["name"] = f"{imported.get('name', 'Abfrage')} (Import)"
-        return self.save(imported, actor=actor, reason=reason)
+        for drop in ("id", "tenant_id", "mandanten_id", "owner_id"):
+            imported.pop(drop, None)
+        name = f"{imported.get('name', 'Abfrage')} (Import)"
+        imported["name"] = name
+        definition = self.validate(imported)
+        return {
+            "name": definition["name"],
+            "data_product_id": definition["data_product_id"],
+            "selected_fields": definition["selected_fields"],
+            "would_import": True,
+        }
+
+    def import_signed(
+        self, bundle: dict[str, Any], *, actor: str, reason: str, commit: bool = False
+    ) -> dict[str, Any]:
+        preview = self.preview_import_signed(bundle)
+        imported = dict(bundle.get("definition") or {})
+        # Fremde IDs/Mandanten aus dem Bundle nie uebernehmen — Speichern nur Token-Mandant.
+        for drop in ("id", "tenant_id", "mandanten_id", "owner_id"):
+            imported.pop(drop, None)
+        imported["name"] = preview["name"]
+        return self.save(imported, actor=actor, reason=reason, commit=commit)
 
     def _load(self, definition_id: str, owner_id: str) -> dict[str, Any]:
         row = (

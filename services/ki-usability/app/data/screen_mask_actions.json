@@ -61,10 +61,10 @@
       "source": {
         "screenId": "admin/postfaecher",
         "actionKey": "speichern",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/admin/postfaecher/actions/speichern",
         "navigationRoute": null,
         "command": "admin.postfachSpeichern",
-        "method": null
+        "method": "POST"
       }
     },
     {
@@ -317,10 +317,10 @@
       "source": {
         "screenId": "auswertungen/abfrage-center",
         "actionKey": "import",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/query-center/actions/import",
         "navigationRoute": null,
         "command": null,
-        "method": null
+        "method": "POST"
       }
     },
     {
@@ -337,10 +337,10 @@
       "source": {
         "screenId": "auswertungen/bonus-berechnung",
         "actionKey": "calculate",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/l3-report-catalog/bonus-runs/actions/calculate",
         "navigationRoute": null,
         "command": null,
-        "method": null
+        "method": "POST"
       }
     },
     {
@@ -357,10 +357,10 @@
       "source": {
         "screenId": "auswertungen/sanktionspruefung-kunden",
         "actionKey": "check",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/compliance/sanctions/actions/pruefen/customers",
         "navigationRoute": null,
         "command": null,
-        "method": null
+        "method": "POST"
       }
     },
     {
@@ -377,10 +377,10 @@
       "source": {
         "screenId": "auswertungen/sanktionspruefung-personal",
         "actionKey": "check",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/compliance/sanctions/actions/pruefen/personal",
         "navigationRoute": null,
         "command": null,
-        "method": null
+        "method": "POST"
       }
     },
     {
@@ -523,14 +523,16 @@
       "intent_phrases": [
         "Speichern"
       ],
-      "required_data": [],
+      "required_data": [
+        "entity_id"
+      ],
       "source": {
         "screenId": "einkauf/purchase-order",
         "actionKey": "speichern",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/speichern",
         "navigationRoute": null,
         "command": null,
-        "method": null
+        "method": "POST"
       }
     },
     {
@@ -1021,10 +1023,10 @@
       "source": {
         "screenId": "logistik/frachttabellen",
         "actionKey": "anlegen",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/logistik/frachttabellen/actions/anlegen",
         "navigationRoute": null,
-        "command": "fracht.createTable",
-        "method": null
+        "command": null,
+        "method": "POST"
       }
     },
     {
@@ -1141,10 +1143,10 @@
       "source": {
         "screenId": "logistik/tourenplanung",
         "actionKey": "anlegen",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/logistik/tours/actions/anlegen",
         "navigationRoute": null,
         "command": "tour.create",
-        "method": null
+        "method": "POST"
       }
     },
     {
@@ -1381,10 +1383,10 @@
       "source": {
         "screenId": "personal/bewerbungen",
         "actionKey": "speichern",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/personal/applications/actions/speichern",
         "navigationRoute": null,
         "command": "personal.saveBewerbung",
-        "method": null
+        "method": "POST"
       }
     },
     {
@@ -1401,10 +1403,10 @@
       "source": {
         "screenId": "personal/einwilligungserklaerungen",
         "actionKey": "anlegen",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/personal/applications/einwilligungserklaerungen/actions/anlegen",
         "navigationRoute": null,
         "command": "personal.saveErklaerung",
-        "method": null
+        "method": "POST"
       }
     },
     {
@@ -1461,7 +1463,7 @@
       "source": {
         "screenId": "personal/onboarding",
         "actionKey": "speichern",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/training/onboarding/runs/actions/speichern",
         "navigationRoute": null,
         "command": "personal.saveOnboarding",
         "method": null
@@ -1501,7 +1503,7 @@
       "source": {
         "screenId": "personal/qualifikationen",
         "actionKey": "speichern",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/training/qualifications/actions/speichern",
         "navigationRoute": null,
         "command": "personal.saveQualifikation",
         "method": null
@@ -1541,7 +1543,7 @@
       "source": {
         "screenId": "personal/schulungen",
         "actionKey": "speichern",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/training/assignments/actions/speichern",
         "navigationRoute": null,
         "command": "personal.saveSchulung",
         "method": null

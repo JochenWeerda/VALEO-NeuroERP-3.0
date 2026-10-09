@@ -173,6 +173,115 @@ MAPPED_RULES: dict[str, dict[str, str]] = {
             "kein CommandEndpoint, kein Booking/Journal — Uebernahme nur UI Vier-Augen."
         ),
     },
+    "mask:auswertungen/sanktionspruefung-kunden:check": {
+        "mcp_tool_id": "compliance.sanctions.check",
+        "coverage": "mapped",
+        "notes": (
+            "MCP-MASK-CE-SANCTIONS-FRACHT-20261009; CE "
+            "/api/v1/compliance/sanctions/actions/pruefen/customers; kein Auto-Freigeben."
+        ),
+    },
+    "mask:auswertungen/sanktionspruefung-personal:check": {
+        "mcp_tool_id": "compliance.sanctions.check",
+        "coverage": "mapped",
+        "notes": (
+            "MCP-MASK-CE-SANCTIONS-FRACHT-20261009; CE "
+            "/api/v1/compliance/sanctions/actions/pruefen/personal; kein Auto-Freigeben."
+        ),
+    },
+    "mask:logistik/frachttabellen:anlegen": {
+        "mcp_tool_id": "logistik.frachttabelle.anlegen",
+        "coverage": "mapped",
+        "notes": (
+            "MCP-MASK-CE-SANCTIONS-FRACHT-20261009; CE "
+            "/api/v1/logistik/frachttabellen/actions/anlegen; Token-Mandant."
+        ),
+    },
+    "mask:auswertungen/bonus-berechnung:calculate": {
+        "mcp_tool_id": "reporting.bonus.calculate",
+        "coverage": "mapped",
+        "notes": (
+            "MCP-MASK-CE-BATCH2-20261009; CE "
+            "/api/v1/l3-report-catalog/bonus-runs/actions/calculate; L3ReportCatalogService."
+        ),
+    },
+    "mask:auswertungen/abfrage-center:import": {
+        "mcp_tool_id": "reporting.query.import_signed",
+        "coverage": "mapped",
+        "notes": (
+            "MCP-MASK-CE-BATCH2-20261009; CE "
+            "/api/v1/query-center/actions/import; signierter Import."
+        ),
+    },
+    "mask:logistik/tourenplanung:anlegen": {
+        "mcp_tool_id": "logistik.tour.anlegen",
+        "coverage": "mapped",
+        "notes": (
+            "MCP-MASK-CE-BATCH2-20261009; CE "
+            "/api/v1/logistik/tours/actions/anlegen; Token-Mandant."
+        ),
+    },
+    "mask:einkauf/purchase-order:speichern": {
+        "mcp_tool_id": "einkauf.bestellung.speichern",
+        "coverage": "mapped",
+        "notes": (
+            "MCP-MASK-CE-BATCH2-20261009; CE "
+            "/api/v1/einkauf/bestellungen/{entity_id}/actions/speichern; "
+            "Kopf-Felder ohne Status/Summen; Token-Mandant."
+        ),
+    },
+    "mask:personal/bewerbungen:speichern": {
+        "mcp_tool_id": "hr.bewerbung.speichern",
+        "coverage": "mapped",
+        "notes": (
+            "MCP-MASK-CE-BATCH3-20261009; CE "
+            "/api/v1/personal/applications/actions/speichern; Token-Mandant."
+        ),
+    },
+    "mask:personal/einwilligungserklaerungen:anlegen": {
+        "mcp_tool_id": "hr.einwilligung.anlegen",
+        "coverage": "mapped",
+        "notes": (
+            "MCP-MASK-CE-BATCH3-20261009; CE "
+            "/api/v1/personal/applications/einwilligungserklaerungen/actions/anlegen; "
+            "Token-Mandant."
+        ),
+    },
+    "mask:admin/postfaecher:speichern": {
+        "mcp_tool_id": "admin.postfach.speichern",
+        "coverage": "mapped",
+        "notes": (
+            "MCP-MASK-CE-BATCH3-20261009; CE "
+            "/api/v1/admin/postfaecher/actions/speichern; Token-Mandant; "
+            "Passwort nicht im Audit."
+        ),
+    },
+    "mask:personal/onboarding:speichern": {
+        "mcp_tool_id": "hr.onboarding.speichern",
+        "coverage": "mapped",
+        "notes": (
+            "MCP-MASK-CE-BATCH4-20261009; CE "
+            "/api/v1/training/onboarding/runs/actions/speichern; Token-Mandant; "
+            "Checkliste tenant-gebunden."
+        ),
+    },
+    "mask:personal/qualifikationen:speichern": {
+        "mcp_tool_id": "hr.qualifikation.speichern",
+        "coverage": "mapped",
+        "notes": (
+            "MCP-MASK-CE-BATCH4-20261009; CE "
+            "/api/v1/training/qualifications/actions/speichern; Token-Mandant."
+        ),
+    },
+    "mask:personal/schulungen:speichern": {
+        "mcp_tool_id": "hr.schulung.speichern",
+        "coverage": "mapped",
+        "notes": (
+            "MCP-MASK-CE-BATCH4-20261009; CE "
+            "/api/v1/training/assignments/actions/speichern; Token-Mandant; "
+            "Kurs tenant-gebunden."
+        ),
+    },
 }
 
 # Verified UI-only actions; "neu" alone never proves absence of a mutation.
@@ -205,6 +314,30 @@ LOCAL_UI_RULES: dict[str, dict[str, str]] = {
         "local_effect": "navigation",
         "notes": "Oeffnet /transporte/fahrer/neu; legt keinen Fahrer an. Der separate Speichervorgang braucht seinen Fachvertrag.",
     },
+    "mask:logistik/verladung:neu": {
+        "coverage": "local_ui",
+        "local_effect": "navigation",
+        "notes": (
+            "SD navigationRoute /verladung/lkw-beladung; legt keine Beladung an. "
+            "MCP-MASK-CE-SANCTIONS-FRACHT-20261009."
+        ),
+    },
+    "mask:einkauf/supplier:neue_bestellung": {
+        "coverage": "local_ui",
+        "local_effect": "navigation",
+        "notes": (
+            "SD navigationRoute /einkauf/bestellungen/neu; legt keine Bestellung an. "
+            "MCP-MASK-CE-BATCH2-20261009."
+        ),
+    },
+    "mask:admin/postfaecher:neu": {
+        "coverage": "local_ui",
+        "local_effect": "form_reset",
+        "notes": (
+            "SD stubReason: leert Eingabe fuer neues Postfach; kein HTTP-Mutation. "
+            "MCP-MASK-CE-BATCH2-20261009. Speichern bleibt blocked (Postfach-WIP)."
+        ),
+    },
 }
 
 BLOCKED_RULES: dict[str, dict[str, str]] = {
@@ -212,38 +345,22 @@ BLOCKED_RULES: dict[str, dict[str, str]] = {
         "coverage": "open_high",
         "notes": "Zahlauf-Freigabe HIGH; nahe Journal/Kasse — ADR-076-Umfeld; forbiddenForAgents.",
     },
-    # Restliche medium ohne HTTP-CommandEndpoint: nur ActionRuntime-Command-Namen
-    # oder Human-Input-Flow ohne kanonischen MCP-Write-Vertrag — nicht fingieren.
+    # Fuhrpark: REST vorhanden, aber ohne tenant_id — kein MCP-Write bis Folge-Claim.
     **{
         mid: {
-            "coverage": "blocked_no_endpoint",
+            "coverage": "blocked_missing_tenant",
             "notes": (
-                "Kein HTTP-CommandEndpoint mit Mandanten-Service-Vertrag; "
-                "nur ActionRuntime-Command oder UI-Flow — MCP-MASK-WRITES-REMAINING-20261008."
+                "blocked_missing_tenant: Fuhrpark-Repository ohne tenant_id-Spalte/"
+                "Token-Filter. Folge-Claim: additive tenant_id + Mandanten-SQL, "
+                "dann CE+MCP. Kein Write ohne Isolation. MCP-MASK-CE-BATCH4-20261009."
             ),
         }
         for mid in (
-            "mask:admin/postfaecher:neu",
-            "mask:admin/postfaecher:speichern",
-            "mask:auswertungen/abfrage-center:import",
-            "mask:auswertungen/bonus-berechnung:calculate",
-            "mask:auswertungen/sanktionspruefung-kunden:check",
-            "mask:auswertungen/sanktionspruefung-personal:check",
-            "mask:einkauf/purchase-order:speichern",
-            "mask:einkauf/supplier:neue_bestellung",
             "mask:fuhrpark/ausgehende-dokumente:speichern",
             "mask:fuhrpark/fahrzeug-stamm:loeschen",
             "mask:fuhrpark/fahrzeug-stamm:speichern",
             "mask:fuhrpark/rechnungen:speichern",
             "mask:fuhrpark/terminarten:speichern",
-            "mask:logistik/frachttabellen:anlegen",
-            "mask:logistik/tourenplanung:anlegen",
-            "mask:logistik/verladung:neu",
-            "mask:personal/bewerbungen:speichern",
-            "mask:personal/einwilligungserklaerungen:anlegen",
-            "mask:personal/onboarding:speichern",
-            "mask:personal/qualifikationen:speichern",
-            "mask:personal/schulungen:speichern",
         )
     },
 }
@@ -375,7 +492,9 @@ def build_map() -> dict[str, Any]:
         "next_medium_candidates": [],
         "classification_complete": True,
         "classification_notes": (
-            "MCP-INVENTUR-OPENING-PROPOSE-20261008: Inventur-Opening mapped_propose_only. "
+            "MCP-MASK-CE-BATCH4-20261009: Personal onboarding/qualifikationen/schulungen "
+            "mapped (Training-REST+Mandant); Fuhrpark blocked_missing_tenant "
+            f"{by_cov.get('blocked_missing_tenant', 0)} (keine tenant_id). "
             f"Rest: open_high nur Zahlauf; blocked_no_endpoint {by_cov.get('blocked_no_endpoint', 0)}; "
             f"local_ui {by_cov.get('local_ui', 0)}; FIN-CLOSE blocked_adr_076."
         ),

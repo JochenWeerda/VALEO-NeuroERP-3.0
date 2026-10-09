@@ -614,6 +614,27 @@ class L3ReportCatalogService:
             "total_bonus": sum(Decimal(str(row["total_bonus"] or 0)) for row in items),
         }
 
+    def validate_bonus_run_params(
+        self,
+        *,
+        report_id: str,
+        from_date: date,
+        to_date: date,
+        rate_pct: Decimal,
+        reason: str,
+    ) -> None:
+        """Schreibfreie Parametervalidierung fuer dryRun/validate/propose."""
+        if report_id not in {"bonus-by-customer", "bonus-by-article-group"}:
+            raise ReportCatalogError(
+                "Nur freigegebene Bonusberichte duerfen berechnet werden"
+            )
+        if not rate_pct.is_finite() or rate_pct <= 0 or rate_pct > 100:
+            raise ReportCatalogError("Bonussatz muss zwischen 0 und 100 Prozent liegen")
+        if from_date > to_date:
+            raise ReportCatalogError("Von-Datum darf nicht nach Bis-Datum liegen")
+        if not (reason or "").strip():
+            raise ReportCatalogError("Audit-Grund ist erforderlich")
+
     def create_bonus_run(
         self,
         *,
@@ -623,13 +644,15 @@ class L3ReportCatalogService:
         rate_pct: Decimal,
         actor: str,
         reason: str,
+        commit: bool = False,
     ) -> dict[str, Any]:
-        if report_id not in {"bonus-by-customer", "bonus-by-article-group"}:
-            raise ReportCatalogError(
-                "Nur freigegebene Bonusberichte duerfen berechnet werden"
-            )
-        if rate_pct <= 0 or rate_pct > 100:
-            raise ReportCatalogError("Bonussatz muss zwischen 0 und 100 Prozent liegen")
+        self.validate_bonus_run_params(
+            report_id=report_id,
+            from_date=from_date,
+            to_date=to_date,
+            rate_pct=rate_pct,
+            reason=reason,
+        )
         result = self.run(
             report_id, from_date=from_date, to_date=to_date, page=1, page_size=5000
         )
@@ -679,7 +702,10 @@ class L3ReportCatalogService:
                     VALUES (:id,:tid,:run_id,:line_no,:dimension_id,:dimension_name,:document_count,:basis_amount,:bonus_amount,:currency)"""),
                 {**line, "tid": self.tenant_id},
             )
-        self.db.commit()
+        # Commands own the transaction containing business data and evidence.
+        # Standalone REST explicitly opts into its final commit.
+        if commit:
+            self.db.commit()
         return {
             "id": run_id,
             "status": "calculated",

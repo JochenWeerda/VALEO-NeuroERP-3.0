@@ -57,8 +57,26 @@ def test_summary_structure(svc: McpToolRegistryService) -> None:
     assert summary["validation_errors"] == []
 
 
-def test_registry_has_39_tools(svc: McpToolRegistryService) -> None:
-    assert len(svc.list_tools()) == 39
+def test_registry_has_45_tools(svc: McpToolRegistryService) -> None:
+    assert len(svc.list_tools()) == 51
+
+
+def test_bonus_and_query_import_writes_are_catalogued(svc: McpToolRegistryService) -> None:
+    bonus = svc.get_tool("reporting.bonus.calculate")
+    assert bonus["scope"] == "reporting:write"
+    assert bonus["audit"] == "write"
+    qimp = svc.get_tool("reporting.query.import_signed")
+    assert qimp["scope"] == "reporting:write"
+    assert qimp["audit"] == "write"
+
+
+def test_tour_and_po_save_writes_are_catalogued(svc: McpToolRegistryService) -> None:
+    tour = svc.get_tool("logistik.tour.anlegen")
+    assert tour["scope"] == "logistics:write"
+    assert tour["audit"] == "write"
+    po = svc.get_tool("einkauf.bestellung.speichern")
+    assert po["scope"] == "einkauf:write"
+    assert po["audit"] == "write"
 
 
 def test_ap_freigabe_tools_are_catalogued(svc: McpToolRegistryService) -> None:
@@ -71,6 +89,15 @@ def test_ap_freigabe_tools_are_catalogued(svc: McpToolRegistryService) -> None:
     assert freigeben["risk_class"] == "high"
     assert freigeben["human_approval_required"] is True
     assert freigeben["idempotent"] is True
+
+
+def test_sanctions_and_fracht_writes_are_catalogued(svc: McpToolRegistryService) -> None:
+    sanctions = svc.get_tool("compliance.sanctions.check")
+    assert sanctions["scope"] == "compliance:write"
+    assert sanctions["audit"] == "write"
+    fracht = svc.get_tool("logistik.frachttabelle.anlegen")
+    assert fracht["scope"] == "logistics:write"
+    assert fracht["audit"] == "write"
 
 
 def test_inventur_propose_opening_is_catalogued(svc: McpToolRegistryService) -> None:
