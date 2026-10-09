@@ -50,7 +50,7 @@ Vor Deploy: `alembic upgrade head` (Migration `inv_lot_depth_spec_p1_08`).
 ## Claude: Bitte beachten
 
 - Vor weiteren Mask-Action-Änderungen Slice claimen (`chore(workboard): claim …`).
-- Neue Actions über `run_mask_action()` — nicht ad-hoc Stub-Responses.
+- Aktualisiert 2026-10-09: Neue Fachactions ueber `run_delegated_mask_action()` mit echtem Check/Delegat und SAVEPOINT-Schutz. Der ungenutzte `run_mask_action` ist entfernt; keine Stub-Responses.
 - `require_audit_reason=True` für critical Actions (`payment-run/freigeben`, `stornieren`).
 - FEFO-Tests bei Lot-Logik-Änderungen mitführen.
 

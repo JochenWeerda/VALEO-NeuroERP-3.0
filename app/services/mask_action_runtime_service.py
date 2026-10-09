@@ -10,8 +10,10 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Awaitable, Callable, Literal
 
-from pydantic import BaseModel, Field
+from fastapi import HTTPException
+from pydantic import BaseModel
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
@@ -108,137 +110,13 @@ def _write_outbox(
     return event_id
 
 
-ExecuteFn = Callable[[Session, dict[str, Any], str, str], dict[str, Any]]
-
-
-def run_mask_action(
-    db: Session,
-    *,
-    action_key: str,
-    entity_type: str,
-    entity_id: str,
-    tenant_id: str,
-    body: dict[str, Any],
-    validate_fn: Callable[[dict[str, Any]], list[dict[str, Any]]] | None = None,
-    propose_fn: Callable[[str, dict[str, Any]], dict[str, Any]] | None = None,
-    execute_fn: ExecuteFn | None = None,
-    outbox_event_type: str | None = None,
-    require_audit_reason: bool = False,
-) -> MaskActionResult:
-    try:
-        mode, audit_reason, idempotency_key, payload = parse_action_body(body)
-    except ValueError:
-        return MaskActionResult(
-            actionKey=action_key, mode="invalid", success=False,
-            error="Unbekannter Aktionsmodus.",
-            validationErrors=[{"field": "_mode", "message": "Ungueltiger Aktionsmodus", "severity": "blocking"}],
-        )
-
-    if mode == "propose":
-        proposal = (propose_fn or _default_propose)(entity_id, payload)
-        return MaskActionResult(
-            actionKey=action_key,
-            mode=mode,
-            success=True,
-            summary=f"Vorschlag für {action_key}",
-            proposedChanges=[proposal],
-        )
-
-    validation_errors = validate_fn(payload) if validate_fn else []
-
-    if mode in ("validate", "dryRun"):
-        ok = len(validation_errors) == 0
-        return MaskActionResult(
-            actionKey=action_key,
-            mode=mode,
-            success=ok,
-            summary="Validierung erfolgreich — keine Änderungen geschrieben." if ok else "Validierung fehlgeschlagen.",
-            proposedChanges=[payload] if ok else None,
-            validationErrors=validation_errors or None,
-        )
-
-    if validation_errors:
-        return MaskActionResult(
-            actionKey=action_key,
-            mode=mode,
-            success=False,
-            error="Validierung fehlgeschlagen.",
-            validationErrors=validation_errors,
-        )
-
-    if require_audit_reason and not (audit_reason or "").strip():
-        return MaskActionResult(
-            actionKey=action_key,
-            mode=mode,
-            success=False,
-            error="auditReason ist für diese Aktion erforderlich.",
-            validationErrors=[{"field": "_auditReason", "message": "Pflichtfeld", "severity": "blocking"}],
-        )
-
-    if execute_fn is None:
-        return MaskActionResult(
-            actionKey=action_key,
-            mode=mode,
-            success=False,
-            error="Execute-Handler nicht konfiguriert.",
-        )
-
-    try:
-        mutation = execute_fn(db, payload, entity_id, tenant_id)
-        summary = mutation.get("summary", f"{action_key} ausgeführt.")
-        affected = mutation.get("affectedIds") or [entity_id]
-        audit_id = _write_audit(
-            db,
-            tenant_id=tenant_id,
-            action_key=action_key,
-            entity_type=entity_type,
-            entity_id=entity_id,
-            audit_reason=audit_reason,
-            idempotency_key=idempotency_key,
-            summary=summary,
-        )
-        outbox_id = ""
-        if outbox_event_type:
-            outbox_id = _write_outbox(
-                db,
-                tenant_id=tenant_id,
-                event_type=outbox_event_type,
-                aggregate_id=entity_id,
-                payload={
-                    "action_key": action_key,
-                    "entity_type": entity_type,
-                    "entity_id": entity_id,
-                    "tenant_id": tenant_id,
-                    "mutation": mutation,
-                    "audit_entry_id": audit_id,
-                },
-            )
-        db.commit()
-        return MaskActionResult(
-            actionKey=action_key,
-            mode=mode,
-            success=True,
-            summary=summary,
-            affectedIds=[str(x) for x in affected],
-            auditEntryId=audit_id,
-            outboxEventId=outbox_id or None,
-        )
-    except Exception as exc:
-        db.rollback()
-        logger.exception("Mask action %s failed", action_key)
-        return MaskActionResult(
-            actionKey=action_key,
-            mode=mode,
-            success=False,
-            error="Aktion konnte nicht gespeichert werden. Es wurde kein Erfolg bestaetigt.",
-        )
-
-
 CheckFn = Callable[[Session, dict[str, Any], str, str], Awaitable[list[dict[str, Any]]]]
 DelegateFn = Callable[[Session, dict[str, Any], str, str], Awaitable[str]]
 
 
 def _fehlertext(exc: Exception) -> str:
+    if isinstance(exc, SQLAlchemyError) or (isinstance(exc, HTTPException) and exc.status_code >= 500):
+        return "Aktion konnte nicht gespeichert oder geprueft werden. Es wurde kein Erfolg bestaetigt."
     detail = getattr(exc, "detail", None)
     if isinstance(detail, dict):
         return str(detail.get("error") or detail.get("detail") or detail)
@@ -267,10 +145,10 @@ async def run_delegated_mask_action(
     * ``check_fn`` liest die Datenbank (Objekt da, Zustand passt) und laeuft in
       **jedem** Modus. Ein Trockenlauf meldet so, was der Fachweg ablehnen wuerde,
       und schreibt nichts.
-    * Bei ``execute`` liegen Audit- und Outbox-Zeile schon in der Sitzung, wenn der
-      Fachweg laeuft; dessen eigener Commit schreibt Mutation, Audit und Ereignis
-      **zusammen**. Scheitert er, wird alles zurueckgerollt, und die Antwort nennt
-      den fachlichen Grund.
+    * Bei ``execute`` liegen Audit- und Outbox-Zeile in der aeusseren Sitzung.
+      Der Fachweg erhaelt eine eigene SAVEPOINT-Session. Sein innerer Commit
+      gibt nur den Savepoint frei; erst die Runtime committet die gesamte Einheit.
+      Auch bei einer Ablehnung nach innerem Commit wird alles zurueckgerollt.
     * ``delegate_fn`` liefert die Zusammenfassung des Geschehenen.
     """
     try:
@@ -327,13 +205,19 @@ async def run_delegated_mask_action(
                 "tenant_id": tenant_id, "audit_entry_id": audit_id, "payload": payload,
             },
         )
-        summary = await delegate_fn(db, payload, entity_id, tenant_id)
-        # Fachwege, die selbst committen, haben Audit und Ereignis schon mitgenommen;
-        # fuer die anderen schliesst dieser Commit die Einheit.
+        # Ein Fachweg darf seinen Savepoint committen, nie die aeussere Einheit.
+        # Der produktive get_db-Vertrag liefert eine SQLAlchemy-Session.
+        if isinstance(db, Session):
+            with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as delegate_db:
+                summary = await delegate_fn(delegate_db, payload, entity_id, tenant_id)
+                delegate_db.commit()  # Auch Fachwege ohne eigenen Commit geben den Savepoint frei.
+        else:
+            # Kleine In-Memory-Adapter in den isolierten Vertragspruefungen.
+            summary = await delegate_fn(db, payload, entity_id, tenant_id)
         db.commit()
     except Exception as exc:  # noqa: BLE001 — der Grund geht an die Maske
         db.rollback()
-        logger.warning("Mask-Aktion %s fuer %s abgelehnt: %s", action_key, entity_id, exc)
+        logger.warning("Mask-Aktion %s fuer %s abgelehnt: %s", action_key, entity_id, _fehlertext(exc))
         return MaskActionResult(
             actionKey=action_key, mode=mode, success=False, error=_fehlertext(exc),
         )
@@ -343,6 +227,3 @@ async def run_delegated_mask_action(
         affectedIds=[entity_id], auditEntryId=audit_id, outboxEventId=outbox_id,
     )
 
-
-def _default_propose(entity_id: str, payload: dict[str, Any]) -> dict[str, Any]:
-    return {"entity_id": entity_id, **payload}

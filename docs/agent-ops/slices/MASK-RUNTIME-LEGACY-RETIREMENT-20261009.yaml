@@ -1,0 +1,38 @@
+slice_id: MASK-RUNTIME-LEGACY-RETIREMENT-20261009
+title: Eine Masken-Runtime mit atomarer Fachdelegation
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-09
+goal: Ungenutzten Altweg entfernen, Fachcommits atomar halten und SQL-Detaillecks sperren.
+file_ownership:
+  - app/services/mask_action_runtime_service.py nur alte Runtime, Savepoint und Fehlertext
+  - tests/test_mask_action_atomic.py auf produktiven Fachweg umstellen
+  - tests/test_process_kernel_wave1_contracts.py nur Zahlungslauf-Fixture
+  - tests/test_mask_aktionen_wirkung.py nur neuer PG-Rueckrollvertrag
+  - Eigene QA, datierte Handshake-Korrekturen, Open-Gaps-Hunks und Workboard
+acceptance:
+  - Produktive Aufrufer und neue Fachcommands nutzen ausschliesslich delegierte Runtime.
+  - Auch Ablehnung nach innerem Fachcommit rollt Mutation, Audit und Outbox zurueck.
+  - Erfolgreiche Fachwege mit und ohne eigenen Commit persistieren exakt die Ergebnis-IDs.
+  - SQLAlchemy- und HTTP-Serverfehler geben keine SQL- oder Personalwerte aus.
+  - Leerer Freigabe-Request nutzt authentifizierten Nutzer und belegten fremden Ersteller.
+tests:
+  - Original fuenf Runtimefehler plus echte Commit-Durchbruch-Gegenprobe
+  - 27 produktive Atomizitaets-, Fehler-, Vorschau- und Retirement-Vertraege
+  - Vollstaendiges Wave-1-Modul mit korrigierter CI-Fixture
+  - Zahlungsschutz, Rationsvertraege und sechs echte PG-Zahlungsablaeufe
+ai_harness:
+  fachlicher_vertrag: Keine Scheinfreigabe; Fachblocker in jedem Modus, echte Persistenz im Execute.
+  architektur_vertrag: Ein bestehender delegierter Weg; keine API, Servicegrenze oder konkurrierendes Modell.
+  daten_vertrag: Eigene Savepoint-Session auf gleicher Verbindung; nur bestehender valeo_probe fuer PG.
+  test_vertrag: Originalfehler und echte SQL-Wirkungen, keine entfernten oder uebersprungenen Fachtests.
+  security_vertrag: Authentifizierter Freigeber, Vier-Augen und SQL-Detailbegrenzung erhalten.
+  betriebs_vertrag: Bestehende CI, keine neue DB/Container/Schema/Migration/Reset.
+  dokumentations_vertrag: QA, Slice, datierte Handshakes, Workboard und Open-Gaps zusammen.
+external_gates:
+  - GitHub-Folgeabnahme nach Push
+risks:
+  - FIN-CLOSE, Zahlauf-MCP und21 fehlende HTTP-Fachcommands weiter offen.
+  - Fremde Tenant-Payload-WIP im Dateikopf separat erhalten, nicht mit abgenommen.
+test_database: Vorhandener valeo_probe mit eigenen Testmandanten; SQLite ausschliesslich In-Memory.
+validation: 100 Tests ohne Skip:63 Runtime-/Wave-1-Vertraege in6,35s und37 Zahlungs-/Rations-/echte PG-Vertraege in29,80s gruen.
