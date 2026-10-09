@@ -726,17 +726,23 @@ def test_store_ap_invoice_posted_event_in_outbox_uses_process_event(monkeypatch)
     assert captured["journal_entry_id"] == "je-1"
 
 
-def test_payment_run_approve_request_accepts_legacy_empty_body_and_uses_default_actor(monkeypatch):
+def test_payment_run_approve_accepts_empty_body_with_authenticated_actor_and_distinct_creator(monkeypatch):
     captured: dict[str, object] = {}
 
     class DummyResult:
+        def __init__(self, row):
+            self.row = row
+
         def fetchone(self):
-            return ("run-1", None)  # (Status|Kennung, Ersteller) — Ersteller unbekannt
+            return self.row
 
     class DummyDb:
-        def execute(self, _query, params):
+        def execute(self, query, params):
             captured.update(params)
-            return DummyResult()
+            if "SELECT status, created_by" in str(query):
+                return DummyResult(("draft", "maker"))
+            assert "UPDATE domain_erp.payment_runs" in str(query)
+            return DummyResult(("run-1",))
 
         def commit(self):
             captured["committed"] = True

@@ -11,6 +11,24 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## Masken-Runtime: Altweg, atomare Fachcommits und Fehlertexte (2026-10-09)
+
+Ungenutzten run_mask_action samt zwei Hilfssymbolen entfernt; dessen
+Atomizitaetsnachweise auf produktiven run_delegated_mask_action uebertragen.
+Echter Original-Fachcommit mit spaeterer Ablehnung hinterliess Fachdaten
+trotz success=false. SAVEPOINT-Session auf gleicher Verbindung haelt nun
+auch innere Fachcommits in der aeusseren Mutation/Audit/Outbox-Einheit.
+Positive Wege mit/ohne Fachcommit und echte PostgreSQL-Freigabe mit spaeterer
+Ablehnung nachgewiesen. SQLAlchemy-/HTTP-Serverfehler ohne SQL/Personalwerte
+in Antwort und Warnmeldung; klare Fachablehnungen erhalten.
+CI37843747893: einziges rotes Testfixture bei16758 gruen, nun belegten
+Entwurf/anderen Ersteller statt unbekannter Altzeile verwenden; Schutz
+unveraendert. Final100 Tests ohne Skip gruen (63+37); vorhandener valeo_probe,
+nur eigene Daten, keine neue DB/Container/Schema/Migration/Reset.
+Fremde gleichzeitige Tenant-Payload-WIP erhalten und getrennt; Folge-CI offen.
+FIN-CLOSE/ADR-076, Zahlauf-MCP und21 HTTP-Fachcommands bleiben offen.
+[QA, Gegenproben und Handshake](../quality-assurance/mask-runtime-legacy-retirement-20261009.md).
+
 ## MCP-Maskenaktionen: lokaler Bedienweg und Fachcommand (2026-10-08)
 
 Zehn der bisherigen31 blocked_no_endpoint sind nach konkreter Handlerpruefung

@@ -50,3 +50,12 @@ den echten MCP-Schreibadapter weiterhin nachzuweisen.
 Architektur-Impact: bestehender Vertrag wird durch fehlenden Audit-Speicher
 vervollstaendigt; keine neue API, kein neuer Container, keine Domänengrenze.
 UIX/MCP-Gesamtziel weiterhin offen.
+
+## Nachtrag 2026-10-09: kanonischer Runtime-Vertrag
+
+Der ungenutzte run_mask_action ist entfernt. Seine Atomizitaetstests pruefen
+nun run_delegated_mask_action. Eigene SAVEPOINT-Session haelt auch innere
+Fachcommits mit spaeterer Ablehnung in der aeusseren Einheit; SQLAlchemy-
+und HTTP-Serverfehler ohne SQL-/Personalwerte. Finale Abnahme100 Tests ohne
+Skip, einschliesslich echtem PG-Zahlauf-Rueckrollvertrag. Historische Zahlen
+oben bleiben datierte Nachweise. [Aktuelle QA und Grenzen](mask-runtime-legacy-retirement-20261009.md).

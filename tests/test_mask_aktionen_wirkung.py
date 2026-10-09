@@ -258,6 +258,37 @@ class TestZahlungslauf:
         assert spuren(engine, HAUS_A, "freigeben") == (0, 0)
 
 
+    def test_fachcommit_mit_spaeterer_ablehnung_rollt_die_ganze_einheit_zurueck(self, engine):
+        import asyncio
+        from fastapi import HTTPException
+        from sqlalchemy.orm import Session
+        from app.api.v1.endpoints.payment_runs import approve_payment_run, ApprovePaymentRunRequest
+        from app.services.mask_action_runtime_service import run_delegated_mask_action
+
+        lauf = zahlungslauf(engine, HAUS_A)
+
+        async def check(session, payload, entity_id, tenant):
+            return []
+
+        async def delegate(session, payload, entity_id, tenant):
+            await approve_payment_run(entity_id, ApprovePaymentRunRequest(),
+                tenant_id=tenant, db=session, user={"sub": "dev", "roles": ["FINANCE_ADMIN"]})
+            raise HTTPException(409, "Abnahme: Ablehnung nach echtem Fachcommit")
+
+        with Session(engine) as db:
+            result = asyncio.run(run_delegated_mask_action(db, action_key="freigeben",
+                entity_type="payment_run", entity_id=lauf, tenant_id=HAUS_A,
+                body={"_mode": "execute", "_auditReason": "Atomizitaetsabnahme"},
+                check_fn=check, delegate_fn=delegate,
+                outbox_event_type="finance.payment_run.approved", require_audit_reason=True))
+        assert result.success is False
+        assert result.error == "Abnahme: Ablehnung nach echtem Fachcommit"
+        assert result.auditEntryId is None and result.outboxEventId is None
+        assert wert(engine, "SELECT status FROM domain_erp.payment_runs WHERE id = :i", i=lauf) == "draft"
+        assert wert(engine, "SELECT approved_by FROM domain_erp.payment_runs WHERE id = :i", i=lauf) is None
+        assert spuren(engine, HAUS_A, "freigeben") == (0, 0)
+
+
 # ── 2. Lieferschein drucken ─────────────────────────────────────────────────
 
 
