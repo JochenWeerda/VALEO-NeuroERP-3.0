@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-08
+last_reviewed: 2026-10-09
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -259,6 +259,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `flow_spine_lifecycle_20260417` | Extend flow spine instances with lifecycle state and timeline events |
 | `foreign_goods_worklist_20260821` | Audit trail for the foreign-goods operator worklist. |
 | `fuhrpark_tables_speditionen_20260225` | Add Fuhrpark sub-tables and Speditionen Frachttarife |
+| `fuhrpark_tenant_ce_20261009` | Fuhrpark: additive tenant_id fuer Masken-CRUD (CE+MCP Isolation). |
 | `fuhrpark_vertiefung_20260616` | Fuhrpark Vertiefung: Statushistorie, Schaeden, Bussgeld |
 | `futtermittel_sorten_produktion_20260410` | Futtermittel-Stammdaten, Rezepte, Produktionsaufträge und Sortenregister |
 | `genossenschaft_mitgliederregister_20261005` | Das Mitgliederregister einer eingetragenen Genossenschaft. |

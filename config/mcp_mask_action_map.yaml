@@ -28,6 +28,11 @@ mcp_write_tools:
 - hr.qualifikation.speichern
 - hr.schulung.speichern
 - admin.postfach.speichern
+- logistik.fahrzeug.speichern
+- logistik.fahrzeug.loeschen
+- logistik.terminart.speichern
+- logistik.rechnung.speichern
+- logistik.ausgehendes_dokument.speichern
 - agrar.ration.transition
 - agrar.feeding.supply_handoff
 - agrar.feeding.actual_measure
@@ -72,9 +77,8 @@ stats:
   mask_mutations_considered: 46
   by_coverage:
     adjacent: 1
-    blocked_missing_tenant: 5
     local_ui: 13
-    mapped: 36
+    mapped: 41
     mapped_propose_only: 1
     mapped_read: 2
     open_high: 1
@@ -374,34 +378,32 @@ mappings:
   domain: logistics
   action_key: speichern
   label: Speichern
-  command_endpoint: null
+  command_endpoint: /api/v1/fuhrpark/ausgehende-dokumente/actions/speichern
   command: fuhrpark.saveDokument
-  coverage: blocked_missing_tenant
-  notes: 'blocked_missing_tenant: Fuhrpark-Repository ohne tenant_id-Spalte/Token-Filter. Folge-Claim:
-    additive tenant_id + Mandanten-SQL, dann CE+MCP. Kein Write ohne Isolation. MCP-MASK-CE-BATCH4-20261009.'
-  mcp_tool_id: null
+  mcp_tool_id: logistik.ausgehendes_dokument.speichern
+  coverage: mapped
+  notes: FUHRPARK-TENANT-CE-20261009; CE /api/v1/fuhrpark/ausgehende-dokumente/actions/speichern; Token-Mandant.
 - mask_action_id: mask:fuhrpark/fahrzeug-stamm:loeschen
   mask: fuhrpark/fahrzeug-stamm
   domain: logistics
   action_key: loeschen
   label: Fahrzeug löschen
-  command_endpoint: null
+  command_endpoint: /api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen
   command: fuhrpark.deleteFahrzeug
-  coverage: blocked_missing_tenant
-  notes: 'blocked_missing_tenant: Fuhrpark-Repository ohne tenant_id-Spalte/Token-Filter. Folge-Claim:
-    additive tenant_id + Mandanten-SQL, dann CE+MCP. Kein Write ohne Isolation. MCP-MASK-CE-BATCH4-20261009.'
-  mcp_tool_id: null
+  mcp_tool_id: logistik.fahrzeug.loeschen
+  coverage: mapped
+  notes: FUHRPARK-TENANT-CE-20261009; CE /api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen; Cross-Tenant
+    404.
 - mask_action_id: mask:fuhrpark/fahrzeug-stamm:speichern
   mask: fuhrpark/fahrzeug-stamm
   domain: logistics
   action_key: speichern
   label: Speichern
-  command_endpoint: null
+  command_endpoint: /api/v1/fuhrpark/fahrzeuge/actions/speichern
   command: fuhrpark.saveFahrzeug
-  coverage: blocked_missing_tenant
-  notes: 'blocked_missing_tenant: Fuhrpark-Repository ohne tenant_id-Spalte/Token-Filter. Folge-Claim:
-    additive tenant_id + Mandanten-SQL, dann CE+MCP. Kein Write ohne Isolation. MCP-MASK-CE-BATCH4-20261009.'
-  mcp_tool_id: null
+  mcp_tool_id: logistik.fahrzeug.speichern
+  coverage: mapped
+  notes: FUHRPARK-TENANT-CE-20261009; CE /api/v1/fuhrpark/fahrzeuge/actions/speichern; Token-Mandant.
 - mask_action_id: mask:fuhrpark/fahrzeuge:neu
   mask: fuhrpark/fahrzeuge
   domain: logistics
@@ -431,12 +433,11 @@ mappings:
   domain: logistics
   action_key: speichern
   label: Speichern
-  command_endpoint: null
+  command_endpoint: /api/v1/fuhrpark/rechnungen/actions/speichern
   command: fuhrpark.saveRechnung
-  coverage: blocked_missing_tenant
-  notes: 'blocked_missing_tenant: Fuhrpark-Repository ohne tenant_id-Spalte/Token-Filter. Folge-Claim:
-    additive tenant_id + Mandanten-SQL, dann CE+MCP. Kein Write ohne Isolation. MCP-MASK-CE-BATCH4-20261009.'
-  mcp_tool_id: null
+  mcp_tool_id: logistik.rechnung.speichern
+  coverage: mapped
+  notes: FUHRPARK-TENANT-CE-20261009; CE /api/v1/fuhrpark/rechnungen/actions/speichern; Token-Mandant.
 - mask_action_id: mask:fuhrpark/terminarten:neu
   mask: fuhrpark/terminarten
   domain: logistics
@@ -454,12 +455,11 @@ mappings:
   domain: logistics
   action_key: speichern
   label: Speichern
-  command_endpoint: null
+  command_endpoint: /api/v1/fuhrpark/terminarten/actions/speichern
   command: fuhrpark.saveTerminart
-  coverage: blocked_missing_tenant
-  notes: 'blocked_missing_tenant: Fuhrpark-Repository ohne tenant_id-Spalte/Token-Filter. Folge-Claim:
-    additive tenant_id + Mandanten-SQL, dann CE+MCP. Kein Write ohne Isolation. MCP-MASK-CE-BATCH4-20261009.'
-  mcp_tool_id: null
+  mcp_tool_id: logistik.terminart.speichern
+  coverage: mapped
+  notes: FUHRPARK-TENANT-CE-20261009; CE /api/v1/fuhrpark/terminarten/actions/speichern; Token-Mandant.
 - mask_action_id: mask:futtermittel/analyse:reject
   mask: futtermittel/analyse
   domain: futtermittel
@@ -709,6 +709,5 @@ mappings:
   mcp_tool_id: null
 next_medium_candidates: []
 classification_complete: true
-classification_notes: 'MCP-MASK-CE-BATCH4-20261009: Personal onboarding/qualifikationen/schulungen mapped
-  (Training-REST+Mandant); Fuhrpark blocked_missing_tenant 5 (keine tenant_id). Rest: open_high nur Zahlauf;
-  blocked_no_endpoint 0; local_ui 13; FIN-CLOSE blocked_adr_076.'
+classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
+  0. Rest: open_high nur Zahlauf; blocked_no_endpoint 0; local_ui 13; FIN-CLOSE blocked_adr_076.'

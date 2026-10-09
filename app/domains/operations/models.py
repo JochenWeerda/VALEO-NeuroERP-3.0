@@ -131,9 +131,13 @@ class Fahrzeug(Base):
     Fahrzeug Model fuer Fuhrpark-Management
     """
     __tablename__ = "ops_fahrzeuge"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "kennzeichen", name="uq_ops_fahrzeuge_tenant_kennzeichen"),
+        {"schema": "domain_ops", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=default_prefixed_id("F"))
+    tenant_id = Column(String(120), nullable=False, index=True)
 
     # Stammdaten (zvoove Fuhrpark)
     ro_nummer = Column(String(50))
@@ -141,7 +145,7 @@ class Fahrzeug(Base):
     betrieb = Column(String(120))
     bereich = Column(String(120))
     pol_kennzeichen = Column(String(30))
-    kennzeichen = Column(String(20), nullable=False, unique=True)
+    kennzeichen = Column(String(20), nullable=False)
     typ = Column(String(50), nullable=False)
     marke = Column(String(50))
     modell = Column(String(50))
@@ -327,10 +331,14 @@ class FuhrparkTerminart(Base):
     Stammdaten fuer Terminarten im Fuhrpark.
     """
     __tablename__ = "ops_fuhrpark_terminarten"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "terminart", name="uq_ops_fuhrpark_terminarten_tenant_name"),
+        {"schema": "domain_ops", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=default_prefixed_id("FTA"))
-    terminart = Column(String(120), nullable=False, unique=True)
+    tenant_id = Column(String(120), nullable=False, index=True)
+    terminart = Column(String(120), nullable=False)
     intervall_monate = Column(Integer, nullable=False, default=0)
     intervall_km = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -342,10 +350,14 @@ class FuhrparkRechnung(Base):
     Fuhrpark-Rechnungen fuer Kosten-/Auswertungsdialoge.
     """
     __tablename__ = "ops_fuhrpark_rechnungen"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "rechnungs_nr", name="uq_ops_fuhrpark_rechnungen_tenant_nr"),
+        {"schema": "domain_ops", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=default_prefixed_id("FR"))
-    rechnungs_nr = Column(String(80), nullable=False, unique=True)
+    tenant_id = Column(String(120), nullable=False, index=True)
+    rechnungs_nr = Column(String(80), nullable=False)
     datum = Column(DateTime(timezone=True), nullable=False)
     fahrzeug_id = Column(String, ForeignKey("domain_ops.ops_fahrzeuge.id", ondelete="SET NULL"))
     fahrzeug_kennzeichen = Column(String(30))
@@ -367,6 +379,7 @@ class FuhrparkAusgehendesDokument(Base):
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=default_prefixed_id("FAD"))
+    tenant_id = Column(String(120), nullable=False, index=True)
     beleg_typ = Column(String(120), nullable=False)
     formular = Column(String(80))
     ziel_modul = Column(String(255))

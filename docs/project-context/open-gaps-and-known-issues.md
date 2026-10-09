@@ -11,12 +11,25 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## Fuhrpark und MCP Mandantengrenzen geschlossen (2026-10-09)
+
+Fuenf Fuhrpark-Commands jetzt mit kanonischer Mandantentrennung integriert:
+41 mapped,0 blocked_missing_tenant,0 blocked_no_endpoint,13 local_ui,
+1 open_high; Registry56.21 bei unabhaengiger Abnahme reproduzierte Fehler
+behoben,isoliert final569 Tests ohne Skip.
+Neue Abnahme237 Tests:68 echte PG-Wirkungspruefungen auf bestehender valeo_probe
+und169 zentrale Guards. Token-Mandant, gleiche Validierung in allen Modi,
+keine fremden Fahrzeugreferenzen und geschuetzte Datensatzidentitaet.
+Keine neue DB/Container/erneute Migration/Reset; keine Gesamt-UAT oder echte
+PG-E2E-Abnahme jedes MCP-Fachhandlers. FIN-CLOSE ADR-076 und Zahlauf open_high
+bleiben offen. [Nachweis und Betriebsvertrag](../quality-assurance/fuhrpark-mcp-isolation-20261009.md).
+
 ## Fachcommand-Integration und Stabilisierung (2026-10-09)
 
 Nach MCP-Batch2-4:36 mapped,13 local_ui,5 blocked_missing_tenant,
-0 blocked_no_endpoint,1 open_high. Die fuenf Fuhrpark-Aktionen sind
-weiter offen: REST allein ersetzt keine Mandantentrennung. FIN-CLOSE
-ADR-076 und Zahlauf-Freigabevertrag bleiben ebenfalls offen.
+0 blocked_no_endpoint,1 open_high war der damalige Zwischenstand. Die fuenf
+Fuhrpark-Aktionen sind inzwischen mit Mandantentrennung integriert (siehe oben).
+FIN-CLOSE ADR-076 und Zahlauf-Freigabevertrag bleiben offen.
 
 Bonus/Query-Import: vorzeitige Fachcommits entfernt, Standalone-REST
 explizit persistent, gleiche signierte Query-Allowlist in allen Modi,

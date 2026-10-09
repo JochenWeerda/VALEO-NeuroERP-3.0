@@ -818,6 +818,132 @@ tools:
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false
 
+  - tool_id: logistik.fahrzeug.speichern
+    domain: logistics
+    name: "Fahrzeug speichern"
+    description: "Legt ein Fahrzeug im Authentifizierungs-Mandanten an oder aktualisiert es (Maske fuhrpark/fahrzeug-stamm:speichern; CE /api/v1/fuhrpark/fahrzeuge/actions/speichern). parameters.kennzeichen, typ, optional id, reason. Token-Mandant; Cross-Tenant-ID → 404. Default dryRun; execute erfordert idempotency_key. Scope logistics:write."
+    scope: logistics:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        kennzeichen: { type: string }
+        typ: { type: string }
+        id: { type: string }
+        reason: { type: string, minLength: 3 }
+      required: [kennzeichen, typ, reason]
+    output_schema:
+      type: object
+      properties:
+        fahrzeug_id: { type: string }
+        kennzeichen: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: logistik.fahrzeug.loeschen
+    domain: logistics
+    name: "Fahrzeug loeschen"
+    description: "Loescht ein Fahrzeug im Authentifizierungs-Mandanten (Maske fuhrpark/fahrzeug-stamm:loeschen; CE /api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen). parameters.fahrzeug_id, reason. Cross-Tenant → 404. Default dryRun; execute erfordert idempotency_key. Scope logistics:write."
+    scope: logistics:write
+    idempotent: true
+    risk_class: high
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        fahrzeug_id: { type: string }
+        reason: { type: string, minLength: 3 }
+      required: [fahrzeug_id, reason]
+    output_schema:
+      type: object
+      properties:
+        fahrzeug_id: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: logistik.terminart.speichern
+    domain: logistics
+    name: "Terminart speichern"
+    description: "Legt eine Fuhrpark-Terminart im Authentifizierungs-Mandanten an oder aktualisiert sie (Maske fuhrpark/terminarten:speichern; CE /api/v1/fuhrpark/terminarten/actions/speichern). parameters.terminart, optional id/intervall_*, reason. Default dryRun; execute erfordert idempotency_key. Scope logistics:write."
+    scope: logistics:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        terminart: { type: string }
+        id: { type: string }
+        intervall_monate: { type: integer }
+        intervall_km: { type: integer }
+        reason: { type: string, minLength: 3 }
+      required: [terminart, reason]
+    output_schema:
+      type: object
+      properties:
+        terminart_id: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: logistik.rechnung.speichern
+    domain: logistics
+    name: "Fuhrpark-Rechnung speichern"
+    description: "Legt eine Fuhrpark-Rechnung im Authentifizierungs-Mandanten an oder aktualisiert sie (Maske fuhrpark/rechnungen:speichern; CE /api/v1/fuhrpark/rechnungen/actions/speichern). parameters.rechnungs_nr, datum, betrag_eur, optional id, reason. Default dryRun; execute erfordert idempotency_key. Scope logistics:write."
+    scope: logistics:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        rechnungs_nr: { type: string }
+        datum: { type: string }
+        betrag_eur: { type: number }
+        id: { type: string }
+        reason: { type: string, minLength: 3 }
+      required: [rechnungs_nr, datum, betrag_eur, reason]
+    output_schema:
+      type: object
+      properties:
+        rechnung_id: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: logistik.ausgehendes_dokument.speichern
+    domain: logistics
+    name: "Ausgehendes Dokument speichern"
+    description: "Legt einen ausgehenden Belegtyp im Authentifizierungs-Mandanten an oder aktualisiert ihn (Maske fuhrpark/ausgehende-dokumente:speichern; CE /api/v1/fuhrpark/ausgehende-dokumente/actions/speichern). parameters.beleg_typ, optional id/formular, reason. Default dryRun; execute erfordert idempotency_key. Scope logistics:write."
+    scope: logistics:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        beleg_typ: { type: string }
+        id: { type: string }
+        formular: { type: string }
+        reason: { type: string, minLength: 3 }
+      required: [beleg_typ, reason]
+    output_schema:
+      type: object
+      properties:
+        dokument_id: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
   # ── Agrar / Ernte (MCP-ERP-TOOLS-002) ────────────────────────────────────
   - tool_id: agrar.contract.get
     domain: agrar

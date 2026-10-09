@@ -677,10 +677,10 @@
       "source": {
         "screenId": "fuhrpark/ausgehende-dokumente",
         "actionKey": "speichern",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/fuhrpark/ausgehende-dokumente/actions/speichern",
         "navigationRoute": null,
         "command": "fuhrpark.saveDokument",
-        "method": null
+        "method": "POST"
       }
     },
     {
@@ -753,14 +753,16 @@
       "intent_phrases": [
         "Fahrzeug löschen"
       ],
-      "required_data": [],
+      "required_data": [
+        "entity_id"
+      ],
       "source": {
         "screenId": "fuhrpark/fahrzeug-stamm",
         "actionKey": "loeschen",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen",
         "navigationRoute": null,
         "command": "fuhrpark.deleteFahrzeug",
-        "method": null
+        "method": "POST"
       }
     },
     {
@@ -777,10 +779,10 @@
       "source": {
         "screenId": "fuhrpark/fahrzeug-stamm",
         "actionKey": "speichern",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/actions/speichern",
         "navigationRoute": null,
         "command": "fuhrpark.saveFahrzeug",
-        "method": null
+        "method": "POST"
       }
     },
     {
@@ -857,10 +859,10 @@
       "source": {
         "screenId": "fuhrpark/rechnungen",
         "actionKey": "speichern",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/fuhrpark/rechnungen/actions/speichern",
         "navigationRoute": null,
         "command": "fuhrpark.saveRechnung",
-        "method": null
+        "method": "POST"
       }
     },
     {
@@ -897,10 +899,10 @@
       "source": {
         "screenId": "fuhrpark/terminarten",
         "actionKey": "speichern",
-        "commandEndpoint": null,
+        "commandEndpoint": "/api/v1/fuhrpark/terminarten/actions/speichern",
         "navigationRoute": null,
         "command": "fuhrpark.saveTerminart",
-        "method": null
+        "method": "POST"
       }
     },
     {

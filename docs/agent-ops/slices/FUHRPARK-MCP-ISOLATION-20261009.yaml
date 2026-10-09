@@ -1,0 +1,23 @@
+slice_id: FUHRPARK-MCP-ISOLATION-20261009
+title: Fuhrpark und MCP Mandantenisolation
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-09
+goal: Fremdmandanten-Zugriffe auf Fuhrpark-CRUD und MCP-Identitaetswege ausschliessen.
+file_ownership:
+  - Abgeschlossenes Cursor-Fuhrpark-WIP mit gezielten Review-Korrekturen
+  - Fuhrpark-Endpunkt und interne Schemas und Command-Implementierungen
+  - Fuhrpark-Operationenmodelle und Repositories
+  - MCP-Fuhrparkhandler und gemeinsamer Tenant-Claim-Resolver
+  - Eigene Tests und QA und Integrationsdokumentation
+acceptance:
+  - Token entscheidet Mandant und widerspruechliche Header werden vor SQL abgewiesen.
+  - Alle vier Modi lehnen fremde IDs und Fahrzeugreferenzen ab.
+  - Eigene Writes und Audit sowie MCP-Replay sind atomar.
+  - Keine weiteren Testdatenbanken und keine fremden Daten entfernt.
+validation: 569 Tests ohne Skip im isolierten Lieferstand; neue Abnahme 68 echte PG-Wirkungstests und 169 Guard-Vertraege.
+test_database: Bestehende valeo_probe mit eigenen Zeilen in zurueckgerollten aeusseren Transaktionen.
+risks:
+  - Keine externe OIDC-UAT oder Parallel-Lastabnahme.
+  - Nicht jeder MCP-Fachhandler ist durch echte PG-E2E-Wirkungstests abgedeckt.
+  - FIN-CLOSE und Zahlauf bleiben separat offen.

@@ -1438,7 +1438,8 @@ def build_fuhrpark_terminarten_screen_definition() -> dict[str, Any]:
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
-                "stubReason": "Legt eine Terminart an oder aktualisiert die gewaehlte.",
+                "commandEndpoint": "/api/v1/fuhrpark/terminarten/actions/speichern",
+                "method": "POST",
             },
             {
                 "key": "neu",
@@ -1543,7 +1544,8 @@ def build_fuhrpark_rechnungen_screen_definition() -> dict[str, Any]:
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
-                "stubReason": "Legt eine Rechnung an oder aktualisiert die gewaehlte.",
+                "commandEndpoint": "/api/v1/fuhrpark/rechnungen/actions/speichern",
+                "method": "POST",
             },
             {
                 "key": "neu",
@@ -1650,7 +1652,8 @@ def build_fuhrpark_ausgehende_dokumente_screen_definition() -> dict[str, Any]:
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
-                "stubReason": "Legt einen Belegtyp an oder aktualisiert den gewaehlten.",
+                "commandEndpoint": "/api/v1/fuhrpark/ausgehende-dokumente/actions/speichern",
+                "method": "POST",
             },
             {
                 "key": "neu",
@@ -1757,7 +1760,8 @@ def build_fuhrpark_fahrzeug_stamm_screen_definition() -> dict[str, Any]:
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
-                "stubReason": "Legt das Fahrzeug an oder aktualisiert die Akte.",
+                "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/actions/speichern",
+                "method": "POST",
             },
             {
                 "key": "liste",
@@ -1803,7 +1807,8 @@ def build_fuhrpark_fahrzeug_stamm_screen_definition() -> dict[str, Any]:
                 "dangerLevel": "high",
                 "zone": "footer",
                 "requiresConfirmation": True,
-                "stubReason": "Loescht die Fahrzeugakte nach Bestaetigung.",
+                "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen",
+                "method": "POST",
             },
         ],
         "tabs": [

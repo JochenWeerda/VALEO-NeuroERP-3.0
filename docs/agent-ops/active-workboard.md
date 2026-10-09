@@ -11,6 +11,22 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FUHRPARK-TENANT-CE-20261009 — abgeschlossen, Cursor
+
+**Owner:** Cursor. **Stand:** integriert mit Codex-Isolationskorrekturen 2026-10-09.
+**Lieferung:** additive `tenant_id` auf 4 Fuhrpark-Stammtabellen; Mandantenfilter
+Reads/Writes; 5× CE+MCP (`logistik.fahrzeug.speichern|loeschen`,
+`terminart|rechnung|ausgehendes_dokument.speichern`). Map mapped **41** /
+blocked_missing_tenant **0** / local_ui **13**; Registry **56**.
+**Probe:** `valeo_probe` → Revision `fuhrpark_tenant_ce_20261009` (gezielt,
+keine neue DB; fremde Dual-Head `versandwege_echt` unberuehrt).
+**Nachweis:** QA `fuhrpark-tenant-ce-20261009.md`; Map/Catalog `--check`;
+pytest Fuhrpark-CE + Map/Registry.
+**Nicht beruehrt:** Codex Touren/Training/Bestellvorschlag.
+**Weiter offen:** FIN-CLOSE ADR-076; Zahlauf open_high; Stufe-2-SUS;
+Godfile-Claim abgeschlossen; Integrationsabnahme siehe FUHRPARK-MCP-ISOLATION-20261009.
+
+
 ## MCP-MASK-CE-BATCH4-20261009 — abgeschlossen, Cursor
 
 **Owner:** Cursor. **Stand:** abgeschlossen 2026-10-09 (kein Commit/Push).
@@ -447,6 +463,8 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 `docs/README.md` und Domain-Depth-Plan verweisen auf den Hub.
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
+
+**FUHRPARK-MCP-ISOLATION-20261009 (abgeschlossen):** Owner Codex-01a0f3fc. Cursor-Fuhrpark-Lieferung geprueft und gezielt repariert:21 Originalfehler, Token-Mandant statt frei waehlbarem Header, eindeutige Claims, gleiche Validierung in allen vier Modi, keine fremden Fahrzeugreferenzen, geschuetzte Repository-Identitaeten. Neue237 Tests davon68 echte PG-Wirkungsvertraege und169 zentrale Guards fuer56 MCP-Tools; isoliert final569 Tests ohne Skip in36,98s. Fuhrpark-Endpunkt873 LOC durch interne Auslagerung, keine Baseline-Erhoehung. Map41 mapped/0 blocked_missing_tenant/0 blocked_no_endpoint/13 local_ui/1 open_high; Registry56. Gemeinsame valeo_probe nur Status und eigene rueckgenommene Transaktionen, keine neue DB/Container/Reset/erneute Migration. Cursor-Migration gezielt integriert; fremde Versandwege-Head und Arbeitsbaum-APIartefakte geschuetzt. OpenAPI/Inventare/Handbuch aus isoliertem Lieferstand regeneriert und Checks gruen. QA/Slice/Gaps aktualisiert; keine Gesamt-UAT/Last-/Konkurrenzabnahme oder echte PG-Abnahme jedes MCP-Fachhandlers behauptet. FIN-CLOSE ADR-076 und Zahlauf bleiben separat offen.
 
 **CI-COMMAND-INVENTORY-20261009 (abgeschlossen):** Owner Codex-01a0f3fc. GitHub37889062947 auf4d4fd9922 Docs Build ausschliesslich endpoint-inventory Drift nach Command-Auslagerung. Endpunkt-Inventar aus exakt abgenommenem Source-Snapshot regeneriert, alle drei Inventarchecks gruen. Andere zwei Inventare nur Datum, daher unveraendert; fremde globale Arbeitsbaum-Inventar-WIP hashgleich erhalten, nur isoliertes Artefakt indexseitig integriert. Keine Code-/Gate-/DB-/Container-/Migrationsaenderung. QA/Slice/Workboard nachgezogen; main/develop Push und GitHub-Folgeabnahme. Fuenf Fuhrpark-Aktionen, FIN-CLOSE/Zahlauf weiter offen.
 

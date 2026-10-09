@@ -171,7 +171,8 @@ def test_screen_definitions_batch4_command_endpoints():
     assert sch["commandEndpoint"].endswith("/assignments/actions/speichern")
 
 
-def test_fuhrpark_classified_blocked_missing_tenant():
+def test_fuhrpark_now_mapped_after_tenant_ce():
+    """Historischer Batch4-Gap geschlossen durch FUHRPARK-TENANT-CE-20261009."""
     import importlib.util
     from pathlib import Path
 
@@ -190,7 +191,7 @@ def test_fuhrpark_classified_blocked_missing_tenant():
         "mask:fuhrpark/rechnungen:speichern",
         "mask:fuhrpark/terminarten:speichern",
     ):
-        assert by_id[mid]["coverage"] == "blocked_missing_tenant"
-        assert by_id[mid]["mcp_tool_id"] is None
-    assert data["stats"]["by_coverage"].get("blocked_missing_tenant", 0) == 5
+        assert by_id[mid]["coverage"] == "mapped"
+        assert by_id[mid]["mcp_tool_id"]
+    assert data["stats"]["by_coverage"].get("blocked_missing_tenant", 0) == 0
     assert data["stats"]["by_coverage"].get("blocked_no_endpoint", 0) == 0
