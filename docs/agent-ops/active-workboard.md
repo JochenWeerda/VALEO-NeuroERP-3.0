@@ -464,6 +464,8 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
 
+**FUHRPARK-PUBLISH-NORMALIZATION-20261009 (reserviert):** Owner Codex-01a0f3fc. Abschlusskontrolle: private Index-Publikation hat Windows-CRLF in eigenen Textartefakten erhalten und dadurch grosse rein formale Diffs erzeugt. Ausschliesslich33 eigene Lieferdateien plus eigenen Folgefix auf kanonische LF normalisieren, byteweise Gleichheit nach Zeilenendnormalisierung beweisen. Keine Fachcodeaenderung, keine fremden Arbeitsdateien/Staging, keine DB/Container;581 Tests bleiben semantisch identisch.
+
 **FUHRPARK-CI-CONSUMERS-20261009 (abgeschlossen):** Owner Codex-01a0f3fc. Zwoelf bestehende Fuhrpark-Vertiefungsvertraege auf eigene rollback-isolierte Probe-Fahrzeuge und verifizierte Testclaims umgestellt; keine fremden Entwicklungsdaten/Seed-Skips. Drei fehlende Slice-Pflichtfelder im roten GitHub-DocsGovernance ergaenzt; lokaler Check genau1 Slice gruen. Isoliert final581 Tests ohne Skip in29,51s, CI-Datenbankpfad80 PG-Vertraege gruen. QA nachgezogen; keine globale Auth-Ausnahme.
 
 **FUHRPARK-CI-PROBE-20261009 (abgeschlossen):** Owner Codex-01a0f3fc. Neue68 PG-Vertraege fuer needs_live_db markiert und explizite vorhandene CI-Jobdatenbank angebunden; lokal kein Entwicklungsdatenbank-Fallback. CI-Verbindungspfad final80 echte PG-Vertraege gruen; keine neue DB/Container/Migration/Reset.
