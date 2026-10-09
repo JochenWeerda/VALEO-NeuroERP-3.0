@@ -68,3 +68,12 @@ und ein datenabhaengiger Skip. Diese Dateien wurden nicht veraendert;
 die finale326er-Auswahl prueft die betroffenen Fach- und API-Vertraege
 ohne diese externe Auth-/Datenbestandsabhaengigkeit. Kein gruener
 Gesamt-PG-/OIDC- oder UAT-Lauf wird behauptet.
+
+## CI-Folgebefund und Reparatur
+
+GitHub37889062947 auf4d4fd9922 blockierte ausschliesslich am
+Endpunkt-Inventar. Dieses aus dem abgenommenen isolierten Source-Snapshot
+regeneriert; alle drei Code-Inventare bestehen --check. Die anderen
+Inventare unterschieden sich nur beim Datum und bleiben unveraendert.
+Fremde Arbeitsbaumfassung des Endpunkt-Inventars hashgleich erhalten.
+Keine Code-/Schema-/Datenbank-/Gateaenderung; neue CI-Folgeabnahme erforderlich.
