@@ -3270,9 +3270,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Legt einen Belegtyp an oder aktualisiert den gewaehlten."
+          "commandEndpoint": "/api/v1/fuhrpark/ausgehende-dokumente/actions/speichern",
+          "method": "POST",
+          "stubReason": null
         },
         {
           "key": "neu",
@@ -3289,7 +3289,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3310,9 +3315,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Legt das Fahrzeug an oder aktualisiert die Akte."
+          "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/actions/speichern",
+          "method": "POST",
+          "stubReason": null
         },
         {
           "key": "liste",
@@ -3365,15 +3370,20 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": true,
           "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Loescht die Fahrzeugakte nach Bestaetigung."
+          "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3402,7 +3412,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3423,9 +3438,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Legt eine Rechnung an oder aktualisiert die gewaehlte."
+          "commandEndpoint": "/api/v1/fuhrpark/rechnungen/actions/speichern",
+          "method": "POST",
+          "stubReason": null
         },
         {
           "key": "neu",
@@ -3442,7 +3457,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3463,9 +3483,9 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Legt eine Terminart an oder aktualisiert die gewaehlte."
+          "commandEndpoint": "/api/v1/fuhrpark/terminarten/actions/speichern",
+          "method": "POST",
+          "stubReason": null
         },
         {
           "key": "neu",
@@ -3482,7 +3502,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3499,7 +3524,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3528,7 +3558,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3568,7 +3603,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3630,7 +3670,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3681,7 +3726,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3710,7 +3760,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3750,7 +3805,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3779,7 +3839,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3796,7 +3861,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3813,7 +3883,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3830,7 +3905,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3903,7 +3983,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -3920,7 +4005,12 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "logistik.frachttabelle.anlegen",
-        "logistik.tour.anlegen"
+        "logistik.tour.anlegen",
+        "logistik.fahrzeug.speichern",
+        "logistik.fahrzeug.loeschen",
+        "logistik.terminart.speichern",
+        "logistik.rechnung.speichern",
+        "logistik.ausgehendes_dokument.speichern"
       ]
     },
     {
@@ -4662,6 +4752,51 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
+      "tool_id": "logistik.fahrzeug.speichern",
+      "domain": "logistics",
+      "scope": "logistics:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "logistik.fahrzeug.loeschen",
+      "domain": "logistics",
+      "scope": "logistics:write",
+      "idempotent": true,
+      "risk_class": "high",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "logistik.terminart.speichern",
+      "domain": "logistics",
+      "scope": "logistics:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "logistik.rechnung.speichern",
+      "domain": "logistics",
+      "scope": "logistics:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "logistik.ausgehendes_dokument.speichern",
+      "domain": "logistics",
+      "scope": "logistics:write",
+      "idempotent": true,
+      "risk_class": "medium",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
       "tool_id": "agrar.contract.get",
       "domain": "agrar",
       "scope": "agrar:read",
@@ -4851,5 +4986,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 86
+  "event_count": 91
 }

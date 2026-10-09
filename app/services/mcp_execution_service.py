@@ -328,6 +328,53 @@ class SchulungSpeichernInput(BaseModel):
     reason: str = Field(min_length=3, max_length=500)
 
 
+class FahrzeugSpeichernInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    kennzeichen: str = Field(min_length=2, max_length=20)
+    typ: str = Field(min_length=2, max_length=50)
+    id: str | None = Field(default=None, max_length=64)
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class FahrzeugLoeschenInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    fahrzeug_id: str = Field(min_length=1, max_length=64)
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class TerminartSpeichernInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    terminart: str = Field(min_length=2, max_length=120)
+    id: str | None = Field(default=None, max_length=64)
+    intervall_monate: int = Field(default=0, ge=0, le=1200)
+    intervall_km: int = Field(default=0, ge=0, le=2_000_000)
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class FuhrparkRechnungSpeichernInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    rechnungs_nr: str = Field(min_length=3, max_length=80)
+    datum: str = Field(min_length=4, max_length=40)
+    betrag_eur: float = Field(ge=0)
+    id: str | None = Field(default=None, max_length=64)
+    fahrzeug_kennzeichen: str | None = Field(default=None, max_length=30)
+    sachkonto: str | None = Field(default=None, max_length=40)
+    kostenart: str | None = Field(default=None, max_length=120)
+    notiz: str | None = None
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class AusgehendesDokumentSpeichernInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    beleg_typ: str = Field(min_length=2, max_length=120)
+    id: str | None = Field(default=None, max_length=64)
+    formular: str | None = Field(default=None, max_length=80)
+    ziel_modul: str | None = Field(default=None, max_length=255)
+    beschreibung: str | None = None
+    aktiv: bool = True
+    reason: str = Field(min_length=3, max_length=500)
+
+
 _FEED_ANALYSIS_TARGETS: dict[str, AnalysisStatus] = {
     "release": AnalysisStatus.RELEASED,
     "reject": AnalysisStatus.REJECTED,
@@ -509,13 +556,9 @@ def _tenant_from_claims(raw: object) -> str | None:
     IdP-Claims). Ein Client-Parameter ``mandanten_id`` bleibt durch
     ``extra=forbid`` und den zentralen Parameter-Guard abgewiesen.
     """
-    if not isinstance(raw, dict):
-        return None
-    for key in ("tenant_id", "mandanten_id"):
-        value = raw.get(key)
-        if isinstance(value, str) and value.strip():
-            return value.strip()
-    return None
+    from app.auth.tenant import tenant_from_claims
+
+    return tenant_from_claims(raw)
 
 
 def _reject_identity_parameters(parameters: dict[str, Any]) -> None:
@@ -633,6 +676,16 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _sanctions_check(db, request, actor, tenant)
     if request.tool_name == "logistik.frachttabelle.anlegen":
         return _frachttabelle_anlegen(db, request, actor, tenant)
+    if request.tool_name == "logistik.fahrzeug.speichern":
+        return _fahrzeug_speichern(db, request, actor, tenant)
+    if request.tool_name == "logistik.fahrzeug.loeschen":
+        return _fahrzeug_loeschen(db, request, actor, tenant)
+    if request.tool_name == "logistik.terminart.speichern":
+        return _terminart_speichern(db, request, actor, tenant)
+    if request.tool_name == "logistik.rechnung.speichern":
+        return _fuhrpark_rechnung_speichern(db, request, actor, tenant)
+    if request.tool_name == "logistik.ausgehendes_dokument.speichern":
+        return _ausgehendes_dokument_speichern(db, request, actor, tenant)
     if request.tool_name == "reporting.bonus.calculate":
         return _bonus_calculate(db, request, actor, tenant)
     if request.tool_name == "reporting.query.import_signed":
@@ -1151,6 +1204,288 @@ def _frachttabelle_anlegen(db: Session, request: ToolExecutionRequest, actor: st
             "id": entity_id,
             "tabelle_nr": opened.tabelle_nr,
             "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _fahrzeug_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: Fahrzeug upsert in authenticated tenant."""
+    try:
+        opened = FahrzeugSpeichernInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid logistik.fahrzeug.speichern parameters") from exc
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.api.v1.endpoints.fuhrpark import upsert_fahrzeug
+
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        payload = {"kennzeichen": opened.kennzeichen, "typ": opened.typ}
+        if opened.id:
+            payload["id"] = opened.id
+        if request.mode != "execute":
+            upsert_fahrzeug(db, tenant, payload, validate_only=True)
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": payload}
+        created = upsert_fahrzeug(db, tenant, payload, commit=False)
+        entity_id = str(created["id"])
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="fuhrpark_fahrzeug", entity_id=entity_id,
+            audit_reason=opened.reason, idempotency_key=request.idempotency_key,
+            summary=f"Fahrzeug {opened.kennzeichen} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False,
+            "fahrzeug_id": entity_id, "kennzeichen": opened.kennzeichen,
+            "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _fahrzeug_loeschen(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: delete Fahrzeug in authenticated tenant."""
+    try:
+        opened = FahrzeugLoeschenInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid logistik.fahrzeug.loeschen parameters") from exc
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.api.v1.endpoints.fuhrpark import delete_fahrzeug_tenant
+        from app.domains.operations.repository import FahrzeugRepository
+
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        if request.mode != "execute":
+            if not FahrzeugRepository(db).get_by_id(tenant, opened.fahrzeug_id):
+                raise HTTPException(404, "Fahrzeug not found")
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": parameters}
+        deleted_id = delete_fahrzeug_tenant(db, tenant, opened.fahrzeug_id, commit=False)
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="fuhrpark_fahrzeug", entity_id=deleted_id,
+            audit_reason=opened.reason, idempotency_key=request.idempotency_key,
+            summary=f"Fahrzeug {deleted_id} geloescht by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False,
+            "fahrzeug_id": deleted_id, "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _terminart_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: Terminart upsert in authenticated tenant."""
+    try:
+        opened = TerminartSpeichernInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid logistik.terminart.speichern parameters") from exc
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.api.v1.endpoints.fuhrpark import upsert_terminart
+
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        payload = {
+            "terminart": opened.terminart,
+            "intervall_monate": opened.intervall_monate,
+            "intervall_km": opened.intervall_km,
+        }
+        if opened.id:
+            payload["id"] = opened.id
+        if request.mode != "execute":
+            upsert_terminart(db, tenant, payload, validate_only=True)
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": payload}
+        created = upsert_terminart(db, tenant, payload, commit=False)
+        entity_id = str(created["id"])
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="fuhrpark_terminart", entity_id=entity_id,
+            audit_reason=opened.reason, idempotency_key=request.idempotency_key,
+            summary=f"Terminart {opened.terminart} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False,
+            "terminart_id": entity_id, "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _fuhrpark_rechnung_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: Fuhrpark-Rechnung upsert in authenticated tenant."""
+    try:
+        opened = FuhrparkRechnungSpeichernInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid logistik.rechnung.speichern parameters") from exc
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.api.v1.endpoints.fuhrpark import upsert_rechnung
+
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        payload = {
+            "rechnungs_nr": opened.rechnungs_nr,
+            "datum": opened.datum,
+            "betrag_eur": opened.betrag_eur,
+            "fahrzeug_kennzeichen": opened.fahrzeug_kennzeichen,
+            "sachkonto": opened.sachkonto,
+            "kostenart": opened.kostenart,
+            "notiz": opened.notiz,
+        }
+        if opened.id:
+            payload["id"] = opened.id
+        if request.mode != "execute":
+            upsert_rechnung(db, tenant, payload, validate_only=True)
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": payload}
+        created = upsert_rechnung(db, tenant, payload, commit=False)
+        entity_id = str(created["id"])
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="fuhrpark_rechnung", entity_id=entity_id,
+            audit_reason=opened.reason, idempotency_key=request.idempotency_key,
+            summary=f"Rechnung {opened.rechnungs_nr} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False,
+            "rechnung_id": entity_id, "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _ausgehendes_dokument_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: ausgehendes Dokument upsert in authenticated tenant."""
+    try:
+        opened = AusgehendesDokumentSpeichernInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid logistik.ausgehendes_dokument.speichern parameters") from exc
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        from app.api.v1.endpoints.fuhrpark import upsert_ausgehendes_dokument
+
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        payload = {
+            "beleg_typ": opened.beleg_typ,
+            "formular": opened.formular,
+            "ziel_modul": opened.ziel_modul,
+            "beschreibung": opened.beschreibung,
+            "aktiv": opened.aktiv,
+        }
+        if opened.id:
+            payload["id"] = opened.id
+        if request.mode != "execute":
+            upsert_ausgehendes_dokument(db, tenant, payload, validate_only=True)
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": payload}
+        created = upsert_ausgehendes_dokument(db, tenant, payload, commit=False)
+        entity_id = str(created["id"])
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="fuhrpark_ausgehendes_dokument", entity_id=entity_id,
+            audit_reason=opened.reason, idempotency_key=request.idempotency_key,
+            summary=f"Dokument {opened.beleg_typ} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False,
+            "dokument_id": entity_id, "auditEntryId": audit_id,
         }
         _store_execution(
             db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]

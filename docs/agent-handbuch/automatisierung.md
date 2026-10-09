@@ -67,7 +67,12 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `lager.inventur.propose_opening` | lager | `lager:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `lager.stock_movement.stornieren` | lager | `lager:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `logistik.ausgehendes_dokument.speichern` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `logistik.fahrzeug.loeschen` | logistics | `logistics:write` | ja | hoch | nein | `POST /api/v1/mcp/tools/call` |
+| `logistik.fahrzeug.speichern` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `logistik.frachttabelle.anlegen` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `logistik.rechnung.speichern` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `logistik.terminart.speichern` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `logistik.tour.anlegen` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `planung.calendar.reproject` | planung | `planung:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
@@ -190,6 +195,11 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `finance.ap_invoice.approved` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
 | `finance.ar_open_item.dunning_created` | outbox | `app/api/v1/endpoints/open_items.py` |
 | `finance.payment_run.approved` | outbox | `app/api/v1/endpoints/mask_actions.py` |
+| `fuhrpark.dokument.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
+| `fuhrpark.fahrzeug.deleted` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
+| `fuhrpark.fahrzeug.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
+| `fuhrpark.rechnung.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
+| `fuhrpark.terminart.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `inventur.abgeschlossen` | outbox | `app/services/inventory_compat_service.py` |
 | `logistik.frachttabelle.created` | outbox | `app/api/v1/endpoints/logistik_frachttabellen.py` |
 | `logistik.tour.created` | outbox | `app/api/v1/command_handlers/logistics.py` |

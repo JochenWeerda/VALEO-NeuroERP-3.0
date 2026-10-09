@@ -121,15 +121,16 @@ def test_unknown_new_action_stays_an_open_business_contract(monkeypatch):
 def test_actual_writes_and_finance_gaps_remain_visible():
     data = generator().build_map()
     by_id = {m["mask_action_id"]: m for m in data["mappings"]}
-    missing_tenant = (
+    fuhrpark_mapped = (
         "fuhrpark/ausgehende-dokumente:speichern",
         "fuhrpark/rechnungen:speichern",
         "fuhrpark/terminarten:speichern",
         "fuhrpark/fahrzeug-stamm:speichern",
         "fuhrpark/fahrzeug-stamm:loeschen",
     )
-    for mask_action in missing_tenant:
-        assert by_id[f"mask:{mask_action}"]["coverage"] == "blocked_missing_tenant"
+    for mask_action in fuhrpark_mapped:
+        assert by_id[f"mask:{mask_action}"]["coverage"] == "mapped"
+        assert by_id[f"mask:{mask_action}"]["mcp_tool_id"]
     assert by_id["mask:personal/onboarding:speichern"]["coverage"] == "mapped"
     assert by_id["mask:personal/qualifikationen:speichern"]["coverage"] == "mapped"
     assert by_id["mask:personal/schulungen:speichern"]["coverage"] == "mapped"
@@ -148,11 +149,11 @@ def test_actual_writes_and_finance_gaps_remain_visible():
     assert by_id["mask:logistik/tourenplanung:anlegen"]["coverage"] == "mapped"
     assert by_id["mask:einkauf/purchase-order:speichern"]["coverage"] == "mapped"
     assert data["stats"]["by_coverage"].get("blocked_no_endpoint", 0) == 0
-    assert data["stats"]["by_coverage"]["blocked_missing_tenant"] == 5
+    assert data["stats"]["by_coverage"].get("blocked_missing_tenant", 0) == 0
     assert data["stats"]["by_coverage"]["local_ui"] == 13
     assert data["stats"]["mask_actions_considered"] == len(by_id)
     assert data["stats"]["mask_mutations_considered"] == len(by_id) - 13
-    assert "blocked_missing_tenant 5" in data["classification_notes"]
+    assert "blocked_missing_tenant 0" in data["classification_notes"]
 
 
 def test_new_http_binding_cannot_silently_remain_classified_local(monkeypatch):

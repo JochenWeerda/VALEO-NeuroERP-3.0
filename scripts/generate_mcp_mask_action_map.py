@@ -282,6 +282,47 @@ MAPPED_RULES: dict[str, dict[str, str]] = {
             "Kurs tenant-gebunden."
         ),
     },
+    "mask:fuhrpark/fahrzeug-stamm:speichern": {
+        "mcp_tool_id": "logistik.fahrzeug.speichern",
+        "coverage": "mapped",
+        "notes": (
+            "FUHRPARK-TENANT-CE-20261009; CE "
+            "/api/v1/fuhrpark/fahrzeuge/actions/speichern; Token-Mandant."
+        ),
+    },
+    "mask:fuhrpark/fahrzeug-stamm:loeschen": {
+        "mcp_tool_id": "logistik.fahrzeug.loeschen",
+        "coverage": "mapped",
+        "notes": (
+            "FUHRPARK-TENANT-CE-20261009; CE "
+            "/api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen; "
+            "Cross-Tenant 404."
+        ),
+    },
+    "mask:fuhrpark/terminarten:speichern": {
+        "mcp_tool_id": "logistik.terminart.speichern",
+        "coverage": "mapped",
+        "notes": (
+            "FUHRPARK-TENANT-CE-20261009; CE "
+            "/api/v1/fuhrpark/terminarten/actions/speichern; Token-Mandant."
+        ),
+    },
+    "mask:fuhrpark/rechnungen:speichern": {
+        "mcp_tool_id": "logistik.rechnung.speichern",
+        "coverage": "mapped",
+        "notes": (
+            "FUHRPARK-TENANT-CE-20261009; CE "
+            "/api/v1/fuhrpark/rechnungen/actions/speichern; Token-Mandant."
+        ),
+    },
+    "mask:fuhrpark/ausgehende-dokumente:speichern": {
+        "mcp_tool_id": "logistik.ausgehendes_dokument.speichern",
+        "coverage": "mapped",
+        "notes": (
+            "FUHRPARK-TENANT-CE-20261009; CE "
+            "/api/v1/fuhrpark/ausgehende-dokumente/actions/speichern; Token-Mandant."
+        ),
+    },
 }
 
 # Verified UI-only actions; "neu" alone never proves absence of a mutation.
@@ -344,24 +385,6 @@ BLOCKED_RULES: dict[str, dict[str, str]] = {
     "mask:finance/payment-run:freigeben": {
         "coverage": "open_high",
         "notes": "Zahlauf-Freigabe HIGH; nahe Journal/Kasse — ADR-076-Umfeld; forbiddenForAgents.",
-    },
-    # Fuhrpark: REST vorhanden, aber ohne tenant_id — kein MCP-Write bis Folge-Claim.
-    **{
-        mid: {
-            "coverage": "blocked_missing_tenant",
-            "notes": (
-                "blocked_missing_tenant: Fuhrpark-Repository ohne tenant_id-Spalte/"
-                "Token-Filter. Folge-Claim: additive tenant_id + Mandanten-SQL, "
-                "dann CE+MCP. Kein Write ohne Isolation. MCP-MASK-CE-BATCH4-20261009."
-            ),
-        }
-        for mid in (
-            "mask:fuhrpark/ausgehende-dokumente:speichern",
-            "mask:fuhrpark/fahrzeug-stamm:loeschen",
-            "mask:fuhrpark/fahrzeug-stamm:speichern",
-            "mask:fuhrpark/rechnungen:speichern",
-            "mask:fuhrpark/terminarten:speichern",
-        )
     },
 }
 
@@ -492,9 +515,8 @@ def build_map() -> dict[str, Any]:
         "next_medium_candidates": [],
         "classification_complete": True,
         "classification_notes": (
-            "MCP-MASK-CE-BATCH4-20261009: Personal onboarding/qualifikationen/schulungen "
-            "mapped (Training-REST+Mandant); Fuhrpark blocked_missing_tenant "
-            f"{by_cov.get('blocked_missing_tenant', 0)} (keine tenant_id). "
+            "FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); "
+            f"blocked_missing_tenant {by_cov.get('blocked_missing_tenant', 0)}. "
             f"Rest: open_high nur Zahlauf; blocked_no_endpoint {by_cov.get('blocked_no_endpoint', 0)}; "
             f"local_ui {by_cov.get('local_ui', 0)}; FIN-CLOSE blocked_adr_076."
         ),

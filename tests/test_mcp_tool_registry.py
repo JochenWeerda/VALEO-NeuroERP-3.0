@@ -58,7 +58,7 @@ def test_summary_structure(svc: McpToolRegistryService) -> None:
 
 
 def test_registry_has_45_tools(svc: McpToolRegistryService) -> None:
-    assert len(svc.list_tools()) == 51
+    assert len(svc.list_tools()) == 56
 
 
 def test_bonus_and_query_import_writes_are_catalogued(svc: McpToolRegistryService) -> None:

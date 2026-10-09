@@ -110,47 +110,81 @@ class WiegungRepository:
 
 
 class FahrzeugRepository:
-    """Repository for Fahrzeug operations"""
-    
+    """Repository for Fahrzeug operations (tenant-scoped)."""
+
     def __init__(self, db: Session):
         self.db = db
-    
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[Fahrzeug]:
-        return self.db.query(Fahrzeug).offset(skip).limit(limit).all()
-    
-    def get_by_id(self, fahrzeug_id: str) -> Optional[Fahrzeug]:
-        return self.db.query(Fahrzeug).filter(Fahrzeug.id == fahrzeug_id).first()
-    
-    def get_by_status(self, status: str) -> List[Fahrzeug]:
-        return self.db.query(Fahrzeug).filter(Fahrzeug.status == status).all()
-    
-    def get_by_kennzeichen(self, kennzeichen: str) -> Optional[Fahrzeug]:
-        return self.db.query(Fahrzeug).filter(Fahrzeug.kennzeichen == kennzeichen).first()
-    
-    def create(self, fahrzeug_data: dict) -> Fahrzeug:
+
+    @staticmethod
+    def _clean(payload: dict) -> dict:
+        return {k: v for k, v in payload.items() if k not in {"id", "tenant_id", "mandanten_id", "created_at", "updated_at"}}
+
+    def get_all(self, tenant_id: str, skip: int = 0, limit: int = 100) -> List[Fahrzeug]:
+        return (
+            self.db.query(Fahrzeug)
+            .filter(Fahrzeug.tenant_id == tenant_id)
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
+    def get_by_id(self, tenant_id: str, fahrzeug_id: str) -> Optional[Fahrzeug]:
+        return (
+            self.db.query(Fahrzeug)
+            .filter(Fahrzeug.tenant_id == tenant_id, Fahrzeug.id == fahrzeug_id)
+            .first()
+        )
+
+    def get_by_status(self, tenant_id: str, status: str) -> List[Fahrzeug]:
+        return (
+            self.db.query(Fahrzeug)
+            .filter(Fahrzeug.tenant_id == tenant_id, Fahrzeug.status == status)
+            .all()
+        )
+
+    def get_by_kennzeichen(self, tenant_id: str, kennzeichen: str) -> Optional[Fahrzeug]:
+        return (
+            self.db.query(Fahrzeug)
+            .filter(Fahrzeug.tenant_id == tenant_id, Fahrzeug.kennzeichen == kennzeichen)
+            .first()
+        )
+
+    def create(self, tenant_id: str, fahrzeug_data: dict, *, commit: bool = True) -> Fahrzeug:
         fahrzeug = Fahrzeug(
             id=f"F-{str(__import__('uuid').uuid4())[:8].upper()}",
-            **fahrzeug_data
+            tenant_id=tenant_id,
+            **self._clean(fahrzeug_data),
         )
         self.db.add(fahrzeug)
-        self.db.commit()
-        self.db.refresh(fahrzeug)
-        return fahrzeug
-    
-    def update(self, fahrzeug_id: str, fahrzeug_data: dict) -> Optional[Fahrzeug]:
-        fahrzeug = self.get_by_id(fahrzeug_id)
-        if fahrzeug:
-            for key, value in fahrzeug_data.items():
-                setattr(fahrzeug, key, value)
+        if commit:
             self.db.commit()
             self.db.refresh(fahrzeug)
+        else:
+            self.db.flush()
         return fahrzeug
-    
-    def delete(self, fahrzeug_id: str) -> bool:
-        fahrzeug = self.get_by_id(fahrzeug_id)
+
+    def update(
+        self, tenant_id: str, fahrzeug_id: str, fahrzeug_data: dict, *, commit: bool = True
+    ) -> Optional[Fahrzeug]:
+        fahrzeug = self.get_by_id(tenant_id, fahrzeug_id)
+        if fahrzeug:
+            for key, value in self._clean(fahrzeug_data).items():
+                setattr(fahrzeug, key, value)
+            if commit:
+                self.db.commit()
+                self.db.refresh(fahrzeug)
+            else:
+                self.db.flush()
+        return fahrzeug
+
+    def delete(self, tenant_id: str, fahrzeug_id: str, *, commit: bool = True) -> bool:
+        fahrzeug = self.get_by_id(tenant_id, fahrzeug_id)
         if fahrzeug:
             self.db.delete(fahrzeug)
-            self.db.commit()
+            if commit:
+                self.db.commit()
+            else:
+                self.db.flush()
             return True
         return False
 
@@ -248,130 +282,227 @@ class FahrzeugTourRepository:
 
 
 class FuhrparkTerminartRepository:
-    """Repository for FuhrparkTerminart operations."""
+    """Repository for FuhrparkTerminart operations (tenant-scoped)."""
 
     def __init__(self, db: Session):
         self.db = db
 
-    def get_all(self) -> List[FuhrparkTerminart]:
-        return self.db.query(FuhrparkTerminart).order_by(FuhrparkTerminart.terminart.asc()).all()
+    @staticmethod
+    def _clean(payload: dict) -> dict:
+        return {k: v for k, v in payload.items() if k not in {"id", "tenant_id", "mandanten_id", "created_at", "updated_at"}}
 
-    def get_by_id(self, item_id: str) -> Optional[FuhrparkTerminart]:
-        return self.db.query(FuhrparkTerminart).filter(FuhrparkTerminart.id == item_id).first()
+    def get_all(self, tenant_id: str) -> List[FuhrparkTerminart]:
+        return (
+            self.db.query(FuhrparkTerminart)
+            .filter(FuhrparkTerminart.tenant_id == tenant_id)
+            .order_by(FuhrparkTerminart.terminart.asc())
+            .all()
+        )
 
-    def get_by_name(self, terminart: str) -> Optional[FuhrparkTerminart]:
-        return self.db.query(FuhrparkTerminart).filter(FuhrparkTerminart.terminart == terminart).first()
+    def get_by_id(self, tenant_id: str, item_id: str) -> Optional[FuhrparkTerminart]:
+        return (
+            self.db.query(FuhrparkTerminart)
+            .filter(FuhrparkTerminart.tenant_id == tenant_id, FuhrparkTerminart.id == item_id)
+            .first()
+        )
 
-    def create(self, payload: dict) -> FuhrparkTerminart:
-        row = FuhrparkTerminart(id=f"FTA-{str(__import__('uuid').uuid4())[:8].upper()}", **payload)
+    def get_by_name(self, tenant_id: str, terminart: str) -> Optional[FuhrparkTerminart]:
+        return (
+            self.db.query(FuhrparkTerminart)
+            .filter(FuhrparkTerminart.tenant_id == tenant_id, FuhrparkTerminart.terminart == terminart)
+            .first()
+        )
+
+    def create(self, tenant_id: str, payload: dict, *, commit: bool = True) -> FuhrparkTerminart:
+        row = FuhrparkTerminart(
+            id=f"FTA-{str(__import__('uuid').uuid4())[:8].upper()}",
+            tenant_id=tenant_id,
+            **self._clean(payload),
+        )
         self.db.add(row)
-        self.db.commit()
-        self.db.refresh(row)
-        return row
-
-    def update(self, item_id: str, payload: dict) -> Optional[FuhrparkTerminart]:
-        row = self.get_by_id(item_id)
-        if row:
-            for key, value in payload.items():
-                setattr(row, key, value)
+        if commit:
             self.db.commit()
             self.db.refresh(row)
+        else:
+            self.db.flush()
         return row
 
-    def delete(self, item_id: str) -> bool:
-        row = self.get_by_id(item_id)
+    def update(
+        self, tenant_id: str, item_id: str, payload: dict, *, commit: bool = True
+    ) -> Optional[FuhrparkTerminart]:
+        row = self.get_by_id(tenant_id, item_id)
+        if row:
+            for key, value in self._clean(payload).items():
+                setattr(row, key, value)
+            if commit:
+                self.db.commit()
+                self.db.refresh(row)
+            else:
+                self.db.flush()
+        return row
+
+    def delete(self, tenant_id: str, item_id: str, *, commit: bool = True) -> bool:
+        row = self.get_by_id(tenant_id, item_id)
         if row:
             self.db.delete(row)
-            self.db.commit()
+            if commit:
+                self.db.commit()
+            else:
+                self.db.flush()
             return True
         return False
 
 
 class FuhrparkRechnungRepository:
-    """Repository for FuhrparkRechnung operations."""
+    """Repository for FuhrparkRechnung operations (tenant-scoped)."""
 
     def __init__(self, db: Session):
         self.db = db
 
-    def get_all(self, skip: int = 0, limit: int = 200) -> List[FuhrparkRechnung]:
+    def _clean(self, payload: dict, tenant_id: str) -> dict:
+        vehicle_id = payload.get("fahrzeug_id")
+        if vehicle_id and not FahrzeugRepository(self.db).get_by_id(tenant_id, vehicle_id):
+            from fastapi import HTTPException
+            raise HTTPException(404, "Fahrzeug not found")
+        return {k: v for k, v in payload.items() if k not in {"id", "tenant_id", "mandanten_id", "created_at", "updated_at"}}
+
+    def get_all(self, tenant_id: str, skip: int = 0, limit: int = 200) -> List[FuhrparkRechnung]:
         return (
             self.db.query(FuhrparkRechnung)
+            .filter(FuhrparkRechnung.tenant_id == tenant_id)
             .order_by(FuhrparkRechnung.datum.desc())
             .offset(skip)
             .limit(limit)
             .all()
         )
 
-    def get_by_id(self, item_id: str) -> Optional[FuhrparkRechnung]:
-        return self.db.query(FuhrparkRechnung).filter(FuhrparkRechnung.id == item_id).first()
+    def get_by_id(self, tenant_id: str, item_id: str) -> Optional[FuhrparkRechnung]:
+        return (
+            self.db.query(FuhrparkRechnung)
+            .filter(FuhrparkRechnung.tenant_id == tenant_id, FuhrparkRechnung.id == item_id)
+            .first()
+        )
 
-    def get_by_rechnungs_nr(self, rechnungs_nr: str) -> Optional[FuhrparkRechnung]:
-        return self.db.query(FuhrparkRechnung).filter(FuhrparkRechnung.rechnungs_nr == rechnungs_nr).first()
+    def get_by_rechnungs_nr(self, tenant_id: str, rechnungs_nr: str) -> Optional[FuhrparkRechnung]:
+        return (
+            self.db.query(FuhrparkRechnung)
+            .filter(
+                FuhrparkRechnung.tenant_id == tenant_id,
+                FuhrparkRechnung.rechnungs_nr == rechnungs_nr,
+            )
+            .first()
+        )
 
-    def create(self, payload: dict) -> FuhrparkRechnung:
-        row = FuhrparkRechnung(id=f"FR-{str(__import__('uuid').uuid4())[:8].upper()}", **payload)
+    def create(self, tenant_id: str, payload: dict, *, commit: bool = True) -> FuhrparkRechnung:
+        row = FuhrparkRechnung(
+            id=f"FR-{str(__import__('uuid').uuid4())[:8].upper()}",
+            tenant_id=tenant_id,
+            **self._clean(payload, tenant_id),
+        )
         self.db.add(row)
-        self.db.commit()
-        self.db.refresh(row)
-        return row
-
-    def update(self, item_id: str, payload: dict) -> Optional[FuhrparkRechnung]:
-        row = self.get_by_id(item_id)
-        if row:
-            for key, value in payload.items():
-                setattr(row, key, value)
+        if commit:
             self.db.commit()
             self.db.refresh(row)
+        else:
+            self.db.flush()
         return row
 
-    def delete(self, item_id: str) -> bool:
-        row = self.get_by_id(item_id)
+    def update(
+        self, tenant_id: str, item_id: str, payload: dict, *, commit: bool = True
+    ) -> Optional[FuhrparkRechnung]:
+        row = self.get_by_id(tenant_id, item_id)
+        if row:
+            for key, value in self._clean(payload, tenant_id).items():
+                setattr(row, key, value)
+            if commit:
+                self.db.commit()
+                self.db.refresh(row)
+            else:
+                self.db.flush()
+        return row
+
+    def delete(self, tenant_id: str, item_id: str, *, commit: bool = True) -> bool:
+        row = self.get_by_id(tenant_id, item_id)
         if row:
             self.db.delete(row)
-            self.db.commit()
+            if commit:
+                self.db.commit()
+            else:
+                self.db.flush()
             return True
         return False
 
 
 class FuhrparkAusgehendesDokumentRepository:
-    """Repository for FuhrparkAusgehendesDokument operations."""
+    """Repository for FuhrparkAusgehendesDokument operations (tenant-scoped)."""
 
     def __init__(self, db: Session):
         self.db = db
 
-    def get_all(self, skip: int = 0, limit: int = 200) -> List[FuhrparkAusgehendesDokument]:
+    @staticmethod
+    def _clean(payload: dict) -> dict:
+        return {k: v for k, v in payload.items() if k not in {"id", "tenant_id", "mandanten_id", "created_at", "updated_at"}}
+
+    def get_all(
+        self, tenant_id: str, skip: int = 0, limit: int = 200
+    ) -> List[FuhrparkAusgehendesDokument]:
         return (
             self.db.query(FuhrparkAusgehendesDokument)
+            .filter(FuhrparkAusgehendesDokument.tenant_id == tenant_id)
             .order_by(FuhrparkAusgehendesDokument.created_at.desc())
             .offset(skip)
             .limit(limit)
             .all()
         )
 
-    def get_by_id(self, item_id: str) -> Optional[FuhrparkAusgehendesDokument]:
-        return self.db.query(FuhrparkAusgehendesDokument).filter(FuhrparkAusgehendesDokument.id == item_id).first()
+    def get_by_id(self, tenant_id: str, item_id: str) -> Optional[FuhrparkAusgehendesDokument]:
+        return (
+            self.db.query(FuhrparkAusgehendesDokument)
+            .filter(
+                FuhrparkAusgehendesDokument.tenant_id == tenant_id,
+                FuhrparkAusgehendesDokument.id == item_id,
+            )
+            .first()
+        )
 
-    def create(self, payload: dict) -> FuhrparkAusgehendesDokument:
-        row = FuhrparkAusgehendesDokument(id=f"FAD-{str(__import__('uuid').uuid4())[:8].upper()}", **payload)
+    def create(
+        self, tenant_id: str, payload: dict, *, commit: bool = True
+    ) -> FuhrparkAusgehendesDokument:
+        row = FuhrparkAusgehendesDokument(
+            id=f"FAD-{str(__import__('uuid').uuid4())[:8].upper()}",
+            tenant_id=tenant_id,
+            **self._clean(payload),
+        )
         self.db.add(row)
-        self.db.commit()
-        self.db.refresh(row)
-        return row
-
-    def update(self, item_id: str, payload: dict) -> Optional[FuhrparkAusgehendesDokument]:
-        row = self.get_by_id(item_id)
-        if row:
-            for key, value in payload.items():
-                setattr(row, key, value)
+        if commit:
             self.db.commit()
             self.db.refresh(row)
+        else:
+            self.db.flush()
         return row
 
-    def delete(self, item_id: str) -> bool:
-        row = self.get_by_id(item_id)
+    def update(
+        self, tenant_id: str, item_id: str, payload: dict, *, commit: bool = True
+    ) -> Optional[FuhrparkAusgehendesDokument]:
+        row = self.get_by_id(tenant_id, item_id)
+        if row:
+            for key, value in self._clean(payload).items():
+                setattr(row, key, value)
+            if commit:
+                self.db.commit()
+                self.db.refresh(row)
+            else:
+                self.db.flush()
+        return row
+
+    def delete(self, tenant_id: str, item_id: str, *, commit: bool = True) -> bool:
+        row = self.get_by_id(tenant_id, item_id)
         if row:
             self.db.delete(row)
-            self.db.commit()
+            if commit:
+                self.db.commit()
+            else:
+                self.db.flush()
             return True
         return False
 

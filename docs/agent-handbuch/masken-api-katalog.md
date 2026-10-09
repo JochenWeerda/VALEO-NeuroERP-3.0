@@ -2666,6 +2666,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2675,7 +2680,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `speichern` | Speichern | safe | nein | `Legt einen Belegtyp an oder aktualisiert den gewaehlten.` |
+| `speichern` | Speichern | safe | nein | `/api/v1/fuhrpark/ausgehende-dokumente/actions/speichern` |
 | `neu` | Neu | safe | nein | `Leert die Eingabe fuer einen neuen Belegtyp.` |
 
 ---
@@ -2700,6 +2705,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2709,12 +2719,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `speichern` | Speichern | safe | nein | `Legt das Fahrzeug an oder aktualisiert die Akte.` |
+| `speichern` | Speichern | safe | nein | `/api/v1/fuhrpark/fahrzeuge/actions/speichern` |
 | `liste` | Zur Liste | safe | nein | `Wechselt zur Fahrzeugliste.` |
 | `drucker` | Drucker einrichten | safe | nein | `Hinterlegt den Drucker an der Fahrzeugakte.` |
 | `drucken` | Drucken | safe | nein | `Druckt die Fahrzeugakte.` |
 | `unfall` | Unfall-Anzeige | moderate | nein | `Erfasst eine Unfallanzeige zum Fahrzeug.` |
-| `loeschen` | Fahrzeug löschen | high | nein | `Loescht die Fahrzeugakte nach Bestaetigung.` |
+| `loeschen` | Fahrzeug löschen | high | nein | `/api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen` |
 
 ---
 
@@ -2738,6 +2748,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2771,6 +2786,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2780,7 +2800,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `speichern` | Speichern | safe | nein | `Legt eine Rechnung an oder aktualisiert die gewaehlte.` |
+| `speichern` | Speichern | safe | nein | `/api/v1/fuhrpark/rechnungen/actions/speichern` |
 | `neu` | Neu | safe | nein | `Leert die Eingabe fuer eine neue Rechnung.` |
 
 ---
@@ -2805,6 +2825,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2814,7 +2839,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `speichern` | Speichern | safe | nein | `Legt eine Terminart an oder aktualisiert die gewaehlte.` |
+| `speichern` | Speichern | safe | nein | `/api/v1/fuhrpark/terminarten/actions/speichern` |
 | `neu` | Neu | safe | nein | `Leert die Eingabe fuer eine neue Terminart.` |
 
 ---
@@ -2835,6 +2860,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2862,6 +2892,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2895,6 +2930,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2931,6 +2971,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -2969,6 +3014,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -3004,6 +3054,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -3038,6 +3093,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -3072,6 +3132,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -3101,6 +3166,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -3128,6 +3198,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -3156,6 +3231,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -3184,6 +3264,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
@@ -3221,6 +3306,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `logistik.frachttabelle.anlegen` — scope `logistics:write`, Risiko mittel
 - `logistik.tour.anlegen` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.fahrzeug.loeschen` — scope `logistics:write`, Risiko hoch
+- `logistik.terminart.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.rechnung.speichern` — scope `logistics:write`, Risiko mittel
+- `logistik.ausgehendes_dokument.speichern` — scope `logistics:write`, Risiko mittel
 
 **Beispiel-Prompts:**
 
