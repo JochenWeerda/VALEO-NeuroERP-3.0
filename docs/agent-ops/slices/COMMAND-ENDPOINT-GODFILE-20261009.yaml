@@ -1,0 +1,35 @@
+slice_id: COMMAND-ENDPOINT-GODFILE-20261009
+title: Command-Implementierungen aus gewachsenen Endpunkten auslagern
+owner: Codex-01a0f3fc
+status: completed
+created_at: 2026-10-09
+goal: Drei Godfile-Regressionsbefunde durch echte Auslagerung beheben.
+file_ownership:
+  - app/api/v1/endpoints/training.py nur Command-Delegation
+  - app/api/v1/endpoints/einkauf_bestellvorschlag.py Command und Eingabeschema
+  - app/api/v1/endpoints/logistics_tours.py Command, Insert-Delegation und Eingabeschemas
+  - app/api/v1/command_handlers
+  - config/godfile_baseline.json nur zwei sinkende Werte
+  - Eigene QA, Slice, Workboard und Open-Gaps-Hunks
+acceptance:
+  - Keine neue oder gewachsene Datei ueber der Groessenratsche.
+  - Routen und API-Vertrag bleiben erhalten.
+  - Bestehende Fachdelegaten und Verbraucher funktionieren weiter.
+tests:
+  - Bestehende Fach-, Batch2-4-, MCP-, Mandanten- und Godfile-Vertraege
+  - OpenAPI-Vertrag vor und nach interner Auslagerung vergleichen
+ai_harness:
+  fachlicher_vertrag: Vorhandene Fachcommands unveraendert hinter duennen Routen.
+  architektur_vertrag: Minor internes Refactoring, keine neue Service- oder Domaenengrenze.
+  daten_vertrag: Bestehende SQL- und Transaktionswege, keine Schemaaenderung.
+  test_vertrag: Vorhandene Wirkungs- und Vertragstests, keine Skips oder abgeschwaechten Gates.
+  security_vertrag: Mandanten- und Freigabevertraege unveraendert.
+  betriebs_vertrag: Keine neue PG-Datenbank, Docker-Ressource, Migration oder Reset.
+  dokumentations_vertrag: QA, Slice, Workboard und Open-Gaps gemeinsam.
+external_gates:
+  - GitHub-Folgeabnahme nach Push
+risks:
+  - Fremde gleichzeitige Bridges-Verkleinerung und globale Arbeitsbaum-Spec bleiben separat.
+  - Fuhrpark, FIN-CLOSE und Zahlauf fachlich weiter offen.
+test_database: Ausschliesslich In-Memory-Pruefung, keine weitere PostgreSQL-Datenbank.
+validation: 326 Tests ohne Skip in24,62s gruen, Godfile-Gate und Generatorchecks gruen; OpenAPI vor/nach Auslagerung bytegleich mit3125 Pfaden.

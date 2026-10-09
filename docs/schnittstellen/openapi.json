@@ -198132,6 +198132,73 @@
         ]
       }
     },
+    "/api/v1/admin/postfaecher/actions/speichern": {
+      "post": {
+        "description": "CE fuer admin/postfaecher:speichern — dryRun ohne INSERT/UPDATE; Token-Mandant.",
+        "operationId": "action_postfach_speichern_api_v1_admin_postfaecher_actions_speichern_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Postfach speichern als Masken-CommandEndpoint",
+        "tags": [
+          "admin",
+          "mailkonto"
+        ]
+      }
+    },
     "/api/v1/admin/postfaecher/anmeldung/abschluss": {
       "post": {
         "operationId": "anmeldung_abschluss_api_v1_admin_postfaecher_anmeldung_abschluss_post",
@@ -249169,6 +249236,87 @@
         ]
       }
     },
+    "/api/v1/compliance/sanctions/actions/pruefen/{scope}": {
+      "post": {
+        "description": "Kanonischer CE fuer auswertungen/sanktionspruefung-*:check.\n\nScope kommt aus dem Pfad (Maskenvertrag), nicht aus Client-Ueberschreibung.\ndryRun/validate/propose: Treffer berechnen, kein Protokoll-INSERT.\nexecute: Treffer + mandantengebundenes Protokoll (kein Auto-Freigeben).",
+        "operationId": "action_pruefen_api_v1_compliance_sanctions_actions_pruefen__scope__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scope",
+            "required": true,
+            "schema": {
+              "enum": [
+                "manual",
+                "personal",
+                "customers"
+              ],
+              "title": "Scope",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sanktionspruefung als Masken-CommandEndpoint (validate/dryRun/propose/execute)",
+        "tags": [
+          "Compliance",
+          "Sanctions"
+        ]
+      }
+    },
     "/api/v1/compliance/sanctions/eintraege": {
       "get": {
         "operationId": "list_eintraege_api_v1_compliance_sanctions_eintraege_get",
@@ -287443,6 +287591,86 @@
           }
         ],
         "summary": "Bestellung aktualisieren",
+        "tags": [
+          "einkauf",
+          "bestellvorschlag",
+          "kontrakte",
+          "lager-konten",
+          "einkauf",
+          "bestellvorschlag"
+        ]
+      }
+    },
+    "/api/v1/einkauf/bestellungen/{bestellung_id}/actions/speichern": {
+      "post": {
+        "description": "CE fuer einkauf/purchase-order:speichern — dryRun ohne UPDATE; Token-Mandant.",
+        "operationId": "action_bestellung_speichern_api_v1_einkauf_bestellungen__bestellung_id__actions_speichern_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bestellung_id",
+            "required": true,
+            "schema": {
+              "title": "Bestellung Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellung speichern als Masken-CommandEndpoint",
         "tags": [
           "einkauf",
           "bestellvorschlag",
@@ -349448,6 +349676,73 @@
         ]
       }
     },
+    "/api/v1/l3-report-catalog/bonus-runs/actions/calculate": {
+      "post": {
+        "description": "CE fuer auswertungen/bonus-berechnung:calculate — dryRun ohne INSERT.",
+        "operationId": "action_bonus_calculate_api_v1_l3_report_catalog_bonus_runs_actions_calculate_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bonuslauf berechnen als Masken-CommandEndpoint",
+        "tags": [
+          "reporting",
+          "l3-parity"
+        ]
+      }
+    },
     "/api/v1/l3-report-catalog/bonus-runs/{run_id}/corrections": {
       "post": {
         "operationId": "correct_bonus_run_api_v1_l3_report_catalog_bonus_runs__run_id__corrections_post",
@@ -356939,6 +357234,65 @@
         ]
       }
     },
+    "/api/v1/logistik/frachttabellen/actions/anlegen": {
+      "post": {
+        "description": "CE fuer logistik/frachttabellen:anlegen — dryRun ohne INSERT.",
+        "operationId": "action_anlegen_api_v1_logistik_frachttabellen_actions_anlegen_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "title": "X-Tenant-Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Frachttabelle anlegen als Masken-CommandEndpoint",
+        "tags": [
+          "Logistik - Frachttabellen & Zuordnungen"
+        ]
+      }
+    },
     "/api/v1/logistik/frachttabellen/zuordnungen": {
       "get": {
         "operationId": "list_zuordnungen_api_v1_logistik_frachttabellen_zuordnungen_get",
@@ -358411,6 +358765,68 @@
           }
         ],
         "summary": "Tour anlegen",
+        "tags": [
+          "logistik",
+          "tourenplanung",
+          "logistik",
+          "tourenplanung"
+        ]
+      }
+    },
+    "/api/v1/logistik/tours/actions/anlegen": {
+      "post": {
+        "description": "CE fuer logistik/tourenplanung:anlegen — dryRun ohne INSERT; Token-Mandant.",
+        "operationId": "action_tour_anlegen_api_v1_logistik_tours_actions_anlegen_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "title": "X-Tenant-Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Tour anlegen als Masken-CommandEndpoint",
         "tags": [
           "logistik",
           "tourenplanung",
@@ -375129,6 +375545,77 @@
         ]
       }
     },
+    "/api/v1/personal/applications/actions/speichern": {
+      "post": {
+        "description": "CE fuer personal/bewerbungen:speichern — dryRun ohne INSERT; Token-Mandant.",
+        "operationId": "action_bewerbung_speichern_api_v1_personal_applications_actions_speichern_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bewerbung speichern als Masken-CommandEndpoint",
+        "tags": [
+          "personal",
+          "hr",
+          "recruiting",
+          "personal",
+          "hr",
+          "recruiting"
+        ]
+      }
+    },
     "/api/v1/personal/applications/aufbewahrung": {
       "get": {
         "description": "Die beschlossene Frist — oder 404, wenn keine beschlossen ist.\n\nKein Standardwert: Eine Frist, die niemand beschlossen hat, ist keine\nGrundlage, um Daten zu vernichten.",
@@ -375391,6 +375878,77 @@
           }
         ],
         "summary": "Neue Fassung der Einwilligungserklärung",
+        "tags": [
+          "personal",
+          "hr",
+          "recruiting",
+          "personal",
+          "hr",
+          "recruiting"
+        ]
+      }
+    },
+    "/api/v1/personal/applications/einwilligungserklaerungen/actions/anlegen": {
+      "post": {
+        "description": "CE fuer personal/einwilligungserklaerungen:anlegen — dryRun ohne INSERT.",
+        "operationId": "action_erklaerung_anlegen_api_v1_personal_applications_einwilligungserklaerungen_actions_anlegen_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Einwilligungserklaerung anlegen als Masken-CommandEndpoint",
         "tags": [
           "personal",
           "hr",
@@ -410940,6 +411498,73 @@
         ]
       }
     },
+    "/api/v1/query-center/actions/import": {
+      "post": {
+        "description": "CE fuer auswertungen/abfrage-center:import — dryRun nur Signaturpruefung.",
+        "operationId": "action_import_api_v1_query_center_actions_import_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Signierten Abfrage-Import als Masken-CommandEndpoint",
+        "tags": [
+          "reporting",
+          "query-center"
+        ]
+      }
+    },
     "/api/v1/query-center/catalog": {
       "get": {
         "operationId": "catalog_api_v1_query_center_catalog_get",
@@ -433643,6 +434268,76 @@
         ]
       }
     },
+    "/api/v1/training/assignments/actions/speichern": {
+      "post": {
+        "description": "CE fuer personal/schulungen:speichern — dryRun ohne INSERT; Token-Mandant.",
+        "operationId": "action_assignment_speichern_api_v1_training_assignments_actions_speichern_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Schulungszuweisung speichern als Masken-CommandEndpoint",
+        "tags": [
+          "training",
+          "hr",
+          "onboarding",
+          "training",
+          "hr"
+        ]
+      }
+    },
     "/api/v1/training/assignments/{item_id}": {
       "delete": {
         "operationId": "delete_assignment_api_v1_training_assignments__item_id__delete",
@@ -434779,6 +435474,76 @@
         ]
       }
     },
+    "/api/v1/training/onboarding/runs/actions/speichern": {
+      "post": {
+        "description": "CE fuer personal/onboarding:speichern — dryRun ohne INSERT; Token-Mandant.",
+        "operationId": "action_onboarding_speichern_api_v1_training_onboarding_runs_actions_speichern_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Onboarding-Lauf speichern als Masken-CommandEndpoint",
+        "tags": [
+          "training",
+          "hr",
+          "onboarding",
+          "training",
+          "hr"
+        ]
+      }
+    },
     "/api/v1/training/onboarding/runs/{item_id}": {
       "delete": {
         "operationId": "delete_run_api_v1_training_onboarding_runs__item_id__delete",
@@ -435117,6 +435882,76 @@
           }
         ],
         "summary": "Qualification anlegen",
+        "tags": [
+          "training",
+          "hr",
+          "onboarding",
+          "training",
+          "hr"
+        ]
+      }
+    },
+    "/api/v1/training/qualifications/actions/speichern": {
+      "post": {
+        "description": "CE fuer personal/qualifikationen:speichern — dryRun ohne INSERT; Token-Mandant.",
+        "operationId": "action_qualification_speichern_api_v1_training_qualifications_actions_speichern_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Qualifikation speichern als Masken-CommandEndpoint",
         "tags": [
           "training",
           "hr",

@@ -11,6 +11,26 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## Fachcommand-Integration und Stabilisierung (2026-10-09)
+
+Nach MCP-Batch2-4:36 mapped,13 local_ui,5 blocked_missing_tenant,
+0 blocked_no_endpoint,1 open_high. Die fuenf Fuhrpark-Aktionen sind
+weiter offen: REST allein ersetzt keine Mandantentrennung. FIN-CLOSE
+ADR-076 und Zahlauf-Freigabevertrag bleiben ebenfalls offen.
+
+Bonus/Query-Import: vorzeitige Fachcommits entfernt, Standalone-REST
+explizit persistent, gleiche signierte Query-Allowlist in allen Modi,
+NaN/sNaN/Infinity fachlich abgelehnt.44 echte HTTP-/MCP-Wirkungstests,
+final326 relevante Tests ohne Skip im isolierten Lieferstand gruen.
+Drei Command-Godfile-Rueckfaelle durch interne Auslagerung geschlossen,
+Grenzen ausschliesslich gesenkt; fremde Bridges-Verkleinerung separat.
+OpenAPI-Drift3113->3125 aus isoliertem Source-Snapshot korrigiert,
+keine alten Pfade entfernt, vor/nach Auslagerung bytegleich und frischer
+--check gruen. Agent-Handbuch-Eventquellen regeneriert. Keine neue
+PG-Datenbank/Container/Migration/Reset; keine Gesamt-UAT behauptet.
+[Reporting-QA](../quality-assurance/reporting-command-atomic-20261009.md) /
+[Godfile- und API-Abnahme](../quality-assurance/command-endpoint-godfile-20261009.md).
+
 ## Masken-Runtime: Altweg, atomare Fachcommits und Fehlertexte (2026-10-09)
 
 Ungenutzten run_mask_action samt zwei Hilfssymbolen entfernt; dessen
