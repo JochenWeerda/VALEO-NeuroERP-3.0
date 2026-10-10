@@ -68,3 +68,5 @@ swarm
 docs
 *.md
 !README.md
+!.oss-scanner/README.md
+!.oss-scanner/threat_model.md
