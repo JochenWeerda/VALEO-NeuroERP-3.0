@@ -48,5 +48,3 @@ jobs:
           file: .oss-scanner/Dockerfile
           push: false
           tags: valeo-neuroerp-oss-scanner:verify
-          cache-from: type=gha
-          cache-to: type=gha,mode=max

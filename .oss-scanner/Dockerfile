@@ -45,12 +45,12 @@ RUN pnpm build \
 # These fast, security-focused checks need no external service. A test failure
 # remains visible in the build log but does not prevent Anthropic from scanning
 # the prepared source and dependency tree.
-RUN python -m pytest -q --no-cov \
+RUN timeout 180s python -m pytest -q --no-cov \
       tests/test_auth_middleware.py \
       tests/test_tenant_enforcement.py \
       tests/test_mcp_oidc_verification.py \
     || echo "WARNING: OSS Scanner Python smoke tests reported failures"
 
-RUN pnpm --filter @valero-neuroerp/frontend-web exec vitest run \
+RUN timeout 180s pnpm --filter @valero-neuroerp/frontend-web exec vitest run \
       src/__tests__/lib/omnibox/command-safety.test.ts \
     || echo "WARNING: OSS Scanner frontend smoke test reported failures"
