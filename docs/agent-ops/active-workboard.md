@@ -60,6 +60,10 @@ eigener Vorpruefung antworten auf die Wiederholung mit ihrem fachlichen Fehler; 
 begruendete Ausnahme; `actionDef.idempotencyKey` im Frontend ist ein fester Wert je Aktion und darf so nicht
 gesetzt werden. **Sichtpruefung Bewerbungsmasken (offen aus BEWERBUNG-ANMELDEKENNUNG):** erledigt — Fassung 1
 angelegt, Einwilligung erteilt und widerrufen, kein Namensfeld, im Verzeichnis steht die Anmeldung.
+**Nachtrag:** Quality Gate zu `f513b806b` rot an „Check physical table catalog“ — der Lesezugriff auf
+`crm_action_audit_log` wanderte von `personal_bewerbungen.py` in den Waechter, der Katalog fuehrte noch den alten
+Code-Verweis. Nachgezogen: nur die Verweise neu berechnet, Tabellenstand unveraendert (ein Eintrag geaendert).
+Achtung an Codex: `docs/admin/table-catalog.*` liegt im Arbeitsbaum als fremdes WIP; dieser eine Verweis gehoert hinein.
 
 ## SONAR-WORKFLOW-LIFECYCLE-20261011 — abgeschlossen, Codex
 

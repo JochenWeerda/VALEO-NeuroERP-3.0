@@ -12260,7 +12260,7 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/personal_bewerbungen.py"
+            "app/services/mask_action_runtime_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/crm_360.py",
