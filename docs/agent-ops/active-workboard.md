@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HAUPTBUCH-ROLLEN-20261011 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-11. Befund aus OFFENE-POSTEN-ROLLEN-20261011.
+**Befund:** Vermessung aller Finanzwege: 413 Wege, 56 pruefen eine Rolle, 357 nicht (175 davon schreibend).
+**Ziel (erster Schnitt, Hauptbuch):** Rolle vor dem ersten Datenbankzugriff an den 54 Wegen fuer Buchungen,
+Konten, Kontenplan, Perioden, Geschaeftsjahre, Buchungsvorlagen, periodische Buchungen und Buchungsimport.
+Lesen `finance_read` (Kontenplan zusaetzlich Einkauf, der Rechnungseingang kontiert damit); anlegen, aendern,
+buchen, stornieren `finance_write`; loeschen, Periode sperren/oeffnen, Geschaeftsjahr anlegen, Massenimport
+`finance_admin`. **Dateibesitz:** `app/auth/finance_roles.py` (additiv), nur die Dekoratoren in
+`journal_entries.py`, `accounts.py`, `chart_of_accounts.py`, `accounting_periods.py`, `finance_period.py`,
+`bulk_journal_import.py`, `booking_templates.py`, `periodische_buchungen.py`, `fibu_geschaeftsjahre.py`,
+neue Vertragsdatei `tests/test_hauptbuch_rollen_vertrag.py`, Anpassung betroffener Tests, QA-Doku.
+**Nicht angefasst:** Codex' Bankdateien (`bank_accounts.py`, `bank_reconciliation.py`, `finance_actions.py`).
+
 ## OFFENE-POSTEN-ROLLEN-20261011 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Befund aus MAHNWESEN-ROLLEN-20261011.
