@@ -17,6 +17,12 @@ ueber Computer Use bedient. Kein Meta-Cloud-API-Zugang ist Voraussetzung fuer
 diesen Zielweg. Diese Entscheidung allein bedeutet weder eine verbundene
 Browser-Sitzung noch einen fertig implementierten Versand.
 
+Verkuerzte Kundenbestellungen sollen gemaess weiterer User-Vorgabe heuristisch
+lernend ergaenzt werden, bei Unsicherheit mit menschlicher Pruefung. Fachregel,
+Lerndaten, Rueckkopplung und Lieferplanung stehen im
+[Bestell-Lernvertrag](whatsapp-order-learning.md). Dieser Vertrag beschreibt
+das Ziel; die vorhandene Inbox implementiert noch keine lernende Ergaenzung.
+
 ## Gepruefter Ist-Stand
 
 | Bereich | Beleg | Befund |

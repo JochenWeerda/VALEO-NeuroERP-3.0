@@ -12,6 +12,7 @@ from decimal import Decimal
 from datetime import datetime, date
 import json
 import logging
+from app.auth.finance_roles import finance_admin, finance_write, open_items_read
 from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
@@ -248,7 +249,8 @@ def _validate_op(payload: OpenItemBase) -> None:
         raise HTTPException(status_code=400, detail="mahn_stufe must be 0..3")
 
 
-@router.get("", response_model=OpenItemListResponse, summary="Open items auflisten")
+@router.get("", response_model=OpenItemListResponse, summary="Open items auflisten",
+            dependencies=[Depends(open_items_read)])
 async def list_open_items(
     tenant_id: str = Depends(get_tenant_id),
     konto_typ: Optional[str] = Query(None),
@@ -330,7 +332,8 @@ async def list_open_items(
     return OpenItemListResponse(items=items, summary=summary)
 
 
-@router.get("/{op_id}", response_model=OpenItem, summary="Open item abrufen")
+@router.get("/{op_id}", response_model=OpenItem, summary="Open item abrufen",
+            dependencies=[Depends(open_items_read)])
 async def get_open_item(op_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     table_ref, cols = _get_open_items_relation(db)
     select_sql = f"""
@@ -379,7 +382,8 @@ async def get_open_item(op_id: str, tenant_id: str = Depends(get_tenant_id), db:
     return _normalize_open_item(row)
 
 
-@router.post("", response_model=OpenItem, status_code=201, summary="Open item anlegen")
+@router.post("", response_model=OpenItem, status_code=201, summary="Open item anlegen",
+            dependencies=[Depends(finance_write)])
 async def create_open_item(payload: OpenItemCreate, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _validate_op(payload)
     op_id = uuid7()
@@ -440,7 +444,8 @@ async def create_open_item(payload: OpenItemCreate, request: Request, tenant_id:
 OP_EDITABLE_STATUSES = {"offen", "teilweise"}
 
 
-@router.put("/{op_id}", response_model=OpenItem, summary="Open item aktualisieren")
+@router.put("/{op_id}", response_model=OpenItem, summary="Open item aktualisieren",
+            dependencies=[Depends(finance_write)])
 async def update_open_item(op_id: str, payload: OpenItemCreate, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _validate_op(payload)
     row = db.execute(
@@ -506,14 +511,16 @@ async def update_open_item(op_id: str, payload: OpenItemCreate, request: Request
     return await get_open_item(op_id, tenant_id, db)
 
 
-@router.patch("/{op_id}", response_model=OpenItem, summary="Open item aktualisieren")
+@router.patch("/{op_id}", response_model=OpenItem, summary="Open item aktualisieren",
+            dependencies=[Depends(finance_write)])
 async def patch_open_item(op_id: str, payload: OpenItemUpdate, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     existing = await get_open_item(op_id, tenant_id, db)
     merged = OpenItemCreate(**{**existing.model_dump(exclude={"id", "tenant_id", "created_at", "updated_at"}), **payload.model_dump(exclude_unset=True)})
     return await update_open_item(op_id, merged, tenant_id, db, request)
 
 
-@router.delete("/{op_id}", status_code=204, response_class=Response, response_model=None, summary="Open item lÃ¶schen")
+@router.delete("/{op_id}", status_code=204, response_class=Response, response_model=None, summary="Open item lÃ¶schen",
+            dependencies=[Depends(finance_admin)])
 async def delete_open_item(op_id: str, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     row = db.execute(
         text("SELECT id, op_status FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"),
@@ -533,7 +540,8 @@ async def delete_open_item(op_id: str, request: Request, tenant_id: str = Depend
     return None
 
 
-@router.post("/batch-settle", response_model=BatchSettleResponse, summary="Settle open items Batch")
+@router.post("/batch-settle", response_model=BatchSettleResponse, summary="Settle open items Batch",
+            dependencies=[Depends(finance_write)])
 async def batch_settle_open_items(
     body: BatchSettleRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -574,7 +582,8 @@ async def batch_settle_open_items(
     )
 
 
-@router.post("/{op_id}/settle", response_model=SettlementResult, summary="Open item settle")
+@router.post("/{op_id}/settle", response_model=SettlementResult, summary="Open item settle",
+            dependencies=[Depends(finance_write)])
 async def settle_open_item(
     op_id: str,
     settlement: OpenItemSettlement,
@@ -787,7 +796,8 @@ async def settle_open_item(
         raise HTTPException(status_code=500, detail=f"Failed to settle open item: {str(e)}")
 
 
-@router.get("/{op_id}/settlements", response_model=list[OpenItemsOut], summary="Settlements abrufen")
+@router.get("/{op_id}/settlements", response_model=list[OpenItemsOut], summary="Settlements abrufen",
+            dependencies=[Depends(open_items_read)])
 async def get_settlements(
     op_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -833,7 +843,8 @@ async def get_settlements(
         )
 
 
-@router.post("/{op_id}/reverse-settlement", response_model=OpenItemsOut, summary="Settlement reverse")
+@router.post("/{op_id}/reverse-settlement", response_model=OpenItemsOut, summary="Settlement reverse",
+            dependencies=[Depends(finance_write)])
 async def reverse_settlement(
     op_id: str,
     settlement_id: str,
@@ -958,7 +969,8 @@ async def reverse_settlement(
         raise HTTPException(status_code=500, detail=f"Failed to reverse settlement: {str(e)}")
 
 
-@router.post("/{entity_id}/actions/mahnen", response_model=TypedObjectOut, summary="Mahnung erstellen (SPEC-P1-04)")
+@router.post("/{entity_id}/actions/mahnen", response_model=TypedObjectOut, summary="Mahnung erstellen (SPEC-P1-04)",
+            dependencies=[Depends(finance_write)])
 async def action_mahnen(
     entity_id: str,
     body: dict = Body(default_factory=dict),

@@ -11,15 +11,59 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## OFFENE-POSTEN-ROLLEN-20261011 — in Arbeit, Claude Code
+## WHATSAPP-LEARNING-CONTRACT-20261011 — abgeschlossen, Codex
 
-**Owner:** Claude Code. **Stand:** 2026-10-11. Befund aus MAHNWESEN-ROLLEN-20261011.
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** User-Vorgabe fuer heuristisch lernende Ergaenzung verkuerzter Kundenbestellungen, Unsicherheit/Human-in-the-loop und tatsaechliche Lieferplanung in einen pruefbaren Integrationsvertrag ueberfuehren. Dokumentationsslice; keine automatische Auftragsanlage oder Versandfreigabe.
+**Dateibesitz:** neues docs/workflows/whatsapp-order-learning.md; docs/workflows/whatsapp-web-computer-use.md eigener Verweis; eigener Workboard-/Handoff-Nachweis. Kein Eingriff in fremdes Code-/Katalog-WIP.
+**Abnahme:** explizite Angaben haben Vorrang; Lernen nur aus belegten bestaetigten Auftraegen/Korrekturen; feldbezogene Unsicherheit, widerspruechliche Muster und Cold Start; keine selbstbestaetigende Lernschleife; Wochen-Stueckguttour und Information bei fehlendem Folgetag; belegter Ist-Stand und offene Implementierung getrennt.
+**Risiken:** aktuelle Kundenmatch-Suche ohne Mandantenfilter, Inbox-Header-/Default-Kontext, Replay/Audit und fehlende Silo-/Gebinde-Felder im kanonischen Auftragsvertrag; diese werden nicht als geloest ausgewiesen.
+**Harness:** Doku-Governance und Linkpruefung; keine DB/Container/Netz-Fachaktion, keine neuen Services/API/Schemata; nachfolgende Codeclaims offen mit Abnahmekriterien.
+
+**Lieferung:** Fachvertrag fuer heuristisch lernende Bestellergaenzung und Human-in-the-loop erstellt; Ist-Stand gegen Intake, API, SalesOrderItemInput und Kundenlookup belegt. Feldbezogene Kalibrierung, korrigierbare Herkunft, getrennte Lieferplanung und woechentliche Stueckguttour festgelegt. Codefunktion noch nicht implementiert; vier konkrete Folgeslices offen. Nachweis: ../workflows/whatsapp-order-learning.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## WHATSAPP-INBOX-TRUST-20261011 — offen
+
+**Owner:** unbesetzt. **Ziel:** Eingangsrechte, mandantengepruefte Kunden-/Artikelreferenzen, Tokenurheber und atomarer Eingangs-/Korrektur-Replay vor Historienlernen. **Dateigrenzen vor Claim:** whatsapp_intake Endpoint/Service, passende Tests und eigener Doku-Nachweis. **Abnahme:** zwei echte Mandanten, fremde Referenzen, kein Default-/Headerbypass, konkurrierender Replay, Original/Korrektur nachvollziehbar. **Risiko:** bestehender globaler Kundenlookup. Vertrag: ../workflows/whatsapp-order-learning.md.
+
+## WHATSAPP-ORDER-HISTORY-20261011 — offen
+
+**Owner:** unbesetzt. **Ziel:** kanonische Silo-/Gebinde-/Einheitenvertraege und begrenzte autorisierte Auftragsgeschichte. **Abnahme:** Verbraucher-/Schemaabgleich; Artikelvarianten/Lieferstellen getrennt, keine zweite JSON-Auftragshistorie. **Abhaengigkeit:** INBOX-TRUST; eigene Dateigrenzen/Claim vor Umsetzung. Vertrag: ../workflows/whatsapp-order-learning.md.
+
+## WHATSAPP-LEARNING-ENGINE-20261011 — offen
+
+**Owner:** unbesetzt. **Ziel:** heuristisch lernende feldbezogene Vorschlaege, Kalibrierung und menschliche Korrektur; keine starre Letztauftrag-Kopie. **Abnahme:** zeitlich getrennte Bewertungsdaten, verbesserter Folgefall nach Korrektur, Cold Start/Ambiguitaet, explizite Angaben erhalten, kein Feedback-Replay/Trainingsleck. **Abhaengigkeit:** INBOX-TRUST und ORDER-HISTORY; eigene Dateigrenzen/Claim. Vertrag: ../workflows/whatsapp-order-learning.md.
+
+## WHATSAPP-DELIVERY-PLANNING-20261011 — offen
+
+**Owner:** unbesetzt. **Ziel:** aktuelle Verfuegbarkeit und feste woechentliche Stueckguttour, Alternativen und persistente Kundeninformation bei fehlendem Folgetag. **Abnahme:** Kapazitaet/Annahmeschluss/Feiertag/Wochenwechsel/ausdruecklicher Wunsch; kein Termin ohne Quelle, keine doppelte Meldung. **Risiko:** Browser-Versand bleibt eigener offener Claim; eigene Dateigrenzen/Claim. Vertrag: ../workflows/whatsapp-order-learning.md.
+
+## HAUPTBUCH-ROLLEN-20261011 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-11. Befund aus OFFENE-POSTEN-ROLLEN-20261011.
+**Befund:** Vermessung aller Finanzwege: 413 Wege, 56 pruefen eine Rolle, 357 nicht (175 davon schreibend).
+**Ziel (erster Schnitt, Hauptbuch):** Rolle vor dem ersten Datenbankzugriff an den 54 Wegen fuer Buchungen,
+Konten, Kontenplan, Perioden, Geschaeftsjahre, Buchungsvorlagen, periodische Buchungen und Buchungsimport.
+Lesen `finance_read` (Kontenplan zusaetzlich Einkauf, der Rechnungseingang kontiert damit); anlegen, aendern,
+buchen, stornieren `finance_write`; loeschen, Periode sperren/oeffnen, Geschaeftsjahr anlegen, Massenimport
+`finance_admin`. **Dateibesitz:** `app/auth/finance_roles.py` (additiv), nur die Dekoratoren in
+`journal_entries.py`, `accounts.py`, `chart_of_accounts.py`, `accounting_periods.py`, `finance_period.py`,
+`bulk_journal_import.py`, `booking_templates.py`, `periodische_buchungen.py`, `fibu_geschaeftsjahre.py`,
+neue Vertragsdatei `tests/test_hauptbuch_rollen_vertrag.py`, Anpassung betroffener Tests, QA-Doku.
+**Nicht angefasst:** Codex' Bankdateien (`bank_accounts.py`, `bank_reconciliation.py`, `finance_actions.py`).
+
+## OFFENE-POSTEN-ROLLEN-20261011 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Befund aus MAHNWESEN-ROLLEN-20261011.
 **Befund:** Die elf Wege unter `/finance/open-items` (lesen, anlegen, aendern, loeschen, ausgleichen, Ausgleich
 zuruecknehmen, mahnen) pruefen keine Rolle. **Ziel:** Rolle vor dem ersten Datenbankzugriff. Lesen: Finanzrollen
 sowie Verkauf, Vertrieb und Einkauf (sie brauchen die offenen Posten ihrer Kunden und Lieferanten); aendern,
 ausgleichen, mahnen: `finance_write`; loeschen: `finance_admin`. **Dateibesitz:** `app/auth/finance_roles.py`
 (additiv), nur die Dekoratoren in `app/api/v1/endpoints/open_items.py`, neue Vertragsdatei
 `tests/test_offene_posten_rollen_vertrag.py`, Anpassung betroffener Tests, QA-Doku.
+**Lieferung:** elf Wege mit `open_items_read` / `finance_write` / `finance_admin` am Dekorator; Vertrag mit
+178 Faellen ohne Datenbank (fuenfzehn Rollen x elf Wege, ohne Anmeldung, Vollstaendigkeit). QA:
+`docs/quality-assurance/offene-posten-rollen-20261011.md`. **Betrieb:** Buchhaltung braucht
+`FINANCE_BEARBEITEN`; Verkauf, Vertrieb und Einkauf lesen mit ihren eigenen Rollen.
 
 ## WHATSAPP-CATALOG-20261011 — abgeschlossen, Codex
 
