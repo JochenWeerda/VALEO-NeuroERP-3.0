@@ -11,13 +11,31 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## WHATSAPP-LEARNING-CONTRACT-20261011 — reserviert, Codex
+## WHATSAPP-LEARNING-CONTRACT-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** User-Vorgabe fuer heuristisch lernende Ergaenzung verkuerzter Kundenbestellungen, Unsicherheit/Human-in-the-loop und tatsaechliche Lieferplanung in einen pruefbaren Integrationsvertrag ueberfuehren. Dokumentationsslice; keine automatische Auftragsanlage oder Versandfreigabe.
 **Dateibesitz:** neues docs/workflows/whatsapp-order-learning.md; docs/workflows/whatsapp-web-computer-use.md eigener Verweis; eigener Workboard-/Handoff-Nachweis. Kein Eingriff in fremdes Code-/Katalog-WIP.
 **Abnahme:** explizite Angaben haben Vorrang; Lernen nur aus belegten bestaetigten Auftraegen/Korrekturen; feldbezogene Unsicherheit, widerspruechliche Muster und Cold Start; keine selbstbestaetigende Lernschleife; Wochen-Stueckguttour und Information bei fehlendem Folgetag; belegter Ist-Stand und offene Implementierung getrennt.
 **Risiken:** aktuelle Kundenmatch-Suche ohne Mandantenfilter, Inbox-Header-/Default-Kontext, Replay/Audit und fehlende Silo-/Gebinde-Felder im kanonischen Auftragsvertrag; diese werden nicht als geloest ausgewiesen.
 **Harness:** Doku-Governance und Linkpruefung; keine DB/Container/Netz-Fachaktion, keine neuen Services/API/Schemata; nachfolgende Codeclaims offen mit Abnahmekriterien.
+
+**Lieferung:** Fachvertrag fuer heuristisch lernende Bestellergaenzung und Human-in-the-loop erstellt; Ist-Stand gegen Intake, API, SalesOrderItemInput und Kundenlookup belegt. Feldbezogene Kalibrierung, korrigierbare Herkunft, getrennte Lieferplanung und woechentliche Stueckguttour festgelegt. Codefunktion noch nicht implementiert; vier konkrete Folgeslices offen. Nachweis: ../workflows/whatsapp-order-learning.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## WHATSAPP-INBOX-TRUST-20261011 — offen
+
+**Owner:** unbesetzt. **Ziel:** Eingangsrechte, mandantengepruefte Kunden-/Artikelreferenzen, Tokenurheber und atomarer Eingangs-/Korrektur-Replay vor Historienlernen. **Dateigrenzen vor Claim:** whatsapp_intake Endpoint/Service, passende Tests und eigener Doku-Nachweis. **Abnahme:** zwei echte Mandanten, fremde Referenzen, kein Default-/Headerbypass, konkurrierender Replay, Original/Korrektur nachvollziehbar. **Risiko:** bestehender globaler Kundenlookup. Vertrag: ../workflows/whatsapp-order-learning.md.
+
+## WHATSAPP-ORDER-HISTORY-20261011 — offen
+
+**Owner:** unbesetzt. **Ziel:** kanonische Silo-/Gebinde-/Einheitenvertraege und begrenzte autorisierte Auftragsgeschichte. **Abnahme:** Verbraucher-/Schemaabgleich; Artikelvarianten/Lieferstellen getrennt, keine zweite JSON-Auftragshistorie. **Abhaengigkeit:** INBOX-TRUST; eigene Dateigrenzen/Claim vor Umsetzung. Vertrag: ../workflows/whatsapp-order-learning.md.
+
+## WHATSAPP-LEARNING-ENGINE-20261011 — offen
+
+**Owner:** unbesetzt. **Ziel:** heuristisch lernende feldbezogene Vorschlaege, Kalibrierung und menschliche Korrektur; keine starre Letztauftrag-Kopie. **Abnahme:** zeitlich getrennte Bewertungsdaten, verbesserter Folgefall nach Korrektur, Cold Start/Ambiguitaet, explizite Angaben erhalten, kein Feedback-Replay/Trainingsleck. **Abhaengigkeit:** INBOX-TRUST und ORDER-HISTORY; eigene Dateigrenzen/Claim. Vertrag: ../workflows/whatsapp-order-learning.md.
+
+## WHATSAPP-DELIVERY-PLANNING-20261011 — offen
+
+**Owner:** unbesetzt. **Ziel:** aktuelle Verfuegbarkeit und feste woechentliche Stueckguttour, Alternativen und persistente Kundeninformation bei fehlendem Folgetag. **Abnahme:** Kapazitaet/Annahmeschluss/Feiertag/Wochenwechsel/ausdruecklicher Wunsch; kein Termin ohne Quelle, keine doppelte Meldung. **Risiko:** Browser-Versand bleibt eigener offener Claim; eigene Dateigrenzen/Claim. Vertrag: ../workflows/whatsapp-order-learning.md.
 
 ## HAUPTBUCH-ROLLEN-20261011 — in Arbeit, Claude Code
 
