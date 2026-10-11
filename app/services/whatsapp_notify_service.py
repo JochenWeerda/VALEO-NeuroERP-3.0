@@ -1,12 +1,13 @@
 """
 WA-NOTIFY-001 — Ausgehende WhatsApp-Benachrichtigungen
 
-Sendet Push-Nachrichten an Kunden:
+Bereitet Nachrichten fuer WhatsApp Web / Computer Use vor:
   - Lieferankündigung: "LKW kommt in ~60 min" (getriggert von Logistik-Event)
   - Dokument-Ready: "Lieferschein/Rechnung verfügbar" mit Portal-Link
 
-In Produktion: Meta Cloud API (POST messages).
-Im Simulator: In-Memory-Outbox + REST-Trigger.
+Kein automatischer Netzwerkversand. pending_browser ist ein Entwurf,
+kein Versand-/Zustellnachweis. Die Outbox ist noch fluechtig; dauerhafte
+Auftraege und verifizierte Browserkonten sind vor Betriebsfreigabe erforderlich.
 
 Outbox-Schema: { tenant_id: [OutboxMessage] }
 """
@@ -15,6 +16,7 @@ from __future__ import annotations
 import logging
 import os
 import uuid
+from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -40,8 +42,8 @@ class OutboxMessage:
     kunden_nr: Optional[str]
     notify_type: NotifyType
     text: str
-    meta_msg_id: Optional[str] = None   # gefüllt nach echtem API-Aufruf
-    status: str = "pending"             # pending | sent | failed | simulated
+    meta_msg_id: Optional[str] = None   # bestehendes Antwortfeld; kein Meta-Versand
+    status: str = "pending_browser"
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
@@ -82,36 +84,13 @@ def _text_dokument_ready(
 
 # ─── Sende-Logik ─────────────────────────────────────────────────────────────
 
-def _send_via_meta(phone: str, text: str, tenant_id: str) -> Optional[str]:
+def _require_tenant(tenant_id: str) -> None:
+    """Kein globaler Entwurfsspeicher bei fehlendem Fachkontext.
+
+    Die Mitgliedschaft muss der Aufrufer pruefen; dies validiert nur den Wert.
     """
-    Sendet Nachricht über Meta Cloud API.
-    Gibt Meta-Nachrichten-ID zurück oder None bei Fehler.
-    Nur aktiv wenn WHATSAPP_PHONE_NUMBER_ID + WHATSAPP_ACCESS_TOKEN gesetzt.
-    """
-    phone_number_id = os.environ.get("WHATSAPP_PHONE_NUMBER_ID", "")
-    access_token = os.environ.get("WHATSAPP_ACCESS_TOKEN", "")
-    if not phone_number_id or not access_token:
-        return None
-    try:
-        import httpx
-        url = f"https://graph.facebook.com/v19.0/{phone_number_id}/messages"
-        payload = {
-            "messaging_product": "whatsapp",
-            "to": phone.lstrip("+"),
-            "type": "text",
-            "text": {"body": text},
-        }
-        resp = httpx.post(
-            url,
-            json=payload,
-            headers={"Authorization": f"Bearer {access_token}"},
-            timeout=10,
-        )
-        resp.raise_for_status()
-        return resp.json().get("messages", [{}])[0].get("id")
-    except Exception as exc:
-        logger.error("Meta API Sende-Fehler für %s: %s", phone, exc)
-        return None
+    if not isinstance(tenant_id, str) or not tenant_id.strip():
+        raise ValueError("Mandant muss angegeben werden")
 
 
 def _store_outbox(msg: OutboxMessage, tenant_id: str) -> None:
@@ -128,16 +107,12 @@ def _store_outbox(msg: OutboxMessage, tenant_id: str) -> None:
 
 
 def _deliver(msg: OutboxMessage) -> OutboxMessage:
-    """Versucht Zustellung via Meta; Fallback: simuliert."""
-    meta_id = _send_via_meta(msg.phone, msg.text, msg.tenant_id)
-    if meta_id:
-        msg.meta_msg_id = meta_id
-        msg.status = "sent"
-        logger.info("WA-Notify gesendet: %s → %s (%s)", msg.notify_type, msg.phone, meta_id)
-    else:
-        msg.status = "simulated"
-        logger.info("WA-Notify simuliert: %s → %s", msg.notify_type, msg.phone)
+    """Nur vorbereiten; echte Zustellung benoetigt den autorisierten Browserweg."""
+    _require_tenant(msg.tenant_id)
+    msg.status = "pending_browser"
+    msg.meta_msg_id = None
     _store_outbox(msg, msg.tenant_id)
+    logger.info("WA-Notify fuer Browserversand vorbereitet")
     return msg
 
 
@@ -155,7 +130,7 @@ def send_lieferankuendigung(
     fahrer: Optional[str] = None,
 ) -> dict:
     """
-    Sendet Lieferankündigung an Kunden.
+    Bereitet Lieferankuendigung fuer Browserversand vor.
     Wird von Logistik-/Disposition-Service aufgerufen wenn LKW ~eta_min Minuten entfernt.
     """
     text = _text_lieferankuendigung(kunden_name, artikel, menge, einheit, eta_min, fahrer)
@@ -181,7 +156,7 @@ def send_dokument_ready(
     portal_url: Optional[str] = None,
 ) -> dict:
     """
-    Benachrichtigt Kunden wenn Lieferschein oder Rechnung im Portal verfügbar ist.
+    Bereitet Nachricht vor, wenn Lieferschein oder Rechnung im Portal verfuegbar ist.
     Wird von Docflow-Service aufgerufen nach Dokumentenerstellung.
     """
     text = _text_dokument_ready(kunden_name, doc_typ, doc_nr, portal_url)
@@ -198,4 +173,5 @@ def send_dokument_ready(
 
 
 def get_outbox(tenant_id: str) -> list[dict]:
-    return list(reversed(_OUTBOX.get(tenant_id, [])))
+    _require_tenant(tenant_id)
+    return deepcopy(list(reversed(_OUTBOX.get(tenant_id, []))))

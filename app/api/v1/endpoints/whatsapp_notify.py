@@ -72,7 +72,7 @@ class OutboxLogResponse(BaseModel):
 async def simulate_lieferankuendigung(body: LieferankuendigungRequest) -> NotifyResponse:
     """
     Triggerbar aus Disposition/Logistik: LKW ~eta_min Minuten entfernt.
-    Im Simulator: Nachricht in Outbox-Log. Mit WHATSAPP_ACCESS_TOKEN: echter Meta-Aufruf.
+    Nur Entwurf in der fluechtigen Outbox; kein automatischer Netzwerkversand.
     """
     return NotifyResponse(**send_lieferankuendigung(
         tenant_id=body.tenant_id,

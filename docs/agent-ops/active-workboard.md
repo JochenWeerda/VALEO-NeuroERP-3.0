@@ -11,12 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## WHATSAPP-BROWSER-PREP-20261011 — reserviert, Codex
+## WHATSAPP-BROWSER-PREP-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Veralteten automatischen Meta-Versand entfernen; benachrichtigende Fachverbraucher bereiten Nachrichten fuer WhatsApp Web vor und behaupten keine Zustellung. Teilmeilenstein zu WHATSAPP-WEB-INTEGRATION-20261011.
 **Dateibesitz:** app/services/whatsapp_notify_service.py; app/api/v1/endpoints/whatsapp_notify.py nur Beschreibungen; tests/test_whatsapp_notify.py; neues tests/test_whatsapp_browser_prepare.py; eigene QA und docs/workflows/whatsapp-web-computer-use.md nur Lieferstand. Keine Auth-, DB- oder Browserautomation-Aenderung.
 **Abnahme:** selbst mit alten Meta-Credentials kein HTTP-Aufruf; Status pending_browser; Outbox-Lesen veraendert keine gespeicherten Auftraege; leerer Mandant abgewiesen. Bestehende Text-/Fachvertraege gruen, keine externe Nachricht. **Risiko:** fluechtige Outbox und bisherige Endpoint-Autorisierung bleiben offen, daher kein produktiver Browserbetrieb.
 **Harness:** Fachvertrag Templates und bestehende Aufrufer; Architektur alter Versand entfernt, kein neuer Dienst; Daten keine Credentials/privaten Werte loggen; Tests echte Funktionen mit HTTP-Verbot; Security kein fremder automatischer Versand; Betrieb ehrlicher pending_browser-Status; Doku QA/Runbook/Workboard; extern Gesamt-CI und Browserabnahme offen.
+
+**Lieferung:** Automatischer Meta-HTTP-Sender entfernt; vorbereitete Nachrichten melden pending_browser ohne Zustellbehauptung. Fehlender Mandant abgewiesen, private Empfaengerlogs entfernt und Outbox-Leser koennen gespeicherte Empfaenger/Status nicht mutieren. Alle 16 Gegenproben vorher rot, danach 33 betroffene Vertraege gruen. Code-Inventare und Architekturindex isoliert gruen. Dauerhafte Outbox, autorisierter Browserarbeiter und Endpoint-Mandantenvertrag bleiben im offenen WHATSAPP-WEB-INTEGRATION-20261011. Nachweis: whatsapp-browser-preparation-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## EIN-MAHNLAUF-20261011 — in Arbeit, Claude Code
 
