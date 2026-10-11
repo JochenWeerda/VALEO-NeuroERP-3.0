@@ -1557,7 +1557,7 @@
       "path": "logistik/tourenplanung"
     },
     {
-      "module": "@/pages/mahnwesen/mahnlauf",
+      "module": "@/pages/finance/mahnlauf",
       "path": "mahnwesen/mahnlauf"
     },
     {

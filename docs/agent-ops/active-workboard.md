@@ -20,9 +20,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Lieferung:** Automatischer Meta-HTTP-Sender entfernt; vorbereitete Nachrichten melden pending_browser ohne Zustellbehauptung. Fehlender Mandant abgewiesen, private Empfaengerlogs entfernt und Outbox-Leser koennen gespeicherte Empfaenger/Status nicht mutieren. Alle 16 Gegenproben vorher rot, danach 33 betroffene Vertraege gruen. Code-Inventare und Architekturindex isoliert gruen. Dauerhafte Outbox, autorisierter Browserarbeiter und Endpoint-Mandantenvertrag bleiben im offenen WHATSAPP-WEB-INTEGRATION-20261011. Nachweis: whatsapp-browser-preparation-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
-## EIN-MAHNLAUF-20261011 — in Arbeit, Claude Code
+## EIN-MAHNLAUF-20261011 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt aus MAHNWESEN-EINZELMASKE-ABLOESEN-20261011.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Offener Punkt aus MAHNWESEN-EINZELMASKE-ABLOESEN-20261011.
 **Befund:** Zwei Mahnlauf-Seiten am selben Backend (`/finance/mahnlauf/*`): `pages/finance/mahnlauf.tsx`
 (Navigation; versendet, kann aber keinen Posten auslassen) und `pages/mahnwesen/mahnlauf.tsx` (ohne
 Navigationseintrag; Auswahl, aber kein Versand, sendet `bediener: 'Portal'`). Der Bediener kommt aus dem Rumpf,
@@ -30,6 +30,10 @@ sonst „KIM“. **Ziel:** ein Mahnlauf — Auswahl in die Hauptseite, `/mahnwes
 Seite entfaellt; Bediener aus der Anmeldung (`anmeldename()`). **Dateibesitz:** `pages/finance/mahnlauf.tsx`,
 `pages/mahnwesen/mahnlauf.tsx` (entfaellt), `lib/api/finance-dunning.ts` (`useRunDunning`), Routeneintraege samt
 erzeugter Dateien, `app/api/v1/endpoints/finance_dunning.py` (nur `run`), Mahnlauf-Tests, QA-Doku.
+**Lieferung:** Haken je Kandidat (vorgewaehlt), Zaehler im Knopf, Teilmenge ueber `rechnungsnrn`; Bediener aus
+`anmeldename()`; leere Auswahl mahnt niemanden (fiel vorher auf den Gesamtlauf zurueck); zweite Seite entfernt,
+`/mahnwesen/mahnlauf` zeigt die eine. QA: `docs/quality-assurance/ein-mahnlauf-20261011.md`.
+**Offen:** `/finance/mahnlauf/*` verlangt eine Anmeldung, aber keine Rolle; Teilmenge laeuft je Rechnung einzeln.
 
 ## WHATSAPP-WEB-CONTRACT-20261011 — abgeschlossen, Codex
 
