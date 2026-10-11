@@ -606,3 +606,38 @@ class TestMandantentrennung:
         erste = meldung(client, HAUS_A).json()["meldungsnummer"]
         zweite = meldung(client, HAUS_A).json()["meldungsnummer"]
         assert int(erste.rsplit("-", 1)[1]) + 1 == int(zweite.rsplit("-", 1)[1])
+
+
+# ── Wer handelt, sagt die Anmeldung (ANMELDEKENNUNG-UEBRIGE-20261011) ───────────
+# Bis zum 11.10.2026 kam ``erfasst_durch`` aus dem Rumpf. Kein Frontend hatte ein Feld
+# dafuer: die Angabe blieb leer, oder ein Aufrufer schrieb hinein, was er wollte.
+
+
+def _als_personalbuero():
+    """Anmeldung mit UUID als Kennung und lesbarem Anmeldenamen, wie Keycloak sie liefert."""
+    from contextlib import contextmanager
+
+    from app.auth import deps
+    from app.main import app
+
+    @contextmanager
+    def angemeldet():
+        app.dependency_overrides[deps.get_current_user] = lambda: {
+            "sub": "5f0c2a9e-0b7d-4e55-9d0e-1c2a3b4c5d6e", "name": "t.de-vries", "roles": list(deps._DEV_ROLES)}
+        try:
+            yield
+        finally:
+            app.dependency_overrides.pop(deps.get_current_user, None)
+
+    return angemeldet()
+
+
+def test_schadenmeldung_und_druckauftrag_tragen_die_anmeldung(client):
+    with _als_personalbuero():
+        schaden = meldung(client, HAUS_A, erfasst_durch="jemand anderes")
+        geraet = drucker(client, HAUS_A)
+        assert geraet.status_code == 201, geraet.text
+        druck = auftrag(client, HAUS_A, geraet.json()["id"], erfasst_durch="jemand anderes")
+    assert schaden.status_code == 201, schaden.text
+    assert druck.status_code == 201, druck.text
+    assert (schaden.json()["erfasst_durch"], druck.json()["erfasst_durch"]) == ("t.de-vries", "t.de-vries")

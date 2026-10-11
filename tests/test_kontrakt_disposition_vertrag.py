@@ -516,3 +516,34 @@ class TestFehlerIstKeinLeererZustand:
             headers=kopf(HAUS_A),
         )
         assert antwort.status_code == 422
+
+
+# ── Wer handelt, sagt die Anmeldung (ANMELDEKENNUNG-UEBRIGE-20261011) ───────────
+# Bis zum 11.10.2026 kam ``erfasst_durch`` aus dem Rumpf. Kein Frontend hatte ein Feld
+# dafuer: die Angabe blieb leer, oder ein Aufrufer schrieb hinein, was er wollte.
+
+
+def _als_personalbuero():
+    """Anmeldung mit UUID als Kennung und lesbarem Anmeldenamen, wie Keycloak sie liefert."""
+    from contextlib import contextmanager
+
+    from app.auth import deps
+    from app.main import app
+
+    @contextmanager
+    def angemeldet():
+        app.dependency_overrides[deps.get_current_user] = lambda: {
+            "sub": "5f0c2a9e-0b7d-4e55-9d0e-1c2a3b4c5d6e", "name": "t.de-vries", "roles": list(deps._DEV_ROLES)}
+        try:
+            yield
+        finally:
+            app.dependency_overrides.pop(deps.get_current_user, None)
+
+    return angemeldet()
+
+
+def test_abruf_traegt_die_anmeldung(client):
+    with _als_personalbuero():
+        antwort = abrufen(client, HAUS_A, KONTRAKT_OFFEN, 1, erfasst_durch="jemand anderes")
+    assert antwort.status_code in (200, 201), antwort.text
+    assert antwort.json()["erfasst_durch"] == "t.de-vries"

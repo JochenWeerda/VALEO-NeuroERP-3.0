@@ -11,15 +11,43 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## ANMELDEKENNUNG-UEBRIGE-20261011 — in Arbeit, Claude Code
+## MASKEN-COMMAND-IDEMPOTENZ-20261011 — in Arbeit, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-11. Folge zu BEWERBUNG-ANMELDEKENNUNG-20261011, dieselbe Regel:
+**Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt aus BEWERBUNG-COMMAND-URHEBER-20261011.
+**Befund:** Alle Masken-Commands lesen `_idempotencyKey` und schreiben ihn nur ins Audit; keiner prueft ihn.
+Ein wiederholtes `execute` mit demselben Schluessel fuehrt die Aktion ein zweites Mal aus. Das Frontend sendet
+keinen Schluessel (dort schuetzt die Sperre des Knopfs); betroffen sind API- und Agenten-Aufrufer.
+**Ziel:** ein gemeinsamer Waechter in `mask_action_runtime_service.py` (Transaktionssperre je Schluessel,
+frueherer Lauf aus `crm_action_audit_log`), genutzt von `run_delegated_mask_action` und den Einzelwegen.
+Ohne Schluessel bleibt alles, wie es ist. **Dateibesitz:** `app/services/mask_action_runtime_service.py`,
+je ein Waechter-Hunk am Beginn des Schreibpfads in `app/api/v1/command_handlers/{fuhrpark,logistics,procurement,training}.py`,
+`l3_report_catalog.py`, `logistik_frachttabellen.py`, `mailkonto.py`, `query_center.py`, `sanctions_compliance.py`,
+`personal_bewerbungen.py` (nur Umzug auf den gemeinsamen Waechter), neue Vertragsdatei
+`tests/test_masken_command_idempotenz_vertrag.py`, QA-Doku. Keine Migration.
+
+## SONAR-WORKFLOW-LIFECYCLE-20261011 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Zwei unbehaltene Workflow-SSE-Tasks und unerreichbare Optimierungshistorie aus aktueller Sonar-Analyse schliessen.
+**Dateibesitz:** app/routers/workflow_router.py nur SSE-Lieferung; app/agents/workflows/system_optimizer.py nur get_optimization_history; neue tests/test_workflow_lifecycle_contract.py und eigene QA-/Workboard-Doku.
+**Abnahme:** echte SSE-Queues erhalten Ereignisse vor erfolgreicher Antwort, Benachrichtigungsfehler machen gespeicherte Fachuebergaenge nicht nachtraeglich ungueltig; Historie tatsaechlich am Agenten aufrufbar, Grenzen geprueft. Kein Netz/DB/Docker/LLM. Keine Aenderung von Auth, Mandantenmodell, Route/Schema oder Sonar-Ausnahmen.
+
+**Lieferung:** Zwei unbehaltene SSE-Tasks ersetzt durch kurze awaited Queue-Lieferung mit sicherem Fehlervertrag; Optimierungshistorie an bestehender Agentenklasse aufrufbar, null/negative Grenzen korrekt. Gegenprobe neun rot/eins gruen, danach 39 Workflow-/MCP-/Krypto-Vertraege plus 23 bestehende Workflow-/Guardtests gruen. Architektur-/Code-Inventare auf isoliertem Stand gruen. Nachweis: sonar-workflow-lifecycle-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## ANMELDEKENNUNG-UEBRIGE-20261011 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Folge zu BEWERBUNG-ANMELDEKENNUNG-20261011, dieselbe Regel:
 wer handelt, traegt das System aus der Anmeldung ein. **Ziel:** `erfasst_durch` in Etikettendruck,
 Schadenmeldung, Genossenschaftsbewegungen, Kontrakt-Disposition und Zeitkonto-Korrektur aus der Anmeldung
 (`anmeldename()`), nicht aus dem Rumpf. Kein Frontend dieser Module hat ein Eingabefeld dafuer — die Angabe
 bleibt heute leer. **Dateibesitz:** nur die jeweiligen Anlege-Hunks in `etiketten.py`, `schaeden.py`,
 `genossenschaft.py`, `kontrakte.py` (`create_disposition`), `personal.py` (`adjust_time_account`,
 zeilenneutral wegen Godfile-Ratsche), neue Vertragsdatei `tests/test_anmeldekennung_vertrag.py`, QA-Nachtrag.
+**Nachweis:** statt einer neuen Datei je Modul ein Vertrag in der bestehenden Vertragsdatei (Quittung,
+Kontrakt-Disposition, Genossenschaftsregister, Zeitkonto); mit den Modulvertraegen 254 gruen gegen
+`valeo_probe` im isolierten Lieferstand, Gates gruen. QA: Nachtrag in
+`docs/quality-assurance/bewerbung-anmeldekennung-20261011.md`.
+**Fremd und rot im Pruefstand:** `test_parallel_installation_endpoints` (fester Druckername, kein
+Aufraeumen; zweiter Lauf scheitert an `ux_drucker_name`).
 
 ## QUALITY-GATE-SECRET-TEST-20261011 — abgeschlossen, Codex
 

@@ -58,10 +58,32 @@ Im isolierten Lieferstand gegen `valeo_probe`:
 - Gates grün: Single Head, Response-Modelle, OpenAPI-Doku und -Spec, Code-Inventare,
   Doku-Generatoren, Improvement-Pipelines.
 
+## Nachtrag: die übrigen Module (Slice ANMELDEKENNUNG-UEBRIGE-20261011)
+
+Dieselbe Regel gilt jetzt auch dort, wo `erfasst_durch` noch aus dem Rumpf kam:
+
+| Weg | Angabe |
+|---|---|
+| `POST /etiketten/druckauftrag` | wer den Druckauftrag anlegt |
+| `POST /schaeden/meldungen` | wer den Schaden erfasst |
+| `POST /genossenschaft/mitglieder` und Anteilsbewegungen (samt Gegenbuchung) | wer bucht |
+| `POST /kontrakte/{id}/dispositionen` | wer abruft |
+| `POST /personal/time-accounts/{ref}/adjust` | wer das Zeitkonto korrigiert |
+
+Keines dieser Module hat im Frontend ein Eingabefeld dafür: Die Angabe blieb bisher leer, oder ein
+Aufrufer schrieb hinein, was er wollte. Die Felder bleiben in den Eingabemodellen erlaubt und werden
+nicht gelesen. `personal.py` und `kontrakte.py` stehen unter der Godfile-Ratsche; die Änderung dort
+ist zeilenneutral.
+
+Nachweis: je Modul ein Vertrag in der bestehenden Vertragsdatei (Anmeldung mit UUID als Kennung und
+lesbarem Namen, im Rumpf ein anderer Name – im Beleg steht der Anmeldename). Mit den Modulverträgen
+**254 grün** gegen `valeo_probe`; Gates grün.
+
 ## Offen
 
-1. **Dieselbe Angabe in anderen Modulen:** `erfasst_durch` wird auch bei Etiketten, Schäden,
-   Genossenschaftsbuchungen, Kontrakt-Disposition und im Zeitkonto aus dem Rumpf genommen. Die Regel
-   ist dieselbe, die Umstellung je Modul ein kleiner Schritt mit `anmeldename()`.
-2. **Sichtprüfung** der beiden Masken im Browser.
-3. **Idempotenz der übrigen Masken-Commands** ist weiterhin ungeprüft.
+1. **Sichtprüfung** der beiden Bewerbungsmasken im Browser.
+2. **Idempotenz der übrigen Masken-Commands** ist weiterhin ungeprüft.
+3. **Nicht aus diesen Slices:** `test_parallel_installation_endpoints` legt einen Drucker mit festem
+   Namen an und räumt nicht auf; im geteilten Prüfstand scheitert er am zweiten Lauf an
+   `ux_drucker_name`. Die 409-Antwort dort gibt außerdem den Datenbanktext samt Wert zurück –
+   dieselbe Schwäche, die `grund_ohne_daten` in der Bewerbungsstrecke geschlossen hat.

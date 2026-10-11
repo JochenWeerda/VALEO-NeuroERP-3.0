@@ -14,6 +14,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from app.auth.deps import anmeldename, get_current_user
 from app.core.database import get_db
 from app.core.business_time import business_today
 from app.core.exceptions import ConflictError, EntityNotFoundError
@@ -3046,8 +3047,7 @@ async def get_time_account(
 @router.post("/time-accounts/{employee_ref}/adjust", status_code=201,
              summary="Zeitkonto korrigieren", response_model=PersonalOut)
 async def adjust_time_account(
-    employee_ref: str,
-    payload: TimeAccountAdjustIn,
+    employee_ref: str, payload: TimeAccountAdjustIn, nutzer: dict = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -3056,7 +3056,7 @@ async def adjust_time_account(
     try:
         ergebnis = orga.korrektur_schreiben(
             db, tenant_id, str(uuid7()), employee_ref,
-            payload.delta_hours, payload.reason, datum, payload.erfasst_durch,
+            payload.delta_hours, payload.reason, datum, anmeldename(nutzer) or None,
         )
         db.commit()
     except HTTPException:

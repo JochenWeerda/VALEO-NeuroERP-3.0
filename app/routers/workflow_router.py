@@ -5,7 +5,6 @@ Persisted workflow endpoints (no in-memory runtime state).
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import time
 from typing import Literal
@@ -24,6 +23,15 @@ from app.services.workflow_service import workflow
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/workflow", tags=["workflow"])
+
+
+async def _publish_workflow_event(event: dict) -> None:
+    # Broadcast only enqueues in the local SSE hub; no detached task is needed.
+    # A notification failure must not undo an already persisted transition.
+    try:
+        await sse_hub.broadcast("workflow", event)
+    except Exception:
+        logger.warning("Workflow notification delivery failed")
 
 
 def get_workflow_repo(db: Session = Depends(get_db)) -> WorkflowRepository:
@@ -88,21 +96,18 @@ async def do_transition(
 
         workflow_transitions_total.labels(domain=domain, action=resolved_action, status=nxt).inc()
 
-        asyncio.create_task(
-            sse_hub.broadcast(
-                "workflow",
-                {
-                    "id": f"workflow-{domain}-{number}-{int(time.time())}",
-                    "ts": time.time(),
-                    "source": "db",
-                    "topic": "workflow",
-                    "domain": domain,
-                    "number": number,
-                    "action": resolved_action,
-                    "fromState": cur,
-                    "toState": nxt,
-                },
-            )
+        await _publish_workflow_event(
+            {
+                "id": f"workflow-{domain}-{number}-{int(time.time())}",
+                "ts": time.time(),
+                "source": "db",
+                "topic": "workflow",
+                "domain": domain,
+                "number": number,
+                "action": resolved_action,
+                "fromState": cur,
+                "toState": nxt,
+            },
         )
 
         return {"ok": True, "state": nxt}
@@ -133,20 +138,17 @@ async def audit(
             for item in items
         ]
 
-        asyncio.create_task(
-            sse_hub.broadcast(
-                "workflow",
-                {
-                    "id": f"audit-{domain}-{number}-{int(time.time())}",
-                    "ts": time.time(),
-                    "source": "db",
-                    "topic": "workflow",
-                    "type": "audit_access",
-                    "domain": domain,
-                    "number": number,
-                    "count": len(payload_items),
-                },
-            )
+        await _publish_workflow_event(
+            {
+                "id": f"audit-{domain}-{number}-{int(time.time())}",
+                "ts": time.time(),
+                "source": "db",
+                "topic": "workflow",
+                "type": "audit_access",
+                "domain": domain,
+                "number": number,
+                "count": len(payload_items),
+            },
         )
 
         return {"ok": True, "items": payload_items}

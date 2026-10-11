@@ -232,6 +232,13 @@ class SystemOptimizerAgent:
             logger.error(f"Connection pool handler fehlgeschlagen: {e}")
 
 
+    def get_optimization_history(self, limit: int = 100) -> List[Dict[str, Any]]:
+        """Get recent optimization history without exposing the backing list."""
+        if limit < 0:
+            raise ValueError("History limit must not be negative")
+        return self.optimization_history[-limit:] if limit else []
+
+
 # LangGraph Workflow Nodes
 async def analyze_system_metrics(state: SystemOptimizerState) -> Dict[str, Any]:
     """Analyze system metrics using AI."""
@@ -386,11 +393,6 @@ def build_system_optimizer_workflow():
 
     return app
     
-    def get_optimization_history(self, limit: int = 100) -> List[Dict[str, Any]]:
-        """Get recent optimization history."""
-        return self.optimization_history[-limit:]
-
-
 # Global instance
 _optimizer_agent: SystemOptimizerAgent | None = None
 

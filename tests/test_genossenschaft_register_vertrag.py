@@ -815,3 +815,40 @@ class TestAntwortmodelle:
         assert client.get(
             f"{WEG}/mitglieder", params={"limit": 5000}, headers=kopf(HAUS_A)
         ).status_code == 422
+
+
+# ── Wer handelt, sagt die Anmeldung (ANMELDEKENNUNG-UEBRIGE-20261011) ───────────
+# Bis zum 11.10.2026 kam ``erfasst_durch`` aus dem Rumpf. Kein Frontend hatte ein Feld
+# dafuer: die Angabe blieb leer, oder ein Aufrufer schrieb hinein, was er wollte.
+
+
+def _als_personalbuero():
+    """Anmeldung mit UUID als Kennung und lesbarem Anmeldenamen, wie Keycloak sie liefert."""
+    from contextlib import contextmanager
+
+    from app.auth import deps
+    from app.main import app
+
+    @contextmanager
+    def angemeldet():
+        app.dependency_overrides[deps.get_current_user] = lambda: {
+            "sub": "5f0c2a9e-0b7d-4e55-9d0e-1c2a3b4c5d6e", "name": "t.de-vries", "roles": list(deps._DEV_ROLES)}
+        try:
+            yield
+        finally:
+            app.dependency_overrides.pop(deps.get_current_user, None)
+
+    return angemeldet()
+
+
+def test_anteilsbewegung_traegt_die_anmeldung(client, engine):
+    from sqlalchemy import text
+
+    with _als_personalbuero():
+        mitglied = mitglied_anlegen(client, HAUS_A, anteile=2, name="Hof Anmeldung", erfasst_durch="jemand anderes")
+    with engine.connect() as v:
+        urheber = {z[0] for z in v.execute(
+            text(f"SELECT erfasst_durch FROM {BEWEGUNGEN} WHERE tenant_id = :h AND mitglieds_id = :m"),  # nosec B608
+            {"h": HAUS_A, "m": mitglied["id"]},
+        )}
+    assert urheber == {"t.de-vries"}
