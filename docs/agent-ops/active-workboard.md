@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MAHNWESEN-EINZELMASKE-ABLOESEN-20261011 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt 1 aus `versandwege-echt-20261008.md`.
+**Entscheidung** (Vorgabe „was nicht einfach laeuft, laeuft einfach nicht“): Die Einzelmaske `/finance/mahnwesen`
+wird abgeloest, nicht angeschlossen. Sie zeigt drei erfundene Debitoren, laedt nie eine Bestandsmahnung
+(`id: 'new'` fest) und speichert Felder, die `POST /dunning` nicht kennt; alles Wirksame kann der Mahnlauf.
+**Ziel:** `/finance/mahnwesen` und `/finance/dunning` zeigen den Mahnlauf; bestehende Links bleiben gueltig.
+**Dateibesitz:** `pages/finance/mahnwesen.tsx` (entfaellt), die zwei Eintraege in `route-aliases.json` samt
+erzeugter Routendateien, der eine Quelltext-Test in `__tests__/pages/logistik/dispo-copilot-uix.test.ts`,
+neuer Vitest, QA-Doku, driftende Generatorartefakte. Nicht angefasst: `offene-posten.tsx`,
+`FrmKontraktDetail.tsx` (fremdes WIP im Arbeitsbaum; ihre Links bleiben durch die Route gueltig).
+
 ## MASKEN-COMMAND-IDEMPOTENZ-20261011 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Offener Punkt aus BEWERBUNG-COMMAND-URHEBER-20261011.
