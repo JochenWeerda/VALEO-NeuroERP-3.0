@@ -1868,7 +1868,6 @@ export const personalBewerbungEinwilligungScreen = {
         },
         { key: 'gueltig_bis', label: 'Gültig bis', type: 'date', required: true, helpText: 'Höchstens drei Jahre ab heute.' },
         { key: 'kanal', label: 'Eingegangen über', type: 'select', required: true, options: einwilligungKanaele },
-        { key: 'erfasst_durch', label: 'Erfasst durch', type: 'text' },
         { key: 'wortlaut', label: 'Wortlaut der Fassung', type: 'textarea', readOnly: true },
       ],
     },
@@ -1935,7 +1934,6 @@ export const personalEinwilligungserklaerungenScreen = {
       required: true,
       helpText: 'Genau der Text, der unterschrieben wird. Nach dem Anlegen nicht mehr änderbar.',
     },
-    { key: 'erstellt_durch', label: 'Erstellt durch', type: 'text' },
   ],
   workflow: { processKey: 'personal.einwilligungserklaerungen' },
   actions: [

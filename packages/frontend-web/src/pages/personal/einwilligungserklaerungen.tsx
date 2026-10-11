@@ -23,7 +23,7 @@ import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { personalEinwilligungserklaerungenScreen } from '@/masks/capture-screens'
 import { legeErklaerungAn, listErklaerungen, vorhandeneFassung } from '@/lib/api/bewerbung-einwilligung'
 
-const leer = { wortlaut: '', erstellt_durch: '' }
+const leer = { wortlaut: '' }
 
 function text(value: unknown): string {
   return String(value ?? '').trim()
@@ -73,7 +73,7 @@ export default function PersonalEinwilligungserklaerungenPage(): JSX.Element {
     if (!wortlaut) return
     setSaving(true)
     try {
-      const erklaerung = await legeErklaerungAn(wortlaut, text(form.values.erstellt_durch) || null)
+      const erklaerung = await legeErklaerungAn(wortlaut)
       toast.success(`Fassung ${erklaerung.fassung} angelegt`, {
         description: 'Sie ist ab jetzt unveränderlich und kann beim Erteilen gewählt werden.',
       })

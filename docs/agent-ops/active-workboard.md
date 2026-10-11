@@ -11,9 +11,65 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BEWERBUNG-COMMAND-URHEBER-20261011 — in Arbeit, Claude Code
+## ANMELDEKENNUNG-UEBRIGE-20261011 — in Arbeit, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-11, auf Zuruf von Codex (Antwort auf den Handshake unten).
+**Owner:** Claude Code. **Stand:** 2026-10-11. Folge zu BEWERBUNG-ANMELDEKENNUNG-20261011, dieselbe Regel:
+wer handelt, traegt das System aus der Anmeldung ein. **Ziel:** `erfasst_durch` in Etikettendruck,
+Schadenmeldung, Genossenschaftsbewegungen, Kontrakt-Disposition und Zeitkonto-Korrektur aus der Anmeldung
+(`anmeldename()`), nicht aus dem Rumpf. Kein Frontend dieser Module hat ein Eingabefeld dafuer — die Angabe
+bleibt heute leer. **Dateibesitz:** nur die jeweiligen Anlege-Hunks in `etiketten.py`, `schaeden.py`,
+`genossenschaft.py`, `kontrakte.py` (`create_disposition`), `personal.py` (`adjust_time_account`,
+zeilenneutral wegen Godfile-Ratsche), neue Vertragsdatei `tests/test_anmeldekennung_vertrag.py`, QA-Nachtrag.
+
+## QUALITY-GATE-SECRET-TEST-20261011 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Zufallsbedingten Backend-CI-Fehler aus develop Run 38126200584 beseitigen: Base64 kann die zwei Klartextbuchstaben pw zufaellig enthalten.
+**Dateibesitz:** tests/test_postfaecher.py nur TestGeheimnis.test_an_mandant_und_zweck_gebunden; neue tests/test_geheimnis_contract.py und eigene QA-/Workboard-Doku.
+**Abnahme:** Verschluesselung/Roundtrip/AAD/Tamper/Schluesselbindung real und deterministisch ohne Datenbank pruefen; erlaubten Base64-Zufall explizit reproduzieren. Keine Produktkrypto-Aenderung/Schwellenabsenkung. Gemeinsamer Pruefstand --status ohne URL nicht verfuegbar; keine DB-Nutzung noetig.
+
+**Lieferung:** Zufallsfehler deterministisch reproduziert; zehn datenbankfreie echte AEAD-Vertraege ersetzen den fehlerhaften pw-Teilstringtest. Produktkrypto unveraendert, keine Sicherheitspruefung abgeschwaecht. Letzte finale Einzelabnahme zehn gruen (2,08s). Nachweis: recursive-stability-milestone-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## MCP-ASYNC-LIFECYCLE-20261011 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Blockierende stdio-MCP-Aufrufe und liegenbleibende Node-Prozesse beheben; JSON-RPC-Antworten validieren.
+**Dateibesitz:** app/integrations/mcp_client.py, neue Tests/test_mcp_client_lifecycle.py, eigene QA-/Workboard-Doku; Generatorartefakte nur bei belegtem Drift.
+**Abnahme:** echte lokale Node-Gegenproben fuer Erfolg, Fehler, falsche ID, Zeitlimit und Abbruch; Eventloop bleibt reaktionsfaehig, Kindprozesse immer beendet; bestehende Optional-result-Schnittstelle erhalten. Kein Netz/DB/Docker; keine Tenant- oder fachlichen Toolrechte erweitern.
+
+**Lieferung:** Echte Asyncio-Prozesse mit Zeitlimit, geprueftem Antwortvertrag und garantierter Bereinigung; 19 echte Node-Gegenproben gruen, inklusive Abbruch, voller stderr-Pipe und reaktionsfaehigem Eventloop. Initialize-/Capability-Handshake und fachlicher PSM-Import bleiben offen. Nachweis: recursive-stability-milestone-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## QUALITY-GATE-MAHNVERSAND-20261011 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Einzigen Frontend-Vertragsfehler aus CI 38126182106 beheben: zwei neue Mahnversand-Buttons widersprechen dem 44-px-Vertrag.
+**Dateibesitz:** pages/finance/mahnlauf.tsx nur die zwei size-Attribute; eigene QA-/Workboard-Hunks.
+**Abnahme:** bestehende 111 UIX- und fuenf Versandtests unveraendert gruen, lint; keine Testabschwächung, Versandlogik erhalten, fremdes Frontend-WIP unberuehrt. Kein DB-/Dockerbedarf.
+
+**Lieferung:** Zwei widerspruechliche sm-Attribute entfernt; alle 116 bestehenden UIX-/Versandtests gruen (32,08s), ESLint gruen. Versandlogik und Tests unveraendert. Nachweis: recursive-stability-milestone-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## BEWERBUNG-ANMELDEKENNUNG-20261011 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. **Entscheidung des Auftraggebers:** das waehlen, was fachlich
+stimmt und im Alltag einfach laeuft („was nicht einfach laeuft, laeuft einfach nicht“).
+**Regel:** Wer handelt, traegt das System aus der Anmeldung ein; niemand tippt seinen Namen. Gilt fuer
+`erstellt_durch` (Fassung), `erfasst_durch` (Einwilligung erteilen/widerrufen), `entschieden_durch`
+(Einstellung/Ablehnung), `durchgefuehrt_durch` (Loeschlauf). Angezeigt wird der Anmeldename
+(`preferred_username`, sonst `sub`); im Audit steht `sub`. Die Eingabefelder verschwinden aus den Masken,
+Werte im Rumpf werden nicht gelesen. **Ausnahme:** `beschluss_durch` der Aufbewahrungsfrist bleibt Freitext —
+es beschreibt das Gremium (z. B. Vorstand), nicht die Person am Bildschirm.
+**Dateibesitz:** `app/auth/deps.py` (additiv: Anmeldename), `personal_bewerbungen.py`,
+`personal_bewerbung_schemas.py`, die zwei Bewerbungs-Screen-Definitions in `screen_definitions_capture.py`
+samt TS-Spiegel, `pages/personal/bewerbung-einwilligung.tsx`, `einwilligungserklaerungen.tsx`,
+`lib/api/bewerbung-einwilligung.ts`, Bewerbungs-Vertraege und -Vitest, QA-Doku, driftende Generatorartefakte.
+**Nachweis:** QA `docs/quality-assurance/bewerbung-anmeldekennung-20261011.md`; sechs neue Vertraege
+(25 in `test_bewerbung_command_urheber_vertrag.py`), Nachbarschaft 455 gruen gegen `valeo_probe` im
+isolierten Lieferstand; Vitest 14, `tsc` 0. Drei Bestandsvertraege umgestellt (Entscheidung,
+Loeschprotokoll, „ohne Kennung kein Lauf“ = 403 statt 422). `get_current_user` liefert zusaetzlich
+`name`; `anmeldename()` in `app/auth/deps.py` ist fuer andere Module wiederverwendbar.
+**Offen:** dieselbe Angabe (`erfasst_durch`) in Etiketten, Schaeden, Genossenschaft,
+Kontrakt-Disposition, Zeitkonto; Sichtpruefung der zwei Masken.
+
+## BEWERBUNG-COMMAND-URHEBER-20261011 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11, auf Zuruf von Codex (Antwort auf den Handshake unten).
 **Ziel:** Die drei Befunde an den Wegen „Bewerbung anlegen“ und „Einwilligungsfassung anlegen“ schliessen
 (fachlicher Weg und Masken-Command): Urheber aus dem geprueften Token statt aus Kopf/Rumpf; Idempotenz-
 schluessel tatsaechlich durchgesetzt; Fehlermeldungen ohne Bewerberdaten; geprueften Urheber im Audit.
@@ -24,6 +80,20 @@ Parameter), eine additive Migration (`crm_action_audit_log.performed_by`), neue 
 **Grenze zu Codex:** Die vier Vertragsdateien aus `QUALITY-GATE-MASK-CONTRACT-20261011` bleiben bis zu
 dessen Commit unberuehrt. Danach aendere ich in `test_bewerbung_erklaerung_fassung_vertrag.py` genau die
 eine Erwartung, die den Urheber aus dem Rumpf festschreibt (`erstellt_durch == "Personalbuero"`).
+**Lieferung:** Urheber aus `sub` des geprueften Tokens (fachlicher Weg, Masken-Command, MCP); ohne
+Kennung 403. Idempotenzschluessel durchgesetzt (Transaktionssperre je Schluessel, frueheres Ergebnis
+zurueck, andere Angaben abgewiesen). `fehler_deuten` nennt Fehlerklasse/SQLSTATE/Regel statt Anweisung
+und Werten; Eingabefehler ohne Eingabe. Migration `audit_urheber_20261011`:
+`crm_action_audit_log.performed_by`, nur von Wegen geschrieben, die ihn uebergeben.
+**Nachweis:** QA `docs/quality-assurance/bewerbung-command-urheber-20261011.md`; 19 neue Vertraege,
+Nachbarschaft 572 gruen gegen `valeo_probe` im isolierten Lieferstand (auf `ac7b576b5`), Gates gruen.
+Nach Codex' Commit zwei Erwartungen angepasst: `erstellt_durch == "dev"` und Fehlerdeutung ueber
+`InsufficientPrivilege` statt Rohtext. **Richtigstellung:** Fassungen waren nie doppelt anlegbar
+(gleicher Wortlaut = 409); betroffen war die Bewerbung.
+**Offen:** Eingabefeld „Erstellt durch“ der Erklaerungsmaske wird noch gesendet, aber nicht gelesen
+(SD + TS-Spiegel + `ErklaerungIn`); uebrige Personenangaben aus dem Rumpf (`entschieden_durch`,
+`beschluss_durch`, `durchgefuehrt_durch`, `erfasst_durch`) sind fachlich zu entscheiden; Idempotenz
+der uebrigen Masken-Commands ungeprueft.
 
 ## HANDSHAKE — Claude Code an Codex: Pruefung der zwei Bewerbungs-Commandwege (2026-10-11)
 

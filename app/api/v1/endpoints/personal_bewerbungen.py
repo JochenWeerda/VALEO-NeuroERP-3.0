@@ -24,7 +24,9 @@ from __future__ import annotations
 import logging
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
+from pydantic import ValidationError
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.personal_bewerbung_schemas import (
@@ -42,7 +44,7 @@ from app.api.v1.schemas.personal_bewerbung_schemas import (
     StufeIn,
     TrockenlaufOut,
 )
-from app.auth.deps import require_roles
+from app.auth.deps import anmeldename, require_roles
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
@@ -60,6 +62,79 @@ personal_write = require_roles("PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin",
 personal_admin = require_roles("PERSONAL_ADMIN", "admin")
 
 router = APIRouter(prefix="/personal", tags=["personal", "hr", "recruiting"])
+
+
+def _urheber(nutzer: dict) -> str:
+    """Wer handelt, sagt die gepruefte Anmeldung — nie ein Kopf oder der Rumpf der Anfrage.
+
+    Bis zum 11.10.2026 nahm der Masken-Command den Urheber einer Einwilligungsfassung aus
+    ``X-User-ID``, sonst aus dem Rumpf, sonst ``"personal-user"``; der fachliche Weg nahm
+    ihn aus dem Rumpf. Der Wert steht in einer Fassung, die sich nicht loeschen laesst.
+    """
+    name = anmeldename(nutzer)
+    if not name:
+        raise HTTPException(
+            status_code=403,
+            detail="Die Anmeldung nennt keine Benutzerkennung; ohne Urheber wird nichts geschrieben.",
+        )
+    return name
+
+
+def _kennung(nutzer: dict) -> str:
+    """Die stabile Kennung fuer das Audit (``sub``); der lesbare Name kann sich aendern."""
+    return str((nutzer or {}).get("sub") or "").strip()[:120] or _urheber(nutzer)
+
+
+def _eingabefehler(fehler: Exception) -> list[dict[str, str]]:
+    """Feld und Regel, nie der eingegebene Wert: Bewerberdaten gehoeren nicht in Fehlermeldungen."""
+    if isinstance(fehler, ValidationError):
+        return [
+            {"field": ".".join(str(teil) for teil in e["loc"]) or "_entity", "message": e["msg"],
+             "severity": "blocking"}
+            for e in fehler.errors(include_url=False, include_context=False, include_input=False)
+        ]
+    return [{"field": "_entity", "message": "Die Eingabe ist nicht lesbar.", "severity": "blocking"}]
+
+
+def _frueherer_lauf(db: Session, tenant_id: str, action_key: str, entity_type: str,
+                    schluessel: str) -> Optional[dict]:
+    """Sperrt den Idempotenzschluessel bis zum Ende der Transaktion und liefert den frueheren Lauf.
+
+    Der Schluessel wurde bis zum 11.10.2026 nur ins Audit geschrieben: Ein wiederholtes
+    ``execute`` legte eine zweite Bewerbung an. Die Sperre legt zwei gleichzeitige Laeufe
+    hintereinander; der zweite findet den Auditeintrag des ersten.
+    """
+    db.execute(
+        text("SELECT pg_advisory_xact_lock(hashtextextended(:s, 0))"),
+        {"s": f"mask_action:{tenant_id}:{entity_type}:{action_key}:{schluessel}"},
+    )
+    zeile = db.execute(
+        text(
+            "SELECT id, entity_id FROM domain_crm.crm_action_audit_log "
+            "WHERE tenant_id = :t AND action_key = :a AND entity_type = :e AND idempotency_key = :k "
+            "ORDER BY performed_at LIMIT 1"
+        ),
+        {"t": tenant_id, "a": action_key, "e": entity_type, "k": schluessel},
+    ).mappings().first()
+    return dict(zeile) if zeile else None
+
+
+def _wiederholung(action_key: str, mode: str, frueher: dict, gleich: Optional[bool]) -> MaskActionResult:
+    """Antwort auf einen Schluessel, der schon gelaufen ist. ``gleich`` ist ``None``, wenn es den
+    Satz nicht mehr gibt (z. B. nach dem Loeschlauf) — auch dann wird nichts neu angelegt."""
+    if gleich is False:
+        return MaskActionResult(
+            actionKey=action_key, mode=mode, success=False,
+            error="Dieser Idempotenzschluessel gehoert zu einem frueheren Auftrag mit anderen Angaben; "
+                  "nichts angelegt.",
+            validationErrors=[{"field": "_idempotencyKey", "message": "Schluessel bereits verwendet",
+                               "severity": "blocking"}],
+        )
+    return MaskActionResult(
+        actionKey=action_key, mode=mode, success=True,
+        summary="Dieser Auftrag wurde bereits ausgefuehrt — nichts erneut angelegt.",
+        affectedIds=[str(frueher["entity_id"])], auditEntryId=str(frueher["id"]),
+    )
 
 
 @router.get("/applications", response_model=List[BewerbungOut],
@@ -217,6 +292,7 @@ async def list_loeschlaeufe(
              summary="Löschlauf durchführen", dependencies=[Depends(personal_admin)])
 async def post_loeschlauf(
     payload: LoeschlaufIn,
+    nutzer: dict = Depends(personal_admin),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -235,7 +311,7 @@ async def post_loeschlauf(
         if not regel:
             raise loeschlauf.ohne_regel(tenant_id)
         ergebnis = loeschlauf.lauf_ausfuehren(
-            db, tenant_id, str(uuid7()), regel, payload.durchgefuehrt_durch, payload.limit
+            db, tenant_id, str(uuid7()), regel, _urheber(nutzer), payload.limit
         )
         db.commit()
     except HTTPException:
@@ -280,17 +356,21 @@ async def list_erklaerungen(
              response_model=ErklaerungOut, summary="Neue Fassung der Einwilligungserklärung", dependencies=[Depends(personal_admin)])
 async def post_erklaerung(
     payload: ErklaerungIn,
+    # Die Rolle steht am Weg und damit vor jedem Parameter: erst pruefen, dann die Datenbank oeffnen.
+    nutzer: dict = Depends(personal_admin),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     """Legt die naechste Fassung an.
 
     Derselbe Wortlaut ist **eine** Fassung: Ein zweites Anlegen antwortet 409 und
-    nennt die vorhandene Nummer.
+    nennt die vorhandene Nummer. ``erstellt_durch`` ist die Kennung aus der Anmeldung;
+    ein Wert im Rumpf wird nicht gelesen.
     """
+    urheber = _urheber(nutzer)
     try:
         ergebnis = einwilligung.erklaerung_anlegen(
-            db, tenant_id, str(uuid7()), payload.wortlaut, payload.erstellt_durch
+            db, tenant_id, str(uuid7()), payload.wortlaut, urheber
         )
         db.commit()
     except HTTPException:
@@ -336,6 +416,7 @@ async def get_application(
 async def update_application_stage(
     application_id: str,
     payload: StufeIn,
+    nutzer: dict = Depends(personal_write),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -350,7 +431,7 @@ async def update_application_stage(
             db, tenant_id, application_id, payload.stage,
             note=payload.note,
             ablehnungsgrund=payload.ablehnungsgrund,
-            entschieden_durch=payload.entschieden_durch,
+            entschieden_durch=_urheber(nutzer),
         )
         db.commit()
     except HTTPException:
@@ -430,6 +511,7 @@ async def get_einwilligung(
 async def post_einwilligung(
     application_id: str,
     payload: EinwilligungIn,
+    nutzer: dict = Depends(personal_write),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -441,7 +523,8 @@ async def post_einwilligung(
     """
     try:
         ergebnis = einwilligung.erteilen(
-            db, tenant_id, application_id, str(uuid7()), payload
+            db, tenant_id, application_id, str(uuid7()),
+            payload.model_copy(update={"erfasst_durch": _urheber(nutzer)}),
         )
         db.commit()
     except HTTPException:
@@ -460,15 +543,15 @@ async def post_einwilligung(
  dependencies=[Depends(personal_write)])
 async def delete_einwilligung(
     application_id: str,
-    erfasst_durch: Optional[str] = Query(None, max_length=120),
+    nutzer: dict = Depends(personal_write),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     """Widerruft die Einwilligung — **ohne Rumpf, ohne Grund, jederzeit**.
 
     Art. 7 Abs. 3 DSGVO: Der Widerruf darf nicht schwerer sein als die Erteilung.
-    Deshalb verlangt dieser Weg nichts ausser der Bewerbung; `erfasst_durch` ist
-    freiwillig.
+    Deshalb verlangt dieser Weg nichts ausser der Bewerbung; wer ihn erfasst hat,
+    traegt das System aus der Anmeldung ein.
 
     Die Erteilung bleibt im Verzeichnis stehen. Der Widerruf ist eine **neue** Zeile:
     Wer die Erteilung ueberschreibt, vernichtet den Nachweis, den Art. 7 Abs. 1
@@ -479,7 +562,7 @@ async def delete_einwilligung(
     """
     try:
         ergebnis = einwilligung.widerrufen(
-            db, tenant_id, application_id, str(uuid7()), erfasst_durch
+            db, tenant_id, application_id, str(uuid7()), _urheber(nutzer)
         )
         db.commit()
     except HTTPException:
@@ -497,10 +580,10 @@ async def delete_einwilligung(
     dependencies=[Depends(personal_write)],
 )
 def action_bewerbung_speichern(
-    request: Request,
     body: dict[str, Any] = Body(default_factory=dict),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(personal_write),
 ) -> MaskActionResult:
     """CE fuer personal/bewerbungen:speichern — dryRun ohne INSERT; Token-Mandant."""
     try:
@@ -523,10 +606,9 @@ def action_bewerbung_speichern(
             mode=mode,
             success=False,
             error="Ungueltige Bewerbungsdaten.",
-            validationErrors=[
-                {"field": "_entity", "message": str(exc), "severity": "blocking"}
-            ],
+            validationErrors=_eingabefehler(exc),
         )
+    urheber = _urheber(nutzer)
     preview = {
         "applicant_name": opened.applicant_name,
         "applicant_email": opened.applicant_email,
@@ -546,6 +628,18 @@ def action_bewerbung_speichern(
     try:
         from app.services.mask_action_runtime_service import _write_audit, _write_outbox
 
+        if idempotency_key:
+            frueher = _frueherer_lauf(db, tenant_id, "speichern", "hr_application", idempotency_key)
+            if frueher is not None:
+                gleich: Optional[bool] = None
+                try:
+                    da = dienst.holen(db, tenant_id, str(frueher["entity_id"]))
+                    gleich = all(da.get(feld) == getattr(opened, feld) for feld in
+                                 ("applicant_name", "applicant_email", "position_title", "source"))
+                except HTTPException:
+                    gleich = None  # die Bewerbung gibt es nicht mehr; angelegt wird trotzdem nichts
+                db.rollback()
+                return _wiederholung("speichern", mode, frueher, gleich)
         created = dienst.anlegen(db, tenant_id, str(uuid7()), opened)
         entity_id = str(created["id"])
         audit_id = _write_audit(
@@ -556,7 +650,9 @@ def action_bewerbung_speichern(
             entity_id=entity_id,
             audit_reason=audit_reason,
             idempotency_key=idempotency_key,
-            summary=f"Bewerbung {opened.applicant_name} erfasst",
+            # Ohne Namen: das Audit ueberlebt den Loeschlauf der Bewerbung.
+            summary="Bewerbung erfasst",
+            performed_by=_kennung(nutzer),
         )
         outbox_id = _write_outbox(
             db,
@@ -581,7 +677,7 @@ def action_bewerbung_speichern(
         actionKey="speichern",
         mode=mode,
         success=True,
-        summary=f"Bewerbung {opened.applicant_name} erfasst.",
+        summary="Bewerbung erfasst.",
         affectedIds=[entity_id],
         auditEntryId=audit_id,
         outboxEventId=outbox_id,
@@ -596,10 +692,10 @@ def action_bewerbung_speichern(
     dependencies=[Depends(personal_admin)],
 )
 def action_erklaerung_anlegen(
-    request: Request,
     body: dict[str, Any] = Body(default_factory=dict),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(personal_admin),
 ) -> MaskActionResult:
     """CE fuer personal/einwilligungserklaerungen:anlegen — dryRun ohne INSERT."""
     try:
@@ -622,11 +718,9 @@ def action_erklaerung_anlegen(
             mode=mode,
             success=False,
             error="Ungueltiger Wortlaut.",
-            validationErrors=[
-                {"field": "wortlaut", "message": str(exc), "severity": "blocking"}
-            ],
+            validationErrors=_eingabefehler(exc),
         )
-    actor = request.headers.get("X-User-ID") or opened.erstellt_durch or "personal-user"
+    actor = _urheber(nutzer)
     preview = {
         "wortlaut": opened.wortlaut[:120],
         "erstellt_durch": actor,
@@ -644,6 +738,15 @@ def action_erklaerung_anlegen(
     try:
         from app.services.mask_action_runtime_service import _write_audit, _write_outbox
 
+        if idempotency_key:
+            frueher = _frueherer_lauf(db, tenant_id, "anlegen", "hr_consent_text", idempotency_key)
+            if frueher is not None:
+                wortlaute = {str(e["id"]): e["wortlaut"]
+                             for e in einwilligung.erklaerungen_auflisten(db, tenant_id, limit=200)}
+                bekannt = wortlaute.get(str(frueher["entity_id"]))
+                gleich = None if bekannt is None else bekannt == opened.wortlaut.strip(einwilligung.LEERRAUM)
+                db.rollback()
+                return _wiederholung("anlegen", mode, frueher, gleich)
         created = einwilligung.erklaerung_anlegen(
             db, tenant_id, str(uuid7()), opened.wortlaut, actor
         )
@@ -656,7 +759,8 @@ def action_erklaerung_anlegen(
             entity_id=entity_id or tenant_id,
             audit_reason=audit_reason,
             idempotency_key=idempotency_key,
-            summary=f"Einwilligungsfassung angelegt by {actor}",
+            summary="Einwilligungsfassung angelegt",
+            performed_by=_kennung(nutzer),
         )
         outbox_id = _write_outbox(
             db,

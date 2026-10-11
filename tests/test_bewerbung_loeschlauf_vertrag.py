@@ -505,15 +505,21 @@ class TestAuftrag:
         assert antwort.status_code == 422
         assert anzahl(engine, HAUS_A) == 1
 
-    def test_ohne_namen_kein_lauf(self, client, engine):
+    def test_ohne_kennung_in_der_anmeldung_kein_lauf(self, client, engine):
         # Ein Eingriff, der Daten endgültig vernichtet, muss einem Menschen
-        # zurechenbar sein.
+        # zurechenbar sein. Bis zum 11.10.2026 genügte dafür ein getippter Name im
+        # Rumpf; jetzt zählt die Anmeldung, und ohne Kennung läuft nichts.
+        from app.auth.deps import get_current_user
+        from app.main import app
+
         frist_setzen(client, HAUS_A)
         bewerbung_anlegen(engine, HAUS_A)
-        antwort = client.post(
-            LAUF, json={"bestaetigung": "ENDGUELTIG LOESCHEN"}, headers=kopf(HAUS_A)
-        )
-        assert antwort.status_code == 422
+        app.dependency_overrides[get_current_user] = lambda: {"sub": "", "roles": ["PERSONAL_ADMIN"]}
+        try:
+            antwort = client.post(LAUF, json=AUFTRAG, headers=kopf(HAUS_A))
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+        assert antwort.status_code == 403
         assert anzahl(engine, HAUS_A) == 1
 
     def test_unbekanntes_feld_wird_abgewiesen(self, client):
@@ -532,7 +538,8 @@ class TestProtokoll:
         lauf = client.post(LAUF, json=AUFTRAG, headers=kopf(HAUS_A)).json()
         liste = client.get(PROTOKOLL, headers=kopf(HAUS_A)).json()
         assert [z["id"] for z in liste] == [lauf["id"]]
-        assert liste[0]["durchgefuehrt_durch"] == "Pruefstand"
+        # Die Anmeldung, nicht der Name aus dem Rumpf (Dev-Token: "dev").
+        assert liste[0]["durchgefuehrt_durch"] == "dev"
         assert liste[0]["aufbewahrung_tage"] == TAGE
 
     def test_protokoll_traegt_keinen_personenbezug(self, engine):

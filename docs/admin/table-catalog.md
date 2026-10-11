@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 670 Tabellen, 8837 Spalten.**
+**31 Schemas, 670 Tabellen, 8838 Spalten.**
 
 ## Schemas
 
@@ -28,7 +28,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_compliance` | `dms-compliance` | 15 | 188 |
 | `domain_contracts` | `agrar` | 3 | 30 |
 | `domain_controlling` | `finance` | 9 | 88 |
-| `domain_crm` | `crm` | 45 | 800 |
+| `domain_crm` | `crm` | 45 | 801 |
 | `domain_dev_mock` | `platform` | 1 | 7 |
 | `domain_docflow` | `dms-compliance` | 22 | 286 |
 | `domain_docs` | `platform` | 2 | 25 |
@@ -205,7 +205,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_crm.contacts` | `app/api/v1/endpoints/compliance_dsgvo.py`, `app/infrastructure/models/__init__.py` | `app/api/v1/endpoints/compliance_dsgvo.py` | — |
 | `domain_crm.credit_limits` | `app/api/v1/endpoints/credit_management.py`, `app/api/v1/endpoints/crm_360.py`, `app/services/customer_service.py` | `app/api/v1/endpoints/credit_management.py` | — |
 | `domain_crm.credit_overrides` | — | `app/api/v1/endpoints/credit_management.py` | — |
-| `domain_crm.crm_action_audit_log` | — | `app/api/v1/endpoints/crm_360.py`, `app/services/mask_action_runtime_service.py` | — |
+| `domain_crm.crm_action_audit_log` | `app/api/v1/endpoints/personal_bewerbungen.py` | `app/api/v1/endpoints/crm_360.py`, `app/services/mask_action_runtime_service.py` | — |
 | `domain_crm.crm_campaign_recipients` | `app/api/v1/endpoints/crm_campaigns.py`, `app/infrastructure/models/crm_campaign_models.py` | `app/api/v1/endpoints/crm_campaigns.py` | — |
 | `domain_crm.crm_campaign_templates` | `app/api/v1/endpoints/crm_campaigns.py`, `app/infrastructure/models/crm_campaign_models.py` | `app/api/v1/endpoints/crm_campaigns.py` | — |
 | `domain_crm.crm_campaigns` | `app/api/v1/endpoints/crm_campaigns.py`, `app/infrastructure/models/crm_campaign_models.py` | `app/api/v1/endpoints/crm_campaigns.py` | — |
@@ -885,7 +885,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `contacts` | `crm` | native | `id` | id, first_name, last_name, email, phone, position, department, customer_id, is_active, created_at, updated_at, deleted_at |
 | `credit_limits` | `crm` | native | `id` | id, tenant_id, customer_id, credit_limit_eur, warning_threshold_percent, block_threshold_percent, created_at, updated_at |
 | `credit_overrides` | `crm` | native | `id` | id, tenant_id, customer_id, approved_by, reason, valid_until, created_at |
-| `crm_action_audit_log` | `crm` | native | `id` | id, tenant_id, action_key, entity_type, entity_id, idempotency_key, audit_reason, performed_at, result_summary |
+| `crm_action_audit_log` | `crm` | native | `id` | id, tenant_id, action_key, entity_type, entity_id, idempotency_key, audit_reason, performed_at, result_summary, performed_by |
 | `crm_campaign_recipients` | `crm` | native | `id` | id, tenant_id, campaign_id, recipient_id, recipient_type, status, sent_at, opened_at, clicked_at, converted_at, bounce_reason, meta, created_at |
 | `crm_campaign_templates` | `crm` | native | `id` | id, tenant_id, name, description, campaign_type, subject_line, message_body, is_active, created_by, meta, created_at, updated_at |
 | `crm_campaigns` | `crm` | native | `id` | id, tenant_id, name, description, state, campaign_type, template_id, segment_id, start_date, end_date, budget, owner_id, total_sent, total_delivered, total_bounced, total_opens, total_clicks, total_conversions, revenue_generated, activated_at, paused_at, completed_at, campaign_channel, target_customer_type, seasonal_context, meta, created_at, updated_at |

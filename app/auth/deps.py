@@ -4,7 +4,7 @@ Bearer-Token-Validierung und Rollen-Check
 """
 
 from __future__ import annotations
-from typing import List, TypedDict
+from typing import List, Optional, TypedDict
 from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from .jwt import decode_token
@@ -33,6 +33,7 @@ class User(TypedDict, total=False):
     """Authenticated User Object"""
     sub: str  # User ID / Username
     roles: List[str]  # User Roles
+    name: str  # Anmeldename fuer Menschen (preferred_username, sonst name/email, sonst sub)
 
 
 def get_current_user(
@@ -53,7 +54,7 @@ def get_current_user(
     """
     token = (creds.credentials or "").strip()
     if settings.API_DEV_TOKEN and token == settings.API_DEV_TOKEN:
-        return {"sub": "dev", "roles": _DEV_ROLES}
+        return {"sub": "dev", "roles": _DEV_ROLES, "name": "dev"}
 
     try:
         claims = decode_token(creds.credentials)
@@ -67,7 +68,23 @@ def get_current_user(
     if not isinstance(roles, list):
         roles = []
 
-    return {"sub": claims.get("sub", ""), "roles": roles}
+    kennung = claims.get("sub", "")
+    name = next(
+        (str(claims[k]).strip() for k in ("preferred_username", "name", "email")
+         if isinstance(claims.get(k), str) and claims[k].strip()),
+        kennung,
+    )
+    return {"sub": kennung, "roles": roles, "name": name}
+
+
+def anmeldename(user: Optional[dict]) -> str:
+    """Wie die angemeldete Person in Belegen heisst: ihr Anmeldename, sonst ihre Kennung.
+
+    ``sub`` ist bei Keycloak und Entra eine UUID — richtig fuer das Audit, unlesbar in
+    einem Feld "Erfasst durch". Leer, wenn die Anmeldung weder Namen noch Kennung nennt.
+    """
+    daten = user or {}
+    return str(daten.get("name") or daten.get("sub") or "").strip()[:120]
 
 
 def require_roles(*needed: str):

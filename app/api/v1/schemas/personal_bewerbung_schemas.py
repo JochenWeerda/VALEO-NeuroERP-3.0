@@ -48,7 +48,7 @@ class StufeIn(BaseModel):
     stage: Stufe
     note: Optional[str] = None
     ablehnungsgrund: Optional[str] = None
-    entschieden_durch: Optional[str] = Field(default=None, max_length=120)
+    entschieden_durch: Optional[str] = Field(default=None, max_length=120)  # veraltet: wird nicht gelesen, es gilt die Anmeldung
 
 
 class BewerbungOut(BaseModel):
@@ -144,7 +144,7 @@ class LoeschlaufIn(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    durchgefuehrt_durch: str = Field(min_length=1, max_length=120)
+    durchgefuehrt_durch: Optional[str] = Field(default=None, max_length=120)  # veraltet: wird nicht gelesen, es gilt die Anmeldung
     bestaetigung: Literal["ENDGUELTIG LOESCHEN"]
     #: Obergrenze je Lauf. Ein abgeschnittener Lauf sagt das in ``weitere_faellig``.
     limit: int = Field(default=1000, ge=1, le=5000)
@@ -191,7 +191,7 @@ class EinwilligungIn(BaseModel):
     #: dem Formular. Ohne sie ist nicht nachweisbar, **wozu** eingewilligt wurde. Kein
     #: freier Text: Zwei Quellen fuer den Wortlaut liefen still auseinander.
     fassung: int = Field(ge=1)
-    erfasst_durch: Optional[str] = Field(default=None, max_length=120)
+    erfasst_durch: Optional[str] = Field(default=None, max_length=120)  # veraltet: wird nicht gelesen, es gilt die Anmeldung
 
 
 class EinwilligungVorgangOut(BaseModel):
@@ -238,7 +238,7 @@ class ErklaerungIn(BaseModel):
     #: Die Nummer vergibt das System — wer sie mitschickt, wird abgewiesen statt
     #: still ueberstimmt.
     wortlaut: str = Field(min_length=1)
-    erstellt_durch: Optional[str] = Field(default=None, max_length=120)
+    erstellt_durch: Optional[str] = Field(default=None, max_length=120)  # veraltet: wird nicht gelesen, es gilt die Anmeldung
 
 
 class ErklaerungOut(BaseModel):

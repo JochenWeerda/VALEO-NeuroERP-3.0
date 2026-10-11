@@ -93,20 +93,42 @@ def fehler_deuten(db: Session, fehler: Exception, was: str, tenant_id: str) -> H
     db.rollback()
     logger.exception("%s fehlgeschlagen (Mandant %s)", was, tenant_id)
     urgrund = getattr(fehler, "orig", None)
+    grund = grund_ohne_daten(fehler)
     if isinstance(fehler, ProgrammingError) and isinstance(urgrund, (UndefinedTable, UndefinedColumn)):
         return HTTPException(
             status_code=503,
             detail={
                 "error": f"{was}: Die Bewerbungstabelle ist nicht auf dem Migrationsstand.",
-                "grund": str(fehler),
+                "grund": grund,
                 "migration_hint": MIGRATIONS_HINWEIS["X-Migration-Hint"],
             },
             headers=MIGRATIONS_HINWEIS,
         )
     return HTTPException(
         status_code=409,
-        detail={"error": f"{was} abgewiesen", "grund": str(fehler)},
+        detail={"error": f"{was} abgewiesen", "grund": grund},
     )
+
+
+def grund_ohne_daten(fehler: Exception) -> str:
+    """Fehlerklasse, SQLSTATE und Name der verletzten Regel — nie Anweisung oder Werte.
+
+    ``str(fehler)`` eines Datenbankfehlers enthaelt die Anweisung samt Parametern, und
+    die Meldung des Servers nennt bei ungueltigen Eingaben den Wert selbst. Bis zum
+    11.10.2026 ging beides als ``grund`` an den Aufrufer: Name und Adresse der
+    Bewerbenden standen in der Fehlermeldung. Der volle Fehler steht im Protokoll.
+    """
+    urgrund = getattr(fehler, "orig", None) or fehler
+    teile = [type(urgrund).__name__]
+    sqlstate = getattr(urgrund, "pgcode", None)
+    if sqlstate:
+        teile.append(f"SQLSTATE {sqlstate}")
+    diag = getattr(urgrund, "diag", None)
+    for merkmal, wort in (("constraint_name", "Regel"), ("table_name", "Tabelle"), ("column_name", "Spalte")):
+        wert = getattr(diag, merkmal, None)
+        if wert:
+            teile.append(f"{wort} {wert}")
+    return ", ".join(teile)
 
 
 def als_dict(row: Any) -> dict:

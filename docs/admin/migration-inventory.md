@@ -107,6 +107,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `articles_model_alignment_20260214` | align domain_inventory.articles with Article model |
 | `artikelnummer_mandant_20261008` | Artikelnummer je Mandant eindeutig statt systemweit. |
 | `audit_attestations_20260917` | Die Attestierung bekommt ihre Tabelle. |
+| `audit_urheber_20261011` | Masken-Audit: gepruefter Urheber. |
 | `b38680c2f581_add_harvest_acceptance_with_nuts2_` | add_harvest_acceptance_with_nuts2_20260217 |
 | `bank_gl_binding_20261001` | Persist an explicit tenant-bound bank-to-ledger link; no inferred backfill. |
 | `bank_legacy_retirement_20261001` | Remove the competing bank model and its development-only legacy records. |
