@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## LLM-JSON-CONTRACT-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Vier duplizierte LLM-JSON-/Fence-Parser zentralisieren; Nichtobjekte und nichtfinite Zahlen sicher abweisen, vorhandene Fachfallbacks nutzen.
+**Dateibesitz:** app/services/llm_gateway.py nur neuer JSON-Objektparser; kaeufer_klassifikator.py, whatsapp_intake_service.py und app/api/v1/endpoints/crm_kim.py nur Antwortparse-Hunks; neue tests/test_llm_json_contract.py, eigene QA-/Workboard-Doku.
+**Abnahme:** echte Verbraucher akzeptieren reine und korrekt eingefasste JSON-Objekte; Listen/Skalare/NaN/defekte Fences fallen nachvollziehbar zur bestehenden Fachlogik zurueck; private Antworten nicht loggen. Kein Netz/DB/Docker/LLM-Aufruf, keine Route/Schema/Auth-Aenderung und keine Sonar-Ausnahme.
+
 ## MAHNWESEN-EINZELMASKE-ABLOESEN-20261011 — in Arbeit, Claude Code
 
 **Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt 1 aus `versandwege-echt-20261008.md`.
