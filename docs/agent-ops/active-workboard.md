@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## QUALITY-GATE-SECRET-TEST-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Zufallsbedingten Backend-CI-Fehler aus develop Run 38126200584 beseitigen: Base64 kann die zwei Klartextbuchstaben pw zufaellig enthalten.
+**Dateibesitz:** tests/test_postfaecher.py nur TestGeheimnis.test_an_mandant_und_zweck_gebunden; neue tests/test_geheimnis_contract.py und eigene QA-/Workboard-Doku.
+**Abnahme:** Verschluesselung/Roundtrip/AAD/Tamper/Schluesselbindung real und deterministisch ohne Datenbank pruefen; erlaubten Base64-Zufall explizit reproduzieren. Keine Produktkrypto-Aenderung/Schwellenabsenkung. Gemeinsamer Pruefstand --status ohne URL nicht verfuegbar; keine DB-Nutzung noetig.
+
 ## MCP-ASYNC-LIFECYCLE-20261011 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Blockierende stdio-MCP-Aufrufe und liegenbleibende Node-Prozesse beheben; JSON-RPC-Antworten validieren.
