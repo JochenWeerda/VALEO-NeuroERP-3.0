@@ -11,6 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MAHNWESEN-ROLLEN-20261011 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt aus EIN-MAHNLAUF-20261011.
+**Befund:** Die elf Mahnwege (`/finance/mahnlauf/*`, `/finance/dunning*`) verlangen eine Anmeldung, aber keine
+Rolle: Wer angemeldet ist, kann einen Mahnlauf ausloesen und Mahnungen versenden. **Ziel:** das bestehende
+Muster aus `app/auth/finance_roles.py` (Zahlungslaeufe, Eingangsrechnungen) — Lesen `finance_read`, Mahnlauf,
+Anlegen, Versenden, Bezahlt-Vermerk `finance_write`; Pruefung vor dem ersten Datenbankzugriff.
+**Dateibesitz:** nur die Dekoratoren in `app/api/v1/endpoints/dunning.py` und `finance_dunning.py`, neue
+Vertragsdatei `tests/test_mahnwesen_rollen_vertrag.py`, Anpassung der Mahn-Tests, QA-Doku, driftende
+Generatorartefakte.
+
 ## WHATSAPP-ACCESS-20261011 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Drei WhatsApp-Vorbereitungs-/Outbox-Endpunkte an bestehende verifizierte OIDC-Mandanten-/Scope-Guards binden; Payload und Query koennen keinen fremden Mandanten waehlen.
