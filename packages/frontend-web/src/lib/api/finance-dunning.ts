@@ -21,6 +21,11 @@ export type DunningCandidate = {
 }
 
 export type DunningNotice = {
+  id: string
+  /** Wie die Mahnung hinausging; leer, solange sie nicht versendet ist. */
+  versand_art: 'email' | 'post' | null
+  empfaenger: string | null
+  versendet_am: string | null
   stufe: number
   datum: string | null
   offen: number | null
@@ -56,6 +61,24 @@ export function useRunDunning() {
       (await apiClient.post<{ ok: boolean; erzeugt: number }>(`${BASE}/run`, input)).data,
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['finance-dunning'] })
+    },
+  })
+}
+
+/**
+ * Versendet eine Mahnung per E-Mail (Postfach "fibu") oder haelt den Postversand fest.
+ * Der Server setzt "versendet" erst nach Annahme durch den Mailserver; ohne Adresse,
+ * Postfach oder Freigabe kommt ein Fehler mit Grund.
+ */
+export function useSendDunning() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: { id: string; versandArt: 'email' | 'post' }) =>
+      (await apiClient.put<{ status: string }>(
+        `/api/v1/finance/dunning/${encodeURIComponent(input.id)}/send`, null, { params: { versand_art: input.versandArt } },
+      )).data,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['finance-dunning', 'notices'] })
     },
   })
 }

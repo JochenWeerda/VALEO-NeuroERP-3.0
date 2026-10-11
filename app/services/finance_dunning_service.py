@@ -159,14 +159,17 @@ class FinanceDunningService:
 
     def list_notices(self, limit: int = 100) -> list[dict]:
         rows = self.db.execute(
-            text("SELECT n.dunning_level, n.dunning_date, n.open_amount, n.dunning_fee, n.interest, "
-                 "n.total_amount, n.payment_deadline, n.status, o.rechnungsnr, o.kunde_name "
+            text("SELECT n.id, n.dunning_level, n.dunning_date, n.open_amount, n.dunning_fee, n.interest, "
+                 "n.total_amount, n.payment_deadline, n.status, n.versand_art, n.empfaenger, n.sent_date, "
+                 "o.rechnungsnr, o.kunde_name "
                  "FROM domain_erp.dunning_notices n "
                  "LEFT JOIN domain_erp.offene_posten o ON o.id = n.op_id AND o.tenant_id = n.tenant_id "
                  "WHERE n.tenant_id = :t ORDER BY n.dunning_date DESC, n.dunning_level DESC LIMIT :lim"),
             {"t": self.tenant_id, "lim": max(1, min(limit, 500))},
         ).mappings().all()
-        return [{"stufe": r["dunning_level"], "datum": r["dunning_date"].isoformat() if r["dunning_date"] else None,
+        return [{"id": r["id"], "versand_art": r["versand_art"], "empfaenger": r["empfaenger"],
+                 "versendet_am": r["sent_date"].isoformat() if r["sent_date"] else None,
+                 "stufe": r["dunning_level"], "datum": r["dunning_date"].isoformat() if r["dunning_date"] else None,
                  "offen": _f(r["open_amount"]), "gebuehr": _f(r["dunning_fee"]), "zinsen": _f(r["interest"]),
                  "gesamt": _f(r["total_amount"]), "frist": r["payment_deadline"].isoformat() if r["payment_deadline"] else None,
                  "status": r["status"], "rechnungsnr": r["rechnungsnr"], "partner": r["kunde_name"]} for r in rows]

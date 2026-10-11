@@ -277,12 +277,18 @@ Lieferstand; Backend-Gates gruen, `tsc` 0 Fehler. **Mitgenommen:** `DunningRespo
 an das Backend aus MCP-MASK-CE-BATCH3 angeglichen (`localEffect` im Typ, Seite gewaehrt
 `admin.postfach.write`); Godfile-Baseline `mask_frontend_bridges.py` 1476 -> 1467.
 **Handshake Cursor/Fuhrpark:** `valeo_neuro_erp` hat `fuhrpark_tenant_ce_20261009` nie gesehen;
-`alembic_version` steht dort jetzt auf `postfach_microsoft_20261008`, das naechste
-`alembic upgrade head` holt Fuhrpark und Versandwege nach. Nicht ausgefuehrt: der Backfill ordnet
-alle Bestandsfahrzeuge `legacy-unassigned` zu. **Handshake Codex/Katalog:** Tabellenkatalog =
+am 2026-10-11 nachgeholt (`alembic upgrade head`, danach Versandwege). Ein Fahrzeug (`EL-AB 123`)
+steht dort jetzt bei `legacy-unassigned` und ist unsichtbar, bis es einem Mandanten zugeordnet wird. **Handshake Codex/Katalog:** Tabellenkatalog =
 Stand `8c09083df` plus `dunning_notices.versand_art`/`empfaenger` und neue Code-Verweise;
 `valeo_probe` kennt neun `create_all`-Tabellen nicht, deshalb nicht blind aus dem Pruefstand erzeugt.
-**Offen:** Sichtpruefung der drei Masken; Mahnschreiben als PDF; MCP-Versand ohne Rollen.
+**Nachtrag Sichtpruefung 2026-10-11:** `/admin/postfaecher` war 404 (Alias fehlte seit dem ersten
+Postfach-Slice) — eingetragen, Routen neu erzeugt (schliesst den Routen-Drift in Universal Mask
+Platform CI). Mahnversand hatte keinen Weg in der Oberflaeche: Liste „Erzeugte Mahnungen“ in
+`pages/finance/mahnlauf.tsx` versendet jetzt je Zeile (E-Mail/Post), `mahnlauf/notices` liefert
+Kennung und Versandweg. 28 Vertraege, Vitest 5 neu, `tsc` 0.
+**Offen:** Einzelmaske `/finance/mahnwesen` ist nicht ans Backend angeschlossen (eigener Slice);
+Mahnschreiben als PDF; MCP-Versand ohne Rollen. **Fremd und rot:** vier Fuhrpark-Masken ohne
+`permission` an Aktionen (Universal Mask Platform CI, seit 2026-10-08).
 
 ## POSTFACH-MICROSOFT365-20261008 — abgeschlossen, Claude Code
 

@@ -57,7 +57,7 @@ Frisch geprüft gegen `valeo_probe` (Upgrade von `fuhrpark_tenant_ce_20261009`).
 
 Alles im isolierten Lieferstand (HEAD-Worktree plus die Dateien dieses Slices), gegen `valeo_probe`:
 
-- `tests/test_versandwege_vertrag.py`: **27 Verträge grün.** SMTP ist an `smtplib` ersetzt;
+- `tests/test_versandwege_vertrag.py`: **27 Verträge grün** (Stand des ersten Commits; siehe Nachtrag). SMTP ist an `smtplib` ersetzt;
   Postfachwahl, Freigaben, Statuswechsel, Kommunikationseintrag und Mandantentrennung laufen echt.
   Je Weg: Erfolg, ohne Postfach (503), ohne Adresse (422), Ablehnung durch den Server (502);
   dazu Freigabe (403), bezahlte Mahnung (409), fremder Mandant (404), Anhang, zwei Schemaverträge.
@@ -74,22 +74,45 @@ Alles im isolierten Lieferstand (HEAD-Worktree plus die Dateien dieses Slices), 
 - Frontend: `tsc` 0 Fehler, ESLint 0 für die geänderten Dateien, Vitest Postfächer und
   Schema-Compiler 19 grün.
 
+## Nachtrag 2026-10-11: Sichtprüfung
+
+Geprüft mit Vite auf Port 3001 und Playwright (headless) gegen die gewachsene Datenbank.
+
+- **Postfächer waren nicht erreichbar.** Das Menü führt nach `/admin/postfaecher`, die Route stand
+  aber in keinem Routeninventar; die Seite zeigte „404 – Seite nicht gefunden“. Der Alias fehlte seit
+  dem ersten Postfach-Slice. Jetzt eingetragen, Routen neu erzeugt (939). Dabei ist auch der
+  Routen-Drift geschlossen, den „Universal Mask Platform CI“ seit dem 08.10.2026 meldet. Die Maske
+  zeigt „Postfach speichern“, „Testmail senden“ und „Beim Anbieter anmelden“.
+- **Der Mahnversand hatte keinen Weg in der Oberfläche.** Die Einzelmaske `/finance/mahnwesen` lädt
+  und speichert fest unter der Kennung `new`, mit Feldnamen, die das Backend nicht kennt, und mit
+  drei fest eingetragenen Beispielkunden; „Senden“ war von dort nie erreichbar. Mahnungen entstehen
+  im Mahnlauf. Dessen Liste „Erzeugte Mahnungen“ (`/finance/mahnlauf`) hat deshalb jetzt je Mahnung
+  „Per E-Mail“ und „Per Post verschickt“, zeigt Status und Versandweg und sperrt je Zeile.
+  `GET /finance/mahnlauf/notices` liefert dafür Kennung, Versandweg und Empfänger.
+  Im Browser mit einer Probemahnung ohne Adresse: 422 und die Begründung des Servers als Meldung.
+  Die Probemahnung ist wieder entfernt.
+- **Anfrage:** Die Maske lädt ohne Fehler; der Versanddialog ist ohne Bestandsanfrage nicht
+  durchgeklickt worden, sein Weg ist über die Verträge gedeckt.
+- `financeService.sendMahnung` rief `POST` auf einen `PUT`-Weg; berichtigt (ohne Aufrufer).
+- Nachweis: Verträge jetzt **28** (neu: die Liste nennt Kennung und Versandweg), mit den beiden
+  Mahn-Testdateien 60 grün; Vitest `mahnlauf-versand` 5 und Postfächer 4 grün; `tsc` 0 Fehler.
+- **Gewachsene Datenbank:** `alembic upgrade head` ist in `valeo_neuro_erp` gelaufen
+  (`fuhrpark_tenant_ce_20261009`, danach `versandwege_echt_20261008`). Betroffen war ein Fahrzeug
+  (`EL-AB 123`); es steht jetzt bei `legacy-unassigned` und ist für die Mandanten unsichtbar, bis
+  es zugeordnet wird.
+
 ## Offen
 
-1. **Gewachsene Datenbank und Fuhrpark:** In `valeo_neuro_erp` ist `fuhrpark_tenant_ce_20261009`
-   nie gelaufen. Weil diese Migration jetzt vor der Versandwege-Migration steht, ist
-   `alembic_version` dort auf `postfach_microsoft_20261008` zurückgestellt; das nächste
-   `alembic upgrade head` holt beide nach (die Versandwege-Migration ist idempotent). Nicht
-   ausgeführt, weil der Fuhrpark-Backfill alle Bestandsfahrzeuge dem Mandanten
-   `legacy-unassigned` zuordnet – das entscheidet der Fuhrpark-Owner.
-2. **Tabellenkatalog:** In `valeo_probe` fehlen neun Tabellen, die CI zusätzlich über
-   `create_all` anlegt. Der Katalog dieses Commits ist deshalb der CI-geprüfte Stand aus
-   `8c09083df` plus die beiden neuen Spalten und die neuen Code-Verweise; er ist nicht blind aus
-   dem Prüfstand erzeugt.
-3. **Ein Archiveintrag im Prüfstand:** Der erste Testlauf schrieb einen Mahnungs-Archiveintrag für
-   den Wegwerf-Mandanten `vw-a-92072e`. Archivierte Inhalte lassen sich nicht löschen
-   (`guard_archived_content`); die Verträge ersetzen den Archiveintrag seitdem.
-4. **Sichtprüfung der Masken** (Mahnwesen, Anfrage, Postfächer) im Browser steht aus.
-5. **Mahnung ohne Beleg:** Die Mail nennt Beträge und Frist als Text; ein Mahnschreiben als PDF
-   gibt es nicht. Der MCP-Versand kennt nur die Kennung des Akteurs, keine Rollen: Postfächer mit
+1. **Einzelmaske `/finance/mahnwesen`:** an das Backend anschließen oder ablösen. Sie ist ein
+   eigener Slice (Debitorenwahl aus den Stammdaten, Feldzuordnung, Laden einer Bestandsmahnung);
+   bis dahin läuft der Versand über den Mahnlauf.
+2. **Mahnschreiben als PDF:** Die Mail nennt Beträge und Frist als Text.
+3. **MCP-Versand ohne Rollen:** Er kennt nur die Kennung des Akteurs; Postfächer mit
    Rollenfreigabe lehnen ihn ab (403), frei gegebene funktionieren.
+4. **Tabellenkatalog:** `valeo_probe` kennt neun Tabellen nicht, die CI über `create_all` anlegt.
+   Der Katalog ist der CI-geprüfte Stand aus `8c09083df` plus die beiden neuen Spalten und die
+   neuen Code-Verweise, nicht blind aus dem Prüfstand erzeugt.
+5. **Ein Archiveintrag im Prüfstand:** Der erste Testlauf schrieb einen Mahnungs-Archiveintrag für
+   den Wegwerf-Mandanten `vw-a-92072e`; archivierte Inhalte lassen sich nicht löschen.
+6. **Nicht aus diesem Slice, aber rot:** „Universal Mask Platform CI“ meldet für vier
+   Fuhrpark-Masken Aktionen ohne `permission` (seit dem 08.10.2026).

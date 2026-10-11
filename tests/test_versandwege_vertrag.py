@@ -458,6 +458,16 @@ class TestMahnung:
         assert self.stand(engine, kennung) == ("sent", "email", "hof@landwirt.example")
         assert len(archiv) == 1 and archiv[0].endswith("|email")
 
+    def test_die_liste_nennt_kennung_und_versandweg(self, engine, client, als, db, smtp):
+        """Ohne Kennung liess sich aus der Liste "Erzeugte Mahnungen" nichts versenden."""
+        postfach(db, "fibu")
+        offen, raus = mahnung(engine), mahnung(engine)
+        als(FIBU)
+        assert client.put(self.WEG.format(raus), headers=kopf()).status_code == 200
+        liste = client.get("/api/v1/finance/mahnlauf/notices", headers=kopf()).json()["items"]
+        nach_kennung = {m["id"]: (m["status"], m["versand_art"], m["empfaenger"]) for m in liste}
+        assert nach_kennung == {offen: ("created", None, None), raus: ("sent", "email", "hof@landwirt.example")}
+
     def test_ohne_adresse_422_und_unversendet(self, engine, client, als, db, smtp, archiv):
         postfach(db, "fibu")
         kennung = mahnung(engine, KUNDE_STUMM)
