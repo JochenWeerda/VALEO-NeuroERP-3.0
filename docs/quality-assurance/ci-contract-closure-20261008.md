@@ -133,7 +133,8 @@ Browser-Screenshot ausschließlich unter dem ignorierten lokalen
 `artifacts/elster/` gesichert. Personenbezogene Formulardaten werden nicht
 versioniert. Am 11.10.2026 gelang mit nachgereichten Zugangsdaten der
 offizielle Entwicklerlogin. Der beauftragte ERiC-44-Lizenzvertrag wurde
-elektronisch akzeptiert; Downloadbereich 44.3.6.0 freigeschaltet. Browserdownloads
-lieferten Zeitlimits, keine neue SDK-Datei wurde erfolgreich gespeichert oder
-integriert bestaetigt. [Zugangsnachweis und Integrationsbedingungen](elster-access-20261011.md).
-SDK-Beschaffung und echte Empfangsquittung bleiben offene Voraussetzungen.
+elektronisch akzeptiert; Downloadbereich 44.3.6.0 freigeschaltet. Browser-Rueckmeldungen liefen ins Zeitlimit; die drei Archive wurden dennoch
+im Downloadordner gespeichert und CRC/SHA-256-geprueft. Offizielles Python-
+Beispiel: lokale Windows-Initialisierung, Versionsabfrage und Beenden ERIC_OK;
+ericapi.dll mit gueltiger Herstellersignatur. Kein Steuerdatensatz versendet. [Zugangsnachweis und Integrationsbedingungen](elster-access-20261011.md).
+Vollstaendige Fachintegration und echte Empfangsquittung bleiben offen.
