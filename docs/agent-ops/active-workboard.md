@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## ELSTER-ACCESS-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Vom Nutzer nachgereichten Entwicklerzugang pruefen, autorisierte ERiC-Lizenzannahme und echten SDK-Downloadstand dokumentieren.
+**Dateibesitz:** eigener ELSTER-Abschnitt docs/quality-assurance/ci-contract-closure-20261008.md, eigener CI-CONTRACT-Abschnitt in Open-Gaps und Workboard, neue QA elster-access-20261011.md. Fremde Hunkbereiche erhalten.
+**Abnahme:** offizieller Entwicklerlogin/Downloadbereich sichtbar, keine Zugangsdaten oder Herstellerpakete in Git; Download nur bei tatsaechlich vorhandener Datei als erfolgreich werten. Echte Steueruebertragung und Vollvalidierung bleiben bis zur Integration gesperrt. Keine DB/Container.
+
 ## QUALITY-GATE-SONAR-BACKEND-20261011 — in arbeit, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Echte verbliebene Sonar-Backendbefunde beheben: Newsletter-Log-Injection, Freigeber-Parameterueberschreibung, unerreichbarer Kulturreturn und redundante Mengenbedingungen.
