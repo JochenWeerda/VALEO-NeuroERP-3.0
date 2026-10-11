@@ -2493,7 +2493,6 @@ def build_personal_bewerbung_einwilligung_screen_definition() -> dict[str, Any]:
                      "helpText": "Höchstens drei Jahre ab heute."},
                     {"key": "kanal", "label": "Eingegangen über", "type": "select", "required": True,
                      "options": _EINWILLIGUNG_KANAELE},
-                    {"key": "erfasst_durch", "label": "Erfasst durch", "type": "text"},
                     {"key": "wortlaut", "label": "Wortlaut der Fassung", "type": "textarea", "readOnly": True},
                 ],
             },
@@ -2582,7 +2581,6 @@ def build_personal_einwilligungserklaerungen_screen_definition() -> dict[str, An
         "fields": [
             {"key": "wortlaut", "label": "Wortlaut", "type": "textarea", "required": True,
              "helpText": "Genau der Text, der unterschrieben wird. Nach dem Anlegen nicht mehr änderbar."},
-            {"key": "erstellt_durch", "label": "Erstellt durch", "type": "text"},
         ],
         "workflow": {"processKey": "personal.einwilligungserklaerungen"},
         "actions": [
@@ -2599,7 +2597,6 @@ def build_personal_einwilligungserklaerungen_screen_definition() -> dict[str, An
                 "method": "POST",
                 "inputFields": [
                     {"key": "wortlaut", "label": "Wortlaut", "type": "textarea", "required": True},
-                    {"key": "erstellt_durch", "label": "Erstellt durch", "type": "text"},
                 ],
             },
             {

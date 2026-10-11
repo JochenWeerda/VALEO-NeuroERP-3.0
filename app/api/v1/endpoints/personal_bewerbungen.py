@@ -44,7 +44,7 @@ from app.api.v1.schemas.personal_bewerbung_schemas import (
     StufeIn,
     TrockenlaufOut,
 )
-from app.auth.deps import require_roles
+from app.auth.deps import anmeldename, require_roles
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
@@ -71,13 +71,18 @@ def _urheber(nutzer: dict) -> str:
     ``X-User-ID``, sonst aus dem Rumpf, sonst ``"personal-user"``; der fachliche Weg nahm
     ihn aus dem Rumpf. Der Wert steht in einer Fassung, die sich nicht loeschen laesst.
     """
-    kennung = str((nutzer or {}).get("sub") or "").strip()
-    if not kennung:
+    name = anmeldename(nutzer)
+    if not name:
         raise HTTPException(
             status_code=403,
             detail="Die Anmeldung nennt keine Benutzerkennung; ohne Urheber wird nichts geschrieben.",
         )
-    return kennung[:120]
+    return name
+
+
+def _kennung(nutzer: dict) -> str:
+    """Die stabile Kennung fuer das Audit (``sub``); der lesbare Name kann sich aendern."""
+    return str((nutzer or {}).get("sub") or "").strip()[:120] or _urheber(nutzer)
 
 
 def _eingabefehler(fehler: Exception) -> list[dict[str, str]]:
@@ -287,6 +292,7 @@ async def list_loeschlaeufe(
              summary="Löschlauf durchführen", dependencies=[Depends(personal_admin)])
 async def post_loeschlauf(
     payload: LoeschlaufIn,
+    nutzer: dict = Depends(personal_admin),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -305,7 +311,7 @@ async def post_loeschlauf(
         if not regel:
             raise loeschlauf.ohne_regel(tenant_id)
         ergebnis = loeschlauf.lauf_ausfuehren(
-            db, tenant_id, str(uuid7()), regel, payload.durchgefuehrt_durch, payload.limit
+            db, tenant_id, str(uuid7()), regel, _urheber(nutzer), payload.limit
         )
         db.commit()
     except HTTPException:
@@ -410,6 +416,7 @@ async def get_application(
 async def update_application_stage(
     application_id: str,
     payload: StufeIn,
+    nutzer: dict = Depends(personal_write),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -424,7 +431,7 @@ async def update_application_stage(
             db, tenant_id, application_id, payload.stage,
             note=payload.note,
             ablehnungsgrund=payload.ablehnungsgrund,
-            entschieden_durch=payload.entschieden_durch,
+            entschieden_durch=_urheber(nutzer),
         )
         db.commit()
     except HTTPException:
@@ -504,6 +511,7 @@ async def get_einwilligung(
 async def post_einwilligung(
     application_id: str,
     payload: EinwilligungIn,
+    nutzer: dict = Depends(personal_write),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -515,7 +523,8 @@ async def post_einwilligung(
     """
     try:
         ergebnis = einwilligung.erteilen(
-            db, tenant_id, application_id, str(uuid7()), payload
+            db, tenant_id, application_id, str(uuid7()),
+            payload.model_copy(update={"erfasst_durch": _urheber(nutzer)}),
         )
         db.commit()
     except HTTPException:
@@ -534,15 +543,15 @@ async def post_einwilligung(
  dependencies=[Depends(personal_write)])
 async def delete_einwilligung(
     application_id: str,
-    erfasst_durch: Optional[str] = Query(None, max_length=120),
+    nutzer: dict = Depends(personal_write),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     """Widerruft die Einwilligung — **ohne Rumpf, ohne Grund, jederzeit**.
 
     Art. 7 Abs. 3 DSGVO: Der Widerruf darf nicht schwerer sein als die Erteilung.
-    Deshalb verlangt dieser Weg nichts ausser der Bewerbung; `erfasst_durch` ist
-    freiwillig.
+    Deshalb verlangt dieser Weg nichts ausser der Bewerbung; wer ihn erfasst hat,
+    traegt das System aus der Anmeldung ein.
 
     Die Erteilung bleibt im Verzeichnis stehen. Der Widerruf ist eine **neue** Zeile:
     Wer die Erteilung ueberschreibt, vernichtet den Nachweis, den Art. 7 Abs. 1
@@ -553,7 +562,7 @@ async def delete_einwilligung(
     """
     try:
         ergebnis = einwilligung.widerrufen(
-            db, tenant_id, application_id, str(uuid7()), erfasst_durch
+            db, tenant_id, application_id, str(uuid7()), _urheber(nutzer)
         )
         db.commit()
     except HTTPException:
@@ -643,7 +652,7 @@ def action_bewerbung_speichern(
             idempotency_key=idempotency_key,
             # Ohne Namen: das Audit ueberlebt den Loeschlauf der Bewerbung.
             summary="Bewerbung erfasst",
-            performed_by=urheber,
+            performed_by=_kennung(nutzer),
         )
         outbox_id = _write_outbox(
             db,
@@ -751,7 +760,7 @@ def action_erklaerung_anlegen(
             audit_reason=audit_reason,
             idempotency_key=idempotency_key,
             summary="Einwilligungsfassung angelegt",
-            performed_by=actor,
+            performed_by=_kennung(nutzer),
         )
         outbox_id = _write_outbox(
             db,

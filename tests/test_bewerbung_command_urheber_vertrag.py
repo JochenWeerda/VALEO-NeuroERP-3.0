@@ -49,8 +49,11 @@ def _aufraeumen(v) -> None:
     for anweisung in (
         "DELETE FROM domain_crm.crm_action_audit_log WHERE tenant_id = :h",
         "DELETE FROM public.outbox_events WHERE tenant_id = :h",
+        "DELETE FROM domain_hr.bewerbung_einwilligungen WHERE tenant_id = :h",
         "DELETE FROM domain_hr.applications WHERE tenant_id = :h",
         "DELETE FROM domain_hr.bewerbung_einwilligungserklaerungen WHERE tenant_id = :h",
+        "DELETE FROM domain_hr.bewerbung_loeschlaeufe WHERE tenant_id = :h",
+        "DELETE FROM domain_hr.bewerbung_aufbewahrung WHERE tenant_id = :h",
     ):
         v.execute(text(anweisung), h)
 
@@ -277,6 +280,100 @@ class TestFehlermeldungen:
         assert "ck_bewerbung_name_gefuellt" in antwort.text
         assert "wiebke.harms" not in antwort.text and "INSERT" not in antwort.text
         assert zeilen(engine, "SELECT count(*) FROM domain_hr.applications WHERE tenant_id = :h") == [(0,)]
+
+
+# ── Anmeldekennung statt getippter Namen (BEWERBUNG-ANMELDEKENNUNG-20261011) ─────
+class TestAnmeldekennung:
+    """Wer handelt, traegt das System ein. Ein Name im Rumpf oder in der Abfrage wird nicht gelesen."""
+
+    PERSONALBUERO = {"sub": "5f0c2a9e-0b7d-4e55-9d0e-1c2a3b4c5d6e", "name": "t.de-vries",
+                     "roles": ["PERSONAL_ADMIN"]}
+
+    def bewerbung(self, client) -> str:
+        return client.post("/api/v1/personal/applications", headers=kopf(), json=BEWERBUNG).json()["id"]
+
+    def test_anmeldename_ist_der_lesbare_name_die_kennung_bleibt_im_audit(self, engine, client, als):
+        """``sub`` ist bei Keycloak eine UUID: richtig im Audit, unlesbar in "Erfasst durch"."""
+        als(self.PERSONALBUERO)
+        ergebnis = client.post(FASSUNG_COMMAND, headers=kopf(), json={"wortlaut": wortlaut()}).json()
+        assert ergebnis["success"] is True, ergebnis
+        fassungen = client.get(FASSUNG_WEG, headers=kopf()).json()
+        assert [f["erstellt_durch"] for f in fassungen if f["id"] == ergebnis["affectedIds"][0]] == ["t.de-vries"]
+        assert zeilen(engine, "SELECT performed_by FROM domain_crm.crm_action_audit_log WHERE tenant_id = :h") == [
+            ("5f0c2a9e-0b7d-4e55-9d0e-1c2a3b4c5d6e",)]
+
+    def test_token_liefert_den_anmeldenamen(self, monkeypatch):
+        from fastapi.security import HTTPAuthorizationCredentials
+
+        from app.auth import deps
+
+        def anmeldung(**claims):
+            monkeypatch.setattr(deps, "decode_token", lambda _t: {"sub": "uuid-1", "roles": ["x"], **claims})
+            return deps.get_current_user(HTTPAuthorizationCredentials(scheme="Bearer", credentials="jwt"))
+
+        assert anmeldung(preferred_username="h.janssen", name="Hilke Janssen")["name"] == "h.janssen"
+        assert anmeldung(name="Hilke Janssen")["name"] == "Hilke Janssen"
+        assert anmeldung(email="hilke@haus.example")["name"] == "hilke@haus.example"
+        assert anmeldung()["name"] == "uuid-1"
+        assert deps.anmeldename({"sub": "uuid-1"}) == "uuid-1" and deps.anmeldename(None) == ""
+
+    def test_entscheidung_traegt_die_anmeldung(self, client, als):
+        als(self.PERSONALBUERO)
+        kennung = self.bewerbung(client)
+        antwort = client.patch(f"/api/v1/personal/applications/{kennung}/stage", headers=kopf(),
+                               json={"stage": "ABGELEHNT", "ablehnungsgrund": "Stelle intern besetzt",
+                                     "entschieden_durch": "Vorstand persoenlich"})
+        assert antwort.status_code == 200, antwort.text
+        assert antwort.json()["entschieden_durch"] == "t.de-vries"
+
+    def test_einwilligung_erteilen_und_widerrufen_tragen_die_anmeldung(self, client, als):
+        import datetime
+
+        als(self.PERSONALBUERO)
+        kennung = self.bewerbung(client)
+        fassung = client.post(FASSUNG_WEG, headers=kopf(), json={"wortlaut": wortlaut()}).json()["fassung"]
+        weg = f"/api/v1/personal/applications/{kennung}/einwilligung"
+        bis = (datetime.date.today() + datetime.timedelta(days=200)).isoformat()
+        erteilt = client.post(weg, headers=kopf(), json={"fassung": fassung, "gueltig_bis": bis, "kanal": "PAPIER",
+                                                         "erfasst_durch": "jemand anderes"})
+        assert erteilt.status_code == 201, erteilt.text
+        assert erteilt.json()["erfasst_durch"] == "t.de-vries"
+        widerrufen = client.delete(weg, headers=kopf(), params={"erfasst_durch": "jemand anderes"})
+        assert widerrufen.status_code == 201, widerrufen.text
+        assert widerrufen.json()["erfasst_durch"] == "t.de-vries"
+
+    def test_loeschlauf_braucht_keinen_getippten_namen(self, client, als):
+        als(self.PERSONALBUERO)
+        frist = client.put("/api/v1/personal/applications/aufbewahrung", headers=kopf(),
+                           json={"aufbewahrung_tage": 180, "gesetzliche_grundlage": "§ 15 Abs. 4 AGG",
+                                 "beschluss_durch": "Vorstand"})
+        assert frist.status_code == 200, frist.text
+        # Der Beschluss beschreibt das Gremium und bleibt, wie er eingegeben wurde.
+        assert frist.json()["beschluss_durch"] == "Vorstand"
+        lauf = client.post("/api/v1/personal/applications/loeschlauf", headers=kopf(),
+                           json={"bestaetigung": "ENDGUELTIG LOESCHEN"})
+        assert lauf.status_code == 201, lauf.text
+        assert lauf.json()["durchgefuehrt_durch"] == "t.de-vries"
+
+    def test_die_masken_fragen_nicht_mehr_nach_dem_eigenen_namen(self):
+        from app.core.screen_definitions import get_screen_definition
+
+        def eingabefelder(sd: dict) -> set[str]:
+            felder = {f["key"] for f in sd.get("fields", [])}
+            for abschnitt in sd.get("sections", []) or []:
+                felder |= {f["key"] for f in abschnitt.get("fields", [])}
+            for reiter in sd.get("tabs", []) or []:
+                felder |= {f["key"] for f in reiter.get("fields", [])}
+                for abschnitt in reiter.get("sections", []) or []:
+                    felder |= {f["key"] for f in abschnitt.get("fields", [])}
+            for aktion in sd.get("actions", []):
+                felder |= {f["key"] for f in aktion.get("inputFields", []) or []}
+            return felder
+
+        for maske in ("personal/einwilligungserklaerungen", "personal/bewerbung-einwilligung"):
+            sd = get_screen_definition(maske)
+            assert sd is not None, maske
+            assert not ({"erstellt_durch", "erfasst_durch"} & eingabefelder(sd)), maske
 
 
 # ── Rechte unveraendert ───────────────────────────────────────────────────────

@@ -49,7 +49,6 @@ const leer = {
   fassung: '',
   gueltig_bis: '',
   kanal: '',
-  erfasst_durch: '',
   wortlaut: '',
 }
 
@@ -171,14 +170,13 @@ export default function PersonalBewerbungEinwilligungPage(): JSX.Element {
         fassung,
         gueltig_bis: gueltigBis,
         kanal,
-        erfasst_durch: text(form.values.erfasst_durch) || null,
       })
       toast.success('Einwilligung erteilt', {
         description: `Fassung ${vorgang.fassung ?? fassung}, gültig bis ${anzeige(vorgang.gueltig_bis ?? gueltigBis)}`,
       })
       // Leeren ohne die Felder als bearbeitet zu markieren — sonst meldet eine
       // gelungene Erteilung "Pflichtfeld".
-      form.resetForm({ ...form.values, fassung: '', gueltig_bis: '', erfasst_durch: '', wortlaut: '' })
+      form.resetForm({ ...form.values, fassung: '', gueltig_bis: '', wortlaut: '' })
       await neuLaden()
     } catch (error) {
       toast.error('Einwilligung nicht erteilt', { description: getAxiosErrorMessage(error) })

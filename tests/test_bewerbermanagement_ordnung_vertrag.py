@@ -277,7 +277,9 @@ class TestAblehnung:
         daten = antwort.json()
         assert daten["ablehnungsgrund"] == "Stelle intern besetzt"
         assert daten["entschieden_am"] is not None
-        assert daten["entschieden_durch"] == "A. Leitung"
+        # Wer entschieden hat, sagt die Anmeldung (Dev-Token: "dev"), nicht der Rumpf
+        # (BEWERBUNG-ANMELDEKENNUNG-20261011).
+        assert daten["entschieden_durch"] == "dev"
         assert daten["endgueltig"] is True
         with engine.connect() as c:
             zeile = c.execute(

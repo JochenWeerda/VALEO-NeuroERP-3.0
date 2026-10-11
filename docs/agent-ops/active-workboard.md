@@ -29,9 +29,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Dateibesitz:** pages/finance/mahnlauf.tsx nur die zwei size-Attribute; eigene QA-/Workboard-Hunks.
 **Abnahme:** bestehende 111 UIX- und fuenf Versandtests unveraendert gruen, lint; keine Testabschwächung, Versandlogik erhalten, fremdes Frontend-WIP unberuehrt. Kein DB-/Dockerbedarf.
 
-## BEWERBUNG-ANMELDEKENNUNG-20261011 — in Arbeit, Claude Code
+## BEWERBUNG-ANMELDEKENNUNG-20261011 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-11. **Entscheidung des Auftraggebers:** das waehlen, was fachlich
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. **Entscheidung des Auftraggebers:** das waehlen, was fachlich
 stimmt und im Alltag einfach laeuft („was nicht einfach laeuft, laeuft einfach nicht“).
 **Regel:** Wer handelt, traegt das System aus der Anmeldung ein; niemand tippt seinen Namen. Gilt fuer
 `erstellt_durch` (Fassung), `erfasst_durch` (Einwilligung erteilen/widerrufen), `entschieden_durch`
@@ -43,6 +43,13 @@ es beschreibt das Gremium (z. B. Vorstand), nicht die Person am Bildschirm.
 `personal_bewerbung_schemas.py`, die zwei Bewerbungs-Screen-Definitions in `screen_definitions_capture.py`
 samt TS-Spiegel, `pages/personal/bewerbung-einwilligung.tsx`, `einwilligungserklaerungen.tsx`,
 `lib/api/bewerbung-einwilligung.ts`, Bewerbungs-Vertraege und -Vitest, QA-Doku, driftende Generatorartefakte.
+**Nachweis:** QA `docs/quality-assurance/bewerbung-anmeldekennung-20261011.md`; sechs neue Vertraege
+(25 in `test_bewerbung_command_urheber_vertrag.py`), Nachbarschaft 455 gruen gegen `valeo_probe` im
+isolierten Lieferstand; Vitest 14, `tsc` 0. Drei Bestandsvertraege umgestellt (Entscheidung,
+Loeschprotokoll, „ohne Kennung kein Lauf“ = 403 statt 422). `get_current_user` liefert zusaetzlich
+`name`; `anmeldename()` in `app/auth/deps.py` ist fuer andere Module wiederverwendbar.
+**Offen:** dieselbe Angabe (`erfasst_durch`) in Etiketten, Schaeden, Genossenschaft,
+Kontrakt-Disposition, Zeitkonto; Sichtpruefung der zwei Masken.
 
 ## BEWERBUNG-COMMAND-URHEBER-20261011 — abgeschlossen, Claude Code
 

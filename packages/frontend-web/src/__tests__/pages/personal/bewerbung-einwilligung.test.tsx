@@ -130,7 +130,7 @@ describe('Einwilligung zur Aufbewahrung', () => {
     await waitFor(() => expect(knopf).toBeDisabled())
     expect(mocks.erteileEinwilligung).toHaveBeenCalledTimes(1)
     expect(mocks.erteileEinwilligung).toHaveBeenCalledWith('bew-1', {
-      fassung: 2, gueltig_bis: '2027-10-01', kanal: 'PAPIER', erfasst_durch: null,
+      fassung: 2, gueltig_bis: '2027-10-01', kanal: 'PAPIER',
     })
     await act(async () => { fertig({ fassung: 2, gueltig_bis: '2027-10-01' }) })
     await waitFor(() => expect(mocks.toastSuccess).toHaveBeenCalledWith('Einwilligung erteilt', expect.anything()))
@@ -228,7 +228,7 @@ describe('Fassungen der Einwilligungserklaerung', () => {
     expect(mocks.legeErklaerungAn).not.toHaveBeenCalled()
     await screen.findByRole('alertdialog')
     fireEvent.click(screen.getByRole('button', { name: 'Anlegen' }))
-    await waitFor(() => expect(mocks.legeErklaerungAn).toHaveBeenCalledWith('Neuer Text', null))
+    await waitFor(() => expect(mocks.legeErklaerungAn).toHaveBeenCalledWith('Neuer Text'))
     await waitFor(() => expect(mocks.toastSuccess).toHaveBeenCalledWith('Fassung 3 angelegt', expect.anything()))
   })
 
