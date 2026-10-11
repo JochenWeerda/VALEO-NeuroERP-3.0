@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WHATSAPP-CATALOG-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Verbraucherverweise der beiden bestehenden Kanal-/Audit-Tabellen fuer WhatsApp-Persistenz nachziehen.
+**Dateibesitz:** docs/admin/table-catalog.json/md nur consumers der Tabellen domain_shared.channel_process_threads und channel_thread_audit_items aus isoliertem HEAD plus eigenen Codehunks; fremde physische Katalog-WIP unveraendert erhalten.
+**Abnahme:** zwei Tabellenverweise nachweislich geaendert, keine Tabellen-/Spalten-/Schemaaenderung, keine Migration/DB/Container/Reset. **Risiko:** fremde Katalog-WIP nicht in eigenen Commit aufnehmen.
+
 ## WHATSAPP-THREAD-GUARD-20261011 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Reservierte WhatsApp-Benachrichtigungsauftraege in bestehender Kanaltabelle vor generischen Prozess-/Freigabewegen schuetzen. Integrationsvoraussetzung von WHATSAPP-PERSISTENCE-20261011.
