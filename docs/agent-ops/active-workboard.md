@@ -11,6 +11,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WHATSAPP-ACCESS-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Drei WhatsApp-Vorbereitungs-/Outbox-Endpunkte an bestehende verifizierte OIDC-Mandanten-/Scope-Guards binden; Payload und Query koennen keinen fremden Mandanten waehlen.
+**Dateibesitz:** app/api/v1/endpoints/whatsapp_notify.py; neue tests/test_whatsapp_access_contract.py; eigene QA-/Workboard-Hunks, docs/workflows/whatsapp-web-computer-use.md Lieferstand. Keine zentralen Auth-/DB-/Transportaenderungen.
+**Abnahme:** echte FastAPI-Requests mit zwei Token-Kontexten; fehlende/ungueltige Identitaet, fehlende/widerspruechliche Claims, fremde Header/Rumpf/Query und falsche Scopes abweisen, Outbox unveraendert. crm:read fuer Lesen, crm:write fuer Vorbereitung; vorhandener admin:all-Vertrag bleibt mandantengebunden. **Risiko:** Browserbindung und persistente Outbox weiterhin offen.
+**Harness:** Fachvertrag nur Vorbereitung, kein Versand; Architektur bestehende zentrale Guards; Daten keine Standardmandanten; Tests HTTP ohne DB/Browser/Netz; Security effektive Tokenrechte; Betrieb keine Mutation bei Ablehnung; Doku QA/Runbook/Workboard; extern CI offen.
+
 ## WHATSAPP-BROWSER-PREP-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Veralteten automatischen Meta-Versand entfernen; benachrichtigende Fachverbraucher bereiten Nachrichten fuer WhatsApp Web vor und behaupten keine Zustellung. Teilmeilenstein zu WHATSAPP-WEB-INTEGRATION-20261011.
