@@ -11,11 +11,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## QUALITY-GATE-MCP-DRIFT-20261011 — reserviert, Codex
+## QUALITY-GATE-MCP-DRIFT-20261011 — in arbeit, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Quality Gate MCP-Referenzdrift aus Run 38121252132 beheben und Wiederholung durch staged Registry-/Referenzvertrag verhindern.
 **Dateibesitz:** scripts/generate_mcp_tool_reference.py, scripts/run-staged-checks.cjs, docs/schnittstellen/mcp-tools.md, neuer fokussierter Generator-Test, eigene QA-Doku, eigener Workboard-Block und README-CI-Nachweis. **Abnahme:** Generatorsequenz aus isoliertem committed Lieferstand, staged Drift-Negativtests, GitHub Quality Gate auf Ergebniscommit erfolgreich; main push/develop Sync.
 **Risiken:** Fremdes WIP nicht integrieren; Tests ohne neue DB/Container. Weitere durch den ersten Abbruch verdeckte Fehler bei Auftreten im Gate ebenfalls diagnostizieren.
+
+**Zwischenabnahme:** Referenz aus committed Registry auf 56 Tools regeneriert; sieben staged Drift-Vertraege bestanden. GitHub-Folgeabnahme nach Ergebnis-Push; kein gruener Gesamtlauf vorweggenommen.
 
 ## README-REFRESH-20261011 — abgeschlossen, Codex
 
