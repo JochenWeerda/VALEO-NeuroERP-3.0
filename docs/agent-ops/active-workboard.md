@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SONAR-WORKFLOW-LIFECYCLE-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Zwei unbehaltene Workflow-SSE-Tasks und unerreichbare Optimierungshistorie aus aktueller Sonar-Analyse schliessen.
+**Dateibesitz:** app/routers/workflow_router.py nur SSE-Lieferung; app/agents/workflows/system_optimizer.py nur get_optimization_history; neue tests/test_workflow_lifecycle_contract.py und eigene QA-/Workboard-Doku.
+**Abnahme:** echte SSE-Queues erhalten Ereignisse vor erfolgreicher Antwort, Benachrichtigungsfehler machen gespeicherte Fachuebergaenge nicht nachtraeglich ungueltig; Historie tatsaechlich am Agenten aufrufbar, Grenzen geprueft. Kein Netz/DB/Docker/LLM. Keine Aenderung von Auth, Mandantenmodell, Route/Schema oder Sonar-Ausnahmen.
+
 ## ANMELDEKENNUNG-UEBRIGE-20261011 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Folge zu BEWERBUNG-ANMELDEKENNUNG-20261011, dieselbe Regel:
