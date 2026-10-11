@@ -1,5 +1,4 @@
 """Real preparation functions: no legacy network send, honest state, isolated drafts."""
-import importlib
 
 import httpx
 import pytest
@@ -8,7 +7,9 @@ import pytest
 @pytest.fixture
 def service(monkeypatch):
     from app.services import whatsapp_notify_service
-    service = importlib.reload(whatsapp_notify_service)
+    service = whatsapp_notify_service
+    from whatsapp_test_support import attach_unit_store
+    attach_unit_store(monkeypatch, service)
     monkeypatch.delenv("WHATSAPP_PHONE_NUMBER_ID", raising=False)
     monkeypatch.delenv("WHATSAPP_ACCESS_TOKEN", raising=False)
 

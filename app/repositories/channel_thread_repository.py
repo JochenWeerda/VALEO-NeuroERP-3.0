@@ -19,13 +19,21 @@ from app.models.channel_threads import (
     ChannelThreadAuditItemRecord,
 )
 
+# Dedicated WhatsApp preparation owns this namespace. These records are not
+# generic process actions and must never reach their read/approval surfaces.
+_RESERVED_NOTIFICATION_PROCESS = "whatsapp.browser.notification.v1"
+
 
 class PersistentChannelProcessThreadStore(ChannelProcessThreadStore):
     def __init__(self, db: Session):
         self.db = db
 
     def save(self, thread: ChannelProcessThread) -> ChannelProcessThread:
+        if thread.process_definition_key == _RESERVED_NOTIFICATION_PROCESS:
+            raise ValueError("Reserved notification process requires its dedicated service")
         record = self.db.get(ChannelProcessThreadRecord, thread.thread_id)
+        if record is not None and record.process_definition_key == _RESERVED_NOTIFICATION_PROCESS:
+            raise ValueError("Reserved notification record cannot be replaced")
         if record is None:
             record = ChannelProcessThreadRecord(thread_id=thread.thread_id)
             self.db.add(record)
@@ -73,10 +81,12 @@ class PersistentChannelProcessThreadStore(ChannelProcessThreadStore):
         stmt = (
             select(ChannelProcessThreadRecord)
             .where(ChannelProcessThreadRecord.thread_id == thread_id)
+            .where(ChannelProcessThreadRecord.process_definition_key != _RESERVED_NOTIFICATION_PROCESS)
         )
         record = self.db.execute(stmt).unique().scalar_one_or_none()
         if record is None:
-            return get_channel_process_thread_store().get(thread_id)
+            cached = get_channel_process_thread_store().get(thread_id)
+            return cached if cached is None or cached.process_definition_key != _RESERVED_NOTIFICATION_PROCESS else None
         return self._to_domain(record)
 
     def list_threads(
@@ -88,7 +98,9 @@ class PersistentChannelProcessThreadStore(ChannelProcessThreadStore):
         process_definition_key: str | None = None,
         limit: int = 50,
     ) -> list[ChannelProcessThread]:
-        stmt = select(ChannelProcessThreadRecord)
+        stmt = select(ChannelProcessThreadRecord).where(
+            ChannelProcessThreadRecord.process_definition_key != _RESERVED_NOTIFICATION_PROCESS
+        )
         if kanal:
             stmt = stmt.where(ChannelProcessThreadRecord.kanal == kanal)
         if tenant_id:
@@ -103,13 +115,14 @@ class PersistentChannelProcessThreadStore(ChannelProcessThreadStore):
         records = self.db.execute(stmt).unique().scalars().all()
         if records:
             return [self._to_domain(record) for record in records]
-        return get_channel_process_thread_store().list_threads(
+        cached = get_channel_process_thread_store().list_threads(
             kanal=kanal,
             tenant_id=tenant_id,
             status=status,
             process_definition_key=process_definition_key,
             limit=limit,
         )
+        return [thread for thread in cached if thread.process_definition_key != _RESERVED_NOTIFICATION_PROCESS]
 
     def get_audit_trail(self, thread_id: str) -> list[ChannelThreadAuditItem] | None:
         thread = self.get(thread_id)

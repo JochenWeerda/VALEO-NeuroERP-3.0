@@ -48773,7 +48773,11 @@
             "thread_id"
           ],
           "read_by": [
-            "app/models/channel_threads.py"
+            "app/models/channel_threads.py",
+            "app/services/whatsapp_notify_service.py"
+          ],
+          "written_by": [
+            "app/services/whatsapp_notify_service.py"
           ]
         },
         "channel_thread_audit_items": {
@@ -48828,6 +48832,9 @@
           ],
           "read_by": [
             "app/models/channel_threads.py"
+          ],
+          "written_by": [
+            "app/services/whatsapp_notify_service.py"
           ]
         },
         "connectors": {

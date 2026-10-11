@@ -23,7 +23,7 @@ Browser-Sitzung noch einen fertig implementierten Versand.
 | --- | --- | --- |
 | Nachrichtentext und Bestellpruefung | `app/api/v1/endpoints/whatsapp_intake.py`, `app/services/whatsapp_intake_service.py` | Bestehende persistente Bestell-Inbox mit Erfassen, Pruefen, Bestaetigen und Verwerfen; geeigneter Wiederverwendungspunkt, Sicherheits-/Replay-Abnahme noch erforderlich |
 | Automatischer Bestellsimulator | `app/services/whatsapp_agent_service.py`, `app/api/v1/endpoints/whatsapp_webhook.py` | Anderer bestehender Bestellweg mit Simulator/Meta-Eingang; nicht als zusaetzliche Browser-Bestellpipeline kopieren |
-| Benachrichtigung | `app/services/whatsapp_notify_service.py` | Automatischer Meta-Versand entfernt; Nachrichten haben pending_browser und keinen Zustellnachweis; Outbox weiterhin nur im Prozessspeicher |
+| Benachrichtigung | `app/services/whatsapp_notify_service.py` | Dauerhafte pending_browser-Auftraege und Audit in bestehenden Kanal-Tabellen; inhalts-/urhebergebundener Replay, kein Zustellnachweis |
 | Kanaladapter | `app/channels/whatsapp_adapter.py`, `app/api/v1/endpoints/channels.py` | Webhook-/Meta-Formate; kein WhatsApp-Web-Adapter |
 | KI-JSON | [JSON-Vertrag](../quality-assurance/llm-json-contract-20261011.md) | Bestehende Bestellextraktion repariert; kein Browsertransport durch diesen Fix |
 
@@ -70,8 +70,9 @@ lesen oder verarbeiten. Wiederanlauf nutzt dauerhafte Eingangs-/Versandnachweise
 - Bestehende Verbraucher, Meta-Wege, Simulator, Konfiguration und Tests gemeinsam
   auf den Browserzielweg nachziehen; veraltete Transportpfade erst nach Pruefung
   ihrer Verbraucher entfernen. Kein konkurrierendes zweites Bestellmodell.
-- Dauerhafte mandantenbezogene Eingangs-/Versandnachweise und atomare
-  Wiederholungsvertraege integrieren; fluechtige Outbox reicht nicht aus.
+- Dauerhafte Eingangs-/Browser-Versandnachweise integrieren. Die
+  Benachrichtigungsvorbereitung ist bereits persistent und replaygeschuetzt;
+  sie ist noch kein Browser-Versandnachweis.
 - Zwei autorisierte Kontexte pruefen: fremder Chat/Empfaenger, fehlende
   Mitgliedschaft, Konto-Wechsel, widerrufene Rechte und fremde Fachreferenzen
   duerfen keine Daten lesen oder veraendern.
@@ -94,5 +95,11 @@ Mandanten nennen; der dev-tenant-Fallback entfaellt. admin:all hebt die
 Mandantenbindung nicht auf.
 [Abnahme des Zugriffsschutzes](../quality-assurance/whatsapp-access-20261011.md).
 Der separate Meta-Webhook und Bestellsimulator sind dadurch nicht abgesichert.
-Browseranbindung, Persistenz-/Isolationsabnahme und realer Versandtest offen.
+Vorbereitungsauftraege und Urheber-Audit sind nun in den bestehenden
+Kanal-Tabellen persistent; erforderlich sind DB-Session, Tokenurheber und
+idempotency_key. Gleiches Replay liefert denselben Auftrag, widerspruechliches
+Replay 409. Generische Kanal-/Freigabewege schliessen den reservierten
+Namensraum aus. Listen: Default 50, maximal 200.
+[Persistenzabnahme](../quality-assurance/whatsapp-persistence-20261011.md).
+Browseranbindung, Eingangs-/Versandnachweise und realer Versandtest offen.
 Keine Nachricht versandt und keine Sitzung angemeldet.

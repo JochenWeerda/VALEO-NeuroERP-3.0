@@ -1,19 +1,19 @@
 """WA-NOTIFY-001 — Unit-Tests für WhatsApp Ausgehende Benachrichtigungen"""
 import importlib
-import sys
 import pytest
 
 
 def _reload():
     mod = "app.services.whatsapp_notify_service"
-    if mod in sys.modules:
-        del sys.modules[mod]
     return importlib.import_module(mod)
 
 
 @pytest.fixture()
-def svc():
-    return _reload()
+def svc(monkeypatch):
+    from whatsapp_test_support import attach_unit_store
+    service = _reload()
+    attach_unit_store(monkeypatch, service)
+    return service
 
 
 class TestTextTemplates:
