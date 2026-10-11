@@ -37,9 +37,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Owner:** unbesetzt. **Ziel:** aktuelle Verfuegbarkeit und feste woechentliche Stueckguttour, Alternativen und persistente Kundeninformation bei fehlendem Folgetag. **Abnahme:** Kapazitaet/Annahmeschluss/Feiertag/Wochenwechsel/ausdruecklicher Wunsch; kein Termin ohne Quelle, keine doppelte Meldung. **Risiko:** Browser-Versand bleibt eigener offener Claim; eigene Dateigrenzen/Claim. Vertrag: ../workflows/whatsapp-order-learning.md.
 
-## HAUPTBUCH-ROLLEN-20261011 — in Arbeit, Claude Code
+## HAUPTBUCH-ROLLEN-20261011 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-11. Befund aus OFFENE-POSTEN-ROLLEN-20261011.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Befund aus OFFENE-POSTEN-ROLLEN-20261011.
 **Befund:** Vermessung aller Finanzwege: 413 Wege, 56 pruefen eine Rolle, 357 nicht (175 davon schreibend).
 **Ziel (erster Schnitt, Hauptbuch):** Rolle vor dem ersten Datenbankzugriff an den 54 Wegen fuer Buchungen,
 Konten, Kontenplan, Perioden, Geschaeftsjahre, Buchungsvorlagen, periodische Buchungen und Buchungsimport.
@@ -50,6 +50,13 @@ buchen, stornieren `finance_write`; loeschen, Periode sperren/oeffnen, Geschaeft
 `bulk_journal_import.py`, `booking_templates.py`, `periodische_buchungen.py`, `fibu_geschaeftsjahre.py`,
 neue Vertragsdatei `tests/test_hauptbuch_rollen_vertrag.py`, Anpassung betroffener Tests, QA-Doku.
 **Nicht angefasst:** Codex' Bankdateien (`bank_accounts.py`, `bank_reconciliation.py`, `finance_actions.py`).
+**Lieferung:** 54 Wege in neun Dateien mit `finance_read` / `kontenplan_read` / `finance_write` / `finance_admin`
+am Dekorator; Vertrag mit 766 Faellen ohne Datenbank (dreizehn Rollen x 54 Wege, ohne Anmeldung, Vollstaendigkeit
+je Datei); 1616 Nachbartests gruen; OpenAPI der 42 Pfade unveraendert. QA:
+`docs/quality-assurance/hauptbuch-rollen-20261011.md`. **Betrieb:** Buchhaltung `FINANCE_BEARBEITEN`, Leitung
+`FINANCE_ADMIN`, Pruefer `FINANCE_LESEN`. **Offen:** 303 Finanzwege ohne Rolle (145 schreibend), groesste Bloecke
+`finance_actions`, `fibu_connectors`, `kostenrechnung`, `closing_checklists`, Stammdaten; `chart_of_accounts.py`
+nimmt den Mandanten aus dem Query-Parameter statt aus dem Mandantenkontext (eigener Slice).
 
 ## OFFENE-POSTEN-ROLLEN-20261011 — abgeschlossen, Claude Code
 

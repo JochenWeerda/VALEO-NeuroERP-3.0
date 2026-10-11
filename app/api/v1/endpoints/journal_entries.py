@@ -30,6 +30,8 @@ from app.api.v1.schemas.journal_entries_schemas import JournalEntriesOut
 from app.core import finance_periods
 
 
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
+
 router = APIRouter()
 
 JOURNAL_ENTRY_ODATA_FIELDS = {
@@ -49,7 +51,7 @@ def _serialize_value(v: Any) -> Any:
     return v
 
 
-@router.get("/new", response_model=JournalEntriesOut, summary="New journal entry template abrufen")
+@router.get("/new", response_model=JournalEntriesOut, summary="New journal entry template abrufen", dependencies=[Depends(finance_read)])
 async def get_new_journal_entry_template(tenant_id: str = Depends(get_tenant_id)):
     """Return default values for the manual booking form."""
     now = datetime.utcnow()
@@ -69,7 +71,7 @@ async def get_new_journal_entry_template(tenant_id: str = Depends(get_tenant_id)
     }
 
 
-@router.post("/", response_model=JournalEntry, status_code=201, summary="Journal entry anlegen")
+@router.post("/", response_model=JournalEntry, status_code=201, summary="Journal entry anlegen", dependencies=[Depends(finance_write)])
 async def create_journal_entry(
     entry_data: JournalEntryCreate,
     request: Request,
@@ -130,7 +132,7 @@ async def create_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to create journal entry: {str(e)}")
 
 
-@router.get("/", response_model=PaginatedResponse[JournalEntry], summary="Journal entries auflisten")
+@router.get("/", response_model=PaginatedResponse[JournalEntry], summary="Journal entries auflisten", dependencies=[Depends(finance_read)])
 async def list_journal_entries(
     request: Request,
     tenant_id: str = Depends(get_tenant_id),
@@ -243,7 +245,7 @@ async def list_journal_entries(
         raise HTTPException(status_code=500, detail=f"Failed to list journal entries: {str(e)}")
 
 
-@router.get("/{entry_id}", response_model=JournalEntry, summary="Journal entry abrufen")
+@router.get("/{entry_id}", response_model=JournalEntry, summary="Journal entry abrufen", dependencies=[Depends(finance_read)])
 async def get_journal_entry(
     entry_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -266,7 +268,7 @@ async def get_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve journal entry: {str(e)}")
 
 
-@router.put("/{entry_id}", response_model=JournalEntry, summary="Journal entry aktualisieren")
+@router.put("/{entry_id}", response_model=JournalEntry, summary="Journal entry aktualisieren", dependencies=[Depends(finance_write)])
 async def update_journal_entry(
     entry_id: str,
     entry_data: JournalEntryUpdate,
@@ -304,7 +306,7 @@ async def update_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to update journal entry: {str(e)}")
 
 
-@router.post("/{entry_id}/post", response_model=JournalEntry, summary="Journal entry erstellen")
+@router.post("/{entry_id}/post", response_model=JournalEntry, summary="Journal entry erstellen", dependencies=[Depends(finance_write)])
 async def post_journal_entry(
     entry_id: str,
     request: Request,
@@ -347,7 +349,7 @@ async def post_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to post journal entry: {str(e)}")
 
 
-@router.post("/{entry_id}/reverse", response_model=None, summary="Journal entry reverse")
+@router.post("/{entry_id}/reverse", response_model=None, summary="Journal entry reverse", dependencies=[Depends(finance_write)])
 async def reverse_journal_entry(
     entry_id: str,
     request: Request,
@@ -391,7 +393,7 @@ async def reverse_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to reverse journal entry: {str(e)}")
 
 
-@router.delete("/{entry_id}", status_code=204, response_class=Response, response_model=None, summary="Journal entry löschen")
+@router.delete("/{entry_id}", status_code=204, response_class=Response, response_model=None, summary="Journal entry löschen", dependencies=[Depends(finance_admin)])
 async def delete_journal_entry(
     entry_id: str,
     request: Request,

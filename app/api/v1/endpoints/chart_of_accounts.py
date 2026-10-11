@@ -23,6 +23,8 @@ from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.chart_of_accounts_schemas import ChartOfAccountsOut
 
 
+from app.auth.finance_roles import finance_admin, finance_read, finance_write, kontenplan_read
+
 router = APIRouter(prefix="/chart-of-accounts")
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -40,7 +42,7 @@ class ValidateResponse(BaseModel):
 SHARED_TENANT = "system"
 
 
-@router.get("/", response_model=PaginatedResponse[Account], summary="Accounts auflisten")
+@router.get("/", response_model=PaginatedResponse[Account], summary="Accounts auflisten", dependencies=[Depends(kontenplan_read)])
 async def list_accounts(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     search: Optional[str] = Query(None, description="Search in account number or name"),
@@ -91,7 +93,7 @@ async def list_accounts(
     )
 
 
-@router.get("/{account_id}", response_model=Account, summary="Account abrufen")
+@router.get("/{account_id}", response_model=Account, summary="Account abrufen", dependencies=[Depends(kontenplan_read)])
 async def get_account(account_id: str, db: Session = Depends(get_db)):
     """Fetch a single account by identifier."""
     account = db.query(AccountModel).filter(AccountModel.id == account_id).first()
@@ -100,7 +102,7 @@ async def get_account(account_id: str, db: Session = Depends(get_db)):
     return Account.model_validate(account)
 
 
-@router.post("/", response_model=Account, summary="Account anlegen")
+@router.post("/", response_model=Account, summary="Account anlegen", dependencies=[Depends(finance_write)])
 async def create_account(account: AccountCreate, request: Request, db: Session = Depends(get_db)):
     """Create a new account."""
     # Check if account number already exists
@@ -123,7 +125,7 @@ async def create_account(account: AccountCreate, request: Request, db: Session =
     return Account.model_validate(db_account)
 
 
-@router.put("/{account_id}", response_model=Account, summary="Account aktualisieren")
+@router.put("/{account_id}", response_model=Account, summary="Account aktualisieren", dependencies=[Depends(finance_write)])
 async def update_account(
     account_id: str,
     account_update: AccountUpdate,
@@ -152,8 +154,7 @@ async def update_account(
 
 
 @router.delete("/{account_id}", summary="Account löschen",
-    response_model=StatusResponse
-)
+    response_model=StatusResponse, dependencies=[Depends(finance_admin)])
 async def delete_account(account_id: str, request: Request, db: Session = Depends(get_db)):
     """Delete an account (soft delete by setting is_active to False)."""
     account = db.query(AccountModel).filter(AccountModel.id == account_id).first()
@@ -177,7 +178,7 @@ async def delete_account(account_id: str, request: Request, db: Session = Depend
     return {"message": "Account deactivated successfully"}
 
 
-@router.post("/validate", response_model=ValidateResponse, summary="Chart of accounts validieren")
+@router.post("/validate", response_model=ValidateResponse, summary="Chart of accounts validieren", dependencies=[Depends(finance_read)])
 async def validate_chart_of_accounts(
     tenant_id: Optional[str] = Query(None, description="Tenant ID"),
     db: Session = Depends(get_db),
@@ -210,8 +211,7 @@ async def validate_chart_of_accounts(
 
 
 @router.post("/datev-export", summary="Export chart of accounts datev",
-    response_model=ChartOfAccountsOut
-)
+    response_model=ChartOfAccountsOut, dependencies=[Depends(finance_read)])
 async def datev_export_chart_of_accounts(
     von_datum: str = Query(..., description="Start date YYYY-MM-DD"),
     bis_datum: Optional[str] = Query(None, description="End date YYYY-MM-DD"),

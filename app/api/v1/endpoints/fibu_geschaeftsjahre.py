@@ -30,6 +30,8 @@ from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.fibu_geschaeftsjahre_schemas import FibuGeschaeftsjahreOut
 
 
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
+
 router = APIRouter(prefix="/fibu/geschaeftsjahre",
                    tags=["FIBU - Geschäftsjahre & Periodische Buchungen"])
 
@@ -122,7 +124,7 @@ class PeriodischeBuchungOut(BaseModel):
 
 # ── Geschäftsjahre ────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[GeschaeftsjahreOut], summary="Geschaeftsjahre auflisten")
+@router.get("", response_model=list[GeschaeftsjahreOut], summary="Geschaeftsjahre auflisten", dependencies=[Depends(finance_read)])
 def list_geschaeftsjahre(
     status: Optional[str] = Query(None),
     db=Depends(get_db),
@@ -138,7 +140,7 @@ def list_geschaeftsjahre(
     return [GeschaeftsjahreOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=GeschaeftsjahreOut, status_code=201, summary="Geschaeftsjahr anlegen")
+@router.post("", response_model=GeschaeftsjahreOut, status_code=201, summary="Geschaeftsjahr anlegen", dependencies=[Depends(finance_admin)])
 def create_geschaeftsjahr(
     payload: GeschaeftsjahreCreate,
     db=Depends(get_db),
@@ -195,7 +197,7 @@ def create_geschaeftsjahr(
     return GeschaeftsjahreOut(**dict(row._mapping))
 
 
-@router.get("/{jahr_nr}/perioden", response_model=list[FibuPeriodeOut], summary="Perioden auflisten")
+@router.get("/{jahr_nr}/perioden", response_model=list[FibuPeriodeOut], summary="Perioden auflisten", dependencies=[Depends(finance_read)])
 def list_perioden(
     jahr_nr: int,
     db=Depends(get_db),
@@ -210,8 +212,7 @@ def list_perioden(
 
 
 @router.patch("/{jahr_nr}/perioden/{periode_nr}/sperren", summary="Sperren periode",
-    response_model=FibuGeschaeftsjahreOut
-)
+    response_model=FibuGeschaeftsjahreOut, dependencies=[Depends(finance_admin)])
 def periode_sperren(
     jahr_nr: int,
     periode_nr: int,
@@ -230,7 +231,7 @@ def periode_sperren(
 
 # ── Periodische Buchungen ─────────────────────────────────────────────────────
 
-@router.get("/periodisch", response_model=list[PeriodischeBuchungOut], summary="Periodische buchungen auflisten")
+@router.get("/periodisch", response_model=list[PeriodischeBuchungOut], summary="Periodische buchungen auflisten", dependencies=[Depends(finance_read)])
 def list_periodische_buchungen(
     nur_aktive: bool = Query(True),
     db=Depends(get_db),
@@ -245,7 +246,7 @@ def list_periodische_buchungen(
     return [PeriodischeBuchungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/periodisch", response_model=PeriodischeBuchungOut, status_code=201, summary="Periodische buchung anlegen")
+@router.post("/periodisch", response_model=PeriodischeBuchungOut, status_code=201, summary="Periodische buchung anlegen", dependencies=[Depends(finance_write)])
 def create_periodische_buchung(
     payload: PeriodischeBuchungCreate,
     db=Depends(get_db),
@@ -274,8 +275,7 @@ def create_periodische_buchung(
 
 
 @router.post("/periodisch/{buchung_id}/ausfuehren", summary="Buchung ausfuehren periodische",
-    response_model=FibuGeschaeftsjahreOut
-)
+    response_model=FibuGeschaeftsjahreOut, dependencies=[Depends(finance_write)])
 def periodische_buchung_ausfuehren(
     buchung_id: str,
     db=Depends(get_db),
@@ -354,8 +354,7 @@ def periodische_buchung_ausfuehren(
 
 
 @router.delete("/periodisch/{buchung_id}", summary="Periodische buchung löschen",
-    response_model=None
-)
+    response_model=None, dependencies=[Depends(finance_admin)])
 def delete_periodische_buchung(
     buchung_id: str,
     db=Depends(get_db),

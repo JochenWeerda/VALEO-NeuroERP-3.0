@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from typing import List, Optional
 from datetime import datetime, date
 from pydantic import BaseModel, ConfigDict
+from app.auth.finance_roles import finance_admin, finance_read
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 import logging
@@ -55,7 +56,7 @@ class PeriodUpdate(BaseModel):
     closed_by: Optional[str] = None
 
 
-@router.post("/", response_model=AccountingPeriod, status_code=201, summary="Period anlegen")
+@router.post("/", response_model=AccountingPeriod, status_code=201, summary="Period anlegen", dependencies=[Depends(finance_admin)])
 async def create_period(
     period_data: PeriodCreate,
     request: Request,
@@ -156,7 +157,7 @@ async def create_period(
         raise HTTPException(status_code=500, detail=f"Failed to create period: {str(e)}")
 
 
-@router.get("/", response_model=List[AccountingPeriod], summary="Periods auflisten")
+@router.get("/", response_model=List[AccountingPeriod], summary="Periods auflisten", dependencies=[Depends(finance_read)])
 async def list_periods(
     status: Optional[str] = Query(None),
     limit: int = Query(100, le=1000),
@@ -207,7 +208,7 @@ async def list_periods(
         raise HTTPException(status_code=500, detail=f"Failed to list periods: {str(e)}")
 
 
-@router.get("/{period_id}", response_model=AccountingPeriod, summary="Period abrufen")
+@router.get("/{period_id}", response_model=AccountingPeriod, summary="Period abrufen", dependencies=[Depends(finance_read)])
 async def get_period(
     period_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -247,7 +248,7 @@ async def get_period(
         raise HTTPException(status_code=500, detail=f"Failed to get period: {str(e)}")
 
 
-@router.put("/{period_id}", response_model=AccountingPeriod, summary="Period aktualisieren")
+@router.put("/{period_id}", response_model=AccountingPeriod, summary="Period aktualisieren", dependencies=[Depends(finance_admin)])
 async def update_period(
     period_id: str,
     period_update: PeriodUpdate,
@@ -337,7 +338,7 @@ async def update_period(
         raise HTTPException(status_code=500, detail=f"Failed to update period: {str(e)}")
 
 
-@router.get("/check/{tenant_id}/{period}", response_model=AccountingPeriodsOut, summary="Period status prüfen")
+@router.get("/check/{tenant_id}/{period}", response_model=AccountingPeriodsOut, summary="Period status prüfen", dependencies=[Depends(finance_read)])
 async def check_period_status(
     tenant_id: str,
     period: str,
@@ -385,7 +386,7 @@ async def check_period_status(
         raise HTTPException(status_code=500, detail=f"Failed to check period status: {str(e)}")
 
 
-@router.get("/check/{period}", response_model=AccountingPeriodsOut, summary="Period status for current tenant prüfen")
+@router.get("/check/{period}", response_model=AccountingPeriodsOut, summary="Period status for current tenant prüfen", dependencies=[Depends(finance_read)])
 async def check_period_status_for_current_tenant(
     period: str,
     tenant_id: str = Depends(get_tenant_id),

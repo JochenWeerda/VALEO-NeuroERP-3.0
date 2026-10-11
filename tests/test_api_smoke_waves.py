@@ -24,11 +24,14 @@ def _client(router, *, existing_row: bool = False, rowcount: int = 1) -> TestCli
         db.execute.return_value = result
         yield db
 
+    from app.auth.deps import get_current_user
     from app.core.database import get_db
     from app.core.dependencies import get_tenant_id
 
     app.dependency_overrides[get_db] = _db
     app.dependency_overrides[get_tenant_id] = lambda: "test-tenant"
+    # Die Finanzwege pruefen seit 11.10.2026 die Rolle; der Rauchtest prueft die Verdrahtung, nicht den Zugang.
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_ADMIN"]}
     app.include_router(router)
     return TestClient(app)
 
