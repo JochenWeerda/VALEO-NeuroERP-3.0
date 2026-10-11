@@ -17399,6 +17399,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/command_handlers/procurement.py",
             "app/api/v1/endpoints/articles.py",
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/einkauf_kpis.py",
@@ -22224,7 +22225,6 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/mask_actions.py",
             "app/api/v1/endpoints/payment_runs.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/payment_run_freigabe.py"
@@ -26017,7 +26017,9 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/training.py"
+            "app/api/v1/command_handlers/training.py",
+            "app/api/v1/endpoints/training.py",
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/training.py"
@@ -26790,7 +26792,9 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/training.py"
+            "app/api/v1/command_handlers/training.py",
+            "app/api/v1/endpoints/training.py",
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/training.py"
@@ -35829,6 +35833,7 @@
             "app/services/logistics_epod_service.py"
           ],
           "written_by": [
+            "app/api/v1/command_handlers/logistics.py",
             "app/api/v1/endpoints/logistics_tours.py",
             "app/services/logistics_epod_service.py",
             "app/services/mobile_sync_service.py"
@@ -35888,6 +35893,7 @@
             "app/api/v1/endpoints/logistics_tours.py"
           ],
           "written_by": [
+            "app/api/v1/command_handlers/logistics.py",
             "app/api/v1/endpoints/logistics_tours.py"
           ]
         }
@@ -39221,6 +39227,11 @@
               "name": "handy_rufnummer",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -39707,6 +39718,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -39776,6 +39792,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
@@ -39825,6 +39846,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -53558,7 +53584,8 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/logistik_frachttabellen.py"
+            "app/api/v1/endpoints/logistik_frachttabellen.py",
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/logistik_frachttabellen.py"

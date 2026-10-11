@@ -45,3 +45,23 @@ projektweiter gruener Gesamtlauf wird vor dessen Abschluss behauptet.
 
 Keine Datenbank, kein Container, keine Migration und kein Reset fuer diese
 Pruefungen; fremdes laufendes WIP bleibt erhalten.
+
+## Generatorfolge und nachfolgender Katalogdrift
+
+Alle 13 Befehle der Doc-Generator-Metafolge bestanden lokal am isolierten
+committed Lieferstand mit der Korrektur. GitHub 38122841810 bestaetigt diesen
+Schritt ebenfalls. Danach reproduziert die physische Katalogpruefung einen
+weiteren Drift; der vorhandene Job exportiert seine echte frische Schema-Ernte.
+
+Diese Ernte enthaelt weiterhin 670 Tabellen. Genau vier Fuhrpark-Tabellen
+erhalten die bereits migrierte tenant_id-Spalte (NOT NULL, character varying).
+Sieben weitere Eintraege korrigieren ausschliesslich Code-Verbraucherzuordnungen
+nach den bereits gelieferten Command-Auslagerungen. Keine Tabelle hinzugefuegt
+oder entfernt; Primaer-/Fremdschluessel unveraendert. Alle Verbraucher und
+Screen-Quellen stimmen mit dem committed Quellcode ueberein; keine fehlende
+Lineage. JSON und Markdown stimmen mit dem kanonischen Generator ueberein.
+
+Die beiden fremden lokalen Katalogfassungen bleiben byteweise erhalten.
+Nur der isolierte Lieferindex erhaelt die aus dem CI-Job geprueften Artefakte.
+Keine lokale DB/Migration/Ruecksetzung und kein neuer Container. Nachabnahme
+des Gesamtlaufs bleibt bis zum folgenden GitHub-Lauf offen.

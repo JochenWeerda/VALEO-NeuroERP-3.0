@@ -11,11 +11,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## QUALITY-GATE-CATALOG-SYNC-20261011 — reserviert, Codex
+## QUALITY-GATE-CATALOG-SYNC-20261011 — in arbeit, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Durch MCP-Drift verdeckten physischen Katalogdrift schliessen: committed Fuhrpark-Migration fuegt tenant_id auf vier Tabellen hinzu; committed Katalog fuehrt diese Spalten noch nicht.
 **Dateibesitz:** docs/admin/table-catalog.json und .md ausschliesslich im isolierten Lieferindex, eigene QA-Doku, eigener Workboard-Block. Fremde Arbeitsfassungen beider Katalogdateien bleiben byteweise erhalten.
 **Abnahme:** Katalog aus realem frischen GitHub-Job nach committed Migration, kanonische Darstellung/Lineage vergleichen, Quality Gate erneut vollstaendig. Keine lokale Migration/Reset/DB-/Containeranlage; bestehende CI-Job-Datenbank.
+
+**Abnahme:** Echte CI-Ernte 38122841810: 670 Tabellen unveraendert, genau vier additive tenant_id-Spalten, sieben Code-Verbraucherzuordnungen korrigiert. Keine PK/FK-Aenderung, keine fehlende Lineage. JSON/Markdown kanonisch geprueft; Folge-CI nach Push. Fremde Arbeitsfassungen byteweise erhalten.
 
 ## QUALITY-GATE-MCP-DRIFT-20261011 — in arbeit, Codex
 
