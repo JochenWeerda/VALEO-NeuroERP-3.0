@@ -100,6 +100,23 @@ describe('Mahnlauf: Posten auslassen', () => {
   })
 })
 
+// Seit dem 11.10.2026 verlangen die Mahnwege eine Finanzrolle. Ein abgelehnter Abruf darf nicht
+// aussehen wie "nichts zu mahnen".
+describe('Mahnlauf ohne Finanzrolle', () => {
+  it('sagt, dass die Rolle fehlt, statt eine leere Liste zu zeigen', async () => {
+    mocks.get.mockRejectedValue({ response: { status: 403, data: { detail: "Insufficient role. Required: ('FINANCE_LESEN',)" } } })
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(<QueryClientProvider client={client}><MahnlaufPage /></QueryClientProvider>)
+    const meldungen = await screen.findAllByRole('alert')
+    expect(meldungen.map((m) => m.textContent)).toEqual([
+      'Mahnkandidaten nicht geladen: Für das Mahnwesen fehlt die Finanzrolle.',
+      'Mahnungen nicht geladen: Für das Mahnwesen fehlt die Finanzrolle.',
+    ])
+    expect(screen.queryByText('Keine überfälligen Debitoren-OP.')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Mahnlauf ausführen/ })).toBeDisabled()
+  })
+})
+
 describe('Es gibt einen Mahnlauf', () => {
   const lesen = (rel: string) => readFileSync(resolve(__dirname, rel), 'utf8')
 

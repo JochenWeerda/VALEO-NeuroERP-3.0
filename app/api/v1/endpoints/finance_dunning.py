@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.auth.deps import anmeldename, get_current_user
+from app.auth.finance_roles import finance_read, finance_write
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.finance_dunning_service import FinanceDunningService
@@ -17,7 +18,8 @@ from app.api.v1.schemas.base import TypedObjectOut
 router = APIRouter(prefix="/finance", tags=["finance", "fibu", "mahnwesen"])
 
 
-@router.get("/mahnlauf/candidates", response_model=TypedObjectOut, summary="Mahnkandidaten (überfällige Debitoren-OP + nächste Stufe)")
+@router.get("/mahnlauf/candidates", response_model=TypedObjectOut, summary="Mahnkandidaten (überfällige Debitoren-OP + nächste Stufe)",
+            dependencies=[Depends(finance_read)])
 def candidates(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -25,7 +27,8 @@ def candidates(
     return {"items": FinanceDunningService(db, tenant_id).candidates()}
 
 
-@router.get("/mahnlauf/notices", response_model=TypedObjectOut, summary="Erzeugte Mahnungen")
+@router.get("/mahnlauf/notices", response_model=TypedObjectOut, summary="Erzeugte Mahnungen",
+            dependencies=[Depends(finance_read)])
 def notices(
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
@@ -40,7 +43,8 @@ class DunningRunIn(BaseModel):
     bediener: Optional[str] = None  # veraltet: wird nicht gelesen, es gilt die Anmeldung
 
 
-@router.post("/mahnlauf/run", response_model=TypedObjectOut, summary="Mahnlauf ausführen (Mahnungen erzeugen + Stufe eskalieren)")
+@router.post("/mahnlauf/run", response_model=TypedObjectOut, summary="Mahnlauf ausführen (Mahnungen erzeugen + Stufe eskalieren)",
+            dependencies=[Depends(finance_write)])
 def run(
     body: DunningRunIn,
     nutzer: dict = Depends(get_current_user),

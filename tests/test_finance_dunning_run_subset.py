@@ -41,7 +41,7 @@ def _client(monkeypatch) -> TestClient:
     app.dependency_overrides[get_tenant_id] = lambda: "system"
     # Wie Keycloak: die Kennung ist eine UUID, lesbar ist der Anmeldename.
     app.dependency_overrides[get_current_user] = lambda: {
-        "sub": "5f0c2a9e-0b7d-4e55-9d0e-1c2a3b4c5d6e", "name": "t.de-vries", "roles": []}
+        "sub": "5f0c2a9e-0b7d-4e55-9d0e-1c2a3b4c5d6e", "name": "t.de-vries", "roles": ["FINANCE_BEARBEITEN"]}
     return TestClient(app)
 
 

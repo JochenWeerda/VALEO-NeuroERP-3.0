@@ -23,6 +23,7 @@ from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 from ....core.gobd_artifact import register_artifact, sha256_hex
 from app.auth.deps import get_current_user
+from app.auth.finance_roles import finance_read, finance_write
 from app.core.exceptions import DomainError
 from app.services.finance_dunning_service import FinanceDunningService
 
@@ -140,7 +141,8 @@ class DunningRunResponse(BaseModel):
     notices_created: int
 
 
-@router.get("/rules", response_model=List[DunningRuleResponse], summary="Dunning rules auflisten")
+@router.get("/rules", response_model=List[DunningRuleResponse], summary="Dunning rules auflisten",
+            dependencies=[Depends(finance_read)])
 async def list_dunning_rules(
     active_only: bool = Query(True, description="Show only active rules"),
     tenant_id: str = Depends(get_tenant_id),
@@ -198,7 +200,8 @@ async def list_dunning_rules(
         raise HTTPException(status_code=503, detail="Mahnregeln nicht lesbar") from e
 
 
-@router.post("/rules", response_model=DunningRuleResponse, status_code=201, summary="Dunning rule anlegen")
+@router.post("/rules", response_model=DunningRuleResponse, status_code=201, summary="Dunning rule anlegen",
+            dependencies=[Depends(finance_write)])
 async def create_dunning_rule(
     rule: DunningRuleCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -285,7 +288,8 @@ async def create_dunning_rule(
         raise HTTPException(status_code=500, detail=f"Failed to create dunning rule: {str(e)}")
 
 
-@router.post("/process", response_model=List[DunningResponse], summary="Dunning verarbeiten")
+@router.post("/process", response_model=List[DunningResponse], summary="Dunning verarbeiten",
+            dependencies=[Depends(finance_write)])
 async def process_dunning(
     request: ProcessDunningRequest,
     db: Session = Depends(get_db),
@@ -482,7 +486,8 @@ async def process_dunning(
         raise HTTPException(status_code=500, detail=f"Failed to process dunning: {str(e)}")
 
 
-@router.post("/run", response_model=DunningRunResponse, summary="Dunning ausführen")
+@router.post("/run", response_model=DunningRunResponse, summary="Dunning ausführen",
+            dependencies=[Depends(finance_write)])
 async def run_dunning(
     request: DunningRunRequest,
     db: Session = Depends(get_db),
@@ -501,7 +506,8 @@ async def run_dunning(
     )
 
 
-@router.post("", response_model=DunningResponse, status_code=201, summary="Dunning anlegen")
+@router.post("", response_model=DunningResponse, status_code=201, summary="Dunning anlegen",
+            dependencies=[Depends(finance_write)])
 async def create_dunning(
     dunning: DunningCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -633,7 +639,8 @@ async def create_dunning(
         raise HTTPException(status_code=500, detail=f"Failed to create dunning: {str(e)}")
 
 
-@router.get("", response_model=List[DunningResponse], summary="Dunnings auflisten")
+@router.get("", response_model=List[DunningResponse], summary="Dunnings auflisten",
+            dependencies=[Depends(finance_read)])
 async def list_dunnings(
     debtor_id: Optional[str] = Query(None, description="Filter by debtor ID"),
     op_id: Optional[str] = Query(None, description="Filter by open item ID"),
@@ -706,7 +713,8 @@ async def list_dunnings(
         raise HTTPException(status_code=503, detail="Mahnungen nicht lesbar") from e
 
 
-@router.put("/{dunning_id}/send", response_model=DunningResponse, summary="Dunning senden")
+@router.put("/{dunning_id}/send", response_model=DunningResponse, summary="Dunning senden",
+            dependencies=[Depends(finance_write)])
 async def send_dunning(
     dunning_id: str,
     versand_art: str = Query("email", pattern="^(email|post)$", description="email: an den Kunden; post: gedruckt verschickt"),
@@ -759,7 +767,8 @@ async def send_dunning(
         raise HTTPException(status_code=500, detail=f"Failed to send dunning: {str(e)}")
 
 
-@router.put("/{dunning_id}/paid", response_model=DunningResponse, summary="Dunning paid markieren")
+@router.put("/{dunning_id}/paid", response_model=DunningResponse, summary="Dunning paid markieren",
+            dependencies=[Depends(finance_write)])
 async def mark_dunning_paid(
     dunning_id: str,
     tenant_id: str = Depends(get_tenant_id),

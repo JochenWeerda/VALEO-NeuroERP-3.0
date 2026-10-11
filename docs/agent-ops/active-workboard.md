@@ -25,9 +25,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Abnahme:** bestehender valeo_probe Revision audit_urheber_20261011; echte Commit-/Rollback-/Wiederanlauf-/Konkurrenzvertraege mit eigenen Zeilen; kein Memoryfallback, keine neue DB/Container/Reset. Kein Versand; persistenter pending_browser ist keine Versandfreigabe. **Risiko:** Browserkonto, Fachreferenzen und sichtbarer Versandnachweis weiterhin offen.
 **Harness:** Fachvertrag Vorbereitung; Architektur bestehende Kanalauftraege, keine Event-Outbox als Zustellbeleg; Daten atomarer Auftrag+Audit und payloadgebundener Replay; Tests SQL-Wirkungen plus vorhandene HTTP-Guards; Security Tokenurheber, Mandant+Aktion; Betrieb Rollback ohne stillen Ersatz; Doku ADR/Domain/QA/Workboard; extern CI/Browserabnahme offen.
 
-## MAHNWESEN-ROLLEN-20261011 — in Arbeit, Claude Code
+## MAHNWESEN-ROLLEN-20261011 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt aus EIN-MAHNLAUF-20261011.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Offener Punkt aus EIN-MAHNLAUF-20261011.
 **Befund:** Die elf Mahnwege (`/finance/mahnlauf/*`, `/finance/dunning*`) verlangen eine Anmeldung, aber keine
 Rolle: Wer angemeldet ist, kann einen Mahnlauf ausloesen und Mahnungen versenden. **Ziel:** das bestehende
 Muster aus `app/auth/finance_roles.py` (Zahlungslaeufe, Eingangsrechnungen) — Lesen `finance_read`, Mahnlauf,
@@ -35,6 +35,11 @@ Anlegen, Versenden, Bezahlt-Vermerk `finance_write`; Pruefung vor dem ersten Dat
 **Dateibesitz:** nur die Dekoratoren in `app/api/v1/endpoints/dunning.py` und `finance_dunning.py`, neue
 Vertragsdatei `tests/test_mahnwesen_rollen_vertrag.py`, Anpassung der Mahn-Tests, QA-Doku, driftende
 Generatorartefakte.
+**Lieferung:** elf Wege mit `finance_read`/`finance_write` am Dekorator; Vertrag mit 122 Faellen ohne Datenbank
+(zehn Rollen x elf Wege, ohne Anmeldung, Vollstaendigkeit); die Maske sagt bei 403 „Finanzrolle fehlt“ statt
+„nichts zu mahnen“. QA: `docs/quality-assurance/mahnwesen-rollen-20261011.md`. **Betrieb:** Debitorenbuchhaltung
+braucht `FINANCE_BEARBEITEN`. **An Codex:** `openapi.json` driftete auf `main` um eine Beschreibung aus
+`fix(whatsapp)` 6a4199ddf (`generate_openapi.py --check` rot) — nicht von mir angefasst.
 
 ## WHATSAPP-ACCESS-20261011 — abgeschlossen, Codex
 
