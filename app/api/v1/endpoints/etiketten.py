@@ -24,6 +24,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
+from app.auth.deps import anmeldename, get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
@@ -163,6 +164,7 @@ async def list_druckauftraege(
              summary="Druckauftrag anlegen")
 async def create_druckauftrag(
     payload: DruckauftragIn,
+    nutzer: dict = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -177,7 +179,9 @@ async def create_druckauftrag(
         drucker_satz = dienst.drucker_holen(db, tenant_id, payload.drucker_id)
         nummer = dienst.naechste_auftragsnummer(db, tenant_id)
         ergebnis = dienst.auftrag_anlegen(
-            db, tenant_id, str(uuid7()), nummer, payload, drucker_satz
+            db, tenant_id, str(uuid7()), nummer,
+            payload.model_copy(update={"erfasst_durch": anmeldename(nutzer) or None}),  # wer druckt, sagt die Anmeldung
+            drucker_satz,
         )
         db.commit()
     except HTTPException:

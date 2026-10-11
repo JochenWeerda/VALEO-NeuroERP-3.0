@@ -11,7 +11,7 @@ from pydantic import ConfigDict, Field
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.auth.deps import User, get_current_user
+from app.auth.deps import User, anmeldename, get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
@@ -1042,7 +1042,7 @@ async def create_disposition(
 ) -> dict:
     """Ruft eine Menge ab. Mehr als kontrahiert nur mit ``allow_overdelivery``."""
     _require_roles(user, KontraktSecurityService.ROLE_BEARBEITEN, KontraktSecurityService.ROLE_ADMIN)
-    return dispo.abrufen(db, tenant_id, kontrakt_id, payload)
+    return dispo.abrufen(db, tenant_id, kontrakt_id, payload.model_copy(update={"erfasst_durch": anmeldename(user) or None}))
 
 
 @router.patch("/{kontrakt_id}/dispositionen/{disp_id}/freigabe", response_model=DispositionOut,

@@ -11,15 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## ANMELDEKENNUNG-UEBRIGE-20261011 — in Arbeit, Claude Code
+## ANMELDEKENNUNG-UEBRIGE-20261011 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-11. Folge zu BEWERBUNG-ANMELDEKENNUNG-20261011, dieselbe Regel:
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Folge zu BEWERBUNG-ANMELDEKENNUNG-20261011, dieselbe Regel:
 wer handelt, traegt das System aus der Anmeldung ein. **Ziel:** `erfasst_durch` in Etikettendruck,
 Schadenmeldung, Genossenschaftsbewegungen, Kontrakt-Disposition und Zeitkonto-Korrektur aus der Anmeldung
 (`anmeldename()`), nicht aus dem Rumpf. Kein Frontend dieser Module hat ein Eingabefeld dafuer — die Angabe
 bleibt heute leer. **Dateibesitz:** nur die jeweiligen Anlege-Hunks in `etiketten.py`, `schaeden.py`,
 `genossenschaft.py`, `kontrakte.py` (`create_disposition`), `personal.py` (`adjust_time_account`,
 zeilenneutral wegen Godfile-Ratsche), neue Vertragsdatei `tests/test_anmeldekennung_vertrag.py`, QA-Nachtrag.
+**Nachweis:** statt einer neuen Datei je Modul ein Vertrag in der bestehenden Vertragsdatei (Quittung,
+Kontrakt-Disposition, Genossenschaftsregister, Zeitkonto); mit den Modulvertraegen 254 gruen gegen
+`valeo_probe` im isolierten Lieferstand, Gates gruen. QA: Nachtrag in
+`docs/quality-assurance/bewerbung-anmeldekennung-20261011.md`.
+**Fremd und rot im Pruefstand:** `test_parallel_installation_endpoints` (fester Druckername, kein
+Aufraeumen; zweiter Lauf scheitert an `ux_drucker_name`).
 
 ## QUALITY-GATE-SECRET-TEST-20261011 — abgeschlossen, Codex
 

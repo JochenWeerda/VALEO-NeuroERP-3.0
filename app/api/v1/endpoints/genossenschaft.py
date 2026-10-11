@@ -27,6 +27,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.auth.deps import anmeldename, get_current_user
 from app.api.v1.schemas.genossenschaft_schemas import (
     AnteilsbewegungCreate,
     AnteilsbewegungGebucht,
@@ -98,6 +99,7 @@ def list_mitglieder(
              summary="Mitglied aufnehmen (§ 15 GenG)")
 def create_mitglied(
     payload: MitgliedCreate,
+    nutzer: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
@@ -149,7 +151,7 @@ def create_mitglied(
                 payload.genossenschaftsanteile, wert, payload.eintrittsdatum,
                 bemerkung="Erstzeichnung beim Beitritt",
                 journal_entry_id=journal_id,
-                erfasst_durch=payload.erfasst_durch,
+                erfasst_durch=anmeldename(nutzer) or None,
             )
         db.commit()
     except HTTPException:
@@ -371,6 +373,7 @@ def _hauptbuch_buchen(
 def create_anteilsbewegung(
     mitglied_id: str,
     payload: AnteilsbewegungCreate,
+    nutzer: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
@@ -428,7 +431,7 @@ def create_anteilsbewegung(
             bemerkung=payload.bemerkung,
             gegen_mitglieds_id=payload.gegen_mitglieds_id,
             journal_entry_id=journal_id,
-            erfasst_durch=payload.erfasst_durch,
+            erfasst_durch=anmeldename(nutzer) or None,
         )
         if gegenseite is not None:
             gegenbewegung_id = str(uuid7())
@@ -438,7 +441,7 @@ def create_anteilsbewegung(
                 payload.wert_eur, payload.datum,
                 bemerkung=f"Gegenbuchung zu {bewegung_id}",
                 gegen_mitglieds_id=mitglied_id,
-                erfasst_durch=payload.erfasst_durch,
+                erfasst_durch=anmeldename(nutzer) or None,
             )
         bestand_nachher = verfuegbar + dienst.VORZEICHEN[payload.bewegungstyp] * payload.anzahl_anteile
         db.commit()
