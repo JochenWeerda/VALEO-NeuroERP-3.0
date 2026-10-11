@@ -11,6 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WHATSAPP-LEARNING-CONTRACT-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** User-Vorgabe fuer heuristisch lernende Ergaenzung verkuerzter Kundenbestellungen, Unsicherheit/Human-in-the-loop und tatsaechliche Lieferplanung in einen pruefbaren Integrationsvertrag ueberfuehren. Dokumentationsslice; keine automatische Auftragsanlage oder Versandfreigabe.
+**Dateibesitz:** neues docs/workflows/whatsapp-order-learning.md; docs/workflows/whatsapp-web-computer-use.md eigener Verweis; eigener Workboard-/Handoff-Nachweis. Kein Eingriff in fremdes Code-/Katalog-WIP.
+**Abnahme:** explizite Angaben haben Vorrang; Lernen nur aus belegten bestaetigten Auftraegen/Korrekturen; feldbezogene Unsicherheit, widerspruechliche Muster und Cold Start; keine selbstbestaetigende Lernschleife; Wochen-Stueckguttour und Information bei fehlendem Folgetag; belegter Ist-Stand und offene Implementierung getrennt.
+**Risiken:** aktuelle Kundenmatch-Suche ohne Mandantenfilter, Inbox-Header-/Default-Kontext, Replay/Audit und fehlende Silo-/Gebinde-Felder im kanonischen Auftragsvertrag; diese werden nicht als geloest ausgewiesen.
+**Harness:** Doku-Governance und Linkpruefung; keine DB/Container/Netz-Fachaktion, keine neuen Services/API/Schemata; nachfolgende Codeclaims offen mit Abnahmekriterien.
+
 ## HAUPTBUCH-ROLLEN-20261011 — in Arbeit, Claude Code
 
 **Owner:** Claude Code. **Stand:** 2026-10-11. Befund aus OFFENE-POSTEN-ROLLEN-20261011.
