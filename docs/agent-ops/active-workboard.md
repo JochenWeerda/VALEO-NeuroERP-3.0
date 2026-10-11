@@ -11,6 +11,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WHATSAPP-BROWSER-PREP-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Veralteten automatischen Meta-Versand entfernen; benachrichtigende Fachverbraucher bereiten Nachrichten fuer WhatsApp Web vor und behaupten keine Zustellung. Teilmeilenstein zu WHATSAPP-WEB-INTEGRATION-20261011.
+**Dateibesitz:** app/services/whatsapp_notify_service.py; app/api/v1/endpoints/whatsapp_notify.py nur Beschreibungen; tests/test_whatsapp_notify.py; neues tests/test_whatsapp_browser_prepare.py; eigene QA und docs/workflows/whatsapp-web-computer-use.md nur Lieferstand. Keine Auth-, DB- oder Browserautomation-Aenderung.
+**Abnahme:** selbst mit alten Meta-Credentials kein HTTP-Aufruf; Status pending_browser; Outbox-Lesen veraendert keine gespeicherten Auftraege; leerer Mandant abgewiesen. Bestehende Text-/Fachvertraege gruen, keine externe Nachricht. **Risiko:** fluechtige Outbox und bisherige Endpoint-Autorisierung bleiben offen, daher kein produktiver Browserbetrieb.
+**Harness:** Fachvertrag Templates und bestehende Aufrufer; Architektur alter Versand entfernt, kein neuer Dienst; Daten keine Credentials/privaten Werte loggen; Tests echte Funktionen mit HTTP-Verbot; Security kein fremder automatischer Versand; Betrieb ehrlicher pending_browser-Status; Doku QA/Runbook/Workboard; extern Gesamt-CI und Browserabnahme offen.
+
 ## EIN-MAHNLAUF-20261011 — in Arbeit, Claude Code
 
 **Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt aus MAHNWESEN-EINZELMASKE-ABLOESEN-20261011.
