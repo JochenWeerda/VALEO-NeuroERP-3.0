@@ -2261,6 +2261,10 @@
       "path": "admin/nummernkreise"
     },
     {
+      "module": "@/pages/admin/postfaecher",
+      "path": "admin/postfaecher"
+    },
+    {
       "module": "@/pages/admin/postfaecher-anmeldung-rueckruf",
       "path": "admin/postfaecher/anmeldung-rueckruf"
     },

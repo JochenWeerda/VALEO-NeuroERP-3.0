@@ -2209,7 +2209,34 @@ export const adminPostfaecherScreen = {
       "kind": "primary",
       "dangerLevel": "safe",
       "zone": "header",
-      "stubReason": "Legt das Postfach an oder aendert das geladene."
+      "permission": "admin.postfach.write",
+      "commandEndpoint": "/api/v1/admin/postfaecher/actions/speichern",
+      "method": "POST",
+      "inputFields": [
+        {
+          "key": "kennung",
+          "label": "Kennung",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "absender_email",
+          "label": "Absender",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "anbieter",
+          "label": "Anbieter",
+          "type": "select",
+          "required": true
+        },
+        {
+          "key": "postfach_id",
+          "label": "Postfach-ID (Update)",
+          "type": "text"
+        }
+      ]
     },
     {
       "key": "testen",
@@ -2246,6 +2273,7 @@ export const adminPostfaecherScreen = {
       "kind": "secondary",
       "dangerLevel": "safe",
       "zone": "footer",
+      "localEffect": "form_reset",
       "stubReason": "Leert die Eingabe fuer ein neues Postfach."
     }
   ],

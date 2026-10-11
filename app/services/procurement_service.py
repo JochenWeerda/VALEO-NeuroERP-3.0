@@ -10,7 +10,7 @@ from sqlalchemy.exc import DataError
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.business_time import business_today
-from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.core.exceptions import ConflictError, DomainError, EntityNotFoundError, ValidationFailedError
 from app.core.uuid7 import uuid7
 from app.infrastructure.models.einkauf_models import (
     ArtikelLagerParameter,
@@ -258,6 +258,22 @@ def position_to_mask(p: EinkaufBestellungPosition) -> dict[str, Any]:
         "lieferdatum": _iso(p.lieferdatum),
         "notiz": p.notiz,
     }
+
+
+class VersandNichtMoeglich(DomainError):
+    """Die Bestellung ging nicht raus: 503 ohne Einrichtung, 422 ohne Empfaenger, sonst 502."""
+
+    error_code = "VERSAND_NICHT_MOEGLICH"
+
+    def __init__(self, ergebnis: dict[str, Any]) -> None:
+        super().__init__(ergebnis.get("fehler") or "Versand nicht moeglich")
+        self.ergebnis = ergebnis
+        if ergebnis.get("status") == "nicht_eingerichtet":
+            self.http_status = 503
+        elif not ergebnis.get("empfaenger") and ergebnis.get("versand_art") == "email":
+            self.http_status = 422
+        else:
+            self.http_status = 502
 
 
 class ProcurementService:
@@ -973,13 +989,20 @@ class ProcurementService:
         self.db.commit()
         return {"id": str(b.id), "status": b.status, "bestellfall": b.bestellfall}
 
-    def versende_bestellung_svc(self, bestellung_id: str, versand_art: str, empfaenger=None) -> dict:
+    def versende_bestellung_svc(self, bestellung_id: str, versand_art: str, empfaenger=None, *,
+                                nutzer: Optional[dict] = None) -> dict:
+        """Versendet die Bestellung; gilt erst als versandt, wenn der Versand geklappt hat
+        (oder Post bewusst gewaehlt wurde). Sonst ``VersandNichtMoeglich`` mit dem Grund."""
         b = self.db.query(EinkaufBestellung).filter(
             EinkaufBestellung.id == bestellung_id, EinkaufBestellung.tenant_id == self.tenant_id,
         ).first()
         if not b:
             raise EntityNotFoundError("EinkaufBestellung", bestellung_id)
-        result = versende_bestellung(self.db, b, versand_art=versand_art, empfaenger_override=empfaenger)
+        result = versende_bestellung(self.db, b, versand_art=versand_art, empfaenger_override=empfaenger,
+                                     nutzer=nutzer)
+        if result["status"] not in ("gesendet", "manuell"):
+            self.db.rollback()
+            raise VersandNichtMoeglich(result)
         self.db.commit()
         return {"bestellung_id": str(b.id), "bestellnummer": b.bestellnummer, "versand": result}
 

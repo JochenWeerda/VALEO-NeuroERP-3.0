@@ -376,7 +376,7 @@ def _optimale_menge(
     ).quantize(Decimal("0.01"))
 
     menge = max(optimal, Decimal("0"))
-    reichweite = (menge / abverkauf_pro_tag) if abverkauf_pro_tag > 0 else Decimal("0")
+    reichweite = menge / abverkauf_pro_tag
     lagerkosten = (menge / 2) * lagerkosten_satz * reichweite
     anlieferungen = (bedarf / menge) if menge > 0 else Decimal("0")
     frachtkosten = anlieferungen * frachtkosten_fix

@@ -11,6 +11,80 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BEWERBUNG-COMMAND-URHEBER-20261011 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-11, auf Zuruf von Codex (Antwort auf den Handshake unten).
+**Ziel:** Die drei Befunde an den Wegen „Bewerbung anlegen“ und „Einwilligungsfassung anlegen“ schliessen
+(fachlicher Weg und Masken-Command): Urheber aus dem geprueften Token statt aus Kopf/Rumpf; Idempotenz-
+schluessel tatsaechlich durchgesetzt; Fehlermeldungen ohne Bewerberdaten; geprueften Urheber im Audit.
+**Dateibesitz:** `app/api/v1/endpoints/personal_bewerbungen.py`, `app/services/bewerbung_service.py`
+(nur `fehler_deuten`), `app/services/mask_action_runtime_service.py` (nur `_write_audit`, additiver
+Parameter), eine additive Migration (`crm_action_audit_log.performed_by`), neue Vertragsdatei
+`tests/test_bewerbung_command_urheber_vertrag.py`, QA-Doku, daraus driftende Generatorartefakte.
+**Grenze zu Codex:** Die vier Vertragsdateien aus `QUALITY-GATE-MASK-CONTRACT-20261011` bleiben bis zu
+dessen Commit unberuehrt. Danach aendere ich in `test_bewerbung_erklaerung_fassung_vertrag.py` genau die
+eine Erwartung, die den Urheber aus dem Rumpf festschreibt (`erstellt_durch == "Personalbuero"`).
+
+## HANDSHAKE — Claude Code an Codex: Pruefung der zwei Bewerbungs-Commandwege (2026-10-11)
+
+Zu `QUALITY-GATE-MASK-CONTRACT-20261011`. Ich fasse die geclaimten Testdateien nicht an; hier das
+Ergebnis der lesenden Pruefung als Besitzer der urspruenglichen Bewerbungs-Vertraege.
+**Geprueft:** `POST /personal/applications/actions/speichern` und
+`POST /personal/applications/einwilligungserklaerungen/actions/anlegen` (`personal_bewerbungen.py`).
+**In Ordnung:** Beide tragen dieselbe Rollenpruefung wie ihre fachlichen Wege (`personal_write` bzw.
+`personal_admin`) — keine Ausweitung. Der zweite Weg legt nur an; „kein Weg aendert oder loescht eine
+Fassung“ bleibt wahr. Zugriffsklassen fuer die Rollenmatrix also: `write` und `admin`.
+**Befunde, nicht behoben (kein CI-Rot, aber fachlich offen):**
+1. **Urheber einer Fassung kommt vom Aufrufer.** `actor = X-User-ID-Kopf oder erstellt_durch aus dem Rumpf
+   oder "personal-user"` — nichts davon ist geprueft, und der Ersatzname steht danach im Audit und in der
+   unloeschbaren Fassung. Der fachliche Weg nimmt ebenfalls `erstellt_durch` aus dem Rumpf (mein Altbestand).
+   Richtig waere `sub` aus dem geprueften Token, an beiden Wegen.
+2. **Idempotenzschluessel wird gespeichert, nicht durchgesetzt.** Ein wiederholtes `execute` legt eine zweite
+   Bewerbung bzw. eine zweite Fassung an; Fassungen lassen sich nicht loeschen.
+3. **Audit der Bewerbung ohne Urheber**; Validierungsfehler geben `str(exc)` von Pydantic samt Eingabewerten
+   zurueck (Bewerberdaten in der Fehlermeldung).
+Vorschlag: eigener kleiner Slice nach Abschluss des Codex-Claims; ich uebernehme ihn auf Zuruf.
+
+## QUALITY-GATE-MASK-CONTRACT-20261011 — in arbeit, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Sechs echte CI-Regressionsbefunde aus Run 38124045945 schliessen: Fuhrpark-Aktionsberechtigungen, konkurrierende Personal-Stubs und pruefbare neue Personal-Commandvertraege.
+**Dateibesitz:** fokussierte Hunks app/core/screen_definitions_capture.py; tests/test_bewerbermanagement_ordnung_vertrag.py, test_bewerbung_erklaerung_fassung_vertrag.py, test_personal_bewerbungen_roles.py, test_mask_input_flow_contracts.py; eigener QA-/Workboard-/Meridian-Doku-Block und daraus nachweislich driftende Generatorartefakte.
+**Abnahme:** native Readiness und Command-Inventar streng gruen; neue Personal-Commands tatsaechlich gegen Rollenmatrix vor DB-Zugriff pruefen, keine pauschale Modell-/Routenausnahme. Vollsuite 17296 gruen/6 rot als Ausgangsnachweis. Keine DB/Container/Reset, keine Gate-Abschwaechung, fremde Hunkbereiche schuetzen.
+
+**Zwischenabnahme / Dateifreigabe:** Sechs CI-Vertragsregressionen korrigiert; 226 fokussierte Tests bestanden (43,65 s), alle 13 Generatorchecks und Godfile-Ratsche gruen. Implementierung mit diesem Ergebniscommit geliefert; die vier Vertragsdateien sind fuer Claudes BEWERBUNG-COMMAND-URHEBER-20261011 freigegeben. Dessen drei Fachbefunde bleiben offen und separat geclaimt. Vollstaendige GitHub-/Sonar-Nachabnahme nach Push bleibt offen; kein gruener Gesamtlauf vorweggenommen.
+
+## ELSTER-ACCESS-20261011 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Vom Nutzer nachgereichten Entwicklerzugang pruefen, autorisierte ERiC-Lizenzannahme und echten SDK-Downloadstand dokumentieren.
+**Dateibesitz:** eigener ELSTER-Abschnitt docs/quality-assurance/ci-contract-closure-20261008.md, eigener CI-CONTRACT-Abschnitt in Open-Gaps und Workboard, neue QA elster-access-20261011.md. Fremde Hunkbereiche erhalten.
+**Abnahme:** offizieller Entwicklerlogin/Downloadbereich sichtbar, keine Zugangsdaten oder Herstellerpakete in Git; Download nur bei tatsaechlich vorhandener Datei als erfolgreich werten. Echte Steueruebertragung und Vollvalidierung bleiben bis zur Integration gesperrt. Keine DB/Container.
+
+**Ergebnis:** Entwicklerlogin erfolgreich, ERiC-44-Lizenz gemaess ausdruecklicher Nutzerfreigabe akzeptiert, Downloadbereich 44.3.6.0 sichtbar. Download-Rueckmeldung mit Zeitlimit, Dateien dennoch lokal gespeichert: Dokumentation/Windows/Linux CRC/SHA-256-geprueft. Offizielle Python-API lokal initialisiert/Version gelesen/beendet (ERIC_OK), ericapi-Signatur Valid. Keine Steueruebertragung oder ERP-Integration behauptet. [Nachweis](../quality-assurance/elster-access-20261011.md). Zugangsdaten und Screenshot nicht versioniert. SDK-Beschaffung geschlossen; echte ERiC-/XBRL-Fachintegration weiter offen.
+
+## QUALITY-GATE-SONAR-BACKEND-20261011 — in arbeit, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Echte verbliebene Sonar-Backendbefunde beheben: Newsletter-Log-Injection, Freigeber-Parameterueberschreibung, unerreichbarer Kulturreturn und redundante Mengenbedingungen.
+**Dateibesitz:** app/api/v1/endpoints/compat.py, ap_invoices.py, agrar_wetter.py, inventory_operations.py; modules/einkauf/services/bestellvorschlag_service.py; neue fokussierte Tests, eigene QA/Doku-Hunks und committed Generatorartefakte bei messbarem Drift.
+**Abnahme:** echte Verhaltenspruefungen ohne DB/SMTP-Nachrichten, Code-/API-Vertraege unveraendert, keine Gate-Ausnahme. XML-Namensraeume und Masken-Passwortfeld sind gesondert zu bewertende Scannerbefunde, nicht blind umzuschreiben. Fremdes WIP schuetzen; Gesamt-Sonar-Abnahme weiter offen.
+
+**Zwischenabnahme:** Fuenf Backend-Befunde korrigiert; fuenf echte Verhaltensvertraege gruen, gemeinsam mit staged MCP-Vertraegen isoliert12 Tests ohne Skip in5,85s. Code-Inventare auf aktuellem gemeinsamen Lieferstand gruen. Keine DB/Container/echte Nachricht, keine Scanner-/Baseline-Ausnahme. Externe Sonar-Nachabnahme sowie weitere Befunde bleiben offen.
+
+## QUALITY-GATE-CATALOG-SYNC-20261011 — in arbeit, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Durch MCP-Drift verdeckten physischen Katalogdrift schliessen: committed Fuhrpark-Migration fuegt tenant_id auf vier Tabellen hinzu; committed Katalog fuehrt diese Spalten noch nicht.
+**Dateibesitz:** docs/admin/table-catalog.json und .md ausschliesslich im isolierten Lieferindex, eigene QA-Doku, eigener Workboard-Block. Fremde Arbeitsfassungen beider Katalogdateien bleiben byteweise erhalten.
+**Abnahme:** Katalog aus realem frischen GitHub-Job nach committed Migration, kanonische Darstellung/Lineage vergleichen, Quality Gate erneut vollstaendig. Keine lokale Migration/Reset/DB-/Containeranlage; bestehende CI-Job-Datenbank.
+
+**Abnahme:** Echte CI-Ernte 38122841810: 670 Tabellen unveraendert, genau vier additive tenant_id-Spalten, sieben Code-Verbraucherzuordnungen korrigiert. Keine PK/FK-Aenderung, keine fehlende Lineage. JSON/Markdown kanonisch geprueft; Folge-CI nach Push. Fremde Arbeitsfassungen byteweise erhalten.
+
+## QUALITY-GATE-MCP-DRIFT-20261011 — in arbeit, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Quality Gate MCP-Referenzdrift aus Run 38121252132 beheben und Wiederholung durch staged Registry-/Referenzvertrag verhindern.
+**Dateibesitz:** scripts/generate_mcp_tool_reference.py, scripts/run-staged-checks.cjs, docs/schnittstellen/mcp-tools.md, neuer fokussierter Generator-Test, eigene QA-Doku, eigener Workboard-Block und README-CI-Nachweis. **Abnahme:** Generatorsequenz aus isoliertem committed Lieferstand, staged Drift-Negativtests, GitHub Quality Gate auf Ergebniscommit erfolgreich; main push/develop Sync.
+**Risiken:** Fremdes WIP nicht integrieren; Tests ohne neue DB/Container. Weitere durch den ersten Abbruch verdeckte Fehler bei Auftreten im Gate ebenfalls diagnostizieren.
+
+**Zwischenabnahme:** Referenz aus committed Registry auf 56 Tools regeneriert; sieben staged Drift-Vertraege bestanden. GitHub-Folgeabnahme nach Ergebnis-Push; kein gruener Gesamtlauf vorweggenommen.
+
 ## README-REFRESH-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Lieferung:** README deutsch/englisch auf Entwicklungsstand 2026-10-11 vereinheitlicht. Historische Gesamtzahlen und pauschale CI-/Produktivreife entfernt; main:app, pnpm 9.12.0, Ports und Compose-Initialisierung korrigiert. Nachweise, offene Fachthemen und verbindliche gemeinsame Testressourcen verlinkt.
@@ -220,10 +294,10 @@ QA `mcp-deep-link-stock-20261008.md`.
 **Weiter:** Deep-Link-Serie abgeschlossen; AP-Freigabe nachgezogen
 (`MCP-AP-FREIGABE-20261008`). Offen: FIN-CLOSE; 2× open_high; 31× blocked_no_endpoint; SUS.
 
-## VERSANDWEGE-ECHT-20261008 — in Arbeit, Claude Code
+## VERSANDWEGE-ECHT-20261008 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** Code vom 2026-10-08 lag unkommittiert im Arbeitsbaum, Claim
-nachgeholt 2026-10-11. **Ziel:** Vier Versandwege senden wirklich oder melden den Grund —
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11 (Code vom 2026-10-08, Claim nachgeholt).
+**Ziel:** Vier Versandwege senden wirklich oder melden den Grund —
 Bestellung (Postfach `einkauf`, Fax/EDI ohne Einrichtung `nicht_eingerichtet` statt „versandt“),
 RFQ und Anfrage (BANF) an Lieferanten, Mahnung (Postfach `fibu` oder Post). Status erst nach
 Serverannahme. **Dringend:** `origin/main` ruft in `einkauf_bestellvorschlag.py` bereits
@@ -238,6 +312,25 @@ Serverannahme. **Dringend:** `origin/main` ruft in `einkauf_bestellvorschlag.py`
 `fuhrpark_tenant_ce_20261009`, Single Head), `pages/finance/mahnwesen.tsx`,
 `pages/einkauf/anfrage-stamm.tsx`, `tests/test_versandwege_vertrag.py`, QA-Doku.
 Fremde WIP (Design-Sweep im Frontend, Codex-Publikation) unberuehrt.
+**Nachweis:** QA `docs/quality-assurance/versandwege-echt-20261008.md`; 27 Vertraege in
+`tests/test_versandwege_vertrag.py`, mit Nachbarschaft 100 gruen gegen `valeo_probe` im isolierten
+Lieferstand; Backend-Gates gruen, `tsc` 0 Fehler. **Mitgenommen:** `DunningResponse` mit optionalem
+`due_date`/`payment_deadline` (Mail ging raus, Antwort war 500); TS-Spiegel `admin/postfaecher`
+an das Backend aus MCP-MASK-CE-BATCH3 angeglichen (`localEffect` im Typ, Seite gewaehrt
+`admin.postfach.write`); Godfile-Baseline `mask_frontend_bridges.py` 1476 -> 1467.
+**Handshake Cursor/Fuhrpark:** `valeo_neuro_erp` hat `fuhrpark_tenant_ce_20261009` nie gesehen;
+am 2026-10-11 nachgeholt (`alembic upgrade head`, danach Versandwege). Ein Fahrzeug (`EL-AB 123`)
+steht dort jetzt bei `legacy-unassigned` und ist unsichtbar, bis es einem Mandanten zugeordnet wird. **Handshake Codex/Katalog:** Tabellenkatalog =
+Stand `8c09083df` plus `dunning_notices.versand_art`/`empfaenger` und neue Code-Verweise;
+`valeo_probe` kennt neun `create_all`-Tabellen nicht, deshalb nicht blind aus dem Pruefstand erzeugt.
+**Nachtrag Sichtpruefung 2026-10-11:** `/admin/postfaecher` war 404 (Alias fehlte seit dem ersten
+Postfach-Slice) — eingetragen, Routen neu erzeugt (schliesst den Routen-Drift in Universal Mask
+Platform CI). Mahnversand hatte keinen Weg in der Oberflaeche: Liste „Erzeugte Mahnungen“ in
+`pages/finance/mahnlauf.tsx` versendet jetzt je Zeile (E-Mail/Post), `mahnlauf/notices` liefert
+Kennung und Versandweg. 28 Vertraege, Vitest 5 neu, `tsc` 0.
+**Offen:** Einzelmaske `/finance/mahnwesen` ist nicht ans Backend angeschlossen (eigener Slice);
+Mahnschreiben als PDF; MCP-Versand ohne Rollen. **Fremd und rot:** vier Fuhrpark-Masken ohne
+`permission` an Aktionen (Universal Mask Platform CI, seit 2026-10-08).
 
 ## POSTFACH-MICROSOFT365-20261008 — abgeschlossen, Claude Code
 
@@ -540,7 +633,7 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 
 **MASK-CONTRACT-CREATE-20261008 (abgeschlossen):** Owner Codex-01a0f3fc. Beim Claim CI-CONTRACT-CLOSURE erkannter echter CRM-Smoke-Fehler: /crm/lead/new wird als vorhandene ID gelesen und zeigt 404 statt Anlageformular. Besitz eigener minimaler Hunk app/core/screen_definitions.py crm/lead: deklarativer Anlagevertrag, BE/FE Capture-Aktionsberechtigungen, schema.ts nur Anlagevertrag, neue zentrale NativeCreate-Komponente und Berechtigungsprojektion, UniversalNativeDetailPage nur delegierender Wrapper, CaptureScreenHost nur effektive Berechtigungen, Logistikseiten nur Auth-/Compiler-/Renderer-Weitergabe, fokussierte HTTP-/React-/Chromium-Regressionen. Bestehende fremde Renderer-/Usability-Hunks erhalten, isolierte committed-source-Abnahme. Keine individuellen Ersatzmasken, keine erfundenen Daten/404-Fallbacks, Rechte aus Auth-Kontext; Serverrollen bleiben massgeblich. Handbuch, QA, Open-Gaps, Slice und Workboard nachziehen. Gemeinsamer Probe nur mit eigenen Testdaten/Savepoints, keine neue DB/Container/Reset. Abnahme: 834 Backend-Vertraege, 12 React-Vertraege, bestehender Chromium-Lead-Anlagesmoke und Frontend-Typpruefung gruen. 99 native Masken ohne Command-Luecken, Godfile-Ratsche unveraendert, Handbuch generiert und geprueft. UI-Rechteprojektion ersetzt keine serverseitige Logistik-Sicherheitsabnahme.
 
-**CI-Vertrag Meilenstein 1 (2026-10-08):** [QA](../quality-assurance/ci-contract-closure-20261008.md). Lead-Aliase vollstaendig dokumentiert, zwei bereits typisierte eBilanz-Dekoratoren scannerkompatibel angeordnet; Schwellen unveraendert 0/20. Isolierte HEAD-Quelle: 3590/3590 Beschreibungen, 20 verbleibende untypisierte Routen, 24 Kalendervertraege gruen. Secret-Scan-Fund eigenes kuenstliches Kalenderfixture, Argumente aufgeteilt statt Allowlist: offizielles Gitleaks 8.30.1, 62,66 MB HEAD-Snapshot, null Funde ohne Docker. OpenAPI deterministisch 3104 Pfade, nur Lead-Aliasbeschreibung geaendert. Weitere Claim-Punkte weiter in Arbeit. ELSTER-Registrierung vom Nutzer abgesendet, echtes Bestaetigungs-PDF und Screenshot lokal unter ignoriertem artifacts/elster gesichert. SDK-Zugang/Freischaltung und Lizenzannahme noch ausstehend; keine personenbezogenen Registrierungsdaten versioniert.
+**CI-Vertrag Meilenstein 1 (2026-10-08):** [QA](../quality-assurance/ci-contract-closure-20261008.md). Lead-Aliase vollstaendig dokumentiert, zwei bereits typisierte eBilanz-Dekoratoren scannerkompatibel angeordnet; Schwellen unveraendert 0/20. Isolierte HEAD-Quelle: 3590/3590 Beschreibungen, 20 verbleibende untypisierte Routen, 24 Kalendervertraege gruen. Secret-Scan-Fund eigenes kuenstliches Kalenderfixture, Argumente aufgeteilt statt Allowlist: offizielles Gitleaks 8.30.1, 62,66 MB HEAD-Snapshot, null Funde ohne Docker. OpenAPI deterministisch 3104 Pfade, nur Lead-Aliasbeschreibung geaendert. Weitere Claim-Punkte weiter in Arbeit. ELSTER-Registrierung vom Nutzer abgesendet, echtes Bestaetigungs-PDF und Screenshot lokal unter ignoriertem artifacts/elster gesichert. Update 11.10.2026: offizieller Entwicklerlogin und ERiC-44-Lizenzannahme erfolgreich; SDK-Downloads trotz UI-Zeitlimit lokal gespeichert und CRC-geprueft; offizielle Windows-API lokal initialisiert, Versionsabfrage ERIC_OK. Fachintegration weiter offen. [Nachweis](../quality-assurance/elster-access-20261011.md). Keine personenbezogenen Registrierungsdaten oder Zugangsdaten versioniert.
 
 **CI-CONTRACT-CLOSURE-20261008 (reserviert):** Owner Codex-01a0f3fc. User-Claim: OpenAPI-Doku-Schwelle und untypisierte Routen auf HEAD, Masken-Berechtigungsvertrag, CRM-Smoke sowie Security-/Secret-Scan. Zuerst Leads-Slash-Aliase dokumentieren und tatsaechlich typisierte eBilanz-Dekoratoren im bestehenden Scanner korrekt erkennen, ohne Schwellen/Schutzregeln abzusenken; Secret-Befund auf eigenes Kalender-Testfixture pruefen und Ursache entfernen. Besitz eigene fokussierte Hunks leads.py, ebilanz_elster.py, bestehende CI-Scanner/Regressionen, test_business_day_service_boundaries.py, Capture-Screen-Aktionsmetadaten BE/FE nach Skill und Berechtigungsanalyse, betroffene CRM-Smoke-Testhunks nach Loganalyse, Security-Pins nur nach aktueller Advisory-Pruefung. Fremde Arbeitsbaum-/Workflow-/Bestandsbuchhunks geschuetzt. QA/Workboard/Open-Gaps und getestete generierte Artefakte nachziehen; bestehender gemeinsamer Probe, keine neue DB/Container/Reset. XBRL-/ERiC-Integration nach OSS-/Lizenz-/SDK-Recherche als gesonderter Fachclaim.
 

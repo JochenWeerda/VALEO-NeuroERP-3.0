@@ -316,35 +316,8 @@ async def delete_anfrage(
         raise HTTPException(status_code=500, detail="Fehler beim Loeschen der Anfrage")
 
 
-@router.post("/anfragen/{anfrage_id}/send")
-async def send_anfrage(
-    anfrage_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """Versendet Anfrage an Lieferanten / setzt Status auf FREIGEGEBEN"""
-    try:
-        existing = db.execute(
-            text("SELECT id, status FROM einkauf_anfragen WHERE (id = :id OR anfrage_nummer = :id) AND tenant_id = :tenant_id"),
-            {"id": anfrage_id, "tenant_id": tenant_id},
-        ).fetchone()
-        if not existing:
-            raise HTTPException(status_code=404, detail="Anfrage nicht gefunden")
-
-        real_id = existing[0]
-        db.execute(
-            text("UPDATE einkauf_anfragen SET status = 'FREIGEGEBEN', updated_at = now() WHERE id = :id AND tenant_id = :tenant_id"),
-            {"id": real_id, "tenant_id": tenant_id},
-        )
-        db.commit()
-        return {"message": "Anfrage erfolgreich freigegeben", "status": "FREIGEGEBEN"}
-
-    except HTTPException:
-        raise
-    except Exception:
-        db.rollback()
-        logger.exception("Anfrage freigeben fehlgeschlagen")
-        raise HTTPException(status_code=500, detail="Fehler beim Freigeben der Anfrage")
+# POST /anfragen/{id}/send: die Maskenbruecke (mask_frontend_bridges) versendet wirklich;
+# der fruehere Weg hier war verdeckt und setzte nur FREIGEGEBEN.
 
 
 # ============================================================================

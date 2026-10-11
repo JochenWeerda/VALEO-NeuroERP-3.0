@@ -16,6 +16,8 @@ from typing import Any, Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.exceptions import DomainError
+
 _DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 
 # Default-Mahnstufen, falls domain_erp.dunning_rules leer ist.
@@ -157,14 +159,112 @@ class FinanceDunningService:
 
     def list_notices(self, limit: int = 100) -> list[dict]:
         rows = self.db.execute(
-            text("SELECT n.dunning_level, n.dunning_date, n.open_amount, n.dunning_fee, n.interest, "
-                 "n.total_amount, n.payment_deadline, n.status, o.rechnungsnr, o.kunde_name "
+            text("SELECT n.id, n.dunning_level, n.dunning_date, n.open_amount, n.dunning_fee, n.interest, "
+                 "n.total_amount, n.payment_deadline, n.status, n.versand_art, n.empfaenger, n.sent_date, "
+                 "o.rechnungsnr, o.kunde_name "
                  "FROM domain_erp.dunning_notices n "
                  "LEFT JOIN domain_erp.offene_posten o ON o.id = n.op_id AND o.tenant_id = n.tenant_id "
                  "WHERE n.tenant_id = :t ORDER BY n.dunning_date DESC, n.dunning_level DESC LIMIT :lim"),
             {"t": self.tenant_id, "lim": max(1, min(limit, 500))},
         ).mappings().all()
-        return [{"stufe": r["dunning_level"], "datum": r["dunning_date"].isoformat() if r["dunning_date"] else None,
+        return [{"id": r["id"], "versand_art": r["versand_art"], "empfaenger": r["empfaenger"],
+                 "versendet_am": r["sent_date"].isoformat() if r["sent_date"] else None,
+                 "stufe": r["dunning_level"], "datum": r["dunning_date"].isoformat() if r["dunning_date"] else None,
                  "offen": _f(r["open_amount"]), "gebuehr": _f(r["dunning_fee"]), "zinsen": _f(r["interest"]),
                  "gesamt": _f(r["total_amount"]), "frist": r["payment_deadline"].isoformat() if r["payment_deadline"] else None,
                  "status": r["status"], "rechnungsnr": r["rechnungsnr"], "partner": r["kunde_name"]} for r in rows]
+
+    def _debitor_email(self, debtor_id: Optional[str]) -> Optional[str]:
+        """E-Mail des Debitors: Kunde (ID oder Kundennummer), sonst CRM-Geschaeftspartner."""
+        if not debtor_id:
+            return None
+        row = self.db.execute(
+            text("SELECT NULLIF(email, '') FROM domain_crm.customers "
+                 "WHERE tenant_id::text = :t AND (id::text = :d OR customer_number = :d) LIMIT 1"),
+            {"t": self.tenant_id, "d": str(debtor_id)},
+        ).first()
+        if row and row[0]:
+            return row[0]
+        row = self.db.execute(
+            text("SELECT NULLIF(email, '') FROM domain_crm.business_partners "
+                 "WHERE tenant_id::text = :t AND partner_id::text = :d LIMIT 1"),
+            {"t": self.tenant_id, "d": str(debtor_id)},
+        ).first()
+        return row[0] if row else None
+
+    def send_notice(self, notice_id: str, *, versand_art: str = "email", nutzer: Optional[dict] = None) -> Any:
+        """Versendet eine Mahnung und setzt erst danach ``sent``.
+
+        ``email``: ueber das Postfach ``fibu`` an die Adresse des Debitors; ohne Adresse,
+        ohne Postfach oder bei Ablehnung des Servers bleibt die Mahnung unversendet.
+        ``post``: der Mensch hat gedruckt und verschickt — das wird so festgehalten.
+        Bis 08.10.2026 setzte "Mahnung senden" ``sent``, ohne dass irgendetwas hinausging.
+        Gibt die aktualisierte Zeile zurueck; der Aufrufer committet.
+        """
+        from app.services.mail_versand import (
+            MailVersandFehler, MailVersandNichtEingerichtet, MailVersandVerweigert, sende_mail,
+        )
+
+        if versand_art not in ("email", "post"):
+            raise MahnungNichtVersendet(422, f"Versandweg '{versand_art}' gibt es nicht; email oder post.")
+        n = self.db.execute(
+            text("SELECT n.id, n.debtor_id, n.dunning_level, n.open_amount, n.dunning_fee, n.interest, "
+                 "n.total_amount, n.payment_deadline, n.status, o.rechnungsnr, o.kunde_id, o.kunde_name "
+                 "FROM domain_erp.dunning_notices n "
+                 "LEFT JOIN domain_erp.offene_posten o ON o.id = n.op_id AND o.tenant_id = n.tenant_id "
+                 "WHERE n.id = :id AND n.tenant_id = :t"),
+            {"id": notice_id, "t": self.tenant_id},
+        ).mappings().first()
+        if n is None:
+            raise MahnungNichtVersendet(404, "Mahnung nicht gefunden")
+        if n["status"] in ("paid", "bezahlt"):
+            raise MahnungNichtVersendet(409, "Mahnung ist bezahlt — nichts zu versenden")
+
+        empfaenger = None
+        if versand_art == "email":
+            empfaenger = self._debitor_email(n["debtor_id"] or n["kunde_id"])
+            if not empfaenger:
+                raise MahnungNichtVersendet(
+                    422, "Beim Kunden ist keine E-Mail-Adresse hinterlegt — Adresse pflegen oder per Post versenden")
+            beleg = n["rechnungsnr"] or "-"
+            frist = f"{n['payment_deadline']:%d.%m.%Y}" if n["payment_deadline"] else "sofort"
+            zeilen = [
+                "Sehr geehrte Damen und Herren,", "",
+                f"zu Rechnung {beleg} ist folgender Betrag offen (Mahnstufe {n['dunning_level']}):", "",
+                f"  Offener Betrag: {Decimal(str(n['open_amount'] or 0)):.2f} EUR",
+                f"  Mahngebuehr:    {Decimal(str(n['dunning_fee'] or 0)):.2f} EUR",
+                f"  Zinsen:         {Decimal(str(n['interest'] or 0)):.2f} EUR",
+                f"  Gesamt:         {Decimal(str(n['total_amount'] or 0)):.2f} EUR", "",
+                f"Bitte begleichen Sie den Gesamtbetrag bis {frist}.",
+                "Sollten Sie inzwischen gezahlt haben, betrachten Sie dieses Schreiben als gegenstandslos.",
+            ]
+            try:
+                sende_mail(empfaenger, f"Zahlungserinnerung Stufe {n['dunning_level']} zu Rechnung {beleg}",
+                           "\n".join(zeilen), db=self.db, tenant_id=self.tenant_id, verwendung="fibu",
+                           nutzer=nutzer)
+            except MailVersandNichtEingerichtet as fehler:
+                raise MahnungNichtVersendet(503, str(fehler)) from fehler
+            except MailVersandVerweigert as fehler:
+                raise MahnungNichtVersendet(403, str(fehler)) from fehler
+            except MailVersandFehler as fehler:
+                raise MahnungNichtVersendet(502, str(fehler)) from fehler
+
+        return self.db.execute(
+            text("UPDATE domain_erp.dunning_notices "
+                 "SET status = 'sent', sent_date = CURRENT_DATE, versand_art = :va, empfaenger = :e, "
+                 "updated_at = NOW() WHERE id = :id AND tenant_id = :t "
+                 "RETURNING id, op_id, debtor_id, dunning_level, dunning_date, due_date, "
+                 "open_amount, dunning_fee, interest, total_amount, payment_deadline, status, "
+                 "sent_date, payment_date, notes, created_at, updated_at"),
+            {"va": versand_art, "e": empfaenger, "id": notice_id, "t": self.tenant_id},
+        ).fetchone()
+
+
+class MahnungNichtVersendet(DomainError):
+    """Mahnung nicht versendet; Status bleibt. 404/409/422/403/502/503 mit Grund."""
+
+    error_code = "MAHNUNG_NICHT_VERSENDET"
+
+    def __init__(self, http_status: int, detail: str) -> None:
+        super().__init__(detail)
+        self.http_status = http_status

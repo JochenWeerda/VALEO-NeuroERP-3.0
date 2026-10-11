@@ -1316,9 +1316,9 @@ async def crm_newsletter(body: NewsletterRequest, tenant_id: str = Depends(get_t
         try:
             sende_mail(adresse, body.betreff, body.text or "", db=db, tenant_id=tenant_id, verwendung="newsletter", nutzer=nutzer)
             versendet += 1
-        except MailVersandFehler as fehler:
+        except MailVersandFehler:
             fehlgeschlagen += 1
-            logging.getLogger(__name__).warning("Newsletter an %s nicht versendet: %s", adresse, fehler)
+            logging.getLogger(__name__).warning("Newsletter: SMTP-Versand fehlgeschlagen")
     if not versendet:
         raise HTTPException(status_code=502, detail="Der SMTP-Server hat keinen Empfänger angenommen.")
     return {"initiiert": True, "empfaenger_gesamt": len(body.empfaenger), "empfaenger_gueltig": len(valid),

@@ -360,15 +360,7 @@ class EinkaufCompatService:
         return [self._anfrage_row_to_dict(r._mapping) for r in rows]
 
     def get_anfrage(self, anfrage_id: str) -> dict:
-        from sqlalchemy import text
-        try:
-            row = self.db.execute(text(
-                "SELECT id, anfrage_nummer, typ, anforderer, artikel, menge, prioritaet, "
-                "status, datum, created_at FROM einkauf_anfragen "
-                "WHERE (id = :fid OR anfrage_nummer = :fid) ORDER BY created_at DESC LIMIT 1"
-            ), {"fid": anfrage_id}).fetchone()
-        except Exception:
-            row = None
+        row = self._load_anfrage_raw_row(anfrage_id)  # mit Mandant (vorher: jede Anfrage jedes Mandanten)
         if row is None:
             raise EntityNotFoundError("Anfrage", anfrage_id)
         return self._anfrage_row_to_dict(row._mapping)
@@ -383,6 +375,7 @@ class EinkaufCompatService:
                 "ORDER BY created_at DESC LIMIT 1"
             ), {"fid": anfrage_id, "tid": self.tenant_id}).fetchone()
         except Exception:
+            self.db.rollback()  # sonst ist die Transaktion tot fuer alles Folgende
             return None
 
     async def convert_anfrage_to_order(self, anfrage_id: str) -> dict:

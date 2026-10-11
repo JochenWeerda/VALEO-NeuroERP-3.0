@@ -418,8 +418,9 @@ export const financeService = {
     return response.data
   },
 
-  async sendMahnung(id: string): Promise<void> {
-    await apiClient.post(`/api/v1/finance/dunning/${id}/send`, null)
+  /** Versendet per E-Mail an den Kunden oder haelt den Postversand fest; Fehler (keine Adresse, kein Postfach) werfen. */
+  async sendMahnung(id: string, versandArt: 'email' | 'post' = 'email'): Promise<void> {
+    await apiClient.put(`/api/v1/finance/dunning/${encodeURIComponent(id)}/send`, null, { params: { versand_art: versandArt } })
   },
 
   // ─── Zahlungsläufe ───────────────────────────────────────────────────────

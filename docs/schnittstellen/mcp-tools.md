@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 51 Tools in 18 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 56 Tools in 18 Domaenen.
 
 ## Uebersicht
 
@@ -56,7 +56,12 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 51 Tools in 18 Domaenen.
 | `lager.inventur.propose_opening` | lager | `lager:write` | nein | hoch | ja |
 | `lager.inventur.status` | lager | `lager:read` | ja | niedrig | nein |
 | `lager.stock_movement.stornieren` | lager | `lager:write` | ja | mittel | nein |
+| `logistik.ausgehendes_dokument.speichern` | logistics | `logistics:write` | ja | mittel | nein |
+| `logistik.fahrzeug.loeschen` | logistics | `logistics:write` | ja | hoch | nein |
+| `logistik.fahrzeug.speichern` | logistics | `logistics:write` | ja | mittel | nein |
 | `logistik.frachttabelle.anlegen` | logistics | `logistics:write` | ja | mittel | nein |
+| `logistik.rechnung.speichern` | logistics | `logistics:write` | ja | mittel | nein |
+| `logistik.terminart.speichern` | logistics | `logistics:write` | ja | mittel | nein |
 | `logistik.tour.anlegen` | logistics | `logistics:write` | ja | mittel | nein |
 | `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein |
 | `planung.calendar.reproject` | planung | `planung:write` | ja | mittel | nein |
@@ -2400,6 +2405,166 @@ Storniert eine Lagerbewegung des Authentifizierungs-Mandanten per Gegenbuchung (
 
 ## Domaene: logistics
 
+### `logistik.ausgehendes_dokument.speichern` — Ausgehendes Dokument speichern
+
+Legt einen ausgehenden Belegtyp im Authentifizierungs-Mandanten an oder aktualisiert ihn (Maske fuhrpark/ausgehende-dokumente:speichern; CE /api/v1/fuhrpark/ausgehende-dokumente/actions/speichern). parameters.beleg_typ, optional id/formular, reason. Default dryRun; execute erfordert idempotency_key. Scope logistics:write.
+
+- **Scope:** `logistics:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "beleg_typ": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "formular": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "beleg_typ",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "dokument_id": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `logistik.fahrzeug.loeschen` — Fahrzeug loeschen
+
+Loescht ein Fahrzeug im Authentifizierungs-Mandanten (Maske fuhrpark/fahrzeug-stamm:loeschen; CE /api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen). parameters.fahrzeug_id, reason. Cross-Tenant → 404. Default dryRun; execute erfordert idempotency_key. Scope logistics:write.
+
+- **Scope:** `logistics:write`
+- **Idempotent:** ja
+- **Risikoklasse:** hoch
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "fahrzeug_id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "fahrzeug_id",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "fahrzeug_id": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `logistik.fahrzeug.speichern` — Fahrzeug speichern
+
+Legt ein Fahrzeug im Authentifizierungs-Mandanten an oder aktualisiert es (Maske fuhrpark/fahrzeug-stamm:speichern; CE /api/v1/fuhrpark/fahrzeuge/actions/speichern). parameters.kennzeichen, typ, optional id, reason. Token-Mandant; Cross-Tenant-ID → 404. Default dryRun; execute erfordert idempotency_key. Scope logistics:write.
+
+- **Scope:** `logistics:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "kennzeichen": {
+      "type": "string"
+    },
+    "typ": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "kennzeichen",
+    "typ",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "fahrzeug_id": {
+      "type": "string"
+    },
+    "kennzeichen": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
 ### `logistik.frachttabelle.anlegen` — Frachttabelle anlegen
 
 Legt eine mandantengebundene Frachttabelle an (Maske logistik/frachttabellen:anlegen; CE /api/v1/logistik/frachttabellen/actions/anlegen). parameters.tabelle_nr, bezeichnung, optional einheit/waehrung. Default dryRun; execute erfordert idempotency_key. Scope logistics:write. Kein FIBU.
@@ -2450,6 +2615,122 @@ Legt eine mandantengebundene Frachttabelle an (Maske logistik/frachttabellen:anl
       "type": "string"
     },
     "tabelle_nr": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `logistik.rechnung.speichern` — Fuhrpark-Rechnung speichern
+
+Legt eine Fuhrpark-Rechnung im Authentifizierungs-Mandanten an oder aktualisiert sie (Maske fuhrpark/rechnungen:speichern; CE /api/v1/fuhrpark/rechnungen/actions/speichern). parameters.rechnungs_nr, datum, betrag_eur, optional id, reason. Default dryRun; execute erfordert idempotency_key. Scope logistics:write.
+
+- **Scope:** `logistics:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "rechnungs_nr": {
+      "type": "string"
+    },
+    "datum": {
+      "type": "string"
+    },
+    "betrag_eur": {
+      "type": "number"
+    },
+    "id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "rechnungs_nr",
+    "datum",
+    "betrag_eur",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "rechnung_id": {
+      "type": "string"
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
+
+### `logistik.terminart.speichern` — Terminart speichern
+
+Legt eine Fuhrpark-Terminart im Authentifizierungs-Mandanten an oder aktualisiert sie (Maske fuhrpark/terminarten:speichern; CE /api/v1/fuhrpark/terminarten/actions/speichern). parameters.terminart, optional id/intervall_*, reason. Default dryRun; execute erfordert idempotency_key. Scope logistics:write.
+
+- **Scope:** `logistics:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "terminart": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "intervall_monate": {
+      "type": "integer"
+    },
+    "intervall_km": {
+      "type": "integer"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "terminart",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "terminart_id": {
       "type": "string"
     },
     "auditEntryId": {

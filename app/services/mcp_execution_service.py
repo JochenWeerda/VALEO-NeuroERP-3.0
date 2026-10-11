@@ -3784,7 +3784,7 @@ def _bestellung_versenden(db: Session, request: ToolExecutionRequest, actor: str
         # ProcurementService commits; confine to SAVEPOINT so audit/replay stay atomic.
         with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as child:
             sent = ProcurementService(child, tenant).versende_bestellung_svc(
-                bestellung_id, opened.versand_art, opened.empfaenger,
+                bestellung_id, opened.versand_art, opened.empfaenger, nutzer={"sub": actor},
             )
         versand = sent.get("versand") if isinstance(sent, dict) else None
         versand_status = (

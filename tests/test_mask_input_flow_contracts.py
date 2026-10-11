@@ -15,8 +15,35 @@ def flows():
 
 def test_all_current_human_flows_have_guarded_submit_contracts():
     actions = flows()
-    assert len(actions) == 9
+    expected = {
+        ("lager/inventur-nebenlaeufe", "create_opening"),
+        ("agrar/feed-readiness", "create_handoff"),
+        ("agrar/feeding-actuals", "create_measure"),
+        ("agrar/feeding-actuals", "configure_threshold"),
+    }
+    actual = {(screen, action["key"]) for screen in SCREEN_DEFINITION_BUILDERS
+              for action in get_screen_definition(screen).get("actions", [])
+              if action.get("inputFlow")}
+    assert expected <= actual
     assert all(valid_input_flow(action) for action in actions)
+
+
+@pytest.mark.parametrize("screen,key", [
+    ("personal/onboarding", "speichern"),
+    ("personal/qualifikationen", "speichern"),
+    ("personal/schulungen", "speichern"),
+    ("personal/bewerbungen", "speichern"),
+    ("personal/einwilligungserklaerungen", "anlegen"),
+])
+def test_migrated_personal_flows_have_real_commands(screen, key):
+    from app.main import app
+
+    action = next(a for a in get_screen_definition(screen)["actions"] if a["key"] == key)
+    assert action.get("commandEndpoint")
+    assert not action.get("inputFlow")
+    assert not action.get("stubReason")
+    assert any(route.path == action["commandEndpoint"] and "POST" in route.methods
+               for route in app.routes)
 
 
 @pytest.mark.parametrize("field,value", [("forbiddenForAgents", False),

@@ -24,7 +24,9 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import dunning
+from app.auth.deps import get_current_user
 from app.core.database import get_db
+from app.core.exceptions import register_domain_exception_handlers
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -98,6 +100,20 @@ class _FakeResult:
     def fetchall(self):
         return list(self._all)
 
+    def mappings(self):
+        return self
+
+    def first(self):
+        return self._one
+
+
+def _notice_mapping(notice_id: str = "notice-1", status: str = "created") -> dict:
+    """Die Zeile, die ``send_notice`` vor dem Versand liest."""
+    return {"id": notice_id, "debtor_id": "deb-1", "dunning_level": 1, "open_amount": Decimal("1000.00"),
+            "dunning_fee": Decimal("5.00"), "interest": Decimal("2.47"), "total_amount": Decimal("1007.47"),
+            "payment_deadline": TODAY + timedelta(days=14), "status": status, "rechnungsnr": "RE-1",
+            "kunde_id": "deb-1", "kunde_name": "Hof Probe"}
+
 
 class FakeDb:
     def __init__(self):
@@ -132,7 +148,9 @@ class FakeDb:
 def _make_app(db: FakeDb) -> TestClient:
     app = FastAPI()
     app.include_router(dunning.router)  # router already has prefix="/dunning"
+    register_domain_exception_handlers(app)
     app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "buchhalter", "roles": ["FINANCE_ADMIN"]}
     # Der Mandant kommt aus dem Header (seit 08.10.2026), nicht aus Query/Rumpf.
     return TestClient(app, headers={"X-Tenant-ID": "system"})
 
@@ -428,8 +446,9 @@ class TestSendDunning:
         from app.api.v1.endpoints import dunning as modul
 
         db = FakeDb()
+        # Postversand: der Mailweg laeuft echt in tests/test_versandwege_vertrag.py.
         db._exec_results = [
-            _FakeResult(fetchone=_notice_row(notice_id="n-1", status="created")),
+            _FakeResult(fetchone=_notice_mapping("n-1")),
             _FakeResult(fetchone=_notice_row(notice_id="n-1", status="sent")),
         ]
         archiviert: list[tuple[str, int]] = []
@@ -437,7 +456,7 @@ class TestSendDunning:
         monkeypatch.setattr(modul, "register_artifact",
                             lambda *a, **k: archiviert.append((k["doc_type"], db.commit_count)) or "art-1")
         client = _make_app(db)
-        r = client.put("/dunning/n-1/send")
+        r = client.put("/dunning/n-1/send", params={"versand_art": "post"})
         assert r.status_code == 200
         assert archiviert == [("dunning_notice", 0)]
         assert db.commit_count == 1
@@ -447,13 +466,14 @@ class TestSendDunning:
         from app.core.gobd_artifact import GobdArtifactError
 
         db = FakeDb()
-        db._exec_results = [_FakeResult(fetchone=_notice_row(notice_id="n-1", status="sent"))]
+        db._exec_results = [_FakeResult(fetchone=_notice_mapping("n-1")),
+                            _FakeResult(fetchone=_notice_row(notice_id="n-1", status="sent"))]
 
         def scheitert(*_a, **_k):
             raise GobdArtifactError("Archiv nicht erreichbar")
 
         monkeypatch.setattr(modul, "register_artifact", scheitert)
-        r = _make_app(db).put("/dunning/n-1/send")
+        r = _make_app(db).put("/dunning/n-1/send", params={"versand_art": "post"})
         assert r.status_code == 500
         assert db.commit_count == 0
         assert db.rollback_count >= 1

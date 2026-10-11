@@ -20,7 +20,9 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.deps import get_current_user
 from app.core.database import get_db
+from app.core.exceptions import DomainError
 from app.core.tenant import get_tenant_id
 from app.services.rfq_service import RfqService
 
@@ -103,11 +105,15 @@ def send_rfq(
     body: SendRequest,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
     try:
-        return _service(db, tenant_id).send_request(rfq_id, body.supplier_ids)
+        return _service(db, tenant_id).send_request(rfq_id, body.supplier_ids, nutzer=nutzer)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except DomainError:
+        db.rollback()
+        raise  # 403/422/502/503 mit Grund — nichts versendet, Status unveraendert
     except Exception as exc:
         db.rollback()
         raise HTTPException(status_code=503, detail=f"Datenbankfehler: {exc}") from exc

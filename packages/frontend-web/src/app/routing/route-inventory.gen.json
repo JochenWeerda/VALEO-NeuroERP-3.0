@@ -176,6 +176,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin/postfaecher",
+      "path": "admin/postfaecher",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/admin/postfaecher-anmeldung-rueckruf",
       "path": "admin/postfaecher/anmeldung-rueckruf",
       "source": "alias"
@@ -1626,8 +1631,18 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/docflow/gobd-export",
+      "path": "docflow/gobd-export/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/docflow/nachweisraum",
       "path": "docflow/nachweisraum",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/docflow/nachweisraum",
+      "path": "docflow/nachweisraum/:id",
       "source": "alias"
     },
     {

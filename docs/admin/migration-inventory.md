@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-09
+last_reviewed: 2026-10-11
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -416,6 +416,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `user_screen_overlays_uix071` | UIX-071 user screen overlays. |
 | `ustva_voranmeldungen_20260527` | UStVA Voranmeldungen Tabelle (§ 18 UStG ELSTER-Übertragung). |
 | `verkauf_fehlende_spalten_20260929` | Fuenf Spalten, die der Code schreibt und keine Migration anlegt. |
+| `versandwege_echt_20261008` | Versandwege: Anfragen mit Mandant, Mahnungen mit Versandweg. |
 | `warehouse_schema_repair_20260626` | WAREHOUSE-REPAIR-001: domain_inventory.warehouses fehlende Spalten nachziehen. |
 | `warehouse_wms_structure_20260517` | WMS warehouse zones, bins, bin_stock, pick_lists and pick_list_lines |
 | `wave3_wf_trigger_log_20260618` | wave3: wf_trigger_log + bank_statements + bank_statement_lines + waagen_quittungen |

@@ -353,11 +353,9 @@ class TestFormUndGrenze:
     def test_antwortmodelle_sind_typisiert(self):
         """Vorher hingen alle Wege an `PersonalOut` mit `extra="allow"`.
 
-        Die Prüfung nennt nicht mehr eine feste Liste erlaubter Modelle — der Slice
-        BEWERBUNG-LOESCHLAUF-20261006 hat vier Wege ergänzt, und eine Aufzählung
-        hätte hier nur verlangt, sie nachzutragen. Geprüft wird die Eigenschaft, auf
-        die es ankommt: **jedes** Antwortmodell ist in diesem Fach erklärt und nimmt
-        keine unbekannten Felder an.
+        Fachantworten stammen aus den Fachschemata. Nur die beiden ausdruecklich
+        geprueften Commandwege nutzen den zentralen MaskActionResult-Vertrag.
+        Alle Wege behalten ein konkretes Modell ohne extra="allow".
         """
         import typing
 
@@ -366,26 +364,41 @@ class TestFormUndGrenze:
         from app.api.v1.endpoints import personal_bewerbungen as modul
         from app.api.v1.schemas import personal_bewerbung_schemas as fach
         from app.api.v1.schemas.personal_bewerbung_schemas import BewerbungOut
+        from app.services.mask_action_runtime_service import MaskActionResult
 
         def kern(modell):
             """`List[X]`/`list[X]` sind dasselbe Versprechen wie `X`."""
             argumente = typing.get_args(modell)
             return argumente[0] if argumente else modell
 
-        modelle = {
-            kern(getattr(r, "response_model", None))
-            for r in modul.router.routes
-            if "applications" in r.path
-        } - {None}
-
-        assert BewerbungOut in modelle
-        for modell in modelle:
+        modelle = set()
+        command_paths = {
+            "/personal/applications/actions/speichern",
+            "/personal/applications/einwilligungserklaerungen/actions/anlegen",
+        }
+        gesehen = set()
+        for route in modul.router.routes:
+            if "applications" not in route.path:
+                continue
+            modell = kern(route.response_model)
+            if modell is None:
+                assert route.path == "/personal/applications/{application_id}"
+                assert route.methods == {"DELETE"}
+                assert route.status_code == 204
+                continue
+            assert modell is not None, route.path
             assert issubclass(modell, BaseModel), modell
-            # In diesem Fach erklärt — nicht ein Sammelmodell aus der Nachbarschaft.
-            assert getattr(fach, modell.__name__, None) is modell, modell
+            if route.path in command_paths:
+                assert modell is MaskActionResult, route.path
+                gesehen.add(route.path)
+            else:
+                assert getattr(fach, modell.__name__, None) is modell, modell
             # `extra="allow"` war der Mangel: Ein Modell, das alles erlaubt,
             # beschreibt nichts.
             assert modell.model_config.get("extra") != "allow", modell.__name__
+            modelle.add(modell)
+        assert BewerbungOut in modelle
+        assert gesehen == command_paths
 
     def test_die_liste_ist_begrenzt(self, client):
         for _ in range(3):

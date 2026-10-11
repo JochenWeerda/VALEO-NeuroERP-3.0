@@ -7,7 +7,9 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import dunning
+from app.auth.deps import get_current_user
 from app.core.database import get_db
+from app.core.exceptions import register_domain_exception_handlers
 
 
 class _FakeResult:
@@ -20,6 +22,12 @@ class _FakeResult:
 
     def fetchall(self):
         return list(self._fetchall)
+
+    def mappings(self):
+        return self
+
+    def first(self):
+        return self._fetchone
 
 
 class FakeDb:
@@ -186,10 +194,18 @@ class FakeDb:
             rows = [notice for notice in self.notices.values() if notice["tenant_id"] == params["tenant_id"]]
             return _FakeResult(fetchall=[self._notice_tuple(notice) for notice in rows])
 
-        if "UPDATE domain_erp.dunning_notices SET status = 'sent'" in sql:
-            notice = self.notices.get(params["dunning_id"])
-            if not notice or notice["tenant_id"] != params["tenant_id"]:
+        if "FROM domain_erp.dunning_notices n LEFT JOIN domain_erp.offene_posten o" in sql:
+            # send_notice liest die Mahnung, bevor es versendet.
+            notice = self.notices.get(params["id"])
+            if not notice or notice["tenant_id"] != params["t"]:
                 return _FakeResult(fetchone=None)
+            return _FakeResult(fetchone={**notice, "rechnungsnr": None, "kunde_id": None, "kunde_name": None})
+
+        if "UPDATE domain_erp.dunning_notices SET status = 'sent'" in sql:
+            notice = self.notices.get(params["id"])
+            if not notice or notice["tenant_id"] != params["t"]:
+                return _FakeResult(fetchone=None)
+            notice["versand_art"] = params["va"]
             notice["status"] = "sent"
             notice["sent_date"] = date(2026, 4, 13)
             return _FakeResult(fetchone=self._notice_tuple(notice))
@@ -217,7 +233,9 @@ class FakeDb:
 def _build_client(db: FakeDb) -> TestClient:
     app = FastAPI()
     app.include_router(dunning.router, prefix="/finance")
+    register_domain_exception_handlers(app)
     app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "buchhalter", "roles": ["FINANCE_ADMIN"]}
     # Der Mandant kommt aus dem Header (seit 08.10.2026), nicht aus Query/Rumpf.
     return TestClient(app, headers={"X-Tenant-ID": "system"})
 
@@ -292,9 +310,11 @@ def test_create_list_and_transition_dunning_notice(monkeypatch):
     assert listed.status_code == 200
     assert len(listed.json()) == 1
 
-    sent = client.put(f"/finance/dunning/{created_id}/send")
+    # Postversand; der Mailweg laeuft echt in tests/test_versandwege_vertrag.py.
+    sent = client.put(f"/finance/dunning/{created_id}/send", params={"versand_art": "post"})
     assert sent.status_code == 200
     assert sent.json()["status"] == "sent"
+    assert db.notices[created_id]["versand_art"] == "post"
 
     paid = client.put(f"/finance/dunning/{created_id}/paid")
     assert paid.status_code == 200
