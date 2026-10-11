@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## QUALITY-GATE-MASK-CONTRACT-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Sechs echte CI-Regressionsbefunde aus Run 38124045945 schliessen: Fuhrpark-Aktionsberechtigungen, konkurrierende Personal-Stubs und pruefbare neue Personal-Commandvertraege.
+**Dateibesitz:** fokussierte Hunks app/core/screen_definitions_capture.py; tests/test_bewerbermanagement_ordnung_vertrag.py, test_bewerbung_erklaerung_fassung_vertrag.py, test_personal_bewerbungen_roles.py, test_mask_input_flow_contracts.py; eigener QA-/Workboard-/Meridian-Doku-Block und daraus nachweislich driftende Generatorartefakte.
+**Abnahme:** native Readiness und Command-Inventar streng gruen; neue Personal-Commands tatsaechlich gegen Rollenmatrix vor DB-Zugriff pruefen, keine pauschale Modell-/Routenausnahme. Vollsuite 17296 gruen/6 rot als Ausgangsnachweis. Keine DB/Container/Reset, keine Gate-Abschwaechung, fremde Hunkbereiche schuetzen.
+
 ## ELSTER-ACCESS-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Vom Nutzer nachgereichten Entwicklerzugang pruefen, autorisierte ERiC-Lizenzannahme und echten SDK-Downloadstand dokumentieren.
