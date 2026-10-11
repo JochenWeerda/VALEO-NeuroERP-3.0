@@ -11,6 +11,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WHATSAPP-PERSISTENCE-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Fluechtige WhatsApp-Outbox durch bestehende domain_shared.channel_process_threads samt Audit ersetzen; Replay an Mandant/Aktion/Inhalt/Urheber binden.
+**Dateibesitz:** app/services/whatsapp_notify_service.py, app/api/v1/endpoints/whatsapp_notify.py; sales_delivery_notes.py nur zwei nachweislich tote Benachrichtigungs-Placeholder; WhatsApp-Tests und neuer Testhelfer/DB-Vertrag; test_service_units_wave101.py nur vier obsolete speicherabhaengige WhatsApp-Tests; eigener ADR Proposed, CRM-Domain-API-Hunk, QA, Runbook/Workboard. Keine Schema-/Migrations-/Browseraenderung.
+**Abnahme:** bestehender valeo_probe Revision audit_urheber_20261011; echte Commit-/Rollback-/Wiederanlauf-/Konkurrenzvertraege mit eigenen Zeilen; kein Memoryfallback, keine neue DB/Container/Reset. Kein Versand; persistenter pending_browser ist keine Versandfreigabe. **Risiko:** Browserkonto, Fachreferenzen und sichtbarer Versandnachweis weiterhin offen.
+**Harness:** Fachvertrag Vorbereitung; Architektur bestehende Kanalauftraege, keine Event-Outbox als Zustellbeleg; Daten atomarer Auftrag+Audit und payloadgebundener Replay; Tests SQL-Wirkungen plus vorhandene HTTP-Guards; Security Tokenurheber, Mandant+Aktion; Betrieb Rollback ohne stillen Ersatz; Doku ADR/Domain/QA/Workboard; extern CI/Browserabnahme offen.
+
 ## MAHNWESEN-ROLLEN-20261011 — in Arbeit, Claude Code
 
 **Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt aus EIN-MAHNLAUF-20261011.
