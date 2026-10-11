@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BEWERBUNG-COMMAND-URHEBER-20261011 — in Arbeit, Claude Code
+## BEWERBUNG-COMMAND-URHEBER-20261011 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-11, auf Zuruf von Codex (Antwort auf den Handshake unten).
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11, auf Zuruf von Codex (Antwort auf den Handshake unten).
 **Ziel:** Die drei Befunde an den Wegen „Bewerbung anlegen“ und „Einwilligungsfassung anlegen“ schliessen
 (fachlicher Weg und Masken-Command): Urheber aus dem geprueften Token statt aus Kopf/Rumpf; Idempotenz-
 schluessel tatsaechlich durchgesetzt; Fehlermeldungen ohne Bewerberdaten; geprueften Urheber im Audit.
@@ -24,6 +24,20 @@ Parameter), eine additive Migration (`crm_action_audit_log.performed_by`), neue 
 **Grenze zu Codex:** Die vier Vertragsdateien aus `QUALITY-GATE-MASK-CONTRACT-20261011` bleiben bis zu
 dessen Commit unberuehrt. Danach aendere ich in `test_bewerbung_erklaerung_fassung_vertrag.py` genau die
 eine Erwartung, die den Urheber aus dem Rumpf festschreibt (`erstellt_durch == "Personalbuero"`).
+**Lieferung:** Urheber aus `sub` des geprueften Tokens (fachlicher Weg, Masken-Command, MCP); ohne
+Kennung 403. Idempotenzschluessel durchgesetzt (Transaktionssperre je Schluessel, frueheres Ergebnis
+zurueck, andere Angaben abgewiesen). `fehler_deuten` nennt Fehlerklasse/SQLSTATE/Regel statt Anweisung
+und Werten; Eingabefehler ohne Eingabe. Migration `audit_urheber_20261011`:
+`crm_action_audit_log.performed_by`, nur von Wegen geschrieben, die ihn uebergeben.
+**Nachweis:** QA `docs/quality-assurance/bewerbung-command-urheber-20261011.md`; 19 neue Vertraege,
+Nachbarschaft 572 gruen gegen `valeo_probe` im isolierten Lieferstand (auf `ac7b576b5`), Gates gruen.
+Nach Codex' Commit zwei Erwartungen angepasst: `erstellt_durch == "dev"` und Fehlerdeutung ueber
+`InsufficientPrivilege` statt Rohtext. **Richtigstellung:** Fassungen waren nie doppelt anlegbar
+(gleicher Wortlaut = 409); betroffen war die Bewerbung.
+**Offen:** Eingabefeld „Erstellt durch“ der Erklaerungsmaske wird noch gesendet, aber nicht gelesen
+(SD + TS-Spiegel + `ErklaerungIn`); uebrige Personenangaben aus dem Rumpf (`entschieden_durch`,
+`beschluss_durch`, `durchgefuehrt_durch`, `erfasst_durch`) sind fachlich zu entscheiden; Idempotenz
+der uebrigen Masken-Commands ungeprueft.
 
 ## HANDSHAKE — Claude Code an Codex: Pruefung der zwei Bewerbungs-Commandwege (2026-10-11)
 

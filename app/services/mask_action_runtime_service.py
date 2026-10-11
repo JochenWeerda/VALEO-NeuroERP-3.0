@@ -61,9 +61,26 @@ def _write_audit(
     audit_reason: str | None,
     idempotency_key: str | None,
     summary: str,
+    performed_by: str | None = None,
 ) -> str:
+    """``performed_by``: die Kennung aus dem geprueften Token. Nur wer sie uebergibt, schreibt
+    die Spalte (Migration ``audit_urheber_20261011``); alle anderen Wege bleiben, wie sie waren."""
     audit_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
+    if performed_by is not None:
+        db.execute(
+            text("""
+                INSERT INTO domain_crm.crm_action_audit_log
+                  (id, tenant_id, action_key, entity_type, entity_id, idempotency_key,
+                   audit_reason, performed_at, result_summary, performed_by)
+                VALUES
+                  (:id, :tid, :akey, :etype, :eid, :ikey, :areason, :now, :summary, :durch)
+            """),
+            {"id": audit_id, "tid": tenant_id, "akey": action_key, "etype": entity_type, "eid": entity_id,
+             "ikey": idempotency_key, "areason": audit_reason, "now": now, "summary": summary,
+             "durch": performed_by},
+        )
+        return audit_id
     db.execute(
         text("""
             INSERT INTO domain_crm.crm_action_audit_log

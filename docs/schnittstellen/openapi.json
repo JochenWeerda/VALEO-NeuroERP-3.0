@@ -376701,7 +376701,7 @@
         ]
       },
       "post": {
-        "description": "Legt die naechste Fassung an.\n\nDerselbe Wortlaut ist **eine** Fassung: Ein zweites Anlegen antwortet 409 und\nnennt die vorhandene Nummer.",
+        "description": "Legt die naechste Fassung an.\n\nDerselbe Wortlaut ist **eine** Fassung: Ein zweites Anlegen antwortet 409 und\nnennt die vorhandene Nummer. ``erstellt_durch`` ist die Kennung aus der Anmeldung;\nein Wert im Rumpf wird nicht gelesen.",
         "operationId": "post_erklaerung_api_v1_personal_applications_einwilligungserklaerungen_post",
         "parameters": [
           {

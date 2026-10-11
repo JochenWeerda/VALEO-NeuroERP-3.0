@@ -12245,6 +12245,11 @@
               "name": "result_summary",
               "nullable": false,
               "type": "text"
+            },
+            {
+              "name": "performed_by",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -12253,6 +12258,9 @@
           "placement": "native",
           "primary_key": [
             "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/personal_bewerbungen.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/crm_360.py",

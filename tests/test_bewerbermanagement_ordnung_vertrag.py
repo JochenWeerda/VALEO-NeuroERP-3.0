@@ -326,14 +326,22 @@ class TestFehlerdeutung:
         """Vorher wurde auch ein Rechtefehler zu "applications table not available"."""
         from unittest.mock import MagicMock
 
+        from psycopg2.errors import InsufficientPrivilege
+        from sqlalchemy.exc import ProgrammingError
+
         from app.services import bewerbung_service as dienst
 
         db = MagicMock()
-        umgewandelt = dienst.fehler_deuten(
-            db, Exception("permission denied for table applications"), "Bewerbung anlegen", HAUS_A
+        fehler = ProgrammingError(
+            "INSERT INTO domain_hr.applications (applicant_name) VALUES (%(name)s)",
+            {"name": "Wiebke Harms"}, InsufficientPrivilege("permission denied for table applications"),
         )
+        umgewandelt = dienst.fehler_deuten(db, fehler, "Bewerbung anlegen", HAUS_A)
         assert umgewandelt.status_code == 409
-        assert "permission denied" in str(umgewandelt.detail)
+        # Die Ursache bleibt nennbar (Fehlerklasse), aber ohne Anweisung und Werte: bis zum 11.10.2026
+        # stand hier ``str(fehler)`` — samt Name der Bewerbenden.
+        assert "InsufficientPrivilege" in str(umgewandelt.detail)
+        assert "Wiebke" not in str(umgewandelt.detail) and "INSERT" not in str(umgewandelt.detail)
         assert "migration_hint" not in str(umgewandelt.detail)
 
     def test_die_alte_tabellenaussage_kommt_nicht_mehr_vor(self):

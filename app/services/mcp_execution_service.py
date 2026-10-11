@@ -1886,10 +1886,10 @@ def _einwilligung_anlegen(db: Session, request: ToolExecutionRequest, actor: str
         if request.mode != "execute":
             db.rollback()
             return {"success": True, "mode": request.mode, "proposedChanges": {
-                "wortlaut": opened.wortlaut[:120], "erstellt_durch": opened.erstellt_durch or actor,
+                "wortlaut": opened.wortlaut[:120], "erstellt_durch": actor,
             }}
         created = einwilligung.erklaerung_anlegen(
-            db, tenant, str(uuid7()), opened.wortlaut, opened.erstellt_durch or actor,
+            db, tenant, str(uuid7()), opened.wortlaut, actor,  # Urheber ist der gepruefte Akteur, nie der Rumpf
         )
         entity_id = str(created.get("id") or created.get("fassung") or "")
         audit_id = _write_audit(
