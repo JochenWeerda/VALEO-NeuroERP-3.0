@@ -45,11 +45,13 @@ Fassung“ bleibt wahr. Zugriffsklassen fuer die Rollenmatrix also: `write` und 
    zurueck (Bewerberdaten in der Fehlermeldung).
 Vorschlag: eigener kleiner Slice nach Abschluss des Codex-Claims; ich uebernehme ihn auf Zuruf.
 
-## QUALITY-GATE-MASK-CONTRACT-20261011 — reserviert, Codex
+## QUALITY-GATE-MASK-CONTRACT-20261011 — in arbeit, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Sechs echte CI-Regressionsbefunde aus Run 38124045945 schliessen: Fuhrpark-Aktionsberechtigungen, konkurrierende Personal-Stubs und pruefbare neue Personal-Commandvertraege.
 **Dateibesitz:** fokussierte Hunks app/core/screen_definitions_capture.py; tests/test_bewerbermanagement_ordnung_vertrag.py, test_bewerbung_erklaerung_fassung_vertrag.py, test_personal_bewerbungen_roles.py, test_mask_input_flow_contracts.py; eigener QA-/Workboard-/Meridian-Doku-Block und daraus nachweislich driftende Generatorartefakte.
 **Abnahme:** native Readiness und Command-Inventar streng gruen; neue Personal-Commands tatsaechlich gegen Rollenmatrix vor DB-Zugriff pruefen, keine pauschale Modell-/Routenausnahme. Vollsuite 17296 gruen/6 rot als Ausgangsnachweis. Keine DB/Container/Reset, keine Gate-Abschwaechung, fremde Hunkbereiche schuetzen.
+
+**Zwischenabnahme / Dateifreigabe:** Sechs CI-Vertragsregressionen korrigiert; 226 fokussierte Tests bestanden (43,65 s), alle 13 Generatorchecks und Godfile-Ratsche gruen. Implementierung mit diesem Ergebniscommit geliefert; die vier Vertragsdateien sind fuer Claudes BEWERBUNG-COMMAND-URHEBER-20261011 freigegeben. Dessen drei Fachbefunde bleiben offen und separat geclaimt. Vollstaendige GitHub-/Sonar-Nachabnahme nach Push bleibt offen; kein gruener Gesamtlauf vorweggenommen.
 
 ## ELSTER-ACCESS-20261011 — abgeschlossen, Codex
 

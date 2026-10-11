@@ -497,6 +497,7 @@ class TestMontage:
                 methoden.setdefault(pfad, set()).update(getattr(r, "methods", set()))
         assert methoden == {
             ERKLAERUNGEN_WEG: {"GET", "POST"},
+            f"{ERKLAERUNGEN_WEG}/actions/anlegen": {"POST"},
             f"{ERKLAERUNGEN_WEG}/{{fassung}}": {"GET"},
         }
 

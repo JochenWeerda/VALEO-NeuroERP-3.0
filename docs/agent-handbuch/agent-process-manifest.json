@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09",
+  "generatedAt": "2026-10-11",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -2893,10 +2893,10 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "hr:write",
           "commandEndpoint": "/api/v1/training/onboarding/runs/actions/speichern",
           "method": "POST",
-          "stubReason": "Legt einen Einarbeitungslauf an."
+          "stubReason": null
         },
         {
           "key": "neu",
@@ -2936,10 +2936,10 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "hr:write",
           "commandEndpoint": "/api/v1/training/qualifications/actions/speichern",
           "method": "POST",
-          "stubReason": "Legt ein Qualifikationsprofil an."
+          "stubReason": null
         },
         {
           "key": "neu",
@@ -2979,10 +2979,10 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "hr:write",
           "commandEndpoint": "/api/v1/training/assignments/actions/speichern",
           "method": "POST",
-          "stubReason": "Legt eine Schulungszuweisung an."
+          "stubReason": null
         },
         {
           "key": "neu",
@@ -3269,7 +3269,7 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "logistics:write",
           "commandEndpoint": "/api/v1/fuhrpark/ausgehende-dokumente/actions/speichern",
           "method": "POST",
           "stubReason": null
@@ -3314,7 +3314,7 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "logistics:write",
           "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/actions/speichern",
           "method": "POST",
           "stubReason": null
@@ -3369,7 +3369,7 @@
           "dangerLevel": "high",
           "humanApprovalRequired": false,
           "requiresConfirmation": true,
-          "permission": null,
+          "permission": "logistics:write",
           "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen",
           "method": "POST",
           "stubReason": null
@@ -3437,7 +3437,7 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "logistics:write",
           "commandEndpoint": "/api/v1/fuhrpark/rechnungen/actions/speichern",
           "method": "POST",
           "stubReason": null
@@ -3482,7 +3482,7 @@
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "logistics:write",
           "commandEndpoint": "/api/v1/fuhrpark/terminarten/actions/speichern",
           "method": "POST",
           "stubReason": null

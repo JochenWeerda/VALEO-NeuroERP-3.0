@@ -14,6 +14,7 @@ PREFIX = "/api/v1/personal/applications"
 CASES = [
     ("GET", "", "read"),
     ("POST", "", "write"),
+    ("POST", "/actions/speichern", "write"),
     ("GET", "/aufbewahrung", "read"),
     ("PUT", "/aufbewahrung", "admin"),
     ("GET", "/loeschlauf/faellig", "read"),
@@ -21,6 +22,7 @@ CASES = [
     ("POST", "/loeschlauf", "admin"),
     ("GET", "/einwilligungserklaerungen", "read"),
     ("POST", "/einwilligungserklaerungen", "admin"),
+    ("POST", "/einwilligungserklaerungen/actions/anlegen", "admin"),
     ("GET", "/einwilligungserklaerungen/1", "read"),
     ("GET", "/candidate", "read"),
     ("PATCH", "/candidate/stage", "write"),
