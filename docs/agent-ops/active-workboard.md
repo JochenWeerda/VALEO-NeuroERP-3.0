@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MCP-ASYNC-LIFECYCLE-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Blockierende stdio-MCP-Aufrufe und liegenbleibende Node-Prozesse beheben; JSON-RPC-Antworten validieren.
+**Dateibesitz:** app/integrations/mcp_client.py, neue Tests/test_mcp_client_lifecycle.py, eigene QA-/Workboard-Doku; Generatorartefakte nur bei belegtem Drift.
+**Abnahme:** echte lokale Node-Gegenproben fuer Erfolg, Fehler, falsche ID, Zeitlimit und Abbruch; Eventloop bleibt reaktionsfaehig, Kindprozesse immer beendet; bestehende Optional-result-Schnittstelle erhalten. Kein Netz/DB/Docker; keine Tenant- oder fachlichen Toolrechte erweitern.
+
 ## QUALITY-GATE-MAHNVERSAND-20261011 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Einzigen Frontend-Vertragsfehler aus CI 38126182106 beheben: zwei neue Mahnversand-Buttons widersprechen dem 44-px-Vertrag.
