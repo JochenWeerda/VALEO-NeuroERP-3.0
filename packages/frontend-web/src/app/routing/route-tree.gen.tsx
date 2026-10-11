@@ -3530,8 +3530,8 @@ const appRoute0493 = createRoute({
   beforeLoad: ({ params }) => {
     throw redirect({ href: buildLegacyRedirect("finance/mahnwesen", params) })
   },
-  component: () => renderPage("@/pages/finance/mahnwesen"),
-  staticData: {"breadcrumb":"Dunning","module":"@/pages/finance/mahnwesen","legacyPath":"/finance/dunning"},
+  component: () => renderPage("@/pages/finance/mahnlauf"),
+  staticData: {"breadcrumb":"Dunning","module":"@/pages/finance/mahnlauf","legacyPath":"/finance/dunning"},
 })
 
 const appRoute0494 = createRoute({
@@ -3628,8 +3628,8 @@ const appRoute0506 = createRoute({
 const appRoute0507 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "finance/mahnwesen",
-  component: () => renderPage("@/pages/finance/mahnwesen"),
-  staticData: {"breadcrumb":"Mahnwesen","module":"@/pages/finance/mahnwesen","legacyPath":"/finance/mahnwesen"},
+  component: () => renderPage("@/pages/finance/mahnlauf"),
+  staticData: {"breadcrumb":"Mahnwesen","module":"@/pages/finance/mahnlauf","legacyPath":"/finance/mahnwesen"},
 })
 
 const appRoute0508 = createRoute({
@@ -10123,7 +10123,7 @@ export const generatedRouteInventory = [
     "source": "alias"
   },
   {
-    "module": "@/pages/finance/mahnwesen",
+    "module": "@/pages/finance/mahnlauf",
     "path": "finance/dunning",
     "source": "alias"
   },
@@ -10193,7 +10193,7 @@ export const generatedRouteInventory = [
     "source": "alias"
   },
   {
-    "module": "@/pages/finance/mahnwesen",
+    "module": "@/pages/finance/mahnlauf",
     "path": "finance/mahnwesen",
     "source": "auto"
   },

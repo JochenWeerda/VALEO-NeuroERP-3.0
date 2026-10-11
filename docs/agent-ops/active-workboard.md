@@ -17,9 +17,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Dateibesitz:** app/services/llm_gateway.py nur neuer JSON-Objektparser; kaeufer_klassifikator.py, whatsapp_intake_service.py und app/api/v1/endpoints/crm_kim.py nur Antwortparse-Hunks; neue tests/test_llm_json_contract.py, eigene QA-/Workboard-Doku.
 **Abnahme:** echte Verbraucher akzeptieren reine und korrekt eingefasste JSON-Objekte; Listen/Skalare/NaN/defekte Fences fallen nachvollziehbar zur bestehenden Fachlogik zurueck; private Antworten nicht loggen. Kein Netz/DB/Docker/LLM-Aufruf, keine Route/Schema/Auth-Aenderung und keine Sonar-Ausnahme.
 
-## MAHNWESEN-EINZELMASKE-ABLOESEN-20261011 — in Arbeit, Claude Code
+## MAHNWESEN-EINZELMASKE-ABLOESEN-20261011 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt 1 aus `versandwege-echt-20261008.md`.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Offener Punkt 1 aus `versandwege-echt-20261008.md`.
 **Entscheidung** (Vorgabe „was nicht einfach laeuft, laeuft einfach nicht“): Die Einzelmaske `/finance/mahnwesen`
 wird abgeloest, nicht angeschlossen. Sie zeigt drei erfundene Debitoren, laedt nie eine Bestandsmahnung
 (`id: 'new'` fest) und speichert Felder, die `POST /dunning` nicht kennt; alles Wirksame kann der Mahnlauf.
@@ -28,6 +28,11 @@ wird abgeloest, nicht angeschlossen. Sie zeigt drei erfundene Debitoren, laedt n
 erzeugter Routendateien, der eine Quelltext-Test in `__tests__/pages/logistik/dispo-copilot-uix.test.ts`,
 neuer Vitest, QA-Doku, driftende Generatorartefakte. Nicht angefasst: `offene-posten.tsx`,
 `FrmKontraktDetail.tsx` (fremdes WIP im Arbeitsbaum; ihre Links bleiben durch die Route gueltig).
+**Lieferung:** Seite entfernt (560 Zeilen), beide Wege zeigen `@/pages/finance/mahnlauf`, Routen neu erzeugt
+(939, Routing-Pruefung gruen), Quelltext-Test durch Routenvertrag ersetzt. QA:
+`docs/quality-assurance/mahnwesen-einzelmaske-abloesen-20261011.md`. **Entfaellt ohne Ersatz:** PDF-Export und
+Vorschau-Meldung der Einzelmaske. **Offen:** dritter Mahnlauf `pages/mahnwesen/mahnlauf.tsx` ohne
+Navigationseintrag; Benutzerhandbuch nennt noch das alte Modul.
 
 ## MASKEN-COMMAND-IDEMPOTENZ-20261011 — abgeschlossen, Claude Code
 

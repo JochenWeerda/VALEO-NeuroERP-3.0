@@ -2476,7 +2476,7 @@
       "source": "alias"
     },
     {
-      "module": "@/pages/finance/mahnwesen",
+      "module": "@/pages/finance/mahnlauf",
       "path": "finance/dunning",
       "source": "alias"
     },
@@ -2546,7 +2546,7 @@
       "source": "alias"
     },
     {
-      "module": "@/pages/finance/mahnwesen",
+      "module": "@/pages/finance/mahnlauf",
       "path": "finance/mahnwesen",
       "source": "auto"
     },
