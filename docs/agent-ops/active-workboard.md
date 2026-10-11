@@ -11,15 +11,19 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## OFFENE-POSTEN-ROLLEN-20261011 — in Arbeit, Claude Code
+## OFFENE-POSTEN-ROLLEN-20261011 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-11. Befund aus MAHNWESEN-ROLLEN-20261011.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Befund aus MAHNWESEN-ROLLEN-20261011.
 **Befund:** Die elf Wege unter `/finance/open-items` (lesen, anlegen, aendern, loeschen, ausgleichen, Ausgleich
 zuruecknehmen, mahnen) pruefen keine Rolle. **Ziel:** Rolle vor dem ersten Datenbankzugriff. Lesen: Finanzrollen
 sowie Verkauf, Vertrieb und Einkauf (sie brauchen die offenen Posten ihrer Kunden und Lieferanten); aendern,
 ausgleichen, mahnen: `finance_write`; loeschen: `finance_admin`. **Dateibesitz:** `app/auth/finance_roles.py`
 (additiv), nur die Dekoratoren in `app/api/v1/endpoints/open_items.py`, neue Vertragsdatei
 `tests/test_offene_posten_rollen_vertrag.py`, Anpassung betroffener Tests, QA-Doku.
+**Lieferung:** elf Wege mit `open_items_read` / `finance_write` / `finance_admin` am Dekorator; Vertrag mit
+178 Faellen ohne Datenbank (fuenfzehn Rollen x elf Wege, ohne Anmeldung, Vollstaendigkeit). QA:
+`docs/quality-assurance/offene-posten-rollen-20261011.md`. **Betrieb:** Buchhaltung braucht
+`FINANCE_BEARBEITEN`; Verkauf, Vertrieb und Einkauf lesen mit ihren eigenen Rollen.
 
 ## WHATSAPP-CATALOG-20261011 — abgeschlossen, Codex
 
