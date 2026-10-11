@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## README-REFRESH-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** GitHub-README auf den belegbaren Entwicklungsstand bringen; deutsche/englische Version vereinheitlichen, veraltete Erfolgszahlen entfernen und Startanleitung sowie Nachweis-/Doku-Verweise korrigieren.
+**Dateibesitz:** README.md und ausschliesslich dieser Workboard-Block. **Abnahme:** relative Links und Befehle gegen Repository pruefen; Markdown-/Staging-Gates; isolierter Commit auf main und GitHub-Push, develop nachziehen.
+**Risiken/Annahmen:** Fremdes WIP bleibt erhalten. Historische Tests sind keine aktuelle Gesamtabnahme; keine Produktivreife oder pauschal gruene CI behaupten. Keine DB-/Docker-Aenderungen.
+
 ## FUHRPARK-TENANT-CE-20261009 — abgeschlossen, Cursor
 
 **Owner:** Cursor. **Stand:** integriert mit Codex-Isolationskorrekturen 2026-10-09.
