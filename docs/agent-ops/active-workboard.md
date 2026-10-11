@@ -25,11 +25,13 @@ je ein Waechter-Hunk am Beginn des Schreibpfads in `app/api/v1/command_handlers/
 `personal_bewerbungen.py` (nur Umzug auf den gemeinsamen Waechter), neue Vertragsdatei
 `tests/test_masken_command_idempotenz_vertrag.py`, QA-Doku. Keine Migration.
 
-## SONAR-WORKFLOW-LIFECYCLE-20261011 — reserviert, Codex
+## SONAR-WORKFLOW-LIFECYCLE-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Zwei unbehaltene Workflow-SSE-Tasks und unerreichbare Optimierungshistorie aus aktueller Sonar-Analyse schliessen.
 **Dateibesitz:** app/routers/workflow_router.py nur SSE-Lieferung; app/agents/workflows/system_optimizer.py nur get_optimization_history; neue tests/test_workflow_lifecycle_contract.py und eigene QA-/Workboard-Doku.
 **Abnahme:** echte SSE-Queues erhalten Ereignisse vor erfolgreicher Antwort, Benachrichtigungsfehler machen gespeicherte Fachuebergaenge nicht nachtraeglich ungueltig; Historie tatsaechlich am Agenten aufrufbar, Grenzen geprueft. Kein Netz/DB/Docker/LLM. Keine Aenderung von Auth, Mandantenmodell, Route/Schema oder Sonar-Ausnahmen.
+
+**Lieferung:** Zwei unbehaltene SSE-Tasks ersetzt durch kurze awaited Queue-Lieferung mit sicherem Fehlervertrag; Optimierungshistorie an bestehender Agentenklasse aufrufbar, null/negative Grenzen korrekt. Gegenprobe neun rot/eins gruen, danach 39 Workflow-/MCP-/Krypto-Vertraege plus 23 bestehende Workflow-/Guardtests gruen. Architektur-/Code-Inventare auf isoliertem Stand gruen. Nachweis: sonar-workflow-lifecycle-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## ANMELDEKENNUNG-UEBRIGE-20261011 — abgeschlossen, Claude Code
 
