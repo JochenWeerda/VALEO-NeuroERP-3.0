@@ -219,7 +219,9 @@ Verträge grün. Zwei High ohne Herstellerfix bleiben audit-blockierend.
 GitHub-Smoke 37730263363 auf c59df8391 in allen fünf Domänen erfolgreich.
 Vollständiges XBRL/ERiC, ungepatchte Security-Befunde und Gesamt-Quality bleiben
 offen. ELSTER-Registrierung durch Nutzer abgesendet, Bestätigungs-PDF lokal
-gesichert; SDK-Zugang und Lizenzannahme noch ausstehend.
+gesichert; Entwicklerlogin und ERiC-44-Lizenzannahme am 11.10.2026 erfolgreich.
+SDK-Download im Browser mit Zeitlimit, Beschaffung und Integration weiterhin
+offen. [Nachweis](../quality-assurance/elster-access-20261011.md).
 
 ## EBILANZ-HONEST-PERSISTENCE — Scheinwirkung und Laufzeit-DDL geschlossen (2026-10-07)
 

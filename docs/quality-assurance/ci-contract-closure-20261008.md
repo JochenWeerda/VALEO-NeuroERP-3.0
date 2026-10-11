@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa, agent]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-10-08
+last_reviewed: 2026-10-11
 version: 1.0.0
 ---
 
@@ -131,10 +131,9 @@ hat der Nutzer selbst abgesendet; die Versandbestätigung wurde am 08.10.2026
 als echtes PDF über „PDF speichern“ heruntergeladen und zusammen mit einem
 Browser-Screenshot ausschließlich unter dem ignorierten lokalen
 `artifacts/elster/` gesichert. Personenbezogene Formulardaten werden nicht
-versioniert. Der ERiC-Bereich leitet zur Entwickleranmeldung weiter;
-freigeschaltete Zugangsdaten liegen noch nicht vor. Kein Lizenzvertrag wurde
-angezeigt oder angenommen, kein SDK heruntergeladen oder als eingebunden
-ausgegeben. Laut
-[ELSTER](https://www.elster.de/elsterweb/infoseite/entwickler) folgt eine
-Herstellerprüfung und Einrichtung des Zugangs innerhalb einiger Tage per
-E-Mail. SDK und echte Empfangsquittung bleiben externe Voraussetzungen.
+versioniert. Am 11.10.2026 gelang mit nachgereichten Zugangsdaten der
+offizielle Entwicklerlogin. Der beauftragte ERiC-44-Lizenzvertrag wurde
+elektronisch akzeptiert; Downloadbereich 44.3.6.0 freigeschaltet. Browserdownloads
+lieferten Zeitlimits, keine neue SDK-Datei wurde erfolgreich gespeichert oder
+integriert bestaetigt. [Zugangsnachweis und Integrationsbedingungen](elster-access-20261011.md).
+SDK-Beschaffung und echte Empfangsquittung bleiben offene Voraussetzungen.
