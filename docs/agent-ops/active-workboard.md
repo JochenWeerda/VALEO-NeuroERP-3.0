@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MASKEN-COMMAND-IDEMPOTENZ-20261011 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt aus BEWERBUNG-COMMAND-URHEBER-20261011.
+**Befund:** Alle Masken-Commands lesen `_idempotencyKey` und schreiben ihn nur ins Audit; keiner prueft ihn.
+Ein wiederholtes `execute` mit demselben Schluessel fuehrt die Aktion ein zweites Mal aus. Das Frontend sendet
+keinen Schluessel (dort schuetzt die Sperre des Knopfs); betroffen sind API- und Agenten-Aufrufer.
+**Ziel:** ein gemeinsamer Waechter in `mask_action_runtime_service.py` (Transaktionssperre je Schluessel,
+frueherer Lauf aus `crm_action_audit_log`), genutzt von `run_delegated_mask_action` und den Einzelwegen.
+Ohne Schluessel bleibt alles, wie es ist. **Dateibesitz:** `app/services/mask_action_runtime_service.py`,
+je ein Waechter-Hunk am Beginn des Schreibpfads in `app/api/v1/command_handlers/{fuhrpark,logistics,procurement,training}.py`,
+`l3_report_catalog.py`, `logistik_frachttabellen.py`, `mailkonto.py`, `query_center.py`, `sanctions_compliance.py`,
+`personal_bewerbungen.py` (nur Umzug auf den gemeinsamen Waechter), neue Vertragsdatei
+`tests/test_masken_command_idempotenz_vertrag.py`, QA-Doku. Keine Migration.
+
 ## SONAR-WORKFLOW-LIFECYCLE-20261011 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Zwei unbehaltene Workflow-SSE-Tasks und unerreichbare Optimierungshistorie aus aktueller Sonar-Analyse schliessen.
