@@ -58,7 +58,8 @@ Abschlussmeldung sagt das. Bleibt nach der Abwahl nur ein solcher Posten übrig,
 ## Offen
 
 1. **Rollen:** Die Wege unter `/finance/mahnlauf/*` verlangen eine Anmeldung, aber keine Rolle. Wer
-   angemeldet ist, kann einen Mahnlauf auslösen.
+   angemeldet ist, kann einen Mahnlauf auslösen. Erledigt am 11.10.2026:
+   [mahnwesen-rollen-20261011.md](mahnwesen-rollen-20261011.md).
 2. **Teilmenge in mehreren Schritten:** Bei einer Teilmenge läuft der Dienst je Rechnung einzeln.
    Scheitert einer mittendrin, sind die vorherigen Mahnungen erzeugt.
 3. **Benutzerhandbuch** nennt `/mahnwesen/mahnlauf` noch mit dem alten Modul und Bild.

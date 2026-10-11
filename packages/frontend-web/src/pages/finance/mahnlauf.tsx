@@ -24,6 +24,12 @@ const STATUS: Record<string, { label: string; variant: 'outline' | 'info' | 'suc
   bezahlt: { label: 'Bezahlt', variant: 'success' },
 }
 
+function grund(fehler: unknown): string {
+  const antwort = (fehler as { response?: { status?: number; data?: { detail?: unknown } } })?.response
+  if (antwort?.status === 403) return 'Für das Mahnwesen fehlt die Finanzrolle.'
+  return typeof antwort?.data?.detail === 'string' ? antwort.data.detail : 'Der Server hat nicht geantwortet.'
+}
+
 function versandText(n: DunningNotice): string {
   if (n.versand_art === 'email') return `E-Mail an ${n.empfaenger ?? '—'}`
   if (n.versand_art === 'post') return 'Post'
@@ -130,6 +136,11 @@ export default function MahnlaufPage() {
         <CardContent className="p-0">
           {candidates.isLoading ? (
             <div className="flex items-center justify-center py-8 text-muted-foreground"><Loader2 className="animate-spin mr-2" size={16} /> Lädt …</div>
+          ) : candidates.isError ? (
+            // Ein abgelehnter Abruf (z. B. fehlende Finanzrolle) ist nicht "nichts zu mahnen".
+            <div role="alert" className="py-8 text-center text-sm text-status-error">
+              Mahnkandidaten nicht geladen: {grund(candidates.error)}
+            </div>
           ) : cand.length === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground">Keine überfälligen Debitoren-OP.</div>
           ) : (
@@ -181,6 +192,10 @@ export default function MahnlaufPage() {
         <CardContent className="p-0">
           {notices.isLoading ? (
             <div className="flex items-center justify-center py-8 text-muted-foreground"><Loader2 className="animate-spin mr-2" size={16} /> Lädt …</div>
+          ) : notices.isError ? (
+            <div role="alert" className="py-8 text-center text-sm text-status-error">
+              Mahnungen nicht geladen: {grund(notices.error)}
+            </div>
           ) : (notices.data?.length ?? 0) === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground">Noch keine Mahnungen erzeugt.</div>
           ) : (

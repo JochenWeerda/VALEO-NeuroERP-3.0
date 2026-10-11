@@ -12,6 +12,9 @@ from app.services import whatsapp_notify_service as service
 
 @pytest.fixture
 def client(monkeypatch):
+    from whatsapp_test_support import attach_unit_store
+    from app.core.database import get_db
+    db = attach_unit_store(monkeypatch, service)
     from sqlalchemy.engine import Engine
 
     def forbidden_database(*args, **kwargs):
@@ -39,6 +42,7 @@ def client(monkeypatch):
 
     monkeypatch.setattr(oidc, "verify", verify)
     app = FastAPI()
+    app.dependency_overrides[get_db] = lambda: db
     app.include_router(endpoint.router, prefix="/whatsapp")
     with TestClient(app) as client:
         yield client
@@ -49,8 +53,8 @@ def headers(token="a", **extra):
     return {"Authorization": f"Bearer {token}", **extra}
 
 
-DELIVERY = {"phone": "+491700000001", "artikel": "Weizen", "menge": 2}
-DOCUMENT = {"phone": "+491700000001", "doc_typ": "Rechnung", "doc_nr": "RE-1"}
+DELIVERY = {"phone": "+491700000001", "artikel": "Weizen", "menge": 2, "idempotency_key": "delivery-1"}
+DOCUMENT = {"phone": "+491700000001", "doc_typ": "Rechnung", "doc_nr": "RE-1", "idempotency_key": "document-1"}
 WRITES = [("/dev/notify/lieferankuendigung", DELIVERY), ("/dev/notify/dokument-ready", DOCUMENT)]
 
 

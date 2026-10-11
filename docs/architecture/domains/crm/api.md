@@ -35,6 +35,20 @@ Siehe [C4 Container](../../views/c4-02-containers.md) — CRM-Cluster-Tabelle.
 
 ## Authentifizierung
 
+### WhatsApp-Benachrichtigungsvorbereitung (2026-10-11)
+
+Die zwei POST-Wege unter /api/v1/whatsapp/dev/notify verlangen crm:write,
+verifizierten OIDC-Mandanten/Urheber und idempotency_key (1 bis 120 Zeichen,
+mindestens ein Nicht-Leerzeichen). Gleicher Auftrag liefert dieselbe Kennung;
+anderer Inhalt oder Urheber zum selben Schluessel liefert 409. Request-Mandant
+ist nur Konsistenzpruefung. GET /api/v1/whatsapp/dev/outbox verlangt crm:read,
+listet ausschliesslich den Token-Mandanten und begrenzt limit auf 1 bis 200
+(Default 50). pending_browser ist kein Versandnachweis.
+
+Persistenz/Audit verwenden bestehende Kanal-Tabellen; generische
+Prozess-/Freigabeansichten schliessen diesen reservierten Namensraum aus.
+Entscheidung: [ADR-081](../../../adr/adr-081-whatsapp-browser-notification-persistence.md).
+
 ### Ausfuehrbarer MCP-Kontaktadapter (2026-09-21)
 
 `POST /api/v1/mcp/tools/call` verbindet `crm.contact.log` mit demselben

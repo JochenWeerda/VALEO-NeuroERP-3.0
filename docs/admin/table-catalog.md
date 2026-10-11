@@ -604,8 +604,8 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.calendar_ics_tokens` | `app/services/calendar_projection_service.py` | `app/services/calendar_projection_service.py` | — |
 | `domain_shared.calendar_items` | `app/services/calendar_projection_service.py` | `app/services/calendar_projection_service.py` | — |
 | `domain_shared.calendar_team_memberships` | `app/services/calendar_projection_service.py` | — | — |
-| `domain_shared.channel_process_threads` | `app/models/channel_threads.py` | — | — |
-| `domain_shared.channel_thread_audit_items` | `app/models/channel_threads.py` | — | — |
+| `domain_shared.channel_process_threads` | `app/models/channel_threads.py`, `app/services/whatsapp_notify_service.py` | `app/services/whatsapp_notify_service.py` | — |
+| `domain_shared.channel_thread_audit_items` | `app/models/channel_threads.py` | `app/services/whatsapp_notify_service.py` | — |
 | `domain_shared.connectors` | `app/api/v1/endpoints/config_service.py` | `app/api/v1/endpoints/config_service.py` | — |
 | `domain_shared.contract_amendments` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_shared.crm_vertreter` | `app/api/v1/endpoints/vertreterstamm.py` | `app/api/v1/endpoints/vertreterstamm.py` | — |

@@ -11,9 +11,45 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## MAHNWESEN-ROLLEN-20261011 — in Arbeit, Claude Code
+## OFFENE-POSTEN-ROLLEN-20261011 — in Arbeit, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt aus EIN-MAHNLAUF-20261011.
+**Owner:** Claude Code. **Stand:** 2026-10-11. Befund aus MAHNWESEN-ROLLEN-20261011.
+**Befund:** Die elf Wege unter `/finance/open-items` (lesen, anlegen, aendern, loeschen, ausgleichen, Ausgleich
+zuruecknehmen, mahnen) pruefen keine Rolle. **Ziel:** Rolle vor dem ersten Datenbankzugriff. Lesen: Finanzrollen
+sowie Verkauf, Vertrieb und Einkauf (sie brauchen die offenen Posten ihrer Kunden und Lieferanten); aendern,
+ausgleichen, mahnen: `finance_write`; loeschen: `finance_admin`. **Dateibesitz:** `app/auth/finance_roles.py`
+(additiv), nur die Dekoratoren in `app/api/v1/endpoints/open_items.py`, neue Vertragsdatei
+`tests/test_offene_posten_rollen_vertrag.py`, Anpassung betroffener Tests, QA-Doku.
+
+## WHATSAPP-CATALOG-20261011 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Verbraucherverweise der beiden bestehenden Kanal-/Audit-Tabellen fuer WhatsApp-Persistenz nachziehen.
+**Dateibesitz:** docs/admin/table-catalog.json/md nur consumers der Tabellen domain_shared.channel_process_threads und channel_thread_audit_items aus isoliertem HEAD plus eigenen Codehunks; fremde physische Katalog-WIP unveraendert erhalten.
+**Abnahme:** zwei Tabellenverweise nachweislich geaendert, keine Tabellen-/Spalten-/Schemaaenderung, keine Migration/DB/Container/Reset. **Risiko:** fremde Katalog-WIP nicht in eigenen Commit aufnehmen.
+
+**Lieferung:** Exakt zwei bestehende Kanal-/Audit-Tabellen erhalten eigene Verbraucher-Lineage; physischer Katalog unveraendert, fremdes physisches WIP erhalten. Drei Code-Inventare, Architekturindex und Agent-Handbuch isoliert aktuell. Nachweis: whatsapp-persistence-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## WHATSAPP-THREAD-GUARD-20261011 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Reservierte WhatsApp-Benachrichtigungsauftraege in bestehender Kanaltabelle vor generischen Prozess-/Freigabewegen schuetzen. Integrationsvoraussetzung von WHATSAPP-PERSISTENCE-20261011.
+**Dateibesitz:** app/repositories/channel_thread_repository.py nur Schutz des reservierten whatsapp.browser.notification.v1-Namensraums in save/get/list; DB-Vertraege und eigene gemeinsame QA/Workboard.
+**Abnahme:** generische Reads liefern diese privaten Auftraege nie; generische save/approval koennen sie nicht ersetzen. Normale Prozess-Threads unveraendert; kein Schema/DB-Reset. **Risiko:** allgemeine Kanal-Mandantenvertraege ausserhalb des reservierten Namensraums bleiben gesondert zu pruefen.
+**Harness:** Fachvertrag Benachrichtigung ist kein generisch ausfuehrbarer Prozess; Architektur gemeinsame Tabelle, dedizierter Zugriff; Daten SQL-Filter vor Laden; Tests echtes Probe-Schema und bestehende Kanaltests; Security keine Nebenwege; Betrieb kein Memorybypass; Doku QA/ADR/Workboard; extern CI offen.
+
+**Lieferung:** Reservierter WhatsApp-Namensraum vor generischen Reads/Approval/Ersetzen geschuetzt, SQL-Filter vor Laden und kein Memory-Lesebypass. Echter normaler ORM-Kanalauftrag weiterhin les-/schreibbar, private Benachrichtigung nicht. Allgemeine Kanal-Isolation ausserhalb dieses Namensraums bleibt offen. Nachweis: whatsapp-persistence-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## WHATSAPP-PERSISTENCE-20261011 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Fluechtige WhatsApp-Outbox durch bestehende domain_shared.channel_process_threads samt Audit ersetzen; Replay an Mandant/Aktion/Inhalt/Urheber binden.
+**Dateibesitz:** app/services/whatsapp_notify_service.py, app/api/v1/endpoints/whatsapp_notify.py; sales_delivery_notes.py nur zwei nachweislich tote Benachrichtigungs-Placeholder; WhatsApp-Tests und neuer Testhelfer/DB-Vertrag; test_service_units_wave101.py nur vier obsolete speicherabhaengige WhatsApp-Tests; eigener ADR Proposed, CRM-Domain-API-Hunk, QA, Runbook/Workboard. Keine Schema-/Migrations-/Browseraenderung.
+**Abnahme:** bestehender valeo_probe Revision audit_urheber_20261011; echte Commit-/Rollback-/Wiederanlauf-/Konkurrenzvertraege mit eigenen Zeilen; kein Memoryfallback, keine neue DB/Container/Reset. Kein Versand; persistenter pending_browser ist keine Versandfreigabe. **Risiko:** Browserkonto, Fachreferenzen und sichtbarer Versandnachweis weiterhin offen.
+**Harness:** Fachvertrag Vorbereitung; Architektur bestehende Kanalauftraege, keine Event-Outbox als Zustellbeleg; Daten atomarer Auftrag+Audit und payloadgebundener Replay; Tests SQL-Wirkungen plus vorhandene HTTP-Guards; Security Tokenurheber, Mandant+Aktion; Betrieb Rollback ohne stillen Ersatz; Doku ADR/Domain/QA/Workboard; extern CI/Browserabnahme offen.
+
+**Lieferung:** Memory-Outbox entfernt; bestehende Kanal-/Audittabellen speichern atomare Auftraege, Tokenurheber und inhaltsgebundenen Replay. Zwei gleichzeitige Transaktionen erzeugen nur einen Auftrag/ein Audit; Rollback und Auditfehler ohne Memoryfallback. HTTP 409/422, Listen 50/max200, synchrone DB-Handler. 79 Vertraege gruen, davon 16 echte Probe-SQL-Vertraege. Zwei tote Verkaufsbeleg-Placeholder und vier oberflaechliche Speichertests ersetzt. Browserkonto, Fachreferenzen und Versandnachweis bleiben offen. Nachweis: whatsapp-persistence-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## MAHNWESEN-ROLLEN-20261011 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Offener Punkt aus EIN-MAHNLAUF-20261011.
 **Befund:** Die elf Mahnwege (`/finance/mahnlauf/*`, `/finance/dunning*`) verlangen eine Anmeldung, aber keine
 Rolle: Wer angemeldet ist, kann einen Mahnlauf ausloesen und Mahnungen versenden. **Ziel:** das bestehende
 Muster aus `app/auth/finance_roles.py` (Zahlungslaeufe, Eingangsrechnungen) — Lesen `finance_read`, Mahnlauf,
@@ -21,6 +57,11 @@ Anlegen, Versenden, Bezahlt-Vermerk `finance_write`; Pruefung vor dem ersten Dat
 **Dateibesitz:** nur die Dekoratoren in `app/api/v1/endpoints/dunning.py` und `finance_dunning.py`, neue
 Vertragsdatei `tests/test_mahnwesen_rollen_vertrag.py`, Anpassung der Mahn-Tests, QA-Doku, driftende
 Generatorartefakte.
+**Lieferung:** elf Wege mit `finance_read`/`finance_write` am Dekorator; Vertrag mit 122 Faellen ohne Datenbank
+(zehn Rollen x elf Wege, ohne Anmeldung, Vollstaendigkeit); die Maske sagt bei 403 „Finanzrolle fehlt“ statt
+„nichts zu mahnen“. QA: `docs/quality-assurance/mahnwesen-rollen-20261011.md`. **Betrieb:** Debitorenbuchhaltung
+braucht `FINANCE_BEARBEITEN`. **An Codex:** `openapi.json` driftete auf `main` um eine Beschreibung aus
+`fix(whatsapp)` 6a4199ddf (`generate_openapi.py --check` rot) — nicht von mir angefasst.
 
 ## WHATSAPP-ACCESS-20261011 — abgeschlossen, Codex
 

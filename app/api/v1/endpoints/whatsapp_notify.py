@@ -3,8 +3,11 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+from app.core.database import get_db
+from app.auth.deps_oidc import get_current_user
 
 from app.auth.guards import require_scopes
 from app.auth.tenant import get_verified_tenant_id
@@ -13,6 +16,7 @@ from app.services.whatsapp_notify_service import (
     get_outbox,
     send_dokument_ready,
     send_lieferankuendigung,
+    WhatsAppReplayConflict,
 )
 
 router = APIRouter()
@@ -21,6 +25,7 @@ router = APIRouter()
 # ─── Request-Schemata ────────────────────────────────────────────────────────
 
 class LieferankuendigungRequest(BaseModel):
+    idempotency_key: str = Field(min_length=1, max_length=120, pattern=r"\S")
     tenant_id: Optional[str] = None
     phone: str
     kunden_nr: Optional[str] = None
@@ -33,6 +38,7 @@ class LieferankuendigungRequest(BaseModel):
 
 
 class DokumentReadyRequest(BaseModel):
+    idempotency_key: str = Field(min_length=1, max_length=120, pattern=r"\S")
     tenant_id: Optional[str] = None
     phone: str
     kunden_nr: Optional[str] = None
@@ -70,6 +76,13 @@ def _check_requested_tenant(requested: Optional[str], verified: str) -> None:
     if requested is not None and requested.strip() != verified:
         raise HTTPException(403, "Mandant stimmt nicht mit der geprueften Anmeldung ueberein")
 
+
+def _verified_actor(user: dict) -> str:
+    actor = user.get("sub")
+    if not isinstance(actor, str) or not actor.strip() or len(actor) > 120:
+        raise HTTPException(403, "Gueltiger Urheber aus der Anmeldung erforderlich")
+    return actor
+
 @router.post(
     "/dev/notify/lieferankuendigung",
     response_model=NotifyResponse,
@@ -77,26 +90,34 @@ def _check_requested_tenant(requested: Optional[str], verified: str) -> None:
     summary="Simuliert Lieferankündigung (Push an Kunde)",
     dependencies=[Depends(require_scopes("crm:write"))],
 )
-async def simulate_lieferankuendigung(
+def simulate_lieferankuendigung(
     body: LieferankuendigungRequest,
     tenant_id: str = Depends(get_verified_tenant_id),
+    user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ) -> NotifyResponse:
     """
     Triggerbar aus Disposition/Logistik: LKW ~eta_min Minuten entfernt.
-    Nur Entwurf in der fluechtigen Outbox; kein automatischer Netzwerkversand.
+    Dauerhafter Vorbereitungsauftrag; kein automatischer Netzwerkversand.
     """
     _check_requested_tenant(body.tenant_id, tenant_id)
-    return NotifyResponse(**send_lieferankuendigung(
-        tenant_id=tenant_id,
-        phone=body.phone,
-        kunden_nr=body.kunden_nr,
-        kunden_name=body.kunden_name,
-        artikel=body.artikel,
-        menge=body.menge,
-        einheit=body.einheit,
-        eta_min=body.eta_min,
-        fahrer=body.fahrer,
-    ))
+    try:
+        result = send_lieferankuendigung(
+            tenant_id=tenant_id,
+            phone=body.phone,
+            kunden_nr=body.kunden_nr,
+            kunden_name=body.kunden_name,
+            artikel=body.artikel,
+            menge=body.menge,
+            einheit=body.einheit,
+            eta_min=body.eta_min,
+            fahrer=body.fahrer,
+            db=db, actor=_verified_actor(user), idempotency_key=body.idempotency_key,
+        )
+        db.commit()
+    except WhatsAppReplayConflict as exc:
+        raise HTTPException(409, str(exc)) from exc
+    return NotifyResponse(**result)
 
 
 @router.post(
@@ -106,23 +127,31 @@ async def simulate_lieferankuendigung(
     summary="Simuliert Dokument-Bereitstellungs-Benachrichtigung",
     dependencies=[Depends(require_scopes("crm:write"))],
 )
-async def simulate_dokument_ready(
+def simulate_dokument_ready(
     body: DokumentReadyRequest,
     tenant_id: str = Depends(get_verified_tenant_id),
+    user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ) -> NotifyResponse:
     """
     Triggerbar aus Docflow nach Lieferschein-/Rechnungs-Erstellung.
     """
     _check_requested_tenant(body.tenant_id, tenant_id)
-    return NotifyResponse(**send_dokument_ready(
-        tenant_id=tenant_id,
-        phone=body.phone,
-        kunden_nr=body.kunden_nr,
-        kunden_name=body.kunden_name,
-        doc_typ=body.doc_typ,
-        doc_nr=body.doc_nr,
-        portal_url=body.portal_url,
-    ))
+    try:
+        result = send_dokument_ready(
+            tenant_id=tenant_id,
+            phone=body.phone,
+            kunden_nr=body.kunden_nr,
+            kunden_name=body.kunden_name,
+            doc_typ=body.doc_typ,
+            doc_nr=body.doc_nr,
+            portal_url=body.portal_url,
+            db=db, actor=_verified_actor(user), idempotency_key=body.idempotency_key,
+        )
+        db.commit()
+    except WhatsAppReplayConflict as exc:
+        raise HTTPException(409, str(exc)) from exc
+    return NotifyResponse(**result)
 
 
 @router.get(
@@ -132,9 +161,11 @@ async def simulate_dokument_ready(
     summary="Alle ausgehenden WhatsApp-Nachrichten (Outbox-Log)",
     dependencies=[Depends(require_scopes("crm:read"))],
 )
-async def get_outbox_log(
+def get_outbox_log(
     tenant_id: Optional[str] = None,
     active_tenant: str = Depends(get_verified_tenant_id),
+    limit: int = Query(50, ge=1, le=200),
+    db: Session = Depends(get_db),
 ) -> OutboxLogResponse:
     _check_requested_tenant(tenant_id, active_tenant)
-    return OutboxLogResponse(tenant_id=active_tenant, messages=get_outbox(active_tenant))
+    return OutboxLogResponse(tenant_id=active_tenant, messages=get_outbox(active_tenant, db=db, limit=limit))
