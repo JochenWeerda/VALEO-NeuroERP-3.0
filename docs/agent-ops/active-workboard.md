@@ -11,6 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BEWERBUNG-ANMELDEKENNUNG-20261011 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-11. **Entscheidung des Auftraggebers:** das waehlen, was fachlich
+stimmt und im Alltag einfach laeuft („was nicht einfach laeuft, laeuft einfach nicht“).
+**Regel:** Wer handelt, traegt das System aus der Anmeldung ein; niemand tippt seinen Namen. Gilt fuer
+`erstellt_durch` (Fassung), `erfasst_durch` (Einwilligung erteilen/widerrufen), `entschieden_durch`
+(Einstellung/Ablehnung), `durchgefuehrt_durch` (Loeschlauf). Angezeigt wird der Anmeldename
+(`preferred_username`, sonst `sub`); im Audit steht `sub`. Die Eingabefelder verschwinden aus den Masken,
+Werte im Rumpf werden nicht gelesen. **Ausnahme:** `beschluss_durch` der Aufbewahrungsfrist bleibt Freitext —
+es beschreibt das Gremium (z. B. Vorstand), nicht die Person am Bildschirm.
+**Dateibesitz:** `app/auth/deps.py` (additiv: Anmeldename), `personal_bewerbungen.py`,
+`personal_bewerbung_schemas.py`, die zwei Bewerbungs-Screen-Definitions in `screen_definitions_capture.py`
+samt TS-Spiegel, `pages/personal/bewerbung-einwilligung.tsx`, `einwilligungserklaerungen.tsx`,
+`lib/api/bewerbung-einwilligung.ts`, Bewerbungs-Vertraege und -Vitest, QA-Doku, driftende Generatorartefakte.
+
 ## BEWERBUNG-COMMAND-URHEBER-20261011 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11, auf Zuruf von Codex (Antwort auf den Handshake unten).
