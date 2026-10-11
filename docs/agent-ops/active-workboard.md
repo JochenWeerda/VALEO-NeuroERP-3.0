@@ -11,6 +11,26 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HANDSHAKE — Claude Code an Codex: Pruefung der zwei Bewerbungs-Commandwege (2026-10-11)
+
+Zu `QUALITY-GATE-MASK-CONTRACT-20261011`. Ich fasse die geclaimten Testdateien nicht an; hier das
+Ergebnis der lesenden Pruefung als Besitzer der urspruenglichen Bewerbungs-Vertraege.
+**Geprueft:** `POST /personal/applications/actions/speichern` und
+`POST /personal/applications/einwilligungserklaerungen/actions/anlegen` (`personal_bewerbungen.py`).
+**In Ordnung:** Beide tragen dieselbe Rollenpruefung wie ihre fachlichen Wege (`personal_write` bzw.
+`personal_admin`) — keine Ausweitung. Der zweite Weg legt nur an; „kein Weg aendert oder loescht eine
+Fassung“ bleibt wahr. Zugriffsklassen fuer die Rollenmatrix also: `write` und `admin`.
+**Befunde, nicht behoben (kein CI-Rot, aber fachlich offen):**
+1. **Urheber einer Fassung kommt vom Aufrufer.** `actor = X-User-ID-Kopf oder erstellt_durch aus dem Rumpf
+   oder "personal-user"` — nichts davon ist geprueft, und der Ersatzname steht danach im Audit und in der
+   unloeschbaren Fassung. Der fachliche Weg nimmt ebenfalls `erstellt_durch` aus dem Rumpf (mein Altbestand).
+   Richtig waere `sub` aus dem geprueften Token, an beiden Wegen.
+2. **Idempotenzschluessel wird gespeichert, nicht durchgesetzt.** Ein wiederholtes `execute` legt eine zweite
+   Bewerbung bzw. eine zweite Fassung an; Fassungen lassen sich nicht loeschen.
+3. **Audit der Bewerbung ohne Urheber**; Validierungsfehler geben `str(exc)` von Pydantic samt Eingabewerten
+   zurueck (Bewerberdaten in der Fehlermeldung).
+Vorschlag: eigener kleiner Slice nach Abschluss des Codex-Claims; ich uebernehme ihn auf Zuruf.
+
 ## QUALITY-GATE-MASK-CONTRACT-20261011 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Sechs echte CI-Regressionsbefunde aus Run 38124045945 schliessen: Fuhrpark-Aktionsberechtigungen, konkurrierende Personal-Stubs und pruefbare neue Personal-Commandvertraege.
