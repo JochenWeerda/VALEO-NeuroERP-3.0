@@ -11,6 +11,26 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WHATSAPP-BROWSER-PREP-20261011 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Veralteten automatischen Meta-Versand entfernen; benachrichtigende Fachverbraucher bereiten Nachrichten fuer WhatsApp Web vor und behaupten keine Zustellung. Teilmeilenstein zu WHATSAPP-WEB-INTEGRATION-20261011.
+**Dateibesitz:** app/services/whatsapp_notify_service.py; app/api/v1/endpoints/whatsapp_notify.py nur Beschreibungen; tests/test_whatsapp_notify.py; neues tests/test_whatsapp_browser_prepare.py; eigene QA und docs/workflows/whatsapp-web-computer-use.md nur Lieferstand. Keine Auth-, DB- oder Browserautomation-Aenderung.
+**Abnahme:** selbst mit alten Meta-Credentials kein HTTP-Aufruf; Status pending_browser; Outbox-Lesen veraendert keine gespeicherten Auftraege; leerer Mandant abgewiesen. Bestehende Text-/Fachvertraege gruen, keine externe Nachricht. **Risiko:** fluechtige Outbox und bisherige Endpoint-Autorisierung bleiben offen, daher kein produktiver Browserbetrieb.
+**Harness:** Fachvertrag Templates und bestehende Aufrufer; Architektur alter Versand entfernt, kein neuer Dienst; Daten keine Credentials/privaten Werte loggen; Tests echte Funktionen mit HTTP-Verbot; Security kein fremder automatischer Versand; Betrieb ehrlicher pending_browser-Status; Doku QA/Runbook/Workboard; extern Gesamt-CI und Browserabnahme offen.
+
+**Lieferung:** Automatischer Meta-HTTP-Sender entfernt; vorbereitete Nachrichten melden pending_browser ohne Zustellbehauptung. Fehlender Mandant abgewiesen, private Empfaengerlogs entfernt und Outbox-Leser koennen gespeicherte Empfaenger/Status nicht mutieren. Alle 16 Gegenproben vorher rot, danach 33 betroffene Vertraege gruen. Code-Inventare und Architekturindex isoliert gruen. Dauerhafte Outbox, autorisierter Browserarbeiter und Endpoint-Mandantenvertrag bleiben im offenen WHATSAPP-WEB-INTEGRATION-20261011. Nachweis: whatsapp-browser-preparation-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## EIN-MAHNLAUF-20261011 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt aus MAHNWESEN-EINZELMASKE-ABLOESEN-20261011.
+**Befund:** Zwei Mahnlauf-Seiten am selben Backend (`/finance/mahnlauf/*`): `pages/finance/mahnlauf.tsx`
+(Navigation; versendet, kann aber keinen Posten auslassen) und `pages/mahnwesen/mahnlauf.tsx` (ohne
+Navigationseintrag; Auswahl, aber kein Versand, sendet `bediener: 'Portal'`). Der Bediener kommt aus dem Rumpf,
+sonst „KIM“. **Ziel:** ein Mahnlauf — Auswahl in die Hauptseite, `/mahnwesen/mahnlauf` zeigt sie, die zweite
+Seite entfaellt; Bediener aus der Anmeldung (`anmeldename()`). **Dateibesitz:** `pages/finance/mahnlauf.tsx`,
+`pages/mahnwesen/mahnlauf.tsx` (entfaellt), `lib/api/finance-dunning.ts` (`useRunDunning`), Routeneintraege samt
+erzeugter Dateien, `app/api/v1/endpoints/finance_dunning.py` (nur `run`), Mahnlauf-Tests, QA-Doku.
+
 ## WHATSAPP-WEB-CONTRACT-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** User-Entscheidung WhatsApp Web im Browser via Computer Use im Kanalvertrag festhalten; vorhandene Webhook-/Meta-/Simulatorwege als Ist-Stand und offene Umstellung kenntlich machen.

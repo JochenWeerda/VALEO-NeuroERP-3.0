@@ -23,7 +23,7 @@ Browser-Sitzung noch einen fertig implementierten Versand.
 | --- | --- | --- |
 | Nachrichtentext und Bestellpruefung | `app/api/v1/endpoints/whatsapp_intake.py`, `app/services/whatsapp_intake_service.py` | Bestehende persistente Bestell-Inbox mit Erfassen, Pruefen, Bestaetigen und Verwerfen; geeigneter Wiederverwendungspunkt, Sicherheits-/Replay-Abnahme noch erforderlich |
 | Automatischer Bestellsimulator | `app/services/whatsapp_agent_service.py`, `app/api/v1/endpoints/whatsapp_webhook.py` | Anderer bestehender Bestellweg mit Simulator/Meta-Eingang; nicht als zusaetzliche Browser-Bestellpipeline kopieren |
-| Benachrichtigung | `app/services/whatsapp_notify_service.py` | Sendet optional via Meta Cloud API; ohne Nachrichten-ID wird simulated gemeldet; Outbox nur im Prozessspeicher |
+| Benachrichtigung | `app/services/whatsapp_notify_service.py` | Automatischer Meta-Versand entfernt; Nachrichten haben pending_browser und keinen Zustellnachweis; Outbox weiterhin nur im Prozessspeicher |
 | Kanaladapter | `app/channels/whatsapp_adapter.py`, `app/api/v1/endpoints/channels.py` | Webhook-/Meta-Formate; kein WhatsApp-Web-Adapter |
 | KI-JSON | [JSON-Vertrag](../quality-assurance/llm-json-contract-20261011.md) | Bestehende Bestellextraktion repariert; kein Browsertransport durch diesen Fix |
 
@@ -82,6 +82,10 @@ lesen oder verarbeiten. Wiederanlauf nutzt dauerhafte Eingangs-/Versandnachweise
 - Browserabnahme mit einem ausdruecklich benannten Testempfaenger und Testinhalt
   ausfuehren; erst danach Betrieb als verfuegbar dokumentieren.
 
-Lieferstand dieses Dokuments: Transportentscheidung und Bestandsabgleich
-abgeschlossen; Browseranbindung, Persistenz-/Isolationsabnahme und realer
-Versandtest offen. Keine Nachricht versandt und keine Sitzung angemeldet.
+Lieferstand dieses Dokuments: Transportentscheidung, Bestandsabgleich und sichere
+Benachrichtigungsvorbereitung abgeschlossen. Alte Meta-Credentials loesen keinen
+Versand aus; Entwuerfe melden pending_browser. Outbox-Ergebnisse sind Kopien,
+fehlender Mandant wird abgewiesen; das ist keine Mitgliedschaftspruefung.
+[Abnahme der Vorbereitung](../quality-assurance/whatsapp-browser-preparation-20261011.md).
+Browseranbindung, Persistenz-/Isolationsabnahme und realer Versandtest offen.
+Keine Nachricht versandt und keine Sitzung angemeldet.

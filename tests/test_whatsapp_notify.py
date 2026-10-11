@@ -58,7 +58,7 @@ class TestSendFunctions:
             tenant_id="t1", phone="+4917600001", kunden_nr="K-001",
             kunden_name="Test GbR", artikel="Weizen", menge=20.0, einheit="t",
         )
-        assert result["status"] in ("sent", "simulated")
+        assert result["status"] == "pending_browser"
         assert result["msg_id"].startswith("NOTIFY-")
         assert "Weizen" in result["text"]
 
@@ -67,7 +67,7 @@ class TestSendFunctions:
             tenant_id="t1", phone="+4917600001", kunden_nr="K-001",
             kunden_name="Test GbR", doc_typ="Rechnung", doc_nr="RE-2026-001",
         )
-        assert result["status"] in ("sent", "simulated")
+        assert result["status"] == "pending_browser"
         assert "RE-2026-001" in result["text"]
 
     def test_outbox_wird_befuellt(self, svc):
