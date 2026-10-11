@@ -274,7 +274,7 @@ async def create_bestandskorrektur(
     korrektur_id = str(uuid4())
     movement_id = str(uuid4())
     posting_date = payload.buchungsdatum or date.today()
-    movement_type = "adjustment" if payload.menge >= 0 else "adjustment"
+    movement_type = "adjustment"
     ref_number = f"KORR-{korrektur_id[:8].upper()}"
 
     # Insert stock movement

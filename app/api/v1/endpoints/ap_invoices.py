@@ -282,8 +282,8 @@ async def approve_ap_invoice(
 
     Freigeber ist der angemeldete Nutzer; ``approved_by`` wird nicht mehr uebernommen.
     """
-    approved_by = str(user.get("sub") or "").strip()
-    logger.info(f"Approving AP invoice: {invoice_id} by {approved_by}")
+    approver_id = str(user.get("sub") or "").strip()
+    logger.info(f"Approving AP invoice: {invoice_id} by {approver_id}")
     repo = get_repository(db)
     invoice = _rechnung(repo, invoice_id, tenant_id)
 
@@ -294,7 +294,7 @@ async def approve_ap_invoice(
         response = await approve_invoice(
             type("ApprovalActionCompat", (), {
                 "invoice_id": invoice_id,
-                "approved_by": approved_by,
+                "approved_by": approver_id,
                 "action": "approve",
                 "comment": None,
             })(),
@@ -305,11 +305,11 @@ async def approve_ap_invoice(
     else:
         current_status = await gateway.get_status(invoice_id, tenant_id, db)
         if current_status.status == "not_requested":
-            await gateway.request_approval(invoice_id, tenant_id, approved_by, None, db)
-        response = await gateway.approve_invoice(invoice_id, tenant_id, approved_by, "approve", None, db)
+            await gateway.request_approval(invoice_id, tenant_id, approver_id, None, db)
+        response = await gateway.approve_invoice(invoice_id, tenant_id, approver_id, "approve", None, db)
 
     invoice["status"] = APPROVAL_STATUS_TO_DOCUMENT_STATUS.get(response.status, invoice.get("status", "ENTWURF"))
-    invoice["approvedBy"] = approved_by
+    invoice["approvedBy"] = approver_id
     invoice["approvedAt"] = datetime.now().isoformat()
     save_to_store("ap_invoice", invoice_id, invoice, repo)
     return {
