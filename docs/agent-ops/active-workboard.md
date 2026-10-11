@@ -11,11 +11,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## LLM-JSON-CONTRACT-20261011 — reserviert, Codex
+## LLM-JSON-CONTRACT-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Vier duplizierte LLM-JSON-/Fence-Parser zentralisieren; Nichtobjekte und nichtfinite Zahlen sicher abweisen, vorhandene Fachfallbacks nutzen.
 **Dateibesitz:** app/services/llm_gateway.py nur neuer JSON-Objektparser; kaeufer_klassifikator.py, whatsapp_intake_service.py und app/api/v1/endpoints/crm_kim.py nur Antwortparse-Hunks; neue tests/test_llm_json_contract.py, eigene QA-/Workboard-Doku.
 **Abnahme:** echte Verbraucher akzeptieren reine und korrekt eingefasste JSON-Objekte; Listen/Skalare/NaN/defekte Fences fallen nachvollziehbar zur bestehenden Fachlogik zurueck; private Antworten nicht loggen. Kein Netz/DB/Docker/LLM-Aufruf, keine Route/Schema/Auth-Aenderung und keine Sonar-Ausnahme.
+
+**Lieferung:** Vier JSON-Parser zentralisiert; Nichtobjekte, nichtfinite Zahlen, doppelte Schluessel und defekte Fences sicher abgewiesen. Private Konvertierungswerte aus Warnungen entfernt. 51 Parser-/Verbraucher-/Gateway-/CRM-Tests gruen; Code-Inventare und Architekturindex isoliert gruen. User-Vorgabe WhatsApp Web im Browser via Computer Use dokumentiert; Transportabgleich bleibt eigenstaendige Folgearbeit. Nachweis: llm-json-contract-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## MAHNWESEN-EINZELMASKE-ABLOESEN-20261011 — abgeschlossen, Claude Code
 

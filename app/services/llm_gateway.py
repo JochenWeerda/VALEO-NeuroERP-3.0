@@ -21,15 +21,49 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 
 import httpx
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 logger = logging.getLogger("llm.gateway")
+
+
+def _finite_json_float(value: str) -> float:
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError("LLM JSON numbers must be finite")
+    return number
+
+
+def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("LLM JSON contains duplicate object keys")
+        result[key] = value
+    return result
+
+
+def parse_json_object(response: str) -> dict[str, Any]:
+    """Decode a plain JSON object or a complete JSON Markdown code block."""
+    cleaned = response.strip()
+    if cleaned.startswith("```"):
+        lines = cleaned.splitlines()
+        if len(lines) < 3 or lines[0].strip().lower() not in {"```", "```json"} or lines[-1].strip() != "```":
+            raise ValueError("LLM JSON code block is incomplete or unsupported")
+        cleaned = "\n".join(lines[1:-1])
+    data = json.loads(
+        cleaned, parse_float=_finite_json_float, parse_constant=_finite_json_float,
+        object_pairs_hook=_unique_json_object,
+    )
+    if not isinstance(data, dict):
+        raise ValueError("LLM response must be a JSON object")
+    return data
 
 SETTINGS_KEY = "llm_gateway"
 PROVIDERS = ("anthropic", "openai_compatible", "ollama")
