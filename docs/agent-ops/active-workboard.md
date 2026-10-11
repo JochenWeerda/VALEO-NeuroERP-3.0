@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## ANMELDEKENNUNG-UEBRIGE-20261011 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-11. Folge zu BEWERBUNG-ANMELDEKENNUNG-20261011, dieselbe Regel:
+wer handelt, traegt das System aus der Anmeldung ein. **Ziel:** `erfasst_durch` in Etikettendruck,
+Schadenmeldung, Genossenschaftsbewegungen, Kontrakt-Disposition und Zeitkonto-Korrektur aus der Anmeldung
+(`anmeldename()`), nicht aus dem Rumpf. Kein Frontend dieser Module hat ein Eingabefeld dafuer — die Angabe
+bleibt heute leer. **Dateibesitz:** nur die jeweiligen Anlege-Hunks in `etiketten.py`, `schaeden.py`,
+`genossenschaft.py`, `kontrakte.py` (`create_disposition`), `personal.py` (`adjust_time_account`,
+zeilenneutral wegen Godfile-Ratsche), neue Vertragsdatei `tests/test_anmeldekennung_vertrag.py`, QA-Nachtrag.
+
 ## QUALITY-GATE-SECRET-TEST-20261011 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Zufallsbedingten Backend-CI-Fehler aus develop Run 38126200584 beseitigen: Base64 kann die zwei Klartextbuchstaben pw zufaellig enthalten.
