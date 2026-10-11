@@ -3,6 +3,7 @@ import { Mail, MailWarning, Loader2, Printer, RefreshCw, Send } from 'lucide-rea
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from '@/hooks/use-toast'
 import { useDunningCandidates, useDunningNotices, useRunDunning, useSendDunning, type DunningNotice } from '@/lib/api/finance-dunning'
 
@@ -10,6 +11,8 @@ import { useDunningCandidates, useDunningNotices, useRunDunning, useSendDunning,
  * Mahnlauf (DOM-FIN-004.2) — überfällige Debitoren-OP mahnen: nächste Mahnstufe,
  * Gebühr/Zinsen/Gesamt + Zahlungsfrist; Mahnlauf erzeugt Mahnungen und eskaliert.
  * Erzeugte Mahnungen gehen von hier aus hinaus: per E-Mail an den Kunden oder per Post.
+ * Jeder Kandidat ist vorgewaehlt; wer einen Posten auslaesst (Zahlung zugesagt, Reklamation
+ * offen), nimmt den Haken heraus. Es gibt nur diesen einen Mahnlauf.
  */
 
 // Der Mahnlauf schreibt "offen", die Einzelanlage "created"; beides ist unversendet.
@@ -38,6 +41,8 @@ export default function MahnlaufPage() {
   const send = useSendDunning()
   // Je Mahnung gesperrt, nicht die ganze Liste (Per-Entity-Pending).
   const [versendet, setVersendet] = useState<Set<string>>(new Set())
+  // Gemerkt wird, was ausgelassen ist: ein neu hinzugekommener Posten ist damit vorgewaehlt.
+  const [ausgelassen, setAusgelassen] = useState<Set<string>>(new Set())
 
   const versenden = async (n: DunningNotice, versandArt: 'email' | 'post') => {
     if (versendet.has(n.id)) return
@@ -59,12 +64,43 @@ export default function MahnlaufPage() {
     }
   }
 
+  const cand = candidates.data ?? []
+  const gewaehlt = cand.filter((c) => !ausgelassen.has(c.op_id))
+
+  const umschalten = (opId: string) => {
+    setAusgelassen((alt) => {
+      const neu = new Set(alt)
+      if (neu.has(opId)) neu.delete(opId)
+      else neu.add(opId)
+      return neu
+    })
+  }
+
   const doRun = () => {
-    if (run.isPending) return
+    if (run.isPending || gewaehlt.length === 0) return
+    // Ohne Abwahl laeuft der Gesamtlauf wie bisher; sonst genau die gewaehlten Rechnungen.
+    // Ein Posten ohne Rechnungsnummer laesst sich nicht einzeln ansprechen: Er laeuft nur im Gesamtlauf mit.
+    const teilmenge = gewaehlt.length !== cand.length
+    const nummern = gewaehlt.map((c) => c.rechnungsnr).filter((nr): nr is string => Boolean(nr))
+    const ohneNummer = teilmenge ? gewaehlt.length - nummern.length : 0
+    if (teilmenge && nummern.length === 0) {
+      toast({
+        title: 'Mahnlauf nicht gestartet',
+        description: 'Die gewählten Posten haben keine Rechnungsnummer; sie laufen nur im Gesamtlauf mit.',
+        variant: 'destructive',
+      })
+      return
+    }
     run.mutate(
-      {},
+      teilmenge ? { rechnungsnrn: nummern } : {},
       {
-        onSuccess: (d) => toast({ title: `Mahnlauf abgeschlossen`, description: `${d.erzeugt} Mahnung(en) erzeugt` }),
+        onSuccess: (d) => {
+          setAusgelassen(new Set())
+          toast({
+            title: `Mahnlauf abgeschlossen`,
+            description: `${d.erzeugt} Mahnung(en) erzeugt${ohneNummer > 0 ? ` · ${ohneNummer} Posten ohne Rechnungsnummer nicht enthalten` : ''}`,
+          })
+        },
         onError: (err: unknown) => toast({
           title: 'Mahnlauf fehlgeschlagen',
           description: (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? 'Unbekannter Fehler',
@@ -73,8 +109,6 @@ export default function MahnlaufPage() {
       },
     )
   }
-
-  const cand = candidates.data ?? []
 
   return (
     <div className="p-4 space-y-4">
@@ -85,9 +119,9 @@ export default function MahnlaufPage() {
           {candidates.isFetching ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           <span className="ml-1">Aktualisieren</span>
         </Button>
-        <Button className="min-h-touch" onClick={doRun} disabled={run.isPending || cand.length === 0}>
+        <Button className="min-h-touch" onClick={doRun} disabled={run.isPending || gewaehlt.length === 0}>
           {run.isPending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Send size={14} className="mr-1" />}
-          Mahnlauf ausführen ({cand.length})
+          Mahnlauf ausführen ({gewaehlt.length === cand.length ? cand.length : `${gewaehlt.length} von ${cand.length}`})
         </Button>
       </div>
 
@@ -103,6 +137,7 @@ export default function MahnlaufPage() {
               <table className="w-full text-sm">
                 <thead className="text-xs text-muted-foreground border-b">
                   <tr>
+                    <th className="text-left font-medium px-3 py-1.5">Mahnen</th>
                     <th className="text-left font-medium px-3 py-1.5">Rechnung</th>
                     <th className="text-left font-medium px-3 py-1.5">Partner</th>
                     <th className="text-right font-medium px-3 py-1.5">Überfällig</th>
@@ -115,7 +150,15 @@ export default function MahnlaufPage() {
                 </thead>
                 <tbody>
                   {cand.map((c) => (
-                    <tr key={c.op_id} className="border-b last:border-0">
+                    <tr key={c.op_id} className={`border-b last:border-0${ausgelassen.has(c.op_id) ? ' text-muted-foreground' : ''}`}>
+                      <td className="px-3 py-1.5">
+                        <Checkbox
+                          checked={!ausgelassen.has(c.op_id)}
+                          disabled={run.isPending || !c.rechnungsnr}
+                          onCheckedChange={() => umschalten(c.op_id)}
+                          aria-label={`${c.rechnungsnr ?? 'Posten'} von ${c.partner ?? 'unbekannt'} in diesem Lauf mahnen`}
+                        />
+                      </td>
                       <td className="px-3 py-1.5 font-medium">{c.rechnungsnr}</td>
                       <td className="px-3 py-1.5">{c.partner ?? '—'}</td>
                       <td className="px-3 py-1.5 text-right text-status-error">{c.tage_ueberfaellig} Tage</td>

@@ -11,6 +11,26 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MAHNWESEN-ROLLEN-20261011 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt aus EIN-MAHNLAUF-20261011.
+**Befund:** Die elf Mahnwege (`/finance/mahnlauf/*`, `/finance/dunning*`) verlangen eine Anmeldung, aber keine
+Rolle: Wer angemeldet ist, kann einen Mahnlauf ausloesen und Mahnungen versenden. **Ziel:** das bestehende
+Muster aus `app/auth/finance_roles.py` (Zahlungslaeufe, Eingangsrechnungen) — Lesen `finance_read`, Mahnlauf,
+Anlegen, Versenden, Bezahlt-Vermerk `finance_write`; Pruefung vor dem ersten Datenbankzugriff.
+**Dateibesitz:** nur die Dekoratoren in `app/api/v1/endpoints/dunning.py` und `finance_dunning.py`, neue
+Vertragsdatei `tests/test_mahnwesen_rollen_vertrag.py`, Anpassung der Mahn-Tests, QA-Doku, driftende
+Generatorartefakte.
+
+## WHATSAPP-ACCESS-20261011 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Drei WhatsApp-Vorbereitungs-/Outbox-Endpunkte an bestehende verifizierte OIDC-Mandanten-/Scope-Guards binden; Payload und Query koennen keinen fremden Mandanten waehlen.
+**Dateibesitz:** app/api/v1/endpoints/whatsapp_notify.py; neue tests/test_whatsapp_access_contract.py; eigene QA-/Workboard-Hunks, docs/workflows/whatsapp-web-computer-use.md Lieferstand. Keine zentralen Auth-/DB-/Transportaenderungen.
+**Abnahme:** echte FastAPI-Requests mit zwei Token-Kontexten; fehlende/ungueltige Identitaet, fehlende/widerspruechliche Claims, fremde Header/Rumpf/Query und falsche Scopes abweisen, Outbox unveraendert. crm:read fuer Lesen, crm:write fuer Vorbereitung; vorhandener admin:all-Vertrag bleibt mandantengebunden. **Risiko:** Browserbindung und persistente Outbox weiterhin offen.
+**Harness:** Fachvertrag nur Vorbereitung, kein Versand; Architektur bestehende zentrale Guards; Daten keine Standardmandanten; Tests HTTP ohne DB/Browser/Netz; Security effektive Tokenrechte; Betrieb keine Mutation bei Ablehnung; Doku QA/Runbook/Workboard; extern CI offen.
+
+**Lieferung:** Drei Vorbereitungs-/Outbox-Endpunkte nutzen bestehende zentrale OIDC-, Mandanten- und Scope-Guards; crm:write fuer Vorbereitung, crm:read fuer Lesen. Header/Rumpf/Query widersprechen niemals dem Token; dev-tenant-Fallback entfernt, admin bleibt mandantengebunden. Vorher 31/32 HTTP-Proben rot, final 63 Vertraege gruen. Architektur-/Code-Inventare isoliert gruen. Fremdes Frontend-WIP unberuehrt; Simulator-Aufrufer muss Login/Tokenkontext nachziehen. Browserbindung, dauerhafte Outbox und separate WhatsApp-Wege bleiben offen. Nachweis: whatsapp-access-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
 ## WHATSAPP-BROWSER-PREP-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Veralteten automatischen Meta-Versand entfernen; benachrichtigende Fachverbraucher bereiten Nachrichten fuer WhatsApp Web vor und behaupten keine Zustellung. Teilmeilenstein zu WHATSAPP-WEB-INTEGRATION-20261011.
@@ -20,9 +40,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Lieferung:** Automatischer Meta-HTTP-Sender entfernt; vorbereitete Nachrichten melden pending_browser ohne Zustellbehauptung. Fehlender Mandant abgewiesen, private Empfaengerlogs entfernt und Outbox-Leser koennen gespeicherte Empfaenger/Status nicht mutieren. Alle 16 Gegenproben vorher rot, danach 33 betroffene Vertraege gruen. Code-Inventare und Architekturindex isoliert gruen. Dauerhafte Outbox, autorisierter Browserarbeiter und Endpoint-Mandantenvertrag bleiben im offenen WHATSAPP-WEB-INTEGRATION-20261011. Nachweis: whatsapp-browser-preparation-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
-## EIN-MAHNLAUF-20261011 — in Arbeit, Claude Code
+## EIN-MAHNLAUF-20261011 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt aus MAHNWESEN-EINZELMASKE-ABLOESEN-20261011.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Offener Punkt aus MAHNWESEN-EINZELMASKE-ABLOESEN-20261011.
 **Befund:** Zwei Mahnlauf-Seiten am selben Backend (`/finance/mahnlauf/*`): `pages/finance/mahnlauf.tsx`
 (Navigation; versendet, kann aber keinen Posten auslassen) und `pages/mahnwesen/mahnlauf.tsx` (ohne
 Navigationseintrag; Auswahl, aber kein Versand, sendet `bediener: 'Portal'`). Der Bediener kommt aus dem Rumpf,
@@ -30,6 +50,10 @@ sonst „KIM“. **Ziel:** ein Mahnlauf — Auswahl in die Hauptseite, `/mahnwes
 Seite entfaellt; Bediener aus der Anmeldung (`anmeldename()`). **Dateibesitz:** `pages/finance/mahnlauf.tsx`,
 `pages/mahnwesen/mahnlauf.tsx` (entfaellt), `lib/api/finance-dunning.ts` (`useRunDunning`), Routeneintraege samt
 erzeugter Dateien, `app/api/v1/endpoints/finance_dunning.py` (nur `run`), Mahnlauf-Tests, QA-Doku.
+**Lieferung:** Haken je Kandidat (vorgewaehlt), Zaehler im Knopf, Teilmenge ueber `rechnungsnrn`; Bediener aus
+`anmeldename()`; leere Auswahl mahnt niemanden (fiel vorher auf den Gesamtlauf zurueck); zweite Seite entfernt,
+`/mahnwesen/mahnlauf` zeigt die eine. QA: `docs/quality-assurance/ein-mahnlauf-20261011.md`.
+**Offen:** `/finance/mahnlauf/*` verlangt eine Anmeldung, aber keine Rolle; Teilmenge laeuft je Rechnung einzeln.
 
 ## WHATSAPP-WEB-CONTRACT-20261011 — abgeschlossen, Codex
 

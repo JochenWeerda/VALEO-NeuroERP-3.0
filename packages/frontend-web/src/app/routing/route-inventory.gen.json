@@ -3291,7 +3291,7 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/mahnwesen/mahnlauf",
+      "module": "@/pages/finance/mahnlauf",
       "path": "mahnwesen/mahnlauf",
       "source": "auto"
     },

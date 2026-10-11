@@ -57,7 +57,8 @@ export function useDunningNotices() {
 export function useRunDunning() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (input: { rechnungsnr?: string } = {}) =>
+    // Ohne Angabe laufen alle ueberfaelligen Posten; `rechnungsnrn` begrenzt auf eine Auswahl.
+    mutationFn: async (input: { rechnungsnr?: string; rechnungsnrn?: string[] } = {}) =>
       (await apiClient.post<{ ok: boolean; erzeugt: number }>(`${BASE}/run`, input)).data,
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['finance-dunning'] })

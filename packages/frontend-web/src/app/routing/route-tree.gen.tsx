@@ -4694,8 +4694,8 @@ const appRoute0654 = createRoute({
 const appRoute0655 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "mahnwesen/mahnlauf",
-  component: () => renderPage("@/pages/mahnwesen/mahnlauf"),
-  staticData: {"breadcrumb":"Mahnlauf","module":"@/pages/mahnwesen/mahnlauf","legacyPath":"/mahnwesen/mahnlauf"},
+  component: () => renderPage("@/pages/finance/mahnlauf"),
+  staticData: {"breadcrumb":"Mahnlauf","module":"@/pages/finance/mahnlauf","legacyPath":"/mahnwesen/mahnlauf"},
 })
 
 const appRoute0656 = createRoute({
@@ -10938,7 +10938,7 @@ export const generatedRouteInventory = [
     "source": "auto"
   },
   {
-    "module": "@/pages/mahnwesen/mahnlauf",
+    "module": "@/pages/finance/mahnlauf",
     "path": "mahnwesen/mahnlauf",
     "source": "auto"
   },

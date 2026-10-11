@@ -56,7 +56,7 @@ Ihre Links bleiben über die Route gültig.
 
 1. **Dritter Mahnlauf:** `pages/mahnwesen/mahnlauf.tsx` (Weg `/mahnwesen/mahnlauf`) ist ein eigener,
    an `/finance/mahnlauf/*` angeschlossener Ablauf ohne Eintrag in der Navigation. Zwei Mahnläufe
-   nebeneinander sind einer zu viel; welcher bleibt, ist nicht entschieden.
+   nebeneinander sind einer zu viel. Erledigt am 11.10.2026: [ein-mahnlauf-20261011.md](ein-mahnlauf-20261011.md).
 2. **Benutzerhandbuch:** `docs/benutzerhandbuch/finanzbuchhaltung.md` nennt für beide Wege noch das alte
    Modul und zeigt das Bild der alten Maske. Es wird mit Bildschirmfotos erzeugt und ist hier nicht neu
    erzeugt worden.

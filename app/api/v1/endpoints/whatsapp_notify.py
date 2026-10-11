@@ -3,8 +3,11 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+
+from app.auth.guards import require_scopes
+from app.auth.tenant import get_verified_tenant_id
 
 from app.services.whatsapp_notify_service import (
     get_outbox,
@@ -18,7 +21,7 @@ router = APIRouter()
 # ─── Request-Schemata ────────────────────────────────────────────────────────
 
 class LieferankuendigungRequest(BaseModel):
-    tenant_id: str = "dev-tenant"
+    tenant_id: Optional[str] = None
     phone: str
     kunden_nr: Optional[str] = None
     kunden_name: Optional[str] = None
@@ -30,7 +33,7 @@ class LieferankuendigungRequest(BaseModel):
 
 
 class DokumentReadyRequest(BaseModel):
-    tenant_id: str = "dev-tenant"
+    tenant_id: Optional[str] = None
     phone: str
     kunden_nr: Optional[str] = None
     kunden_name: Optional[str] = None
@@ -63,19 +66,28 @@ class OutboxLogResponse(BaseModel):
 
 # ─── Endpunkte ───────────────────────────────────────────────────────────────
 
+def _check_requested_tenant(requested: Optional[str], verified: str) -> None:
+    if requested is not None and requested.strip() != verified:
+        raise HTTPException(403, "Mandant stimmt nicht mit der geprueften Anmeldung ueberein")
+
 @router.post(
     "/dev/notify/lieferankuendigung",
     response_model=NotifyResponse,
     tags=["WhatsApp Dev-Simulator"],
     summary="Simuliert Lieferankündigung (Push an Kunde)",
+    dependencies=[Depends(require_scopes("crm:write"))],
 )
-async def simulate_lieferankuendigung(body: LieferankuendigungRequest) -> NotifyResponse:
+async def simulate_lieferankuendigung(
+    body: LieferankuendigungRequest,
+    tenant_id: str = Depends(get_verified_tenant_id),
+) -> NotifyResponse:
     """
     Triggerbar aus Disposition/Logistik: LKW ~eta_min Minuten entfernt.
     Nur Entwurf in der fluechtigen Outbox; kein automatischer Netzwerkversand.
     """
+    _check_requested_tenant(body.tenant_id, tenant_id)
     return NotifyResponse(**send_lieferankuendigung(
-        tenant_id=body.tenant_id,
+        tenant_id=tenant_id,
         phone=body.phone,
         kunden_nr=body.kunden_nr,
         kunden_name=body.kunden_name,
@@ -92,13 +104,18 @@ async def simulate_lieferankuendigung(body: LieferankuendigungRequest) -> Notify
     response_model=NotifyResponse,
     tags=["WhatsApp Dev-Simulator"],
     summary="Simuliert Dokument-Bereitstellungs-Benachrichtigung",
+    dependencies=[Depends(require_scopes("crm:write"))],
 )
-async def simulate_dokument_ready(body: DokumentReadyRequest) -> NotifyResponse:
+async def simulate_dokument_ready(
+    body: DokumentReadyRequest,
+    tenant_id: str = Depends(get_verified_tenant_id),
+) -> NotifyResponse:
     """
     Triggerbar aus Docflow nach Lieferschein-/Rechnungs-Erstellung.
     """
+    _check_requested_tenant(body.tenant_id, tenant_id)
     return NotifyResponse(**send_dokument_ready(
-        tenant_id=body.tenant_id,
+        tenant_id=tenant_id,
         phone=body.phone,
         kunden_nr=body.kunden_nr,
         kunden_name=body.kunden_name,
@@ -113,6 +130,11 @@ async def simulate_dokument_ready(body: DokumentReadyRequest) -> NotifyResponse:
     response_model=OutboxLogResponse,
     tags=["WhatsApp Dev-Simulator"],
     summary="Alle ausgehenden WhatsApp-Nachrichten (Outbox-Log)",
+    dependencies=[Depends(require_scopes("crm:read"))],
 )
-async def get_outbox_log(tenant_id: str = "dev-tenant") -> OutboxLogResponse:
-    return OutboxLogResponse(tenant_id=tenant_id, messages=get_outbox(tenant_id))
+async def get_outbox_log(
+    tenant_id: Optional[str] = None,
+    active_tenant: str = Depends(get_verified_tenant_id),
+) -> OutboxLogResponse:
+    _check_requested_tenant(tenant_id, active_tenant)
+    return OutboxLogResponse(tenant_id=active_tenant, messages=get_outbox(active_tenant))
