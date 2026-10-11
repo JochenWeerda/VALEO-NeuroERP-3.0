@@ -9,11 +9,23 @@ from typing import Any, Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.exceptions import DomainError
+
 _DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 
 
 def _f(v: Any) -> float:
     return float(v) if v is not None else 0.0
+
+
+class RfqVersandFehler(DomainError):
+    """Anfrage nicht versendet; der Status bleibt, wie er war."""
+
+    error_code = "RFQ_NICHT_VERSENDET"
+
+    def __init__(self, http_status: int, detail: str) -> None:
+        super().__init__(detail)
+        self.http_status = http_status
 
 
 class RfqService:
@@ -74,9 +86,26 @@ class RfqService:
         out["quotes"] = [self._row_to_quote(q) for q in quotes]
         return out
 
-    def send_request(self, rfq_id: int, supplier_ids: Optional[list[str]] = None) -> dict:
-        if not self._fetch_rfq(rfq_id):
+    def send_request(self, rfq_id: int, supplier_ids: Optional[list[str]] = None, *,
+                     nutzer: Optional[dict] = None) -> dict:
+        """Schickt die Anfrage per E-Mail an jeden gewaehlten Lieferanten (Postfach ``einkauf``).
+
+        ``VERSENDET`` erst, wenn mindestens eine Nachricht angenommen wurde. Bis 08.10.2026
+        setzte dieser Weg den Status und meldete ``suppliers_notified`` ohne eine einzige Mail.
+        """
+        rfq = self._fetch_rfq(rfq_id)
+        if not rfq:
             raise ValueError("Anfrage nicht gefunden")
+        zeilen = ["Sehr geehrte Damen und Herren,", "",
+                  "wir bitten um Ihr Angebot fuer:", f"  Artikel: {rfq[1]}", f"  Menge: {_f(rfq[2]):g}"]
+        if rfq[3]:
+            zeilen.append(f"  Benoetigt bis: {rfq[3]:%d.%m.%Y}")
+        if rfq[4]:
+            zeilen += ["", str(rfq[4])]
+        zeilen += ["", f"Bitte geben Sie bei Ihrer Antwort die Anfragenummer {rfq_id} an."]
+        versand = anfrage_an_lieferanten(self.db, self.tenant_id, supplier_ids,
+                                         f"Preisanfrage Nr. {rfq_id}: {rfq[1]}", zeilen, nutzer)
+        erreicht = [v["supplier_id"] for v in versand if v["status"] == "gesendet"]
         self.db.execute(
             text(
                 "UPDATE domain_einkauf.rfq_requests SET status = 'VERSENDET' "
@@ -85,7 +114,7 @@ class RfqService:
             {"id": rfq_id, "tid": self.tenant_id},
         )
         self.db.commit()
-        return {"rfq_id": rfq_id, "status": "VERSENDET", "suppliers_notified": supplier_ids or []}
+        return {"rfq_id": rfq_id, "status": "VERSENDET", "suppliers_notified": erreicht, "versand": versand}
 
     def add_quote(
         self,
@@ -317,3 +346,120 @@ class RfqService:
         if include_rfq_id:
             out["rfq_id"] = row[1]
         return out
+
+
+def _lieferanten_adressen(db: Session, tenant_id: str, ids: list[str]) -> dict[str, tuple[str, Optional[str]]]:
+    """Kennung -> (Name, E-Mail). Kennung ist die Lieferanten-ID, deren Partner-ID oder die
+    ID des CRM-Geschaeftspartners (der Anfragedialog waehlt aus den CRM-Lieferanten)."""
+    gefunden: dict[str, tuple[str, Optional[str]]] = {}
+    for kennung, name, adresse in db.execute(
+        text(
+            "SELECT k.kennung, l.firmenname, COALESCE(NULLIF(l.email_bestellung, ''), NULLIF(l.email, '')) "
+            "FROM domain_einkauf.lieferanten l "
+            "JOIN unnest(CAST(:ids AS text[])) AS k(kennung) ON k.kennung IN (l.id::text, l.partner_id) "
+            "WHERE l.tenant_id = :tid"
+        ),
+        {"tid": tenant_id, "ids": ids},
+    ).fetchall():
+        if kennung not in gefunden or (adresse and not gefunden[kennung][1]):
+            gefunden[kennung] = (name, adresse)
+    rest = [k for k in ids if k not in gefunden]
+    if rest:
+        for kennung, name, adresse in db.execute(
+            text(
+                "SELECT partner_id::text, COALESCE(NULLIF(name_1, ''), partner_number), NULLIF(email, '') "
+                "FROM domain_crm.business_partners "
+                "WHERE tenant_id::text = :tid AND partner_id::text = ANY(CAST(:ids AS text[]))"
+            ),
+            {"tid": tenant_id, "ids": rest},
+        ).fetchall():
+            gefunden[kennung] = (name, adresse)
+    return gefunden
+
+
+def anfrage_an_lieferanten(db: Session, tenant_id: str, supplier_ids: Optional[list[str]], betreff: str,
+                           zeilen: list[str], nutzer: Optional[dict]) -> list[dict]:
+    """Mailt eine Anfrage an jeden Lieferanten (Postfach ``einkauf``) und liefert das Ergebnis je
+    Lieferant. Wirft ``RfqVersandFehler``, wenn keiner erreicht wurde — dann ist nichts versendet."""
+    from app.services.mail_versand import (
+        MailVersandFehler, MailVersandNichtEingerichtet, MailVersandVerweigert, sende_mail,
+    )
+
+    ids = list(dict.fromkeys(str(s).strip() for s in (supplier_ids or []) if str(s).strip()))
+    if not ids:
+        raise RfqVersandFehler(422, "Keine Lieferanten gewaehlt — an wen soll die Anfrage gehen?")
+    adressen = _lieferanten_adressen(db, tenant_id, ids)
+    unbekannt = [k for k in ids if k not in adressen]
+    if unbekannt:
+        raise RfqVersandFehler(422, f"Lieferanten nicht gefunden: {', '.join(unbekannt)}")
+
+    versand: list[dict] = []
+    for kennung in ids:
+        name, adresse = adressen[kennung]
+        eintrag = {"supplier_id": kennung, "name": name, "empfaenger": adresse}
+        if not adresse:
+            versand.append({**eintrag, "status": "fehler", "fehler": "Keine E-Mail-Adresse hinterlegt"})
+            continue
+        try:
+            sende_mail(adresse, betreff, "\n".join(zeilen), db=db, tenant_id=tenant_id,
+                       verwendung="einkauf", nutzer=nutzer)
+        except MailVersandNichtEingerichtet as fehler:
+            raise RfqVersandFehler(503, str(fehler)) from fehler
+        except MailVersandVerweigert as fehler:
+            raise RfqVersandFehler(403, str(fehler)) from fehler
+        except MailVersandFehler as fehler:
+            versand.append({**eintrag, "status": "fehler", "fehler": str(fehler)})
+            continue
+        versand.append({**eintrag, "status": "gesendet", "fehler": None})
+
+    if not any(v["status"] == "gesendet" for v in versand):
+        raise RfqVersandFehler(502, "Kein Lieferant erreicht: " + "; ".join(
+            f"{v['name']}: {v['fehler']}" for v in versand))
+    return versand
+
+
+def versende_einkauf_anfrage(db: Session, tenant_id: str, anfrage_id: str, supplier_ids: Optional[list[str]],
+                             methode: Optional[str], nutzer: Optional[dict]) -> dict:
+    """Anfrage (BANF) an Lieferanten: Mail an jeden, danach Status ``ANGEBOTSPHASE``.
+
+    Bis 08.10.2026 antwortete die Maskenbruecke ``sent: true``, ohne zu senden oder zu speichern."""
+    from datetime import datetime, timezone
+
+    if (methode or "email") != "email":
+        raise RfqVersandFehler(422, f"Versandweg '{methode}' gibt es fuer Anfragen nicht; nur E-Mail.")
+    anfrage = db.execute(
+        text(
+            "SELECT id, anfrage_nummer, artikel, menge, einheit, datum, notizen FROM einkauf_anfragen "
+            "WHERE (id = :fid OR anfrage_nummer = :fid) AND tenant_id = :tid LIMIT 1"
+        ),
+        {"fid": anfrage_id, "tid": tenant_id},
+    ).mappings().first()
+    if anfrage is None:
+        raise RfqVersandFehler(404, "Anfrage nicht gefunden")
+    positionen = db.execute(
+        text("SELECT artikel, quantity, unit, due_date FROM einkauf_anfragen_positionen "
+             "WHERE anfrage_id = :id ORDER BY created_at"),
+        {"id": anfrage["id"]},
+    ).mappings().all()
+    nummer = anfrage["anfrage_nummer"]
+    zeilen = ["Sehr geehrte Damen und Herren,", "", "wir bitten um Ihr Angebot fuer:"]
+    for pos in positionen or [{"artikel": anfrage["artikel"], "quantity": anfrage["menge"],
+                               "unit": anfrage["einheit"], "due_date": anfrage["datum"]}]:
+        zeile = f"  {pos['artikel'] or 'Position'}: {_f(pos['quantity']):g} {pos['unit'] or ''}".rstrip()
+        if pos["due_date"]:
+            zeile += f" (bis {pos['due_date']:%d.%m.%Y})"
+        zeilen.append(zeile)
+    if anfrage["notizen"]:
+        zeilen += ["", str(anfrage["notizen"])]
+    zeilen += ["", f"Bitte geben Sie bei Ihrer Antwort die Anfragenummer {nummer} an."]
+    versand = anfrage_an_lieferanten(db, tenant_id, supplier_ids, f"Anfrage {nummer}", zeilen, nutzer)
+    db.execute(
+        text("UPDATE einkauf_anfragen SET status = 'ANGEBOTSPHASE', updated_at = now() "
+             "WHERE id = :id AND tenant_id = :tid"),
+        {"id": anfrage["id"], "tid": tenant_id},
+    )
+    db.commit()
+    erreicht = [v["supplier_id"] for v in versand if v["status"] == "gesendet"]
+    return {"id": str(anfrage["id"]), "status": "ANGEBOTSPHASE", "sent": True, "supplierIds": erreicht,
+            "method": "email", "sent_at": datetime.now(timezone.utc).isoformat(), "count": len(erreicht),
+            "versand": versand}

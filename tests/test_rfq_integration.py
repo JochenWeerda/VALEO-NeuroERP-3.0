@@ -133,9 +133,10 @@ class TestRfqIntegration:
         rfq_id = rfq_context["rfq_id"]
         supplier_id = rfq_context["supplier_id"]
 
+        # Ohne Lieferanten geht nichts hinaus und der Status bleibt (bis 08.10.2026: "VERSENDET"
+        # ohne eine Mail). Der Mailweg selbst: tests/test_versandwege_vertrag.py.
         sent = client.post(f"/api/v1/einkauf/rfq/{rfq_id}/send", json={}, headers=HEADERS)
-        assert sent.status_code == 200
-        assert sent.json()["status"] == "VERSENDET"
+        assert sent.status_code == 422, sent.text
 
         q1 = client.post(
             f"/api/v1/einkauf/rfq/{rfq_id}/quotes",

@@ -21,6 +21,7 @@ from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.deps import get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import Customer
@@ -356,22 +357,12 @@ def send_anfrage(
     body: AnfrageSendIn,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    nutzer: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
-    from app.api.v1.endpoints.compat import _load_einkauf_anfrage
+    """Mail an jeden Lieferanten, dann ANGEBOTSPHASE; sonst 4xx/5xx mit Grund (RfqVersandFehler)."""
+    from app.services.rfq_service import versende_einkauf_anfrage
 
-    doc = _load_einkauf_anfrage(db, anfrage_id)
-    if doc is None:
-        raise HTTPException(status_code=404, detail="Anfrage not found")
-    suppliers = body.supplierIds
-    return {
-        "id": anfrage_id,
-        "status": "ANGEBOTSPHASE",
-        "sent": True,
-        "supplierIds": suppliers,
-        "method": body.method or "email",
-        "sent_at": _now().isoformat(),
-        "count": len(suppliers),
-    }
+    return versende_einkauf_anfrage(db, tenant_id, anfrage_id, body.supplierIds, body.method, nutzer)
 
 
 @router.post("/einkauf/lieferscheine/{ls_id}/print", response_model=BridgeOut, summary="Einkauf-Lieferschein drucken")

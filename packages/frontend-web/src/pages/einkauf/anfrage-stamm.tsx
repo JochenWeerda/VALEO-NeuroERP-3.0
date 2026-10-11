@@ -9,7 +9,6 @@ import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/hooks/use-toast'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
@@ -183,7 +182,6 @@ export default function AnfrageStammPage(): JSX.Element {
   const [sendRfqDialogOpen, setSendRfqDialogOpen] = useState(false)
   const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([])
   const [availableSuppliers, setAvailableSuppliers] = useState<Record<string, unknown>[]>([])
-  const [sendMethod, setSendMethod] = useState<'email' | 'portal'>('email')
   const entityType = 'purchaseRequest'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Anfrage')
   const anfrageConfig = createAnfrageConfig(t, entityTypeLabel)
@@ -377,23 +375,19 @@ export default function AnfrageStammPage(): JSX.Element {
 
     setLoading(true)
     try {
-      // Update Status auf ANGEBOTSPHASE
-      const updateData = {
-        ...data,
-        status: 'ANGEBOTSPHASE',
-      }
-
-      await saveData(updateData)
-
-      // Send RFQ to suppliers
-      await apiClient.post(`/api/v1/einkauf/anfragen/${id}/send`, {
-          supplierIds: selectedSuppliers,
-          method: sendMethod,
-      })
-
+      // Der Server mailt jedem Lieferanten (Postfach "einkauf") und setzt erst danach
+      // ANGEBOTSPHASE; ohne Postfach oder Adresse kommt ein Fehler mit Grund zurueck.
+      const res = await apiClient.post<{ count: number; versand?: { name: string; status: string; fehler?: string | null }[] }>(
+        `/api/v1/einkauf/anfragen/${encodeURIComponent(String(id))}/send`,
+        { supplierIds: selectedSuppliers, method: 'email' },
+      )
+      const nichtErreicht = (res.data.versand ?? []).filter((v) => v.status !== 'gesendet')
       toast({
         title: t('crud.messages.rfqSentSuccess'),
-        description: t('crud.messages.rfqSentToSuppliers', { count: selectedSuppliers.length }),
+        description: [
+          t('crud.messages.rfqSentToSuppliers', { count: res.data.count }),
+          ...nichtErreicht.map((v) => `${v.name}: ${v.fehler ?? v.status}`),
+        ].join(' · '),
       })
 
       setSendRfqDialogOpen(false)
@@ -404,7 +398,7 @@ export default function AnfrageStammPage(): JSX.Element {
       toast({
         variant: 'destructive',
         title: t('crud.messages.rfqSendError'),
-        description: error.message,
+        description: error.response?.data?.detail ?? error.message,
       })
     } finally {
       setLoading(false)
@@ -631,17 +625,6 @@ export default function AnfrageStammPage(): JSX.Element {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label>{t('crud.fields.sendMethod')}</Label>
-              <NativeSelect
-                value={sendMethod}
-                onValueChange={(value) => setSendMethod(value as 'email' | 'portal')}
-                options={[
-                  { value: 'email', label: t('crud.fields.email') },
-                  { value: 'portal', label: t('crud.fields.portal') },
-                ]}
-              />
-            </div>
             <div>
               <Label>{t('crud.fields.selectSuppliers')}</Label>
               <div className="border rounded-md p-4 max-h-64 overflow-y-auto space-y-2">

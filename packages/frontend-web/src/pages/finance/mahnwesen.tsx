@@ -203,7 +203,6 @@ const createMahnwesenConfig = (t: TFunction, entityTypeLabel: string): MaskConfi
     { key: 'preview', label: t('crud.actions.preview'), type: 'secondary' },
     { key: 'send', label: t('crud.actions.send'), type: 'primary' },
     { key: 'payment', label: t('crud.actions.bookPayment'), type: 'secondary' },
-    { key: 'inkasso', label: t('crud.actions.handOverToCollection'), type: 'danger' },
     { key: 'export', label: t('crud.actions.pdfExport'), type: 'secondary' }
   ],
   api: {
@@ -355,22 +354,21 @@ export default function MahnwesenPage(): JSX.Element {
       }
       return
     } else if (action === 'send') {
-      const errors = validate(formData)
-      if (Object.keys(errors).length > 0) {
-        showValidationToast(errors)
+      // Versand erst nach dem Speichern: der Server mailt an den Kunden (Postfach "fibu")
+      // und setzt "versendet" nur, wenn die Mail angenommen wurde.
+      if (!formData.id) {
+        toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveFirst') })
         return
       }
-
       try {
-        await saveData(formData)
-        setIsDirty(false)
-        toast({
-          title: t('crud.messages.dunningSent'),
-          description: t('crud.messages.dunningSentDesc'),
-        })
+        const res = await apiClient.put<{ status: string }>(
+          `/api/v1/finance/dunning/${encodeURIComponent(String(formData.id))}/send`, null, { params: { versand_art: 'email' } },
+        )
+        toast({ title: t('crud.messages.dunningSent'), description: `Status: ${res.data.status}` })
         navigate('/finance/mahnwesen')
-      } catch (error) {
-        // Error wird bereits in useMaskData behandelt
+      } catch (_rawErr: unknown) {
+        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string }
+        toast({ variant: 'destructive', title: t('common.error'), description: error.response?.data?.detail ?? error.message })
       }
     } else if (action === 'payment') {
       if (!formData.id) {
@@ -387,19 +385,6 @@ export default function MahnwesenPage(): JSX.Element {
         const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('crud.messages.paymentError'), description: msg })
-      }
-    } else if (action === 'inkasso') {
-      if (!formData.id) {
-        toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveFirst') })
-        return
-      }
-      try {
-        await apiClient.put(`/api/v1/finance/dunning/${String(formData.id ?? '')}/send`)
-        toast({ title: t('crud.messages.collectionHandedOver'), description: t('crud.messages.collectionHandedOverDesc') })
-      } catch (_rawErr: unknown) {
-        const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
-        const msg = error.response?.data?.detail ?? error.message
-        toast({ variant: 'destructive', title: t('crud.messages.collectionError'), description: msg })
       }
     } else if (action === 'export') {
       try {
@@ -424,8 +409,15 @@ export default function MahnwesenPage(): JSX.Element {
     }
   })
 
+  // Speichern speichert — versendet wird nur ueber die Aktion "Senden".
   const handleSave = async (formData: Record<string, unknown>) => {
-    await handleAction('send', formData)
+    const errors = validate(formData)
+    if (Object.keys(errors).length > 0) {
+      showValidationToast(errors)
+      return
+    }
+    await saveData(formData)
+    setIsDirty(false)
   }
 
   const handleCancel = () => {

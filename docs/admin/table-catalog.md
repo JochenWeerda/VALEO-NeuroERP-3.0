@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 670 Tabellen, 8835 Spalten.**
+**31 Schemas, 670 Tabellen, 8837 Spalten.**
 
 ## Schemas
 
@@ -33,7 +33,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_docflow` | `dms-compliance` | 22 | 286 |
 | `domain_docs` | `platform` | 2 | 25 |
 | `domain_einkauf` | `procurement` | 19 | 378 |
-| `domain_erp` | `finance` | 46 | 588 |
+| `domain_erp` | `finance` | 46 | 590 |
 | `domain_finance` | `finance` | 20 | 229 |
 | `domain_futtermittel` | `agrar` | 4 | 36 |
 | `domain_hr` | `hr` | 29 | 345 |
@@ -201,7 +201,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_crm.business_partner_price_agreements` | `app/api/v1/endpoints/crm_360_reads.py`, `app/infrastructure/models/__init__.py`, `app/services/business_partner_service.py` | — | — |
 | `domain_crm.business_partner_pricing_rules` | `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.business_partner_profiles` | `app/infrastructure/models/__init__.py` | — | — |
-| `domain_crm.business_partners` | `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_sql.py`, `app/api/v1/endpoints/finance_invoices.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/einkauf_models.py`, `app/infrastructure/models/l3c_models.py`, `app/services/business_partner_service.py`, `app/services/customer_reference.py`, `app/services/customer_service.py`, `app/services/kunden_merge.py`, `app/services/mcp_execution_service.py` | — | — |
+| `domain_crm.business_partners` | `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_sql.py`, `app/api/v1/endpoints/finance_invoices.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/einkauf_models.py`, `app/infrastructure/models/l3c_models.py`, `app/services/business_partner_service.py`, `app/services/customer_reference.py`, `app/services/customer_service.py`, `app/services/finance_dunning_service.py`, `app/services/kunden_merge.py`, `app/services/mcp_execution_service.py`, `app/services/rfq_service.py` | — | — |
 | `domain_crm.contacts` | `app/api/v1/endpoints/compliance_dsgvo.py`, `app/infrastructure/models/__init__.py` | `app/api/v1/endpoints/compliance_dsgvo.py` | — |
 | `domain_crm.credit_limits` | `app/api/v1/endpoints/credit_management.py`, `app/api/v1/endpoints/crm_360.py`, `app/services/customer_service.py` | `app/api/v1/endpoints/credit_management.py` | — |
 | `domain_crm.credit_overrides` | — | `app/api/v1/endpoints/credit_management.py` | — |
@@ -215,7 +215,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_crm.crm_opportunities` | `app/api/v1/endpoints/crm_360_reads.py`, `app/api/v1/endpoints/crm_reports.py`, `app/api/v1/endpoints/opportunities.py`, `app/domains/crm/models.py`, `app/services/mask_rollout_summary_service.py` | `app/services/crm_lead_service.py` | — |
 | `domain_crm.crm_segment_members` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/crm/router.py` | `app/crm/router.py` | — |
 | `domain_crm.crm_segments` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/crm/router.py` | `app/crm/router.py` | — |
-| `domain_crm.customers` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance_dsgvo.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_sql.py`, `app/api/v1/endpoints/customers.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/schemas/crm.py`, `app/domains/logistik/strecke.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/agrar_models.py`, `app/infrastructure/models/l3c_models.py`, `app/services/business_partner_service.py`, `app/services/crm_lead_service.py`, `app/services/customer_reference.py`, `app/services/customer_sales_eligibility.py`, `app/services/customer_service.py`, `app/services/kunden_merge.py`, `app/services/mcp_execution_service.py`, `app/services/sales_credit_service.py`, `app/services/sales_posting_service.py`, `app/services/whatsapp_agent_service.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance_dsgvo.py`, `app/services/business_partner_service.py`, `app/services/customer_service.py` | `sales/delivery-note` |
+| `domain_crm.customers` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance_dsgvo.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_sql.py`, `app/api/v1/endpoints/customers.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/schemas/crm.py`, `app/domains/logistik/strecke.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/agrar_models.py`, `app/infrastructure/models/l3c_models.py`, `app/services/business_partner_service.py`, `app/services/crm_lead_service.py`, `app/services/customer_reference.py`, `app/services/customer_sales_eligibility.py`, `app/services/customer_service.py`, `app/services/finance_dunning_service.py`, `app/services/kunden_merge.py`, `app/services/mcp_execution_service.py`, `app/services/sales_credit_service.py`, `app/services/sales_posting_service.py`, `app/services/whatsapp_agent_service.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance_dsgvo.py`, `app/services/business_partner_service.py`, `app/services/customer_service.py` | `sales/delivery-note` |
 | `domain_crm.farm_profiles` | `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.leads` | `app/api/v1/endpoints/compliance_dsgvo.py`, `app/infrastructure/models/__init__.py`, `app/services/interessent_service.py` | `app/api/v1/endpoints/compliance_dsgvo.py` | — |
 | `domain_crm.mail_workspace_attachments` | `app/services/mail_workspace_service.py` | `app/services/mail_workspace_service.py` | — |
@@ -262,7 +262,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_einkauf.kontrakt_positionen` | `app/api/v1/endpoints/price_calculation.py`, `app/infrastructure/models/einkauf_models.py` | — | — |
 | `domain_einkauf.kontrakte` | `app/api/v1/endpoints/price_calculation.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/customer_reference.py` | — | — |
 | `domain_einkauf.lager_kontenzuordnung` | `app/api/v1/endpoints/inventory_operations.py`, `app/infrastructure/models/einkauf_models.py` | — | — |
-| `domain_einkauf.lieferanten` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/crm_partner_suche.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/bestell_kommunikation_service.py`, `app/services/customer_reference.py`, `app/services/einkauf_compat_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/mcp_execution_service.py` | — | — |
+| `domain_einkauf.lieferanten` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/crm_partner_suche.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/bestell_kommunikation_service.py`, `app/services/customer_reference.py`, `app/services/einkauf_compat_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/mcp_execution_service.py`, `app/services/rfq_service.py` | — | — |
 | `domain_einkauf.paletten_konto_buchungen` | `app/infrastructure/models/einkauf_models.py` | — | — |
 | `domain_einkauf.pfand_konto_buchungen` | `app/infrastructure/models/einkauf_models.py` | — | — |
 | `domain_einkauf.procurement_ers_credits` | `app/services/procurement_match_service.py` | `app/services/procurement_match_service.py` | — |
@@ -999,7 +999,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `delivery_notes` | `finance` | native | `id` | id, tenant_id, source, created_at |
 | `druckauftraege` | `finance` | native | `id` | id, tenant_id, auftrags_nr, chargen_id, artikel, menge, lieferant, eingang, anzahl_etiketten, drucker_id, status, uebermittelt_am, gedruckt_am, fehler, erfasst_durch, created_at, updated_at |
 | `drucker` | `finance` | native | `id` | id, tenant_id, name, standort, typ, modell, status, ip, aktiv, created_at, updated_at |
-| `dunning_notices` | `finance` | native | `id` | id, tenant_id, op_id, debtor_id, dunning_level, dunning_date, due_date, open_amount, dunning_fee, interest, total_amount, payment_deadline, status, sent_date, payment_date, notes, created_at, updated_at |
+| `dunning_notices` | `finance` | native | `id` | id, tenant_id, op_id, debtor_id, dunning_level, dunning_date, due_date, open_amount, dunning_fee, interest, total_amount, payment_deadline, status, sent_date, payment_date, notes, created_at, updated_at, versand_art, empfaenger |
 | `dunning_rules` | `finance` | native | `id` | id, tenant_id, level, days_overdue_min, days_overdue_max, fee_amount, fee_percentage, interest_rate, payment_deadline_days, block_customer, escalate_to_collection, description_template, active, created_at, updated_at |
 | `exchange_rates` | `finance` | native | `id` | id, tenant_id, from_currency, to_currency, rate, valid_from, valid_to, source, active, created_at, updated_at, rate_date, rate_type |
 | `fibu_connector_profiles` | `finance` | native | `id` | id, tenant_id, connector_type, name, is_default, settings, mapping, version, created_at, updated_at, created_by, updated_by |

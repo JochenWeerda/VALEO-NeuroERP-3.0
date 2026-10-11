@@ -22,6 +22,9 @@ from app.core.uuid7 import uuid7
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 from ....core.gobd_artifact import register_artifact, sha256_hex
+from app.auth.deps import get_current_user
+from app.core.exceptions import DomainError
+from app.services.finance_dunning_service import FinanceDunningService
 
 logger = logging.getLogger(__name__)
 
@@ -104,12 +107,12 @@ class DunningResponse(BaseModel):
     debtor_id: str
     dunning_level: int
     dunning_date: date
-    due_date: date
+    due_date: Optional[date]  # in der Tabelle nullbar; eine Bestandszeile darf Liste und Versand nicht kippen
     open_amount: Decimal
     dunning_fee: Decimal
     interest: Decimal
     total_amount: Decimal
-    payment_deadline: date
+    payment_deadline: Optional[date]
     status: str
     sent_date: Optional[date]
     payment_date: Optional[date]
@@ -301,11 +304,12 @@ async def process_dunning(
         # Get overdue open items
         if request.op_ids:
             op_query = text("""
-                SELECT id, debtor_id, booking_date, due_date, open_amount, dunning_level
+                SELECT id, COALESCE(debtor_id, kunde_id), COALESCE(booking_date, rechnungsdatum),
+                       COALESCE(due_date, faelligkeit), COALESCE(open_amount, offen), dunning_level
                 FROM domain_erp.offene_posten
                 WHERE id = ANY(:op_ids) AND tenant_id = :tenant_id
-                AND debtor_id IS NOT NULL
-                AND open_amount > 0
+                AND COALESCE(debtor_id, kunde_id) IS NOT NULL
+                AND COALESCE(open_amount, offen) > 0
             """)
             op_rows = db.execute(op_query, {
                 "op_ids": request.op_ids,
@@ -313,10 +317,11 @@ async def process_dunning(
             }).fetchall()
         elif request.debtor_id:
             op_query = text("""
-                SELECT id, debtor_id, booking_date, due_date, open_amount, dunning_level
+                SELECT id, COALESCE(debtor_id, kunde_id), COALESCE(booking_date, rechnungsdatum),
+                       COALESCE(due_date, faelligkeit), COALESCE(open_amount, offen), dunning_level
                 FROM domain_erp.offene_posten
-                WHERE debtor_id = :debtor_id AND tenant_id = :tenant_id
-                AND open_amount > 0
+                WHERE COALESCE(debtor_id, kunde_id) = :debtor_id AND tenant_id = :tenant_id
+                AND COALESCE(open_amount, offen) > 0
             """)
             op_rows = db.execute(op_query, {
                 "debtor_id": request.debtor_id,
@@ -324,12 +329,13 @@ async def process_dunning(
             }).fetchall()
         else:
             op_query = text("""
-                SELECT id, debtor_id, booking_date, due_date, open_amount, dunning_level
+                SELECT id, COALESCE(debtor_id, kunde_id), COALESCE(booking_date, rechnungsdatum),
+                       COALESCE(due_date, faelligkeit), COALESCE(open_amount, offen), dunning_level
                 FROM domain_erp.offene_posten
                 WHERE tenant_id = :tenant_id
-                AND debtor_id IS NOT NULL
-                AND open_amount > 0
-                AND due_date < CURRENT_DATE
+                AND COALESCE(debtor_id, kunde_id) IS NOT NULL
+                AND COALESCE(open_amount, offen) > 0
+                AND COALESCE(due_date, faelligkeit) < CURRENT_DATE
             """)
             op_rows = db.execute(op_query, {
                 "tenant_id": tenant_id
@@ -703,31 +709,18 @@ async def list_dunnings(
 @router.put("/{dunning_id}/send", response_model=DunningResponse, summary="Dunning senden")
 async def send_dunning(
     dunning_id: str,
+    versand_art: str = Query("email", pattern="^(email|post)$", description="email: an den Kunden; post: gedruckt verschickt"),
     tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    nutzer: dict = Depends(get_current_user),
 ):
     """
-    Mark dunning notice as sent.
+    Versendet die Mahnung (E-Mail ueber das Postfach ``fibu``) oder haelt den Postversand fest.
+    ``sent`` erst danach; ohne Adresse oder Postfach bleibt sie unversendet (422/503).
     """
     try:
-        update_query = text("""
-            UPDATE domain_erp.dunning_notices
-            SET status = 'sent', sent_date = CURRENT_DATE, updated_at = NOW()
-            WHERE id = :dunning_id AND tenant_id = :tenant_id
-            RETURNING id, op_id, debtor_id, dunning_level, dunning_date, due_date,
-                      open_amount, dunning_fee, interest, total_amount, payment_deadline, status,
-                      sent_date, payment_date, notes, created_at, updated_at
-        """)
-        
-        row = db.execute(update_query, {
-            "dunning_id": dunning_id,
-            "tenant_id": tenant_id
-        }).fetchone()
-        
-        if not row:
-            raise HTTPException(status_code=404, detail="Dunning notice not found")
-        
-        canonical = f"Mahnung|{dunning_id}|{row[1]}|{row[3]}|{row[6]}|{row[9]}"
+        row = FinanceDunningService(db, tenant_id).send_notice(dunning_id, versand_art=versand_art, nutzer=nutzer)
+        canonical = f"Mahnung|{dunning_id}|{row[1]}|{row[3]}|{row[6]}|{row[9]}|{versand_art}"
         content_hash = sha256_hex(canonical.encode("utf-8"))
         # Versandstatus und Archiveintrag gemeinsam: ohne Archiv kein "versandt".
         register_artifact(
@@ -757,7 +750,8 @@ async def send_dunning(
             updated_at=row[16]
         )
         
-    except HTTPException:
+    except (HTTPException, DomainError):
+        db.rollback()
         raise
     except Exception as e:
         db.rollback()

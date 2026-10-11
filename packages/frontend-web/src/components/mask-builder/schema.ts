@@ -187,6 +187,8 @@ export interface ScreenActionDefinition {
   /** Opens an existing human input flow; submitEndpoint is documentation, never auto-dispatched. */
   inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
   stubReason?: string
+  /** Wirkt nur in der Maske (kein Fachbefehl): Eingabe leeren oder woandershin fuehren. */
+  localEffect?: 'form_reset' | 'navigation'
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   requiresConfirmation?: boolean
   dangerLevel?: ActionDangerLevel

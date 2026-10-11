@@ -236,10 +236,10 @@ QA `mcp-deep-link-stock-20261008.md`.
 **Weiter:** Deep-Link-Serie abgeschlossen; AP-Freigabe nachgezogen
 (`MCP-AP-FREIGABE-20261008`). Offen: FIN-CLOSE; 2× open_high; 31× blocked_no_endpoint; SUS.
 
-## VERSANDWEGE-ECHT-20261008 — in Arbeit, Claude Code
+## VERSANDWEGE-ECHT-20261008 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** Code vom 2026-10-08 lag unkommittiert im Arbeitsbaum, Claim
-nachgeholt 2026-10-11. **Ziel:** Vier Versandwege senden wirklich oder melden den Grund —
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11 (Code vom 2026-10-08, Claim nachgeholt).
+**Ziel:** Vier Versandwege senden wirklich oder melden den Grund —
 Bestellung (Postfach `einkauf`, Fax/EDI ohne Einrichtung `nicht_eingerichtet` statt „versandt“),
 RFQ und Anfrage (BANF) an Lieferanten, Mahnung (Postfach `fibu` oder Post). Status erst nach
 Serverannahme. **Dringend:** `origin/main` ruft in `einkauf_bestellvorschlag.py` bereits
@@ -254,6 +254,19 @@ Serverannahme. **Dringend:** `origin/main` ruft in `einkauf_bestellvorschlag.py`
 `fuhrpark_tenant_ce_20261009`, Single Head), `pages/finance/mahnwesen.tsx`,
 `pages/einkauf/anfrage-stamm.tsx`, `tests/test_versandwege_vertrag.py`, QA-Doku.
 Fremde WIP (Design-Sweep im Frontend, Codex-Publikation) unberuehrt.
+**Nachweis:** QA `docs/quality-assurance/versandwege-echt-20261008.md`; 27 Vertraege in
+`tests/test_versandwege_vertrag.py`, mit Nachbarschaft 100 gruen gegen `valeo_probe` im isolierten
+Lieferstand; Backend-Gates gruen, `tsc` 0 Fehler. **Mitgenommen:** `DunningResponse` mit optionalem
+`due_date`/`payment_deadline` (Mail ging raus, Antwort war 500); TS-Spiegel `admin/postfaecher`
+an das Backend aus MCP-MASK-CE-BATCH3 angeglichen (`localEffect` im Typ, Seite gewaehrt
+`admin.postfach.write`); Godfile-Baseline `mask_frontend_bridges.py` 1476 -> 1467.
+**Handshake Cursor/Fuhrpark:** `valeo_neuro_erp` hat `fuhrpark_tenant_ce_20261009` nie gesehen;
+`alembic_version` steht dort jetzt auf `postfach_microsoft_20261008`, das naechste
+`alembic upgrade head` holt Fuhrpark und Versandwege nach. Nicht ausgefuehrt: der Backfill ordnet
+alle Bestandsfahrzeuge `legacy-unassigned` zu. **Handshake Codex/Katalog:** Tabellenkatalog =
+Stand `8c09083df` plus `dunning_notices.versand_art`/`empfaenger` und neue Code-Verweise;
+`valeo_probe` kennt neun `create_all`-Tabellen nicht, deshalb nicht blind aus dem Pruefstand erzeugt.
+**Offen:** Sichtpruefung der drei Masken; Mahnschreiben als PDF; MCP-Versand ohne Rollen.
 
 ## POSTFACH-MICROSOFT365-20261008 — abgeschlossen, Claude Code
 

@@ -55682,9 +55682,16 @@
             "type": "string"
           },
           "due_date": {
-            "format": "date",
-            "title": "Due Date",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due Date"
           },
           "dunning_date": {
             "format": "date",
@@ -55739,9 +55746,16 @@
             "title": "Payment Date"
           },
           "payment_deadline": {
-            "format": "date",
-            "title": "Payment Deadline",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Deadline"
           },
           "sent_date": {
             "anyOf": [
@@ -285713,7 +285727,7 @@
     },
     "/api/v1/einkauf/anfragen/{anfrage_id}/send": {
       "post": {
-        "description": "Versendet Anfrage an Lieferanten / setzt Status auf FREIGEGEBEN",
+        "description": "Mail an jeden Lieferanten, dann ANGEBOTSPHASE; sonst 4xx/5xx mit Grund (RfqVersandFehler).",
         "operationId": "send_anfrage_api_v1_einkauf_anfragen__anfrage_id__send_post",
         "parameters": [
           {
@@ -285742,11 +285756,23 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnfrageSendIn"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeOut"
+                }
               }
             },
             "description": "Successful Response"
@@ -285762,10 +285788,14 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Send Anfrage",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Anfrage an Lieferanten senden",
         "tags": [
-          "Einkauf",
-          "Einkauf"
+          "mask-frontend-bridges"
         ]
       }
     },
@@ -313826,7 +313856,7 @@
     },
     "/api/v1/finance/dunning/{dunning_id}/send": {
       "put": {
-        "description": "Mark dunning notice as sent.",
+        "description": "Versendet die Mahnung (E-Mail ueber das Postfach ``fibu``) oder haelt den Postversand fest.\n``sent`` erst danach; ohne Adresse oder Postfach bleibt sie unversendet (422/503).",
         "operationId": "send_dunning_api_v1_finance_dunning__dunning_id__send_put",
         "parameters": [
           {
@@ -313835,6 +313865,19 @@
             "required": true,
             "schema": {
               "title": "Dunning Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "email: an den Kunden; post: gedruckt verschickt",
+            "in": "query",
+            "name": "versand_art",
+            "required": false,
+            "schema": {
+              "default": "email",
+              "description": "email: an den Kunden; post: gedruckt verschickt",
+              "pattern": "^(email|post)$",
+              "title": "Versand Art",
               "type": "string"
             }
           },
