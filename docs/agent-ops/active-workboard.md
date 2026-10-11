@@ -11,6 +11,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WHATSAPP-THREAD-GUARD-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Reservierte WhatsApp-Benachrichtigungsauftraege in bestehender Kanaltabelle vor generischen Prozess-/Freigabewegen schuetzen. Integrationsvoraussetzung von WHATSAPP-PERSISTENCE-20261011.
+**Dateibesitz:** app/repositories/channel_thread_repository.py nur Schutz des reservierten whatsapp.browser.notification.v1-Namensraums in save/get/list; DB-Vertraege und eigene gemeinsame QA/Workboard.
+**Abnahme:** generische Reads liefern diese privaten Auftraege nie; generische save/approval koennen sie nicht ersetzen. Normale Prozess-Threads unveraendert; kein Schema/DB-Reset. **Risiko:** allgemeine Kanal-Mandantenvertraege ausserhalb des reservierten Namensraums bleiben gesondert zu pruefen.
+**Harness:** Fachvertrag Benachrichtigung ist kein generisch ausfuehrbarer Prozess; Architektur gemeinsame Tabelle, dedizierter Zugriff; Daten SQL-Filter vor Laden; Tests echtes Probe-Schema und bestehende Kanaltests; Security keine Nebenwege; Betrieb kein Memorybypass; Doku QA/ADR/Workboard; extern CI offen.
+
 ## WHATSAPP-PERSISTENCE-20261011 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Fluechtige WhatsApp-Outbox durch bestehende domain_shared.channel_process_threads samt Audit ersetzen; Replay an Mandant/Aktion/Inhalt/Urheber binden.
