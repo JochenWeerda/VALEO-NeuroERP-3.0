@@ -87,5 +87,12 @@ Benachrichtigungsvorbereitung abgeschlossen. Alte Meta-Credentials loesen keinen
 Versand aus; Entwuerfe melden pending_browser. Outbox-Ergebnisse sind Kopien,
 fehlender Mandant wird abgewiesen; das ist keine Mitgliedschaftspruefung.
 [Abnahme der Vorbereitung](../quality-assurance/whatsapp-browser-preparation-20261011.md).
+Die drei Benachrichtigungs-/Outbox-Endpunkte verlangen nun verifizierte OIDC-
+Identitaet mit eindeutigem tenant_id oder mandanten_id; crm:write berechtigt
+zur Vorbereitung, crm:read zum Lesen. Header/Rumpf/Query duerfen nur denselben
+Mandanten nennen; der dev-tenant-Fallback entfaellt. admin:all hebt die
+Mandantenbindung nicht auf.
+[Abnahme des Zugriffsschutzes](../quality-assurance/whatsapp-access-20261011.md).
+Der separate Meta-Webhook und Bestellsimulator sind dadurch nicht abgesichert.
 Browseranbindung, Persistenz-/Isolationsabnahme und realer Versandtest offen.
 Keine Nachricht versandt und keine Sitzung angemeldet.

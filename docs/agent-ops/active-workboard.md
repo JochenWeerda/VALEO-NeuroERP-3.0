@@ -22,12 +22,14 @@ Anlegen, Versenden, Bezahlt-Vermerk `finance_write`; Pruefung vor dem ersten Dat
 Vertragsdatei `tests/test_mahnwesen_rollen_vertrag.py`, Anpassung der Mahn-Tests, QA-Doku, driftende
 Generatorartefakte.
 
-## WHATSAPP-ACCESS-20261011 — reserviert, Codex
+## WHATSAPP-ACCESS-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Drei WhatsApp-Vorbereitungs-/Outbox-Endpunkte an bestehende verifizierte OIDC-Mandanten-/Scope-Guards binden; Payload und Query koennen keinen fremden Mandanten waehlen.
 **Dateibesitz:** app/api/v1/endpoints/whatsapp_notify.py; neue tests/test_whatsapp_access_contract.py; eigene QA-/Workboard-Hunks, docs/workflows/whatsapp-web-computer-use.md Lieferstand. Keine zentralen Auth-/DB-/Transportaenderungen.
 **Abnahme:** echte FastAPI-Requests mit zwei Token-Kontexten; fehlende/ungueltige Identitaet, fehlende/widerspruechliche Claims, fremde Header/Rumpf/Query und falsche Scopes abweisen, Outbox unveraendert. crm:read fuer Lesen, crm:write fuer Vorbereitung; vorhandener admin:all-Vertrag bleibt mandantengebunden. **Risiko:** Browserbindung und persistente Outbox weiterhin offen.
 **Harness:** Fachvertrag nur Vorbereitung, kein Versand; Architektur bestehende zentrale Guards; Daten keine Standardmandanten; Tests HTTP ohne DB/Browser/Netz; Security effektive Tokenrechte; Betrieb keine Mutation bei Ablehnung; Doku QA/Runbook/Workboard; extern CI offen.
+
+**Lieferung:** Drei Vorbereitungs-/Outbox-Endpunkte nutzen bestehende zentrale OIDC-, Mandanten- und Scope-Guards; crm:write fuer Vorbereitung, crm:read fuer Lesen. Header/Rumpf/Query widersprechen niemals dem Token; dev-tenant-Fallback entfernt, admin bleibt mandantengebunden. Vorher 31/32 HTTP-Proben rot, final 63 Vertraege gruen. Architektur-/Code-Inventare isoliert gruen. Fremdes Frontend-WIP unberuehrt; Simulator-Aufrufer muss Login/Tokenkontext nachziehen. Browserbindung, dauerhafte Outbox und separate WhatsApp-Wege bleiben offen. Nachweis: whatsapp-access-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## WHATSAPP-BROWSER-PREP-20261011 — abgeschlossen, Codex
 
