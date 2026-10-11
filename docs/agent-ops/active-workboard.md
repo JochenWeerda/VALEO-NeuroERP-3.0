@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WHATSAPP-WEB-CONTRACT-20261011 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** User-Entscheidung WhatsApp Web im Browser via Computer Use im Kanalvertrag festhalten; vorhandene Webhook-/Meta-/Simulatorwege als Ist-Stand und offene Umstellung kenntlich machen.
+**Dateibesitz:** docs/workflows/nc-h-channels-integration.md nur WhatsApp-Hunks; neues docs/workflows/whatsapp-web-computer-use.md; eigene Workboard-Hunks. Keine Code-, API- oder Auth-Aenderung.
+**Abnahme:** Ziel und Ist belegbar getrennt, bestehende Bestell-Inbox wiederverwendbar, Konto-/Mandantenzuordnung und Wiederholungs-/Zustellnachweis beschrieben. Markdown-/Governancechecks gruen; kein Login, keine Nachricht, keine DB/Container. **Risiko:** Browsertransport noch nicht implementiert, bestehende Outbox nur fluechtig.
+**Harness:** Fachvertrag bestehende Bestellpruefung; Architektur kein neuer Dienst; Daten keine Browsercredentials im Repo; Tests Dokuchecks; Security gepruefte Identitaet und Konto-Mandant; Betrieb kein blindes Retry bei unklarem Versand; Doku Kanalvertrag/Runbook/Workboard; extern Browserabnahme offen.
+
+**Lieferung:** WhatsApp Web via Computer Use als User-Zielweg dokumentiert. Bisherigen Meta-/Simulatortransport, fluechtige Outbox und ungeprueften Header-/Default-Mandanten im Webhook als Ist-Befunde kenntlich gemacht. Bestehende Bestell-Inbox, Konto-/Mandantenbindung, Wiederholung und sichtbarer Versandnachweis als Integrationsvertrag beschrieben; kein Browserbetrieb behauptet. Nachweis: ../workflows/whatsapp-web-computer-use.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+
+## WHATSAPP-WEB-INTEGRATION-20261011 — offen
+
+**Owner:** unbesetzt. **Ziel:** Browsertransport gemaess docs/workflows/whatsapp-web-computer-use.md implementieren; Meta-/Simulatorwege nach Verbraucheranalyse konsolidieren. **Abnahme:** verifizierte Konto-/Mandantenbindung; dauerhafte idempotente Eingangs-/Versandnachweise; echte Negativ- und Wiederanlauftests; autorisierter Browser-Testversand mit benanntem Empfaenger. **Risiken:** vorhandener Header-/Default-Mandant im Webhook, fluechtige Outbox, paralleler Bestellsimulator. Vor Umsetzung eigene Dateigrenzen/Claim festlegen.
+
 ## LLM-JSON-CONTRACT-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Vier duplizierte LLM-JSON-/Fence-Parser zentralisieren; Nichtobjekte und nichtfinite Zahlen sicher abweisen, vorhandene Fachfallbacks nutzen.
