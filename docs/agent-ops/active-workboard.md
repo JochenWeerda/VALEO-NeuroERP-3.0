@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## QUALITY-GATE-MAHNVERSAND-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Einzigen Frontend-Vertragsfehler aus CI 38126182106 beheben: zwei neue Mahnversand-Buttons widersprechen dem 44-px-Vertrag.
+**Dateibesitz:** pages/finance/mahnlauf.tsx nur die zwei size-Attribute; eigene QA-/Workboard-Hunks.
+**Abnahme:** bestehende 111 UIX- und fuenf Versandtests unveraendert gruen, lint; keine Testabschwächung, Versandlogik erhalten, fremdes Frontend-WIP unberuehrt. Kein DB-/Dockerbedarf.
+
 ## BEWERBUNG-ANMELDEKENNUNG-20261011 — in Arbeit, Claude Code
 
 **Owner:** Claude Code. **Stand:** 2026-10-11. **Entscheidung des Auftraggebers:** das waehlen, was fachlich
