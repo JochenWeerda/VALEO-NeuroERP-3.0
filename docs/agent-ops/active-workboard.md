@@ -11,6 +11,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WHATSAPP-WEB-CONTRACT-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** User-Entscheidung WhatsApp Web im Browser via Computer Use im Kanalvertrag festhalten; vorhandene Webhook-/Meta-/Simulatorwege als Ist-Stand und offene Umstellung kenntlich machen.
+**Dateibesitz:** docs/workflows/nc-h-channels-integration.md nur WhatsApp-Hunks; neues docs/workflows/whatsapp-web-computer-use.md; eigene Workboard-Hunks. Keine Code-, API- oder Auth-Aenderung.
+**Abnahme:** Ziel und Ist belegbar getrennt, bestehende Bestell-Inbox wiederverwendbar, Konto-/Mandantenzuordnung und Wiederholungs-/Zustellnachweis beschrieben. Markdown-/Governancechecks gruen; kein Login, keine Nachricht, keine DB/Container. **Risiko:** Browsertransport noch nicht implementiert, bestehende Outbox nur fluechtig.
+**Harness:** Fachvertrag bestehende Bestellpruefung; Architektur kein neuer Dienst; Daten keine Browsercredentials im Repo; Tests Dokuchecks; Security gepruefte Identitaet und Konto-Mandant; Betrieb kein blindes Retry bei unklarem Versand; Doku Kanalvertrag/Runbook/Workboard; extern Browserabnahme offen.
+
 ## LLM-JSON-CONTRACT-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Vier duplizierte LLM-JSON-/Fence-Parser zentralisieren; Nichtobjekte und nichtfinite Zahlen sicher abweisen, vorhandene Fachfallbacks nutzen.
