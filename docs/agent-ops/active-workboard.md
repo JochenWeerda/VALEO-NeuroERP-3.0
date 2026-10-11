@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## QUALITY-GATE-SONAR-BACKEND-20261011 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Echte verbliebene Sonar-Backendbefunde beheben: Newsletter-Log-Injection, Freigeber-Parameterueberschreibung, unerreichbarer Kulturreturn und redundante Mengenbedingungen.
+**Dateibesitz:** app/api/v1/endpoints/compat.py, ap_invoices.py, agrar_wetter.py, inventory_operations.py; modules/einkauf/services/bestellvorschlag_service.py; neue fokussierte Tests, eigene QA/Doku-Hunks und committed Generatorartefakte bei messbarem Drift.
+**Abnahme:** echte Verhaltenspruefungen ohne DB/SMTP-Nachrichten, Code-/API-Vertraege unveraendert, keine Gate-Ausnahme. XML-Namensraeume und Masken-Passwortfeld sind gesondert zu bewertende Scannerbefunde, nicht blind umzuschreiben. Fremdes WIP schuetzen; Gesamt-Sonar-Abnahme weiter offen.
+
 ## QUALITY-GATE-CATALOG-SYNC-20261011 — in arbeit, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Durch MCP-Drift verdeckten physischen Katalogdrift schliessen: committed Fuhrpark-Migration fuegt tenant_id auf vier Tabellen hinzu; committed Katalog fuehrt diese Spalten noch nicht.
