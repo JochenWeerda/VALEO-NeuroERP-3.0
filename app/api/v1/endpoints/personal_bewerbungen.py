@@ -51,7 +51,7 @@ from app.core.uuid7 import uuid7
 from app.services import bewerbung_einwilligung_service as einwilligung
 from app.services import bewerbung_loeschlauf_service as loeschlauf
 from app.services import bewerbung_service as dienst
-from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
+from app.services.mask_action_runtime_service import MaskActionResult, frueherer_lauf, parse_action_body
 
 logger = logging.getLogger(__name__)
 
@@ -98,25 +98,11 @@ def _eingabefehler(fehler: Exception) -> list[dict[str, str]]:
 
 def _frueherer_lauf(db: Session, tenant_id: str, action_key: str, entity_type: str,
                     schluessel: str) -> Optional[dict]:
-    """Sperrt den Idempotenzschluessel bis zum Ende der Transaktion und liefert den frueheren Lauf.
-
-    Der Schluessel wurde bis zum 11.10.2026 nur ins Audit geschrieben: Ein wiederholtes
-    ``execute`` legte eine zweite Bewerbung an. Die Sperre legt zwei gleichzeitige Laeufe
-    hintereinander; der zweite findet den Auditeintrag des ersten.
-    """
-    db.execute(
-        text("SELECT pg_advisory_xact_lock(hashtextextended(:s, 0))"),
-        {"s": f"mask_action:{tenant_id}:{entity_type}:{action_key}:{schluessel}"},
+    """Der gemeinsame Waechter aller Masken-Commands. Hier bleibt nur der Vergleich mit dem
+    gespeicherten Satz: Derselbe Schluessel mit anderen Angaben ist ein Fehler, kein Erfolg."""
+    return frueherer_lauf(
+        db, tenant_id=tenant_id, action_key=action_key, entity_type=entity_type, idempotency_key=schluessel,
     )
-    zeile = db.execute(
-        text(
-            "SELECT id, entity_id FROM domain_crm.crm_action_audit_log "
-            "WHERE tenant_id = :t AND action_key = :a AND entity_type = :e AND idempotency_key = :k "
-            "ORDER BY performed_at LIMIT 1"
-        ),
-        {"t": tenant_id, "a": action_key, "e": entity_type, "k": schluessel},
-    ).mappings().first()
-    return dict(zeile) if zeile else None
 
 
 def _wiederholung(action_key: str, mode: str, frueher: dict, gleich: Optional[bool]) -> MaskActionResult:

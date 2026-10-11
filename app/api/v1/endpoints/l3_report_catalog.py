@@ -194,7 +194,14 @@ def action_bonus_calculate(
         )
 
     try:
-        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
+
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key="calculate", entity_type="bonus_run",
+            idempotency_key=idempotency_key, mode=mode,
+        )
+        if wiederholt is not None:
+            return wiederholt
 
         created = svc.create_bonus_run(
             report_id=report_id,

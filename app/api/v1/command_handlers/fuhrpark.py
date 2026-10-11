@@ -232,7 +232,14 @@ def action_fahrzeug_speichern(
             proposedChanges=[preview],
         )
     try:
-        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
+
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key="speichern", entity_type="fuhrpark_fahrzeug",
+            idempotency_key=idempotency_key, mode=mode,
+        )
+        if wiederholt is not None:
+            return wiederholt
 
         created = upsert_fahrzeug(db, tenant_id, data, commit=False)
         entity_id = str(created["id"])
@@ -311,7 +318,14 @@ def action_fahrzeug_loeschen(
             proposedChanges=[preview],
         )
     try:
-        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
+
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key="loeschen", entity_type="fuhrpark_fahrzeug",
+            idempotency_key=idempotency_key, mode=mode, entity_id=entity_id,
+        )
+        if wiederholt is not None:
+            return wiederholt
 
         deleted_id = delete_fahrzeug_tenant(db, tenant_id, entity_id, commit=False)
         audit_id = _write_audit(
@@ -383,7 +397,14 @@ def action_terminart_speichern(
             proposedChanges=[preview],
         )
     try:
-        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
+
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key="speichern", entity_type="fuhrpark_terminart",
+            idempotency_key=idempotency_key, mode=mode,
+        )
+        if wiederholt is not None:
+            return wiederholt
 
         created = upsert_terminart(db, tenant_id, data, commit=False)
         entity_id = str(created["id"])
@@ -460,7 +481,14 @@ def action_rechnung_speichern(
             proposedChanges=[preview],
         )
     try:
-        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
+
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key="speichern", entity_type="fuhrpark_rechnung",
+            idempotency_key=idempotency_key, mode=mode,
+        )
+        if wiederholt is not None:
+            return wiederholt
 
         created = upsert_rechnung(db, tenant_id, data, commit=False)
         entity_id = str(created["id"])
@@ -533,7 +561,14 @@ def action_dokument_speichern(
             proposedChanges=[preview],
         )
     try:
-        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
+
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key="speichern", entity_type="fuhrpark_ausgehendes_dokument",
+            idempotency_key=idempotency_key, mode=mode,
+        )
+        if wiederholt is not None:
+            return wiederholt
 
         created = upsert_ausgehendes_dokument(db, tenant_id, data, commit=False)
         entity_id = str(created["id"])

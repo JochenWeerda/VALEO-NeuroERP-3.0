@@ -79,11 +79,22 @@ Nachweis: je Modul ein Vertrag in der bestehenden Vertragsdatei (Anmeldung mit U
 lesbarem Namen, im Rumpf ein anderer Name – im Beleg steht der Anmeldename). Mit den Modulverträgen
 **254 grün** gegen `valeo_probe`; Gates grün.
 
+## Sichtprüfung (11.10.2026, Entwicklungsdatenbank, Browser ohne Oberfläche)
+
+- **Einwilligungserklärungen:** Die Maske hat ein Feld, den Wortlaut. Fassung 1 angelegt (Rückfrage
+  „danach nicht mehr änderbar", Meldung „Fassung 1 angelegt"); gesendet wurde nur der Wortlaut, in der
+  Liste steht unter „Erstellt durch" die Anmeldung.
+- **Einwilligung einer Bewerbung:** Fassung, Gültig bis und Kanal gewählt, erteilt („läuft bis
+  11.10.2027"), danach widerrufen (Rückfrage, Stand „keine"). Gesendet wurden Fassung, Datum und Kanal;
+  im Verzeichnis stehen beide Vorgänge mit der Anmeldung unter „Erfasst durch".
+- Keine Fehler in der Browserkonsole.
+
+Die Idempotenz der übrigen Masken-Commands ist geprüft und geschlossen:
+[masken-command-idempotenz-20261011.md](masken-command-idempotenz-20261011.md).
+
 ## Offen
 
-1. **Sichtprüfung** der beiden Bewerbungsmasken im Browser.
-2. **Idempotenz der übrigen Masken-Commands** ist weiterhin ungeprüft.
-3. **Nicht aus diesen Slices:** `test_parallel_installation_endpoints` legt einen Drucker mit festem
+1. **Nicht aus diesen Slices:** `test_parallel_installation_endpoints` legt einen Drucker mit festem
    Namen an und räumt nicht auf; im geteilten Prüfstand scheitert er am zweiten Lauf an
    `ux_drucker_name`. Die 409-Antwort dort gibt außerdem den Datenbanktext samt Wert zurück –
    dieselbe Schwäche, die `grund_ohne_daten` in der Bewerbungsstrecke geschlossen hat.

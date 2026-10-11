@@ -25,7 +25,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_kontakt_service import CrmKontaktService
 from app.services.crm_notification_service import CrmNotificationService
-from app.services.llm_gateway import LLMGateway
+from app.services.llm_gateway import LLMGateway, parse_json_object
 from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/crm/kim", tags=["crm", "kim", "360"])
@@ -767,9 +767,6 @@ def neuro_summary(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> NeuroSummary:
-    import json
-    import re
-
     cust = get_customer(body.customerId, db, tenant_id)
     if not cust:
         return NeuroSummary(healthScore=0, statusLabel="Unbekannt", summary="Kunde nicht gefunden.")
@@ -794,8 +791,7 @@ def neuro_summary(
     if not out:
         return fallback
     try:
-        cleaned = re.sub(r"^```(?:json)?|```$", "", out.strip()).strip()
-        data = json.loads(cleaned)
+        data = parse_json_object(out)
         return NeuroSummary(
             healthScore=int(max(0, min(100, data.get("healthScore", fallback.healthScore)))),
             statusLabel=str(data.get("statusLabel") or fallback.statusLabel),
@@ -832,10 +828,8 @@ def draft_email(
     )
     out = LLMGateway(db, tenant_id).complete_or_none(prompt, max_tokens=700)
     if out:
-        import json
-        import re
         try:
-            data = json.loads(re.sub(r"^```(?:json)?|```$", "", out.strip()).strip())
+            data = parse_json_object(out)
             return DraftEmailOut(subject=str(data.get("subject") or ""), body=str(data.get("body") or ""), engine="llm")
         except Exception:
             pass

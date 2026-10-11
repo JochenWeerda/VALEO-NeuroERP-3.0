@@ -62,17 +62,16 @@ class WhatsAppIntakeService:
         Nutzt das anbieterunabhängige LLM-Gateway (Anbieterwahl des Admins, inkl.
         Tenant-Konfiguration). Fällt bei fehlendem Anbieter/Fehler deterministisch
         auf die Heuristik zurück."""
-        from app.services.llm_gateway import LLMGateway
+        from app.services.llm_gateway import LLMGateway, parse_json_object
 
         out = LLMGateway(self.db, self.tenant_id).complete_or_none(
             f"{_SCHEMA_HINT}\n\nNachricht:\n{raw_text}", max_tokens=1024
         )
         if out:
             try:
-                cleaned = re.sub(r"^```(?:json)?|```$", "", out.strip()).strip()
-                return json.loads(cleaned), "claude", 0.9
-            except Exception as exc:  # pragma: no cover - Parsing
-                logger.warning("whatsapp_llm_parse_fehlgeschlagen: %s — fallback heuristik", exc)
+                return parse_json_object(out), "claude", 0.9
+            except Exception:
+                logger.warning("whatsapp_llm_parse_fehlgeschlagen — fallback heuristik")
         return self._extract_heuristik(raw_text), "heuristik", 0.45
 
     def _extract_heuristik(self, raw_text: str) -> dict:

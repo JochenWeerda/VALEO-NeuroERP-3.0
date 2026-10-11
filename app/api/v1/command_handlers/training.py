@@ -58,7 +58,14 @@ def action_onboarding_speichern(request: Request, body: dict[str, Any], db: Sess
             proposedChanges=[preview],
         )
     try:
-        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
+
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key="speichern", entity_type="hr_onboarding_run",
+            idempotency_key=idempotency_key, mode=mode,
+        )
+        if wiederholt is not None:
+            return wiederholt
 
         created = insert_onboarding_run(db, tenant_id, dict(data))
         entity_id = str(created["id"])
@@ -133,7 +140,14 @@ def action_qualification_speichern(request: Request, body: dict[str, Any], db: S
             proposedChanges=[preview],
         )
     try:
-        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
+
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key="speichern", entity_type="hr_qualification",
+            idempotency_key=idempotency_key, mode=mode,
+        )
+        if wiederholt is not None:
+            return wiederholt
 
         created = insert_qualification(db, tenant_id, dict(data))
         entity_id = str(created["id"])
@@ -228,7 +242,14 @@ def action_assignment_speichern(request: Request, body: dict[str, Any], db: Sess
             proposedChanges=[preview],
         )
     try:
-        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
+
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key="speichern", entity_type="hr_training_assignment",
+            idempotency_key=idempotency_key, mode=mode,
+        )
+        if wiederholt is not None:
+            return wiederholt
 
         created = insert_assignment(db, tenant_id, dict(data))
         entity_id = str(created["id"])

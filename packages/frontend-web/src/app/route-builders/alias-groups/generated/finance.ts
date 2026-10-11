@@ -102,7 +102,7 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "lastschriften-debitoren"
   },
   {
-    "module": "@/pages/finance/mahnwesen",
+    "module": "@/pages/finance/mahnlauf",
     "path": "mahnwesen"
   },
   {

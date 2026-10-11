@@ -205,7 +205,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_crm.contacts` | `app/api/v1/endpoints/compliance_dsgvo.py`, `app/infrastructure/models/__init__.py` | `app/api/v1/endpoints/compliance_dsgvo.py` | — |
 | `domain_crm.credit_limits` | `app/api/v1/endpoints/credit_management.py`, `app/api/v1/endpoints/crm_360.py`, `app/services/customer_service.py` | `app/api/v1/endpoints/credit_management.py` | — |
 | `domain_crm.credit_overrides` | — | `app/api/v1/endpoints/credit_management.py` | — |
-| `domain_crm.crm_action_audit_log` | `app/api/v1/endpoints/personal_bewerbungen.py` | `app/api/v1/endpoints/crm_360.py`, `app/services/mask_action_runtime_service.py` | — |
+| `domain_crm.crm_action_audit_log` | `app/services/mask_action_runtime_service.py` | `app/api/v1/endpoints/crm_360.py`, `app/services/mask_action_runtime_service.py` | — |
 | `domain_crm.crm_campaign_recipients` | `app/api/v1/endpoints/crm_campaigns.py`, `app/infrastructure/models/crm_campaign_models.py` | `app/api/v1/endpoints/crm_campaigns.py` | — |
 | `domain_crm.crm_campaign_templates` | `app/api/v1/endpoints/crm_campaigns.py`, `app/infrastructure/models/crm_campaign_models.py` | `app/api/v1/endpoints/crm_campaigns.py` | — |
 | `domain_crm.crm_campaigns` | `app/api/v1/endpoints/crm_campaigns.py`, `app/infrastructure/models/crm_campaign_models.py` | `app/api/v1/endpoints/crm_campaigns.py` | — |

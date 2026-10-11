@@ -103,9 +103,8 @@ Geprüft mit Vite auf Port 3001 und Playwright (headless) gegen die gewachsene D
 
 ## Offen
 
-1. **Einzelmaske `/finance/mahnwesen`:** an das Backend anschließen oder ablösen. Sie ist ein
-   eigener Slice (Debitorenwahl aus den Stammdaten, Feldzuordnung, Laden einer Bestandsmahnung);
-   bis dahin läuft der Versand über den Mahnlauf.
+1. **Einzelmaske `/finance/mahnwesen`:** erledigt am 11.10.2026 – abgelöst, der Weg zeigt den
+   Mahnlauf ([mahnwesen-einzelmaske-abloesen-20261011.md](mahnwesen-einzelmaske-abloesen-20261011.md)).
 2. **Mahnschreiben als PDF:** Die Mail nennt Beträge und Frist als Text.
 3. **MCP-Versand ohne Rollen:** Er kennt nur die Kennung des Akteurs; Postfächer mit
    Rollenfreigabe lehnen ihn ab (403), frei gegebene funktionieren.

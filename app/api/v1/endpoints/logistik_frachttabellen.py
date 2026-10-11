@@ -238,7 +238,14 @@ def action_anlegen(
         )
 
     try:
-        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
+
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key="anlegen", entity_type="frachttabelle",
+            idempotency_key=idempotency_key, mode=mode,
+        )
+        if wiederholt is not None:
+            return wiederholt
 
         row = insert_frachttabelle(
             db,

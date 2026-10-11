@@ -218,7 +218,14 @@ def action_import(
         )
 
     try:
-        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
+
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key="import", entity_type="query_definition",
+            idempotency_key=idempotency_key, mode=mode,
+        )
+        if wiederholt is not None:
+            return wiederholt
 
         saved = svc.import_signed(bundle, actor=actor(request), reason=reason)
         def_id = str(saved.get("id") or "")
