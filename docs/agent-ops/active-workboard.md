@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## MASKEN-COMMAND-IDEMPOTENZ-20261011 — in Arbeit, Claude Code
+## MASKEN-COMMAND-IDEMPOTENZ-20261011 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-11. Offener Punkt aus BEWERBUNG-COMMAND-URHEBER-20261011.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Offener Punkt aus BEWERBUNG-COMMAND-URHEBER-20261011.
 **Befund:** Alle Masken-Commands lesen `_idempotencyKey` und schreiben ihn nur ins Audit; keiner prueft ihn.
 Ein wiederholtes `execute` mit demselben Schluessel fuehrt die Aktion ein zweites Mal aus. Das Frontend sendet
 keinen Schluessel (dort schuetzt die Sperre des Knopfs); betroffen sind API- und Agenten-Aufrufer.
@@ -24,6 +24,17 @@ je ein Waechter-Hunk am Beginn des Schreibpfads in `app/api/v1/command_handlers/
 `l3_report_catalog.py`, `logistik_frachttabellen.py`, `mailkonto.py`, `query_center.py`, `sanctions_compliance.py`,
 `personal_bewerbungen.py` (nur Umzug auf den gemeinsamen Waechter), neue Vertragsdatei
 `tests/test_masken_command_idempotenz_vertrag.py`, QA-Doku. Keine Migration.
+**Lieferung:** `wiederholter_auftrag()` im Standardweg (vor der Zustandspruefung und in der Schreibtransaktion)
+und in 15 Einzelwegen; die zwei Bewerbungswege nutzen denselben Waechter. Wiederholung = Erfolg mit derselben
+Audit-Kennung, kein zweites Ereignis; anderes Objekt = Fehler; gescheiterter Lauf und Trockenlauf verbrauchen
+den Schluessel nicht. **Nachweis:** 16 Vertraege gegen `valeo_probe` (darunter zwei gleichzeitige Laeufe und
+eine Ratsche „kein Schreibweg ohne Waechter“); ohne Waechter sind fuenf davon rot. QA:
+`docs/quality-assurance/masken-command-idempotenz-20261011.md`. **Mitgeprueft, kein Befund:** der MCP-Weg
+(`mcp_tool_executions`). **Grenzen:** kein Vergleich der Angaben (das Audit speichert den Rumpf nicht); Wege mit
+eigener Vorpruefung antworten auf die Wiederholung mit ihrem fachlichen Fehler; `rations_lifecycle.py` als
+begruendete Ausnahme; `actionDef.idempotencyKey` im Frontend ist ein fester Wert je Aktion und darf so nicht
+gesetzt werden. **Sichtpruefung Bewerbungsmasken (offen aus BEWERBUNG-ANMELDEKENNUNG):** erledigt — Fassung 1
+angelegt, Einwilligung erteilt und widerrufen, kein Namensfeld, im Verzeichnis steht die Anmeldung.
 
 ## SONAR-WORKFLOW-LIFECYCLE-20261011 — abgeschlossen, Codex
 

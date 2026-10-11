@@ -134,7 +134,14 @@ def action_bestellung_speichern(bestellung_id: str, request: Request, body: dict
         )
 
     try:
-        from app.services.mask_action_runtime_service import _write_audit, _write_outbox
+        from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
+
+        wiederholt = wiederholter_auftrag(
+            db, tenant_id=tenant_id, action_key="speichern", entity_type="einkauf_bestellung",
+            idempotency_key=idempotency_key, mode=mode, entity_id=entity_id,
+        )
+        if wiederholt is not None:
+            return wiederholt
         from sqlalchemy.orm import Session as SASession
 
         with SASession(bind=db.connection(), join_transaction_mode="create_savepoint") as child:
