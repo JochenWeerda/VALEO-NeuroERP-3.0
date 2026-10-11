@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## README-REFRESH-20261011 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Lieferung:** README deutsch/englisch auf Entwicklungsstand 2026-10-11 vereinheitlicht. Historische Gesamtzahlen und pauschale CI-/Produktivreife entfernt; main:app, pnpm 9.12.0, Ports und Compose-Initialisierung korrigiert. Nachweise, offene Fachthemen und verbindliche gemeinsame Testressourcen verlinkt.
+**Dateibesitz:** README.md und ausschliesslich dieser Workboard-Block. **Abnahme:** alle relativen Markdown-Ziele gegen committed HEAD, interne Anker, Workflow-Dateien und Package-Skripte geprueft; isolierte Markdown-/Governance-/Pfad-Gates bestanden. Keine Code-/DB-/Docker-Aenderung, kein neuer Gesamttest behauptet.
+**Restbefunde:** Quality Gate auf veroeffentlichtem 4337dd684 fehlgeschlagen, im README mit konkretem Run offen ausgewiesen; README-Aktualisierung behebt diesen bestehenden Code-/CI-Befund nicht. Fremdes WIP bleibt erhalten. Ergebniscommit auf main, GitHub-Push und develop-Synchronisierung folgen im Abschluss.
+
 ## FUHRPARK-TENANT-CE-20261009 — abgeschlossen, Cursor
 
 **Owner:** Cursor. **Stand:** integriert mit Codex-Isolationskorrekturen 2026-10-09.
@@ -214,9 +220,29 @@ QA `mcp-deep-link-stock-20261008.md`.
 **Weiter:** Deep-Link-Serie abgeschlossen; AP-Freigabe nachgezogen
 (`MCP-AP-FREIGABE-20261008`). Offen: FIN-CLOSE; 2× open_high; 31× blocked_no_endpoint; SUS.
 
-## POSTFACH-MICROSOFT365-20261008 — in Arbeit, Claude Code
+## VERSANDWEGE-ECHT-20261008 — in Arbeit, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-08. **Ziel:** Postfaecher mit Microsoft 365:
+**Owner:** Claude Code. **Stand:** Code vom 2026-10-08 lag unkommittiert im Arbeitsbaum, Claim
+nachgeholt 2026-10-11. **Ziel:** Vier Versandwege senden wirklich oder melden den Grund —
+Bestellung (Postfach `einkauf`, Fax/EDI ohne Einrichtung `nicht_eingerichtet` statt „versandt“),
+RFQ und Anfrage (BANF) an Lieferanten, Mahnung (Postfach `fibu` oder Post). Status erst nach
+Serverannahme. **Dringend:** `origin/main` ruft in `einkauf_bestellvorschlag.py` bereits
+`versende_bestellung_svc(..., nutzer=…)` auf; die Service-Seite fehlt im HEAD (TypeError).
+**Dateibesitz:** `app/services/mail_versand.py`, `rfq_service.py`, `finance_dunning_service.py`,
+`procurement_service.py` (nur `versende_bestellung_svc` + `VersandNichtMoeglich`),
+`einkauf_compat_service.py` (nur `get_anfrage`/`_load_anfrage_raw_row`),
+`modules/einkauf/services/versand_service.py`, `app/api/v1/endpoints/rfq.py`, `dunning.py`
+(`send_dunning` + OP-Abfragen), `mask_frontend_bridges.py` (nur `send_anfrage`),
+`app/einkauf/router.py` (nur der verdeckte `/anfragen/{id}/send`), `mcp_execution_service.py`
+(nur der Versandzweig, falls noetig), Migration `versandwege_echt_20261008` (umgehaengt hinter
+`fuhrpark_tenant_ce_20261009`, Single Head), `pages/finance/mahnwesen.tsx`,
+`pages/einkauf/anfrage-stamm.tsx`, `tests/test_versandwege_vertrag.py`, QA-Doku.
+Fremde WIP (Design-Sweep im Frontend, Codex-Publikation) unberuehrt.
+
+## POSTFACH-MICROSOFT365-20261008 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-08, Commit `3854b3a50`, gepusht;
+QA `docs/quality-assurance/postfach-microsoft365-20261008.md`. **Ziel:** Postfaecher mit Microsoft 365:
 Anmeldung per OAuth2 (Microsoft Identity Platform, delegiert, `Mail.Send` + `offline_access`),
 Versand ueber Microsoft Graph `sendMail` (landet in "Gesendete Elemente"; kein SMTP AUTH noetig),
 Alias ueber `from`. OAuth-Ablauf fuer Google und Microsoft vereinheitlicht. **Dateibesitz:**
@@ -463,6 +489,8 @@ Stufe-2-SUS-Protokoll vorbereitet. Keine neue DB/Container/Migration.
 `docs/README.md` und Domain-Depth-Plan verweisen auf den Hub.
 
 ## CI-RUN-REPAIR-20261005 — in arbeit, Codex (Chat 01a0f3fc)
+
+**FUHRPARK-PUBLISH-NORMALIZATION-20261009 (reserviert):** Owner Codex-01a0f3fc. Abschlusskontrolle: private Index-Publikation hat Windows-CRLF in eigenen Textartefakten erhalten und dadurch grosse rein formale Diffs erzeugt. Ausschliesslich33 eigene Lieferdateien plus eigenen Folgefix auf kanonische LF normalisieren, byteweise Gleichheit nach Zeilenendnormalisierung beweisen. Keine Fachcodeaenderung, keine fremden Arbeitsdateien/Staging, keine DB/Container;581 Tests bleiben semantisch identisch.
 
 **FUHRPARK-CI-CONSUMERS-20261009 (abgeschlossen):** Owner Codex-01a0f3fc. Zwoelf bestehende Fuhrpark-Vertiefungsvertraege auf eigene rollback-isolierte Probe-Fahrzeuge und verifizierte Testclaims umgestellt; keine fremden Entwicklungsdaten/Seed-Skips. Drei fehlende Slice-Pflichtfelder im roten GitHub-DocsGovernance ergaenzt; lokaler Check genau1 Slice gruen. Isoliert final581 Tests ohne Skip in29,51s, CI-Datenbankpfad80 PG-Vertraege gruen. QA nachgezogen; keine globale Auth-Ausnahme.
 
