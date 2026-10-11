@@ -21,23 +21,29 @@ bleibt heute leer. **Dateibesitz:** nur die jeweiligen Anlege-Hunks in `etikette
 `genossenschaft.py`, `kontrakte.py` (`create_disposition`), `personal.py` (`adjust_time_account`,
 zeilenneutral wegen Godfile-Ratsche), neue Vertragsdatei `tests/test_anmeldekennung_vertrag.py`, QA-Nachtrag.
 
-## QUALITY-GATE-SECRET-TEST-20261011 — reserviert, Codex
+## QUALITY-GATE-SECRET-TEST-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Zufallsbedingten Backend-CI-Fehler aus develop Run 38126200584 beseitigen: Base64 kann die zwei Klartextbuchstaben pw zufaellig enthalten.
 **Dateibesitz:** tests/test_postfaecher.py nur TestGeheimnis.test_an_mandant_und_zweck_gebunden; neue tests/test_geheimnis_contract.py und eigene QA-/Workboard-Doku.
 **Abnahme:** Verschluesselung/Roundtrip/AAD/Tamper/Schluesselbindung real und deterministisch ohne Datenbank pruefen; erlaubten Base64-Zufall explizit reproduzieren. Keine Produktkrypto-Aenderung/Schwellenabsenkung. Gemeinsamer Pruefstand --status ohne URL nicht verfuegbar; keine DB-Nutzung noetig.
 
-## MCP-ASYNC-LIFECYCLE-20261011 — reserviert, Codex
+**Lieferung:** Zufallsfehler deterministisch reproduziert; zehn datenbankfreie echte AEAD-Vertraege ersetzen den fehlerhaften pw-Teilstringtest. Produktkrypto unveraendert, keine Sicherheitspruefung abgeschwaecht. Letzte finale Einzelabnahme zehn gruen (2,08s). Nachweis: recursive-stability-milestone-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## MCP-ASYNC-LIFECYCLE-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Blockierende stdio-MCP-Aufrufe und liegenbleibende Node-Prozesse beheben; JSON-RPC-Antworten validieren.
 **Dateibesitz:** app/integrations/mcp_client.py, neue Tests/test_mcp_client_lifecycle.py, eigene QA-/Workboard-Doku; Generatorartefakte nur bei belegtem Drift.
 **Abnahme:** echte lokale Node-Gegenproben fuer Erfolg, Fehler, falsche ID, Zeitlimit und Abbruch; Eventloop bleibt reaktionsfaehig, Kindprozesse immer beendet; bestehende Optional-result-Schnittstelle erhalten. Kein Netz/DB/Docker; keine Tenant- oder fachlichen Toolrechte erweitern.
 
-## QUALITY-GATE-MAHNVERSAND-20261011 — reserviert, Codex
+**Lieferung:** Echte Asyncio-Prozesse mit Zeitlimit, geprueftem Antwortvertrag und garantierter Bereinigung; 19 echte Node-Gegenproben gruen, inklusive Abbruch, voller stderr-Pipe und reaktionsfaehigem Eventloop. Initialize-/Capability-Handshake und fachlicher PSM-Import bleiben offen. Nachweis: recursive-stability-milestone-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## QUALITY-GATE-MAHNVERSAND-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Einzigen Frontend-Vertragsfehler aus CI 38126182106 beheben: zwei neue Mahnversand-Buttons widersprechen dem 44-px-Vertrag.
 **Dateibesitz:** pages/finance/mahnlauf.tsx nur die zwei size-Attribute; eigene QA-/Workboard-Hunks.
 **Abnahme:** bestehende 111 UIX- und fuenf Versandtests unveraendert gruen, lint; keine Testabschwächung, Versandlogik erhalten, fremdes Frontend-WIP unberuehrt. Kein DB-/Dockerbedarf.
+
+**Lieferung:** Zwei widerspruechliche sm-Attribute entfernt; alle 116 bestehenden UIX-/Versandtests gruen (32,08s), ESLint gruen. Versandlogik und Tests unveraendert. Nachweis: recursive-stability-milestone-20261011.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## BEWERBUNG-ANMELDEKENNUNG-20261011 — abgeschlossen, Claude Code
 

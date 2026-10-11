@@ -174,12 +174,12 @@ export default function MahnlaufPage() {
                       <td className="px-3 py-1.5 text-right whitespace-nowrap">
                         {unversendet && (
                           <>
-                            <Button size="sm" variant="outline" className="min-h-touch" disabled={laeuft}
+                            <Button variant="outline" className="min-h-touch" disabled={laeuft}
                               onClick={() => { void versenden(n, 'email') }} aria-label={`Mahnung zu ${n.rechnungsnr ?? n.id} per E-Mail senden`}>
                               {laeuft ? <Loader2 size={14} className="animate-spin mr-1" /> : <Mail size={14} className="mr-1" />}
                               Per E-Mail
                             </Button>
-                            <Button size="sm" variant="ghost" className="ml-1 min-h-touch" disabled={laeuft}
+                            <Button variant="ghost" className="ml-1 min-h-touch" disabled={laeuft}
                               onClick={() => { void versenden(n, 'post') }} aria-label={`Postversand der Mahnung zu ${n.rechnungsnr ?? n.id} festhalten`}>
                               <Printer size={14} className="mr-1" />
                               Per Post verschickt

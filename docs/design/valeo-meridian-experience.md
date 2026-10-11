@@ -17,6 +17,8 @@ Qualifikationen, Onboarding und Schulungen hr:write. Ausfuehrbare Personal-
 Commands tragen keine konkurrierende Stub-Markierung. Die bestehende
 ScreenDefinition-RenderPlan-Runtime-Kette und strenge Readiness bleiben erhalten.
 Metadaten verleihen keine Rechte und ersetzen keine Serverautorisierung.
+Die Mahnversand-Aktionen verwenden den bestehenden 44-px-Vertrag ohne eine
+konkurrierende sm-Groessendeklaration; UIX- und Versandvertraege bleiben streng.
 
 Stand 2026-10-08: Das Agrar-Sortenregister liest den bestehenden kanonischen
 VarietyOut-Vertrag statt eines Phantom-Endpunkts. Nullable Metadaten und

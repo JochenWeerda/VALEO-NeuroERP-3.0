@@ -150,16 +150,7 @@ def anlegen(db, haus=HAUS_A, **daten):
 
 # ── Verschluesselung ──────────────────────────────────────────────────────────
 class TestGeheimnis:
-    def test_an_mandant_und_zweck_gebunden(self):
-        from app.core import geheimnis
-
-        chiffrat = geheimnis.verschluesseln("pw", tenant_id=HAUS_A, zweck="mailkonto")
-        assert chiffrat.startswith("v1:") and "pw" not in chiffrat
-        assert geheimnis.entschluesseln(chiffrat, tenant_id=HAUS_A, zweck="mailkonto") == "pw"
-        with pytest.raises(geheimnis.GeheimnisUngueltig):
-            geheimnis.entschluesseln(chiffrat, tenant_id=HAUS_B, zweck="mailkonto")
-        with pytest.raises(geheimnis.GeheimnisUngueltig):
-            geheimnis.entschluesseln(chiffrat, tenant_id=HAUS_A, zweck="imap")
+    # Database-free AEAD contracts live in test_geheimnis_contract.py.
 
     def test_ohne_schluessel_wird_nichts_gespeichert(self, db, monkeypatch):
         from app.core.geheimnis import GeheimnisNichtEingerichtet
