@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## KONTENPLAN-MANDANT-20261012 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-12. Befund aus HAUPTBUCH-ROLLEN-20261011.
+**Befund:** `chart_of_accounts.py` nimmt den Mandanten aus dem Query-Parameter `tenant_id` (Liste, Pruefung,
+DATEV-Ausgabe) oder aus dem Rumpf (anlegen); lesen, aendern und loeschen eines einzelnen Kontos filtern gar
+nicht nach Mandant. Wer lesen darf, bekommt mit `?tenant_id=` Kontenplan und DATEV-Buchungen eines anderen
+Mandanten. **Ziel:** Der Mandant kommt an allen sieben Wegen aus dem Mandantenkontext; fremde Konten
+antworten 404; der gemeinsame Kontenrahmen (`system`) bleibt sichtbar. **Dateibesitz:** nur
+`app/api/v1/endpoints/chart_of_accounts.py`, neue Vertragsdatei `tests/test_kontenplan_mandant_vertrag.py`,
+Anpassung betroffener Tests, driftende Generatorartefakte (OpenAPI nur die eigenen Pfade),
+QA-Doku. **Nicht angefasst:** `accounts.py`, das Schema `AccountCreate` (geteilt).
+
 ## WHATSAPP-LEARNING-CONTRACT-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** User-Vorgabe fuer heuristisch lernende Ergaenzung verkuerzter Kundenbestellungen, Unsicherheit/Human-in-the-loop und tatsaechliche Lieferplanung in einen pruefbaren Integrationsvertrag ueberfuehren. Dokumentationsslice; keine automatische Auftragsanlage oder Versandfreigabe.
