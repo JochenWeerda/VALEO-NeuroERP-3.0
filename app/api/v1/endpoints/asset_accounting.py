@@ -4,6 +4,7 @@ Tabellen: domain_finance.fixed_assets, domain_finance.asset_depreciation_runs
 """
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
 import logging
 from datetime import date, datetime, timezone
 from decimal import Decimal
@@ -100,8 +101,7 @@ class BudgetLineIn(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.get("/assets", tags=["finance", "asset-accounting"], summary="Assets auflisten",
-    response_model=AssetAccountingOut
-)
+    response_model=AssetAccountingOut, dependencies=[Depends(finance_read)])
 def list_assets(
     asset_class: Optional[str] = Query(None),
     is_active: Optional[bool] = Query(None),
@@ -136,8 +136,7 @@ def list_assets(
 # ---------------------------------------------------------------------------
 
 @router.post("/assets", status_code=201, tags=["finance", "asset-accounting"], summary="Asset anlegen",
-    response_model=AssetAccountingOut
-)
+    response_model=AssetAccountingOut, dependencies=[Depends(finance_write)])
 def create_asset(
     body: AssetCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -189,8 +188,7 @@ def create_asset(
 # ---------------------------------------------------------------------------
 
 @router.get("/assets/{asset_id}", tags=["finance", "asset-accounting"], summary="Asset abrufen",
-    response_model=AssetAccountingOut
-)
+    response_model=AssetAccountingOut, dependencies=[Depends(finance_read)])
 def get_asset(
     asset_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -225,8 +223,7 @@ def get_asset(
 # ---------------------------------------------------------------------------
 
 @router.patch("/assets/{asset_id}", tags=["finance", "asset-accounting"], summary="Asset aktualisieren",
-    response_model=AssetAccountingOut
-)
+    response_model=AssetAccountingOut, dependencies=[Depends(finance_write)])
 def update_asset(
     asset_id: str,
     body: AssetUpdate,
@@ -279,8 +276,7 @@ def update_asset(
 # ---------------------------------------------------------------------------
 
 @router.post("/assets/{asset_id}/dispose", tags=["finance", "asset-accounting"], summary="Asset dispose",
-    response_model=AssetAccountingOut
-)
+    response_model=AssetAccountingOut, dependencies=[Depends(finance_admin)])
 def dispose_asset(
     asset_id: str,
     body: AssetDispose,
@@ -362,8 +358,7 @@ def dispose_asset(
 # ---------------------------------------------------------------------------
 
 @router.post("/depreciation-run", tags=["finance", "asset-accounting"], summary="Depreciation ausführen",
-    response_model=AssetAccountingOut
-)
+    response_model=AssetAccountingOut, dependencies=[Depends(finance_admin)])
 def run_depreciation(
     body: DepreciationRunRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -464,8 +459,7 @@ def run_depreciation(
 # ---------------------------------------------------------------------------
 
 @router.get("/asset-register", tags=["finance", "asset-accounting"], summary="Register asset",
-    response_model=AssetAccountingOut
-)
+    response_model=AssetAccountingOut, dependencies=[Depends(finance_read)])
 def asset_register(
     year: int = Query(..., description="Geschäftsjahr"),
     tenant_id: str = Depends(get_tenant_id),
@@ -530,8 +524,7 @@ def asset_register(
 # ---------------------------------------------------------------------------
 
 @router.get("/depreciation-forecast", tags=["finance", "asset-accounting"], summary="Forecast depreciation",
-    response_model=AssetAccountingOut
-)
+    response_model=AssetAccountingOut, dependencies=[Depends(finance_read)])
 def depreciation_forecast(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

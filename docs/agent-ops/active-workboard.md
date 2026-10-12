@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## ABSCHLUSS-ROLLEN-20261012 — in Arbeit, Claude Code
+## ABSCHLUSS-ROLLEN-20261012 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-12. Zweiter Schnitt nach HAUPTBUCH-ROLLEN-20261011.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Zweiter Schnitt nach HAUPTBUCH-ROLLEN-20261011.
 **Befund:** Abschluss, Auswertung und Kostenrechnung pruefen keine Rolle (elf Dateien, rund 75 Wege).
 **Ziel:** Rolle vor dem ersten Datenbankzugriff. Lesen `finance_read`; anlegen, aendern, buchen
 `finance_write`; loeschen, genehmigen, UStVA einreichen, Anlagenabgang und Abschreibungslauf `finance_admin`.
@@ -21,6 +21,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 `asset_accounting.py`, `budget_planning.py`, `liquidity_planning.py`, `liquidity.py`, `financial_reports.py`,
 `subsidiary_ledger_reconciliation.py`, `vat_return_export.py`, `finance_datev.py`, `kostenrechnung.py`; neue Vertragsdatei
 `tests/test_abschluss_rollen_vertrag.py`, Anpassung betroffener Tests, QA-Doku.
+**Lieferung:** 74 Wege in elf Dateien mit `finance_read` / `finance_write` / `finance_admin` am Dekorator; Vertrag
+mit 1048 Faellen ohne Datenbank; 2135 Nachbartests gruen, einer rot und fremd
+(`test_parallel_installation_endpoints`, Druckerrest im Pruefstand). QA:
+`docs/quality-assurance/abschluss-rollen-20261012.md`. **Betrieb:** UStVA einreichen, Genehmigungen,
+Anlagenabgang, Abschreibungslauf nur `FINANCE_ADMIN`/`admin`. **Offen:** 229 Finanzwege ohne Rolle; Masken
+melden 403 nicht als fehlende Rolle (ausser Mahnlauf).
 
 ## KONTENRAHMEN-PFLEGERECHT-20261012 — abgeschlossen, Claude Code
 
