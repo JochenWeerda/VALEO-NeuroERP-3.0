@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HANDBUCH-ABGELOESTE-MASKEN-20261012 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-12. Offener Punkt aus den Abloese-Slices vom 11./12.10.
+**Befund:** Das Benutzerhandbuch nennt fuer `/finance/dunning`, `/finance/mahnwesen`, `/mahnwesen/mahnlauf` und
+`/finance/kontenplan` noch die geloeschten Masken und zeigt deren Bildschirmfotos. **Ziel:** Handbuch aus dem
+Routen-Inventar neu erzeugen (`scripts/generate_benutzerhandbuch_full.py`, reine Generatorausgabe — zieht
+auch fremde neue Routen nach); Mahnlauf und Kontenplan frisch aufnehmen.
+**Dateibesitz:** `docs/benutzerhandbuch/*.md` (Generatorausgabe),
+`screenshot-manifest.json` nur die Eintraege dieser Wege, sechs Bilder unter `img/`, QA-Doku.
+
 ## KONTENPLAN-HUELLE-ABLOESEN-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Befund aus KONTENPLAN-MANDANT-20261012.
