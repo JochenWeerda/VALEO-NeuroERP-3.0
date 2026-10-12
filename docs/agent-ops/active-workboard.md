@@ -11,6 +11,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FINANCE-BANK-ACTIONS-ROLES-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** 32 Wege in eigenen Bank-/Finanzaktionsdateien pruefen bestehende Finanzrollen vor Fach-/DB-Zugriff. Bankdaten lesen finance_read, Bankstamm pflegen finance_write, Loeschen/Geldausfuehrung/Abschlusssperren finance_admin; Kreditlimit-Lesen ueber bestehendes breites open_items_read, Buchungskonto-Optionen kontenplan_read. Stammdaten ausserhalb dieser drei Dateien unberuehrt.
+**Dateibesitz:** bank_accounts.py, bank_reconciliation.py, finance_actions.py nur Import/Route-Dependencies; neuer tests/test_finance_bank_roles.py; vorhandene betroffene Test-Router nur explizite gepruefte Rollen-Testidentitaet; eigene QA/Workboard. Keine Aenderung zentraler Auth-/Rollen-/Tenantmodelle, keine neue DB und kein Browserbetrieb.
+**Abnahme:** alle Route-/Rollenklassen vollstaendig, unberechtigte Rollen/fehlende Anmeldung vor DB abweisen; berechtigte Nachbarvertraege bleiben funktionsfaehig. Rollen-Abnahme ist keine Mandanten-/Daten-/Browserabnahme; Header-/Default-/Urheber-Folgebefunde getrennt offen.
+**Risiko:** alter BANK-RECONCILIATION-PROOF-20261001 gehoert derselben Codex-Session; dieser Teilschnitt aendert keine Vergleichs-/Buchungslogik. SEPA/Raten/Mahnaktionswege verwenden eigene Default-/Operatorwerte, hier nur Role-Gate. **Harness:** echte FastAPI-Dependencies, gemockte Identitaetsgrenze und verweigerte DB; Nachbartests ohne neue Ressourcen; QA/Doku/Workboard und OpenAPI-Strukturvergleich; externe CI nach Push getrennt.
+
 ## WHATSAPP-EMERGENCY-CONTRACT-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** User-Fachregel fuer seltene dringende Last-minute-Auftraege: Kammerumverteilung, akzeptierte Ersatzsorte als Teilmenge, offene Restmengen und Lernen ohne Verfaelschung normaler Kundenmuster verbindlich dokumentieren.
