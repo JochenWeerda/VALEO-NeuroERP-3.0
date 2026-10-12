@@ -5,7 +5,7 @@ Eingehende Nachrichten aus der Verkaufs-WhatsApp-Gruppe werden als Freitext erfa
 Kunde/Artikel/Menge/Termin/Silo/Preis zerlegt. Fällt der LLM-Pfad aus (kein
 ANTHROPIC_API_KEY o. ä.), greift ein deterministischer Heuristik-Parser, damit der
 Ablauf jederzeit funktioniert. Kunde wird gegen kunden_lookup gematcht, Artikel
-best-effort gegen den Artikelstamm. Nach Bestätigung entsteht ein Kontakt am Kunden
+gegen mandantengebundene Stammdaten. Nach Bestätigung entsteht ein Kontakt am Kunden
 (Brücke in den Flow Spine) und der Beleg wird vorbelegt.
 """
 
@@ -15,6 +15,7 @@ import json
 import logging
 import re
 import uuid
+from copy import deepcopy
 from typing import Any, Optional
 
 from sqlalchemy import text
@@ -22,7 +23,8 @@ from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
+class WhatsAppReferenceError(ValueError):
+    """A selected reference is unavailable or ambiguous in the tenant."""
 
 _SCHEMA_HINT = (
     "Extrahiere die Bestellung als JSON (NUR JSON, keine Markdown-Blöcke, kein Text drumherum). "
@@ -51,9 +53,11 @@ _EINHEITEN = ["to", "t", "kg", "LKW", "Pal", "Palette", "Sack", "Big-Bag", "BigB
 
 
 class WhatsAppIntakeService:
-    def __init__(self, db: Session, tenant_id: Optional[str] = None) -> None:
+    def __init__(self, db: Session, tenant_id: str) -> None:
+        if not isinstance(tenant_id, str) or not tenant_id.strip() or len(tenant_id) > 64:
+            raise ValueError("Explicit tenant context required")
         self.db = db
-        self.tenant_id = tenant_id or _DEFAULT_TENANT
+        self.tenant_id = tenant_id
 
     # ── Extraktion ────────────────────────────────────────────────────────
     def extract(self, raw_text: str) -> tuple[dict, str, float]:
@@ -122,64 +126,106 @@ class WhatsAppIntakeService:
 
     # ── Matching ──────────────────────────────────────────────────────────
     def match_kunde(self, kunde_text: Optional[str], ort: Optional[str]) -> Optional[dict]:
-        """Fuzzy-Match gegen kunden_lookup.
+        """Fuzzy-Match im eigenen aktiven Business-Partner-Kontext.
 
         Tokens des Kundennamens werden mit OR gegen name/matchcode geprüft (mind. ein
         Treffer ist Pflicht); ein evtl. genannter Ort dient als Ranking-Boost, NICHT als
         harte Bedingung — so matcht 'Lindena Dornum' auf 'A. & H. Lindena GbR' (Dornum),
         ohne dass 'Dornum' im Namen stehen muss.
         """
-        if not kunde_text:
+        if not isinstance(kunde_text, str) or not kunde_text.strip():
             return None
         tokens = [t for t in re.split(r"[\s.,&:]+", kunde_text) if len(t) >= 3][:4]
         if not tokens:
             return None
         ort_tokens = [t for t in tokens]
-        if ort:
+        if isinstance(ort, str) and ort:
             ort_tokens += [t for t in re.split(r"[\s.,]+", ort) if len(t) >= 3]
-        name_score = " + ".join(f"(CASE WHEN name ILIKE :t{i} OR matchcode ILIKE :t{i} THEN 1 ELSE 0 END)" for i in range(len(tokens)))
-        ort_score = " + ".join(f"(CASE WHEN ort ILIKE :o{i} THEN 1 ELSE 0 END)" for i in range(len(ort_tokens))) or "0"
-        where = " OR ".join(f"name ILIKE :t{i} OR matchcode ILIKE :t{i}" for i in range(len(tokens)))
+        name_score = " + ".join(f"(CASE WHEN k.name ILIKE :t{i} OR k.matchcode ILIKE :t{i} THEN 1 ELSE 0 END)" for i in range(len(tokens)))
+        ort_score = " + ".join(f"(CASE WHEN k.ort ILIKE :o{i} THEN 1 ELSE 0 END)" for i in range(len(ort_tokens))) or "0"
+        where = " OR ".join(f"k.name ILIKE :t{i} OR k.matchcode ILIKE :t{i}" for i in range(len(tokens)))
         params: dict[str, Any] = {f"t{i}": f"%{tok}%" for i, tok in enumerate(tokens)}
         params.update({f"o{i}": f"%{tok}%" for i, tok in enumerate(ort_tokens)})
+        params["tenant"] = self.tenant_id
         sql = (
-            f"SELECT kunden_nr, name, plz, ort, business_partner_id, ({name_score}) AS nscore, ({ort_score}) AS oscore "
-            f"FROM kunden_lookup WHERE {where} ORDER BY nscore DESC, oscore DESC, length(name) ASC LIMIT 1"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
+            f"SELECT k.kunden_nr, k.name, k.plz, k.ort, k.business_partner_id, ({name_score}) AS nscore, ({ort_score}) AS oscore "
+            "FROM public.kunden_lookup k JOIN domain_crm.business_partners bp "
+            "ON bp.partner_id::text = k.business_partner_id::text "
+            "WHERE bp.tenant_id = :tenant AND bp.is_customer IS TRUE AND bp.status = 'active' AND ("
+            f"{where}) ORDER BY nscore DESC, oscore DESC, length(name) ASC LIMIT 2"  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
         )
-        try:
-            r = self.db.execute(text(sql), params).mappings().first()
-        except Exception:
-            self.db.rollback()
+        rows = self.db.execute(text(sql), params).mappings().all()
+        if len(rows) != 1:
             return None
-        if not r:
-            return None
+        r = rows[0]
         return {"kunden_nr": r["kunden_nr"], "name": r["name"], "plz": r.get("plz"), "ort": r.get("ort")}
 
+    def _customer_by_number(self, number: str) -> dict:
+        rows = self.db.execute(text(
+            "SELECT k.kunden_nr, k.name1 AS name, k.plz, k.ort FROM public.kunden k "
+            "JOIN domain_crm.business_partners bp ON bp.partner_id::text = k.business_partner_id::text "
+            "WHERE k.kunden_nr = :number AND bp.tenant_id = :tenant "
+            "AND k.geloescht IS NOT TRUE AND bp.is_customer IS TRUE AND bp.status = 'active' "
+            "LIMIT 2 FOR SHARE OF k, bp"
+        ), {"number": number, "tenant": self.tenant_id}).mappings().all()
+        if len(rows) != 1:
+            raise WhatsAppReferenceError("Unavailable customer reference")
+        return dict(rows[0])
+
     def match_artikel(self, artikel_text: Optional[str]) -> Optional[dict]:
-        if not artikel_text or artikel_text == "—":
+        if not isinstance(artikel_text, str) or not artikel_text.strip() or artikel_text == "—":
             return None
         token = re.split(r"[\s/]+", artikel_text.strip())[0]
         if len(token) < 2:
             return None
-        try:
-            r = self.db.execute(
-                text(
-                    "SELECT article_number, name FROM domain_inventory.articles "
-                    "WHERE tenant_id = :t AND is_active IS NOT FALSE "
-                    "AND (name ILIKE :q OR article_number ILIKE :q) "
-                    "ORDER BY length(name) LIMIT 1"
-                ),
-                {"q": f"%{token}%", "t": self.tenant_id},
-            ).mappings().first()
-        except Exception:
-            self.db.rollback()
+        rows = self.db.execute(
+            text(
+                "SELECT article_number, name FROM domain_inventory.articles "
+                "WHERE tenant_id = :t AND is_active IS NOT FALSE "
+                "AND (name ILIKE :q OR article_number ILIKE :q) "
+                "ORDER BY length(name) LIMIT 2"
+            ),
+            {"q": f"%{token}%", "t": self.tenant_id},
+        ).mappings().all()
+        if len(rows) != 1:
             return None
-        return {"article_number": r["article_number"], "name": r["name"]} if r else None
+        return {"article_number": rows[0]["article_number"], "name": rows[0]["name"]}
+
+    @staticmethod
+    def _positions(parsed: dict) -> list[dict]:
+        positions = parsed.get("positionen")
+        if positions is None:
+            return []
+        if not isinstance(positions, list) or any(not isinstance(p, dict) for p in positions):
+            raise WhatsAppReferenceError("Invalid order positions")
+        return positions
+
+    def _validate_references(self, parsed: dict, customer_number: Optional[str]) -> dict:
+        result = deepcopy(parsed)
+        result["match_kunde"] = self._customer_by_number(customer_number) if customer_number is not None else None
+        for pos in self._positions(result):
+            refs = [pos[key] for key in ("match_article_number", "article_number") if pos.get(key) is not None]
+            if not refs:
+                pos.pop("match_name", None)
+                continue
+            if any(not isinstance(ref, str) or not ref.strip() for ref in refs) or len(set(refs)) != 1:
+                raise WhatsAppReferenceError("Invalid article reference")
+            rows = self.db.execute(text(
+                "SELECT name FROM domain_inventory.articles WHERE tenant_id=:tenant "
+                "AND article_number=:number AND is_active IS NOT FALSE LIMIT 2 FOR SHARE"
+            ), {"tenant": self.tenant_id, "number": refs[0]}).mappings().all()
+            if len(rows) != 1:
+                raise WhatsAppReferenceError("Unavailable article reference")
+            pos["match_name"] = rows[0]["name"]
+        return result
 
     # ── Persistenz / Workflow ─────────────────────────────────────────────
     def _enrich(self, parsed: dict) -> dict:
+        parsed = deepcopy(parsed)
         kunde = self.match_kunde(parsed.get("kunde"), parsed.get("ort"))
-        for pos in parsed.get("positionen", []) or []:
+        for pos in self._positions(parsed):
+            for key in ("match_article_number", "match_name", "article_number"):
+                pos.pop(key, None)
             art = self.match_artikel(pos.get("artikel"))
             if art:
                 pos["match_article_number"] = art["article_number"]
@@ -236,13 +282,16 @@ class WhatsAppIntakeService:
         rows = self.db.execute(text(sql), params).mappings().all()
         return [self._row(r) for r in rows]
 
-    def bestaetigen(self, inbox_id: str, kunden_nr: Optional[str], beleg_typ: str, parsed_override: Optional[dict]) -> dict:
+    def bestaetigen(self, inbox_id: str, kunden_nr: Optional[str], beleg_typ: str, parsed_override: Optional[dict], *, actor: str) -> dict:
         """Verkäufer bestätigt: Kunde fixieren, Beleg-Typ setzen, Kontakt am Kunden anlegen."""
+        if not isinstance(actor, str) or not actor.strip() or len(actor) > 120:
+            raise ValueError("Verified actor required")
         cur = self.get(inbox_id)
         if not cur:
             return {}
-        knr = kunden_nr or cur.get("kunden_nr")
-        parsed = parsed_override or cur.get("parsed") or {}
+        knr = cur.get("kunden_nr") if kunden_nr is None else kunden_nr
+        parsed = (cur.get("parsed") or {}) if parsed_override is None else parsed_override
+        parsed = self._validate_references(parsed, knr)
         self.db.execute(
             text(
                 "UPDATE public.whatsapp_bestellungen SET status='bestaetigt', kunden_nr=:knr, "
@@ -266,7 +315,7 @@ class WhatsAppIntakeService:
                 ),
                 {
                     "knr": knr, "kurz": f"WhatsApp-Bestellung: {pos_txt[:280]}" or "WhatsApp-Bestellung",
-                    "notiz": cur.get("raw_text"), "bed": cur.get("absender"),
+                    "notiz": cur.get("raw_text"), "bed": actor,
                     "verweis": f"Bestell-Inbox {inbox_id[:8]}", "tid": self.tenant_id,
                 },
             )

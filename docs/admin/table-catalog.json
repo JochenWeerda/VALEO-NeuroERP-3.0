@@ -11959,7 +11959,8 @@
             "app/services/finance_dunning_service.py",
             "app/services/kunden_merge.py",
             "app/services/mcp_execution_service.py",
-            "app/services/rfq_service.py"
+            "app/services/rfq_service.py",
+            "app/services/whatsapp_intake_service.py"
           ]
         },
         "cancellation_reason": {

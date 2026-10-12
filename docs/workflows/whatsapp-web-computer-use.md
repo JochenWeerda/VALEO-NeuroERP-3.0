@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, agent, operator]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-10-11
+last_reviewed: 2026-10-12
 description: Verbindlicher Browsertransport, belegter Ist-Stand und Abnahme der WhatsApp-Integration.
 ---
 
@@ -27,7 +27,7 @@ das Ziel; die vorhandene Inbox implementiert noch keine lernende Ergaenzung.
 
 | Bereich | Beleg | Befund |
 | --- | --- | --- |
-| Nachrichtentext und Bestellpruefung | `app/api/v1/endpoints/whatsapp_intake.py`, `app/services/whatsapp_intake_service.py` | Bestehende persistente Bestell-Inbox mit Erfassen, Pruefen, Bestaetigen und Verwerfen; geeigneter Wiederverwendungspunkt, Sicherheits-/Replay-Abnahme noch erforderlich |
+| Nachrichtentext und Bestellpruefung | `app/api/v1/endpoints/whatsapp_intake.py`, `app/services/whatsapp_intake_service.py` | Persistente Bestell-Inbox mit verifiziertem OIDC-Mandanten/Scopes und geprueften Kunden-/Artikelreferenzen; Replay-/Original-/Korrekturabnahme bleibt offen |
 | Automatischer Bestellsimulator | `app/services/whatsapp_agent_service.py`, `app/api/v1/endpoints/whatsapp_webhook.py` | Anderer bestehender Bestellweg mit Simulator/Meta-Eingang; nicht als zusaetzliche Browser-Bestellpipeline kopieren |
 | Benachrichtigung | `app/services/whatsapp_notify_service.py` | Dauerhafte pending_browser-Auftraege und Audit in bestehenden Kanal-Tabellen; inhalts-/urhebergebundener Replay, kein Zustellnachweis |
 | Kanaladapter | `app/channels/whatsapp_adapter.py`, `app/api/v1/endpoints/channels.py` | Webhook-/Meta-Formate; kein WhatsApp-Web-Adapter |
@@ -109,3 +109,11 @@ Namensraum aus. Listen: Default 50, maximal 200.
 [Persistenzabnahme](../quality-assurance/whatsapp-persistence-20261011.md).
 Browseranbindung, Eingangs-/Versandnachweise und realer Versandtest offen.
 Keine Nachricht versandt und keine Sitzung angemeldet.
+
+Die fuenf Bestell-Inbox-Wege sind ebenfalls an die bestehenden verifizierten
+Mandanten-/Scope-Guards gebunden. Kundenmatch benoetigt einen aktiven eigenen
+Kunden-Business-Partner, Artikelreferenzen werden vor Bestaetigung erneut
+geprueft. Mehrdeutige Matches bleiben offen; Kontakt-Bediener kommt aus Token-sub.
+[Inbox-Zugriffsabnahme](../quality-assurance/whatsapp-inbox-access-20261012.md).
+Eingangs-Replay, unveraenderliches Original-/Korrektur-Audit und echte lernende
+Ergaenzung sind dadurch noch nicht implementiert.

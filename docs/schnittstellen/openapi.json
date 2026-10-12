@@ -20083,9 +20083,16 @@
         "type": "object"
       },
       "BestaetigenIn": {
+        "additionalProperties": false,
         "properties": {
           "beleg_typ": {
             "default": "auftrag",
+            "enum": [
+              "angebot",
+              "auftrag",
+              "lieferschein",
+              "rechnung"
+            ],
             "title": "Beleg Typ",
             "type": "string"
           },
@@ -51687,6 +51694,13 @@
             "title": "Doc Typ",
             "type": "string"
           },
+          "idempotency_key": {
+            "maxLength": 120,
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
           "kunden_name": {
             "anyOf": [
               {
@@ -51725,12 +51739,19 @@
             "title": "Portal Url"
           },
           "tenant_id": {
-            "default": "dev-tenant",
-            "title": "Tenant Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
           }
         },
         "required": [
+          "idempotency_key",
           "phone",
           "doc_typ",
           "doc_nr"
@@ -94858,6 +94879,13 @@
             ],
             "title": "Fahrer"
           },
+          "idempotency_key": {
+            "maxLength": 120,
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
           "kunden_name": {
             "anyOf": [
               {
@@ -94889,12 +94917,19 @@
             "type": "string"
           },
           "tenant_id": {
-            "default": "dev-tenant",
-            "title": "Tenant Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
           }
         },
         "required": [
+          "idempotency_key",
           "phone",
           "artikel",
           "menge"
@@ -179143,6 +179178,7 @@
         "type": "object"
       },
       "app__api__v1__endpoints__whatsapp_intake__IntakeIn": {
+        "additionalProperties": false,
         "properties": {
           "absender": {
             "anyOf": [
@@ -447053,6 +447089,24 @@
       "post": {
         "description": "Triggerbar aus Docflow nach Lieferschein-/Rechnungs-Erstellung.",
         "operationId": "simulate_dokument_ready_api_v1_whatsapp_dev_notify_dokument_ready_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -447099,8 +447153,26 @@
     },
     "/api/v1/whatsapp/dev/notify/lieferankuendigung": {
       "post": {
-        "description": "Triggerbar aus Disposition/Logistik: LKW ~eta_min Minuten entfernt.\nIm Simulator: Nachricht in Outbox-Log. Mit WHATSAPP_ACCESS_TOKEN: echter Meta-Aufruf.",
+        "description": "Triggerbar aus Disposition/Logistik: LKW ~eta_min Minuten entfernt.\nDauerhafter Vorbereitungsauftrag; kein automatischer Netzwerkversand.",
         "operationId": "simulate_lieferankuendigung_api_v1_whatsapp_dev_notify_lieferankuendigung_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -447203,9 +447275,43 @@
             "name": "tenant_id",
             "required": false,
             "schema": {
-              "default": "dev-tenant",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tenant-Id"
             }
           }
         ],
