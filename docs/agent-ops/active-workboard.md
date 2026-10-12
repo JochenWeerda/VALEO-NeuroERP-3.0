@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## IDENTITY-INTEGRATION-REST-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „rest bitte auch noch umsetzen“. **Ziel:** offene Sitzungs-, Agenten-, Freigabe- und Ressourcenvertraege in vorhandene Wege integrieren. **Dateibesitz:** app/auth/oidc.py und dependencies.py nur zentrale verifizierte Identitaet; operator_agent.py samt operator_agent_service.py und agent_proposal_repository.py/model/schemas nur Tokenurheber, Inhaltsbindung, Idempotenz und Ausfuehrungsgrenze; frontend hooks/useAuth.ts, lib/api-client.ts und axios.ts nur Authkonfiguration/Refresh/Logout, ProtectedRoute.tsx nur OIDC-Bypass-Hunk (fremdes Styling erhalten); config/architecture-domain-prefixes.yaml nur neue eigene Identitaetsmodule; eigene Tests/QA/ADR und Plattform-Domainpack. Elternclaim IDENTITY-CONTROL behaelt Sessionmodule, Neuro-Broker/Gateway und lib/auth.ts. **Abnahme:** kein frei gelieferter Urheber/Rolle, kein dev/HS-Fallback, Widerruf auch an Streams, Rechte-Schnittmenge und Mandatsende vor Wirkung, Vier Augen/Inhaltsbindung/Replay und atomare Quoten; echte positive und negative Vertrage mit vorhandenen Ressourcen. Keine neue DB/Container/Reset, keine privaten Benutzerwerte versionieren. **Risiken:** Provider-Erstanmeldung bleibt persoenliche Benutzeraktion; fremde UI-/Finanzclaims bleiben geschuetzt.
+
 ## KONTO-SPERRE-MELDUNG-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Offener Punkt aus KONTO-SPERRE-20261012.
