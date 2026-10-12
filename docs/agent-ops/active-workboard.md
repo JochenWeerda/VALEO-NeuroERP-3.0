@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## IDENTITY-ADMIN-HANDBUCH-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber: Testanmeldung, Mandanten-/Administrator-/Nutzer-/Agentenverwaltung mit Handbuch-Screenshots und hierarchischen Kontingenten. **Ziel:** echte Verwaltungswege, Loeschschutz ab erster Buchung, Sperre statt Loeschen, kontingentgebundene Unterdelegation und nachvollziehbares Verbrauchsnebenbuch. **Dateibesitz:** app/api/v1/endpoints/tenants.py, neues app/services/tenant_lifecycle_service.py; neue identity_quota-Module und eigene Tests; neue native Verwaltungs-ScreenDefinitions in eigenem Modul samt eng begrenzter Registry-Anbindung, neue thin-wrapper Routen (kein fremdes Maskenstyling); docs/benutzerhandbuch/identity-administration.md samt ausschliesslich synthetischen Screenshots, eigene QA/Workboard/ADR083-Ergaenzung. Bestehender IDENTITY-CONTROL-Claim behaelt Provider/User-/Agent-API und deren Integration. **Abnahme:** Buchungshistorie verhindert physisches Loeschen, fremde Mandanten unzugaenglich, deaktivierte Mandanten nicht benutzbar; Elternbudget kann durch Unteragenten nicht steigen, atomare Reservierung und Abrechnung mit Replay-Schutz. Screenshots ausschliesslich echte Browserablaeufe und synthetische Daten, keine privaten Zugangsdaten. **Risiken:** persoenliche MFA-Erstanmeldung vom Auftraggeber vertagt; dafuer keine Ersatzfreigabe behaupten. Vorhandenen Pruefstand verwenden; kein neuer Container/DB/Reset, keine fremden Claims uebernehmen.
+
 ## STEUERSCHLUESSEL-EINHEIT-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Auftrag: SKR03 fuer den Testmandanten, eine Quelle.
