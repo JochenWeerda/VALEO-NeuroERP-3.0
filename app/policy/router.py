@@ -23,7 +23,6 @@ from app.middleware.rate_limit import limiter
 from .store import PolicyStore, DEFAULT_DB
 from .ws import hub
 from app.auth.deps import get_current_user, require_roles, User
-from app.auth.jwt import decode_token
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -181,34 +180,12 @@ async def restore_from_backup(
 # --- WebSocket ---
 
 
-def _extract_websocket_token(websocket: WebSocket, query_token: str | None) -> str:
-    if query_token:
-        return query_token.strip()
-
-    auth_header = (websocket.headers.get("authorization") or "").strip()
-    if auth_header.lower().startswith("bearer "):
-        return auth_header[7:].strip()
-    return auth_header
-
-
 def _resolve_policy_ws_auth(websocket: WebSocket, query_token: str | None) -> dict:
-    token = _extract_websocket_token(websocket, query_token)
-    if not token:
-        raise ValueError("Missing bearer token")
-
-    if settings.API_DEV_TOKEN and token == settings.API_DEV_TOKEN:
-        return {"user_id": "dev", "roles": ["admin"]}
-
-    claims = decode_token(token)
-    user_id = (claims.get("sub") or "").strip()
-    roles = claims.get("roles") or []
-    if not isinstance(roles, list):
-        roles = []
-    if not user_id:
-        raise ValueError("Invalid or expired token")
-    if not {"admin", "manager"}.intersection(set(roles)):
-        raise ValueError("Insufficient role")
-    return {"user_id": user_id, "roles": roles}
+    from app.core.security import verified_websocket_context
+    context = verified_websocket_context(websocket, query_token)
+    if not {"admin", "manager"}.intersection(context["roles"]):
+        raise HTTPException(403, "Insufficient role")
+    return context
 
 
 @router.websocket("/ws")

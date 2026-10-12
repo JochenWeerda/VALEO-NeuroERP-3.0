@@ -16,12 +16,7 @@ policy_router_module = importlib.import_module("app.policy.router")
 client = TestClient(app)
 
 
-@pytest.fixture(autouse=True)
-def _configure_dev_token(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(settings, "API_DEV_TOKEN", "dev-token")
-    monkeypatch.setattr(security.settings, "API_DEV_TOKEN", "dev-token")
-    monkeypatch.setattr(realtime_ws.settings, "API_DEV_TOKEN", "dev-token")
-    monkeypatch.setattr(policy_router_module.settings, "API_DEV_TOKEN", "dev-token")
+from test_system_tenant_binding import keys, probe
 
 
 def test_pos_websocket_rejects_missing_token() -> None:
@@ -32,9 +27,9 @@ def test_pos_websocket_rejects_missing_token() -> None:
         assert exc.code == 1008
 
 
-def test_pos_websocket_scopes_terminal_registry_by_tenant() -> None:
-    with client.websocket_connect("/api/v1/ws/pos/T-1?token=dev-token&tenant_id=tenant-a"):
-        with client.websocket_connect("/api/v1/ws/pos/T-1?token=dev-token&tenant_id=tenant-b"):
+def test_pos_websocket_scopes_terminal_registry_by_tenant(probe) -> None:
+    with client.websocket_connect('/api/v1/ws/pos/T-1?token=' + probe.token('tenant-a')):
+        with client.websocket_connect('/api/v1/ws/pos/T-1?token=' + probe.token('tenant-b')):
             assert "tenant-a:T-1" in realtime_ws.active_terminals
             assert "tenant-b:T-1" in realtime_ws.active_terminals
             assert len(realtime_ws.active_terminals) == 2
@@ -48,7 +43,7 @@ def test_workflow_websocket_rejects_missing_token() -> None:
         assert exc.code == 1008
 
 
-def test_workflow_websocket_reads_tenant_scoped_status(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_workflow_websocket_reads_tenant_scoped_status(monkeypatch: pytest.MonkeyPatch, probe) -> None:
     captured: list[str] = []
 
     def _fake_cache_get_json(key: str):
@@ -57,7 +52,7 @@ def test_workflow_websocket_reads_tenant_scoped_status(monkeypatch: pytest.Monke
 
     monkeypatch.setattr("app.core.cache.cache_get_json", _fake_cache_get_json)
 
-    with client.websocket_connect("/api/v1/ws/workflow/WF-1?token=dev-token&tenant_id=tenant-a") as websocket:
+    with client.websocket_connect('/api/v1/ws/workflow/WF-1?token=' + probe.token('tenant-a')) as websocket:
         websocket.send_json({"action": "status"})
         response = websocket.receive_json()
 
@@ -74,6 +69,6 @@ def test_policy_websocket_rejects_missing_token() -> None:
         assert exc.code == 1008
 
 
-def test_policy_websocket_accepts_dev_token() -> None:
-    with client.websocket_connect("/api/mcp/policy/ws?token=dev-token") as websocket:
+def test_policy_websocket_accepts_verified_admin(probe) -> None:
+    with client.websocket_connect('/api/mcp/policy/ws?token=' + probe.token(changes={'roles': ['admin']})) as websocket:
         websocket.send_text("ping")

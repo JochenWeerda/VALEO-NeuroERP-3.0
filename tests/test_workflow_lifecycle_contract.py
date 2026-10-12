@@ -33,9 +33,15 @@ class Repository:
 @pytest.fixture(autouse=True)
 def forbid_database(monkeypatch):
     from sqlalchemy.engine import Engine
+    from app.core.tenant_context import set_current_tenant_id, reset_current_tenant_id
     def forbidden(*args, **kwargs):
         raise AssertionError("This contract must not open a database connection")
     monkeypatch.setattr(Engine, "connect", forbidden)
+    context = set_current_tenant_id("system")
+    try:
+        yield
+    finally:
+        reset_current_tenant_id(context)
 
 
 @pytest.mark.parametrize("operation", ["transition", "audit"])
@@ -45,7 +51,7 @@ def test_sse_is_delivered_before_success(monkeypatch, operation):
     monkeypatch.setattr(routes.workflow, "next", lambda *args, **kwargs: (True, "submitted", "ok"))
     repo = Repository()
     async def scenario():
-        queue = await hub.subscribe("workflow")
+        queue = await hub.subscribe("workflow", tenant_id="system")
         if operation == "transition":
             result = await routes.do_transition("sales", "contract-probe", "submit", {"reason": "probe"}, repo)
             assert result == {"ok": True, "state": "submitted"}
@@ -59,13 +65,13 @@ def test_sse_is_delivered_before_success(monkeypatch, operation):
             assert event["type"] == "audit_access" and event["count"] == 0
         assert event["number"] == "contract-probe"
         assert event["domain"] == "sales"
-        await hub.unsubscribe("workflow", queue)
+        await hub.unsubscribe("workflow", queue, tenant_id="system")
     asyncio.run(scenario())
 
 
 @pytest.mark.parametrize("operation", ["transition", "audit"])
 def test_notification_failure_does_not_invalidate_success(monkeypatch, caplog, operation):
-    async def failed_broadcast(*args):
+    async def failed_broadcast(*args, **kwargs):
         raise RuntimeError("private subscriber data")
     monkeypatch.setattr(routes, "sse_hub", SimpleNamespace(broadcast=failed_broadcast))
     monkeypatch.setattr(routes.workflow, "next", lambda *args, **kwargs: (True, "submitted", "ok"))
@@ -87,12 +93,12 @@ def test_invalid_transition_never_publishes(monkeypatch):
     monkeypatch.setattr(routes.workflow, "next", lambda *args, **kwargs: (False, "draft", "blocked"))
     repo = Repository()
     async def scenario():
-        queue = await hub.subscribe("workflow")
+        queue = await hub.subscribe("workflow", tenant_id="system")
         with pytest.raises(HTTPException) as error:
             await routes.do_transition("sales", "contract-probe", "submit", {}, repo)
         assert error.value.status_code == 400
         assert queue.empty() and repo.state == "draft" and repo.audits == []
-        await hub.unsubscribe("workflow", queue)
+        await hub.unsubscribe("workflow", queue, tenant_id="system")
     asyncio.run(scenario())
 
 

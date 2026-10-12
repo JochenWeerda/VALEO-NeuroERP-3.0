@@ -11,29 +11,37 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## IDENTITY-ARCHITECTURE-IMPLEMENTATION-20261012 — reserviert, Codex
+## IDENTITY-ARCHITECTURE-IMPLEMENTATION-20261012 — in arbeit, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
 **Dateibesitz:** docs/architecture/security/central-identity-agent-management-proposal.md fuer Umsetzungslieferstand; eigener QA-/Workboard-Plan. Ausfuehrender Code bekommt weiterhin abgegrenzte Unterclaims.
 **Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
 
-## IDENTITY-AUTH-CONTRACT-20261012 — reserviert, Codex
+**Lieferung:** Umsetzung beauftragt und erster Identitaetsmeilenstein geliefert. Sitzungswiderruf, administrierte Agentenmandate, inhaltsgebundene Freigaben, Kontingente und Ressourcensteuerung bleiben weitere Implementierungsschritte. Nachweis: docs/quality-assurance/identity-transport-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## IDENTITY-AUTH-CONTRACT-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
 **Dateibesitz:** tests/test_auth_middleware.py und tests/test_mandant_token_bindung.py nur alte Dev-/Missing-Claim-Erwartungen durch verpflichtenden echten Providervertrag ersetzen; Mapper-Test erhalten. Eigene QA/Workboard.
 **Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
 
-## IDENTITY-REGRESSION-20261012 — reserviert, Codex
+**Lieferung:** Permissive Uebergangstests durch verpflichtende echte Provideridentitaet ersetzt, Mapper-Vertrag erhalten. 19 gruen, Missing-Claim-Schalter und Dev-Token erteilen keine Ausnahme. Nachweis: docs/quality-assurance/identity-transport-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## IDENTITY-REGRESSION-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
 **Dateibesitz:** tests/test_finance_bank_roles.py und tests/test_workflow_lifecycle_contract.py nur explizite Identitaets-/Mandanten-Testgrenzen; kein Produkt- oder DB-Edit. Eigene QA/Workboard.
 **Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
 
-## IDENTITY-STREAMS-20261012 — reserviert, Codex
+**Lieferung:** Finanzrollen bleiben isolierter Rollenvertrag mit ausdruecklicher Testmandantengrenze; Workflow-Ereignistests isolieren Kontext und pruefen tatsaechliche Zustellung/Bereinigung. Nachweis: docs/quality-assurance/identity-transport-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## IDENTITY-STREAMS-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
 **Dateibesitz:** app/core/sse.py, app/routers/workflow_router.py und export_router.py nur mandantengebundene Ereigniszustaellung; app/policy/router.py nur zentraler WS-Kontext; tests/test_identity_streams.py und bestehende zwei Realtime-Security-Testdateien nur echte signierte Testidentitaeten; eigene QA/Workboard. Kein DB-/Provider-/Frontend-Edit.
 **Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
+
+**Lieferung:** SSE nach Mandant/Kanal getrennt, eigene Subscriptionbereinigung und Tokenablauf; Policy-WS verwendet verifizierte Identitaet statt Dev-/HS. Globaler Policyvertrag bleibt separate Shared-Data-Abnahme. Nachweis: docs/quality-assurance/identity-transport-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## ZAHLUNG-STAMMDATEN-ROLLEN-20261012 — abgeschlossen, Claude Code
 
@@ -57,11 +65,13 @@ Rolle; ohne Rolle schreibend noch 19 (`finance_invoices`, `document_control`, `m
 `payment_matching`, `bank_statement_import`, Einzelwege). **Offen:** Debitoren/Kreditoren lesen kann jeder
 Angemeldete (fachliche Entscheidung).
 
-## IDENTITY-TRANSPORT-20261012 — reserviert, Codex
+## IDENTITY-TRANSPORT-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
 **Dateibesitz:** app/core/security.py nach abgeschlossenem Claude-Claim nur zentrale Verifikation und Exempt-/Queryvertrag; app/api/v1/endpoints/websocket.py und copilot_ws.py nur Authentifizierung/Lebensdauer; tests/test_identity_transport.py; eigene QA/ADR/Workboard. SYSTEM-TENANT-BOUNDARY behaelt main.py, deps/tenant und zentrales Routebinding. Realm/Frontend/DB bleiben unberuehrt.
 **Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
+
+**Lieferung:** Gemeinsame signierte Provideridentitaet fuer HTTP/WS; keine Dev-/HS-/Nicht-API-/Queryumgehung, Ablauf beendet WS vor Fachzugriff. Abnahme mit echten Token, zwei Mandanten und vier Realtimewegen. Nachweis: docs/quality-assurance/identity-transport-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## IDENTITY-AGENT-PROPOSAL-20261012 — abgeschlossen, Codex
 
@@ -95,13 +105,15 @@ WIP ohne die Zeilen dieser Migration — vor einem Commit dieser Dateien mit HEA
 Katalog-Check. **Offen:** uebrige Buchungswege melden die Sperre als Datenbankfehler; keine Anzeige, wo ein Konto
 hinterlegt ist; `allow_manual_entries`/`currency` weiter ungespeichert im Schema.
 
-## SYSTEM-TENANT-BOUNDARY-20261012 — reserviert, Codex
+## SYSTEM-TENANT-BOUNDARY-20261012 — in arbeit, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „dann schliesse diese Sicherheitsluecke systemweit“. **Ziel:** verbindlicher verifizierter Mandantenkontext vor allen geschuetzten API-Fachzugriffen; kein permissiver Missing-Claim-/Dev-/Headerfallback. Zentrale Path-/Query-/Body-Bindung und Inventar aller Umgehungsflaechen, schrittweise echte zwei-Mandanten-Abnahme. Breite Rollen und explizite Shared-Data-Policies bleiben getrennte Rechte.
 **Dateibesitz:** main.py nur Bearer-/Mandantenmiddleware und abschliessende Routebindung; app/auth/tenant.py zentraler vorhandener Claimvertrag; app/core/tenant.py und app/auth/deps.py/deps_oidc.py nur Wiederverwendung verifizierter Requestidentitaet; neues zentrales Route-Binding-Modul und Tests/QA/Proposed ADR/Workboard. Bank-/SEPA-Folgeobjekte und WebSocket-/MCP-Kontext nach eigenem abgegrenztem Unterclaim. Keine Migration/DB-Ruecksetzung/Container.
 **Integration mit Claude:** Sein MANDANT-TOKEN-BINDUNG-20261012 behaelt app/core/security.py (Bindung), config.py, Realm-Mapper und Frontend-Dateien. Diese Dateien werden hier nicht uebernommen. Neue User-Vorgabe verlangt systemweiten Abschluss: fehlender Mandant darf nicht bis zu optionalem Schalter/Dev-Ausnahme weiterlaufen. Zentraler Serverboundary wird streng; Provider-/Frontend-Arbeit weiterhin Claude. Fremdes WIP erhalten.
 **Abnahme:** echte signierte JWTs gegen vorhandenen Validator, fehlende/ungueltige/widerspruechliche Claims ohne Fachzugriff; kontextgebundene Header/Path/Query/Body inklusive Mehrfachwerte; keine Standardmandantenwahl; Request-Kontext nach parallelen Requests sauber; Routeinventar/HTTP-/MCP-/Streaming-/Bank-/CRUD-Pruefmatrix. Bei offenen Folgeobjekt-/Transportflaechen keinen Systemgesamtabschluss behaupten.
 **Harness:** bestehende Verifier/Guards konsolidieren, Minor-Sicherheitsreparatur plus Significant zentrales Bindungsmodul mit Proposed ADR; gemeinsamer valeo_probe/eigene Daten, keine neuen DBs; Doku/Runbook/Inventargates und CI separat.
+
+**Lieferung:** HTTP-Provideridentitaet und zentrale Selektorbindung geliefert; 710 gezielte Vertraege gruen. Teilmeilenstein; Bank-/SEPA-Folgeobjekte, Providerbetrieb, Widerruf und weitere Fachobjekte bleiben offen. Nachweis: docs/quality-assurance/identity-transport-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## MANDANT-TOKEN-BINDUNG-20261012 — abgeschlossen, Claude Code
 
