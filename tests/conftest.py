@@ -77,8 +77,20 @@ def _enable_dev_token(monkeypatch):
         request.state.authenticated_token = "dev-token"
         return "dev-token"
     _app.dependency_overrides[security.require_bearer_token] = declared_test_identity
+    from app.auth.deps import get_current_user
+    previous_user = _app.dependency_overrides.get(get_current_user)
+
+    def declared_test_user(request: Request):
+        declared_test_identity(request)
+        return {"sub": "dev", "roles": ["admin"], "raw": request.state.token_claims}
+
+    _app.dependency_overrides[get_current_user] = declared_test_user
     yield
     _app.dependency_overrides.pop(security.require_bearer_token, None)
+    if previous_user is None:
+        _app.dependency_overrides.pop(get_current_user, None)
+    else:
+        _app.dependency_overrides[get_current_user] = previous_user
 
 
 def skip_if_db_unavailable(response):

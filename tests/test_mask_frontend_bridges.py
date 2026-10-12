@@ -5,7 +5,7 @@ from __future__ import annotations
 from app.core import security
 from app.core.config import settings
 from fastapi.testclient import TestClient
-from main import app
+from app.main import app
 
 client = TestClient(app, raise_server_exceptions=False, base_url="http://localhost")
 AUTH_HEADERS = {"Authorization": "Bearer jwt-token"}
@@ -20,6 +20,15 @@ def _disable_dev_token(monkeypatch) -> None:
 def _headers(monkeypatch) -> dict[str, str]:
     _disable_dev_token(monkeypatch)
     return {**AUTH_HEADERS, **TENANT_HEADER}
+
+
+def _finanz_headers(monkeypatch) -> dict[str, str]:
+    """Die Finanzwege der Bruecke pruefen seit 12.10.2026 eine Rolle.
+
+    Hier meldet sich die ausdrueckliche Testidentitaet der ``conftest.py`` an (Rolle ``admin``); ein
+    Nutzer ohne Rolle bekaeme an diesen Wegen 403.
+    """
+    return {"Authorization": "Bearer dev-token", **TENANT_HEADER}
 
 
 def test_ai_ask_returns_summary(monkeypatch):
@@ -105,7 +114,7 @@ def test_pos_gift_cards_ist_liste(monkeypatch, require_db):
 
 
 def test_finance_stats_hat_open_items(monkeypatch, require_db):
-    response = client.get("/api/v1/finance/stats", headers=_headers(monkeypatch))
+    response = client.get("/api/v1/finance/stats", headers=_finanz_headers(monkeypatch))
     assert response.status_code == 200
     payload = response.json()
     assert "open_items" in payload
@@ -113,7 +122,7 @@ def test_finance_stats_hat_open_items(monkeypatch, require_db):
 
 
 def test_fibu_cockpit_hat_mandantenkontext(monkeypatch, require_db):
-    response = client.get("/api/v1/finance/followup/fibu/cockpit", headers=_headers(monkeypatch))
+    response = client.get("/api/v1/finance/followup/fibu/cockpit", headers=_finanz_headers(monkeypatch))
     assert response.status_code == 200
     payload = response.json()
     assert payload["schema_version"] == 1

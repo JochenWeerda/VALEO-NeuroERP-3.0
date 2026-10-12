@@ -41,6 +41,9 @@ class TaxKeyCreate(BaseModel):
     notizen: Optional[str] = Field(None, max_length=500, description="Internal notes")
     debit_account: Optional[str] = Field(None, max_length=20, description="Debit account for tax")
     credit_account: Optional[str] = Field(None, max_length=20, description="Credit account for tax")
+    revenue_account: Optional[str] = Field(
+        None, max_length=20, description="Erloeskonto fuer Verkaufsbelege; leer = nicht automatisch buchen")
+    par_24_ustg: bool = Field(default=False, description="Durchschnittssatz nach Paragraf 24 UStG")
     country: str = Field(default="DE", max_length=2, description="Country code (ISO 3166-1 alpha-2)")
     region: Optional[str] = Field(None, max_length=50, description="Region/state if applicable")
     active: bool = Field(default=True, description="Active status")
@@ -91,6 +94,8 @@ class TaxKeyUpdate(BaseModel):
     notizen: Optional[str] = Field(None, max_length=500)
     debit_account: Optional[str] = Field(None, max_length=20)
     credit_account: Optional[str] = Field(None, max_length=20)
+    revenue_account: Optional[str] = Field(None, max_length=20)
+    par_24_ustg: Optional[bool] = None
     country: Optional[str] = Field(None, max_length=2)
     region: Optional[str] = Field(None, max_length=50)
     active: Optional[bool] = None
@@ -127,6 +132,8 @@ class TaxKeyResponse(BaseModel):
     active: bool
     created_at: datetime
     updated_at: datetime
+    revenue_account: Optional[str] = None
+    par_24_ustg: bool = False
 
 
 @router.get("", response_model=List[TaxKeyResponse], summary="Tax keys auflisten")
@@ -155,7 +162,7 @@ async def list_tax_keys(
             SELECT id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
                    intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
                    debit_account, credit_account, country, region, active,
-                   created_at, updated_at
+                   created_at, updated_at, revenue_account, par_24_ustg
             FROM domain_erp.tax_keys
             WHERE {' AND '.join(where_clauses)}
             ORDER BY code
@@ -185,7 +192,9 @@ async def list_tax_keys(
                 region=str(row[15]) if row[15] else None,
                 active=bool(row[16]),
                 created_at=row[17],
-                updated_at=row[18]
+                updated_at=row[18],
+                revenue_account=str(row[19]) if row[19] else None,
+                par_24_ustg=bool(row[20]),
             ))
         
         return result
@@ -209,7 +218,7 @@ async def get_tax_key(
             SELECT id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
                    intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
                    debit_account, credit_account, country, region, active,
-                   created_at, updated_at
+                   created_at, updated_at, revenue_account, par_24_ustg
             FROM domain_erp.tax_keys
             WHERE id = :tax_key_id AND tenant_id = :tenant_id
         """)
@@ -241,7 +250,9 @@ async def get_tax_key(
             region=str(row[15]) if row[15] else None,
             active=bool(row[16]),
             created_at=row[17],
-            updated_at=row[18]
+            updated_at=row[18],
+            revenue_account=str(row[19]) if row[19] else None,
+            par_24_ustg=bool(row[20]),
         )
         
     except HTTPException:
@@ -282,15 +293,17 @@ async def create_tax_key(
             INSERT INTO domain_erp.tax_keys
             (id, tenant_id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
              intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
-             debit_account, credit_account, country, region, active, created_at, updated_at)
+             debit_account, credit_account, country, region, active, created_at, updated_at,
+             revenue_account, par_24_ustg)
             VALUES
             (:id, :tenant_id, :code, :bezeichnung, :steuersatz, :ustva_position, :ustva_bezeichnung,
              :intracom, :export, :reverse_charge, :gueltig_von, :gueltig_bis, :notizen,
-             :debit_account, :credit_account, :country, :region, :active, NOW(), NOW())
+             :debit_account, :credit_account, :country, :region, :active, NOW(), NOW(),
+             :revenue_account, :par_24_ustg)
             RETURNING id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
                       intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
                       debit_account, credit_account, country, region, active,
-                      created_at, updated_at
+                      created_at, updated_at, revenue_account, par_24_ustg
         """)
         
         row = db.execute(insert_query, {
@@ -311,7 +324,9 @@ async def create_tax_key(
             "credit_account": tax_key.credit_account,
             "country": tax_key.country,
             "region": tax_key.region,
-            "active": tax_key.active
+            "active": tax_key.active,
+            "revenue_account": tax_key.revenue_account,
+            "par_24_ustg": tax_key.par_24_ustg,
         }).fetchone()
         
         db.commit()
@@ -335,7 +350,9 @@ async def create_tax_key(
             region=str(row[15]) if row[15] else None,
             active=bool(row[16]),
             created_at=row[17],
-            updated_at=row[18]
+            updated_at=row[18],
+            revenue_account=str(row[19]) if row[19] else None,
+            par_24_ustg=bool(row[20]),
         )
         
     except HTTPException:
@@ -420,6 +437,13 @@ async def update_tax_key(
         if tax_key.credit_account is not None:
             update_fields.append("credit_account = :credit_account")
             params["credit_account"] = tax_key.credit_account
+        if tax_key.revenue_account is not None:
+            # Leere Angabe nimmt die Einordnung zurueck: Dann wird mit dem Schluessel nicht gebucht.
+            update_fields.append("revenue_account = :revenue_account")
+            params["revenue_account"] = tax_key.revenue_account.strip() or None
+        if tax_key.par_24_ustg is not None:
+            update_fields.append("par_24_ustg = :par_24_ustg")
+            params["par_24_ustg"] = tax_key.par_24_ustg
         if tax_key.country is not None:
             update_fields.append("country = :country")
             params["country"] = tax_key.country
@@ -442,7 +466,7 @@ async def update_tax_key(
             RETURNING id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
                       intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
                       debit_account, credit_account, country, region, active,
-                      created_at, updated_at
+                      created_at, updated_at, revenue_account, par_24_ustg
         """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         
         row = db.execute(update_query, params).fetchone()
@@ -471,7 +495,9 @@ async def update_tax_key(
             region=str(row[15]) if row[15] else None,
             active=bool(row[16]),
             created_at=row[17],
-            updated_at=row[18]
+            updated_at=row[18],
+            revenue_account=str(row[19]) if row[19] else None,
+            par_24_ustg=bool(row[20]),
         )
         
     except HTTPException:
@@ -530,7 +556,7 @@ async def get_tax_key_by_code(
             SELECT id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
                    intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
                    debit_account, credit_account, country, region, active,
-                   created_at, updated_at
+                   created_at, updated_at, revenue_account, par_24_ustg
             FROM domain_erp.tax_keys
             WHERE code = :code AND tenant_id = :tenant_id AND active = true
             ORDER BY gueltig_von DESC
@@ -564,7 +590,9 @@ async def get_tax_key_by_code(
             region=str(row[15]) if row[15] else None,
             active=bool(row[16]),
             created_at=row[17],
-            updated_at=row[18]
+            updated_at=row[18],
+            revenue_account=str(row[19]) if row[19] else None,
+            par_24_ustg=bool(row[20]),
         )
         
     except HTTPException:

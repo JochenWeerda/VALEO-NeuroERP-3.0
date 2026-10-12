@@ -8,7 +8,6 @@ import { rollenHinweis } from './role-hint'
 import { tenantFromToken } from './tenant-from-token'
 import { toast } from 'sonner'
 
-const DEV_TOKEN = import.meta.env.VITE_API_DEV_TOKEN as string | undefined || 'dev-token'
 
 function normalizeApiBaseUrl(value: string | undefined): string {
   const raw = value?.trim() ?? ''
@@ -32,7 +31,6 @@ function normalizeApiBaseUrl(value: string | undefined): string {
 }
 
 const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL)
-const DEFAULT_TENANT_ID = import.meta.env.VITE_TENANT_ID || '00000000-0000-0000-0000-000000000001'
 
 export type ApiResult<T> = T & {
   data: T
@@ -105,16 +103,12 @@ class APIClient {
     // Request Interceptor (Auth Token)
     this.client.interceptors.request.use(
       (config) => {
-        const token = auth.getAccessToken() ?? DEV_TOKEN
+        const token = auth.getAccessToken()
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
         }
-        const tenantId =
-          tenantFromToken(token)
-          || window.localStorage.getItem('tenant_id')
-          || window.sessionStorage.getItem('tenant_id')
-          || DEFAULT_TENANT_ID
-        config.headers['X-Tenant-ID'] = tenantId
+        const tenantId = tenantFromToken(token)
+        if (tenantId) config.headers['X-Tenant-ID'] = tenantId
         return config
       },
       (error) => Promise.reject(error),
@@ -125,18 +119,8 @@ class APIClient {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          // Only redirect to login if OIDC is configured
-          // Check if OIDC is actually configured (not just placeholder)
-          const discoveryUrl = import.meta.env.VITE_OIDC_DISCOVERY_URL ?? ''
-          const placeholderPatterns = ['your-oidc-provider.com', 'example.com', 'keycloak.example.com', '{tenant-id}', '{domain}', '{application-id}', '{client-id}']
-          const oidcConfigured = discoveryUrl.length > 0 && !placeholderPatterns.some(pattern => discoveryUrl.includes(pattern))
-          if (oidcConfigured) {
-            auth.clearTokens()
-            window.location.href = '/login'
-          } else {
-            // In dev mode without OIDC, just log the error
-            console.warn('API request returned 401 Unauthorized. In dev mode without OIDC, this might be expected.')
-          }
+          auth.clearTokens()
+          window.location.href = '/login'
         }
         if (error.response?.status === 403) {
           // Fehlt nur eine Rolle, sagt die Maske das — an dieser einen Stelle statt in jeder Maske.

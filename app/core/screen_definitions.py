@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from app.core.screen_definitions_identity import IDENTITY_SCREEN_BUILDERS
 from app.core.mask_rollout_catalog import ROLLOUT_WAVES_42_51
 from app.core.screen_definitions_capture import (
     build_strecke_disposition_screen_definition,
@@ -30,6 +31,7 @@ from app.core.screen_definitions_capture import (
     build_personal_bewerbung_einwilligung_screen_definition,
     build_personal_einwilligungserklaerungen_screen_definition,
     build_admin_postfaecher_screen_definition,
+    build_sales_gutschrift_screen_definition,
     build_nawaro_ernterklaerung_drucken_screen_definition,
     build_strecke_dokumente_drucken_screen_definition,
     build_strecke_nawaro_lieferungen_screen_definition,
@@ -40,11 +42,7 @@ from app.core.screen_definitions_capture import (
 
 
 def _human_input_flow(endpoint: str) -> dict[str, Any]:
-    """Existing page dialogs collect input before submitting ordinary REST APIs.
-
-    These endpoints do not implement ActionRuntime dryRun/validate modes and
-    must not be exposed as directly executable commandEndpoints.
-    """
+    """Human-only form metadata for REST endpoints without ActionRuntime modes."""
     return {"inputFlow": {"kind": "humanForm", "submitEndpoint": endpoint, "method": "POST"},
             "forbiddenForAgents": True}
 
@@ -4484,6 +4482,7 @@ def _build_sanctions_scope_screen_definition(
 
 
 _SCREEN_DEFINITIONS: dict[str, Any] = {
+    **IDENTITY_SCREEN_BUILDERS,
     "schnittstelle/legacy-adapter-monitor": lambda: {
         "schemaVersion": 1, "id": "schnittstelle/legacy-adapter-monitor", "domain": "integration", "mode": "list",
         "title": "Standard-/Unimet-Adapter", "subtitle": "Eingang, Fehlerkorb, Staging und Reconciliation",
@@ -4830,6 +4829,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "personal/bewerbung-einwilligung": build_personal_bewerbung_einwilligung_screen_definition,
     "personal/einwilligungserklaerungen": build_personal_einwilligungserklaerungen_screen_definition,
     "admin/postfaecher": build_admin_postfaecher_screen_definition,
+    "sales/gutschrift": build_sales_gutschrift_screen_definition,
     "logistik/frachtbrief": build_logistik_frachtbrief_screen_definition,
     "logistik/verladung": build_logistik_verladung_screen_definition,
     "logistik/tourenplanung": build_logistik_tourenplanung_screen_definition,
@@ -5465,6 +5465,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "personal/bewerbung-einwilligung": ["einwilligung", "talentpool", "widerruf", "aufbewahrung"],
     "personal/einwilligungserklaerungen": ["einwilligungserklaerung", "fassung", "wortlaut"],
     "admin/postfaecher": ["postfach", "mailkonto", "e-mail", "absender", "smtp", "ionos", "gmail"],
+    "sales/gutschrift": ["gutschrift", "rechnungskorrektur", "credit note", "erloesminderung", "retoure gutschrift"],
     "logistik/tourenplanung": ["tourenplanung", "tour disponieren", "lieferschein tour"],
     "transporte/fahrer": ["fahrer", "fahrerliste", "touren heute"],
     "logistik/tour-fracht-arbeitsraum": ["dispo arbeitsraum", "tour fracht", "frachtkosten"],
@@ -5516,6 +5517,8 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    "admin/identity-budgets": "/admin/identity-budgets",
+    "admin/token-consumption": "/admin/token-consumption",
     "schnittstelle/legacy-adapter-monitor": "/schnittstelle/legacy-adapter-monitor",
     "workspace/letzte-dokumente": "/workspace/letzte-dokumente",
     "auswertungen/l3-berichtskatalog": "/auswertungen/l3-berichtskatalog",
@@ -5596,6 +5599,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "personal/bewerbung-einwilligung": "/personal/bewerbungen",
     "personal/einwilligungserklaerungen": "/personal/einwilligungserklaerungen",
     "admin/postfaecher": "/admin/postfaecher",
+    "sales/gutschrift": "/sales/credit-notes",
     "logistik/frachtbrief": "/logistik/frachtbriefe",
     "logistik/verladung": "/verladung",
     "logistik/tourenplanung": "/logistik/tourenplanung",

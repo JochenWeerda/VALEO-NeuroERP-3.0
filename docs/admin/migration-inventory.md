@@ -269,6 +269,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `gobd_aufbewahrungsfristen_20260301` | GoBD: domain_finance.aufbewahrungsfristen (operative Fristentabelle) |
 | `gobd_journal_hash_chain_trigger_20260303` | GoBD Hash-Chain: Trigger für journal_entries (sequence_number, hash_prev, hash_current) |
 | `grundfutteranalysen_20260419` | Grundfutter-Laboranalysen: LUFA/VDLUFA-Prüfberichts-Schema (GfE-2023) |
+| `gutschrift_ust_20261012` | Gutschrift: Umsatzsteuer je Position, Netto/Steuer/Brutto getrennt, Erloeskonto je Steuerschluessel. |
 | `hr_applications_table_20260702` | hr: applications-Tabelle für Bewerbungs-Pipeline |
 | `hr_personal_time_tracking_20260215` | hr personal time tracking tables |
 | `hr_planning_tables_20260625` | HR planning tables — employee_time_profiles, calendar_events, payroll_exports, |
@@ -410,6 +411,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `seed_anlage1_abzugstabelle_template_20260303` | seed Anlage 1 (Abzugstabelle Qualität) amendment template |
 | `seed_default_tenant_20260214` | seed default tenant for foreign-key constrained domain tables |
 | `steuernachweis_mandant_20261001` | Steuerliche Nachweise bekommen eine Migration — und einen Mandanten. |
+| `steuerschluessel_einheit_20261012` | Steuerschluessel: eine Quelle. Erloeskonto und Paragraf-24-Kennzeichen an ``tax_keys``. |
 | `streckengeschaefte_table_merge_20260424` | Streckengeschaefte persistent (public.streckengeschaefte); merge mehrerer Alembic-Heads. |
 | `supply_chain_events_20260610` | supply_chain_events — append-only Ketten-Ereignis-Log (DOM-SUPPLY-004.2) |
 | `tank_adapter_20260821` | Tank adapter inbox and delivery-note handover. |

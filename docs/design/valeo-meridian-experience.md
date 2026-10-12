@@ -11,6 +11,13 @@ description: Meridian als Design-, Layout- und Governance-Vertrag des Single Mas
 
 # VALEO Meridian Experience
 
+Stand 2026-10-12: Kontingente und technisches Verbrauchsnebenbuch sind native
+ScreenDefinitions unter admin/identity-budgets und admin/token-consumption.
+Die vorhandene RenderPlan-/UniversalMaskRuntime-/UniversalMaskRenderer-Kette
+traegt Tabellen, Eingaben, Bestaetigung, Vorschau und Begründung. Keine separate
+Verwaltungs-UI; Provider-Anmeldung und weitere Verwaltungsablaeufe bleiben
+eigene Abnahmeschritte.
+
 Stand 2026-10-11: Fuhrpark-Schreibaktionen deklarieren in der kanonischen
 ScreenDefinition denselben Scope logistics:write wie die MCP-Registry;
 Qualifikationen, Onboarding und Schulungen hr:write. Ausfuehrbare Personal-

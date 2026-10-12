@@ -11,6 +11,105 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## IDENTITY-MASK-PLATFORM-SCOPES-20261012 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** UI-Rechtevertrag fuer administrative Masken mit der ausdruecklichen Plattformscope-Pruefung des Backends harmonisieren. **Dateibesitz:** frontend components/mask-builder/runtime/screen-permissions.ts nur platform:-Scope und identity:quota:read; bestehender Komponenten-Vertragstest; eigene QA/Workboard. Keine fremden Masken-/Stylingdateien. **Abnahme:** Mandanten-admin/admin:all erhaelt keinen Plattform-Button ohne konkreten Scope; eigene Kontingentansicht bleibt fuer angemeldete Nutzer erreichbar. Backendautorisierung bleibt verbindlich. Keine DB/Container/Reset.
+
+**Lieferung:** Plattformaktionen erfordern konkrete Scopes auch bei Mandanten-admin/admin:all; sechs UI-Rechtevertraege bestanden. Nachweis: identity-administration-20261012.md. Frische Browserpruefung erreicht Kennwortmaske ohne invalid_scope; keine persoenlichen Zugangsdaten eingegeben. GitHub-Gesamtabnahme bleibt offen. Keine DB/Container/Reset.
+
+## GUTSCHRIFT-MASKE-SD-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Vorgabe: keine handgebauten Masken; Mask Builder,
+ScreenDefinitions, MCP- und CI-Schnittstellen.
+**Befund:** `pages/sales/credit-note-editor.tsx` war eine Attrappe (Positionstabelle als Textfeld, Felder passten
+nicht zur Schnittstelle, Wege ins Leere) mit Prozentfeld je Position.
+**Lieferung:** ScreenDefinition `sales/gutschrift` (bereit, Beratungswert 1,0): Steuerschluessel als Auswahl aus
+`tax_keys`, kein Prozentfeld; Maske rechnet nicht (`POST /sales/credit-notes/steuer-vorschau`). Kommando-Wege
+`…/actions/speichern` und `…/{id}/actions/buchen` ueber `run_delegated_mask_action`; `GET …/{id}`; Rollen an allen
+Gutschrift-Wegen (`beleg_read`/`beleg_write`). Seite als Huelle um `UniversalMaskRenderer`.
+MCP: Werkzeug `sales.gutschrift.speichern`; Buchen `forbiddenForAgents` (Aktionskarte `open_high`).
+Nachgezogen: `screen_mask_actions.json`, `mcp_mask_action_map.yaml`, `mcp_erp_tools.yaml`, `mcp-tools.md`,
+Agent-Handbuch, OpenAPI; vier Zaehlwerte der MCP-Ratschen (+1 je neuem Eintrag).
+Tests: `tests/test_gutschrift_umsatzsteuer.py` 35 gruen, Plattform zusammen 305; Vitest Maske 5 gruen.
+QA: `docs/quality-assurance/gutschrift-maske-sd-20261012.md`.
+**An Codex/Cursor (MCP-MASK-CE):** `tests/test_mcp_*` Zaehlwerte und `MAPPED_RULES`/`BLOCKED_RULES` um
+`sales/gutschrift` ergaenzt — bitte gegenlesen.
+**Offen:** uebrige Masken mit Prozent-Freitext (Ausgangs-/Eingangsrechnung, Einkaufsgutschrift, Lieferschein,
+Bestellung, Zinsabrechnung, Artikelstamm, Kasse, Ernteannahme); Maske Steuerschluessel als ScreenDefinition;
+Entwurf bearbeiten; Vorschlag/Freigabe-Paar fuer das Buchen durch Agenten; Sichtpruefung im Browser.
+
+## IDENTITY-ADMIN-HANDBUCH-20261012 — in arbeit, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber: Testanmeldung, Mandanten-/Administrator-/Nutzer-/Agentenverwaltung mit Handbuch-Screenshots und hierarchischen Kontingenten. **Ziel:** echte Verwaltungswege, Loeschschutz ab erster Buchung, Sperre statt Loeschen, kontingentgebundene Unterdelegation und nachvollziehbares Verbrauchsnebenbuch. **Dateibesitz:** app/api/v1/endpoints/tenants.py, neues app/services/tenant_lifecycle_service.py; neue identity_quota-Module und eigene Tests; neue native Verwaltungs-ScreenDefinitions in eigenem Modul samt eng begrenzter Registry-Anbindung, neue thin-wrapper Routen (kein fremdes Maskenstyling); docs/benutzerhandbuch/identity-administration.md samt ausschliesslich synthetischen Screenshots, eigene QA/Workboard/ADR083-Ergaenzung. Bestehender IDENTITY-CONTROL-Claim behaelt Provider/User-/Agent-API und deren Integration. **Abnahme:** Buchungshistorie verhindert physisches Loeschen, fremde Mandanten unzugaenglich, deaktivierte Mandanten nicht benutzbar; Elternbudget kann durch Unteragenten nicht steigen, atomare Reservierung und Abrechnung mit Replay-Schutz. Screenshots ausschliesslich echte Browserablaeufe und synthetische Daten, keine privaten Zugangsdaten. **Risiken:** persoenliche MFA-Erstanmeldung vom Auftraggeber vertagt; dafuer keine Ersatzfreigabe behaupten. Vorhandenen Pruefstand verwenden; kein neuer Container/DB/Reset, keine fremden Claims uebernehmen.
+
+**Lieferung:** Grundlage geliefert: Mandanten-Loeschschutz, sofortige Sperre, hierarchische atomare Kontingente und technisches Verbrauchsnebenbuch; 110 Vertraege bestanden. Native Budget-/Nebenbuchmasken geliefert. Modellaufrufe, Agentenanlage und vollstaendige Handbuch-Screenshotserie bleiben offen. Nachweis: identity-administration-20261012.md. Frische Browserpruefung erreicht Kennwortmaske ohne invalid_scope; keine persoenlichen Zugangsdaten eingegeben. GitHub-Gesamtabnahme bleibt offen. Keine DB/Container/Reset.
+
+## STEUERSCHLUESSEL-EINHEIT-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Auftrag: SKR03 fuer den Testmandanten, eine Quelle.
+**Befund:** Zwei Tabellen fuer Steuerschluessel. `domain_erp.tax_keys` hat die Maske und speist Eingangsrechnung
+und UStVA; `public.vat_codes` liest niemand. GUTSCHRIFT-UST-20261012 hatte die Gutschrift an `vat_codes` gehaengt —
+falsch, hier korrigiert.
+**Lieferung:** `app/finance/steuerschluessel.py` (`steuergruppen`, `richte_skr03_ein`, `kontenrahmen`) als einzige
+Stelle; Migration `steuerschluessel_einheit_20261012` (ein Head): `tax_keys.revenue_account`, `tax_keys.par_24_ustg`,
+`vat_codes.skr03_revenue_account` wieder entfernt; Steuerschluessel-Wege pflegen beide Felder;
+`scripts/seed_steuerschluessel_skr03.py`; Default-Mandant in der Entwicklungs-DB mit SKR03 eingerichtet;
+Eingangsrechnung nimmt bei gleichem Satz den Schluessel mit Vorsteuerkonto.
+`tests/test_gutschrift_umsatzsteuer.py` 20 gruen. QA: `docs/quality-assurance/steuerschluessel-einheit-20261012.md`.
+**Offen:** Masken auf Steuerschluessel-Auswahl (naechster Slice); `vat_codes` samt Wegen ohne Verbraucher
+(Loeschen = eigene Entscheidung); Tax Rules Service / EU-TEDB eingeplant, nicht gebaut.
+
+## GUTSCHRIFT-UST-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Fachliche Entscheidung des Auftraggebers vom 12.10.
+**Entscheidung:** Umsatzsteuer je Position; Netto/Steuer/Brutto getrennt, Belegbetrag brutto; Erloes nur netto;
+Steuer separat; keine stillschweigende Steuerannahme (sonst zur Pruefung); Rechnungskorrektur und Gutschrift nach
+Paragraf 14 UStG getrennt; nichts ueberschreiben.
+**Lieferung:** Migration `gutschrift_ust_20261012` (auf `konto_sperre_20261012`, ein Head): `tax_code` je Position,
+`tax_rate` ohne Vorgabe 19, `net_amount`/`tax_amount`/`correction_type` am Beleg, `vat_codes.skr03_revenue_account`
+(vorbelegt nur DE_19 -> 8400, DE_7 -> 8300). `sales_credit_notes.py`: Soll Erloeskonto netto + Soll Steuerkonto je
+Steuerschluessel, Haben 1400 brutto, OP-Minderung brutto; neun Faelle enden mit 409 „bitte pruefen“.
+`tests/test_gutschrift_umsatzsteuer.py` 17 gruen (Pruefstand). QA: `docs/quality-assurance/gutschrift-umsatzsteuer-20261012.md`.
+**Offen:** DATEV-Automatikkonten (doppelte Steuer im Export nicht geprueft); Maske fuehrt Steuersatz statt
+Steuerschluessel; Paragraf-24-Schluessel ohne Erloeskonto; `vat_codes` in der Entwicklungs-DB leer;
+Ausgangsrechnung bucht weiter mit festem 1776.
+
+## BUCHUNG-STILL-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Offene Punkte aus KONTO-SPERRE-MELDUNG-20261012.
+**Befund:** `POST /sales/credit-notes/{id}/post` schrieb den Buchungskopf fest, dann Zeilen mit Kontonummern statt
+Konto-IDs (Fremdschluessel, verschluckt), haette jeden OP des Kunden gemindert und endete immer mit 500
+(Antwort passte nicht zum Modell). Inventur/Bestandskorrektur meldeten Erfolg nach Buchungsfehler.
+`inventory_counts.py` nahm den Mandanten aus `?tenant_id=`; Einzelwege filterten gar nicht.
+**Lieferung:** Gutschrift in einer Transaktion mit aufgeloesten Konten, OP-Minderung nur an `invoice_reference`;
+Buchungsfehler = Fehler; Inventur mit `get_tenant_id` und Mandantenfilter (fremde Inventur 404), Query-Parameter
+`tenant_id` entfernt (OpenAPI nachgezogen). `tests/test_buchung_nicht_still.py` 8 gruen, Nachbarn 95 gruen.
+QA: `docs/quality-assurance/buchung-nicht-still-20261012.md`.
+**Offen:** Gutschrift ohne Umsatzsteuerkorrektur; `POST /inventory/counts` setzt Pflichtfeld `counted_by` nicht;
+Inventur-Wege ohne Lagerrolle; Frontend ruft nicht vorhandenes `PUT /inventory/counts/{id}`.
+
+## IDENTITY-REMAINING-WIRING-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** uebrigen roten Wiring-Fall der Belegprojektion reparieren, ohne Produktionsauth zu mocken. **Dateibesitz:** tests/test_document_control_projection.py nur lokaler Import der ausdruecklichen Kompatibilitaets-App im registrierten Projektionsweg; QA/Workboard. Claudes committete Modulimportkorrektur bleibt erhalten. **Abnahme:** echter HTTP-Wiring-Vertrag mit FakeProjection besteht, gepruefter Rollenvertrag bleibt separat; keine DB/Container/Reset. **Risiko:** zwei Snapshot-Tests haben eine fehlende kanonische Migration; nicht durch Sicherheitslockerung verdecken.
+
+## TESTGRENZE-FINANZ-HAUPTAPP-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Rest aus TESTGRENZE-FINANZ-20261012, frei seit `6178a79f1`.
+**Befund:** 13 Finanz-Nachbardateien riefen `main:app` (Produktionsdienst) mit Dev-Token: 105 Faelle rot (401/403).
+**Lieferung:** Die 13 Dateien nehmen `app.main` (Kompatibilitaets-App), fuer die die ausdrueckliche Testidentitaet
+der `conftest.py` gilt; zwei Finanzwege in `test_mask_frontend_bridges` melden sich mit ihr an (Rolle noetig).
+Nur Testdateien, kein Produktcode. 298 bestanden, 2 rot.
+**Offen (kein Anmeldethema):** `test_small_endpoints_wave54` Snapshot-Faelle: `read_model_snapshots` gibt es im
+Pruefstand nicht (keine Migration; in der gewachsenen DB liegt sie in `public`).
+**An Codex:** Weitere 107 Testdateien importieren `from main import app`; dieselbe Umstellung duerfte dort greifen.
+Diese Tests pruefen danach nicht mehr den Middleware-Stapel des Produktionsdienstes.
+
+## IDENTITY-INTEGRATION-REST-20261012 — in arbeit, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „rest bitte auch noch umsetzen“. **Ziel:** offene Sitzungs-, Agenten-, Freigabe- und Ressourcenvertraege in vorhandene Wege integrieren. **Dateibesitz:** app/auth/oidc.py und dependencies.py nur zentrale verifizierte Identitaet; operator_agent.py samt operator_agent_service.py und agent_proposal_repository.py/model/schemas nur Tokenurheber, Inhaltsbindung, Idempotenz und Ausfuehrungsgrenze; frontend hooks/useAuth.ts, lib/api-client.ts und axios.ts nur Authkonfiguration/Refresh/Logout, ProtectedRoute.tsx nur OIDC-Bypass-Hunk (fremdes Styling erhalten); config/architecture-domain-prefixes.yaml nur neue eigene Identitaetsmodule; eigene Tests/QA/ADR und Plattform-Domainpack. Elternclaim IDENTITY-CONTROL behaelt Sessionmodule, Neuro-Broker/Gateway und lib/auth.ts. **Abnahme:** kein frei gelieferter Urheber/Rolle, kein dev/HS-Fallback, Widerruf auch an Streams, Rechte-Schnittmenge und Mandatsende vor Wirkung, Vier Augen/Inhaltsbindung/Replay und atomare Quoten; echte positive und negative Vertrage mit vorhandenen Ressourcen. Keine neue DB/Container/Reset, keine privaten Benutzerwerte versionieren. **Risiken:** Provider-Erstanmeldung bleibt persoenliche Benutzeraktion; fremde UI-/Finanzclaims bleiben geschuetzt.
+
+**Lieferung:** Browser-PKCE/State/Nonce, keine Dev-/Default-/Maskenrueckfaelle, bestaetigbarer Logout und Refreshrennen gesichert; 14 Browservertraege, tsc und ESLint gruen. Fremdes ProtectedRoute-Styling nicht aufgenommen. Konkurrenz-HS-Auth nach Verbraucherpruefung entfernt. Agenten-/Operatorintegration bleibt in Arbeit. Nachweis: identity-session-integration-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
 ## KONTO-SPERRE-MELDUNG-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Offener Punkt aus KONTO-SPERRE-20261012.
@@ -115,6 +214,8 @@ Fehler-Toast; Masken, die Fehler schlucken, zeigen weiter leere Listen; Scope-Ab
 **Lieferung:** Test-Unterclaim geliefert: vier Rollenvertragsdateien mit 3959 Faellen gruen. Zahlungs-/Stammdaten-Testdatei fuer Claude freigegeben; 67 Finanz-Nachbarfaelle bleiben sein Slice. Produktionsauth unveraendert, keine DB/Container/Reset. Uebrige Identitaetsumsetzung bleibt offen. Nachweis: identity-test-boundaries-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 **Lieferung:** Provider-Teilmeilenstein geliefert: keine Musterkonten, PKCE, kurze Laufzeiten und additive 34 Fachrollen samt ausdruecklichem manager im Realm und laufenden Dienst. Neun Vertraege und beide Katalogchecks gruen. Keine automatische Rollenvergabe. Private Erstzuordnung ausserhalb Git; Benutzer-Erstanmeldung und restliche Sessions-/Agentensteuerung bleiben offen. Nachweis: identity-provider-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+**Lieferung:** Sitzungs-/Browserteil geliefert: persistenter serverseitiger Widerruf mit Audit, Idle/Absolutgrenze, laufende Streams und verifizierter interner Kontext; 77 RSA-/Sitzungs-/Streamvertraege gruen. Agentenmandate/Freigaben/Quoten und Providerrollen-/MFA-Gesamtabnahme bleiben offen. Nachweis: identity-session-integration-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## FINANZ-REST-ROLLEN-20261012 — abgeschlossen, Claude Code
 

@@ -11,6 +11,8 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
   const declared = new Set((screen.actions ?? []).flatMap(action => action.permission ? [action.permission] : []))
   if (screen.creation) declared.add(screen.creation.permission)
   return [...declared].filter(permission => {
+    if (permission.startsWith('platform:')) return scopes.has(permission)
+    if (permission === 'identity:quota:read') return true // Server returns only own allocations.
     if (scopes.has('admin:all') || roles.has('admin')) return true
     if (scopes.has(permission)) return true
     if (permission === 'logistics:read' && scopes.has('logistics:write')) return true

@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-12
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-12T05:45:06Z'
+generated_at: '2026-10-12T20:12:24Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1882,6 +1882,7 @@ domains:
     - genossenschaft
     - geo
     - idempotency_monitoring
+    - identity_management
     - import_pipeline
     - iot_telemetry
     - job_runner
@@ -2079,13 +2080,14 @@ domains:
 mapping_stats:
   frontend_routes_total: 939
   frontend_routes_mapped: 939
-  backend_services_total: 280
+  backend_services_total: 281
   backend_services_mapped: 280
-  backend_endpoints_total: 455
-  backend_endpoints_mapped: 455
+  backend_endpoints_total: 456
+  backend_endpoints_mapped: 456
 unmapped:
   frontend_routes: []
-  backend_services: []
+  backend_services:
+  - tenant_lifecycle_service
   backend_endpoints: []
 status:
   architecture_os_mvp: active

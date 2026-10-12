@@ -19910,9 +19910,11 @@
             "app/api/v1/endpoints/financial_reports.py",
             "app/api/v1/endpoints/inventory_operations.py",
             "app/api/v1/endpoints/journal_entries.py",
+            "app/api/v1/endpoints/sales_credit_notes.py",
             "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py",
             "app/core/connectors/workflow.py",
             "app/domains/inventory/api/storage_fees.py",
+            "app/finance/steuerschluessel.py",
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/journal.py",
             "app/services/finance_closing_service.py",
@@ -19921,7 +19923,8 @@
           "written_by": [
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/inventory_operations.py",
-            "app/domains/inventory/api/storage_fees.py"
+            "app/domains/inventory/api/storage_fees.py",
+            "app/finance/steuerschluessel.py"
           ]
         },
         "closing_checklist_templates": {
@@ -22651,6 +22654,16 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "revenue_account",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "par_24_ustg",
+              "nullable": false,
+              "type": "boolean"
             }
           ],
           "foreign_keys": [],
@@ -22663,10 +22676,12 @@
           "read_by": [
             "app/api/v1/endpoints/tax_keys.py",
             "app/api/v1/endpoints/vat_return_export.py",
+            "app/finance/steuerschluessel.py",
             "app/finance/tax_resolver.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/tax_keys.py"
+            "app/api/v1/endpoints/tax_keys.py",
+            "app/finance/steuerschluessel.py"
           ]
         },
         "vat_returns": {
@@ -45401,13 +45416,18 @@
             },
             {
               "name": "tax_rate",
-              "nullable": false,
+              "nullable": true,
               "type": "numeric"
             },
             {
               "name": "line_total",
               "nullable": false,
               "type": "numeric"
+            },
+            {
+              "name": "tax_code",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
@@ -45421,6 +45441,9 @@
           "placement": "prefix",
           "primary_key": [
             "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/sales_credit_notes.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/sales_credit_notes.py"
@@ -45492,6 +45515,21 @@
               "name": "updated_at",
               "nullable": false,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "net_amount",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "tax_amount",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "correction_type",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -56755,10 +56793,12 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/compat.py",
+            "app/finance/steuerschluessel.py",
             "app/infrastructure/models/l3c_models.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/compat.py"
+            "app/api/v1/endpoints/compat.py",
+            "app/finance/steuerschluessel.py"
           ]
         },
         "tenants": {

@@ -26456,6 +26456,191 @@
         "title": "Buchungsvorschlag",
         "type": "object"
       },
+      "BudgetAllocate": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "user",
+              "agent"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "max_children": {
+            "maximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Max Children",
+            "type": "integer"
+          },
+          "owner": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Owner",
+            "type": "string"
+          },
+          "parent": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Parent",
+            "type": "string"
+          },
+          "request_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Request Id",
+            "type": "string"
+          },
+          "tokens": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 1000000000000.0,
+            "title": "Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tokens",
+          "max_children",
+          "request_id",
+          "parent",
+          "owner",
+          "kind"
+        ],
+        "title": "BudgetAllocate",
+        "type": "object"
+      },
+      "BudgetCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "_auditReason": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auditreason"
+          },
+          "_idempotencyKey": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotencykey"
+          },
+          "_mode": {
+            "default": "execute",
+            "enum": [
+              "execute",
+              "dryRun",
+              "validate",
+              "propose"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "user",
+                  "agent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "max_children": {
+            "maximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Max Children",
+            "type": "integer"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "tokens": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 1000000000000.0,
+            "title": "Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tokens",
+          "max_children"
+        ],
+        "title": "BudgetCommand",
+        "type": "object"
+      },
+      "BudgetCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "max_children": {
+            "maximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Max Children",
+            "type": "integer"
+          },
+          "tokens": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 1000000000000.0,
+            "title": "Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tokens",
+          "max_children"
+        ],
+        "title": "BudgetCreate",
+        "type": "object"
+      },
       "BudgetCreateRequest": {
         "properties": {
           "bezeichnung": {
@@ -26563,6 +26748,85 @@
           }
         },
         "title": "BudgetLineUpdate",
+        "type": "object"
+      },
+      "BudgetOut": {
+        "properties": {
+          "allocated": {
+            "title": "Allocated",
+            "type": "integer"
+          },
+          "available": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available"
+          },
+          "children": {
+            "title": "Children",
+            "type": "integer"
+          },
+          "depth": {
+            "title": "Depth",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "max_children": {
+            "title": "Max Children",
+            "type": "integer"
+          },
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "parent": {
+            "title": "Parent",
+            "type": "string"
+          },
+          "reserved": {
+            "title": "Reserved",
+            "type": "integer"
+          },
+          "spent": {
+            "title": "Spent",
+            "type": "integer"
+          },
+          "total_spent": {
+            "title": "Total Spent",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "owner",
+          "kind",
+          "limit",
+          "max_children",
+          "children",
+          "allocated",
+          "reserved",
+          "spent",
+          "total_spent",
+          "depth",
+          "parent"
+        ],
+        "title": "BudgetOut",
         "type": "object"
       },
       "BudgetPlanCreate": {
@@ -39876,6 +40140,15 @@
       },
       "CreditNoteCreate": {
         "properties": {
+          "correction_type": {
+            "default": "rechnungskorrektur",
+            "enum": [
+              "rechnungskorrektur",
+              "gutschrift_14_ustg"
+            ],
+            "title": "Correction Type",
+            "type": "string"
+          },
           "credit_note_number": {
             "maxLength": 64,
             "minLength": 1,
@@ -39920,6 +40193,20 @@
             "title": "Lines",
             "type": "array"
           },
+          "net_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Amount"
+          },
           "notes": {
             "anyOf": [
               {
@@ -39941,6 +40228,20 @@
             "default": "draft",
             "title": "Status",
             "type": "string"
+          },
+          "tax_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Amount"
           },
           "tenant_id": {
             "anyOf": [
@@ -40055,6 +40356,153 @@
         "title": "CreditNoteCreateIn",
         "type": "object"
       },
+      "CreditNoteDetailOut": {
+        "properties": {
+          "correction_type": {
+            "default": "rechnungskorrektur",
+            "enum": [
+              "rechnungskorrektur",
+              "gutschrift_14_ustg"
+            ],
+            "title": "Correction Type",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "credit_note_number": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Credit Note Number",
+            "type": "string"
+          },
+          "currency": {
+            "default": "EUR",
+            "title": "Currency",
+            "type": "string"
+          },
+          "customer_id": {
+            "title": "Customer Id",
+            "type": "string"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "invoice_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invoice Reference"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/CreditNoteLineOut"
+            },
+            "title": "Lines",
+            "type": "array"
+          },
+          "net_amount": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Amount"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "default": "draft",
+            "title": "Status",
+            "type": "string"
+          },
+          "tax_amount": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Amount"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "total_amount": {
+            "default": "0",
+            "title": "Total Amount",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "credit_note_number",
+          "customer_id",
+          "reason",
+          "id",
+          "tenant_id"
+        ],
+        "title": "CreditNoteDetailOut",
+        "type": "object"
+      },
       "CreditNoteLineInput-Input": {
         "properties": {
           "article_number": {
@@ -40084,6 +40532,17 @@
             ],
             "title": "Quantity"
           },
+          "tax_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Code"
+          },
           "tax_rate": {
             "anyOf": [
               {
@@ -40091,9 +40550,11 @@
               },
               {
                 "type": "string"
+              },
+              {
+                "type": "null"
               }
             ],
-            "default": "19",
             "title": "Tax Rate"
           },
           "unit_price": {
@@ -40138,10 +40599,27 @@
             "title": "Quantity",
             "type": "string"
           },
+          "tax_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Code"
+          },
           "tax_rate": {
-            "default": "19",
-            "title": "Tax Rate",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Rate"
           },
           "unit_price": {
             "title": "Unit Price",
@@ -40156,8 +40634,83 @@
         "title": "CreditNoteLineInput",
         "type": "object"
       },
+      "CreditNoteLineOut": {
+        "properties": {
+          "article_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Number"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "line_total": {
+            "title": "Line Total",
+            "type": "string"
+          },
+          "quantity": {
+            "title": "Quantity",
+            "type": "string"
+          },
+          "tax_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Code"
+          },
+          "tax_rate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Rate"
+          },
+          "unit_price": {
+            "title": "Unit Price",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "quantity",
+          "unit_price",
+          "id",
+          "line_total"
+        ],
+        "title": "CreditNoteLineOut",
+        "type": "object"
+      },
       "CreditNoteOut": {
         "properties": {
+          "correction_type": {
+            "default": "rechnungskorrektur",
+            "enum": [
+              "rechnungskorrektur",
+              "gutschrift_14_ustg"
+            ],
+            "title": "Correction Type",
+            "type": "string"
+          },
           "created_at": {
             "anyOf": [
               {
@@ -40218,6 +40771,17 @@
             "title": "Lines",
             "type": "array"
           },
+          "net_amount": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Amount"
+          },
           "notes": {
             "anyOf": [
               {
@@ -40239,6 +40803,17 @@
             "default": "draft",
             "title": "Status",
             "type": "string"
+          },
+          "tax_amount": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Amount"
           },
           "tenant_id": {
             "title": "Tenant Id",
@@ -93880,6 +94455,90 @@
         "title": "LeasingRueckgabePayload",
         "type": "object"
       },
+      "LedgerOut": {
+        "properties": {
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "actual_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Tokens"
+          },
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "budget_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget Id"
+          },
+          "detail": {
+            "additionalProperties": true,
+            "title": "Detail",
+            "type": "object"
+          },
+          "event": {
+            "title": "Event",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "job": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job"
+          },
+          "reason": {
+            "default": "",
+            "title": "Reason",
+            "type": "string"
+          },
+          "tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tokens"
+          }
+        },
+        "required": [
+          "id",
+          "event",
+          "actor",
+          "at",
+          "detail"
+        ],
+        "title": "LedgerOut",
+        "type": "object"
+      },
       "LeergutArtCreate": {
         "properties": {
           "art_nr": {
@@ -96937,6 +97596,22 @@
           }
         },
         "title": "LifecycleActionRequest",
+        "type": "object"
+      },
+      "LifecycleReason": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "LifecycleReason",
         "type": "object"
       },
       "LineCounts": {
@@ -137815,6 +138490,21 @@
         "title": "RevokeResultOut",
         "type": "object"
       },
+      "RevokeSubject": {
+        "properties": {
+          "subject": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Subject",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject"
+        ],
+        "title": "RevokeSubject",
+        "type": "object"
+      },
       "ReworkDetailOut": {
         "description": "Slice mit unvollstaendigem Harness oder ohne Tests.",
         "properties": {
@@ -146295,6 +146985,34 @@
         "title": "ServiceAnfragenOut",
         "type": "object"
       },
+      "SessionOut": {
+        "properties": {
+          "absolute_seconds": {
+            "title": "Absolute Seconds",
+            "type": "integer"
+          },
+          "idle_seconds": {
+            "title": "Idle Seconds",
+            "type": "integer"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject",
+          "tenant_id",
+          "idle_seconds",
+          "absolute_seconds"
+        ],
+        "title": "SessionOut",
+        "type": "object"
+      },
       "SessionRequest": {
         "properties": {
           "channel": {
@@ -151040,6 +151758,111 @@
           "zu_status"
         ],
         "title": "StatusWechselPayload",
+        "type": "object"
+      },
+      "SteuerVorschauGruppe": {
+        "properties": {
+          "brutto": {
+            "title": "Brutto",
+            "type": "string"
+          },
+          "netto": {
+            "title": "Netto",
+            "type": "string"
+          },
+          "satz": {
+            "title": "Satz",
+            "type": "string"
+          },
+          "steuer": {
+            "title": "Steuer",
+            "type": "string"
+          },
+          "tax_code": {
+            "title": "Tax Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tax_code",
+          "satz",
+          "netto",
+          "steuer",
+          "brutto"
+        ],
+        "title": "SteuerVorschauGruppe",
+        "type": "object"
+      },
+      "SteuerVorschauIn": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/CreditNoteLineInput-Input"
+            },
+            "title": "Lines",
+            "type": "array"
+          }
+        },
+        "title": "SteuerVorschauIn",
+        "type": "object"
+      },
+      "SteuerVorschauOut": {
+        "description": "Was die Buchung aus den Positionen machen wuerde — oder warum sie nicht bucht.",
+        "properties": {
+          "brutto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brutto"
+          },
+          "geklaert": {
+            "title": "Geklaert",
+            "type": "boolean"
+          },
+          "gruppen": {
+            "items": {
+              "$ref": "#/components/schemas/SteuerVorschauGruppe"
+            },
+            "title": "Gruppen",
+            "type": "array"
+          },
+          "netto": {
+            "title": "Netto",
+            "type": "string"
+          },
+          "pruefgrund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pruefgrund"
+          },
+          "steuer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuer"
+          }
+        },
+        "required": [
+          "geklaert",
+          "netto"
+        ],
+        "title": "SteuerVorschauOut",
         "type": "object"
       },
       "StockMovement": {
@@ -156437,6 +157260,12 @@
             "description": "Internal notes",
             "title": "Notizen"
           },
+          "par_24_ustg": {
+            "default": false,
+            "description": "Durchschnittssatz nach Paragraf 24 UStG",
+            "title": "Par 24 Ustg",
+            "type": "boolean"
+          },
           "region": {
             "anyOf": [
               {
@@ -156449,6 +157278,19 @@
             ],
             "description": "Region/state if applicable",
             "title": "Region"
+          },
+          "revenue_account": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Erloeskonto fuer Verkaufsbelege; leer = nicht automatisch buchen",
+            "title": "Revenue Account"
           },
           "reverse_charge": {
             "default": false,
@@ -156580,6 +157422,11 @@
             ],
             "title": "Notizen"
           },
+          "par_24_ustg": {
+            "default": false,
+            "title": "Par 24 Ustg",
+            "type": "boolean"
+          },
           "region": {
             "anyOf": [
               {
@@ -156590,6 +157437,17 @@
               }
             ],
             "title": "Region"
+          },
+          "revenue_account": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue Account"
           },
           "reverse_charge": {
             "title": "Reverse Charge",
@@ -156757,6 +157615,17 @@
             ],
             "title": "Notizen"
           },
+          "par_24_ustg": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Par 24 Ustg"
+          },
           "region": {
             "anyOf": [
               {
@@ -156768,6 +157637,18 @@
               }
             ],
             "title": "Region"
+          },
+          "revenue_account": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue Account"
           },
           "reverse_charge": {
             "anyOf": [
@@ -313863,6 +314744,335 @@
         ]
       }
     },
+    "/api/v1/identity/budgets": {
+      "get": {
+        "operationId": "budgets_api_v1_identity_budgets_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BudgetOut"
+                  },
+                  "title": "Response Budgets Api V1 Identity Budgets Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Wirksame Nutzer- und Agentenkontingente auflisten",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/identity/budgets/actions/{action_key}": {
+      "post": {
+        "operationId": "budget_command_api_v1_identity_budgets_actions__action_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_key",
+            "required": true,
+            "schema": {
+              "enum": [
+                "root",
+                "allocate"
+              ],
+              "title": "Action Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BudgetCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kontingentvergabe im Maskbuilder prüfen und kontrolliert ausführen",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/identity/budgets/allocate": {
+      "post": {
+        "operationId": "allocate_budget_api_v1_identity_budgets_allocate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BudgetAllocate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BudgetOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Elternkontingent an Nutzer oder Agenten verteilen",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/identity/budgets/root": {
+      "post": {
+        "operationId": "create_budget_api_v1_identity_budgets_root_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BudgetCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BudgetOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mandantenkontingent mit ausdrücklicher Plattformberechtigung bereitstellen",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/identity/consumption-ledger": {
+      "get": {
+        "operationId": "consumption_ledger_api_v1_identity_consumption_ledger_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "default": "+",
+              "title": "Before",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LedgerOut"
+                  },
+                  "title": "Response Consumption Ledger Api V1 Identity Consumption Ledger Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Technisches Token-Verbrauchsnebenbuch des eigenen Mandanten abrufen",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/identity/session": {
+      "get": {
+        "operationId": "current_session_api_v1_identity_session_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Aktuelle verifizierte Sitzung",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/identity/session/logout": {
+      "post": {
+        "operationId": "logout_api_v1_identity_session_logout_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Aktuelle Sitzung serverseitig widerrufen",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/identity/subjects/revoke": {
+      "post": {
+        "operationId": "revoke_subject_api_v1_identity_subjects_revoke_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeSubject"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vorhandene Sitzungen eines Mandantenbenutzers widerrufen",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
     "/api/v1/import-pipeline/configs": {
       "get": {
         "description": "List all import pipeline configs for the tenant.",
@@ -315917,22 +317127,6 @@
         "parameters": [
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
@@ -315991,24 +317185,6 @@
       "post": {
         "description": "Inventur-Kopf anlegen.",
         "operationId": "create_inventory_count_api_v1_inventory_counts__post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -316065,22 +317241,6 @@
             "schema": {
               "title": "Count Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -316241,22 +317401,6 @@
               "description": "Periode z.B. 2026-Q1 oder 2026-12",
               "title": "Period",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -316449,22 +317593,6 @@
             "schema": {
               "title": "Count Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -384870,6 +385998,111 @@
         ]
       }
     },
+    "/api/v1/sales/credit-notes/actions/speichern": {
+      "post": {
+        "description": "CE fuer sales/gutschrift:speichern. Trockenlauf prueft, schreibt nichts; Mandant aus der Anmeldung.",
+        "operationId": "action_gutschrift_speichern_api_v1_sales_credit_notes_actions_speichern_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gutschrift als Entwurf speichern (Masken-CommandEndpoint)",
+        "tags": [
+          "sales",
+          "credit-notes",
+          "returns",
+          "sales",
+          "credit-notes",
+          "returns"
+        ]
+      }
+    },
+    "/api/v1/sales/credit-notes/steuer-vorschau": {
+      "post": {
+        "description": "Rechnet Netto, Umsatzsteuer und Brutto je Steuerschluessel — mit derselben Stelle wie die Buchung.\n\nDie Maske rechnet nicht selbst. Laesst sich die Steuer nicht bestimmen, steht der Grund in\n``pruefgrund``, und Steuer und Brutto bleiben leer.",
+        "operationId": "steuer_vorschau_api_v1_sales_credit_notes_steuer_vorschau_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SteuerVorschauIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SteuerVorschauOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Umsatzsteuer der Positionen berechnen (liest nur)",
+        "tags": [
+          "sales",
+          "credit-notes",
+          "returns",
+          "sales",
+          "credit-notes",
+          "returns"
+        ]
+      }
+    },
     "/api/v1/sales/credit-notes/{cn_id}": {
       "delete": {
         "operationId": "delete_credit_note_api_v1_sales_credit_notes__cn_id__delete",
@@ -384913,11 +386146,125 @@
           "credit-notes",
           "returns"
         ]
+      },
+      "get": {
+        "operationId": "get_credit_note_api_v1_sales_credit_notes__cn_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cn_id",
+            "required": true,
+            "schema": {
+              "title": "Cn Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreditNoteDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Credit note mit Positionen",
+        "tags": [
+          "sales",
+          "credit-notes",
+          "returns",
+          "sales",
+          "credit-notes",
+          "returns"
+        ]
+      }
+    },
+    "/api/v1/sales/credit-notes/{cn_id}/actions/buchen": {
+      "post": {
+        "description": "CE fuer sales/gutschrift:buchen. Der Trockenlauf nennt den Pruefgrund, ohne zu buchen.",
+        "operationId": "action_gutschrift_buchen_api_v1_sales_credit_notes__cn_id__actions_buchen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cn_id",
+            "required": true,
+            "schema": {
+              "title": "Cn Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gutschrift buchen (Masken-CommandEndpoint)",
+        "tags": [
+          "sales",
+          "credit-notes",
+          "returns",
+          "sales",
+          "credit-notes",
+          "returns"
+        ]
       }
     },
     "/api/v1/sales/credit-notes/{cn_id}/post": {
       "post": {
-        "description": "Post a credit note — creates GL reversal entry and updates OP.",
+        "description": "Gutschrift buchen: Erloes netto, Umsatzsteuer getrennt, Forderung brutto — in einer Transaktion.\n\nSoll  Erloeskonto je Steuerschluessel   Netto\nSoll  Umsatzsteuerkonto je Schluessel   Steuer\nHaben Forderungen                       Brutto\n\nBis 12.10.2026 wurde der Kopf zuerst festgeschrieben; die Zeilen trugen Kontonummern statt\nKonto-IDs, scheiterten am Fremdschluessel, und der Fehler wurde verschluckt. Der Gesamtbetrag ging\nungeteilt gegen das Erloeskonto.",
         "operationId": "post_credit_note_api_v1_sales_credit_notes__cn_id__post_post",
         "parameters": [
           {
@@ -397193,31 +398540,26 @@
     },
     "/api/v1/tenants/": {
       "get": {
-        "description": "List tenants with pagination.\n\nRetrieve a paginated list of all tenants in the system.",
         "operationId": "list_tenants_api_v1_tenants__get",
         "parameters": [
           {
-            "description": "Number of items to skip",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
-              "description": "Number of items to skip",
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
             }
           },
           {
-            "description": "Maximum number of items to return",
             "in": "query",
             "name": "limit",
             "required": false,
             "schema": {
               "default": 100,
-              "description": "Maximum number of items to return",
-              "maximum": 1000,
+              "maximum": 100,
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
@@ -397251,14 +398593,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Tenants auflisten",
+        "summary": "Berechtigte Mandanten auflisten",
         "tags": [
           "tenants",
           "tenants"
         ]
       },
       "post": {
-        "description": "Create a new tenant.\n\nThis endpoint allows creating a new tenant in the system.\nThe tenant will be used for multi-tenant data isolation.",
         "operationId": "create_tenant_api_v1_tenants__post",
         "requestBody": {
           "content": {
@@ -397297,28 +398638,37 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Tenant anlegen",
+        "summary": "Mandanten mit Plattformberechtigung anlegen",
         "tags": [
           "tenants",
           "tenants"
         ]
       }
     },
-    "/api/v1/tenants/{tenant_id}": {
+    "/api/v1/tenants/{target_id}": {
       "delete": {
-        "description": "Delete tenant (soft delete).\n\nMark a tenant as inactive. This is a soft delete operation.",
-        "operationId": "delete_tenant_api_v1_tenants__tenant_id__delete",
+        "operationId": "delete_tenant_api_v1_tenants__target_id__delete",
         "parameters": [
           {
             "in": "path",
-            "name": "tenant_id",
+            "name": "target_id",
             "required": true,
             "schema": {
-              "title": "Tenant Id",
+              "title": "Target Id",
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LifecycleReason"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "204": {
             "description": "Successful Response"
@@ -397339,22 +398689,21 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Tenant löschen",
+        "summary": "Mandanten ausschließlich ohne Buchungen und geschützte Referenzen löschen",
         "tags": [
           "tenants",
           "tenants"
         ]
       },
       "get": {
-        "description": "Get tenant by ID.\n\nRetrieve detailed information about a specific tenant.",
-        "operationId": "get_tenant_api_v1_tenants__tenant_id__get",
+        "operationId": "get_tenant_api_v1_tenants__target_id__get",
         "parameters": [
           {
             "in": "path",
-            "name": "tenant_id",
+            "name": "target_id",
             "required": true,
             "schema": {
-              "title": "Tenant Id",
+              "title": "Target Id",
               "type": "string"
             }
           }
@@ -397386,22 +398735,21 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Tenant abrufen",
+        "summary": "Eigenen oder ausdrücklich administrierten Mandanten abrufen",
         "tags": [
           "tenants",
           "tenants"
         ]
       },
       "put": {
-        "description": "Update tenant information.\n\nModify tenant details such as name, domain, or settings.",
-        "operationId": "update_tenant_api_v1_tenants__tenant_id__put",
+        "operationId": "update_tenant_api_v1_tenants__target_id__put",
         "parameters": [
           {
             "in": "path",
-            "name": "tenant_id",
+            "name": "target_id",
             "required": true,
             "schema": {
-              "title": "Tenant Id",
+              "title": "Target Id",
               "type": "string"
             }
           }
@@ -397443,7 +398791,65 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Tenant aktualisieren",
+        "summary": "Mandantenstammdaten administrieren",
+        "tags": [
+          "tenants",
+          "tenants"
+        ]
+      }
+    },
+    "/api/v1/tenants/{target_id}/block": {
+      "post": {
+        "operationId": "block_tenant_api_v1_tenants__target_id__block_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "title": "Target Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LifecycleReason"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tenant"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mandanten unter Erhalt sämtlicher Buchungen sperren",
         "tags": [
           "tenants",
           "tenants"

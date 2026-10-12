@@ -150,9 +150,9 @@ def test_actual_writes_and_finance_gaps_remain_visible():
     assert by_id["mask:einkauf/purchase-order:speichern"]["coverage"] == "mapped"
     assert data["stats"]["by_coverage"].get("blocked_no_endpoint", 0) == 0
     assert data["stats"]["by_coverage"].get("blocked_missing_tenant", 0) == 0
-    assert data["stats"]["by_coverage"]["local_ui"] == 13
+    assert data["stats"]["by_coverage"]["local_ui"] == 14
     assert data["stats"]["mask_actions_considered"] == len(by_id)
-    assert data["stats"]["mask_mutations_considered"] == len(by_id) - 13
+    assert data["stats"]["mask_mutations_considered"] == len(by_id) - 14
     assert "blocked_missing_tenant 0" in data["classification_notes"]
 
 

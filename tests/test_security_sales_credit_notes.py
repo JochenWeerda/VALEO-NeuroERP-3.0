@@ -73,10 +73,11 @@ async def test_create_credit_note_rejects_payload_tenant_mismatch(monkeypatch):
 async def test_post_credit_note_scopes_lookup_and_update_by_tenant(monkeypatch):
     db = _CapturingDb(
         rows=[
-            [("cn-1", "tenant-a", "GS-1", "cust-1", Decimal("50.00"), "draft")],
+            [("cn-1", "tenant-a", "GS-1", "cust-1", Decimal("50.00"), "draft", None, "rechnungskorrektur")],
             [_eligibility_fetchone_ok()],
-            [],
-            [],
+            [(1, "3", Decimal("19"), Decimal("42.02"))],
+            [("3", Decimal("19"), "1776", "8400", False)],
+            [("1400", "konto-1400", False), ("1776", "konto-1776", False), ("8400", "konto-8400", False)],
         ]
     )
     monkeypatch.setattr(sales_credit_notes, "log_fibu_audit", lambda *args, **kwargs: None)
@@ -89,12 +90,13 @@ async def test_post_credit_note_scopes_lookup_and_update_by_tenant(monkeypatch):
     )
 
     select_statement, select_params = db.calls[0]
-    update_statement, update_params = db.calls[3]
+    update_statement, update_params = next(
+        c for c in db.calls if "UPDATE domain_sales.sales_credit_notes" in c[0])
     assert "WHERE id = :id AND tenant_id = :tid" in select_statement
     assert select_params == {"id": "cn-1", "tid": "tenant-a"}
     assert "WHERE id = :id AND tenant_id = :tid" in update_statement
-    assert update_params == {"id": "cn-1", "tid": "tenant-a"}
-    assert result["ok"] is True
+    assert (update_params["id"], update_params["tid"]) == ("cn-1", "tenant-a")
+    assert result.success is True
 
 
 @pytest.mark.asyncio

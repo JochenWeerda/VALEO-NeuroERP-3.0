@@ -1,8 +1,4 @@
-﻿/**
- * Authentication Library
- * OIDC/OAuth2 Flow für Production
- */
-
+/** Canonical provider login with PKCE, explicit logout and no development identity. */
 import { jwtDecode } from 'jwt-decode'
 
 export interface User {
@@ -13,393 +9,176 @@ export interface User {
   roles: string[]
   exp: number
 }
-
 export interface AuthConfig {
-  oidc: {
-    discoveryUrl: string
-    clientId: string
-    redirectUri: string
-    scopes: string[]
-  }
+  oidc: { discoveryUrl: string; clientId: string; redirectUri: string; scopes: string[] }
 }
-
-// Helper: Check if OIDC is actually configured (not just placeholder)
-const isOidcConfigured = (): boolean => {
-  const discoveryUrl = import.meta.env.VITE_OIDC_DISCOVERY_URL ?? ''
-  // Check if URL is empty or is a placeholder
-  if (!discoveryUrl || discoveryUrl.length === 0) {
-    return false
-  }
-  // Check for common placeholder patterns
-  const placeholderPatterns = [
-    'your-oidc-provider.com',
-    'example.com',
-    'keycloak.example.com',
-    'login.microsoftonline.com/{tenant-id}',
-    '{domain}.auth0.com',
-    '{domain}.okta.com',
-    '{tenant-id}',
-    '{application-id}',
-    '{client-id}',
-    '{domain}',
-  ]
-  return !placeholderPatterns.some(pattern => discoveryUrl.includes(pattern))
+interface Discovery {
+  issuer: string
+  authorization_endpoint: string
+  token_endpoint: string
+  revocation_endpoint?: string
 }
-
-// Auth-Config aus ENV
+const localHost = ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)
 const config: AuthConfig = {
   oidc: {
-    discoveryUrl: import.meta.env.VITE_OIDC_DISCOVERY_URL ?? '',
-    clientId: import.meta.env.VITE_OIDC_CLIENT_ID ?? '',
-    redirectUri: import.meta.env.VITE_OIDC_REDIRECT_URI ?? `${window.location.origin}/auth/callback`,
-    scopes: ['openid', 'profile', 'email', 'offline_access'],
+    discoveryUrl: import.meta.env.VITE_OIDC_DISCOVERY_URL || (localHost ? 'http://localhost:8080/realms/valeo-neuro-erp/.well-known/openid-configuration' : ''),
+    clientId: import.meta.env.VITE_OIDC_CLIENT_ID || 'valeo-neuro-erp-frontend',
+    redirectUri: import.meta.env.VITE_OIDC_REDIRECT_URI || `${window.location.origin}/auth/callback`,
+    scopes: ['openid', 'profile', 'email'],
   },
 }
+const strings = (value: unknown): string[] => Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
 
-const RANDOM_STRING_LENGTH = 32
-
-class AuthService {
+export class AuthService {
   private accessToken: string | null = null
   private refreshToken: string | null = null
   private user: User | null = null
+  private generation = 0
+  private refreshPending: Promise<boolean> | null = null
 
-  constructor() {
-    // Load from localStorage
-    this.accessToken = localStorage.getItem('access_token')
-    this.refreshToken = localStorage.getItem('refresh_token')
-    
-    // Development mode: Create mock user if no OIDC config
-    const oidcConfigured = isOidcConfigured()
-    
-    // If OIDC not configured, always use dev token (even if token exists in localStorage)
-    if (!oidcConfigured) {
-      // Create a mock user for development
-      const mockUser: User = {
-        sub: 'dev-user',
-        email: 'dev@valeo-neuro-erp.local',
-        name: 'Development User',
-        scopes: ['admin:all', 'sales:read', 'sales:write', 'crm:read', 'crm:write'],
-        roles: ['admin', 'user'],
-        exp: Math.floor(Date.now() / 1000) + 86400, // 24 hours from now
-      }
-      this.user = mockUser
-      // Always use dev token in dev mode (override any existing token)
-      const devToken = import.meta.env.VITE_API_DEV_TOKEN || 'dev-token'
-      this.accessToken = devToken
-      localStorage.setItem('access_token', devToken)
-      return
-    }
-    
-    // OIDC configured - only create mock user if no token exists
-    if (this.accessToken == null) {
-      // No token and OIDC configured - user needs to login
-      return
-    }
-    
-    if (this.accessToken != null) {
-      // If token is dev-token, don't try to decode it as JWT
-      if (this.accessToken === 'dev-token' || this.accessToken === import.meta.env.VITE_API_DEV_TOKEN) {
-        // Dev token - use mock user
-        if (!this.user) {
-          const mockUser: User = {
-            sub: 'dev-user',
-            email: 'dev@valeo-neuro-erp.local',
-            name: 'Development User',
-            scopes: ['admin:all', 'sales:read', 'sales:write', 'crm:read', 'crm:write'],
-            roles: ['admin', 'user'],
-            exp: Math.floor(Date.now() / 1000) + 86400,
-          }
-          this.user = mockUser
-        }
-        return
-      }
-      
-      try {
-        this.user = jwtDecode<User>(this.accessToken)
-        
-        // Check if expired
-        if (this.user.exp * 1000 < Date.now()) {
-          // In dev mode without OIDC, recreate mock user instead of logout
-          if (!oidcConfigured) {
-            const mockUser: User = {
-              sub: 'dev-user',
-              email: 'dev@valeo-neuro-erp.local',
-              name: 'Development User',
-              scopes: ['admin:all', 'sales:read', 'sales:write', 'crm:read', 'crm:write'],
-              roles: ['admin', 'user'],
-              exp: Math.floor(Date.now() / 1000) + 86400,
-            }
-            this.user = mockUser
-            // Reset token to dev-token
-            const devToken = import.meta.env.VITE_API_DEV_TOKEN || 'dev-token'
-            this.accessToken = devToken
-            localStorage.setItem('access_token', devToken)
-            return
-          }
-          this.logout()
-        }
-      } catch (e) {
-        // In dev mode without OIDC, create mock user instead of logout
-        if (!oidcConfigured) {
-          const mockUser: User = {
-            sub: 'dev-user',
-            email: 'dev@valeo-neuro-erp.local',
-            name: 'Development User',
-            scopes: ['admin:all', 'sales:read', 'sales:write', 'crm:read', 'crm:write'],
-            roles: ['admin', 'user'],
-            exp: Math.floor(Date.now() / 1000) + 86400,
-          }
-          this.user = mockUser
-          // Reset token to dev-token
-          const devToken = import.meta.env.VITE_API_DEV_TOKEN || 'dev-token'
-          this.accessToken = devToken
-          localStorage.setItem('access_token', devToken)
-          return
-        }
-        this.logout()
-      }
+  constructor(private readonly settings: AuthConfig = config,
+    private readonly navigate: (url: string) => void = url => window.location.assign(url)) {
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      try { this.setTokens(token, localStorage.getItem('refresh_token') ?? undefined) }
+      catch { this.clearTokens() }
     }
   }
 
-  /**
-   * Startet OIDC-Login-Flow
-   */
-  async login(): Promise<void> {
-    if (config.oidc.discoveryUrl.length === 0) {
-      throw new Error('OIDC not configured. Set VITE_OIDC_DISCOVERY_URL')
+  private async discovery(): Promise<Discovery> {
+    const location = this.settings.oidc.discoveryUrl
+    if (!location) throw new Error('Der Anmeldedienst ist noch nicht konfiguriert.')
+    const response = await fetch(location)
+    if (!response.ok) throw new Error('Der Anmeldedienst ist nicht erreichbar.')
+    const metadata = await response.json() as Discovery
+    const expected = location.replace(/\/\.well-known\/openid-configuration\/?$/, '')
+    if (metadata.issuer !== expected) throw new Error('Unerwarteter Anmeldedienst.')
+    for (const endpoint of [metadata.authorization_endpoint, metadata.token_endpoint, metadata.revocation_endpoint].filter((value): value is string => typeof value === 'string')) {
+      const url = new URL(endpoint)
+      if (url.origin !== new URL(expected).origin) throw new Error('Unerwarteter Anmelde-Endpunkt.')
     }
+    return metadata
+  }
 
-    // Fetch OIDC discovery document
-    const discoveryResponse = await fetch(config.oidc.discoveryUrl)
-    const discovery = await discoveryResponse.json()
+  private random(length: number): string {
+    const bytes = crypto.getRandomValues(new Uint8Array(length))
+    return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  }
 
-    // Generate state & nonce
-    const state = this.generateRandomString(RANDOM_STRING_LENGTH)
-    const nonce = this.generateRandomString(RANDOM_STRING_LENGTH)
-
+  async login(): Promise<void> {
+    const metadata = await this.discovery()
+    const state = this.random(24), nonce = this.random(24), verifier = this.random(48)
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier))
+    const challenge = btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
     sessionStorage.setItem('auth_state', state)
     sessionStorage.setItem('auth_nonce', nonce)
-
-    // Build authorization URL
-    const params = new URLSearchParams({
-      client_id: config.oidc.clientId,
-      redirect_uri: config.oidc.redirectUri,
-      response_type: 'code',
-      scope: config.oidc.scopes.join(' '),
-      state,
-      nonce,
-    })
-
-    const authUrl = `${discovery.authorization_endpoint}?${params.toString()}`
-
-    // Redirect to OIDC provider
-    window.location.href = authUrl
+    sessionStorage.setItem('auth_code_verifier', verifier)
+    const params = new URLSearchParams({ client_id: this.settings.oidc.clientId,
+      redirect_uri: this.settings.oidc.redirectUri, response_type: 'code', scope: this.settings.oidc.scopes.join(' '),
+      state, nonce, code_challenge: challenge, code_challenge_method: 'S256' })
+    this.navigate(`${metadata.authorization_endpoint}?${params.toString()}`)
   }
 
-  /**
-   * Callback-Handler nach OIDC-Redirect
-   */
   async handleCallback(code: string, state: string): Promise<void> {
-    // Verify state
-    const savedState = sessionStorage.getItem('auth_state')
-    if (state !== savedState) {
-      throw new Error('Invalid state parameter')
-    }
-
-    // Exchange code for tokens
-    const discoveryResponse = await fetch(config.oidc.discoveryUrl)
-    const discovery = await discoveryResponse.json()
-
-    const tokenResponse = await fetch(discovery.token_endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        code,
-        redirect_uri: config.oidc.redirectUri,
-        client_id: config.oidc.clientId,
-      }),
-    })
-
-    if (!tokenResponse.ok) {
-      throw new Error('Token exchange failed')
-    }
-
-    const tokens = await tokenResponse.json()
-
-    // Save tokens
+    const saved = sessionStorage.getItem('auth_state'), nonce = sessionStorage.getItem('auth_nonce')
+    const verifier = sessionStorage.getItem('auth_code_verifier')
+    if (!code || !state || !saved || state !== saved || !nonce || !verifier) throw new Error('Ungueltige Anmeldeantwort.')
+    const generation = this.generation
+    // A callback is consumed once, including failed code exchanges.
+    for (const key of ['auth_state', 'auth_nonce', 'auth_code_verifier']) sessionStorage.removeItem(key)
+    const metadata = await this.discovery()
+    const response = await fetch(metadata.token_endpoint, { method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ grant_type: 'authorization_code', code, code_verifier: verifier,
+        redirect_uri: this.settings.oidc.redirectUri, client_id: this.settings.oidc.clientId }) })
+    if (!response.ok) throw new Error('Die Anmeldung konnte nicht abgeschlossen werden.')
+    const tokens = await response.json()
+    if (typeof tokens.id_token !== 'string') throw new Error('Identitaetsbestaetigung fehlt.')
+    const identity = jwtDecode<{ nonce?: string; iss?: string; aud?: string | string[]; exp?: number }>(tokens.id_token)
+    const audience = typeof identity.aud === 'string' ? [identity.aud] : identity.aud ?? []
+    if (identity.nonce !== nonce || identity.iss !== metadata.issuer || !audience.includes(this.settings.oidc.clientId)
+      || typeof identity.exp !== 'number' || identity.exp * 1000 <= Date.now()) throw new Error('Ungueltige Identitaetsbestaetigung.')
+    if (generation !== this.generation) throw new Error('Die Anmeldung wurde abgebrochen.')
     this.setTokens(tokens.access_token, tokens.refresh_token)
-
-    // Clear session storage
-    sessionStorage.removeItem('auth_state')
-    sessionStorage.removeItem('auth_nonce')
   }
 
-  /**
-   * Speichert Tokens und decoded User
-   */
-  private setTokens(accessToken: string, refreshToken?: string): void {
-    this.accessToken = accessToken
-    this.refreshToken = refreshToken ?? null
-
-    localStorage.setItem('access_token', accessToken)
-    if (typeof refreshToken === 'string') {
-      localStorage.setItem('refresh_token', refreshToken)
-    }
-
-    // Decode JWT
-    try {
-      this.user = jwtDecode<User>(accessToken)
-    } catch (e) {
-      console.error('Failed to decode JWT:', e)
-      this.logout()
-    }
+  private setTokens(token: unknown, refresh?: unknown): void {
+    if (typeof token !== 'string') throw new Error('Zugriffstoken fehlt.')
+    const user = this.decodeUser(token)
+    this.accessToken = token
+    this.refreshToken = typeof refresh === 'string' ? refresh : null
+    this.user = user
+    localStorage.setItem('access_token', token)
+    if (this.refreshToken) localStorage.setItem('refresh_token', this.refreshToken)
+    else localStorage.removeItem('refresh_token')
+    window.dispatchEvent(new Event('valeo-auth-changed'))
   }
 
-  /**
-   * Refresh Access-Token mit Refresh-Token
-   */
   async refreshAccessToken(): Promise<boolean> {
-    if (this.refreshToken == null) {
-      return false
-    }
-
-    try {
-      const discoveryResponse = await fetch(config.oidc.discoveryUrl)
-      const discovery = await discoveryResponse.json()
-
-      const tokenResponse = await fetch(discovery.token_endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          grant_type: 'refresh_token',
-          refresh_token: this.refreshToken,
-          client_id: config.oidc.clientId,
-        }),
-      })
-
-      if (!tokenResponse.ok) {
+    if (!this.refreshToken) return false
+    if (this.refreshPending) return this.refreshPending
+    const token = this.refreshToken, generation = this.generation
+    this.refreshPending = (async () => {
+      try {
+        const metadata = await this.discovery()
+        const response = await fetch(metadata.token_endpoint, { method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: token, client_id: this.settings.oidc.clientId }) })
+        if (!response.ok) throw new Error('Token refresh failed')
+        const tokens = await response.json()
+        if (generation !== this.generation) return false
+        this.setTokens(tokens.access_token, tokens.refresh_token)
+        return true
+      } catch {
+        if (generation === this.generation) this.clearTokens()
         return false
-      }
-
-      const tokens = await tokenResponse.json()
-      this.setTokens(tokens.access_token, tokens.refresh_token)
-
-      return true
-    } catch (e) {
-      console.error('Token refresh failed:', e)
-      return false
-    }
+      } finally { this.refreshPending = null }
+    })()
+    return this.refreshPending
   }
 
-  /**
-   * Logout (lokale Tokens löschen)
-   */
-  logout(): void {
-    const oidcConfigured = config.oidc.discoveryUrl.length > 0
-    // In dev mode without OIDC, don't clear tokens (keep dev token)
-    if (!oidcConfigured && this.accessToken === 'dev-token') {
-      // Keep dev token for development
-      return
-    }
-    this.accessToken = null
-    this.refreshToken = null
+  async logout(): Promise<void> {
+    const token = this.accessToken, refresh = this.refreshToken
+    this.clearTokens()
+    const results = await Promise.allSettled([
+      token ? fetch('/api/v1/identity/session/logout', { method: 'POST', keepalive: true,
+        headers: { Authorization: `Bearer ${token}` } }).then(response => {
+        if (!response.ok && response.status !== 401) throw new Error('Session revocation failed')
+      }) : Promise.resolve(),
+      refresh ? this.discovery().then(metadata => {
+        if (!metadata.revocation_endpoint) throw new Error('Provider revocation unavailable')
+        return fetch(metadata.revocation_endpoint, { method: 'POST', keepalive: true,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ token: refresh, token_type_hint: 'refresh_token', client_id: this.settings.oidc.clientId }) })
+      }).then(response => { if (!response.ok) throw new Error('Provider revocation failed') }) : Promise.resolve(),
+    ])
+    if (results.some(result => result.status === 'rejected')) throw new Error('Lokal abgemeldet; der vollstaendige Widerruf konnte nicht bestaetigt werden.')
+  }
+
+  clearTokens(): void {
+    this.generation += 1
+    this.accessToken = this.refreshToken = null
     this.user = null
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
+    window.dispatchEvent(new Event('valeo-auth-changed'))
   }
 
-  /**
-   * Clear tokens (alias for logout)
-   */
-  clearTokens(): void {
-    this.logout()
+  private decodeUser(token: string): User {
+    const claims = jwtDecode<User & { scope?: string; erp_scopes?: string[]; realm_access?: { roles?: string[] } }>(token)
+    if (typeof claims.sub !== 'string' || !claims.sub || typeof claims.exp !== 'number'
+      || !Number.isFinite(claims.exp) || claims.exp * 1000 <= Date.now()) throw new Error('Ungueltiges Zugriffstoken.')
+    const names = claims as User & { preferred_username?: string }
+    return { ...claims, name: names.name || names.preferred_username || claims.sub, email: typeof claims.email === 'string' ? claims.email : '', roles: strings(claims.roles ?? claims.realm_access?.roles),
+      scopes: [...new Set([...strings(claims.scopes), ...(typeof claims.scope === 'string' ? claims.scope.split(' ').filter(Boolean) : []), ...strings(claims.erp_scopes)])] }
   }
-
-  /**
-   * Gibt aktuellen User zurück
-   */
-  getUser(): User | null {
-    return this.user
-  }
-
-  /**
-   * Gibt Access-Token zurück
-   */
-  getAccessToken(): string | null {
-    return this.accessToken
-  }
-
-  /**
-   * Prüft ob User authenticated ist
-   */
-  isAuthenticated(): boolean {
-    // In development mode without OIDC, allow access if mock user exists
-    const oidcConfigured = config.oidc.discoveryUrl.length > 0
-    if (!oidcConfigured && this.user !== null) {
-      return true
-    }
-    return this.accessToken !== null && this.user !== null
-  }
-
-  /**
-   * Prüft ob User bestimmte Scope hat
-   */
-  hasScope(scope: string): boolean {
-    return (this.user?.scopes?.includes(scope)) ?? false
-  }
-
-  /**
-   * Prüft ob User bestimmte Rolle hat
-   */
-  hasRole(role: string): boolean {
-    const hasRole = (this.user?.roles?.includes(role)) ?? false
-    const hasAdminScope = (this.user?.scopes?.includes('admin:all')) ?? false
-    return hasRole || hasAdminScope
-  }
-
-  /**
-   * Helper: Generate random string
-   */
-  private generateRandomString(length: number): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    let result = ''
-    const randomArray = new Uint8Array(length)
-    crypto.getRandomValues(randomArray)
-    
-    for (let i = 0; i < length; i++) {
-      result += chars[randomArray[i] % chars.length]
-    }
-    
-    return result
-  }
+  getUser(): User | null { return this.isAuthenticated() ? this.user : null }
+  getAccessToken(): string | null { return this.isAuthenticated() ? this.accessToken : null }
+  isAuthenticated(): boolean { return this.accessToken !== null && this.user !== null && this.user.exp * 1000 > Date.now() }
+  hasScope(scope: string): boolean { const user = this.getUser(); return Boolean(user && (user.scopes.includes(scope) || user.scopes.includes('admin:all'))) }
+  hasRole(role: string): boolean { const user = this.getUser(); return Boolean(user && (user.roles.includes(role) || user.roles.includes('admin'))) }
 }
-
-// Singleton
 export const auth = new AuthService()
-
-export function getAccessToken(): string | null {
-  return auth.getAccessToken()
-}
-
-export function clearAuthSession(): void {
-  auth.logout()
-}
-
-export function handleUnauthorized(): void {
-  const oidcConfigured = isOidcConfigured()
-  // Only redirect to login if OIDC is configured
-  if (oidcConfigured) {
-    auth.logout()
-    if (typeof window !== 'undefined') {
-      window.location.assign('/login')
-    }
-  } else {
-    // In dev mode without OIDC, just clear session but don't redirect
-    auth.logout()
-  }
-}
+export function getAccessToken(): string | null { return auth.getAccessToken() }
+export function clearAuthSession(): void { auth.clearTokens() }
+export function handleUnauthorized(): void { auth.clearTokens(); window.location.assign('/login') }

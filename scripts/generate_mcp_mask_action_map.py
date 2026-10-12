@@ -247,6 +247,14 @@ MAPPED_RULES: dict[str, dict[str, str]] = {
             "Token-Mandant."
         ),
     },
+    "mask:sales/gutschrift:speichern": {
+        "mcp_tool_id": "sales.gutschrift.speichern",
+        "coverage": "mapped",
+        "notes": (
+            "GUTSCHRIFT-MASKE-SD-20261012; CE /api/v1/sales/credit-notes/actions/speichern; "
+            "Token-Mandant; Entwurf, keine Buchung."
+        ),
+    },
     "mask:admin/postfaecher:speichern": {
         "mcp_tool_id": "admin.postfach.speichern",
         "coverage": "mapped",
@@ -371,6 +379,11 @@ LOCAL_UI_RULES: dict[str, dict[str, str]] = {
             "MCP-MASK-CE-BATCH2-20261009."
         ),
     },
+    "mask:sales/gutschrift:neu": {
+        "coverage": "local_ui",
+        "local_effect": "form_reset",
+        "notes": "SD stubReason: leert die Eingabe fuer eine neue Gutschrift; keine HTTP-Mutation.",
+    },
     "mask:admin/postfaecher:neu": {
         "coverage": "local_ui",
         "local_effect": "form_reset",
@@ -382,6 +395,13 @@ LOCAL_UI_RULES: dict[str, dict[str, str]] = {
 }
 
 BLOCKED_RULES: dict[str, dict[str, str]] = {
+    "mask:sales/gutschrift:buchen": {
+        "coverage": "open_high",
+        "notes": (
+            "Buchung ins Hauptbuch mit Umsatzsteuerberichtigung und OP-Minderung; forbiddenForAgents. "
+            "Agent legt den Entwurf an (sales.gutschrift.speichern), gebucht wird durch einen Menschen."
+        ),
+    },
     "mask:finance/payment-run:freigeben": {
         "coverage": "open_high",
         "notes": "Zahlauf-Freigabe HIGH; nahe Journal/Kasse — ADR-076-Umfeld; forbiddenForAgents.",

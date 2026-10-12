@@ -69,3 +69,64 @@ def test_role_reconciliation_fails_when_inventory_or_creation_is_not_confirmed(f
     with httpx.Client(base_url='https://provider.invalid', transport=httpx.MockTransport(handler)) as client:
         with pytest.raises(RuntimeError):
             reconcile_realm_roles(client, {}, 'fixture', [{'name': 'required_role'}])
+
+
+def test_development_port_3001_has_exact_callback_and_no_wildcard():
+    from scripts.provision_identity_provider import reconcile_callback_origins
+    source=json.loads((ROOT/'config/keycloak/realm-export.json').read_text(encoding='utf-8'))
+    desired=next(c for c in source['clients'] if c['clientId']=='valeo-neuro-erp-frontend')
+    assert 'http://localhost:3001/auth/callback' in desired['redirectUris']
+    assert 'http://localhost:3001/*' not in desired['redirectUris']
+    assert 'http://localhost:3001' in desired['webOrigins']
+    current={'redirectUris':['https://existing.invalid/auth/callback'],
+             'webOrigins':['https://existing.invalid'],'secret':'synthetic-existing-secret'}
+    reconcile_callback_origins(current,desired)
+    assert 'http://localhost:3001/auth/callback' in current['redirectUris']
+    assert 'https://existing.invalid/auth/callback' in current['redirectUris']
+    assert current['secret']=='synthetic-existing-secret'
+    expected=copy.deepcopy(current)
+    reconcile_callback_origins(current,desired)
+    assert current==expected
+
+
+@pytest.mark.parametrize('realm_file',['realm-export.json','realm-staging.json'])
+def test_every_declared_oidc_scope_exists_and_identity_kind_is_mapped(realm_file):
+    realm=prepared_realm(json.loads((ROOT/'config/keycloak'/realm_file).read_text(encoding='utf-8')))
+    known={scope['name'] for scope in realm['clientScopes']}|{'offline_access'}
+    assert {'profile','email','roles','web-origins'}<=known
+    for client in realm['clients']:
+        assert set(client.get('defaultClientScopes',[])+client.get('optionalClientScopes',[]))<=known
+        mapper=next(m for m in client['protocolMappers'] if m['name']=='erp-identity-type')
+        assert mapper['config']['user.attribute']=='identity_type'
+        assert mapper['config']['claim.name']=='identity_type'
+        assert mapper['protocolMapper']=='oidc-usermodel-attribute-mapper'
+        assert 'claim.value' not in mapper['config']  # No fabricated human/service claim.
+
+
+def test_scope_creation_and_assignment_are_additive_verified_and_repeatable():
+    from scripts.provision_identity_provider import reconcile_client_scopes, assign_declared_scopes, standard_login_scopes
+    scopes={'roles':{'id':'roles-fixture','name':'roles','protocolMappers':[{'name':'preserved-custom'}]}}
+    original=copy.deepcopy(scopes['roles'])
+    assigned={'roles'}
+    writes=[]
+    def handler(request):
+        path=request.url.path
+        if path.endswith('/client-scopes'):
+            if request.method=='POST':
+                record=json.loads(request.content);scopes[record['name']]={**record,'id':record['name']+'-fixture'}
+                writes.append(('create',record['name']))
+                return httpx.Response(201)
+            return httpx.Response(200,json=list(scopes.values()))
+        if path.endswith('/default-client-scopes'):
+            return httpx.Response(200,json=[scopes[name] for name in assigned])
+        if request.method=='PUT':
+            name=path.rsplit('/',1)[-1].removesuffix('-fixture');assigned.add(name);writes.append(('assign',name))
+            return httpx.Response(204)
+        raise AssertionError((request.method,path))
+    with httpx.Client(base_url='https://provider.invalid',transport=httpx.MockTransport(handler)) as client:
+        for _ in range(2):
+            ids=reconcile_client_scopes(client,{},'fixture',standard_login_scopes())
+            assign_declared_scopes(client,{},'fixture','browser',{'defaultClientScopes':['roles','profile','email']},ids)
+    assert scopes['roles']==original
+    assert assigned=={'roles','profile','email'}
+    assert sorted(writes)==sorted([('create','profile'),('create','email'),('create','web-origins'),('assign','profile'),('assign','email')])

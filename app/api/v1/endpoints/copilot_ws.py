@@ -6,6 +6,7 @@ WebSocket-Endpoint fuer Echtzeit-AI-Streaming mit Neuro-Core Pipeline Integratio
 from __future__ import annotations
 
 import json
+import asyncio
 import logging
 from datetime import datetime, timezone
 from uuid import uuid4
@@ -156,7 +157,7 @@ async def copilot_chat(
                 "state": "engaged",
             })
 
-            pipeline_result = _run_pipeline_sync(user_text, session_ctx)
+            pipeline_result = await asyncio.to_thread(_run_pipeline_sync, user_text, session_ctx)
 
             await websocket.send_json({
                 "type": "pipeline_result",

@@ -179,9 +179,7 @@ def test_kontenzuordnung_der_warengruppe_wird_gefunden(lage):
 
 # --- Ratsche: Kein Buchungsweg faengt die Sperre breit ab, ohne sie zu erkennen --------------
 
-# Buchen mit Kontonummern statt Konto-IDs und scheitern heute schon am Fremdschluessel; die Gutschrift
-# ist an der Stelle bereits festgeschrieben. Eigener Befund, im QA-Dokument genannt.
-AUSNAHMEN = {"app/api/v1/endpoints/sales_credit_notes.py"}
+AUSNAHMEN: set[str] = set()
 
 
 def _breit(handler: ast.ExceptHandler) -> bool:
@@ -206,7 +204,8 @@ def _stumme_stellen() -> list[str]:
             if not any(von <= z <= bis for z in einfuegungen):
                 continue
             for handler in versuch.handlers:
-                if _breit(handler) and "kontosperre_meldung" not in ast.unparse(handler):
+                wirft_weiter = isinstance(handler.body[-1], ast.Raise) and handler.body[-1].exc is None
+                if _breit(handler) and not wirft_weiter and "kontosperre_meldung" not in ast.unparse(handler):
                     stellen.append(f"{rel}:{handler.lineno}")
     return stellen
 
