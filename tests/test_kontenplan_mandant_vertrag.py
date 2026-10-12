@@ -125,6 +125,50 @@ def test_aendern_wirkt_auch_ohne_namen_im_rumpf(haus):
     assert gelesen.json()["category"] == "fixed_assets"
 
 
+def _als(haus, *rollen):
+    haus["app"].dependency_overrides[get_current_user] = lambda: {
+        "sub": "5f0c2a9e", "name": "t.de-vries", "roles": list(rollen)}
+
+
+@pytest.mark.parametrize("methode,rumpf", [("PUT", {"account_name": "umbenannt"}), ("DELETE", None)])
+@pytest.mark.parametrize("rollen", [("FINANCE_ADMIN",), ("FINANCE_ADMIN", "manager")])
+def test_gemeinsamer_rahmen_ist_fuer_die_hausrolle_nur_lesbar(haus, methode, rumpf, rollen):
+    """Die Finanzleitung eines Hauses sieht den gemeinsamen Rahmen — aendern wuerde alle Haeuser treffen."""
+    _als(haus, *rollen)
+    antwort = haus["client"].request(methode, f"{PREFIX}/{haus['gemeinsam']}", json=rumpf, headers=_kopf(HAUS_A))
+    assert antwort.status_code == 403, antwort.text
+    assert "KONTENRAHMEN_PFLEGE" in antwort.json()["detail"]
+    gelesen = haus["client"].get(f"{PREFIX}/{haus['gemeinsam']}", headers=_kopf(HAUS_B))
+    assert gelesen.status_code == 200, gelesen.text
+    assert gelesen.json()["account_name"] == "Gemeinsam"
+    assert gelesen.json()["is_active"] is True
+
+
+@pytest.mark.parametrize("pflegerecht", ["KONTENRAHMEN_PFLEGE", "admin"])
+def test_gemeinsamen_rahmen_pflegt_wer_das_recht_hat(haus, pflegerecht):
+    _als(haus, "FINANCE_ADMIN", pflegerecht)
+    geaendert = haus["client"].put(
+        f"{PREFIX}/{haus['gemeinsam']}", json={"account_name": "Gepflegt"}, headers=_kopf(HAUS_A))
+    assert geaendert.status_code == 200, geaendert.text
+    assert haus["client"].get(f"{PREFIX}/{haus['gemeinsam']}", headers=_kopf(HAUS_B)).json()["account_name"] == "Gepflegt"
+    assert haus["client"].delete(f"{PREFIX}/{haus['gemeinsam']}", headers=_kopf(HAUS_A)).status_code == 200
+
+
+def test_pflegerecht_allein_ist_keine_schreibrolle(haus):
+    """Das Recht am gemeinsamen Rahmen ersetzt die Finanzrolle nicht."""
+    _als(haus, "KONTENRAHMEN_PFLEGE")
+    antwort = haus["client"].put(
+        f"{PREFIX}/{haus['gemeinsam']}", json={"account_name": "ohne Finanzrolle"}, headers=_kopf(HAUS_A))
+    assert antwort.status_code == 403, antwort.text
+
+
+def test_eigenes_konto_braucht_kein_pflegerecht(haus):
+    _als(haus, "FINANCE_ADMIN")
+    assert haus["client"].put(
+        f"{PREFIX}/{haus['a']}", json={"account_name": "eigenes"}, headers=_kopf(HAUS_A)).status_code == 200
+    assert haus["client"].delete(f"{PREFIX}/{haus['a']}", headers=_kopf(HAUS_A)).status_code == 200
+
+
 class _Mitschnitt:
     """Nimmt die Parameter der DATEV-Abfrage auf und liefert keine Buchungen."""
 

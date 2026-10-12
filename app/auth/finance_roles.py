@@ -36,3 +36,8 @@ kontenplan_read = require_roles(
     "EINKAUF_LESEN", "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN",
     "admin", "manager",
 )
+
+# Der gemeinsame Kontenrahmen (Mandant ``system``) gilt fuer alle Haeuser einer Installation. Ihn zu
+# lesen ist etwas anderes als ihn zu pflegen: Aendern und deaktivieren braucht dieses eigene Recht,
+# die Finanzrolle eines Hauses genuegt dafuer nicht.
+KONTENRAHMEN_PFLEGE = frozenset({"KONTENRAHMEN_PFLEGE", "admin"})

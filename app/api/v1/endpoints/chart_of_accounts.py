@@ -24,7 +24,13 @@ from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.chart_of_accounts_schemas import ChartOfAccountsOut
 
 
-from app.auth.finance_roles import finance_admin, finance_read, finance_write, kontenplan_read
+from app.auth.finance_roles import (
+    KONTENRAHMEN_PFLEGE,
+    finance_admin,
+    finance_read,
+    finance_write,
+    kontenplan_read,
+)
 
 router = APIRouter(prefix="/chart-of-accounts")
 
@@ -65,6 +71,24 @@ def _konto(db: Session, account_id: str, tenant_id: str) -> AccountModel:
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
     return account
+
+
+def _pflegbar(account: AccountModel, nutzer: dict) -> None:
+    """Ein Konto des gemeinsamen Rahmens pflegt nur, wer das Recht dazu hat.
+
+    Sehen darf es jeder Mandant. Bis zum 12.10.2026 durfte es auch jeder mit Schreibrolle
+    aendern und deaktivieren — fuer alle Mandanten zugleich.
+    """
+    if account.tenant_id != SHARED_TENANT:
+        return
+    if KONTENRAHMEN_PFLEGE.isdisjoint(nutzer.get("roles") or []):
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Dieses Konto gehoert zum gemeinsamen Kontenrahmen. Aendern und deaktivieren darf es nur, "
+                "wer das Recht KONTENRAHMEN_PFLEGE hat."
+            ),
+        )
 
 
 @router.get("/", response_model=PaginatedResponse[Account], summary="Accounts auflisten", dependencies=[Depends(kontenplan_read)])
@@ -172,10 +196,12 @@ async def update_account(
     account_update: AccountUpdate,
     request: Request,
     tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(finance_write),
     db: Session = Depends(get_db),
 ):
     """Update an existing account."""
     account = _konto(db, account_id, tenant_id)
+    _pflegbar(account, nutzer)
 
     # Geaendert wurde nur, wenn auch der Name im Rumpf stand — sonst meldete der Weg Erfolg ohne Wirkung.
     for field, value in _spalten(account_update.model_dump(exclude_unset=True)).items():
@@ -197,10 +223,12 @@ async def delete_account(
     account_id: str,
     request: Request,
     tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(finance_admin),
     db: Session = Depends(get_db),
 ):
     """Delete an account (soft delete by setting is_active to False)."""
     account = _konto(db, account_id, tenant_id)
+    _pflegbar(account, nutzer)
 
     # Check if account has any journal entries
     if hasattr(account, 'journal_entry_lines') and account.journal_entry_lines:
@@ -216,7 +244,8 @@ async def delete_account(
         {"is_active": False, "account_number": account.account_number},
         request=request,
     )
-    return {"message": "Account deactivated successfully"}
+    # Ohne ``success`` scheiterte die Antwort am Antwortschema: Das Konto war deaktiviert, der Aufrufer sah 500.
+    return StatusResponse(success=True, message="Account deactivated successfully")
 
 
 @router.post("/validate", response_model=ValidateResponse, summary="Chart of accounts validieren", dependencies=[Depends(finance_read)])
