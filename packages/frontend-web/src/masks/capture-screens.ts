@@ -2384,6 +2384,11 @@ export const salesGutschriftScreen = {
       "key": "steuer",
       "endpoint": "/api/v1/sales/credit-notes/steuer-vorschau",
       "method": "POST"
+    },
+    {
+      "key": "vorschlaege",
+      "endpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege",
+      "pageSize": 200
     }
   ],
   "summary": [
@@ -2596,6 +2601,42 @@ export const salesGutschriftScreen = {
       "method": "POST"
     },
     {
+      "key": "vorschlag_freigeben",
+      "label": "Vorschlag freigeben",
+      "command": "sales.gutschriftVorschlagFreigeben",
+      "kind": "secondary",
+      "dangerLevel": "moderate",
+      "zone": "header",
+      "requiresConfirmation": true,
+      "humanApprovalRequired": true,
+      "forbiddenForAgents": true,
+      "permission": "sales.gutschrift.post",
+      "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
+      "method": "POST"
+    },
+    {
+      "key": "vorschlag_ablehnen",
+      "label": "Vorschlag ablehnen",
+      "command": "sales.gutschriftVorschlagAblehnen",
+      "kind": "secondary",
+      "dangerLevel": "moderate",
+      "zone": "header",
+      "humanApprovalRequired": true,
+      "forbiddenForAgents": true,
+      "auditReasonRequired": true,
+      "permission": "sales.gutschrift.post",
+      "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen",
+      "method": "POST",
+      "inputFields": [
+        {
+          "key": "grund",
+          "label": "Grund der Ablehnung",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
       "key": "neu",
       "label": "Neue Gutschrift",
       "command": "sales.gutschriftNeu",
@@ -2766,6 +2807,66 @@ export const salesGutschriftScreen = {
           "key": "laden",
           "label": "Öffnen",
           "command": "sales.gutschriftLaden",
+          "dangerLevel": "safe"
+        }
+      ]
+    },
+    {
+      "key": "vorschlaege",
+      "label": "Buchungsvorschläge von Agenten",
+      "dataSourceKey": "vorschlaege",
+      "serverPagination": false,
+      "pageSize": 50,
+      "virtualized": false,
+      "rowHeight": 44,
+      "rowDetail": false,
+      "columns": [
+        {
+          "key": "credit_note_number",
+          "label": "Gutschrift",
+          "sortable": true,
+          "filterable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "vorgeschlagen_von",
+          "label": "Vorgeschlagen von",
+          "filterable": true,
+          "priority": "secondary"
+        },
+        {
+          "key": "netto",
+          "label": "Netto",
+          "numeric": true,
+          "renderKind": "currency",
+          "priority": "secondary"
+        },
+        {
+          "key": "steuer",
+          "label": "Umsatzsteuer",
+          "numeric": true,
+          "renderKind": "currency",
+          "priority": "secondary"
+        },
+        {
+          "key": "brutto",
+          "label": "Brutto",
+          "numeric": true,
+          "renderKind": "currency",
+          "priority": "primary"
+        },
+        {
+          "key": "status_text",
+          "label": "Stand",
+          "renderKind": "status",
+          "priority": "primary"
+        }
+      ],
+      "rowActions": [
+        {
+          "key": "pruefen",
+          "label": "Prüfen",
+          "command": "sales.gutschriftVorschlagPruefen",
           "dangerLevel": "safe"
         }
       ]

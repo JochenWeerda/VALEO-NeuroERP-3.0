@@ -305,6 +305,16 @@ class GutschriftSpeichernInput(BaseModel):
     reason: str = Field(min_length=3, max_length=500)
 
 
+class GutschriftProposeInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    credit_note_id: str = Field(min_length=1, max_length=64)
+
+
+class GutschriftBuchenInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    proposal_id: str = Field(min_length=1, max_length=36)
+
+
 class PostfachSpeichernInput(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     kennung: str = Field(min_length=1, max_length=80)
@@ -728,6 +738,10 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _postfach_speichern(db, request, actor, tenant)
     if request.tool_name == "sales.gutschrift.speichern":
         return _gutschrift_speichern(db, request, actor, tenant)
+    if request.tool_name == "sales.gutschrift.propose":
+        return _gutschrift_propose(db, request, actor, tenant)
+    if request.tool_name == "sales.gutschrift.buchen":
+        return _gutschrift_buchen(db, request, actor, tenant)
     if request.tool_name == "agrar.contract.get":
         return _agrar_contract_get(db, request, actor, tenant)
     if request.tool_name == "agrar.weighing_ticket.list":
@@ -2187,6 +2201,216 @@ def _gutschrift_speichern(db: Session, request: ToolExecutionRequest, actor: str
             "success": True, "mode": "execute", "replayed": False,
             "credit_note_id": entity_id, "credit_note_number": opened.credit_note_number,
             **betraege, "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+_GUTSCHRIFT_VORSCHLAG_ART = "sales_credit_note_buchung"
+_GUTSCHRIFT_ROUTE = "/sales/credit-notes"
+_GUTSCHRIFT_SCREEN_ID = "sales/gutschrift"
+
+
+def _gutschrift_plan_vorschau(plan: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "credit_note_id": str(plan["id"]),
+        "credit_note_number": str(plan["nummer"]),
+        "netto": float(plan["netto"]),
+        "steuer": float(plan["steuer"]),
+        "brutto": float(plan["brutto"]),
+        "buchungszeilen": [
+            {"text": z["text"], "soll": float(z["soll"]), "haben": float(z["haben"]), "tax_code": z["code"]}
+            for z in plan["zeilen"]
+        ],
+        "route_path": _GUTSCHRIFT_ROUTE,
+        "screen_id": _GUTSCHRIFT_SCREEN_ID,
+    }
+
+
+def _gutschrift_propose(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Schlaegt die Buchung einer Gutschrift vor. Bucht nie; ein Mensch prueft und gibt frei."""
+    from app.api.v1.endpoints.sales_credit_notes import _buchungsplan
+
+    try:
+        opened = GutschriftProposeInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid sales.gutschrift.propose parameters") from exc
+    if request.mode == "execute":
+        raise HTTPException(501, "Booking is not an MCP execution on propose; use sales.gutschrift.buchen")
+    parameters = opened.model_dump(mode="json")
+    if request.mode == "propose" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "propose requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        if request.mode == "propose":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        # Dieselbe Pruefung wie die Buchung: Laesst sich die Gutschrift nicht buchen (fehlender
+        # Steuerschluessel, Widerspruch, fehlendes Konto), gibt es keinen Vorschlag, sondern den Grund.
+        vorschau = _gutschrift_plan_vorschau(_buchungsplan(db, tenant, opened.credit_note_id))
+        if request.mode != "propose":
+            db.rollback()
+            return {"success": True, "mode": request.mode, "approved": False, **vorschau}
+        offen = db.execute(text("""
+            SELECT proposal_id FROM public.agent_proposals
+            WHERE tenant_id = :tenant AND action_type = :art AND approval_status = 'pending'
+              AND context_snapshot ->> 'credit_note_id' = :cn
+        """), {"tenant": tenant, "art": _GUTSCHRIFT_VORSCHLAG_ART, "cn": opened.credit_note_id}).first()
+        if offen:
+            raise HTTPException(409, f"A pending booking proposal already exists: {offen[0]}")
+        proposal_id = str(uuid4())
+        now = datetime.now(timezone.utc).isoformat()
+        db.execute(text("""
+            INSERT INTO public.agent_proposals
+                (proposal_id, tenant_id, action_type, risk_level, approval_status,
+                 context_snapshot, rationale, idempotency_key, created_at)
+            VALUES
+                (:id, :tenant, :art, 'high', 'pending', CAST(:snapshot AS json), :rationale, :key, :now)
+        """), {
+            "id": proposal_id,
+            "tenant": tenant,
+            "art": _GUTSCHRIFT_VORSCHLAG_ART,
+            "snapshot": json.dumps({
+                "context_summary": f"Gutschrift {vorschau['credit_note_number']} buchen",
+                "proposed_action": (
+                    f"Erloes netto {vorschau['netto']:.2f}, Umsatzsteuer {vorschau['steuer']:.2f}, "
+                    f"Forderung brutto {vorschau['brutto']:.2f} (nach menschlicher Freigabe)"
+                ),
+                "human_approval_required": True,
+                "audit_events": [{"event": "proposal_created", "by": actor, "occurred_at": now}],
+                "actor_id": actor,
+                "payload_hash": fingerprint,
+                **vorschau,
+            }),
+            "rationale": "MCP sales.gutschrift.propose",
+            "key": hashlib.sha256(f"{tenant}|{request.tool_name}|{request.idempotency_key}".encode()).hexdigest(),
+            "now": now,
+        })
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="sales_credit_note_proposal", entity_id=proposal_id,
+            audit_reason="MCP Gutschrift-Buchungsvorschlag", idempotency_key=request.idempotency_key,
+            summary=f"Buchungsvorschlag fuer Gutschrift {vorschau['credit_note_number']} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "propose", "replayed": False, "approved": False,
+            "entwurf_id": proposal_id, "approval_status": "pending", "auditEntryId": audit_id,
+            **vorschau,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _gutschrift_buchen(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Bucht eine Gutschrift — nur aus einem Vorschlag, den ein Mensch freigegeben hat."""
+    from sqlalchemy.exc import IntegrityError
+
+    from app.api.v1.endpoints.sales_credit_notes import _buche, _buchungsplan
+    from app.core.exceptions import kontosperre_meldung
+
+    try:
+        payload = GutschriftBuchenInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid sales.gutschrift.buchen parameters") from exc
+    if request.mode == "propose":
+        raise HTTPException(422, "sales.gutschrift.buchen does not accept propose; use sales.gutschrift.propose")
+    parameters = payload.model_dump(mode="json")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        proposal = db.execute(text("""
+            SELECT proposal_id, action_type, approval_status, context_snapshot, execution_result, reviewed_by
+            FROM public.agent_proposals
+            WHERE proposal_id = :id AND tenant_id = :tenant
+            FOR UPDATE OF agent_proposals
+        """), {"id": payload.proposal_id, "tenant": tenant}).mappings().first()
+        if not proposal:
+            raise HTTPException(404, "Proposal not found in the authenticated tenant")
+        if proposal["action_type"] != _GUTSCHRIFT_VORSCHLAG_ART:
+            raise HTTPException(409, "Proposal is not a credit note booking proposal")
+        if proposal["approval_status"] != "approved":
+            raise HTTPException(409, "Proposal is not approved")
+        if proposal["execution_result"] is not None:
+            raise HTTPException(409, "Proposal was already executed")
+        snapshot = proposal["context_snapshot"] or {}
+        if isinstance(snapshot, str):
+            snapshot = json.loads(snapshot)
+        credit_note_id = snapshot.get("credit_note_id") if isinstance(snapshot, dict) else None
+        if not isinstance(credit_note_id, str) or not credit_note_id.strip():
+            raise HTTPException(409, "Proposal snapshot lacks credit_note_id")
+        plan = _buchungsplan(db, tenant, credit_note_id)
+        vorschau = _gutschrift_plan_vorschau(plan)
+        # Gebucht wird, was freigegeben wurde — nicht, was die Gutschrift inzwischen geworden ist.
+        if round(float(snapshot.get("brutto") or 0), 2) != round(vorschau["brutto"], 2):
+            raise HTTPException(409, "Credit note changed after approval; a new proposal is required")
+        if request.mode != "execute":
+            db.rollback()
+            return {"success": True, "mode": request.mode, "approved": True,
+                    "proposal_id": payload.proposal_id, **vorschau}
+        try:
+            meldung = _buche(db, plan, tenant)
+        except IntegrityError as fehler:
+            sperre = kontosperre_meldung(fehler)
+            if sperre:
+                raise HTTPException(409, sperre) from fehler
+            raise
+        execution_result = {
+            "credit_note_id": credit_note_id,
+            "credit_note_number": vorschau["credit_note_number"],
+            "brutto": vorschau["brutto"],
+            "executed_by": actor,
+            "approved_by": proposal["reviewed_by"],
+            "executed_at": datetime.now(timezone.utc).isoformat(),
+        }
+        db.execute(text("""
+            UPDATE public.agent_proposals
+            SET execution_result = CAST(:result AS json)
+            WHERE proposal_id = :id AND tenant_id = :tenant
+        """), {"result": json.dumps(execution_result), "id": payload.proposal_id, "tenant": tenant})
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="sales_credit_note", entity_id=credit_note_id,
+            audit_reason=f"MCP Gutschrift gebucht aus freigegebenem Vorschlag (Freigabe: {proposal['reviewed_by']})",
+            idempotency_key=request.idempotency_key,
+            summary=f"Gutschrift {vorschau['credit_note_number']} gebucht aus Vorschlag {payload.proposal_id} by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False, "approved": True,
+            "proposal_id": payload.proposal_id, "auditEntryId": audit_id, "posted": True,
+            "approved_by": proposal["reviewed_by"], "message": meldung,
+            **vorschau,
         }
         _store_execution(
             db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]

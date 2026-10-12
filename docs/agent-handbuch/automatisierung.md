@@ -80,6 +80,8 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `qualitaet.reklamation.abschliessen` | qualitaet | `quality:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `reporting.bonus.calculate` | reporting | `reporting:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `reporting.query.import_signed` | reporting | `reporting:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `sales.gutschrift.buchen` | sales | `sales:write` | ja | hoch | ja | `POST /api/v1/mcp/tools/call` |
+| `sales.gutschrift.propose` | sales | `sales:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `sales.gutschrift.speichern` | sales | `sales:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
@@ -214,6 +216,8 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `reporting.bonus_run.calculated` | outbox | `app/api/v1/endpoints/l3_report_catalog.py` |
 | `reporting.query_definition.imported` | outbox | `app/api/v1/endpoints/query_center.py` |
 | `sales.credit_note.posted` | outbox | `app/api/v1/endpoints/sales_credit_notes.py` |
+| `sales.credit_note.posting_approved` | outbox | `app/api/v1/endpoints/sales_credit_notes.py` |
+| `sales.credit_note.posting_rejected` | outbox | `app/api/v1/endpoints/sales_credit_notes.py` |
 | `sales.credit_note.saved` | outbox | `app/api/v1/endpoints/sales_credit_notes.py` |
 | `sales.delivery_note.print_requested` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `settlement.created` | outbox | `app/core/settlement_audit_chain.py` |

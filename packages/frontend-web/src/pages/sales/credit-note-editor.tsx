@@ -13,21 +13,26 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { ActionInputDialog } from '@/components/mask-builder/renderers/ActionInputDialog'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
-import type { ScreenDefinition } from '@/components/mask-builder/schema'
+import type { ScreenActionDefinition, ScreenDefinition } from '@/components/mask-builder/schema'
 import type { WorkflowState } from '@/components/mask-builder/runtime/WorkflowRuntime'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { salesGutschriftScreen } from '@/masks/capture-screens'
 import {
   bucheGutschrift,
+  gibVorschlagFrei,
   ladeGutschrift,
+  lehneVorschlagAb,
+  listeBuchungsvorschlaege,
   listeGutschriften,
   listeSteuerschluessel,
   speichereGutschrift,
   steuerVorschau,
+  type Buchungsvorschlag,
   type Gutschrift,
   type GutschriftPosition,
   type Steuerschluessel,
@@ -48,6 +53,7 @@ const leer: Record<string, unknown> = {
 }
 const POSITION_LEER = { pos_description: '', pos_quantity: '', pos_unit_price: '', pos_tax_code: '' }
 const STATUS: Record<string, string> = { draft: 'Entwurf', posted: 'Gebucht' }
+const VORSCHLAG_STAND: Record<string, string> = { pending: 'Wartet auf Prüfung', approved: 'Freigegeben', rejected: 'Abgelehnt' }
 // Der Server prueft die Rolle; hier nur die Freigabe der Aktionen im Builder.
 const RECHTE = ['sales.gutschrift.write', 'sales.gutschrift.post']
 
@@ -75,6 +81,9 @@ export default function CreditNoteEditorPage(): JSX.Element {
   const liste = useQuery({ queryKey: ['sales-gutschriften'], queryFn: listeGutschriften })
   const steuerschluessel = useQuery({ queryKey: ['finance', 'tax-keys', 'auswahl'], queryFn: listeSteuerschluessel, staleTime: 5 * 60 * 1000 })
   const gutschriften = useMemo(() => liste.data ?? [], [liste.data])
+  // Vorschlaege von Agenten: Ein Mensch oeffnet die Gutschrift, prueft sie und gibt frei oder lehnt ab.
+  const vorschlagsListe = useQuery({ queryKey: ['sales-gutschrift-vorschlaege'], queryFn: listeBuchungsvorschlaege })
+  const vorschlaege = useMemo(() => vorschlagsListe.data ?? [], [vorschlagsListe.data])
   const schluessel = useMemo(() => steuerschluessel.data ?? [], [steuerschluessel.data])
 
   const [positionen, setPositionen] = useState<GutschriftPosition[]>([])
@@ -82,6 +91,9 @@ export default function CreditNoteEditorPage(): JSX.Element {
   const [laeuft, setLaeuft] = useState<string | null>(null)
   const [pruefgrund, setPruefgrund] = useState<string | null>(null)
   const [buchenFragen, setBuchenFragen] = useState(false)
+  const [vorschlag, setVorschlag] = useState<Buchungsvorschlag | null>(null)
+  const [freigebenFragen, setFreigebenFragen] = useState(false)
+  const [ablehnenFragen, setAblehnenFragen] = useState(false)
   const sperre = useRef(false)
 
   const vorschau = useQuery({
@@ -100,6 +112,8 @@ export default function CreditNoteEditorPage(): JSX.Element {
   }, [steuerschluessel.error, steuerschluessel.isError])
 
   const gebucht = geladen?.status === 'posted'
+  // Freigeben und Ablehnen gelten dem geoeffneten, noch ungeprueften Vorschlag.
+  const vorschlagOffen = vorschlag?.approval_status === 'pending' && geladen?.id === vorschlag.credit_note_id
   const gespeichert = geladen !== null
   const steuer = positionen.length > 0 ? vorschau.data : undefined
 
@@ -132,9 +146,10 @@ export default function CreditNoteEditorPage(): JSX.Element {
       ...aktion,
       disabled: laeuft !== null
         || ((aktion.key === 'position' || aktion.key === 'speichern') && gespeichert)
-        || (aktion.key === 'buchen' && (!gespeichert || gebucht)),
+        || (aktion.key === 'buchen' && (!gespeichert || gebucht))
+        || ((aktion.key === 'vorschlag_freigeben' || aktion.key === 'vorschlag_ablehnen') && !vorschlagOffen),
     })),
-  }), [gebucht, geladen, gespeichert, isTouch, laeuft, schluessel, steuer])
+  }), [gebucht, geladen, gespeichert, isTouch, laeuft, schluessel, steuer, vorschlagOffen])
 
   const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: RECHTE }), [schema])
   const form = useUniversalFormState({ screen: schema, initialValues: leer })
@@ -155,10 +170,12 @@ export default function CreditNoteEditorPage(): JSX.Element {
 
   const neuLaden = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ['sales-gutschriften'] })
+    await queryClient.invalidateQueries({ queryKey: ['sales-gutschrift-vorschlaege'] })
   }, [queryClient])
 
-  const zeige = useCallback((gutschrift: Gutschrift | null) => {
+  const zeige = useCallback((gutschrift: Gutschrift | null, zuVorschlag: Buchungsvorschlag | null = null) => {
     setGeladen(gutschrift)
+    setVorschlag(zuVorschlag)
     setPruefgrund(null)
     setPositionen((gutschrift?.lines ?? []).map((z) => ({
       description: z.description, quantity: Number(z.quantity), unit_price: Number(z.unit_price), tax_code: z.tax_code ?? null,
@@ -252,6 +269,40 @@ export default function CreditNoteEditorPage(): JSX.Element {
     }
   }), [mitSperre, zeige])
 
+  const pruefen = useCallback((id: unknown) => mitSperre('pruefen', async () => {
+    const gewaehlt = vorschlaege.find((v) => v.proposal_id === String(id))
+    if (!gewaehlt) return
+    try {
+      zeige(await ladeGutschrift(gewaehlt.credit_note_id), gewaehlt)
+    } catch (fehler) {
+      toast.error('Gutschrift zum Vorschlag nicht geladen', { description: getAxiosErrorMessage(fehler) })
+    }
+  }), [mitSperre, vorschlaege, zeige])
+
+  const entscheiden = useCallback((art: 'freigeben' | 'ablehnen', grund = '') => mitSperre(art, async () => {
+    if (!vorschlag || !geladen) return
+    try {
+      const ergebnis = art === 'freigeben'
+        ? await gibVorschlagFrei(vorschlag.proposal_id)
+        : await lehneVorschlagAb(vorschlag.proposal_id, grund)
+      if (!ergebnis.success) {
+        const meldung = ergebnis.error ?? 'Die Entscheidung wurde abgelehnt.'
+        setPruefgrund(meldung)
+        toast.error(art === 'freigeben' ? 'Nicht freigegeben' : 'Nicht abgelehnt', { description: meldung })
+        return
+      }
+      toast.success(art === 'freigeben' ? 'Vorschlag freigegeben' : 'Vorschlag abgelehnt', { description: ergebnis.summary ?? undefined })
+      await neuLaden()
+      const aktuell = (await listeBuchungsvorschlaege()).find((v) => v.proposal_id === vorschlag.proposal_id) ?? null
+      zeige(await ladeGutschrift(geladen.id), aktuell)
+    } catch (fehler) {
+      toast.error('Entscheidung nicht gespeichert', { description: getAxiosErrorMessage(fehler) })
+    } finally {
+      setFreigebenFragen(false)
+      setAblehnenFragen(false)
+    }
+  }), [geladen, mitSperre, neuLaden, vorschlag, zeige])
+
   const screenContext = useMemo(() => createScreenContext({
     data: { gutschriften, positionen },
     permissions: { granted: RECHTE },
@@ -262,17 +313,22 @@ export default function CreditNoteEditorPage(): JSX.Element {
       'sales.gutschriftBuchen': () => setBuchenFragen(true),
       'sales.gutschriftNeu': () => zeige(null),
       'sales.gutschriftLaden': (payload) => oeffnen(payload.id),
+      'sales.gutschriftVorschlagPruefen': (payload) => pruefen(payload.id),
+      'sales.gutschriftVorschlagFreigeben': () => setFreigebenFragen(true),
+      'sales.gutschriftVorschlagAblehnen': () => setAblehnenFragen(true),
       'sales.gutschriftPositionEntfernen': (payload) => {
         if (gespeichert) return
         setPositionen((alt) => alt.filter((_, index) => index !== Number(payload.id)))
       },
     },
     navigation: { push: () => undefined },
-  }), [form.values, gespeichert, gutschriften, oeffnen, positionUebernehmen, positionen, speichern, zeige])
+  }), [form.values, gespeichert, gutschriften, oeffnen, positionUebernehmen, positionen, pruefen, speichern, zeige])
 
   const workflow = useMemo<WorkflowState>(() => {
     const ohneSchluessel = positionen.some((p) => !p.tax_code)
-    const naechste = gebucht
+    const naechste = vorschlagOffen
+      ? `Vorschlag von ${vorschlag?.vorgeschlagen_von ?? 'Agent'} prüfen: Positionen und Steuer ansehen, dann freigeben oder ablehnen.`
+      : gebucht
       ? 'Gebucht. Neue Gutschrift erfassen.'
       : pruefgrund
         ? 'Buchung abgelehnt: Prüfgrund klären (Steuerschlüssel, Konten, Belegbetrag).'
@@ -291,7 +347,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
         tone: gebucht ? 'success' : hinweise.length > 0 ? 'warning' : 'info',
       },
       nextAllowedActions: [{
-        actionKey: gebucht ? 'neu' : gespeichert ? 'buchen' : positionen.length === 0 ? 'position' : 'speichern',
+        actionKey: vorschlagOffen ? 'vorschlag_freigeben' : gebucht ? 'neu' : gespeichert ? 'buchen' : positionen.length === 0 ? 'position' : 'speichern',
         label: naechste,
         dangerLevel: gespeichert && !gebucht ? 'moderate' : 'safe',
         requiresConfirmation: gespeichert && !gebucht,
@@ -302,7 +358,9 @@ export default function CreditNoteEditorPage(): JSX.Element {
       isBlocked: false,
       isTerminal: gebucht,
     }
-  }, [gebucht, gespeichert, positionen, pruefgrund, steuer])
+  }, [gebucht, gespeichert, positionen, pruefgrund, steuer, vorschlag, vorschlagOffen])
+
+  const ablehnenAktion = salesGutschriftScreen.actions.find((a) => a.key === 'vorschlag_ablehnen') as ScreenActionDefinition
 
   if (liste.isLoading) {
     return (
@@ -349,8 +407,60 @@ export default function CreditNoteEditorPage(): JSX.Element {
             status: g.status,
             status_text: STATUS[g.status] ?? g.status,
           })),
+          vorschlaege: vorschlaege.map((v) => ({
+            id: v.proposal_id,
+            credit_note_number: v.credit_note_number,
+            vorgeschlagen_von: v.vorgeschlagen_von ?? '–',
+            netto: Number(v.netto),
+            steuer: Number(v.steuer),
+            brutto: Number(v.brutto),
+            status_text: v.gebucht
+              ? 'Gebucht'
+              : v.approval_status === 'rejected' && v.ablehnungsgrund
+                ? `Abgelehnt: ${v.ablehnungsgrund}`
+                : v.approval_status === 'approved'
+                  ? `Freigegeben von ${v.geprueft_von ?? '–'}`
+                  : VORSCHLAG_STAND[v.approval_status] ?? v.approval_status,
+          })),
         }}
       />
+      <ActionInputDialog
+        action={ablehnenAktion}
+        open={ablehnenFragen}
+        onCancel={() => setAblehnenFragen(false)}
+        onSubmit={(werte) => {
+          const grund = text(werte.grund)
+          if (!grund) {
+            toast.error('Grund fehlt', { description: 'Eine Ablehnung braucht einen Grund.' })
+            return
+          }
+          void entscheiden('ablehnen', grund)
+        }}
+      />
+      <AlertDialog open={freigebenFragen} onOpenChange={(offen) => { if (!offen && laeuft === null) setFreigebenFragen(false) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Buchungsvorschlag zu {vorschlag?.credit_note_number} freigeben?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {vorschlag?.vorgeschlagen_von ?? 'Ein Agent'} schlägt vor, {euro(vorschlag?.brutto)} brutto zu buchen
+              (netto {euro(vorschlag?.netto)}, Umsatzsteuer {euro(vorschlag?.steuer)}). Mit der Freigabe darf der Agent
+              genau diese Buchung ausführen. Die Freigabe selbst bucht nicht.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={laeuft !== null}>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={laeuft !== null}
+              onClick={(event) => {
+                event.preventDefault()
+                void entscheiden('freigeben')
+              }}
+            >
+              Freigeben
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <AlertDialog open={buchenFragen} onOpenChange={(offen) => { if (!offen && laeuft === null) setBuchenFragen(false) }}>
         <AlertDialogContent>
           <AlertDialogHeader>

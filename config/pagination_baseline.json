@@ -240,8 +240,6 @@
     "app/api/v1/endpoints/tapi.py::dial_pending": 1,
     "app/api/v1/endpoints/tapi.py::pending": 1,
     "app/api/v1/endpoints/training.py::_list": 1,
-    "app/api/v1/endpoints/vat_codes.py::get_vat_code_audit": 1,
-    "app/api/v1/endpoints/vat_codes.py::list_vat_codes": 1,
     "app/api/v1/endpoints/waagen_vorlagen.py::list_vorlagen": 1,
     "app/api/v1/endpoints/warehouse_transfers.py::get_correction_lines": 1,
     "app/api/v1/endpoints/warehouse_transfers.py::get_transfer_lines": 1,

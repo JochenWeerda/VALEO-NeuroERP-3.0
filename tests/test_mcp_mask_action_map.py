@@ -67,7 +67,7 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
     assert by_id["mask:personal/bewerbungen:neu"]["coverage"] == "local_ui"
     assert data.get("classification_complete") is True
     assert data["stats"]["by_coverage"].get("open_medium", 0) == 0
-    assert data["stats"]["by_coverage"].get("open_high", 0) == 2
+    assert data["stats"]["by_coverage"].get("open_high", 0) == 3
     assert data["stats"]["by_coverage"].get("mapped_propose_only", 0) == 1
     assert by_id["mask:auswertungen/bonus-berechnung:calculate"]["mcp_tool_id"] == (
         "reporting.bonus.calculate"
@@ -81,7 +81,7 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
     assert by_id["mask:einkauf/purchase-order:speichern"]["mcp_tool_id"] == (
         "einkauf.bestellung.speichern"
     )
-    assert data["stats"]["by_coverage"].get("mapped", 0) == 42
+    assert data["stats"]["by_coverage"].get("mapped", 0) == 43
     assert data["stats"]["by_coverage"].get("blocked_no_endpoint", 0) == 0
     assert data["stats"]["by_coverage"].get("blocked_missing_tenant", 0) == 0
     assert data["stats"]["by_coverage"].get("local_ui", 0) == 14

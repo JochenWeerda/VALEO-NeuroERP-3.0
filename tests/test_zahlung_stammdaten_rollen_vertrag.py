@@ -142,15 +142,6 @@ WEGE = {
         ("POST", "/fibu/stammdaten/leergutarten", "write"),
         ("DELETE", "/fibu/stammdaten/leergutarten/{art_nr}", "admin"),
     ],
-    "vat_codes": [
-        ("GET", "/finance/vat-codes", "offen"),
-        ("GET", "/finance/vat-codes/{vat_code_id}", "offen"),
-        ("POST", "/finance/vat-codes", "write"),
-        ("PATCH", "/finance/vat-codes/{vat_code_id}", "write"),
-        ("DELETE", "/finance/vat-codes/{vat_code_id}", "admin"),
-        ("GET", "/finance/vat-codes/{vat_code_id}/audit", "offen"),
-        ("POST", "/finance/vat-codes/seed-defaults", "write"),
-    ],
     "tax_keys": [
         ("GET", "/tax-keys", "offen"),
         ("GET", "/tax-keys/{tax_key_id}", "offen"),
@@ -277,7 +268,7 @@ def test_ohne_anmeldung_kein_geschuetzter_weg(grenze, modul, methode, weg, zugan
 
 def test_offen_ist_nur_das_lesen_von_stammdaten():
     """Kein schreibender Weg und kein Weg des Zahlungsverkehrs ist offen."""
-    stammdaten = {"finance_stammdaten", "fibu_stammdaten", "vat_codes", "tax_keys", "exchange_rates",
+    stammdaten = {"finance_stammdaten", "fibu_stammdaten", "tax_keys", "exchange_rates",
                   "zahlungsbedingungen", "forderungsgruppen", "erloeskennziffern", "debtors", "creditors"}
     for modul, methode, weg, zugang in FAELLE:
         if zugang == "offen":

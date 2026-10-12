@@ -11,6 +11,40 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## GUTSCHRIFT-AGENT-FREIGABE-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Entscheidung des Auftraggebers: Agent bucht
+Gutschriften nach dem Muster human in the loop — ein Mensch prueft und gibt frei.
+**Lieferung:** MCP `sales.gutschrift.propose` (Vorschlag, bucht nicht) und `sales.gutschrift.buchen` (nur aus
+freigegebenem Vorschlag, genau einmal, nur wenn unveraendert). Mensch: Maske `sales/gutschrift`, Tabelle
+„Buchungsvorschlaege von Agenten“, Aktionen `vorschlag_freigeben` / `vorschlag_ablehnen` (CE unter
+`/sales/credit-notes/buchungsvorschlaege/{id}/actions/…`, `forbiddenForAgents`, Vier Augen, Pruefer aus der
+geprueften Anmeldung, Ablehnung mit Grund). Aktionskatalog, Aktionskarte, Werkzeugreferenz, Handbuch, OpenAPI
+nachgezogen; Zaehlwerte der MCP-Ratschen +2 Werkzeuge. Tests: 43 (Gutschrift) / 2163 (mit Nachbarn) / Vitest 7.
+QA: `docs/quality-assurance/gutschrift-agent-freigabe-20261012.md`.
+**An Codex (IDENTITY-CONTROL, Agentenmandate/Freigaben) — Befund, nicht behoben:** Die allgemeine Freigabe
+`POST /operator-agent/proposals/{id}/approve` nimmt die Rollen aus dem Anfragekopf `X-VALEO-Roles` und den
+Freigebenden aus dem Rumpf; `AgentActionType` kennt `ap_invoice_freigabe` nicht (Laden/Liste brechen);
+`proposal_to_snapshot` verwirft beim Freigeben `invoice_id`. Fuer `finance.ap_invoice.propose` und
+`sales.invoice.propose` gibt es damit keinen tragfaehigen menschlichen Freigabeweg. Die Gutschrift nutzt die Stelle
+nicht.
+**Hinweis:** `scripts/check_pagination.py` ist seit KONTO-SPERRE-20261012 rot (`.all()` in der Vorpruefung in
+`journal_entries.py`, von mir verursacht). Codex hat das unter JOURNAL-BLOCK-SUMMARY-20261012 behoben; ich fasse die
+Datei nicht an.
+
+## VAT-CODES-ENTFERNEN-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Entscheidung des Auftraggebers: `vat_codes` loeschen.
+**Lieferung:** Migration `vat_codes_entfernt_20261012` (ein Head; Tabellen `vat_codes`, `vat_codes_audit`, Typ
+`vatcodecategory`), Wege `/finance/vat-codes`, Modul, Schemas und Modelle entfernt; Rollenvertrag und
+Pagination-Baseline bereinigt. Beide Datenbanken migriert. Steuerschluessel nur noch aus `domain_erp.tax_keys`.
+
+## ENDPOINT-SPACING-RATCHET-20261012 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** ueberzaehlige Leerzeilen in compat.py und mask_frontend_bridges.py normalisieren, nachdem Rollenimporte die exakte Dateigroessenratsche um je eine Zeile verletzten. **Dateibesitz:** beide Dateien ausschliesslich je eine ueberzaehlige Leerzeile; eigene QA/Workboard. **Abnahme:** Python-AST vor/nach identisch, Godfile-Gate mit unveraenderter Baseline gruen, keine Fach-/API-/Rollen-/Importaenderung. Struktureller Sammeldateiabbau und Gesamt-CI bleiben offen. Keine DB/Container/Reset.
+
+**Lieferung:** Je eine Leerzeile entfernt, vollstaendiger Python-AST beider Dateien identisch; Dateigroessen 3474 und 1467, Godfile-Gate mit unveraenderter Baseline bestanden. Nachweis: endpoint-spacing-ratchet-20261012.md. Weitere Godfile-/Katalog-/Auditbefunde bleiben offen. Keine DB/Container/Reset.
+
 ## JOURNAL-BLOCK-SUMMARY-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** unpaginierte Materialisierung bei der Kontosperrenpruefung durch eine einzige vollstaendige SQL-Aggregatantwort ersetzen. **Dateibesitz:** journal_entries.py nur Sperrkontenabfrage und Meldungsformatierung; eigener fokussierter Test, QA/Workboard. Keine Buchungs-/Rollen-/Mandantenlogik oder fremde Kontenplanaenderung. **Abnahme:** alle gesperrten Kontonummern geordnet, keine Abschneidung, keine Sperre fuer offene Konten; Pagination-Ratsche unveraendert, vorhandener Pruefstand ohne neue DB/Container/Reset.

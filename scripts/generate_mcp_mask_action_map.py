@@ -247,6 +247,14 @@ MAPPED_RULES: dict[str, dict[str, str]] = {
             "Token-Mandant."
         ),
     },
+    "mask:sales/gutschrift:buchen": {
+        "mcp_tool_id": "sales.gutschrift.buchen",
+        "coverage": "mapped",
+        "notes": (
+            "GUTSCHRIFT-AGENT-FREIGABE-20261012; Buchung nur nach approved Proposal "
+            "(sales.gutschrift.propose, Freigabe durch einen Menschen in der Maske); Token-Mandant."
+        ),
+    },
     "mask:sales/gutschrift:speichern": {
         "mcp_tool_id": "sales.gutschrift.speichern",
         "coverage": "mapped",
@@ -395,12 +403,13 @@ LOCAL_UI_RULES: dict[str, dict[str, str]] = {
 }
 
 BLOCKED_RULES: dict[str, dict[str, str]] = {
-    "mask:sales/gutschrift:buchen": {
+    "mask:sales/gutschrift:vorschlag_freigeben": {
         "coverage": "open_high",
-        "notes": (
-            "Buchung ins Hauptbuch mit Umsatzsteuerberichtigung und OP-Minderung; forbiddenForAgents. "
-            "Agent legt den Entwurf an (sales.gutschrift.speichern), gebucht wird durch einen Menschen."
-        ),
+        "notes": "Menschliche Freigabe (Vier Augen) eines Agentenvorschlags; bewusst ohne MCP-Werkzeug; forbiddenForAgents.",
+    },
+    "mask:sales/gutschrift:vorschlag_ablehnen": {
+        "coverage": "open_high",
+        "notes": "Menschliche Ablehnung eines Agentenvorschlags; bewusst ohne MCP-Werkzeug; forbiddenForAgents.",
     },
     "mask:finance/payment-run:freigeben": {
         "coverage": "open_high",
@@ -415,6 +424,12 @@ MCP_NATIVE_WRITES = (
         "mask_action_id": None,
         "coverage": "mcp_native",
         "notes": "Kein mask:* Eintrag; MCP-Write ohne Mask-ID-Parität.",
+    },
+    {
+        "mcp_tool_id": "sales.gutschrift.propose",
+        "mask_action_id": None,
+        "coverage": "mcp_native",
+        "notes": "Buchungsvorschlag zur Gutschrift; gebucht wird ueber mask:sales/gutschrift:buchen nach Freigabe.",
     },
     {
         "mcp_tool_id": "sales.invoice.propose",

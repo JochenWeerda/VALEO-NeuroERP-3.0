@@ -4425,6 +4425,8 @@
       "mcp_tool_ids": [
         "sales.order.status",
         "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
         "sales.invoice.propose",
         "sales.invoice.post"
       ]
@@ -4474,6 +4476,28 @@
           "stubReason": null
         },
         {
+          "key": "vorschlag_freigeben",
+          "label": "Vorschlag freigeben",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "sales.gutschrift.post",
+          "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "vorschlag_ablehnen",
+          "label": "Vorschlag ablehnen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": false,
+          "permission": "sales.gutschrift.post",
+          "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
           "key": "neu",
           "label": "Neue Gutschrift",
           "dangerLevel": "safe",
@@ -4489,6 +4513,8 @@
       "mcp_tool_ids": [
         "sales.order.status",
         "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
         "sales.invoice.propose",
         "sales.invoice.post"
       ]
@@ -4508,6 +4534,8 @@
       "mcp_tool_ids": [
         "sales.order.status",
         "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
         "sales.invoice.propose",
         "sales.invoice.post"
       ]
@@ -4539,6 +4567,8 @@
       "mcp_tool_ids": [
         "sales.order.status",
         "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
         "sales.invoice.propose",
         "sales.invoice.post"
       ]
@@ -4575,6 +4605,8 @@
       "mcp_tool_ids": [
         "sales.order.status",
         "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
         "sales.invoice.propose",
         "sales.invoice.post"
       ]
@@ -4594,6 +4626,8 @@
       "mcp_tool_ids": [
         "sales.order.status",
         "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
         "sales.invoice.propose",
         "sales.invoice.post"
       ]
@@ -4613,6 +4647,8 @@
       "mcp_tool_ids": [
         "sales.order.status",
         "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
         "sales.invoice.propose",
         "sales.invoice.post"
       ]
@@ -4707,6 +4743,24 @@
       "idempotent": true,
       "risk_class": "medium",
       "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "sales.gutschrift.propose",
+      "domain": "sales",
+      "scope": "sales:write",
+      "idempotent": false,
+      "risk_class": "high",
+      "human_approval_required": true,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "sales.gutschrift.buchen",
+      "domain": "sales",
+      "scope": "sales:write",
+      "idempotent": true,
+      "risk_class": "high",
+      "human_approval_required": true,
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
@@ -5151,5 +5205,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 94
+  "event_count": 96
 }
