@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## IDENTITY-SESSION-PERSISTENCE-20261012 — reserviert, Codex
+## IDENTITY-SESSION-PERSISTENCE-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Sitzungswiderrufe im vorhandenen Redis dauerhaft halten. **Dateibesitz:** config/redis.conf, docker-compose.yml nur Redis-Hostbindung, neue Session-Persistenztests und eigene QA/Workboard. app/core/identity_session.py bleibt im bestehenden eigenen Identitaetsclaim. **Abnahme:** AOF auf bestehendem redis_data, eigene Widerrufsdaten nach kontrolliertem Neustart weiterhin gesperrt; kein neuer Container/DB/Volume, keine fremden Daten loeschen. Neustart erst nach Pruefung laufender Claims und gemeinsamer Nutzung. **Risiko:** kurze Redis-Unterbrechung; keine Cache-Reset- oder Prune-Aktion.
+
+**Lieferung:** AOF mit synchronem Fsync auf vorhandenem Redis-Volume aktiviert; echtes Backend weist eigene widerrufene Sitzung auch nach Redis-Neustart mit 401 ab. 69 lokale Sitzungs-/RSA-/Transportvertraege gruen. Windows-Redis unveraendert; engere Hostbindung blockiert und auf vorherige Bindung zurueckgestellt. Session-API/Agentenarchitektur bleibt im Elternclaim offen. Nachweis: identity-session-persistence-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## FACHROLLEN-KATALOG-20261012 — abgeschlossen, Claude Code
 
