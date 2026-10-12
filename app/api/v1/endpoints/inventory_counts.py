@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.exceptions import kontosperre_meldung
 from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import InventoryCount, InventoryCountLine
@@ -332,6 +333,12 @@ async def post_inventory_count(
                     reference=f"INVENTUR-{count_id[:8].upper()}",
                 )
     except Exception as e:  # noqa: BLE001
+        # Bestand und Buchung teilen eine Transaktion: Lehnt die Kontosperre die Buchungszeile ab,
+        # ist auch die Bestandsaenderung verloren. Das wird gesagt statt als Erfolg gemeldet.
+        sperre = kontosperre_meldung(e)
+        if sperre:
+            db.rollback()
+            raise HTTPException(status_code=409, detail=sperre) from e
         logger.warning("Journal-Buchungen für Inventur konnten nicht erstellt werden: %s", e)
 
     # Update count status

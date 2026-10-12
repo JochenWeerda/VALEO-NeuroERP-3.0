@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## KONTO-SPERRE-MELDUNG-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Offener Punkt aus KONTO-SPERRE-20261012.
+**Befund 1:** Die Kontosperre (Trigger `konto_sperre`) las sich nur an der manuellen Buchung als Satz; Vorlage,
+CSV-Einspielung, OP-Ausgleich antworteten 500, Bestandskorrektur und Inventur verschluckten sie und meldeten Erfolg.
+**Befund 2 (Altfehler):** `POST …/bestandskorrektur` speicherte nie: Vorabfrage auf `articles.article_group`
+(Spalte gibt es nicht), Fehler verschluckt, Transaktion tot, Antwort 201 „gebucht“. 0 Korrekturen in beiden DBs.
+**Lieferung:** `kontosperre_meldung()` + zentraler Behandler (409 `KONTO_GESPERRT`) in `app/core/exceptions.py`;
+409 in `booking_templates`, `bulk_journal_import`, `open_items`, `inventory_operations`, `inventory_counts`;
+Kontenzuordnung ueber `articles.warengruppe` im Sicherungspunkt. `tests/test_kontosperre_meldung.py` 8 gruen
+(Pruefstand, echter Trigger, Ratsche). QA: `docs/quality-assurance/konto-sperre-meldung-20261012.md`.
+**Offen:** Inventur buchen meldet bei anderem Buchungsfehler weiter Erfolg (tote Transaktion);
+`sales_credit_notes.py` schreibt Kontonummern in `account_id` (Gutschrift ohne Buchungszeilen).
+
 ## IDENTITY-SESSION-PERSISTENCE-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Sitzungswiderrufe im vorhandenen Redis dauerhaft halten. **Dateibesitz:** config/redis.conf, docker-compose.yml nur Redis-Hostbindung, neue Session-Persistenztests und eigene QA/Workboard. app/core/identity_session.py bleibt im bestehenden eigenen Identitaetsclaim. **Abnahme:** AOF auf bestehendem redis_data, eigene Widerrufsdaten nach kontrolliertem Neustart weiterhin gesperrt; kein neuer Container/DB/Volume, keine fremden Daten loeschen. Neustart erst nach Pruefung laufender Claims und gemeinsamer Nutzung. **Risiko:** kurze Redis-Unterbrechung; keine Cache-Reset- oder Prune-Aktion.

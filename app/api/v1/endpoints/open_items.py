@@ -12,6 +12,7 @@ from decimal import Decimal
 from datetime import datetime, date
 import json
 import logging
+from app.core.exceptions import kontosperre_meldung
 from app.auth.finance_roles import finance_admin, finance_write, open_items_read
 from app.core.uuid7 import uuid7
 
@@ -793,6 +794,9 @@ async def settle_open_item(
         raise
     except Exception as e:
         db.rollback()
+        sperre = kontosperre_meldung(e)
+        if sperre:
+            raise HTTPException(status_code=409, detail=sperre)
         raise HTTPException(status_code=500, detail=f"Failed to settle open item: {str(e)}")
 
 

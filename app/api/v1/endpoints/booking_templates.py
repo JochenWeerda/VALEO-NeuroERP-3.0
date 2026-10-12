@@ -5,6 +5,7 @@ FIBU-GL-07: Automatische Buchungsschemata
 
 from typing import List, Optional, Dict, Any
 from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
+from app.core.exceptions import kontosperre_meldung
 from app.auth.finance_roles import finance_admin, finance_read, finance_write
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -463,6 +464,9 @@ async def apply_booking_template(
         raise
     except Exception as e:
         db.rollback()
+        sperre = kontosperre_meldung(e)
+        if sperre:
+            raise HTTPException(status_code=409, detail=sperre)
         logger.error(f"Error applying booking template: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to apply booking template: {str(e)}")
 
