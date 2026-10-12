@@ -115,3 +115,14 @@ Die sieben Bank-Testdateien und drei eigene Verträge haben jetzt eine ausdrück
 Elf Dateien, vorher rot, jetzt 484 bestanden und 3 übersprungen. Von den oben genannten 67 Fällen
 bleiben die an der Hauptanwendung ohne `Authorization`-Kopf; sie hängen an der noch nicht
 committeten Korrektur der `tests/conftest.py`.
+
+## Nachtrag 2026-10-12: Tests an der Hauptanwendung (`TESTGRENZE-FINANZ-HAUPTAPP-20261012`)
+
+Die übrigen Nachbartests riefen den Produktionsdienst `main:app` mit dem Dev-Token, den es dort
+nicht mehr gibt. 13 Dateien nehmen jetzt die Kompatibilitäts-Anwendung `app.main`, an der die
+`conftest.py` die Anmeldung ausdrücklich ersetzt. Vorher 105 rote Fälle, jetzt 298 bestanden und
+2 rot. Die zwei roten (`test_small_endpoints_wave54`, Snapshot) scheitern an der Tabelle
+`read_model_snapshots`, die keine Migration anlegt.
+
+Preis der Umstellung: Diese Tests prüfen die Wege, nicht mehr den Middleware-Stapel des
+Produktionsdienstes. Den prüfen die Identitätsverträge.

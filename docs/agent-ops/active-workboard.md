@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## TESTGRENZE-FINANZ-HAUPTAPP-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Rest aus TESTGRENZE-FINANZ-20261012, frei seit `6178a79f1`.
+**Befund:** 13 Finanz-Nachbardateien riefen `main:app` (Produktionsdienst) mit Dev-Token: 105 Faelle rot (401/403).
+**Lieferung:** Die 13 Dateien nehmen `app.main` (Kompatibilitaets-App), fuer die die ausdrueckliche Testidentitaet
+der `conftest.py` gilt; zwei Finanzwege in `test_mask_frontend_bridges` melden sich mit ihr an (Rolle noetig).
+Nur Testdateien, kein Produktcode. 298 bestanden, 2 rot.
+**Offen (kein Anmeldethema):** `test_small_endpoints_wave54` Snapshot-Faelle: `read_model_snapshots` gibt es im
+Pruefstand nicht (keine Migration; in der gewachsenen DB liegt sie in `public`).
+**An Codex:** Weitere 107 Testdateien importieren `from main import app`; dieselbe Umstellung duerfte dort greifen.
+Diese Tests pruefen danach nicht mehr den Middleware-Stapel des Produktionsdienstes.
+
 ## IDENTITY-INTEGRATION-REST-20261012 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „rest bitte auch noch umsetzen“. **Ziel:** offene Sitzungs-, Agenten-, Freigabe- und Ressourcenvertraege in vorhandene Wege integrieren. **Dateibesitz:** app/auth/oidc.py und dependencies.py nur zentrale verifizierte Identitaet; operator_agent.py samt operator_agent_service.py und agent_proposal_repository.py/model/schemas nur Tokenurheber, Inhaltsbindung, Idempotenz und Ausfuehrungsgrenze; frontend hooks/useAuth.ts, lib/api-client.ts und axios.ts nur Authkonfiguration/Refresh/Logout, ProtectedRoute.tsx nur OIDC-Bypass-Hunk (fremdes Styling erhalten); config/architecture-domain-prefixes.yaml nur neue eigene Identitaetsmodule; eigene Tests/QA/ADR und Plattform-Domainpack. Elternclaim IDENTITY-CONTROL behaelt Sessionmodule, Neuro-Broker/Gateway und lib/auth.ts. **Abnahme:** kein frei gelieferter Urheber/Rolle, kein dev/HS-Fallback, Widerruf auch an Streams, Rechte-Schnittmenge und Mandatsende vor Wirkung, Vier Augen/Inhaltsbindung/Replay und atomare Quoten; echte positive und negative Vertrage mit vorhandenen Ressourcen. Keine neue DB/Container/Reset, keine privaten Benutzerwerte versionieren. **Risiken:** Provider-Erstanmeldung bleibt persoenliche Benutzeraktion; fremde UI-/Finanzclaims bleiben geschuetzt.
