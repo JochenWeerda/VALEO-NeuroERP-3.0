@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## IDENTITY-ARCHITECTURE-IMPLEMENTATION-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
+**Dateibesitz:** docs/architecture/security/central-identity-agent-management-proposal.md fuer Umsetzungslieferstand; eigener QA-/Workboard-Plan. Ausfuehrender Code bekommt weiterhin abgegrenzte Unterclaims.
+**Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
+
 ## IDENTITY-AUTH-CONTRACT-20261012 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
