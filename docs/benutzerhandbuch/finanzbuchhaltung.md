@@ -49,7 +49,7 @@ GoBD-konform dokumentiert.
 
 ## Maskenregister
 
-Vollständige Abdeckung: **122** App-Routen
+Vollständige Abdeckung: **123** App-Routen
 (0 explizit in der Sidebar-Navigation).
 
 | Maske | Route | Modul |
@@ -141,7 +141,7 @@ Vollständige Abdeckung: **122** App-Routen
 | Debitoren Stamm | `/finance/debitoren-stamm` | `@/pages/finance/debitoren-stamm` |
 | :Id | `/finance/debitoren/:id` | `@/pages/finance/debitoren-stamm` |
 | New | `/finance/debitoren/new` | `@/pages/finance/debitoren-stamm` |
-| Dunning | `/finance/dunning` | `@/pages/finance/mahnwesen` |
+| Dunning | `/finance/dunning` | `@/pages/finance/mahnlauf` |
 | Dunning Editor | `/finance/dunning-editor` | `@/pages/finance/dunning-editor` |
 | Invoice Form | `/finance/invoice-form` | `@/pages/finance/invoice-form` |
 | Invoices | `/finance/invoices` | `@/pages/finance/invoices-list` |
@@ -149,13 +149,13 @@ Vollständige Abdeckung: **122** App-Routen
 | Neu | `/finance/invoices/neu` | `@/pages/finance/invoice-form` |
 | New | `/finance/invoices/new` | `@/pages/finance/invoice-form` |
 | Kasse | `/finance/kasse` | `@/pages/finance/kasse` |
-| Kontenplan | `/finance/kontenplan` | `@/pages/finance/kontenplan` |
+| Kontenplan | `/finance/kontenplan` | `@/pages/finance/chart-of-accounts` |
 | :Id | `/finance/kreditor/:id` | `@/pages/finance/kreditor-native` |
 | Kreditoren | `/finance/kreditoren` | `@/pages/finance/kreditoren-stamm` |
 | Kreditoren Stamm | `/finance/kreditoren-stamm` | `@/pages/finance/kreditoren-stamm` |
 | Lastschriften Debitoren | `/finance/lastschriften-debitoren` | `@/pages/finance/lastschriften-debitoren` |
 | Mahnlauf | `/finance/mahnlauf` | `@/pages/finance/mahnlauf` |
-| Mahnwesen | `/finance/mahnwesen` | `@/pages/finance/mahnwesen` |
+| Mahnwesen | `/finance/mahnwesen` | `@/pages/finance/mahnlauf` |
 | Nebenbuch Abstimmung | `/finance/nebenbuch-abstimmung` | `@/pages/finance/nebenbuch-abstimmung` |
 | Offene Posten | `/finance/offene-posten` | `@/pages/fibu/offene-posten` |
 | Offene Posten Cockpit | `/finance/offene-posten-cockpit` | `@/pages/finance/offene-posten-cockpit` |
@@ -166,6 +166,7 @@ Vollständige Abdeckung: **122** App-Routen
 | Payments | `/finance/payments` | `@/pages/finance/payment-matching` |
 | Periodenabschluss | `/finance/periodenabschluss` | `@/pages/finance/periodenabschluss` |
 | Periods | `/finance/periods` | `@/pages/finance/periods` |
+| Rechnungstapel | `/finance/rechnungstapel` | `@/pages/finance/rechnungstapel` |
 | Reports | `/finance/reports` | `@/pages/finance/reports` |
 | Skonto Optimizer | `/finance/skonto-optimizer` | `@/pages/finance/skonto-optimizer` |
 | Steuerschluessel | `/finance/steuerschluessel` | `@/pages/finance/steuerschluessel` |
@@ -175,7 +176,7 @@ Vollständige Abdeckung: **122** App-Routen
 | Zahlungseingang | `/finance/zahlungseingang` | `@/pages/finance/zahlungseingang` |
 | Zahlungslauf Kreditoren | `/finance/zahlungslauf-kreditoren` | `@/pages/finance/zahlungslauf-kreditoren` |
 | Liquiditaet | `/finanzplanung/liquiditaet` | `@/pages/finanzplanung/liquiditaet` |
-| Mahnlauf | `/mahnwesen/mahnlauf` | `@/pages/mahnwesen/mahnlauf` |
+| Mahnlauf | `/mahnwesen/mahnlauf` | `@/pages/finance/mahnlauf` |
 
 ## Masken im Detail
 
@@ -2445,7 +2446,7 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### Dunning
 
-**Route:** `/finance/dunning` · **Modul:** `@/pages/finance/mahnwesen`
+**Route:** `/finance/dunning` · **Modul:** `@/pages/finance/mahnlauf`
 
 **Ziel:** Dunning in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
@@ -2653,7 +2654,7 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### Kontenplan
 
-**Route:** `/finance/kontenplan` · **Modul:** `@/pages/finance/kontenplan`
+**Route:** `/finance/kontenplan` · **Modul:** `@/pages/finance/chart-of-accounts`
 
 **Ziel:** Kontenplan in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
@@ -2809,7 +2810,7 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### Mahnwesen
 
-**Route:** `/finance/mahnwesen` · **Modul:** `@/pages/finance/mahnwesen`
+**Route:** `/finance/mahnwesen` · **Modul:** `@/pages/finance/mahnlauf`
 
 **Ziel:** Mahnwesen in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 
@@ -3093,6 +3094,29 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 | Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
 | Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
 
+### Rechnungstapel
+
+**Route:** `/finance/rechnungstapel` · **Modul:** `@/pages/finance/rechnungstapel`
+
+**Ziel:** Rechnungstapel in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
+
+**Schritte:**
+
+1. Sidebar oder Suche: **Rechnungstapel** öffnen (`/finance/rechnungstapel`).
+2. Filter und Spalten nach Bedarf setzen; bei ListReport Zeilen per Doppelklick oder Aktion öffnen.
+3. Bei Belegen: Kopfdaten prüfen, Positionen erfassen oder ändern, **Speichern** bzw. workflowgebundene Aktion (Freigabe, Folgebeleg) ausführen.
+4. Ergebnis in Liste, Detailansicht oder Folgebeleg verifizieren; bei Fehlern Meldungstext und Status prüfen.
+
+**Ergebnis:** Datensatz gespeichert, Liste aktualisiert oder Folgeprozess ausgelöst.
+
+**Häufige Fehler:**
+
+| Symptom | Ursache | Maßnahme |
+|---------|---------|----------|
+| Maske lädt nicht | Modul nicht freigeschaltet oder fehlende Berechtigung | Administrator: Modul/RBAC prüfen |
+| Speichern fehlgeschlagen | Pflichtfeld, Status oder Validierung | Meldung lesen, Pflichtfelder ergänzen |
+| Aktion ausgegraut | Workflow-Status oder Sperre | Vorbeleg freigeben oder Berechtigung klären |
+
 ### Reports
 
 **Route:** `/finance/reports` · **Modul:** `@/pages/finance/reports`
@@ -3329,7 +3353,7 @@ Für jede Route: Navigation, Bearbeitung, Ergebnis und typische Fehler.
 
 ### Mahnlauf
 
-**Route:** `/mahnwesen/mahnlauf` · **Modul:** `@/pages/mahnwesen/mahnlauf`
+**Route:** `/mahnwesen/mahnlauf` · **Modul:** `@/pages/finance/mahnlauf`
 
 **Ziel:** Mahnlauf in VALEO NeuroERP öffnen, Daten prüfen oder erfassen und das Ergebnis in Liste bzw. Folgebeleg kontrollieren.
 

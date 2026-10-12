@@ -11,15 +11,22 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## HANDBUCH-ABGELOESTE-MASKEN-20261012 — in Arbeit, Claude Code
+## HANDBUCH-ABGELOESTE-MASKEN-20261012 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-12. Offener Punkt aus den Abloese-Slices vom 11./12.10.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Offener Punkt aus den Abloese-Slices vom 11./12.10.
 **Befund:** Das Benutzerhandbuch nennt fuer `/finance/dunning`, `/finance/mahnwesen`, `/mahnwesen/mahnlauf` und
 `/finance/kontenplan` noch die geloeschten Masken und zeigt deren Bildschirmfotos. **Ziel:** Handbuch aus dem
 Routen-Inventar neu erzeugen (`scripts/generate_benutzerhandbuch_full.py`, reine Generatorausgabe — zieht
 auch fremde neue Routen nach); Mahnlauf und Kontenplan frisch aufnehmen.
 **Dateibesitz:** `docs/benutzerhandbuch/*.md` (Generatorausgabe),
 `screenshot-manifest.json` nur die Eintraege dieser Wege, sechs Bilder unter `img/`, QA-Doku.
+**Lieferung (enger als geclaimt):** nur `finanzbuchhaltung.md` neu erzeugt (vier Wege zeigen die richtige Maske,
+`/finance/rechnungstapel` kommt dazu), sechs Bilder frisch aufgenommen, vier `module`-Felder im Manifest.
+**Nicht** das ganze Handbuch: Der Generator haette in 13 weiteren Kapiteln handgeschriebenen Inhalt geloescht
+(Feldbuch-Kapitel in `wissensbasis-kundenportal.md`, Eintrag „Moderne Bedienung“ in `index.md`) — diese Dateien
+sind unveraendert. QA: `docs/quality-assurance/handbuch-abgeloeste-masken-20261012.md`. **Offen:**
+`generate_benutzerhandbuch_full.py` ueberschreibt Handgeschriebenes und darf so nicht blind laufen; 13 Kapitel
+sind hinter dem Routen-Inventar; die Texte bleiben Schablone.
 
 ## KONTENPLAN-HUELLE-ABLOESEN-20261012 — abgeschlossen, Claude Code
 
