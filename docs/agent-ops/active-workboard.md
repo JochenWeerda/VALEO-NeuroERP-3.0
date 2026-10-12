@@ -11,6 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## KONTENPLAN-PRAXIS-20261012 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-12. **Von:** Auftraggeber („gaengige Praxis uebernehmen“,
+„Pflegemaske Kontenplan anfassen“). **Ziel:** Kontenplanpflege ist Stammdatenpflege, kein Tagesgeschaeft:
+anlegen, aendern, deaktivieren nur Finanzleitung (`finance_admin`); ein bebuchtes Konto wird nicht deaktiviert
+und wechselt die Kontenart nicht (409); die Pflegemaske nennt die Folge vor dem Deaktivieren, kennzeichnet den
+gemeinsamen Rahmen und zeigt die Begruendung einer Ablehnung. **Dateibesitz:** `chart_of_accounts.py`,
+`accounts.py` (nur zwei Dekoratoren), `tests/test_kontenplan_mandant_vertrag.py`,
+`tests/test_hauptbuch_rollen_vertrag.py`, `pages/finance/chart-of-accounts.tsx` (vom Auftraggeber freigegeben;
+ihr fremdes, nicht committetes WIP dort — drei Klassenaenderungen — bleibt im Arbeitsbaum erhalten), QA-Doku.
+
 ## FINANCE-BANK-ACTIONS-ROLES-20261012 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** 32 Wege in eigenen Bank-/Finanzaktionsdateien pruefen bestehende Finanzrollen vor Fach-/DB-Zugriff. Bankdaten lesen finance_read, Bankstamm pflegen finance_write, Loeschen/Geldausfuehrung/Abschlusssperren finance_admin; Kreditlimit-Lesen ueber bestehendes breites open_items_read, Buchungskonto-Optionen kontenplan_read. Stammdaten ausserhalb dieser drei Dateien unberuehrt.
