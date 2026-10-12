@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## KONTENPLAN-HUELLE-ABLOESEN-20261012 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-12. Befund aus KONTENPLAN-MANDANT-20261012.
+**Befund (Sichtpruefung):** `/finance/kontenplan` (`pages/finance/kontenplan.tsx`) ist eine Huelle: Speichern
+zeigt „Gespeichert — Die Aenderungen wurden erfolgreich gespeichert“ und sendet nichts; die Felder (Periode,
+Steuerschluessel, Anfangsbestand) hat der Weg nicht. Die Pflegemaske `/finance/chart-of-accounts` legt an,
+aendert und deaktiviert wirklich. **Ziel:** Huelle loeschen, `/finance/kontenplan` zeigt die Pflegemaske.
+**Dateibesitz:** `pages/finance/kontenplan.tsx` (loeschen), Eintrag in `route-aliases.json`,
+Routenerzeugnisse, Routenvertrag als Test, QA-Doku. **Nicht angefasst:** die Pflegemaske selbst (fremdes WIP).
+
 ## WHATSAPP-INBOX-ACCESS-20261012 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Abgegrenzter erster Code-Schnitt von WHATSAPP-INBOX-TRUST-20261011: verifizierte OIDC-Mandanten-/Scope-Pruefung fuer alle fuenf Inbox-Wege, mandantengebundene Kunden-/Artikelreferenzen und keine willkuerlichen Mehrfachtreffer. Kontakt-Bediener aus Token. Kein neuer Auth-/Mandantenvertrag.
