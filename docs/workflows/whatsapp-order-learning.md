@@ -4,7 +4,7 @@ type: explanation
 audience: [product, entwickler, agent, disposition, qa]
 owner: Codex
 status: geplant
-last_reviewed: 2026-10-11
+last_reviewed: 2026-10-12
 description: User-Fachvertrag fuer heuristische Bestellmuster, belegtes Lernen, Unsicherheit, menschliche Korrektur und verfuegbare Liefertermine.
 ---
 
@@ -31,15 +31,16 @@ er, dass ein Versand technisch stattgefunden hat.
 | Bestand | Aktueller Befund |
 | --- | --- |
 | `app/services/whatsapp_intake_service.py::extract` | LLM-Extraktion mit pauschalem confidence=0.9; Regex-Fallback mit 0.45. Keine kalibrierte Wahrscheinlichkeit fuer eine Historienergaenzung. |
-| `_enrich` im selben Service | Kunden-/Artikelmatch; keine Historienergaenzung und kein Lernen aus Korrekturen. Kundenmatch nimmt einen Fuzzy-Treffer aus kunden_lookup ohne Mandantenpraedikat. |
-| `bestaetigen` im selben Service | Bestaetigung kann parsed ersetzen; erzeugt Kundenkontakt und Beleg-Vorbelegung. Kein unveraenderlicher Vorschlags-/Korrekturvergleich und keine echte Auftragsanlage. |
-| `app/api/v1/endpoints/whatsapp_intake.py` | Separater Header-Mandantenvertrag, nicht die verifizierten Guards der reparierten Benachrichtigungsendpunkte; Eingangs-Replay-/Urheberabnahme offen. |
+| `_enrich` im selben Service | Aktiver Kunden-Business-Partner im eigenen Mandanten erforderlich; mehrere Kunden-/Artikeltreffer bleiben offen. Keine Historienergaenzung und kein Lernen aus Korrekturen. |
+| `bestaetigen` im selben Service | Kunden-/Artikelreferenzen werden vor Write mandantengeprueft, Kontakt-Bediener aus Token; weiterhin kein unveraenderlicher Vorschlags-/Korrekturvergleich und keine echte Auftragsanlage. |
+| `app/api/v1/endpoints/whatsapp_intake.py` | Alle fuenf Wege nutzen verifizierten OIDC-Mandanten und crm:read/crm:write; Eingangs-Replay und vollstaendige Urheber-/Korrekturabnahme bleiben offen. |
 | `app/api/v1/endpoints/sales_orders.py::SalesOrderItemInput` | Artikel, Menge und Preis vorhanden; Einheit, Silo und Gebindegroesse fehlen in diesem Eingabevertrag. Historische Inbox-Bestaetigung ist daher kein Nachweis eines ausgefuehrten Auftrags. |
 | Benachrichtigung | Persistente replaygeschuetzte Vorbereitung vorhanden; Browseranbindung und sichtbarer Versandnachweis offen. |
 
 Dies ist ein **Fach- und Integrationsvertrag**, keine Behauptung einer bereits
 implementierten lernenden Bestellverarbeitung. Die bisherigen festen
 Extraktionswerte duerfen nicht als Freigabesicherheit weiterverwendet werden.
+Erster Code-Schnitt: [Inbox-Zugriffsschutz](../quality-assurance/whatsapp-inbox-access-20261012.md).
 
 ## Lern- und Vorschlagsverfahren
 
@@ -160,7 +161,9 @@ einem fremden oder allgemeinen Kundenkontext.
 | WHATSAPP-DELIVERY-PLANNING-20261011 | Verfuegbarkeitsanbindung und feste Stueckguttouren, Alternativen und Kundeninformation | Folgetag verfuegbar/nicht verfuegbar; volle Tour, Annahmeschluss, Feiertag, Wochenwechsel, expliziter Wunsch; keine Zusage ohne aktuelle Quelle; keine doppelte Meldung |
 | Bestehender WHATSAPP-WEB-INTEGRATION-20261011 | Konto-/Chatbindung und Browser-Versandnachweis | Autorisierter konkreter Testempfaenger; Abbruch vor/nach Senden und Wiederanlauf ohne Doppelversand |
 
-Die Code-Slices sind offen, unreserviert und vor Umsetzung separat zu claimen.
+Die Code-Slices bleiben offen und sind vor Umsetzung separat zu claimen.
+INBOX-TRUST hat den abgeschlossenen Teilschnitt INBOX-ACCESS-20261012; dieser
+ersetzt nicht die noch offene Replay-/Original-/Korrektur-Abnahme.
 Tests nutzen ausschliesslich den bestehenden gemeinsamen Pruefstand, eigene
 Datensaetze oder Savepoints; keine neue Testdatenbank und kein neuer Container.
 

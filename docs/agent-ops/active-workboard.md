@@ -45,13 +45,19 @@ die Huelle; `financeService.createAccount`/`updateAccount`/`getAccount` lesen `r
 antwortet mit dem Konto direkt (Rueckgabe `undefined`, derzeit ungenutzt); Brotkrume „Chart Of Accounts“.
 **An Codex:** `config/architecture-index.yaml` driftet auf `main` (ADR-081 fehlt) — nicht von mir angefasst.
 
-## WHATSAPP-INBOX-ACCESS-20261012 — reserviert, Codex
+## WHATSAPP-INBOX-ACCESS-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Abgegrenzter erster Code-Schnitt von WHATSAPP-INBOX-TRUST-20261011: verifizierte OIDC-Mandanten-/Scope-Pruefung fuer alle fuenf Inbox-Wege, mandantengebundene Kunden-/Artikelreferenzen und keine willkuerlichen Mehrfachtreffer. Kontakt-Bediener aus Token. Kein neuer Auth-/Mandantenvertrag.
 **Dateibesitz:** app/api/v1/endpoints/whatsapp_intake.py, app/services/whatsapp_intake_service.py; neue tests/test_whatsapp_inbox_access.py und tests/test_whatsapp_inbox_references.py; eigene QA-/Workboard-Hunks, CRM API, beide WhatsApp-Runbooks nur Lieferstand. Generierte eigene API-/Code-Metadaten isoliert, keine fremden Katalog-/Frontendhunks.
 **Abnahme:** echte HTTP-Guards vor Fachzugriff, zwei echte Probe-Mandanten und fremde Inbox/Kunden-/Artikelreferenzen unveraendert; keine Defaultmandanten, kein Adminbypass, ambiguose Matches bleiben offen. Bestehende manuelle Freitextpositionen und Kontakt-/Beleg-Vorbelegung bleiben nutzbar.
 **Risiko:** public.kunden-Bridge weiterhin via business_partner_id notwendig wegen bestehender Fremdschluessel; keine konkurrierende Historie/ungepruefte Nummernzuordnung. Atomarer Eingangs-Replay und unveraenderliches Korrektur-Audit bleiben im Elternslice offen, ebenso Lernen und Browsertransport.
 **Harness:** Fachvertrag gepruefte Referenzen; bestehende zentrale Guards; eigener Probe-Datensatz/Savepoints, kein Reset/Container; DB-/HTTP-Negativproben; QA/Domaenen-/Workboardlieferstand; externe CI nach Push getrennt.
+
+**Lieferung:** Alle fuenf Inbox-Wege mit bestehenden verifizierten OIDC-Mandanten-/Scope-Guards; kein Default-Kontext. Kunden ueber aktiven eigenen BusinessPartner gebunden, Mehrfachtreffer offen; Kunden-/Artikelreferenzen vor Bestaetigung erneut unter Zeilensperren geprueft, Kontakt-Bediener aus Token. 171 Tests gruen, davon 22 neue echte Probe-Referenz-/HTTP-Vertraege; unveraenderte Daten bei Fremdreferenzen. Kanonische Metadaten aus veroeffentlichtem HEAD plus eigenem Slice erzeugt, Claudes vier Kontenplan-Pfade und nachfolgender Routenwechsel erhalten. Eingangs-Replay und unveraenderliches Korrektur-Audit bleiben im Elternslice offen. Nachweis: whatsapp-inbox-access-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## KONTENPLAN-VERIFIED-SHARED-POLICY-20261012 — offen
+
+**Owner:** unbesetzt. **Von:** Codex, Hinweis und Codeabgleich zu Claudes fbc4aedb6. **Befund:** Kontenplan-Query-/Rumpfumgehung repariert; get_tenant_id aus app/core/tenant.py nimmt weiterhin X-Tenant-ID mit Default statt verifizierter Tokenbindung. _konto erlaubt system auch fuer Aendern/Deaktivieren; gemeinsame Lesbarkeit und allgemeine Pflege sind unterschiedliche Rechte. Keine Gegenreparatur in fremdem Slice vorgenommen. **Ziel:** bestehende verifizierte Guards und explizite Pflegepolicy fuer gemeinsamen Rahmen konsolidieren. **Abnahme:** fremder Header mit echtem Token abgewiesen, system fuer erlaubte Leser sichtbar, fehlende gemeinsame Pflegerechte ohne globale Mutation, zwei echte Mandanten. **Risiko:** bestehende Kontenplan- und Benutzer-/Maskenvertraege vorher pruefen; eigener Claim/Dateibesitz noetig. Kein Reset/neue Testdatenbank.
 
 ## KONTENPLAN-MANDANT-20261012 — abgeschlossen, Claude Code
 
