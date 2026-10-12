@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FINANZ-REST-ROLLEN-20261012 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-12. **Von:** Auftraggeber („bewusst Ausgelassenes und Offenes
+delegiere ich an dich; Codex uebernimmt solange die systemweite Umsetzung des Architekturansatzes“).
+**Ziel:** die uebrigen Finanzwege ohne Rolle schliessen. (a) `payment_matching.py`, `bank_statement_import.py`,
+`finance_read_models.py`: lesen/schreiben/Leitung wie ueblich. (b) `finance_invoices.py`, `document_control.py`,
+Eingangsrechnungen in `mask_frontend_bridges.py`: Belege mehrerer Bereiche — lesen wie offene Posten, bearbeiten
+Finanz, Verkauf, Einkauf (`beleg_write`), loeschen Leitung. (c) Finanzwege in `mask_frontend_bridges.py`
+(Lastschrift freigeben/ausfuehren, Periode abschliessen, Anlagen, DATEV) und Debitorenimport in `compat.py` —
+sie umgehen heute die Rollen der eigentlichen Wege. (d) Debitoren/Kreditoren lesen nur noch Finanz, Verkauf,
+Vertrieb, Einkauf. **Dateibesitz:** `app/auth/finance_roles.py` (additiv), nur Dekoratoren in den genannten
+Dateien (in `mask_frontend_bridges.py` und `compat.py` nur die genannten Wege), neue Vertragsdatei, die sechs
+Bank-Testdateien (Auftraggeber hat die Bankwege ausdruecklich an Claude Code delegiert), QA-Doku.
+
 ## IDENTITY-ADR-NAV-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
