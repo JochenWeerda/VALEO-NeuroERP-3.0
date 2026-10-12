@@ -200,7 +200,7 @@ tools:
   - tool_id: sales.gutschrift.speichern
     domain: sales
     name: "Gutschrift als Entwurf speichern"
-    description: "Legt eine Gutschrift (kaufmaennische Rechnungskorrektur) als Entwurf im Authentifizierungs-Mandanten an (Maske sales/gutschrift:speichern; CE /api/v1/sales/credit-notes/actions/speichern). parameters.credit_note_number, customer_id, grund, lines[] mit description, quantity, unit_price und tax_code (Steuerschluessel des Mandanten aus finance/tax-keys; kein Prozentsatz, kein Vorgabewert), optional invoice_reference, reason. Default dryRun liefert Netto/Umsatzsteuer/Brutto oder den Pruefgrund. execute erfordert idempotency_key. Gebucht wird NICHT: Die Buchung ist forbiddenForAgents und bleibt beim Menschen. Scope sales:write. Kein tenant_id-Parameter."
+    description: "Legt eine Gutschrift (kaufmaennische Rechnungskorrektur) als Entwurf im Authentifizierungs-Mandanten an (Maske sales/gutschrift:speichern; CE /api/v1/sales/credit-notes/actions/speichern). parameters.credit_note_number, customer_id, grund, lines[] mit description, quantity, unit_price und tax_code (Steuerschluessel des Mandanten aus finance/tax-keys; kein Prozentsatz, kein Vorgabewert), optional invoice_reference, reason. Default dryRun liefert Netto/Umsatzsteuer/Brutto oder den Pruefgrund. execute erfordert idempotency_key. Gebucht wird NICHT: Buchen geht nur ueber sales.gutschrift.propose, menschliche Freigabe und sales.gutschrift.buchen. Scope sales:write. Kein tenant_id-Parameter."
     scope: sales:write
     idempotent: true
     risk_class: medium
@@ -239,6 +239,64 @@ tools:
     audit: write
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false
+
+  - tool_id: sales.gutschrift.propose
+    domain: sales
+    name: "Buchung einer Gutschrift vorschlagen"
+    description: "Legt einen ausstehenden Buchungsvorschlag fuer eine Gutschrift (Entwurf) im Authentifizierungs-Mandanten an. parameters.credit_note_id. Default dryRun liest, was gebucht wuerde (Erloes netto, Umsatzsteuer, Forderung brutto, Buchungszeilen) oder den Pruefgrund (HTTP 409), wenn sich die Gutschrift nicht buchen laesst. propose (mit idempotency_key) speichert agent_proposals (sales_credit_note_buchung) mit approval_status pending und bucht nicht. execute ist nicht angebunden. Ein Mensch prueft und gibt in der Maske sales/gutschrift frei; danach sales.gutschrift.buchen. Ein Freigabe-Boolean im Aufruf wird abgewiesen. Scope sales:write. Kein tenant_id-Parameter."
+    scope: sales:write
+    idempotent: false
+    risk_class: high
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        credit_note_id: { type: string, description: "ID der Gutschrift (Entwurf)" }
+      required: [credit_note_id]
+    output_schema:
+      type: object
+      properties:
+        entwurf_id: { type: string, description: "proposal_id fuer sales.gutschrift.buchen" }
+        credit_note_id: { type: string }
+        credit_note_number: { type: string }
+        netto: { type: number }
+        steuer: { type: number }
+        brutto: { type: number }
+        buchungszeilen: { type: array }
+        route_path: { type: string }
+        screen_id: { type: string }
+        approval_status: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: true
+
+  - tool_id: sales.gutschrift.buchen
+    domain: sales
+    name: "Gutschrift aus freigegebenem Vorschlag buchen"
+    description: "Bucht eine Gutschrift (Erloes netto, Umsatzsteuer getrennt, Forderung brutto, OP-Minderung der bezogenen Rechnung) nur aus einem agent_proposals-Datensatz (sales_credit_note_buchung), den ein Mensch freigegeben hat. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved; hat sich die Gutschrift seit der Freigabe geaendert, HTTP 409 und neuer Vorschlag noetig. Kein Freigabe-Boolean im Aufruf. Scope sales:write. Kein tenant_id-Parameter."
+    scope: sales:write
+    idempotent: true
+    risk_class: high
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        proposal_id: { type: string, description: "entwurf_id aus sales.gutschrift.propose" }
+      required: [proposal_id]
+    output_schema:
+      type: object
+      properties:
+        credit_note_id: { type: string }
+        credit_note_number: { type: string }
+        netto: { type: number }
+        steuer: { type: number }
+        brutto: { type: number }
+        posted: { type: boolean }
+        approved_by: { type: string }
+        auditEntryId: { type: string }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: true
 
   - tool_id: sales.invoice.propose
     domain: sales

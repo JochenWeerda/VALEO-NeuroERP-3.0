@@ -40,6 +40,8 @@ AUFRAEUMEN = (
     "DELETE FROM domain_sales.sales_credit_notes WHERE tenant_id = :t",
     "DELETE FROM domain_erp.chart_of_accounts WHERE tenant_id = :t",
     "DELETE FROM domain_erp.tax_keys WHERE tenant_id = :t",
+    "DELETE FROM public.agent_proposals WHERE tenant_id = :t",
+    "DELETE FROM public.mcp_tool_executions WHERE tenant_id = :t",
     "DELETE FROM domain_shared.tenants WHERE id = :t",
 )
 
@@ -543,19 +545,184 @@ def test_mcp_weist_mandantenangabe_und_fehlendes_recht_ab(mcp):
     assert _koepfe(mcp["mandant"]) == 0
 
 
-def test_buchen_ist_fuer_agenten_gesperrt():
-    """Kein MCP-Werkzeug bucht eine Gutschrift; die Maskenaktion ist als gesperrt ausgewiesen."""
+def test_agent_bucht_nicht_direkt_sondern_nur_ueber_vorschlag_und_freigabe():
+    """Die Maskenaktionen Buchen, Freigeben und Ablehnen sind fuer Agenten gesperrt; es gibt das Werkzeugpaar."""
     import yaml
 
     from app.core.screen_definitions import get_screen_definition
 
-    aktion = next(a for a in get_screen_definition("sales/gutschrift")["actions"] if a["key"] == "buchen")
-    assert aktion["forbiddenForAgents"] is True and aktion["humanApprovalRequired"] is True
+    aktionen = {a["key"]: a for a in get_screen_definition("sales/gutschrift")["actions"]}
+    for schluessel in ("buchen", "vorschlag_freigeben", "vorschlag_ablehnen"):
+        assert aktionen[schluessel]["forbiddenForAgents"] is True, schluessel
+        assert aktionen[schluessel]["humanApprovalRequired"] is True, schluessel
     wurzel = __import__("pathlib").Path(__file__).resolve().parent.parent
     karte = yaml.safe_load((wurzel / "config/mcp_mask_action_map.yaml").read_text(encoding="utf-8"))
     eintraege = {m["mask_action_id"]: m for m in karte["mappings"] if m.get("mask") == "sales/gutschrift"}
-    assert eintraege["mask:sales/gutschrift:buchen"]["mcp_tool_id"] is None
-    assert eintraege["mask:sales/gutschrift:buchen"]["coverage"] == "open_high"
+    assert eintraege["mask:sales/gutschrift:buchen"]["mcp_tool_id"] == "sales.gutschrift.buchen"
     assert eintraege["mask:sales/gutschrift:speichern"]["mcp_tool_id"] == "sales.gutschrift.speichern"
-    werkzeuge = yaml.safe_load((wurzel / "config/mcp_erp_tools.yaml").read_text(encoding="utf-8"))["tools"]
-    assert [w["tool_id"] for w in werkzeuge if "gutschrift" in w["tool_id"]] == ["sales.gutschrift.speichern"]
+    # Fuer die Freigabe gibt es kein Werkzeug — sie ist die Pruefung durch einen Menschen.
+    for schluessel in ("vorschlag_freigeben", "vorschlag_ablehnen"):
+        assert eintraege[f"mask:sales/gutschrift:{schluessel}"]["mcp_tool_id"] is None
+    werkzeuge = {w["tool_id"]: w for w in
+                 yaml.safe_load((wurzel / "config/mcp_erp_tools.yaml").read_text(encoding="utf-8"))["tools"]
+                 if "gutschrift" in w["tool_id"]}
+    assert sorted(werkzeuge) == ["sales.gutschrift.buchen", "sales.gutschrift.propose", "sales.gutschrift.speichern"]
+    assert werkzeuge["sales.gutschrift.buchen"]["human_approval_required"] is True
+    assert werkzeuge["sales.gutschrift.propose"]["human_approval_required"] is True
+
+
+# --- Agent schlaegt vor, Mensch prueft und gibt frei, Agent bucht ---------------------------------
+
+def _werkzeug(mcp, name: str, parameter: dict, **zusatz):
+    return mcp["mcp"].post("/mcp/tools/call", json={"tool_name": name, "parameters": parameter, **zusatz})
+
+
+def _vorschlag(mcp, gs: str) -> str:
+    antwort = _werkzeug(mcp, "sales.gutschrift.propose", {"credit_note_id": gs}, mode="propose",
+                        idempotency_key=f"vorschlag-{gs}")
+    assert antwort.status_code == 200, antwort.text
+    assert antwort.json()["approval_status"] == "pending"
+    return antwort.json()["entwurf_id"]
+
+
+def _als_mensch(mcp, kennung: str = "buchhaltung-1") -> None:
+    from app.auth.deps import get_current_user
+
+    mcp["client"].app.dependency_overrides[get_current_user] = lambda: {
+        "sub": kennung, "name": kennung, "roles": ["FINANCE_BEARBEITEN"]}
+
+
+def _stand(vorschlag: str) -> tuple:
+    with SessionLocal() as db:
+        return tuple(db.execute(text(
+            "SELECT approval_status, reviewed_by, execution_result IS NOT NULL FROM public.agent_proposals "
+            "WHERE proposal_id = :id"), {"id": vorschlag}).fetchone())
+
+
+def test_vorschlag_zeigt_die_buchung_und_bucht_nicht(mcp):
+    gs = _gutschrift(mcp, [("3", 19, 1000)], total=1190)
+    vorschau = _werkzeug(mcp, "sales.gutschrift.propose", {"credit_note_id": gs}).json()
+    assert (vorschau["netto"], vorschau["steuer"], vorschau["brutto"]) == (1000.0, 190.0, 1190.0)
+    assert [(z["soll"], z["haben"]) for z in vorschau["buchungszeilen"]] == [(1000.0, 0.0), (190.0, 0.0), (0.0, 1190.0)]
+    vorschlag = _vorschlag(mcp, gs)
+    assert _stand(vorschlag) == ("pending", None, False)
+    assert _buchung(mcp["mandant"]) == [] and _zustand(gs)[0] == "draft"
+    # Ein zweiter Vorschlag fuer dieselbe Gutschrift, solange der erste offen ist: abgelehnt.
+    zweiter = _werkzeug(mcp, "sales.gutschrift.propose", {"credit_note_id": gs}, mode="propose",
+                        idempotency_key=f"vorschlag-{gs}-2")
+    assert zweiter.status_code == 409
+
+
+def test_kein_vorschlag_fuer_eine_gutschrift_die_sich_nicht_buchen_laesst(mcp):
+    gs = _gutschrift(mcp, [(None, None, 100)], total=100)
+    antwort = _werkzeug(mcp, "sales.gutschrift.propose", {"credit_note_id": gs}, mode="propose",
+                        idempotency_key=f"vorschlag-{gs}")
+    assert antwort.status_code == 409 and "keinen Steuerschlüssel" in antwort.text
+    with SessionLocal() as db:
+        assert db.execute(text(
+            "SELECT count(*) FROM public.agent_proposals WHERE tenant_id = :t"), {"t": mcp["mandant"]}).scalar() == 0
+
+
+def test_ohne_freigabe_bucht_der_agent_nicht(mcp):
+    gs = _gutschrift(mcp, [("3", 19, 1000)], total=1190)
+    vorschlag = _vorschlag(mcp, gs)
+    antwort = _werkzeug(mcp, "sales.gutschrift.buchen", {"proposal_id": vorschlag}, mode="execute",
+                        idempotency_key=f"buchen-{gs}")
+    assert antwort.status_code == 409 and "not approved" in antwort.text
+    assert _buchung(mcp["mandant"]) == [] and _zustand(gs)[0] == "draft"
+
+
+def test_mensch_gibt_frei_und_der_agent_bucht_genau_einmal(mcp):
+    gs = _gutschrift(mcp, [("3", 19, 1000)], total=1190)
+    vorschlag = _vorschlag(mcp, gs)
+
+    _als_mensch(mcp)
+    liste = mcp["client"].get("/sales/credit-notes/buchungsvorschlaege", params={"status": "pending"}).json()
+    assert [(v["proposal_id"], v["vorgeschlagen_von"], Decimal(v["brutto"])) for v in liste] == [
+        (vorschlag, "agent-7", Decimal("1190.00"))]
+    weg = f"/sales/credit-notes/buchungsvorschlaege/{vorschlag}/actions/freigeben"
+    assert mcp["client"].post(weg, json={"_mode": "dryRun"}).json()["success"] is True
+    assert _stand(vorschlag)[0] == "pending"
+    freigabe = mcp["client"].post(weg, json={"_mode": "execute", "_idempotencyKey": f"frei-{vorschlag}"}).json()
+    assert freigabe["success"] is True, freigabe
+    assert _stand(vorschlag) == ("approved", "buchhaltung-1", False)
+    # Freigeben bucht nicht.
+    assert _buchung(mcp["mandant"]) == [] and _zustand(gs)[0] == "draft"
+
+    auftrag = {"mode": "execute", "idempotency_key": f"buchen-{gs}"}
+    gebucht = _werkzeug(mcp, "sales.gutschrift.buchen", {"proposal_id": vorschlag}, **auftrag)
+    assert gebucht.status_code == 200, gebucht.text
+    assert gebucht.json()["posted"] is True and gebucht.json()["approved_by"] == "buchhaltung-1"
+    erwartet = [("8400", 1000.0, 0.0, "3"), ("1776", 190.0, 0.0, "3"), ("1400", 0.0, 1190.0, None)]
+    assert _buchung(mcp["mandant"]) == erwartet and _zustand(gs)[0] == "posted"
+    assert _stand(vorschlag) == ("approved", "buchhaltung-1", True)
+
+    # Derselbe Auftrag noch einmal: dieselbe Antwort. Ein neuer Auftrag: abgelehnt. Es bleibt bei einer Buchung.
+    assert _werkzeug(mcp, "sales.gutschrift.buchen", {"proposal_id": vorschlag}, **auftrag).json()["replayed"] is True
+    nochmal = _werkzeug(mcp, "sales.gutschrift.buchen", {"proposal_id": vorschlag}, mode="execute",
+                        idempotency_key=f"buchen-{gs}-2")
+    assert nochmal.status_code == 409
+    assert _buchung(mcp["mandant"]) == erwartet
+
+
+def test_wer_vorschlaegt_gibt_nicht_selbst_frei(mcp):
+    gs = _gutschrift(mcp, [("3", 19, 1000)], total=1190)
+    vorschlag = _vorschlag(mcp, gs)
+    _als_mensch(mcp, kennung="agent-7")
+    ergebnis = mcp["client"].post(
+        f"/sales/credit-notes/buchungsvorschlaege/{vorschlag}/actions/freigeben", json={"_mode": "execute"}).json()
+    assert ergebnis["success"] is False and "nicht selbst prüfen" in ergebnis["error"]
+    assert _stand(vorschlag)[0] == "pending"
+
+
+def test_freigabe_verlangt_die_rolle_und_kommt_nicht_aus_der_anfrage(mcp):
+    """Wer freigibt, steht in der geprueften Anmeldung — ein Kopf oder ein Feld der Anfrage zaehlt nicht."""
+    from app.auth.deps import get_current_user
+
+    gs = _gutschrift(mcp, [("3", 19, 1000)], total=1190)
+    vorschlag = _vorschlag(mcp, gs)
+    weg = f"/sales/credit-notes/buchungsvorschlaege/{vorschlag}/actions/freigeben"
+    mcp["client"].app.dependency_overrides[get_current_user] = lambda: {"sub": "lager-1", "name": "lager-1", "roles": ["LAGER_LESEN"]}
+    antwort = mcp["client"].post(weg, json={"_mode": "execute", "approved_by": "chef"},
+                                 headers={"X-VALEO-Roles": "agent:approve,FINANCE_ADMIN"})
+    assert antwort.status_code == 403
+    assert _stand(vorschlag)[0] == "pending"
+    _als_mensch(mcp)
+    mcp["client"].post(weg, json={"_mode": "execute", "approved_by": "chef"})
+    assert _stand(vorschlag)[:2] == ("approved", "buchhaltung-1")
+
+
+def test_ablehnung_braucht_einen_grund_und_sperrt_die_buchung(mcp):
+    gs = _gutschrift(mcp, [("3", 19, 1000)], total=1190)
+    vorschlag = _vorschlag(mcp, gs)
+    _als_mensch(mcp)
+    weg = f"/sales/credit-notes/buchungsvorschlaege/{vorschlag}/actions/ablehnen"
+    ohne = mcp["client"].post(weg, json={"_mode": "execute"}).json()
+    assert ohne["success"] is False and _stand(vorschlag)[0] == "pending"
+    mit = mcp["client"].post(weg, json={"_mode": "execute", "_auditReason": "Menge stimmt nicht mit der Retoure"}).json()
+    assert mit["success"] is True, mit
+    assert _stand(vorschlag)[:2] == ("rejected", "buchhaltung-1")
+    abgelehnt = mcp["client"].get("/sales/credit-notes/buchungsvorschlaege").json()[0]
+    assert abgelehnt["ablehnungsgrund"] == "Menge stimmt nicht mit der Retoure"
+    antwort = _werkzeug(mcp, "sales.gutschrift.buchen", {"proposal_id": vorschlag}, mode="execute",
+                        idempotency_key=f"buchen-{gs}")
+    assert antwort.status_code == 409
+    assert _buchung(mcp["mandant"]) == [] and _zustand(gs)[0] == "draft"
+
+
+def test_gebucht_wird_was_freigegeben_wurde(mcp):
+    """Aendert sich die Gutschrift nach der Freigabe, bucht der Agent nicht — es braucht einen neuen Vorschlag."""
+    gs = _gutschrift(mcp, [("3", 19, 1000)], total=1190)
+    vorschlag = _vorschlag(mcp, gs)
+    _als_mensch(mcp)
+    assert mcp["client"].post(f"/sales/credit-notes/buchungsvorschlaege/{vorschlag}/actions/freigeben",
+                              json={"_mode": "execute"}).json()["success"] is True
+    with SessionLocal() as db:
+        db.execute(text("UPDATE domain_sales.sales_credit_note_lines SET line_total = 2000, unit_price = 2000 "
+                        "WHERE credit_note_id = :id"), {"id": gs})
+        db.execute(text("UPDATE domain_sales.sales_credit_notes SET total_amount = 2380 WHERE id = :id"), {"id": gs})
+        db.commit()
+    antwort = _werkzeug(mcp, "sales.gutschrift.buchen", {"proposal_id": vorschlag}, mode="execute",
+                        idempotency_key=f"buchen-{gs}")
+    assert antwort.status_code == 409 and "changed after approval" in antwort.text
+    assert _buchung(mcp["mandant"]) == [] and _zustand(gs)[0] == "draft"

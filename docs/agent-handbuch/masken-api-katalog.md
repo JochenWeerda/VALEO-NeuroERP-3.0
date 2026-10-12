@@ -3715,6 +3715,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
 - `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
@@ -3749,11 +3751,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - `gutschriften` → `/api/v1/sales/credit-notes`
 - `steuerschluessel` → `/api/v1/finance/tax-keys`
 - `steuer` → `/api/v1/sales/credit-notes/steuer-vorschau`
+- `vorschlaege` → `/api/v1/sales/credit-notes/buchungsvorschlaege`
 
 **MCP-Tools (Domäne):**
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
 - `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
@@ -3770,6 +3775,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `position` | Position übernehmen | safe | nein | `Stellt die Positionseingabe in die Positionsliste der Maske; gespeichert wird erst mit Speichern.` |
 | `speichern` | Als Entwurf speichern | safe | nein | `/api/v1/sales/credit-notes/actions/speichern` |
 | `buchen` | Buchen | moderate | ja | `/api/v1/sales/credit-notes/{entity_id}/actions/buchen` |
+| `vorschlag_freigeben` | Vorschlag freigeben | moderate | ja | `/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben` |
+| `vorschlag_ablehnen` | Vorschlag ablehnen | moderate | ja | `/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen` |
 | `neu` | Neue Gutschrift | safe | nein | `Leert die Eingabe fuer eine neue Gutschrift.` |
 
 ---
@@ -3799,6 +3806,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
 - `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
@@ -3830,6 +3839,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
 - `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
@@ -3872,6 +3883,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
 - `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
@@ -3911,6 +3924,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
 - `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
@@ -3936,6 +3951,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
 - `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
 - `sales.invoice.post` — scope `sales:write`, Risiko hoch
 

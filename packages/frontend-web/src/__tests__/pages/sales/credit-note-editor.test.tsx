@@ -10,6 +10,9 @@ const mocks = vi.hoisted(() => ({
   vorschau: vi.fn(),
   speichern: vi.fn(),
   buchen: vi.fn(),
+  vorschlaege: vi.fn(),
+  freigeben: vi.fn(),
+  ablehnen: vi.fn(),
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 vi.mock('@/lib/api/gutschrift', () => ({
@@ -19,6 +22,9 @@ vi.mock('@/lib/api/gutschrift', () => ({
   steuerVorschau: mocks.vorschau,
   speichereGutschrift: mocks.speichern,
   bucheGutschrift: mocks.buchen,
+  listeBuchungsvorschlaege: mocks.vorschlaege,
+  gibVorschlagFrei: mocks.freigeben,
+  lehneVorschlagAb: mocks.ablehnen,
 }))
 vi.mock('sonner', () => ({ toast: mocks.toast }))
 vi.mock('@/app/routing/typed-router', () => ({
@@ -43,6 +49,11 @@ const ENTWURF = {
   status: 'draft', lines: [{ description: 'Weizen', quantity: 2, unit_price: 500, tax_code: '3' }],
 }
 
+const VORSCHLAG = {
+  proposal_id: 'v-1', credit_note_id: 'gs-1', credit_note_number: 'GS-1', netto: 1000, steuer: 190, brutto: 1190,
+  approval_status: 'pending', vorgeschlagen_von: 'agent-7', gebucht: false,
+}
+
 function zeichnen(): void {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(<QueryClientProvider client={client}><CreditNoteEditorPage /></QueryClientProvider>)
@@ -61,6 +72,7 @@ async function erfassePosition(mitSchluessel: boolean): Promise<void> {
 beforeEach(() => {
   vi.clearAllMocks()
   mocks.liste.mockResolvedValue([])
+  mocks.vorschlaege.mockResolvedValue([])
   mocks.schluessel.mockResolvedValue(SCHLUESSEL)
   mocks.vorschau.mockResolvedValue({
     geklaert: true, netto: 1000, steuer: 190, brutto: 1190,
@@ -149,5 +161,42 @@ describe('Gutschrift', () => {
       description: 'Gutschrift nicht gebucht, bitte prüfen: Konto 8400 fehlt im Kontenplan. Die Gutschrift bleibt Entwurf.',
     }))
     expect(await screen.findByText(/Gutschrift nicht gebucht, bitte prüfen: Konto 8400 fehlt im Kontenplan\./)).toBeInTheDocument()
+  })
+
+  // Ein Agent bucht nicht selbst: Er schlaegt vor, ein Mensch prueft in dieser Maske und gibt frei.
+  it('laesst den Vorschlag eines Agenten erst nach dem Oeffnen der Gutschrift freigeben', async () => {
+    mocks.liste.mockResolvedValue([ENTWURF])
+    mocks.laden.mockResolvedValue(ENTWURF)
+    mocks.vorschlaege.mockResolvedValue([VORSCHLAG])
+    mocks.freigeben.mockResolvedValue({ actionKey: 'vorschlag_freigeben', mode: 'execute', success: true, summary: 'freigegeben' })
+    zeichnen()
+    expect(await screen.findByText('agent-7')).toBeInTheDocument()
+    expect(screen.getByText('Wartet auf Prüfung')).toBeInTheDocument()
+    // Ohne geoeffnete Gutschrift gibt es nichts freizugeben.
+    expect(screen.getByTestId('action-vorschlag_freigeben')).toBeDisabled()
+    fireEvent.click(screen.getByTestId('row-action-pruefen'))
+    await waitFor(() => expect(mocks.laden).toHaveBeenCalledWith('gs-1'))
+    await waitFor(() => expect(screen.getByTestId('action-vorschlag_freigeben')).not.toBeDisabled())
+    fireEvent.click(screen.getByTestId('action-vorschlag_freigeben'))
+    expect(mocks.freigeben).not.toHaveBeenCalled()
+    const dialog = await screen.findByRole('alertdialog')
+    expect(within(dialog).getByText(/Die Freigabe selbst bucht nicht/)).toBeInTheDocument()
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Freigeben' }))
+    await waitFor(() => expect(mocks.freigeben).toHaveBeenCalledWith('v-1'))
+    expect(mocks.buchen).not.toHaveBeenCalled()
+  })
+
+  it('lehnt einen Vorschlag nur mit Grund ab', async () => {
+    mocks.liste.mockResolvedValue([ENTWURF])
+    mocks.laden.mockResolvedValue(ENTWURF)
+    mocks.vorschlaege.mockResolvedValue([VORSCHLAG])
+    mocks.ablehnen.mockResolvedValue({ actionKey: 'vorschlag_ablehnen', mode: 'execute', success: true, summary: 'abgelehnt' })
+    zeichnen()
+    fireEvent.click(await screen.findByTestId('row-action-pruefen'))
+    await waitFor(() => expect(screen.getByTestId('action-vorschlag_ablehnen')).not.toBeDisabled())
+    fireEvent.click(screen.getByTestId('action-vorschlag_ablehnen'))
+    fireEvent.change(await screen.findByLabelText(/Grund der Ablehnung/), { target: { value: 'Menge stimmt nicht' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await waitFor(() => expect(mocks.ablehnen).toHaveBeenCalledWith('v-1', 'Menge stimmt nicht'))
   })
 })

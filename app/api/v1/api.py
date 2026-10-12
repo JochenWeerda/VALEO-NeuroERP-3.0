@@ -46,7 +46,6 @@ from app.api.v1.endpoints import (
     geo,
     prospecting,
     finance_invoices,
-    vat_codes,
     audit,
     accounting_periods,
     payment_matching,
@@ -645,10 +644,6 @@ api_router.include_router(
     tags=["finance", "invoices"]
 )
 
-api_router.include_router(
-    vat_codes.router,
-    tags=["finance", "vat-codes"]
-)
 
 api_router.include_router(
     audit.router,

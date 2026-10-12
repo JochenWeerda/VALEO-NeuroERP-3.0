@@ -2,11 +2,71 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 89,
-    "screens_with_actions": 46,
+    "actions": 95,
+    "screens_with_actions": 48,
     "domains": 14
   },
   "actions": [
+    {
+      "id": "mask:admin/identity-budgets:allocate",
+      "label": "Kontingent vergeben",
+      "description": "Kontingent vergeben (admin/identity-budgets)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/identity-budgets",
+      "intent_phrases": [
+        "Kontingent vergeben"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/identity-budgets",
+        "actionKey": "allocate",
+        "commandEndpoint": "/api/v1/identity/budgets/actions/allocate",
+        "navigationRoute": null,
+        "command": "identity.budget.allocate",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:admin/identity-budgets:ledger",
+      "label": "Verbrauchsnebenbuch",
+      "description": "Verbrauchsnebenbuch (admin/identity-budgets)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/identity-budgets",
+      "intent_phrases": [
+        "Verbrauchsnebenbuch"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/identity-budgets",
+        "actionKey": "ledger",
+        "commandEndpoint": null,
+        "navigationRoute": "/admin/token-consumption",
+        "command": "identity.ledger.open",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:admin/identity-budgets:root",
+      "label": "Mandantenbudget bereitstellen",
+      "description": "Mandantenbudget bereitstellen (admin/identity-budgets)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/identity-budgets",
+      "intent_phrases": [
+        "Mandantenbudget bereitstellen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/identity-budgets",
+        "actionKey": "root",
+        "commandEndpoint": "/api/v1/identity/budgets/actions/root",
+        "navigationRoute": null,
+        "command": "identity.budget.root",
+        "method": "POST"
+      }
+    },
     {
       "id": "mask:admin/postfaecher:anmelden",
       "label": "Beim Anbieter anmelden",
@@ -87,6 +147,26 @@
         "navigationRoute": null,
         "command": "admin.postfachTesten",
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:admin/token-consumption:budgets",
+      "label": "Kontingente öffnen",
+      "description": "Kontingente öffnen (admin/token-consumption)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/token-consumption",
+      "intent_phrases": [
+        "Kontingente öffnen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/token-consumption",
+        "actionKey": "budgets",
+        "commandEndpoint": null,
+        "navigationRoute": "/admin/identity-budgets",
+        "command": "identity.budgets.open",
+        "method": null
       }
     },
     {
@@ -1714,6 +1794,50 @@
         "commandEndpoint": "/api/v1/sales/credit-notes/actions/speichern",
         "navigationRoute": null,
         "command": "sales.gutschriftSpeichern",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:sales/gutschrift:vorschlag_ablehnen",
+      "label": "Vorschlag ablehnen",
+      "description": "Vorschlag ablehnen (sales/gutschrift)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "sales/gutschrift",
+      "intent_phrases": [
+        "Vorschlag ablehnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "sales/gutschrift",
+        "actionKey": "vorschlag_ablehnen",
+        "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen",
+        "navigationRoute": null,
+        "command": "sales.gutschriftVorschlagAblehnen",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:sales/gutschrift:vorschlag_freigeben",
+      "label": "Vorschlag freigeben",
+      "description": "Vorschlag freigeben (sales/gutschrift)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "sales/gutschrift",
+      "intent_phrases": [
+        "Vorschlag freigeben"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "sales/gutschrift",
+        "actionKey": "vorschlag_freigeben",
+        "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
+        "navigationRoute": null,
+        "command": "sales.gutschriftVorschlagFreigeben",
         "method": "POST"
       }
     },

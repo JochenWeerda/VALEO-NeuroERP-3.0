@@ -2842,6 +2842,7 @@ def build_sales_gutschrift_screen_definition() -> dict[str, Any]:
             {"key": "steuerschluessel", "endpoint": "/api/v1/finance/tax-keys", "pageSize": 200,
              "table": "domain_erp.tax_keys"},
             {"key": "steuer", "endpoint": "/api/v1/sales/credit-notes/steuer-vorschau", "method": "POST"},
+            {"key": "vorschlaege", "endpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege", "pageSize": 200},
         ],
         "summary": [
             {"key": "netto", "label": "Netto", "value": "0,00 €"},
@@ -2915,6 +2916,23 @@ def build_sales_gutschrift_screen_definition() -> dict[str, Any]:
              "permission": "sales.gutschrift.post",
              "commandEndpoint": "/api/v1/sales/credit-notes/{entity_id}/actions/buchen",
              "method": "POST"},
+            {"key": "vorschlag_freigeben", "label": "Vorschlag freigeben", "command": "sales.gutschriftVorschlagFreigeben",
+             "kind": "secondary", "dangerLevel": "moderate", "zone": "header",
+             "requiresConfirmation": True,
+             "humanApprovalRequired": True,
+             "forbiddenForAgents": True,
+             "permission": "sales.gutschrift.post",
+             "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
+             "method": "POST"},
+            {"key": "vorschlag_ablehnen", "label": "Vorschlag ablehnen", "command": "sales.gutschriftVorschlagAblehnen",
+             "kind": "secondary", "dangerLevel": "moderate", "zone": "header",
+             "humanApprovalRequired": True,
+             "forbiddenForAgents": True,
+             "auditReasonRequired": True,
+             "permission": "sales.gutschrift.post",
+             "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen",
+             "method": "POST",
+             "inputFields": [{"key": "grund", "label": "Grund der Ablehnung", "type": "text", "required": True}]},
             {"key": "neu", "label": "Neue Gutschrift", "command": "sales.gutschriftNeu",
              "kind": "secondary", "dangerLevel": "safe", "zone": "footer",
              "localEffect": "form_reset",
@@ -2983,6 +3001,32 @@ def build_sales_gutschrift_screen_definition() -> dict[str, Any]:
                     {"key": "laden", "label": "Öffnen", "command": "sales.gutschriftLaden", "dangerLevel": "safe"},
                 ],
             },
+            {
+                # Ein Agent hat vorgeschlagen, eine Gutschrift zu buchen. Ein Mensch oeffnet sie, prueft
+                # Positionen und Steuer und gibt frei oder lehnt ab. Freigeben bucht nicht.
+                "key": "vorschlaege",
+                "label": "Buchungsvorschläge von Agenten",
+                "dataSourceKey": "vorschlaege",
+                "serverPagination": False,
+                "pageSize": 50,
+                "virtualized": False,
+                "rowHeight": 44,
+                "rowDetail": False,
+                "columns": [
+                    {"key": "credit_note_number", "label": "Gutschrift", "sortable": True, "filterable": True,
+                     "priority": "primary"},
+                    {"key": "vorgeschlagen_von", "label": "Vorgeschlagen von", "filterable": True, "priority": "secondary"},
+                    {"key": "netto", "label": "Netto", "numeric": True, "renderKind": "currency", "priority": "secondary"},
+                    {"key": "steuer", "label": "Umsatzsteuer", "numeric": True, "renderKind": "currency",
+                     "priority": "secondary"},
+                    {"key": "brutto", "label": "Brutto", "numeric": True, "renderKind": "currency", "priority": "primary"},
+                    {"key": "status_text", "label": "Stand", "renderKind": "status", "priority": "primary"},
+                ],
+                "rowActions": [
+                    {"key": "pruefen", "label": "Prüfen", "command": "sales.gutschriftVorschlagPruefen",
+                     "dangerLevel": "safe"},
+                ],
+            },
         ],
         "agentContract": {
             "businessPurpose": (
@@ -2998,8 +3042,17 @@ def build_sales_gutschrift_screen_definition() -> dict[str, Any]:
             "dangerousActions": [
                 {
                     "key": "buchen",
-                    "reason": "Buchung ins Hauptbuch mit Umsatzsteuerberichtigung und OP-Minderung: "
-                              "forbiddenForAgents — ein Agent legt den Entwurf an, gebucht wird durch einen Menschen.",
+                    "reason": "Buchung ins Hauptbuch mit Umsatzsteuerberichtigung und OP-Minderung: Die Maskenaktion "
+                              "ist forbiddenForAgents. Ein Agent schlaegt die Buchung vor (sales.gutschrift.propose), "
+                              "ein Mensch prueft und gibt frei, erst dann bucht der Agent (sales.gutschrift.buchen).",
+                },
+                {
+                    "key": "vorschlag_freigeben",
+                    "reason": "Die Freigabe ist die Pruefung durch einen Menschen (Vier Augen) — nie durch einen Agenten.",
+                },
+                {
+                    "key": "vorschlag_ablehnen",
+                    "reason": "Die Ablehnung ist die Entscheidung eines Menschen — nie die eines Agenten.",
                 },
             ],
             "sensitiveFields": [],

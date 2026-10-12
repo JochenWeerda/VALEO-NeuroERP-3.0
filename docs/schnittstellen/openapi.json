@@ -26456,6 +26456,112 @@
         "title": "Buchungsvorschlag",
         "type": "object"
       },
+      "BuchungsvorschlagOut": {
+        "description": "Vorschlag eines Agenten, eine Gutschrift zu buchen — mit dem, was gebucht wuerde.",
+        "properties": {
+          "ablehnungsgrund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ablehnungsgrund"
+          },
+          "approval_status": {
+            "title": "Approval Status",
+            "type": "string"
+          },
+          "brutto": {
+            "title": "Brutto",
+            "type": "string"
+          },
+          "credit_note_id": {
+            "title": "Credit Note Id",
+            "type": "string"
+          },
+          "credit_note_number": {
+            "title": "Credit Note Number",
+            "type": "string"
+          },
+          "gebucht": {
+            "default": false,
+            "title": "Gebucht",
+            "type": "boolean"
+          },
+          "geprueft_am": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geprueft Am"
+          },
+          "geprueft_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geprueft Von"
+          },
+          "netto": {
+            "title": "Netto",
+            "type": "string"
+          },
+          "proposal_id": {
+            "title": "Proposal Id",
+            "type": "string"
+          },
+          "steuer": {
+            "title": "Steuer",
+            "type": "string"
+          },
+          "vorgeschlagen_am": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vorgeschlagen Am"
+          },
+          "vorgeschlagen_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vorgeschlagen Von"
+          }
+        },
+        "required": [
+          "proposal_id",
+          "credit_note_id",
+          "credit_note_number",
+          "netto",
+          "steuer",
+          "brutto",
+          "approval_status"
+        ],
+        "title": "BuchungsvorschlagOut",
+        "type": "object"
+      },
       "BudgetAllocate": {
         "additionalProperties": false,
         "properties": {
@@ -162996,596 +163102,6 @@
           "id"
         ],
         "title": "VarietyOut",
-        "type": "object"
-      },
-      "VatCodeAuditResponse": {
-        "properties": {
-          "action": {
-            "title": "Action",
-            "type": "string"
-          },
-          "change_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Change Type"
-          },
-          "changed_at": {
-            "format": "date-time",
-            "title": "Changed At",
-            "type": "string"
-          },
-          "changed_by": {
-            "title": "Changed By",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "legal_reference": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Legal Reference"
-          },
-          "new_value": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "New Value"
-          },
-          "old_value": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Old Value"
-          },
-          "reason": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reason"
-          },
-          "vat_code_id": {
-            "title": "Vat Code Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "vat_code_id",
-          "action",
-          "change_type",
-          "old_value",
-          "new_value",
-          "changed_by",
-          "changed_at",
-          "reason",
-          "legal_reference"
-        ],
-        "title": "VatCodeAuditResponse",
-        "type": "object"
-      },
-      "VatCodeCategory": {
-        "description": "VAT code categories",
-        "enum": [
-          "DE_INLAND",
-          "DE_AGR_PAUSCHAL",
-          "DE_FORST",
-          "EU_IGL",
-          "EU_ERWERB",
-          "EU_OSS",
-          "EXPORT",
-          "EXEMPT"
-        ],
-        "title": "VatCodeCategory",
-        "type": "string"
-      },
-      "VatCodeCreate": {
-        "properties": {
-          "category": {
-            "$ref": "#/components/schemas/VatCodeCategory"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "is_agricultural": {
-            "default": false,
-            "title": "Is Agricultural",
-            "type": "boolean"
-          },
-          "is_reduced": {
-            "default": false,
-            "title": "Is Reduced",
-            "type": "boolean"
-          },
-          "is_reverse_charge": {
-            "default": false,
-            "title": "Is Reverse Charge",
-            "type": "boolean"
-          },
-          "is_standard": {
-            "default": false,
-            "title": "Is Standard",
-            "type": "boolean"
-          },
-          "is_zero": {
-            "default": false,
-            "title": "Is Zero",
-            "type": "boolean"
-          },
-          "legal_basis": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Legal Basis"
-          },
-          "legal_note": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Legal Note"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "name_long": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name Long"
-          },
-          "paragraph_24": {
-            "default": false,
-            "title": "Paragraph 24",
-            "type": "boolean"
-          },
-          "rate": {
-            "title": "Rate",
-            "type": "number"
-          },
-          "skr03_account": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skr03 Account"
-          },
-          "skr04_account": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skr04 Account"
-          },
-          "valid_from": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Valid From"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "category",
-          "rate"
-        ],
-        "title": "VatCodeCreate",
-        "type": "object"
-      },
-      "VatCodeResponse": {
-        "properties": {
-          "category": {
-            "title": "Category",
-            "type": "string"
-          },
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "created_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created By"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "is_active": {
-            "title": "Is Active",
-            "type": "boolean"
-          },
-          "is_agricultural": {
-            "title": "Is Agricultural",
-            "type": "boolean"
-          },
-          "is_reduced": {
-            "title": "Is Reduced",
-            "type": "boolean"
-          },
-          "is_reverse_charge": {
-            "title": "Is Reverse Charge",
-            "type": "boolean"
-          },
-          "is_standard": {
-            "title": "Is Standard",
-            "type": "boolean"
-          },
-          "is_zero": {
-            "title": "Is Zero",
-            "type": "boolean"
-          },
-          "legal_basis": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Legal Basis"
-          },
-          "legal_note": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Legal Note"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "name_long": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name Long"
-          },
-          "paragraph_24": {
-            "title": "Paragraph 24",
-            "type": "boolean"
-          },
-          "rate": {
-            "title": "Rate",
-            "type": "number"
-          },
-          "skr03_account": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skr03 Account"
-          },
-          "skr04_account": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skr04 Account"
-          },
-          "updated_at": {
-            "format": "date-time",
-            "title": "Updated At",
-            "type": "string"
-          },
-          "updated_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updated By"
-          },
-          "valid_from": {
-            "format": "date-time",
-            "title": "Valid From",
-            "type": "string"
-          },
-          "valid_to": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Valid To"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "name_long",
-          "category",
-          "rate",
-          "skr03_account",
-          "skr04_account",
-          "legal_basis",
-          "legal_note",
-          "is_standard",
-          "is_reduced",
-          "is_zero",
-          "is_reverse_charge",
-          "is_agricultural",
-          "paragraph_24",
-          "is_active",
-          "valid_from",
-          "valid_to",
-          "created_at",
-          "created_by",
-          "updated_at",
-          "updated_by"
-        ],
-        "title": "VatCodeResponse",
-        "type": "object"
-      },
-      "VatCodeUpdate": {
-        "properties": {
-          "is_active": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Active"
-          },
-          "is_agricultural": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Agricultural"
-          },
-          "is_reduced": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Reduced"
-          },
-          "is_reverse_charge": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Reverse Charge"
-          },
-          "is_standard": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Standard"
-          },
-          "is_zero": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Zero"
-          },
-          "legal_basis": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Legal Basis"
-          },
-          "legal_note": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Legal Note"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "name_long": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name Long"
-          },
-          "paragraph_24": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Paragraph 24"
-          },
-          "rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rate"
-          },
-          "skr03_account": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skr03 Account"
-          },
-          "skr04_account": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skr04 Account"
-          },
-          "valid_to": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Valid To"
-          }
-        },
-        "title": "VatCodeUpdate",
-        "type": "object"
-      },
-      "VatCodesOut": {
-        "additionalProperties": true,
-        "description": "Response schema for vat codes endpoints.",
-        "properties": {},
-        "title": "VatCodesOut",
         "type": "object"
       },
       "VatReturnExportOut": {
@@ -302779,472 +302295,6 @@
         ]
       }
     },
-    "/api/v1/finance/vat-codes": {
-      "get": {
-        "description": "List all VAT codes (admin)",
-        "operationId": "list_vat_codes_api_v1_finance_vat_codes_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "category",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/VatCodeCategory"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Category"
-            }
-          },
-          {
-            "in": "query",
-            "name": "is_active",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Is Active"
-            }
-          },
-          {
-            "in": "query",
-            "name": "include_inactive",
-            "required": false,
-            "schema": {
-              "default": false,
-              "title": "Include Inactive",
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/VatCodeResponse"
-                  },
-                  "title": "Response List Vat Codes Api V1 Finance Vat Codes Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Vat codes auflisten",
-        "tags": [
-          "finance",
-          "vat-codes",
-          "finance",
-          "vat-codes"
-        ]
-      },
-      "post": {
-        "description": "Create new VAT code (admin only)",
-        "operationId": "create_vat_code_api_v1_finance_vat_codes_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VatCodeCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VatCodeResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Vat code anlegen",
-        "tags": [
-          "finance",
-          "vat-codes",
-          "finance",
-          "vat-codes"
-        ]
-      }
-    },
-    "/api/v1/finance/vat-codes/seed-defaults": {
-      "post": {
-        "description": "Seed default German VAT codes (one-time admin action)",
-        "operationId": "seed_default_vat_codes_api_v1_finance_vat_codes_seed_defaults_post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "current_user",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Current User",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VatCodesOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Default vat codes seed",
-        "tags": [
-          "finance",
-          "vat-codes",
-          "finance",
-          "vat-codes"
-        ]
-      }
-    },
-    "/api/v1/finance/vat-codes/{vat_code_id}": {
-      "delete": {
-        "description": "Soft-delete VAT code (admin only) - sets is_active=False",
-        "operationId": "delete_vat_code_api_v1_finance_vat_codes__vat_code_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "vat_code_id",
-            "required": true,
-            "schema": {
-              "title": "Vat Code Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Reason for deletion",
-            "in": "query",
-            "name": "reason",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Reason for deletion",
-              "title": "Reason"
-            }
-          },
-          {
-            "in": "query",
-            "name": "current_user",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "title": "Current User",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__base__StatusResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Vat code löschen",
-        "tags": [
-          "finance",
-          "vat-codes",
-          "finance",
-          "vat-codes"
-        ]
-      },
-      "get": {
-        "description": "Get single VAT code",
-        "operationId": "get_vat_code_api_v1_finance_vat_codes__vat_code_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "vat_code_id",
-            "required": true,
-            "schema": {
-              "title": "Vat Code Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VatCodeResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Vat code abrufen",
-        "tags": [
-          "finance",
-          "vat-codes",
-          "finance",
-          "vat-codes"
-        ]
-      },
-      "patch": {
-        "description": "Update VAT code (admin only) - creates audit trail",
-        "operationId": "update_vat_code_api_v1_finance_vat_codes__vat_code_id__patch",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "vat_code_id",
-            "required": true,
-            "schema": {
-              "title": "Vat Code Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Reason for change (e.g., 'Gesetzesänderung 2025')",
-            "in": "query",
-            "name": "reason",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Reason for change (e.g., 'Gesetzesänderung 2025')",
-              "title": "Reason"
-            }
-          },
-          {
-            "description": "Legal reference (e.g., '§24 UStG neu ab 2025')",
-            "in": "query",
-            "name": "legal_reference",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Legal reference (e.g., '§24 UStG neu ab 2025')",
-              "title": "Legal Reference"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VatCodeUpdate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VatCodeResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Vat code aktualisieren",
-        "tags": [
-          "finance",
-          "vat-codes",
-          "finance",
-          "vat-codes"
-        ]
-      }
-    },
-    "/api/v1/finance/vat-codes/{vat_code_id}/audit": {
-      "get": {
-        "description": "Get audit trail for VAT code (who changed what when)",
-        "operationId": "get_vat_code_audit_api_v1_finance_vat_codes__vat_code_id__audit_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "vat_code_id",
-            "required": true,
-            "schema": {
-              "title": "Vat Code Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/VatCodeAuditResponse"
-                  },
-                  "title": "Response Get Vat Code Audit Api V1 Finance Vat Codes  Vat Code Id  Audit Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Vat code audit abrufen",
-        "tags": [
-          "finance",
-          "vat-codes",
-          "finance",
-          "vat-codes"
-        ]
-      }
-    },
     "/api/v1/finance/vat-return": {
       "get": {
         "description": "List all VAT returns.",
@@ -386041,6 +385091,197 @@
           }
         ],
         "summary": "Gutschrift als Entwurf speichern (Masken-CommandEndpoint)",
+        "tags": [
+          "sales",
+          "credit-notes",
+          "returns",
+          "sales",
+          "credit-notes",
+          "returns"
+        ]
+      }
+    },
+    "/api/v1/sales/credit-notes/buchungsvorschlaege": {
+      "get": {
+        "operationId": "list_buchungsvorschlaege_api_v1_sales_credit_notes_buchungsvorschlaege_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BuchungsvorschlagOut"
+                  },
+                  "title": "Response List Buchungsvorschlaege Api V1 Sales Credit Notes Buchungsvorschlaege Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Buchungsvorschlaege von Agenten zu Gutschriften",
+        "tags": [
+          "sales",
+          "credit-notes",
+          "returns",
+          "sales",
+          "credit-notes",
+          "returns"
+        ]
+      }
+    },
+    "/api/v1/sales/credit-notes/buchungsvorschlaege/{proposal_id}/actions/ablehnen": {
+      "post": {
+        "description": "CE fuer sales/gutschrift:vorschlag_ablehnen. Braucht einen Grund; die Gutschrift bleibt Entwurf.",
+        "operationId": "action_vorschlag_ablehnen_api_v1_sales_credit_notes_buchungsvorschlaege__proposal_id__actions_ablehnen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "proposal_id",
+            "required": true,
+            "schema": {
+              "title": "Proposal Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Buchungsvorschlag eines Agenten ablehnen (nur Mensch)",
+        "tags": [
+          "sales",
+          "credit-notes",
+          "returns",
+          "sales",
+          "credit-notes",
+          "returns"
+        ]
+      }
+    },
+    "/api/v1/sales/credit-notes/buchungsvorschlaege/{proposal_id}/actions/freigeben": {
+      "post": {
+        "description": "CE fuer sales/gutschrift:vorschlag_freigeben. Freigeben bucht nicht — danach bucht der Agent.\n\nGeprueft wird vor der Freigabe, ob die Gutschrift noch so gebucht wuerde, wie der Agent sie\nvorgeschlagen hat. Hat sie sich geaendert oder laesst sie sich nicht mehr buchen, gibt es keine\nFreigabe, sondern den Grund.",
+        "operationId": "action_vorschlag_freigeben_api_v1_sales_credit_notes_buchungsvorschlaege__proposal_id__actions_freigeben_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "proposal_id",
+            "required": true,
+            "schema": {
+              "title": "Proposal Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Buchungsvorschlag eines Agenten freigeben (nur Mensch)",
         "tags": [
           "sales",
           "credit-notes",

@@ -75,6 +75,44 @@ export type KommandoErgebnis = {
   auditEntryId?: string | null
 }
 
+/** Vorschlag eines Agenten, eine Gutschrift zu buchen. Ein Mensch prueft und gibt frei. */
+export type Buchungsvorschlag = {
+  proposal_id: string
+  credit_note_id: string
+  credit_note_number: string
+  netto: number | string
+  steuer: number | string
+  brutto: number | string
+  approval_status: 'pending' | 'approved' | 'rejected' | string
+  vorgeschlagen_von?: string | null
+  geprueft_von?: string | null
+  ablehnungsgrund?: string | null
+  gebucht: boolean
+}
+
+export async function listeBuchungsvorschlaege(): Promise<Buchungsvorschlag[]> {
+  return (await apiClient.get<Buchungsvorschlag[]>(`${WEG}/buchungsvorschlaege`)).data
+}
+
+export async function gibVorschlagFrei(id: string): Promise<KommandoErgebnis> {
+  return (
+    await apiClient.post<KommandoErgebnis>(`${WEG}/buchungsvorschlaege/${encodeURIComponent(id)}/actions/freigeben`, {
+      _mode: 'execute',
+      _idempotencyKey: `gutschrift-vorschlag-freigeben-${id}`,
+    })
+  ).data
+}
+
+export async function lehneVorschlagAb(id: string, grund: string): Promise<KommandoErgebnis> {
+  return (
+    await apiClient.post<KommandoErgebnis>(`${WEG}/buchungsvorschlaege/${encodeURIComponent(id)}/actions/ablehnen`, {
+      _mode: 'execute',
+      _idempotencyKey: `gutschrift-vorschlag-ablehnen-${id}`,
+      _auditReason: grund,
+    })
+  ).data
+}
+
 export async function listeGutschriften(): Promise<Gutschrift[]> {
   return (await apiClient.get<Gutschrift[]>(WEG)).data
 }

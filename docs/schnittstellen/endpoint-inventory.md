@@ -438,7 +438,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `users` | User API endpoints |
 | `ux_overlays` | User-scoped ScreenDefinition overlays (UIX-071). |
 | `ux_telemetry` | UX-Telemetrie — Omnibox-Intent-Signale (UIX-060). |
-| `vat_codes` | VAT Tax Codes Admin API |
 | `vat_return_export` | VAT Return Export API |
 | `verladung` | Verladung — vollständiges CRUD. |
 | `vermehrungsvertrag` | Vermehrungsvertrag [SAATV] — Saatgut-Anbauverträge mit Vermehrern. |
