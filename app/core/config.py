@@ -94,6 +94,10 @@ class Settings(BaseSettings):
     OIDC_CLIENT_ID: Optional[str] = None
     OIDC_ISSUER_URL: Optional[str] = None
     OIDC_JWKS_URL: Optional[str] = None
+    # Mandantenbindung: Traegt das Token einen Mandanten (``tenant_id``/``mandanten_id``), muss die Anfrage
+    # denselben nennen — immer. Dieser Schalter verlangt zusaetzlich, dass JEDES Token einen traegt.
+    # Erst einschalten, wenn jeder Benutzer im Anmeldedienst das Attribut ``tenant_id`` hat.
+    OIDC_TENANT_CLAIM_REQUIRED: bool = False
 
     # Logging Configuration
     LOG_LEVEL: str = "INFO"

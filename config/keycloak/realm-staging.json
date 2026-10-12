@@ -41,6 +41,22 @@
   "clients": [
     {
       "clientId": "valeo-erp-staging",
+      "protocolMappers": [
+        {
+          "name": "tenant_id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "tenant_id",
+            "user.attribute": "tenant_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ],
       "name": "VALEO NeuroERP Frontend (Staging)",
       "description": "Frontend-Client für Staging-Umgebung",
       "enabled": true,

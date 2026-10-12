@@ -10,6 +10,7 @@ from typing import Optional, Any
 from datetime import datetime
 from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -110,6 +111,21 @@ async def create_journal_entry(
                     status_code=403,
                     detail=finance_periods.meldung(period, gesperrt),
                 )
+
+        # Die Sperre setzt die Datenbank durch (Trigger an den Buchungszeilen). Hier nur, damit die
+        # Buchhaltung einen Satz liest statt eines Datenbankfehlers.
+        gesperrte = db.execute(
+            text(
+                "SELECT account_number FROM domain_erp.chart_of_accounts "
+                "WHERE id = ANY(:ids) AND posting_blocked ORDER BY account_number"
+            ),
+            {"ids": sorted({line.account_id for line in entry_data.lines})},
+        ).scalars().all()
+        if gesperrte:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Konto {', '.join(gesperrte)} ist fuer Buchungen gesperrt.",
+            )
 
         entry_repo = container.resolve(JournalEntryRepository)
 

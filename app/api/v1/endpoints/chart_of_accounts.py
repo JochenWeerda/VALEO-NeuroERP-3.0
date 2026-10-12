@@ -255,7 +255,8 @@ async def delete_account(
         raise HTTPException(
             status_code=409,
             detail=(
-                f"Konto {account.account_number} ist bebucht und laesst sich nicht deaktivieren."
+                f"Konto {account.account_number} ist bebucht und laesst sich nicht deaktivieren. "
+                "Soll es nicht mehr bebucht werden, das Konto sperren."
             ),
         )
 

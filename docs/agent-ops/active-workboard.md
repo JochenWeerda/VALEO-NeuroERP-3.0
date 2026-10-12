@@ -11,9 +11,74 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## KONTENPLAN-PRAXIS-20261012 — in Arbeit, Claude Code
+## IDENTITY-AGENT-PROPOSAL-20261012 — abgeschlossen, Codex
 
-**Owner:** Claude Code. **Stand:** 2026-10-12. **Von:** Auftraggeber („gaengige Praxis uebernehmen“,
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber, Vorschlag zentrales Identitaets-, Rechte- und Agentenmanagement. **Ziel:** Vorschlag als pruefbaren Architekturentwurf dokumentieren; Zielbild, bestehenden Lieferstand und Folgeabnahmen unterscheiden.
+**Dateibesitz:** docs/architecture/security/central-identity-agent-management-proposal.md; eigene Workboard-Hunks. Keine Provider-, Frontend-, DB- oder Konfigurationsaenderung.
+**Abnahme:** Menschen/Maschinen, Mandantenmitgliedschaft, objektbezogene Rechte, Sitzungswiderruf, Delegation, Freigaben und Ressourcen durchgaengig beschrieben; Beispielwerte nicht als beschlossene Einstellungen; Reihenfolge und offene Nachweise explizit. Bestehende Sicherheitsreparatur bleibt im SYSTEM-TENANT-BOUNDARY-Claim.
+
+**Lieferung:** Architekturvorschlag dokumentiert: verifizierte Mitgliedschaft, getrennte Menschen-/Maschinenidentitaeten, begrenzte Delegation, Freigaben, Sitzungswiderruf, Audit und Ressourcensteuerung. Integrationsfolge und Abnahmen explizit; Beispielwerte und Tarife bleiben Vorschlaege. Keine Behauptung eines Systemgesamtabschlusses. Nachweis: docs/architecture/security/central-identity-agent-management-proposal.md. Laufende Sicherheitsarbeit im SYSTEM-TENANT-BOUNDARY-Claim bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## KONTO-SPERRE-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. **Von:** Auftraggeber („ja weiter“), offener Punkt aus
+KONTENPLAN-PRAXIS-20261012. **Befund:** Fuer ein bebuchtes Konto nennt die Praxis die Sperre; das Konto hat
+kein solches Feld (`allow_manual_entries` steht in Schema und Maske, nicht in der Tabelle). **Ziel:** Spalte
+`posting_blocked`; ein Trigger an `domain_erp.journal_entry_lines` lehnt jede neue Buchungszeile auf ein
+gesperrtes Konto ab — eine Stelle fuer alle rund zwanzig Buchungswege; sperren/entsperren ueber die Kontenpflege;
+Maske zeigt und setzt die Sperre statt des wirkungslosen Felds. **Dateibesitz:** neue Migration
+`alembic/versions/konto_sperre_20261012.py`, Spalte im Modell `Account`, `schemas/finance.py` (Konto-Schemas),
+`chart_of_accounts.py`, `pages/finance/chart-of-accounts.tsx`, `lib/services/finance-service.ts` (Typ),
+`tests/test_konto_sperre.py`, Tabellenkatalog/Migrationsinventar nur die eigenen Zeilen,
+Handbuchabschnitt, QA-Doku. **Migration:** eine, additiv, auf dem einzigen Head `audit_urheber_20261011`.
+**Lieferung:** Spalte `posting_blocked`; Trigger `trg_journal_entry_lines_konto_sperre` lehnt jede neue Buchungszeile
+auf ein gesperrtes Konto ab (auch rohes SQL, auch Umhaengen); sperren/entsperren ueber die Kontenpflege; manuelle
+Buchung 409 mit Begruendung; Pflegemaske mit Spalte „Buchbar“ und Sperrfeld statt des nie gespeicherten
+`allow_manual_entries`; Handbuch beschreibt die Sperre. Migration auf `valeo_probe` und `valeo_neuro_erp` gelaufen.
+Vertrag 33 gruen (acht neu), 2107 Nachbartests gruen, OpenAPI aktuell, tsc/ESLint gruen. QA:
+`docs/quality-assurance/konto-sperre-20261012.md`. **Nicht geprueft:** Maske im Browser — das Dev-Backend lehnt den
+Dev-Token ab, solange das nicht committete WIP von SYSTEM-TENANT-BOUNDARY-20261012 im Arbeitsbaum geladen ist.
+**An alle:** `docs/admin/table-catalog.*`, `migration-inventory.md` und `openapi.json` tragen im Arbeitsbaum fremdes
+WIP ohne die Zeilen dieser Migration — vor einem Commit dieser Dateien mit HEAD zusammenfuehren, sonst faellt der
+Katalog-Check. **Offen:** uebrige Buchungswege melden die Sperre als Datenbankfehler; keine Anzeige, wo ein Konto
+hinterlegt ist; `allow_manual_entries`/`currency` weiter ungespeichert im Schema.
+
+## SYSTEM-TENANT-BOUNDARY-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „dann schliesse diese Sicherheitsluecke systemweit“. **Ziel:** verbindlicher verifizierter Mandantenkontext vor allen geschuetzten API-Fachzugriffen; kein permissiver Missing-Claim-/Dev-/Headerfallback. Zentrale Path-/Query-/Body-Bindung und Inventar aller Umgehungsflaechen, schrittweise echte zwei-Mandanten-Abnahme. Breite Rollen und explizite Shared-Data-Policies bleiben getrennte Rechte.
+**Dateibesitz:** main.py nur Bearer-/Mandantenmiddleware und abschliessende Routebindung; app/auth/tenant.py zentraler vorhandener Claimvertrag; app/core/tenant.py und app/auth/deps.py/deps_oidc.py nur Wiederverwendung verifizierter Requestidentitaet; neues zentrales Route-Binding-Modul und Tests/QA/Proposed ADR/Workboard. Bank-/SEPA-Folgeobjekte und WebSocket-/MCP-Kontext nach eigenem abgegrenztem Unterclaim. Keine Migration/DB-Ruecksetzung/Container.
+**Integration mit Claude:** Sein MANDANT-TOKEN-BINDUNG-20261012 behaelt app/core/security.py (Bindung), config.py, Realm-Mapper und Frontend-Dateien. Diese Dateien werden hier nicht uebernommen. Neue User-Vorgabe verlangt systemweiten Abschluss: fehlender Mandant darf nicht bis zu optionalem Schalter/Dev-Ausnahme weiterlaufen. Zentraler Serverboundary wird streng; Provider-/Frontend-Arbeit weiterhin Claude. Fremdes WIP erhalten.
+**Abnahme:** echte signierte JWTs gegen vorhandenen Validator, fehlende/ungueltige/widerspruechliche Claims ohne Fachzugriff; kontextgebundene Header/Path/Query/Body inklusive Mehrfachwerte; keine Standardmandantenwahl; Request-Kontext nach parallelen Requests sauber; Routeinventar/HTTP-/MCP-/Streaming-/Bank-/CRUD-Pruefmatrix. Bei offenen Folgeobjekt-/Transportflaechen keinen Systemgesamtabschluss behaupten.
+**Harness:** bestehende Verifier/Guards konsolidieren, Minor-Sicherheitsreparatur plus Significant zentrales Bindungsmodul mit Proposed ADR; gemeinsamer valeo_probe/eigene Daten, keine neuen DBs; Doku/Runbook/Inventargates und CI separat.
+
+## MANDANT-TOKEN-BINDUNG-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. **Von:** Auftraggeber („Anmeldedienst den Mandanten im Token
+mitgeben lassen“), Hinweis Codex (KONTENPLAN-VERIFIED-SHARED-POLICY-20261012, erste Haelfte).
+**Befund:** Der Kopf `X-Tenant-ID` wird nur auf Form geprueft, nicht gegen das Token; 326 Dateien beziehen den
+Mandanten so. **Ziel:** (1) Keycloak gibt das Benutzerattribut `tenant_id` als Claim ins Token (Mapper in den
+Realm-Dateien). (2) Eine Stelle bindet: `require_bearer_token` lehnt 403 ab, wenn der Mandant der Anfrage nicht
+der des Tokens ist. Tokens ohne Claim laufen weiter, bis `OIDC_TENANT_CLAIM_REQUIRED=true` gesetzt wird
+(Umstellung ohne Aussperren). Dev-Token ausgenommen. (3) Die Oberflaeche nimmt den Mandanten aus dem Token.
+**Dateibesitz:** `app/core/security.py` (nur die Bindung), `app/core/config.py` (ein Schalter),
+`config/keycloak/realm-export.json`, `config/keycloak/realm-staging.json` (nur Mapper), `lib/api-client.ts`,
+neue `lib/tenant-from-token.ts`, neue Tests,
+QA-Doku. **Nicht angefasst:** `app/auth/tenant.py` und die Wege, die `get_verified_tenant_id` schon nutzen (Codex).
+**Lieferung:** `_bind_tenant` in `require_bearer_token` (jeder API-Weg): Token mit Mandant + anderer Kopf 403,
+mehrdeutiges Token 403, Token ohne Mandant laeuft bis `OIDC_TENANT_CLAIM_REQUIRED=true`; Dev-Token ausgenommen;
+Query-Token genauso gebunden. Hauptrealm gab `tenant_id` schon ins Token, Staging-Realm bekommt den Mapper.
+Oberflaeche nimmt den Mandanten aus dem Token. 16 + 359 Backend-Tests, 4 Vitest, tsc/ESLint gruen. QA:
+`docs/quality-assurance/mandant-token-bindung-20261012.md`. **Betrieb:** Benutzerattribut `tenant_id` pflegen,
+dann Schalter setzen; laufender Staging-Keycloak uebernimmt die Realm-Datei nicht von selbst. **Offen:** echtes
+Keycloak-Token nicht gegen das Backend geprueft (kein Keycloak in der Entwicklung); Benutzer `admin` ist an
+`system` gebunden; `lib/mcp.ts` unveraendert. **An Codex:** `get_verified_tenant_id` unberuehrt; die zentrale Bindung
+ist die schwaechere Grundregel fuer alle Wege, eure strengere bleibt an ihren Wegen.
+**Nachtrag KONTENPLAN-PRAXIS-20261012:** Handbuchabschnitt „Kontenplan pflegen“ steht im geschuetzten Teil von
+`docs/benutzerhandbuch/finanzbuchhaltung.md` (vor „Maskenregister“, uebersteht die Neuerzeugung).
+
+## KONTENPLAN-PRAXIS-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. **Von:** Auftraggeber („gaengige Praxis uebernehmen“,
 „Pflegemaske Kontenplan anfassen“). **Ziel:** Kontenplanpflege ist Stammdatenpflege, kein Tagesgeschaeft:
 anlegen, aendern, deaktivieren nur Finanzleitung (`finance_admin`); ein bebuchtes Konto wird nicht deaktiviert
 und wechselt die Kontenart nicht (409); die Pflegemaske nennt die Folge vor dem Deaktivieren, kennzeichnet den
@@ -21,6 +86,15 @@ gemeinsamen Rahmen und zeigt die Begruendung einer Ablehnung. **Dateibesitz:** `
 `accounts.py` (nur zwei Dekoratoren), `tests/test_kontenplan_mandant_vertrag.py`,
 `tests/test_hauptbuch_rollen_vertrag.py`, `pages/finance/chart-of-accounts.tsx` (vom Auftraggeber freigegeben;
 ihr fremdes, nicht committetes WIP dort — drei Klassenaenderungen — bleibt im Arbeitsbaum erhalten), QA-Doku.
+**Lieferung (nach Praxisvorgabe des Auftraggebers: Anzeige/Pflege getrennt, Pflegerecht delegierbar, Bestaetigung
+ersetzt kein Recht, benutzte Konten bleiben):** anlegen/aendern/deaktivieren ueber `kontenpflege`
+(`KONTENPLAN_PFLEGE`, `FINANCE_ADMIN`, `admin`) statt Schreibrolle; bebuchtes Konto 409 bei Deaktivieren und
+Kontenartwechsel (alte Pruefung griff nie); Pflegemaske zeigt Ablehnungsgrund, Kennzeichen „Gemeinsamer Rahmen“,
+Folge vor dem Deaktivieren, zweiter Klick bei Rahmen-/Kontenartaenderung. Vertraege 25 + 820 gruen, 1333
+Nachbartests gruen, tsc/ESLint gruen, Sichtpruefung ohne Schreibzugriff. QA:
+`docs/quality-assurance/kontenplan-praxis-20261012.md`. **Betrieb:** `FINANCE_BEARBEITEN` pflegt keine Konten mehr.
+**Offen:** Kontosperre (Spalte fehlt; `allow_manual_entries` und Waehrung werden nicht gespeichert), Reaktivieren,
+Export-Knopf ohne Wirkung.
 
 ## FINANCE-BANK-ACTIONS-ROLES-20261012 — abgeschlossen, Codex
 

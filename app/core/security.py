@@ -50,6 +50,7 @@ async def require_bearer_token(
                 request.state.token_claims = {"token_type": "dev"}
                 return token
             claims = _validate_jwt(token)
+            _bind_tenant(request, claims)
             request.state.token_claims = claims
             return token
         raise HTTPException(
@@ -65,8 +66,56 @@ async def require_bearer_token(
         return token
 
     claims = _validate_jwt(token)
+    _bind_tenant(request, claims)
     request.state.token_claims = claims
     return token
+
+
+_TENANT_CLAIMS = ("tenant_id", "mandanten_id")
+
+
+def _token_tenants(claims: Dict[str, Any]) -> set[str]:
+    """Die Mandanten, die das Token nennt. Keycloak liefert ein Attribut je nach Mapper als Text oder Liste."""
+    gefunden: set[str] = set()
+    for key in _TENANT_CLAIMS:
+        wert = claims.get(key)
+        for einzel in wert if isinstance(wert, (list, tuple)) else [wert]:
+            if isinstance(einzel, str) and einzel.strip():
+                gefunden.add(einzel.strip())
+    return gefunden
+
+
+def _bind_tenant(request: Request, claims: Dict[str, Any]) -> None:
+    """Bindet den Mandanten der Anfrage an den Mandanten der Anmeldung.
+
+    Bis zum 12.10.2026 wurde ``X-Tenant-ID`` nur auf seine Form geprueft: Wer angemeldet war, konnte
+    jeden Mandanten in den Kopf schreiben. Jetzt gilt an dieser einen Stelle fuer jede Anfrage:
+
+    * Nennt das Token genau einen Mandanten, muss die Anfrage denselben nennen — sonst 403.
+    * Nennt das Token mehrere, ist es nicht eindeutig — 403.
+    * Nennt das Token keinen, laeuft die Anfrage weiter, solange ``OIDC_TENANT_CLAIM_REQUIRED`` aus ist
+      (Umstellung, ohne alle auszusperren); mit dem Schalter 403.
+
+    Der Dev-Token kommt hier nicht vorbei — er traegt keine Claims und gilt nur in der Entwicklung.
+    """
+    tenants = _token_tenants(claims)
+    if len(tenants) > 1:
+        logger.warning("tenant_binding ambiguous sub=%s", claims.get("sub"))
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Das Token nennt mehr als einen Mandanten.")
+    if not tenants:
+        if settings.OIDC_TENANT_CLAIM_REQUIRED:
+            logger.warning("tenant_binding missing_claim sub=%s", claims.get("sub"))
+            raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Das Token nennt keinen Mandanten.")
+        return
+    angemeldet = next(iter(tenants))
+    # Die Middleware hat den Mandanten der Anfrage schon bestimmt (Kopf, in der Entwicklung der Vorgabemandant).
+    angefragt = getattr(request.state, "tenant_id", None) or (request.headers.get("X-Tenant-ID") or "").strip()
+    if angefragt and angefragt != angemeldet:
+        logger.warning("tenant_binding mismatch sub=%s path=%s", claims.get("sub"), request.url.path)
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            detail="Der Mandant der Anfrage (X-Tenant-ID) ist nicht der Mandant der Anmeldung.",
+        )
 
 
 def _validate_jwt(token: str) -> Dict[str, Any]:

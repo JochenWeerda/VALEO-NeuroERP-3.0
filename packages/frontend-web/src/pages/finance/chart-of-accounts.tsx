@@ -33,7 +33,7 @@ type AccountUpdateForm = {
   account_type: Account['account_type']
   category: string
   currency: string
-  allow_manual_entries: boolean
+  posting_blocked: boolean
 }
 
 type AccountFormErrors = Partial<Record<'account_number' | 'account_name' | 'account_type' | 'category' | 'currency', string>>
@@ -72,7 +72,7 @@ const EMPTY_UPDATE_FORM: AccountUpdateForm = {
   account_type: 'asset',
   category: 'current_assets',
   currency: 'EUR',
-  allow_manual_entries: true,
+  posting_blocked: false,
 }
 
 const validateCreateForm = (form: AccountCreateForm): AccountFormErrors => {
@@ -297,6 +297,8 @@ export default function ChartOfAccountsPage(): JSX.Element {
     ? null
     : editingAccount.tenant_id === GEMEINSAMER_RAHMEN
       ? 'Dieses Konto gehört zum gemeinsamen Kontenrahmen. Die Änderung gilt für alle Mandanten.'
+      : updateForm.posting_blocked && !editingAccount.posting_blocked
+        ? 'Auf ein gesperrtes Konto lässt sich nicht mehr buchen – auch nicht automatisch, etwa aus Eingangsrechnung oder Wareneingang.'
       : updateForm.account_type !== editingAccount.account_type
         ? 'Die Kontenart entscheidet, ob das Konto in Bilanz oder GuV steht. Bei einem bebuchten Konto lässt sie sich nicht mehr ändern.'
         : null
@@ -310,7 +312,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
       account_type: account.account_type,
       category: account.category,
       currency: account.currency || 'EUR',
-      allow_manual_entries: account.allow_manual_entries,
+      posting_blocked: Boolean(account.posting_blocked),
     })
   }
 
@@ -376,9 +378,9 @@ export default function ChartOfAccountsPage(): JSX.Element {
       render: (account: Account) => account.currency,
     },
     {
-      key: 'allow_manual_entries' as const,
-      label: 'Manuell',
-      render: (account: Account) => <Badge variant={account.allow_manual_entries ? 'default' : 'secondary'}>{account.allow_manual_entries ? 'Ja' : 'Nein'}</Badge>,
+      key: 'posting_blocked' as const,
+      label: 'Buchbar',
+      render: (account: Account) => <Badge variant={account.posting_blocked ? 'destructive' : 'secondary'}>{account.posting_blocked ? 'Gesperrt' : 'Offen'}</Badge>,
     },
     {
       key: 'actions' as const,
@@ -400,7 +402,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
                 <AlertDialogDescription>
                   Konto {account.account_number} „{account.account_name}“ wirklich deaktivieren? Es steht dann für neue
                   Buchungen nicht mehr zur Verfügung und verschwindet aus dem Kontenplan. Ein bebuchtes Konto bleibt
-                  erhalten und lässt sich nicht deaktivieren.
+                  erhalten und lässt sich nicht deaktivieren – es lässt sich über „Bearbeiten“ sperren.
                   {account.tenant_id === GEMEINSAMER_RAHMEN ? ' Das Konto gehört zum gemeinsamen Kontenrahmen: Die Deaktivierung gilt für alle Mandanten.' : ''}
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -485,18 +487,6 @@ export default function ChartOfAccountsPage(): JSX.Element {
                   onChange={(event) => handleCreateField('currency', event.target.value.toUpperCase())}
                 />
                 {createErrors.currency ? <p className="text-sm text-status-error">{createErrors.currency}</p> : null}
-              </div>
-              <div className="flex items-center justify-between rounded-md border p-3">
-                <div>
-                  <p className="text-sm font-medium">Manuelle Buchungen erlauben</p>
-                  <p className="text-xs text-muted-foreground">Fuer dieses Konto direkte Buchungen zulassen</p>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={createForm.allow_manual_entries}
-                  onChange={(event) => handleCreateField('allow_manual_entries', event.target.checked)}
-                  className="h-4 w-4 rounded border"
-                />
               </div>
               <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
@@ -611,10 +601,10 @@ export default function ChartOfAccountsPage(): JSX.Element {
             </div>
             <div className="flex items-center justify-between rounded-md border p-3">
               <div>
-                <p className="text-sm font-medium">Manuelle Buchungen erlauben</p>
-                <p className="text-xs text-muted-foreground">Direkte Buchungen fuer dieses Konto zulassen</p>
+                <p className="text-sm font-medium">Konto für Buchungen sperren</p>
+                <p className="text-xs text-muted-foreground">Das Konto bleibt im Kontenplan sichtbar, nimmt aber keine neue Buchung an</p>
               </div>
-              <input type="checkbox" checked={updateForm.allow_manual_entries} onChange={(event) => handleUpdateField('allow_manual_entries', event.target.checked)} className="h-4 w-4 rounded border" />
+              <input type="checkbox" aria-label="Konto für Buchungen sperren" checked={updateForm.posting_blocked} onChange={(event) => handleUpdateField('posting_blocked', event.target.checked)} className="h-4 w-4 rounded border" />
             </div>
             {updateHinweis ? (
               <p className="rounded-md border border-status-warning p-3 text-sm text-status-warning">
