@@ -14,6 +14,11 @@
         "summary": "Kassenabschluss ohne Bewertungsmodell gesperrt",
         "description": "Reject the retired synthetic closing until cash valuation is defined.",
         "operationId": "cash_close_day_api_v1_finance_cash_close_day_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "X-Tenant-ID",
@@ -109,6 +114,12 @@
           "type"
         ],
         "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }
