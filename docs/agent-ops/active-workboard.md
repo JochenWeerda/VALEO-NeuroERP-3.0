@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## IDENTITY-STREAMS-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
+**Dateibesitz:** app/core/sse.py, app/routers/workflow_router.py und export_router.py nur mandantengebundene Ereigniszustaellung; app/policy/router.py nur zentraler WS-Kontext; tests/test_identity_streams.py und bestehende zwei Realtime-Security-Testdateien nur echte signierte Testidentitaeten; eigene QA/Workboard. Kein DB-/Provider-/Frontend-Edit.
+**Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
+
 ## ZAHLUNG-STAMMDATEN-ROLLEN-20261012 — in Arbeit, Claude Code
 
 **Owner:** Claude Code. **Stand:** 2026-10-12. Dritter Schnitt nach HAUPTBUCH- und ABSCHLUSS-ROLLEN.
