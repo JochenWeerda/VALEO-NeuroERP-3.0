@@ -4,7 +4,7 @@ type: how-to
 audience: [endnutzer, power-user]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-06-25
+last_reviewed: 2026-10-12
 version: 3.0.0
 ---
 
@@ -46,6 +46,62 @@ GoBD-konform dokumentiert.
 - **Zahlung nicht zuordenbar:** Verwendungszweck/Belegnummer prüfen.
 - **Mahnung trotz Zahlung:** Zahlungseingang war zum Stichtag noch nicht gebucht.
 - **Falsche Mahnstufe:** Mahnhistorie des Kunden prüfen.
+
+## Kontenplan pflegen
+
+Dieser Abschnitt beschreibt, wer Konten pflegt, wie Sie ein Konto deaktivieren, wann das nicht geht
+und was Sie stattdessen tun.
+
+Den Kontenplan sehen viele, pflegen dürfen ihn wenige: Anlegen, Ändern und Deaktivieren verlangt das
+Recht **Kontenpflege** (`KONTENPLAN_PFLEGE`) oder die Finanzleitung. Konten mit dem Kennzeichen
+**Gemeinsamer Rahmen** gelten für alle Mandanten; für sie braucht es zusätzlich das Recht
+`KONTENRAHMEN_PFLEGE`. Die Buchhaltung bucht auf die Konten, ändert sie aber nicht.
+
+### Konto deaktivieren
+
+1. *Finanzbuchhaltung* → *Kontenplan* öffnen (`/finance/kontenplan`).
+2. Das Konto suchen, das Sie deaktivieren möchten.
+3. In der Zeile **Deaktivieren** wählen und die Rückfrage bestätigen.
+
+Vor dem Deaktivieren prüft das System, ob das Konto bebucht ist. Ein deaktiviertes Konto steht für
+neue Buchungen nicht mehr zur Verfügung und erscheint nicht mehr im Kontenplan. Gelöscht wird es
+nicht.
+
+!!! warning "Die Rückfrage ersetzt kein Recht"
+    „Wirklich deaktivieren?" schützt vor dem Versehen. Fehlt das Recht, lehnt das System ab – mit
+    oder ohne Bestätigung – und nennt den Grund.
+
+### Wann sich ein Konto nicht deaktivieren lässt
+
+Ein Konto lässt sich nicht deaktivieren, wenn eine der folgenden Bedingungen zutrifft:
+
+- Es ist bebucht – auf einer gebuchten Buchung oder in einer Zeile eines noch nicht gebuchten
+  Entwurfs.
+- Ihnen fehlt das Recht Kontenpflege.
+- Es gehört zum gemeinsamen Rahmen und Ihnen fehlt das Recht `KONTENRAHMEN_PFLEGE`.
+
+Die Meldung nennt den Grund. Liegt es an einem Entwurf, entfernen Sie dort die Zeile und versuchen
+es erneut. Ist das Konto einmal gebucht worden, bleibt es dauerhaft erhalten – auch dann, wenn die
+Buchung storniert wurde: Das Storno ist selbst eine Buchung auf dem Konto.
+
+Für ein bebuchtes Konto gilt außerdem: Bezeichnung und Kategorie lassen sich ändern, die Kontenart
+nicht mehr. Sie entscheidet, ob das Konto in der Bilanz oder in der Gewinn- und Verlustrechnung
+steht.
+
+### Konten, die nicht mehr benutzt werden sollen
+
+Ein bebuchtes Konto legen Sie still, statt es zu deaktivieren:
+
+- Benennen Sie das Konto so um, dass niemand es mehr wählt, zum Beispiel
+  `_NICHT_VERWENDEN_<alter Name>`.
+
+Eine Sperre, die das Konto für neue Buchungen schließt und es im Kontenplan sichtbar lässt, gibt es
+in dieser Version noch nicht.
+
+### Änderungen mit größerer Wirkung
+
+Ändern Sie ein Konto des gemeinsamen Rahmens oder die Kontenart, weist die Maske auf die Wirkung hin
+und verlangt einen zweiten Klick auf **Ja, ändern**. Erst dann wird gespeichert.
 
 ## Maskenregister
 

@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## KONTENPLAN-PRAXIS-20261012 — in Arbeit, Claude Code
+## KONTENPLAN-PRAXIS-20261012 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-12. **Von:** Auftraggeber („gaengige Praxis uebernehmen“,
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. **Von:** Auftraggeber („gaengige Praxis uebernehmen“,
 „Pflegemaske Kontenplan anfassen“). **Ziel:** Kontenplanpflege ist Stammdatenpflege, kein Tagesgeschaeft:
 anlegen, aendern, deaktivieren nur Finanzleitung (`finance_admin`); ein bebuchtes Konto wird nicht deaktiviert
 und wechselt die Kontenart nicht (409); die Pflegemaske nennt die Folge vor dem Deaktivieren, kennzeichnet den
@@ -21,6 +21,15 @@ gemeinsamen Rahmen und zeigt die Begruendung einer Ablehnung. **Dateibesitz:** `
 `accounts.py` (nur zwei Dekoratoren), `tests/test_kontenplan_mandant_vertrag.py`,
 `tests/test_hauptbuch_rollen_vertrag.py`, `pages/finance/chart-of-accounts.tsx` (vom Auftraggeber freigegeben;
 ihr fremdes, nicht committetes WIP dort — drei Klassenaenderungen — bleibt im Arbeitsbaum erhalten), QA-Doku.
+**Lieferung (nach Praxisvorgabe des Auftraggebers: Anzeige/Pflege getrennt, Pflegerecht delegierbar, Bestaetigung
+ersetzt kein Recht, benutzte Konten bleiben):** anlegen/aendern/deaktivieren ueber `kontenpflege`
+(`KONTENPLAN_PFLEGE`, `FINANCE_ADMIN`, `admin`) statt Schreibrolle; bebuchtes Konto 409 bei Deaktivieren und
+Kontenartwechsel (alte Pruefung griff nie); Pflegemaske zeigt Ablehnungsgrund, Kennzeichen „Gemeinsamer Rahmen“,
+Folge vor dem Deaktivieren, zweiter Klick bei Rahmen-/Kontenartaenderung. Vertraege 27 + 818 gruen, 1333
+Nachbartests gruen, tsc/ESLint gruen, Sichtpruefung ohne Schreibzugriff. QA:
+`docs/quality-assurance/kontenplan-praxis-20261012.md`. **Betrieb:** `FINANCE_BEARBEITEN` pflegt keine Konten mehr.
+**Offen:** Kontosperre (Spalte fehlt; `allow_manual_entries` und Waehrung werden nicht gespeichert), Reaktivieren,
+Export-Knopf ohne Wirkung.
 
 ## FINANCE-BANK-ACTIONS-ROLES-20261012 — abgeschlossen, Codex
 
