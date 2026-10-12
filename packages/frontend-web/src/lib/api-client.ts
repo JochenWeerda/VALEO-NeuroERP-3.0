@@ -4,6 +4,7 @@
  */
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse, isAxiosError } from 'axios'
 import { auth } from './auth'
+import { tenantFromToken } from './tenant-from-token'
 
 const DEV_TOKEN = import.meta.env.VITE_API_DEV_TOKEN as string | undefined || 'dev-token'
 
@@ -107,7 +108,8 @@ class APIClient {
           config.headers.Authorization = `Bearer ${token}`
         }
         const tenantId =
-          window.localStorage.getItem('tenant_id')
+          tenantFromToken(token)
+          || window.localStorage.getItem('tenant_id')
           || window.sessionStorage.getItem('tenant_id')
           || DEFAULT_TENANT_ID
         config.headers['X-Tenant-ID'] = tenantId
