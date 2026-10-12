@@ -11,15 +11,22 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## KONTENPLAN-HUELLE-ABLOESEN-20261012 — in Arbeit, Claude Code
+## KONTENPLAN-HUELLE-ABLOESEN-20261012 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-12. Befund aus KONTENPLAN-MANDANT-20261012.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Befund aus KONTENPLAN-MANDANT-20261012.
 **Befund (Sichtpruefung):** `/finance/kontenplan` (`pages/finance/kontenplan.tsx`) ist eine Huelle: Speichern
 zeigt „Gespeichert — Die Aenderungen wurden erfolgreich gespeichert“ und sendet nichts; die Felder (Periode,
 Steuerschluessel, Anfangsbestand) hat der Weg nicht. Die Pflegemaske `/finance/chart-of-accounts` legt an,
 aendert und deaktiviert wirklich. **Ziel:** Huelle loeschen, `/finance/kontenplan` zeigt die Pflegemaske.
 **Dateibesitz:** `pages/finance/kontenplan.tsx` (loeschen), Eintrag in `route-aliases.json`,
 Routenerzeugnisse, Routenvertrag als Test, QA-Doku. **Nicht angefasst:** die Pflegemaske selbst (fremdes WIP).
+**Lieferung:** `pages/finance/kontenplan.tsx` entfernt; `/finance/kontenplan` zeigt `@/pages/finance/chart-of-accounts`
+(939 Routen wie zuvor, Routing-Pruefung gruen). Routenvertrag `__tests__/pages/finance/kontenplan-route.test.ts`
+gruen, `tsc --noEmit` gruen. Sichtpruefung nachher: Pflegemaske mit 29 Konten, „Neues Konto“ und „Bearbeiten“ da.
+QA: `docs/quality-assurance/kontenplan-huelle-abloesen-20261012.md`. **Offen:** Benutzerhandbuch beschreibt noch
+die Huelle; `financeService.createAccount`/`updateAccount`/`getAccount` lesen `response.data.data`, der Weg
+antwortet mit dem Konto direkt (Rueckgabe `undefined`, derzeit ungenutzt); Brotkrume „Chart Of Accounts“.
+**An Codex:** `config/architecture-index.yaml` driftet auf `main` (ADR-081 fehlt) — nicht von mir angefasst.
 
 ## WHATSAPP-INBOX-ACCESS-20261012 — reserviert, Codex
 
