@@ -112,6 +112,17 @@ const validateUpdateForm = (form: AccountUpdateForm): AccountFormErrors => {
   return errors
 }
 
+// Der gemeinsame Kontenrahmen gilt fuer alle Mandanten einer Installation.
+const GEMEINSAMER_RAHMEN = 'system'
+
+// Lehnt der Weg ab (fehlendes Pflegerecht, bebuchtes Konto), nennt er den Grund — den zeigt die Maske.
+function grund(error: unknown, ersatz: string): string {
+  const antwort = (error as { response?: { status?: number; data?: { detail?: unknown } } })?.response
+  if (typeof antwort?.data?.detail === 'string' && antwort.data.detail.trim()) return antwort.data.detail
+  if (antwort?.status === 403) return 'Für die Kontenpflege fehlt das Recht (KONTENPLAN_PFLEGE).'
+  return ersatz
+}
+
 export default function ChartOfAccountsPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -126,6 +137,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
   const [createErrors, setCreateErrors] = useState<AccountFormErrors>({})
   const [updateForm, setUpdateForm] = useState<AccountUpdateForm>(EMPTY_UPDATE_FORM)
   const [updateErrors, setUpdateErrors] = useState<AccountFormErrors>({})
+  const [updateBestaetigt, setUpdateBestaetigt] = useState(false)
 
   const categoryLabels: Record<(typeof CATEGORY_KEYS)[number], string> = {
     current_assets: t('crud.fields.accountCategoryCurrentAssets'),
@@ -198,7 +210,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
       setCreateErrors({})
     },
     onError: (mutationError) => {
-      toast.error('Fehler beim Erstellen des Kontos')
+      toast.error(grund(mutationError, 'Fehler beim Erstellen des Kontos'))
     },
   })
 
@@ -212,7 +224,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
       setUpdateErrors({})
     },
     onError: (mutationError) => {
-      toast.error('Fehler beim Aktualisieren des Kontos')
+      toast.error(grund(mutationError, 'Fehler beim Aktualisieren des Kontos'))
     },
   })
 
@@ -223,7 +235,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
       queryClient.invalidateQueries({ queryKey: queryKeys.finance.chartOfAccounts.all })
     },
     onError: (mutationError) => {
-      toast.error('Fehler beim Deaktivieren des Kontos')
+      toast.error(grund(mutationError, 'Fehler beim Deaktivieren des Kontos'))
     },
   })
 
@@ -236,6 +248,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
 
   const handleUpdateField = <K extends keyof AccountUpdateForm>(field: K, value: AccountUpdateForm[K]): void => {
     setUpdateForm((prev) => ({ ...prev, [field]: value }))
+    setUpdateBestaetigt(false)
     if (updateErrors[field as keyof AccountFormErrors]) {
       setUpdateErrors((prev) => ({ ...prev, [field]: undefined }))
     }
@@ -264,6 +277,12 @@ export default function ChartOfAccountsPage(): JSX.Element {
     if (Object.keys(errors).length > 0) {
       return
     }
+    // Aenderungen mit groesserer Wirkung brauchen einen zweiten, bewussten Klick. Das Recht ersetzt er nicht —
+    // das prueft der Weg.
+    if (updateHinweis && !updateBestaetigt) {
+      setUpdateBestaetigt(true)
+      return
+    }
     updateMutation.mutate({
       id: editingAccount.id,
       data: {
@@ -274,9 +293,18 @@ export default function ChartOfAccountsPage(): JSX.Element {
     })
   }
 
+  const updateHinweis = !editingAccount
+    ? null
+    : editingAccount.tenant_id === GEMEINSAMER_RAHMEN
+      ? 'Dieses Konto gehört zum gemeinsamen Kontenrahmen. Die Änderung gilt für alle Mandanten.'
+      : updateForm.account_type !== editingAccount.account_type
+        ? 'Die Kontenart entscheidet, ob das Konto in Bilanz oder GuV steht. Bei einem bebuchten Konto lässt sie sich nicht mehr ändern.'
+        : null
+
   const handleEdit = (account: Account): void => {
     setEditingAccount(account)
     setUpdateErrors({})
+    setUpdateBestaetigt(false)
     setUpdateForm({
       account_name: account.account_name,
       account_type: account.account_type,
@@ -304,7 +332,10 @@ export default function ChartOfAccountsPage(): JSX.Element {
       label: t('crud.fields.accountName'),
       render: (account: Account) => (
         <div>
-          <div className="font-medium">{account.account_name}</div>
+          <div className="font-medium">
+            {account.account_name}
+            {account.tenant_id === GEMEINSAMER_RAHMEN ? <Badge variant="outline" className="ml-2">Gemeinsamer Rahmen</Badge> : null}
+          </div>
           <div className="text-sm text-muted-foreground">{categoryLabels[account.category as keyof typeof categoryLabels] || account.category}</div>
         </div>
       ),
@@ -367,8 +398,10 @@ export default function ChartOfAccountsPage(): JSX.Element {
               <AlertDialogHeader>
                 <AlertDialogTitle>Konto deaktivieren</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Sind Sie sicher, dass Sie das Konto "{account.account_name}" deaktivieren moechten?
-                  Das Konto wird nicht geloescht, sondern nur deaktiviert.
+                  Konto {account.account_number} „{account.account_name}“ wirklich deaktivieren? Es steht dann für neue
+                  Buchungen nicht mehr zur Verfügung und verschwindet aus dem Kontenplan. Ein bebuchtes Konto bleibt
+                  erhalten und lässt sich nicht deaktivieren.
+                  {account.tenant_id === GEMEINSAMER_RAHMEN ? ' Das Konto gehört zum gemeinsamen Kontenrahmen: Die Deaktivierung gilt für alle Mandanten.' : ''}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -583,11 +616,17 @@ export default function ChartOfAccountsPage(): JSX.Element {
               </div>
               <input type="checkbox" checked={updateForm.allow_manual_entries} onChange={(event) => handleUpdateField('allow_manual_entries', event.target.checked)} className="h-4 w-4 rounded border" />
             </div>
+            {updateHinweis ? (
+              <p className="rounded-md border border-status-warning p-3 text-sm text-status-warning">
+                {updateHinweis}
+                {updateBestaetigt ? ' Wirklich ändern?' : ''}
+              </p>
+            ) : null}
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={() => setEditingAccount(null)}>Abbrechen</Button>
               <Button type="button" disabled={updateMutation.isPending} onClick={onUpdateSubmit}>
                 {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Speichern
+                {updateHinweis && updateBestaetigt ? 'Ja, ändern' : 'Speichern'}
               </Button>
             </div>
           </div>

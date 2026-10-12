@@ -11,6 +11,7 @@ from sqlalchemy import text
 from app.api.v1.endpoints import finance_actions
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.auth.deps import get_current_user
 import test_journal_amount_integrity as amount_contracts
 
 case = amount_contracts.case
@@ -22,6 +23,7 @@ def client(db, tenant, prefix="/finance"):
     app.include_router(finance_actions.router, prefix=prefix)
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_tenant_id] = lambda: tenant
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "cash-test", "roles": ["FINANCE_ADMIN"]}
     return TestClient(app)
 
 

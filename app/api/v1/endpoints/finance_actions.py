@@ -6,6 +6,8 @@ Minimal action endpoints that execute a short logic or stub and return { success
 import io
 from datetime import date, datetime, timezone
 from typing import Any, List, Optional
+from app.auth.finance_roles import finance_admin, finance_read, finance_write, open_items_read
+
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
@@ -70,7 +72,7 @@ class ClosingActionRequest(BaseModel):
 
 # ── Bank reconciliation run ─────────────────────────────────────────────────────
 
-@router.post("/bank-reconciliation/run", response_model=ActionResponse, summary="Bank reconciliation ausführen")
+@router.post("/bank-reconciliation/run", response_model=ActionResponse, summary="Bank reconciliation ausführen", dependencies=[Depends(finance_read)])
 async def run_bank_reconciliation(
     body: BankReconciliationRunRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -107,7 +109,7 @@ async def run_bank_reconciliation(
 
 # ── Journal entry post ─────────────────────────────────────────────────────────
 
-@router.post("/journal-entries/post", response_model=ActionResponse, summary="Journal entry action erstellen")
+@router.post("/journal-entries/post", response_model=ActionResponse, summary="Journal entry action erstellen", dependencies=[Depends(finance_write)])
 async def post_journal_entry_action(
     body: JournalEntryPostRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -172,8 +174,7 @@ async def post_journal_entry_action(
 @router.post(
     "/cash/close-day", status_code=409, response_model=None,
     summary="Kassenabschluss ohne Bewertungsmodell gesperrt",
-    responses={409: {"description": "Kein belegter Kassenbestand und keine Gegenkontierung; keine Journalbuchung."}},
-)
+    responses={409: {"description": "Kein belegter Kassenbestand und keine Gegenkontierung; keine Journalbuchung."}}, dependencies=[Depends(finance_admin)])
 async def cash_close_day(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -190,7 +191,7 @@ async def cash_close_day(
 
 # ── Direct debit run ───────────────────────────────────────────────────────────
 
-@router.post("/direct-debit/run", response_model=ActionResponse, summary="Direct debit ausführen")
+@router.post("/direct-debit/run", response_model=ActionResponse, summary="Direct debit ausführen", dependencies=[Depends(finance_admin)])
 async def run_direct_debit(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -250,7 +251,7 @@ class ClosingRunRequest(BaseModel):
     closing_type: str = Field("month", description="month | quarter | year")
 
 
-@router.post("/closing/calculate", response_model=ClosingCalculateOut, summary="Closing berechnen")
+@router.post("/closing/calculate", response_model=ClosingCalculateOut, summary="Closing berechnen", dependencies=[Depends(finance_read)])
 async def calculate_closing(
     body: ClosingRunRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -276,7 +277,7 @@ async def calculate_closing(
         raise HTTPException(status_code=500, detail=f"Berechnung fehlgeschlagen: {exc}")
 
 
-@router.post("/closing/lock", response_model=ActionResponse, summary="Closing sperren")
+@router.post("/closing/lock", response_model=ActionResponse, summary="Closing sperren", dependencies=[Depends(finance_admin)])
 async def lock_closing(
     body: ClosingRunRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -302,7 +303,7 @@ async def lock_closing(
         raise HTTPException(status_code=500, detail=f"Sperre fehlgeschlagen: {exc}") from exc
 
 
-@router.post("/closing/run", response_model=ActionResponse, summary="Closing ausführen")
+@router.post("/closing/run", response_model=ActionResponse, summary="Closing ausführen", dependencies=[Depends(finance_admin)])
 async def run_closing(
     body: Optional[ClosingRunRequest] = None,
     tenant_id: str = Depends(get_tenant_id),
@@ -328,7 +329,7 @@ async def run_closing(
         raise HTTPException(status_code=500, detail=f"Abschluss fehlgeschlagen: {exc}") from exc
 
 
-@router.post("/closing/approve", response_model=ClosingApproveOut, summary="Closing genehmigen")
+@router.post("/closing/approve", response_model=ClosingApproveOut, summary="Closing genehmigen", dependencies=[Depends(finance_admin)])
 async def approve_closing(
     body: ClosingActionRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -354,7 +355,7 @@ async def approve_closing(
 
 # ── Credit limits ─────────────────────────────────────────────────────────────
 
-@router.get("/credit-limits", response_model=list[CreditLimitOut], summary="Credit limits auflisten")
+@router.get("/credit-limits", response_model=list[CreditLimitOut], summary="Credit limits auflisten", dependencies=[Depends(open_items_read)])
 async def list_credit_limits(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -377,7 +378,7 @@ async def list_credit_limits(
 
 # ── Collaterals ───────────────────────────────────────────────────────────────
 
-@router.get("/collaterals", response_model=list[CollateralOut], summary="Collaterals auflisten")
+@router.get("/collaterals", response_model=list[CollateralOut], summary="Collaterals auflisten", dependencies=[Depends(finance_read)])
 async def list_collaterals(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -398,7 +399,7 @@ async def list_collaterals(
 
 # ── Payment suggestions ────────────────────────────────────────────────────────
 
-@router.get("/payment-suggestions", response_model=list[PaymentSuggestionOut], summary="Payment suggestions auflisten")
+@router.get("/payment-suggestions", response_model=list[PaymentSuggestionOut], summary="Payment suggestions auflisten", dependencies=[Depends(finance_read)])
 async def list_payment_suggestions(
     days_ahead: int = Query(14, ge=1, le=365),
     tenant_id: str = Depends(get_tenant_id),
@@ -453,8 +454,7 @@ class BuchungsuebergabeExportSummary(BaseModel):
 
 
 @router.post("/buchungsuebergabe-export", summary="Export buchungsuebergabe",
-    response_model=BuchungsuebergabeExportOut
-)
+    response_model=BuchungsuebergabeExportOut, dependencies=[Depends(finance_read)])
 async def buchungsuebergabe_export(
     body: BuchungsuebergabeExportRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -579,8 +579,7 @@ async def buchungsuebergabe_export(
 # ── Period-Close Readiness ────────────────────────────────────────────────────
 
 @router.get("/close-readiness", tags=["finance", "closing"], summary="Close readiness abrufen",
-    response_model=CloseReadinessOut
-)
+    response_model=CloseReadinessOut, dependencies=[Depends(finance_read)])
 async def get_close_readiness(
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -646,7 +645,7 @@ class MahnstufeIn(_BM):
     operator: _Opt[str] = "system"
 
 
-@router.post("/sepa/mandate", response_model=SepaMandatOut, status_code=201, summary="SEPA-Mandat anlegen")
+@router.post("/sepa/mandate", response_model=SepaMandatOut, status_code=201, summary="SEPA-Mandat anlegen", dependencies=[Depends(finance_write)])
 def create_sepa_mandat_endpoint(
     body: SEPAMandatIn,
     x_tenant_id: _Opt[str] = Header(None),
@@ -661,7 +660,7 @@ def create_sepa_mandat_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/sepa/mandate/{mandat_id}/widerruf", response_model=SepaMandatOut, summary="SEPA-Mandat widerrufen")
+@router.post("/sepa/mandate/{mandat_id}/widerruf", response_model=SepaMandatOut, summary="SEPA-Mandat widerrufen", dependencies=[Depends(finance_write)])
 def widerruf_sepa_mandat_endpoint(
     mandat_id: str,
     x_tenant_id: _Opt[str] = Header(None),
@@ -675,7 +674,7 @@ def widerruf_sepa_mandat_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/sepa/batches", response_model=SepaBatchOut, status_code=201, summary="SEPA-Lastschrift-Batch erstellen")
+@router.post("/sepa/batches", response_model=SepaBatchOut, status_code=201, summary="SEPA-Lastschrift-Batch erstellen", dependencies=[Depends(finance_admin)])
 def create_sepa_batch_endpoint(
     body: SEPABatchIn,
     x_tenant_id: _Opt[str] = Header(None),
@@ -690,7 +689,7 @@ def create_sepa_batch_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/ratenzahlung/plaene", response_model=RatenzahlungsplanOut, status_code=201, summary="Ratenzahlungsplan anlegen")
+@router.post("/ratenzahlung/plaene", response_model=RatenzahlungsplanOut, status_code=201, summary="Ratenzahlungsplan anlegen", dependencies=[Depends(finance_write)])
 def create_ratenzahlungsplan_endpoint(
     body: RatenzahlungPlanIn,
     x_tenant_id: _Opt[str] = Header(None),
@@ -705,7 +704,7 @@ def create_ratenzahlungsplan_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/ratenzahlung/raten/{rate_id}/buchen", response_model=RateOut, summary="Rate als bezahlt buchen")
+@router.post("/ratenzahlung/raten/{rate_id}/buchen", response_model=RateOut, summary="Rate als bezahlt buchen", dependencies=[Depends(finance_write)])
 def buche_rate_endpoint(
     rate_id: str,
     body: RateBuchenIn,
@@ -720,7 +719,7 @@ def buche_rate_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/mahnstufe/{rechnungsnr}/eskalieren", response_model=MahnstufeOut, status_code=201, summary="Mahnstufe eskalieren")
+@router.post("/mahnstufe/{rechnungsnr}/eskalieren", response_model=MahnstufeOut, status_code=201, summary="Mahnstufe eskalieren", dependencies=[Depends(finance_write)])
 def eskaliere_mahnstufe_endpoint(
     rechnungsnr: str,
     body: MahnstufeIn,
@@ -735,7 +734,7 @@ def eskaliere_mahnstufe_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/mahnstufe/{rechnungsnr}/trail", response_model=MahnstufenTrailOut, summary="Mahnstufen-Trail abrufen")
+@router.get("/mahnstufe/{rechnungsnr}/trail", response_model=MahnstufenTrailOut, summary="Mahnstufen-Trail abrufen", dependencies=[Depends(finance_read)])
 def get_mahnstufe_trail_endpoint(
     rechnungsnr: str,
     x_tenant_id: _Opt[str] = Header(None),

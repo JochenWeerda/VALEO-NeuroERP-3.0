@@ -4,6 +4,8 @@ from decimal import Decimal
 import logging
 from typing import Annotated
 
+from app.auth.finance_roles import finance_read
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -159,20 +161,20 @@ def _comparison(statement_id: str, bank_account_id: str, tenant_id: str, db: Ses
         raise HTTPException(500, "Bankvergleich konnte nicht verlaesslich ermittelt werden") from None
 
 
-@router.get("/{statement_id}/balance-comparison", response_model=BalanceComparison, summary="Bank balance evidence")
+@router.get("/{statement_id}/balance-comparison", response_model=BalanceComparison, summary="Bank balance evidence", dependencies=[Depends(finance_read)])
 async def get_balance_comparison(statement_id: str, bank_account_id: str = Query(...),
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _comparison(statement_id, bank_account_id, tenant_id, db).balance_comparison
 
 
-@router.get("/{statement_id}/differences", response_model=list[DifferenceItem], summary="Unresolved bank lines")
+@router.get("/{statement_id}/differences", response_model=list[DifferenceItem], summary="Unresolved bank lines", dependencies=[Depends(finance_read)])
 async def get_reconciliation_differences(statement_id: str, bank_account_id: str = Query(...),
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
     offset: Annotated[int, Query(ge=0)] = 0, limit: Annotated[int, Query(ge=1, le=100)] = 100):
     return _comparison(statement_id, bank_account_id, tenant_id, db, offset=offset, limit=limit).differences
 
 
-@router.post("/{statement_id}/reconcile", response_model=ReconciliationResult, summary="Read-only bank comparison")
+@router.post("/{statement_id}/reconcile", response_model=ReconciliationResult, summary="Read-only bank comparison", dependencies=[Depends(finance_read)])
 async def reconcile_bank_statement(statement_id: str, bank_account_id: str = Query(...),
     tenant_id: str = Depends(get_tenant_id),
     auto_book: Annotated[bool, Query(description="Retired: direct booking is not supported")] = False,
@@ -182,7 +184,7 @@ async def reconcile_bank_statement(statement_id: str, bank_account_id: str = Que
     return _comparison(statement_id, bank_account_id, tenant_id, db)
 
 
-@router.get("/{statement_id}/summary", response_model=ReconciliationResult, summary="Canonical bank comparison summary")
+@router.get("/{statement_id}/summary", response_model=ReconciliationResult, summary="Canonical bank comparison summary", dependencies=[Depends(finance_read)])
 async def get_reconciliation_summary(statement_id: str, bank_account_id: str = Query(...),
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _comparison(statement_id, bank_account_id, tenant_id, db)

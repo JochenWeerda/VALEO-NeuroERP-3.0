@@ -11,6 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.api.v1.endpoints import bank_accounts, bank_reconciliation
+from app.auth.deps import get_current_user
 from app.core.database import get_db
 
 
@@ -90,6 +91,7 @@ def case(schema, request):
     app.include_router(bank_accounts.router)
     app.include_router(bank_reconciliation.router)
     app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "bank-proof-test", "roles": ["FINANCE_ADMIN"]}
     with TestClient(app, headers={"X-Tenant-ID": tenant}, raise_server_exceptions=False) as client:
         yield db, client, tenant, other, bank, gl, contra, statement, line
     db.rollback()

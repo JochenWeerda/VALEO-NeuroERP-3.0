@@ -9,6 +9,7 @@ from pydantic import ValidationError
 from sqlalchemy import text
 
 from app.api.v1.endpoints import bank_reconciliation as reconciliation
+from app.auth.deps import get_current_user
 from app.core.database import get_db
 from test_bank_reconciliation_proof import schema as bank_schema_fixture, case as bank_case_fixture
 
@@ -40,6 +41,7 @@ def test_http_direct_booking_rejected():
     app = FastAPI()
     app.include_router(reconciliation.router)
     app.dependency_overrides[get_db] = lambda: NoAccess()
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "bank-retirement-test", "roles": ["FINANCE_ADMIN"]}
     with TestClient(app) as client:
         response = client.post("/bank-reconciliation/stmt/reconcile", params={
             "bank_account_id": "bank", "auto_book": True})
@@ -69,6 +71,7 @@ def test_comparison_is_read_only_and_does_not_guess_accounts(import_case, mode):
         app = FastAPI()
         app.include_router(reconciliation.router)
         app.dependency_overrides[get_db] = lambda: db
+        app.dependency_overrides[get_current_user] = lambda: {"sub": "bank-retirement-test", "roles": ["FINANCE_ADMIN"]}
         with TestClient(app, headers={"X-Tenant-ID": tenant}) as client:
             params = {"bank_account_id": bank, "tenant_id": tenant}
             if mode == "summary":
