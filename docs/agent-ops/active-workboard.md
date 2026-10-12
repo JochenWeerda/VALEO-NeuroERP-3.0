@@ -11,6 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## ABSCHLUSS-ROLLEN-20261012 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-12. Zweiter Schnitt nach HAUPTBUCH-ROLLEN-20261011.
+**Befund:** Abschluss, Auswertung und Kostenrechnung pruefen keine Rolle (elf Dateien, rund 75 Wege).
+**Ziel:** Rolle vor dem ersten Datenbankzugriff. Lesen `finance_read`; anlegen, aendern, buchen
+`finance_write`; loeschen, genehmigen, UStVA einreichen, Anlagenabgang und Abschreibungslauf `finance_admin`.
+**Dateibesitz:** nur Dekoratoren und ein Import in `closing_checklists.py`, `accruals_provisions.py`,
+`asset_accounting.py`, `budget_planning.py`, `liquidity_planning.py`, `liquidity.py`, `financial_reports.py`,
+`subsidiary_ledger_reconciliation.py`, `vat_return_export.py`, `finance_datev.py`, `kostenrechnung.py`; neue Vertragsdatei
+`tests/test_abschluss_rollen_vertrag.py`, Anpassung betroffener Tests, QA-Doku.
+
 ## KONTENRAHMEN-PFLEGERECHT-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. **Von:** Auftraggeber („getrennte Rechte umsetzen“), Hinweis
