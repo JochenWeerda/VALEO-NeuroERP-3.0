@@ -5,6 +5,7 @@ offenen Auftraegen und Bank-/Kassenbestaenden.
 """
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_read
 from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, Query
@@ -46,7 +47,7 @@ def _safe_float(val) -> float:
     return float(val)
 
 
-@router.get("/overview", response_model=LiquidityOverview, summary="Liquidity overview abrufen")
+@router.get("/overview", response_model=LiquidityOverview, summary="Liquidity overview abrufen", dependencies=[Depends(finance_read)])
 async def get_liquidity_overview(
     tage_voraus: int = Query(90, ge=7, le=365, description="Prognosehorizont in Tagen"),
     tenant_id: str = Depends(get_tenant_id),

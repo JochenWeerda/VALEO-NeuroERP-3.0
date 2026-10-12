@@ -102,6 +102,17 @@ sich ein urspruenglicher Fehler nicht durch Wiederholung selbst bestaetigen.
 Mandanten- und Kundenmuster bleiben getrennt; mandantenuebergreifendes Lernen
 ist durch diesen Vertrag nicht freigegeben.
 
+Fachliche Kundenkorrektur und betriebliche Dispositionsabweichung sind
+verschiedene Feedbackarten. Mengenkuerzung wegen Kammerumverteilung,
+Teilbelieferung wegen Tourknappheit und eine nur fuer den Notfall akzeptierte
+Ersatzsorte werden **nicht** als normale Mengen-, Gebinde-, Silo- oder
+Sortenpraeferenz gelernt. Wunsch, bestaetigte Bestellung, Allokation und
+tatsaechliche Lieferung bleiben getrennte Merkmale. Das System darf aus
+belegten Ausnahmeentscheidungen lernen, welche Notfallvorschlaege brauchbar
+waren; es darf damit weder eine Notfallfreigabe selbst erteilen noch die
+normalen Kundenmuster umdeuten. Eine dauerhafte Kundenaenderung benoetigt
+eine gesondert nachvollziehbare fachliche Bestaetigung.
+
 ## Lieferplanung und Kundeninformation
 
 Lieferwunsch und geplanter Liefertermin sind getrennte Angaben. Ein altes
@@ -128,6 +139,93 @@ Nachrichten verwenden den bestehenden persistenten pending_browser-Auftrag,
 einen fachlich stabilen Replay-Schluessel und den verifizierten Empfaenger.
 Terminabweichung, Vorbereitung, Versand und Zustellung bleiben getrennte
 Nachweise. Wiederholte Planung erzeugt keine doppelte Kundenmeldung.
+
+## Seltene Last-minute-Disposition (User-Vorgabe 2026-10-12)
+
+Bei dringenden spaeten Bestellungen koennen verfuegbare Touren und Beladung
+eine vollstaendige Wunschlieferung am selben Tag verhindern. Ein Gliederzug
+oder Sattelauflieger kann mehrere beladene Kammern/Kessel haben. Einzelne
+Kammerinhalte koennen ausnahmsweise von einem bereits geplanten Kunden zu
+einem dringenden Kunden umdisponiert werden. Entfernte Ladestellen werden
+gegebenenfalls nur morgens angefahren; kundenspezifische Mischungen stehen
+eventuell erst am naechsten Morgen bereit. Eine geeignete, akzeptierte
+Ersatzsorte kann den dringenden Bedarf als Teilmenge ueberbruecken; die
+Restmenge der bestellten Wunschsorte folgt zum geprueften naechsten Werktag.
+Dies bleibt ausdruecklich eine Ausnahme, keine normale Erfuellungsstrategie.
+
+### Entscheidungs- und Mengenvertrag
+
+- Die urspruengliche Bestellung beider Kunden bleibt erhalten. Eine andere
+  Tagesallokation ist keine stillschweigende Bestellmengenkuerzung oder
+  Stornierung. Die beim abgebenden Kunden fehlende Menge bleibt offen,
+  soweit keine ausdrueckliche fachliche Aenderung bestaetigt wurde.
+- Ein Vorschlag benennt Dringlichkeitsgrund, Quellauftrag, Zielauftrag,
+  Tour/Fahrzeug/Kammer, tatsaechlich verfuegbare Artikel-/Chargenmenge,
+  Einheit, Lieferstelle/Silo und die Auswirkungen auf beide Lieferzusagen.
+  Geplante Kammerkapazitaet ist kein Nachweis des wirklich geladenen Inhalts.
+  Bereits entladene oder anderweitig gebundene Mengen sind nicht verfuegbar.
+- KI schlaegt Alternativen vor; ein berechtigter Disponent gibt diese
+  kundenuebergreifende Ausnahme frei. Die Ersatzsorte braucht dokumentierte
+  Kundenakzeptanz oder eine bereits gueltige ausdrueckliche Ersatzfreigabe.
+  Ein aehnlicher Name, KI-Score oder gleiche Artikelgruppe beweist keine
+  Eignung. Artikel-/Qualitaets-, Einsatz-, Lieferstellen-/Silo- und
+  Fahrzeug-/Kammerbedingungen sowie bestehende Fachsperren werden geprueft.
+- Der Ersatzartikel wird als tatsaechlicher Artikel mit seiner eigenen
+  Identitaet/Charge dokumentiert. Er wird nicht unter dem Artikel der
+  Wunschsorte ausgebucht, geliefert oder abgerechnet. Anrechnung auf die
+  bestellte Menge und etwaige Preisabweichung werden ausdruecklich festgelegt;
+  keine pauschale Gleichsetzung verschiedener Einheiten oder Produkte.
+- Quellallokation reduzieren, Zielallokation erhoehen, Restverpflichtungen
+  fuehren und Freigabe/Audit speichern ist ein zusammenhaengender Vorgang.
+  Dieselbe Kammermenge darf nicht zwei Kunden zugleich zugesagt werden.
+  Parallele Disposition, Wiederholung oder Abbruch darf keine Doppelallokation
+  und keine verlorene Restmenge erzeugen. Eine Ruecknahme stellt die
+  betroffenen Allokationen nachvollziehbar wieder her.
+- Die Folgetour fuer **beide** offenen Restmengen wird gegen aktuelle
+  Ladebereitschaft, Annahmeschluss, Werktagskalender und Transportkapazitaet
+  geprueft. "Naechster Morgen" oder "naechster Werktag" ist keine automatische
+  Zusage. Fehlt die Verfuegbarkeit, muss die Disposition eine Alternative
+  klaeren; die Restpflicht bleibt offen.
+- Betroffene Kunden erhalten die fuer sie relevante Information ueber
+  Artikel, Teilmenge, offene Restmenge und geprueften Folgetermin. Keine
+  Offenlegung von Namen, Auftraegen oder Dringlichkeitsdetails anderer Kunden.
+  Versand folgt dem bestehenden persistenten Browser-Auftragsvertrag.
+  Gleicher LKW oder gleiche Ladestelle erlaubt keinen Mandantenwechsel.
+
+### Beispiel mit bereits freigegebener mengenmaessiger Anrechnung
+
+Ein Kunde hat 12 t bestellt. Eine tatsaechlich mit 4 t beladene Kammer wird
+zum dringenden Kunden umdisponiert: Der erste Kunde erhaelt heute 8 t und
+hat weiterhin 4 t offen. Der dringende Kunde hat 6 t Wunschsorte bestellt
+und akzeptiert ausnahmsweise 4 t Ersatzsorte als anrechenbare Ueberbrueckung:
+heute 4 t Ersatzsorte, weiterhin 2 t Wunschsorte offen. Beide Restmengen
+erhalten einen gesondert geprueften Folgetermin. Das Beispiel setzt die
+Ersatzfreigabe und Anrechnung voraus; es behauptet keine fachliche
+Gleichwertigkeit der Sorten.
+
+Das Lernsystem sieht weiterhin 12 t als Bestellung des ersten Kunden und
+6 t der Wunschsorte als Bestellung des dringenden Kunden. Die Tageslieferungen
+8 t bzw. 4 t Ersatz sind belegte Ausnahmeergebnisse, keine neuen Standardwerte.
+
+### Integration und Ausnahmebetrieb
+
+Im geprueften Python-Bestand von app/services und app/api/v1/endpoints ist
+kein fachlicher Kammer-/Kessel-Allokationsvertrag fuer diesen Bestelleingang
+nachgewiesen. Bestehende Rationsassistenz
+`app/services/feeding_assist_service.py::substitutes` erzeugt Kandidaten fuer
+Einzelfutter; sie beweist weder Ersatzfreigabe fuer eine kundenspezifische
+Kraftfuttermischung noch Transport-, Kammer- oder Restmengenumbuchung. Keine
+zweite Ausnahme-Auftragsdatenbank oder automatische Nutzung dieses
+Rationspfads als Freigabe einfuehren.
+
+Die Umsetzung benoetigt einen abgegrenzten Fachcommand auf bestehenden
+Auftrags-/Dispositionsvertraegen mit den oben genannten atomaren Nachweisen.
+Der normale Lern-/Bestellweg startet keine Kammerumbuchung. Der Ausnahmepfad
+kennzeichnet Ursache, Freigabe und Auswirkungen dauerhaft. Ausnahmehaeufigkeit,
+offene Restmengen, verspaetete Folgelieferungen und Folgen fuer abgebende Kunden
+werden beobachtet. Wachsende Ausnahmehaeufigkeit wird der Disposition als
+Kapazitaets-/Planungsproblem sichtbar; sie erweitert nicht selbst die
+Freigaberegel. Keine ungemessene feste Prozentgrenze als User-Vorgabe erfinden.
 
 ## Integration und Betrieb
 
@@ -159,6 +257,7 @@ einem fremden oder allgemeinen Kundenkontext.
 | WHATSAPP-ORDER-HISTORY-20261011 | Kanonische Silo-/Gebinde-/Einheitenvertraege und begrenzte autorisierte Historie | Verbraucher-/Schemaabgleich, keine Konkurrenzhistorie, unterschiedliche Lieferstellen und Varianten getrennt |
 | WHATSAPP-LEARNING-ENGINE-20261011 | Lernende Kandidaten, feldbezogene Unsicherheit, menschliches Feedback und kalibrierte Uebernahme | Zeitlich getrennte Bewertungsdaten; explizite Angaben unveraendert; korrigiertes Muster verbessert Folgefall; Cold Start, konkurrierende Mengen/Silos und Saisonwechsel; kein Lern-Replay/Trainingsleck |
 | WHATSAPP-DELIVERY-PLANNING-20261011 | Verfuegbarkeitsanbindung und feste Stueckguttouren, Alternativen und Kundeninformation | Folgetag verfuegbar/nicht verfuegbar; volle Tour, Annahmeschluss, Feiertag, Wochenwechsel, expliziter Wunsch; keine Zusage ohne aktuelle Quelle; keine doppelte Meldung |
+| WHATSAPP-EMERGENCY-ALLOCATION-20261012 | Seltene freigegebene Kammerumverteilung, Ersatz-Teilmenge und Restverpflichtungen beider Kunden | Mengenbilanz und richtige Artikel/Chargen; beide Kunden ohne fremde Details informiert; fehlende Ersatz-/Dispositionsfreigabe abgewiesen; konkurrierende Allokation, Replay/Rollback und Ruecknahme; unmoeglicher Folgetermin bleibt offen; Ausnahmen verfälschen keine normalen Lernmuster |
 | Bestehender WHATSAPP-WEB-INTEGRATION-20261011 | Konto-/Chatbindung und Browser-Versandnachweis | Autorisierter konkreter Testempfaenger; Abbruch vor/nach Senden und Wiederanlauf ohne Doppelversand |
 
 Die Code-Slices bleiben offen und sind vor Umsetzung separat zu claimen.

@@ -11,6 +11,54 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WHATSAPP-EMERGENCY-CONTRACT-20261012 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** User-Fachregel fuer seltene dringende Last-minute-Auftraege: Kammerumverteilung, akzeptierte Ersatzsorte als Teilmenge, offene Restmengen und Lernen ohne Verfaelschung normaler Kundenmuster verbindlich dokumentieren.
+**Dateibesitz:** docs/workflows/whatsapp-order-learning.md nur Ausnahme-/Feedback-/Integrationsvertrag; eigenes Workboard/Handoff. Kein Fachwrite, keine Tourumbuchung, keine neue Transport-/Rationslogik.
+**Abnahme:** Ursprung und Wunsch unveraendert, beide Kunden und Restverpflichtungen sichtbar, keine Doppelallokation, Ersatzartikel fachlich/operativ freigegeben, naechster Werktag nur bei belegter Verfuegbarkeit, menschliche Dispositionsfreigabe, Ausnahme nicht als Mengen-/Sortenpraeferenz lernen. Vorhandene Rationsassistenz nicht als Transport-/Eignungsfreigabe ausweisen.
+**Risiken:** Kammerallokation und atomare Mehrkundenumbuchung im Bestelleingang nicht nachgewiesen; Code-Slice bleibt separat offen. **Harness:** Ist-Abgleich vorhandener Tour-/Verkaufs-/Assistenzpfade, Doku-Governance und Referenzpruefung; keine DB/Container/Reset, keine Browsernachricht.
+
+**Lieferung:** User-Regel fuer seltene Kammerumverteilung und akzeptierte Ersatz-Teilmenge dokumentiert: Originalwuensche erhalten, Restmengen beider Kunden, atomare Allokation/Freigabe, tatsaechliche Artikelidentitaet und gepruefter Folgetermin. Betriebsbedingte Abweichungen sind eigenes Feedback und keine normale Mengen-/Sortenpraeferenz. Vorhandene Einzelfutterassistenz als anderer Vertrag abgegrenzt; keine Kammerfunktion oder Versand als implementiert behauptet. Nachweis: ../workflows/whatsapp-order-learning.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## WHATSAPP-EMERGENCY-ALLOCATION-20261012 — offen
+
+**Owner:** unbesetzt. **Ziel:** seltene Last-minute-Ausnahme auf kanonischer Auftrags-/Dispositionsebene: freigegebene Kammerumverteilung, akzeptierte Ersatz-Teilmenge und Restmengen beider Kunden; originalen Wunsch und operative Abweichung trennen. **Dateibesitz:** vor Claim Verbraucher-/Schemaabgleich, kein paralleles Auftragsmodell. **Abnahme:** Mengenbilanz/richtige Artikel-/Chargen; menschliche Dispositions- und belegte Ersatzfreigabe; zwei autorisierte Kunden ohne gegenseitigen Datenauszug; konkurrierende Allokation/Replay/Rollback/Ruecknahme ohne Doppelbindung; Folgetermin nur bei Verfuegbarkeit, Ausnahme nicht als normale Mengen-/Sortenpraeferenz lernen. **Risiken:** Kammer-/Kesselvertrag fuer Bestelleingang nicht nachgewiesen, Rations-Einzelfutterassistenz keine Freigabe fuer Kraftfuttermischung oder Transport. **Abhaengigkeiten:** INBOX-TRUST, ORDER-HISTORY, DELIVERY-PLANNING; Lernengine muss Feedbackart beachten. **Harness:** Fachfreigabe, bestehende Rechte, atomare Original-/Rest-/Auditnachweise, echte zwei-Kontext-Proben im gemeinsamen Pruefstand, kein Reset/Container, Doku und externer Versandnachweis getrennt. Vertrag: ../workflows/whatsapp-order-learning.md.
+
+## ABSCHLUSS-ROLLEN-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Zweiter Schnitt nach HAUPTBUCH-ROLLEN-20261011.
+**Befund:** Abschluss, Auswertung und Kostenrechnung pruefen keine Rolle (elf Dateien, rund 75 Wege).
+**Ziel:** Rolle vor dem ersten Datenbankzugriff. Lesen `finance_read`; anlegen, aendern, buchen
+`finance_write`; loeschen, genehmigen, UStVA einreichen, Anlagenabgang und Abschreibungslauf `finance_admin`.
+**Dateibesitz:** nur Dekoratoren und ein Import in `closing_checklists.py`, `accruals_provisions.py`,
+`asset_accounting.py`, `budget_planning.py`, `liquidity_planning.py`, `liquidity.py`, `financial_reports.py`,
+`subsidiary_ledger_reconciliation.py`, `vat_return_export.py`, `finance_datev.py`, `kostenrechnung.py`; neue Vertragsdatei
+`tests/test_abschluss_rollen_vertrag.py`, Anpassung betroffener Tests, QA-Doku.
+**Lieferung:** 74 Wege in elf Dateien mit `finance_read` / `finance_write` / `finance_admin` am Dekorator; Vertrag
+mit 1048 Faellen ohne Datenbank; 2135 Nachbartests gruen, einer rot und fremd
+(`test_parallel_installation_endpoints`, Druckerrest im Pruefstand). QA:
+`docs/quality-assurance/abschluss-rollen-20261012.md`. **Betrieb:** UStVA einreichen, Genehmigungen,
+Anlagenabgang, Abschreibungslauf nur `FINANCE_ADMIN`/`admin`. **Offen:** 229 Finanzwege ohne Rolle; Masken
+melden 403 nicht als fehlende Rolle (ausser Mahnlauf).
+
+## KONTENRAHMEN-PFLEGERECHT-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. **Von:** Auftraggeber („getrennte Rechte umsetzen“), Hinweis
+Codex (KONTENPLAN-VERIFIED-SHARED-POLICY-20261012, zweite Haelfte). **Befund:** Jeder Mandant mit
+Schreibrolle aendert und deaktiviert Konten des gemeinsamen Rahmens (`system`) — fuer alle Mandanten.
+**Ziel:** Lesen bleibt wie es ist; aendern und deaktivieren eines `system`-Kontos braucht ein eigenes Recht
+(`KONTENRAHMEN_PFLEGE` oder `admin`), sonst 403 ohne Aenderung. **Dateibesitz:** `app/auth/finance_roles.py`
+(additiv), `app/api/v1/endpoints/chart_of_accounts.py`, `tests/test_kontenplan_mandant_vertrag.py`, QA-Doku.
+**Nicht Teil dieses Slices:** die Bindung des Mandanten an das Token (erste Haelfte von Codex' Hinweis) — dafuer steht die
+Antwort des Auftraggebers aus, ob der Anmeldedienst den Mandanten im Token mitgibt.
+**Lieferung:** Aendern und Deaktivieren eines `system`-Kontos verlangt zur Finanzrolle des Wegs
+`KONTENRAHMEN_PFLEGE` oder `admin`, sonst 403 ohne Aenderung; Lesen unveraendert. Mitbehoben: Deaktivieren
+antwortete immer 500 (Antwortschema ohne `success`), obwohl das Konto deaktiviert war. Vertrag gegen `valeo_probe`
+18 gruen (acht neu), 1271 Nachbartests gruen, OpenAPI unveraendert. QA:
+`docs/quality-assurance/kontenrahmen-pflegerecht-20261012.md`. **Betrieb:** Ohne Zuweisung von
+`KONTENRAHMEN_PFLEGE` pflegt nur `admin` den gemeinsamen Rahmen. **Offen:** Pflegemaske zeigt die Ablehnung nur als
+„Fehler beim Aktualisieren“ (Datei mit fremdem WIP, nicht angefasst); Mandantenbindung an das Token weiter offen.
+
 ## HANDBUCH-ABGELOESTE-MASKEN-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Offener Punkt aus den Abloese-Slices vom 11./12.10.

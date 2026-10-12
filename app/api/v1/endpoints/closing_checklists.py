@@ -3,6 +3,7 @@ Closing Checklists API
 FIBU-CLS-01: Abschlusschecklisten
 """
 
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
 from typing import Any, Dict, List, Optional
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -34,7 +35,7 @@ from app.api.v1.schemas.closing_checklists_schemas import ClosingChecklistsOut
 router = APIRouter(prefix="/closing-checklists", tags=["finance", "closing"])
 
 
-@router.get("/templates", response_model=list[ClosingChecklistsOut], summary="Checklist templates auflisten")
+@router.get("/templates", response_model=list[ClosingChecklistsOut], summary="Checklist templates auflisten", dependencies=[Depends(finance_read)])
 async def list_checklist_templates(
     closing_type: Optional[str] = Query(None, description="Filter by closing type"),
     active_only: bool = Query(True, description="Show only active templates"),
@@ -262,7 +263,7 @@ async def list_checklist_templates(
         ]
 
 
-@router.post("/templates", response_model=ClosingChecklistsOut, status_code=201, summary="Checklist template anlegen")
+@router.post("/templates", response_model=ClosingChecklistsOut, status_code=201, summary="Checklist template anlegen", dependencies=[Depends(finance_write)])
 async def create_checklist_template(
     template: ChecklistTemplateCreate,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -317,7 +318,7 @@ async def create_checklist_template(
         raise HTTPException(status_code=500, detail=f"Failed to create checklist template: {str(e)}")
 
 
-@router.post("", response_model=ClosingChecklistResponse, status_code=201, summary="Closing checklist anlegen")
+@router.post("", response_model=ClosingChecklistResponse, status_code=201, summary="Closing checklist anlegen", dependencies=[Depends(finance_write)])
 async def create_closing_checklist(
     checklist: ClosingChecklistCreate,
     db: Session = Depends(get_db)
@@ -520,7 +521,7 @@ async def create_closing_checklist(
         raise HTTPException(status_code=500, detail=f"Failed to create closing checklist: {str(e)}")
 
 
-@router.get("/{checklist_id}", response_model=ClosingChecklistResponse, summary="Closing checklist abrufen")
+@router.get("/{checklist_id}", response_model=ClosingChecklistResponse, summary="Closing checklist abrufen", dependencies=[Depends(finance_read)])
 async def get_closing_checklist(
     checklist_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -559,8 +560,7 @@ async def get_closing_checklist(
 
 
 @router.post("/{checklist_id}/items/{item_code}/complete", summary="Checklist item complete",
-    response_model=ClosingChecklistsOut
-)
+    response_model=ClosingChecklistsOut, dependencies=[Depends(finance_write)])
 async def complete_checklist_item(
     checklist_id: str,
     item_code: str,
@@ -642,8 +642,7 @@ async def complete_checklist_item(
 
 
 @router.post("/{checklist_id}/validate", summary="Checklist items validieren",
-    response_model=ClosingChecklistsOut
-)
+    response_model=ClosingChecklistsOut, dependencies=[Depends(finance_write)])
 async def validate_checklist_items(
     checklist_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -759,7 +758,7 @@ async def validate_checklist_items(
         raise HTTPException(status_code=500, detail=f"Failed to validate checklist: {str(e)}")
 
 
-@router.get("", response_model=List[ClosingChecklistResponse], summary="Closing checklists auflisten")
+@router.get("", response_model=List[ClosingChecklistResponse], summary="Closing checklists auflisten", dependencies=[Depends(finance_read)])
 async def list_closing_checklists(
     period: Optional[str] = Query(None, description="Filter by period (YYYY-MM)"),
     closing_type: Optional[str] = Query(None, description="Filter by closing type"),
@@ -815,7 +814,7 @@ async def list_closing_checklists(
         return []
 
 
-@router.get("/cockpit/summary", response_model=ClosingChecklistsOut, summary="Closing cockpit summary abrufen")
+@router.get("/cockpit/summary", response_model=ClosingChecklistsOut, summary="Closing cockpit summary abrufen", dependencies=[Depends(finance_read)])
 async def get_closing_cockpit_summary(
     tenant_id: str = Query("system", description="Tenant ID"),
     period: Optional[str] = Query(None, description="Period in YYYY-MM"),
@@ -920,7 +919,7 @@ async def get_closing_cockpit_summary(
     return result
 
 
-@router.post("/{checklist_id}/approve", response_model=ClosingChecklistResponse, summary="Closing checklist genehmigen")
+@router.post("/{checklist_id}/approve", response_model=ClosingChecklistResponse, summary="Closing checklist genehmigen", dependencies=[Depends(finance_admin)])
 async def approve_closing_checklist(
     checklist_id: str,
     approved_by: str = Query("system", description="Approver user ID"),
@@ -946,7 +945,7 @@ async def approve_closing_checklist(
     return await get_closing_checklist(checklist_id, tenant_id, db)
 
 
-@router.delete("/{checklist_id}", status_code=204, response_class=Response, response_model=None, summary="Closing checklist lÃ¶schen")
+@router.delete("/{checklist_id}", status_code=204, response_class=Response, response_model=None, summary="Closing checklist lÃ¶schen", dependencies=[Depends(finance_admin)])
 async def delete_closing_checklist(
     checklist_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
