@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MASKEN-ROLLENHINWEIS-20261012 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-12. **Von:** Auftraggeber (delegierter offener Punkt „Masken melden
+403 nicht als fehlende Rolle“). **Befund:** Rund 360 Finanzwege lehnen seit den Rollen-Slices mit 403
+„Insufficient role. Required: (…)“ ab; nur Mahnlauf und Kontenplan uebersetzen das. Die uebrigen Masken zeigen
+einen englischen Satz, „Fehler beim Laden“ oder eine leere Liste. **Ziel:** eine Stelle statt jeder Maske —
+der Antwort-Interceptor uebersetzt die Ablehnung in einen deutschen Satz mit den noetigen Rollen und meldet
+sie einmal. **Dateibesitz:** neue `lib/role-hint.ts`,
+`lib/api-client.ts` (nur der Antwort-Interceptor), Vitest, QA-Doku.
+
 ## IDENTITY-PRIVATE-PUSH-20261012 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
