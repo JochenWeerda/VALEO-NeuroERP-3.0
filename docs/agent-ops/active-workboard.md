@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## IDENTITY-PRIVATE-DATA-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
+**Dateibesitz:** .gitignore, scripts/guard-forbidden-paths.cjs sowie neuer generischer lokaler Private-Identity-Scanner und Test; eigene QA/Workboard. Keine persoenlichen Werte in versionierten Artefakten. Private Identitaet/Erstkennwort ausschliesslich ausserhalb des Repositorys.
+**Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
+
 ## IDENTITY-CONTROL-20261012 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „Rest auch noch umsetzen“. **Ziel:** ERP-Providerbetrieb, administratives Mandantenprofil, Sitzungswiderruf, Agentenmandate, inhaltsgebundene Freigaben und atomare Ressourcenbegrenzung an vorhandenen Ausfuehrungswegen integrieren.
