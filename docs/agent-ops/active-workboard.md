@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## ZAHLUNG-STAMMDATEN-ROLLEN-20261012 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-12. Dritter Schnitt nach HAUPTBUCH- und ABSCHLUSS-ROLLEN.
+**Befund:** 24 Finanzdateien pruefen keine Rolle. **Ziel:** (a) Zahlungsverkehr und Schnittstellen — vierzehn
+Dateien: lesen `finance_read`, schreiben `finance_write`, loeschen/Lastschrift ausgeben/Stapel freigeben und
+ausfuehren/Importlauf buchen/Lohn- und Fremdsystemlaeufe/Schnittstellenkonfiguration `finance_admin`.
+(b) Stammdaten — zehn Dateien: lesen bleibt fuer jeden Angemeldeten (Verkauf, Einkauf, CRM lesen
+Zahlungsbedingungen und Steuerschluessel), schreiben `finance_write`, loeschen `finance_admin`.
+**Dateibesitz:** nur Dekoratoren und ein Import in den 24 Dateien; `tests/test_zahlung_stammdaten_rollen_vertrag.py`;
+Anpassung betroffener Tests; QA-Doku.
+**Nicht Teil:** `finance_invoices.py` und `document_control.py` (auch Verkauf/Auswertung schreiben dort), Bankdateien (Codex).
+
 ## IDENTITY-TRANSPORT-20261012 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
