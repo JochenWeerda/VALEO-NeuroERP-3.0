@@ -47,7 +47,7 @@ class Probe:
     app: FastAPI
 
     def token(self, tenant="tenant-a", *, changes=None, omit=(), key=0):
-        claims = {"iss": ISSUER, "aud": AUDIENCE, "exp": int(time.time()) + 300,
+        claims = {"iss": ISSUER, "aud": AUDIENCE, "exp": int(time.time()) + 300, "iat": time.time(), "sid": "test-session-" + tenant,
                   "sub": "human-a", "tenant_id": tenant, "roles": ["FINANCE_BEARBEITEN"]}
         claims.update(changes or {})
         for name in omit:
@@ -67,9 +67,18 @@ def probe(monkeypatch, keys):
     monkeypatch.setattr(settings, "OIDC_JWKS_URL", ISSUER + "/certs")
     monkeypatch.setattr(settings, "API_DEV_TOKEN", "opaque-own-dev-token")
     monkeypatch.setattr(security, "_get_jwks", lambda *a, **k: [jwk])
+    # This fixture isolates JWT/selector validation; shared-session enforcement
+    # has its own Redis contracts and remains active in the production app.
+    monkeypatch.setattr('app.core.identity_session.validate', lambda *a, **k: None)
     calls = []
     app = FastAPI()
     app.add_middleware(BearerAuthMiddleware)
+
+    @app.get('/api/identity-contract')
+    def execution_identity():
+        from app.core.identity_context import current_identity
+        principal = current_identity()
+        return {'subject': principal.subject, 'tenant': principal.tenant_id, 'representation': repr(principal)}
 
     @app.get("/api/probe", dependencies=[Depends(finance_write)])
     def query(tenant_id: str = Query("system"), header: str = Depends(get_tenant_id), user: dict = Depends(get_current_user)):
@@ -191,4 +200,17 @@ def test_no_context_bleed_across_success_rejection_and_next_request(probe):
 def test_every_registered_protected_http_route_is_bound_and_installation_idempotent(probe):
     first = install_tenant_bindings(probe.app, public_paths=BearerAuthMiddleware.PUBLIC_PATHS)
     second = install_tenant_bindings(probe.app, public_paths=BearerAuthMiddleware.PUBLIC_PATHS)
-    assert first == second and len(first) == 5
+    assert first == second and len(first) == 6
+
+
+def test_execution_identity_is_scoped_and_does_not_expose_credentials(probe):
+    from app.core.identity_context import current_identity
+    token = probe.token('tenant-b')
+    result = probe.client.get('/api/identity-contract', headers={'Authorization': 'Bearer '+token})
+    assert result.status_code == 200
+    assert result.json()['subject'] == 'human-a'
+    assert result.json()['tenant'] == 'tenant-b'
+    assert token not in result.json()['representation']
+    with pytest.raises(HTTPException) as error:
+        current_identity()
+    assert error.value.status_code == 401

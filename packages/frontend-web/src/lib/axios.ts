@@ -1,6 +1,7 @@
-﻿import axios from "axios"
+import axios from "axios"
 import { v4 as uuidv4 } from "uuid"
-import { clearAuthSession, getAccessToken, handleUnauthorized } from "@/lib/auth"
+import { getAccessToken, handleUnauthorized } from "@/lib/auth"
+import { tenantFromToken } from "@/lib/tenant-from-token"
 
 function normalizeApiBaseUrl(value: string | undefined): string {
   const raw = value?.trim() ?? ""
@@ -24,10 +25,8 @@ function normalizeApiBaseUrl(value: string | undefined): string {
 }
 
 const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL)
-const TENANT_ID = import.meta.env.VITE_TENANT_ID ?? ""
 const REQUEST_TIMEOUT_MS = 30_000
 const HTTP_STATUS_UNAUTHORIZED = 401
-const HTTP_STATUS_FORBIDDEN = 403
 
 interface RequestMetadata {
   startTime: number
@@ -110,15 +109,14 @@ api.interceptors.request.use((config) => {
   const headers = ensureHeaders(cfg)
 
   const token = getAccessToken()
-  // Always send token if available, or use dev-token as fallback in dev mode
-  const oidcConfigured = (import.meta.env.VITE_OIDC_DISCOVERY_URL ?? '').length > 0
-  const finalToken = token || (!oidcConfigured ? (import.meta.env.VITE_API_DEV_TOKEN || 'dev-token') : null)
+  const finalToken = token
   if (finalToken !== null && readHeader(headers, "Authorization") === undefined) {
     writeHeader(headers, "Authorization", `Bearer ${finalToken}`)
   }
 
-  if (TENANT_ID !== "" && readHeader(headers, "x-tenant-id") === undefined) {
-    writeHeader(headers, "x-tenant-id", TENANT_ID)
+  const tenantId = tenantFromToken(token)
+  if (tenantId && readHeader(headers, "x-tenant-id") === undefined) {
+    writeHeader(headers, "x-tenant-id", tenantId)
   }
 
   const requestId = readHeader(headers, "x-request-id") ?? createRequestId()
@@ -168,30 +166,9 @@ api.interceptors.response.use(
     })
 
     if (status === HTTP_STATUS_UNAUTHORIZED) {
-      // In development mode without OIDC, don't redirect to login
-      // The backend should handle dev mode authentication
-      // Check if OIDC is actually configured (not just placeholder)
-      const discoveryUrl = import.meta.env.VITE_OIDC_DISCOVERY_URL ?? ''
-      const placeholderPatterns = ['your-oidc-provider.com', 'example.com', 'keycloak.example.com', '{tenant-id}', '{domain}', '{application-id}', '{client-id}']
-      const oidcConfigured = discoveryUrl.length > 0 && !placeholderPatterns.some(pattern => discoveryUrl.includes(pattern))
-      if (oidcConfigured) {
-        handleUnauthorized()
-      }
-      // In dev mode, log the error but don't redirect
-      console.warn('API request returned 401 Unauthorized. In dev mode without OIDC, this might be expected.')
-      throw error
+      handleUnauthorized()
     }
-
-    if (status === HTTP_STATUS_FORBIDDEN) {
-      // Check if OIDC is actually configured (not just placeholder)
-      const discoveryUrl = import.meta.env.VITE_OIDC_DISCOVERY_URL ?? ''
-      const placeholderPatterns = ['your-oidc-provider.com', 'example.com', 'keycloak.example.com', '{tenant-id}', '{domain}', '{application-id}', '{client-id}']
-      const oidcConfigured = discoveryUrl.length > 0 && !placeholderPatterns.some(pattern => discoveryUrl.includes(pattern))
-      // Only clear session if OIDC is configured
-      if (oidcConfigured) {
-        clearAuthSession()
-      }
-    }
+    // A role denial does not invalidate an authenticated session.
 
     throw error
   }

@@ -2375,5 +2375,8 @@ from app.api.v1.endpoints import reports_export  # noqa: E402
 api_router.include_router(reports_export.router, tags=["reports", "export"])
 
 # CRM Kundensegmente
+
+from app.api.v1.endpoints import identity_management  # noqa: E402
+api_router.include_router(identity_management.router)
 from app.api.v1.endpoints import crm_segments  # noqa: E402
 api_router.include_router(crm_segments.router, tags=["crm", "segments"])

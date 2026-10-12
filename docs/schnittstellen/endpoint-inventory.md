@@ -243,6 +243,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `hrm_lifecycle_actions` | DOM-HRM-004 — HRM Lifecycle: Zeiterfassung, Abwesenheit, Arbeitszeitkonto. |
 | `iban_lookup` | IBAN Lookup Service |
 | `idempotency_monitoring` | — |
+| `identity_management` | Server-side session management in the shared identity boundary. |
 | `import_pipeline` | Import Pipeline Endpoints — Wave 3 AP6 |
 | `individualpreise` | Individualpreise [PRI/PRIE] — Kunden-/Lieferanten-spezifische Preise. |
 | `individuelle_artikelnummern` | Individuelle Artikelnummern [INDIVART] — Kunden-/Lieferanten-spezifische Artikelnummern. |

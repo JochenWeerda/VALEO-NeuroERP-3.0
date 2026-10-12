@@ -56,9 +56,11 @@ Pruefstand nicht (keine Migration; in der gewachsenen DB liegt sie in `public`).
 **An Codex:** Weitere 107 Testdateien importieren `from main import app`; dieselbe Umstellung duerfte dort greifen.
 Diese Tests pruefen danach nicht mehr den Middleware-Stapel des Produktionsdienstes.
 
-## IDENTITY-INTEGRATION-REST-20261012 — reserviert, Codex
+## IDENTITY-INTEGRATION-REST-20261012 — in arbeit, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „rest bitte auch noch umsetzen“. **Ziel:** offene Sitzungs-, Agenten-, Freigabe- und Ressourcenvertraege in vorhandene Wege integrieren. **Dateibesitz:** app/auth/oidc.py und dependencies.py nur zentrale verifizierte Identitaet; operator_agent.py samt operator_agent_service.py und agent_proposal_repository.py/model/schemas nur Tokenurheber, Inhaltsbindung, Idempotenz und Ausfuehrungsgrenze; frontend hooks/useAuth.ts, lib/api-client.ts und axios.ts nur Authkonfiguration/Refresh/Logout, ProtectedRoute.tsx nur OIDC-Bypass-Hunk (fremdes Styling erhalten); config/architecture-domain-prefixes.yaml nur neue eigene Identitaetsmodule; eigene Tests/QA/ADR und Plattform-Domainpack. Elternclaim IDENTITY-CONTROL behaelt Sessionmodule, Neuro-Broker/Gateway und lib/auth.ts. **Abnahme:** kein frei gelieferter Urheber/Rolle, kein dev/HS-Fallback, Widerruf auch an Streams, Rechte-Schnittmenge und Mandatsende vor Wirkung, Vier Augen/Inhaltsbindung/Replay und atomare Quoten; echte positive und negative Vertrage mit vorhandenen Ressourcen. Keine neue DB/Container/Reset, keine privaten Benutzerwerte versionieren. **Risiken:** Provider-Erstanmeldung bleibt persoenliche Benutzeraktion; fremde UI-/Finanzclaims bleiben geschuetzt.
+
+**Lieferung:** Browser-PKCE/State/Nonce, keine Dev-/Default-/Maskenrueckfaelle, bestaetigbarer Logout und Refreshrennen gesichert; 14 Browservertraege, tsc und ESLint gruen. Fremdes ProtectedRoute-Styling nicht aufgenommen. Konkurrenz-HS-Auth nach Verbraucherpruefung entfernt. Agenten-/Operatorintegration bleibt in Arbeit. Nachweis: identity-session-integration-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## KONTO-SPERRE-MELDUNG-20261012 — abgeschlossen, Claude Code
 
@@ -164,6 +166,8 @@ Fehler-Toast; Masken, die Fehler schlucken, zeigen weiter leere Listen; Scope-Ab
 **Lieferung:** Test-Unterclaim geliefert: vier Rollenvertragsdateien mit 3959 Faellen gruen. Zahlungs-/Stammdaten-Testdatei fuer Claude freigegeben; 67 Finanz-Nachbarfaelle bleiben sein Slice. Produktionsauth unveraendert, keine DB/Container/Reset. Uebrige Identitaetsumsetzung bleibt offen. Nachweis: identity-test-boundaries-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 **Lieferung:** Provider-Teilmeilenstein geliefert: keine Musterkonten, PKCE, kurze Laufzeiten und additive 34 Fachrollen samt ausdruecklichem manager im Realm und laufenden Dienst. Neun Vertraege und beide Katalogchecks gruen. Keine automatische Rollenvergabe. Private Erstzuordnung ausserhalb Git; Benutzer-Erstanmeldung und restliche Sessions-/Agentensteuerung bleiben offen. Nachweis: identity-provider-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+**Lieferung:** Sitzungs-/Browserteil geliefert: persistenter serverseitiger Widerruf mit Audit, Idle/Absolutgrenze, laufende Streams und verifizierter interner Kontext; 77 RSA-/Sitzungs-/Streamvertraege gruen. Agentenmandate/Freigaben/Quoten und Providerrollen-/MFA-Gesamtabnahme bleiben offen. Nachweis: identity-session-integration-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## FINANZ-REST-ROLLEN-20261012 — abgeschlossen, Claude Code
 

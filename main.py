@@ -318,29 +318,51 @@ class BearerAuthMiddleware:
             expiry = websocket.state.token_claims["exp"]
 
             async def guarded_receive():
-                remaining = expiry - time.time()
-                if remaining <= 0:
-                    await send({"type": "websocket.close", "code": 1008, "reason": "Session expired"})
-                    raise WebSocketDisconnect(1008)
+                from app.core.identity_session import validate
+                incoming = asyncio.create_task(receive())
                 try:
-                    message = await asyncio.wait_for(receive(), timeout=remaining)
-                    if message["type"] == "websocket.receive" and time.time() >= expiry:
-                        await send({"type": "websocket.close", "code": 1008, "reason": "Session expired"})
-                        raise WebSocketDisconnect(1008)
-                    return message
-                except asyncio.TimeoutError:
-                    await send({"type": "websocket.close", "code": 1008, "reason": "Session expired"})
+                    while True:
+                        await asyncio.to_thread(validate, websocket.state.token_claims, websocket.state.authenticated_token, touch=False)
+                        remaining = expiry - time.time()
+                        if remaining <= 0:
+                            raise HTTPException(401, "Session expired")
+                        done, _ = await asyncio.wait([incoming], timeout=min(remaining, settings.IDENTITY_REVOCATION_POLL_SECONDS))
+                        if done:
+                            message = incoming.result()
+                            if message["type"] == "websocket.receive":
+                                if time.time() >= expiry:
+                                    raise HTTPException(401, "Session expired")
+                                await asyncio.to_thread(validate, websocket.state.token_claims, websocket.state.authenticated_token, touch=True)
+                            return message
+                except HTTPException:
+                    await send({"type": "websocket.close", "code": 1008, "reason": "Session expired or revoked"})
                     raise WebSocketDisconnect(1008)
+                finally:
+                    if not incoming.done():
+                        incoming.cancel()
+                        with contextlib.suppress(asyncio.CancelledError):
+                            await incoming
 
             async def guarded_send(message):
+                from app.core.identity_session import validate
+                if message["type"] in {"websocket.accept", "websocket.send"}:
+                    try:
+                        await asyncio.to_thread(validate, websocket.state.token_claims, websocket.state.authenticated_token, touch=False)
+                    except HTTPException:
+                        await send({"type": "websocket.close", "code": 1008, "reason": "Session expired or revoked"})
+                        raise WebSocketDisconnect(1008)
                 if message["type"] in {"websocket.accept", "websocket.send"} and time.time() >= expiry:
                     await send({"type": "websocket.close", "code": 1008, "reason": "Session expired"})
                     raise WebSocketDisconnect(1008)
                 await send(message)
 
             try:
+                from app.core.identity_context import set_current_identity, reset_current_identity
+                identity_token = set_current_identity(websocket.state.token_claims, websocket.state.authenticated_token)
                 await self.app(scope, guarded_receive, guarded_send)
             finally:
+                if 'identity_token' in locals():
+                    reset_current_identity(identity_token)
                 reset_current_tenant_id(context_token)
             return
         if scope["type"] != "http":
@@ -394,8 +416,12 @@ class BearerAuthMiddleware:
             await send(message)
 
         try:
+            from app.core.identity_context import set_current_identity, reset_current_identity
+            identity_token = set_current_identity(request.state.token_claims, authenticated_token)
             await self.app(scope, receive, send_wrapper)
         finally:
+            if 'identity_token' in locals():
+                reset_current_identity(identity_token)
             reset_current_tenant_id(token)
 
     def _is_public_path(self, path: str) -> bool:

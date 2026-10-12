@@ -264,9 +264,15 @@ class Settings(BaseSettings):
     MAX_PAGE_SIZE: int = 1000
 
     # API Authentication
-    # SC-AUTH-002: In Produktion MUSS API_DEV_TOKEN=None sein (Startup-Guard in main.py).
-    # In Entwicklung: API_DEV_TOKEN=dev-token in .env setzen.
+    # Legacy configuration for isolated compatibility tests; provider auth never accepts it.
     API_DEV_TOKEN: Optional[str] = None
+    IDENTITY_SESSION_IDLE_SECONDS: int = Field(default=900, gt=0)
+    IDENTITY_SESSION_MAX_SECONDS: int = Field(default=28800, gt=0)
+    IDENTITY_REVOCATION_POLL_SECONDS: int = Field(default=5, gt=0)
+    IDENTITY_MAX_PARALLEL_JOBS: int = Field(default=3, gt=0)
+    IDENTITY_MAX_JOB_SECONDS: int = Field(default=300, gt=0)
+    IDENTITY_MAX_JOB_CALLS: int = Field(default=100, gt=0)
+    IDENTITY_MAX_JOB_TOKEN_UNITS: int = Field(default=100000, gt=0)
     CHANNEL_SLACK_SIGNING_SECRET: Optional[str] = None
     CHANNEL_SLACK_BOT_TOKEN: Optional[str] = None
     CHANNEL_TEAMS_WEBHOOK_SECRET: Optional[str] = None

@@ -185,15 +185,17 @@ def extract_scopes(claims: Dict[str, Any]) -> List[str]:
     Returns:
         Liste von Scope-Strings
     """
-    # Azure AD: "scp" claim (space-separated)
+    explicit = claims.get("erp_scopes", [])
+    explicit = [v for v in explicit if isinstance(v, str)] if isinstance(explicit, list) else []
+    # Administrator-managed ERP permissions are separate from requested OAuth scopes.
     scp = claims.get("scp", "")
     if isinstance(scp, str) and scp:
-        return scp.split()
+        return list(dict.fromkeys(scp.split() + explicit))
 
     # Generic: "scope" claim (space-separated)
     scope = claims.get("scope", "")
     if isinstance(scope, str) and scope:
-        return scope.split()
+        return list(dict.fromkeys(scope.split() + explicit))
 
-    return []
+    return explicit
 

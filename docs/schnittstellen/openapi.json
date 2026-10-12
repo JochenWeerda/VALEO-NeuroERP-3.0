@@ -137913,6 +137913,21 @@
         "title": "RevokeResultOut",
         "type": "object"
       },
+      "RevokeSubject": {
+        "properties": {
+          "subject": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Subject",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject"
+        ],
+        "title": "RevokeSubject",
+        "type": "object"
+      },
       "ReworkDetailOut": {
         "description": "Slice mit unvollstaendigem Harness oder ohne Tests.",
         "properties": {
@@ -146391,6 +146406,34 @@
         "description": "Response schema for service anfragen endpoints.",
         "properties": {},
         "title": "ServiceAnfragenOut",
+        "type": "object"
+      },
+      "SessionOut": {
+        "properties": {
+          "absolute_seconds": {
+            "title": "Absolute Seconds",
+            "type": "integer"
+          },
+          "idle_seconds": {
+            "title": "Idle Seconds",
+            "type": "integer"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject",
+          "tenant_id",
+          "idle_seconds",
+          "absolute_seconds"
+        ],
+        "title": "SessionOut",
         "type": "object"
       },
       "SessionRequest": {
@@ -313991,6 +314034,90 @@
         "tags": [
           "hrm-lifecycle",
           "hrm-lifecycle"
+        ]
+      }
+    },
+    "/api/v1/identity/session": {
+      "get": {
+        "operationId": "current_session_api_v1_identity_session_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Aktuelle verifizierte Sitzung",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/identity/session/logout": {
+      "post": {
+        "operationId": "logout_api_v1_identity_session_logout_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Aktuelle Sitzung serverseitig widerrufen",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/identity/subjects/revoke": {
+      "post": {
+        "operationId": "revoke_subject_api_v1_identity_subjects_revoke_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeSubject"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vorhandene Sitzungen eines Mandantenbenutzers widerrufen",
+        "tags": [
+          "identity"
         ]
       }
     },

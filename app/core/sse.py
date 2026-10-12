@@ -81,14 +81,24 @@ async def sse_stream(request: Request, channel: str):
             yield f"data: {json.dumps({'type': 'connected', 'channel': channel})}\n\n"
             
             while time.time() < expiry:
+                from app.core.identity_session import validate
+                try:
+                    await asyncio.to_thread(validate, request.state.token_claims, request.state.authenticated_token, touch=False)
+                except HTTPException:
+                    break
                 # Check if client disconnected
                 if await request.is_disconnected():
                     break
                 
                 try:
                     # Wait for message with timeout
-                    data = await asyncio.wait_for(queue.get(), timeout=min(30.0, max(0.001, expiry - time.time())))
+                    from app.core.config import settings
+                    data = await asyncio.wait_for(queue.get(), timeout=min(settings.IDENTITY_REVOCATION_POLL_SECONDS, max(0.001, expiry - time.time())))
                     if time.time() < expiry:
+                        try:
+                            await asyncio.to_thread(validate, request.state.token_claims, request.state.authenticated_token, touch=False)
+                        except HTTPException:
+                            break
                         yield f"data: {json.dumps(data)}\n\n"
                 except asyncio.TimeoutError:
                     # Send keepalive

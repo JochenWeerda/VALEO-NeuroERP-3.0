@@ -14,6 +14,7 @@ import jwt
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import InvalidTokenError
+from starlette.concurrency import run_in_threadpool
 
 from .config import settings
 
@@ -51,7 +52,7 @@ async def require_bearer_token(
             token = query_token
             if any(value.strip() != token for value in request.query_params.getlist("token")):
                 raise HTTPException(401, "Ambiguous bearer credentials")
-            verified_identity(request, token)
+            await run_in_threadpool(verified_identity, request, token)
             return token
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -63,7 +64,7 @@ async def require_bearer_token(
     if query_tokens and (request.scope["type"] == "websocket" or request.url.path == "/api/events" or request.url.path.startswith("/api/stream/")):
         if any(value.strip() != token for value in query_tokens):
             raise HTTPException(401, "Ambiguous bearer credentials")
-    verified_identity(request, token)
+    await run_in_threadpool(verified_identity, request, token)
     return token
 
 
@@ -79,6 +80,8 @@ def verified_identity(connection, token: str) -> dict:
         except jwt.PyJWTError as exc:
             raise HTTPException(401, "Invalid bearer token") from exc
     tenant = checked_tenant(claims)
+    from app.core.identity_session import validate
+    validate(claims, token, touch=not getattr(connection.state, "tenant_verified", False))
     bind_headers(connection.scope, tenant)
     from app.core.tenant_binding import TENANT_FIELDS, TENANT_LIST_FIELDS
     for name in TENANT_FIELDS | TENANT_LIST_FIELDS:
