@@ -3586,8 +3586,8 @@ const appRoute0500 = createRoute({
 const appRoute0501 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "finance/kontenplan",
-  component: () => renderPage("@/pages/finance/kontenplan"),
-  staticData: {"breadcrumb":"Kontenplan","module":"@/pages/finance/kontenplan","legacyPath":"/finance/kontenplan"},
+  component: () => renderPage("@/pages/finance/chart-of-accounts"),
+  staticData: {"breadcrumb":"Kontenplan","module":"@/pages/finance/chart-of-accounts","legacyPath":"/finance/kontenplan"},
 })
 
 const appRoute0502 = createRoute({
@@ -10163,9 +10163,9 @@ export const generatedRouteInventory = [
     "source": "auto"
   },
   {
-    "module": "@/pages/finance/kontenplan",
+    "module": "@/pages/finance/chart-of-accounts",
     "path": "finance/kontenplan",
-    "source": "auto"
+    "source": "alias"
   },
   {
     "module": "@/pages/finance/kreditor-native",

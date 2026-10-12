@@ -74,10 +74,6 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "kasse"
   },
   {
-    "module": "@/pages/finance/kontenplan",
-    "path": "kontenplan"
-  },
-  {
     "module": "@/pages/finance/kreditoren-stamm",
     "path": "kreditoren-stamm"
   },

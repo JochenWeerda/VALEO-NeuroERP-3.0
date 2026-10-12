@@ -2516,9 +2516,9 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/finance/kontenplan",
+      "module": "@/pages/finance/chart-of-accounts",
       "path": "finance/kontenplan",
-      "source": "auto"
+      "source": "alias"
     },
     {
       "module": "@/pages/finance/kreditor-native",

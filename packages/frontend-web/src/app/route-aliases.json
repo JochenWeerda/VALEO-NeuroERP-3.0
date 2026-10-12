@@ -1249,7 +1249,7 @@
       "path": "finance/kasse"
     },
     {
-      "module": "@/pages/finance/kontenplan",
+      "module": "@/pages/finance/chart-of-accounts",
       "path": "finance/kontenplan"
     },
     {
