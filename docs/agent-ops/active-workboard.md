@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MANDANT-TOKEN-BINDUNG-20261012 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-12. **Von:** Auftraggeber („Anmeldedienst den Mandanten im Token
+mitgeben lassen“), Hinweis Codex (KONTENPLAN-VERIFIED-SHARED-POLICY-20261012, erste Haelfte).
+**Befund:** Der Kopf `X-Tenant-ID` wird nur auf Form geprueft, nicht gegen das Token; 326 Dateien beziehen den
+Mandanten so. **Ziel:** (1) Keycloak gibt das Benutzerattribut `tenant_id` als Claim ins Token (Mapper in den
+Realm-Dateien). (2) Eine Stelle bindet: `require_bearer_token` lehnt 403 ab, wenn der Mandant der Anfrage nicht
+der des Tokens ist. Tokens ohne Claim laufen weiter, bis `OIDC_TENANT_CLAIM_REQUIRED=true` gesetzt wird
+(Umstellung ohne Aussperren). Dev-Token ausgenommen. (3) Die Oberflaeche nimmt den Mandanten aus dem Token.
+**Dateibesitz:** `app/core/security.py` (nur die Bindung), `app/core/config.py` (ein Schalter),
+`config/keycloak/realm-export.json`, `config/keycloak/realm-staging.json` (nur Mapper), `lib/api-client.ts`,
+neue `lib/tenant-from-token.ts`, neue Tests,
+QA-Doku. **Nicht angefasst:** `app/auth/tenant.py` und die Wege, die `get_verified_tenant_id` schon nutzen (Codex).
+
 ## KONTENPLAN-PRAXIS-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. **Von:** Auftraggeber („gaengige Praxis uebernehmen“,
