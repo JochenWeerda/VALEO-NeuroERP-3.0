@@ -11,6 +11,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WHATSAPP-EMERGENCY-CONTRACT-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** User-Fachregel fuer seltene dringende Last-minute-Auftraege: Kammerumverteilung, akzeptierte Ersatzsorte als Teilmenge, offene Restmengen und Lernen ohne Verfaelschung normaler Kundenmuster verbindlich dokumentieren.
+**Dateibesitz:** docs/workflows/whatsapp-order-learning.md nur Ausnahme-/Feedback-/Integrationsvertrag; eigenes Workboard/Handoff. Kein Fachwrite, keine Tourumbuchung, keine neue Transport-/Rationslogik.
+**Abnahme:** Ursprung und Wunsch unveraendert, beide Kunden und Restverpflichtungen sichtbar, keine Doppelallokation, Ersatzartikel fachlich/operativ freigegeben, naechster Werktag nur bei belegter Verfuegbarkeit, menschliche Dispositionsfreigabe, Ausnahme nicht als Mengen-/Sortenpraeferenz lernen. Vorhandene Rationsassistenz nicht als Transport-/Eignungsfreigabe ausweisen.
+**Risiken:** Kammerallokation und atomare Mehrkundenumbuchung im Bestelleingang nicht nachgewiesen; Code-Slice bleibt separat offen. **Harness:** Ist-Abgleich vorhandener Tour-/Verkaufs-/Assistenzpfade, Doku-Governance und Referenzpruefung; keine DB/Container/Reset, keine Browsernachricht.
+
 ## ABSCHLUSS-ROLLEN-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Zweiter Schnitt nach HAUPTBUCH-ROLLEN-20261011.
