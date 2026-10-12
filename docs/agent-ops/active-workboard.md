@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## TESTGRENZE-FINANZ-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Folge aus FINANZ-REST-ROLLEN-20261012 und `840b78e30`.
+**Befund:** Elf Testdateien rund um die Finanz- und Bankwege waren rot: Ihre Mini-Anwendungen setzten weder
+einen geprueften Mandanten noch (an den jetzt geschuetzten Bankwegen) einen Nutzer.
+**Lieferung:** `tests/testgrenze.py` (`ersetze_mandant`, `ersetze_nutzer` — ausdrueckliche Testgrenze, nur im
+Pruefstand) und ihr Einsatz in `test_mahnwesen_rollen_vertrag`, `test_offene_posten_rollen_vertrag`,
+`test_kontenplan_mandant_vertrag`, `test_bank_import_account_replay`, `test_bank_payment_matching_integrity`,
+`test_bank_statement_import_integrity`, `test_payment_csv_import_integrity`, `test_bank_directbook_retirement`;
+damit auch `test_bank_camt_parser_integrity`, `test_bank_mt940_parser_integrity`, `test_bank_statement_date`
+(sie benutzen die Fixture der Replay-Datei). Alle elf gruen: 484 bestanden, 3 uebersprungen. Kein Produktcode.
+**An Codex:** Keine dieser Dateien lag in eurem Arbeitsbaum-WIP. Offen bleiben die Tests an der Hauptanwendung
+ohne Authorization-Kopf (`test_document_control*`, `test_finance_p0_endpoints`, `test_finance_read_models_api`,
+`test_gap_fixes_batch1`, `test_mask_entity_backends`, `test_mask_frontend_bridges`,
+`test_process_kernel_wave7_read_models`, `test_small_endpoints_wave54`, `test_masken_command_idempotenz_vertrag`)
+— sie haengen an eurem Auth-Double in `tests/conftest.py` (nicht committet): Es ersetzt `require_bearer_token`,
+aber nicht `app.auth.deps.get_current_user`; an Wegen mit Rolle endet das mit „Not authenticated“.
+
 ## MASKEN-ROLLENHINWEIS-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. **Von:** Auftraggeber (delegierter offener Punkt „Masken melden

@@ -107,3 +107,11 @@ für die Sichtprüfung liegt noch nicht vor.
   entschieden; die Datei ist als Ganzes ein Umgehungsweg.
 - **`crm_account_hierarchy.py`** (Kundenhierarchie setzen) und **`iban_lookup.py`** prüfen keine Rolle.
 - **Abrechnungs- und Positions-Lesemodell** (oben, ausgenommen).
+
+## Nachtrag 2026-10-12: Testgrenze der Mini-Anwendungen (`TESTGRENZE-FINANZ-20261012`)
+
+Die sieben Bank-Testdateien und drei eigene Verträge haben jetzt eine ausdrückliche Testgrenze
+(`tests/testgrenze.py`: Mandant aus dem Kopf der Testanfrage oder fest, Nutzer mit Finanzleitung).
+Elf Dateien, vorher rot, jetzt 484 bestanden und 3 übersprungen. Von den oben genannten 67 Fällen
+bleiben die an der Hauptanwendung ohne `Authorization`-Kopf; sie hängen an der noch nicht
+committeten Korrektur der `tests/conftest.py`.

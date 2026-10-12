@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.endpoints import bank_statement_import
 from app.core.database import get_db
+from testgrenze import ersetze_mandant, ersetze_nutzer
 
 
 class ImportSession(Session):
@@ -66,6 +67,8 @@ def import_case():
     app = FastAPI()
     app.include_router(bank_statement_import.router)
     app.dependency_overrides[get_db] = lambda: db
+    ersetze_mandant(app)
+    ersetze_nutzer(app, "FINANCE_ADMIN")
     with TestClient(app, headers={"X-Tenant-ID": tenant}) as client:
         yield db, client, tenant
     db.rollback()
