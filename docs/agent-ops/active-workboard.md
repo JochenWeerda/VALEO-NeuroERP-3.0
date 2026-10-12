@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## ENDPOINT-SPACING-RATCHET-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** ueberzaehlige Leerzeilen in compat.py und mask_frontend_bridges.py normalisieren, nachdem Rollenimporte die exakte Dateigroessenratsche um je eine Zeile verletzten. **Dateibesitz:** beide Dateien ausschliesslich je eine ueberzaehlige Leerzeile; eigene QA/Workboard. **Abnahme:** Python-AST vor/nach identisch, Godfile-Gate mit unveraenderter Baseline gruen, keine Fach-/API-/Rollen-/Importaenderung. Struktureller Sammeldateiabbau und Gesamt-CI bleiben offen. Keine DB/Container/Reset.
+
 ## JOURNAL-BLOCK-SUMMARY-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** unpaginierte Materialisierung bei der Kontosperrenpruefung durch eine einzige vollstaendige SQL-Aggregatantwort ersetzen. **Dateibesitz:** journal_entries.py nur Sperrkontenabfrage und Meldungsformatierung; eigener fokussierter Test, QA/Workboard. Keine Buchungs-/Rollen-/Mandantenlogik oder fremde Kontenplanaenderung. **Abnahme:** alle gesperrten Kontonummern geordnet, keine Abschneidung, keine Sperre fuer offene Konten; Pagination-Ratsche unveraendert, vorhandener Pruefstand ohne neue DB/Container/Reset.
