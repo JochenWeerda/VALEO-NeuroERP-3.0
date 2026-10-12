@@ -8,6 +8,7 @@ den Feldschluesseln, die die Maske bereits verwendet.
 
 from __future__ import annotations
 
+from app.auth.finance_roles import beleg_read, beleg_write, finance_admin, finance_read, finance_write
 import json
 import uuid
 from datetime import date, datetime, timezone
@@ -420,7 +421,7 @@ def _rechnung_out(row: dict[str, Any], positionen: list[dict[str, Any]] | None =
     }
 
 
-@router.get("/einkauf/rechnungen", response_model=list[BridgeOut], summary="Eingangsrechnungen auflisten")
+@router.get("/einkauf/rechnungen", response_model=list[BridgeOut], summary="Eingangsrechnungen auflisten", dependencies=[Depends(beleg_read)])
 def list_einkauf_rechnungen(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -434,7 +435,7 @@ def list_einkauf_rechnungen(
     return [_rechnung_out(dict(r)) for r in rows]
 
 
-@router.post("/einkauf/rechnungen", response_model=BridgeOut, status_code=201, summary="Eingangsrechnung anlegen")
+@router.post("/einkauf/rechnungen", response_model=BridgeOut, status_code=201, summary="Eingangsrechnung anlegen", dependencies=[Depends(beleg_write)])
 def create_einkauf_rechnung(
     body: dict[str, Any] = Body(default={}),
     tenant_id: str = Depends(get_tenant_id),
@@ -492,7 +493,7 @@ def create_einkauf_rechnung(
     return _rechnung_out({"id": rechnung_id, **body, "rechnungs_nummer": body.get("rechnung_nr")}, body.get("positionen") or [])
 
 
-@router.get("/einkauf/rechnungen/{rechnung_id}", response_model=BridgeOut, summary="Eingangsrechnung abrufen")
+@router.get("/einkauf/rechnungen/{rechnung_id}", response_model=BridgeOut, summary="Eingangsrechnung abrufen", dependencies=[Depends(beleg_read)])
 def get_einkauf_rechnung(
     rechnung_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -513,7 +514,7 @@ def get_einkauf_rechnung(
     return _rechnung_out(dict(rows[0]), [dict(p) for p in positionen])
 
 
-@router.patch("/einkauf/rechnungen/{rechnung_id}", response_model=BridgeOut, summary="Eingangsrechnung aktualisieren")
+@router.patch("/einkauf/rechnungen/{rechnung_id}", response_model=BridgeOut, summary="Eingangsrechnung aktualisieren", dependencies=[Depends(beleg_write)])
 def patch_einkauf_rechnung(
     rechnung_id: str,
     body: dict[str, Any] = Body(default={}),
@@ -548,7 +549,7 @@ def patch_einkauf_rechnung(
     return {**existing, **body, "id": rechnung_id, "beleg_nr": existing.get("beleg_nr") or rechnung_id}
 
 
-@router.delete("/einkauf/rechnungen/{rechnung_id}", status_code=204, response_class=Response, summary="Eingangsrechnung löschen")
+@router.delete("/einkauf/rechnungen/{rechnung_id}", status_code=204, response_class=Response, summary="Eingangsrechnung löschen", dependencies=[Depends(finance_admin)])
 def delete_einkauf_rechnung(
     rechnung_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -569,7 +570,7 @@ def delete_einkauf_rechnung(
 # ---------------------------------------------------------------------------
 
 
-@router.post("/finance/direct-debits/{run_id}/approve", response_model=BridgeOut, summary="Lastschriftlauf freigeben")
+@router.post("/finance/direct-debits/{run_id}/approve", response_model=BridgeOut, summary="Lastschriftlauf freigeben", dependencies=[Depends(finance_admin)])
 def approve_direct_debit(
     run_id: str,
     body: DirectDebitActionIn,
@@ -595,7 +596,7 @@ def approve_direct_debit(
     }
 
 
-@router.post("/finance/direct-debits/{run_id}/execute", response_model=BridgeOut, summary="Lastschriftlauf ausführen")
+@router.post("/finance/direct-debits/{run_id}/execute", response_model=BridgeOut, summary="Lastschriftlauf ausführen", dependencies=[Depends(finance_admin)])
 def execute_direct_debit(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -627,7 +628,7 @@ def execute_direct_debit(
     }
 
 
-@router.get("/finance/export/datev", response_model=BridgeOut, summary="DATEV-Export")
+@router.get("/finance/export/datev", response_model=BridgeOut, summary="DATEV-Export", dependencies=[Depends(finance_read)])
 def export_datev(
     typ: str = Query("alle"),
     datum_von: Optional[str] = Query(None),
@@ -668,7 +669,7 @@ def _anlage_from_row(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-@router.get("/finance/fixed-assets", response_model=list[BridgeOut], summary="Anlagen auflisten")
+@router.get("/finance/fixed-assets", response_model=list[BridgeOut], summary="Anlagen auflisten", dependencies=[Depends(finance_read)])
 def list_fixed_assets(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -681,7 +682,7 @@ def list_fixed_assets(
     return [_anlage_from_row(dict(r)) for r in rows]
 
 
-@router.post("/finance/fixed-assets", response_model=BridgeOut, status_code=201, summary="Anlage anlegen")
+@router.post("/finance/fixed-assets", response_model=BridgeOut, status_code=201, summary="Anlage anlegen", dependencies=[Depends(finance_write)])
 def create_fixed_asset(
     body: AnlageIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -722,7 +723,7 @@ def create_fixed_asset(
     })
 
 
-@router.get("/finance/fixed-assets/detail", response_model=list[BridgeOut], summary="Anlagen-Detailauflistung")
+@router.get("/finance/fixed-assets/detail", response_model=list[BridgeOut], summary="Anlagen-Detailauflistung", dependencies=[Depends(finance_read)])
 def list_fixed_assets_detail(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -730,7 +731,7 @@ def list_fixed_assets_detail(
     return list_fixed_assets(tenant_id, db)
 
 
-@router.get("/finance/fixed-assets/{asset_id}/depreciation", response_model=BridgeOut, summary="AfA einer Anlage")
+@router.get("/finance/fixed-assets/{asset_id}/depreciation", response_model=BridgeOut, summary="AfA einer Anlage", dependencies=[Depends(finance_read)])
 def get_fixed_asset_depreciation(
     asset_id: str,
     year: int = Query(date.today().year),
@@ -756,7 +757,7 @@ def get_fixed_asset_depreciation(
     }
 
 
-@router.get("/finance/stats", response_model=BridgeOut, summary="Fibu-Kennzahlen")
+@router.get("/finance/stats", response_model=BridgeOut, summary="Fibu-Kennzahlen", dependencies=[Depends(finance_read)])
 def finance_stats(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -782,7 +783,7 @@ def finance_stats(
     }
 
 
-@router.get("/finance/followup/fibu/cockpit", response_model=BridgeOut, summary="Fibu-Cockpit")
+@router.get("/finance/followup/fibu/cockpit", response_model=BridgeOut, summary="Fibu-Cockpit", dependencies=[Depends(finance_read)])
 def fibu_cockpit(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -836,7 +837,7 @@ def fibu_cockpit(
     }
 
 
-@router.post("/finance/periods/{period_id}/close", response_model=BridgeOut, summary="Buchungsperiode abschliessen")
+@router.post("/finance/periods/{period_id}/close", response_model=BridgeOut, summary="Buchungsperiode abschliessen", dependencies=[Depends(finance_admin)])
 def close_finance_period(
     period_id: str,
     tenant_id: str = Depends(get_tenant_id),

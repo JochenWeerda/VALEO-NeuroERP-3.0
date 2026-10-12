@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import pytest
 from app.api.v1.endpoints import finance_read_models as read_models
+from app.auth.deps import get_current_user
 
 APInvoiceBucket = read_models.APInvoiceBucket
 APInvoiceCockpitReadModel = read_models.APInvoiceCockpitReadModel
@@ -594,6 +595,7 @@ def test_ap_invoice_cockpit_endpoint_returns_200():
     # Override get_tenant_id dependency to bypass header requirement
     from app.core.tenant import get_tenant_id
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-wave2"
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_ADMIN"]}
 
     with TestClient(app) as client:
         response = client.get("/finance/read-models/ap-invoice-cockpit")
@@ -620,6 +622,7 @@ def test_process_observation_endpoint_returns_sla_profiles():
     from app.core.database import get_db
 
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-wave2"
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_ADMIN"]}
     app.dependency_overrides[get_db] = lambda: None
 
     with TestClient(app) as client:
@@ -648,6 +651,7 @@ def test_rebuild_endpoint_returns_projection_summary():
     from app.core.database import get_db
 
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-wave2"
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_ADMIN"]}
     app.dependency_overrides[get_db] = lambda: None
 
     with TestClient(app) as client:
@@ -674,6 +678,7 @@ def test_status_endpoint_returns_projection_metrics():
     from app.core.database import get_db
 
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-wave2"
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_ADMIN"]}
     app.dependency_overrides[get_db] = lambda: None
 
     with TestClient(app) as client:

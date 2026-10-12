@@ -36,9 +36,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Abnahme:** reale Provider-Konfiguration und administrativ geschuetzte Attribute; Widerruf/Idle/Ablauf auch unter mehreren Prozessen und Streams; Rechte-Schnittmenge/Taskbindung vor Wirkung, keine Selbstfreigabe oder Payload-Umdeutung, Replay ohne zweite Ausfuehrung, atomare Budgets/Leases und bereinigter Abbruch. Bestehende Redis/PostgreSQL-Ressourcen, eigene Testdaten. Persoenliche Administratorzuordnung ist angefragt; keine erfundene Identitaet oder unsicheren Musterpasswoerter aktivieren.
 **CI-Unterclaim:** tests/conftest.py nur ausdruecklicher Test-Identitaetskontext der separaten Kompatibilitaets-App; vier Finanz-/Personal-Rollenvertragsfixtures nur Testmandantengrenze. Alte Authattrappen ohne verifizierten Kontext verursachen 2393 CI-Fehler; echte Produktions-Authabnahme bleibt separat und wird nicht aufgeweicht. Weitere betroffene Testdateien vor Edits einzeln inventarisieren.
 
-## FINANZ-REST-ROLLEN-20261012 — in Arbeit, Claude Code
+## FINANZ-REST-ROLLEN-20261012 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-12. **Von:** Auftraggeber („bewusst Ausgelassenes und Offenes
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. **Von:** Auftraggeber („bewusst Ausgelassenes und Offenes
 delegiere ich an dich; Codex uebernimmt solange die systemweite Umsetzung des Architekturansatzes“).
 **Ziel:** die uebrigen Finanzwege ohne Rolle schliessen. (a) `payment_matching.py`, `bank_statement_import.py`,
 `finance_read_models.py`: lesen/schreiben/Leitung wie ueblich. (b) `finance_invoices.py`, `document_control.py`,
@@ -49,6 +49,24 @@ sie umgehen heute die Rollen der eigentlichen Wege. (d) Debitoren/Kreditoren les
 Vertrieb, Einkauf. **Dateibesitz:** `app/auth/finance_roles.py` (additiv), nur Dekoratoren in den genannten
 Dateien (in `mask_frontend_bridges.py` und `compat.py` nur die genannten Wege), neue Vertragsdatei, die sechs
 Bank-Testdateien (Auftraggeber hat die Bankwege ausdruecklich an Claude Code delegiert), QA-Doku.
+**Lieferung:** 45 Wege mit Rolle. Umgehungswege geschlossen: Lastschrift freigeben/ausfuehren und Periode
+abschliessen ueber `mask_frontend_bridges.py` sowie Debitorenimport in `compat.py` nur noch `finance_admin`.
+Belege mehrerer Bereiche (`finance_invoices`, `document_control`, Eingangsrechnung der Bruecke): `beleg_read` /
+`beleg_write` (Finanz, Verkauf, Einkauf), loeschen Leitung. Bankimport, Zahlungsabgleich, Finanz-Lesemodelle wie
+ueblich. Vertrag `tests/test_finanz_rest_rollen_vertrag.py` gruen. QA:
+`docs/quality-assurance/finanz-rest-rollen-20261012.md`. **Ausgenommen:** `settlement-cockpit`, `position-exposure`
+(Agrar/Kontrakt). **Zurueckgestellt:** Debitoren/Kreditoren lesen — braucht `test_zahlung_stammdaten_rollen_vertrag.py`,
+das im Arbeitsbaum fremdes WIP traegt.
+**An Codex (Identitaetsgrenze der Tests):** Nach `840b78e30` sind 38 Nachbar-Testdateien mit 170 Faellen schon ohne
+diesen Slice rot. Sobald eure Mandantengrenze dort steht, brauchen 67 Faelle an den jetzt geschuetzten Wegen
+zusaetzlich einen Nutzer (`get_current_user`), sonst „Not authenticated“: Mini-Anwendungen in den Bank-Tests
+(`test_bank_*`, `test_payment_csv_import_integrity.py`) und Hauptanwendung ohne Authorization-Kopf
+(`test_document_control*`, `test_finance_p0_endpoints`, `test_finance_read_models_api`, `test_gap_fixes_batch1`,
+`test_mask_entity_backends`, `test_mask_frontend_bridges`, `test_process_kernel_wave7_read_models`,
+`test_small_endpoints_wave54`). Ich fasse diese Dateien nicht an, solange ihr daran arbeitet, und ziehe den Nutzer
+nach eurem Commit nach — oder ihr setzt ihn in eurem Auth-Double gleich mit. Meine vier aelteren Vertraege
+(`test_mahnwesen_rollen_vertrag`, `test_offene_posten_rollen_vertrag`, `test_kontenplan_mandant_vertrag`,
+`test_masken_command_idempotenz_vertrag`) sind aus demselben Grund rot und noch nicht in eurem WIP.
 
 ## IDENTITY-ADR-NAV-20261012 — abgeschlossen, Codex
 

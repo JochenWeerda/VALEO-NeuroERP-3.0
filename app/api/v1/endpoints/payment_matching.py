@@ -3,6 +3,7 @@ Payment Matching API
 FIBU-AR-03: Zahlungseingänge & Matching
 """
 
+from app.auth.finance_roles import finance_read, finance_write
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Request
 from typing import List, Optional
 from datetime import datetime, date
@@ -88,7 +89,7 @@ def _build_payment_import_datensatz(
     }
 
 
-@router.post("/import/csv", response_model=List[PaymentEntry], summary="Payments csv importieren")
+@router.post("/import/csv", response_model=List[PaymentEntry], summary="Payments csv importieren", dependencies=[Depends(finance_write)])
 async def import_payments_csv(
     file: UploadFile = File(...),
     tenant_id: str = Depends(get_tenant_id),
@@ -247,7 +248,7 @@ async def import_payments_csv(
         raise HTTPException(status_code=500, detail="Failed to import CSV")
 
 
-@router.get("/unmatched", response_model=List[PaymentEntry], summary="Unmatched payments abrufen")
+@router.get("/unmatched", response_model=List[PaymentEntry], summary="Unmatched payments abrufen", dependencies=[Depends(finance_read)])
 async def get_unmatched_payments(
     tenant_id: str = Depends(get_tenant_id),
     bank_account: Optional[str] = Query(None),
@@ -303,7 +304,7 @@ async def get_unmatched_payments(
         )
 
 
-@router.get("/open-items/{customer_id}", response_model=List[OpenItemMatch], summary="Open items for matching abrufen")
+@router.get("/open-items/{customer_id}", response_model=List[OpenItemMatch], summary="Open items for matching abrufen", dependencies=[Depends(finance_read)])
 async def get_open_items_for_matching(
     customer_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -494,7 +495,7 @@ def match_statement_lines(db: Session, tenant_id: str,
     return results
 
 
-@router.post("/match/{payment_id}", response_model=MatchResult, summary="Payment match")
+@router.post("/match/{payment_id}", response_model=MatchResult, summary="Payment match", dependencies=[Depends(finance_write)])
 async def match_payment(
     payment_id: str,
     op_id: Optional[str] = Query(None),
@@ -528,7 +529,7 @@ async def match_payment(
         raise HTTPException(status_code=500, detail="Failed to match payment") from exc
 
 
-@router.post("/auto-match", response_model=List[MatchResult], summary="Match payments auto")
+@router.post("/auto-match", response_model=List[MatchResult], summary="Match payments auto", dependencies=[Depends(finance_write)])
 async def auto_match_payments(
     tenant_id: str = Depends(get_tenant_id),
     bank_account: Optional[str] = Query(None),
@@ -549,7 +550,7 @@ async def auto_match_payments(
         raise HTTPException(status_code=500, detail="Failed to auto-match payments") from exc
 
 
-@router.get("/match-suggestions/{payment_id}", response_model=List[OpenItemMatch], summary="Match suggestions abrufen")
+@router.get("/match-suggestions/{payment_id}", response_model=List[OpenItemMatch], summary="Match suggestions abrufen", dependencies=[Depends(finance_read)])
 async def get_match_suggestions(
     payment_id: str,
     tenant_id: str = Depends(get_tenant_id),
