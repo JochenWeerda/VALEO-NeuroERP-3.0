@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## IDENTITY-REMAINING-WIRING-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** uebrigen roten Wiring-Fall der Belegprojektion reparieren, ohne Produktionsauth zu mocken. **Dateibesitz:** tests/test_document_control_projection.py nur lokaler Import der ausdruecklichen Kompatibilitaets-App im registrierten Projektionsweg; QA/Workboard. Claudes committete Modulimportkorrektur bleibt erhalten. **Abnahme:** echter HTTP-Wiring-Vertrag mit FakeProjection besteht, gepruefter Rollenvertrag bleibt separat; keine DB/Container/Reset. **Risiko:** zwei Snapshot-Tests haben eine fehlende kanonische Migration; nicht durch Sicherheitslockerung verdecken.
+
 ## TESTGRENZE-FINANZ-HAUPTAPP-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Rest aus TESTGRENZE-FINANZ-20261012, frei seit `6178a79f1`.
