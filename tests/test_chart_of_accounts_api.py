@@ -17,6 +17,7 @@ from fastapi.testclient import TestClient
 
 from main import app
 from conftest import skip_if_db_unavailable
+from app.auth.deps import get_current_user
 from app.core.database import get_db
 
 client = TestClient(app, raise_server_exceptions=False)
@@ -227,6 +228,7 @@ def _coa_client(db: _FakeDb):
     _app = FastAPI()
     _app.include_router(coa_router.router)  # router prefix is already /chart-of-accounts
     _app.dependency_overrides[get_db] = lambda: db
+    _app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_ADMIN"]}
     return TestClient(_app, raise_server_exceptions=False)
 
 

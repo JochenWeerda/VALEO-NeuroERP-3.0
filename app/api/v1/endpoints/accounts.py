@@ -20,10 +20,12 @@ from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.accounts_schemas import AccountsOut
 
 
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
+
 router = APIRouter()
 
 
-@router.post("/", response_model=Account, status_code=201, summary="Account anlegen")
+@router.post("/", response_model=Account, status_code=201, summary="Account anlegen", dependencies=[Depends(finance_write)])
 async def create_account(
     account_data: AccountCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -42,7 +44,7 @@ async def create_account(
         raise HTTPException(status_code=500, detail=f"Failed to create account: {str(e)}")
 
 
-@router.get("/", response_model=PaginatedResponse[Account], summary="Accounts auflisten")
+@router.get("/", response_model=PaginatedResponse[Account], summary="Accounts auflisten", dependencies=[Depends(finance_read)])
 async def list_accounts(
     tenant_id: str = Depends(get_tenant_id),
     account_type: Optional[str] = Query(None, description="Filter by account type"),
@@ -85,7 +87,7 @@ async def list_accounts(
         raise HTTPException(status_code=500, detail=f"Failed to list accounts: {str(e)}")
 
 
-@router.get("/hierarchy", response_model=List[AccountHierarchy], summary="Accounts hierarchy abrufen")
+@router.get("/hierarchy", response_model=List[AccountHierarchy], summary="Accounts hierarchy abrufen", dependencies=[Depends(finance_read)])
 async def get_accounts_hierarchy(
     tenant_id: str = Depends(get_tenant_id),
     account_type: Optional[str] = Query(None, description="Filter by account type"),
@@ -172,7 +174,7 @@ async def get_accounts_hierarchy(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve account hierarchy: {str(e)}")
 
 
-@router.get("/{account_id}", response_model=Account, summary="Account abrufen")
+@router.get("/{account_id}", response_model=Account, summary="Account abrufen", dependencies=[Depends(finance_read)])
 async def get_account(
     account_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -195,7 +197,7 @@ async def get_account(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve account: {str(e)}")
 
 
-@router.get("/number/{account_number}", response_model=Account, summary="Account by number abrufen")
+@router.get("/number/{account_number}", response_model=Account, summary="Account by number abrufen", dependencies=[Depends(finance_read)])
 async def get_account_by_number(
     account_number: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -218,7 +220,7 @@ async def get_account_by_number(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve account: {str(e)}")
 
 
-@router.put("/{account_id}", response_model=Account, summary="Account aktualisieren")
+@router.put("/{account_id}", response_model=Account, summary="Account aktualisieren", dependencies=[Depends(finance_write)])
 async def update_account(
     account_id: str,
     account_data: AccountUpdate,
@@ -242,7 +244,7 @@ async def update_account(
         raise HTTPException(status_code=500, detail=f"Failed to update account: {str(e)}")
 
 
-@router.delete("/{account_id}", status_code=204, response_class=Response, response_model=None, summary="Account löschen")
+@router.delete("/{account_id}", status_code=204, response_class=Response, response_model=None, summary="Account löschen", dependencies=[Depends(finance_admin)])
 async def delete_account(
     account_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -264,7 +266,7 @@ async def delete_account(
         raise HTTPException(status_code=500, detail=f"Failed to delete account: {str(e)}")
 
 
-@router.get("/{account_id}/balance", response_model=AccountsOut, summary="Account balance abrufen")
+@router.get("/{account_id}/balance", response_model=AccountsOut, summary="Account balance abrufen", dependencies=[Depends(finance_read)])
 async def get_account_balance(
     account_id: str,
     tenant_id: str = Depends(get_tenant_id),

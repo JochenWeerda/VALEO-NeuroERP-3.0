@@ -25,6 +25,8 @@ from app.core.uuid7 import uuid7
 from app.api.v1.schemas.base import BaseSchema, IDResponse
 
 
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
+
 router = APIRouter(prefix="/fibu/periodische-buchungen",
                    tags=["FIBU - Periodische Buchungen"])
 
@@ -84,7 +86,7 @@ class FaelligBelegOut(BaseModel):
 
 # ── CRUD ──────────────────────────────────────────────────────────────────────
 
-@router.get("", response_model=list[PeriodischeBuchungOut], summary="Periodische buchungen auflisten")
+@router.get("", response_model=list[PeriodischeBuchungOut], summary="Periodische buchungen auflisten", dependencies=[Depends(finance_read)])
 def list_periodische_buchungen(
     gesperrt: Optional[bool] = Query(None),
     turnus: Optional[str] = Query(None),
@@ -107,7 +109,7 @@ def list_periodische_buchungen(
     return [PeriodischeBuchungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.get("/faellig", response_model=list[FaelligBelegOut], summary="Faellige buchungen abrufen")
+@router.get("/faellig", response_model=list[FaelligBelegOut], summary="Faellige buchungen abrufen", dependencies=[Depends(finance_read)])
 def get_faellige_buchungen(
     stichtag: date = Query(default=None),
     db=Depends(get_db),
@@ -127,7 +129,7 @@ def get_faellige_buchungen(
     return [FaelligBelegOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=PeriodischeBuchungOut, status_code=201, summary="Periodische buchung anlegen")
+@router.post("", response_model=PeriodischeBuchungOut, status_code=201, summary="Periodische buchung anlegen", dependencies=[Depends(finance_write)])
 def create_periodische_buchung(
     payload: PeriodischeBuchungCreate,
     db=Depends(get_db),
@@ -154,8 +156,7 @@ def create_periodische_buchung(
 
 
 @router.patch("/{buchung_id}/sperren", summary="Buchung sperren",
-    response_model=IDResponse
-)
+    response_model=IDResponse, dependencies=[Depends(finance_write)])
 def sperren_buchung(
     buchung_id: str,
     gesperrt: bool = Query(...),
@@ -173,8 +174,7 @@ def sperren_buchung(
 
 
 @router.delete("/{buchung_id}", summary="Periodische buchung löschen",
-    response_model=None
-)
+    response_model=None, dependencies=[Depends(finance_admin)])
 def delete_periodische_buchung(
     buchung_id: str,
     db=Depends(get_db),

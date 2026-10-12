@@ -90,7 +90,7 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "kasse"
   },
   {
-    "module": "@/pages/finance/kontenplan",
+    "module": "@/pages/finance/chart-of-accounts",
     "path": "kontenplan"
   },
   {

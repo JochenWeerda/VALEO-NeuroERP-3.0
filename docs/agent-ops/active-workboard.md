@@ -11,6 +11,67 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HANDBUCH-ABGELOESTE-MASKEN-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Offener Punkt aus den Abloese-Slices vom 11./12.10.
+**Befund:** Das Benutzerhandbuch nennt fuer `/finance/dunning`, `/finance/mahnwesen`, `/mahnwesen/mahnlauf` und
+`/finance/kontenplan` noch die geloeschten Masken und zeigt deren Bildschirmfotos. **Ziel:** Handbuch aus dem
+Routen-Inventar neu erzeugen (`scripts/generate_benutzerhandbuch_full.py`, reine Generatorausgabe — zieht
+auch fremde neue Routen nach); Mahnlauf und Kontenplan frisch aufnehmen.
+**Dateibesitz:** `docs/benutzerhandbuch/*.md` (Generatorausgabe),
+`screenshot-manifest.json` nur die Eintraege dieser Wege, sechs Bilder unter `img/`, QA-Doku.
+**Lieferung (enger als geclaimt):** nur `finanzbuchhaltung.md` neu erzeugt (vier Wege zeigen die richtige Maske,
+`/finance/rechnungstapel` kommt dazu), sechs Bilder frisch aufgenommen, vier `module`-Felder im Manifest.
+**Nicht** das ganze Handbuch: Der Generator haette in 13 weiteren Kapiteln handgeschriebenen Inhalt geloescht
+(Feldbuch-Kapitel in `wissensbasis-kundenportal.md`, Eintrag „Moderne Bedienung“ in `index.md`) — diese Dateien
+sind unveraendert. QA: `docs/quality-assurance/handbuch-abgeloeste-masken-20261012.md`. **Offen:**
+`generate_benutzerhandbuch_full.py` ueberschreibt Handgeschriebenes und darf so nicht blind laufen; 13 Kapitel
+sind hinter dem Routen-Inventar; die Texte bleiben Schablone.
+
+## KONTENPLAN-HUELLE-ABLOESEN-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Befund aus KONTENPLAN-MANDANT-20261012.
+**Befund (Sichtpruefung):** `/finance/kontenplan` (`pages/finance/kontenplan.tsx`) ist eine Huelle: Speichern
+zeigt „Gespeichert — Die Aenderungen wurden erfolgreich gespeichert“ und sendet nichts; die Felder (Periode,
+Steuerschluessel, Anfangsbestand) hat der Weg nicht. Die Pflegemaske `/finance/chart-of-accounts` legt an,
+aendert und deaktiviert wirklich. **Ziel:** Huelle loeschen, `/finance/kontenplan` zeigt die Pflegemaske.
+**Dateibesitz:** `pages/finance/kontenplan.tsx` (loeschen), Eintrag in `route-aliases.json`,
+Routenerzeugnisse, Routenvertrag als Test, QA-Doku. **Nicht angefasst:** die Pflegemaske selbst (fremdes WIP).
+**Lieferung:** `pages/finance/kontenplan.tsx` entfernt; `/finance/kontenplan` zeigt `@/pages/finance/chart-of-accounts`
+(939 Routen wie zuvor, Routing-Pruefung gruen). Routenvertrag `__tests__/pages/finance/kontenplan-route.test.ts`
+gruen, `tsc --noEmit` gruen. Sichtpruefung nachher: Pflegemaske mit 29 Konten, „Neues Konto“ und „Bearbeiten“ da.
+QA: `docs/quality-assurance/kontenplan-huelle-abloesen-20261012.md`. **Offen:** Benutzerhandbuch beschreibt noch
+die Huelle; `financeService.createAccount`/`updateAccount`/`getAccount` lesen `response.data.data`, der Weg
+antwortet mit dem Konto direkt (Rueckgabe `undefined`, derzeit ungenutzt); Brotkrume „Chart Of Accounts“.
+**An Codex:** `config/architecture-index.yaml` driftet auf `main` (ADR-081 fehlt) — nicht von mir angefasst.
+
+## WHATSAPP-INBOX-ACCESS-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Abgegrenzter erster Code-Schnitt von WHATSAPP-INBOX-TRUST-20261011: verifizierte OIDC-Mandanten-/Scope-Pruefung fuer alle fuenf Inbox-Wege, mandantengebundene Kunden-/Artikelreferenzen und keine willkuerlichen Mehrfachtreffer. Kontakt-Bediener aus Token. Kein neuer Auth-/Mandantenvertrag.
+**Dateibesitz:** app/api/v1/endpoints/whatsapp_intake.py, app/services/whatsapp_intake_service.py; neue tests/test_whatsapp_inbox_access.py und tests/test_whatsapp_inbox_references.py; eigene QA-/Workboard-Hunks, CRM API, beide WhatsApp-Runbooks nur Lieferstand. Generierte eigene API-/Code-Metadaten isoliert, keine fremden Katalog-/Frontendhunks.
+**Abnahme:** echte HTTP-Guards vor Fachzugriff, zwei echte Probe-Mandanten und fremde Inbox/Kunden-/Artikelreferenzen unveraendert; keine Defaultmandanten, kein Adminbypass, ambiguose Matches bleiben offen. Bestehende manuelle Freitextpositionen und Kontakt-/Beleg-Vorbelegung bleiben nutzbar.
+**Risiko:** public.kunden-Bridge weiterhin via business_partner_id notwendig wegen bestehender Fremdschluessel; keine konkurrierende Historie/ungepruefte Nummernzuordnung. Atomarer Eingangs-Replay und unveraenderliches Korrektur-Audit bleiben im Elternslice offen, ebenso Lernen und Browsertransport.
+**Harness:** Fachvertrag gepruefte Referenzen; bestehende zentrale Guards; eigener Probe-Datensatz/Savepoints, kein Reset/Container; DB-/HTTP-Negativproben; QA/Domaenen-/Workboardlieferstand; externe CI nach Push getrennt.
+
+## KONTENPLAN-MANDANT-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Befund aus HAUPTBUCH-ROLLEN-20261011.
+**Befund:** `chart_of_accounts.py` nimmt den Mandanten aus dem Query-Parameter `tenant_id` (Liste, Pruefung,
+DATEV-Ausgabe) oder aus dem Rumpf (anlegen); lesen, aendern und loeschen eines einzelnen Kontos filtern gar
+nicht nach Mandant. Wer lesen darf, bekommt mit `?tenant_id=` Kontenplan und DATEV-Buchungen eines anderen
+Mandanten. **Ziel:** Der Mandant kommt an allen sieben Wegen aus dem Mandantenkontext; fremde Konten
+antworten 404; der gemeinsame Kontenrahmen (`system`) bleibt sichtbar. **Dateibesitz:** nur
+`app/api/v1/endpoints/chart_of_accounts.py`, neue Vertragsdatei `tests/test_kontenplan_mandant_vertrag.py`,
+Anpassung betroffener Tests, driftende Generatorartefakte (OpenAPI nur die eigenen Pfade),
+QA-Doku. **Nicht angefasst:** `accounts.py`, das Schema `AccountCreate` (geteilt).
+**Lieferung:** alle sieben Wege nehmen den Mandanten aus `get_tenant_id`; fremde Konten 404; `system` bleibt
+sichtbar und pflegbar. Mitbehoben: Anlegen scheiterte immer mit 500 (`currency`/`allow_manual_entries` nicht in
+der Tabelle), Aendern wirkte nur mit Namen im Rumpf. Vertrag gegen `valeo_probe`: 10 gruen, gegen den Stand davor
+9 rot; 1141 Nachbartests gruen. `openapi.json`: nur die vier eigenen Pfade ersetzt, drei fremde weichen weiter ab
+(WhatsApp, Codex). QA: `docs/quality-assurance/kontenplan-mandant-20261012.md`. **Offen:** gemeinsamer Rahmen bei
+mehreren Mandanten; Maske `pages/finance/kontenplan.tsx` sendet deutsche Feldnamen (Speichern ungeprueft);
+dieselbe Mandantenpruefung fuer die uebrigen Finanzdateien.
+
 ## WHATSAPP-LEARNING-CONTRACT-20261011 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** User-Vorgabe fuer heuristisch lernende Ergaenzung verkuerzter Kundenbestellungen, Unsicherheit/Human-in-the-loop und tatsaechliche Lieferplanung in einen pruefbaren Integrationsvertrag ueberfuehren. Dokumentationsslice; keine automatische Auftragsanlage oder Versandfreigabe.
@@ -37,9 +98,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Owner:** unbesetzt. **Ziel:** aktuelle Verfuegbarkeit und feste woechentliche Stueckguttour, Alternativen und persistente Kundeninformation bei fehlendem Folgetag. **Abnahme:** Kapazitaet/Annahmeschluss/Feiertag/Wochenwechsel/ausdruecklicher Wunsch; kein Termin ohne Quelle, keine doppelte Meldung. **Risiko:** Browser-Versand bleibt eigener offener Claim; eigene Dateigrenzen/Claim. Vertrag: ../workflows/whatsapp-order-learning.md.
 
-## HAUPTBUCH-ROLLEN-20261011 — in Arbeit, Claude Code
+## HAUPTBUCH-ROLLEN-20261011 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-11. Befund aus OFFENE-POSTEN-ROLLEN-20261011.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-11. Befund aus OFFENE-POSTEN-ROLLEN-20261011.
 **Befund:** Vermessung aller Finanzwege: 413 Wege, 56 pruefen eine Rolle, 357 nicht (175 davon schreibend).
 **Ziel (erster Schnitt, Hauptbuch):** Rolle vor dem ersten Datenbankzugriff an den 54 Wegen fuer Buchungen,
 Konten, Kontenplan, Perioden, Geschaeftsjahre, Buchungsvorlagen, periodische Buchungen und Buchungsimport.
@@ -50,6 +111,13 @@ buchen, stornieren `finance_write`; loeschen, Periode sperren/oeffnen, Geschaeft
 `bulk_journal_import.py`, `booking_templates.py`, `periodische_buchungen.py`, `fibu_geschaeftsjahre.py`,
 neue Vertragsdatei `tests/test_hauptbuch_rollen_vertrag.py`, Anpassung betroffener Tests, QA-Doku.
 **Nicht angefasst:** Codex' Bankdateien (`bank_accounts.py`, `bank_reconciliation.py`, `finance_actions.py`).
+**Lieferung:** 54 Wege in neun Dateien mit `finance_read` / `kontenplan_read` / `finance_write` / `finance_admin`
+am Dekorator; Vertrag mit 766 Faellen ohne Datenbank (dreizehn Rollen x 54 Wege, ohne Anmeldung, Vollstaendigkeit
+je Datei); 1616 Nachbartests gruen; OpenAPI der 42 Pfade unveraendert. QA:
+`docs/quality-assurance/hauptbuch-rollen-20261011.md`. **Betrieb:** Buchhaltung `FINANCE_BEARBEITEN`, Leitung
+`FINANCE_ADMIN`, Pruefer `FINANCE_LESEN`. **Offen:** 303 Finanzwege ohne Rolle (145 schreibend), groesste Bloecke
+`finance_actions`, `fibu_connectors`, `kostenrechnung`, `closing_checklists`, Stammdaten; `chart_of_accounts.py`
+nimmt den Mandanten aus dem Query-Parameter statt aus dem Mandantenkontext (eigener Slice).
 
 ## OFFENE-POSTEN-ROLLEN-20261011 — abgeschlossen, Claude Code
 

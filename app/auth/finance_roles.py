@@ -3,6 +3,11 @@
 Seit 07.10.2026 pruefen Zahlungslaeufe und Eingangsrechnungen ihre Rolle vor dem
 ersten Datenbankzugriff (vorher keiner). Freigeben, Ausfuehren und Buchen bewegt
 Geld oder schreibt das Hauptbuch: nur ``FINANCE_ADMIN``/``admin``.
+
+Seit 11.10.2026 gilt am Hauptbuch selbst: Die Buchhaltung (``finance_write``) erfasst, bucht und
+storniert ihre Buchungen — das ist ihre taegliche Arbeit, ein Storno bleibt als Gegenbuchung sichtbar.
+Der Leitung vorbehalten ist, was sich nicht durch eine Gegenbuchung zuruecknehmen laesst: loeschen,
+Perioden sperren und oeffnen, ein Geschaeftsjahr anlegen, der Massenimport.
 """
 
 from __future__ import annotations
@@ -20,6 +25,14 @@ open_items_read = require_roles(
     "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN",
     "SALES_LESEN", "SALES_BEARBEITEN", "SALES_ADMIN",
     "CRM_LESEN", "CRM_BEARBEITEN", "CRM_ADMIN",
+    "EINKAUF_LESEN", "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN",
+    "admin", "manager",
+)
+
+# Den Kontenplan liest auch der Einkauf: Der Rechnungseingang kontiert damit. Salden und Buchungen
+# bleiben ``finance_read``.
+kontenplan_read = require_roles(
+    "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN",
     "EINKAUF_LESEN", "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN",
     "admin", "manager",
 )

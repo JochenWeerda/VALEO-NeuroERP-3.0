@@ -13900,7 +13900,7 @@
     {
       "path": "finance/dunning",
       "slug": "finance__dunning",
-      "module": "@/pages/finance/mahnwesen",
+      "module": "@/pages/finance/mahnlauf",
       "status": "ok",
       "approval": "approved",
       "qc": {
@@ -14164,7 +14164,7 @@
     {
       "path": "finance/kontenplan",
       "slug": "finance__kontenplan",
-      "module": "@/pages/finance/kontenplan",
+      "module": "@/pages/finance/chart-of-accounts",
       "status": "ok",
       "approval": "approved",
       "qc": {
@@ -14362,7 +14362,7 @@
     {
       "path": "finance/mahnwesen",
       "slug": "finance__mahnwesen",
-      "module": "@/pages/finance/mahnwesen",
+      "module": "@/pages/finance/mahnlauf",
       "status": "ok",
       "approval": "approved",
       "qc": {
@@ -18819,7 +18819,7 @@
     {
       "path": "mahnwesen/mahnlauf",
       "slug": "mahnwesen__mahnlauf",
-      "module": "@/pages/mahnwesen/mahnlauf",
+      "module": "@/pages/finance/mahnlauf",
       "status": "ok",
       "approval": "approved",
       "qc": {

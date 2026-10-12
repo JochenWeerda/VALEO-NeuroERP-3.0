@@ -5,6 +5,7 @@ FIBU-GL-07: Automatische Buchungsschemata
 
 from typing import List, Optional, Dict, Any
 from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
@@ -99,7 +100,7 @@ class ApplyTemplateResponse(BaseModel):
     applied_at: datetime
 
 
-@router.get("", response_model=List[BookingTemplateResponse], summary="Booking templates auflisten")
+@router.get("", response_model=List[BookingTemplateResponse], summary="Booking templates auflisten", dependencies=[Depends(finance_read)])
 async def list_booking_templates(
     category: Optional[str] = Query(None, description="Filter by category"),
     active_only: bool = Query(True, description="Show only active templates"),
@@ -165,7 +166,7 @@ async def list_booking_templates(
         return []
 
 
-@router.get("/{template_id}", response_model=BookingTemplateResponse, summary="Booking template abrufen")
+@router.get("/{template_id}", response_model=BookingTemplateResponse, summary="Booking template abrufen", dependencies=[Depends(finance_read)])
 async def get_booking_template(
     template_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -218,7 +219,7 @@ async def get_booking_template(
         raise HTTPException(status_code=500, detail=f"Failed to get booking template: {str(e)}")
 
 
-@router.post("", response_model=BookingTemplateResponse, status_code=201, summary="Booking template anlegen")
+@router.post("", response_model=BookingTemplateResponse, status_code=201, summary="Booking template anlegen", dependencies=[Depends(finance_write)])
 async def create_booking_template(
     template: BookingTemplateCreate,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -297,7 +298,7 @@ async def create_booking_template(
         raise HTTPException(status_code=500, detail=f"Failed to create booking template: {str(e)}")
 
 
-@router.post("/{template_id}/apply", response_model=ApplyTemplateResponse, summary="Booking template apply")
+@router.post("/{template_id}/apply", response_model=ApplyTemplateResponse, summary="Booking template apply", dependencies=[Depends(finance_write)])
 async def apply_booking_template(
     template_id: str,
     request: ApplyTemplateRequest,
@@ -466,7 +467,7 @@ async def apply_booking_template(
         raise HTTPException(status_code=500, detail=f"Failed to apply booking template: {str(e)}")
 
 
-@router.put("/{template_id}", response_model=BookingTemplateResponse, summary="Booking template aktualisieren")
+@router.put("/{template_id}", response_model=BookingTemplateResponse, summary="Booking template aktualisieren", dependencies=[Depends(finance_write)])
 async def update_booking_template(
     template_id: str,
     template: BookingTemplateUpdate,
@@ -568,7 +569,7 @@ async def update_booking_template(
         raise HTTPException(status_code=500, detail=f"Failed to update booking template: {str(e)}")
 
 
-@router.delete("/{template_id}", status_code=204, response_class=Response, response_model=None, summary="Booking template löschen")
+@router.delete("/{template_id}", status_code=204, response_class=Response, response_model=None, summary="Booking template löschen", dependencies=[Depends(finance_admin)])
 async def delete_booking_template(
     template_id: str,
     tenant_id: str = Query("system", description="Tenant ID"),

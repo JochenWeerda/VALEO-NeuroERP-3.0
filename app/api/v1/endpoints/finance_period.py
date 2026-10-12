@@ -17,10 +17,12 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.finance_period_service import FinancePeriodService, PeriodError
 
+from app.auth.finance_roles import finance_admin, finance_read
+
 router = APIRouter(prefix="/finance", tags=["finance", "fibu", "abschluss"])
 
 
-@router.get("/perioden", response_model=FinancePeriodListOut, summary="Buchungsperioden mit Abschlussreife")
+@router.get("/perioden", response_model=FinancePeriodListOut, summary="Buchungsperioden mit Abschlussreife", dependencies=[Depends(finance_read)])
 def list_periods(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -28,7 +30,7 @@ def list_periods(
     return {"items": FinancePeriodService(db, tenant_id).list_periods()}
 
 
-@router.get("/perioden/{period}/readiness", response_model=FinancePeriodReadinessOut, summary="Abschlussreife einer Periode")
+@router.get("/perioden/{period}/readiness", response_model=FinancePeriodReadinessOut, summary="Abschlussreife einer Periode", dependencies=[Depends(finance_read)])
 def readiness(
     period: str,
     db: Session = Depends(get_db),
@@ -42,7 +44,7 @@ class CloseIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/perioden/{period}/close", response_model=FinancePeriodActionOut, summary="Periode abschließen (sperren)")
+@router.post("/perioden/{period}/close", response_model=FinancePeriodActionOut, summary="Periode abschließen (sperren)", dependencies=[Depends(finance_admin)])
 def close_period(
     period: str,
     body: CloseIn,
@@ -60,7 +62,7 @@ class ReopenIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/perioden/{period}/reopen", response_model=FinancePeriodActionOut, summary="Periode wieder öffnen")
+@router.post("/perioden/{period}/reopen", response_model=FinancePeriodActionOut, summary="Periode wieder öffnen", dependencies=[Depends(finance_admin)])
 def reopen_period(
     period: str,
     body: ReopenIn,

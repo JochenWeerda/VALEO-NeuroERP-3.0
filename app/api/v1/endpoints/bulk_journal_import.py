@@ -5,6 +5,7 @@ FIBU-GL-04: Sammel-/Massenbuchungen Import
 
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Request
+from app.auth.finance_roles import finance_admin, finance_read
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal, InvalidOperation
@@ -167,7 +168,7 @@ def validate_and_parse_row(
     return entry, None
 
 
-@router.post("/csv", response_model=ImportResult, summary="Journal entries csv importieren")
+@router.post("/csv", response_model=ImportResult, summary="Journal entries csv importieren", dependencies=[Depends(finance_admin)])
 async def import_journal_entries_csv(
     file: UploadFile = File(...),
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
@@ -373,8 +374,7 @@ async def import_journal_entries_csv(
 
 
 @router.get("/template", summary="Import template abrufen",
-    response_model=BulkJournalImportOut
-)
+    response_model=BulkJournalImportOut, dependencies=[Depends(finance_read)])
 async def get_import_template():
     """
     Get CSV template for journal entry import.
