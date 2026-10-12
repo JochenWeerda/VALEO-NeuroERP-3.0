@@ -17,6 +17,8 @@ export interface Account {
   balance: number
   allow_manual_entries: boolean
   is_active: boolean
+  /** Fuer neue Buchungen gesperrt; das Konto bleibt im Kontenplan sichtbar. */
+  posting_blocked: boolean
   parent_account_id?: string | null
   created_at: string
   updated_at: string
@@ -43,6 +45,7 @@ export interface AccountUpdate {
   category?: string
   currency?: string
   allow_manual_entries?: boolean
+  posting_blocked?: boolean
 }
 
 export interface JournalEntry {

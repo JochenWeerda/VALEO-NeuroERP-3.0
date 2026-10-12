@@ -92,11 +92,21 @@ steht.
 
 Ein bebuchtes Konto legen Sie still, statt es zu deaktivieren:
 
-- Benennen Sie das Konto so um, dass niemand es mehr wählt, zum Beispiel
-  `_NICHT_VERWENDEN_<alter Name>`.
+1. Im Kontenplan in der Zeile des Kontos **Bearbeiten** wählen.
+2. **Konto für Buchungen sperren** ankreuzen.
+3. **Speichern** – die Maske weist auf die Wirkung hin – und mit **Ja, ändern** bestätigen.
 
-Eine Sperre, die das Konto für neue Buchungen schließt und es im Kontenplan sichtbar lässt, gibt es
-in dieser Version noch nicht.
+Ein gesperrtes Konto bleibt im Kontenplan sichtbar und trägt in der Spalte *Buchbar* den Vermerk
+**Gesperrt**. Seine Buchungen bleiben unverändert. Neue Buchungen nimmt es nicht an – weder von Hand
+noch automatisch, etwa aus Eingangsrechnung, Wareneingang oder Lagergeld. Wer es versucht, liest:
+„Konto … ist für Buchungen gesperrt."
+
+!!! warning "Vor dem Sperren prüfen"
+    Ist das Konto in einer automatischen Buchung hinterlegt, scheitert diese nach dem Sperren.
+    Stellen Sie dort zuerst ein anderes Konto ein.
+
+Die Sperre heben Sie auf demselben Weg wieder auf. Zusätzlich können Sie das Konto so umbenennen,
+dass niemand es mehr wählt, zum Beispiel `_NICHT_VERWENDEN_<alter Name>`.
 
 ### Änderungen mit größerer Wirkung
 
