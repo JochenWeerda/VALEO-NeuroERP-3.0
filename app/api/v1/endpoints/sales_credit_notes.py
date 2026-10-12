@@ -7,8 +7,8 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from decimal import Decimal
-from typing import List, Optional
+from decimal import ROUND_HALF_UP, Decimal
+from typing import List, Literal, Optional
 
 from fastapi import Response, APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
@@ -49,7 +49,10 @@ class CreditNoteLineInput(BaseModel):
     description: str
     quantity: Decimal = Field(ge=Decimal("0"))
     unit_price: Decimal = Field(ge=Decimal("0"))
-    tax_rate: Decimal = Field(default=Decimal("19"))
+    # Steuerschluessel der Position (``vat_codes.id``). Ohne ihn wird die Gutschrift nicht gebucht.
+    tax_code: Optional[str] = None
+    # Kein Vorgabewert: Ein Satz, den niemand angegeben hat, ist keine Angabe.
+    tax_rate: Optional[Decimal] = None
 
 
 class CreditNoteLineOut(CreditNoteLineInput):
@@ -63,7 +66,13 @@ class CreditNoteBase(BaseModel):
     customer_name: Optional[str] = None
     invoice_reference: Optional[str] = None
     reason: str = Field(..., min_length=1, max_length=500)
+    # Brutto. Netto und Umsatzsteuer stehen daneben, sobald sie sich aus den Positionen ergeben.
     total_amount: Decimal = Decimal("0")
+    net_amount: Optional[Decimal] = None
+    tax_amount: Optional[Decimal] = None
+    # Kaufmaennische Rechnungskorrektur (Erloesminderung) oder Gutschrift nach Paragraf 14 UStG
+    # (Abrechnung durch den Leistungsempfaenger — keine Erloesminderung).
+    correction_type: Literal["rechnungskorrektur", "gutschrift_14_ustg"] = "rechnungskorrektur"
     currency: str = "EUR"
     status: str = "draft"
     notes: Optional[str] = None
@@ -81,6 +90,89 @@ class CreditNoteOut(CreditNoteBase):
     updated_at: Optional[datetime] = None
 
 
+# ---------------------------------------------------------------------------
+# Umsatzsteuer der Gutschrift
+# ---------------------------------------------------------------------------
+
+CENT = Decimal("0.01")
+FORDERUNGSKONTO = "1400"
+
+
+class Steuerklaerung(Exception):
+    """Die Umsatzsteuer der Gutschrift laesst sich nicht eindeutig bestimmen — ein Mensch muss pruefen."""
+
+
+class Steuergruppe(BaseModel):
+    """Alle Positionen eines Steuerschluessels: Netto, Steuer und die Konten dazu."""
+
+    tax_code: str
+    satz: Decimal
+    netto: Decimal
+    steuer: Decimal
+    erloeskonto: str
+    steuerkonto: Optional[str] = None
+
+
+def steuergruppen(db: Session, tenant_id: str, zeilen: list[tuple]) -> list[Steuergruppe]:
+    """Netto und Umsatzsteuer je Steuerschluessel aus den Positionen ``(nr, tax_code, tax_rate, netto)``.
+
+    Nichts wird angenommen: Fehlt der Schluessel, ist er unbekannt, widerspricht ihm der Satz der
+    Position oder fehlt ein Konto, gibt es eine ``Steuerklaerung`` statt einer Buchung. Die Steuer wird
+    je Steuersatz auf die Summe der Nettobetraege gerechnet, nicht je Position.
+    """
+    if not zeilen:
+        raise Steuerklaerung("Die Gutschrift hat keine Positionen; die Umsatzsteuer lässt sich nicht bestimmen.")
+    ohne = [str(nr) for nr, code, _satz, _netto in zeilen if not (code or "").strip()]
+    if ohne:
+        raise Steuerklaerung(f"Position {', '.join(ohne)} hat keinen Steuerschlüssel.")
+
+    codes = sorted({str(code).strip() for _nr, code, _satz, _netto in zeilen})
+    bekannt = {
+        str(r[0]): r
+        for r in db.execute(
+            text(
+                "SELECT id, rate, skr03_account, skr03_revenue_account, is_reverse_charge FROM vat_codes "
+                "WHERE id = ANY(:codes) AND (tenant_id = :tid OR tenant_id IS NULL) AND is_active "
+                "AND valid_from <= NOW() AND (valid_to IS NULL OR valid_to > NOW())"
+            ),
+            {"codes": codes, "tid": tenant_id},
+        ).fetchall()
+    }
+    unbekannt = [c for c in codes if c not in bekannt]
+    if unbekannt:
+        raise Steuerklaerung(f"Steuerschlüssel {', '.join(unbekannt)} ist nicht bekannt oder nicht gültig.")
+
+    netto_je_code: dict[str, Decimal] = {c: Decimal("0") for c in codes}
+    for nr, code, satz, netto in zeilen:
+        code = str(code).strip()
+        satz_des_schluessels = Decimal(str(bekannt[code][1]))
+        if satz is not None and Decimal(str(satz)) != satz_des_schluessels:
+            raise Steuerklaerung(
+                f"Position {nr}: Steuersatz {Decimal(str(satz)).normalize():f} % widerspricht dem "
+                f"Steuerschlüssel {code} ({satz_des_schluessels.normalize():f} %)."
+            )
+        netto_je_code[code] += Decimal(str(netto or 0))
+
+    gruppen: list[Steuergruppe] = []
+    for code in codes:
+        _id, rate, steuerkonto, erloeskonto, reverse_charge = bekannt[code]
+        satz = Decimal(str(rate))
+        if reverse_charge:
+            raise Steuerklaerung(f"Steuerschlüssel {code} (Reverse Charge) wird nicht automatisch gebucht.")
+        if not (erloeskonto or "").strip():
+            raise Steuerklaerung(f"Für Steuerschlüssel {code} ist kein Erlöskonto hinterlegt.")
+        if satz > 0 and not (steuerkonto or "").strip():
+            raise Steuerklaerung(f"Für Steuerschlüssel {code} ist kein Umsatzsteuerkonto hinterlegt.")
+        netto = netto_je_code[code].quantize(CENT, rounding=ROUND_HALF_UP)
+        gruppen.append(Steuergruppe(
+            tax_code=code, satz=satz, netto=netto,
+            steuer=(netto * satz / Decimal("100")).quantize(CENT, rounding=ROUND_HALF_UP),
+            erloeskonto=str(erloeskonto).strip(),
+            steuerkonto=str(steuerkonto).strip() if satz > 0 else None,
+        ))
+    return gruppen
+
+
 @router.post("/credit-notes", response_model=CreditNoteOut, status_code=201, summary="Credit note anlegen")
 async def create_credit_note(
     payload: CreditNoteCreate,
@@ -93,25 +185,40 @@ async def create_credit_note(
     assert_customer_allowed_for_invoice(db, tid, payload.customer_id)
     cn_id = uuid7()
 
-    total = sum(
-        line.quantity * line.unit_price for line in payload.lines
-    ) if payload.lines else payload.total_amount
+    # Netto und Umsatzsteuer aus den Positionen. Ein Entwurf darf unvollstaendig sein — dann bleiben
+    # Netto und Steuer leer, und gebucht wird er so nicht. Ein Widerspruch wird gleich abgelehnt.
+    netto: Optional[Decimal] = None
+    steuer: Optional[Decimal] = None
+    total = payload.total_amount
+    if payload.lines:
+        zeilen = [(i, z.tax_code, z.tax_rate, z.quantity * z.unit_price) for i, z in enumerate(payload.lines, 1)]
+        netto = sum((z[3] for z in zeilen), Decimal("0")).quantize(CENT, rounding=ROUND_HALF_UP)
+        total = netto
+        try:
+            gruppen = steuergruppen(db, tid, zeilen)
+        except Steuerklaerung as klaerung:
+            if "widerspricht" in str(klaerung):
+                raise HTTPException(status_code=422, detail=str(klaerung)) from klaerung
+        else:
+            netto = sum((g.netto for g in gruppen), Decimal("0"))
+            steuer = sum((g.steuer for g in gruppen), Decimal("0"))
+            total = netto + steuer
 
     db.execute(
         text("""
             INSERT INTO domain_sales.sales_credit_notes
             (id, tenant_id, credit_note_number, customer_id, customer_name,
-             invoice_reference, reason, total_amount, currency, status, notes,
-             created_at, updated_at)
+             invoice_reference, reason, total_amount, net_amount, tax_amount, correction_type,
+             currency, status, notes, created_at, updated_at)
             VALUES (:id, :tid, :cn, :cid, :cname, :iref, :reason,
-                    :total, :cur, :status, :notes, NOW(), NOW())
+                    :total, :netto, :steuer, :art, :cur, :status, :notes, NOW(), NOW())
         """),
         {
             "id": cn_id, "tid": tid, "cn": payload.credit_note_number,
             "cid": payload.customer_id, "cname": payload.customer_name,
             "iref": payload.invoice_reference, "reason": payload.reason,
-            "total": total, "cur": payload.currency,
-            "status": payload.status, "notes": payload.notes,
+            "total": total, "netto": netto, "steuer": steuer, "art": payload.correction_type,
+            "cur": payload.currency, "status": payload.status, "notes": payload.notes,
         },
     )
 
@@ -121,15 +228,15 @@ async def create_credit_note(
             text("""
                 INSERT INTO domain_sales.sales_credit_note_lines
                 (id, credit_note_id, line_number, article_number, description,
-                 quantity, unit_price, tax_rate, line_total)
-                VALUES (:id, :cnid, :ln, :anr, :desc, :qty, :up, :tax,
+                 quantity, unit_price, tax_code, tax_rate, line_total)
+                VALUES (:id, :cnid, :ln, :anr, :desc, :qty, :up, :code, :tax,
                         :total)
             """),
             {
                 "id": line_id, "cnid": cn_id, "ln": i,
                 "anr": line.article_number, "desc": line.description,
                 "qty": line.quantity, "up": line.unit_price,
-                "tax": line.tax_rate,
+                "code": (line.tax_code or "").strip() or None, "tax": line.tax_rate,
                 "total": line.quantity * line.unit_price,
             },
         )
@@ -157,7 +264,8 @@ async def create_credit_note(
         credit_note_number=payload.credit_note_number,
         customer_id=payload.customer_id, customer_name=payload.customer_name,
         invoice_reference=payload.invoice_reference, reason=payload.reason,
-        total_amount=total, currency=payload.currency,
+        total_amount=total, net_amount=netto, tax_amount=steuer,
+        correction_type=payload.correction_type, currency=payload.currency,
         status=payload.status, notes=payload.notes, lines=payload.lines,
     )
 
@@ -183,7 +291,7 @@ async def list_credit_notes(
         text(f"""
             SELECT id, tenant_id, credit_note_number, customer_id, customer_name,
                    invoice_reference, reason, total_amount, currency, status, notes,
-                   created_at, updated_at
+                   created_at, updated_at, net_amount, tax_amount, correction_type
             FROM domain_sales.sales_credit_notes
             WHERE {' AND '.join(where)}
             ORDER BY created_at DESC
@@ -197,6 +305,7 @@ async def list_credit_notes(
             reason=r[6], total_amount=Decimal(str(r[7])),
             currency=r[8], status=r[9], notes=r[10],
             created_at=r[11], updated_at=r[12],
+            net_amount=r[13], tax_amount=r[14], correction_type=r[15],
         )
         for r in rows
     ]
@@ -230,16 +339,23 @@ async def post_credit_note(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Gutschrift buchen: Buchungskopf, zwei Zeilen und OP-Minderung in einer Transaktion.
+    """Gutschrift buchen: Erloes netto, Umsatzsteuer getrennt, Forderung brutto — in einer Transaktion.
+
+    Soll  Erloeskonto je Steuerschluessel   Netto
+    Soll  Umsatzsteuerkonto je Schluessel   Steuer
+    Haben Forderungen                       Brutto
+
+    Die Steuer kommt aus den Positionen und ihrem Steuerschluessel. Fehlt eine Angabe oder widersprechen
+    sich Angaben, wird nicht gebucht (409) — die Gutschrift bleibt Entwurf und geht zur Pruefung.
 
     Bis 12.10.2026 wurde der Kopf zuerst festgeschrieben; die Zeilen trugen Kontonummern statt
-    Konto-IDs, scheiterten am Fremdschluessel, und der Fehler wurde verschluckt: „gebucht“ mit einem
-    Buchungskopf ohne Zeilen. Jetzt gilt alles oder nichts.
+    Konto-IDs, scheiterten am Fremdschluessel, und der Fehler wurde verschluckt. Der Gesamtbetrag ging
+    ungeteilt gegen das Erloeskonto.
     """
     row = db.execute(
         text(
-            "SELECT id, tenant_id, credit_note_number, customer_id, total_amount, status, invoice_reference "
-            "FROM domain_sales.sales_credit_notes WHERE id = :id AND tenant_id = :tid"
+            "SELECT id, tenant_id, credit_note_number, customer_id, total_amount, status, invoice_reference, "
+            "correction_type FROM domain_sales.sales_credit_notes WHERE id = :id AND tenant_id = :tid"
         ),
         {"id": cn_id, "tid": tenant_id},
     ).fetchone()
@@ -250,25 +366,75 @@ async def post_credit_note(
 
     assert_customer_allowed_for_invoice(db, tenant_id, str(row[3]))
 
+    def zur_pruefung(grund: str) -> HTTPException:
+        return HTTPException(status_code=409, detail=f"Gutschrift nicht gebucht, bitte prüfen: {grund}")
+
+    if row[7] != "rechnungskorrektur":
+        raise zur_pruefung(
+            "Eine Gutschrift nach § 14 UStG ist eine Abrechnung durch den Leistungsempfänger und keine "
+            "Erlösminderung; sie wird nicht über diesen Weg gebucht."
+        )
+
+    zeilen = [
+        tuple(z) for z in db.execute(
+            text(
+                "SELECT line_number, tax_code, tax_rate, line_total FROM domain_sales.sales_credit_note_lines "
+                "WHERE credit_note_id = :id ORDER BY line_number"
+            ),
+            {"id": cn_id},
+        ).fetchall()
+    ]
+    try:
+        gruppen = steuergruppen(db, tenant_id, zeilen)
+    except Steuerklaerung as klaerung:
+        raise zur_pruefung(str(klaerung)) from klaerung
+
+    netto = sum((g.netto for g in gruppen), Decimal("0"))
+    steuer = sum((g.steuer for g in gruppen), Decimal("0"))
+    brutto = netto + steuer
+    beleg = Decimal(str(row[4] or 0)).quantize(CENT, rounding=ROUND_HALF_UP)
+    if beleg != brutto:
+        raise zur_pruefung(
+            f"Der Belegbetrag {beleg:.2f} weicht vom Brutto der Positionen {brutto:.2f} ab "
+            f"(netto {netto:.2f}, Umsatzsteuer {steuer:.2f})."
+        )
+    if brutto <= 0:
+        raise zur_pruefung("Der Betrag der Gutschrift ist null.")
+
     # Konten des Mandanten, sonst die des gemeinsamen Rahmens.
+    nummern = sorted(
+        {FORDERUNGSKONTO}
+        | {g.erloeskonto for g in gruppen}
+        | {g.steuerkonto for g in gruppen if g.steuerkonto and g.steuer > 0}
+    )
     konten: dict[str, str] = {}
     for nummer, konto_id, _eigen in db.execute(
         text(
             "SELECT account_number, id, (tenant_id = :tid) AS eigen FROM domain_erp.chart_of_accounts "
-            "WHERE account_number IN ('1400', '8400') AND tenant_id IN (:tid, 'system') AND is_active "
+            "WHERE account_number = ANY(:nummern) AND tenant_id IN (:tid, 'system') AND is_active "
             "ORDER BY eigen"
         ),
-        {"tid": tenant_id},
+        {"tid": tenant_id, "nummern": nummern},
     ).fetchall():
         konten[str(nummer)] = str(konto_id)
-    fehlend = [n for n in ("1400", "8400") if n not in konten]
+    fehlend = [n for n in nummern if n not in konten]
     if fehlend:
-        raise HTTPException(
-            status_code=409,
-            detail=f"Gutschrift nicht gebucht: Konto {', '.join(fehlend)} fehlt im Kontenplan.",
-        )
+        raise zur_pruefung(f"Konto {', '.join(fehlend)} fehlt im Kontenplan.")
 
-    total = Decimal(str(row[4]))
+    buchungszeilen: list[dict] = []
+    for g in gruppen:
+        if g.netto > 0:
+            buchungszeilen.append({
+                "konto": konten[g.erloeskonto], "soll": g.netto, "haben": Decimal("0"), "code": g.tax_code,
+                "text": f"Gutschrift Erlöskorrektur netto ({g.tax_code})"})
+        if g.steuerkonto and g.steuer > 0:
+            buchungszeilen.append({
+                "konto": konten[g.steuerkonto], "soll": g.steuer, "haben": Decimal("0"), "code": g.tax_code,
+                "text": f"Gutschrift Umsatzsteuerberichtigung ({g.tax_code})"})
+    buchungszeilen.append({
+        "konto": konten[FORDERUNGSKONTO], "soll": Decimal("0"), "haben": brutto, "code": None,
+        "text": "Gutschrift Forderungsminderung"})
+
     je_id = uuid7()
     try:
         db.execute(
@@ -282,31 +448,28 @@ async def post_credit_note(
             {
                 "id": je_id, "tid": row[1],
                 "en": f"GS-{row[2]}", "desc": f"Gutschrift {row[2]}",
-                "total": total, "ref": row[2],
+                "total": brutto, "ref": row[2],
             },
         )
-        db.execute(
-            text("""
-                INSERT INTO domain_erp.journal_entry_lines
-                    (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-                VALUES
-                    (:id1, :tid, :jeid, :forderung, 'Gutschrift Forderungsminderung', 0, :total, 1, NOW()),
-                    (:id2, :tid, :jeid, :erloes, 'Gutschrift Erlöskorrektur', :total, 0, 2, NOW())
-            """),
-            {
-                "id1": uuid7(), "id2": uuid7(), "tid": row[1], "jeid": je_id, "total": total,
-                "forderung": konten["1400"], "erloes": konten["8400"],
-            },
-        )
+        for nr, zeile in enumerate(buchungszeilen, 1):
+            db.execute(
+                text("""
+                    INSERT INTO domain_erp.journal_entry_lines
+                        (id, tenant_id, journal_entry_id, account_id, description, debit, credit,
+                         tax_code, line_number, created_at)
+                    VALUES (:id, :tid, :jeid, :konto, :text, :soll, :haben, :code, :nr, NOW())
+                """),
+                {"id": uuid7(), "tid": row[1], "jeid": je_id, "nr": nr, **zeile},
+            )
         db.execute(
             text(
-                "UPDATE domain_sales.sales_credit_notes SET status = 'posted', updated_at = NOW() "
-                "WHERE id = :id AND tenant_id = :tid"
+                "UPDATE domain_sales.sales_credit_notes SET status = 'posted', net_amount = :netto, "
+                "tax_amount = :steuer, updated_at = NOW() WHERE id = :id AND tenant_id = :tid"
             ),
-            {"id": cn_id, "tid": tenant_id},
+            {"id": cn_id, "tid": tenant_id, "netto": netto, "steuer": steuer},
         )
-        # Gemindert wird nur der offene Posten der Rechnung, auf die sich die Gutschrift bezieht.
-        # (Vorher: jeder offene Posten des Kunden, jeweils um den vollen Betrag.)
+        # Gemindert wird nur der offene Posten der Rechnung, auf die sich die Gutschrift bezieht —
+        # um den Bruttobetrag. (Vorher: jeder offene Posten des Kunden, jeweils um den vollen Betrag.)
         rechnung = (row[6] or "").strip()
         if rechnung:
             db.execute(
@@ -317,7 +480,7 @@ async def post_credit_note(
                     WHERE tenant_id = :tid AND konto_typ = 'debitoren' AND rechnungsnr = :rechnung
                       AND op_status NOT IN ('geschlossen', 'ausgeziffert')
                 """),
-                {"tid": row[1], "betrag": total, "rechnung": rechnung},
+                {"tid": row[1], "betrag": brutto, "rechnung": rechnung},
             )
         db.commit()
     except Exception:
@@ -325,8 +488,17 @@ async def post_credit_note(
         db.rollback()
         raise
 
-    log_fibu_audit(db, row[1], "post", "sales_credit_note", cn_id, {"total": float(total)}, request=request)
-    return StatusResponse(success=True, message=f"Gutschrift {row[2]} gebucht (Buchung GS-{row[2]}).")
+    log_fibu_audit(
+        db, row[1], "post", "sales_credit_note", cn_id,
+        {"total": float(brutto), "net": float(netto), "tax": float(steuer)}, request=request,
+    )
+    return StatusResponse(
+        success=True,
+        message=(
+            f"Gutschrift {row[2]} gebucht (Buchung GS-{row[2]}): netto {netto:.2f}, "
+            f"Umsatzsteuer {steuer:.2f}, brutto {brutto:.2f}."
+        ),
+    )
 
 
 # ---------------------------------------------------------------------------

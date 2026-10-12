@@ -44,6 +44,9 @@ class VatCode(Base):
     # German tax account (SKR03/SKR04)
     skr03_account = Column(String(10), nullable=True)
     skr04_account = Column(String(10), nullable=True)
+    # Erloeskonto, gegen das eine Gutschrift netto korrigiert wird. Leer = nicht eingeordnet:
+    # Dann wird mit diesem Schluessel nicht automatisch gebucht.
+    skr03_revenue_account = Column(String(10), nullable=True)
     
     # Validity
     valid_from = Column(DateTime, nullable=False)
@@ -107,11 +110,13 @@ DEFAULT_VAT_CODES = [
     # Domestic standard
     {"id": "DE_19", "name": "USt 19%", "name_long": "Umsatzsteuer 19% Regelsteuersatz", 
      "category": VatCodeCategory.DE_INLAND, "rate": 19.0, "skr03_account": "1776", "skr04_account": "1776",
+     "skr03_revenue_account": "8400",
      "legal_basis": "§ 12 Abs. 1 UStG", "is_standard": True, "is_active": True},
     
     # Domestic reduced
     {"id": "DE_7", "name": "USt 7%", "name_long": "Umsatzsteuer 7% ermäßigter Steuersatz",
      "category": VatCodeCategory.DE_INLAND, "rate": 7.0, "skr03_account": "1771", "skr04_account": "1771",
+     "skr03_revenue_account": "8300",
      "legal_basis": "§ 12 Abs. 2 UStG Anlage 2", "is_reduced": True, "is_active": True},
     
     # Agricultural §24 - Durchschnittssatz

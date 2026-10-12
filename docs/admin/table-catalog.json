@@ -19910,6 +19910,7 @@
             "app/api/v1/endpoints/financial_reports.py",
             "app/api/v1/endpoints/inventory_operations.py",
             "app/api/v1/endpoints/journal_entries.py",
+            "app/api/v1/endpoints/sales_credit_notes.py",
             "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py",
             "app/core/connectors/workflow.py",
             "app/domains/inventory/api/storage_fees.py",
@@ -45401,13 +45402,18 @@
             },
             {
               "name": "tax_rate",
-              "nullable": false,
+              "nullable": true,
               "type": "numeric"
             },
             {
               "name": "line_total",
               "nullable": false,
               "type": "numeric"
+            },
+            {
+              "name": "tax_code",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
@@ -45421,6 +45427,9 @@
           "placement": "prefix",
           "primary_key": [
             "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/sales_credit_notes.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/sales_credit_notes.py"
@@ -45492,6 +45501,21 @@
               "name": "updated_at",
               "nullable": false,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "net_amount",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "tax_amount",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "correction_type",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],

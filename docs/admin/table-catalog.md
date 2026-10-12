@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 670 Tabellen, 8839 Spalten.**
+**31 Schemas, 670 Tabellen, 8843 Spalten.**
 
 ## Schemas
 
@@ -51,7 +51,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_pricing` | `finance` | 5 | 48 |
 | `domain_procurement` | `procurement` | 5 | 50 |
 | `domain_reporting` | `finance` | 6 | 80 |
-| `domain_sales` | `crm` | 11 | 152 |
+| `domain_sales` | `crm` | 11 | 156 |
 | `domain_shared` | `platform` | 152 | 1814 |
 | `domain_workflow` | `platform` | 3 | 37 |
 
@@ -280,7 +280,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_erp.booking_templates` | `app/api/v1/endpoints/booking_templates.py` | `app/api/v1/endpoints/booking_templates.py` | — |
 | `domain_erp.business_partners` | `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_sql.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/stmd_duplikat.py`, `app/api/v1/endpoints/xrechnung.py` | — | — |
 | `domain_erp.cash_movements` | `app/api/v1/endpoints/admin_pos.py`, `app/services/finance_read_model_service.py` | — | — |
-| `domain_erp.chart_of_accounts` | `app/api/v1/endpoints/bank_accounts.py`, `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/booking_templates.py`, `app/api/v1/endpoints/bulk_journal_import.py`, `app/api/v1/endpoints/chart_of_accounts.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/financial_reports.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/journal_entries.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py`, `app/core/connectors/workflow.py`, `app/domains/inventory/api/storage_fees.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/journal.py`, `app/services/finance_closing_service.py`, `app/services/finance_transaction_service.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/domains/inventory/api/storage_fees.py` | — |
+| `domain_erp.chart_of_accounts` | `app/api/v1/endpoints/bank_accounts.py`, `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/booking_templates.py`, `app/api/v1/endpoints/bulk_journal_import.py`, `app/api/v1/endpoints/chart_of_accounts.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/financial_reports.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/journal_entries.py`, `app/api/v1/endpoints/sales_credit_notes.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py`, `app/core/connectors/workflow.py`, `app/domains/inventory/api/storage_fees.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/journal.py`, `app/services/finance_closing_service.py`, `app/services/finance_transaction_service.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/domains/inventory/api/storage_fees.py` | — |
 | `domain_erp.closing_checklist_templates` | `app/api/v1/endpoints/closing_checklists.py` | `app/api/v1/endpoints/closing_checklists.py` | — |
 | `domain_erp.closing_checklists` | `app/api/v1/endpoints/closing_checklists.py` | `app/api/v1/endpoints/closing_checklists.py` | — |
 | `domain_erp.collaterals` | `app/api/v1/endpoints/finance_actions.py` | — | — |
@@ -563,7 +563,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_sales.delivery_note_positions` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_invoices.py`, `app/api/v1/endpoints/sustainability.py`, `app/services/docflow_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/mcp_execution_service.py`, `app/services/sales_match_service.py`, `app/services/warehouse_service.py` | `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_orders.py` | `sales/delivery-note` |
 | `domain_sales.delivery_notes` | `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/branches.py`, `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/logistics_tours.py`, `app/api/v1/endpoints/mask_actions.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_invoices.py`, `app/api/v1/endpoints/sales_orders.py`, `app/api/v1/endpoints/sales_reports.py`, `app/api/v1/endpoints/sustainability.py`, `app/services/docflow_service.py`, `app/services/document_control_projection.py`, `app/services/logistics_disposition_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/mcp_execution_service.py`, `app/services/o2c_chain_service.py`, `app/services/sales_credit_service.py`, `app/services/sales_match_service.py`, `app/services/sales_storno_service.py`, `app/services/warehouse_service.py` | `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/finance_invoices.py`, `app/api/v1/endpoints/logistics_tours.py`, `app/api/v1/endpoints/sales_credit_notes.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_orders.py`, `app/services/mcp_execution_service.py`, `app/services/sales_storno_service.py`, `app/services/warehouse_service.py` | `sales/delivery-note` |
 | `domain_sales.sales_ab_status_log` | — | `app/services/sales_ab_lifecycle_service.py` | — |
-| `domain_sales.sales_credit_note_lines` | — | `app/api/v1/endpoints/sales_credit_notes.py` | — |
+| `domain_sales.sales_credit_note_lines` | `app/api/v1/endpoints/sales_credit_notes.py` | `app/api/v1/endpoints/sales_credit_notes.py` | — |
 | `domain_sales.sales_credit_notes` | `app/api/v1/endpoints/sales_credit_notes.py`, `app/services/sales_storno_service.py` | `app/api/v1/endpoints/sales_credit_notes.py` | — |
 | `domain_sales.sales_delivery_notes` | `app/services/sales_lieferschein_close_service.py` | `app/services/sales_lieferschein_close_service.py` | — |
 | `domain_sales.sales_invoice_lines` | `app/api/v1/endpoints/xrechnung.py`, `app/domains/documents/sales_invoice_models.py` | — | — |
@@ -1374,8 +1374,8 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `delivery_note_positions` | `crm` | native | `id` | id, delivery_note_id, pos_nr, artikel_id, artikel_nr, bezeichnung, bezeichnung2, menge, einheit, listenpreis, rabatt, art, netto_preis, netto_betrag, niederlassung, lagerhalle, lagerfach, charge, serien_nr, erloskonto, mwst_prozent, kontrakt_nr, skontierf, fremdware, created_at, updated_at, gef_punkt, na_bio, muster_nr, strecke, zus_beleg, anerken |
 | `delivery_notes` | `crm` | native | `id` | id, tenant_id, delivery_note_number, customer_id, branch_id, sales_rep_id, operator_id, delivery_date, delivery_time, cost_center_id, truck_number, is_credit_note, is_self_pickup, is_early_payment, reference_invoice_number, status, is_printed, is_delivered, invoice_number, totals, created_at, updated_at, created_by, updated_by, sales_order_id, storno_grund |
 | `sales_ab_status_log` | `crm` | prefix | `id` | id, auftrag_id, tenant_id, old_status, new_status, operator, reason, created_at |
-| `sales_credit_note_lines` | `crm` | prefix | `id` | id, credit_note_id, line_number, article_number, description, quantity, unit_price, tax_rate, line_total |
-| `sales_credit_notes` | `crm` | prefix | `id` | id, tenant_id, credit_note_number, customer_id, customer_name, invoice_reference, reason, total_amount, currency, status, notes, created_at, updated_at |
+| `sales_credit_note_lines` | `crm` | prefix | `id` | id, credit_note_id, line_number, article_number, description, quantity, unit_price, tax_rate, line_total, tax_code |
+| `sales_credit_notes` | `crm` | prefix | `id` | id, tenant_id, credit_note_number, customer_id, customer_name, invoice_reference, reason, total_amount, currency, status, notes, created_at, updated_at, net_amount, tax_amount, correction_type |
 | `sales_delivery_notes` | `crm` | prefix | `id` | id, tenant_id, quittiert_am, quittiert_von |
 | `sales_invoice_lines` | `crm` | prefix | `id` | id, tenant_id, invoice_id, line_no, article_id, article_number, description, quantity, unit, unit_price, net_amount, vat_rate, created_at, updated_at |
 | `sales_invoices` | `crm` | prefix | `id` | id, tenant_id, invoice_number, customer_id, invoice_date, due_date, currency, status, net_amount, vat_amount, gross_amount, note, created_by, created_at, updated_at |

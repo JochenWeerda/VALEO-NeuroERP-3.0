@@ -11,6 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## GUTSCHRIFT-UST-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Fachliche Entscheidung des Auftraggebers vom 12.10.
+**Entscheidung:** Umsatzsteuer je Position; Netto/Steuer/Brutto getrennt, Belegbetrag brutto; Erloes nur netto;
+Steuer separat; keine stillschweigende Steuerannahme (sonst zur Pruefung); Rechnungskorrektur und Gutschrift nach
+Paragraf 14 UStG getrennt; nichts ueberschreiben.
+**Lieferung:** Migration `gutschrift_ust_20261012` (auf `konto_sperre_20261012`, ein Head): `tax_code` je Position,
+`tax_rate` ohne Vorgabe 19, `net_amount`/`tax_amount`/`correction_type` am Beleg, `vat_codes.skr03_revenue_account`
+(vorbelegt nur DE_19 -> 8400, DE_7 -> 8300). `sales_credit_notes.py`: Soll Erloeskonto netto + Soll Steuerkonto je
+Steuerschluessel, Haben 1400 brutto, OP-Minderung brutto; neun Faelle enden mit 409 „bitte pruefen“.
+`tests/test_gutschrift_umsatzsteuer.py` 17 gruen (Pruefstand). QA: `docs/quality-assurance/gutschrift-umsatzsteuer-20261012.md`.
+**Offen:** DATEV-Automatikkonten (doppelte Steuer im Export nicht geprueft); Maske fuehrt Steuersatz statt
+Steuerschluessel; Paragraf-24-Schluessel ohne Erloeskonto; `vat_codes` in der Entwicklungs-DB leer;
+Ausgangsrechnung bucht weiter mit festem 1776.
+
 ## BUCHUNG-STILL-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Offene Punkte aus KONTO-SPERRE-MELDUNG-20261012.

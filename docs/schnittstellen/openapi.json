@@ -39876,6 +39876,15 @@
       },
       "CreditNoteCreate": {
         "properties": {
+          "correction_type": {
+            "default": "rechnungskorrektur",
+            "enum": [
+              "rechnungskorrektur",
+              "gutschrift_14_ustg"
+            ],
+            "title": "Correction Type",
+            "type": "string"
+          },
           "credit_note_number": {
             "maxLength": 64,
             "minLength": 1,
@@ -39920,6 +39929,20 @@
             "title": "Lines",
             "type": "array"
           },
+          "net_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Amount"
+          },
           "notes": {
             "anyOf": [
               {
@@ -39941,6 +39964,20 @@
             "default": "draft",
             "title": "Status",
             "type": "string"
+          },
+          "tax_amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Amount"
           },
           "tenant_id": {
             "anyOf": [
@@ -40084,6 +40121,17 @@
             ],
             "title": "Quantity"
           },
+          "tax_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Code"
+          },
           "tax_rate": {
             "anyOf": [
               {
@@ -40091,9 +40139,11 @@
               },
               {
                 "type": "string"
+              },
+              {
+                "type": "null"
               }
             ],
-            "default": "19",
             "title": "Tax Rate"
           },
           "unit_price": {
@@ -40138,10 +40188,27 @@
             "title": "Quantity",
             "type": "string"
           },
+          "tax_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Code"
+          },
           "tax_rate": {
-            "default": "19",
-            "title": "Tax Rate",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Rate"
           },
           "unit_price": {
             "title": "Unit Price",
@@ -40158,6 +40225,15 @@
       },
       "CreditNoteOut": {
         "properties": {
+          "correction_type": {
+            "default": "rechnungskorrektur",
+            "enum": [
+              "rechnungskorrektur",
+              "gutschrift_14_ustg"
+            ],
+            "title": "Correction Type",
+            "type": "string"
+          },
           "created_at": {
             "anyOf": [
               {
@@ -40218,6 +40294,17 @@
             "title": "Lines",
             "type": "array"
           },
+          "net_amount": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Amount"
+          },
           "notes": {
             "anyOf": [
               {
@@ -40239,6 +40326,17 @@
             "default": "draft",
             "title": "Status",
             "type": "string"
+          },
+          "tax_amount": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Amount"
           },
           "tenant_id": {
             "title": "Tenant Id",
@@ -162317,6 +162415,17 @@
             ],
             "title": "Skr03 Account"
           },
+          "skr03_revenue_account": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skr03 Revenue Account"
+          },
           "skr04_account": {
             "anyOf": [
               {
@@ -162455,6 +162564,17 @@
               }
             ],
             "title": "Skr03 Account"
+          },
+          "skr03_revenue_account": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skr03 Revenue Account"
           },
           "skr04_account": {
             "anyOf": [
@@ -162672,6 +162792,17 @@
               }
             ],
             "title": "Skr03 Account"
+          },
+          "skr03_revenue_account": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skr03 Revenue Account"
           },
           "skr04_account": {
             "anyOf": [
@@ -384835,7 +384966,7 @@
     },
     "/api/v1/sales/credit-notes/{cn_id}/post": {
       "post": {
-        "description": "Gutschrift buchen: Buchungskopf, zwei Zeilen und OP-Minderung in einer Transaktion.\n\nBis 12.10.2026 wurde der Kopf zuerst festgeschrieben; die Zeilen trugen Kontonummern statt\nKonto-IDs, scheiterten am Fremdschluessel, und der Fehler wurde verschluckt: „gebucht“ mit einem\nBuchungskopf ohne Zeilen. Jetzt gilt alles oder nichts.",
+        "description": "Gutschrift buchen: Erloes netto, Umsatzsteuer getrennt, Forderung brutto — in einer Transaktion.\n\nSoll  Erloeskonto je Steuerschluessel   Netto\nSoll  Umsatzsteuerkonto je Schluessel   Steuer\nHaben Forderungen                       Brutto\n\nDie Steuer kommt aus den Positionen und ihrem Steuerschluessel. Fehlt eine Angabe oder widersprechen\nsich Angaben, wird nicht gebucht (409) — die Gutschrift bleibt Entwurf und geht zur Pruefung.\n\nBis 12.10.2026 wurde der Kopf zuerst festgeschrieben; die Zeilen trugen Kontonummern statt\nKonto-IDs, scheiterten am Fremdschluessel, und der Fehler wurde verschluckt. Der Gesamtbetrag ging\nungeteilt gegen das Erloeskonto.",
         "operationId": "post_credit_note_api_v1_sales_credit_notes__cn_id__post_post",
         "parameters": [
           {

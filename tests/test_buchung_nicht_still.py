@@ -81,72 +81,7 @@ def _zahl(sql: str, **werte) -> int:
         return db.execute(text(sql), werte).scalar()
 
 
-# --- Gutschrift ----------------------------------------------------------------------------
-
-@pytest.fixture
-def gutschrift(haus):
-    lauf, mandant = haus["lauf"], haus["mandant"]
-    with SessionLocal() as db:
-        db.execute(text(
-            "INSERT INTO domain_sales.sales_credit_notes "
-            "(id, tenant_id, credit_note_number, customer_id, invoice_reference, reason, total_amount, status) "
-            "VALUES (:id, :t, :nr, 'kunde-1', :re, 'Retoure', 100, 'draft')"),
-            {"id": f"bs-{lauf}-gs", "t": mandant, "nr": f"GS-{lauf}", "re": f"RE-{lauf}-1"})
-        for nr, offen in ((1, 250), (2, 400)):
-            db.execute(text(
-                "INSERT INTO domain_erp.offene_posten "
-                "(id, tenant_id, rechnungsnr, konto_typ, kunde_id, betrag, offen, op_status) "
-                "VALUES (:id, :t, :re, 'debitoren', 'kunde-1', :offen, :offen, 'offen')"),
-                {"id": f"bs-{lauf}-op{nr}", "t": mandant, "re": f"RE-{lauf}-{nr}", "offen": offen})
-        db.commit()
-    return {**haus, "id": f"bs-{lauf}-gs"}
-
-
-def test_gutschrift_bucht_kopf_und_zwei_zeilen_auf_echte_konten(gutschrift):
-    antwort = gutschrift["client"].post(f"/sales/credit-notes/{gutschrift['id']}/post")
-    assert antwort.status_code == 200, antwort.text
-    assert antwort.json()["success"] is True
-    with SessionLocal() as db:
-        zeilen = db.execute(text(
-            "SELECT k.account_number, l.debit, l.credit FROM domain_erp.journal_entry_lines l "
-            "JOIN domain_erp.chart_of_accounts k ON k.id = l.account_id "
-            "JOIN domain_erp.journal_entries e ON e.id = l.journal_entry_id "
-            "WHERE e.tenant_id = :t ORDER BY l.line_number"), {"t": gutschrift["mandant"]}).fetchall()
-        status = db.execute(text(
-            "SELECT status FROM domain_sales.sales_credit_notes WHERE id = :id"), {"id": gutschrift["id"]}).scalar()
-    assert [(z[0], float(z[1]), float(z[2])) for z in zeilen] == [("1400", 0.0, 100.0), ("8400", 100.0, 0.0)]
-    assert status == "posted"
-
-
-def test_gutschrift_mindert_nur_den_posten_ihrer_rechnung(gutschrift):
-    """Vorher traf die Minderung jeden offenen Posten des Kunden, jeweils um den vollen Betrag."""
-    assert gutschrift["client"].post(f"/sales/credit-notes/{gutschrift['id']}/post").status_code == 200
-    with SessionLocal() as db:
-        posten = db.execute(text(
-            "SELECT rechnungsnr, offen, op_status FROM domain_erp.offene_posten WHERE tenant_id = :t "
-            "ORDER BY rechnungsnr"), {"t": gutschrift["mandant"]}).fetchall()
-    lauf = gutschrift["lauf"]
-    assert [(p[0], float(p[1]), p[2]) for p in posten] == [
-        (f"RE-{lauf}-1", 150.0, "teilweise"), (f"RE-{lauf}-2", 400.0, "offen")]
-
-
-def test_gutschrift_auf_gesperrtes_konto_bucht_nichts(gutschrift):
-    """Alles oder nichts: kein Buchungskopf ohne Zeilen, die Gutschrift bleibt Entwurf."""
-    with SessionLocal() as db:
-        db.execute(text(
-            "INSERT INTO domain_erp.chart_of_accounts "
-            "(id, account_number, account_name, account_type, category, tenant_id, is_active, posting_blocked) "
-            "VALUES (:id, '1400', 'Forderungen', 'asset', 'receivables', :t, true, true)"),
-            {"id": f"bs-{gutschrift['lauf']}-1400", "t": gutschrift["mandant"]})
-        db.commit()
-    antwort = gutschrift["client"].post(f"/sales/credit-notes/{gutschrift['id']}/post")
-    assert antwort.status_code == 409, antwort.text
-    assert antwort.json()["detail"] == "Konto 1400 ist fuer Buchungen gesperrt."
-    assert _zahl("SELECT count(*) FROM domain_erp.journal_entries WHERE tenant_id = :t", t=gutschrift["mandant"]) == 0
-    assert _zahl("SELECT count(*) FROM domain_sales.sales_credit_notes WHERE id = :id AND status = 'draft'",
-                 id=gutschrift["id"]) == 1
-    assert _zahl("SELECT count(*) FROM domain_erp.offene_posten WHERE tenant_id = :t AND offen = betrag",
-                 t=gutschrift["mandant"]) == 2
+# Die Gutschrift prueft ``tests/test_gutschrift_umsatzsteuer.py``.
 
 
 # --- Bestandskorrektur und Inventur ------------------------------------------------------------
