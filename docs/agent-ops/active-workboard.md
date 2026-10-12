@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## OPEN-ITEMS-VERIFIED-ACTOR-20261012 — reserviert, Codex
+## OPEN-ITEMS-VERIFIED-ACTOR-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Audit-Urheber der offenen Posten ausschliesslich aus verifizierter Identitaet; ueberholte Header-/JWT-Dekodierung entfernen und Godfile-Neufund abbauen. **Dateibesitz:** app/api/v1/endpoints/open_items.py nur _get_user_id_from_request und dessen Identitaetsimport; neuer fokussierter Vertragstest; eigene QA/Workboard. Keine Finanzrollen, Fachbuchungen, fremde Katalog- oder Maskenaenderungen. **Abnahme:** gefaelschter X-User-ID/Bearer-Body beeinflusst Auditkennung nicht, fehlende Identitaet scheitert geschlossen, bestehende Finanzrollen bleiben erhalten, Datei unter 1001 Zeilen ohne Baseline-Ausnahme. Keine DB/Container/Reset.
+
+**Lieferung:** Lokaler OP-Audithelfer verwendet verifizierte Identitaet statt X-User-ID oder ungeprueftem JWT; fuenf neue Urheber- und 178 bestehende Rollenvertraege bestanden. Godfile-Neufund entfernt, keine Baseline erhoeht. Nachweis: open-items-verified-actor-20261012.md. Gemeinsamer FIBU-Audit-Helfer und Mahnoperator bleiben offen. Keine DB/Container/Reset.
 
 ## IDENTITY-MASK-PLATFORM-SCOPES-20261012 — abgeschlossen, Codex
 
