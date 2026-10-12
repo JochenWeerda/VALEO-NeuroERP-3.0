@@ -80,7 +80,7 @@ def test_projection_refresh_is_tenant_scoped_and_idempotent() -> None:
 def test_project_endpoint_registered(monkeypatch: pytest.MonkeyPatch) -> None:
     import app.api.v1.endpoints.document_control as endpoint
     from fastapi.testclient import TestClient
-    from main import app
+    from app.main import app  # explicit wiring app; production auth has separate RSA contracts
 
     class FakeProjection:
         def __init__(self, db, tenant_id):  # noqa: ANN001

@@ -134,9 +134,11 @@ QA: `docs/quality-assurance/buchung-nicht-still-20261012.md`.
 **Offen:** Gutschrift ohne Umsatzsteuerkorrektur; `POST /inventory/counts` setzt Pflichtfeld `counted_by` nicht;
 Inventur-Wege ohne Lagerrolle; Frontend ruft nicht vorhandenes `PUT /inventory/counts/{id}`.
 
-## IDENTITY-REMAINING-WIRING-20261012 — reserviert, Codex
+## IDENTITY-REMAINING-WIRING-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** uebrigen roten Wiring-Fall der Belegprojektion reparieren, ohne Produktionsauth zu mocken. **Dateibesitz:** tests/test_document_control_projection.py nur lokaler Import der ausdruecklichen Kompatibilitaets-App im registrierten Projektionsweg; QA/Workboard. Claudes committete Modulimportkorrektur bleibt erhalten. **Abnahme:** echter HTTP-Wiring-Vertrag mit FakeProjection besteht, gepruefter Rollenvertrag bleibt separat; keine DB/Container/Reset. **Risiko:** zwei Snapshot-Tests haben eine fehlende kanonische Migration; nicht durch Sicherheitslockerung verdecken.
+
+**Lieferung:** Explizite Kompatibilitaets-App fuer den HTTP-Wiring-Vertrag; vier vorhandene Projektionsvertraege bestanden in 22,54s. Produktionsauth unveraendert, kein RSA-Nachweis aus diesem Test abgeleitet. Nachweis: document-projection-wiring-20261012.md. Zwei Snapshot-Faelle mit fehlender kanonischer Migration bleiben offen. Keine DB/Container/Reset.
 
 ## TESTGRENZE-FINANZ-HAUPTAPP-20261012 — abgeschlossen, Claude Code
 
