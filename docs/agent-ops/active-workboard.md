@@ -11,6 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SYSTEM-TENANT-BOUNDARY-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „dann schliesse diese Sicherheitsluecke systemweit“. **Ziel:** verbindlicher verifizierter Mandantenkontext vor allen geschuetzten API-Fachzugriffen; kein permissiver Missing-Claim-/Dev-/Headerfallback. Zentrale Path-/Query-/Body-Bindung und Inventar aller Umgehungsflaechen, schrittweise echte zwei-Mandanten-Abnahme. Breite Rollen und explizite Shared-Data-Policies bleiben getrennte Rechte.
+**Dateibesitz:** main.py nur Bearer-/Mandantenmiddleware und abschliessende Routebindung; app/auth/tenant.py zentraler vorhandener Claimvertrag; app/core/tenant.py und app/auth/deps.py/deps_oidc.py nur Wiederverwendung verifizierter Requestidentitaet; neues zentrales Route-Binding-Modul und Tests/QA/Proposed ADR/Workboard. Bank-/SEPA-Folgeobjekte und WebSocket-/MCP-Kontext nach eigenem abgegrenztem Unterclaim. Keine Migration/DB-Ruecksetzung/Container.
+**Integration mit Claude:** Sein MANDANT-TOKEN-BINDUNG-20261012 behaelt app/core/security.py (Bindung), config.py, Realm-Mapper und Frontend-Dateien. Diese Dateien werden hier nicht uebernommen. Neue User-Vorgabe verlangt systemweiten Abschluss: fehlender Mandant darf nicht bis zu optionalem Schalter/Dev-Ausnahme weiterlaufen. Zentraler Serverboundary wird streng; Provider-/Frontend-Arbeit weiterhin Claude. Fremdes WIP erhalten.
+**Abnahme:** echte signierte JWTs gegen vorhandenen Validator, fehlende/ungueltige/widerspruechliche Claims ohne Fachzugriff; kontextgebundene Header/Path/Query/Body inklusive Mehrfachwerte; keine Standardmandantenwahl; Request-Kontext nach parallelen Requests sauber; Routeinventar/HTTP-/MCP-/Streaming-/Bank-/CRUD-Pruefmatrix. Bei offenen Folgeobjekt-/Transportflaechen keinen Systemgesamtabschluss behaupten.
+**Harness:** bestehende Verifier/Guards konsolidieren, Minor-Sicherheitsreparatur plus Significant zentrales Bindungsmodul mit Proposed ADR; gemeinsamer valeo_probe/eigene Daten, keine neuen DBs; Doku/Runbook/Inventargates und CI separat.
+
 ## MANDANT-TOKEN-BINDUNG-20261012 — in Arbeit, Claude Code
 
 **Owner:** Claude Code. **Stand:** 2026-10-12. **Von:** Auftraggeber („Anmeldedienst den Mandanten im Token
