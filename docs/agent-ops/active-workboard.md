@@ -75,11 +75,13 @@ Fehler-Toast; Masken, die Fehler schlucken, zeigen weiter leere Listen; Scope-Ab
 
 **Lieferung:** Jeder ausgehende Commit samt Metadaten und Merge-Aenderungen geprueft; sechs synthetische Git-/Inhaltsvertraege bestanden. Bewusste Hook-Umgehung und fehlendes lokales Manifest bleiben dokumentierte Grenzen. Nachweis: private-identity-publication-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
-## IDENTITY-PROVIDER-RUNTIME-20261012 — reserviert, Codex
+## IDENTITY-PROVIDER-RUNTIME-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
 **Dateibesitz:** docker-compose.yml nur vorhandener Keycloak-Dienst und aktivierte Profilfunktion; lokale ENV-Werte ausserhalb Git; eigene QA/Runbook/Workboard. Bestehenden Container kontrolliert rekonfigurieren, vorhandene Providerdatenbank erhalten; keine neue Datenbank/Volumes/Container pro Test. Keine persoenlichen Werte committen.
 **Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
+
+**Lieferung:** Managed-Profile-Funktion im bestehenden Keycloak aktiviert, vorhandene Providerdatenbank erhalten; geschuetztes Mandantenattribut live bestaetigt. Nachweis: identity-provider-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## IDENTITY-PRIVATE-DATA-20261012 — abgeschlossen, Codex
 
@@ -97,6 +99,8 @@ Fehler-Toast; Masken, die Fehler schlucken, zeigen weiter leere Listen; Scope-Ab
 **CI-Unterclaim:** tests/conftest.py nur ausdruecklicher Test-Identitaetskontext der separaten Kompatibilitaets-App; vier Finanz-/Personal-Rollenvertragsfixtures nur Testmandantengrenze. Alte Authattrappen ohne verifizierten Kontext verursachen 2393 CI-Fehler; echte Produktions-Authabnahme bleibt separat und wird nicht aufgeweicht. Weitere betroffene Testdateien vor Edits einzeln inventarisieren.
 
 **Lieferung:** Test-Unterclaim geliefert: vier Rollenvertragsdateien mit 3959 Faellen gruen. Zahlungs-/Stammdaten-Testdatei fuer Claude freigegeben; 67 Finanz-Nachbarfaelle bleiben sein Slice. Produktionsauth unveraendert, keine DB/Container/Reset. Uebrige Identitaetsumsetzung bleibt offen. Nachweis: identity-test-boundaries-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+**Lieferung:** Provider-Teilmeilenstein geliefert: keine Musterkonten, PKCE, kurze Laufzeiten und additive 34 Fachrollen samt ausdruecklichem manager im Realm und laufenden Dienst. Neun Vertraege und beide Katalogchecks gruen. Keine automatische Rollenvergabe. Private Erstzuordnung ausserhalb Git; Benutzer-Erstanmeldung und restliche Sessions-/Agentensteuerung bleiben offen. Nachweis: identity-provider-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## FINANZ-REST-ROLLEN-20261012 — abgeschlossen, Claude Code
 

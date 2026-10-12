@@ -22,12 +22,12 @@
   "maxDeltaTimeSeconds": 43200,
   "failureFactor": 5,
   "defaultSignatureAlgorithm": "RS256",
-  "revokeRefreshToken": false,
+  "revokeRefreshToken": true,
   "refreshTokenMaxReuse": 0,
-  "accessTokenLifespan": 900,
+  "accessTokenLifespan": 300,
   "accessTokenLifespanForImplicitFlow": 900,
-  "ssoSessionIdleTimeout": 1800,
-  "ssoSessionMaxLifespan": 36000,
+  "ssoSessionIdleTimeout": 900,
+  "ssoSessionMaxLifespan": 28800,
   "ssoSessionIdleTimeoutRememberMe": 0,
   "ssoSessionMaxLifespanRememberMe": 0,
   "offlineSessionIdleTimeout": 2592000,
@@ -55,10 +55,35 @@
             "access.token.claim": "true",
             "userinfo.token.claim": "true"
           }
+        },
+        {
+          "name": "erp-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "valeo-neuro-erp-backend",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "erp-permissions",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "erp_scopes",
+            "claim.name": "erp_scopes",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
         }
       ],
       "name": "VALEO NeuroERP Frontend (Staging)",
-      "description": "Frontend-Client für Staging-Umgebung",
+      "description": "Frontend-Client fÃ¼r Staging-Umgebung",
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "webOrigins": [
@@ -74,7 +99,7 @@
       ],
       "protocol": "openid-connect",
       "publicClient": true,
-      "directAccessGrantsEnabled": true,
+      "directAccessGrantsEnabled": false,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
       "serviceAccountsEnabled": false,
@@ -187,131 +212,201 @@
         "description": "Read-only access to all documents",
         "composite": false,
         "clientRole": false
+      },
+      {
+        "name": "AGRAR_ADMIN",
+        "description": "Agrar: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "AGRAR_BEARBEITEN",
+        "description": "Agrar: anlegen und aendern"
+      },
+      {
+        "name": "AGRAR_LESEN",
+        "description": "Agrar: ansehen"
+      },
+      {
+        "name": "CRM_ADMIN",
+        "description": "Vertrieb und Kundenpflege: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "CRM_BEARBEITEN",
+        "description": "Vertrieb und Kundenpflege: anlegen und aendern"
+      },
+      {
+        "name": "CRM_LESEN",
+        "description": "Vertrieb und Kundenpflege: ansehen"
+      },
+      {
+        "name": "EINKAUF_ADMIN",
+        "description": "Einkauf: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "EINKAUF_BEARBEITEN",
+        "description": "Einkauf: anlegen und aendern"
+      },
+      {
+        "name": "EINKAUF_LESEN",
+        "description": "Einkauf: ansehen"
+      },
+      {
+        "name": "FINANCE_ADMIN",
+        "description": "Finanzbuchhaltung: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "FINANCE_BEARBEITEN",
+        "description": "Finanzbuchhaltung: anlegen und aendern"
+      },
+      {
+        "name": "FINANCE_LESEN",
+        "description": "Finanzbuchhaltung: ansehen"
+      },
+      {
+        "name": "FUTTERMITTEL_ADMIN",
+        "description": "Futtermittel: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "FUTTERMITTEL_BEARBEITEN",
+        "description": "Futtermittel: anlegen und aendern"
+      },
+      {
+        "name": "FUTTERMITTEL_LESEN",
+        "description": "Futtermittel: ansehen"
+      },
+      {
+        "name": "HARVEST_ADMIN",
+        "description": "Ernteannahme: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "HARVEST_BEARBEITEN",
+        "description": "Ernteannahme: anlegen und aendern"
+      },
+      {
+        "name": "HARVEST_LESEN",
+        "description": "Ernteannahme: ansehen"
+      },
+      {
+        "name": "KONTENPLAN_PFLEGE",
+        "description": "Kontenplan: pflegen (delegierbar, unabhaengig von der Leitungsrolle)"
+      },
+      {
+        "name": "KONTENRAHMEN_PFLEGE",
+        "description": "Gemeinsamer Kontenrahmen: pflegen (delegierbar, unabhaengig von der Leitungsrolle)"
+      },
+      {
+        "name": "KONTRAKT_ADMIN",
+        "description": "Kontrakte: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "KONTRAKT_BEARBEITEN",
+        "description": "Kontrakte: anlegen und aendern"
+      },
+      {
+        "name": "KONTRAKT_LESEN",
+        "description": "Kontrakte: ansehen"
+      },
+      {
+        "name": "KONTRAKT_LOESCHEN",
+        "description": "Kontrakte: loeschen"
+      },
+      {
+        "name": "LAGER_ADMIN",
+        "description": "Lager: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "LAGER_LESEN",
+        "description": "Lager: ansehen"
+      },
+      {
+        "name": "PERSONAL_ADMIN",
+        "description": "Personal: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "PERSONAL_BEARBEITEN",
+        "description": "Personal: anlegen und aendern"
+      },
+      {
+        "name": "PERSONAL_LESEN",
+        "description": "Personal: ansehen"
+      },
+      {
+        "name": "QUALITAET_LESEN",
+        "description": "Qualitaetssicherung: ansehen"
+      },
+      {
+        "name": "SALES_ADMIN",
+        "description": "Verkauf: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "SALES_BEARBEITEN",
+        "description": "Verkauf: anlegen und aendern"
+      },
+      {
+        "name": "SALES_LESEN",
+        "description": "Verkauf: ansehen"
+      },
+      {
+        "name": "SETTLEMENT_LESEN",
+        "description": "Abrechnung: ansehen"
+      },
+      {
+        "name": "manager",
+        "description": "Explicit management role; never assigned by default"
       }
     ]
   },
-  "users": [
-    {
-      "username": "test-admin",
-      "enabled": true,
-      "emailVerified": true,
-      "firstName": "Test",
-      "lastName": "Administrator",
-      "email": "test-admin@valeo-staging.local",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "Test123!",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["user", "admin"],
-      "clientRoles": {
-        "valeo-erp-staging": ["sales:read", "sales:write", "sales:approve", "sales:post", "policy:read", "policy:write", "admin:all"]
-      },
-      "attributes": {
-        "department": ["IT"],
-        "employee_id": ["EMP-ADMIN-001"]
-      }
-    },
-    {
-      "username": "test-user",
-      "enabled": true,
-      "emailVerified": true,
-      "firstName": "Test",
-      "lastName": "User",
-      "email": "test-user@valeo-staging.local",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "Test123!",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["user"],
-      "clientRoles": {
-        "valeo-erp-staging": ["sales:read", "sales:write", "policy:read"]
-      },
-      "attributes": {
-        "department": ["Sales"],
-        "employee_id": ["EMP-USER-001"]
-      }
-    },
-    {
-      "username": "test-sales-manager",
-      "enabled": true,
-      "emailVerified": true,
-      "firstName": "Test",
-      "lastName": "Sales Manager",
-      "email": "test-sales-mgr@valeo-staging.local",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "Test123!",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["user", "sales_manager"],
-      "clientRoles": {
-        "valeo-erp-staging": ["sales:read", "sales:write", "sales:approve", "policy:read"]
-      },
-      "attributes": {
-        "department": ["Sales"],
-        "employee_id": ["EMP-SALESMGR-001"]
-      }
-    },
-    {
-      "username": "test-readonly",
-      "enabled": true,
-      "emailVerified": true,
-      "firstName": "Test",
-      "lastName": "Readonly",
-      "email": "test-readonly@valeo-staging.local",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "Test123!",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["user", "readonly"],
-      "clientRoles": {
-        "valeo-erp-staging": ["sales:read", "policy:read"]
-      },
-      "attributes": {
-        "department": ["Audit"],
-        "employee_id": ["EMP-READONLY-001"]
-      }
-    }
-  ],
+  "users": [],
   "scopeMappings": [
     {
       "clientScope": "sales:read",
-      "roles": ["user", "admin", "sales_manager", "readonly"]
+      "roles": [
+        "user",
+        "admin",
+        "sales_manager",
+        "readonly"
+      ]
     },
     {
       "clientScope": "sales:write",
-      "roles": ["user", "admin", "sales_manager"]
+      "roles": [
+        "user",
+        "admin",
+        "sales_manager"
+      ]
     },
     {
       "clientScope": "sales:approve",
-      "roles": ["admin", "sales_manager"]
+      "roles": [
+        "admin",
+        "sales_manager"
+      ]
     },
     {
       "clientScope": "sales:post",
-      "roles": ["admin"]
+      "roles": [
+        "admin"
+      ]
     },
     {
       "clientScope": "policy:read",
-      "roles": ["user", "admin", "sales_manager", "readonly"]
+      "roles": [
+        "user",
+        "admin",
+        "sales_manager",
+        "readonly"
+      ]
     },
     {
       "clientScope": "policy:write",
-      "roles": ["admin"]
+      "roles": [
+        "admin"
+      ]
     },
     {
       "clientScope": "admin:all",
-      "roles": ["admin"]
+      "roles": [
+        "admin"
+      ]
     }
   ],
   "defaultDefaultClientScopes": [
@@ -322,11 +417,13 @@
     "web-origins"
   ],
   "internationalizationEnabled": true,
-  "supportedLocales": ["de", "en"],
+  "supportedLocales": [
+    "de",
+    "en"
+  ],
   "defaultLocale": "de",
   "loginTheme": "keycloak",
   "accountTheme": "keycloak.v2",
   "adminTheme": "keycloak.v2",
   "emailTheme": "keycloak"
 }
-
