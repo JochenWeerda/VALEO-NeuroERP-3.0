@@ -11,6 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WHATSAPP-INBOX-ACCESS-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Abgegrenzter erster Code-Schnitt von WHATSAPP-INBOX-TRUST-20261011: verifizierte OIDC-Mandanten-/Scope-Pruefung fuer alle fuenf Inbox-Wege, mandantengebundene Kunden-/Artikelreferenzen und keine willkuerlichen Mehrfachtreffer. Kontakt-Bediener aus Token. Kein neuer Auth-/Mandantenvertrag.
+**Dateibesitz:** app/api/v1/endpoints/whatsapp_intake.py, app/services/whatsapp_intake_service.py; neue tests/test_whatsapp_inbox_access.py und tests/test_whatsapp_inbox_references.py; eigene QA-/Workboard-Hunks, CRM API, beide WhatsApp-Runbooks nur Lieferstand. Generierte eigene API-/Code-Metadaten isoliert, keine fremden Katalog-/Frontendhunks.
+**Abnahme:** echte HTTP-Guards vor Fachzugriff, zwei echte Probe-Mandanten und fremde Inbox/Kunden-/Artikelreferenzen unveraendert; keine Defaultmandanten, kein Adminbypass, ambiguose Matches bleiben offen. Bestehende manuelle Freitextpositionen und Kontakt-/Beleg-Vorbelegung bleiben nutzbar.
+**Risiko:** public.kunden-Bridge weiterhin via business_partner_id notwendig wegen bestehender Fremdschluessel; keine konkurrierende Historie/ungepruefte Nummernzuordnung. Atomarer Eingangs-Replay und unveraenderliches Korrektur-Audit bleiben im Elternslice offen, ebenso Lernen und Browsertransport.
+**Harness:** Fachvertrag gepruefte Referenzen; bestehende zentrale Guards; eigener Probe-Datensatz/Savepoints, kein Reset/Container; DB-/HTTP-Negativproben; QA/Domaenen-/Workboardlieferstand; externe CI nach Push getrennt.
+
 ## KONTENPLAN-MANDANT-20261012 — in Arbeit, Claude Code
 
 **Owner:** Claude Code. **Stand:** 2026-10-12. Befund aus HAUPTBUCH-ROLLEN-20261011.
