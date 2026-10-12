@@ -116,15 +116,15 @@ async def create_journal_entry(
         # Buchhaltung einen Satz liest statt eines Datenbankfehlers.
         gesperrte = db.execute(
             text(
-                "SELECT account_number FROM domain_erp.chart_of_accounts "
-                "WHERE id = ANY(:ids) AND posting_blocked ORDER BY account_number"
+                "SELECT string_agg(account_number, ', ' ORDER BY account_number) "
+                "FROM domain_erp.chart_of_accounts WHERE id = ANY(:ids) AND posting_blocked"
             ),
             {"ids": sorted({line.account_id for line in entry_data.lines})},
-        ).scalars().all()
+        ).scalar_one()
         if gesperrte:
             raise HTTPException(
                 status_code=409,
-                detail=f"Konto {', '.join(gesperrte)} ist fuer Buchungen gesperrt.",
+                detail=f"Konto {gesperrte} ist fuer Buchungen gesperrt.",
             )
 
         entry_repo = container.resolve(JournalEntryRepository)
