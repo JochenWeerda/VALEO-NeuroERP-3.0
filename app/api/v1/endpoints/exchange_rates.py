@@ -3,6 +3,7 @@ Exchange Rates API
 FIBU-GL-06: Fremdwährung & Wechselkurse
 """
 
+from app.auth.finance_roles import finance_write
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -194,7 +195,7 @@ async def get_exchange_rate(
         raise HTTPException(status_code=500, detail=f"Failed to get exchange rate: {str(e)}")
 
 
-@router.post("", response_model=ExchangeRateResponse, status_code=201, summary="Exchange rate anlegen")
+@router.post("", response_model=ExchangeRateResponse, status_code=201, summary="Exchange rate anlegen", dependencies=[Depends(finance_write)])
 async def create_exchange_rate(
     rate: ExchangeRateCreate,
     tenant_id: str = Query("system", description="Tenant ID"),
@@ -279,7 +280,7 @@ async def create_exchange_rate(
         raise HTTPException(status_code=500, detail=f"Failed to create exchange rate: {str(e)}")
 
 
-@router.put("/{rate_id}", response_model=ExchangeRateResponse, summary="Exchange rate aktualisieren")
+@router.put("/{rate_id}", response_model=ExchangeRateResponse, summary="Exchange rate aktualisieren", dependencies=[Depends(finance_write)])
 async def update_exchange_rate(
     rate_id: str,
     rate: ExchangeRateUpdate,
@@ -348,7 +349,7 @@ async def update_exchange_rate(
         raise HTTPException(status_code=500, detail=f"Failed to update exchange rate: {str(e)}")
 
 
-@router.post("/convert", response_model=CurrencyConversionResponse, summary="Currency umwandeln")
+@router.post("/convert", response_model=CurrencyConversionResponse, summary="Currency umwandeln", dependencies=[Depends(finance_write)])
 async def convert_currency(
     request: CurrencyConversionRequest,
     tenant_id: str = Query("system", description="Tenant ID"),

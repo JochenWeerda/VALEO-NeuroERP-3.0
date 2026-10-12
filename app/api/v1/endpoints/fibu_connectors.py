@@ -5,6 +5,7 @@ Profile CRUD, Import-Runs: Upload → Parse → Validate → Post → Cancel/Rev
 
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
 import json
 from typing import List, Optional
 from uuid import uuid4
@@ -40,7 +41,7 @@ def _user_from_request(request: Optional[Request]) -> Optional[str]:
 
 # ---------- Profiles ----------
 
-@router.get("/profiles", response_model=List[ConnectorProfile], summary="Profiles auflisten")
+@router.get("/profiles", response_model=List[ConnectorProfile], summary="Profiles auflisten", dependencies=[Depends(finance_read)])
 async def list_profiles(
     type: str = Query(..., pattern="^(PAYROLL|ASSET_LEDGER)$"),
     tenant_id: str = Depends(get_tenant_id),
@@ -75,7 +76,7 @@ async def list_profiles(
     ]
 
 
-@router.post("/profiles", response_model=ConnectorProfile, status_code=201, summary="Profile anlegen")
+@router.post("/profiles", response_model=ConnectorProfile, status_code=201, summary="Profile anlegen", dependencies=[Depends(finance_admin)])
 async def create_profile(
     payload: ConnectorProfileCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -118,7 +119,7 @@ async def create_profile(
     )
 
 
-@router.get("/profiles/{profile_id}", response_model=ConnectorProfile, summary="Profile abrufen")
+@router.get("/profiles/{profile_id}", response_model=ConnectorProfile, summary="Profile abrufen", dependencies=[Depends(finance_read)])
 async def get_profile(
     profile_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -140,7 +141,7 @@ async def get_profile(
     )
 
 
-@router.put("/profiles/{profile_id}", response_model=ConnectorProfile, summary="Profile aktualisieren")
+@router.put("/profiles/{profile_id}", response_model=ConnectorProfile, summary="Profile aktualisieren", dependencies=[Depends(finance_admin)])
 async def update_profile(
   profile_id: str,
   payload: ConnectorProfileUpdate,
@@ -182,7 +183,7 @@ async def update_profile(
     return await get_profile(profile_id, tenant_id, db)
 
 
-@router.delete("/profiles/{profile_id}", status_code=204, response_class=Response, response_model=None, summary="Profile löschen")
+@router.delete("/profiles/{profile_id}", status_code=204, response_class=Response, response_model=None, summary="Profile löschen", dependencies=[Depends(finance_admin)])
 async def delete_profile(
   profile_id: str,
   tenant_id: str = Depends(get_tenant_id),
@@ -205,7 +206,7 @@ async def delete_profile(
 
 # ---------- Imports (Runs) ----------
 
-@router.post("/{connector_type}/imports", response_model=ImportUploadResponse, status_code=201, summary="Import run anlegen")
+@router.post("/{connector_type}/imports", response_model=ImportUploadResponse, status_code=201, summary="Import run anlegen", dependencies=[Depends(finance_write)])
 async def create_import_run(
     connector_type: str,
     request: Request,
@@ -231,7 +232,7 @@ async def create_import_run(
     return ImportUploadResponse(run_id=run_id, status="PARSED", message="Upload und Parse erfolgreich.")
 
 
-@router.get("/imports/{run_id}", response_model=ConnectorRunSummary, summary="Import run abrufen")
+@router.get("/imports/{run_id}", response_model=ConnectorRunSummary, summary="Import run abrufen", dependencies=[Depends(finance_read)])
 async def get_import_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -257,7 +258,7 @@ async def get_import_run(
     )
 
 
-@router.get("/imports/{run_id}/items", response_model=List[ConnectorRunItem], summary="Run items auflisten")
+@router.get("/imports/{run_id}/items", response_model=List[ConnectorRunItem], summary="Run items auflisten", dependencies=[Depends(finance_read)])
 async def list_run_items(
     run_id: str,
     only_errors: bool = Query(False),
@@ -290,7 +291,7 @@ async def list_run_items(
     ]
 
 
-@router.post("/imports/{run_id}/validate", response_model=ConnectorRunSummary, summary="Import run validieren")
+@router.post("/imports/{run_id}/validate", response_model=ConnectorRunSummary, summary="Import run validieren", dependencies=[Depends(finance_write)])
 async def validate_import_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -303,7 +304,7 @@ async def validate_import_run(
     return await get_import_run(run_id, tenant_id, db)
 
 
-@router.post("/imports/{run_id}/post", response_model=ConnectorRunSummary, summary="Import run erstellen")
+@router.post("/imports/{run_id}/post", response_model=ConnectorRunSummary, summary="Import run erstellen", dependencies=[Depends(finance_admin)])
 async def post_import_run(
     run_id: str,
     request: Request,
@@ -317,7 +318,7 @@ async def post_import_run(
     return await get_import_run(run_id, tenant_id, db)
 
 
-@router.post("/imports/{run_id}/cancel", response_model=ConnectorRunSummary, summary="Import run stornieren")
+@router.post("/imports/{run_id}/cancel", response_model=ConnectorRunSummary, summary="Import run stornieren", dependencies=[Depends(finance_write)])
 async def cancel_import_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -330,7 +331,7 @@ async def cancel_import_run(
     return await get_import_run(run_id, tenant_id, db)
 
 
-@router.post("/imports/{run_id}/reverse", response_model=ConnectorRunSummary, summary="Import run reverse")
+@router.post("/imports/{run_id}/reverse", response_model=ConnectorRunSummary, summary="Import run reverse", dependencies=[Depends(finance_admin)])
 async def reverse_import_run(
     run_id: str,
     request: Request,

@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import exchange_rates
+from app.auth.deps import get_current_user
 from app.core.database import get_db
 
 
@@ -157,6 +158,7 @@ def _build_client(db: FakeDb) -> TestClient:
     app = FastAPI()
     app.include_router(exchange_rates.router, prefix="/finance")
     app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_ADMIN"]}
     return TestClient(app)
 
 

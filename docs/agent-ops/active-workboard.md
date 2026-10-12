@@ -17,9 +17,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Dateibesitz:** app/core/sse.py, app/routers/workflow_router.py und export_router.py nur mandantengebundene Ereigniszustaellung; app/policy/router.py nur zentraler WS-Kontext; tests/test_identity_streams.py und bestehende zwei Realtime-Security-Testdateien nur echte signierte Testidentitaeten; eigene QA/Workboard. Kein DB-/Provider-/Frontend-Edit.
 **Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
 
-## ZAHLUNG-STAMMDATEN-ROLLEN-20261012 — in Arbeit, Claude Code
+## ZAHLUNG-STAMMDATEN-ROLLEN-20261012 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-12. Dritter Schnitt nach HAUPTBUCH- und ABSCHLUSS-ROLLEN.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Dritter Schnitt nach HAUPTBUCH- und ABSCHLUSS-ROLLEN.
 **Befund:** 24 Finanzdateien pruefen keine Rolle. **Ziel:** (a) Zahlungsverkehr und Schnittstellen — vierzehn
 Dateien: lesen `finance_read`, schreiben `finance_write`, loeschen/Lastschrift ausgeben/Stapel freigeben und
 ausfuehren/Importlauf buchen/Lohn- und Fremdsystemlaeufe/Schnittstellenkonfiguration `finance_admin`.
@@ -28,6 +28,16 @@ Zahlungsbedingungen und Steuerschluessel), schreiben `finance_write`, loeschen `
 **Dateibesitz:** nur Dekoratoren und ein Import in den 24 Dateien; `tests/test_zahlung_stammdaten_rollen_vertrag.py`;
 Anpassung betroffener Tests; QA-Doku.
 **Nicht Teil:** `finance_invoices.py` und `document_control.py` (auch Verkauf/Auswertung schreiben dort), Bankdateien (Codex).
+**Lieferung (22 statt 24 Dateien):** 106 Wege mit `finance_read` / `finance_write` / `finance_admin`; 31 Lesewege der
+Stammdaten bewusst offen. Lastschrift ausgeben, Rechnungsstapel freigeben/ausfuehren, Importlauf buchen, Lohn- und
+Fremdsystemlaeufe, Schnittstellenkonfiguration und jedes Loeschen nur `finance_admin`. Vertrag 1910 Faelle gruen;
+2683 Nachbartests gruen, drei rot und fremd (`test_config_service`, eigene Zeilen aus dem Vorlauf im Pruefstand).
+QA: `docs/quality-assurance/zahlung-stammdaten-rollen-20261012.md`. **Zurueckgenommen, an Codex:**
+`bank_statement_import.py` und `payment_matching.py` — 93 Faelle in euren sechs Bank-Testdateien bauen
+Mini-Anwendungen ohne Nutzer; die Rollen dort gehoeren in euren Bank-Slice. **Stand Finanzwege:** 321 von 413 mit
+Rolle; ohne Rolle schreibend noch 19 (`finance_invoices`, `document_control`, `mask_frontend_bridges`,
+`payment_matching`, `bank_statement_import`, Einzelwege). **Offen:** Debitoren/Kreditoren lesen kann jeder
+Angemeldete (fachliche Entscheidung).
 
 ## IDENTITY-TRANSPORT-20261012 — reserviert, Codex
 

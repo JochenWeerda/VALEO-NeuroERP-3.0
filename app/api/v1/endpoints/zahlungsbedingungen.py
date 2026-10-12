@@ -8,6 +8,7 @@ Fachlicher Hintergrund (Referenz-ERP Wissensbasis, Domain 03 FIBU):
   Schlüsselfelder: ZABD-Nr + Bezeichnung + Zahlungsziel + Skonto-Parameter.
   Hinterlegung am Kunden-/Lieferantenstamm und am Beleg.
 """
+from app.auth.finance_roles import finance_admin, finance_write
 from datetime import datetime
 from typing import Optional
 
@@ -92,7 +93,7 @@ def get_zahlungsbedingung(
     return ZahlungsbedingungOut(**dict(row._mapping))
 
 
-@router.post("", response_model=ZahlungsbedingungOut, status_code=201, summary="Zahlungsbedingung anlegen")
+@router.post("", response_model=ZahlungsbedingungOut, status_code=201, summary="Zahlungsbedingung anlegen", dependencies=[Depends(finance_write)])
 def create_zahlungsbedingung(
     payload: ZahlungsbedingungCreate,
     db=Depends(get_db),
@@ -125,7 +126,7 @@ def create_zahlungsbedingung(
     return ZahlungsbedingungOut(**dict(row._mapping))
 
 
-@router.put("/{zabd_nr}", response_model=ZahlungsbedingungOut, summary="Zahlungsbedingung aktualisieren")
+@router.put("/{zabd_nr}", response_model=ZahlungsbedingungOut, summary="Zahlungsbedingung aktualisieren", dependencies=[Depends(finance_write)])
 def update_zahlungsbedingung(
     zabd_nr: str,
     payload: ZahlungsbedingungCreate,
@@ -156,8 +157,7 @@ def update_zahlungsbedingung(
 
 
 @router.delete("/{zabd_nr}", summary="Zahlungsbedingung löschen",
-    response_model=None
-)
+    response_model=None, dependencies=[Depends(finance_admin)])
 def delete_zahlungsbedingung(
     zabd_nr: str,
     db=Depends(get_db),

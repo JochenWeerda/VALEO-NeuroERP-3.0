@@ -2,6 +2,7 @@
 Direct debit endpoints used by finance UI masks.
 """
 
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
 import logging
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/direct-debits", tags=["finance", "direct-debits"])
 
 
-@router.get("", response_model=list[DirectDebitsOut], summary="Direct debits auflisten")
+@router.get("", response_model=list[DirectDebitsOut], summary="Direct debits auflisten", dependencies=[Depends(finance_read)])
 async def list_direct_debits(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -64,7 +65,7 @@ async def list_direct_debits(
         ) from exc
 
 
-@router.get("/new", response_model=DirectDebitsOut, summary="New direct debit template abrufen")
+@router.get("/new", response_model=DirectDebitsOut, summary="New direct debit template abrufen", dependencies=[Depends(finance_read)])
 async def get_new_direct_debit_template(tenant_id: str = Depends(get_tenant_id)):
     """Return default values for direct debit create forms."""
     return {
@@ -114,7 +115,7 @@ class DirectDebitRunCreate(BaseModel):
 # --------------- POST / DELETE ---------------
 
 
-@router.post("", response_model=DirectDebitsOut, status_code=201, summary="Direct debit run anlegen")
+@router.post("", response_model=DirectDebitsOut, status_code=201, summary="Direct debit run anlegen", dependencies=[Depends(finance_write)])
 async def create_direct_debit_run(
     body: DirectDebitRunCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -155,7 +156,7 @@ async def create_direct_debit_run(
     }
 
 
-@router.get("/{run_id}", response_model=DirectDebitsOut, summary="Direct debit run abrufen")
+@router.get("/{run_id}", response_model=DirectDebitsOut, summary="Direct debit run abrufen", dependencies=[Depends(finance_read)])
 async def get_direct_debit_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -201,7 +202,7 @@ async def get_direct_debit_run(
     }
 
 
-@router.post("/{run_id}/export", response_model=StatusResponse, summary="Direct debit run exportieren")
+@router.post("/{run_id}/export", response_model=StatusResponse, summary="Direct debit run exportieren", dependencies=[Depends(finance_admin)])
 async def export_direct_debit_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -223,7 +224,7 @@ async def export_direct_debit_run(
     return {"ok": True, "run_id": run_id, "exported_items": result.rowcount}
 
 
-@router.delete("/{run_id}", response_class=Response, status_code=204, response_model=None, summary="Direct debit run stornieren")
+@router.delete("/{run_id}", response_class=Response, status_code=204, response_model=None, summary="Direct debit run stornieren", dependencies=[Depends(finance_admin)])
 async def cancel_direct_debit_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
