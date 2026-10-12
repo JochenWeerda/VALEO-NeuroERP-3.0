@@ -5,6 +5,7 @@ FIBU-GL-04: Sammel-/Massenbuchungen Import
 
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Request
+from app.core.exceptions import kontosperre_meldung
 from app.auth.finance_roles import finance_admin, finance_read
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -369,6 +370,9 @@ async def import_journal_entries_csv(
         raise
     except Exception as e:
         db.rollback()
+        sperre = kontosperre_meldung(e)
+        if sperre:
+            raise HTTPException(status_code=409, detail=sperre)
         logger.error(f"Error importing journal entries: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to import journal entries: {str(e)}")
 

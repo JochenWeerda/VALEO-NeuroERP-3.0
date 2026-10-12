@@ -11,6 +11,26 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## KONTO-SPERRE-MELDUNG-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Offener Punkt aus KONTO-SPERRE-20261012.
+**Befund 1:** Die Kontosperre (Trigger `konto_sperre`) las sich nur an der manuellen Buchung als Satz; Vorlage,
+CSV-Einspielung, OP-Ausgleich antworteten 500, Bestandskorrektur und Inventur verschluckten sie und meldeten Erfolg.
+**Befund 2 (Altfehler):** `POST …/bestandskorrektur` speicherte nie: Vorabfrage auf `articles.article_group`
+(Spalte gibt es nicht), Fehler verschluckt, Transaktion tot, Antwort 201 „gebucht“. 0 Korrekturen in beiden DBs.
+**Lieferung:** `kontosperre_meldung()` + zentraler Behandler (409 `KONTO_GESPERRT`) in `app/core/exceptions.py`;
+409 in `booking_templates`, `bulk_journal_import`, `open_items`, `inventory_operations`, `inventory_counts`;
+Kontenzuordnung ueber `articles.warengruppe` im Sicherungspunkt. `tests/test_kontosperre_meldung.py` 8 gruen
+(Pruefstand, echter Trigger, Ratsche). QA: `docs/quality-assurance/konto-sperre-meldung-20261012.md`.
+**Offen:** Inventur buchen meldet bei anderem Buchungsfehler weiter Erfolg (tote Transaktion);
+`sales_credit_notes.py` schreibt Kontonummern in `account_id` (Gutschrift ohne Buchungszeilen).
+
+## IDENTITY-SESSION-PERSISTENCE-20261012 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Sitzungswiderrufe im vorhandenen Redis dauerhaft halten. **Dateibesitz:** config/redis.conf, docker-compose.yml nur Redis-Hostbindung, neue Session-Persistenztests und eigene QA/Workboard. app/core/identity_session.py bleibt im bestehenden eigenen Identitaetsclaim. **Abnahme:** AOF auf bestehendem redis_data, eigene Widerrufsdaten nach kontrolliertem Neustart weiterhin gesperrt; kein neuer Container/DB/Volume, keine fremden Daten loeschen. Neustart erst nach Pruefung laufender Claims und gemeinsamer Nutzung. **Risiko:** kurze Redis-Unterbrechung; keine Cache-Reset- oder Prune-Aktion.
+
+**Lieferung:** AOF mit synchronem Fsync auf vorhandenem Redis-Volume aktiviert; echtes Backend weist eigene widerrufene Sitzung auch nach Redis-Neustart mit 401 ab. 69 lokale Sitzungs-/RSA-/Transportvertraege gruen. Windows-Redis unveraendert; engere Hostbindung blockiert und auf vorherige Bindung zurueckgestellt. Session-API/Agentenarchitektur bleibt im Elternclaim offen. Nachweis: identity-session-persistence-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
 ## FACHROLLEN-KATALOG-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Befund aus den Rollen-Slices.
@@ -61,23 +81,29 @@ Andere 403-Antworten bleiben unberuehrt. Vitest 5 neu + 14 Mahnlauf gruen, tsc/E
 Provider-Konto ohne Finanzrolle fuer die Sichtpruefung). **Offen:** doppelte Meldung in Masken mit eigenem
 Fehler-Toast; Masken, die Fehler schlucken, zeigen weiter leere Listen; Scope-Ablehnungen nicht uebersetzt.
 
-## IDENTITY-PRIVATE-PUSH-20261012 — reserviert, Codex
+## IDENTITY-PRIVATE-PUSH-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
 **Dateibesitz:** .husky/pre-push und neuer scripts/private-identity-push-guard.cjs; guard-forbidden-paths.cjs nur exportierbare Pfadpruefung; private-identity-guard.cjs nur generischer Content-/Metadatavertrag; neuer Test. Jeder ausgehende Commit wird lokal geprueft, auch wenn Daten in Folgecommits wieder entfernt wurden. Keine echten Identitaetswerte in Code/Tests/Commits.
 **Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
 
-## IDENTITY-PROVIDER-RUNTIME-20261012 — reserviert, Codex
+**Lieferung:** Jeder ausgehende Commit samt Metadaten und Merge-Aenderungen geprueft; sechs synthetische Git-/Inhaltsvertraege bestanden. Bewusste Hook-Umgehung und fehlendes lokales Manifest bleiben dokumentierte Grenzen. Nachweis: private-identity-publication-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## IDENTITY-PROVIDER-RUNTIME-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
 **Dateibesitz:** docker-compose.yml nur vorhandener Keycloak-Dienst und aktivierte Profilfunktion; lokale ENV-Werte ausserhalb Git; eigene QA/Runbook/Workboard. Bestehenden Container kontrolliert rekonfigurieren, vorhandene Providerdatenbank erhalten; keine neue Datenbank/Volumes/Container pro Test. Keine persoenlichen Werte committen.
 **Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
 
-## IDENTITY-PRIVATE-DATA-20261012 — reserviert, Codex
+**Lieferung:** Managed-Profile-Funktion im bestehenden Keycloak aktiviert, vorhandene Providerdatenbank erhalten; geschuetztes Mandantenattribut live bestaetigt. Nachweis: identity-provider-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## IDENTITY-PRIVATE-DATA-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
 **Dateibesitz:** .gitignore, scripts/guard-forbidden-paths.cjs sowie neuer generischer lokaler Private-Identity-Scanner und Test; eigene QA/Workboard. Keine persoenlichen Werte in versionierten Artefakten. Private Identitaet/Erstkennwort ausschliesslich ausserhalb des Repositorys.
 **Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
+
+**Lieferung:** Private Identitaeten ausserhalb Git; Pfad- und lokale gesalzene Inhaltspruefung, keine persoenlichen Werte in versionierten Dateien. Nachweis: private-identity-publication-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## IDENTITY-CONTROL-20261012 — in arbeit, Codex
 
@@ -87,6 +113,8 @@ Fehler-Toast; Masken, die Fehler schlucken, zeigen weiter leere Listen; Scope-Ab
 **CI-Unterclaim:** tests/conftest.py nur ausdruecklicher Test-Identitaetskontext der separaten Kompatibilitaets-App; vier Finanz-/Personal-Rollenvertragsfixtures nur Testmandantengrenze. Alte Authattrappen ohne verifizierten Kontext verursachen 2393 CI-Fehler; echte Produktions-Authabnahme bleibt separat und wird nicht aufgeweicht. Weitere betroffene Testdateien vor Edits einzeln inventarisieren.
 
 **Lieferung:** Test-Unterclaim geliefert: vier Rollenvertragsdateien mit 3959 Faellen gruen. Zahlungs-/Stammdaten-Testdatei fuer Claude freigegeben; 67 Finanz-Nachbarfaelle bleiben sein Slice. Produktionsauth unveraendert, keine DB/Container/Reset. Uebrige Identitaetsumsetzung bleibt offen. Nachweis: identity-test-boundaries-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+**Lieferung:** Provider-Teilmeilenstein geliefert: keine Musterkonten, PKCE, kurze Laufzeiten und additive 34 Fachrollen samt ausdruecklichem manager im Realm und laufenden Dienst. Neun Vertraege und beide Katalogchecks gruen. Keine automatische Rollenvergabe. Private Erstzuordnung ausserhalb Git; Benutzer-Erstanmeldung und restliche Sessions-/Agentensteuerung bleiben offen. Nachweis: identity-provider-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## FINANZ-REST-ROLLEN-20261012 — abgeschlossen, Claude Code
 

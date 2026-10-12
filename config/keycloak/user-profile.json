@@ -1,0 +1,117 @@
+{
+  "unmanagedAttributePolicy": "DISABLED",
+  "attributes": [
+    {
+      "name": "username",
+      "permissions": {
+        "view": [
+          "admin",
+          "user"
+        ],
+        "edit": [
+          "admin"
+        ]
+      },
+      "validations": {
+        "length": {
+          "min": 3,
+          "max": 120
+        }
+      }
+    },
+    {
+      "name": "email",
+      "permissions": {
+        "view": [
+          "admin",
+          "user"
+        ],
+        "edit": [
+          "admin",
+          "user"
+        ]
+      },
+      "validations": {
+        "email": {}
+      }
+    },
+    {
+      "name": "firstName",
+      "permissions": {
+        "view": [
+          "admin",
+          "user"
+        ],
+        "edit": [
+          "admin",
+          "user"
+        ]
+      }
+    },
+    {
+      "name": "lastName",
+      "permissions": {
+        "view": [
+          "admin",
+          "user"
+        ],
+        "edit": [
+          "admin",
+          "user"
+        ]
+      }
+    },
+    {
+      "name": "tenant_id",
+      "permissions": {
+        "view": [
+          "admin",
+          "user"
+        ],
+        "edit": [
+          "admin"
+        ]
+      },
+      "validations": {
+        "length": {
+          "min": 1,
+          "max": 64
+        },
+        "pattern": {
+          "pattern": "^[A-Za-z0-9_-]+$"
+        }
+      }
+    },
+    {
+      "name": "identity_type",
+      "permissions": {
+        "view": [
+          "admin"
+        ],
+        "edit": [
+          "admin"
+        ]
+      },
+      "validations": {
+        "options": {
+          "options": [
+            "human",
+            "service"
+          ]
+        }
+      }
+    },
+    {
+      "name": "erp_scopes",
+      "permissions": {
+        "view": [
+          "admin",
+          "user"
+        ],
+        "edit": [
+          "admin"
+        ]
+      }
+    }
+  ]
+}

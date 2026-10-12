@@ -63,6 +63,7 @@ services:
       KC_HTTP_PORT: 8080
       KC_HTTPS_PORT: 8443
       KC_HEALTH_ENABLED: "true"
+      KC_FEATURES: declarative-user-profile
     ports:
       - "8080:8080"
     depends_on:

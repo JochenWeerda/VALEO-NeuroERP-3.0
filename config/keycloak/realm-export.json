@@ -48,6 +48,146 @@
         "name": "crm_manager",
         "description": "CRM Manager - CRM Module Access",
         "composite": false
+      },
+      {
+        "name": "AGRAR_ADMIN",
+        "description": "Agrar: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "AGRAR_BEARBEITEN",
+        "description": "Agrar: anlegen und aendern"
+      },
+      {
+        "name": "AGRAR_LESEN",
+        "description": "Agrar: ansehen"
+      },
+      {
+        "name": "CRM_ADMIN",
+        "description": "Vertrieb und Kundenpflege: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "CRM_BEARBEITEN",
+        "description": "Vertrieb und Kundenpflege: anlegen und aendern"
+      },
+      {
+        "name": "CRM_LESEN",
+        "description": "Vertrieb und Kundenpflege: ansehen"
+      },
+      {
+        "name": "EINKAUF_ADMIN",
+        "description": "Einkauf: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "EINKAUF_BEARBEITEN",
+        "description": "Einkauf: anlegen und aendern"
+      },
+      {
+        "name": "EINKAUF_LESEN",
+        "description": "Einkauf: ansehen"
+      },
+      {
+        "name": "FINANCE_ADMIN",
+        "description": "Finanzbuchhaltung: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "FINANCE_BEARBEITEN",
+        "description": "Finanzbuchhaltung: anlegen und aendern"
+      },
+      {
+        "name": "FINANCE_LESEN",
+        "description": "Finanzbuchhaltung: ansehen"
+      },
+      {
+        "name": "FUTTERMITTEL_ADMIN",
+        "description": "Futtermittel: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "FUTTERMITTEL_BEARBEITEN",
+        "description": "Futtermittel: anlegen und aendern"
+      },
+      {
+        "name": "FUTTERMITTEL_LESEN",
+        "description": "Futtermittel: ansehen"
+      },
+      {
+        "name": "HARVEST_ADMIN",
+        "description": "Ernteannahme: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "HARVEST_BEARBEITEN",
+        "description": "Ernteannahme: anlegen und aendern"
+      },
+      {
+        "name": "HARVEST_LESEN",
+        "description": "Ernteannahme: ansehen"
+      },
+      {
+        "name": "KONTENPLAN_PFLEGE",
+        "description": "Kontenplan: pflegen (delegierbar, unabhaengig von der Leitungsrolle)"
+      },
+      {
+        "name": "KONTENRAHMEN_PFLEGE",
+        "description": "Gemeinsamer Kontenrahmen: pflegen (delegierbar, unabhaengig von der Leitungsrolle)"
+      },
+      {
+        "name": "KONTRAKT_ADMIN",
+        "description": "Kontrakte: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "KONTRAKT_BEARBEITEN",
+        "description": "Kontrakte: anlegen und aendern"
+      },
+      {
+        "name": "KONTRAKT_LESEN",
+        "description": "Kontrakte: ansehen"
+      },
+      {
+        "name": "KONTRAKT_LOESCHEN",
+        "description": "Kontrakte: loeschen"
+      },
+      {
+        "name": "LAGER_ADMIN",
+        "description": "Lager: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "LAGER_LESEN",
+        "description": "Lager: ansehen"
+      },
+      {
+        "name": "PERSONAL_ADMIN",
+        "description": "Personal: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "PERSONAL_BEARBEITEN",
+        "description": "Personal: anlegen und aendern"
+      },
+      {
+        "name": "PERSONAL_LESEN",
+        "description": "Personal: ansehen"
+      },
+      {
+        "name": "QUALITAET_LESEN",
+        "description": "Qualitaetssicherung: ansehen"
+      },
+      {
+        "name": "SALES_ADMIN",
+        "description": "Verkauf: leiten: freigeben, loeschen, abschliessen"
+      },
+      {
+        "name": "SALES_BEARBEITEN",
+        "description": "Verkauf: anlegen und aendern"
+      },
+      {
+        "name": "SALES_LESEN",
+        "description": "Verkauf: ansehen"
+      },
+      {
+        "name": "SETTLEMENT_LESEN",
+        "description": "Abrechnung: ansehen"
+      },
+      {
+        "name": "manager",
+        "description": "Explicit management role; never assigned by default"
       }
     ]
   },
@@ -81,6 +221,33 @@
         "email",
         "profile",
         "roles"
+      ],
+      "protocolMappers": [
+        {
+          "name": "erp-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "valeo-neuro-erp-backend",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "erp-permissions",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "erp_scopes",
+            "claim.name": "erp_scopes",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        }
       ]
     },
     {
@@ -94,7 +261,6 @@
       "serviceAccountsEnabled": true,
       "authorizationServicesEnabled": true,
       "clientAuthenticatorType": "client-secret",
-      "secret": "valeo-backend-secret-dev-change-in-prod",
       "redirectUris": [
         "http://localhost:8000/auth/callback"
       ],
@@ -102,68 +268,39 @@
         "email",
         "profile",
         "roles"
+      ],
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "protocolMappers": [
+        {
+          "name": "erp-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "valeo-neuro-erp-backend",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "erp-permissions",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "erp_scopes",
+            "claim.name": "erp_scopes",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        }
       ]
     }
   ],
-  "users": [
-    {
-      "username": "admin",
-      "enabled": true,
-      "emailVerified": true,
-      "email": "admin@valeo-erp.local",
-      "firstName": "System",
-      "lastName": "Administrator",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "admin123",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["admin", "user"],
-      "attributes": {
-        "tenant_id": ["system"]
-      }
-    },
-    {
-      "username": "user",
-      "enabled": true,
-      "emailVerified": true,
-      "email": "user@valeo-erp.local",
-      "firstName": "Test",
-      "lastName": "User",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "user123",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["user"],
-      "attributes": {
-        "tenant_id": ["demo-tenant"]
-      }
-    },
-    {
-      "username": "finance",
-      "enabled": true,
-      "emailVerified": true,
-      "email": "finance@valeo-erp.local",
-      "firstName": "Finance",
-      "lastName": "Manager",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "finance123",
-          "temporary": false
-        }
-      ],
-      "realmRoles": ["user", "finance_manager"],
-      "attributes": {
-        "tenant_id": ["demo-tenant"]
-      }
-    }
-  ],
+  "users": [],
   "clientScopes": [
     {
       "name": "roles",
@@ -204,6 +341,10 @@
         }
       ]
     }
-  ]
+  ],
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 900,
+  "ssoSessionMaxLifespan": 28800,
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 0
 }
-

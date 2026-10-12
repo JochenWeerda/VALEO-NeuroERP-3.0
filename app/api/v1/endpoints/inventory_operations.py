@@ -11,6 +11,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from app.core.exceptions import kontosperre_meldung
 from app.core.tenant import get_tenant_id
 from pydantic import BaseModel, Field
 from sqlalchemy import text
@@ -140,17 +141,21 @@ def _ensure_account(db, tenant_id: str, account_number: str, account_name: str, 
 def _get_account_mapping(db, tenant_id: str, article_id: str):
     """Look up LagerKontenzuordnung for the article's group; fall back to SKR03 defaults."""
     try:
-        row = db.execute(
-            text("""
-                SELECT lkz.bestandskonto, lkz.gegenkonto_zugang, lkz.gegenkonto_abgang
-                FROM domain_einkauf.lager_kontenzuordnung lkz
-                JOIN domain_inventory.articles a ON a.article_group = lkz.artikelgruppe
-                WHERE lkz.tenant_id = :tenant_id AND a.id = :article_id AND lkz.aktiv = true
-                ORDER BY lkz.niederlassung_id NULLS LAST
-                LIMIT 1
-            """),
-            {"tenant_id": tenant_id, "article_id": article_id},
-        ).mappings().first()
+        # Im Sicherungspunkt: Scheitert die Abfrage, bleibt die Transaktion der Bestandskorrektur heil.
+        # Bis 12.10.2026 fragte sie die Spalte ``article_group`` ab, die es nicht gibt; der verschluckte
+        # Fehler brach die Transaktion ab, und jede Korrektur meldete "gebucht", ohne etwas zu speichern.
+        with db.begin_nested():
+            row = db.execute(
+                text("""
+                    SELECT lkz.bestandskonto, lkz.gegenkonto_zugang, lkz.gegenkonto_abgang
+                    FROM domain_einkauf.lager_kontenzuordnung lkz
+                    JOIN domain_inventory.articles a ON a.warengruppe = lkz.artikelgruppe
+                    WHERE lkz.tenant_id = :tenant_id AND a.id = :article_id AND lkz.aktiv = true
+                    ORDER BY lkz.niederlassung_id NULLS LAST
+                    LIMIT 1
+                """),
+                {"tenant_id": tenant_id, "article_id": article_id},
+            ).mappings().first()
         if row:
             return {
                 "bestandskonto": row["bestandskonto"],
@@ -357,6 +362,12 @@ async def create_bestandskorrektur(
                 reference=ref_number,
             )
     except Exception as exc:
+        # Bestand und Buchung teilen eine Transaktion: Lehnt die Kontosperre die Buchungszeile ab,
+        # ist auch die Bestandsaenderung verloren. Das wird gesagt statt als Erfolg gemeldet.
+        sperre = kontosperre_meldung(exc)
+        if sperre:
+            db.rollback()
+            raise HTTPException(status_code=409, detail=sperre) from exc
         # Nicht blockierend: die Bestandskorrektur bleibt bestehen. Die
         # ausgefallene GL-Buchung wird gemeldet statt verschluckt.
         from app.core.metrics import critical_data_path_errors_total
