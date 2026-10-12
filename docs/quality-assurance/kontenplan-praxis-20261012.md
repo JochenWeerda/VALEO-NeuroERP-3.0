@@ -49,8 +49,8 @@ und nicht Teil dieses Commits.
 
 | Prüfung | Ergebnis |
 |---|---|
-| `tests/test_kontenplan_mandant_vertrag.py` gegen `valeo_probe` (echte Datenbank, zwei Mandanten, echte Buchungszeile) | 27 bestanden |
-| `tests/test_hauptbuch_rollen_vertrag.py` (jetzt 14 Rollen × 54 Wege, Zugangsklasse „pflege") | 818 bestanden |
+| `tests/test_kontenplan_mandant_vertrag.py` gegen `valeo_probe` (echte Datenbank, zwei Mandanten, echte Buchungszeile) | 25 bestanden |
+| `tests/test_hauptbuch_rollen_vertrag.py` (jetzt 14 Rollen × 54 Wege, Zugangsklasse „pflege") | 820 bestanden |
 | alle Testdateien, die Kontenplan, `/accounts` oder Finanzrollen berühren | 1333 bestanden, 2 übersprungen |
 | Schnittstellenbeschreibung der betroffenen Pfade | unverändert |
 | `tsc --noEmit`, ESLint auf der Maske | ohne Fehler |

@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## KONTO-SPERRE-20261012 — in Arbeit, Claude Code
+## KONTO-SPERRE-20261012 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-12. **Von:** Auftraggeber („ja weiter“), offener Punkt aus
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. **Von:** Auftraggeber („ja weiter“), offener Punkt aus
 KONTENPLAN-PRAXIS-20261012. **Befund:** Fuer ein bebuchtes Konto nennt die Praxis die Sperre; das Konto hat
 kein solches Feld (`allow_manual_entries` steht in Schema und Maske, nicht in der Tabelle). **Ziel:** Spalte
 `posting_blocked`; ein Trigger an `domain_erp.journal_entry_lines` lehnt jede neue Buchungszeile auf ein
@@ -23,6 +23,17 @@ Maske zeigt und setzt die Sperre statt des wirkungslosen Felds. **Dateibesitz:**
 `chart_of_accounts.py`, `pages/finance/chart-of-accounts.tsx`, `lib/services/finance-service.ts` (Typ),
 `tests/test_konto_sperre.py`, Tabellenkatalog/Migrationsinventar nur die eigenen Zeilen,
 Handbuchabschnitt, QA-Doku. **Migration:** eine, additiv, auf dem einzigen Head `audit_urheber_20261011`.
+**Lieferung:** Spalte `posting_blocked`; Trigger `trg_journal_entry_lines_konto_sperre` lehnt jede neue Buchungszeile
+auf ein gesperrtes Konto ab (auch rohes SQL, auch Umhaengen); sperren/entsperren ueber die Kontenpflege; manuelle
+Buchung 409 mit Begruendung; Pflegemaske mit Spalte „Buchbar“ und Sperrfeld statt des nie gespeicherten
+`allow_manual_entries`; Handbuch beschreibt die Sperre. Migration auf `valeo_probe` und `valeo_neuro_erp` gelaufen.
+Vertrag 33 gruen (acht neu), 2107 Nachbartests gruen, OpenAPI aktuell, tsc/ESLint gruen. QA:
+`docs/quality-assurance/konto-sperre-20261012.md`. **Nicht geprueft:** Maske im Browser — das Dev-Backend lehnt den
+Dev-Token ab, solange das nicht committete WIP von SYSTEM-TENANT-BOUNDARY-20261012 im Arbeitsbaum geladen ist.
+**An alle:** `docs/admin/table-catalog.*`, `migration-inventory.md` und `openapi.json` tragen im Arbeitsbaum fremdes
+WIP ohne die Zeilen dieser Migration — vor einem Commit dieser Dateien mit HEAD zusammenfuehren, sonst faellt der
+Katalog-Check. **Offen:** uebrige Buchungswege melden die Sperre als Datenbankfehler; keine Anzeige, wo ein Konto
+hinterlegt ist; `allow_manual_entries`/`currency` weiter ungespeichert im Schema.
 
 ## SYSTEM-TENANT-BOUNDARY-20261012 — reserviert, Codex
 
@@ -71,7 +82,7 @@ ihr fremdes, nicht committetes WIP dort — drei Klassenaenderungen — bleibt i
 ersetzt kein Recht, benutzte Konten bleiben):** anlegen/aendern/deaktivieren ueber `kontenpflege`
 (`KONTENPLAN_PFLEGE`, `FINANCE_ADMIN`, `admin`) statt Schreibrolle; bebuchtes Konto 409 bei Deaktivieren und
 Kontenartwechsel (alte Pruefung griff nie); Pflegemaske zeigt Ablehnungsgrund, Kennzeichen „Gemeinsamer Rahmen“,
-Folge vor dem Deaktivieren, zweiter Klick bei Rahmen-/Kontenartaenderung. Vertraege 27 + 818 gruen, 1333
+Folge vor dem Deaktivieren, zweiter Klick bei Rahmen-/Kontenartaenderung. Vertraege 25 + 820 gruen, 1333
 Nachbartests gruen, tsc/ESLint gruen, Sichtpruefung ohne Schreibzugriff. QA:
 `docs/quality-assurance/kontenplan-praxis-20261012.md`. **Betrieb:** `FINANCE_BEARBEITEN` pflegt keine Konten mehr.
 **Offen:** Kontosperre (Spalte fehlt; `allow_manual_entries` und Waehrung werden nicht gespeichert), Reaktivieren,
