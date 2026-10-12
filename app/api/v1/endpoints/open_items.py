@@ -15,6 +15,7 @@ import logging
 from app.core.exceptions import kontosperre_meldung
 from app.auth.finance_roles import finance_admin, finance_write, open_items_read
 from app.core.uuid7 import uuid7
+from app.core.identity_context import current_identity
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
@@ -32,22 +33,8 @@ router = APIRouter(prefix="/open-items", tags=["finance", "open-items"])
 
 
 def _get_user_id_from_request(request: Request | None) -> str | None:
-    if request is None:
-        return None
-    uid = request.headers.get("X-User-ID")
-    if uid:
-        return uid
-    auth = request.headers.get("Authorization", "")
-    if auth.startswith("Bearer "):
-        try:
-            import base64 as _b64
-            import json as _json
-            payload = auth[7:].split(".")[1]
-            payload += "=" * (4 - len(payload) % 4)
-            return _json.loads(_b64.urlsafe_b64decode(payload)).get("sub")
-        except Exception:  # noqa: BLE001 â€” JWT decode failed; caller handles None return
-            pass
-    return None
+    """Audit actor from the verified execution context, never caller headers."""
+    return current_identity().subject
 
 
 class OpenItemSettlement(BaseModel):
