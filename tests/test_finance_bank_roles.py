@@ -15,6 +15,7 @@ from fastapi.testclient import TestClient
 
 from app.auth.deps import get_current_user
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 
 WEGE = {'bank_accounts': [('GET', '/bank-accounts/new', 'read'),
                    ('GET', '/bank-accounts', 'read'),
@@ -76,6 +77,8 @@ def grenze():
         raise HTTPException(418, "autorisierte Datenbankgrenze")
 
     app.dependency_overrides[get_db] = datenbank
+    # This suite isolates roles; real provider/tenant validation is tested separately.
+    app.dependency_overrides[get_tenant_id] = lambda: "haus-a"
     with TestClient(app) as client:
         yield app, client, aufrufe
     app.dependency_overrides.clear()

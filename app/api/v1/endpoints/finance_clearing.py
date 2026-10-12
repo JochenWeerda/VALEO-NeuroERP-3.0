@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_read, finance_write
 from datetime import date
 from typing import Any, Optional
 
@@ -18,7 +19,7 @@ from app.api.v1.schemas.base import TypedObjectOut
 router = APIRouter(prefix="/finance", tags=["finance", "fibu", "op"])
 
 
-@router.get("/zahlungseingang/clearings", response_model=TypedObjectOut, summary="Auszifferungen je OP")
+@router.get("/zahlungseingang/clearings", response_model=TypedObjectOut, summary="Auszifferungen je OP", dependencies=[Depends(finance_read)])
 def clearings(
     rechnungsnr: str = Query(..., description="Rechnungsnummer des OP"),
     db: Session = Depends(get_db),
@@ -36,7 +37,7 @@ class PaymentIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/zahlungseingang", response_model=TypedObjectOut, summary="Zahlungseingang erfassen (OP ausziffern)")
+@router.post("/zahlungseingang", response_model=TypedObjectOut, summary="Zahlungseingang erfassen (OP ausziffern)", dependencies=[Depends(finance_write)])
 def record_payment(
     body: PaymentIn,
     db: Session = Depends(get_db),

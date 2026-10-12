@@ -1,5 +1,5 @@
 """
-API authentication helpers with optional OIDC/JWT validation.
+API authentication helpers with mandatory provider identity and ERP tenant binding.
 """
 
 from __future__ import annotations
@@ -30,12 +30,15 @@ async def require_bearer_token(
 ) -> str:
     """
     Validate bearer token and attach claims to the request state.
-    Supports a development token (API_DEV_TOKEN) and OIDC JWT validation.
+    Requires a signed provider identity and an unambiguous ERP tenant.
     Falls back to ?token= query param for SSE/WebSocket paths where browsers
     cannot set Authorization headers (EventSource limitation).
     """
     if _is_path_exempt(request.url.path):
         return ""
+
+    if len(request.headers.getlist("authorization")) > 1:
+        raise HTTPException(401, "Ambiguous bearer credentials")
 
     if not isinstance(credentials, HTTPAuthorizationCredentials):
         credentials = await http_bearer(request)
@@ -43,15 +46,12 @@ async def require_bearer_token(
     if credentials is None or credentials.scheme.lower() != "bearer":
         # Fallback: accept token from query param for SSE and WebSocket endpoints
         query_token = request.query_params.get("token", "").strip()
-        if query_token:
+        if query_token and (request.scope["type"] == "websocket" or
+                            request.url.path == "/api/events" or request.url.path.startswith("/api/stream/")):
             token = query_token
-            expected = settings.API_DEV_TOKEN
-            if expected and token == expected:
-                request.state.token_claims = {"token_type": "dev"}
-                return token
-            claims = _validate_jwt(token)
-            _bind_tenant(request, claims)
-            request.state.token_claims = claims
+            if any(value.strip() != token for value in request.query_params.getlist("token")):
+                raise HTTPException(401, "Ambiguous bearer credentials")
+            verified_identity(request, token)
             return token
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -59,63 +59,54 @@ async def require_bearer_token(
         )
 
     token = credentials.credentials.strip()
-    expected = settings.API_DEV_TOKEN
-
-    if expected and token == expected:
-        request.state.token_claims = {"token_type": "dev"}
-        return token
-
-    claims = _validate_jwt(token)
-    _bind_tenant(request, claims)
-    request.state.token_claims = claims
+    query_tokens = request.query_params.getlist("token")
+    if query_tokens and (request.scope["type"] == "websocket" or request.url.path == "/api/events" or request.url.path.startswith("/api/stream/")):
+        if any(value.strip() != token for value in query_tokens):
+            raise HTTPException(401, "Ambiguous bearer credentials")
+    verified_identity(request, token)
     return token
 
 
-_TENANT_CLAIMS = ("tenant_id", "mandanten_id")
+def verified_identity(connection, token: str) -> dict:
+    """One signed provider identity for HTTP dependencies and WebSockets."""
+    from app.core.tenant_binding import checked_tenant, bind_headers, check_selector
+    if (getattr(connection.state, "tenant_verified", False)
+            and token == getattr(connection.state, "authenticated_token", None)):
+        claims = connection.state.token_claims
+    else:
+        try:
+            claims = _validate_jwt(token)
+        except jwt.PyJWTError as exc:
+            raise HTTPException(401, "Invalid bearer token") from exc
+    tenant = checked_tenant(claims)
+    bind_headers(connection.scope, tenant)
+    from app.core.tenant_binding import TENANT_FIELDS, TENANT_LIST_FIELDS
+    for name in TENANT_FIELDS | TENANT_LIST_FIELDS:
+        if name in connection.query_params:
+            check_selector(connection.query_params.getlist(name), tenant)
+    connection.state.token_claims = claims
+    connection.state.tenant_id = tenant
+    connection.state.tenant_verified = True
+    connection.state.authenticated_token = token
+    return claims
 
 
-def _token_tenants(claims: Dict[str, Any]) -> set[str]:
-    """Die Mandanten, die das Token nennt. Keycloak liefert ein Attribut je nach Mapper als Text oder Liste."""
-    gefunden: set[str] = set()
-    for key in _TENANT_CLAIMS:
-        wert = claims.get(key)
-        for einzel in wert if isinstance(wert, (list, tuple)) else [wert]:
-            if isinstance(einzel, str) and einzel.strip():
-                gefunden.add(einzel.strip())
-    return gefunden
-
-
-def _bind_tenant(request: Request, claims: Dict[str, Any]) -> None:
-    """Bindet den Mandanten der Anfrage an den Mandanten der Anmeldung.
-
-    Bis zum 12.10.2026 wurde ``X-Tenant-ID`` nur auf seine Form geprueft: Wer angemeldet war, konnte
-    jeden Mandanten in den Kopf schreiben. Jetzt gilt an dieser einen Stelle fuer jede Anfrage:
-
-    * Nennt das Token genau einen Mandanten, muss die Anfrage denselben nennen — sonst 403.
-    * Nennt das Token mehrere, ist es nicht eindeutig — 403.
-    * Nennt das Token keinen, laeuft die Anfrage weiter, solange ``OIDC_TENANT_CLAIM_REQUIRED`` aus ist
-      (Umstellung, ohne alle auszusperren); mit dem Schalter 403.
-
-    Der Dev-Token kommt hier nicht vorbei — er traegt keine Claims und gilt nur in der Entwicklung.
-    """
-    tenants = _token_tenants(claims)
-    if len(tenants) > 1:
-        logger.warning("tenant_binding ambiguous sub=%s", claims.get("sub"))
-        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Das Token nennt mehr als einen Mandanten.")
-    if not tenants:
-        if settings.OIDC_TENANT_CLAIM_REQUIRED:
-            logger.warning("tenant_binding missing_claim sub=%s", claims.get("sub"))
-            raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Das Token nennt keinen Mandanten.")
-        return
-    angemeldet = next(iter(tenants))
-    # Die Middleware hat den Mandanten der Anfrage schon bestimmt (Kopf, in der Entwicklung der Vorgabemandant).
-    angefragt = getattr(request.state, "tenant_id", None) or (request.headers.get("X-Tenant-ID") or "").strip()
-    if angefragt and angefragt != angemeldet:
-        logger.warning("tenant_binding mismatch sub=%s path=%s", claims.get("sub"), request.url.path)
-        raise HTTPException(
-            status.HTTP_403_FORBIDDEN,
-            detail="Der Mandant der Anfrage (X-Tenant-ID) ist nicht der Mandant der Anmeldung.",
-        )
+def verified_websocket_context(websocket, query_token: str | None, query_tenant: str | None = None) -> dict:
+    from app.auth.oidc import extract_roles
+    from app.core.tenant_binding import check_selector
+    headers = websocket.headers.getlist("authorization")
+    if len(headers) > 1:
+        raise HTTPException(401, "Ambiguous bearer credentials")
+    header = headers[0] if headers else ""
+    if header and not header.lower().startswith("bearer "):
+        raise HTTPException(401, "Missing bearer token")
+    token = header[7:].strip() if header else (query_token or "").strip()
+    values = websocket.query_params.getlist("token")
+    if not token or any(value.strip() != token for value in values):
+        raise HTTPException(401, "Missing or ambiguous bearer credentials")
+    claims = verified_identity(websocket, token)
+    check_selector(query_tenant, websocket.state.tenant_id)
+    return {"user_id": claims["sub"], "roles": extract_roles(claims), "tenant_id": websocket.state.tenant_id}
 
 
 def _validate_jwt(token: str) -> Dict[str, Any]:
@@ -153,9 +144,13 @@ def _validate_jwt(token: str) -> Dict[str, Any]:
     issuer = _resolve_issuer()
 
     options = {
-        "verify_aud": bool(audience),
-        "verify_iss": bool(issuer),
+        "verify_aud": True,
+        "verify_iss": True,
+        "require": ["iss", "aud", "exp", "sub"],
     }
+
+    if not audience or not issuer:
+        raise HTTPException(401, "Identity provider issuer and audience are required")
 
     try:
         claims = jwt.decode(
@@ -270,19 +265,7 @@ def _is_path_exempt(path: str) -> bool:
     Prüft ob ein Pfad von Auth exemptiert ist.
     Unterstützt exakte Matches und Prefix-Matches (endend mit /).
     """
-    if not path.startswith("/api"):
-        return True
-
     normalized = path.rstrip("/")
-    
-    for exempt_path in settings.API_AUTH_EXEMPT_PATHS:
-        # Prefix-Match für Pfade mit / am Ende
-        if exempt_path.endswith("/"):
-            prefix = exempt_path.rstrip("/")
-            if normalized.startswith(prefix):
-                return True
-        # Exakter Match
-        elif normalized == exempt_path.rstrip("/"):
-            return True
-    
-    return False
+    # Explicit operational probes only; callbacks require their own documented trust boundary.
+    return normalized in {"/api/v1/health", "/api/v1/health/live", "/api/v1/health/ready",
+                          "/api/v1/health/startup", "/api/v1/health/database"}

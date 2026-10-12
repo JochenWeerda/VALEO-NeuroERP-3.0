@@ -32,12 +32,19 @@ def test_fibu_connector_import_rejects_invalid_payroll_csv_with_422(monkeypatch)
     monkeypatch.setattr(fibu_connectors.workflow, "set_run_artifact", _set_run_artifact)
     monkeypatch.setattr(fibu_connectors.workflow, "parse_run", _parse_run)
 
-    client = TestClient(app)
-    response = client.post(
-        "/api/v1/finance/connectors/PAYROLL/imports",
-        files={"file": ("payroll.csv", b"buchungsdatum;konto;betrag;soll_haben\n2026-03-15;;120;S\n", "text/csv")},
-        headers={"X-Tenant-ID": "tenant-1"},
-    )
+    from app.auth.deps import get_current_user
+
+    # Der Weg prueft seit 12.10.2026 die Finanzrolle; hier geht es um die Datenqualitaet des Imports.
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_ADMIN"]}
+    try:
+        client = TestClient(app)
+        response = client.post(
+            "/api/v1/finance/connectors/PAYROLL/imports",
+            files={"file": ("payroll.csv", b"buchungsdatum;konto;betrag;soll_haben\n2026-03-15;;120;S\n", "text/csv")},
+            headers={"X-Tenant-ID": "tenant-1"},
+        )
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
 
     assert response.status_code == 422
     body = response.json()["detail"]

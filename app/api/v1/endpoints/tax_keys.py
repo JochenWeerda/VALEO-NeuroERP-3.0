@@ -3,6 +3,7 @@ Tax Keys API
 FIBU-TAX-01: Steuerschlüssel-System vervollständigen
 """
 
+from app.auth.finance_roles import finance_admin, finance_write
 from typing import List, Optional
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -250,7 +251,7 @@ async def get_tax_key(
         raise HTTPException(status_code=500, detail=f"Failed to get tax key: {str(e)}")
 
 
-@router.post("", response_model=TaxKeyResponse, status_code=201, summary="Tax key anlegen")
+@router.post("", response_model=TaxKeyResponse, status_code=201, summary="Tax key anlegen", dependencies=[Depends(finance_write)])
 async def create_tax_key(
     tax_key: TaxKeyCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -345,7 +346,7 @@ async def create_tax_key(
         raise HTTPException(status_code=500, detail=f"Failed to create tax key: {str(e)}")
 
 
-@router.put("/{tax_key_id}", response_model=TaxKeyResponse, summary="Tax key aktualisieren")
+@router.put("/{tax_key_id}", response_model=TaxKeyResponse, summary="Tax key aktualisieren", dependencies=[Depends(finance_write)])
 async def update_tax_key(
     tax_key_id: str,
     tax_key: TaxKeyUpdate,
@@ -481,7 +482,7 @@ async def update_tax_key(
         raise HTTPException(status_code=500, detail=f"Failed to update tax key: {str(e)}")
 
 
-@router.delete("/{tax_key_id}", status_code=204, response_class=Response, response_model=None, summary="Tax key löschen")
+@router.delete("/{tax_key_id}", status_code=204, response_class=Response, response_model=None, summary="Tax key löschen", dependencies=[Depends(finance_admin)])
 async def delete_tax_key(
     tax_key_id: str,
     tenant_id: str = Depends(get_tenant_id),

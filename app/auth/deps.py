@@ -5,29 +5,12 @@ Bearer-Token-Validierung und Rollen-Check
 
 from __future__ import annotations
 from typing import List, Optional, TypedDict
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from .jwt import decode_token
-from app.core.config import settings
-from app.core.tenant_context import get_current_tenant_id
+from app.core.tenant import get_tenant_id
 
 # Bearer-Token-Schema
 bearer = HTTPBearer(auto_error=True)
-
-# Dev-Token erhält alle Standard-Domänenrollen (nur aktiv wenn API_DEV_TOKEN gesetzt)
-_DEV_ROLES = [
-    "admin", "manager", "user",
-    "KONTRAKT_LESEN", "KONTRAKT_BEARBEITEN", "KONTRAKT_ADMIN", "KONTRAKT_LOESCHEN",
-    "HARVEST_LESEN", "HARVEST_BEARBEITEN", "HARVEST_ADMIN",
-    "SALES_LESEN", "SALES_BEARBEITEN", "SALES_ADMIN",
-    "EINKAUF_LESEN", "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN",
-    "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN",
-    "LAGER_LESEN", "LAGER_BEARBEITEN", "LAGER_ADMIN",
-    "CRM_LESEN", "CRM_BEARBEITEN", "CRM_ADMIN",
-    "QUALITAET_LESEN", "QUALITAET_BEARBEITEN", "QUALITAET_ADMIN",
-    "FUTTERMITTEL_LESEN", "FUTTERMITTEL_BEARBEITEN", "FUTTERMITTEL_ADMIN",
-]
-
 
 class User(TypedDict, total=False):
     """Authenticated User Object"""
@@ -37,11 +20,12 @@ class User(TypedDict, total=False):
 
 
 def get_current_user(
+    request: Request,
     creds: HTTPAuthorizationCredentials = Depends(bearer),
 ) -> User:
     """
     Dependency: Validiert JWT Token und gibt User zurück.
-    Akzeptiert im Dev-Betrieb API_DEV_TOKEN (konsistent mit require_bearer_token).
+    Verwendet ausschliesslich die verifizierte Provideridentitaet.
 
     Args:
         creds: Bearer-Token aus Authorization-Header
@@ -52,21 +36,18 @@ def get_current_user(
     Raises:
         HTTPException 401: Token ungültig oder abgelaufen
     """
-    token = (creds.credentials or "").strip()
-    if settings.API_DEV_TOKEN and token == settings.API_DEV_TOKEN:
-        return {"sub": "dev", "roles": _DEV_ROLES, "name": "dev"}
-
-    try:
-        claims = decode_token(creds.credentials)
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-        )
-
-    roles = claims.get("roles") or []
-    if not isinstance(roles, list):
-        roles = []
+    if (getattr(request.state, "tenant_verified", False)
+            and creds.credentials.strip() == getattr(request.state, "authenticated_token", None)):
+        from app.auth.oidc import extract_roles
+        claims = request.state.token_claims
+        subject = claims["sub"]
+        name = next((claims[k].strip() for k in ("preferred_username", "name", "email")
+                     if isinstance(claims.get(k), str) and claims[k].strip()), subject)
+        return {"sub": subject, "roles": extract_roles(claims), "name": name, "raw": claims}
+    from app.core.security import verified_identity
+    from app.auth.oidc import extract_roles
+    claims = verified_identity(request, creds.credentials.strip())
+    roles = extract_roles(claims)
 
     kennung = claims.get("sub", "")
     name = next(
@@ -74,7 +55,7 @@ def get_current_user(
          if isinstance(claims.get(k), str) and claims[k].strip()),
         kennung,
     )
-    return {"sub": kennung, "roles": roles, "name": name}
+    return {"sub": kennung, "roles": roles, "name": name, "raw": claims}
 
 
 def anmeldename(user: Optional[dict]) -> str:
@@ -115,12 +96,3 @@ def require_roles(*needed: str):
         return user
 
     return _dep
-
-
-def get_tenant_id(x_tenant_id: str | None = Header(default=None, alias="X-Tenant-ID")) -> str:
-    """
-    Compatibility tenant dependency for modules importing app.auth.deps.get_tenant_id.
-    """
-    tenant_id = (x_tenant_id or "").strip()
-    return tenant_id or get_current_tenant_id() or settings.DEFAULT_TENANT_ID
-

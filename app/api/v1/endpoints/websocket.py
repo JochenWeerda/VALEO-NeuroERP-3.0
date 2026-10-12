@@ -8,8 +8,6 @@ import json
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect, status
 from typing import Dict, Set
 
-from app.auth.jwt import decode_token
-from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -22,43 +20,9 @@ router = APIRouter()
 active_terminals: Dict[str, Set[WebSocket]] = {}
 
 
-def _extract_websocket_token(websocket: WebSocket, query_token: str | None) -> str:
-    if query_token:
-        return query_token.strip()
-
-    auth_header = (websocket.headers.get("authorization") or "").strip()
-    if auth_header.lower().startswith("bearer "):
-        return auth_header[7:].strip()
-    return auth_header
-
-
-def _resolve_authenticated_context(
-    websocket: WebSocket,
-    query_token: str | None,
-    query_tenant_id: str | None,
-) -> dict:
-    token = _extract_websocket_token(websocket, query_token)
-    if not token:
-        raise ValueError("Missing bearer token")
-
-    if settings.API_DEV_TOKEN and token == settings.API_DEV_TOKEN:
-        user_id = "dev"
-        roles: list[str] = ["admin"]
-    else:
-        claims = decode_token(token)
-        user_id = (claims.get("sub") or "").strip()
-        roles = claims.get("roles") or []
-        if not isinstance(roles, list):
-            roles = []
-        if not user_id:
-            raise ValueError("Invalid or expired token")
-
-    tenant_id = (
-        (query_tenant_id or "").strip()
-        or (websocket.headers.get("x-tenant-id") or "").strip()
-        or "system"
-    )
-    return {"user_id": user_id, "roles": roles, "tenant_id": tenant_id}
+def _resolve_authenticated_context(websocket: WebSocket, query_token: str | None, query_tenant_id: str | None) -> dict:
+    from app.core.security import verified_websocket_context
+    return verified_websocket_context(websocket, query_token, query_tenant_id)
 
 
 def _terminal_key(tenant_id: str, terminal_id: str) -> str:

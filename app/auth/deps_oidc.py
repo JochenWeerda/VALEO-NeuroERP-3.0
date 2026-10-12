@@ -5,7 +5,7 @@ Bearer-Token-Validierung mit OIDC Provider
 
 from __future__ import annotations
 from typing import List, TypedDict
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from .oidc import oidc, extract_roles, extract_scopes
 import logging
@@ -25,6 +25,7 @@ class User(TypedDict, total=False):
 
 
 async def get_current_user(
+    request: Request,
     creds: HTTPAuthorizationCredentials = Depends(bearer),
 ) -> User:
     """
@@ -40,7 +41,9 @@ async def get_current_user(
         HTTPException 401: Token ungültig oder abgelaufen
     """
     try:
-        claims = await oidc.verify(creds.credentials)
+        claims = (request.state.token_claims if (getattr(request.state, "tenant_verified", False)
+                  and creds.credentials.strip() == getattr(request.state, "authenticated_token", None))
+                  else await oidc.verify(creds.credentials))
     except Exception as e:
         logger.warning(f"Token validation failed: {e}")
         raise HTTPException(

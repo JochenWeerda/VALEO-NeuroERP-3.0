@@ -4,6 +4,7 @@ RESTful API for debtor master data management
 Adapted to existing database schema (debitor_number, name, address JSONB)
 """
 
+from app.auth.finance_roles import finance_admin, finance_write
 from typing import Optional
 import re
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
@@ -129,7 +130,7 @@ def _row_to_debtor(row) -> Debtor:
     )
 
 
-@router.post("/", response_model=Debtor, status_code=201, summary="Debtor anlegen")
+@router.post("/", response_model=Debtor, status_code=201, summary="Debtor anlegen", dependencies=[Depends(finance_write)])
 async def create_debtor(
     debtor_data: DebtorCreate,
     db: Session = Depends(get_db)
@@ -287,7 +288,7 @@ async def get_debtor(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve debtor: {str(e)}")
 
 
-@router.put("/{debtor_id}", response_model=Debtor, summary="Debtor aktualisieren")
+@router.put("/{debtor_id}", response_model=Debtor, summary="Debtor aktualisieren", dependencies=[Depends(finance_write)])
 async def update_debtor(
     debtor_id: str,
     debtor_data: DebtorUpdate,
@@ -440,7 +441,7 @@ async def get_debtor_balance(
         raise HTTPException(status_code=500, detail=f"Failed to get debtor balance: {str(e)}")
 
 
-@router.delete("/{debtor_id}", status_code=204, response_class=Response, response_model=None, summary="Debtor löschen")
+@router.delete("/{debtor_id}", status_code=204, response_class=Response, response_model=None, summary="Debtor löschen", dependencies=[Depends(finance_admin)])
 async def delete_debtor(
     debtor_id: str,
     db: Session = Depends(get_db)

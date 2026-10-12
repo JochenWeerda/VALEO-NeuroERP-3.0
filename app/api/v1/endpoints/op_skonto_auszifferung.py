@@ -12,6 +12,7 @@ Fachlicher Hintergrund (Referenz-ERP Wissensbasis, Domain 03 FIBU):
   für Warenhändler. Der Skontobetrag wird auf ein separates Skontokonto gebucht.
   Wichtig für korrekte GuV-Darstellung und periodengerechte Buchung.
 """
+from app.auth.finance_roles import finance_read, finance_write
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
@@ -83,8 +84,7 @@ class SkontoBerechnung(BaseModel):
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.post("/berechnen", summary="Skonto berechne",
-    response_model=OpSkontoAuszifferungOut
-)
+    response_model=OpSkontoAuszifferungOut, dependencies=[Depends(finance_write)])
 def berechne_skonto(payload: SkontoBerechnung):
     """Skontobetrag aus Rechnungsbetrag und Prozentsatz berechnen.
 
@@ -112,7 +112,7 @@ def berechne_skonto(payload: SkontoBerechnung):
     }
 
 
-@router.get("", response_model=list[SkontoAuszifferungOut], summary="Auszifferungen auflisten")
+@router.get("", response_model=list[SkontoAuszifferungOut], summary="Auszifferungen auflisten", dependencies=[Depends(finance_read)])
 def list_auszifferungen(
     op_id: Optional[str] = Query(None),
     von_datum: Optional[date] = Query(None),
@@ -139,7 +139,7 @@ def list_auszifferungen(
     return [SkontoAuszifferungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=SkontoAuszifferungOut, status_code=201, summary="Auszifferung anlegen")
+@router.post("", response_model=SkontoAuszifferungOut, status_code=201, summary="Auszifferung anlegen", dependencies=[Depends(finance_write)])
 def create_auszifferung(
     payload: SkontoAuszifferungCreate,
     db=Depends(get_db),
@@ -205,7 +205,7 @@ def create_auszifferung(
     return SkontoAuszifferungOut(**dict(row._mapping))
 
 
-@router.post("/{auszifferung_id}/stornieren", response_model=SkontoAuszifferungOut, summary="Auszifferung storniere")
+@router.post("/{auszifferung_id}/stornieren", response_model=SkontoAuszifferungOut, summary="Auszifferung storniere", dependencies=[Depends(finance_write)])
 def storniere_auszifferung(
     auszifferung_id: str,
     db=Depends(get_db),

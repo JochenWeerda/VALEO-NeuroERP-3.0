@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import fibu_connectors
+from app.auth.deps import get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
@@ -260,6 +261,7 @@ def _build_client(db: FakeDb) -> TestClient:
     app.include_router(fibu_connectors.router)
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
     app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_ADMIN"]}
     return TestClient(app)
 
 

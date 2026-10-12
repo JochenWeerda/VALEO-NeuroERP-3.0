@@ -15,6 +15,7 @@ import logging
 import time
 import asyncio
 import contextlib
+from jwt import PyJWTError
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
@@ -295,6 +296,8 @@ class BearerAuthMiddleware:
         f"{settings.API_V1_STR}/health",
         f"{settings.API_V1_STR}/health/live",
         f"{settings.API_V1_STR}/health/startup",
+        f"{settings.API_V1_STR}/health/ready",
+        f"{settings.API_V1_STR}/health/database",
         f"{settings.API_V1_STR}/openapi.json",
     }
 
@@ -302,6 +305,44 @@ class BearerAuthMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
+        if scope["type"] == "websocket":
+            from fastapi import WebSocket, WebSocketDisconnect
+            from app.core.security import verified_websocket_context
+            websocket = WebSocket(scope, receive, send)
+            try:
+                context = verified_websocket_context(websocket, websocket.query_params.get("token"))
+            except (HTTPException, PyJWTError):
+                await websocket.close(code=1008, reason="Verified identity and tenant required")
+                return
+            context_token = set_current_tenant_id(context["tenant_id"])
+            expiry = websocket.state.token_claims["exp"]
+
+            async def guarded_receive():
+                remaining = expiry - time.time()
+                if remaining <= 0:
+                    await send({"type": "websocket.close", "code": 1008, "reason": "Session expired"})
+                    raise WebSocketDisconnect(1008)
+                try:
+                    message = await asyncio.wait_for(receive(), timeout=remaining)
+                    if message["type"] == "websocket.receive" and time.time() >= expiry:
+                        await send({"type": "websocket.close", "code": 1008, "reason": "Session expired"})
+                        raise WebSocketDisconnect(1008)
+                    return message
+                except asyncio.TimeoutError:
+                    await send({"type": "websocket.close", "code": 1008, "reason": "Session expired"})
+                    raise WebSocketDisconnect(1008)
+
+            async def guarded_send(message):
+                if message["type"] in {"websocket.accept", "websocket.send"} and time.time() >= expiry:
+                    await send({"type": "websocket.close", "code": 1008, "reason": "Session expired"})
+                    raise WebSocketDisconnect(1008)
+                await send(message)
+
+            try:
+                await self.app(scope, guarded_receive, guarded_send)
+            finally:
+                reset_current_tenant_id(context_token)
+            return
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
@@ -320,20 +361,32 @@ class BearerAuthMiddleware:
             return
 
         try:
-            await require_bearer_token(request)
+            authenticated_token = await require_bearer_token(request)
+        except PyJWTError:
+            response = JSONResponse(status_code=401, content={"detail": "Invalid bearer token"})
+            _apply_cors_headers(response, request)
+            await response(scope, receive, send)
+            return
         except HTTPException as exc:
             response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
             _apply_cors_headers(response, request)
             await response(scope, receive, send)
             return
 
-        header_tenant = (request.headers.get("X-Tenant-ID") or "").strip()
-        claims = getattr(request.state, "token_claims", {}) or {}
-        token_tenant = str(claims.get("tenant_id") or claims.get("tid") or "").strip()
-        resolved_tenant = header_tenant or token_tenant or settings.DEFAULT_TENANT_ID
+        from app.core.tenant_binding import checked_tenant, bind_headers
+        try:
+            resolved_tenant = checked_tenant(getattr(request.state, "token_claims", None))
+            bind_headers(scope, resolved_tenant)
+        except HTTPException as exc:
+            response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+            _apply_cors_headers(response, request)
+            await response(scope, receive, send)
+            return
 
         token = set_current_tenant_id(resolved_tenant)
         request.state.tenant_id = resolved_tenant
+        request.state.tenant_verified = True
+        request.state.authenticated_token = authenticated_token
 
         async def send_wrapper(message):
             if message["type"] == "http.response.start":
@@ -346,7 +399,7 @@ class BearerAuthMiddleware:
             reset_current_tenant_id(token)
 
     def _is_public_path(self, path: str) -> bool:
-        return path in self.PUBLIC_PATHS or path.startswith("/docs/") or path.startswith("/metrics")
+        return path in self.PUBLIC_PATHS or path.startswith("/docs/") or path == "/metrics"
 
 
 class RequestLoggingMiddleware:
@@ -593,6 +646,9 @@ try:
         logger.info("OpenTelemetry: Instrumentierung aktiv")
 except Exception as _otel_exc:
     logger.debug("OpenTelemetry-Setup übersprungen: %s", _otel_exc)
+
+from app.core.tenant_binding import install_tenant_bindings
+install_tenant_bindings(app, public_paths=BearerAuthMiddleware.PUBLIC_PATHS)
 
 if __name__ == "__main__":
     uvicorn.run(

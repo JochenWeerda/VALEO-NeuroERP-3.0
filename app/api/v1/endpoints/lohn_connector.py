@@ -5,6 +5,7 @@ CRUD für Import-Läufe, Handler zum Auslösen eines Imports (erzeugt Journal-Ei
 
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_admin, finance_read
 from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional
@@ -70,7 +71,7 @@ def _row_to_run(row) -> LohnImportRun:
     )
 
 
-@router.get("/runs", response_model=List[LohnImportRun], summary="Lohn import runs auflisten")
+@router.get("/runs", response_model=List[LohnImportRun], summary="Lohn import runs auflisten", dependencies=[Depends(finance_read)])
 async def list_lohn_import_runs(
     tenant_id: str = Depends(get_tenant_id),
     period: Optional[str] = Query(None, description="Filter Periode YYYY-MM"),
@@ -94,7 +95,7 @@ async def list_lohn_import_runs(
     return [_row_to_run(r) for r in rows]
 
 
-@router.get("/runs/{run_id}", response_model=LohnImportRun, summary="Lohn import run abrufen")
+@router.get("/runs/{run_id}", response_model=LohnImportRun, summary="Lohn import run abrufen", dependencies=[Depends(finance_read)])
 async def get_lohn_import_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -115,7 +116,7 @@ async def get_lohn_import_run(
     return _row_to_run(row)
 
 
-@router.post("/runs", response_model=LohnImportRun, status_code=201, summary="Lohn import run anlegen")
+@router.post("/runs", response_model=LohnImportRun, status_code=201, summary="Lohn import run anlegen", dependencies=[Depends(finance_admin)])
 async def create_lohn_import_run(
     payload: LohnImportRunCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -150,7 +151,7 @@ async def create_lohn_import_run(
     return _row_to_run(row)
 
 
-@router.post("/runs/trigger", response_model=LohnConnectorOut, summary="Lohn import auslösen")
+@router.post("/runs/trigger", response_model=LohnConnectorOut, summary="Lohn import auslösen", dependencies=[Depends(finance_admin)])
 async def trigger_lohn_import(
     payload: LohnImportTrigger,
     tenant_id: str = Depends(get_tenant_id),
@@ -202,7 +203,7 @@ async def trigger_lohn_import(
     }
 
 
-@router.delete("/runs/{run_id}", status_code=204, response_class=Response, response_model=None, summary="Lohn import run löschen")
+@router.delete("/runs/{run_id}", status_code=204, response_class=Response, response_model=None, summary="Lohn import run löschen", dependencies=[Depends(finance_admin)])
 async def delete_lohn_import_run(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),

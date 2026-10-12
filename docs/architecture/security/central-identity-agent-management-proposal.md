@@ -10,10 +10,19 @@ description: Konsolidiertes Zielbild aus dem Auftraggebervorschlag mit Integrati
 
 # Zentrales Identitaets-, Rechte- und Agentenmanagement
 
-**Status: Vorschlag, keine vollstaendige Lieferfreigabe.** Grundlage ist der am
+**Status: Umsetzung beauftragt, Gesamtlieferung noch offen.** Grundlage ist der am
 2026-10-12 vom Auftraggeber eingebrachte Entwurf gleichen Titels. Die laufende
 Reparatur der Mandantenbindung bleibt beauftragt. Weitergehende Sitzungs-,
-Autonomie- und Tarifregeln werden hier als Zielbild beschrieben.
+Autonomie- und Tarifregeln werden hier als Zielbild beschrieben. Der Auftraggeber
+hat am selben Tag die Umsetzung des Entwurfs beauftragt; Beispielwerte bleiben
+konfigurierbar und werden nicht als Tarif- oder Fachschwellen festgeschrieben.
+
+Erster Implementierungsmeilenstein: verbindliche Provideridentitaet, eindeutiger
+ERP-Mandant, zentrale HTTP-Selektorbindung sowie signierte WebSocket-Kontexte
+und mandantengebundene SSE-Zustellung. Nachweis und Grenzen:
+[Identitaetsabnahme](../../quality-assurance/identity-transport-20261012.md).
+Sitzungswiderruf, administrierte Agentenmandate, objektbezogene Freigaben und
+Ressourcensteuerung sind dadurch noch nicht abgenommen.
 
 ## Architekturgrundsatz
 

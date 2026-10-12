@@ -3,6 +3,7 @@ Creditor (Kreditoren) master data management endpoints.
 FIBU-AP-01: CRUD + Dublettencheck (creditor_number pro Tenant).
 """
 
+from app.auth.finance_roles import finance_admin, finance_write
 from typing import Optional
 import re
 import json
@@ -142,7 +143,7 @@ def _row_to_creditor(row) -> Creditor:
     )
 
 
-@router.post("/", response_model=Creditor, status_code=201, summary="Creditor anlegen")
+@router.post("/", response_model=Creditor, status_code=201, summary="Creditor anlegen", dependencies=[Depends(finance_write)])
 async def create_creditor(
     payload: CreditorCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -268,7 +269,7 @@ async def get_creditor(
     return _row_to_creditor(row)
 
 
-@router.put("/{creditor_id}", response_model=Creditor, summary="Creditor aktualisieren")
+@router.put("/{creditor_id}", response_model=Creditor, summary="Creditor aktualisieren", dependencies=[Depends(finance_write)])
 async def update_creditor(
     creditor_id: str,
     payload: CreditorUpdate,
@@ -416,7 +417,7 @@ async def get_creditor_balance(
         raise HTTPException(status_code=500, detail=f"OP-Saldo konnte nicht ermittelt werden: {str(e)}")
 
 
-@router.delete("/{creditor_id}", status_code=204, response_class=Response, response_model=None, summary="Creditor löschen")
+@router.delete("/{creditor_id}", status_code=204, response_class=Response, response_model=None, summary="Creditor löschen", dependencies=[Depends(finance_admin)])
 async def delete_creditor(
     creditor_id: str,
     tenant_id: str = Depends(get_tenant_id),

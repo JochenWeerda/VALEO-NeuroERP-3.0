@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.metrics import workflow_transitions_total
 from app.core.sse import sse_hub
+from app.core.tenant_context import get_current_tenant_id
 from app.models.documents import WorkflowAudit, WorkflowStatus
 from app.repositories.workflow_repository import WorkflowRepository
 from app.services.workflow_service import workflow
@@ -29,7 +30,7 @@ async def _publish_workflow_event(event: dict) -> None:
     # Broadcast only enqueues in the local SSE hub; no detached task is needed.
     # A notification failure must not undo an already persisted transition.
     try:
-        await sse_hub.broadcast("workflow", event)
+        await sse_hub.broadcast("workflow", event, tenant_id=get_current_tenant_id())
     except Exception:
         logger.warning("Workflow notification delivery failed")
 

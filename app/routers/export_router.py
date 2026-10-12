@@ -141,7 +141,7 @@ async def export_documents(
             "format": fmt_slug,
             "count": len(rows),
             "filename": f"{domain_slug}_export.{fmt_slug}",
-        }))
+        }, tenant_id=tenant_id))
 
         return FileResponse(  # NOSONAR - output_path is built from a fixed temp dir and validated slugs.
             output_path, media_type=media_type, filename=f"{domain_slug}_export.{fmt_slug}"

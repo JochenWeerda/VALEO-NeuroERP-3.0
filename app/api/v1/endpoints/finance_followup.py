@@ -5,6 +5,7 @@ Explizite Backend-Contracts für Mahnwesen-Export und Lastschriften-Export.
 """
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_admin, finance_read, finance_write
 import csv
 import io
 import json
@@ -232,7 +233,7 @@ def _kasse_csv_rows(db: Session, tenant_id: str) -> list[list[object]]:
 # Mahnwesen
 # ---------------------------------------------------------------------------
 
-@router.get("/mahnwesen/preview", response_model=FinanceFollowupOut, summary="Mahnwesen preview abrufen")
+@router.get("/mahnwesen/preview", response_model=FinanceFollowupOut, summary="Mahnwesen preview abrufen", dependencies=[Depends(finance_read)])
 async def get_mahnwesen_preview(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -276,7 +277,7 @@ async def get_mahnwesen_preview(
     return preview.model_dump(mode="json")
 
 
-@router.post("/mahnwesen/export", response_model=FinanceFollowupOut, status_code=202, summary="Mahnwesen exportieren")
+@router.post("/mahnwesen/export", response_model=FinanceFollowupOut, status_code=202, summary="Mahnwesen exportieren", dependencies=[Depends(finance_write)])
 async def export_mahnwesen(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -398,8 +399,7 @@ async def export_mahnwesen(
 
 
 @router.get("/mahnwesen/export/{export_id}/download", summary="Mahnwesen export herunterladen",
-    response_model=FinanceFollowupOut
-)
+    response_model=FinanceFollowupOut, dependencies=[Depends(finance_read)])
 async def download_mahnwesen_export(
     export_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -420,7 +420,7 @@ async def download_mahnwesen_export(
 # Lastschriften
 # ---------------------------------------------------------------------------
 
-@router.get("/lastschriften/{run_id}/preview", response_model=FinanceFollowupOut, summary="Lastschrift preview abrufen")
+@router.get("/lastschriften/{run_id}/preview", response_model=FinanceFollowupOut, summary="Lastschrift preview abrufen", dependencies=[Depends(finance_read)])
 async def get_lastschrift_preview(
     run_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -503,7 +503,7 @@ async def get_lastschrift_preview(
     return preview.model_dump(mode="json")
 
 
-@router.post("/lastschriften/{run_id}/export", response_model=FinanceFollowupOut, status_code=202, summary="Lastschriften exportieren")
+@router.post("/lastschriften/{run_id}/export", response_model=FinanceFollowupOut, status_code=202, summary="Lastschriften exportieren", dependencies=[Depends(finance_admin)])
 async def export_lastschriften(
     run_id: str,
     body: dict,
@@ -613,8 +613,7 @@ async def export_lastschriften(
 
 
 @router.get("/lastschriften/{run_id}/export/{export_id}/download", summary="Lastschrift export herunterladen",
-    response_model=FinanceFollowupOut
-)
+    response_model=FinanceFollowupOut, dependencies=[Depends(finance_read)])
 async def download_lastschrift_export(
     run_id: str,
     export_id: str,
@@ -636,7 +635,7 @@ async def download_lastschrift_export(
 # ---------------------------------------------------------------------------
 
 
-@router.get("/kasse/preview", response_model=FinanceFollowupOut, summary="Kassenfolge preview abrufen")
+@router.get("/kasse/preview", response_model=FinanceFollowupOut, summary="Kassenfolge preview abrufen", dependencies=[Depends(finance_read)])
 async def get_kassenfolge_preview(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -686,7 +685,7 @@ async def get_kassenfolge_preview(
     return preview.model_dump(mode="json")
 
 
-@router.post("/kasse/export", response_model=FinanceFollowupOut, status_code=202, summary="Kassenfolge exportieren")
+@router.post("/kasse/export", response_model=FinanceFollowupOut, status_code=202, summary="Kassenfolge exportieren", dependencies=[Depends(finance_write)])
 async def export_kassenfolge(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -794,8 +793,7 @@ async def export_kassenfolge(
 
 
 @router.get("/kasse/export/{export_id}/download", summary="Kasse export herunterladen",
-    response_model=FinanceFollowupOut
-)
+    response_model=FinanceFollowupOut, dependencies=[Depends(finance_read)])
 async def download_kasse_export(
     export_id: str,
     tenant_id: str = Depends(get_tenant_id),

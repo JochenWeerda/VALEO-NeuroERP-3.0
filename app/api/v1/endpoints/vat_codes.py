@@ -3,6 +3,7 @@ VAT Tax Codes Admin API
 CRUD operations with full audit trail
 """
 
+from app.auth.finance_roles import finance_admin, finance_write
 from fastapi import APIRouter, HTTPException, Depends, Query, Request
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -189,7 +190,7 @@ async def get_vat_code(
     return code
 
 
-@router.post("", response_model=VatCodeResponse, summary="Vat code anlegen")
+@router.post("", response_model=VatCodeResponse, summary="Vat code anlegen", dependencies=[Depends(finance_write)])
 async def create_vat_code(
     data: VatCodeCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -244,7 +245,7 @@ async def create_vat_code(
     return vat_code
 
 
-@router.patch("/{vat_code_id}", response_model=VatCodeResponse, summary="Vat code aktualisieren")
+@router.patch("/{vat_code_id}", response_model=VatCodeResponse, summary="Vat code aktualisieren", dependencies=[Depends(finance_write)])
 async def update_vat_code(
     vat_code_id: str,
     data: VatCodeUpdate,
@@ -292,8 +293,7 @@ async def update_vat_code(
 
 
 @router.delete("/{vat_code_id}", summary="Vat code löschen",
-    response_model=StatusResponse
-)
+    response_model=StatusResponse, dependencies=[Depends(finance_admin)])
 async def delete_vat_code(
     vat_code_id: str,
     reason: Optional[str] = Query(None, description="Reason for deletion"),
@@ -349,8 +349,7 @@ async def get_vat_code_audit(
 
 
 @router.post("/seed-defaults", summary="Default vat codes seed",
-    response_model=VatCodesOut
-)
+    response_model=VatCodesOut, dependencies=[Depends(finance_write)])
 async def seed_default_vat_codes(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),

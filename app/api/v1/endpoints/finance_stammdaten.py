@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_admin, finance_write
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -170,8 +171,8 @@ async def get_debitor(
     return _debitor_dict(row, op_map.get(row.company_name or ""))
 
 
-@router.patch("/finance/debitoren/{debitor_id}", response_model=TypedObjectOut, summary="Debitor aktualisieren")
-@router.patch("/finance/debtors/{debitor_id}", response_model=TypedObjectOut, summary="Debitor aktualisieren")
+@router.patch("/finance/debitoren/{debitor_id}", response_model=TypedObjectOut, summary="Debitor aktualisieren", dependencies=[Depends(finance_write)])
+@router.patch("/finance/debtors/{debitor_id}", response_model=TypedObjectOut, summary="Debitor aktualisieren", dependencies=[Depends(finance_write)])
 async def patch_debitor(
     debitor_id: str,
     payload: DebitorPatch,
@@ -205,7 +206,7 @@ async def list_kreditoren(
     return [_creditor_from_lieferant(item, op_map.get(item.get("firmenname") or "")) for item in items]
 
 
-@router.post("/finance/creditors", response_model=TypedObjectOut, status_code=201, summary="Kreditor anlegen")
+@router.post("/finance/creditors", response_model=TypedObjectOut, status_code=201, summary="Kreditor anlegen", dependencies=[Depends(finance_write)])
 async def create_kreditor(
     payload: CreditorWrite,
     db: Session = Depends(get_db),
@@ -251,8 +252,8 @@ async def get_kreditor(
     return _creditor_from_lieferant(lf, op_map.get(lf.get("firmenname") or ""))
 
 
-@router.put("/finance/creditors/{kreditor_id}", response_model=TypedObjectOut, summary="Kreditor aktualisieren")
-@router.patch("/finance/creditors/{kreditor_id}", response_model=TypedObjectOut, summary="Kreditor aktualisieren")
+@router.put("/finance/creditors/{kreditor_id}", response_model=TypedObjectOut, summary="Kreditor aktualisieren", dependencies=[Depends(finance_write)])
+@router.patch("/finance/creditors/{kreditor_id}", response_model=TypedObjectOut, summary="Kreditor aktualisieren", dependencies=[Depends(finance_write)])
 async def update_kreditor(
     kreditor_id: str,
     payload: CreditorWrite,
@@ -284,7 +285,7 @@ async def update_kreditor(
     return _creditor_from_lieferant(lf)
 
 
-@router.delete("/finance/creditors/{kreditor_id}", status_code=204, summary="Kreditor loeschen")
+@router.delete("/finance/creditors/{kreditor_id}", status_code=204, summary="Kreditor loeschen", dependencies=[Depends(finance_admin)])
 async def delete_kreditor(
     kreditor_id: str,
     db: Session = Depends(get_db),
