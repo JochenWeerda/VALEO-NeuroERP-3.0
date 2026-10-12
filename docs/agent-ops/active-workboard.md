@@ -11,12 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## WHATSAPP-EMERGENCY-CONTRACT-20261012 — reserviert, Codex
+## WHATSAPP-EMERGENCY-CONTRACT-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** User-Fachregel fuer seltene dringende Last-minute-Auftraege: Kammerumverteilung, akzeptierte Ersatzsorte als Teilmenge, offene Restmengen und Lernen ohne Verfaelschung normaler Kundenmuster verbindlich dokumentieren.
 **Dateibesitz:** docs/workflows/whatsapp-order-learning.md nur Ausnahme-/Feedback-/Integrationsvertrag; eigenes Workboard/Handoff. Kein Fachwrite, keine Tourumbuchung, keine neue Transport-/Rationslogik.
 **Abnahme:** Ursprung und Wunsch unveraendert, beide Kunden und Restverpflichtungen sichtbar, keine Doppelallokation, Ersatzartikel fachlich/operativ freigegeben, naechster Werktag nur bei belegter Verfuegbarkeit, menschliche Dispositionsfreigabe, Ausnahme nicht als Mengen-/Sortenpraeferenz lernen. Vorhandene Rationsassistenz nicht als Transport-/Eignungsfreigabe ausweisen.
 **Risiken:** Kammerallokation und atomare Mehrkundenumbuchung im Bestelleingang nicht nachgewiesen; Code-Slice bleibt separat offen. **Harness:** Ist-Abgleich vorhandener Tour-/Verkaufs-/Assistenzpfade, Doku-Governance und Referenzpruefung; keine DB/Container/Reset, keine Browsernachricht.
+
+**Lieferung:** User-Regel fuer seltene Kammerumverteilung und akzeptierte Ersatz-Teilmenge dokumentiert: Originalwuensche erhalten, Restmengen beider Kunden, atomare Allokation/Freigabe, tatsaechliche Artikelidentitaet und gepruefter Folgetermin. Betriebsbedingte Abweichungen sind eigenes Feedback und keine normale Mengen-/Sortenpraeferenz. Vorhandene Einzelfutterassistenz als anderer Vertrag abgegrenzt; keine Kammerfunktion oder Versand als implementiert behauptet. Nachweis: ../workflows/whatsapp-order-learning.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## WHATSAPP-EMERGENCY-ALLOCATION-20261012 — offen
+
+**Owner:** unbesetzt. **Ziel:** seltene Last-minute-Ausnahme auf kanonischer Auftrags-/Dispositionsebene: freigegebene Kammerumverteilung, akzeptierte Ersatz-Teilmenge und Restmengen beider Kunden; originalen Wunsch und operative Abweichung trennen. **Dateibesitz:** vor Claim Verbraucher-/Schemaabgleich, kein paralleles Auftragsmodell. **Abnahme:** Mengenbilanz/richtige Artikel-/Chargen; menschliche Dispositions- und belegte Ersatzfreigabe; zwei autorisierte Kunden ohne gegenseitigen Datenauszug; konkurrierende Allokation/Replay/Rollback/Ruecknahme ohne Doppelbindung; Folgetermin nur bei Verfuegbarkeit, Ausnahme nicht als normale Mengen-/Sortenpraeferenz lernen. **Risiken:** Kammer-/Kesselvertrag fuer Bestelleingang nicht nachgewiesen, Rations-Einzelfutterassistenz keine Freigabe fuer Kraftfuttermischung oder Transport. **Abhaengigkeiten:** INBOX-TRUST, ORDER-HISTORY, DELIVERY-PLANNING; Lernengine muss Feedbackart beachten. **Harness:** Fachfreigabe, bestehende Rechte, atomare Original-/Rest-/Auditnachweise, echte zwei-Kontext-Proben im gemeinsamen Pruefstand, kein Reset/Container, Doku und externer Versandnachweis getrennt. Vertrag: ../workflows/whatsapp-order-learning.md.
 
 ## ABSCHLUSS-ROLLEN-20261012 — abgeschlossen, Claude Code
 
