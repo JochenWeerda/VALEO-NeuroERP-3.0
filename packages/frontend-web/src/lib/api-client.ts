@@ -4,7 +4,9 @@
  */
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse, isAxiosError } from 'axios'
 import { auth } from './auth'
+import { rollenHinweis } from './role-hint'
 import { tenantFromToken } from './tenant-from-token'
+import { toast } from 'sonner'
 
 const DEV_TOKEN = import.meta.env.VITE_API_DEV_TOKEN as string | undefined || 'dev-token'
 
@@ -134,6 +136,16 @@ class APIClient {
           } else {
             // In dev mode without OIDC, just log the error
             console.warn('API request returned 401 Unauthorized. In dev mode without OIDC, this might be expected.')
+          }
+        }
+        if (error.response?.status === 403) {
+          // Fehlt nur eine Rolle, sagt die Maske das — an dieser einen Stelle statt in jeder Maske.
+          // Die Meldung ersetzt auch `detail`: Masken, die den Fehlertext selbst zeigen, zeigen denselben Satz.
+          const daten = error.response.data as { detail?: unknown } | undefined
+          const hinweis = rollenHinweis(daten?.detail)
+          if (hinweis && daten) {
+            daten.detail = hinweis
+            toast.error(hinweis, { id: 'fehlende-berechtigung' })
           }
         }
         return Promise.reject(error)
