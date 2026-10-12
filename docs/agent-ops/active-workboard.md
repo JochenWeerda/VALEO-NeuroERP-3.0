@@ -11,6 +11,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## IDENTITY-CONTROL-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „Rest auch noch umsetzen“. **Ziel:** ERP-Providerbetrieb, administratives Mandantenprofil, Sitzungswiderruf, Agentenmandate, inhaltsgebundene Freigaben und atomare Ressourcenbegrenzung an vorhandenen Ausfuehrungswegen integrieren.
+**Dateibesitz:** config/keycloak/realm-export.json, realm-staging.json und neues user-profile.json; neuer scripts/provision_identity_provider.py; app/core/config.py nur Identitaets-/Sitzungs-/Limitfelder; neue core-Identitaetsmodule und identity_management-Endpoint samt API-Registrierung; main.py/core/security.py/deps_oidc.py nur gemeinsame Enforcement-/Streaming-Anbindung; services/neuro_tool_broker.py, neuro_tool_execution.py und llm_gateway.py nur Autorisierung/Budget; frontend lib/auth.ts nur vorhandene Anmeldung/Logout (kein fremdes Masken-WIP); neue Tests/QA/Proposed ADR/Runbook/Domainpack/Inventare nach isolierter Generierung. Kein neuer Container/DB/Reset.
+**Abnahme:** reale Provider-Konfiguration und administrativ geschuetzte Attribute; Widerruf/Idle/Ablauf auch unter mehreren Prozessen und Streams; Rechte-Schnittmenge/Taskbindung vor Wirkung, keine Selbstfreigabe oder Payload-Umdeutung, Replay ohne zweite Ausfuehrung, atomare Budgets/Leases und bereinigter Abbruch. Bestehende Redis/PostgreSQL-Ressourcen, eigene Testdaten. Persoenliche Administratorzuordnung ist angefragt; keine erfundene Identitaet oder unsicheren Musterpasswoerter aktivieren.
+**CI-Unterclaim:** tests/conftest.py nur ausdruecklicher Test-Identitaetskontext der separaten Kompatibilitaets-App; vier Finanz-/Personal-Rollenvertragsfixtures nur Testmandantengrenze. Alte Authattrappen ohne verifizierten Kontext verursachen 2393 CI-Fehler; echte Produktions-Authabnahme bleibt separat und wird nicht aufgeweicht. Weitere betroffene Testdateien vor Edits einzeln inventarisieren.
+
 ## FINANZ-REST-ROLLEN-20261012 — in Arbeit, Claude Code
 
 **Owner:** Claude Code. **Stand:** 2026-10-12. **Von:** Auftraggeber („bewusst Ausgelassenes und Offenes
