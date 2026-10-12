@@ -11,6 +11,19 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## KONTO-SPERRE-20261012 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-12. **Von:** Auftraggeber („ja weiter“), offener Punkt aus
+KONTENPLAN-PRAXIS-20261012. **Befund:** Fuer ein bebuchtes Konto nennt die Praxis die Sperre; das Konto hat
+kein solches Feld (`allow_manual_entries` steht in Schema und Maske, nicht in der Tabelle). **Ziel:** Spalte
+`posting_blocked`; ein Trigger an `domain_erp.journal_entry_lines` lehnt jede neue Buchungszeile auf ein
+gesperrtes Konto ab — eine Stelle fuer alle rund zwanzig Buchungswege; sperren/entsperren ueber die Kontenpflege;
+Maske zeigt und setzt die Sperre statt des wirkungslosen Felds. **Dateibesitz:** neue Migration
+`alembic/versions/konto_sperre_20261012.py`, Spalte im Modell `Account`, `schemas/finance.py` (Konto-Schemas),
+`chart_of_accounts.py`, `pages/finance/chart-of-accounts.tsx`, `lib/services/finance-service.ts` (Typ),
+`tests/test_konto_sperre.py`, Tabellenkatalog/Migrationsinventar nur die eigenen Zeilen,
+Handbuchabschnitt, QA-Doku. **Migration:** eine, additiv, auf dem einzigen Head `audit_urheber_20261011`.
+
 ## SYSTEM-TENANT-BOUNDARY-20261012 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „dann schliesse diese Sicherheitsluecke systemweit“. **Ziel:** verbindlicher verifizierter Mandantenkontext vor allen geschuetzten API-Fachzugriffen; kein permissiver Missing-Claim-/Dev-/Headerfallback. Zentrale Path-/Query-/Body-Bindung und Inventar aller Umgehungsflaechen, schrittweise echte zwei-Mandanten-Abnahme. Breite Rollen und explizite Shared-Data-Policies bleiben getrennte Rechte.
