@@ -10,6 +10,16 @@ description: Abnahme und verbleibende Integrationsarbeit fuer die erste Stufe de
 
 # Identitaet und Mandantenbindung
 
+**Betriebspruefung 2026-10-12:** Der vorhandene Keycloak-Container laeuft, seine
+administrative Realm-Liste enthaelt jedoch nur `master`. Der konfigurierte
+ERP-Realm `valeo-neuro-erp` ist darin nicht vorhanden. Deshalb ist der reale
+ERP-Login noch nicht betriebsbereit; die RSA-Abnahme unten belegt den Codevertrag,
+keine Anmeldung gegen diesen laufenden Provider. Die lokale Pruefung gibt weder
+Administratorzugangsdaten noch Access-Token aus. Naechster Betriebsclaim muss
+Realm, Client-/Audience-Vertrag, administrative Mandantenattribute, persoenliche
+Benutzerzuordnung und Frontend-Anbindung gemeinsam abnehmen. Kein Rueckfall
+auf den Administrator-Dev-Token.
+
 ## Umsetzung
 
 Vorhandene Providervalidierung ist die gemeinsame Grenze fuer HTTP, Rollen-
@@ -64,3 +74,9 @@ brauchen eine ausdrueckliche Shared-Policy-Abnahme.
 OpenAPI-/Inventar-/Handbuch-Generatoren und externer CI-Gesamtlauf werden erst
 nach Integration auf dem aktuellen gemeinsamen HEAD abschliessend geprueft.
 Fremde Frontend-, Katalog- und Metadatenaenderungen bleiben geschuetzt.
+
+GitHub zum Code-Meilenstein `840b78e30`: OpenAPI Drift Check, Docs Governance
+und Erntepeak-Lasttest gruen; weitere Laeufe noch aktiv. Docs Build scheiterte
+am fehlenden generierten ADR-082-Navigationseintrag. `generate_adr_nav.py`
+regeneriert die Navigation; anschliessender `--check` gruen. CI-Gesamtfreigabe
+weiterhin erst nach Abschluss der erneuten Laeufe.
