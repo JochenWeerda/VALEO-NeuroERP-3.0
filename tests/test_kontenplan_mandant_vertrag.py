@@ -169,6 +169,78 @@ def test_eigenes_konto_braucht_kein_pflegerecht(haus):
     assert haus["client"].delete(f"{PREFIX}/{haus['a']}", headers=_kopf(HAUS_A)).status_code == 200
 
 
+@pytest.fixture
+def bebucht(haus):
+    """Eine Buchungszeile gegen das Konto von Haus A."""
+    lauf = haus["lauf"]
+    with SessionLocal() as db:
+        db.execute(text(
+            "INSERT INTO domain_erp.journal_entries (id, tenant_id, entry_number, entry_date, posting_date) "
+            "VALUES (:id, :t, :nr, DATE '2026-10-01', DATE '2026-10-01')"),
+            {"id": f"kp-{lauf}-je", "t": HAUS_A, "nr": f"KP-{lauf}"})
+        db.execute(text(
+            "INSERT INTO domain_erp.journal_entry_lines (id, journal_entry_id, account_id, line_number) "
+            "VALUES (:id, :je, :konto, 1)"),
+            {"id": f"kp-{lauf}-jel", "je": f"kp-{lauf}-je", "konto": haus["a"]})
+        db.commit()
+    try:
+        yield haus
+    finally:
+        with SessionLocal() as db:
+            db.execute(text("DELETE FROM domain_erp.journal_entry_lines WHERE id = :id"), {"id": f"kp-{lauf}-jel"})
+            db.execute(text("DELETE FROM domain_erp.journal_entries WHERE id = :id"), {"id": f"kp-{lauf}-je"})
+            db.commit()
+
+
+def test_bebuchtes_konto_wird_nicht_deaktiviert(bebucht):
+    """Die alte Pruefung fragte eine Beziehung ab, die das Modell nicht hat — sie griff nie."""
+    antwort = bebucht["client"].delete(f"{PREFIX}/{bebucht['a']}", headers=_kopf(HAUS_A))
+    assert antwort.status_code == 409, antwort.text
+    assert "bebucht" in antwort.json()["detail"]
+    assert bebucht["client"].get(f"{PREFIX}/{bebucht['a']}", headers=_kopf(HAUS_A)).json()["is_active"] is True
+
+
+def test_bebuchtes_konto_behaelt_die_kontenart(bebucht):
+    kopf = _kopf(HAUS_A)
+    wechsel = bebucht["client"].put(f"{PREFIX}/{bebucht['a']}", json={"account_type": "expense"}, headers=kopf)
+    assert wechsel.status_code == 409, wechsel.text
+    assert "Kontenart" in wechsel.json()["detail"]
+    # Die Maske schickt die unveraenderte Kontenart immer mit — das ist kein Wechsel.
+    umbenannt = bebucht["client"].put(
+        f"{PREFIX}/{bebucht['a']}", json={"account_name": "Neuer Name", "account_type": "asset"}, headers=kopf)
+    assert umbenannt.status_code == 200, umbenannt.text
+    gelesen = bebucht["client"].get(f"{PREFIX}/{bebucht['a']}", headers=kopf).json()
+    assert (gelesen["account_name"], gelesen["account_type"]) == ("Neuer Name", "asset")
+
+
+def test_unbebuchtes_konto_wechselt_die_kontenart(haus):
+    antwort = haus["client"].put(f"{PREFIX}/{haus['a']}", json={"account_type": "expense"}, headers=_kopf(HAUS_A))
+    assert antwort.status_code == 200, antwort.text
+
+
+@pytest.mark.parametrize("methode,weg,rumpf", [
+    ("POST", "/", "neu"), ("PUT", "/{a}", {"account_name": "x"}), ("DELETE", "/{a}", None)])
+def test_kontenpflege_ist_sache_der_leitung(haus, methode, weg, rumpf):
+    """Die Buchhaltung bucht — den Kontenplan pflegt, wer das Recht dazu hat."""
+    if rumpf == "neu":
+        rumpf = _konto(f"Y{haus['lauf']}", HAUS_A)
+    _als(haus, "FINANCE_BEARBEITEN", "manager")
+    antwort = haus["client"].request(methode, PREFIX + weg.format(a=haus["a"]), json=rumpf, headers=_kopf(HAUS_A))
+    assert antwort.status_code == 403, antwort.text
+    # Das Pflegerecht ist delegierbar und haengt nicht an Adminrechten.
+    _als(haus, "KONTENPLAN_PFLEGE")
+    antwort = haus["client"].request(methode, PREFIX + weg.format(a=haus["a"]), json=rumpf, headers=_kopf(HAUS_A))
+    assert antwort.status_code == 200, antwort.text
+
+
+def test_kontenpflege_des_hauses_reicht_nicht_fuer_den_gemeinsamen_rahmen(haus):
+    _als(haus, "KONTENPLAN_PFLEGE")
+    antwort = haus["client"].put(
+        f"{PREFIX}/{haus['gemeinsam']}", json={"account_name": "x"}, headers=_kopf(HAUS_A))
+    assert antwort.status_code == 403, antwort.text
+    assert "KONTENRAHMEN_PFLEGE" in antwort.json()["detail"]
+
+
 class _Mitschnitt:
     """Nimmt die Parameter der DATEV-Abfrage auf und liefert keine Buchungen."""
 

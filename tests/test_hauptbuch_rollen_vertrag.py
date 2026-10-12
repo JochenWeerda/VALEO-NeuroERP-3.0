@@ -8,6 +8,8 @@ Die Regel ist dieselbe wie an den uebrigen Finanzwegen:
 
 * lesen — Finanzrollen; den Kontenplan liest auch der Einkauf, der Rechnungseingang kontiert damit
 * anlegen, aendern, buchen, stornieren — Buchhaltung (``finance_write``)
+* Konten anlegen, aendern, deaktivieren — Kontenpflege (``KONTENPLAN_PFLEGE``, delegierbar) und
+  Finanzleitung: Kontenplanpflege ist Stammdatenpflege, kein Tagesgeschaeft
 * loeschen, Periode sperren und oeffnen, Geschaeftsjahr anlegen, Massenimport — Finanzleitung
 
 Kein Datenbankzugriff: Die Grenze antwortet 418, sobald ein Weg die Datenbank verlangt.
@@ -37,21 +39,21 @@ WEGE = {
         ("DELETE", "/{entry_id}", "admin"),
     ],
     "accounts": [
-        ("POST", "/", "write"),
+        ("POST", "/", "pflege"),
         ("GET", "/", "read"),
         ("GET", "/hierarchy", "read"),
         ("GET", "/{account_id}", "read"),
         ("GET", "/number/{account_number}", "read"),
-        ("PUT", "/{account_id}", "write"),
-        ("DELETE", "/{account_id}", "admin"),
+        ("PUT", "/{account_id}", "pflege"),
+        ("DELETE", "/{account_id}", "pflege"),
         ("GET", "/{account_id}/balance", "read"),
     ],
     "chart_of_accounts": [
         ("GET", "/chart-of-accounts/", "kontenplan"),
         ("GET", "/chart-of-accounts/{account_id}", "kontenplan"),
-        ("POST", "/chart-of-accounts/", "write"),
-        ("PUT", "/chart-of-accounts/{account_id}", "write"),
-        ("DELETE", "/chart-of-accounts/{account_id}", "admin"),
+        ("POST", "/chart-of-accounts/", "pflege"),
+        ("PUT", "/chart-of-accounts/{account_id}", "pflege"),
+        ("DELETE", "/chart-of-accounts/{account_id}", "pflege"),
         ("POST", "/chart-of-accounts/validate", "read"),
         ("POST", "/chart-of-accounts/datev-export", "read"),
     ],
@@ -104,13 +106,14 @@ FAELLE = [(modul, methode, weg, zugang) for modul, wege in WEGE.items() for meth
 FINANZ_LESEN = {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"}
 ERLAUBT = {
     "read": FINANZ_LESEN,
-    "kontenplan": FINANZ_LESEN | {"EINKAUF_LESEN", "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN"},
+    "kontenplan": FINANZ_LESEN | {"EINKAUF_LESEN", "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN", "KONTENPLAN_PFLEGE"},
+    "pflege": {"KONTENPLAN_PFLEGE", "FINANCE_ADMIN", "admin"},
     "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"},
     "admin": {"FINANCE_ADMIN", "admin"},
 }
 ROLLEN = [None, "user", "LAGER_ADMIN", "PERSONAL_ADMIN", "SALES_ADMIN", "CRM_ADMIN",
           "EINKAUF_LESEN", "EINKAUF_ADMIN", "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN",
-          "admin", "manager"]
+          "admin", "manager", "KONTENPLAN_PFLEGE"]
 
 
 def _router(modul: str):

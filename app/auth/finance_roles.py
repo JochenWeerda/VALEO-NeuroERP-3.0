@@ -32,10 +32,15 @@ open_items_read = require_roles(
 # Den Kontenplan liest auch der Einkauf: Der Rechnungseingang kontiert damit. Salden und Buchungen
 # bleiben ``finance_read``.
 kontenplan_read = require_roles(
-    "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN",
+    "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "KONTENPLAN_PFLEGE",
     "EINKAUF_LESEN", "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN",
     "admin", "manager",
 )
+
+# Kontenplanpflege ist Stammdatenpflege, kein Tagesgeschaeft: Sehen duerfen die Konten viele, anlegen,
+# aendern und deaktivieren ein begrenzter Kreis. Das Recht ist delegierbar (``KONTENPLAN_PFLEGE``) und
+# haengt nicht an technischen Adminrechten; die Finanzleitung hat es von sich aus.
+kontenpflege = require_roles("KONTENPLAN_PFLEGE", "FINANCE_ADMIN", "admin")
 
 # Der gemeinsame Kontenrahmen (Mandant ``system``) gilt fuer alle Haeuser einer Installation. Ihn zu
 # lesen ist etwas anderes als ihn zu pflegen: Aendern und deaktivieren braucht dieses eigene Recht,

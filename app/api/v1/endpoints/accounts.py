@@ -20,12 +20,12 @@ from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.accounts_schemas import AccountsOut
 
 
-from app.auth.finance_roles import finance_admin, finance_read, finance_write
+from app.auth.finance_roles import finance_read, kontenpflege
 
 router = APIRouter()
 
 
-@router.post("/", response_model=Account, status_code=201, summary="Account anlegen", dependencies=[Depends(finance_write)])
+@router.post("/", response_model=Account, status_code=201, summary="Account anlegen", dependencies=[Depends(kontenpflege)])
 async def create_account(
     account_data: AccountCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -220,7 +220,7 @@ async def get_account_by_number(
         raise HTTPException(status_code=500, detail=f"Failed to retrieve account: {str(e)}")
 
 
-@router.put("/{account_id}", response_model=Account, summary="Account aktualisieren", dependencies=[Depends(finance_write)])
+@router.put("/{account_id}", response_model=Account, summary="Account aktualisieren", dependencies=[Depends(kontenpflege)])
 async def update_account(
     account_id: str,
     account_data: AccountUpdate,
@@ -244,7 +244,7 @@ async def update_account(
         raise HTTPException(status_code=500, detail=f"Failed to update account: {str(e)}")
 
 
-@router.delete("/{account_id}", status_code=204, response_class=Response, response_model=None, summary="Account löschen", dependencies=[Depends(finance_admin)])
+@router.delete("/{account_id}", status_code=204, response_class=Response, response_model=None, summary="Account löschen", dependencies=[Depends(kontenpflege)])
 async def delete_account(
     account_id: str,
     tenant_id: str = Depends(get_tenant_id),

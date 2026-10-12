@@ -26,9 +26,8 @@ from app.api.v1.schemas.chart_of_accounts_schemas import ChartOfAccountsOut
 
 from app.auth.finance_roles import (
     KONTENRAHMEN_PFLEGE,
-    finance_admin,
     finance_read,
-    finance_write,
+    kontenpflege,
     kontenplan_read,
 )
 
@@ -71,6 +70,14 @@ def _konto(db: Session, account_id: str, tenant_id: str) -> AccountModel:
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
     return account
+
+
+def _bebucht(db: Session, account_id: str) -> bool:
+    """Ob gegen das Konto schon gebucht wurde (auch als Entwurf)."""
+    return db.execute(
+        text("SELECT 1 FROM domain_erp.journal_entry_lines WHERE account_id = :id LIMIT 1"),
+        {"id": account_id},
+    ).first() is not None
 
 
 def _pflegbar(account: AccountModel, nutzer: dict) -> None:
@@ -156,7 +163,7 @@ async def get_account(
     return Account.model_validate(account)
 
 
-@router.post("/", response_model=Account, summary="Account anlegen", dependencies=[Depends(finance_write)])
+@router.post("/", response_model=Account, summary="Account anlegen", dependencies=[Depends(kontenpflege)])
 async def create_account(
     account: AccountCreate,
     request: Request,
@@ -190,18 +197,30 @@ async def create_account(
     return Account.model_validate(db_account)
 
 
-@router.put("/{account_id}", response_model=Account, summary="Account aktualisieren", dependencies=[Depends(finance_write)])
+@router.put("/{account_id}", response_model=Account, summary="Account aktualisieren", dependencies=[Depends(kontenpflege)])
 async def update_account(
     account_id: str,
     account_update: AccountUpdate,
     request: Request,
     tenant_id: str = Depends(get_tenant_id),
-    nutzer: dict = Depends(finance_write),
+    nutzer: dict = Depends(kontenpflege),
     db: Session = Depends(get_db),
 ):
     """Update an existing account."""
     account = _konto(db, account_id, tenant_id)
     _pflegbar(account, nutzer)
+
+    # Die Kontenart eines bebuchten Kontos bleibt: Sie entscheidet, ob das Konto in Bilanz oder GuV steht —
+    # ein Wechsel wuerde abgeschlossene Auswertungen nachtraeglich verschieben.
+    neue_art = account_update.account_type
+    if neue_art is not None and neue_art != account.account_type and _bebucht(db, account_id):
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"Konto {account.account_number} ist bebucht. Die Kontenart laesst sich nicht mehr aendern; "
+                "Bezeichnung und Kategorie schon."
+            ),
+        )
 
     # Geaendert wurde nur, wenn auch der Name im Rumpf stand — sonst meldete der Weg Erfolg ohne Wirkung.
     for field, value in _spalten(account_update.model_dump(exclude_unset=True)).items():
@@ -218,23 +237,26 @@ async def update_account(
 
 
 @router.delete("/{account_id}", summary="Account löschen",
-    response_model=StatusResponse, dependencies=[Depends(finance_admin)])
+    response_model=StatusResponse, dependencies=[Depends(kontenpflege)])
 async def delete_account(
     account_id: str,
     request: Request,
     tenant_id: str = Depends(get_tenant_id),
-    nutzer: dict = Depends(finance_admin),
+    nutzer: dict = Depends(kontenpflege),
     db: Session = Depends(get_db),
 ):
     """Delete an account (soft delete by setting is_active to False)."""
     account = _konto(db, account_id, tenant_id)
     _pflegbar(account, nutzer)
 
-    # Check if account has any journal entries
-    if hasattr(account, 'journal_entry_lines') and account.journal_entry_lines:
+    # Die Pruefung fragte eine Beziehung ab, die das Modell nicht hat — sie griff nie. Ein bebuchtes Konto
+    # verschwaende mit dem Deaktivieren aus dem Kontenplan, seine Buchungen blieben ohne sichtbares Konto.
+    if _bebucht(db, account_id):
         raise HTTPException(
-            status_code=400,
-            detail="Cannot delete account with existing journal entries"
+            status_code=409,
+            detail=(
+                f"Konto {account.account_number} ist bebucht und laesst sich nicht deaktivieren."
+            ),
         )
 
     account.is_active = False
