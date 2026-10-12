@@ -74,3 +74,9 @@ brauchen eine ausdrueckliche Shared-Policy-Abnahme.
 OpenAPI-/Inventar-/Handbuch-Generatoren und externer CI-Gesamtlauf werden erst
 nach Integration auf dem aktuellen gemeinsamen HEAD abschliessend geprueft.
 Fremde Frontend-, Katalog- und Metadatenaenderungen bleiben geschuetzt.
+
+GitHub zum Code-Meilenstein `840b78e30`: OpenAPI Drift Check, Docs Governance
+und Erntepeak-Lasttest gruen; weitere Laeufe noch aktiv. Docs Build scheiterte
+am fehlenden generierten ADR-082-Navigationseintrag. `generate_adr_nav.py`
+regeneriert die Navigation; anschliessender `--check` gruen. CI-Gesamtfreigabe
+weiterhin erst nach Abschluss der erneuten Laeufe.
