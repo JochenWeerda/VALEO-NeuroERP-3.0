@@ -189,3 +189,9 @@ playwright-results.json/
 ostfriesland_*.json
 
 .claude/settings.local.json
+
+# Private identity provisioning stays outside version control, including forced-add protection.
+**/identity-private/**
+*.identity-private.json
+*.identity-secrets.local.*
+.env.identity*

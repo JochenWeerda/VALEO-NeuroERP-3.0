@@ -61,11 +61,13 @@ Andere 403-Antworten bleiben unberuehrt. Vitest 5 neu + 14 Mahnlauf gruen, tsc/E
 Provider-Konto ohne Finanzrolle fuer die Sichtpruefung). **Offen:** doppelte Meldung in Masken mit eigenem
 Fehler-Toast; Masken, die Fehler schlucken, zeigen weiter leere Listen; Scope-Ablehnungen nicht uebersetzt.
 
-## IDENTITY-PRIVATE-PUSH-20261012 — reserviert, Codex
+## IDENTITY-PRIVATE-PUSH-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
 **Dateibesitz:** .husky/pre-push und neuer scripts/private-identity-push-guard.cjs; guard-forbidden-paths.cjs nur exportierbare Pfadpruefung; private-identity-guard.cjs nur generischer Content-/Metadatavertrag; neuer Test. Jeder ausgehende Commit wird lokal geprueft, auch wenn Daten in Folgecommits wieder entfernt wurden. Keine echten Identitaetswerte in Code/Tests/Commits.
 **Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
+
+**Lieferung:** Jeder ausgehende Commit samt Metadaten und Merge-Aenderungen geprueft; sechs synthetische Git-/Inhaltsvertraege bestanden. Bewusste Hook-Umgehung und fehlendes lokales Manifest bleiben dokumentierte Grenzen. Nachweis: private-identity-publication-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## IDENTITY-PROVIDER-RUNTIME-20261012 — reserviert, Codex
 
@@ -73,11 +75,13 @@ Fehler-Toast; Masken, die Fehler schlucken, zeigen weiter leere Listen; Scope-Ab
 **Dateibesitz:** docker-compose.yml nur vorhandener Keycloak-Dienst und aktivierte Profilfunktion; lokale ENV-Werte ausserhalb Git; eigene QA/Runbook/Workboard. Bestehenden Container kontrolliert rekonfigurieren, vorhandene Providerdatenbank erhalten; keine neue Datenbank/Volumes/Container pro Test. Keine persoenlichen Werte committen.
 **Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
 
-## IDENTITY-PRIVATE-DATA-20261012 — reserviert, Codex
+## IDENTITY-PRIVATE-DATA-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
 **Dateibesitz:** .gitignore, scripts/guard-forbidden-paths.cjs sowie neuer generischer lokaler Private-Identity-Scanner und Test; eigene QA/Workboard. Keine persoenlichen Werte in versionierten Artefakten. Private Identitaet/Erstkennwort ausschliesslich ausserhalb des Repositorys.
 **Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
+
+**Lieferung:** Private Identitaeten ausserhalb Git; Pfad- und lokale gesalzene Inhaltspruefung, keine persoenlichen Werte in versionierten Dateien. Nachweis: private-identity-publication-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## IDENTITY-CONTROL-20261012 — in arbeit, Codex
 

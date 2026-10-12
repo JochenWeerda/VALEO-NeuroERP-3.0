@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
 const { execSync } = require("node:child_process");
+const { checkFiles } = require('./private-identity-guard.cjs');
 
 const BLOCKED_RULES = [
   { name: "node_modules", test: (p) => /(^|\/)node_modules(\/|$)/.test(p) },
@@ -9,6 +10,7 @@ const BLOCKED_RULES = [
   { name: "__pycache__", test: (p) => /(^|\/)__pycache__(\/|$)/.test(p) },
   { name: "htmlcov", test: (p) => /(^|\/)htmlcov(\/|$)/.test(p) },
   { name: "test-results", test: (p) => /(^|\/)test-results(\/|$)/.test(p) },
+  { name: "private identity", test: (p) => /(^|\/)identity-private(\/|$)|\.identity-private\.json$|\.identity-secrets\.local\.|(^|\/)\.env\.identity/.test(p) },
   {
     name: "gitleaks-report.json",
     test: (p) => p === "gitleaks-report.json" || p.endsWith("/gitleaks-report.json"),
@@ -76,12 +78,13 @@ function main() {
   const { staged, range } = parseArgs(process.argv);
   if (staged || !range) {
     const files = getStagedFiles();
-    printAndExit(findViolations(files));
+    printAndExit([...findViolations(files), ...checkFiles(files, '')]);
     return;
   }
 
   const files = getRangeFiles(range);
-  printAndExit(findViolations(files));
+  printAndExit([...findViolations(files), ...checkFiles(files, 'HEAD')]);
 }
 
-main();
+module.exports = {findViolations};
+if (require.main === module) main();
