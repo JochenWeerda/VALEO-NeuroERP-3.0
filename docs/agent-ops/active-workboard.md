@@ -39,9 +39,11 @@ Datei nicht an.
 `vatcodecategory`), Wege `/finance/vat-codes`, Modul, Schemas und Modelle entfernt; Rollenvertrag und
 Pagination-Baseline bereinigt. Beide Datenbanken migriert. Steuerschluessel nur noch aus `domain_erp.tax_keys`.
 
-## ENDPOINT-SPACING-RATCHET-20261012 — reserviert, Codex
+## ENDPOINT-SPACING-RATCHET-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** ueberzaehlige Leerzeilen in compat.py und mask_frontend_bridges.py normalisieren, nachdem Rollenimporte die exakte Dateigroessenratsche um je eine Zeile verletzten. **Dateibesitz:** beide Dateien ausschliesslich je eine ueberzaehlige Leerzeile; eigene QA/Workboard. **Abnahme:** Python-AST vor/nach identisch, Godfile-Gate mit unveraenderter Baseline gruen, keine Fach-/API-/Rollen-/Importaenderung. Struktureller Sammeldateiabbau und Gesamt-CI bleiben offen. Keine DB/Container/Reset.
+
+**Lieferung:** Je eine Leerzeile entfernt, vollstaendiger Python-AST beider Dateien identisch; Dateigroessen 3474 und 1467, Godfile-Gate mit unveraenderter Baseline bestanden. Nachweis: endpoint-spacing-ratchet-20261012.md. Weitere Godfile-/Katalog-/Auditbefunde bleiben offen. Keine DB/Container/Reset.
 
 ## JOURNAL-BLOCK-SUMMARY-20261012 — abgeschlossen, Codex
 

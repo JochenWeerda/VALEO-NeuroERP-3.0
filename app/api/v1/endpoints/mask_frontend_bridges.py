@@ -362,7 +362,6 @@ def send_anfrage(
 ) -> dict[str, Any]:
     """Mail an jeden Lieferanten, dann ANGEBOTSPHASE; sonst 4xx/5xx mit Grund (RfqVersandFehler)."""
     from app.services.rfq_service import versende_einkauf_anfrage
-
     return versende_einkauf_anfrage(db, tenant_id, anfrage_id, body.supplierIds, body.method, nutzer)
 
 

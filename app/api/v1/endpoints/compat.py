@@ -149,7 +149,6 @@ class NewsletterOut(BaseSchema):
     hinweis: str = ""
 
 
-
 router = APIRouter(tags=["compat"])
 
 
