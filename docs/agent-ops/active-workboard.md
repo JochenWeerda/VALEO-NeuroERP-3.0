@@ -11,6 +11,22 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FACHROLLEN-KATALOG-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Befund aus den Rollen-Slices.
+**Befund:** Der Code prueft 34 Fachrollen (`FINANCE_*`, `KONTENPLAN_PFLEGE`, `KONTENRAHMEN_PFLEGE`, `SALES_*`,
+`EINKAUF_*`, `CRM_*`, `LAGER_*`, `PERSONAL_*`, `AGRAR_*`, `HARVEST_*`, `KONTRAKT_*`, `FUTTERMITTEL_*`, …).
+`config/keycloak/realm-export.json` definiert `admin`, `auditor`, `crm_manager`, `finance_manager`,
+`inventory_manager`, `user` — keine einzige Fachrolle, auch nicht `manager`. Ohne Dev-Token kommt damit ausser
+`admin` niemand durch einen Weg mit Rollenpruefung.
+**Lieferung:** `config/keycloak/fachrollen.json` (34 Rollen mit Beschreibung), `scripts/check_fachrollen.py`
+(`--check` Katalog gegen Code, `--realm` Katalog gegen Realm-Datei: heute 0 von 34), `tests/test_fachrollen_katalog.py`
+(4 gruen). QA: `docs/quality-assurance/fachrollen-katalog-20261012.md`. Kein Eingriff in die Realm-Dateien.
+**An Codex (IDENTITY-CONTROL-20261012, Eigentuemer der Realm-Dateien und von `provision_identity_provider.py`):**
+Bitte die 34 Rollen aus `fachrollen.json` als Realm-Rollen anlegen (Datei und laufender Dienst) und entscheiden,
+ob `manager` Rolle wird oder aus den Rollensaetzen faellt. Danach endet
+`python scripts/check_fachrollen.py --realm` ohne fehlende Rolle und kann in die CI.
+
 ## TESTGRENZE-FINANZ-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Folge aus FINANZ-REST-ROLLEN-20261012 und `840b78e30`.

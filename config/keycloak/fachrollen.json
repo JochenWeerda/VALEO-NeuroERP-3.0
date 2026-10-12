@@ -1,0 +1,141 @@
+{
+  "hinweis": "Fachrollen, die der Code prueft. Erzeugt von scripts/check_fachrollen.py; Beschreibungen duerfen von Hand geschaerft werden und bleiben erhalten. Jede Rolle muss im Anmeldedienst als Realm-Rolle bestehen, sonst kann sie niemand bekommen. admin, manager und user sind keine Fachrollen und stehen hier nicht.",
+  "rollen": [
+    {
+      "name": "AGRAR_ADMIN",
+      "beschreibung": "Agrar: leiten: freigeben, loeschen, abschliessen"
+    },
+    {
+      "name": "AGRAR_BEARBEITEN",
+      "beschreibung": "Agrar: anlegen und aendern"
+    },
+    {
+      "name": "AGRAR_LESEN",
+      "beschreibung": "Agrar: ansehen"
+    },
+    {
+      "name": "CRM_ADMIN",
+      "beschreibung": "Vertrieb und Kundenpflege: leiten: freigeben, loeschen, abschliessen"
+    },
+    {
+      "name": "CRM_BEARBEITEN",
+      "beschreibung": "Vertrieb und Kundenpflege: anlegen und aendern"
+    },
+    {
+      "name": "CRM_LESEN",
+      "beschreibung": "Vertrieb und Kundenpflege: ansehen"
+    },
+    {
+      "name": "EINKAUF_ADMIN",
+      "beschreibung": "Einkauf: leiten: freigeben, loeschen, abschliessen"
+    },
+    {
+      "name": "EINKAUF_BEARBEITEN",
+      "beschreibung": "Einkauf: anlegen und aendern"
+    },
+    {
+      "name": "EINKAUF_LESEN",
+      "beschreibung": "Einkauf: ansehen"
+    },
+    {
+      "name": "FINANCE_ADMIN",
+      "beschreibung": "Finanzbuchhaltung: leiten: freigeben, loeschen, abschliessen"
+    },
+    {
+      "name": "FINANCE_BEARBEITEN",
+      "beschreibung": "Finanzbuchhaltung: anlegen und aendern"
+    },
+    {
+      "name": "FINANCE_LESEN",
+      "beschreibung": "Finanzbuchhaltung: ansehen"
+    },
+    {
+      "name": "FUTTERMITTEL_ADMIN",
+      "beschreibung": "Futtermittel: leiten: freigeben, loeschen, abschliessen"
+    },
+    {
+      "name": "FUTTERMITTEL_BEARBEITEN",
+      "beschreibung": "Futtermittel: anlegen und aendern"
+    },
+    {
+      "name": "FUTTERMITTEL_LESEN",
+      "beschreibung": "Futtermittel: ansehen"
+    },
+    {
+      "name": "HARVEST_ADMIN",
+      "beschreibung": "Ernteannahme: leiten: freigeben, loeschen, abschliessen"
+    },
+    {
+      "name": "HARVEST_BEARBEITEN",
+      "beschreibung": "Ernteannahme: anlegen und aendern"
+    },
+    {
+      "name": "HARVEST_LESEN",
+      "beschreibung": "Ernteannahme: ansehen"
+    },
+    {
+      "name": "KONTENPLAN_PFLEGE",
+      "beschreibung": "Kontenplan: pflegen (delegierbar, unabhaengig von der Leitungsrolle)"
+    },
+    {
+      "name": "KONTENRAHMEN_PFLEGE",
+      "beschreibung": "Gemeinsamer Kontenrahmen: pflegen (delegierbar, unabhaengig von der Leitungsrolle)"
+    },
+    {
+      "name": "KONTRAKT_ADMIN",
+      "beschreibung": "Kontrakte: leiten: freigeben, loeschen, abschliessen"
+    },
+    {
+      "name": "KONTRAKT_BEARBEITEN",
+      "beschreibung": "Kontrakte: anlegen und aendern"
+    },
+    {
+      "name": "KONTRAKT_LESEN",
+      "beschreibung": "Kontrakte: ansehen"
+    },
+    {
+      "name": "KONTRAKT_LOESCHEN",
+      "beschreibung": "Kontrakte: loeschen"
+    },
+    {
+      "name": "LAGER_ADMIN",
+      "beschreibung": "Lager: leiten: freigeben, loeschen, abschliessen"
+    },
+    {
+      "name": "LAGER_LESEN",
+      "beschreibung": "Lager: ansehen"
+    },
+    {
+      "name": "PERSONAL_ADMIN",
+      "beschreibung": "Personal: leiten: freigeben, loeschen, abschliessen"
+    },
+    {
+      "name": "PERSONAL_BEARBEITEN",
+      "beschreibung": "Personal: anlegen und aendern"
+    },
+    {
+      "name": "PERSONAL_LESEN",
+      "beschreibung": "Personal: ansehen"
+    },
+    {
+      "name": "QUALITAET_LESEN",
+      "beschreibung": "Qualitaetssicherung: ansehen"
+    },
+    {
+      "name": "SALES_ADMIN",
+      "beschreibung": "Verkauf: leiten: freigeben, loeschen, abschliessen"
+    },
+    {
+      "name": "SALES_BEARBEITEN",
+      "beschreibung": "Verkauf: anlegen und aendern"
+    },
+    {
+      "name": "SALES_LESEN",
+      "beschreibung": "Verkauf: ansehen"
+    },
+    {
+      "name": "SETTLEMENT_LESEN",
+      "beschreibung": "Abrechnung: ansehen"
+    }
+  ]
+}
