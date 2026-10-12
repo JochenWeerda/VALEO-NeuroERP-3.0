@@ -11,6 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## KONTENRAHMEN-PFLEGERECHT-20261012 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-10-12. **Von:** Auftraggeber („getrennte Rechte umsetzen“), Hinweis
+Codex (KONTENPLAN-VERIFIED-SHARED-POLICY-20261012, zweite Haelfte). **Befund:** Jeder Mandant mit
+Schreibrolle aendert und deaktiviert Konten des gemeinsamen Rahmens (`system`) — fuer alle Mandanten.
+**Ziel:** Lesen bleibt wie es ist; aendern und deaktivieren eines `system`-Kontos braucht ein eigenes Recht
+(`KONTENRAHMEN_PFLEGE` oder `admin`), sonst 403 ohne Aenderung. **Dateibesitz:** `app/auth/finance_roles.py`
+(additiv), `app/api/v1/endpoints/chart_of_accounts.py`, `tests/test_kontenplan_mandant_vertrag.py`, QA-Doku.
+**Nicht Teil dieses Slices:** die Bindung des Mandanten an das Token (erste Haelfte von Codex' Hinweis) — dafuer steht die
+Antwort des Auftraggebers aus, ob der Anmeldedienst den Mandanten im Token mitgibt.
+
 ## HANDBUCH-ABGELOESTE-MASKEN-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Offener Punkt aus den Abloese-Slices vom 11./12.10.
