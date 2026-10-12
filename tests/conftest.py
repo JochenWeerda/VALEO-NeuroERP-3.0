@@ -1,8 +1,8 @@
 """
 Zentrale Test-Fixtures für VALEO NeuroERP 3.0.
 
-- Setzt API_DEV_TOKEN automatisch für alle Tests (kein Keycloak nötig).
-- Bypassed require_bearer_token via dependency_overrides (kein Authorization-Header nötig).
+- Setzt die alte Token-Konfiguration nur fuer isolierte Kompatibilitaetstests.
+- Ersetzt Anmeldung ausschliesslich in app.main; Produktionsauth bleibt unveraendert.
 - Stellt skip_if_db_unavailable() als Hilfsfunktion bereit.
 - Marker needs_live_db: wird Tests zugewiesen, die die Fixture require_db nutzen
   (für CI: pytest -m needs_live_db mit PYTEST_REQUIRE_DB_STRICT=1).
@@ -56,18 +56,27 @@ def mocker(monkeypatch):
 
 @pytest.fixture(autouse=True)
 def _enable_dev_token(monkeypatch):
-    """Aktiviert den Dev-Token-Bypass und bypassed require_bearer_token in allen Tests.
+    """Explizite Identitaetsattrappe der separaten Kompatibilitaets-App.
 
-    Zwei-Schicht-Ansatz:
-    1. API_DEV_TOKEN setzen — für Tests die selbst 'Authorization: Bearer dev-token' senden
-    2. dependency_overrides — für Tests die keine Auth-Header senden (Großteil der Suite)
+    Diese Fixture beweist keine Signatur- oder Mandantensicherheit. Die echte
+    Produktions-App main:app behaelt ihre Provider- und Mandantenpruefung.
     """
     monkeypatch.setattr(settings, "API_DEV_TOKEN", "dev-token")
     monkeypatch.setattr(security.settings, "API_DEV_TOKEN", "dev-token")
 
-    # Bypass require_bearer_token für alle TestClient-Anfragen ohne Authorization-Header
+    # Authentifizierung nur fuer die Kompatibilitaets-App ersetzen.
     from app.main import app as _app
-    _app.dependency_overrides[security.require_bearer_token] = lambda: "dev-token"
+    from fastapi import Request
+    def declared_test_identity(request: Request):
+        # Only the documented compatibility app uses this explicit auth double.
+        # Production main:app and its RSA/JWKS contract are not overridden.
+        tenant = request.headers.get("X-Tenant-ID") or settings.DEFAULT_TENANT_ID
+        request.state.tenant_id = tenant
+        request.state.tenant_verified = True
+        request.state.token_claims = {"sub": "dev", "tenant_id": tenant, "roles": ["admin"], "scope": "admin:all"}
+        request.state.authenticated_token = "dev-token"
+        return "dev-token"
+    _app.dependency_overrides[security.require_bearer_token] = declared_test_identity
     yield
     _app.dependency_overrides.pop(security.require_bearer_token, None)
 

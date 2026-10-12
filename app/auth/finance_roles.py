@@ -46,3 +46,15 @@ kontenpflege = require_roles("KONTENPLAN_PFLEGE", "FINANCE_ADMIN", "admin")
 # lesen ist etwas anderes als ihn zu pflegen: Aendern und deaktivieren braucht dieses eigene Recht,
 # die Finanzrolle eines Hauses genuegt dafuer nicht.
 KONTENRAHMEN_PFLEGE = frozenset({"KONTENRAHMEN_PFLEGE", "admin"})
+
+# Belege, an denen mehrere Bereiche arbeiten: Ausgangsrechnung (Verkauf fakturiert, Finanz bucht),
+# Eingangsrechnung (Einkauf erfasst, Finanz bucht), Belegkontrolle (offene Bestellungen, fehlende
+# Eingangsbelege, gesperrte Lieferscheine). Lesen wie die offenen Posten; bearbeiten die Sachbearbeitung
+# der drei Bereiche. Loeschen bleibt ``finance_admin``.
+beleg_read = open_items_read
+beleg_write = require_roles(
+    "FINANCE_BEARBEITEN", "FINANCE_ADMIN",
+    "SALES_BEARBEITEN", "SALES_ADMIN",
+    "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN",
+    "admin", "manager",
+)

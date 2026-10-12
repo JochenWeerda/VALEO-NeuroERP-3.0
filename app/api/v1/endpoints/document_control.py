@@ -1,5 +1,6 @@
 """Document control (Beleg-Kontrolle) API."""
 
+from app.auth.finance_roles import beleg_read, beleg_write
 from datetime import datetime
 from typing import Any, Literal
 
@@ -53,7 +54,7 @@ class TransitionIn(BaseModel):
     reason: str = Field(min_length=5, max_length=500)
 
 
-@router.post("/exceptions", response_model=ControlRegisteredOut, status_code=201, summary="Beleg-Ausnahme registrieren")
+@router.post("/exceptions", response_model=ControlRegisteredOut, status_code=201, summary="Beleg-Ausnahme registrieren", dependencies=[Depends(beleg_write)])
 def register_exception(
     body: ExceptionIn,
     request: Request,
@@ -67,7 +68,7 @@ def register_exception(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.get("/exceptions", response_model=ControlWorklistOut, summary="Beleg-Kontrolle Worklist")
+@router.get("/exceptions", response_model=ControlWorklistOut, summary="Beleg-Kontrolle Worklist", dependencies=[Depends(beleg_read)])
 def list_exceptions(
     page: int = Query(1, ge=1),
     page_size: int = Query(25, ge=1, le=200),
@@ -94,12 +95,12 @@ def list_exceptions(
     )
 
 
-@router.get("/summary", response_model=ControlSummaryOut, summary="Beleg-Kontrolle Zusammenfassung")
+@router.get("/summary", response_model=ControlSummaryOut, summary="Beleg-Kontrolle Zusammenfassung", dependencies=[Depends(beleg_read)])
 def summary(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, int]:
     return DocumentControlService(db, tenant_id).summary()
 
 
-@router.post("/project", response_model=ControlProjectionOut, summary="Belegausnahmen aus Quellbelegen projizieren")
+@router.post("/project", response_model=ControlProjectionOut, summary="Belegausnahmen aus Quellbelegen projizieren", dependencies=[Depends(beleg_write)])
 def project_exceptions(
     request: Request,
     db: Session = Depends(get_db),
@@ -112,7 +113,7 @@ def project_exceptions(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/exceptions/{case_id}/assign", response_model=ControlAssignOut, summary="Ausnahme zuweisen")
+@router.post("/exceptions/{case_id}/assign", response_model=ControlAssignOut, summary="Ausnahme zuweisen", dependencies=[Depends(beleg_write)])
 def assign_exception(
     case_id: str,
     body: AssignIn,
@@ -134,7 +135,7 @@ def assign_exception(
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.post("/exceptions/{case_id}/transition", response_model=ControlTransitionOut, summary="Ausnahmestatus wechseln")
+@router.post("/exceptions/{case_id}/transition", response_model=ControlTransitionOut, summary="Ausnahmestatus wechseln", dependencies=[Depends(beleg_write)])
 def transition_exception(
     case_id: str,
     body: TransitionIn,

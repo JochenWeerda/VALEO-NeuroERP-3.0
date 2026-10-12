@@ -19,6 +19,7 @@ from fastapi.testclient import TestClient
 from app.api.v1.endpoints import open_items
 from app.auth.deps import get_current_user
 from app.core.database import get_db
+from testgrenze import ersetze_mandant
 
 PREFIX = "/api/v1/finance/open-items"
 
@@ -60,6 +61,7 @@ def grenze():
         raise HTTPException(418, "autorisierte Datenbankgrenze")
 
     app.dependency_overrides[get_db] = datenbank
+    ersetze_mandant(app, 'haus-a')
     with TestClient(app) as client:
         yield app, client, aufrufe
 

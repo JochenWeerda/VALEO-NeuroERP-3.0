@@ -11,6 +11,115 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FACHROLLEN-KATALOG-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Befund aus den Rollen-Slices.
+**Befund:** Der Code prueft 34 Fachrollen (`FINANCE_*`, `KONTENPLAN_PFLEGE`, `KONTENRAHMEN_PFLEGE`, `SALES_*`,
+`EINKAUF_*`, `CRM_*`, `LAGER_*`, `PERSONAL_*`, `AGRAR_*`, `HARVEST_*`, `KONTRAKT_*`, `FUTTERMITTEL_*`, …).
+`config/keycloak/realm-export.json` definiert `admin`, `auditor`, `crm_manager`, `finance_manager`,
+`inventory_manager`, `user` — keine einzige Fachrolle, auch nicht `manager`. Ohne Dev-Token kommt damit ausser
+`admin` niemand durch einen Weg mit Rollenpruefung.
+**Lieferung:** `config/keycloak/fachrollen.json` (34 Rollen mit Beschreibung), `scripts/check_fachrollen.py`
+(`--check` Katalog gegen Code, `--realm` Katalog gegen Realm-Datei: heute 0 von 34), `tests/test_fachrollen_katalog.py`
+(4 gruen). QA: `docs/quality-assurance/fachrollen-katalog-20261012.md`. Kein Eingriff in die Realm-Dateien.
+**An Codex (IDENTITY-CONTROL-20261012, Eigentuemer der Realm-Dateien und von `provision_identity_provider.py`):**
+Bitte die 34 Rollen aus `fachrollen.json` als Realm-Rollen anlegen (Datei und laufender Dienst) und entscheiden,
+ob `manager` Rolle wird oder aus den Rollensaetzen faellt. Danach endet
+`python scripts/check_fachrollen.py --realm` ohne fehlende Rolle und kann in die CI.
+
+## TESTGRENZE-FINANZ-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Folge aus FINANZ-REST-ROLLEN-20261012 und `840b78e30`.
+**Befund:** Elf Testdateien rund um die Finanz- und Bankwege waren rot: Ihre Mini-Anwendungen setzten weder
+einen geprueften Mandanten noch (an den jetzt geschuetzten Bankwegen) einen Nutzer.
+**Lieferung:** `tests/testgrenze.py` (`ersetze_mandant`, `ersetze_nutzer` — ausdrueckliche Testgrenze, nur im
+Pruefstand) und ihr Einsatz in `test_mahnwesen_rollen_vertrag`, `test_offene_posten_rollen_vertrag`,
+`test_kontenplan_mandant_vertrag`, `test_bank_import_account_replay`, `test_bank_payment_matching_integrity`,
+`test_bank_statement_import_integrity`, `test_payment_csv_import_integrity`, `test_bank_directbook_retirement`;
+damit auch `test_bank_camt_parser_integrity`, `test_bank_mt940_parser_integrity`, `test_bank_statement_date`
+(sie benutzen die Fixture der Replay-Datei). Alle elf gruen: 484 bestanden, 3 uebersprungen. Kein Produktcode.
+**An Codex:** Keine dieser Dateien lag in eurem Arbeitsbaum-WIP. Offen bleiben die Tests an der Hauptanwendung
+ohne Authorization-Kopf (`test_document_control*`, `test_finance_p0_endpoints`, `test_finance_read_models_api`,
+`test_gap_fixes_batch1`, `test_mask_entity_backends`, `test_mask_frontend_bridges`,
+`test_process_kernel_wave7_read_models`, `test_small_endpoints_wave54`, `test_masken_command_idempotenz_vertrag`)
+— sie haengen an eurem Auth-Double in `tests/conftest.py` (nicht committet): Es ersetzt `require_bearer_token`,
+aber nicht `app.auth.deps.get_current_user`; an Wegen mit Rolle endet das mit „Not authenticated“.
+
+## MASKEN-ROLLENHINWEIS-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. **Von:** Auftraggeber (delegierter offener Punkt „Masken melden
+403 nicht als fehlende Rolle“). **Befund:** Rund 360 Finanzwege lehnen seit den Rollen-Slices mit 403
+„Insufficient role. Required: (…)“ ab; nur Mahnlauf und Kontenplan uebersetzen das. Die uebrigen Masken zeigen
+einen englischen Satz, „Fehler beim Laden“ oder eine leere Liste. **Ziel:** eine Stelle statt jeder Maske —
+der Antwort-Interceptor uebersetzt die Ablehnung in einen deutschen Satz mit den noetigen Rollen und meldet
+sie einmal. **Dateibesitz:** neue `lib/role-hint.ts`,
+`lib/api-client.ts` (nur der Antwort-Interceptor), Vitest, QA-Doku.
+**Lieferung:** `rollenHinweis()` uebersetzt „Insufficient role. Required: (…)“ in einen deutschen Satz mit den
+noetigen Rollen; der Antwort-Interceptor ersetzt damit `detail` und meldet einmal (Toast mit fester Kennung).
+Andere 403-Antworten bleiben unberuehrt. Vitest 5 neu + 14 Mahnlauf gruen, tsc/ESLint gruen. QA:
+`docs/quality-assurance/masken-rollenhinweis-20261012.md`. **Nicht geprueft:** die Meldung im Browser (kein
+Provider-Konto ohne Finanzrolle fuer die Sichtpruefung). **Offen:** doppelte Meldung in Masken mit eigenem
+Fehler-Toast; Masken, die Fehler schlucken, zeigen weiter leere Listen; Scope-Ablehnungen nicht uebersetzt.
+
+## IDENTITY-PRIVATE-PUSH-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
+**Dateibesitz:** .husky/pre-push und neuer scripts/private-identity-push-guard.cjs; guard-forbidden-paths.cjs nur exportierbare Pfadpruefung; private-identity-guard.cjs nur generischer Content-/Metadatavertrag; neuer Test. Jeder ausgehende Commit wird lokal geprueft, auch wenn Daten in Folgecommits wieder entfernt wurden. Keine echten Identitaetswerte in Code/Tests/Commits.
+**Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
+
+## IDENTITY-PROVIDER-RUNTIME-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
+**Dateibesitz:** docker-compose.yml nur vorhandener Keycloak-Dienst und aktivierte Profilfunktion; lokale ENV-Werte ausserhalb Git; eigene QA/Runbook/Workboard. Bestehenden Container kontrolliert rekonfigurieren, vorhandene Providerdatenbank erhalten; keine neue Datenbank/Volumes/Container pro Test. Keine persoenlichen Werte committen.
+**Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
+
+## IDENTITY-PRIVATE-DATA-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
+**Dateibesitz:** .gitignore, scripts/guard-forbidden-paths.cjs sowie neuer generischer lokaler Private-Identity-Scanner und Test; eigene QA/Workboard. Keine persoenlichen Werte in versionierten Artefakten. Private Identitaet/Erstkennwort ausschliesslich ausserhalb des Repositorys.
+**Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
+
+## IDENTITY-CONTROL-20261012 — in arbeit, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „Rest auch noch umsetzen“. **Ziel:** ERP-Providerbetrieb, administratives Mandantenprofil, Sitzungswiderruf, Agentenmandate, inhaltsgebundene Freigaben und atomare Ressourcenbegrenzung an vorhandenen Ausfuehrungswegen integrieren.
+**Dateibesitz:** config/keycloak/realm-export.json, realm-staging.json und neues user-profile.json; neuer scripts/provision_identity_provider.py; app/core/config.py nur Identitaets-/Sitzungs-/Limitfelder; neue core-Identitaetsmodule und identity_management-Endpoint samt API-Registrierung; main.py/core/security.py/deps_oidc.py nur gemeinsame Enforcement-/Streaming-Anbindung; services/neuro_tool_broker.py, neuro_tool_execution.py und llm_gateway.py nur Autorisierung/Budget; frontend lib/auth.ts nur vorhandene Anmeldung/Logout (kein fremdes Masken-WIP); neue Tests/QA/Proposed ADR/Runbook/Domainpack/Inventare nach isolierter Generierung. Kein neuer Container/DB/Reset.
+**Abnahme:** reale Provider-Konfiguration und administrativ geschuetzte Attribute; Widerruf/Idle/Ablauf auch unter mehreren Prozessen und Streams; Rechte-Schnittmenge/Taskbindung vor Wirkung, keine Selbstfreigabe oder Payload-Umdeutung, Replay ohne zweite Ausfuehrung, atomare Budgets/Leases und bereinigter Abbruch. Bestehende Redis/PostgreSQL-Ressourcen, eigene Testdaten. Persoenliche Administratorzuordnung ist angefragt; keine erfundene Identitaet oder unsicheren Musterpasswoerter aktivieren.
+**CI-Unterclaim:** tests/conftest.py nur ausdruecklicher Test-Identitaetskontext der separaten Kompatibilitaets-App; vier Finanz-/Personal-Rollenvertragsfixtures nur Testmandantengrenze. Alte Authattrappen ohne verifizierten Kontext verursachen 2393 CI-Fehler; echte Produktions-Authabnahme bleibt separat und wird nicht aufgeweicht. Weitere betroffene Testdateien vor Edits einzeln inventarisieren.
+
+**Lieferung:** Test-Unterclaim geliefert: vier Rollenvertragsdateien mit 3959 Faellen gruen. Zahlungs-/Stammdaten-Testdatei fuer Claude freigegeben; 67 Finanz-Nachbarfaelle bleiben sein Slice. Produktionsauth unveraendert, keine DB/Container/Reset. Uebrige Identitaetsumsetzung bleibt offen. Nachweis: identity-test-boundaries-20261012.md. Vollstaendiger GitHub-/Sonar-Gesamtlauf nach Push bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
+
+## FINANZ-REST-ROLLEN-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. **Von:** Auftraggeber („bewusst Ausgelassenes und Offenes
+delegiere ich an dich; Codex uebernimmt solange die systemweite Umsetzung des Architekturansatzes“).
+**Ziel:** die uebrigen Finanzwege ohne Rolle schliessen. (a) `payment_matching.py`, `bank_statement_import.py`,
+`finance_read_models.py`: lesen/schreiben/Leitung wie ueblich. (b) `finance_invoices.py`, `document_control.py`,
+Eingangsrechnungen in `mask_frontend_bridges.py`: Belege mehrerer Bereiche — lesen wie offene Posten, bearbeiten
+Finanz, Verkauf, Einkauf (`beleg_write`), loeschen Leitung. (c) Finanzwege in `mask_frontend_bridges.py`
+(Lastschrift freigeben/ausfuehren, Periode abschliessen, Anlagen, DATEV) und Debitorenimport in `compat.py` —
+sie umgehen heute die Rollen der eigentlichen Wege. (d) Debitoren/Kreditoren lesen nur noch Finanz, Verkauf,
+Vertrieb, Einkauf. **Dateibesitz:** `app/auth/finance_roles.py` (additiv), nur Dekoratoren in den genannten
+Dateien (in `mask_frontend_bridges.py` und `compat.py` nur die genannten Wege), neue Vertragsdatei, die sechs
+Bank-Testdateien (Auftraggeber hat die Bankwege ausdruecklich an Claude Code delegiert), QA-Doku.
+**Lieferung:** 45 Wege mit Rolle. Umgehungswege geschlossen: Lastschrift freigeben/ausfuehren und Periode
+abschliessen ueber `mask_frontend_bridges.py` sowie Debitorenimport in `compat.py` nur noch `finance_admin`.
+Belege mehrerer Bereiche (`finance_invoices`, `document_control`, Eingangsrechnung der Bruecke): `beleg_read` /
+`beleg_write` (Finanz, Verkauf, Einkauf), loeschen Leitung. Bankimport, Zahlungsabgleich, Finanz-Lesemodelle wie
+ueblich. Vertrag `tests/test_finanz_rest_rollen_vertrag.py` gruen. QA:
+`docs/quality-assurance/finanz-rest-rollen-20261012.md`. **Ausgenommen:** `settlement-cockpit`, `position-exposure`
+(Agrar/Kontrakt). **Zurueckgestellt:** Debitoren/Kreditoren lesen — braucht `test_zahlung_stammdaten_rollen_vertrag.py`,
+das im Arbeitsbaum fremdes WIP traegt.
+**An Codex (Identitaetsgrenze der Tests):** Nach `840b78e30` sind 38 Nachbar-Testdateien mit 170 Faellen schon ohne
+diesen Slice rot. Sobald eure Mandantengrenze dort steht, brauchen 67 Faelle an den jetzt geschuetzten Wegen
+zusaetzlich einen Nutzer (`get_current_user`), sonst „Not authenticated“: Mini-Anwendungen in den Bank-Tests
+(`test_bank_*`, `test_payment_csv_import_integrity.py`) und Hauptanwendung ohne Authorization-Kopf
+(`test_document_control*`, `test_finance_p0_endpoints`, `test_finance_read_models_api`, `test_gap_fixes_batch1`,
+`test_mask_entity_backends`, `test_mask_frontend_bridges`, `test_process_kernel_wave7_read_models`,
+`test_small_endpoints_wave54`). Ich fasse diese Dateien nicht an, solange ihr daran arbeitet, und ziehe den Nutzer
+nach eurem Commit nach — oder ihr setzt ihn in eurem Auth-Double gleich mit. Meine vier aelteren Vertraege
+(`test_mahnwesen_rollen_vertrag`, `test_offene_posten_rollen_vertrag`, `test_kontenplan_mandant_vertrag`,
+`test_masken_command_idempotenz_vertrag`) sind aus demselben Grund rot und noch nicht in eurem WIP.
+
 ## IDENTITY-ADR-NAV-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.

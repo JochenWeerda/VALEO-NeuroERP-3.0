@@ -236,6 +236,8 @@ def grenze():
         raise HTTPException(418, "autorisierte Datenbankgrenze")
 
     app.dependency_overrides[get_db] = datenbank
+    from app.core.tenant import get_tenant_id
+    app.dependency_overrides[get_tenant_id] = lambda: 'haus-a'  # isolated role contract, not provider/tenant proof
     with TestClient(app) as client:
         yield app, client, aufrufe
     app.dependency_overrides.clear()

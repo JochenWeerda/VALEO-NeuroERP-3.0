@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from app.auth.finance_roles import finance_admin
 import json
 import os
 from datetime import date, datetime, timezone
@@ -1672,7 +1673,7 @@ async def import_kunden_csv(
     return {"created": created, "updated": updated, "errors": errors}
 
 
-@router.post("/finance/import/debitoren", response_model=CsvImportResponse, summary="Debitoren csv importieren")
+@router.post("/finance/import/debitoren", response_model=CsvImportResponse, summary="Debitoren csv importieren", dependencies=[Depends(finance_admin)])
 async def import_debitoren_csv(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),

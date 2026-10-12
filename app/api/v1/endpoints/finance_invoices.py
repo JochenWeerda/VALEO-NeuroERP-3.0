@@ -3,6 +3,7 @@ Finance Invoices API Endpoints
 Spezifische Endpoints für Finance-Modul Invoices
 """
 
+from app.auth.finance_roles import beleg_read, beleg_write, finance_admin
 from datetime import datetime, timedelta
 import logging
 from typing import Optional
@@ -102,7 +103,7 @@ def _beleg_speichern(repo, number: str, data: dict) -> dict:
     return repo.save_document("sales_invoice", number, data, commit=False)
 
 
-@router.post("", response_model=FinanceInvoicesOut, summary="Invoice anlegen")
+@router.post("", response_model=FinanceInvoicesOut, summary="Invoice anlegen", dependencies=[Depends(beleg_write)])
 async def create_invoice(
     invoice: SalesInvoice,
     tenant_id: str = Depends(get_tenant_id),
@@ -199,7 +200,7 @@ async def create_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to create invoice: {str(e)}")
 
 
-@router.get("/{invoice_number}", response_model=StatusResponse, summary="Invoice abrufen")
+@router.get("/{invoice_number}", response_model=StatusResponse, summary="Invoice abrufen", dependencies=[Depends(beleg_read)])
 async def get_invoice(
     invoice_number: str,
     db: Session = Depends(get_db)
@@ -218,7 +219,7 @@ async def get_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to get invoice: {str(e)}")
 
 
-@router.put("/{invoice_number}", response_model=FinanceInvoicesOut, summary="Invoice aktualisieren")
+@router.put("/{invoice_number}", response_model=FinanceInvoicesOut, summary="Invoice aktualisieren", dependencies=[Depends(beleg_write)])
 async def update_invoice(
     invoice_number: str,
     invoice: SalesInvoice,
@@ -269,7 +270,7 @@ async def update_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to update invoice: {str(e)}")
 
 
-@router.get("", response_model=FinanceInvoicesOut, summary="Invoices auflisten")
+@router.get("", response_model=FinanceInvoicesOut, summary="Invoices auflisten", dependencies=[Depends(beleg_read)])
 async def list_invoices(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -309,7 +310,7 @@ async def list_invoices(
 
 
 
-@router.delete("/{invoice_number}", status_code=204, response_class=Response, response_model=None, summary="Invoice löschen")
+@router.delete("/{invoice_number}", status_code=204, response_class=Response, response_model=None, summary="Invoice löschen", dependencies=[Depends(finance_admin)])
 async def delete_invoice(
     invoice_number: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -332,7 +333,7 @@ async def delete_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to delete invoice: {str(e)}")
 
 
-@router.post("/{invoice_number}/storno", response_model=StatusResponse, summary="Invoice storno")
+@router.post("/{invoice_number}/storno", response_model=StatusResponse, summary="Invoice storno", dependencies=[Depends(beleg_write)])
 async def storno_invoice(
     invoice_number: str,
     tenant_id: str = Depends(get_tenant_id),
