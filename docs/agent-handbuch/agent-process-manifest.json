@@ -4028,6 +4028,60 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "admin/identity-budgets",
+      "title": "Nutzer- und Agentenkontingente",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__identity-budgets/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/identity-budgets/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/identity-budgets/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/identity-budgets/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "allocate",
+          "label": "Kontingent vergeben",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "identity:quota:allocate",
+          "commandEndpoint": "/api/v1/identity/budgets/actions/allocate",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "root",
+          "label": "Mandantenbudget bereitstellen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "platform:quota:manage",
+          "commandEndpoint": "/api/v1/identity/budgets/actions/root",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "ledger",
+          "label": "Verbrauchsnebenbuch",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "identity:quota:read",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "owner",
+        "subject",
+        "actor"
+      ],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
       "mask_id": "admin/postfaecher",
       "title": "Postfächer",
       "domain": "platform",
@@ -4085,6 +4139,38 @@
       ],
       "sensitive_fields": [
         "passwort"
+      ],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
+      "mask_id": "admin/token-consumption",
+      "title": "Technisches Verbrauchsnebenbuch",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__token-consumption/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/token-consumption/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/token-consumption/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/token-consumption/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "budgets",
+          "label": "Kontingente öffnen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "identity:quota:read",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "owner",
+        "subject",
+        "actor"
       ],
       "mcp_tool_ids": [
         "admin.postfach.speichern"
@@ -5065,5 +5151,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 93
+  "event_count": 94
 }

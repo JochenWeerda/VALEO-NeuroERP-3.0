@@ -1,137 +1,51 @@
-"""
-Tenant API endpoints
-RESTful API for tenant management
-"""
-
-from fastapi import Response, APIRouter, Depends, HTTPException, Query
+"""Tenant lifecycle with explicit platform authority and journal preservation."""
+from fastapi import Response, APIRouter, Depends, Query
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
+from app.core.database import get_db
+from app.services.tenant_lifecycle_service import TenantLifecycleService
+from app.api.v1.schemas.shared import TenantCreate, TenantUpdate, Tenant
+from app.api.v1.schemas.base import PaginatedResponse
 
-from ....core.database import get_db
-from ....infrastructure.repositories import TenantRepository
-from ....core.dependency_container import container
-from ..schemas.shared import (
-    TenantCreate, TenantUpdate, Tenant
-)
-from ..schemas.base import PaginatedResponse
-
-from app.api.v1.schemas.base import BaseSchema
+router=APIRouter(tags=['tenants'])
 
 
-router = APIRouter(tags=["tenants"])
+class LifecycleReason(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    reason: str=Field(min_length=3,max_length=500)
 
 
-@router.post("/", response_model=Tenant, status_code=201, summary="Tenant anlegen")
-async def create_tenant(
-    tenant_data: TenantCreate,
-    db: Session = Depends(get_db)
-):
-    """
-    Create a new tenant.
-
-    This endpoint allows creating a new tenant in the system.
-    The tenant will be used for multi-tenant data isolation.
-    """
-    try:
-        tenant_repo = container.resolve(TenantRepository)
-        tenant = await tenant_repo.create(tenant_data.model_dump(), tenant_data.name)  # Use tenant name as tenant_id for simplicity
-        return Tenant.model_validate(tenant)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to create tenant: {str(e)}")
+@router.post('/',response_model=Tenant,status_code=201,summary='Mandanten mit Plattformberechtigung anlegen')
+def create_tenant(payload: TenantCreate,db: Session=Depends(get_db)) -> Tenant:
+    return Tenant.model_validate(TenantLifecycleService(db).create(payload.model_dump()))
 
 
-@router.get("/{tenant_id}", response_model=Tenant, summary="Tenant abrufen")
-async def get_tenant(
-    tenant_id: str,
-    db: Session = Depends(get_db)
-):
-    """
-    Get tenant by ID.
-
-    Retrieve detailed information about a specific tenant.
-    """
-    try:
-        tenant_repo = container.resolve(TenantRepository)
-        tenant = await tenant_repo.get_by_id(tenant_id, tenant_id)
-        if not tenant:
-            raise HTTPException(status_code=404, detail="Tenant not found")
-        return Tenant.model_validate(tenant)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve tenant: {str(e)}")
+@router.get('/',response_model=PaginatedResponse[Tenant],summary='Berechtigte Mandanten auflisten')
+def list_tenants(skip: int=Query(0,ge=0),limit: int=Query(100,ge=1,le=100),db: Session=Depends(get_db)) -> PaginatedResponse[Tenant]:
+    rows,total=TenantLifecycleService(db).list(skip,limit)
+    return PaginatedResponse[Tenant](items=[Tenant.model_validate(row) for row in rows],total=total,
+        page=skip//limit+1,size=limit,pages=(total+limit-1)//limit,has_next=skip+limit<total,has_prev=skip>0)
 
 
-@router.get("/", response_model=PaginatedResponse[Tenant], summary="Tenants auflisten")
-async def list_tenants(
-    skip: int = Query(0, ge=0, description="Number of items to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of items to return"),
-    db: Session = Depends(get_db)
-):
-    """
-    List tenants with pagination.
-
-    Retrieve a paginated list of all tenants in the system.
-    """
-    try:
-        tenant_repo = container.resolve(TenantRepository)
-
-        # For listing all tenants, we use a dummy tenant_id since this is a system-wide operation
-        # In a real implementation, this would require admin privileges
-        tenants = await tenant_repo.get_all("system", skip, limit)
-        total = await tenant_repo.count("system")
-
-        return PaginatedResponse[Tenant](
-            items=[Tenant.model_validate(tenant) for tenant in tenants],
-            total=total,
-            page=(skip // limit) + 1,
-            size=limit,
-            pages=(total + limit - 1) // limit,
-            has_next=(skip + limit) < total,
-            has_prev=skip > 0
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to list tenants: {str(e)}")
+# target_id is an administrative object selector, not an active tenant switch.
+# Cross-tenant access requires the explicit platform scope in the service.
+@router.get('/{target_id}',response_model=Tenant,summary='Eigenen oder ausdrücklich administrierten Mandanten abrufen')
+def get_tenant(target_id: str,db: Session=Depends(get_db)) -> Tenant:
+    return Tenant.model_validate(TenantLifecycleService(db).get(target_id))
 
 
-@router.put("/{tenant_id}", response_model=Tenant, summary="Tenant aktualisieren")
-async def update_tenant(
-    tenant_id: str,
-    tenant_data: TenantUpdate,
-    db: Session = Depends(get_db)
-):
-    """
-    Update tenant information.
-
-    Modify tenant details such as name, domain, or settings.
-    """
-    try:
-        tenant_repo = container.resolve(TenantRepository)
-        tenant = await tenant_repo.update(tenant_id, tenant_data.model_dump(exclude_unset=True), tenant_id)
-        if not tenant:
-            raise HTTPException(status_code=404, detail="Tenant not found")
-        return Tenant.model_validate(tenant)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to update tenant: {str(e)}")
+@router.put('/{target_id}',response_model=Tenant,summary='Mandantenstammdaten administrieren')
+def update_tenant(target_id: str,payload: TenantUpdate,db: Session=Depends(get_db)) -> Tenant:
+    return Tenant.model_validate(TenantLifecycleService(db).update(target_id,payload.model_dump(exclude_unset=True)))
 
 
-@router.delete("/{tenant_id}", status_code=204, response_class=Response, response_model=None, summary="Tenant löschen")
-async def delete_tenant(
-    tenant_id: str,
-    db: Session = Depends(get_db)
-):
-    """
-    Delete tenant (soft delete).
+@router.post('/{target_id}/block',response_model=Tenant,summary='Mandanten unter Erhalt sämtlicher Buchungen sperren')
+def block_tenant(target_id: str,payload: LifecycleReason,db: Session=Depends(get_db)) -> Tenant:
+    return Tenant.model_validate(TenantLifecycleService(db).block(target_id,payload.reason))
 
-    Mark a tenant as inactive. This is a soft delete operation.
-    """
-    try:
-        tenant_repo = container.resolve(TenantRepository)
-        success = await tenant_repo.delete(tenant_id, tenant_id)
-        if not success:
-            raise HTTPException(status_code=404, detail="Tenant not found")
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to delete tenant: {str(e)}")
+
+@router.delete('/{target_id}',status_code=204,response_class=Response,response_model=None,
+               summary='Mandanten ausschließlich ohne Buchungen und geschützte Referenzen löschen')
+def delete_tenant(target_id: str,payload: LifecycleReason,db: Session=Depends(get_db)) -> Response:
+    TenantLifecycleService(db).delete(target_id,payload.reason)
+    return Response(status_code=204)

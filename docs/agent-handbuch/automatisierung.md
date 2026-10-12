@@ -201,6 +201,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `fuhrpark.fahrzeug.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.rechnung.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.terminart.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
+| `identity.tenant.` | outbox | `app/services/tenant_lifecycle_service.py` |
 | `inventur.abgeschlossen` | outbox | `app/services/inventory_compat_service.py` |
 | `logistik.frachttabelle.created` | outbox | `app/api/v1/endpoints/logistik_frachttabellen.py` |
 | `logistik.tour.created` | outbox | `app/api/v1/command_handlers/logistics.py` |

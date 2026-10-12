@@ -26456,6 +26456,191 @@
         "title": "Buchungsvorschlag",
         "type": "object"
       },
+      "BudgetAllocate": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "user",
+              "agent"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "max_children": {
+            "maximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Max Children",
+            "type": "integer"
+          },
+          "owner": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Owner",
+            "type": "string"
+          },
+          "parent": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Parent",
+            "type": "string"
+          },
+          "request_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Request Id",
+            "type": "string"
+          },
+          "tokens": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 1000000000000.0,
+            "title": "Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tokens",
+          "max_children",
+          "request_id",
+          "parent",
+          "owner",
+          "kind"
+        ],
+        "title": "BudgetAllocate",
+        "type": "object"
+      },
+      "BudgetCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "_auditReason": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auditreason"
+          },
+          "_idempotencyKey": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotencykey"
+          },
+          "_mode": {
+            "default": "execute",
+            "enum": [
+              "execute",
+              "dryRun",
+              "validate",
+              "propose"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "user",
+                  "agent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "max_children": {
+            "maximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Max Children",
+            "type": "integer"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "tokens": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 1000000000000.0,
+            "title": "Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tokens",
+          "max_children"
+        ],
+        "title": "BudgetCommand",
+        "type": "object"
+      },
+      "BudgetCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "max_children": {
+            "maximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Max Children",
+            "type": "integer"
+          },
+          "tokens": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 1000000000000.0,
+            "title": "Tokens",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tokens",
+          "max_children"
+        ],
+        "title": "BudgetCreate",
+        "type": "object"
+      },
       "BudgetCreateRequest": {
         "properties": {
           "bezeichnung": {
@@ -26563,6 +26748,85 @@
           }
         },
         "title": "BudgetLineUpdate",
+        "type": "object"
+      },
+      "BudgetOut": {
+        "properties": {
+          "allocated": {
+            "title": "Allocated",
+            "type": "integer"
+          },
+          "available": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Available"
+          },
+          "children": {
+            "title": "Children",
+            "type": "integer"
+          },
+          "depth": {
+            "title": "Depth",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "max_children": {
+            "title": "Max Children",
+            "type": "integer"
+          },
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "parent": {
+            "title": "Parent",
+            "type": "string"
+          },
+          "reserved": {
+            "title": "Reserved",
+            "type": "integer"
+          },
+          "spent": {
+            "title": "Spent",
+            "type": "integer"
+          },
+          "total_spent": {
+            "title": "Total Spent",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "owner",
+          "kind",
+          "limit",
+          "max_children",
+          "children",
+          "allocated",
+          "reserved",
+          "spent",
+          "total_spent",
+          "depth",
+          "parent"
+        ],
+        "title": "BudgetOut",
         "type": "object"
       },
       "BudgetPlanCreate": {
@@ -94191,6 +94455,90 @@
         "title": "LeasingRueckgabePayload",
         "type": "object"
       },
+      "LedgerOut": {
+        "properties": {
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "actual_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Tokens"
+          },
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "budget_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget Id"
+          },
+          "detail": {
+            "additionalProperties": true,
+            "title": "Detail",
+            "type": "object"
+          },
+          "event": {
+            "title": "Event",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "job": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job"
+          },
+          "reason": {
+            "default": "",
+            "title": "Reason",
+            "type": "string"
+          },
+          "tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tokens"
+          }
+        },
+        "required": [
+          "id",
+          "event",
+          "actor",
+          "at",
+          "detail"
+        ],
+        "title": "LedgerOut",
+        "type": "object"
+      },
       "LeergutArtCreate": {
         "properties": {
           "art_nr": {
@@ -97248,6 +97596,22 @@
           }
         },
         "title": "LifecycleActionRequest",
+        "type": "object"
+      },
+      "LifecycleReason": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "LifecycleReason",
         "type": "object"
       },
       "LineCounts": {
@@ -314380,6 +314744,251 @@
         ]
       }
     },
+    "/api/v1/identity/budgets": {
+      "get": {
+        "operationId": "budgets_api_v1_identity_budgets_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BudgetOut"
+                  },
+                  "title": "Response Budgets Api V1 Identity Budgets Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Wirksame Nutzer- und Agentenkontingente auflisten",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/identity/budgets/actions/{action_key}": {
+      "post": {
+        "operationId": "budget_command_api_v1_identity_budgets_actions__action_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_key",
+            "required": true,
+            "schema": {
+              "enum": [
+                "root",
+                "allocate"
+              ],
+              "title": "Action Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BudgetCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kontingentvergabe im Maskbuilder prüfen und kontrolliert ausführen",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/identity/budgets/allocate": {
+      "post": {
+        "operationId": "allocate_budget_api_v1_identity_budgets_allocate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BudgetAllocate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BudgetOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Elternkontingent an Nutzer oder Agenten verteilen",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/identity/budgets/root": {
+      "post": {
+        "operationId": "create_budget_api_v1_identity_budgets_root_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BudgetCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BudgetOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mandantenkontingent mit ausdrücklicher Plattformberechtigung bereitstellen",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/identity/consumption-ledger": {
+      "get": {
+        "operationId": "consumption_ledger_api_v1_identity_consumption_ledger_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "default": "+",
+              "title": "Before",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LedgerOut"
+                  },
+                  "title": "Response Consumption Ledger Api V1 Identity Consumption Ledger Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Technisches Token-Verbrauchsnebenbuch des eigenen Mandanten abrufen",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
     "/api/v1/identity/session": {
       "get": {
         "operationId": "current_session_api_v1_identity_session_get",
@@ -397931,31 +398540,26 @@
     },
     "/api/v1/tenants/": {
       "get": {
-        "description": "List tenants with pagination.\n\nRetrieve a paginated list of all tenants in the system.",
         "operationId": "list_tenants_api_v1_tenants__get",
         "parameters": [
           {
-            "description": "Number of items to skip",
             "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
               "default": 0,
-              "description": "Number of items to skip",
               "minimum": 0,
               "title": "Skip",
               "type": "integer"
             }
           },
           {
-            "description": "Maximum number of items to return",
             "in": "query",
             "name": "limit",
             "required": false,
             "schema": {
               "default": 100,
-              "description": "Maximum number of items to return",
-              "maximum": 1000,
+              "maximum": 100,
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
@@ -397989,14 +398593,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Tenants auflisten",
+        "summary": "Berechtigte Mandanten auflisten",
         "tags": [
           "tenants",
           "tenants"
         ]
       },
       "post": {
-        "description": "Create a new tenant.\n\nThis endpoint allows creating a new tenant in the system.\nThe tenant will be used for multi-tenant data isolation.",
         "operationId": "create_tenant_api_v1_tenants__post",
         "requestBody": {
           "content": {
@@ -398035,28 +398638,37 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Tenant anlegen",
+        "summary": "Mandanten mit Plattformberechtigung anlegen",
         "tags": [
           "tenants",
           "tenants"
         ]
       }
     },
-    "/api/v1/tenants/{tenant_id}": {
+    "/api/v1/tenants/{target_id}": {
       "delete": {
-        "description": "Delete tenant (soft delete).\n\nMark a tenant as inactive. This is a soft delete operation.",
-        "operationId": "delete_tenant_api_v1_tenants__tenant_id__delete",
+        "operationId": "delete_tenant_api_v1_tenants__target_id__delete",
         "parameters": [
           {
             "in": "path",
-            "name": "tenant_id",
+            "name": "target_id",
             "required": true,
             "schema": {
-              "title": "Tenant Id",
+              "title": "Target Id",
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LifecycleReason"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "204": {
             "description": "Successful Response"
@@ -398077,22 +398689,21 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Tenant löschen",
+        "summary": "Mandanten ausschließlich ohne Buchungen und geschützte Referenzen löschen",
         "tags": [
           "tenants",
           "tenants"
         ]
       },
       "get": {
-        "description": "Get tenant by ID.\n\nRetrieve detailed information about a specific tenant.",
-        "operationId": "get_tenant_api_v1_tenants__tenant_id__get",
+        "operationId": "get_tenant_api_v1_tenants__target_id__get",
         "parameters": [
           {
             "in": "path",
-            "name": "tenant_id",
+            "name": "target_id",
             "required": true,
             "schema": {
-              "title": "Tenant Id",
+              "title": "Target Id",
               "type": "string"
             }
           }
@@ -398124,22 +398735,21 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Tenant abrufen",
+        "summary": "Eigenen oder ausdrücklich administrierten Mandanten abrufen",
         "tags": [
           "tenants",
           "tenants"
         ]
       },
       "put": {
-        "description": "Update tenant information.\n\nModify tenant details such as name, domain, or settings.",
-        "operationId": "update_tenant_api_v1_tenants__tenant_id__put",
+        "operationId": "update_tenant_api_v1_tenants__target_id__put",
         "parameters": [
           {
             "in": "path",
-            "name": "tenant_id",
+            "name": "target_id",
             "required": true,
             "schema": {
-              "title": "Tenant Id",
+              "title": "Target Id",
               "type": "string"
             }
           }
@@ -398181,7 +398791,65 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Tenant aktualisieren",
+        "summary": "Mandantenstammdaten administrieren",
+        "tags": [
+          "tenants",
+          "tenants"
+        ]
+      }
+    },
+    "/api/v1/tenants/{target_id}/block": {
+      "post": {
+        "operationId": "block_tenant_api_v1_tenants__target_id__block_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "title": "Target Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LifecycleReason"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tenant"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mandanten unter Erhalt sämtlicher Buchungen sperren",
         "tags": [
           "tenants",
           "tenants"

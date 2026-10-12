@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## IDENTITY-MASK-PLATFORM-SCOPES-20261012 — reserviert, Codex
+## IDENTITY-MASK-PLATFORM-SCOPES-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** UI-Rechtevertrag fuer administrative Masken mit der ausdruecklichen Plattformscope-Pruefung des Backends harmonisieren. **Dateibesitz:** frontend components/mask-builder/runtime/screen-permissions.ts nur platform:-Scope und identity:quota:read; bestehender Komponenten-Vertragstest; eigene QA/Workboard. Keine fremden Masken-/Stylingdateien. **Abnahme:** Mandanten-admin/admin:all erhaelt keinen Plattform-Button ohne konkreten Scope; eigene Kontingentansicht bleibt fuer angemeldete Nutzer erreichbar. Backendautorisierung bleibt verbindlich. Keine DB/Container/Reset.
+
+**Lieferung:** Plattformaktionen erfordern konkrete Scopes auch bei Mandanten-admin/admin:all; sechs UI-Rechtevertraege bestanden. Nachweis: identity-administration-20261012.md. Frische Browserpruefung erreicht Kennwortmaske ohne invalid_scope; keine persoenlichen Zugangsdaten eingegeben. GitHub-Gesamtabnahme bleibt offen. Keine DB/Container/Reset.
 
 ## GUTSCHRIFT-MASKE-SD-20261012 — abgeschlossen, Claude Code
 
@@ -36,9 +38,11 @@ QA: `docs/quality-assurance/gutschrift-maske-sd-20261012.md`.
 Bestellung, Zinsabrechnung, Artikelstamm, Kasse, Ernteannahme); Maske Steuerschluessel als ScreenDefinition;
 Entwurf bearbeiten; Vorschlag/Freigabe-Paar fuer das Buchen durch Agenten; Sichtpruefung im Browser.
 
-## IDENTITY-ADMIN-HANDBUCH-20261012 — reserviert, Codex
+## IDENTITY-ADMIN-HANDBUCH-20261012 — in arbeit, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber: Testanmeldung, Mandanten-/Administrator-/Nutzer-/Agentenverwaltung mit Handbuch-Screenshots und hierarchischen Kontingenten. **Ziel:** echte Verwaltungswege, Loeschschutz ab erster Buchung, Sperre statt Loeschen, kontingentgebundene Unterdelegation und nachvollziehbares Verbrauchsnebenbuch. **Dateibesitz:** app/api/v1/endpoints/tenants.py, neues app/services/tenant_lifecycle_service.py; neue identity_quota-Module und eigene Tests; neue native Verwaltungs-ScreenDefinitions in eigenem Modul samt eng begrenzter Registry-Anbindung, neue thin-wrapper Routen (kein fremdes Maskenstyling); docs/benutzerhandbuch/identity-administration.md samt ausschliesslich synthetischen Screenshots, eigene QA/Workboard/ADR083-Ergaenzung. Bestehender IDENTITY-CONTROL-Claim behaelt Provider/User-/Agent-API und deren Integration. **Abnahme:** Buchungshistorie verhindert physisches Loeschen, fremde Mandanten unzugaenglich, deaktivierte Mandanten nicht benutzbar; Elternbudget kann durch Unteragenten nicht steigen, atomare Reservierung und Abrechnung mit Replay-Schutz. Screenshots ausschliesslich echte Browserablaeufe und synthetische Daten, keine privaten Zugangsdaten. **Risiken:** persoenliche MFA-Erstanmeldung vom Auftraggeber vertagt; dafuer keine Ersatzfreigabe behaupten. Vorhandenen Pruefstand verwenden; kein neuer Container/DB/Reset, keine fremden Claims uebernehmen.
+
+**Lieferung:** Grundlage geliefert: Mandanten-Loeschschutz, sofortige Sperre, hierarchische atomare Kontingente und technisches Verbrauchsnebenbuch; 110 Vertraege bestanden. Native Budget-/Nebenbuchmasken geliefert. Modellaufrufe, Agentenanlage und vollstaendige Handbuch-Screenshotserie bleiben offen. Nachweis: identity-administration-20261012.md. Frische Browserpruefung erreicht Kennwortmaske ohne invalid_scope; keine persoenlichen Zugangsdaten eingegeben. GitHub-Gesamtabnahme bleibt offen. Keine DB/Container/Reset.
 
 ## STEUERSCHLUESSEL-EINHEIT-20261012 — abgeschlossen, Claude Code
 

@@ -34,3 +34,23 @@ describe('authenticated mask permission projection', () => {
     expect(getScreenPermissions(lead, user([], ['CRM_BEARBEITEN']))).toEqual(['crm.lead.create'])
   })
 })
+
+
+describe('platform capacity remains explicit', () => {
+  const administration: ScreenDefinition = { ...screen, id: 'admin/identity-budgets', domain: 'platform',
+    actions: [
+      { key: 'root', label: 'Mandantenbudget', permission: 'platform:quota:manage' },
+      { key: 'read', label: 'Eigene Kontingente', permission: 'identity:quota:read' },
+      { key: 'allocate', label: 'Vergeben', permission: 'identity:quota:allocate' },
+    ] }
+  it('does not project platform capacity from tenant admin or admin:all', () => {
+    expect(getScreenPermissions(administration, user(['admin:all'], ['admin'])))
+      .toEqual(['identity:quota:read', 'identity:quota:allocate'])
+    expect(getScreenPermissions(administration, user(['platform:quota:manage'])))
+      .toEqual(['platform:quota:manage', 'identity:quota:read'])
+  })
+  it('keeps own quota navigation available without granting allocation rights', () => {
+    expect(getScreenPermissions(administration, user())).toEqual(['identity:quota:read'])
+    expect(getScreenPermissions(administration, null)).toEqual([])
+  })
+})

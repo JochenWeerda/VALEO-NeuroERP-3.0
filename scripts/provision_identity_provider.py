@@ -16,9 +16,41 @@ import httpx
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def standard_login_scopes() -> list[dict]:
+    """Explicit standard scopes: imported realms do not manufacture missing ones."""
+    def property_mapper(name,attribute,claim,json_type='String'):
+        return {'name':name,'protocol':'openid-connect','protocolMapper':'oidc-usermodel-property-mapper',
+            'consentRequired':False,'config':{'user.attribute':attribute,'claim.name':claim,
+            'jsonType.label':json_type,'id.token.claim':'true','access.token.claim':'true','userinfo.token.claim':'true'}}
+    scopes=[]
+    for name,mappers in [
+        ('profile',[property_mapper('username','username','preferred_username'),
+                    property_mapper('given name','firstName','given_name'),
+                    property_mapper('family name','lastName','family_name')]),
+        ('email',[property_mapper('email','email','email'),
+                  property_mapper('email verified','emailVerified','email_verified','boolean')]),
+        ('roles',[{'name':'realm roles','protocol':'openid-connect',
+            'protocolMapper':'oidc-usermodel-realm-role-mapper','consentRequired':False,
+            'config':{'claim.name':'roles','jsonType.label':'String','multivalued':'true',
+                      'access.token.claim':'true','id.token.claim':'true'}},
+            {'name':'tenant_id','protocol':'openid-connect','protocolMapper':'oidc-usermodel-attribute-mapper',
+             'consentRequired':False,'config':{'claim.name':'tenant_id','user.attribute':'tenant_id',
+             'jsonType.label':'String','access.token.claim':'true','id.token.claim':'true'}}]),
+        ('web-origins',[{'name':'allowed web origins','protocol':'openid-connect',
+            'protocolMapper':'oidc-allowed-origins-mapper','consentRequired':False,
+            'config':{'access.token.claim':'true','id.token.claim':'false'}}])]:
+        scopes.append({'name':name,'protocol':'openid-connect',
+            'attributes':{'include.in.token.scope':'true','display.on.consent.screen':'true'},
+            'protocolMappers':mappers})
+    return scopes
+
+
 def prepared_realm(source: dict) -> dict:
     realm = copy.deepcopy(source)
     realm['users'] = []
+    scopes=realm.setdefault('clientScopes',[])
+    existing_scopes={scope['name'] for scope in scopes}
+    scopes.extend(scope for scope in standard_login_scopes() if scope['name'] not in existing_scopes)
     catalog = json.loads((ROOT / 'config/keycloak/fachrollen.json').read_text(encoding='utf-8'))
     roles = realm.setdefault('roles', {}).setdefault('realm', [])
     known = {role['name'] for role in roles}
@@ -28,7 +60,11 @@ def prepared_realm(source: dict) -> dict:
     roles.extend(role for role in desired if role['name'] not in known)
     realm.update(accessTokenLifespan=300, ssoSessionIdleTimeout=900,
                  ssoSessionMaxLifespan=28800, revokeRefreshToken=True, refreshTokenMaxReuse=0)
+    available_scopes={scope['name'] for scope in scopes}|{'offline_access'}
     for client in realm.get('clients', []):
+        # Remove unused imported optional references that never had a scope.
+        if 'optionalClientScopes' in client:
+            client['optionalClientScopes']=[name for name in client['optionalClientScopes'] if name in available_scopes]
         client.pop('secret', None)
         client['directAccessGrantsEnabled'] = False
         client['implicitFlowEnabled'] = False
@@ -40,12 +76,57 @@ def prepared_realm(source: dict) -> dict:
             'protocolMapper':'oidc-audience-mapper','consentRequired':False,
             'config':{'included.client.audience':'valeo-neuro-erp-backend',
                       'access.token.claim':'true','id.token.claim':'false'}})
+        mappers[:] = [m for m in mappers if m.get('name') != 'erp-identity-type']
+        mappers.append({'name':'erp-identity-type','protocol':'openid-connect',
+            'protocolMapper':'oidc-usermodel-attribute-mapper','consentRequired':False,
+            'config':{'user.attribute':'identity_type','claim.name':'identity_type','jsonType.label':'String',
+                      'access.token.claim':'true','id.token.claim':'true'}})
         mappers[:] = [m for m in mappers if m.get('name') != 'erp-permissions']
         mappers.append({'name':'erp-permissions','protocol':'openid-connect',
             'protocolMapper':'oidc-usermodel-attribute-mapper','consentRequired':False,
             'config':{'user.attribute':'erp_scopes','claim.name':'erp_scopes','jsonType.label':'String',
                       'multivalued':'true','access.token.claim':'true','id.token.claim':'true'}})
     return realm
+
+
+def reconcile_client_scopes(client: httpx.Client, headers: dict, realm: str, desired: list[dict]) -> dict[str,str]:
+    route=f'/admin/realms/{realm}/client-scopes'
+    inventory=client.get(route,headers=headers)
+    inventory.raise_for_status()
+    existing={scope['name']:scope for scope in inventory.json()}
+    for scope in desired:
+        if scope['name'] in existing:
+            continue  # Preserve existing scope policy and unrelated mappers.
+        response=client.post(route,headers=headers,json=scope)
+        if response.status_code!=201: raise RuntimeError('Declared OIDC scope creation failed')
+    verified=client.get(route,headers=headers);verified.raise_for_status()
+    ids={scope['name']:scope['id'] for scope in verified.json()}
+    if not {scope['name'] for scope in desired}<=ids.keys():
+        raise RuntimeError('Declared OIDC scopes not persisted')
+    return ids
+
+
+def assign_declared_scopes(client: httpx.Client, headers: dict, realm: str, identifier: str,
+                           desired: dict, scopes: dict[str,str]) -> None:
+    for field,kind in [('defaultClientScopes','default-client-scopes'),('optionalClientScopes','optional-client-scopes')]:
+        if not desired.get(field): continue
+        route=f'/admin/realms/{realm}/clients/{identifier}/{kind}'
+        assigned=client.get(route,headers=headers);assigned.raise_for_status()
+        current={scope['name'] for scope in assigned.json()}
+        for name in desired.get(field,[]):
+            if name in current: continue
+            if name not in scopes: raise RuntimeError('Client references a missing OIDC scope')
+            response=client.put(route+'/'+scopes[name],headers=headers)
+            if response.status_code!=204: raise RuntimeError('OIDC client scope assignment failed')
+        verified=client.get(route,headers=headers);verified.raise_for_status()
+        if not set(desired.get(field,[])) <= {scope['name'] for scope in verified.json()}:
+            raise RuntimeError('OIDC client scope assignment not persisted')
+
+
+def reconcile_callback_origins(current: dict, desired: dict) -> None:
+    """Only declared callback origins, with existing deployment addresses retained."""
+    for field in ('redirectUris','webOrigins'):
+        current[field] = sorted(set(current.get(field,[])) | set(desired.get(field,[])))
 
 
 def provision(client: httpx.Client, username: str, password: str, source: dict, profile: dict) -> dict:
@@ -65,6 +146,7 @@ def provision(client: httpx.Client, username: str, password: str, source: dict, 
     elif exists.status_code != 200:
         raise RuntimeError(f'Realm inventory failed ({exists.status_code})')
     reconcile_realm_roles(client, headers, name, realm['roles']['realm'])
+    scope_ids=reconcile_client_scopes(client,headers,name,realm['clientScopes'])
     for desired in realm.get('clients',[]):
         found=client.get(f'/admin/realms/{name}/clients',headers=headers,params={'clientId':desired['clientId']})
         found.raise_for_status()
@@ -76,13 +158,15 @@ def provision(client: httpx.Client, username: str, password: str, source: dict, 
         current['implicitFlowEnabled'] = False
         if current.get('publicClient'):
             current.setdefault('attributes', {})['pkce.code.challenge.method'] = 'S256'
-        owned_names={'erp-api-audience','erp-permissions'}
+        reconcile_callback_origins(current,desired)
+        owned_names={'erp-api-audience','erp-permissions','erp-identity-type'}
         mappers=[m for m in current.get('protocolMappers',[]) if m.get('name') not in owned_names]
         mappers.extend(m for m in desired.get('protocolMappers',[]) if m.get('name') in owned_names)
         current['protocolMappers']=mappers
         response=client.put(f'/admin/realms/{name}/clients/{client_id}',headers=headers,json=current)
         if response.status_code != 204:
             raise RuntimeError('ERP client mapper integration failed')
+        assign_declared_scopes(client,headers,name,client_id,desired,scope_ids)
     representation=client.get(f'/admin/realms/{name}',headers=headers).json()
     for setting in ('accessTokenLifespan', 'ssoSessionIdleTimeout', 'ssoSessionMaxLifespan',
                     'revokeRefreshToken', 'refreshTokenMaxReuse'):

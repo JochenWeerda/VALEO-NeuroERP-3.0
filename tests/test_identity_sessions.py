@@ -12,7 +12,7 @@ ORIGINAL_VALIDATE=sessions.validate
 
 @pytest.fixture
 def session(monkeypatch):
-    client=redis.Redis.from_url('redis://127.0.0.1:6379/0',decode_responses=True)
+    client=redis.Redis.from_url('redis://127.0.0.1:6379/0',decode_responses=True,socket_connect_timeout=1,socket_timeout=2)
     try:
         client.ping()
     except redis.RedisError:
@@ -136,3 +136,14 @@ def test_subject_revoke_requires_admin_and_rejects_old_token(probe,session,monke
     admin={'Authorization':'Bearer '+probe.token(changes={'sub':'test-admin','sid':'admin-session','roles':['admin']})}
     assert client.post('/api/v1/identity/subjects/revoke',headers=admin,json={'subject':'human-a'}).status_code==204
     assert client.get('/api/v1/identity/session',headers=headers).status_code==401
+
+
+def test_tenant_block_revokes_every_subject_but_preserves_other_tenants(session):
+    _,claims=session
+    sessions.validate(claims,'own-token')
+    sessions.block_tenant(claims['tenant_id'],actor='fixture-platform')
+    for subject in (claims['sub'],'other-person','service-worker'):
+        with pytest.raises(HTTPException) as error:
+            sessions.validate({**claims,'sub':subject,'sid':'fresh-session'},'other-token')
+        assert error.value.status_code==403
+    sessions.validate({**claims,'tenant_id':'tenant-b'},'other-tenant')

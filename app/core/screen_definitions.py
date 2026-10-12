@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from app.core.screen_definitions_identity import IDENTITY_SCREEN_BUILDERS
 from app.core.mask_rollout_catalog import ROLLOUT_WAVES_42_51
 from app.core.screen_definitions_capture import (
     build_strecke_disposition_screen_definition,
@@ -41,11 +42,7 @@ from app.core.screen_definitions_capture import (
 
 
 def _human_input_flow(endpoint: str) -> dict[str, Any]:
-    """Existing page dialogs collect input before submitting ordinary REST APIs.
-
-    These endpoints do not implement ActionRuntime dryRun/validate modes and
-    must not be exposed as directly executable commandEndpoints.
-    """
+    """Human-only form metadata for REST endpoints without ActionRuntime modes."""
     return {"inputFlow": {"kind": "humanForm", "submitEndpoint": endpoint, "method": "POST"},
             "forbiddenForAgents": True}
 
@@ -4485,6 +4482,7 @@ def _build_sanctions_scope_screen_definition(
 
 
 _SCREEN_DEFINITIONS: dict[str, Any] = {
+    **IDENTITY_SCREEN_BUILDERS,
     "schnittstelle/legacy-adapter-monitor": lambda: {
         "schemaVersion": 1, "id": "schnittstelle/legacy-adapter-monitor", "domain": "integration", "mode": "list",
         "title": "Standard-/Unimet-Adapter", "subtitle": "Eingang, Fehlerkorb, Staging und Reconciliation",
@@ -5519,6 +5517,8 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    "admin/identity-budgets": "/admin/identity-budgets",
+    "admin/token-consumption": "/admin/token-consumption",
     "schnittstelle/legacy-adapter-monitor": "/schnittstelle/legacy-adapter-monitor",
     "workspace/letzte-dokumente": "/workspace/letzte-dokumente",
     "auswertungen/l3-berichtskatalog": "/auswertungen/l3-berichtskatalog",

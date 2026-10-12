@@ -10,6 +10,7 @@ from app.core.config import settings
 
 PREFIX='valeo:identity:v1:'
 _CHECK = '''
+if redis.call('EXISTS', KEYS[3]) == 1 then return 'tenant_blocked' end
 local revoked = tonumber(redis.call('GET', KEYS[2]) or '0')
 local now, issued, idle, maximum, touch = tonumber(ARGV[1]), tonumber(ARGV[2]), tonumber(ARGV[3]), tonumber(ARGV[4]), tonumber(ARGV[5])
 if issued <= revoked then return 'revoked' end
@@ -54,10 +55,12 @@ def validate(claims: dict, token: str, *, touch: bool = True) -> None:
     normalized={**claims,'tenant_id': claims.get('tenant_id') or claims.get('mandanten_id')}
     session, subject=keys(normalized,token)
     try:
-        result=store().eval(_CHECK,2,session,subject,now,issued,
+        result=store().eval(_CHECK,3,session,subject,tenant_block_key(normalized['tenant_id']),now,issued,
                             settings.IDENTITY_SESSION_IDLE_SECONDS,settings.IDENTITY_SESSION_MAX_SECONDS,int(touch))
     except redis.RedisError as exc:
         raise HTTPException(503,'Identity session store unavailable') from exc
+    if result == 'tenant_blocked':
+        raise HTTPException(403,'Mandant ist gesperrt')
     if result != 'active':
         raise HTTPException(401,'Session expired or revoked')
 
@@ -86,6 +89,22 @@ def revoke_subject(issuer: str, tenant: str, subject: str, *, actor: str) -> Non
             tx.set(key,time.time())
             tx.xadd(PREFIX+'audit:'+tenant, {'event':'subject_sessions_revoked',
                     'actor':actor,'subject':subject,'tenant_id':tenant,'at':str(time.time())})
+            tx.execute()
+    except redis.RedisError as exc:
+        raise HTTPException(503,'Identity session store unavailable') from exc
+
+
+def tenant_block_key(tenant: str) -> str:
+    return PREFIX+'tenant_blocked:'+hashlib.sha256(tenant.encode()).hexdigest()
+
+
+def block_tenant(tenant: str, *, actor: str) -> None:
+    """Durable deny marker before DB change: partial failure remains fail closed."""
+    try:
+        with store().pipeline(transaction=True) as tx:
+            tx.set(tenant_block_key(tenant),'1')
+            tx.xadd(PREFIX+'audit:'+tenant,dict(event='tenant_blocked',actor=actor,
+                                             tenant_id=tenant,at=str(time.time())))
             tx.execute()
     except redis.RedisError as exc:
         raise HTTPException(503,'Identity session store unavailable') from exc

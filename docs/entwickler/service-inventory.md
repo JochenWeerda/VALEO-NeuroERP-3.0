@@ -281,6 +281,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `supply_chain_trace_service` | Supply-Chain-Traceability (DOM-SUPPLY-004) — durchgängige, prüfbare Kette. |
 | `sync_scheduler` | Advanced Sync Scheduler Service |
 | `tank_adapter_service` | Idempotent tank-system intake, validation and delivery-note handover. |
+| `tenant_lifecycle_service` | Explicit tenant administration; preserve every journal entry before deletion. |
 | `tse_fiskaly_service` | Compatibility facade for the canonical fiscalization provider layer. |
 | `vies_service` | VIES Service |
 | `voice_adapter` | Voice Adapter Layer — NC-003 |
