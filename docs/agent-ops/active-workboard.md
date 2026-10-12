@@ -11,11 +11,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## IDENTITY-AGENT-PROPOSAL-20261012 — reserviert, Codex
+## IDENTITY-AGENT-PROPOSAL-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber, Vorschlag zentrales Identitaets-, Rechte- und Agentenmanagement. **Ziel:** Vorschlag als pruefbaren Architekturentwurf dokumentieren; Zielbild, bestehenden Lieferstand und Folgeabnahmen unterscheiden.
 **Dateibesitz:** docs/architecture/security/central-identity-agent-management-proposal.md; eigene Workboard-Hunks. Keine Provider-, Frontend-, DB- oder Konfigurationsaenderung.
 **Abnahme:** Menschen/Maschinen, Mandantenmitgliedschaft, objektbezogene Rechte, Sitzungswiderruf, Delegation, Freigaben und Ressourcen durchgaengig beschrieben; Beispielwerte nicht als beschlossene Einstellungen; Reihenfolge und offene Nachweise explizit. Bestehende Sicherheitsreparatur bleibt im SYSTEM-TENANT-BOUNDARY-Claim.
+
+**Lieferung:** Architekturvorschlag dokumentiert: verifizierte Mitgliedschaft, getrennte Menschen-/Maschinenidentitaeten, begrenzte Delegation, Freigaben, Sitzungswiderruf, Audit und Ressourcensteuerung. Integrationsfolge und Abnahmen explizit; Beispielwerte und Tarife bleiben Vorschlaege. Keine Behauptung eines Systemgesamtabschlusses. Nachweis: docs/architecture/security/central-identity-agent-management-proposal.md. Laufende Sicherheitsarbeit im SYSTEM-TENANT-BOUNDARY-Claim bleibt offen. Fremdes WIP erhalten, keine DB/Container/Reset.
 
 ## KONTO-SPERRE-20261012 — abgeschlossen, Claude Code
 
