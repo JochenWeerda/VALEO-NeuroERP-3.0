@@ -11,15 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## MASKEN-ROLLENHINWEIS-20261012 — in Arbeit, Claude Code
+## MASKEN-ROLLENHINWEIS-20261012 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-12. **Von:** Auftraggeber (delegierter offener Punkt „Masken melden
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. **Von:** Auftraggeber (delegierter offener Punkt „Masken melden
 403 nicht als fehlende Rolle“). **Befund:** Rund 360 Finanzwege lehnen seit den Rollen-Slices mit 403
 „Insufficient role. Required: (…)“ ab; nur Mahnlauf und Kontenplan uebersetzen das. Die uebrigen Masken zeigen
 einen englischen Satz, „Fehler beim Laden“ oder eine leere Liste. **Ziel:** eine Stelle statt jeder Maske —
 der Antwort-Interceptor uebersetzt die Ablehnung in einen deutschen Satz mit den noetigen Rollen und meldet
 sie einmal. **Dateibesitz:** neue `lib/role-hint.ts`,
 `lib/api-client.ts` (nur der Antwort-Interceptor), Vitest, QA-Doku.
+**Lieferung:** `rollenHinweis()` uebersetzt „Insufficient role. Required: (…)“ in einen deutschen Satz mit den
+noetigen Rollen; der Antwort-Interceptor ersetzt damit `detail` und meldet einmal (Toast mit fester Kennung).
+Andere 403-Antworten bleiben unberuehrt. Vitest 5 neu + 14 Mahnlauf gruen, tsc/ESLint gruen. QA:
+`docs/quality-assurance/masken-rollenhinweis-20261012.md`. **Nicht geprueft:** die Meldung im Browser (kein
+Provider-Konto ohne Finanzrolle fuer die Sichtpruefung). **Offen:** doppelte Meldung in Masken mit eigenem
+Fehler-Toast; Masken, die Fehler schlucken, zeigen weiter leere Listen; Scope-Ablehnungen nicht uebersetzt.
 
 ## IDENTITY-PRIVATE-PUSH-20261012 — reserviert, Codex
 
