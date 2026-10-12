@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## JOURNAL-BLOCK-SUMMARY-20261012 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** unpaginierte Materialisierung bei der Kontosperrenpruefung durch eine einzige vollstaendige SQL-Aggregatantwort ersetzen. **Dateibesitz:** journal_entries.py nur Sperrkontenabfrage und Meldungsformatierung; eigener fokussierter Test, QA/Workboard. Keine Buchungs-/Rollen-/Mandantenlogik oder fremde Kontenplanaenderung. **Abnahme:** alle gesperrten Kontonummern geordnet, keine Abschneidung, keine Sperre fuer offene Konten; Pagination-Ratsche unveraendert, vorhandener Pruefstand ohne neue DB/Container/Reset.
+
+**Lieferung:** Kontosperrenmeldung als vollstaendige sortierte SQL-Aggregatantwort; drei echte PostgreSQL-Vertraege bestanden. Pagination-Ratsche unveraendert gruen: 280 Abfragen in 253 Funktionen. Nachweis: journal-block-summary-20261012.md. Weitere Godfile-/Katalog-/Auditbefunde bleiben offen. Keine DB/Container/Reset.
+
 ## OPEN-ITEMS-VERIFIED-ACTOR-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Audit-Urheber der offenen Posten ausschliesslich aus verifizierter Identitaet; ueberholte Header-/JWT-Dekodierung entfernen und Godfile-Neufund abbauen. **Dateibesitz:** app/api/v1/endpoints/open_items.py nur _get_user_id_from_request und dessen Identitaetsimport; neuer fokussierter Vertragstest; eigene QA/Workboard. Keine Finanzrollen, Fachbuchungen, fremde Katalog- oder Maskenaenderungen. **Abnahme:** gefaelschter X-User-ID/Bearer-Body beeinflusst Auditkennung nicht, fehlende Identitaet scheitert geschlossen, bestehende Finanzrollen bleiben erhalten, Datei unter 1001 Zeilen ohne Baseline-Ausnahme. Keine DB/Container/Reset.
