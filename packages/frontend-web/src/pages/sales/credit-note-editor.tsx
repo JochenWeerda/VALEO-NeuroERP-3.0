@@ -1,493 +1,380 @@
-import { useState } from 'react'
-import { useNavigate, useParams } from '@/app/routing/typed-router'
-import { useTranslation } from 'react-i18next'
-import type { TFunction } from 'i18next'
-import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
-import { MaskConfig } from '@/components/mask-builder/types'
-import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
-import { toast } from '@/hooks/use-toast'
-import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
-  CrudCapabilityChecklist,
-  EvidenceTemplateLink,
-  ManagementDecisionPanel,
-  NextActionPanel,
-  OperationalTaskPlan,
-  RoleFocusBar,
-  type UxTaskItem,
-} from '@/components/workflow'
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
+import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
+import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
+import type { ScreenDefinition } from '@/components/mask-builder/schema'
+import type { WorkflowState } from '@/components/mask-builder/runtime/WorkflowRuntime'
+import { getAxiosErrorMessage } from '@/lib/api-client'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { salesGutschriftScreen } from '@/masks/capture-screens'
+import {
+  bucheGutschrift,
+  ladeGutschrift,
+  listeGutschriften,
+  listeSteuerschluessel,
+  speichereGutschrift,
+  steuerVorschau,
+  type Gutschrift,
+  type GutschriftPosition,
+  type Steuerschluessel,
+} from '@/lib/api/gutschrift'
 
-type CreditNoteRoleFocus = 'all' | 'sales' | 'billing' | 'finance' | 'management'
+/**
+ * Gutschrift (Rechnungskorrektur). Die Seite speichert, der Mask Builder zeichnet — Felder, Tabellen
+ * und Aktionen stehen in der ScreenDefinition `sales/gutschrift`.
+ *
+ * Die Umsatzsteuer kommt aus dem Steuerschluessel der Position. Die Seite rechnet nichts: Netto,
+ * Steuer und Brutto liefert der Server, der dieselbe Stelle wie die Buchung benutzt.
+ */
 
-const creditNoteRoleProfiles: Array<{ id: CreditNoteRoleFocus; label: string; description: string }> = [
-  {
-    id: 'all',
-    label: 'Alle Rollen',
-    description: 'Zeigt die Gutschrift fuer Vertrieb, Faktura, Finance und Leitung.',
-  },
-  {
-    id: 'sales',
-    label: 'Vertrieb',
-    description: 'Fokus auf Kunde, Grund, Ausgangsrechnung und Kundenklaerung.',
-  },
-  {
-    id: 'billing',
-    label: 'Faktura',
-    description: 'Fokus auf Positionen, Betrag, Freigabe, Versand und Druck.',
-  },
-  {
-    id: 'finance',
-    label: 'Finance',
-    description: 'Fokus auf Betrag, Steuer, Zahlungsziel und OP-Auswirkung.',
-  },
-  {
-    id: 'management',
-    label: 'Leitung',
-    description: 'Fokus auf Freigabefaehigkeit, Blocker und naechste Aktion.',
-  },
-]
+const leer: Record<string, unknown> = {
+  credit_note_number: '', customer_id: '', customer_name: '', invoice_reference: '',
+  correction_type: 'rechnungskorrektur', reason: '', reason_text: '', notes: '',
+  pos_description: '', pos_quantity: '', pos_unit_price: '', pos_tax_code: '',
+}
+const POSITION_LEER = { pos_description: '', pos_quantity: '', pos_unit_price: '', pos_tax_code: '' }
+const STATUS: Record<string, string> = { draft: 'Entwurf', posted: 'Gebucht' }
+// Der Server prueft die Rolle; hier nur die Freigabe der Aktionen im Builder.
+const RECHTE = ['sales.gutschrift.write', 'sales.gutschrift.post']
 
-const createCreditNoteConfig = (t: TFunction, entityTypeLabel: string): MaskConfig => ({
-  title: `${t('crud.actions.create')}/${t('crud.actions.edit')} ${entityTypeLabel}`,
-  subtitle: t('crud.tooltips.fields.creditNote'),
-  type: 'object-page',
-  tabs: [
-    {
-      key: 'grunddaten',
-      label: t('crud.detail.basicInfo'),
-      fields: [
-        {
-          name: 'number',
-          label: t('crud.fields.number'),
-          type: 'text',
-          required: true,
-          placeholder: t('crud.tooltips.placeholders.creditNoteNumber')
-        },
-        {
-          name: 'date',
-          label: t('crud.fields.date'),
-          type: 'date',
-          required: true
-        },
-        {
-          name: 'customerId',
-          label: t('crud.entities.customer'),
-          type: 'lookup',
-          required: true,
-          endpoint: '/api/v1/crm/customers/',
-          displayField: 'name',
-          valueField: 'id'
-        },
-        {
-          name: 'sourceInvoice',
-          label: t('crud.fields.sourceInvoice'),
-          type: 'lookup',
-          endpoint: '/api/v1/finance/invoices',
-          displayField: 'number',
-          valueField: 'id',
-          helpText: t('crud.tooltips.fields.sourceInvoice')
-        },
-        {
-          name: 'reason',
-          label: t('crud.fields.reason'),
-          type: 'select',
-          required: true,
-          options: [
-            { value: 'return', label: t('crud.fields.reasonReturn') },
-            { value: 'discount', label: t('crud.fields.reasonDiscount') },
-            { value: 'error', label: t('crud.fields.reasonError') },
-            { value: 'complaint', label: t('crud.fields.reasonComplaint') },
-            { value: 'other', label: t('crud.dialogs.amend.types.other') }
-          ]
-        },
-        {
-          name: 'reasonText',
-          label: t('crud.fields.reasonDetails'),
-          type: 'textarea',
-          placeholder: t('crud.tooltips.placeholders.creditNoteReason')
-        },
-        {
-          name: 'status',
-          label: t('crud.fields.status'),
-          type: 'select',
-          required: true,
-          options: [
-            { value: 'draft', label: t('status.draft') },
-            { value: 'approved', label: t('status.approved') },
-            { value: 'sent', label: t('status.sent') },
-            { value: 'paid', label: t('status.paid') },
-            { value: 'cancelled', label: t('status.cancelled') }
-          ]
-        }
-      ],
-      layout: 'grid',
-      columns: 2
-    },
-    {
-      key: 'positionen',
-      label: t('crud.fields.items'),
-      fields: [
-        {
-          name: 'lines',
-          label: t('crud.fields.creditNoteItems'),
-          type: 'table',
-          required: true,
-          columns: [
-            { key: 'article', label: t('crud.fields.product'), type: 'lookup', required: true },
-            { key: 'qty', label: t('crud.fields.quantity'), type: 'number', required: true },
-            { key: 'price', label: t('crud.fields.price'), type: 'number', required: true },
-            { key: 'vatRate', label: `${t('crud.fields.taxRate')  } %`, type: 'number', required: true },
-            { key: 'discount', label: `${t('crud.fields.discount')  } %`, type: 'number' }
-          ],
-          minRows: 1,
-          helpText: t('crud.tooltips.fields.creditNoteItems')
-        }
-      ]
-    },
-    {
-      key: 'betrag',
-      label: t('crud.fields.amounts'),
-      fields: [
-        {
-          name: 'subtotalNet',
-          label: t('crud.fields.netAmount'),
-          type: 'number',
-          required: true,
-          step: 0.01,
-          readonly: true,
-          helpText: t('crud.tooltips.fields.subtotalNet')
-        },
-        {
-          name: 'totalDiscount',
-          label: t('crud.fields.totalDiscount'),
-          type: 'number',
-          step: 0.01,
-          readonly: true,
-          helpText: t('crud.tooltips.fields.totalDiscount')
-        },
-        {
-          name: 'totalTax',
-          label: t('crud.fields.totalTax'),
-          type: 'number',
-          required: true,
-          step: 0.01,
-          readonly: true,
-          helpText: t('crud.tooltips.fields.totalTax')
-        },
-        {
-          name: 'totalGross',
-          label: t('crud.fields.grossAmount'),
-          type: 'number',
-          required: true,
-          step: 0.01,
-          readonly: true,
-          helpText: t('crud.tooltips.fields.totalGross')
-        }
-      ],
-      layout: 'grid',
-      columns: 2
-    },
-    {
-      key: 'zahlung',
-      label: t('crud.fields.paymentAndDue'),
-      fields: [
-        {
-          name: 'paymentTerms',
-          label: t('crud.fields.paymentTerms'),
-          type: 'select',
-          required: true,
-          options: [
-            { value: 'immediate', label: t('crud.fields.paymentTermsImmediate') },
-            { value: 'net30', label: t('crud.fields.paymentTermsNet30') },
-            { value: 'net60', label: t('crud.fields.paymentTermsNet60') },
-            { value: 'net90', label: t('crud.fields.paymentTermsNet90') }
-          ]
-        },
-        {
-          name: 'dueDate',
-          label: t('crud.fields.dueDate'),
-          type: 'date',
-          required: true
-        }
-      ]
-    },
-    {
-      key: 'notizen',
-      label: t('crud.fields.notes'),
-      fields: [
-        {
-          name: 'notes',
-          label: t('crud.fields.internalNotes'),
-          type: 'textarea',
-          placeholder: t('crud.tooltips.placeholders.creditNoteNotes')
-        }
-      ]
-    }
-  ],
-  actions: [
-    {
-      key: 'calculate',
-      label: t('crud.actions.recalculate'),
-      type: 'secondary',
-      onClick: () => {}
-    },
-    {
-      key: 'preview',
-      label: t('crud.actions.preview'),
-      type: 'secondary',
-      onClick: () => {}
-    },
-    {
-      key: 'approve',
-      label: t('crud.actions.approve'),
-      type: 'primary',
-      onClick: () => {}
-    },
-    {
-      key: 'send',
-      label: t('crud.actions.send'),
-      type: 'primary',
-      onClick: () => {}
-    },
-    {
-      key: 'print',
-      label: t('crud.actions.print'),
-      type: 'secondary',
-      onClick: () => {}
-    },
-    {
-      key: 'cancel',
-      label: t('crud.actions.cancel'),
-      type: 'danger',
-      onClick: () => {}
-    }
-  ],
-  api: {
-    baseUrl: '/api/v1/sales/credit-notes',
-    endpoints: {
-      list: '/api/v1/sales/credit-notes',
-      get: '/api/v1/sales/credit-notes/{id}',
-      create: '/api/v1/sales/credit-notes',
-      update: '/api/v1/sales/credit-notes/{id}',
-      delete: '/api/v1/sales/credit-notes/{id}'
-    }
-  },
-  permissions: ['sales.write', 'sales.credit_notes']
-})
+function text(wert: unknown): string {
+  return String(wert ?? '').trim()
+}
+
+function zahl(wert: unknown): number {
+  return Number(text(wert).replace(',', '.')) || 0
+}
+
+function euro(wert: unknown): string {
+  return Number(wert ?? 0).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
+}
+
+function schluesselText(code: string | null, schluessel: Steuerschluessel[]): string {
+  if (!code) return 'nicht gewählt'
+  const k = schluessel.find((s) => s.code === code)
+  return k ? `${k.code} – ${k.bezeichnung}` : `${code} – nicht (mehr) gültig`
+}
 
 export default function CreditNoteEditorPage(): JSX.Element {
-  const { t } = useTranslation()
-  const navigate = useNavigate()
-  const { id } = useParams()
-  const [isDirty, setIsDirty] = useState(false)
-  const [roleFocus, setRoleFocus] = useState<CreditNoteRoleFocus>('all')
-  const entityType = 'creditNote'
-  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Gutschrift')
-  const creditNoteConfig = createCreditNoteConfig(t, entityTypeLabel)
+  const isTouch = useTouchDevice()
+  const queryClient = useQueryClient()
+  const liste = useQuery({ queryKey: ['sales-gutschriften'], queryFn: listeGutschriften })
+  const steuerschluessel = useQuery({ queryKey: ['finance', 'tax-keys', 'auswahl'], queryFn: listeSteuerschluessel, staleTime: 5 * 60 * 1000 })
+  const gutschriften = useMemo(() => liste.data ?? [], [liste.data])
+  const schluessel = useMemo(() => steuerschluessel.data ?? [], [steuerschluessel.data])
 
-  const { data, loading, saveData } = useMaskData({
-    apiUrl: creditNoteConfig.api.baseUrl,
-    id: id ?? 'new'
+  const [positionen, setPositionen] = useState<GutschriftPosition[]>([])
+  const [geladen, setGeladen] = useState<Gutschrift | null>(null)
+  const [laeuft, setLaeuft] = useState<string | null>(null)
+  const [pruefgrund, setPruefgrund] = useState<string | null>(null)
+  const [buchenFragen, setBuchenFragen] = useState(false)
+  const sperre = useRef(false)
+
+  const vorschau = useQuery({
+    queryKey: ['sales-gutschrift-steuer', positionen],
+    queryFn: () => steuerVorschau(positionen),
+    enabled: positionen.length > 0,
   })
 
-  const validate = (formData: Record<string, unknown>) => validateFields(getFieldsFromMaskConfig(creditNoteConfig), formData ?? {})
-  const showValidationToast = (errors: Record<string, string>) => {
-    toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
-  }
-
-  const { handleAction, loadingActionKey } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
-    if (action === 'calculate') {
-      toast({ title: 'Neuberechnung', description: t('crud.messages.recalculateFunction', { defaultValue: 'Beträge werden neu berechnet.' }) })
-    } else if (action === 'preview') {
-      // Vorschau anzeigen
-      window.open('/api/v1/sales/credit-notes/preview', '_blank')
-    } else if (action === 'approve') {
-      const errors = validate(formData)
-      if (Object.keys(errors).length > 0) {
-        showValidationToast(errors)
-        return
-      }
-
-      try {
-        await saveData({ ...formData, status: 'approved' })
-        setIsDirty(false)
-        navigate('/sales/credit-notes')
-      } catch (error) {
-        // Error wird bereits in useMaskData behandelt
-      }
-    } else if (action === 'send') {
-      const errors = validate(formData)
-      if (Object.keys(errors).length > 0) {
-        showValidationToast(errors)
-        return
-      }
-
-      try {
-        await saveData({ ...formData, status: 'sent' })
-        setIsDirty(false)
-        navigate('/sales/credit-notes')
-      } catch (error) {
-        // Error wird bereits in useMaskData behandelt
-      }
-    } else if (action === 'print') {
-      window.open('/api/v1/sales/credit-notes/print', '_blank')
-    } else if (action === 'cancel') {
-      if (window.confirm(t('crud.dialogs.cancel.descriptionGeneric', { entityType: entityTypeLabel }))) {
-        try {
-          await saveData({ ...formData, status: 'cancelled' })
-          setIsDirty(false)
-          navigate('/sales/credit-notes')
-        } catch (error) {
-          // Error wird bereits in useMaskData behandelt
-        }
-      }
+  useEffect(() => {
+    if (liste.isError) toast.error('Gutschriften nicht geladen', { description: getAxiosErrorMessage(liste.error) })
+  }, [liste.error, liste.isError])
+  useEffect(() => {
+    if (steuerschluessel.isError) {
+      toast.error('Steuerschlüssel nicht geladen', { description: getAxiosErrorMessage(steuerschluessel.error) })
     }
-  })
+  }, [steuerschluessel.error, steuerschluessel.isError])
 
-  const handleSave = async (formData: Record<string, unknown>) => {
-    await handleAction('approve', formData)
-  }
+  const gebucht = geladen?.status === 'posted'
+  const gespeichert = geladen !== null
+  const steuer = positionen.length > 0 ? vorschau.data : undefined
 
-  const handleCancel = () => {
-    if (isDirty && !confirm(t('crud.messages.discardChanges'))) {
+  const schema = useMemo<ScreenDefinition>(() => ({
+    ...salesGutschriftScreen,
+    subtitle: geladen ? `${STATUS[geladen.status] ?? geladen.status}: ${geladen.credit_note_number}` : salesGutschriftScreen.subtitle,
+    layout: { ...salesGutschriftScreen.layout, density: isTouch ? 'comfortable' : 'compact' },
+    summary: salesGutschriftScreen.summary.map((eintrag) => ({
+      ...eintrag,
+      value: eintrag.key === 'netto'
+        ? euro(steuer?.netto ?? 0)
+        : steuer?.geklaert
+          ? euro(eintrag.key === 'steuer' ? steuer.steuer : steuer.brutto)
+          : 'offen',
+    })),
+    fields: salesGutschriftScreen.fields.map((feld) => ({
+      ...feld,
+      readOnly: gespeichert,
+      ...(feld.key === 'pos_tax_code'
+        ? {
+            // Verkaufsbeleg: reine Vorsteuerschluessel gehoeren nicht in die Auswahl.
+            options: schluessel
+              .filter((k) => !(k.debit_account && !k.credit_account))
+              .map((k) => ({ value: k.code, label: `${k.code} – ${k.bezeichnung} (${Number(k.steuersatz).toLocaleString('de-DE')} %)` })),
+            placeholder: schluessel.length === 0 ? 'Kein Steuerschlüssel eingerichtet' : 'Steuerschlüssel wählen',
+          }
+        : {}),
+    })),
+    actions: salesGutschriftScreen.actions.map((aktion) => ({
+      ...aktion,
+      disabled: laeuft !== null
+        || ((aktion.key === 'position' || aktion.key === 'speichern') && gespeichert)
+        || (aktion.key === 'buchen' && (!gespeichert || gebucht)),
+    })),
+  }), [gebucht, geladen, gespeichert, isTouch, laeuft, schluessel, steuer])
+
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: RECHTE }), [schema])
+  const form = useUniversalFormState({ screen: schema, initialValues: leer })
+  const { resetForm, setValue } = form
+
+  // Ein Ablauf zur Zeit: der Schluessel zeigt, welcher, und sperrt alle Knoepfe.
+  const mitSperre = useCallback(async (schluesselName: string, arbeit: () => Promise<void>) => {
+    if (sperre.current) return
+    sperre.current = true
+    setLaeuft(schluesselName)
+    try {
+      await arbeit()
+    } finally {
+      sperre.current = false
+      setLaeuft(null)
+    }
+  }, [])
+
+  const neuLaden = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['sales-gutschriften'] })
+  }, [queryClient])
+
+  const zeige = useCallback((gutschrift: Gutschrift | null) => {
+    setGeladen(gutschrift)
+    setPruefgrund(null)
+    setPositionen((gutschrift?.lines ?? []).map((z) => ({
+      description: z.description, quantity: Number(z.quantity), unit_price: Number(z.unit_price), tax_code: z.tax_code ?? null,
+    })))
+    resetForm(gutschrift
+      ? {
+          ...leer,
+          credit_note_number: gutschrift.credit_note_number,
+          customer_id: gutschrift.customer_id,
+          customer_name: gutschrift.customer_name ?? '',
+          invoice_reference: gutschrift.invoice_reference ?? '',
+          correction_type: gutschrift.correction_type,
+          reason: gutschrift.reason,
+          notes: gutschrift.notes ?? '',
+        }
+      : { ...leer })
+  }, [resetForm])
+
+  const positionUebernehmen = useCallback(() => {
+    const werte = form.values
+    if (!text(werte.pos_description) || zahl(werte.pos_quantity) <= 0 || zahl(werte.pos_unit_price) <= 0) {
+      toast.error('Position unvollständig', { description: 'Bezeichnung, Menge und Einzelpreis eintragen.' })
       return
     }
-    navigate('/sales/credit-notes')
+    setPositionen((alt) => [...alt, {
+      description: text(werte.pos_description),
+      quantity: zahl(werte.pos_quantity),
+      unit_price: zahl(werte.pos_unit_price),
+      tax_code: text(werte.pos_tax_code) || null,
+    }])
+    Object.entries(POSITION_LEER).forEach(([feld, wert]) => setValue(feld, wert))
+  }, [form.values, setValue])
+
+  const speichern = useCallback(() => mitSperre('speichern', async () => {
+    const werte = form.values
+    if (!text(werte.credit_note_number) || !text(werte.customer_id) || !text(werte.reason) || positionen.length === 0) {
+      form.revealErrors?.()
+      toast.error('Gutschrift unvollständig', { description: 'Nummer, Kunde, Grund und mindestens eine Position angeben.' })
+      return
+    }
+    try {
+      const nummer = text(werte.credit_note_number)
+      const ergebnis = await speichereGutschrift({
+        credit_note_number: nummer,
+        customer_id: text(werte.customer_id),
+        customer_name: text(werte.customer_name) || null,
+        invoice_reference: text(werte.invoice_reference) || null,
+        reason: text(werte.reason_text) ? `${text(werte.reason)}: ${text(werte.reason_text)}` : text(werte.reason),
+        correction_type: text(werte.correction_type) || 'rechnungskorrektur',
+        notes: text(werte.notes) || null,
+        lines: positionen,
+      }, `gutschrift-speichern-${nummer}`)
+      if (!ergebnis.success) {
+        toast.error('Gutschrift nicht gespeichert', { description: ergebnis.error ?? 'Die Eingabe wurde abgelehnt.' })
+        return
+      }
+      toast.success('Entwurf gespeichert', { description: ergebnis.summary ?? undefined })
+      await neuLaden()
+      const neu = (await listeGutschriften()).find((g) => g.credit_note_number === nummer)
+      if (neu) zeige(await ladeGutschrift(neu.id))
+    } catch (fehler) {
+      toast.error('Gutschrift nicht gespeichert', { description: getAxiosErrorMessage(fehler) })
+    }
+  }), [form, mitSperre, neuLaden, positionen, zeige])
+
+  const buchen = useCallback(() => mitSperre('buchen', async () => {
+    if (!geladen) return
+    try {
+      const ergebnis = await bucheGutschrift(geladen.id, `gutschrift-buchen-${geladen.id}`)
+      if (!ergebnis.success) {
+        const grund = ergebnis.error ?? 'Die Buchung wurde abgelehnt.'
+        setPruefgrund(grund)
+        toast.error('Nicht gebucht', { description: `${grund} Die Gutschrift bleibt Entwurf.` })
+        return
+      }
+      toast.success('Gutschrift gebucht', { description: ergebnis.summary ?? undefined })
+      await neuLaden()
+      zeige(await ladeGutschrift(geladen.id))
+    } catch (fehler) {
+      toast.error('Nicht gebucht', { description: getAxiosErrorMessage(fehler) })
+    } finally {
+      setBuchenFragen(false)
+    }
+  }), [geladen, mitSperre, neuLaden, zeige])
+
+  const oeffnen = useCallback((id: unknown) => mitSperre('laden', async () => {
+    try {
+      zeige(await ladeGutschrift(String(id)))
+    } catch (fehler) {
+      toast.error('Gutschrift nicht geladen', { description: getAxiosErrorMessage(fehler) })
+    }
+  }), [mitSperre, zeige])
+
+  const screenContext = useMemo(() => createScreenContext({
+    data: { gutschriften, positionen },
+    permissions: { granted: RECHTE },
+    state: { values: form.values, policies: {} },
+    actions: {
+      'sales.gutschriftPosition': () => positionUebernehmen(),
+      'sales.gutschriftSpeichern': () => speichern(),
+      'sales.gutschriftBuchen': () => setBuchenFragen(true),
+      'sales.gutschriftNeu': () => zeige(null),
+      'sales.gutschriftLaden': (payload) => oeffnen(payload.id),
+      'sales.gutschriftPositionEntfernen': (payload) => {
+        if (gespeichert) return
+        setPositionen((alt) => alt.filter((_, index) => index !== Number(payload.id)))
+      },
+    },
+    navigation: { push: () => undefined },
+  }), [form.values, gespeichert, gutschriften, oeffnen, positionUebernehmen, positionen, speichern, zeige])
+
+  const workflow = useMemo<WorkflowState>(() => {
+    const ohneSchluessel = positionen.some((p) => !p.tax_code)
+    const naechste = gebucht
+      ? 'Gebucht. Neue Gutschrift erfassen.'
+      : pruefgrund
+        ? 'Buchung abgelehnt: Prüfgrund klären (Steuerschlüssel, Konten, Belegbetrag).'
+        : gespeichert
+          ? 'Entwurf buchen.'
+          : positionen.length === 0
+            ? 'Position erfassen und übernehmen.'
+            : ohneSchluessel
+              ? 'Steuerschlüssel für jede Position wählen; ohne ihn wird nicht gebucht.'
+              : 'Als Entwurf speichern.'
+    const hinweise = [pruefgrund, steuer && !steuer.geklaert ? steuer.pruefgrund : null].filter(Boolean) as string[]
+    return {
+      status: {
+        currentStatus: gebucht ? 'gebucht' : gespeichert ? 'entwurf' : 'erfassen',
+        statusLabel: gebucht ? 'Gebucht' : gespeichert ? 'Entwurf' : 'Erfassen',
+        tone: gebucht ? 'success' : hinweise.length > 0 ? 'warning' : 'info',
+      },
+      nextAllowedActions: [{
+        actionKey: gebucht ? 'neu' : gespeichert ? 'buchen' : positionen.length === 0 ? 'position' : 'speichern',
+        label: naechste,
+        dangerLevel: gespeichert && !gebucht ? 'moderate' : 'safe',
+        requiresConfirmation: gespeichert && !gebucht,
+      }],
+      blockingReasons: hinweise.map((meldung, index) => ({ code: `steuer-${index}`, message: meldung, blocking: true })),
+      auditTrail: [],
+      policyHints: [],
+      isBlocked: false,
+      isTerminal: gebucht,
+    }
+  }, [gebucht, gespeichert, positionen, pruefgrund, steuer])
+
+  if (liste.isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="min-h-touch h-10 w-48" />
+        <Skeleton className="h-40" />
+      </div>
+    )
   }
 
-  const creditNote = (data ?? {}) as Record<string, unknown>
-  const lines = Array.isArray(creditNote.lines) ? creditNote.lines : []
-  const hasCustomer = Boolean(creditNote.customerId)
-  const hasSourceInvoice = Boolean(creditNote.sourceInvoice)
-  const hasReason = Boolean(creditNote.reason)
-  const hasReasonText = Boolean(String(creditNote.reasonText ?? '').trim())
-  const hasLines = lines.length > 0
-  const hasAmount = Number(creditNote.totalGross ?? 0) > 0 || lines.some(line => Number(line?.price ?? 0) > 0)
-  const hasPaymentPath = Boolean(creditNote.paymentTerms && creditNote.dueDate)
-  const isCancelled = creditNote.status === 'cancelled'
-  const isCreditNoteReady = hasCustomer && hasReason && hasLines && hasAmount && hasPaymentPath && !isCancelled
-  const nextCreditNoteAction = !hasCustomer
-    ? 'Kunden fuer die Gutschrift auswaehlen.'
-    : !hasSourceInvoice
-      ? 'Ausgangsrechnung verknuepfen oder begruenden, warum keine vorhanden ist.'
-      : !hasReason
-        ? 'Gutschriftsgrund auswaehlen.'
-        : !hasLines
-          ? 'Mindestens eine Gutschriftsposition erfassen.'
-          : !hasAmount
-            ? 'Betrag und Steuer pruefen.'
-            : !hasPaymentPath
-              ? 'Zahlungsbedingung und Faelligkeit setzen.'
-              : isCancelled
-                ? 'Stornierte Gutschrift pruefen; keine Freigabe moeglich.'
-                : 'Gutschrift freigeben, senden oder drucken.'
-  const creditNoteTaskItems: UxTaskItem[] = [
-    {
-      label: 'Kunde und Ausgangsrechnung klaeren',
-      done: hasCustomer && (hasSourceInvoice || hasReasonText),
-      hint: hasCustomer ? (hasSourceInvoice ? 'Kunde und Ausgangsrechnung sind verbunden.' : 'Kunde ist gesetzt; Ausgangsrechnung oder Begruendung klaeren.') : 'Kunde fehlt noch.',
-    },
-    {
-      label: 'Grund und Positionen erfassen',
-      done: hasReason && hasLines,
-      hint: hasReason && hasLines ? `${lines.length} Positionen mit Grund ${String(creditNote.reason)}.` : 'Grund und mindestens eine Position sind Pflicht.',
-    },
-    {
-      label: 'Betrag und Zahlungsfolge pruefen',
-      done: hasAmount && hasPaymentPath,
-      hint: hasAmount && hasPaymentPath ? `Brutto ${Number(creditNote.totalGross ?? 0).toFixed(2)} und Faelligkeit ${String(creditNote.dueDate ?? '')}.` : 'Betrag, Steuer, Zahlungsbedingung und Faelligkeit pruefen.',
-    },
-    {
-      label: 'Freigabe und Nachweis sichern',
-      done: ['approved', 'sent', 'paid'].includes(String(creditNote.status)),
-      hint: creditNote.status ? `Status: ${String(creditNote.status)}.` : 'Freigabe, Versand oder Druck als Nachweis festhalten.',
-    },
-  ]
-  const creditNoteCrudCapabilities = [
-    {
-      key: 'create',
-      label: 'Anlegen/Speichern',
-      available: isCreditNoteReady,
-      hint: isCreditNoteReady ? 'Gutschrift kann gespeichert oder freigegeben werden.' : 'Kunde, Grund, Positionen, Betrag und Zahlungsfolge muessen stimmen.',
-    },
-    {
-      key: 'read',
-      label: 'Lesen',
-      available: true,
-      hint: 'Grunddaten, Positionen, Betrag, Zahlung und Notizen sind in der Maske sichtbar.',
-    },
-    {
-      key: 'update',
-      label: 'Bearbeiten',
-      available: !isCancelled,
-      hint: isCancelled ? 'Stornierte Gutschriften sollten nicht weiter bearbeitet werden.' : 'Felder und Positionen koennen ueber die ObjectPage bearbeitet werden.',
-    },
-    {
-      key: 'approve',
-      label: 'Freigeben/Senden',
-      available: isCreditNoteReady,
-      hint: isCreditNoteReady ? 'Freigabe, Versand und Druck sind als Aktionen vorhanden.' : 'Freigabe braucht vollstaendige Gutschrift.',
-    },
-    {
-      key: 'evidence',
-      label: 'Nachweis',
-      available: hasReason && (hasSourceInvoice || hasReasonText),
-      hint: hasSourceInvoice ? 'Ausgangsrechnung und Grund bilden den Nachweis.' : 'Ohne Ausgangsrechnung braucht die Gutschrift eine klare Begruendung.',
-    },
-    {
-      key: 'audit',
-      label: 'Pruefspur',
-      available: Boolean(id || creditNote.number),
-      hint: id || creditNote.number ? 'Gutschriftsnummer, Status, Grund und Aktionen bilden die Pruefspur.' : 'Pruefspur entsteht beim Speichern.',
-    },
-  ]
-
   return (
-    <div className="space-y-4">
-      <RoleFocusBar
-        roles={creditNoteRoleProfiles}
-        value={roleFocus}
-        onChange={setRoleFocus}
-        visibleCount={roleFocus === 'all' ? 4 : 1}
-        totalCount={4}
-      />
-      <ManagementDecisionPanel
-        decision={{
-          allowed: isCreditNoteReady,
-          allowedLabel: 'Freigabefaehig',
-          blockedLabel: 'Noch nicht freigabefaehig',
-          summary: isCreditNoteReady
-            ? `Die Gutschrift ist fachlich bereit. ${lines.length} Positionen, ${Number(creditNote.totalGross ?? 0).toFixed(2)} EUR brutto.`
-            : `Vor Freigabe ist noch etwas offen: ${nextCreditNoteAction}`,
-          blockerCount: [!hasCustomer, !hasReason, !hasLines, !hasAmount, !hasPaymentPath, isCancelled].filter(Boolean).length,
-          nextFocus: nextCreditNoteAction,
-          template: {
-            label: 'Gutschriftenliste oeffnen',
-            href: '/sales/credit-notes',
-          },
+    <div className="space-y-6 p-3 md:p-6">
+      <UniversalMaskRenderer
+        plan={plan}
+        formState={form}
+        hideFormSubmit
+        screenContext={screenContext}
+        workflowState={workflow}
+        tables={{
+          positionen: positionen.map((p, index) => ({
+            id: String(index),
+            nr: index + 1,
+            description: p.description,
+            quantity: p.quantity,
+            unit_price: p.unit_price,
+            tax_code_text: schluesselText(p.tax_code, schluessel),
+            netto: p.quantity * p.unit_price,
+          })),
+          steuer: (steuer?.gruppen ?? []).map((g) => ({
+            id: g.tax_code,
+            tax_code_text: `${schluesselText(g.tax_code, schluessel)} (${Number(g.satz).toLocaleString('de-DE')} %)`,
+            netto: Number(g.netto),
+            steuer: Number(g.steuer),
+            brutto: Number(g.brutto),
+          })),
+          gutschriften: gutschriften.map((g) => ({
+            id: g.id,
+            credit_note_number: g.credit_note_number,
+            customer_text: g.customer_name ? `${g.customer_name} (${g.customer_id})` : g.customer_id,
+            invoice_reference: g.invoice_reference ?? '–',
+            net_amount: g.net_amount == null ? null : Number(g.net_amount),
+            tax_amount: g.tax_amount == null ? null : Number(g.tax_amount),
+            total_amount: Number(g.total_amount),
+            status: g.status,
+            status_text: STATUS[g.status] ?? g.status,
+          })),
         }}
       />
-      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
-        <OperationalTaskPlan title="Gutschriften-Freigabeplan" items={creditNoteTaskItems} />
-        <div className="space-y-3">
-          <NextActionPanel
-            action={nextCreditNoteAction}
-            tone={isCreditNoteReady ? 'emerald' : isCancelled ? 'red' : hasCustomer ? 'amber' : 'blue'}
-          />
-          <EvidenceTemplateLink link={{ label: 'Rechnungsliste pruefen', href: '/sales/rechnungen' }} />
-        </div>
-      </div>
-      <CrudCapabilityChecklist capabilities={creditNoteCrudCapabilities} />
-      <ObjectPage
-        config={creditNoteConfig}
-        data={data}
-        onSave={handleSave}
-        onCancel={handleCancel}
-        onAction={handleAction}
-        loadingActionKey={loadingActionKey}
-        isLoading={loading}
-      />
+      <AlertDialog open={buchenFragen} onOpenChange={(offen) => { if (!offen && laeuft === null) setBuchenFragen(false) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Gutschrift {geladen?.credit_note_number} buchen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Gebucht wird der Erlös netto, die Umsatzsteuer getrennt und die Forderung brutto
+              {geladen?.invoice_reference ? `; der offene Posten der Rechnung ${geladen.invoice_reference} wird gemindert` : ''}.
+              Eine Buchung lässt sich nicht löschen, nur stornieren.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={laeuft !== null}>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={laeuft !== null}
+              onClick={(event) => {
+                event.preventDefault()
+                void buchen()
+              }}
+            >
+              Buchen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

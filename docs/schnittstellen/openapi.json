@@ -40092,6 +40092,153 @@
         "title": "CreditNoteCreateIn",
         "type": "object"
       },
+      "CreditNoteDetailOut": {
+        "properties": {
+          "correction_type": {
+            "default": "rechnungskorrektur",
+            "enum": [
+              "rechnungskorrektur",
+              "gutschrift_14_ustg"
+            ],
+            "title": "Correction Type",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "credit_note_number": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Credit Note Number",
+            "type": "string"
+          },
+          "currency": {
+            "default": "EUR",
+            "title": "Currency",
+            "type": "string"
+          },
+          "customer_id": {
+            "title": "Customer Id",
+            "type": "string"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "invoice_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invoice Reference"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/CreditNoteLineOut"
+            },
+            "title": "Lines",
+            "type": "array"
+          },
+          "net_amount": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Amount"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "default": "draft",
+            "title": "Status",
+            "type": "string"
+          },
+          "tax_amount": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Amount"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "total_amount": {
+            "default": "0",
+            "title": "Total Amount",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "credit_note_number",
+          "customer_id",
+          "reason",
+          "id",
+          "tenant_id"
+        ],
+        "title": "CreditNoteDetailOut",
+        "type": "object"
+      },
       "CreditNoteLineInput-Input": {
         "properties": {
           "article_number": {
@@ -40221,6 +40368,72 @@
           "unit_price"
         ],
         "title": "CreditNoteLineInput",
+        "type": "object"
+      },
+      "CreditNoteLineOut": {
+        "properties": {
+          "article_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Number"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "line_total": {
+            "title": "Line Total",
+            "type": "string"
+          },
+          "quantity": {
+            "title": "Quantity",
+            "type": "string"
+          },
+          "tax_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Code"
+          },
+          "tax_rate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Rate"
+          },
+          "unit_price": {
+            "title": "Unit Price",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "quantity",
+          "unit_price",
+          "id",
+          "line_total"
+        ],
+        "title": "CreditNoteLineOut",
         "type": "object"
       },
       "CreditNoteOut": {
@@ -151181,6 +151394,111 @@
           "zu_status"
         ],
         "title": "StatusWechselPayload",
+        "type": "object"
+      },
+      "SteuerVorschauGruppe": {
+        "properties": {
+          "brutto": {
+            "title": "Brutto",
+            "type": "string"
+          },
+          "netto": {
+            "title": "Netto",
+            "type": "string"
+          },
+          "satz": {
+            "title": "Satz",
+            "type": "string"
+          },
+          "steuer": {
+            "title": "Steuer",
+            "type": "string"
+          },
+          "tax_code": {
+            "title": "Tax Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tax_code",
+          "satz",
+          "netto",
+          "steuer",
+          "brutto"
+        ],
+        "title": "SteuerVorschauGruppe",
+        "type": "object"
+      },
+      "SteuerVorschauIn": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/CreditNoteLineInput-Input"
+            },
+            "title": "Lines",
+            "type": "array"
+          }
+        },
+        "title": "SteuerVorschauIn",
+        "type": "object"
+      },
+      "SteuerVorschauOut": {
+        "description": "Was die Buchung aus den Positionen machen wuerde — oder warum sie nicht bucht.",
+        "properties": {
+          "brutto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brutto"
+          },
+          "geklaert": {
+            "title": "Geklaert",
+            "type": "boolean"
+          },
+          "gruppen": {
+            "items": {
+              "$ref": "#/components/schemas/SteuerVorschauGruppe"
+            },
+            "title": "Gruppen",
+            "type": "array"
+          },
+          "netto": {
+            "title": "Netto",
+            "type": "string"
+          },
+          "pruefgrund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pruefgrund"
+          },
+          "steuer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuer"
+          }
+        },
+        "required": [
+          "geklaert",
+          "netto"
+        ],
+        "title": "SteuerVorschauOut",
         "type": "object"
       },
       "StockMovement": {
@@ -385071,6 +385389,111 @@
         ]
       }
     },
+    "/api/v1/sales/credit-notes/actions/speichern": {
+      "post": {
+        "description": "CE fuer sales/gutschrift:speichern. Trockenlauf prueft, schreibt nichts; Mandant aus der Anmeldung.",
+        "operationId": "action_gutschrift_speichern_api_v1_sales_credit_notes_actions_speichern_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gutschrift als Entwurf speichern (Masken-CommandEndpoint)",
+        "tags": [
+          "sales",
+          "credit-notes",
+          "returns",
+          "sales",
+          "credit-notes",
+          "returns"
+        ]
+      }
+    },
+    "/api/v1/sales/credit-notes/steuer-vorschau": {
+      "post": {
+        "description": "Rechnet Netto, Umsatzsteuer und Brutto je Steuerschluessel — mit derselben Stelle wie die Buchung.\n\nDie Maske rechnet nicht selbst. Laesst sich die Steuer nicht bestimmen, steht der Grund in\n``pruefgrund``, und Steuer und Brutto bleiben leer.",
+        "operationId": "steuer_vorschau_api_v1_sales_credit_notes_steuer_vorschau_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SteuerVorschauIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SteuerVorschauOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Umsatzsteuer der Positionen berechnen (liest nur)",
+        "tags": [
+          "sales",
+          "credit-notes",
+          "returns",
+          "sales",
+          "credit-notes",
+          "returns"
+        ]
+      }
+    },
     "/api/v1/sales/credit-notes/{cn_id}": {
       "delete": {
         "operationId": "delete_credit_note_api_v1_sales_credit_notes__cn_id__delete",
@@ -385114,11 +385537,125 @@
           "credit-notes",
           "returns"
         ]
+      },
+      "get": {
+        "operationId": "get_credit_note_api_v1_sales_credit_notes__cn_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cn_id",
+            "required": true,
+            "schema": {
+              "title": "Cn Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreditNoteDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Credit note mit Positionen",
+        "tags": [
+          "sales",
+          "credit-notes",
+          "returns",
+          "sales",
+          "credit-notes",
+          "returns"
+        ]
+      }
+    },
+    "/api/v1/sales/credit-notes/{cn_id}/actions/buchen": {
+      "post": {
+        "description": "CE fuer sales/gutschrift:buchen. Der Trockenlauf nennt den Pruefgrund, ohne zu buchen.",
+        "operationId": "action_gutschrift_buchen_api_v1_sales_credit_notes__cn_id__actions_buchen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cn_id",
+            "required": true,
+            "schema": {
+              "title": "Cn Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gutschrift buchen (Masken-CommandEndpoint)",
+        "tags": [
+          "sales",
+          "credit-notes",
+          "returns",
+          "sales",
+          "credit-notes",
+          "returns"
+        ]
       }
     },
     "/api/v1/sales/credit-notes/{cn_id}/post": {
       "post": {
-        "description": "Gutschrift buchen: Erloes netto, Umsatzsteuer getrennt, Forderung brutto — in einer Transaktion.\n\nSoll  Erloeskonto je Steuerschluessel   Netto\nSoll  Umsatzsteuerkonto je Schluessel   Steuer\nHaben Forderungen                       Brutto\n\nDie Steuer kommt aus den Positionen und ihrem Steuerschluessel. Fehlt eine Angabe oder widersprechen\nsich Angaben, wird nicht gebucht (409) — die Gutschrift bleibt Entwurf und geht zur Pruefung.\n\nBis 12.10.2026 wurde der Kopf zuerst festgeschrieben; die Zeilen trugen Kontonummern statt\nKonto-IDs, scheiterten am Fremdschluessel, und der Fehler wurde verschluckt. Der Gesamtbetrag ging\nungeteilt gegen das Erloeskonto.",
+        "description": "Gutschrift buchen: Erloes netto, Umsatzsteuer getrennt, Forderung brutto — in einer Transaktion.\n\nSoll  Erloeskonto je Steuerschluessel   Netto\nSoll  Umsatzsteuerkonto je Schluessel   Steuer\nHaben Forderungen                       Brutto\n\nBis 12.10.2026 wurde der Kopf zuerst festgeschrieben; die Zeilen trugen Kontonummern statt\nKonto-IDs, scheiterten am Fremdschluessel, und der Fehler wurde verschluckt. Der Gesamtbetrag ging\nungeteilt gegen das Erloeskonto.",
         "operationId": "post_credit_note_api_v1_sales_credit_notes__cn_id__post_post",
         "parameters": [
           {

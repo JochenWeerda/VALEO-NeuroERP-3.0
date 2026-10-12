@@ -4338,6 +4338,71 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
+      "mask_id": "sales/gutschrift",
+      "title": "Gutschrift",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/sales__gutschrift/:entityId",
+      "agent_contract_url": "/api/v1/masks/sales/gutschrift/agent-contract",
+      "screen_definition_url": "/api/v1/masks/sales/gutschrift/screen-definition",
+      "readiness_url": "/api/v1/masks/sales/gutschrift/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "position",
+          "label": "Position übernehmen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Stellt die Positionseingabe in die Positionsliste der Maske; gespeichert wird erst mit Speichern."
+        },
+        {
+          "key": "speichern",
+          "label": "Als Entwurf speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "sales.gutschrift.write",
+          "commandEndpoint": "/api/v1/sales/credit-notes/actions/speichern",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "buchen",
+          "label": "Buchen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "sales.gutschrift.post",
+          "commandEndpoint": "/api/v1/sales/credit-notes/{entity_id}/actions/buchen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "neu",
+          "label": "Neue Gutschrift",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Leert die Eingabe fuer eine neue Gutschrift."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
         "sales.invoice.propose",
         "sales.invoice.post"
       ]
@@ -4356,6 +4421,7 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",
+        "sales.gutschrift.speichern",
         "sales.invoice.propose",
         "sales.invoice.post"
       ]
@@ -4386,6 +4452,7 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",
+        "sales.gutschrift.speichern",
         "sales.invoice.propose",
         "sales.invoice.post"
       ]
@@ -4421,6 +4488,7 @@
       ],
       "mcp_tool_ids": [
         "sales.order.status",
+        "sales.gutschrift.speichern",
         "sales.invoice.propose",
         "sales.invoice.post"
       ]
@@ -4439,6 +4507,7 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",
+        "sales.gutschrift.speichern",
         "sales.invoice.propose",
         "sales.invoice.post"
       ]
@@ -4457,6 +4526,7 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",
+        "sales.gutschrift.speichern",
         "sales.invoice.propose",
         "sales.invoice.post"
       ]
@@ -4541,6 +4611,15 @@
       "scope": "sales:read",
       "idempotent": true,
       "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "sales.gutschrift.speichern",
+      "domain": "sales",
+      "scope": "sales:write",
+      "idempotent": true,
+      "risk_class": "medium",
       "human_approval_required": false,
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
@@ -4986,5 +5065,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 91
+  "event_count": 93
 }

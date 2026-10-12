@@ -285,6 +285,26 @@ class EinwilligungAnlegenInput(BaseModel):
     reason: str = Field(min_length=3, max_length=500)
 
 
+class GutschriftZeileInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    description: str = Field(min_length=1, max_length=500)
+    quantity: Decimal = Field(gt=0)
+    unit_price: Decimal = Field(ge=0)
+    # Steuerschluessel des Mandanten. Kein Vorgabewert: ohne ihn bleibt die Steuer offen.
+    tax_code: str | None = Field(default=None, max_length=50)
+
+
+class GutschriftSpeichernInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    credit_note_number: str = Field(min_length=1, max_length=64)
+    customer_id: str = Field(min_length=1, max_length=64)
+    customer_name: str | None = Field(default=None, max_length=200)
+    invoice_reference: str | None = Field(default=None, max_length=64)
+    grund: str = Field(min_length=1, max_length=500)
+    lines: list[GutschriftZeileInput] = Field(min_length=1, max_length=200)
+    reason: str = Field(min_length=3, max_length=500)
+
+
 class PostfachSpeichernInput(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     kennung: str = Field(min_length=1, max_length=80)
@@ -706,6 +726,8 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _schulung_speichern(db, request, actor, tenant)
     if request.tool_name == "admin.postfach.speichern":
         return _postfach_speichern(db, request, actor, tenant)
+    if request.tool_name == "sales.gutschrift.speichern":
+        return _gutschrift_speichern(db, request, actor, tenant)
     if request.tool_name == "agrar.contract.get":
         return _agrar_contract_get(db, request, actor, tenant)
     if request.tool_name == "agrar.weighing_ticket.list":
@@ -2086,6 +2108,85 @@ def _schulung_speichern(db: Session, request: ToolExecutionRequest, actor: str, 
         result = {
             "success": True, "mode": "execute", "replayed": False,
             "assignment_id": entity_id, "auditEntryId": audit_id,
+        }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _gutschrift_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
+    """Mask-parity write: Gutschrift als Entwurf im Authentifizierungs-Mandanten. Gebucht wird hier nie."""
+    from app.api.v1.endpoints.sales_credit_notes import CreditNoteCreate, _lege_an, _zeilen
+    from app.finance.steuerschluessel import CENT, Steuerklaerung, steuergruppen
+
+    try:
+        opened = GutschriftSpeichernInput.model_validate(request.parameters)
+    except ValidationError as exc:
+        raise HTTPException(422, "Invalid sales.gutschrift.speichern parameters") from exc
+    parameters = opened.model_dump(mode="json", exclude_none=True)
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+    try:
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        if db.execute(
+            text("SELECT 1 FROM domain_sales.sales_credit_notes WHERE tenant_id = :tid AND credit_note_number = :nr"),
+            {"tid": tenant, "nr": opened.credit_note_number},
+        ).first():
+            raise HTTPException(409, f"Credit note number {opened.credit_note_number} already exists")
+        eingabe = CreditNoteCreate.model_validate({
+            "credit_note_number": opened.credit_note_number, "customer_id": opened.customer_id,
+            "customer_name": opened.customer_name, "invoice_reference": opened.invoice_reference,
+            "reason": opened.grund, "status": "draft",
+            "lines": [zeile.model_dump() for zeile in opened.lines],
+        })
+        # Dieselbe Stelle wie die Buchung: Netto, Steuer, Brutto — oder der Grund, warum nicht.
+        zeilen = _zeilen(eingabe.lines)
+        netto = sum((z[3] for z in zeilen), Decimal("0")).quantize(CENT)
+        steuer: Decimal | None = None
+        pruefgrund: str | None = None
+        try:
+            steuer = sum((g.steuer for g in steuergruppen(db, tenant, zeilen)), Decimal("0"))
+        except Steuerklaerung as klaerung:
+            pruefgrund = str(klaerung)
+            if "widerspricht" in pruefgrund:
+                raise HTTPException(422, pruefgrund) from klaerung
+        betraege = {
+            "netto": float(netto),
+            "steuer": None if steuer is None else float(steuer),
+            "brutto": None if steuer is None else float(netto + steuer),
+            "pruefgrund": pruefgrund,
+        }
+        if request.mode != "execute":
+            db.rollback()
+            return {"success": True, "mode": request.mode, "proposedChanges": {**parameters, **betraege}}
+        angelegt = _lege_an(db, tenant, eingabe)
+        entity_id = str(angelegt["id"])
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name,
+            entity_type="sales_credit_note", entity_id=entity_id,
+            audit_reason=opened.reason, idempotency_key=request.idempotency_key,
+            summary=f"Gutschrift {opened.credit_note_number} als Entwurf gespeichert by {actor}",
+        )
+        result = {
+            "success": True, "mode": "execute", "replayed": False,
+            "credit_note_id": entity_id, "credit_note_number": opened.credit_note_number,
+            **betraege, "auditEntryId": audit_id,
         }
         _store_execution(
             db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]

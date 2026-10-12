@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 56 Tools in 18 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 57 Tools in 18 Domaenen.
 
 ## Uebersicht
 
@@ -69,6 +69,7 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 56 Tools in 18 Domaenen.
 | `qualitaet.reklamation.abschliessen` | qualitaet | `quality:write` | ja | mittel | nein |
 | `reporting.bonus.calculate` | reporting | `reporting:write` | ja | mittel | nein |
 | `reporting.query.import_signed` | reporting | `reporting:write` | ja | mittel | nein |
+| `sales.gutschrift.speichern` | sales | `sales:write` | ja | mittel | nein |
 | `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein |
@@ -3330,6 +3331,117 @@ Importiert eine HMAC-signierte Abfragedefinition (Maske auswertungen/abfrage-cen
 ```
 
 ## Domaene: sales
+
+### `sales.gutschrift.speichern` — Gutschrift als Entwurf speichern
+
+Legt eine Gutschrift (kaufmaennische Rechnungskorrektur) als Entwurf im Authentifizierungs-Mandanten an (Maske sales/gutschrift:speichern; CE /api/v1/sales/credit-notes/actions/speichern). parameters.credit_note_number, customer_id, grund, lines[] mit description, quantity, unit_price und tax_code (Steuerschluessel des Mandanten aus finance/tax-keys; kein Prozentsatz, kein Vorgabewert), optional invoice_reference, reason. Default dryRun liefert Netto/Umsatzsteuer/Brutto oder den Pruefgrund. execute erfordert idempotency_key. Gebucht wird NICHT: Die Buchung ist forbiddenForAgents und bleibt beim Menschen. Scope sales:write. Kein tenant_id-Parameter.
+
+- **Scope:** `sales:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "credit_note_number": {
+      "type": "string"
+    },
+    "customer_id": {
+      "type": "string"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "invoice_reference": {
+      "type": "string",
+      "description": "Rechnungsnummer, deren offener Posten beim Buchen gemindert wird"
+    },
+    "grund": {
+      "type": "string",
+      "description": "Grund der Gutschrift, z. B. Retoure"
+    },
+    "lines": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit_price": {
+            "type": "number",
+            "description": "Einzelpreis netto"
+          },
+          "tax_code": {
+            "type": "string",
+            "description": "Steuerschluessel des Mandanten"
+          }
+        },
+        "required": [
+          "description",
+          "quantity",
+          "unit_price"
+        ]
+      }
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 3
+    }
+  },
+  "required": [
+    "credit_note_number",
+    "customer_id",
+    "grund",
+    "lines",
+    "reason"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "credit_note_id": {
+      "type": "string"
+    },
+    "credit_note_number": {
+      "type": "string"
+    },
+    "netto": {
+      "type": "number"
+    },
+    "steuer": {
+      "type": "number",
+      "nullable": true
+    },
+    "brutto": {
+      "type": "number",
+      "nullable": true
+    },
+    "pruefgrund": {
+      "type": "string",
+      "nullable": true
+    },
+    "auditEntryId": {
+      "type": "string"
+    }
+  }
+}
+```
 
 ### `sales.invoice.post` — Rechnung aus freigegebenem Vorschlag anlegen
 

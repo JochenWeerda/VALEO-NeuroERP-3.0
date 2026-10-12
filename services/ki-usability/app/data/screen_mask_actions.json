@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 85,
-    "screens_with_actions": 45,
+    "actions": 89,
+    "screens_with_actions": 46,
     "domains": 14
   },
   "actions": [
@@ -1632,6 +1632,88 @@
         "commandEndpoint": "/api/v1/sales/delivery-notes/{entity_id}/actions/drucken",
         "navigationRoute": null,
         "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:sales/gutschrift:buchen",
+      "label": "Buchen",
+      "description": "Buchen (sales/gutschrift)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "sales/gutschrift",
+      "intent_phrases": [
+        "Buchen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "sales/gutschrift",
+        "actionKey": "buchen",
+        "commandEndpoint": "/api/v1/sales/credit-notes/{entity_id}/actions/buchen",
+        "navigationRoute": null,
+        "command": "sales.gutschriftBuchen",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:sales/gutschrift:neu",
+      "label": "Neue Gutschrift",
+      "description": "Neue Gutschrift (sales/gutschrift)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "sales/gutschrift",
+      "intent_phrases": [
+        "Neue Gutschrift"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "sales/gutschrift",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "sales.gutschriftNeu",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:sales/gutschrift:position",
+      "label": "Position übernehmen",
+      "description": "Position übernehmen (sales/gutschrift)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "sales/gutschrift",
+      "intent_phrases": [
+        "Position übernehmen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "sales/gutschrift",
+        "actionKey": "position",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "sales.gutschriftPosition",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:sales/gutschrift:speichern",
+      "label": "Als Entwurf speichern",
+      "description": "Als Entwurf speichern (sales/gutschrift)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "sales/gutschrift",
+      "intent_phrases": [
+        "Als Entwurf speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "sales/gutschrift",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/sales/credit-notes/actions/speichern",
+        "navigationRoute": null,
+        "command": "sales.gutschriftSpeichern",
         "method": "POST"
       }
     },

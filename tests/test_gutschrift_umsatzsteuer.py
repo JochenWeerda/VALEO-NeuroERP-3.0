@@ -324,3 +324,238 @@ def test_steuerschluessel_pflege_fuehrt_das_erloeskonto(haus):
     antwort = haus["client"].put(f"/finance/tax-keys/{nach_code['24']['id']}", json={"revenue_account": "8400"})
     assert antwort.status_code == 200, antwort.text
     assert antwort.json()["revenue_account"] == "8400"
+
+
+# --- Maske sales/gutschrift: ScreenDefinition und Kommando-Wege --------------------------------
+
+RUMPF = {
+    "customer_id": "kunde-1", "reason": "Retoure",
+    "lines": [{"description": "Weizen", "quantity": "2", "unit_price": "500", "tax_code": "3"}],
+}
+
+
+def _koepfe(mandant: str) -> int:
+    with SessionLocal() as db:
+        return db.execute(text(
+            "SELECT count(*) FROM domain_sales.sales_credit_notes WHERE tenant_id = :t"), {"t": mandant}).scalar()
+
+
+def test_maske_ist_eine_screen_definition_ohne_prozentfeld():
+    from app.api.v1.endpoints.mask_screen_definition import _check_readiness
+    from app.core.screen_definitions import _AGENT_SYNONYMS, _SCREEN_LIST_ROUTE, get_screen_definition
+    from app.core.screen_governance import governance_errors, ux_lint
+
+    sd = get_screen_definition("sales/gutschrift")
+    assert sd["adapter"]["temporary"] is False
+    assert "sales/gutschrift" in _AGENT_SYNONYMS and "sales/gutschrift" in _SCREEN_LIST_ROUTE
+    assert governance_errors(sd) == []
+    assert [f for f in ux_lint(sd) if f["severity"] == "error"] == []
+    bereit = _check_readiness(sd)
+    assert bereit["generatorReady"] is True and bereit["advisoryScore"] == 1.0
+
+    felder = {f["key"]: f for f in sd["fields"]}
+    # Die Steuer kommt aus dem Steuerschluessel: kein Prozentfeld, kein Vorgabewert.
+    assert felder["pos_tax_code"]["type"] == "select" and felder["pos_tax_code"]["dataSourceKey"] == "steuerschluessel"
+    assert "default" not in felder["pos_tax_code"] and "defaultValue" not in felder["pos_tax_code"]
+    assert not [k for k, f in felder.items() if f["type"] == "percentage" or "rate" in k or "satz" in k]
+    wege = {a["key"]: a.get("commandEndpoint") for a in sd["actions"]}
+    assert wege["speichern"] == "/api/v1/sales/credit-notes/actions/speichern"
+    assert wege["buchen"] == "/api/v1/sales/credit-notes/{entity_id}/actions/buchen"
+
+
+def test_steuer_vorschau_rechnet_wie_die_buchung(haus):
+    antwort = haus["client"].post("/sales/credit-notes/steuer-vorschau", json={"lines": RUMPF["lines"]})
+    assert antwort.status_code == 200, antwort.text
+    daten = antwort.json()
+    assert (daten["geklaert"], Decimal(daten["netto"]), Decimal(daten["steuer"]), Decimal(daten["brutto"])) == (
+        True, Decimal("1000.00"), Decimal("190.00"), Decimal("1190.00"))
+    assert [(g["tax_code"], Decimal(g["steuer"])) for g in daten["gruppen"]] == [("3", Decimal("190.00"))]
+
+
+def test_steuer_vorschau_nimmt_ohne_schluessel_nichts_an(haus):
+    zeile = {"description": "Weizen", "quantity": "1", "unit_price": "100"}
+    daten = haus["client"].post("/sales/credit-notes/steuer-vorschau", json={"lines": [zeile]}).json()
+    assert (daten["geklaert"], daten["steuer"], daten["brutto"]) == (False, None, None)
+    assert "keinen Steuerschlüssel" in daten["pruefgrund"]
+
+
+def test_kommando_speichern_trockenlauf_schreibt_nichts(haus):
+    antwort = haus["client"].post("/sales/credit-notes/actions/speichern", json={
+        **RUMPF, "credit_note_number": f"GS-{haus['lauf']}", "_mode": "dryRun"})
+    assert antwort.status_code == 200, antwort.text
+    assert antwort.json()["success"] is True, antwort.json()
+    assert _koepfe(haus["mandant"]) == 0
+
+
+def test_kommando_speichern_legt_den_entwurf_an_und_lehnt_die_doppelte_nummer_ab(haus):
+    rumpf = {**RUMPF, "credit_note_number": f"GS-{haus['lauf']}", "_mode": "execute",
+             "_idempotencyKey": f"gs-{haus['lauf']}-1"}
+    antwort = haus["client"].post("/sales/credit-notes/actions/speichern", json=rumpf)
+    assert antwort.status_code == 200, antwort.text
+    ergebnis = antwort.json()
+    assert ergebnis["success"] is True, ergebnis
+    assert "netto 1000.00, Umsatzsteuer 190.00" in ergebnis["summary"]
+    assert _koepfe(haus["mandant"]) == 1
+
+    liste = haus["client"].get("/sales/credit-notes").json()
+    assert [(g["status"], Decimal(g["total_amount"])) for g in liste] == [("draft", Decimal("1190.00"))]
+    einzeln = haus["client"].get(f"/sales/credit-notes/{liste[0]['id']}").json()
+    assert [(z["description"], z["tax_code"]) for z in einzeln["lines"]] == [("Weizen", "3")]
+
+    zweite = haus["client"].post("/sales/credit-notes/actions/speichern", json={
+        **rumpf, "_idempotencyKey": f"gs-{haus['lauf']}-2"}).json()
+    assert zweite["success"] is False and "bereits vergeben" in zweite["error"]
+    assert _koepfe(haus["mandant"]) == 1
+
+
+def test_kommando_speichern_verlangt_positionen(haus):
+    antwort = haus["client"].post("/sales/credit-notes/actions/speichern", json={
+        "credit_note_number": f"GS-{haus['lauf']}", "customer_id": "kunde-1", "reason": "Retoure", "lines": [],
+        "_mode": "execute"}).json()
+    assert antwort["success"] is False and "Position" in antwort["error"]
+    assert _koepfe(haus["mandant"]) == 0
+
+
+def test_kommando_buchen_trockenlauf_nennt_den_pruefgrund(haus):
+    gs = _gutschrift(haus, [(None, None, 100)], total=100)
+    ergebnis = haus["client"].post(f"/sales/credit-notes/{gs}/actions/buchen", json={"_mode": "dryRun"}).json()
+    assert ergebnis["success"] is False
+    assert "bitte prüfen" in ergebnis["error"] and "keinen Steuerschlüssel" in ergebnis["error"]
+    assert _buchung(haus["mandant"]) == [] and _zustand(gs)[0] == "draft"
+
+
+def test_kommando_buchen_bucht_mit_audit_und_nur_einmal(haus):
+    gs = _gutschrift(haus, [("3", 19, 1000)], total=1190)
+    weg = f"/sales/credit-notes/{gs}/actions/buchen"
+    assert haus["client"].post(weg, json={"_mode": "dryRun"}).json()["success"] is True
+    assert _buchung(haus["mandant"]) == []
+
+    rumpf = {"_mode": "execute", "_idempotencyKey": f"buchen-{gs}"}
+    ergebnis = haus["client"].post(weg, json=rumpf).json()
+    assert ergebnis["success"] is True, ergebnis
+    assert ergebnis["auditEntryId"] and "brutto 1190.00" in ergebnis["summary"]
+    erwartet = [("8400", 1000.0, 0.0, "3"), ("1776", 190.0, 0.0, "3"), ("1400", 0.0, 1190.0, None)]
+    assert _buchung(haus["mandant"]) == erwartet
+
+    # Wiederholung desselben Auftrags und ein zweiter Auftrag: Es bleibt bei einer Buchung.
+    haus["client"].post(weg, json=rumpf)
+    zweiter = haus["client"].post(weg, json={"_mode": "execute", "_idempotencyKey": f"buchen-{gs}-2"}).json()
+    assert zweiter["success"] is False and "bereits gebucht" in zweiter["error"]
+    assert _buchung(haus["mandant"]) == erwartet
+
+
+def test_kommando_buchen_nennt_die_kontosperre(haus):
+    with SessionLocal() as db:
+        db.execute(text(
+            "INSERT INTO domain_erp.chart_of_accounts "
+            "(id, account_number, account_name, account_type, category, tenant_id, is_active, posting_blocked) "
+            "VALUES (:id, '1400', 'Forderungen', 'asset', 'receivables', :t, true, true)"),
+            {"id": f"gu-{haus['lauf']}-1400", "t": haus["mandant"]})
+        db.commit()
+    gs = _gutschrift(haus, [("3", 19, 1000)], total=1190)
+    ergebnis = haus["client"].post(f"/sales/credit-notes/{gs}/actions/buchen", json={"_mode": "execute"}).json()
+    assert ergebnis["success"] is False and "1400 ist fuer Buchungen gesperrt" in ergebnis["error"]
+    assert _buchung(haus["mandant"]) == [] and _zustand(gs)[0] == "draft"
+
+
+def test_gutschrift_wege_pruefen_die_rolle(haus):
+    from app.auth.deps import get_current_user
+
+    haus["client"].app.dependency_overrides[get_current_user] = lambda: {"sub": "x", "name": "x", "roles": ["LAGER_LESEN"]}
+    assert haus["client"].get("/sales/credit-notes").status_code == 403
+    assert haus["client"].post("/sales/credit-notes/actions/speichern", json={"_mode": "dryRun"}).status_code == 403
+    assert haus["client"].post("/sales/credit-notes/x/actions/buchen", json={"_mode": "dryRun"}).status_code == 403
+
+
+# --- MCP: Agent legt den Entwurf an, gebucht wird durch einen Menschen --------------------------
+
+@pytest.fixture
+def mcp(haus):
+    from app.api.v1.endpoints.mcp_tool_registry import get_current_user as mcp_nutzer
+    from app.api.v1.endpoints.mcp_tool_registry import get_db as mcp_get_db
+    from app.api.v1.endpoints.mcp_tool_registry import router as mcp_router
+
+    app = FastAPI()
+    app.include_router(mcp_router)
+    scopes = ["sales:write"]
+    app.dependency_overrides[mcp_nutzer] = lambda: {
+        "sub": "agent-7", "scopes": list(scopes), "raw": {"tenant_id": haus["mandant"]}}
+
+    def _db():
+        with SessionLocal() as db:
+            yield db
+
+    app.dependency_overrides[mcp_get_db] = _db
+    with TestClient(app, raise_server_exceptions=False) as client:
+        yield {**haus, "mcp": client, "scopes": scopes}
+
+
+def _auftrag(mcp, **zusatz) -> dict:
+    return {
+        "tool_name": "sales.gutschrift.speichern",
+        "parameters": {
+            "credit_note_number": f"GS-{mcp['lauf']}-A", "customer_id": "kunde-1", "grund": "Retoure",
+            "lines": [{"description": "Weizen", "quantity": 2, "unit_price": 500, "tax_code": "3"}],
+            "reason": "Retoure laut Kundenmeldung",
+        },
+        **zusatz,
+    }
+
+
+def test_mcp_trockenlauf_zeigt_die_betraege_und_schreibt_nichts(mcp):
+    antwort = mcp["mcp"].post("/mcp/tools/call", json=_auftrag(mcp))
+    assert antwort.status_code == 200, antwort.text
+    vorschlag = antwort.json()["proposedChanges"]
+    assert (vorschlag["netto"], vorschlag["steuer"], vorschlag["brutto"], vorschlag["pruefgrund"]) == (
+        1000.0, 190.0, 1190.0, None)
+    assert _koepfe(mcp["mandant"]) == 0
+
+
+def test_mcp_trockenlauf_nennt_den_pruefgrund_statt_einen_satz_anzunehmen(mcp):
+    auftrag = _auftrag(mcp)
+    del auftrag["parameters"]["lines"][0]["tax_code"]
+    vorschlag = mcp["mcp"].post("/mcp/tools/call", json=auftrag).json()["proposedChanges"]
+    assert (vorschlag["steuer"], vorschlag["brutto"]) == (None, None)
+    assert "keinen Steuerschlüssel" in vorschlag["pruefgrund"]
+
+
+def test_mcp_legt_den_entwurf_einmal_an_und_bucht_nicht(mcp):
+    ohne_schluessel = mcp["mcp"].post("/mcp/tools/call", json=_auftrag(mcp, mode="execute"))
+    assert ohne_schluessel.status_code == 422
+    auftrag = _auftrag(mcp, mode="execute", idempotency_key=f"mcp-{mcp['lauf']}")
+    erste = mcp["mcp"].post("/mcp/tools/call", json=auftrag)
+    assert erste.status_code == 200, erste.text
+    ergebnis = erste.json()
+    assert ergebnis["success"] is True and ergebnis["auditEntryId"] and ergebnis["brutto"] == 1190.0
+    zweite = mcp["mcp"].post("/mcp/tools/call", json=auftrag).json()
+    assert zweite["credit_note_id"] == ergebnis["credit_note_id"]
+    assert _koepfe(mcp["mandant"]) == 1
+    assert _zustand(ergebnis["credit_note_id"])[0] == "draft"
+    assert _buchung(mcp["mandant"]) == []
+
+
+def test_mcp_weist_mandantenangabe_und_fehlendes_recht_ab(mcp):
+    fremd = _auftrag(mcp)
+    fremd["parameters"]["tenant_id"] = "anderes-haus"
+    assert mcp["mcp"].post("/mcp/tools/call", json=fremd).status_code == 422
+    mcp["scopes"][:] = ["sales:read"]
+    assert mcp["mcp"].post("/mcp/tools/call", json=_auftrag(mcp)).status_code == 403
+    assert _koepfe(mcp["mandant"]) == 0
+
+
+def test_buchen_ist_fuer_agenten_gesperrt():
+    """Kein MCP-Werkzeug bucht eine Gutschrift; die Maskenaktion ist als gesperrt ausgewiesen."""
+    import yaml
+
+    from app.core.screen_definitions import get_screen_definition
+
+    aktion = next(a for a in get_screen_definition("sales/gutschrift")["actions"] if a["key"] == "buchen")
+    assert aktion["forbiddenForAgents"] is True and aktion["humanApprovalRequired"] is True
+    wurzel = __import__("pathlib").Path(__file__).resolve().parent.parent
+    karte = yaml.safe_load((wurzel / "config/mcp_mask_action_map.yaml").read_text(encoding="utf-8"))
+    eintraege = {m["mask_action_id"]: m for m in karte["mappings"] if m.get("mask") == "sales/gutschrift"}
+    assert eintraege["mask:sales/gutschrift:buchen"]["mcp_tool_id"] is None
+    assert eintraege["mask:sales/gutschrift:buchen"]["coverage"] == "open_high"
+    assert eintraege["mask:sales/gutschrift:speichern"]["mcp_tool_id"] == "sales.gutschrift.speichern"
+    werkzeuge = yaml.safe_load((wurzel / "config/mcp_erp_tools.yaml").read_text(encoding="utf-8"))["tools"]
+    assert [w["tool_id"] for w in werkzeuge if "gutschrift" in w["tool_id"]] == ["sales.gutschrift.speichern"]

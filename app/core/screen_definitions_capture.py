@@ -2817,3 +2817,215 @@ def build_admin_postfaecher_screen_definition() -> dict[str, Any]:
             "bundleGroup": "platform",
         },
     }
+
+
+def build_sales_gutschrift_screen_definition() -> dict[str, Any]:
+    """Gutschrift (kaufmaennische Rechnungskorrektur) erfassen und buchen. Die Seite speichert, der Builder zeichnet.
+
+    Die Umsatzsteuer kommt aus dem **Steuerschluessel** der Position (``domain_erp.tax_keys``) — die
+    Maske hat kein Prozentfeld und keinen Vorgabewert. Netto, Umsatzsteuer und Brutto rechnet der Server
+    (``/sales/credit-notes/steuer-vorschau``, dieselbe Stelle wie die Buchung); die Maske zeigt sie nur.
+    Gebucht wird Erloes netto, Umsatzsteuer getrennt, Forderung brutto. Lehnt die Buchung ab, nennt die
+    Antwort den Pruefgrund, und die Gutschrift bleibt Entwurf.
+    """
+    return {
+        "schemaVersion": 1,
+        "id": "sales/gutschrift",
+        "domain": "sales",
+        "mode": "list",
+        "title": "Gutschrift",
+        "subtitle": "Verkauf / Rechnungskorrektur",
+        "adapter": {"type": "native", "sourceId": "sales/gutschrift", "temporary": False},
+        "dataSources": [
+            {"key": "gutschriften", "endpoint": "/api/v1/sales/credit-notes", "pageSize": 200,
+             "table": "domain_sales.sales_credit_notes"},
+            {"key": "steuerschluessel", "endpoint": "/api/v1/finance/tax-keys", "pageSize": 200,
+             "table": "domain_erp.tax_keys"},
+            {"key": "steuer", "endpoint": "/api/v1/sales/credit-notes/steuer-vorschau", "method": "POST"},
+        ],
+        "summary": [
+            {"key": "netto", "label": "Netto", "value": "0,00 €"},
+            {"key": "steuer", "label": "Umsatzsteuer", "value": "offen"},
+            {"key": "brutto", "label": "Brutto", "value": "offen"},
+        ],
+        "fields": [
+            {"key": "credit_note_number", "label": "Gutschriftnummer", "type": "text", "required": True},
+            {"key": "customer_id", "label": "Kunde (Nr.)", "type": "text", "required": True},
+            {"key": "customer_name", "label": "Kundenname", "type": "text"},
+            {"key": "invoice_reference", "label": "Rechnungsnummer (Bezug)", "type": "text",
+             "helpText": "Der offene Posten dieser Rechnung wird um den Bruttobetrag gemindert. "
+                         "Ohne Bezug wird kein Posten gemindert."},
+            {"key": "correction_type", "label": "Art", "type": "select", "required": True,
+             "options": [
+                 {"value": "rechnungskorrektur", "label": "Rechnungskorrektur (Erlösminderung)"},
+                 {"value": "gutschrift_14_ustg", "label": "Gutschrift nach § 14 UStG (Abrechnung durch den Leistungsempfänger)"},
+             ],
+             "helpText": "Eine Gutschrift nach § 14 UStG ist keine Erlösminderung und wird hier nicht gebucht."},
+            {"key": "reason", "label": "Grund", "type": "select", "required": True,
+             "options": [
+                 {"value": "Retoure", "label": "Retoure"},
+                 {"value": "Preisnachlass", "label": "Preisnachlass"},
+                 {"value": "Rechnungsfehler", "label": "Rechnungsfehler"},
+                 {"value": "Reklamation", "label": "Reklamation"},
+                 {"value": "Sonstiges", "label": "Sonstiges"},
+             ]},
+            {"key": "reason_text", "label": "Erläuterung", "type": "text"},
+            {"key": "notes", "label": "Notizen", "type": "textarea"},
+            # Positionserfassung: Die Eingabe wird mit „Position übernehmen“ in die Liste gestellt.
+            {"key": "pos_description", "label": "Position: Bezeichnung", "type": "text"},
+            {"key": "pos_quantity", "label": "Position: Menge", "type": "number"},
+            {"key": "pos_unit_price", "label": "Position: Einzelpreis netto", "type": "currency"},
+            {"key": "pos_tax_code", "label": "Position: Steuerschlüssel", "type": "select", "options": [],
+             "dataSourceKey": "steuerschluessel",
+             "helpText": "Aus der Maske Steuerschlüssel. Es gibt keinen Vorgabewert: "
+                         "Ohne Steuerschlüssel wird die Gutschrift nicht gebucht."},
+        ],
+        "workflow": {
+            "processKey": "order-to-cash",
+            "documentType": "sales_credit_note",
+            "phases": [
+                {"key": "erfassen", "label": "Erfassen"},
+                {"key": "entwurf", "label": "Entwurf"},
+                {"key": "gebucht", "label": "Gebucht"},
+            ],
+        },
+        "actions": [
+            {"key": "position", "label": "Position übernehmen", "command": "sales.gutschriftPosition",
+             "kind": "secondary", "dangerLevel": "safe", "zone": "header",
+             "stubReason": "Stellt die Positionseingabe in die Positionsliste der Maske; gespeichert wird erst mit Speichern."},
+            {"key": "speichern", "label": "Als Entwurf speichern", "command": "sales.gutschriftSpeichern",
+             "kind": "primary", "dangerLevel": "safe", "zone": "header",
+             "permission": "sales.gutschrift.write",
+             "commandEndpoint": "/api/v1/sales/credit-notes/actions/speichern",
+             "method": "POST",
+             "inputFields": [
+                 {"key": "credit_note_number", "label": "Gutschriftnummer", "type": "text", "required": True},
+                 {"key": "customer_id", "label": "Kunde (Nr.)", "type": "text", "required": True},
+                 {"key": "reason", "label": "Grund", "type": "text", "required": True},
+                 {"key": "invoice_reference", "label": "Rechnungsnummer (Bezug)", "type": "text"},
+                 {"key": "correction_type", "label": "Art", "type": "select"},
+                 {"key": "lines", "label": "Positionen (description, quantity, unit_price, tax_code)", "type": "table",
+                  "required": True},
+             ]},
+            {"key": "buchen", "label": "Buchen", "command": "sales.gutschriftBuchen",
+             "kind": "secondary", "dangerLevel": "moderate", "zone": "header",
+             "requiresConfirmation": True,
+             "humanApprovalRequired": True,
+             "forbiddenForAgents": True,
+             "permission": "sales.gutschrift.post",
+             "commandEndpoint": "/api/v1/sales/credit-notes/{entity_id}/actions/buchen",
+             "method": "POST"},
+            {"key": "neu", "label": "Neue Gutschrift", "command": "sales.gutschriftNeu",
+             "kind": "secondary", "dangerLevel": "safe", "zone": "footer",
+             "localEffect": "form_reset",
+             "stubReason": "Leert die Eingabe fuer eine neue Gutschrift."},
+        ],
+        "tables": [
+            {
+                "key": "positionen",
+                "label": "Positionen",
+                "serverPagination": False,
+                "pageSize": 50,
+                "virtualized": False,
+                "rowHeight": 44,
+                "rowDetail": False,
+                "columns": [
+                    {"key": "nr", "label": "Nr.", "width": 60, "sortable": True, "priority": "primary"},
+                    {"key": "description", "label": "Bezeichnung", "filterable": True, "priority": "primary"},
+                    {"key": "quantity", "label": "Menge", "numeric": True, "renderKind": "number", "priority": "secondary"},
+                    {"key": "unit_price", "label": "Einzelpreis netto", "numeric": True, "renderKind": "currency",
+                     "priority": "secondary"},
+                    {"key": "tax_code_text", "label": "Steuerschlüssel", "priority": "primary"},
+                    {"key": "netto", "label": "Netto", "numeric": True, "renderKind": "currency", "priority": "primary"},
+                ],
+                "rowActions": [
+                    {"key": "entfernen", "label": "Entfernen", "command": "sales.gutschriftPositionEntfernen",
+                     "dangerLevel": "safe"},
+                ],
+            },
+            {
+                "key": "steuer",
+                "label": "Steuerausweis",
+                "dataSourceKey": "steuer",
+                "serverPagination": False,
+                "pageSize": 25,
+                "virtualized": False,
+                "rowHeight": 44,
+                "rowDetail": False,
+                "columns": [
+                    {"key": "tax_code_text", "label": "Steuerschlüssel", "filterable": True, "sortable": True, "priority": "primary"},
+                    {"key": "netto", "label": "Netto", "numeric": True, "renderKind": "currency", "priority": "primary"},
+                    {"key": "steuer", "label": "Umsatzsteuer", "numeric": True, "renderKind": "currency", "priority": "primary"},
+                    {"key": "brutto", "label": "Brutto", "numeric": True, "renderKind": "currency", "priority": "primary"},
+                ],
+            },
+            {
+                "key": "gutschriften",
+                "label": "Gutschriften",
+                "dataSourceKey": "gutschriften",
+                "serverPagination": False,
+                "pageSize": 50,
+                "virtualized": False,
+                "rowHeight": 44,
+                "rowDetail": False,
+                "columns": [
+                    {"key": "credit_note_number", "label": "Nummer", "sortable": True, "filterable": True,
+                     "priority": "primary"},
+                    {"key": "customer_text", "label": "Kunde", "filterable": True, "priority": "primary"},
+                    {"key": "invoice_reference", "label": "Rechnung", "priority": "secondary"},
+                    {"key": "net_amount", "label": "Netto", "numeric": True, "renderKind": "currency", "priority": "secondary"},
+                    {"key": "tax_amount", "label": "Umsatzsteuer", "numeric": True, "renderKind": "currency",
+                     "priority": "secondary"},
+                    {"key": "total_amount", "label": "Brutto", "numeric": True, "renderKind": "currency", "priority": "primary"},
+                    {"key": "status_text", "label": "Status", "renderKind": "status", "priority": "primary"},
+                ],
+                "rowActions": [
+                    {"key": "laden", "label": "Öffnen", "command": "sales.gutschriftLaden", "dangerLevel": "safe"},
+                ],
+            },
+        ],
+        "agentContract": {
+            "businessPurpose": (
+                "Gutschrift an den Kunden (Rechnungskorrektur) erfassen und buchen: Positionen mit "
+                "Steuerschluessel, Erloes netto, Umsatzsteuer getrennt, Forderung brutto; ohne eindeutige "
+                "Steuerangabe wird nicht gebucht, sondern der Pruefgrund genannt."
+            ),
+            "examplePrompts": [
+                "Lege eine Gutschrift ueber 1.000 EUR netto mit Steuerschluessel 3 zur Rechnung RE-1001 an.",
+                "Warum wurde Gutschrift {entity_id} nicht gebucht?",
+                "Welche Gutschriften sind noch Entwurf?",
+            ],
+            "dangerousActions": [
+                {
+                    "key": "buchen",
+                    "reason": "Buchung ins Hauptbuch mit Umsatzsteuerberichtigung und OP-Minderung: "
+                              "forbiddenForAgents — ein Agent legt den Entwurf an, gebucht wird durch einen Menschen.",
+                },
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+                "screenRoot": "[data-testid='screen-sales/gutschrift']",
+                "primaryAction": "[data-testid='action-speichern']",
+            },
+        },
+        "layout": {
+            "floorplan": "worklist",
+            "density": "compact",
+            # Stand, naechster Schritt und Pruefgrund stehen im Prozessbereich neben der Maske.
+            "contextRail": "workflow",
+            "tableProfile": "financial",
+            "columnNavigation": "single",
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+            "summaryPlacement": "footer",
+            "statusPlacement": "afterFields",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 24,
+            "requiresLazyTabs": False,
+            "requiresVirtualTables": False,
+            "lookupMinChars": 2,
+            "bundleGroup": "sales",
+        },
+    }

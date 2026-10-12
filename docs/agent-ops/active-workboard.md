@@ -11,6 +11,27 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## GUTSCHRIFT-MASKE-SD-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Vorgabe: keine handgebauten Masken; Mask Builder,
+ScreenDefinitions, MCP- und CI-Schnittstellen.
+**Befund:** `pages/sales/credit-note-editor.tsx` war eine Attrappe (Positionstabelle als Textfeld, Felder passten
+nicht zur Schnittstelle, Wege ins Leere) mit Prozentfeld je Position.
+**Lieferung:** ScreenDefinition `sales/gutschrift` (bereit, Beratungswert 1,0): Steuerschluessel als Auswahl aus
+`tax_keys`, kein Prozentfeld; Maske rechnet nicht (`POST /sales/credit-notes/steuer-vorschau`). Kommando-Wege
+`…/actions/speichern` und `…/{id}/actions/buchen` ueber `run_delegated_mask_action`; `GET …/{id}`; Rollen an allen
+Gutschrift-Wegen (`beleg_read`/`beleg_write`). Seite als Huelle um `UniversalMaskRenderer`.
+MCP: Werkzeug `sales.gutschrift.speichern`; Buchen `forbiddenForAgents` (Aktionskarte `open_high`).
+Nachgezogen: `screen_mask_actions.json`, `mcp_mask_action_map.yaml`, `mcp_erp_tools.yaml`, `mcp-tools.md`,
+Agent-Handbuch, OpenAPI; vier Zaehlwerte der MCP-Ratschen (+1 je neuem Eintrag).
+Tests: `tests/test_gutschrift_umsatzsteuer.py` 35 gruen, Plattform zusammen 305; Vitest Maske 5 gruen.
+QA: `docs/quality-assurance/gutschrift-maske-sd-20261012.md`.
+**An Codex/Cursor (MCP-MASK-CE):** `tests/test_mcp_*` Zaehlwerte und `MAPPED_RULES`/`BLOCKED_RULES` um
+`sales/gutschrift` ergaenzt — bitte gegenlesen.
+**Offen:** uebrige Masken mit Prozent-Freitext (Ausgangs-/Eingangsrechnung, Einkaufsgutschrift, Lieferschein,
+Bestellung, Zinsabrechnung, Artikelstamm, Kasse, Ernteannahme); Maske Steuerschluessel als ScreenDefinition;
+Entwurf bearbeiten; Vorschlag/Freigabe-Paar fuer das Buchen durch Agenten; Sichtpruefung im Browser.
+
 ## IDENTITY-ADMIN-HANDBUCH-20261012 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber: Testanmeldung, Mandanten-/Administrator-/Nutzer-/Agentenverwaltung mit Handbuch-Screenshots und hierarchischen Kontingenten. **Ziel:** echte Verwaltungswege, Loeschschutz ab erster Buchung, Sperre statt Loeschen, kontingentgebundene Unterdelegation und nachvollziehbares Verbrauchsnebenbuch. **Dateibesitz:** app/api/v1/endpoints/tenants.py, neues app/services/tenant_lifecycle_service.py; neue identity_quota-Module und eigene Tests; neue native Verwaltungs-ScreenDefinitions in eigenem Modul samt eng begrenzter Registry-Anbindung, neue thin-wrapper Routen (kein fremdes Maskenstyling); docs/benutzerhandbuch/identity-administration.md samt ausschliesslich synthetischen Screenshots, eigene QA/Workboard/ADR083-Ergaenzung. Bestehender IDENTITY-CONTROL-Claim behaelt Provider/User-/Agent-API und deren Integration. **Abnahme:** Buchungshistorie verhindert physisches Loeschen, fremde Mandanten unzugaenglich, deaktivierte Mandanten nicht benutzbar; Elternbudget kann durch Unteragenten nicht steigen, atomare Reservierung und Abrechnung mit Replay-Schutz. Screenshots ausschliesslich echte Browserablaeufe und synthetische Daten, keine privaten Zugangsdaten. **Risiken:** persoenliche MFA-Erstanmeldung vom Auftraggeber vertagt; dafuer keine Ersatzfreigabe behaupten. Vorhandenen Pruefstand verwenden; kein neuer Container/DB/Reset, keine fremden Claims uebernehmen.

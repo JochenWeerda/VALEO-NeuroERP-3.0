@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (100 Masken).
+> Generiert aus `app/core/screen_definitions.py` (101 Masken).
 
 ## Übersicht
 
@@ -95,6 +95,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `produktion/produktionsleitstand` | Produktionsleitstand | agrar | mittel | — | `GET /api/v1/masks/produktion/produktionsleitstand/agent-contract` |
 | `qualitaet/reklamation` | Reklamation | qualitaet | mittel | `complaint-to-resolution` | `GET /api/v1/masks/qualitaet/reklamation/agent-contract` |
 | `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
+| `sales/gutschrift` | Gutschrift | sales | mittel | — | `GET /api/v1/masks/sales/gutschrift/agent-contract` |
 | `sales/invoice` | Ausgangsrechnung | sales | niedrig | — | `GET /api/v1/masks/sales/invoice/agent-contract` |
 | `sales/invoices` | Ausgangsrechnungen | sales | niedrig | — | `GET /api/v1/masks/sales/invoices/agent-contract` |
 | `sales/sales-order` | Verkaufsauftrag | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/sales-order/agent-contract` |
@@ -3647,6 +3648,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
 - `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
@@ -3661,6 +3663,48 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `drucken` | Lieferschein drucken | safe | nein | `/api/v1/sales/delivery-notes/{entity_id}/actions/drucken` |
+
+---
+
+### `sales/gutschrift` — Gutschrift
+
+**Zweck:** Gutschrift an den Kunden (Rechnungskorrektur) erfassen und buchen: Positionen mit Steuerschluessel, Erloes netto, Umsatzsteuer getrennt, Forderung brutto; ohne eindeutige Steuerangabe wird nicht gebucht, sondern der Pruefgrund genannt.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/sales/gutschrift/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/sales/gutschrift/agent-contract` |
+| Readiness | `GET /api/v1/masks/sales/gutschrift/readiness` |
+| Rollout-Route | `/mask-rollout/sales__gutschrift/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `gutschriften` → `/api/v1/sales/credit-notes`
+- `steuerschluessel` → `/api/v1/finance/tax-keys`
+- `steuer` → `/api/v1/sales/credit-notes/steuer-vorschau`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Lege eine Gutschrift ueber 1.000 EUR netto mit Steuerschluessel 3 zur Rechnung RE-1001 an.
+- Warum wurde Gutschrift {entity_id} nicht gebucht?
+- Welche Gutschriften sind noch Entwurf?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `position` | Position übernehmen | safe | nein | `Stellt die Positionseingabe in die Positionsliste der Maske; gespeichert wird erst mit Speichern.` |
+| `speichern` | Als Entwurf speichern | safe | nein | `/api/v1/sales/credit-notes/actions/speichern` |
+| `buchen` | Buchen | moderate | ja | `/api/v1/sales/credit-notes/{entity_id}/actions/buchen` |
+| `neu` | Neue Gutschrift | safe | nein | `Leert die Eingabe fuer eine neue Gutschrift.` |
 
 ---
 
@@ -3688,6 +3732,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
 - `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
@@ -3718,6 +3763,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
 - `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
@@ -3759,6 +3805,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
 - `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
@@ -3797,6 +3844,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
 - `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
@@ -3821,6 +3869,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
 - `sales.invoice.propose` — scope `sales:write`, Risiko hoch
 - `sales.invoice.post` — scope `sales:write`, Risiko hoch
 
