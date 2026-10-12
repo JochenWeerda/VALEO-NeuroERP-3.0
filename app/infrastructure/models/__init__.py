@@ -1166,6 +1166,9 @@ class Account(Base):
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     parent_account_id = Column(String, ForeignKey("domain_erp.chart_of_accounts.id"), nullable=True)
     is_active = Column(Boolean, default=True)
+    # Gesperrt: bleibt im Kontenplan sichtbar, nimmt aber keine neue Buchungszeile an
+    # (Trigger an journal_entry_lines, Migration konto_sperre_20261012).
+    posting_blocked = Column(Boolean, nullable=False, default=False, server_default="false")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)

@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-11
+last_reviewed: 2026-10-12
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -287,6 +287,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `journal_entries_document_type_20260408` | domain_erp.journal_entries: document_type ergaenzen (GoBD Belegart) |
 | `journal_entries_unify_20260301` | Journal: Eine Tabelle für List + Connector (domain_erp.journal_entries) |
 | `journal_number_tenant_20261005` | Journal numbers identify entries within a tenant, never across tenants. |
+| `konto_sperre_20261012` | Kontosperre: ein gesperrtes Konto nimmt keine neue Buchungszeile an. |
 | `kontrakt_disposition_20261005` | Der Abruf einer kontrahierten Menge — als Tabelle, nicht als Laufzeit-DDL. |
 | `kontrakt_lifecycle_fixing_20260623` | DOM-CON-004 — Kontrakt Lifecycle, Fixing, Settlement Tabellen |
 | `kontrakt_ordnung_20261001` | Der Kontrakt-Overlay ohne Vertragsbezug wird stillgelegt. |

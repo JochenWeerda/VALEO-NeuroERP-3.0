@@ -1197,6 +1197,12 @@
             "description": "Parent account ID for hierarchy",
             "title": "Parent Account Id"
           },
+          "posting_blocked": {
+            "default": false,
+            "description": "Fuer neue Buchungen gesperrt",
+            "title": "Posting Blocked",
+            "type": "boolean"
+          },
           "tenant_id": {
             "title": "Tenant Id",
             "type": "string"
@@ -1411,6 +1417,12 @@
             "description": "Parent account ID for hierarchy",
             "title": "Parent Account Id"
           },
+          "posting_blocked": {
+            "default": false,
+            "description": "Fuer neue Buchungen gesperrt",
+            "title": "Posting Blocked",
+            "type": "boolean"
+          },
           "tenant_id": {
             "title": "Tenant Id",
             "type": "string"
@@ -1500,6 +1512,18 @@
               }
             ],
             "title": "Currency"
+          },
+          "posting_blocked": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Konto fuer neue Buchungen sperren",
+            "title": "Posting Blocked"
           }
         },
         "title": "AccountUpdate",

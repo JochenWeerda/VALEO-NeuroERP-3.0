@@ -241,6 +241,122 @@ def test_kontenpflege_des_hauses_reicht_nicht_fuer_den_gemeinsamen_rahmen(haus):
     assert "KONTENRAHMEN_PFLEGE" in antwort.json()["detail"]
 
 
+# --- Kontosperre (KONTO-SPERRE-20261012) -------------------------------------------------------
+
+
+def _zeile(lauf: str, konto: str, nr: int) -> None:
+    """Schreibt eine Buchungszeile so, wie es die rohen SQL-Wege tun — an der Maske und am Weg vorbei."""
+    with SessionLocal() as db:
+        db.execute(text(
+            "INSERT INTO domain_erp.journal_entry_lines (id, journal_entry_id, account_id, line_number) "
+            "VALUES (:id, :je, :konto, :nr)"),
+            {"id": f"kp-{lauf}-jel{nr}", "je": f"kp-{lauf}-je", "konto": konto, "nr": nr})
+        db.commit()
+
+
+@pytest.fixture
+def gesperrt(bebucht):
+    antwort = bebucht["client"].put(
+        f"{PREFIX}/{bebucht['a']}", json={"posting_blocked": True}, headers=_kopf(HAUS_A))
+    assert antwort.status_code == 200, antwort.text
+    assert antwort.json()["posting_blocked"] is True
+    try:
+        yield bebucht
+    finally:
+        with SessionLocal() as db:
+            db.execute(text("DELETE FROM domain_erp.journal_entry_lines WHERE id LIKE :m"),
+                       {"m": f"kp-{bebucht['lauf']}-jel_"})
+            db.commit()
+
+
+def test_bebuchtes_konto_laesst_sich_sperren_und_bleibt_sichtbar(gesperrt):
+    """Deaktivieren geht bei einem bebuchten Konto nicht — sperren schon, und es bleibt im Kontenplan."""
+    liste = gesperrt["client"].get(PREFIX + "/", params={"search": gesperrt["lauf"]}, headers=_kopf(HAUS_A))
+    eigene = [k for k in liste.json()["items"] if k["id"] == gesperrt["a"]]
+    assert [(k["posting_blocked"], k["is_active"]) for k in eigene] == [(True, True)]
+
+
+def test_gesperrtes_konto_nimmt_keine_buchungszeile_an(gesperrt):
+    """Die Sperre gilt an der Tabelle, nicht an einem einzelnen Weg: Auch rohes SQL kommt nicht vorbei."""
+    from sqlalchemy.exc import IntegrityError
+
+    with pytest.raises(IntegrityError) as fehler:
+        _zeile(gesperrt["lauf"], gesperrt["a"], 2)
+    assert "fuer Buchungen gesperrt" in str(fehler.value)
+    assert f"A{gesperrt['lauf']}" in str(fehler.value)
+
+
+def test_sperre_laesst_bestehende_zeilen_in_ruhe(gesperrt):
+    with SessionLocal() as db:
+        zeilen = db.execute(text(
+            "SELECT count(*) FROM domain_erp.journal_entry_lines WHERE account_id = :k"), {"k": gesperrt["a"]}).scalar()
+        # Eine bestehende Zeile laesst sich weiter aendern, solange sie auf ihrem Konto bleibt.
+        db.execute(text("UPDATE domain_erp.journal_entry_lines SET line_number = 1 WHERE account_id = :k"),
+                   {"k": gesperrt["a"]})
+        db.commit()
+    assert zeilen == 1
+
+
+def test_umhaengen_auf_ein_gesperrtes_konto_wird_abgelehnt(gesperrt):
+    from sqlalchemy.exc import IntegrityError
+
+    _zeile(gesperrt["lauf"], gesperrt["b"], 3)  # Konto von Haus B ist offen
+    with SessionLocal() as db, pytest.raises(IntegrityError):
+        db.execute(text("UPDATE domain_erp.journal_entry_lines SET account_id = :k WHERE id = :id"),
+                   {"k": gesperrt["a"], "id": f"kp-{gesperrt['lauf']}-jel3"})
+        db.commit()
+
+
+def test_entsperrtes_konto_wird_wieder_bebucht(gesperrt):
+    antwort = gesperrt["client"].put(
+        f"{PREFIX}/{gesperrt['a']}", json={"posting_blocked": False}, headers=_kopf(HAUS_A))
+    assert antwort.status_code == 200, antwort.text
+    _zeile(gesperrt["lauf"], gesperrt["a"], 4)
+
+
+def test_sperren_ist_kontenpflege(bebucht):
+    """Die Buchhaltung sperrt kein Konto; wer die Kontenpflege hat, schon."""
+    _als(bebucht, "FINANCE_BEARBEITEN", "manager")
+    assert bebucht["client"].put(
+        f"{PREFIX}/{bebucht['a']}", json={"posting_blocked": True}, headers=_kopf(HAUS_A)).status_code == 403
+    _als(bebucht, "KONTENPLAN_PFLEGE")
+    assert bebucht["client"].put(
+        f"{PREFIX}/{bebucht['a']}", json={"posting_blocked": True}, headers=_kopf(HAUS_A)).status_code == 200
+    bebucht["client"].put(f"{PREFIX}/{bebucht['a']}", json={"posting_blocked": False}, headers=_kopf(HAUS_A))
+
+
+def test_gemeinsamen_rahmen_sperrt_nur_das_rahmenrecht(haus):
+    _als(haus, "FINANCE_ADMIN")
+    assert haus["client"].put(
+        f"{PREFIX}/{haus['gemeinsam']}", json={"posting_blocked": True}, headers=_kopf(HAUS_A)).status_code == 403
+
+
+def test_manuelle_buchung_auf_gesperrtes_konto_nennt_den_grund(gesperrt, monkeypatch):
+    """Die Buchhaltung liest „Konto … ist gesperrt“ — nicht den Datenbankfehler des Triggers."""
+    from app.api.v1.endpoints import journal_entries
+
+    def kein_schreiben(_klasse):
+        raise AssertionError("Die Buchung darf vor der Ablehnung nicht angelegt werden")
+
+    monkeypatch.setattr(journal_entries.container, "resolve", kein_schreiben)
+    app = FastAPI()
+    app.include_router(journal_entries.router, prefix="/journal-entries")
+    app.dependency_overrides[get_current_user] = lambda: {
+        "sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_BEARBEITEN"]}
+    rumpf = {
+        "entry_number": f"KP-{gesperrt['lauf']}-M", "entry_date": "2026-10-12T00:00:00",
+        "posting_date": "2026-10-12T00:00:00", "description": "Test", "reference": "BELEG-1",
+        "lines": [
+            {"account_id": gesperrt["a"], "debit_amount": "10.00", "line_number": 1},
+            {"account_id": gesperrt["gemeinsam"], "credit_amount": "10.00", "line_number": 2},
+        ],
+    }
+    with TestClient(app) as client:
+        antwort = client.post("/journal-entries/", json=rumpf, headers=_kopf(HAUS_A))
+    assert antwort.status_code == 409, antwort.text
+    assert antwort.json()["detail"] == f"Konto A{gesperrt['lauf']} ist fuer Buchungen gesperrt."
+
+
 class _Mitschnitt:
     """Nimmt die Parameter der DATEV-Abfrage auf und liefert keine Buchungen."""
 

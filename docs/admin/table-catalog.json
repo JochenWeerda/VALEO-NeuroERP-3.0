@@ -13389,7 +13389,6 @@
             "app/api/v1/endpoints/crm_360_sql.py",
             "app/api/v1/endpoints/customers.py",
             "app/api/v1/endpoints/mask_frontend_bridges.py",
-            "app/api/v1/endpoints/sales_delivery_notes.py",
             "app/api/v1/schemas/crm.py",
             "app/domains/logistik/strecke.py",
             "app/infrastructure/models/__init__.py",
@@ -13406,9 +13405,6 @@
             "app/services/sales_credit_service.py",
             "app/services/sales_posting_service.py",
             "app/services/whatsapp_agent_service.py"
-          ],
-          "screens": [
-            "sales/delivery-note"
           ],
           "written_by": [
             "app/api/v1/endpoints/compat.py",
@@ -19882,6 +19878,11 @@
               "name": "deleted_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "posting_blocked",
+              "nullable": false,
+              "type": "boolean"
             }
           ],
           "foreign_keys": [
@@ -19908,6 +19909,7 @@
             "app/api/v1/endpoints/finance_actions.py",
             "app/api/v1/endpoints/financial_reports.py",
             "app/api/v1/endpoints/inventory_operations.py",
+            "app/api/v1/endpoints/journal_entries.py",
             "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py",
             "app/core/connectors/workflow.py",
             "app/domains/inventory/api/storage_fees.py",

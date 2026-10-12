@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 670 Tabellen, 8838 Spalten.**
+**31 Schemas, 670 Tabellen, 8839 Spalten.**
 
 ## Schemas
 
@@ -33,7 +33,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_docflow` | `dms-compliance` | 22 | 286 |
 | `domain_docs` | `platform` | 2 | 25 |
 | `domain_einkauf` | `procurement` | 19 | 378 |
-| `domain_erp` | `finance` | 46 | 590 |
+| `domain_erp` | `finance` | 46 | 591 |
 | `domain_finance` | `finance` | 20 | 229 |
 | `domain_futtermittel` | `agrar` | 4 | 36 |
 | `domain_hr` | `hr` | 29 | 345 |
@@ -215,7 +215,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_crm.crm_opportunities` | `app/api/v1/endpoints/crm_360_reads.py`, `app/api/v1/endpoints/crm_reports.py`, `app/api/v1/endpoints/opportunities.py`, `app/domains/crm/models.py`, `app/services/mask_rollout_summary_service.py` | `app/services/crm_lead_service.py` | — |
 | `domain_crm.crm_segment_members` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/crm/router.py` | `app/crm/router.py` | — |
 | `domain_crm.crm_segments` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/crm/router.py` | `app/crm/router.py` | — |
-| `domain_crm.customers` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance_dsgvo.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_sql.py`, `app/api/v1/endpoints/customers.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/schemas/crm.py`, `app/domains/logistik/strecke.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/agrar_models.py`, `app/infrastructure/models/l3c_models.py`, `app/services/business_partner_service.py`, `app/services/crm_lead_service.py`, `app/services/customer_reference.py`, `app/services/customer_sales_eligibility.py`, `app/services/customer_service.py`, `app/services/finance_dunning_service.py`, `app/services/kunden_merge.py`, `app/services/mcp_execution_service.py`, `app/services/sales_credit_service.py`, `app/services/sales_posting_service.py`, `app/services/whatsapp_agent_service.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance_dsgvo.py`, `app/services/business_partner_service.py`, `app/services/customer_service.py` | `sales/delivery-note` |
+| `domain_crm.customers` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance_dsgvo.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_sql.py`, `app/api/v1/endpoints/customers.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/schemas/crm.py`, `app/domains/logistik/strecke.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/agrar_models.py`, `app/infrastructure/models/l3c_models.py`, `app/services/business_partner_service.py`, `app/services/crm_lead_service.py`, `app/services/customer_reference.py`, `app/services/customer_sales_eligibility.py`, `app/services/customer_service.py`, `app/services/finance_dunning_service.py`, `app/services/kunden_merge.py`, `app/services/mcp_execution_service.py`, `app/services/sales_credit_service.py`, `app/services/sales_posting_service.py`, `app/services/whatsapp_agent_service.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance_dsgvo.py`, `app/services/business_partner_service.py`, `app/services/customer_service.py` | — |
 | `domain_crm.farm_profiles` | `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.leads` | `app/api/v1/endpoints/compliance_dsgvo.py`, `app/infrastructure/models/__init__.py`, `app/services/interessent_service.py` | `app/api/v1/endpoints/compliance_dsgvo.py` | — |
 | `domain_crm.mail_workspace_attachments` | `app/services/mail_workspace_service.py` | `app/services/mail_workspace_service.py` | — |
@@ -280,7 +280,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_erp.booking_templates` | `app/api/v1/endpoints/booking_templates.py` | `app/api/v1/endpoints/booking_templates.py` | — |
 | `domain_erp.business_partners` | `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_sql.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/stmd_duplikat.py`, `app/api/v1/endpoints/xrechnung.py` | — | — |
 | `domain_erp.cash_movements` | `app/api/v1/endpoints/admin_pos.py`, `app/services/finance_read_model_service.py` | — | — |
-| `domain_erp.chart_of_accounts` | `app/api/v1/endpoints/bank_accounts.py`, `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/booking_templates.py`, `app/api/v1/endpoints/bulk_journal_import.py`, `app/api/v1/endpoints/chart_of_accounts.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/financial_reports.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py`, `app/core/connectors/workflow.py`, `app/domains/inventory/api/storage_fees.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/journal.py`, `app/services/finance_closing_service.py`, `app/services/finance_transaction_service.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/domains/inventory/api/storage_fees.py` | — |
+| `domain_erp.chart_of_accounts` | `app/api/v1/endpoints/bank_accounts.py`, `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/booking_templates.py`, `app/api/v1/endpoints/bulk_journal_import.py`, `app/api/v1/endpoints/chart_of_accounts.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/financial_reports.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/journal_entries.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py`, `app/core/connectors/workflow.py`, `app/domains/inventory/api/storage_fees.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/journal.py`, `app/services/finance_closing_service.py`, `app/services/finance_transaction_service.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/domains/inventory/api/storage_fees.py` | — |
 | `domain_erp.closing_checklist_templates` | `app/api/v1/endpoints/closing_checklists.py` | `app/api/v1/endpoints/closing_checklists.py` | — |
 | `domain_erp.closing_checklists` | `app/api/v1/endpoints/closing_checklists.py` | `app/api/v1/endpoints/closing_checklists.py` | — |
 | `domain_erp.collaterals` | `app/api/v1/endpoints/finance_actions.py` | — | — |
@@ -988,7 +988,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `booking_templates` | `finance` | native | `id` | id, tenant_id, name, description, category, trigger_type, trigger_config, lines, default_amount, currency, active, created_at, updated_at |
 | `business_partners` | `finance` | native | `id` | id, tenant_id, partner_name, credit_limit, used_credit, currency, created_at, updated_at, partner_number, name, partner_type, vat_id, tax_number, iban, bic, payment_terms, active |
 | `cash_movements` | `finance` | native | `id` | id, tenant_id, created_at |
-| `chart_of_accounts` | `finance` | native | `id` | id, tenant_id, account_number, account_name, account_type, category, is_active, created_at, updated_at, subcategory, description, is_summary, balance, last_transaction_date, parent_account_id, deleted_at |
+| `chart_of_accounts` | `finance` | native | `id` | id, tenant_id, account_number, account_name, account_type, category, is_active, created_at, updated_at, subcategory, description, is_summary, balance, last_transaction_date, parent_account_id, deleted_at, posting_blocked |
 | `closing_checklist_templates` | `finance` | native | `id` | id, tenant_id, template_name, description, closing_type, items, active, created_at, updated_at |
 | `closing_checklists` | `finance` | native | `id` | id, tenant_id, period, closing_type, template_id, status, progress_percentage, total_items, completed_items, required_items, completed_required_items, items, completed_at, completed_by, created_at, updated_at, period_start, period_end, notes |
 | `collaterals` | `finance` | native | `id` | id, tenant_id, collateral_type, description, value, currency, created_at, updated_at |
