@@ -17,7 +17,7 @@ export function tenantFromToken(token: string | null | undefined): string | null
     const base64 = teile[1].replace(/-/g, '+').replace(/_/g, '/')
     const json = decodeURIComponent(
       Array.from(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')))
-        .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
+        .map((c) => `%${c.charCodeAt(0).toString(16).padStart(2, '0')}`)
         .join(''),
     )
     const claims = JSON.parse(json) as Record<string, unknown>

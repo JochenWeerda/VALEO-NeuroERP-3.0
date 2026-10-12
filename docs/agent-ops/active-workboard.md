@@ -19,9 +19,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Abnahme:** echte signierte JWTs gegen vorhandenen Validator, fehlende/ungueltige/widerspruechliche Claims ohne Fachzugriff; kontextgebundene Header/Path/Query/Body inklusive Mehrfachwerte; keine Standardmandantenwahl; Request-Kontext nach parallelen Requests sauber; Routeinventar/HTTP-/MCP-/Streaming-/Bank-/CRUD-Pruefmatrix. Bei offenen Folgeobjekt-/Transportflaechen keinen Systemgesamtabschluss behaupten.
 **Harness:** bestehende Verifier/Guards konsolidieren, Minor-Sicherheitsreparatur plus Significant zentrales Bindungsmodul mit Proposed ADR; gemeinsamer valeo_probe/eigene Daten, keine neuen DBs; Doku/Runbook/Inventargates und CI separat.
 
-## MANDANT-TOKEN-BINDUNG-20261012 — in Arbeit, Claude Code
+## MANDANT-TOKEN-BINDUNG-20261012 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-12. **Von:** Auftraggeber („Anmeldedienst den Mandanten im Token
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. **Von:** Auftraggeber („Anmeldedienst den Mandanten im Token
 mitgeben lassen“), Hinweis Codex (KONTENPLAN-VERIFIED-SHARED-POLICY-20261012, erste Haelfte).
 **Befund:** Der Kopf `X-Tenant-ID` wird nur auf Form geprueft, nicht gegen das Token; 326 Dateien beziehen den
 Mandanten so. **Ziel:** (1) Keycloak gibt das Benutzerattribut `tenant_id` als Claim ins Token (Mapper in den
@@ -32,6 +32,17 @@ der des Tokens ist. Tokens ohne Claim laufen weiter, bis `OIDC_TENANT_CLAIM_REQU
 `config/keycloak/realm-export.json`, `config/keycloak/realm-staging.json` (nur Mapper), `lib/api-client.ts`,
 neue `lib/tenant-from-token.ts`, neue Tests,
 QA-Doku. **Nicht angefasst:** `app/auth/tenant.py` und die Wege, die `get_verified_tenant_id` schon nutzen (Codex).
+**Lieferung:** `_bind_tenant` in `require_bearer_token` (jeder API-Weg): Token mit Mandant + anderer Kopf 403,
+mehrdeutiges Token 403, Token ohne Mandant laeuft bis `OIDC_TENANT_CLAIM_REQUIRED=true`; Dev-Token ausgenommen;
+Query-Token genauso gebunden. Hauptrealm gab `tenant_id` schon ins Token, Staging-Realm bekommt den Mapper.
+Oberflaeche nimmt den Mandanten aus dem Token. 16 + 359 Backend-Tests, 4 Vitest, tsc/ESLint gruen. QA:
+`docs/quality-assurance/mandant-token-bindung-20261012.md`. **Betrieb:** Benutzerattribut `tenant_id` pflegen,
+dann Schalter setzen; laufender Staging-Keycloak uebernimmt die Realm-Datei nicht von selbst. **Offen:** echtes
+Keycloak-Token nicht gegen das Backend geprueft (kein Keycloak in der Entwicklung); Benutzer `admin` ist an
+`system` gebunden; `lib/mcp.ts` unveraendert. **An Codex:** `get_verified_tenant_id` unberuehrt; die zentrale Bindung
+ist die schwaechere Grundregel fuer alle Wege, eure strengere bleibt an ihren Wegen.
+**Nachtrag KONTENPLAN-PRAXIS-20261012:** Handbuchabschnitt „Kontenplan pflegen“ steht im geschuetzten Teil von
+`docs/benutzerhandbuch/finanzbuchhaltung.md` (vor „Maskenregister“, uebersteht die Neuerzeugung).
 
 ## KONTENPLAN-PRAXIS-20261012 — abgeschlossen, Claude Code
 
