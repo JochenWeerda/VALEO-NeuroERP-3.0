@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## IDENTITY-MASK-PLATFORM-SCOPES-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** UI-Rechtevertrag fuer administrative Masken mit der ausdruecklichen Plattformscope-Pruefung des Backends harmonisieren. **Dateibesitz:** frontend components/mask-builder/runtime/screen-permissions.ts nur platform:-Scope und identity:quota:read; bestehender Komponenten-Vertragstest; eigene QA/Workboard. Keine fremden Masken-/Stylingdateien. **Abnahme:** Mandanten-admin/admin:all erhaelt keinen Plattform-Button ohne konkreten Scope; eigene Kontingentansicht bleibt fuer angemeldete Nutzer erreichbar. Backendautorisierung bleibt verbindlich. Keine DB/Container/Reset.
+
 ## GUTSCHRIFT-MASKE-SD-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Vorgabe: keine handgebauten Masken; Mask Builder,
