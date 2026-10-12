@@ -19,9 +19,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 **Risiko:** public.kunden-Bridge weiterhin via business_partner_id notwendig wegen bestehender Fremdschluessel; keine konkurrierende Historie/ungepruefte Nummernzuordnung. Atomarer Eingangs-Replay und unveraenderliches Korrektur-Audit bleiben im Elternslice offen, ebenso Lernen und Browsertransport.
 **Harness:** Fachvertrag gepruefte Referenzen; bestehende zentrale Guards; eigener Probe-Datensatz/Savepoints, kein Reset/Container; DB-/HTTP-Negativproben; QA/Domaenen-/Workboardlieferstand; externe CI nach Push getrennt.
 
-## KONTENPLAN-MANDANT-20261012 — in Arbeit, Claude Code
+## KONTENPLAN-MANDANT-20261012 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** 2026-10-12. Befund aus HAUPTBUCH-ROLLEN-20261011.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Befund aus HAUPTBUCH-ROLLEN-20261011.
 **Befund:** `chart_of_accounts.py` nimmt den Mandanten aus dem Query-Parameter `tenant_id` (Liste, Pruefung,
 DATEV-Ausgabe) oder aus dem Rumpf (anlegen); lesen, aendern und loeschen eines einzelnen Kontos filtern gar
 nicht nach Mandant. Wer lesen darf, bekommt mit `?tenant_id=` Kontenplan und DATEV-Buchungen eines anderen
@@ -30,6 +30,13 @@ antworten 404; der gemeinsame Kontenrahmen (`system`) bleibt sichtbar. **Dateibe
 `app/api/v1/endpoints/chart_of_accounts.py`, neue Vertragsdatei `tests/test_kontenplan_mandant_vertrag.py`,
 Anpassung betroffener Tests, driftende Generatorartefakte (OpenAPI nur die eigenen Pfade),
 QA-Doku. **Nicht angefasst:** `accounts.py`, das Schema `AccountCreate` (geteilt).
+**Lieferung:** alle sieben Wege nehmen den Mandanten aus `get_tenant_id`; fremde Konten 404; `system` bleibt
+sichtbar und pflegbar. Mitbehoben: Anlegen scheiterte immer mit 500 (`currency`/`allow_manual_entries` nicht in
+der Tabelle), Aendern wirkte nur mit Namen im Rumpf. Vertrag gegen `valeo_probe`: 10 gruen, gegen den Stand davor
+9 rot; 1141 Nachbartests gruen. `openapi.json`: nur die vier eigenen Pfade ersetzt, drei fremde weichen weiter ab
+(WhatsApp, Codex). QA: `docs/quality-assurance/kontenplan-mandant-20261012.md`. **Offen:** gemeinsamer Rahmen bei
+mehreren Mandanten; Maske `pages/finance/kontenplan.tsx` sendet deutsche Feldnamen (Speichern ungeprueft);
+dieselbe Mandantenpruefung fuer die uebrigen Finanzdateien.
 
 ## WHATSAPP-LEARNING-CONTRACT-20261011 — abgeschlossen, Codex
 

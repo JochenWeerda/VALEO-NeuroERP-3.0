@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 from ....core.config import settings
 from ....core.database import get_db
 from ....core.fibu_audit import log_fibu_audit
+from ....core.tenant import get_tenant_id
 from ....infrastructure.models import Account as AccountModel
 from ....finance.export_datev import DATEVExporter
 from ..schemas.base import PaginatedResponse
@@ -42,9 +43,33 @@ class ValidateResponse(BaseModel):
 SHARED_TENANT = "system"
 
 
+def _spalten(werte: dict) -> dict:
+    """Nur, was die Tabelle auch speichert."""
+    return {k: v for k, v in werte.items() if k in AccountModel.__table__.columns}
+
+
+def _konto(db: Session, account_id: str, tenant_id: str) -> AccountModel:
+    """Das Konto des Mandanten oder des gemeinsamen Rahmens — ein fremdes gibt es nicht (404).
+
+    Bis zum 12.10.2026 wurde nur nach der Kennung gesucht: Lesen, aendern und loeschen
+    trafen auch das Konto eines anderen Mandanten.
+    """
+    account = (
+        db.query(AccountModel)
+        .filter(
+            AccountModel.id == account_id,
+            (AccountModel.tenant_id == tenant_id) | (AccountModel.tenant_id == SHARED_TENANT),
+        )
+        .first()
+    )
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
+    return account
+
+
 @router.get("/", response_model=PaginatedResponse[Account], summary="Accounts auflisten", dependencies=[Depends(kontenplan_read)])
 async def list_accounts(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     search: Optional[str] = Query(None, description="Search in account number or name"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(50, ge=1, le=200, description="Maximum number of records"),
@@ -61,8 +86,11 @@ async def list_accounts(
     gemeinsam. Wer ihn pflegen soll, muss ihn auch sehen. Die Herkunft bleibt
     am Eintrag (``tenant_id``) erkennbar: ``system`` ist gemeinsam, alles
     andere gehoert dem Mandanten.
+
+    Der Mandant kommt aus dem Mandantenkontext. Bis zum 12.10.2026 kam er aus dem
+    Query-Parameter ``tenant_id`` — wer lesen durfte, las damit jeden Mandanten.
     """
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
 
     query = db.query(AccountModel).filter(AccountModel.is_active == True)  # noqa: E712
     query = query.filter(
@@ -94,31 +122,44 @@ async def list_accounts(
 
 
 @router.get("/{account_id}", response_model=Account, summary="Account abrufen", dependencies=[Depends(kontenplan_read)])
-async def get_account(account_id: str, db: Session = Depends(get_db)):
+async def get_account(
+    account_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
     """Fetch a single account by identifier."""
-    account = db.query(AccountModel).filter(AccountModel.id == account_id).first()
-    if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
+    account = _konto(db, account_id, tenant_id)
     return Account.model_validate(account)
 
 
 @router.post("/", response_model=Account, summary="Account anlegen", dependencies=[Depends(finance_write)])
-async def create_account(account: AccountCreate, request: Request, db: Session = Depends(get_db)):
-    """Create a new account."""
+async def create_account(
+    account: AccountCreate,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Create a new account.
+
+    Das Konto gehoert dem Mandanten der Anmeldung. Das Feld ``tenant_id`` im Rumpf
+    entscheidet nichts mehr; bis zum 12.10.2026 legte es das Konto bei jedem Mandanten an.
+    """
     # Check if account number already exists
     existing = db.query(AccountModel).filter(
         AccountModel.account_number == account.account_number,
-        AccountModel.tenant_id == account.tenant_id
+        AccountModel.tenant_id == tenant_id
     ).first()
     if existing:
         raise HTTPException(status_code=400, detail="Account number already exists")
 
-    db_account = AccountModel(**account.model_dump())
+    # ``currency`` und ``allow_manual_entries`` stehen im Schema, aber nicht in der Tabelle: Bis zum
+    # 12.10.2026 scheiterte jedes Anlegen daran mit 500.
+    db_account = AccountModel(**{**_spalten(account.model_dump()), "tenant_id": tenant_id})
     db.add(db_account)
     db.commit()
     db.refresh(db_account)
     log_fibu_audit(
-        db, account.tenant_id, "create", "finance_account", db_account.id,
+        db, tenant_id, "create", "finance_account", db_account.id,
         {"account_number": account.account_number, "account_name": account.account_name},
         request=request,
     )
@@ -130,23 +171,20 @@ async def update_account(
     account_id: str,
     account_update: AccountUpdate,
     request: Request,
-    db: Session = Depends(get_db)
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ):
     """Update an existing account."""
-    account = db.query(AccountModel).filter(AccountModel.id == account_id).first()
-    if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
+    account = _konto(db, account_id, tenant_id)
 
-    # Check if updating to an existing account number
-    if account_update.account_name is not None:
-        update_data = account_update.model_dump(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(account, field, value)
+    # Geaendert wurde nur, wenn auch der Name im Rumpf stand — sonst meldete der Weg Erfolg ohne Wirkung.
+    for field, value in _spalten(account_update.model_dump(exclude_unset=True)).items():
+        setattr(account, field, value)
 
     db.commit()
     db.refresh(account)
     log_fibu_audit(
-        db, account.tenant_id, "update", "finance_account", account_id,
+        db, tenant_id, "update", "finance_account", account_id,
         {"updated_fields": list(account_update.model_dump(exclude_unset=True).keys())},
         request=request,
     )
@@ -155,11 +193,14 @@ async def update_account(
 
 @router.delete("/{account_id}", summary="Account löschen",
     response_model=StatusResponse, dependencies=[Depends(finance_admin)])
-async def delete_account(account_id: str, request: Request, db: Session = Depends(get_db)):
+async def delete_account(
+    account_id: str,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
     """Delete an account (soft delete by setting is_active to False)."""
-    account = db.query(AccountModel).filter(AccountModel.id == account_id).first()
-    if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
+    account = _konto(db, account_id, tenant_id)
 
     # Check if account has any journal entries
     if hasattr(account, 'journal_entry_lines') and account.journal_entry_lines:
@@ -171,7 +212,7 @@ async def delete_account(account_id: str, request: Request, db: Session = Depend
     account.is_active = False
     db.commit()
     log_fibu_audit(
-        db, account.tenant_id, "delete", "finance_account", account_id,
+        db, tenant_id, "delete", "finance_account", account_id,
         {"is_active": False, "account_number": account.account_number},
         request=request,
     )
@@ -180,13 +221,13 @@ async def delete_account(account_id: str, request: Request, db: Session = Depend
 
 @router.post("/validate", response_model=ValidateResponse, summary="Chart of accounts validieren", dependencies=[Depends(finance_read)])
 async def validate_chart_of_accounts(
-    tenant_id: Optional[str] = Query(None, description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """
     Validate the chart of accounts (duplicate account numbers, valid account types).
     """
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     errors: List[str] = []
 
     accounts = (
@@ -215,14 +256,14 @@ async def validate_chart_of_accounts(
 async def datev_export_chart_of_accounts(
     von_datum: str = Query(..., description="Start date YYYY-MM-DD"),
     bis_datum: Optional[str] = Query(None, description="End date YYYY-MM-DD"),
-    tenant_id: Optional[str] = Query(None, description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """
     Export bookings (journal entries) in DATEV format for the given date range.
     Returns DATEV CSV as downloadable file.
     """
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     bis = bis_datum or von_datum
 
     # domain_erp.journal_entries / journal_entry_lines (debit, credit; chart_of_accounts)
