@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## IDENTITY-TRANSPORT-20261012 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber „setze den Architekturentwurf um“. **Ziel:** vorhandene OIDC-Validierung verbindlich machen, Default-/Dev-/HS-Identitaetsumgehung entfernen; HTTP und WebSockets denselben geprueften Mandanten verwenden lassen. Bestandteil der Umsetzung, kein Gesamtabschluss der Sitzungs-/Agentenarchitektur.
+**Dateibesitz:** app/core/security.py nach abgeschlossenem Claude-Claim nur zentrale Verifikation und Exempt-/Queryvertrag; app/api/v1/endpoints/websocket.py und copilot_ws.py nur Authentifizierung/Lebensdauer; tests/test_identity_transport.py; eigene QA/ADR/Workboard. SYSTEM-TENANT-BOUNDARY behaelt main.py, deps/tenant und zentrales Routebinding. Realm/Frontend/DB bleiben unberuehrt.
+**Abnahme:** echte RSA-Token, fehlende Claims/Signatur/Dev/HS abweisen; fremde Header/Querywerte vor Fachzugriff, nicht-API-Routen ebenfalls authentifizieren; Querytoken nur SSE/WS. WS-Kontext nicht frei waehlen und nach Ablauf keine Fachwirkung. Bestehende Nachbarvertraege und explizite Callback-Vertraege pruefen. Keine DB/Container/Migration.
+
 ## IDENTITY-AGENT-PROPOSAL-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber, Vorschlag zentrales Identitaets-, Rechte- und Agentenmanagement. **Ziel:** Vorschlag als pruefbaren Architekturentwurf dokumentieren; Zielbild, bestehenden Lieferstand und Folgeabnahmen unterscheiden.
