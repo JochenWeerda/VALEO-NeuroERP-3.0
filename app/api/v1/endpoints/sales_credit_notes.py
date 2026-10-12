@@ -23,6 +23,7 @@ from app.services.customer_sales_eligibility import (
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.core.fibu_audit import log_fibu_audit
+from app.finance.steuerschluessel import CENT, Steuerklaerung, steuergruppen
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ class CreditNoteLineInput(BaseModel):
     description: str
     quantity: Decimal = Field(ge=Decimal("0"))
     unit_price: Decimal = Field(ge=Decimal("0"))
-    # Steuerschluessel der Position (``vat_codes.id``). Ohne ihn wird die Gutschrift nicht gebucht.
+    # Steuerschluessel der Position (``tax_keys.code`` des Mandanten). Ohne ihn wird nicht gebucht.
     tax_code: Optional[str] = None
     # Kein Vorgabewert: Ein Satz, den niemand angegeben hat, ist keine Angabe.
     tax_rate: Optional[Decimal] = None
@@ -90,87 +91,7 @@ class CreditNoteOut(CreditNoteBase):
     updated_at: Optional[datetime] = None
 
 
-# ---------------------------------------------------------------------------
-# Umsatzsteuer der Gutschrift
-# ---------------------------------------------------------------------------
-
-CENT = Decimal("0.01")
 FORDERUNGSKONTO = "1400"
-
-
-class Steuerklaerung(Exception):
-    """Die Umsatzsteuer der Gutschrift laesst sich nicht eindeutig bestimmen — ein Mensch muss pruefen."""
-
-
-class Steuergruppe(BaseModel):
-    """Alle Positionen eines Steuerschluessels: Netto, Steuer und die Konten dazu."""
-
-    tax_code: str
-    satz: Decimal
-    netto: Decimal
-    steuer: Decimal
-    erloeskonto: str
-    steuerkonto: Optional[str] = None
-
-
-def steuergruppen(db: Session, tenant_id: str, zeilen: list[tuple]) -> list[Steuergruppe]:
-    """Netto und Umsatzsteuer je Steuerschluessel aus den Positionen ``(nr, tax_code, tax_rate, netto)``.
-
-    Nichts wird angenommen: Fehlt der Schluessel, ist er unbekannt, widerspricht ihm der Satz der
-    Position oder fehlt ein Konto, gibt es eine ``Steuerklaerung`` statt einer Buchung. Die Steuer wird
-    je Steuersatz auf die Summe der Nettobetraege gerechnet, nicht je Position.
-    """
-    if not zeilen:
-        raise Steuerklaerung("Die Gutschrift hat keine Positionen; die Umsatzsteuer lässt sich nicht bestimmen.")
-    ohne = [str(nr) for nr, code, _satz, _netto in zeilen if not (code or "").strip()]
-    if ohne:
-        raise Steuerklaerung(f"Position {', '.join(ohne)} hat keinen Steuerschlüssel.")
-
-    codes = sorted({str(code).strip() for _nr, code, _satz, _netto in zeilen})
-    bekannt = {
-        str(r[0]): r
-        for r in db.execute(
-            text(
-                "SELECT id, rate, skr03_account, skr03_revenue_account, is_reverse_charge FROM vat_codes "
-                "WHERE id = ANY(:codes) AND (tenant_id = :tid OR tenant_id IS NULL) AND is_active "
-                "AND valid_from <= NOW() AND (valid_to IS NULL OR valid_to > NOW())"
-            ),
-            {"codes": codes, "tid": tenant_id},
-        ).fetchall()
-    }
-    unbekannt = [c for c in codes if c not in bekannt]
-    if unbekannt:
-        raise Steuerklaerung(f"Steuerschlüssel {', '.join(unbekannt)} ist nicht bekannt oder nicht gültig.")
-
-    netto_je_code: dict[str, Decimal] = {c: Decimal("0") for c in codes}
-    for nr, code, satz, netto in zeilen:
-        code = str(code).strip()
-        satz_des_schluessels = Decimal(str(bekannt[code][1]))
-        if satz is not None and Decimal(str(satz)) != satz_des_schluessels:
-            raise Steuerklaerung(
-                f"Position {nr}: Steuersatz {Decimal(str(satz)).normalize():f} % widerspricht dem "
-                f"Steuerschlüssel {code} ({satz_des_schluessels.normalize():f} %)."
-            )
-        netto_je_code[code] += Decimal(str(netto or 0))
-
-    gruppen: list[Steuergruppe] = []
-    for code in codes:
-        _id, rate, steuerkonto, erloeskonto, reverse_charge = bekannt[code]
-        satz = Decimal(str(rate))
-        if reverse_charge:
-            raise Steuerklaerung(f"Steuerschlüssel {code} (Reverse Charge) wird nicht automatisch gebucht.")
-        if not (erloeskonto or "").strip():
-            raise Steuerklaerung(f"Für Steuerschlüssel {code} ist kein Erlöskonto hinterlegt.")
-        if satz > 0 and not (steuerkonto or "").strip():
-            raise Steuerklaerung(f"Für Steuerschlüssel {code} ist kein Umsatzsteuerkonto hinterlegt.")
-        netto = netto_je_code[code].quantize(CENT, rounding=ROUND_HALF_UP)
-        gruppen.append(Steuergruppe(
-            tax_code=code, satz=satz, netto=netto,
-            steuer=(netto * satz / Decimal("100")).quantize(CENT, rounding=ROUND_HALF_UP),
-            erloeskonto=str(erloeskonto).strip(),
-            steuerkonto=str(steuerkonto).strip() if satz > 0 else None,
-        ))
-    return gruppen
 
 
 @router.post("/credit-notes", response_model=CreditNoteOut, status_code=201, summary="Credit note anlegen")

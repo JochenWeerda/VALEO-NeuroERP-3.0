@@ -55,7 +55,6 @@ class VatCodeCreate(BaseModel):
     rate: float
     skr03_account: Optional[str] = None
     skr04_account: Optional[str] = None
-    skr03_revenue_account: Optional[str] = None
     legal_basis: Optional[str] = None
     legal_note: Optional[str] = None
     is_standard: bool = False
@@ -73,7 +72,6 @@ class VatCodeUpdate(BaseModel):
     rate: Optional[float] = None
     skr03_account: Optional[str] = None
     skr04_account: Optional[str] = None
-    skr03_revenue_account: Optional[str] = None
     legal_basis: Optional[str] = None
     legal_note: Optional[str] = None
     is_standard: Optional[bool] = None
@@ -94,7 +92,6 @@ class VatCodeResponse(BaseModel):
     rate: float
     skr03_account: Optional[str]
     skr04_account: Optional[str]
-    skr03_revenue_account: Optional[str] = None
     legal_basis: Optional[str]
     legal_note: Optional[str]
     is_standard: bool
@@ -218,7 +215,6 @@ async def create_vat_code(
         rate=data.rate,
         skr03_account=data.skr03_account,
         skr04_account=data.skr04_account,
-        skr03_revenue_account=data.skr03_revenue_account,
         legal_basis=data.legal_basis,
         legal_note=data.legal_note,
         is_standard=data.is_standard,
@@ -380,7 +376,6 @@ async def seed_default_vat_codes(
             rate=code_data["rate"],
             skr03_account=code_data.get("skr03_account"),
             skr04_account=code_data.get("skr04_account"),
-            skr03_revenue_account=code_data.get("skr03_revenue_account"),
             legal_basis=code_data.get("legal_basis"),
             is_standard=code_data.get("is_standard", False),
             is_reduced=code_data.get("is_reduced", False),

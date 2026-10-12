@@ -3,6 +3,11 @@
 Stand: 2026-10-12 · Slice `GUTSCHRIFT-UST-20261012` · offener Punkt aus
 [Kein „gebucht" ohne Buchung](buchung-nicht-still-20261012.md)
 
+> **Korrektur vom selben Tag:** Dieser Slice hing die Gutschrift an `vat_codes` – eine Tabelle, die sonst
+> niemand liest. Seit [Steuerschlüssel: eine Quelle](steuerschluessel-einheit-20261012.md) kommt der
+> Steuerschlüssel aus `domain_erp.tax_keys` des Mandanten (Codes `3`, `2` statt `DE_19`, `DE_7`; Erlöskonto
+> in `tax_keys.revenue_account`). Die Buchungslogik unten gilt unverändert.
+
 ## Fachliche Entscheidung (Auftraggeber, 12.10.2026)
 
 1. Steuersatz je Position, nicht pauschal je Gutschrift.

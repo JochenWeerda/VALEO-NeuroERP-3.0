@@ -11,6 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STEUERSCHLUESSEL-EINHEIT-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Auftrag: SKR03 fuer den Testmandanten, eine Quelle.
+**Befund:** Zwei Tabellen fuer Steuerschluessel. `domain_erp.tax_keys` hat die Maske und speist Eingangsrechnung
+und UStVA; `public.vat_codes` liest niemand. GUTSCHRIFT-UST-20261012 hatte die Gutschrift an `vat_codes` gehaengt —
+falsch, hier korrigiert.
+**Lieferung:** `app/finance/steuerschluessel.py` (`steuergruppen`, `richte_skr03_ein`, `kontenrahmen`) als einzige
+Stelle; Migration `steuerschluessel_einheit_20261012` (ein Head): `tax_keys.revenue_account`, `tax_keys.par_24_ustg`,
+`vat_codes.skr03_revenue_account` wieder entfernt; Steuerschluessel-Wege pflegen beide Felder;
+`scripts/seed_steuerschluessel_skr03.py`; Default-Mandant in der Entwicklungs-DB mit SKR03 eingerichtet;
+Eingangsrechnung nimmt bei gleichem Satz den Schluessel mit Vorsteuerkonto.
+`tests/test_gutschrift_umsatzsteuer.py` 20 gruen. QA: `docs/quality-assurance/steuerschluessel-einheit-20261012.md`.
+**Offen:** Masken auf Steuerschluessel-Auswahl (naechster Slice); `vat_codes` samt Wegen ohne Verbraucher
+(Loeschen = eigene Entscheidung); Tax Rules Service / EU-TEDB eingeplant, nicht gebaut.
+
 ## GUTSCHRIFT-UST-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Fachliche Entscheidung des Auftraggebers vom 12.10.

@@ -156578,6 +156578,12 @@
             "description": "Internal notes",
             "title": "Notizen"
           },
+          "par_24_ustg": {
+            "default": false,
+            "description": "Durchschnittssatz nach Paragraf 24 UStG",
+            "title": "Par 24 Ustg",
+            "type": "boolean"
+          },
           "region": {
             "anyOf": [
               {
@@ -156590,6 +156596,19 @@
             ],
             "description": "Region/state if applicable",
             "title": "Region"
+          },
+          "revenue_account": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Erloeskonto fuer Verkaufsbelege; leer = nicht automatisch buchen",
+            "title": "Revenue Account"
           },
           "reverse_charge": {
             "default": false,
@@ -156721,6 +156740,11 @@
             ],
             "title": "Notizen"
           },
+          "par_24_ustg": {
+            "default": false,
+            "title": "Par 24 Ustg",
+            "type": "boolean"
+          },
           "region": {
             "anyOf": [
               {
@@ -156731,6 +156755,17 @@
               }
             ],
             "title": "Region"
+          },
+          "revenue_account": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue Account"
           },
           "reverse_charge": {
             "title": "Reverse Charge",
@@ -156898,6 +156933,17 @@
             ],
             "title": "Notizen"
           },
+          "par_24_ustg": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Par 24 Ustg"
+          },
           "region": {
             "anyOf": [
               {
@@ -156909,6 +156955,18 @@
               }
             ],
             "title": "Region"
+          },
+          "revenue_account": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue Account"
           },
           "reverse_charge": {
             "anyOf": [
@@ -162458,17 +162516,6 @@
             ],
             "title": "Skr03 Account"
           },
-          "skr03_revenue_account": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skr03 Revenue Account"
-          },
           "skr04_account": {
             "anyOf": [
               {
@@ -162607,17 +162654,6 @@
               }
             ],
             "title": "Skr03 Account"
-          },
-          "skr03_revenue_account": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skr03 Revenue Account"
           },
           "skr04_account": {
             "anyOf": [
@@ -162835,17 +162871,6 @@
               }
             ],
             "title": "Skr03 Account"
-          },
-          "skr03_revenue_account": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Skr03 Revenue Account"
           },
           "skr04_account": {
             "anyOf": [

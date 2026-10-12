@@ -75,8 +75,8 @@ async def test_post_credit_note_scopes_lookup_and_update_by_tenant(monkeypatch):
         rows=[
             [("cn-1", "tenant-a", "GS-1", "cust-1", Decimal("50.00"), "draft", None, "rechnungskorrektur")],
             [_eligibility_fetchone_ok()],
-            [(1, "DE_19", Decimal("19"), Decimal("42.02"))],
-            [("DE_19", 19.0, "1776", "8400", False)],
+            [(1, "3", Decimal("19"), Decimal("42.02"))],
+            [("3", Decimal("19"), "1776", "8400", False)],
             [("1400", "konto-1400", False), ("1776", "konto-1776", False), ("8400", "konto-8400", False)],
         ]
     )

@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 670 Tabellen, 8843 Spalten.**
+**31 Schemas, 670 Tabellen, 8845 Spalten.**
 
 ## Schemas
 
@@ -33,7 +33,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_docflow` | `dms-compliance` | 22 | 286 |
 | `domain_docs` | `platform` | 2 | 25 |
 | `domain_einkauf` | `procurement` | 19 | 378 |
-| `domain_erp` | `finance` | 46 | 591 |
+| `domain_erp` | `finance` | 46 | 593 |
 | `domain_finance` | `finance` | 20 | 229 |
 | `domain_futtermittel` | `agrar` | 4 | 36 |
 | `domain_hr` | `hr` | 29 | 345 |
@@ -280,7 +280,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_erp.booking_templates` | `app/api/v1/endpoints/booking_templates.py` | `app/api/v1/endpoints/booking_templates.py` | — |
 | `domain_erp.business_partners` | `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_sql.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/stmd_duplikat.py`, `app/api/v1/endpoints/xrechnung.py` | — | — |
 | `domain_erp.cash_movements` | `app/api/v1/endpoints/admin_pos.py`, `app/services/finance_read_model_service.py` | — | — |
-| `domain_erp.chart_of_accounts` | `app/api/v1/endpoints/bank_accounts.py`, `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/booking_templates.py`, `app/api/v1/endpoints/bulk_journal_import.py`, `app/api/v1/endpoints/chart_of_accounts.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/financial_reports.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/journal_entries.py`, `app/api/v1/endpoints/sales_credit_notes.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py`, `app/core/connectors/workflow.py`, `app/domains/inventory/api/storage_fees.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/journal.py`, `app/services/finance_closing_service.py`, `app/services/finance_transaction_service.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/domains/inventory/api/storage_fees.py` | — |
+| `domain_erp.chart_of_accounts` | `app/api/v1/endpoints/bank_accounts.py`, `app/api/v1/endpoints/bank_reconciliation.py`, `app/api/v1/endpoints/booking_templates.py`, `app/api/v1/endpoints/bulk_journal_import.py`, `app/api/v1/endpoints/chart_of_accounts.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/financial_reports.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/journal_entries.py`, `app/api/v1/endpoints/sales_credit_notes.py`, `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py`, `app/core/connectors/workflow.py`, `app/domains/inventory/api/storage_fees.py`, `app/finance/steuerschluessel.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/journal.py`, `app/services/finance_closing_service.py`, `app/services/finance_transaction_service.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/domains/inventory/api/storage_fees.py`, `app/finance/steuerschluessel.py` | — |
 | `domain_erp.closing_checklist_templates` | `app/api/v1/endpoints/closing_checklists.py` | `app/api/v1/endpoints/closing_checklists.py` | — |
 | `domain_erp.closing_checklists` | `app/api/v1/endpoints/closing_checklists.py` | `app/api/v1/endpoints/closing_checklists.py` | — |
 | `domain_erp.collaterals` | `app/api/v1/endpoints/finance_actions.py` | — | — |
@@ -311,7 +311,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_erp.pos_transactions` | `app/api/v1/endpoints/admin_pos.py` | — | — |
 | `domain_erp.schaden_meldungen` | `app/services/schaden_service.py` | — | — |
 | `domain_erp.serial_numbers` | `app/api/v1/endpoints/admin_pos.py` | — | — |
-| `domain_erp.tax_keys` | `app/api/v1/endpoints/tax_keys.py`, `app/api/v1/endpoints/vat_return_export.py`, `app/finance/tax_resolver.py` | `app/api/v1/endpoints/tax_keys.py` | — |
+| `domain_erp.tax_keys` | `app/api/v1/endpoints/tax_keys.py`, `app/api/v1/endpoints/vat_return_export.py`, `app/finance/steuerschluessel.py`, `app/finance/tax_resolver.py` | `app/api/v1/endpoints/tax_keys.py`, `app/finance/steuerschluessel.py` | — |
 | `domain_erp.vat_returns` | `app/api/v1/endpoints/vat_return_export.py` | `app/api/v1/endpoints/vat_return_export.py` | — |
 | `domain_erp.versicherungen` | `app/services/schaden_service.py` | — | — |
 | `domain_finance.aufbewahrungsfristen` | `app/finance/gobd.py`, `app/finance/models.py` | `app/finance/gobd.py` | — |
@@ -700,7 +700,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.sepa_mandates` | `app/api/v1/endpoints/finance_actions.py`, `app/api/v1/endpoints/finance_followup.py` | — | — |
 | `domain_shared.stuecklisten` | `app/api/v1/endpoints/stuecklisten.py` | `app/api/v1/endpoints/stuecklisten.py` | — |
 | `domain_shared.stuecklisten_positionen` | `app/api/v1/endpoints/stuecklisten.py` | `app/api/v1/endpoints/stuecklisten.py` | — |
-| `domain_shared.system_properties` | `app/api/v1/endpoints/compat.py`, `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/compat.py` | — |
+| `domain_shared.system_properties` | `app/api/v1/endpoints/compat.py`, `app/finance/steuerschluessel.py`, `app/infrastructure/models/l3c_models.py` | `app/api/v1/endpoints/compat.py`, `app/finance/steuerschluessel.py` | — |
 | `domain_shared.tenants` | `app/api/v1/endpoints/admin_monitoring.py`, `app/api/v1/endpoints/admin_suite.py`, `app/api/v1/endpoints/health.py`, `app/api/v1/endpoints/sales_invoice_einvoice.py`, `app/core/geheimnis.py`, `app/core/policy_overrides.py`, `app/core/process_config.py`, `app/core/workflow_template_marketplace.py`, `app/domains/crm/models.py`, `app/domains/inventory/api/charge_lineage.py`, `app/domains/inventory/api/stock_movements.py`, `app/finance/gobd.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/agrar_models.py`, `app/infrastructure/models/journal.py`, `app/infrastructure/models/l3c_models.py`, `app/infrastructure/models/studio_models.py`, `app/models/blockchain_anchors.py`, `app/models/channel_threads.py`, `app/models/knowledge.py`, `app/seeds/inventory_seed.py`, `app/services/admin_core_service.py`, `app/services/connector_config.py`, `app/services/finance_read_model_service.py`, `app/services/llm_gateway.py`, `app/workers/mail_poll_worker.py`, `app/workers/rag_indexer.py` | `app/api/v1/endpoints/admin_monitoring.py`, `app/api/v1/endpoints/admin_suite.py`, `app/core/workflow_template_marketplace.py`, `app/seeds/inventory_seed.py`, `app/services/admin_core_service.py`, `app/services/connector_config.py` | `sales/invoice` |
 | `domain_shared.user_screen_overlays` | `app/api/v1/endpoints/ux_overlays.py` | `app/api/v1/endpoints/ux_overlays.py` | — |
 | `domain_shared.users` | `app/api/v1/endpoints/collab_notes.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/personal.py`, `app/core/fibu_audit.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/journal.py`, `app/infrastructure/models/l3c_models.py`, `app/services/admin_core_service.py`, `app/services/einkauf_compat_service.py`, `app/services/finance_transaction_service.py`, `app/services/personal_service.py` | `app/services/admin_core_service.py`, `app/services/personal_service.py` | — |
@@ -1020,7 +1020,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `pos_transactions` | `finance` | native | `id` | id, tenant_id, source, created_at, transaction_date |
 | `schaden_meldungen` | `finance` | native | `id` | id, tenant_id, meldungsnummer, art, schadendatum, ort, beschreibung, schadenhoehe, versicherung_id, zeuge, status, gemeldet_am, gemeldet_durch, meldeweg, regulierungsbetrag, abgelehnt_grund, erfasst_durch, created_at, updated_at |
 | `serial_numbers` | `finance` | native | `id` | id, tenant_id, created_at |
-| `tax_keys` | `finance` | native | `id` | id, tenant_id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung, intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen, debit_account, credit_account, country, region, active, created_at, updated_at |
+| `tax_keys` | `finance` | native | `id` | id, tenant_id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung, intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen, debit_account, credit_account, country, region, active, created_at, updated_at, revenue_account, par_24_ustg |
 | `vat_returns` | `finance` | native | `id` | id, tenant_id, period, return_type, taxpayer_name, tax_id, vat_id, total_sales_net, total_input_tax, total_output_tax, vat_payable, positions, status, calculated_at, validated_at, submitted_at, notes, created_at, updated_at |
 | `versicherungen` | `finance` | native | `id` | id, tenant_id, bezeichnung, vertragsnummer, typ, versicherer, gueltig_von, gueltig_bis, meldefrist_tage, ansprechpartner, kontakt, aktiv, created_at, updated_at |
 

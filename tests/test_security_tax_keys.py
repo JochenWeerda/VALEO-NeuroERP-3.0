@@ -60,6 +60,8 @@ def _tax_key_row():
         True,
         datetime.utcnow(),
         datetime.utcnow(),
+        "8400",
+        False,
     )
 
 

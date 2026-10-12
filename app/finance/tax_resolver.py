@@ -66,6 +66,7 @@ def resolve_tax_key_accounts(
           AND (gueltig_bis IS NULL OR gueltig_bis >= :as_of)
           AND country = :country
         ORDER BY
+          CASE WHEN debit_account IS NOT NULL THEN 0 ELSE 1 END,
           CASE WHEN intracom = :intracom THEN 0 ELSE 1 END,
           CASE WHEN export = :export THEN 0 ELSE 1 END,
           gueltig_von DESC
