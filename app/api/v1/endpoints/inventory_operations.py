@@ -368,8 +368,8 @@ async def create_bestandskorrektur(
         if sperre:
             db.rollback()
             raise HTTPException(status_code=409, detail=sperre) from exc
-        # Nicht blockierend: die Bestandskorrektur bleibt bestehen. Die
-        # ausgefallene GL-Buchung wird gemeldet statt verschluckt.
+        # Auch jeder andere Fehler der Buchung verwirft die Bestandskorrektur; gemeldet wird er
+        # als Fehler, nicht als Erfolg.
         from app.core.metrics import critical_data_path_errors_total
 
         critical_data_path_errors_total.labels(
@@ -379,6 +379,11 @@ async def create_bestandskorrektur(
             "GL-Buchung fuer Bestandskorrektur %s fehlgeschlagen: %s",
             ref_number, exc, exc_info=True,
         )
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="Bestandskorrektur nicht gebucht: Die Buchung im Hauptbuch ist fehlgeschlagen.",
+        ) from exc
 
     db.commit()
 

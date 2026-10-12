@@ -315917,22 +315917,6 @@
         "parameters": [
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "in": "query",
             "name": "skip",
             "required": false,
             "schema": {
@@ -315991,24 +315975,6 @@
       "post": {
         "description": "Inventur-Kopf anlegen.",
         "operationId": "create_inventory_count_api_v1_inventory_counts__post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -316065,22 +316031,6 @@
             "schema": {
               "title": "Count Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -316241,22 +316191,6 @@
               "description": "Periode z.B. 2026-Q1 oder 2026-12",
               "title": "Period",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -316449,22 +316383,6 @@
             "schema": {
               "title": "Count Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],
@@ -384917,7 +384835,7 @@
     },
     "/api/v1/sales/credit-notes/{cn_id}/post": {
       "post": {
-        "description": "Post a credit note — creates GL reversal entry and updates OP.",
+        "description": "Gutschrift buchen: Buchungskopf, zwei Zeilen und OP-Minderung in einer Transaktion.\n\nBis 12.10.2026 wurde der Kopf zuerst festgeschrieben; die Zeilen trugen Kontonummern statt\nKonto-IDs, scheiterten am Fremdschluessel, und der Fehler wurde verschluckt: „gebucht“ mit einem\nBuchungskopf ohne Zeilen. Jetzt gilt alles oder nichts.",
         "operationId": "post_credit_note_api_v1_sales_credit_notes__cn_id__post_post",
         "parameters": [
           {

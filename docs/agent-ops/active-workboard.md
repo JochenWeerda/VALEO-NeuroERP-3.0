@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BUCHUNG-STILL-20261012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Offene Punkte aus KONTO-SPERRE-MELDUNG-20261012.
+**Befund:** `POST /sales/credit-notes/{id}/post` schrieb den Buchungskopf fest, dann Zeilen mit Kontonummern statt
+Konto-IDs (Fremdschluessel, verschluckt), haette jeden OP des Kunden gemindert und endete immer mit 500
+(Antwort passte nicht zum Modell). Inventur/Bestandskorrektur meldeten Erfolg nach Buchungsfehler.
+`inventory_counts.py` nahm den Mandanten aus `?tenant_id=`; Einzelwege filterten gar nicht.
+**Lieferung:** Gutschrift in einer Transaktion mit aufgeloesten Konten, OP-Minderung nur an `invoice_reference`;
+Buchungsfehler = Fehler; Inventur mit `get_tenant_id` und Mandantenfilter (fremde Inventur 404), Query-Parameter
+`tenant_id` entfernt (OpenAPI nachgezogen). `tests/test_buchung_nicht_still.py` 8 gruen, Nachbarn 95 gruen.
+QA: `docs/quality-assurance/buchung-nicht-still-20261012.md`.
+**Offen:** Gutschrift ohne Umsatzsteuerkorrektur; `POST /inventory/counts` setzt Pflichtfeld `counted_by` nicht;
+Inventur-Wege ohne Lagerrolle; Frontend ruft nicht vorhandenes `PUT /inventory/counts/{id}`.
+
 ## IDENTITY-REMAINING-WIRING-20261012 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** uebrigen roten Wiring-Fall der Belegprojektion reparieren, ohne Produktionsauth zu mocken. **Dateibesitz:** tests/test_document_control_projection.py nur lokaler Import der ausdruecklichen Kompatibilitaets-App im registrierten Projektionsweg; QA/Workboard. Claudes committete Modulimportkorrektur bleibt erhalten. **Abnahme:** echter HTTP-Wiring-Vertrag mit FakeProjection besteht, gepruefter Rollenvertrag bleibt separat; keine DB/Container/Reset. **Risiko:** zwei Snapshot-Tests haben eine fehlende kanonische Migration; nicht durch Sicherheitslockerung verdecken.

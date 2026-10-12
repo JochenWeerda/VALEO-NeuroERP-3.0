@@ -230,10 +230,15 @@ async def post_credit_note(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Post a credit note — creates GL reversal entry and updates OP."""
+    """Gutschrift buchen: Buchungskopf, zwei Zeilen und OP-Minderung in einer Transaktion.
+
+    Bis 12.10.2026 wurde der Kopf zuerst festgeschrieben; die Zeilen trugen Kontonummern statt
+    Konto-IDs, scheiterten am Fremdschluessel, und der Fehler wurde verschluckt: „gebucht“ mit einem
+    Buchungskopf ohne Zeilen. Jetzt gilt alles oder nichts.
+    """
     row = db.execute(
         text(
-            "SELECT id, tenant_id, credit_note_number, customer_id, total_amount, status "
+            "SELECT id, tenant_id, credit_note_number, customer_id, total_amount, status, invoice_reference "
             "FROM domain_sales.sales_credit_notes WHERE id = :id AND tenant_id = :tid"
         ),
         {"id": cn_id, "tid": tenant_id},
@@ -245,73 +250,83 @@ async def post_credit_note(
 
     assert_customer_allowed_for_invoice(db, tenant_id, str(row[3]))
 
-    total = Decimal(str(row[4]))
-    je_id = uuid7()
-    db.execute(
-        text("""
-            INSERT INTO domain_erp.journal_entries
-            (id, tenant_id, entry_number, entry_date, posting_date, description,
-             source, status, total_debit, total_credit, reference, created_at, updated_at)
-            VALUES (:id, :tid, :en, NOW(), NOW(), :desc,
-                    'sales_credit_note', 'posted', :total, :total, :ref, NOW(), NOW())
-        """),
-        {
-            "id": je_id, "tid": row[1],
-            "en": f"GS-{row[2]}", "desc": f"Gutschrift {row[2]}",
-            "total": total, "ref": row[2],
-        },
-    )
-
-    db.execute(
+    # Konten des Mandanten, sonst die des gemeinsamen Rahmens.
+    konten: dict[str, str] = {}
+    for nummer, konto_id, _eigen in db.execute(
         text(
-            "UPDATE domain_sales.sales_credit_notes SET status = 'posted', updated_at = NOW() "
-            "WHERE id = :id AND tenant_id = :tid"
+            "SELECT account_number, id, (tenant_id = :tid) AS eigen FROM domain_erp.chart_of_accounts "
+            "WHERE account_number IN ('1400', '8400') AND tenant_id IN (:tid, 'system') AND is_active "
+            "ORDER BY eigen"
         ),
-        {"id": cn_id, "tid": tenant_id},
-    )
-    db.commit()
-
-    # CREDIT-NOTE-POST-001: GL-Zeilen + OP-Reduktion (Belegbruch schliessen)
-    try:
-        from app.core.uuid7 import uuid7 as _uuid7
-        db.execute(text("""
-            INSERT INTO domain_erp.journal_entry_lines
-                (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-            VALUES
-                (:id1, :tid, :jeid, '1400', 'Gutschrift Forderungsminderung', 0, :total, 1, NOW()),
-                (:id2, :tid, :jeid, '8400', 'Gutschrift Erlöskorrektur', :total, 0, 2, NOW())
-            ON CONFLICT DO NOTHING
-        """), {
-            "id1": _uuid7(), "id2": _uuid7(),
-            "tid": row[1], "jeid": je_id, "total": float(total),
-        })
-        # Debitoren-OP für Gutschrift ausziffern/reduzieren
-        cn_number = str(row[2])
-        db.execute(text("""
-            UPDATE domain_erp.offene_posten
-            SET offen = GREATEST(0, offen - :betrag),
-                op_status = CASE WHEN offen - :betrag <= 0 THEN 'geschlossen' ELSE 'teilweise' END
-            WHERE tenant_id = :tid AND konto_typ = 'debitoren'
-              AND (rechnungsnr = :ref OR kunde_id = :cid)
-              AND op_status NOT IN ('geschlossen', 'ausgeziffert')
-        """), {"tid": row[1], "betrag": float(total), "ref": cn_number, "cid": str(row[3])})
-        db.commit()
-    except Exception as exc:  # noqa: BLE001
-        # Nicht blockierend fuer die Gutschrift selbst. Faellt dieser Block aus,
-        # steht der Buchungskopf allerdings ohne GL-Zeilen da — das muss
-        # sichtbar sein und darf nicht still passieren.
-        from app.core.metrics import critical_data_path_errors_total
-
-        critical_data_path_errors_total.labels(
-            endpoint="sales_credit_note_gl", error_type="posting_failed"
-        ).inc()
-        logger.error(
-            "GL-Zeilen/OP-Reduktion fuer Gutschrift %s fehlgeschlagen: %s",
-            cn_id, exc, exc_info=True,
+        {"tid": tenant_id},
+    ).fetchall():
+        konten[str(nummer)] = str(konto_id)
+    fehlend = [n for n in ("1400", "8400") if n not in konten]
+    if fehlend:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Gutschrift nicht gebucht: Konto {', '.join(fehlend)} fehlt im Kontenplan.",
         )
 
+    total = Decimal(str(row[4]))
+    je_id = uuid7()
+    try:
+        db.execute(
+            text("""
+                INSERT INTO domain_erp.journal_entries
+                (id, tenant_id, entry_number, entry_date, posting_date, description,
+                 source, status, total_debit, total_credit, reference, created_at, updated_at)
+                VALUES (:id, :tid, :en, NOW(), NOW(), :desc,
+                        'sales_credit_note', 'posted', :total, :total, :ref, NOW(), NOW())
+            """),
+            {
+                "id": je_id, "tid": row[1],
+                "en": f"GS-{row[2]}", "desc": f"Gutschrift {row[2]}",
+                "total": total, "ref": row[2],
+            },
+        )
+        db.execute(
+            text("""
+                INSERT INTO domain_erp.journal_entry_lines
+                    (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
+                VALUES
+                    (:id1, :tid, :jeid, :forderung, 'Gutschrift Forderungsminderung', 0, :total, 1, NOW()),
+                    (:id2, :tid, :jeid, :erloes, 'Gutschrift Erlöskorrektur', :total, 0, 2, NOW())
+            """),
+            {
+                "id1": uuid7(), "id2": uuid7(), "tid": row[1], "jeid": je_id, "total": total,
+                "forderung": konten["1400"], "erloes": konten["8400"],
+            },
+        )
+        db.execute(
+            text(
+                "UPDATE domain_sales.sales_credit_notes SET status = 'posted', updated_at = NOW() "
+                "WHERE id = :id AND tenant_id = :tid"
+            ),
+            {"id": cn_id, "tid": tenant_id},
+        )
+        # Gemindert wird nur der offene Posten der Rechnung, auf die sich die Gutschrift bezieht.
+        # (Vorher: jeder offene Posten des Kunden, jeweils um den vollen Betrag.)
+        rechnung = (row[6] or "").strip()
+        if rechnung:
+            db.execute(
+                text("""
+                    UPDATE domain_erp.offene_posten
+                    SET offen = GREATEST(0, offen - :betrag),
+                        op_status = CASE WHEN offen - :betrag <= 0 THEN 'geschlossen' ELSE 'teilweise' END
+                    WHERE tenant_id = :tid AND konto_typ = 'debitoren' AND rechnungsnr = :rechnung
+                      AND op_status NOT IN ('geschlossen', 'ausgeziffert')
+                """),
+                {"tid": row[1], "betrag": total, "rechnung": rechnung},
+            )
+        db.commit()
+    except Exception:
+        # Nichts bleibt halb stehen; die Kontosperre uebersetzt der zentrale Behandler (409).
+        db.rollback()
+        raise
+
     log_fibu_audit(db, row[1], "post", "sales_credit_note", cn_id, {"total": float(total)}, request=request)
-    return {"ok": True, "journal_entry_id": je_id}
+    return StatusResponse(success=True, message=f"Gutschrift {row[2]} gebucht (Buchung GS-{row[2]}).")
 
 
 # ---------------------------------------------------------------------------
