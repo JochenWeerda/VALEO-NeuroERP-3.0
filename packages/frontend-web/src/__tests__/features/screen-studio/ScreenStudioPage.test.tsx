@@ -97,7 +97,7 @@ describe('ScreenStudioPage', () => {
 
   it('requires saving local changes before review or publication', async () => {
     const response = async (url: string, body: { definition?: unknown }) => ({ data: {
-      id: 'draft-a', status: 'draft', definition: body.definition,
+      id: 'draft-a', status: 'draft', revision: 'revision-a', definition: body.definition,
       violations: [], canPublish: true, readiness: { errors: [] },
     } })
     postMock.mockImplementation(response)
@@ -116,6 +116,27 @@ describe('ScreenStudioPage', () => {
     expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
     await waitFor(() => expect(screen.getByRole('button', { name: 'Freigeben' })).toBeEnabled())
+  })
+
+
+  it('reopens a persisted draft and publishes the displayed server revision', async () => {
+    const { emptyStudioDraft } = await import('@/features/screen-studio/studio-defaults')
+    const definition = { ...emptyStudioDraft(), title: 'Entwurf einer anderen Person' }
+    const record = { id: 'draft-review', status: 'review', revision: 'loaded-revision', definition }
+    getMock.mockImplementation(async (url: string) => ({ data:
+      url.endsWith('/drafts') ? { drafts: [record] } : url.endsWith('/draft-review') ? record : { floorplans: ['worklist'] },
+    }))
+    postMock.mockImplementation(async (url: string, body: { definition?: unknown }) => ({ data:
+      url.endsWith('/publish') ? { ...record, status: 'published_temp', violations: [], canPublish: true, readiness: { errors: [] } }
+        : { definition: body.definition, violations: [], canPublish: true, readiness: { errors: [] } },
+    }))
+    renderStudio()
+    await screen.findByRole('option', { name: 'Entwurf einer anderen Person (review)' })
+    fireEvent.change(screen.getByLabelText('Gespeicherten Entwurf öffnen'), { target: { value: 'draft-review' } })
+    await waitFor(() => expect(screen.getByDisplayValue('Entwurf einer anderen Person')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Freigeben' })).toBeEnabled())
+    fireEvent.click(screen.getByRole('button', { name: 'Freigeben' }))
+    await waitFor(() => expect(postMock).toHaveBeenCalledWith('/api/v1/studio/drafts/draft-review/publish', { expected_revision: 'loaded-revision' }))
   })
 
 })

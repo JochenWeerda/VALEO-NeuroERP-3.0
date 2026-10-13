@@ -1,6 +1,7 @@
 """Postgres persistence for Masken-Studio drafts (require_db)."""
 
 from __future__ import annotations
+from studio_review_helper import publish_reviewed
 
 import pytest
 from uuid import uuid4
@@ -101,14 +102,15 @@ def test_sql_tenant_isolation_and_four_eyes(studio_db) -> None:
     draft_id = created.json()["id"]
     other = client.get("/api/v1/studio/drafts", headers=_HEADERS_B)
     assert other.json()["drafts"] == []
-    forbidden = client.post(
-        f"/api/v1/studio/drafts/{draft_id}/publish",
+    assert client.get(f"/api/v1/studio/drafts/{draft_id}", headers=_HEADERS_B).status_code == 404
+    forbidden = publish_reviewed(
+        client, f"/api/v1/studio/drafts/{draft_id}/publish",
         headers={**_HEADERS_A, "X-Actor-ID": "anna"},
     )
     assert forbidden.status_code == 403
     _USER["sub"] = "berta"
-    published = client.post(
-        f"/api/v1/studio/drafts/{draft_id}/publish",
+    published = publish_reviewed(
+        client, f"/api/v1/studio/drafts/{draft_id}/publish",
         headers={**_HEADERS_A, "X-Actor-ID": "berta"},
     )
     assert published.status_code == 200, published.text

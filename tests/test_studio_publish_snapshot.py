@@ -1,3 +1,4 @@
+from studio_review_helper import publish_reviewed
 """Publication rejects changes made after the server validates a snapshot."""
 from copy import deepcopy
 import pytest
@@ -26,7 +27,7 @@ def test_publish_rejects_intervening_changes(probe, monkeypatch, change):
         return result
 
     monkeypatch.setattr(studio_drafts, '_report', report_then_change)
-    response = client.post('/studio/drafts/'+record['id']+'/publish')
+    response = publish_reviewed(client, '/studio/drafts/'+record['id']+'/publish')
     assert response.status_code == 409, response.text
     assert store.get_draft(record['tenant_id'], record['id'])['status'] != 'published_temp'
     assert store.get_published_definition(record['tenant_id'], record['screen_id']) is None
@@ -36,7 +37,7 @@ def test_unchanged_snapshot_publishes(probe):
     client, user = probe
     record = create(client)
     user['sub'] = 'reviewer'
-    response = client.post('/studio/drafts/'+record['id']+'/publish')
+    response = publish_reviewed(client, '/studio/drafts/'+record['id']+'/publish')
     assert response.status_code == 200, response.text
     assert response.json()['definition'] == record['definition']
 
@@ -56,3 +57,28 @@ def test_sql_rejects_stale_snapshot(studio_db):
     assert current['status'] == 'draft'
     published = store.set_status(_TENANT_A, record['id'], 'reviewer', 'published_temp', expected_snapshot=current)
     assert published['definition'] == changed
+
+
+@pytest.mark.parametrize('body', [None, {}, {'expected_revision': '0' * 64}])
+def test_missing_or_wrong_display_revision_cannot_publish(probe, body):
+    client, user = probe
+    record = create(client)
+    user['sub'] = 'reviewer'
+    response = client.post('/studio/drafts/'+record['id']+'/publish', json=body)
+    assert response.status_code == (409 if body and 'expected_revision' in body else 422)
+    assert store.get_draft(record['tenant_id'], record['id'])['status'] == 'draft'
+
+
+def test_display_revision_expires_after_edit(probe):
+    client, user = probe
+    record = create(client)
+    changed = deepcopy(record['definition'])
+    changed['title'] = 'Geaendert'
+    updated = client.put('/studio/drafts/'+record['id'], json={'definition': changed}).json()
+    assert updated['revision'] != record['revision']
+    user['sub'] = 'reviewer'
+    rejected = client.post('/studio/drafts/'+record['id']+'/publish', json={'expected_revision': record['revision']})
+    assert rejected.status_code == 409
+    fetched = client.get('/studio/drafts/'+record['id']).json()
+    assert fetched['definition'] == changed
+    assert client.post('/studio/drafts/'+record['id']+'/publish', json={'expected_revision': fetched['revision']}).status_code == 200

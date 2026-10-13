@@ -1,6 +1,7 @@
 """Studio API: catalog, propose, validate, four-eyes publish."""
 
 from __future__ import annotations
+from studio_review_helper import publish_reviewed
 
 import pytest
 from fastapi.testclient import TestClient
@@ -79,14 +80,14 @@ def test_save_and_same_actor_cannot_publish() -> None:
     )
     assert created.status_code == 200, created.text
     draft_id = created.json()["id"]
-    forbidden = client.post(
-        f"/api/v1/studio/drafts/{draft_id}/publish",
+    forbidden = publish_reviewed(
+        client, f"/api/v1/studio/drafts/{draft_id}/publish",
         headers={**_HEADERS, "X-Actor-ID": "anna"},
     )
     assert forbidden.status_code == 403
     _USER["sub"] = "berta"
-    published = client.post(
-        f"/api/v1/studio/drafts/{draft_id}/publish",
+    published = publish_reviewed(
+        client, f"/api/v1/studio/drafts/{draft_id}/publish",
         headers={**_HEADERS, "X-Actor-ID": "berta"},
     )
     assert published.status_code == 200, published.text
@@ -131,8 +132,8 @@ def _publish_sample(client: TestClient, intent: str = "Lieferanten bewerten") ->
     )
     assert created.status_code == 200, created.text
     _USER["sub"] = "berta"
-    published = client.post(
-        f"/api/v1/studio/drafts/{created.json()['id']}/publish",
+    published = publish_reviewed(
+        client, f"/api/v1/studio/drafts/{created.json()['id']}/publish",
         headers={**_HEADERS, "X-Actor-ID": "berta"},
     )
     assert published.status_code == 200, published.text

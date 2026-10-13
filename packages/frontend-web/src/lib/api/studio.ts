@@ -8,6 +8,23 @@ export interface StudioReport {
   definition: ScreenDefinition
 }
 
+export interface StudioDraftRecord {
+  id: string
+  status: string
+  revision: string
+  definition: ScreenDefinition
+}
+
+export async function fetchStudioDrafts(): Promise<StudioDraftRecord[]> {
+  const response = await apiClient.get('/api/v1/studio/drafts')
+  return response.data.drafts ?? []
+}
+
+export async function fetchStudioDraft(id: string): Promise<StudioDraftRecord> {
+  const response = await apiClient.get(`/api/v1/studio/drafts/${encodeURIComponent(id)}`)
+  return response.data as StudioDraftRecord
+}
+
 export async function fetchStudioCatalog() {
   const response = await apiClient.get('/api/v1/studio/catalog')
   return response.data as {
@@ -34,17 +51,17 @@ export async function saveStudioDraft(definition: ScreenDefinition, draftId?: st
   const response = draftId
     ? await apiClient.put(`/api/v1/studio/drafts/${draftId}`, payload)
     : await apiClient.post('/api/v1/studio/drafts', payload)
-  return response.data as StudioReport & { id: string; status: string }
+  return response.data as StudioReport & StudioDraftRecord
 }
 
 export async function submitStudioReview(draftId: string) {
   const response = await apiClient.post(`/api/v1/studio/drafts/${draftId}/submit-review`, {})
-  return response.data
+  return response.data as StudioDraftRecord
 }
 
-export async function publishStudioDraft(draftId: string) {
-  const response = await apiClient.post(`/api/v1/studio/drafts/${draftId}/publish`, {})
-  return response.data as StudioReport & { id: string; status: string; route?: string }
+export async function publishStudioDraft(draftId: string, expectedRevision: string) {
+  const response = await apiClient.post(`/api/v1/studio/drafts/${draftId}/publish`, { expected_revision: expectedRevision })
+  return response.data as StudioReport & StudioDraftRecord & { route?: string }
 }
 
 export function studioRunPath(screenId: string) {

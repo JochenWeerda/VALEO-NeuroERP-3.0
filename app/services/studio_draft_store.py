@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from copy import deepcopy
 from datetime import UTC, datetime
 from typing import Any
@@ -40,19 +42,31 @@ def invalidate_studio_table_cache() -> None:
     _table_ok = None
 
 
+def _with_revision(item: dict[str, Any]) -> dict[str, Any]:
+    record = deepcopy(item)
+    bound = {key: record.get(key) for key in (
+        "id", "tenant_id", "definition", "updated_at", "updated_by", "status"
+    )}
+    record["revision"] = hashlib.sha256(json.dumps(
+        bound, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False
+    ).encode()).hexdigest()
+    return record
+
+
 def list_drafts(tenant_id: str) -> list[dict[str, Any]]:
     if _use_sql():
-        return _sql_list(tenant_id)
-    return [deepcopy(item) for item in _DRAFTS.values() if item["tenant_id"] == tenant_id]
+        return [_with_revision(item) for item in _sql_list(tenant_id)]
+    return [_with_revision(item) for item in _DRAFTS.values() if item["tenant_id"] == tenant_id]
 
 
 def get_draft(tenant_id: str, draft_id: str) -> dict[str, Any] | None:
     if _use_sql():
-        return _sql_get(tenant_id, draft_id)
+        item = _sql_get(tenant_id, draft_id)
+        return _with_revision(item) if item is not None else None
     item = _DRAFTS.get(draft_id)
     if item is None or item["tenant_id"] != tenant_id:
         return None
-    return deepcopy(item)
+    return _with_revision(item)
 
 
 def save_draft(
@@ -64,9 +78,9 @@ def save_draft(
     readiness: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if _use_sql():
-        return _sql_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness)
+        return _with_revision(_sql_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness))
     with _memory_lock:
-        return _memory_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness)
+        return _with_revision(_memory_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness))
 
 
 def _assert_snapshot(item: dict[str, Any], expected: dict[str, Any] | None) -> None:
@@ -84,7 +98,7 @@ def set_status(
     if status not in _STATUSES:
         raise ValueError(f"status_{status}_unbekannt")
     if _use_sql():
-        return _sql_set_status(tenant_id, draft_id, actor, status, expected_snapshot=expected_snapshot)
+        return _with_revision(_sql_set_status(tenant_id, draft_id, actor, status, expected_snapshot=expected_snapshot))
     with _memory_lock:
         item = _DRAFTS.get(draft_id)
         if item is None or item["tenant_id"] != tenant_id:
@@ -97,7 +111,7 @@ def set_status(
             item["updated_by"] = actor
         item["updated_at"] = datetime.now(UTC).isoformat()
         _DRAFTS[draft_id] = item
-        return deepcopy(item)
+        return _with_revision(item)
 
 
 def get_published_definition(tenant_id: str, screen_id: str) -> dict[str, Any] | None:
