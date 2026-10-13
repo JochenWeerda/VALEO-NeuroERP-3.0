@@ -1,5 +1,7 @@
 """Tests for Neuro Tool Broker (NC-A6 + NC-A7)."""
 
+import pytest
+
 from unittest.mock import MagicMock, patch
 
 from app.agents.neuro_intent_engine import IntentCategory, IntentResult, RiskClass
@@ -24,17 +26,13 @@ def _make_intent(intent: str, capability: str | None = None, risk: RiskClass = R
 # NC-A6: Existing broker tests
 # ---------------------------------------------------------------------------
 
-def test_inventory_query_uses_mcp_tool_contract():
+def test_inventory_query_without_identity_is_rejected():
     broker = NeuroToolBroker()
     plan = generate_plan(_make_intent("lagerbestand_abfragen"))
-
     result = broker.execute_plan(plan, tenant_id="t1", context={"channel": "api"})
-
-    assert result["status"] == "executed"
-    assert result["tool_trace"][0]["binding_kind"] == "mcp_tool"
-    assert result["tool_trace"][0]["binding_target"] == "valeo_inventory_bestand_get"
-    assert result["tool_trace"][0]["status"] == "executed"
-    assert result["tool_trace"][0]["result"]["mode"] == "openapi_internal"
+    assert result["status"] == "failed"
+    assert result["tool_trace"][0]["status"] == "failed"
+    assert result["tool_trace"][0]["result"]["mode"] == "execution_rejected"
 
 
 def test_purchase_order_plan_stops_at_approval_step():
@@ -535,9 +533,19 @@ def test_step_audit_trace_written_to_db(_mock_verify):
 
 def test_step_audit_trace_skipped_without_db():
     """Without a DB session, audit trace is silently skipped."""
-    broker = NeuroToolBroker()
+    broker = NeuroToolBroker(tool_execution_service=_mock_success_exec_svc())
     plan = generate_plan(_make_intent("lagerbestand_abfragen"))
 
     # Should not raise even without DB
     result = broker.execute_plan(plan, tenant_id="t1", db=None, context={"channel": "api"})
     assert result["status"] == "executed"
+
+
+@pytest.mark.parametrize("status", [401,403])
+def test_endpoint_auth_rejection_is_failed_not_degraded(status):
+    service = MagicMock(spec=NeuroToolExecutionService)
+    service.execute_contract.return_value = {"mode":"fallback_contract", "http_status":status}
+    broker = NeuroToolBroker(tool_execution_service=service)
+    result = broker.execute_plan(generate_plan(_make_intent("lagerbestand_abfragen")), tenant_id="own")
+    assert result["status"] == "failed"
+    assert result["tool_trace"][0]["status"] == "failed"

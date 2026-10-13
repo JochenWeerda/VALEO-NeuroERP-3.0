@@ -12,6 +12,7 @@ from typing import Any, Optional
 
 from sqlalchemy import text
 
+from app.core.belegkommandos import BELEGKOMMANDOS
 from app.core.belegvertrag import (
     BELEGARTEN, Beleg, Belegaktion, Belegposition, Belegvariante, Buchung, Historieneintrag, Kettenglied, Partner,
     Steuergruppe, Summen, ohne_preise,
@@ -182,18 +183,25 @@ def _kette(svc: DocflowService, doc_id: str) -> list[Kettenglied]:
     ]
 
 
+def _aktion(key: str, bezeichnung: str, kommando: str, *, grund: Optional[str] = None,
+            folgebelegart: Optional[str] = None) -> Belegaktion:
+    """Eine Aktion des Belegs; ob sie eine Freigabe braucht, sagt das Verzeichnis der Belegkommandos."""
+    return Belegaktion(
+        key=key, bezeichnung=bezeichnung, kommando=kommando, folgebelegart=folgebelegart,
+        freigabe_noetig=BELEGKOMMANDOS[kommando].freigabe_noetig, erlaubt=grund is None, grund=grund,
+    )
+
+
 def _aktionen(svc: DocflowService, doc_id: str, variante: Belegvariante, status: str, buchung: Buchung,
               offen: dict[str, Decimal]) -> list[Belegaktion]:
     """Was mit dem Beleg in seinem Zustand geht. Das Recht des Lesers ist hier noch nicht eingerechnet (BELEG-012)."""
     aktionen: list[Belegaktion] = []
     if status == "draft":
-        aktionen.append(Belegaktion(key="bearbeiten", bezeichnung="Bearbeiten", kommando="docflow.update"))
-        aktionen.append(Belegaktion(key="freigeben", bezeichnung="Freigeben", kommando="docflow.release"))
+        aktionen.append(_aktion("bearbeiten", "Bearbeiten", "docflow.update"))
+        aktionen.append(_aktion("freigeben", "Freigeben", "docflow.release"))
     if variante.bucht and status not in _ENDE | {"posted"}:
-        aktionen.append(Belegaktion(
-            key="buchen", bezeichnung="Buchen", kommando="docflow.post", freigabe_noetig=True,
-            erlaubt=buchung.stand != "pruefen", grund=buchung.grund if buchung.stand == "pruefen" else None,
-        ))
+        aktionen.append(_aktion(
+            "buchen", "Buchen", "docflow.post", grund=buchung.grund if buchung.stand == "pruefen" else None))
     for folgeart in variante.folgebelege:
         grund = None
         if status in _ENDE:
@@ -205,18 +213,14 @@ def _aktionen(svc: DocflowService, doc_id: str, variante: Belegvariante, status:
                 svc._pruefe_rechnungsweg(doc_id, variante.belegart, TRANSITIONS[variante.belegart][folgeart])
             except ConflictError as konflikt:
                 grund = str(konflikt.detail if hasattr(konflikt, "detail") else konflikt)
-        aktionen.append(Belegaktion(
-            key=f"umwandeln:{folgeart}", bezeichnung=f"{BELEGARTEN[folgeart].bezeichnung} erstellen",
-            kommando="docflow.convert", folgebelegart=folgeart, erlaubt=grund is None, grund=grund,
-        ))
+        aktionen.append(_aktion(
+            f"umwandeln:{folgeart}", f"{BELEGARTEN[folgeart].bezeichnung} erstellen", "docflow.convert",
+            grund=grund, folgebelegart=folgeart))
     if status not in _ENDE:
         grund = None
         if variante.belegart.endswith("_credit_memo") and status == "posted":
             grund = "Eine gebuchte Gutschrift lässt sich noch nicht stornieren: Die Gegenbuchung fehlt."
         elif variante.belegart.endswith("_invoice") and status != "posted":
             grund = "Storniert wird nur ein gebuchter Beleg."
-        aktionen.append(Belegaktion(
-            key="stornieren", bezeichnung="Stornieren", kommando="docflow.reverse", freigabe_noetig=True,
-            erlaubt=grund is None, grund=grund,
-        ))
+        aktionen.append(_aktion("stornieren", "Stornieren", "docflow.reverse", grund=grund))
     return aktionen

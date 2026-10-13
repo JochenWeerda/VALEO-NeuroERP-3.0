@@ -573,6 +573,79 @@ tools:
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false
 
+  # ── Belege (BELEG-013): nur lesend ─────────────────────────────────────────
+  - tool_id: beleg.arten
+    domain: belege
+    name: "Belegarten und Belegkommandos beschreiben"
+    description: "Beschreibt die Belegarten des Belegvertrags (Bezeichnung, Partnerrolle, Steuerrichtung, mit oder ohne Preise, ob Finance bucht, Folgebelege) und das Verzeichnis der Belegkommandos (schreibend, Risiko, Freigabe, Idempotenz, Adresse). Keine Parameter. HTTP tool_name=beleg.arten. Scope belege:read; nur Lesen."
+    scope: belege:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties: {}
+      required: []
+    output_schema:
+      type: object
+      properties:
+        vertragsversion: { type: string }
+        status: { type: array }
+        preisfelder: { type: array }
+        belegarten: { type: array }
+        kommandos: { type: array }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: beleg.suchen
+    domain: belege
+    name: "Belege suchen"
+    description: "Sucht Belege im Authentifizierungs-Mandanten nach Belegart, Status, Teil der Belegnummer oder Partnernummer; neueste zuerst, hoechstens 50. Belegarten ohne Preise (Lieferschein, Wareneingang) kommen ohne Betrag. HTTP tool_name=beleg.suchen. Scope belege:read; nur Lesen."
+    scope: belege:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        belegart: { type: string, nullable: true, enum: [sales_offer, sales_order, sales_delivery, sales_invoice, sales_credit_memo, purchase_order, goods_receipt, purchase_invoice, purchase_credit_memo] }
+        status: { type: string, nullable: true, enum: [draft, open, released, posted, reversed, cancelled] }
+        beleg_nr: { type: string, nullable: true, description: "Teil der Belegnummer" }
+        partner_nr: { type: string, nullable: true, description: "Kunden- bzw. Lieferantennummer" }
+        limit: { type: integer, default: 20 }
+      required: []
+    output_schema:
+      type: object
+      properties:
+        items: { type: array }
+        count: { type: integer }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: beleg.lesen
+    domain: belege
+    name: "Beleg lesen"
+    description: "Liefert einen Beleg des Authentifizierungs-Mandanten in der Form des Belegvertrags (docs/schnittstellen/contracts/belegvertrag.schema.json): Kopf, Partner, Positionen mit offener Menge, Summen je Steuerschluessel, Buchungsstand mit Grund, Belegkette, Statushistorie und die im Zustand moeglichen Aktionen mit Kommando und Sperrgrund. Dieselbe Antwort wie GET /api/v1/belege/{belegart}/{beleg_id}. HTTP tool_name=beleg.lesen. Scope belege:read; nur Lesen."
+    scope: belege:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        belegart: { type: string, enum: [sales_offer, sales_order, sales_delivery, sales_invoice, sales_credit_memo, purchase_order, goods_receipt, purchase_invoice, purchase_credit_memo] }
+        beleg_id: { type: string }
+      required: [belegart, beleg_id]
+    output_schema:
+      type: object
+      properties:
+        beleg: { type: object }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
   # ── Compliance ─────────────────────────────────────────────────────────────
   - tool_id: compliance.gate.status
     domain: compliance

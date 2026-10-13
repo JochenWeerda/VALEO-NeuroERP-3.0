@@ -1,23 +1,20 @@
 """
 Neuro Tool Execution Service - NC-A7
-Executes MCP/OpenAPI tool contracts against the internal FastAPI surface and
-falls back to contract-only simulation when a route cannot be executed safely.
+Executes authenticated read/calculation/validation contracts internally.
+Legacy writes and external transport remain disabled pending contract approval.
 """
 
 from __future__ import annotations
 
-import json
 import logging
 import re
-from urllib import parse, request
 from typing import Any
 
+from fastapi import HTTPException
+from starlette.requests import Request
 from fastapi.testclient import TestClient
 
-from app.core.config import settings
-from app.core.outbound_security import validate_outbound_http_target
-from app.core.mcp_tool_contracts import MCPRequestPayloadMode, MCPToolContract
-from app.integrations.services.superglue_secret_resolver import resolve_superglue_auth_token
+from app.core.mcp_tool_contracts import MCPRequestPayloadMode, MCPToolContract, MCPToolKategorie
 
 logger = logging.getLogger(__name__)
 
@@ -44,17 +41,20 @@ class NeuroToolExecutionService:
     ) -> dict[str, Any]:
         ctx = context or {}
         method, path_template = self._split_endpoint(contract.api_endpoint or "GET /api/v1/unknown")
-        request_spec = self._build_request_spec(
-            contract,
-            method=method,
-            path_template=path_template,
-            parameters=parameters,
-            tenant_id=tenant_id,
-            context=ctx,
-        )
-
-        if ctx.get("external_base_url"):
-            return self._execute_external(contract, request_spec, ctx)
+        rejection = self._execution_rejection(contract, tenant_id, ctx)
+        if rejection is not None:
+            return rejection
+        try:
+            request_spec = self._build_request_spec(
+                contract, method=method, path_template=path_template,
+                parameters=parameters, tenant_id=tenant_id, context=ctx,
+            )
+        except HTTPException as exc:
+            return {
+                "mode": "execution_rejected", "tool_name": contract.tool_name,
+                "http_status": exc.status_code, "rejection_reason": "tenant_selector_rejected",
+                "request": {}, "response": None,
+            }
 
         client = self._get_client()
         try:
@@ -65,9 +65,9 @@ class NeuroToolExecutionService:
                 json=request_spec["json"],
                 headers=request_spec["headers"],
             )
-        except Exception as exc:  # pragma: no cover - defensive boundary
-            logger.warning("Internal tool execution failed for %s: %s", contract.tool_name, exc)
-            return self._fallback_result(contract, request_spec, f"transport_error: {exc}")
+        except Exception:  # pragma: no cover - defensive boundary
+            logger.warning("Internal tool execution failed for %s", contract.tool_name)
+            return self._fallback_result(contract, request_spec, "transport_error")
 
         if response.status_code >= 400:
             return self._fallback_result(
@@ -83,52 +83,64 @@ class NeuroToolExecutionService:
             "tool_name": contract.tool_name,
             "api_endpoint": contract.api_endpoint,
             "http_status": response.status_code,
-            "request": request_spec,
+            "request": self._public_request_spec(request_spec),
             "response": self._read_response_body(response),
         }
 
-    def _execute_external(
-        self,
-        contract: MCPToolContract,
-        request_spec: dict[str, Any],
-        context: dict[str, Any],
-    ) -> dict[str, Any]:
-        path = request_spec["path"]
-        try:
-            base_url = validate_outbound_http_target(str(context["external_base_url"])).rstrip("/")
-            url = f"{base_url}{path}" if path.startswith("/") else f"{base_url}/{path}"
-            validate_outbound_http_target(url)
-            response = self._request_external(
-                method=request_spec["method"],
-                url=url,
-                params=request_spec["query"],
-                json_body=request_spec["json"],
-                headers=request_spec["headers"],
-            )
-        except Exception as exc:  # pragma: no cover - defensive boundary
-            logger.warning("External tool execution failed for %s: %s", contract.tool_name, exc)
-            return self._fallback_result(
-                contract,
-                {**request_spec, "url": locals().get("url", f"<blocked>{path}")},
-                f"transport_error: {exc}",
-            )
-
-        if response["status_code"] >= 400:
-            return self._fallback_result(
-                contract,
-                {**request_spec, "url": url},
-                f"http_{response['status_code']}",
-                http_status=response["status_code"],
-                response_body=response["body"],
-            )
-
+    @staticmethod
+    def _execution_rejection(
+        contract: MCPToolContract, tenant_id: str, context: dict[str, Any]
+    ) -> dict[str, Any] | None:
+        # This legacy transport has no target-bound external credentials or
+        # approved versioned write-command binding. Caller flags cannot enable it.
+        reason, status = None, 403
+        token = context.get("auth_token")
+        if not isinstance(token, str) or not token.strip() or any(c in token for c in "\r\n"):
+            reason, status = "authenticated_token_required", 401
+        elif not isinstance(tenant_id, str) or not tenant_id.strip():
+            reason = "tenant_required"
+        elif context.get("external_base_url"):
+            reason = "external_target_not_approved"
+        elif contract.kategorie not in {
+            MCPToolKategorie.LESEN, MCPToolKategorie.BERECHNEN, MCPToolKategorie.VALIDIEREN
+        }:
+            reason = "write_capability_not_approved"
+        else:
+            headers = context.get("execution_headers", {})
+            if not isinstance(headers, dict) or any(
+                not isinstance(k, str) or k.lower() not in {"x-correlation-id", "x-request-id"}
+                or not isinstance(v, str) or any(c in v for c in "\r\n")
+                for k, v in headers.items()
+            ):
+                reason = "execution_headers_not_allowed"
+        if reason is None:
+            from app.core.security import verified_identity
+            from app.core.tenant_binding import check_selector, check_body_selectors
+            connection = Request({"type": "http", "method": "GET", "path": "/api/v1/neuro/tool",
+                                  "query_string": b"", "headers": []})
+            try:
+                verified_identity(connection, token.strip())
+                check_selector(tenant_id, connection.state.tenant_id)
+                check_body_selectors(context.get("policy_context", {}), connection.state.tenant_id)
+            except HTTPException as exc:
+                reason, status = "identity_or_tenant_rejected", exc.status_code
+            else:
+                return None
         return {
-            "mode": "openapi_external",
-            "tool_name": contract.tool_name,
-            "api_endpoint": contract.api_endpoint,
-            "http_status": response["status_code"],
-            "request": {**request_spec, "url": url},
-            "response": response["body"],
+            "mode": "execution_rejected", "tool_name": contract.tool_name,
+            "api_endpoint": contract.api_endpoint, "http_status": status,
+            "rejection_reason": reason, "request": {}, "response": None,
+        }
+
+    @staticmethod
+    def _public_request_spec(request_spec: dict[str, Any]) -> dict[str, Any]:
+        # Execution traces must never expose the credential used for transport.
+        return {
+            **request_spec,
+            "headers": {
+                k: ("[REDACTED]" if k.lower() == "authorization" else v)
+                for k, v in request_spec.get("headers", {}).items()
+            },
         }
 
     @staticmethod
@@ -154,6 +166,8 @@ class NeuroToolExecutionService:
         tenant_id: str,
         context: dict[str, Any],
     ) -> dict[str, Any]:
+        from app.core.tenant_binding import check_body_selectors
+        check_body_selectors(parameters, tenant_id)
         merged = dict(parameters)
         merged.setdefault("tenant_id", tenant_id)
         merged.setdefault("prozess_key", context.get("process_key", "agrar_settlement"))
@@ -162,7 +176,7 @@ class NeuroToolExecutionService:
         merged.setdefault("ist_wert", parameters.get("amount", 0))
         merged.setdefault("entity_typ", self._normalize_entity_type(parameters.get("entity_type") or context.get("entity_type")))
         merged.setdefault("datensatz", dict(parameters))
-        merged.setdefault("kontext", dict(context))
+        merged.setdefault("kontext", {k: v for k, v in context.items() if k not in {"auth_token", "execution_headers"}})
 
         path = path_template
         consumed_path_params: set[str] = set()
@@ -195,7 +209,7 @@ class NeuroToolExecutionService:
             "json": body,
             "headers": {
                 "Authorization": (
-                    f"Bearer {context.get('auth_token') or (resolve_superglue_auth_token(tenant_id, allow_global_fallback=True) if context.get('provider_key') == 'superglue' else None) or settings.API_DEV_TOKEN or 'neuro-tool-broker'}"
+                    f"Bearer {context['auth_token'].strip()}"
                 ),
                 "X-Tenant-ID": tenant_id,
                 "Content-Type": "application/json",
@@ -273,57 +287,6 @@ class NeuroToolExecutionService:
         except Exception:
             return {"text": response.text}
 
-    def _request_external(
-        self,
-        *,
-        method: str,
-        url: str,
-        params: dict[str, Any],
-        json_body: dict[str, Any] | None,
-        headers: dict[str, Any],
-    ) -> dict[str, Any]:
-        if self._external_requester is not None:
-            return self._external_requester(
-                method=method,
-                url=url,
-                params=params,
-                json_body=json_body,
-                headers=headers,
-            )
-
-        full_url = url
-        if params:
-            full_url = f"{url}?{parse.urlencode(params, doseq=True)}"
-
-        payload = None
-        req_headers = dict(headers)
-        if json_body is not None:
-            payload = json.dumps(json_body).encode("utf-8")
-            req_headers.setdefault("Content-Type", "application/json")
-
-        req = request.Request(full_url, data=payload, headers=req_headers, method=method.upper())
-        try:
-            with request.urlopen(req, timeout=10) as response:
-                body_bytes = response.read()
-                body_text = body_bytes.decode("utf-8") if body_bytes else ""
-                try:
-                    body = json.loads(body_text) if body_text else None
-                except Exception:
-                    body = {"text": body_text}
-                return {"status_code": response.status, "body": body}
-        except Exception as exc:
-            status = getattr(exc, "code", None)
-            body = None
-            if hasattr(exc, "read"):
-                try:
-                    raw = exc.read().decode("utf-8")
-                    body = json.loads(raw) if raw else None
-                except Exception:
-                    body = {"text": raw} if "raw" in locals() else None
-            if status is not None:
-                return {"status_code": status, "body": body}
-            raise
-
     @staticmethod
     def _fallback_result(
         contract: MCPToolContract,
@@ -339,6 +302,6 @@ class NeuroToolExecutionService:
             "api_endpoint": contract.api_endpoint,
             "fallback_reason": reason,
             "http_status": http_status,
-            "request": request_spec,
+            "request": NeuroToolExecutionService._public_request_spec(request_spec),
             "response": response_body,
         }

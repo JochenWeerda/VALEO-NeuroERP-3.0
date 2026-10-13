@@ -199,6 +199,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `mailkonto_service` | Postfaecher des Mandanten: ausgehende E-Mails ueber seinen eigenen Dienst. |
 | `mask_action_runtime_service` | SPEC-P1-04 — gemeinsame ActionRuntime für Mask-CommandEndpoints. |
 | `mask_rollout_summary_service` | Data service for batch mask rollout screen-summary endpoints (Waves 42–51). |
+| `mcp_beleg_tools` | Lesende MCP-Werkzeuge fuer Belege (BELEG-013). |
 | `mcp_execution_service` | Authenticated ERP adapters; a catalog entry alone never enables execution. |
 | `mcp_tool_registry_service` | MCP-ERP-TOOLS-001 — Rollenbasierter ERP-Tool-Katalog fuer Agent-Zugriff. |
 | `meldewesen_lifecycle_service` | DOM-MEL-004.2 — Meldewesen Lifecycle (Intrastat/ELSTER/ATLAS — extern gegated). |

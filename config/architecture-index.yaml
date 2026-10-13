@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-13
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-13T11:07:44Z'
+generated_at: '2026-10-13T11:16:22Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -930,6 +930,7 @@ domains:
     - connector_config
     - doc_nachweisraum_lifecycle_service
     - docflow_artifact_service
+    - docflow_belegadapter
     - docflow_evidence_service
     - docflow_followup_service
     - docflow_gobd_service
@@ -945,6 +946,7 @@ domains:
     - atlas_zollausfuhr
     - audit
     - audit_evidence
+    - belege
     - compliance
     - compliance_dsgvo
     - compliance_whistleblower
@@ -1811,6 +1813,7 @@ domains:
     - mailkonto_service
     - mask_action_runtime_service
     - mask_rollout_summary_service
+    - mcp_beleg_tools
     - mcp_execution_service
     - mcp_tool_registry_service
     - mobile_sync_service
@@ -2081,10 +2084,10 @@ domains:
 mapping_stats:
   frontend_routes_total: 939
   frontend_routes_mapped: 939
-  backend_services_total: 283
-  backend_services_mapped: 282
-  backend_endpoints_total: 455
-  backend_endpoints_mapped: 455
+  backend_services_total: 285
+  backend_services_mapped: 284
+  backend_endpoints_total: 456
+  backend_endpoints_mapped: 456
 unmapped:
   frontend_routes: []
   backend_services:

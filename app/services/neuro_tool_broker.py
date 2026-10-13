@@ -553,9 +553,14 @@ class NeuroToolBroker:
 
         # NC-A7: distinguish real execution from fallback
         mode = payload.get("mode", "unknown")
+        if mode == "execution_rejected":
+            return {
+                "step_status": "failed",
+                "trace": {"status": "failed", "result": payload},
+            }
         if mode == "fallback_contract":
             http_status = payload.get("http_status")
-            if http_status and http_status >= 500:
+            if http_status and (http_status in {401, 403} or http_status >= 500):
                 return {
                     "step_status": "failed",
                     "trace": {"status": "failed", "result": payload},

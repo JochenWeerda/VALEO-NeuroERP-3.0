@@ -11,6 +11,22 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** drei lesende MCP-Werkzeuge `beleg.arten`, `beleg.suchen`, `beleg.lesen` (Scope `belege:read`,
+`app/services/mcp_beleg_tools.py`, Registry jetzt 62 Werkzeuge) ueber denselben Belegvertrag wie die Maske;
+Verzeichnis der Belegkommandos `app/core/belegkommandos.py` mit Risikoklassen R0–R4 nach MCP-WRITE.
+Tests 16 neu, 198 vorhandene MCP-Tests gruen. QA: `docs/quality-assurance/belege-mcp-lesen-20261013.md`.
+**Beruehrung mit MCP-WRITE (Codex):** in `app/services/mcp_execution_service.py` nur ein Import, eine Tabelle
+`_BELEG_TOOLS` und zwei Zeilen im Verteiler; kein schreibender Weg. Kein schreibendes Belegkommando hat ein
+MCP-Werkzeug (MCP-WRITE-014, per Test).
+**An Codex:** (1) Scope `belege:read` traegt noch kein Token — bitte in der Identitaet vergeben, sonst sind die
+Werkzeuge fuer niemanden aufrufbar. (2) `belegkommandos.py` ist die Zuarbeit der Belege fuer Stufe 2
+(keine zweite Capability-Registry); Einstufung bitte pruefen: release R3, post R3, reverse R4, convert R2,
+create/update/delete_draft R1. (3) Wer einen schreibenden Weg in `app/api/v1/endpoints/docflow.py` ergaenzt,
+traegt ihn im Verzeichnis nach, sonst wird `tests/test_mcp_beleg_tools.py` rot.
+
 ## BELEG-011 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
@@ -34,9 +50,15 @@ BELEG-012 braucht die Zuordnung Recht → Rolle.
 
 **Lieferung:** Alle 15 Regeln, R0–R4, vier geordnete Integrationsstufen mit Abnahmegates, internes YAML-Beispiel und offene Runtime-Migration dokumentiert; AGENTS.md und Architekturindex verweisen verbindlich darauf. Dokumentations- und Staged-Gates; keine Runtime-Freischaltung, DB oder Container.
 
-## MCP-WRITE-EXECUTION-MIGRATION — offen
+## MCP-WRITE-EXECUTION-MIGRATION — abgeschlossen, Codex
 
-**Owner:** offen. **Ziel:** Stufe 1 des MCP-Schreibstandards umsetzen; Token-/Header-Fallbacks und Freischaltgrenzen inventarisieren und absichern. **Dateibesitz:** vor Umsetzung separat claimen. **Abnahme:** Identitaets-, Mandanten-, Rechte- und Freischaltungs-Negativtests ohne Geschaeftsaenderung; nachfolgende Stufen gemaess Architekturstandard.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Legacy-Neuro-Transport gegen Token-Fallbacks, Identitaetsheader-Overrides und unbelegte externe/Schreibfreigaben absichern. **Dateibesitz:** app/services/neuro_tool_execution.py; app/services/neuro_tool_broker.py nur Ergebnisstatus; app/api/v1/endpoints/neuro_pipeline.py nur gepruefter Transporttoken; app/agents/neuro_pipeline.py nur Trennung Transporttoken/Fachkontext; tests/test_neuro_tool_execution.py; tests/test_neuro_pipeline.py nur Identitaetsvertrag; tests/test_neuro_tool_broker.py nur zugehoerige Vertragsfaelle; tests/test_security_outbound_policy.py nur Legacy-Tool-Ablehnung; docs/quality-assurance/mcp-execution-boundary-20261013.md. **Abnahme:** Ablehnungen vor Transport, keine Token in Ergebnissen, Broker meldet Ablehnung als Fehler; zielgerichtete Tests. **Risiken:** Separater MCP-ERP-Ausfuehrungsdienst und Domain-Command-Bindung bleiben Folgearbeit; keine externe Freischaltung ohne Zielvertrag.
+
+**Lieferung:** Legacy-Neuro-Grenze abgesichert: verifizierte RSA-/Mandantenidentitaet, kein Token-Fallback/Identitaetsheader-Override, keine unbelegten externen/Writes, redigierter Trace und gescheiterte Auth bleibt Fehler. REST bindet geprueften Bearer. QA: mcp-execution-boundary-20261013.md. Dies ist nur der Legacy-Transportteil von Stufe 1.
+
+## MCP-WRITE-CANONICAL-ENFORCEMENT — offen
+
+**Owner:** offen. **Ziel:** Separaten MCP-ERP-Ausfuehrungsdienst und Command-/Capability-/Superglue-Pfade gemaess MCP-WRITE-001 bis 015 inventarisieren und durchsetzen; keine Schreibfreischaltung ohne versionierte Domain-Commands und Agentenrollen-Nachweise. **Dateibesitz:** vor Umsetzung separat claimen. **Abnahme:** Mandant/Rechte/Idempotenz/Version/Freigabe/Transaktion/Audit/Outbox sowie Gleichwertigkeit der Adapter.
 
 ## BELEG-010 — abgeschlossen, Claude Code
 

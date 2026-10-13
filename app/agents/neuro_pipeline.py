@@ -24,8 +24,9 @@ def run_pipeline(
     tenant_id: str = "system",
     db: Optional[Session] = None,
     dry_run: bool = False,
+    auth_token: Optional[str] = None,
 ) -> dict:
-    ctx = context or {}
+    ctx = {key: value for key, value in (context or {}).items() if key != "auth_token"}
 
     # 1. Intent Classification
     intent_result: IntentResult = classify(user_input, ctx)
@@ -101,7 +102,7 @@ def run_pipeline(
     broker_result = execute_plan_via_broker(
         plan,
         tenant_id=tenant_id,
-        context=ctx,
+        context={**ctx, "auth_token": auth_token},
         db=db,
     )
 
