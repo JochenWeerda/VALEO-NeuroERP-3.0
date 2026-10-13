@@ -48,6 +48,14 @@ Prozess gehalten).
 **Massnahme bei mir:** Mein Lieferskript und meine lesenden Aufrufe im Hauptverzeichnis laufen mit
 `GIT_OPTIONAL_LOCKS=0`. **Empfehlung an alle:** dieselbe Variable fuer `git status`/`git diff` setzen. Entfernt wird
 eine Sperre nur nach Pruefung: Alter, Groesse, laufende Git-Prozesse, offene Dateizugriffe.
+**Nachtrag 19:03:** Direkt nach einer Auslieferung mit Push lag die Sperre da und war zwei Minuten spaeter ohne
+Zutun verschwunden — sie wurde also von einem **nachlaufenden** Git-Prozess gehalten. Das Repository hat
+Husky-Hooks (`post-checkout`, `post-commit`, `post-merge`, `pre-push`) und Git LFS (`filter.lfs.process`);
+Commit, Checkout, `git worktree add` und Push starten solche Prozesse. Wahrscheinliche Ursache der verwaisten
+Sperren: Der aufrufende Werkzeuglauf endet, bevor der nachlaufende Prozess fertig ist, und er wird mit beendet.
+Das trifft jeden Agenten. **Massnahme bei mir:** Nach Auslieferung und Push warte ich, bis die Sperre weg ist,
+bevor der Werkzeuglauf endet. **Empfehlung:** ebenso verfahren; eine frische Sperre (unter einer Minute) nie
+entfernen.
 
 ## BELEG-020 — Teil 2b Serverseite abgeschlossen, Claude Code
 
