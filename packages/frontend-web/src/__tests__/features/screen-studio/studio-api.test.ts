@@ -15,12 +15,12 @@ it('uses the authenticated client without caller-selected identities on all stud
   await saveStudioDraft(definition)
   await saveStudioDraft(definition, 'draft-a')
   await submitStudioReview('draft-a')
-  await publishStudioDraft('draft-a')
+  await publishStudioDraft('draft-a', 'reviewed-revision')
   expect(client.post.mock.calls).toEqual([
     ['/api/v1/studio/propose', { intent: 'Kunden' }],
     ['/api/v1/studio/drafts', { definition }],
     ['/api/v1/studio/drafts/draft-a/submit-review', {}],
-    ['/api/v1/studio/drafts/draft-a/publish', {}],
+    ['/api/v1/studio/drafts/draft-a/publish', { expected_revision: 'reviewed-revision' }],
   ])
   expect(client.put).toHaveBeenCalledWith('/api/v1/studio/drafts/draft-a', { definition })
 })

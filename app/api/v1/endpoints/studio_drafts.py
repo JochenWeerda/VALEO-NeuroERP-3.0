@@ -32,6 +32,10 @@ class StudioProposeIn(BaseModel):
     intent: str = Field(min_length=1)
 
 
+class StudioPublishIn(BaseModel):
+    expected_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
 def _actor(user: dict[str, Any]) -> str:
     subject = user.get("sub")
     if not isinstance(subject, str) or not subject.strip():
@@ -93,6 +97,17 @@ def studio_list_drafts(tenant_id: str = Depends(get_tenant_id), user: dict = Dep
     return {"drafts": list_drafts(tenant_id)}
 
 
+@router.get("/drafts/{draft_id}", summary="Gespeicherten Studio-Entwurf zur Pruefung abrufen")
+def studio_get_draft(
+    draft_id: str, tenant_id: str = Depends(get_tenant_id),
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    item = get_draft(tenant_id, draft_id)
+    if item is None:
+        raise HTTPException(404, "draft_nicht_gefunden")
+    return item
+
+
 @router.post("/drafts", summary="Studio-Entwurf anlegen")
 def studio_create_draft(
     body: StudioDefinitionIn,
@@ -143,12 +158,15 @@ def studio_submit_review(
 @router.post("/drafts/{draft_id}/publish", summary="Studio-Entwurf als published_temp freigeben")
 def studio_publish(
     draft_id: str,
+    body: StudioPublishIn,
     tenant_id: str = Depends(get_tenant_id),
     user: dict = Depends(_publisher),
 ) -> dict[str, Any]:
     item = get_draft(tenant_id, draft_id)
     if item is None:
         raise HTTPException(status_code=404, detail="draft_nicht_gefunden")
+    if body.expected_revision != item["revision"]:
+        raise HTTPException(409, "entwurf_seit_anzeige_geaendert")
     report = _report(item["definition"])
     if not report["canPublish"]:
         raise HTTPException(status_code=400, detail={"violations": report["violations"], "readiness": report["readiness"]})

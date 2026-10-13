@@ -1,3 +1,4 @@
+from studio_review_helper import publish_reviewed
 """Explicit HTTP identity doubles; no production authentication override."""
 import pytest
 from fastapi import FastAPI
@@ -43,7 +44,7 @@ def test_creator_and_editor_ignore_caller_identity_headers(probe):
 def test_header_change_cannot_impersonate_an_independent_publisher(probe):
     client, _ = probe
     record = create(client)
-    response = client.post('/studio/drafts/'+record['id']+'/publish', headers={'X-Actor-ID': 'another-person'})
+    response = publish_reviewed(client, '/studio/drafts/'+record['id']+'/publish', headers={'X-Actor-ID': 'another-person'})
     assert response.status_code == 403
     assert store.get_draft('studio-test-tenant', record['id'])['status'] == 'draft'
 
@@ -67,9 +68,9 @@ def test_review_submission_cannot_relabel_the_content_editor(probe):
     assert review.status_code == 200
     assert review.json()['updated_by'] == 'editor'
     user['sub'] = 'editor'
-    assert client.post('/studio/drafts/'+record['id']+'/publish').status_code == 403
+    assert publish_reviewed(client, '/studio/drafts/'+record['id']+'/publish').status_code == 403
     user['sub'] = 'independent-reviewer'
-    assert client.post('/studio/drafts/'+record['id']+'/publish').status_code == 200
+    assert publish_reviewed(client, '/studio/drafts/'+record['id']+'/publish').status_code == 200
 
 
 def test_missing_verified_subject_cannot_create_a_draft(probe):

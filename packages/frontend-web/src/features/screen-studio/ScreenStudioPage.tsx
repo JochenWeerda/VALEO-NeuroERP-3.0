@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import {
   fetchStudioCatalog,
+  fetchStudioDrafts,
+  fetchStudioDraft,
   proposeStudioDraft,
   publishStudioDraft,
   saveStudioDraft,
@@ -25,11 +27,13 @@ export function ScreenStudioPage(): JSX.Element {
   const [intent, setIntent] = useState('Lieferanten bewerten und auswählen')
   const [draftId, setDraftId] = useState<string>()
   const [savedSignature, setSavedSignature] = useState<string>()
+  const [savedRevision, setSavedRevision] = useState<string>()
   const [publishedRoute, setPublishedRoute] = useState<string>()
   const [report, setReport] = useState<StudioReport>()
   const [pending, setPending] = useState<string>()
   const [feedback, setFeedback] = useState<string | null>(null)
   const catalog = useQuery({ queryKey: ['studio-catalog'], queryFn: fetchStudioCatalog })
+  const drafts = useQuery({ queryKey: ['studio-drafts'], queryFn: fetchStudioDrafts })
   const plan = useMemo(() => compileRenderPlanFromScreenDefinition(definition), [definition])
   const dirty = savedSignature !== JSON.stringify(definition)
   const tables = useMemo(() => mockRowsFor(definition), [definition])
@@ -63,6 +67,27 @@ export function ScreenStudioPage(): JSX.Element {
         <div>
           <h1 className="text-lg font-semibold">Masken-Studio</h1>
           <p className="text-sm text-muted-foreground">ScreenDefinition erzeugen, prüfen und als temporären Entwurf speichern.</p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="studio-existing">Gespeicherten Entwurf öffnen</Label>
+          <select id="studio-existing" value={draftId ?? ''} disabled={Boolean(pending)}
+            onChange={(event) => {
+              const id = event.target.value
+              if (!id) return
+              void run('load', async () => {
+                const item = await fetchStudioDraft(id)
+                dispatch({ type: 'replace', definition: item.definition })
+                setDraftId(item.id)
+                setSavedSignature(JSON.stringify(item.definition))
+                setSavedRevision(item.revision)
+                setPublishedRoute(undefined)
+                setReport(undefined)
+                setFeedback(`Entwurf geladen (${item.status}).`)
+              })
+            }}>
+            <option value="">Entwurf auswählen</option>
+            {(drafts.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.definition.title} ({item.status})</option>)}
+          </select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="studio-intent">Agent-Vorschlag</Label>
@@ -104,6 +129,8 @@ export function ScreenStudioPage(): JSX.Element {
             const saved = await saveStudioDraft(definition, draftId)
             setDraftId(saved.id)
             setSavedSignature(JSON.stringify(saved.definition))
+            setSavedRevision(saved.revision)
+            void drafts.refetch()
             setPublishedRoute(undefined)
             setReport(saved)
             setFeedback(`Gespeichert (${saved.status}).`)
@@ -112,15 +139,19 @@ export function ScreenStudioPage(): JSX.Element {
           </Button>
           <Button type="button" variant="outline" disabled={!draftId || dirty || Boolean(pending)} onClick={() => void run('review', async () => {
             if (dirty) return
-            await submitStudioReview(draftId ?? '')
+            const reviewed = await submitStudioReview(draftId ?? '')
+            setSavedRevision(reviewed.revision)
+            void drafts.refetch()
             setFeedback('Zur Prüfung gegeben.')
           })}>
             Prüfung
           </Button>
-          <Button type="button" variant="outline" disabled={!draftId || dirty || Boolean(pending) || !report?.canPublish} onClick={() => void run('publish', async () => {
-            if (dirty) return
-            const published = await publishStudioDraft(draftId ?? '')
+          <Button type="button" variant="outline" disabled={!draftId || !savedRevision || dirty || Boolean(pending) || !report?.canPublish} onClick={() => void run('publish', async () => {
+            if (dirty || !savedRevision) return
+            const published = await publishStudioDraft(draftId ?? '', savedRevision)
             setReport(published)
+            setSavedRevision(published.revision)
+            void drafts.refetch()
             setPublishedRoute(published.route)
             setFeedback(`Veröffentlicht als ${published.status}.`)
           })}>
