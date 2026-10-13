@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## LOGIN-CALLBACK-REENTRANCY-20261013 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** reale gültige Kennwortanmeldung des eigenen synthetischen Nutzers kehrt zur Loginseite zurück; wiederholte Callbackfehler. **Dateibesitz:** pages/auth/Callback.tsx nur Import/effect-Ausführungsgrenze, keine fremden Stylinghunks; neue React-StrictMode-Verträge; eigene QA/Workboard. Elternclaim LOGIN-VARIANTS behält komplette Abnahme. **Abnahme:** genau ein Callback pro gemounteter Seite auch bei StrictMode und instabiler Hook-Funktionsreferenz; PKCE/State/Nonce und Replay-Abweisung bleiben bestehen; echter Browser-Recheck und synthetische Screenshots. Fremdes Styling erhalten, keine persönlichen Kennungen, keine DB/Container/Reset.
+
 ## LOGIN-VARIANTS-20261013 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber: Anmeldeprozess in allen Varianten testen, real im Browser mit Screenshots. **Ziel:** nachvollziehbare Testmatrix fuer Providerlogin, PKCE/Callback, Token-/Mandanten-/Rollenbindung, Refresh, Logout, Widerruf, MFA-/Kennwortablauf und Dienste. **Dateibesitz:** lib/auth.test.ts nur neue Varianten, gegebenenfalls Authquellen innerhalb bestehender Elternclaims; eigene QA/Handbuch samt ausschliesslich echten synthetischen Screenshots; eigene Provider-Testfixture-/Pruefskripte. **Abnahme:** automatische Verträge und reale Browsernachweise getrennt; kein fingierter Erfolg, keine persönlichen Kennungen/Passwörter/OTP in Git oder Screenshots; persönliche MFA bleibt vertagt, Kennwortänderung im Browser erforderlichenfalls Benutzerhandoff. Vorhandener Prüfstand, keine DB/Container/Reset. Provider-Testdaten nur eigene synthetische Kennungen, keine Änderung bestehender Benutzer oder Sicherheitsrichtlinien.
