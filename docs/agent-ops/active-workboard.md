@@ -11,6 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SCREEN-FRAMEWORK-GAP-20261013 — Bestandspruefung vorgelegt, Claude Code
+
+**Owner:** Claude Code. **Stand:** Analyse vorgelegt 2026-10-13, nichts am Code geaendert.
+**Inhalt:** `docs/design/screen-framework-fiori-gap-analyse.md` — Mask Builder/ScreenDefinitions gegen die
+Fiori-Konzepte (vorhanden/teilweise/fehlt/redundant), DocFlow gegen die Bedingungen des Auftraggebers,
+Anmeldung/Staging/Browserpruefung; Phase 0 mit neun Arbeiten. Entscheidungen des Auftraggebers vom 13.10.2026
+(DocFlow fuehrende Belegstruktur; Sichtpruefung ueber echten OIDC/PKCE Pflicht vor Welle 1) stehen in
+`docs/design/belegmaske-varianten-masterplan.md`, Abschnitt D0.
+**An Codex (Identitaet) — zwei Arbeiten aus Phase 0, nicht begonnen:** (0.1) DocFlow nimmt `tenant_id` aus der
+Anfrage statt aus der Anmeldung; (0.6) dedizierter Testbenutzer im Keycloak lokal und fuer Staging, Zugangsdaten
+nur in der Umgebung, damit Playwright ueber OIDC/PKCE anmeldet (heute Standard: gesetztes Token).
+**DocFlow-Luecken:** Teilmengen ueber mehrere Folgebelege fehlen (`uq_docflow_header_link_source_relation`,
+keine Restmengenrechnung); keine Statushistorie, `best_effort_audit` verschluckt Fehler; `sales_credit_memo`
+bucht nicht; keine Einkaufsbelegarten.
+
 ## BELEG-MASTERPLAN-20261013 — Plan vorgelegt, Claude Code
 
 **Owner:** Claude Code. **Stand:** Plan zur Entscheidung vorgelegt 2026-10-13, nichts umgesetzt.

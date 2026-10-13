@@ -101,6 +101,30 @@ Finance (Buchungsautorität)     Steuerschlüssel → Konten → Journal, offene
 - **Fachliche Sonderteile** (Wiegedaten, Qualitätsparameter, Fracht, Kontraktbezug) sind eigene
   Bausteine, die eine Variante einhängt — keine Sonderfälle im Grundgerüst.
 
+## D0. Entschieden am 13.10.2026 (Auftraggeber)
+
+- **E1: DocFlow wird die führende Belegstruktur** (Belegidentität, Versionierung, Belegkette,
+  Statushistorie, Dokumentenverknüpfung, Workflow). Fachlich verantwortet der Einkauf die
+  Eingangsrechnung, buchhalterisch die Finanzbuchhaltung; DocFlow ist weder Hauptbuch noch
+  Steuerengine. Der bisherige Einkaufsweg wird nicht repariert, sondern ist nur noch Migrationsquelle
+  bzw. vorübergehender Kompatibilitätsadapter. Bedingung: Nachweis, dass DocFlow Mengen, Preise,
+  Steuerpositionen, Teilrechnungen, Gutschriften, Belegreferenzen und revisionssichere Statuswechsel
+  trägt; kein neuer paralleler Datenspeicher.
+- **E4: Sichtprüfung ist Pflicht vor Welle 1** — über den echten OIDC-/PKCE-Ablauf mit dediziertem
+  Testbenutzer (nicht mit einem persönlichen Konto), isolierter Umgebung, Referenzbelegen, Playwright
+  mit Bildschirmfotos und manueller Sichtabnahme. Ein gesetztes Token zählt für die Abnahme nicht.
+- **Reihenfolge:** Framework-Konsolidierung vor Feature-Erweiterung. Phase 0 = Bestand prüfen
+  (DocFlow, Einkaufsbelege, Anmeldung, Staging) und Lücken schließen; Phase 1 = universelle
+  Eingangsbelegmaske auf DocFlow; Phase 2 = weitere Einkaufs- und Verkaufsbelege. Welle 1 enthält
+  keine destruktiven Änderungen an bestehenden Einkaufs- oder Buchhaltungstabellen; Altstrukturen
+  gehen erst nach verifizierter Migration und dokumentiertem Rückfallkonzept außer Betrieb.
+- **Kein zweites UI-Framework** neben dem Mask Builder; SAP Fiori elements ist Referenz, nicht
+  Laufzeit.
+
+Die Bestandsprüfung dazu steht in `screen-framework-fiori-gap-analyse.md`. Sie ändert die
+Reihenfolge unten: Die dort genannte **Phase 0 geht Welle 0 voran**, und die Referenzimplementierung
+ist die Eingangsbelegmaske (bisher BELEG-042), nicht die Rechnung im Verkauf.
+
 ## D. Entscheidungen, die der Plan braucht
 
 | # | Frage | Empfehlung | Warum |
