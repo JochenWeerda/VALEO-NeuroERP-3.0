@@ -1,317 +1,287 @@
-import { useMemo, useState } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { apiClient } from '@/lib/api-client'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Search, Plus, Percent } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { v4 as uuidv4 } from 'uuid'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
+import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
+import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
+import { createScreenContext } from '@/components/mask-builder/governance/screen-context'
+import type { ScreenDefinition } from '@/components/mask-builder/schema'
+import { getAxiosErrorMessage } from '@/lib/api-client'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { financeSteuerschluesselScreen } from '@/masks/capture-screens'
+import {
+  ladeKontenvorschlaege,
+  listeSteuerschluessel,
+  speichereSteuerschluessel,
+  type Kontovorschlag,
+  type Steuerschluessel,
+  type SteuerschluesselEingabe,
+} from '@/lib/api/steuerschluessel'
 
-type TaxKey = {
-  id: string
-  code: string
-  bezeichnung: string
-  steuersatz: string | number
-  ustva_position?: string
-  ustva_bezeichnung?: string
-  intracom?: boolean
-  export?: boolean
-  reverse_charge?: boolean
-  debit_account?: string
-  credit_account?: string
-  country?: string
-  active?: boolean
+/**
+ * Steuerschluessel des Mandanten. Die Seite speichert, der Mask Builder zeichnet — Felder, Tabelle
+ * und Aktionen stehen in der ScreenDefinition `finance/steuerschluessel`.
+ *
+ * Aus diesen Schluesseln nehmen alle Belege Satz und Konten. Deshalb gibt es keinen Vorgabewert,
+ * weder fuer den Satz noch fuer ein Konto; geprueft wird auf dem Server.
+ *
+ * Die Konten sind eine Auswahl aus dem Kontenplan: je Feld nur Konten der passenden Art, die zum
+ * Satz passenden zuerst. Der Server reiht, die Seite waehlt nichts vor.
+ */
+
+const leer: Record<string, unknown> = {
+  code: '', bezeichnung: '', steuersatz: '', credit_account: '', revenue_account: '', debit_account: '',
+  par_24_ustg: false, reverse_charge: false, intracom: false, export: false,
+  ustva_position: '', ustva_bezeichnung: '', gueltig_von: '', gueltig_bis: '', active: true, notizen: '',
+}
+const PFLICHT = ['code', 'bezeichnung', 'steuersatz', 'gueltig_von']
+// Der Server prueft die Rolle; hier nur die Freigabe der Aktion im Builder.
+const RECHTE = ['finance.steuerschluessel.write']
+const LISTE = ['finance', 'tax-keys']
+const BUCHT_NICHT = 'Bucht nicht automatisch'
+const KONTENFELDER = ['credit_account', 'revenue_account', 'debit_account'] as const
+type Kontenfeld = (typeof KONTENFELDER)[number]
+
+function kontenAuswahl(vorschlaege: Kontovorschlag[], gewaehlt: string): Array<{ value: string; label: string }> {
+  const auswahl = vorschlaege.map((k) => ({
+    value: k.account_number,
+    label: `${k.account_number} – ${k.account_name}${k.grund?.startsWith('passt') ? ` (Vorschlag: ${k.grund})` : ''}`,
+  }))
+  // Ein hinterlegtes Konto, das der Kontenplan nicht mehr anbietet, bleibt sichtbar — der Server lehnt es beim Speichern ab.
+  return gewaehlt && !auswahl.some((o) => o.value === gewaehlt)
+    ? [{ value: gewaehlt, label: `${gewaehlt} – nicht im Kontenplan, gesperrt oder falsche Kontenart` }, ...auswahl]
+    : auswahl
 }
 
-type TaxKeyCreatePayload = {
-  code: string
-  bezeichnung: string
-  steuersatz: number
-  ustva_position: string
-  ustva_bezeichnung: string
-  intracom: boolean
-  export: boolean
-  reverse_charge: boolean
-  gueltig_von: string
-  gueltig_bis?: string | null
-  notizen?: string | null
-  debit_account?: string | null
-  credit_account?: string | null
-  country: string
-  region?: string | null
-  active: boolean
+function text(wert: unknown): string {
+  return String(wert ?? '').trim()
 }
 
-function useSteuerschluessel(country: string, activeOnly: boolean) {
-  return useQuery({
-    queryKey: ['finance', 'tax-keys', country, activeOnly],
-    queryFn: async () =>
-      (
-        await apiClient.get<TaxKey[]>('/api/v1/finance/tax-keys', {
-          params: {
-            country: country || undefined,
-            active_only: activeOnly,
-          },
-        })
-      ).data,
-    staleTime: 5 * 60 * 1000,
-  })
+function prozent(wert: unknown): string {
+  return `${Number(wert).toLocaleString('de-DE')} %`
 }
 
-function steuerartLabel(key: TaxKey): string {
-  if (key.reverse_charge) return 'Reverse-Charge'
-  if (key.export) return 'Export'
-  if (key.intracom) return 'Innergemeinschaftlich'
-  const pos = key.ustva_position ?? ''
-  if (pos.startsWith('5') || pos.startsWith('6') || pos.startsWith('7')) return 'USt'
-  if (pos.startsWith('4') || pos.startsWith('3')) return 'VSt'
-  return '-'
-}
-
-const defaultPayload: TaxKeyCreatePayload = {
-  code: '',
-  bezeichnung: '',
-  steuersatz: 19,
-  ustva_position: '66',
-  ustva_bezeichnung: '',
-  intracom: false,
-  export: false,
-  reverse_charge: false,
-  gueltig_von: new Date().toISOString().slice(0, 10),
-  gueltig_bis: null,
-  notizen: null,
-  debit_account: '1400',
-  credit_account: '1776',
-  country: 'DE',
-  region: null,
-  active: true,
+function kennzeichen(k: Steuerschluessel): string {
+  const teile = [
+    k.par_24_ustg ? '§ 24 UStG' : null,
+    k.reverse_charge ? 'Reverse Charge' : null,
+    k.intracom ? 'Innergemeinschaftlich' : null,
+    k.export ? 'Ausfuhr' : null,
+  ].filter(Boolean)
+  return teile.length > 0 ? teile.join(', ') : '–'
 }
 
 export default function SteuerschluesselPage(): JSX.Element {
+  const isTouch = useTouchDevice()
   const queryClient = useQueryClient()
-  const [search, setSearch] = useState('')
-  const [country, setCountry] = useState('DE')
-  const [activeOnly, setActiveOnly] = useState(true)
-  const [createOpen, setCreateOpen] = useState(false)
-  const [createPayload, setCreatePayload] = useState<TaxKeyCreatePayload>(defaultPayload)
+  const liste = useQuery({ queryKey: [...LISTE, 'pflege'], queryFn: listeSteuerschluessel })
+  const schluessel = useMemo(() => liste.data ?? [], [liste.data])
 
-  const { data: keys = [], isLoading, isError } = useSteuerschluessel(country, activeOnly)
-
-  const createMutation = useMutation({
-    mutationFn: async (payload: TaxKeyCreatePayload) =>
-      apiClient.post('/api/v1/finance/tax-keys', payload),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['finance', 'tax-keys'] })
-      setCreateOpen(false)
-      setCreatePayload(defaultPayload)
-    },
+  const [geladen, setGeladen] = useState<Steuerschluessel | null>(null)
+  // Der Satz aus der Eingabe reiht die Kontenvorschlaege.
+  const [satz, setSatz] = useState('')
+  const konten = useQuery({
+    queryKey: [...LISTE, 'kontenvorschlaege', satz],
+    queryFn: () => ladeKontenvorschlaege(satz),
+    placeholderData: (vorher) => vorher,
   })
+  const [laeuft, setLaeuft] = useState(false)
+  const [fragen, setFragen] = useState<SteuerschluesselEingabe | null>(null)
+  const sperre = useRef(false)
+  // Ein Auftrag je bestaetigtem Speichern: Eine Wiederholung derselben Anfrage schreibt nicht zweimal.
+  const auftrag = useRef('')
 
-  const filtered = useMemo(
-    () =>
-      keys.filter((k) =>
-        k.code.toLowerCase().includes(search.toLowerCase()) ||
-        k.bezeichnung.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [keys, search],
-  )
+  useEffect(() => {
+    if (liste.isError) toast.error('Steuerschlüssel nicht geladen', { description: getAxiosErrorMessage(liste.error) })
+  }, [liste.error, liste.isError])
+  useEffect(() => {
+    if (konten.isError) toast.error('Kontenplan nicht geladen', { description: getAxiosErrorMessage(konten.error) })
+  }, [konten.error, konten.isError])
 
-  const onCreate = () => {
-    const payload = { ...createPayload }
-    if (payload.reverse_charge) {
-      payload.steuersatz = 0
+  const schema = useMemo<ScreenDefinition>(() => ({
+    ...financeSteuerschluesselScreen,
+    subtitle: geladen ? `Schlüssel ${geladen.code} bearbeiten` : financeSteuerschluesselScreen.subtitle,
+    layout: { ...financeSteuerschluesselScreen.layout, density: isTouch ? 'comfortable' : 'compact' },
+    summary: financeSteuerschluesselScreen.summary.map((eintrag) => ({
+      ...eintrag,
+      value: String(eintrag.key === 'anzahl'
+        ? schluessel.length
+        : schluessel.filter((k) => k.active && (k.verwendung ?? '').startsWith(BUCHT_NICHT)).length),
+    })),
+    // Der Schluessel entscheidet ueber Anlage oder Aenderung; beim Bearbeiten steht er fest.
+    fields: financeSteuerschluesselScreen.fields.map((feld) => ({
+      ...feld,
+      readOnly: feld.key === 'code' && geladen !== null,
+      ...(KONTENFELDER.includes(feld.key as Kontenfeld)
+        ? {
+            options: kontenAuswahl(konten.data?.[feld.key as Kontenfeld] ?? [], geladen?.[feld.key as Kontenfeld] ?? ''),
+            placeholder: 'Kein Konto',
+          }
+        : {}),
+    })),
+    actions: financeSteuerschluesselScreen.actions.map((aktion) => ({ ...aktion, disabled: laeuft })),
+  }), [geladen, isTouch, konten.data, laeuft, schluessel])
+
+  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: RECHTE }), [schema])
+  const form = useUniversalFormState({ screen: schema, initialValues: leer })
+  const { resetForm } = form
+  const satzEingabe = text(form.values.steuersatz)
+  useEffect(() => setSatz(satzEingabe), [satzEingabe])
+
+  const zeige = useCallback((k: Steuerschluessel | null) => {
+    setGeladen(k)
+    resetForm(k
+      ? {
+          ...leer,
+          code: k.code, bezeichnung: k.bezeichnung, steuersatz: String(Number(k.steuersatz)),
+          credit_account: k.credit_account ?? '', revenue_account: k.revenue_account ?? '', debit_account: k.debit_account ?? '',
+          par_24_ustg: k.par_24_ustg, reverse_charge: k.reverse_charge, intracom: k.intracom, export: k.export,
+          ustva_position: k.ustva_position ?? '', ustva_bezeichnung: k.ustva_bezeichnung ?? '',
+          gueltig_von: k.gueltig_von, gueltig_bis: k.gueltig_bis ?? '', active: k.active, notizen: k.notizen ?? '',
+        }
+      : { ...leer })
+  }, [resetForm])
+
+  const vorhanden = useCallback((code: string) => schluessel.find((k) => k.code === code) ?? null, [schluessel])
+
+  const speichernFragen = useCallback(() => {
+    const werte = form.values
+    if (PFLICHT.some((feld) => !text(werte[feld]))) {
+      form.revealErrors?.()
+      toast.error('Steuerschlüssel unvollständig', {
+        description: 'Schlüssel, Bezeichnung, Steuersatz und Gültig von angeben. Es gibt keinen Vorgabewert.',
+      })
+      return
     }
-    createMutation.mutate(payload)
+    auftrag.current = `steuerschluessel-speichern-${uuidv4()}`
+    setFragen({
+      code: text(werte.code),
+      bezeichnung: text(werte.bezeichnung),
+      steuersatz: text(werte.steuersatz),
+      credit_account: text(werte.credit_account) || null,
+      revenue_account: text(werte.revenue_account) || null,
+      debit_account: text(werte.debit_account) || null,
+      par_24_ustg: werte.par_24_ustg === true,
+      reverse_charge: werte.reverse_charge === true,
+      intracom: werte.intracom === true,
+      export: werte.export === true,
+      ustva_position: text(werte.ustva_position) || null,
+      ustva_bezeichnung: text(werte.ustva_bezeichnung) || null,
+      gueltig_von: text(werte.gueltig_von),
+      gueltig_bis: text(werte.gueltig_bis) || null,
+      active: werte.active !== false,
+      notizen: text(werte.notizen) || null,
+    })
+  }, [form])
+
+  const speichern = useCallback(async () => {
+    if (!fragen || sperre.current) return
+    sperre.current = true
+    setLaeuft(true)
+    try {
+      const ergebnis = await speichereSteuerschluessel(fragen, auftrag.current)
+      if (!ergebnis.success) {
+        const gruende = (ergebnis.validationErrors ?? []).map((f) => f.message).join(' ')
+        toast.error('Steuerschlüssel nicht gespeichert', { description: gruende || ergebnis.error || 'Die Eingabe wurde abgelehnt.' })
+        return
+      }
+      toast.success('Steuerschlüssel gespeichert', { description: ergebnis.summary ?? undefined })
+      await queryClient.invalidateQueries({ queryKey: LISTE })
+      zeige((await listeSteuerschluessel()).find((k) => k.code === fragen.code) ?? null)
+    } catch (fehler) {
+      toast.error('Steuerschlüssel nicht gespeichert', { description: getAxiosErrorMessage(fehler) })
+    } finally {
+      sperre.current = false
+      setLaeuft(false)
+      setFragen(null)
+    }
+  }, [fragen, queryClient, zeige])
+
+  const screenContext = useMemo(() => createScreenContext({
+    data: { steuerschluessel: schluessel },
+    permissions: { granted: RECHTE },
+    state: { values: form.values, policies: {} },
+    actions: {
+      'finance.steuerschluesselSpeichern': () => speichernFragen(),
+      'finance.steuerschluesselNeu': () => zeige(null),
+      'finance.steuerschluesselBearbeiten': (payload) => zeige(schluessel.find((k) => k.id === String(payload.id)) ?? null),
+    },
+    navigation: { push: () => undefined },
+  }), [form.values, schluessel, speichernFragen, zeige])
+
+  if (liste.isLoading) {
+    return (
+      <div className="space-y-6 p-3 md:p-6">
+        <Skeleton className="min-h-touch h-10 w-48" />
+        <Skeleton className="h-40" />
+      </div>
+    )
   }
 
+  const bestand = fragen ? vorhanden(fragen.code) : null
+
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold">Steuerschluessel</h1>
-          <p className="text-muted-foreground">Steuerarten, Reverse-Charge und UStVA-Zuordnungen verwalten</p>
-        </div>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Neu
-        </Button>
-      </div>
-
-      <div className="flex flex-wrap gap-3">
-        <div className="relative max-w-sm flex-1 min-w-[260px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            className="pl-9"
-            placeholder="Code oder Bezeichnung suchen..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <Input
-          className="w-24"
-          value={country}
-          onChange={(e) => setCountry(e.target.value.toUpperCase())}
-          maxLength={2}
-          placeholder="Land"
-        />
-        <Button variant={activeOnly ? 'default' : 'outline'} onClick={() => setActiveOnly((v) => !v)}>
-          {activeOnly ? 'Nur aktiv' : 'Alle'}
-        </Button>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Percent className="h-5 w-5" />
-            Steuerschluessel ({filtered.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading && <p className="text-muted-foreground text-sm">Lade Steuerschluessel...</p>}
-          {isError && <p className="text-status-error text-sm">Fehler beim Laden der Steuerschluessel.</p>}
-          {!isLoading && !isError && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-left text-muted-foreground">
-                    <th className="py-2 pr-4 font-medium">Code</th>
-                    <th className="py-2 pr-4 font-medium">Bezeichnung</th>
-                    <th className="py-2 pr-4 font-medium">Steuersatz %</th>
-                    <th className="py-2 pr-4 font-medium">Steuerart</th>
-                    <th className="py-2 pr-4 font-medium">Land</th>
-                    <th className="py-2 pr-4 font-medium">UStVA-Position</th>
-                    <th className="py-2 pr-4 font-medium">Konto Soll</th>
-                    <th className="py-2 pr-4 font-medium">Konto Haben</th>
-                    <th className="py-2 font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.length === 0 && (
-                    <tr>
-                      <td colSpan={9} className="py-8 text-center text-muted-foreground">
-                        Keine Steuerschluessel gefunden.
-                      </td>
-                    </tr>
-                  )}
-                  {filtered.map((k) => (
-                    <tr key={k.id} className="border-b hover:bg-muted/50 transition-colors">
-                      <td className="py-2 pr-4 font-mono font-semibold">{k.code}</td>
-                      <td className="py-2 pr-4">{k.bezeichnung}</td>
-                      <td className="py-2 pr-4 text-right">{Number(k.steuersatz).toFixed(2)} %</td>
-                      <td className="py-2 pr-4">
-                        <Badge variant="outline">{steuerartLabel(k)}</Badge>
-                      </td>
-                      <td className="py-2 pr-4">{k.country || 'DE'}</td>
-                      <td className="py-2 pr-4 font-mono">{k.ustva_position ?? '-'}</td>
-                      <td className="py-2 pr-4 font-mono">{k.debit_account ?? '-'}</td>
-                      <td className="py-2 pr-4 font-mono">{k.credit_account ?? '-'}</td>
-                      <td className="py-2">
-                        <Badge variant={k.active !== false ? 'default' : 'secondary'}>
-                          {k.active !== false ? 'Aktiv' : 'Inaktiv'}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Neuen Steuerschluessel anlegen</DialogTitle>
-          </DialogHeader>
-
-          <div className="grid gap-3">
-            <Label>Code</Label>
-            <Input value={createPayload.code} onChange={(e) => setCreatePayload((p) => ({ ...p, code: e.target.value }))} />
-            <Label>Bezeichnung</Label>
-            <Input value={createPayload.bezeichnung} onChange={(e) => setCreatePayload((p) => ({ ...p, bezeichnung: e.target.value }))} />
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Steuersatz %</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  disabled={createPayload.reverse_charge}
-                  value={createPayload.steuersatz}
-                  onChange={(e) => setCreatePayload((p) => ({ ...p, steuersatz: Number(e.target.value || 0) }))}
-                />
-              </div>
-              <div>
-                <Label>Land</Label>
-                <Input
-                  maxLength={2}
-                  value={createPayload.country}
-                  onChange={(e) => setCreatePayload((p) => ({ ...p, country: e.target.value.toUpperCase() }))}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>UStVA-Position</Label>
-                <Input value={createPayload.ustva_position} onChange={(e) => setCreatePayload((p) => ({ ...p, ustva_position: e.target.value }))} />
-              </div>
-              <div>
-                <Label>UStVA-Bezeichnung</Label>
-                <Input value={createPayload.ustva_bezeichnung} onChange={(e) => setCreatePayload((p) => ({ ...p, ustva_bezeichnung: e.target.value }))} />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Konto Soll</Label>
-                <Input value={createPayload.debit_account || ''} onChange={(e) => setCreatePayload((p) => ({ ...p, debit_account: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Konto Haben</Label>
-                <Input value={createPayload.credit_account || ''} onChange={(e) => setCreatePayload((p) => ({ ...p, credit_account: e.target.value }))} />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 pt-1 text-sm">
-              <label className="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={createPayload.intracom}
-                  onChange={(e) => setCreatePayload((p) => ({ ...p, intracom: e.target.checked }))}
-                />
-                Intracom
-              </label>
-              <label className="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={createPayload.export}
-                  onChange={(e) => setCreatePayload((p) => ({ ...p, export: e.target.checked }))}
-                />
-                Export
-              </label>
-              <label className="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={createPayload.reverse_charge}
-                  onChange={(e) =>
-                    setCreatePayload((p) => ({ ...p, reverse_charge: e.target.checked, steuersatz: e.target.checked ? 0 : p.steuersatz }))
-                  }
-                />
-                Reverse-Charge
-              </label>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>Abbrechen</Button>
-            <Button onClick={onCreate} disabled={createMutation.isPending}>Speichern</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+    <div className="space-y-6 p-3 md:p-6">
+      <UniversalMaskRenderer
+        plan={plan}
+        formState={form}
+        hideFormSubmit
+        screenContext={screenContext}
+        tables={{
+          steuerschluessel: schluessel.map((k) => ({
+            id: k.id,
+            code: k.code,
+            bezeichnung: k.bezeichnung,
+            satz_text: prozent(k.steuersatz),
+            credit_account: k.credit_account ?? '–',
+            revenue_account: k.revenue_account ?? '–',
+            debit_account: k.debit_account ?? '–',
+            kennzeichen_text: kennzeichen(k),
+            verwendung: k.verwendung ?? '–',
+            status_text: k.active ? 'Aktiv' : 'Inaktiv',
+          })),
+        }}
+      />
+      <AlertDialog open={fragen !== null} onOpenChange={(offen) => { if (!offen && !laeuft) setFragen(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Steuerschlüssel {fragen?.code} {bestand ? 'ändern' : 'anlegen'}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {bestand
+                ? `Den Schlüssel gibt es schon (${bestand.bezeichnung}, ${prozent(bestand.steuersatz)}); er wird geändert. `
+                : ''}
+              Neue Belege rechnen ab sofort mit {prozent(fragen?.steuersatz.replace(',', '.'))} und den angegebenen Konten.
+              Gebuchte Belege bleiben unverändert.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={laeuft}>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={laeuft}
+              onClick={(event) => {
+                event.preventDefault()
+                void speichern()
+              }}
+            >
+              Speichern
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

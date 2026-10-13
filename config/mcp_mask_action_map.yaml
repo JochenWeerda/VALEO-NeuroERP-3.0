@@ -1,12 +1,12 @@
 schema_version: '1.0'
 slice_id: MCP-MASK-WRITE-PARITY-20261008
-generated_on: '2026-10-12'
+generated_on: '2026-10-13'
 sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 95
-    screens_with_actions: 48
+    actions: 97
+    screens_with_actions: 49
     domains: 14
 mcp_write_tools:
 - crm.contact.log
@@ -80,15 +80,15 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 64
-  mask_mutations_considered: 50
+  mask_actions_considered: 66
+  mask_mutations_considered: 51
   by_coverage:
     adjacent: 1
-    local_ui: 14
+    local_ui: 15
     mapped: 43
     mapped_propose_only: 1
     mapped_read: 2
-    open_high: 3
+    open_high: 4
 mappings:
 - mask_action_id: mask:admin/postfaecher:neu
   mask: admin/postfaecher
@@ -367,6 +367,28 @@ mappings:
   command: null
   coverage: open_high
   notes: Zahlauf-Freigabe HIGH; nahe Journal/Kasse — ADR-076-Umfeld; forbiddenForAgents.
+  mcp_tool_id: null
+- mask_action_id: mask:finance/steuerschluessel:neu
+  mask: finance/steuerschluessel
+  domain: finance
+  action_key: neu
+  label: Neuer Steuerschlüssel
+  command_endpoint: null
+  command: finance.steuerschluesselNeu
+  coverage: local_ui
+  local_effect: form_reset
+  notes: 'SD stubReason: leert die Eingabe fuer einen neuen Steuerschluessel; keine HTTP-Mutation.'
+  mcp_tool_id: null
+- mask_action_id: mask:finance/steuerschluessel:speichern
+  mask: finance/steuerschluessel
+  domain: finance
+  action_key: speichern
+  label: Steuerschlüssel speichern
+  command_endpoint: /api/v1/finance/tax-keys/actions/speichern
+  command: finance.steuerschluesselSpeichern
+  coverage: open_high
+  notes: Steuerschluessel bestimmen Satz und Konten aller Belege; ein Agent darf eine Regel vorschlagen,
+    nie in Kraft setzen. Bewusst ohne MCP-Werkzeug; forbiddenForAgents.
   mcp_tool_id: null
 - mask_action_id: mask:fuhrpark/ausgehende-dokumente:neu
   mask: fuhrpark/ausgehende-dokumente
@@ -770,4 +792,4 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high nur Zahlauf; blocked_no_endpoint 0; local_ui 14; FIN-CLOSE blocked_adr_076.'
+  0. Rest: open_high nur Zahlauf; blocked_no_endpoint 0; local_ui 15; FIN-CLOSE blocked_adr_076.'

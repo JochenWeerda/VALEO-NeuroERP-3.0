@@ -2892,3 +2892,307 @@ export const salesGutschriftScreen = {
     "bundleGroup": "sales"
   }
 } satisfies ScreenDefinition
+
+/**
+ * Steuerschluessel des Mandanten: die eine Quelle fuer Satz und Konten aller Belege. Kein Vorgabewert.
+ * Quelle: `build_finance_steuerschluessel_screen_definition`.
+ */
+export const financeSteuerschluesselScreen = {
+  "schemaVersion": 1,
+  "id": "finance/steuerschluessel",
+  "domain": "finance",
+  "mode": "list",
+  "title": "Steuerschlüssel",
+  "subtitle": "Finanzbuchhaltung / Stammdaten",
+  "adapter": {
+    "type": "native",
+    "sourceId": "finance/steuerschluessel",
+    "temporary": false
+  },
+  "dataSources": [
+    {
+      "key": "steuerschluessel",
+      "endpoint": "/api/v1/finance/tax-keys",
+      "pageSize": 200,
+      "table": "domain_erp.tax_keys"
+    },
+    {
+      "key": "konten",
+      "endpoint": "/api/v1/finance/tax-keys/kontenvorschlaege",
+      "table": "domain_erp.chart_of_accounts"
+    }
+  ],
+  "summary": [
+    {
+      "key": "anzahl",
+      "label": "Steuerschlüssel",
+      "value": "0"
+    },
+    {
+      "key": "ohne_buchung",
+      "label": "Buchen nicht automatisch",
+      "value": "0"
+    }
+  ],
+  "fields": [
+    {
+      "key": "code",
+      "label": "Schlüssel",
+      "type": "text",
+      "required": true,
+      "helpText": "Ein oder zwei Ziffern. Ein vorhandener Schlüssel wird geändert, ein neuer angelegt."
+    },
+    {
+      "key": "bezeichnung",
+      "label": "Bezeichnung",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "steuersatz",
+      "label": "Steuersatz in %",
+      "type": "number",
+      "required": true,
+      "helpText": "Es gibt keinen Vorgabewert. Steuerfrei ist 0."
+    },
+    {
+      "key": "credit_account",
+      "label": "Umsatzsteuerkonto",
+      "type": "select",
+      "options": [],
+      "dataSourceKey": "konten",
+      "helpText": "Verbindlichkeitskonto aus dem Kontenplan, für Verkaufsbelege. Bei einem Satz über 0 Pflicht, damit gebucht wird."
+    },
+    {
+      "key": "revenue_account",
+      "label": "Erlöskonto",
+      "type": "select",
+      "options": [],
+      "dataSourceKey": "konten",
+      "helpText": "Erlöskonto aus dem Kontenplan. Ohne Erlöskonto wird mit dem Schlüssel kein Verkaufsbeleg automatisch gebucht."
+    },
+    {
+      "key": "debit_account",
+      "label": "Vorsteuerkonto",
+      "type": "select",
+      "options": [],
+      "dataSourceKey": "konten",
+      "helpText": "Aktivkonto aus dem Kontenplan, für Eingangsbelege."
+    },
+    {
+      "key": "par_24_ustg",
+      "label": "Durchschnittssatz nach § 24 UStG",
+      "type": "boolean"
+    },
+    {
+      "key": "reverse_charge",
+      "label": "Reverse Charge (§ 13b UStG)",
+      "type": "boolean",
+      "helpText": "Verlangt den Steuersatz 0; wird nicht automatisch gebucht."
+    },
+    {
+      "key": "intracom",
+      "label": "Innergemeinschaftlich",
+      "type": "boolean"
+    },
+    {
+      "key": "export",
+      "label": "Ausfuhr",
+      "type": "boolean"
+    },
+    {
+      "key": "ustva_position",
+      "label": "UStVA-Kennzahl",
+      "type": "text"
+    },
+    {
+      "key": "ustva_bezeichnung",
+      "label": "UStVA-Text",
+      "type": "text"
+    },
+    {
+      "key": "gueltig_von",
+      "label": "Gültig von",
+      "type": "date",
+      "required": true
+    },
+    {
+      "key": "gueltig_bis",
+      "label": "Gültig bis",
+      "type": "date"
+    },
+    {
+      "key": "active",
+      "label": "Aktiv",
+      "type": "boolean",
+      "helpText": "Ein inaktiver Schlüssel steht in keiner Auswahl und bucht nicht."
+    },
+    {
+      "key": "notizen",
+      "label": "Notizen",
+      "type": "textarea"
+    }
+  ],
+  "workflow": {
+    "processKey": "finance.steuerschluessel"
+  },
+  "actions": [
+    {
+      "key": "speichern",
+      "label": "Steuerschlüssel speichern",
+      "command": "finance.steuerschluesselSpeichern",
+      "kind": "primary",
+      "dangerLevel": "moderate",
+      "zone": "header",
+      "requiresConfirmation": true,
+      "humanApprovalRequired": true,
+      "forbiddenForAgents": true,
+      "permission": "finance.steuerschluessel.write",
+      "commandEndpoint": "/api/v1/finance/tax-keys/actions/speichern",
+      "method": "POST",
+      "inputFields": [
+        {
+          "key": "code",
+          "label": "Schlüssel",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "bezeichnung",
+          "label": "Bezeichnung",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "steuersatz",
+          "label": "Steuersatz in %",
+          "type": "number",
+          "required": true
+        },
+        {
+          "key": "gueltig_von",
+          "label": "Gültig von",
+          "type": "date",
+          "required": true
+        },
+        {
+          "key": "credit_account",
+          "label": "Umsatzsteuerkonto",
+          "type": "text"
+        },
+        {
+          "key": "revenue_account",
+          "label": "Erlöskonto",
+          "type": "text"
+        },
+        {
+          "key": "debit_account",
+          "label": "Vorsteuerkonto",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "key": "neu",
+      "label": "Neuer Steuerschlüssel",
+      "command": "finance.steuerschluesselNeu",
+      "kind": "secondary",
+      "dangerLevel": "safe",
+      "zone": "footer",
+      "localEffect": "form_reset",
+      "stubReason": "Leert die Eingabe fuer einen neuen Steuerschluessel."
+    }
+  ],
+  "tables": [
+    {
+      "key": "steuerschluessel",
+      "label": "Steuerschlüssel",
+      "dataSourceKey": "steuerschluessel",
+      "serverPagination": false,
+      "pageSize": 50,
+      "virtualized": false,
+      "rowHeight": 44,
+      "rowDetail": false,
+      "columns": [
+        {
+          "key": "code",
+          "label": "Schlüssel",
+          "width": 90,
+          "sortable": true,
+          "filterable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "bezeichnung",
+          "label": "Bezeichnung",
+          "filterable": true,
+          "priority": "primary"
+        },
+        {
+          "key": "satz_text",
+          "label": "Satz",
+          "priority": "primary"
+        },
+        {
+          "key": "credit_account",
+          "label": "Umsatzsteuerkonto",
+          "priority": "secondary"
+        },
+        {
+          "key": "revenue_account",
+          "label": "Erlöskonto",
+          "priority": "secondary"
+        },
+        {
+          "key": "debit_account",
+          "label": "Vorsteuerkonto",
+          "priority": "secondary"
+        },
+        {
+          "key": "kennzeichen_text",
+          "label": "Kennzeichen",
+          "priority": "secondary"
+        },
+        {
+          "key": "verwendung",
+          "label": "Bucht automatisch für",
+          "priority": "primary"
+        },
+        {
+          "key": "status_text",
+          "label": "Status",
+          "renderKind": "status",
+          "priority": "primary"
+        }
+      ],
+      "rowActions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "command": "finance.steuerschluesselBearbeiten",
+          "dangerLevel": "safe"
+        }
+      ]
+    }
+  ],
+  "noWorkflowReason": "Steuerschluessel sind Stammdaten; sie werden gepflegt, es gibt keinen Belegablauf.",
+  "layout": {
+    "floorplan": "worklist",
+    "density": "compact",
+    "contextRail": "none",
+    "tableProfile": "financial",
+    "columnNavigation": "single",
+    "preferredMode": "desktopDense",
+    "mobileMode": "mobileStack",
+    "touchTargetPx": 44,
+    "summaryPlacement": "footer",
+    "statusPlacement": "afterFields"
+  },
+  "performance": {
+    "initialPayloadBudgetKb": 24,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": false,
+    "lookupMinChars": 2,
+    "bundleGroup": "finance"
+  }
+} satisfies ScreenDefinition

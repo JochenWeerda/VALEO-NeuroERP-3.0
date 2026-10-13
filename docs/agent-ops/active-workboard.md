@@ -11,6 +11,73 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## LOGIN-REFRESH-20261013 — in arbeit, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** reale Sitzung endet nach Zugriffstokenablauf; beide HTTP-Clients erneuern Token nicht und Kaltstart verwirft Refresh. **Ziel:** Providererneuerung vor HTTP-Transport und beim Wiederladen, ohne abgelaufene Token zu akzeptieren. **Dateibesitz:** lib/auth.ts, hooks/useAuth.ts, lib/api-client.ts, lib/axios.ts ausschliesslich Sitzungserneuerung innerhalb eigener Identity-Elternclaims; auth.test.ts und neue fokussierte Vertraege, eigene QA/Workboard. **Abnahme:** Kaltstart ohne vorzeitige Freigabe, parallele Anfragen teilen einen Refresh, Logout gewinnt gegen laufende Erneuerung, fehlgeschlagener Refresh sperrt Zugang; realer Browser-Recheck. Keine persoenlichen Kennungen, DB/Container/Reset.
+
+**Lieferung:** Kaltstart und HTTP-Erneuerung implementiert, elf neue Frontendvertraege bestanden; realer Ablauf-Recheck noch offen. Nachweis: login-variants-20261013.md. Keine persoenlichen Kennungen, neue DB/Container oder Migration.
+
+## STEUERSCHLUESSEL-KONTENVORSCHLAG-20261013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Auftrag: Kontonummern aus dem Kontenplan vorschlagen
+(fachliche kontextuelle Zuordnung).
+**Lieferung:** `GET /finance/tax-keys/kontenvorschlaege?steuersatz=` — je Feld (Umsatzsteuer = Verbindlichkeit,
+Vorsteuer = Aktiv, Erloes = Erloes) die bebuchbaren Konten der Art, zum Satz und zur Rolle passende zuerst; die
+Maske `finance/steuerschluessel` zeigt sie als Auswahl, waehlt nichts vor. Speichern lehnt ein Konto der falschen
+Art ab (`konto_hindernis`). Tests 31 / Vitest 231. QA: Nachtrag in
+`docs/quality-assurance/steuerschluessel-maske-sd-20261013.md`.
+**Mask Builder (alle Masken):** `schemaVolatility` nahm von Auswahlfeldern nur Werte, nicht Beschriftungen, in den
+Cache-Schluessel; korrigiert.
+
+## LOGIN-TOPBAR-IDENTITY-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** reales Benutzermenü zeigt festes Test-Admin-Profil, Abmelden-Schaltfläche hat keinen Handler. **Ziel:** kanonische angemeldete Identität anzeigen und realen Logout auslösen. **Dateibesitz:** TopBar.tsx nur Authimport, Profilwerte und Logout-Handler/Status; keine Gestaltung; neue React-Verträge; eigene QA/Workboard/Handbuch. Elternclaim IDENTITY-CONTROL behält lib/auth.ts und LOGIN-VARIANTS Gesamtabnahme. **Abnahme:** echter Testnutzer statt Attrappe sichtbar, Abmelden ruft zentralen Widerruf auf, keine erfundene Adminidentität; Browser-Screenshots/Logout-Recheck, bestehende Sicherheitsverträge bleiben erhalten. Keine persönlichen Benutzerwerte versionieren, keine DB/Container/Reset.
+
+**Lieferung:** Drei React-Vertraege und reale Kennung/Abmeldung samt erneuter Kennwortanforderung im Browser bestanden. Nachweis: login-variants-20261013.md. Keine persoenlichen Kennungen, neue DB/Container oder Migration.
+
+## LOGIN-RUNTIME-ISSUER-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** reale Anmeldung und lesender Backendnachweis: erwarteter issuer http://keycloak:8080, Browserprovider issuer http://localhost:8080. **Ziel:** öffentlichen Token-Aussteller vom internen JWKS-Transport trennen. **Dateibesitz:** docker-compose.yml backend nur OIDC_ISSUER_URL/OIDC_JWKS_URL; lokaler begrenzter Runtimeoverride ohne init_db und ohne Schemaänderung; eigener Konfigurationsvertrag, QA/Handbuch/Workboard. **Abnahme:** tatsächliche Backendkonfiguration korrekt, bestehender Backenddienst rekonfiguriert ohne neue DB/Container pro Test oder Migration; keine Änderung bestehender Nutzer/Rollen/Realmrichtlinien, echter Browser-Recheck. Persönliche Kennungen nicht versionieren. Produktions-Deploymentkonfiguration bleibt eigener offener Befund.
+
+**Lieferung:** Oeffentlicher Issuer/interner JWKS getrennt; Konfigurationsvertrag, Healthz 200 und echter Browserlogin; Produktionskonfiguration offen. Nachweis: login-variants-20261013.md. Keine persoenlichen Kennungen, neue DB/Container oder Migration.
+
+## STEUERSCHLUESSEL-MASKE-SD-20261013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Auftrag: Maske Steuerschluessel vereinheitlichen,
+keine handgebauten Masken.
+**Lieferung:** ScreenDefinition `finance/steuerschluessel` (ohne Vorgabewert; Erloeskonto, Paragraf 24, Spalte
+„Bucht automatisch fuer“ aus der Regel der Buchung), Seite als Wrapper, CE
+`POST /finance/tax-keys/actions/speichern` (`finance_write`, Anlage oder Aenderung nach Schluessel, Kontenpruefung
+gegen den Kontenplan, Alt/Neu in der Antwort). `speichern` ist `forbiddenForAgents`, in der Aktionskarte
+`open_high`, kein MCP-Werkzeug. Aktionskatalog, Aktionskarte (open_high 4, local_ui 15), Handbuch, OpenAPI
+(3142 Pfade), Rollenvertrag nachgezogen. Tests: 24 (Maske) / 74 (mit Gutschrift) / Vitest 228.
+QA: `docs/quality-assurance/steuerschluessel-maske-sd-20261013.md`.
+**Mitbehoben:** `GET /finance/tax-keys` lag eine Stunde im Cache und wurde nach keiner Aenderung geleert; ein
+Ladefehler kam als leere Liste zurueck. **Mask Builder (alle Masken):** `schemaVolatility` in
+`render-plan/schema-compiler.ts` nahm `readOnly` und `subtitle` nicht in den Cache-Schluessel — zur Laufzeit
+gesperrte Felder blieben aenderbar. Korrigiert, Test `render-plan-cache.test.ts`.
+**Vorgefunden, nicht von mir, nicht behoben:** `test_generate_architecture_index::test_build_index_mapping_complete`
+ist rot (`tenant_lifecycle_service` ohne Domain-Zuordnung in `generate_architecture_index.py`);
+`test_inventory_auxiliary::test_route_is_registered` antwortet 401.
+
+## LOGIN-ROUTE-COLLISION-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** echte Browserwarnung: auth/callback matched protected _app/auth/Callback. **Ziel:** kanonische öffentliche Anmelderouten gegen automatische Groß-/Kleinschreibungsduplikate schützen. **Dateibesitz:** generate-tanstack-routes.mjs ausschließlich öffentliche Authpfade und deren generierte Routen/Inventar; neuer tatsächlicher TanStack-Matching-Vertrag; eigene QA/Workboard. **Abnahme:** login/auth/login/auth/callback samt Großschreibung matchen außerhalb _app; andere ERP-Routen bleiben geschützt; Generator stabil und echter positiver Browser-Recheck. Keine Authlockerung, keine persönlichen Kennungen, keine DB/Container/Reset; fremdes Styling erhalten.
+
+**Lieferung:** Kanonische oeffentliche Authrouten, sieben reale TanStack-Matchingfaelle und echte Anmeldung bestanden. Nachweis: login-variants-20261013.md. Keine persoenlichen Kennungen, neue DB/Container oder Migration.
+
+## LOGIN-CALLBACK-REENTRANCY-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** reale gültige Kennwortanmeldung des eigenen synthetischen Nutzers kehrt zur Loginseite zurück; wiederholte Callbackfehler. **Dateibesitz:** pages/auth/Callback.tsx nur Import/effect-Ausführungsgrenze, keine fremden Stylinghunks; neue React-StrictMode-Verträge; eigene QA/Workboard. Elternclaim LOGIN-VARIANTS behält komplette Abnahme. **Abnahme:** genau ein Callback pro gemounteter Seite auch bei StrictMode und instabiler Hook-Funktionsreferenz; PKCE/State/Nonce und Replay-Abweisung bleiben bestehen; echter Browser-Recheck und synthetische Screenshots. Fremdes Styling erhalten, keine persönlichen Kennungen, keine DB/Container/Reset.
+
+**Lieferung:** Einmalige Callbackausfuehrung mit vier React-Vertraegen; echte Anmeldung bis Start. Nachweis: login-variants-20261013.md. Keine persoenlichen Kennungen, neue DB/Container oder Migration.
+
+## LOGIN-VARIANTS-20261013 — in arbeit, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber: Anmeldeprozess in allen Varianten testen, real im Browser mit Screenshots. **Ziel:** nachvollziehbare Testmatrix fuer Providerlogin, PKCE/Callback, Token-/Mandanten-/Rollenbindung, Refresh, Logout, Widerruf, MFA-/Kennwortablauf und Dienste. **Dateibesitz:** lib/auth.test.ts nur neue Varianten, gegebenenfalls Authquellen innerhalb bestehender Elternclaims; eigene QA/Handbuch samt ausschliesslich echten synthetischen Screenshots; eigene Provider-Testfixture-/Pruefskripte. **Abnahme:** automatische Verträge und reale Browsernachweise getrennt; kein fingierter Erfolg, keine persönlichen Kennungen/Passwörter/OTP in Git oder Screenshots; persönliche MFA bleibt vertagt, Kennwortänderung im Browser erforderlichenfalls Benutzerhandoff. Vorhandener Prüfstand, keine DB/Container/Reset. Provider-Testdaten nur eigene synthetische Kennungen, keine Änderung bestehender Benutzer oder Sicherheitsrichtlinien.
+
+**Lieferung:** 30 Frontendfaelle, 124 vorhandene Backendfaelle und echte Anmeldung/Abmeldung dokumentiert; gesamte Variantenabnahme bleibt in Arbeit. Nachweis: login-variants-20261013.md. Keine persoenlichen Kennungen, neue DB/Container oder Migration.
+
 ## IDENTITY-CI-CONTRACT-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** bestätigte CI-Fehler aus Run 38305586021 schließen. **Dateibesitz:** route-aliases.json nur zwei Kontingentseiten und deren generierte Routen; tenants.py nur gemeinsame verifizierte Tenant-Dependency (Elternclaim bleibt); sales_credit_notes.py ausschließlich geprüfte statische SQL-Suffixannotation; neue Tenant-HTTP-Gegenprobe, eigene QA/Workboard und isolierte OpenAPI. **Abnahme:** Generator erhält beide Routen dauerhaft; Doc-Drift null; Tenant-Dependency vor DB, keine System-Ausnahme; SQL-Suffix nur feste Literale und Werte als Bindparameter, SQL-Gate grün. Keine Fachbuchung, Rechteerweiterung, Migration, neue DB/Container/Reset; fremde WIP erhalten.

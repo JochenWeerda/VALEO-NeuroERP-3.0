@@ -9,6 +9,7 @@ import { useFeature } from '@/hooks/useFeature'
 import { useTheme } from '@/hooks/useTheme'
 import { availableLanguages, loadLanguage } from '@/i18n/config'
 import { useTouchDevice } from '@/hooks/useTouchDevice'
+import { useAuth } from '@/hooks/useAuth'
 
 interface TopBarProps {
   onCommandOpen?: () => void
@@ -161,10 +162,7 @@ export function TopBar({
   const isTouchChrome = useTouchDevice()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
-  const user = {
-    name: 'Test Admin',
-    email: 'test-admin@valeo.local',
-  }
+  const { user, logout, isAuthenticated } = useAuth()
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent): void => {
@@ -323,8 +321,8 @@ export function TopBar({
         {userMenuOpen && (
           <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border bg-popover p-1 shadow-lg">
             <div className="px-3 py-2">
-              <p className="text-sm font-medium">{user.name}</p>
-              <p className="text-xs text-muted-foreground">{user.email}</p>
+              <p className="text-sm font-medium">{user?.name ?? 'Nicht angemeldet'}</p>
+              <p className="text-xs text-muted-foreground">{user?.email ?? ''}</p>
             </div>
             <div className="my-1 h-px bg-border" />
             {isTouchChrome && (
@@ -396,7 +394,8 @@ export function TopBar({
               <span>Dokumentation</span>
             </button>
             <div className="my-1 h-px bg-border" />
-            <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-left text-sm text-destructive hover:bg-accent">
+            <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-left text-sm text-destructive hover:bg-accent"
+              disabled={!isAuthenticated} onClick={() => { setUserMenuOpen(false); logout() }}>
               <LogOut className="h-4 w-4" />
               <span>Abmelden</span>
             </button>

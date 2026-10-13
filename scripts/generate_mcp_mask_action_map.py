@@ -387,6 +387,11 @@ LOCAL_UI_RULES: dict[str, dict[str, str]] = {
             "MCP-MASK-CE-BATCH2-20261009."
         ),
     },
+    "mask:finance/steuerschluessel:neu": {
+        "coverage": "local_ui",
+        "local_effect": "form_reset",
+        "notes": "SD stubReason: leert die Eingabe fuer einen neuen Steuerschluessel; keine HTTP-Mutation.",
+    },
     "mask:sales/gutschrift:neu": {
         "coverage": "local_ui",
         "local_effect": "form_reset",
@@ -403,6 +408,13 @@ LOCAL_UI_RULES: dict[str, dict[str, str]] = {
 }
 
 BLOCKED_RULES: dict[str, dict[str, str]] = {
+    "mask:finance/steuerschluessel:speichern": {
+        "coverage": "open_high",
+        "notes": (
+            "Steuerschluessel bestimmen Satz und Konten aller Belege; ein Agent darf eine Regel vorschlagen, "
+            "nie in Kraft setzen. Bewusst ohne MCP-Werkzeug; forbiddenForAgents."
+        ),
+    },
     "mask:sales/gutschrift:vorschlag_freigeben": {
         "coverage": "open_high",
         "notes": "Menschliche Freigabe (Vier Augen) eines Agentenvorschlags; bewusst ohne MCP-Werkzeug; forbiddenForAgents.",

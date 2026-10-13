@@ -3082,3 +3082,160 @@ def build_sales_gutschrift_screen_definition() -> dict[str, Any]:
             "bundleGroup": "sales",
         },
     }
+
+
+def build_finance_steuerschluessel_screen_definition() -> dict[str, Any]:
+    """Steuerschluessel des Mandanten pflegen. Die Seite speichert, der Builder zeichnet.
+
+    Die Tabelle ``domain_erp.tax_keys`` ist die eine Quelle, aus der Belege Satz und Konten nehmen
+    (``app/finance/steuerschluessel.py``). Die Maske hat deshalb keinen Vorgabewert — weder fuer den
+    Satz noch fuer ein Konto — und zeigt je Schluessel, wofuer er automatisch bucht oder warum nicht.
+    Speichern ist Menschen vorbehalten: Ein Agent darf eine Steuerregel vorschlagen, nie in Kraft setzen.
+    """
+    return {
+        "schemaVersion": 1,
+        "id": "finance/steuerschluessel",
+        "domain": "finance",
+        "mode": "list",
+        "title": "Steuerschlüssel",
+        "subtitle": "Finanzbuchhaltung / Stammdaten",
+        "adapter": {"type": "native", "sourceId": "finance/steuerschluessel", "temporary": False},
+        "dataSources": [
+            {"key": "steuerschluessel", "endpoint": "/api/v1/finance/tax-keys", "pageSize": 200,
+             "table": "domain_erp.tax_keys"},
+            # Konten der passenden Art aus dem Kontenplan, die fachlich naechsten zuerst.
+            {"key": "konten", "endpoint": "/api/v1/finance/tax-keys/kontenvorschlaege",
+             "table": "domain_erp.chart_of_accounts"},
+        ],
+        "summary": [
+            {"key": "anzahl", "label": "Steuerschlüssel", "value": "0"},
+            {"key": "ohne_buchung", "label": "Buchen nicht automatisch", "value": "0"},
+        ],
+        "fields": [
+            {"key": "code", "label": "Schlüssel", "type": "text", "required": True,
+             "helpText": "Ein oder zwei Ziffern. Ein vorhandener Schlüssel wird geändert, ein neuer angelegt."},
+            {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+            {"key": "steuersatz", "label": "Steuersatz in %", "type": "number", "required": True,
+             "helpText": "Es gibt keinen Vorgabewert. Steuerfrei ist 0."},
+            # Die Auswahl kommt aus dem Kontenplan: je Feld nur Konten der passenden Art, zum Satz passende
+            # zuerst. Vorgeschlagen wird, gewaehlt wird nicht — es gibt keinen Vorgabewert.
+            {"key": "credit_account", "label": "Umsatzsteuerkonto", "type": "select", "options": [],
+             "dataSourceKey": "konten",
+             "helpText": "Verbindlichkeitskonto aus dem Kontenplan, für Verkaufsbelege. "
+                         "Bei einem Satz über 0 Pflicht, damit gebucht wird."},
+            {"key": "revenue_account", "label": "Erlöskonto", "type": "select", "options": [],
+             "dataSourceKey": "konten",
+             "helpText": "Erlöskonto aus dem Kontenplan. Ohne Erlöskonto wird mit dem Schlüssel kein "
+                         "Verkaufsbeleg automatisch gebucht."},
+            {"key": "debit_account", "label": "Vorsteuerkonto", "type": "select", "options": [],
+             "dataSourceKey": "konten",
+             "helpText": "Aktivkonto aus dem Kontenplan, für Eingangsbelege."},
+            {"key": "par_24_ustg", "label": "Durchschnittssatz nach § 24 UStG", "type": "boolean"},
+            {"key": "reverse_charge", "label": "Reverse Charge (§ 13b UStG)", "type": "boolean",
+             "helpText": "Verlangt den Steuersatz 0; wird nicht automatisch gebucht."},
+            {"key": "intracom", "label": "Innergemeinschaftlich", "type": "boolean"},
+            {"key": "export", "label": "Ausfuhr", "type": "boolean"},
+            {"key": "ustva_position", "label": "UStVA-Kennzahl", "type": "text"},
+            {"key": "ustva_bezeichnung", "label": "UStVA-Text", "type": "text"},
+            {"key": "gueltig_von", "label": "Gültig von", "type": "date", "required": True},
+            {"key": "gueltig_bis", "label": "Gültig bis", "type": "date"},
+            {"key": "active", "label": "Aktiv", "type": "boolean",
+             "helpText": "Ein inaktiver Schlüssel steht in keiner Auswahl und bucht nicht."},
+            {"key": "notizen", "label": "Notizen", "type": "textarea"},
+        ],
+        "workflow": {"processKey": "finance.steuerschluessel"},
+        "actions": [
+            {"key": "speichern", "label": "Steuerschlüssel speichern", "command": "finance.steuerschluesselSpeichern",
+             "kind": "primary", "dangerLevel": "moderate", "zone": "header",
+             "requiresConfirmation": True,
+             "humanApprovalRequired": True,
+             "forbiddenForAgents": True,
+             "permission": "finance.steuerschluessel.write",
+             "commandEndpoint": "/api/v1/finance/tax-keys/actions/speichern",
+             "method": "POST",
+             "inputFields": [
+                 {"key": "code", "label": "Schlüssel", "type": "text", "required": True},
+                 {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+                 {"key": "steuersatz", "label": "Steuersatz in %", "type": "number", "required": True},
+                 {"key": "gueltig_von", "label": "Gültig von", "type": "date", "required": True},
+                 {"key": "credit_account", "label": "Umsatzsteuerkonto", "type": "text"},
+                 {"key": "revenue_account", "label": "Erlöskonto", "type": "text"},
+                 {"key": "debit_account", "label": "Vorsteuerkonto", "type": "text"},
+             ]},
+            {"key": "neu", "label": "Neuer Steuerschlüssel", "command": "finance.steuerschluesselNeu",
+             "kind": "secondary", "dangerLevel": "safe", "zone": "footer",
+             "localEffect": "form_reset",
+             "stubReason": "Leert die Eingabe fuer einen neuen Steuerschluessel."},
+        ],
+        "tables": [
+            {
+                "key": "steuerschluessel",
+                "label": "Steuerschlüssel",
+                "dataSourceKey": "steuerschluessel",
+                "serverPagination": False,
+                "pageSize": 50,
+                "virtualized": False,
+                "rowHeight": 44,
+                "rowDetail": False,
+                "columns": [
+                    {"key": "code", "label": "Schlüssel", "width": 90, "sortable": True, "filterable": True,
+                     "priority": "primary"},
+                    {"key": "bezeichnung", "label": "Bezeichnung", "filterable": True, "priority": "primary"},
+                    {"key": "satz_text", "label": "Satz", "priority": "primary"},
+                    {"key": "credit_account", "label": "Umsatzsteuerkonto", "priority": "secondary"},
+                    {"key": "revenue_account", "label": "Erlöskonto", "priority": "secondary"},
+                    {"key": "debit_account", "label": "Vorsteuerkonto", "priority": "secondary"},
+                    {"key": "kennzeichen_text", "label": "Kennzeichen", "priority": "secondary"},
+                    {"key": "verwendung", "label": "Bucht automatisch für", "priority": "primary"},
+                    {"key": "status_text", "label": "Status", "renderKind": "status", "priority": "primary"},
+                ],
+                "rowActions": [
+                    {"key": "bearbeiten", "label": "Bearbeiten", "command": "finance.steuerschluesselBearbeiten",
+                     "dangerLevel": "safe"},
+                ],
+            },
+        ],
+        "noWorkflowReason": "Steuerschluessel sind Stammdaten; sie werden gepflegt, es gibt keinen Belegablauf.",
+        "agentContract": {
+            "businessPurpose": (
+                "Steuerschluessel des Mandanten pflegen: Satz, Umsatzsteuer-, Vorsteuer- und Erloeskonto, "
+                "Paragraf 24 UStG, Reverse Charge, Gueltigkeit. Aus ihnen nehmen alle Belege ihre Umsatzsteuer."
+            ),
+            "examplePrompts": [
+                "Welche Steuerschluessel buchen nicht automatisch und warum?",
+                "Auf welches Konto bucht Steuerschluessel 3 die Umsatzsteuer?",
+            ],
+            "dangerousActions": [
+                {
+                    "key": "speichern",
+                    "reason": "Ein Steuerschluessel bestimmt Satz und Konten aller kuenftigen Belege. Ein Agent darf "
+                              "eine Aenderung vorschlagen, in Kraft setzt sie ein Mensch — die Aktion ist "
+                              "forbiddenForAgents und hat kein MCP-Werkzeug.",
+                },
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+                "screenRoot": "[data-testid='screen-finance/steuerschluessel']",
+                "primaryAction": "[data-testid='action-speichern']",
+            },
+        },
+        "layout": {
+            "floorplan": "worklist",
+            "density": "compact",
+            "contextRail": "none",
+            "tableProfile": "financial",
+            "columnNavigation": "single",
+            "preferredMode": "desktopDense",
+            "mobileMode": "mobileStack",
+            "touchTargetPx": 44,
+            "summaryPlacement": "footer",
+            "statusPlacement": "afterFields",
+        },
+        "performance": {
+            "initialPayloadBudgetKb": 24,
+            "requiresLazyTabs": False,
+            "requiresVirtualTables": False,
+            "lookupMinChars": 2,
+            "bundleGroup": "finance",
+        },
+    }

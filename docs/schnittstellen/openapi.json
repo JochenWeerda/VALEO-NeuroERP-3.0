@@ -88235,6 +88235,35 @@
         "title": "KontoLookupResult",
         "type": "object"
       },
+      "Kontovorschlag": {
+        "properties": {
+          "account_name": {
+            "title": "Account Name",
+            "type": "string"
+          },
+          "account_number": {
+            "title": "Account Number",
+            "type": "string"
+          },
+          "grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grund"
+          }
+        },
+        "required": [
+          "account_number",
+          "account_name"
+        ],
+        "title": "Kontovorschlag",
+        "type": "object"
+      },
       "KontraktCreate": {
         "properties": {
           "bezeichnung": {
@@ -157569,12 +157598,37 @@
             "type": "string"
           },
           "ustva_bezeichnung": {
-            "title": "Ustva Bezeichnung",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ustva Bezeichnung"
           },
           "ustva_position": {
-            "title": "Ustva Position",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ustva Position"
+          },
+          "verwendung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verwendung"
           }
         },
         "required": [
@@ -302092,6 +302146,57 @@
         ]
       }
     },
+    "/api/v1/finance/tax-keys/actions/speichern": {
+      "post": {
+        "description": "CE fuer finance/steuerschluessel:speichern. Der Schluessel (code) entscheidet: neu oder Aenderung.",
+        "operationId": "action_steuerschluessel_speichern_api_v1_finance_tax_keys_actions_speichern_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Steuerschlüssel anlegen oder ändern (Masken-CommandEndpoint)",
+        "tags": [
+          "finance",
+          "tax",
+          "finance",
+          "tax"
+        ]
+      }
+    },
     "/api/v1/finance/tax-keys/code/{code}": {
       "get": {
         "description": "Get tax key by code.",
@@ -302135,6 +302240,73 @@
           }
         ],
         "summary": "Tax key by code abrufen",
+        "tags": [
+          "finance",
+          "tax",
+          "finance",
+          "tax"
+        ]
+      }
+    },
+    "/api/v1/finance/tax-keys/kontenvorschlaege": {
+      "get": {
+        "description": "Umsatzsteuer-, Vorsteuer- und Erlöskonten des Mandanten, die fachlich nächsten zuerst. Wählt nichts vor.",
+        "operationId": "list_kontenvorschlaege_api_v1_finance_tax_keys_kontenvorschlaege_get",
+        "parameters": [
+          {
+            "description": "Steuersatz in Prozent; reiht passende Konten nach vorn",
+            "in": "query",
+            "name": "steuersatz",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Steuersatz in Prozent; reiht passende Konten nach vorn",
+              "title": "Steuersatz"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "items": {
+                      "$ref": "#/components/schemas/Kontovorschlag"
+                    },
+                    "type": "array"
+                  },
+                  "title": "Response List Kontenvorschlaege Api V1 Finance Tax Keys Kontenvorschlaege Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Konten aus dem Kontenplan je Feld des Steuerschlüssels vorschlagen",
         "tags": [
           "finance",
           "tax",

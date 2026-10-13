@@ -246,6 +246,9 @@ services:
       # RATIONS_OPTIMIZATION_URL: http://rations-optimization:8000
       RATIONS_OPTIMIZATION_API_KEY: ${RATIONS_OPTIMIZATION_API_KEY:-dev-api-key-change-in-production}
       KEYCLOAK_URL: http://keycloak:8080
+      # JWT issuer is the browser-visible URL; JWKS uses the Docker network.
+      OIDC_ISSUER_URL: ${OIDC_ISSUER_URL:-http://localhost:8080/realms/valeo-neuro-erp}
+      OIDC_JWKS_URL: ${OIDC_JWKS_URL:-http://keycloak:8080/realms/valeo-neuro-erp/protocol/openid-connect/certs}
       API_DEV_TOKEN: dev-token
       AI_SERVICE_URL: http://ai:5000
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}

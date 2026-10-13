@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from '@/app/routing/typed-router'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,8 +14,12 @@ export default function CallbackPage(): JSX.Element {
   const [searchParams] = useSearchParams()
   const { handleCallback } = useAuth()
   const [error, setError] = useState<string | null>(null)
+  const started = useRef(false)
 
   useEffect(() => {
+    // State/PKCE are single-use, including StrictMode and hook-driven rerenders.
+    if (started.current) return
+    started.current = true
     const processCallback = async (): Promise<void> => {
       const codeParam = searchParams.get('code')
       const stateParam = searchParams.get('state')

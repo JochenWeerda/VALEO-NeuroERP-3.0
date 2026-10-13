@@ -41,7 +41,13 @@ export class AuthService {
     const token = localStorage.getItem('access_token')
     if (token) {
       try { this.setTokens(token, localStorage.getItem('refresh_token') ?? undefined) }
-      catch { this.clearTokens() }
+      catch {
+        try {
+          this.decodeUser(token, true)
+          this.refreshToken = localStorage.getItem('refresh_token')
+          localStorage.removeItem('access_token')
+        } catch { this.clearTokens() }
+      }
     }
   }
 
@@ -164,15 +170,21 @@ export class AuthService {
     window.dispatchEvent(new Event('valeo-auth-changed'))
   }
 
-  private decodeUser(token: string): User {
+  private decodeUser(token: string, allowExpired = false): User {
     const claims = jwtDecode<User & { scope?: string; erp_scopes?: string[]; realm_access?: { roles?: string[] } }>(token)
     if (typeof claims.sub !== 'string' || !claims.sub || typeof claims.exp !== 'number'
-      || !Number.isFinite(claims.exp) || claims.exp * 1000 <= Date.now()) throw new Error('Ungueltiges Zugriffstoken.')
+      || !Number.isFinite(claims.exp) || (!allowExpired && claims.exp * 1000 <= Date.now())) throw new Error('Ungueltiges Zugriffstoken.')
     const names = claims as User & { preferred_username?: string }
     return { ...claims, name: names.name || names.preferred_username || claims.sub, email: typeof claims.email === 'string' ? claims.email : '', roles: strings(claims.roles ?? claims.realm_access?.roles),
       scopes: [...new Set([...strings(claims.scopes), ...(typeof claims.scope === 'string' ? claims.scope.split(' ').filter(Boolean) : []), ...strings(claims.erp_scopes)])] }
   }
   getUser(): User | null { return this.isAuthenticated() ? this.user : null }
+  canRefresh(): boolean { return this.refreshToken !== null }
+  async getFreshAccessToken(): Promise<string | null> {
+    if (this.user && this.user.exp * 1000 > Date.now() + 30_000) return this.getAccessToken()
+    if (this.canRefresh()) await this.refreshAccessToken()
+    return this.getAccessToken()
+  }
   getAccessToken(): string | null { return this.isAuthenticated() ? this.accessToken : null }
   isAuthenticated(): boolean { return this.accessToken !== null && this.user !== null && this.user.exp * 1000 > Date.now() }
   hasScope(scope: string): boolean { const user = this.getUser(); return Boolean(user && (user.scopes.includes(scope) || user.scopes.includes('admin:all'))) }

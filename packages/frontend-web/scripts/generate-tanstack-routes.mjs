@@ -84,6 +84,7 @@ const candidates = [
 // Native mask aliases are the rollout switch for UniversalMaskRuntime pages and
 // must win over legacy auto detail routes on the same URL.
 const byPath = new Map()
+const publicPaths = new Set(['login', 'auth/login', 'auth/callback'])
 function candidatePriority(entry) {
   if (entry.source === 'alias' && entry.module?.endsWith('-native')) return -1
   return { auto: 0, alias: 1, navigation: 2 }[entry.source] ?? 3
@@ -91,6 +92,9 @@ function candidatePriority(entry) {
 for (const entry of candidates.sort(
   (a, b) => candidatePriority(a) - candidatePriority(b),
 )) {
+  // Matching is case-insensitive: only the canonical public entries may own
+  // these URLs. Auto/alias variants must never place login behind _app.
+  if (publicPaths.has(entry.path.toLowerCase())) continue
   if (entry.path && !byPath.has(entry.path)) byPath.set(entry.path, entry)
 }
 
@@ -109,7 +113,6 @@ const paramKeys = [
     ),
   ),
 ].sort()
-const publicPaths = new Set(['login', 'auth/login', 'auth/callback'])
 const publicEntries = entries.filter((entry) => publicPaths.has(entry.path))
 const appEntries = entries.filter(
   (entry) =>

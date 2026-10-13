@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-12",
+  "generatedAt": "2026-10-13",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -2552,6 +2552,48 @@
         "maker",
         "checker"
       ],
+      "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "finance/steuerschluessel",
+      "title": "Steuerschlüssel",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/finance__steuerschluessel/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/steuerschluessel/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/steuerschluessel/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/steuerschluessel/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Steuerschlüssel speichern",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "finance.steuerschluessel.write",
+          "commandEndpoint": "/api/v1/finance/tax-keys/actions/speichern",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "neu",
+          "label": "Neuer Steuerschlüssel",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Leert die Eingabe fuer einen neuen Steuerschluessel."
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
         "finance.ap_invoice.freigeben",
@@ -5205,5 +5247,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 96
+  "event_count": 97
 }

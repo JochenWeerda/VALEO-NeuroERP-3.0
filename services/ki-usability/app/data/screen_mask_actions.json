@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 95,
-    "screens_with_actions": 48,
+    "actions": 97,
+    "screens_with_actions": 49,
     "domains": 14
   },
   "actions": [
@@ -720,6 +720,46 @@
         "commandEndpoint": "/api/v1/finance/payment-runs/{entity_id}/actions/freigeben",
         "navigationRoute": null,
         "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:finance/steuerschluessel:neu",
+      "label": "Neuer Steuerschlüssel",
+      "description": "Neuer Steuerschlüssel (finance/steuerschluessel)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/steuerschluessel",
+      "intent_phrases": [
+        "Neuer Steuerschlüssel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/steuerschluessel",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "finance.steuerschluesselNeu",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:finance/steuerschluessel:speichern",
+      "label": "Steuerschlüssel speichern",
+      "description": "Steuerschlüssel speichern (finance/steuerschluessel)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/steuerschluessel",
+      "intent_phrases": [
+        "Steuerschlüssel speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/steuerschluessel",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/finance/tax-keys/actions/speichern",
+        "navigationRoute": null,
+        "command": "finance.steuerschluesselSpeichern",
         "method": "POST"
       }
     },
