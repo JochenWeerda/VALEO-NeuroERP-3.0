@@ -81,6 +81,10 @@ async def test_post_credit_note_scopes_lookup_and_update_by_tenant(monkeypatch):
         ]
     )
     monkeypatch.setattr(sales_credit_notes, "log_fibu_audit", lambda *args, **kwargs: None)
+    # Der Test prueft die Mandantenbindung der Abfragen an einer nachgestellten Datenbank; die Freigabe prueft
+    # tests/test_freigabe_zweitwege.py an der echten.
+    from app.services import finance_freigabe
+    monkeypatch.setattr(finance_freigabe, "verlange_gutschrift", lambda *_a, **_k: None)
 
     result = await sales_credit_notes.post_credit_note(
         cn_id="cn-1",

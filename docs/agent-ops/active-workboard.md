@@ -11,6 +11,23 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## APPROVAL-001-ZWEITWEGE — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** Die Approval Engine ist allgemein (`app/services/freigabe_engine.py`; DocFlow ist ein Bereich).
+Angeschlossen (`app/services/finance_freigabe.py`): Eingangsrechnung der Finanzbuchhaltung (REST und Prozesskern),
+Verkaufsgutschrift (in `_buche`), alter Rechnungsweg (bucht nur bis zur Grenze; Storno mit Freigabe).
+Gemeinsamer Weg `GET/POST /api/v1/approvals/{bereich}/{id}`, `POST …/{freigabe}/decision`. Protokoll
+`domain_docflow.approval_log` (Migration `approval_log_20261013`, ein Head — auf `valeo_probe` und
+`valeo_neuro_erp` angewandt). Tests 10 neu. QA: Nachtrag in `docs/quality-assurance/approval-001-freigabe-20261013.md`.
+**VERHALTENSAENDERUNG fuer alle:** `POST /finance/ap/invoices/{id}/post` und das Buchen einer Verkaufsgutschrift
+antworten ohne zentrale Freigabe 409; `/finance/invoices` bucht ueber 10.000 EUR nicht und storniert keine
+DocFlow-Rechnung. Tests holen die Freigabe mit `sichere_freigabe_fuer` aus `tests/freigabehilfe.py`.
+**Befunde, nicht behoben:** Der Dokumentspeicher von `/finance/invoices` ist nicht mandantengebunden
+(`GET /finance/invoices/{nr}` liefert fremde Rechnungen); `posted_by` der Eingangsrechnung kommt aus der Anfrage.
+**Vorbestehend rot (auch auf `main`):** `tests/test_eingangsrechnung_mandant.py` (18),
+`tests/test_gap_fixes_batch3.py` (11–13), `tests/test_sales_cn_inv_001.py` (2).
+
 ## BELEG-PILOT-ROUTING-PREVIEW-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Realen Beleg-Pilot-Routenfehler (unsupported page group) und Weiterlaufen nach fehlgeschlagener Vorschau beheben. **Dateibesitz:** app/page-module-loader.ts; app/page-module-groups/finance.ts; components/mask-builder/UniversalNativeDetailPage.tsx; bestehender __tests__/app/page-module-loader.test.ts; neuer __tests__/components/mask-builder/native-detail-preview.test.tsx; docs/quality-assurance/beleg-pilot-routing-preview-20261013.md (Frontend-Pfade unter packages/frontend-web/src). **Abnahme:** Belegmodul laedt, fehlgeschlagene Vorschau fuehrt nie execute aus, echte Browser-Rechnung renderbar/Screenshot soweit Runtime-Vertrag laedt. **Risiken:** Command-Adapter und Aktionszustand bleiben eigene Arbeit; keine fachlichen Belege mutieren.

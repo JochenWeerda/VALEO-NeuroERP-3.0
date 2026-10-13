@@ -103,6 +103,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `agri_silo_material_flow_20260612` | Agrar: Siloanlagen, Silozellen, Materialfluss-Knoten/Kanten (domain_inventory). |
 | `agribusiness_farmers_table_20260525` | Agribusiness farmers table |
 | `approval_engine_20261013` | Freigaben fuer buchungs- und stornorelevante Vorgaenge (APPROVAL-001). |
+| `approval_log_20261013` | Unveraenderliches Freigabeprotokoll fuer alle Bereiche (APPROVAL-001). |
 | `articles_image_url_20260322` | Add image_url to articles |
 | `articles_master_fields_gap_83_20260215` | Close 8.3 article master-data field gaps. |
 | `articles_model_alignment_20260214` | align domain_inventory.articles with Article model |

@@ -11,6 +11,7 @@ import logging
 
 from app.core.database import get_db
 from app.auth.finance_roles import finance_admin, finance_read, finance_write
+from app.services.finance_freigabe import EingangsrechnungFreigabe, verlange_oder_409
 from app.core.tenant import get_tenant_id
 from app.core.data_quality_enforcement import (
     build_dq_error_detail,
@@ -161,6 +162,7 @@ async def create_ap_invoice(
     doc: SalesInvoice,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(finance_write),
 ) -> dict:
     """Erstellt eine neue Eingangsrechnung (Kreditoren)."""
     logger.info(f"Creating AP invoice: {doc.number}")
@@ -181,6 +183,8 @@ async def create_ap_invoice(
             raise HTTPException(status_code=409, detail=f"Rechnungsnummer {doc.number} ist bereits vergeben")
         daten = doc.model_dump()
         daten["tenantId"] = tenant_id
+        # Wer angelegt hat, gibt spaeter nicht frei (Funktionstrennung, APPROVAL-001).
+        daten["createdBy"] = str((nutzer or {}).get("sub") or "") if isinstance(nutzer, dict) else ""
         result = save_to_store("ap_invoice", doc.number, daten, repo)
         return {"status": "ok", "message": "AP Invoice created", "data": result}
     except HTTPException:
@@ -338,6 +342,7 @@ async def post_ap_invoice(
     posted_by: str = Query(...),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(finance_admin),
 ) -> dict:
     """Bucht eine Eingangsrechnung (erzeugt GL-Buchung + OP)."""
     logger.info(f"Posting AP invoice: {invoice_id} by {posted_by}")
@@ -375,6 +380,15 @@ async def post_ap_invoice(
             detail=finance_periods.meldung(period, gesperrt),
         )
 
+    # Zentrale Freigabe (APPROVAL-001): Eine Finanzrechnung hat keinen Rechnungsabgleich und braucht deshalb die
+    # Freigabe einer zweiten Person — zusaetzlich zum Freigabeablauf dieses Moduls.
+    freigabe = EingangsrechnungFreigabe(db, tenant_id)
+    akteur = str(nutzer.get("sub") or "") if isinstance(nutzer, dict) else None
+    try:
+        verlange_oder_409(freigabe, freigabe.vorgang_aus(invoice_id, invoice), "post", akteur)
+    except HTTPException:
+        db.rollback()
+        raise
     # Journal, offener Posten und Beleg in einer Transaktion. Scheitert etwas, bleibt die Rechnung freigegeben.
     try:
         je_id, gruppen = buche_eingangsrechnung(

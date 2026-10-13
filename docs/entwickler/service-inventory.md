@@ -95,7 +95,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `docflow_belegadapter` | DocFlow-Belege in der Form des Belegvertrags (BELEG-011). |
 | `docflow_evidence_service` | Dokument-Nachweisraum (DOM-DOC-004) — GoBD-Artefakt-/Vorgangs-Sicht. |
 | `docflow_followup_service` | Bescheid/Rückmeldung & Wiedervorlage am Vorgang (DOM-DOC-004.3). |
-| `docflow_freigabe` | Approval Engine fuer DocFlow-Belege (APPROVAL-001). |
+| `docflow_freigabe` | DocFlow-Belege an der zentralen Approval Engine (APPROVAL-001). |
 | `docflow_gobd_service` | GoBD-Exportpaket & DMS-/Paperless-Liveprobe (DOM-DOC-004.4). |
 | `docflow_return_service` | Document-return worklist on top of canonical Docflow headers and artifacts. |
 | `docflow_service` | Service layer for the canonical Docflow command pipeline (DOCFLOW-P0-01..03). |
@@ -141,6 +141,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `finance_datev_service` | DATEV-Export (DOM-FIN-004.5). |
 | `finance_dunning_service` | Mahnlauf & Mahnstufen-Eskalation (DOM-FIN-004.2). |
 | `finance_eingangsrechnung_buchung` | Eingangsrechnung buchen: Aufwand und Vorsteuer je Steuerschluessel im Soll, Kreditor brutto im Haben. |
+| `finance_freigabe` | Die Buchungswege neben DocFlow an der zentralen Approval Engine (APPROVAL-001). |
 | `finance_mahnstufe_service` | DOM-FINANCE-004.4 — Mahnstufen-Eskalation-Trail Service (append-only). |
 | `finance_op_service` | Offene-Posten-Cockpit / OP-Aging (DOM-FIN-004). |
 | `finance_period_service` | Periodenabschluss & Storno-Konsistenz (DOM-FIN-004.4). |
@@ -151,6 +152,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `fints_connector` | FinTS/HBCI Bank-API Connector (§ 25a KWG, PSD2). |
 | `foreign_goods_worklist_service` | Governed operator projection over canonical foreign-goods storage records. |
 | `frachtbrief_service` | Frachtbrief als Transportbeleg der Sendung, nicht als Lieferschein. |
+| `freigabe_engine` | Die zentrale Approval Engine (APPROVAL-001). |
 | `gap_analytics` | GAP-Analytik: Trend-/Wachstumsabschätzung aus mehreren Jahrgängen. |
 | `gap_pipeline` | GAP (Gemeinsame Agrarpolitik) ETL-Engine. |
 | `gap_pipeline_service` | Service layer for the GAP (Gemeinsame Agrarpolitik) ETL pipeline endpoints. |

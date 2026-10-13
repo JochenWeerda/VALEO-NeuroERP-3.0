@@ -90,7 +90,7 @@ def beleg_suchen(db: Session, request: Any, actor: str, tenant: str, nutzer: Any
                 """
                 SELECT id, doc_type, doc_number, status, document_date, customer_id, supplier_id, currency, total_gross
                 FROM domain_docflow.document_headers
-                WHERE tenant_id = :tenant AND deleted_at IS NULL
+                WHERE tenant_id = :tenant AND deleted_at IS NULL AND source_system <> 'gobd_artifact'
                   AND doc_type = ANY(:arten)
                   AND (CAST(:status AS text) IS NULL OR status = :status)
                   AND (CAST(:nr AS text) IS NULL OR doc_number ILIKE '%' || :nr || '%')

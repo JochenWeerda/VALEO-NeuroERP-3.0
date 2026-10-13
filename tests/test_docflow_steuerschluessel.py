@@ -55,6 +55,7 @@ def haus(monkeypatch):
             # Statushistorie und Kommandoprotokoll sind unveraenderlich; Aufraeumen nur mit Wartungsschalter.
             db.execute(text("SELECT set_config('valeo.docflow_wartung', 'loeschen', true)"))
             for sql in (
+                "DELETE FROM domain_docflow.approval_log WHERE tenant_id = :t",
                 "DELETE FROM domain_docflow.approvals WHERE tenant_id = :t",
                 "DELETE FROM domain_docflow.document_status_history WHERE tenant_id = :t",
                 "DELETE FROM domain_docflow.document_command_log WHERE tenant_id = :t",

@@ -370,6 +370,7 @@ domains:
       - archive_
       - dms_
       - connector_
+      - freigabe_
       - docflow_
       - doc_nachweisraum_
       - audit_hardening
@@ -379,6 +380,7 @@ domains:
       - compliance
       - dms
       - archive
+      - approvals
       - belege
       - docflow
       - dokumente

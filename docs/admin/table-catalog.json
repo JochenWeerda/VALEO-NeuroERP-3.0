@@ -14565,6 +14565,68 @@
     },
     "domain_docflow": {
       "tables": {
+        "approval_log": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "subject_type",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "subject_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "approval_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "event",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "actor",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "payload",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "logged_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/freigabe_engine.py"
+          ],
+          "written_by": [
+            "app/services/freigabe_engine.py"
+          ]
+        },
         "approvals": {
           "columns": [
             {
@@ -14666,10 +14728,10 @@
             "id"
           ],
           "read_by": [
-            "app/services/docflow_freigabe.py"
+            "app/services/freigabe_engine.py"
           ],
           "written_by": [
-            "app/services/docflow_freigabe.py"
+            "app/services/freigabe_engine.py"
           ]
         },
         "command_idempotency_keys": {
@@ -15213,6 +15275,7 @@
             "app/services/docflow_freigabe.py",
             "app/services/docflow_return_service.py",
             "app/services/docflow_service.py",
+            "app/services/finance_freigabe.py",
             "app/services/mcp_beleg_tools.py",
             "app/services/settlement_document_archive_service.py"
           ],
@@ -21623,6 +21686,7 @@
             "app/services/finance_belegbuchung.py",
             "app/services/finance_closing_service.py",
             "app/services/finance_datev_service.py",
+            "app/services/finance_freigabe.py",
             "app/services/finance_read_model_service.py",
             "app/services/finance_transaction_service.py",
             "app/services/sales_posting_service.py",
@@ -45809,6 +45873,7 @@
           "read_by": [
             "app/api/v1/endpoints/sales_credit_notes.py",
             "app/core/screen_definitions_capture.py",
+            "app/services/finance_freigabe.py",
             "app/services/mcp_execution_service.py",
             "app/services/sales_storno_service.py"
           ],
@@ -57064,7 +57129,7 @@
             "app/api/v1/endpoints/compat.py",
             "app/finance/steuerschluessel.py",
             "app/infrastructure/models/l3c_models.py",
-            "app/services/docflow_freigabe.py"
+            "app/services/freigabe_engine.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/compat.py",

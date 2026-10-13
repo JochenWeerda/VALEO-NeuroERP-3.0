@@ -28,6 +28,8 @@ from app.core.database import SessionLocal
 from app.core.exceptions import register_domain_exception_handlers
 from app.finance.steuerschluessel import kontenrahmen, richte_skr03_ein
 from app.finance.tax_resolver import resolve_tax_key_accounts
+from app.services.finance_freigabe import VerkaufsgutschriftFreigabe
+from freigabehilfe import sichere_freigabe_fuer
 from testgrenze import ersetze_mandant, ersetze_nutzer
 
 AUFRAEUMEN = (
@@ -108,6 +110,8 @@ def _gutschrift(haus, positionen, *, total, art="rechnungskorrektur") -> str:
                 "VALUES (:id, :gs, :nr, 'Position', 1, :netto, :code, :satz, :netto)"),
                 {"id": f"{gs}-{nr}", "gs": gs, "nr": nr, "code": code, "satz": satz, "netto": netto})
         db.commit()
+    # Jede Gutschrift braucht die Freigabe einer zweiten Person (APPROVAL-001).
+    sichere_freigabe_fuer(VerkaufsgutschriftFreigabe, haus["mandant"], gs)
     return gs
 
 
@@ -193,6 +197,7 @@ def test_anlegen_fuehrt_netto_steuer_und_brutto_getrennt(haus):
     daten = antwort.json()
     assert (Decimal(daten["net_amount"]), Decimal(daten["tax_amount"]), Decimal(daten["total_amount"])) == (
         Decimal("1000.00"), Decimal("190.00"), Decimal("1190.00"))
+    sichere_freigabe_fuer(VerkaufsgutschriftFreigabe, haus["mandant"], daten["id"])
     assert haus["client"].post(f"/sales/credit-notes/{daten['id']}/post").status_code == 200
     assert _buchung(haus["mandant"])[-1] == ("1400", 0.0, 1190.0, None)
 
