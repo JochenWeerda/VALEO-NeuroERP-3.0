@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import documentPermissions from './beleg-permissions.generated.json'
 import { useAuth } from '@/hooks/useAuth'
 import type { User } from '@/lib/auth'
 import type { ScreenDefinition } from '../schema'
@@ -11,6 +12,10 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
   const declared = new Set((screen.actions ?? []).flatMap(action => action.permission ? [action.permission] : []))
   if (screen.creation) declared.add(screen.creation.permission)
   return [...declared].filter(permission => {
+    if (permission.startsWith('belege.')) {
+      const screens = documentPermissions.screens as Record<string, Record<string, string[]>>
+      return (screens[screen.id]?.[permission] ?? []).some(role => roles.has(role))
+    }
     if (permission.startsWith('platform:')) return scopes.has(permission)
     if (permission === 'identity:quota:read') return true // Server returns only own allocations.
     if (scopes.has('admin:all') || roles.has('admin')) return true

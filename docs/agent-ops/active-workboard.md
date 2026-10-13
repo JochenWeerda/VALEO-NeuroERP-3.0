@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BELEG-MASK-PERMISSION-PROJECTION-20261013 — reserviert, Codex
+## BELEG-MASK-PERMISSION-PROJECTION-20261013 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Bestehende kanonische Belegrechte in den gemeinsamen Masken-Permission-Resolver projizieren, ohne zweite Rollenmatrix; Voraussetzung fuer BELEG-020 Teil 2. **Dateibesitz:** neues scripts/generate_beleg_permission_projection.py; neue runtime/beleg-permissions.generated.json; runtime/screen-permissions.ts; bestehender screen-permissions.test.ts; neuer tests/test_beleg_permission_projection.py; docs/quality-assurance/beleg-mask-permissions-20261013.md. Frontend-Pfade unter packages/frontend-web/src/components/mask-builder/ bzw. __tests__/components/mask-builder/. **Abnahme:** Drift-Gate, richtige Rechte nach Belegart/Rolle, keine Freigabe allein durch Scope/Schema und keine unbekannten Belegrechte. **Risiken:** Noch keine Registry-/Route-Aktivierung, Maskensichtpruefung bleibt offen.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Bestehende kanonische Belegrechte in den gemeinsamen Masken-Permission-Resolver projizieren, ohne zweite Rollenmatrix; Voraussetzung fuer BELEG-020 Teil 2. **Dateibesitz:** neues scripts/generate_beleg_permission_projection.py; neue runtime/beleg-permissions.generated.json; runtime/screen-permissions.ts; bestehender screen-permissions.test.ts; neuer tests/test_beleg_permission_projection.py; docs/quality-assurance/beleg-mask-permissions-20261013.md. Frontend-Pfade unter packages/frontend-web/src/components/mask-builder/ bzw. __tests__/components/mask-builder/. **Abnahme:** Drift-Gate, richtige Rechte nach Belegart/Rolle, keine Freigabe allein durch Scope/Schema und keine unbekannten Belegrechte. **Risiken:** Noch keine Registry-/Route-Aktivierung, Maskensichtpruefung bleibt offen.
+
+**Lieferung:** Gemeinsamer Frontend-Resolver projiziert belege.* aus generierter kanonischer Belegrollen-Matrix je Screen/Belegart; kein zweites Rechtesystem, keine Fachaktion allein durch Scope/Schema. Zehn Vitest-Faelle und Drift-Gate gruen. QA: beleg-mask-permissions-20261013.md. BELEG-020 Teil 2 (Registry/Route/Metadaten/Aktionsbindung/Sichtpruefung) weiterhin offen.
 
 ## BELEG-SCOPE-PARITY-20261013 — abgeschlossen, Codex
 
