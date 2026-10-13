@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## CI-POSITION-SALES-IDENTITY-20261013 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** verbliebene Positions-/Sales-Orders-CI-Faelle senden dev-token; Positionsfixture loescht den gemeinsamen Testtenant, Sales-Smokes akzeptieren Fehler und koennen ausserhalb Test-DB schreiben. **Ziel:** signierte Testidentitaeten, eigene Mandanten/Belege, transaktionale Isolation und konkrete Erfolgsassertions. **Dateibesitz:** tests/test_position_service.py nur DB-/HTTP-Fixtures und Header/negative Authfaelle; tests/test_sales_orders_api.py nur HTTP-Fixtures und echte Erfolgs-/Persistenzassertions; eigene QA/Workboard. Keine Produktions-/Rollen-/Fachlogikaenderung. **Abnahme:** echte Middleware/JWT, alte Tokens/fremde Header abgewiesen, bestehende Fachfaelle erhalten; kein shared DELETE/Seed/Migration, alle schreibenden Smokes fordern freigegebene DB, eigene Daten per Savepointrollback. JWKS/Sessionstore im vorhandenen Probe-Kontext isoliert; Gesamt-CI weiter offen. Bestehender valeo_probe, keine neue DB/Container/Reset.
+
 ## STEUERSCHLUESSEL-BELEGE-20261013 — Teil 3 (DocFlow-Rechnung) abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** Teil 3 abgeschlossen 2026-10-13. Architekturentscheidung des Auftraggebers
