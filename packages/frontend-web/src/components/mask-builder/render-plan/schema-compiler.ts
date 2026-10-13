@@ -216,7 +216,10 @@ function schemaVolatility(schema: ScreenDefinition): string {
     field.options ? `${field.key}=${field.options.map((option) => String(option.value)).join('|')}` : ''
   )).join(';')
   const actions = (schema.actions ?? []).map((action) => `${action.key}${action.disabled ? '!' : ''}`).join(',')
-  return `${summary}#${options}#${actions}#${schema.layout?.density ?? ''}`
+  // Schreibschutz und Untertitel aendern sich zur Laufzeit (ein geladener Datensatz sperrt sein
+  // Schluesselfeld). Ohne sie im Schluessel lieferte der Cache den Plan des vorigen Zustands.
+  const readOnly = (schema.fields ?? []).filter((field) => field.readOnly).map((field) => field.key).join(',')
+  return `${summary}#${options}#${actions}#${schema.layout?.density ?? ''}#${readOnly}#${schema.subtitle ?? ''}`
 }
 
 export function compileRenderPlan(

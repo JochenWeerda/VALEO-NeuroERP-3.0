@@ -157569,12 +157569,37 @@
             "type": "string"
           },
           "ustva_bezeichnung": {
-            "title": "Ustva Bezeichnung",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ustva Bezeichnung"
           },
           "ustva_position": {
-            "title": "Ustva Position",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ustva Position"
+          },
+          "verwendung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verwendung"
           }
         },
         "required": [
@@ -302084,6 +302109,57 @@
           }
         ],
         "summary": "Tax key anlegen",
+        "tags": [
+          "finance",
+          "tax",
+          "finance",
+          "tax"
+        ]
+      }
+    },
+    "/api/v1/finance/tax-keys/actions/speichern": {
+      "post": {
+        "description": "CE fuer finance/steuerschluessel:speichern. Der Schluessel (code) entscheidet: neu oder Aenderung.",
+        "operationId": "action_steuerschluessel_speichern_api_v1_finance_tax_keys_actions_speichern_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Steuerschlüssel anlegen oder ändern (Masken-CommandEndpoint)",
         "tags": [
           "finance",
           "tax",

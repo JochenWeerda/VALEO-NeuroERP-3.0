@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-12
+last_reviewed: 2026-10-13
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (103 Masken).
+> Generiert aus `app/core/screen_definitions.py` (104 Masken).
 
 ## Übersicht
 
@@ -65,6 +65,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/kreditor` | Kreditor | finance | niedrig | — | `GET /api/v1/masks/finance/kreditor/agent-contract` |
 | `finance/payment-run` | Zahlungslauf | finance | niedrig | `procure-to-pay`, `order-to-cash`, `finance-to-close` | `GET /api/v1/masks/finance/payment-run/agent-contract` |
 | `finance/rechnungstapel` | Rechnungstapel | finance | niedrig | — | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
+| `finance/steuerschluessel` | Steuerschlüssel | finance | mittel | — | `GET /api/v1/masks/finance/steuerschluessel/agent-contract` |
 | `fuhrpark/ausgehende-dokumente` | Ausgehende Belege | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/ausgehende-dokumente/agent-contract` |
 | `fuhrpark/fahrzeug-stamm` | Fahrzeug-Stamm | logistics | hoch | — | `GET /api/v1/masks/fuhrpark/fahrzeug-stamm/agent-contract` |
 | `fuhrpark/fahrzeuge` | Fahrzeuge | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/fahrzeuge/agent-contract` |
@@ -1978,6 +1979,43 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Welche Selbstabrechner warten auf Freigabe?
 
 **Sensible Felder:** `validation_error, source_ref, maker, checker`
+
+---
+
+### `finance/steuerschluessel` — Steuerschlüssel
+
+**Zweck:** Steuerschluessel des Mandanten pflegen: Satz, Umsatzsteuer-, Vorsteuer- und Erloeskonto, Paragraf 24 UStG, Reverse Charge, Gueltigkeit. Aus ihnen nehmen alle Belege ihre Umsatzsteuer.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/finance/steuerschluessel/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/finance/steuerschluessel/agent-contract` |
+| Readiness | `GET /api/v1/masks/finance/steuerschluessel/readiness` |
+| Rollout-Route | `/mask-rollout/finance__steuerschluessel/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `steuerschluessel` → `/api/v1/finance/tax-keys`
+
+**MCP-Tools (Domäne):**
+
+- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
+- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Steuerschluessel buchen nicht automatisch und warum?
+- Auf welches Konto bucht Steuerschluessel 3 die Umsatzsteuer?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Steuerschlüssel speichern | moderate | ja | `/api/v1/finance/tax-keys/actions/speichern` |
+| `neu` | Neuer Steuerschlüssel | safe | nein | `Leert die Eingabe fuer einen neuen Steuerschluessel.` |
 
 ---
 

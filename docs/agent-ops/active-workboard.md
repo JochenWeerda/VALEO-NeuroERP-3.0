@@ -11,6 +11,25 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STEUERSCHLUESSEL-MASKE-SD-20261013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Auftrag: Maske Steuerschluessel vereinheitlichen,
+keine handgebauten Masken.
+**Lieferung:** ScreenDefinition `finance/steuerschluessel` (ohne Vorgabewert; Erloeskonto, Paragraf 24, Spalte
+„Bucht automatisch fuer“ aus der Regel der Buchung), Seite als Wrapper, CE
+`POST /finance/tax-keys/actions/speichern` (`finance_write`, Anlage oder Aenderung nach Schluessel, Kontenpruefung
+gegen den Kontenplan, Alt/Neu in der Antwort). `speichern` ist `forbiddenForAgents`, in der Aktionskarte
+`open_high`, kein MCP-Werkzeug. Aktionskatalog, Aktionskarte (open_high 4, local_ui 15), Handbuch, OpenAPI
+(3142 Pfade), Rollenvertrag nachgezogen. Tests: 24 (Maske) / 74 (mit Gutschrift) / Vitest 228.
+QA: `docs/quality-assurance/steuerschluessel-maske-sd-20261013.md`.
+**Mitbehoben:** `GET /finance/tax-keys` lag eine Stunde im Cache und wurde nach keiner Aenderung geleert; ein
+Ladefehler kam als leere Liste zurueck. **Mask Builder (alle Masken):** `schemaVolatility` in
+`render-plan/schema-compiler.ts` nahm `readOnly` und `subtitle` nicht in den Cache-Schluessel — zur Laufzeit
+gesperrte Felder blieben aenderbar. Korrigiert, Test `render-plan-cache.test.ts`.
+**Vorgefunden, nicht von mir, nicht behoben:** `test_generate_architecture_index::test_build_index_mapping_complete`
+ist rot (`tenant_lifecycle_service` ohne Domain-Zuordnung in `generate_architecture_index.py`);
+`test_inventory_auxiliary::test_route_is_registered` antwortet 401.
+
 ## LOGIN-ROUTE-COLLISION-20261013 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** echte Browserwarnung: auth/callback matched protected _app/auth/Callback. **Ziel:** kanonische öffentliche Anmelderouten gegen automatische Groß-/Kleinschreibungsduplikate schützen. **Dateibesitz:** generate-tanstack-routes.mjs ausschließlich öffentliche Authpfade und deren generierte Routen/Inventar; neuer tatsächlicher TanStack-Matching-Vertrag; eigene QA/Workboard. **Abnahme:** login/auth/login/auth/callback samt Großschreibung matchen außerhalb _app; andere ERP-Routen bleiben geschützt; Generator stabil und echter positiver Browser-Recheck. Keine Authlockerung, keine persönlichen Kennungen, keine DB/Container/Reset; fremdes Styling erhalten.

@@ -43,6 +43,26 @@ class Steuergruppe(BaseModel):
     steuerkonto: Optional[str] = None
 
 
+def verkauf_hindernis(code: str, satz: Decimal, steuerkonto: Optional[str], erloeskonto: Optional[str],
+                      reverse_charge: bool) -> Optional[str]:
+    """Warum mit dem Schluessel kein Verkaufsbeleg automatisch gebucht wird — oder ``None``."""
+    if reverse_charge:
+        return f"Steuerschlüssel {code} (Reverse Charge) wird nicht automatisch gebucht."
+    if not (erloeskonto or "").strip():
+        return f"Für Steuerschlüssel {code} ist kein Erlöskonto hinterlegt."
+    if satz > 0 and not (steuerkonto or "").strip():
+        return f"Für Steuerschlüssel {code} ist kein Umsatzsteuerkonto hinterlegt."
+    return None
+
+
+def verwendung(code: str, satz: Decimal, steuerkonto: Optional[str], vorsteuerkonto: Optional[str],
+               erloeskonto: Optional[str], reverse_charge: bool) -> str:
+    """Wofuer der Schluessel automatisch bucht — fuer die Maske, aus derselben Regel wie die Buchung."""
+    hindernis = verkauf_hindernis(code, satz, steuerkonto, erloeskonto, reverse_charge)
+    teile = ([] if hindernis else ["Verkauf"]) + (["Einkauf"] if (vorsteuerkonto or "").strip() else [])
+    return ", ".join(teile) if teile else f"Bucht nicht automatisch: {hindernis}"
+
+
 def steuergruppen(db: Session, tenant_id: str, zeilen: list[tuple]) -> list[Steuergruppe]:
     """Netto und Umsatzsteuer je Steuerschluessel aus Verkaufspositionen ``(nr, tax_code, tax_rate, netto)``.
 
@@ -84,12 +104,9 @@ def steuergruppen(db: Session, tenant_id: str, zeilen: list[tuple]) -> list[Steu
     for code in codes:
         _code, rate, steuerkonto, erloeskonto, reverse_charge = bekannt[code]
         satz = Decimal(str(rate))
-        if reverse_charge:
-            raise Steuerklaerung(f"Steuerschlüssel {code} (Reverse Charge) wird nicht automatisch gebucht.")
-        if not (erloeskonto or "").strip():
-            raise Steuerklaerung(f"Für Steuerschlüssel {code} ist kein Erlöskonto hinterlegt.")
-        if satz > 0 and not (steuerkonto or "").strip():
-            raise Steuerklaerung(f"Für Steuerschlüssel {code} ist kein Umsatzsteuerkonto hinterlegt.")
+        hindernis = verkauf_hindernis(code, satz, steuerkonto, erloeskonto, bool(reverse_charge))
+        if hindernis:
+            raise Steuerklaerung(hindernis)
         netto = netto_je_code[code].quantize(CENT, rounding=ROUND_HALF_UP)
         gruppen.append(Steuergruppe(
             tax_code=code, satz=satz, netto=netto,
