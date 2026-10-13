@@ -68,9 +68,11 @@ Folgebeleg zurueck, sondern 409 (ohne Mengen) bzw. einen Teilbeleg (mit Mengen).
 **Befund:** Die DocFlow-Wege sind `async def` mit blockierenden DB-Aufrufen; ein wartender Aufruf blockiert
 die Ereignisschleife. `infrastructure.audit_log` fehlt in der gewachsenen Datenbank.
 
-## DOCFLOW-TOKEN-TENANT-20261013 — reserviert, Codex
+## DOCFLOW-TOKEN-TENANT-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Phase 0.1 aus Screen-Framework-Gap: zwoelf DocFlow-Wege verwenden Query/Standardtenant. **Ziel:** DocFlow ausschliesslich an verifizierten Tokenmandanten binden, bisheriger optionaler Query nur gleichlautende Bestaetigung. **Dateibesitz:** app/api/v1/endpoints/docflow.py nur Tenantimport/-Dependency, zwoelf Tenantparameter und Standardfallback; keine Claude-Teilmengen/Audit-/Steuer-/Fachlogik. Neuer echter HTTP-/PostgreSQL-Vertrag mit zwei eigenen Tenants; tests/test_docflow_steuerschluessel.py ausschliesslich explizite Testtenant-Dependency der vorhandenen Miniapp; eigene QA/Workboard/isolierte API-Metadaten. **Abnahme:** fehlende/alte Identitaet und fremde Querywerte vor DB abgewiesen; ohne Query eigener Tokentenant, fremde Belege/Commands ohne Mutation; kanonisches get_tenant_id, keine globale Authattrappe. Bestehender valeo_probe, --status vor DB, eigene Savepointdaten; keine neue DB/Container/Reset/Migration. Aktoren/Fachrollen bleiben eigener offener Identitybefund. Dateibesitz begrenzt, Claudes kommende 0.2/0.3 unveraendert.
+
+**Lieferung:** Kanonischer Tokentenant fuer Hauptwege und neue Statushistorie; Query nur gleichlautende Bestaetigung, kein Standardfallback. 84 echte Sicherheits-/DB-Gegenproben und 52 Nachbarfaelle bestanden, Tenant-Audit gruen. Isolierte produktive OpenAPI 3145 Pfade geprueft. Claudes Fach-/Akteur-/Steueraenderungen erhalten; keine neue DB/Container/Migration/Reset. Nachweis: docflow-token-tenant-20261013.md. Phase 0.6, Fach-/Referenzrechte, GoBD/Logistik und Gesamt-CI bleiben offen.
 
 ## CI-FEED-IDENTITY-ISOLATION-20261013 — abgeschlossen, Codex
 

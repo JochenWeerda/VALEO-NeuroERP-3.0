@@ -21,6 +21,7 @@ from sqlalchemy import text
 
 from app.api.v1.endpoints import docflow
 from app.core.database import SessionLocal
+from app.core.tenant import get_tenant_id
 from app.finance.steuerschluessel import richte_skr03_ein
 from app.services import docflow_service
 from testgrenze import ersetze_nutzer
@@ -41,6 +42,8 @@ def haus(monkeypatch):
         db.commit()
     monkeypatch.setattr(docflow_service, "assert_customer_allowed_for_invoice", lambda *_a, **_k: None)
     app = FastAPI()
+    # Isolated tax business contract; production token verification is tested separately.
+    app.dependency_overrides[get_tenant_id] = lambda: mandant
     app.include_router(docflow.router, prefix="/docflow")
     # Schreibende DocFlow-Wege verlangen seit dem 13.10.2026 die Anmeldung (Akteur der Statushistorie).
     ersetze_nutzer(app, "admin")

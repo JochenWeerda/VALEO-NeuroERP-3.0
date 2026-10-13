@@ -267074,22 +267074,6 @@
         "parameters": [
           {
             "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
-            }
-          },
-          {
-            "in": "query",
             "name": "doc_type",
             "required": false,
             "schema": {
@@ -267114,6 +267098,22 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
             }
           }
         ],
