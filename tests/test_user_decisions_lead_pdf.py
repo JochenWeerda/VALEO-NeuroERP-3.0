@@ -10,7 +10,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url
@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 from app.api.v1.endpoints import leads, mask_actions, agrar_settlements
 from app.auth.deps import get_current_user
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.services import crm_lead_service as lead_service
 from app.services import settlement_document_archive_service as archive
 
@@ -59,6 +60,11 @@ def context():
         app.include_router(mask_actions.router,prefix='/api/v1')
         app.include_router(agrar_settlements.router,prefix='/api/v1/agrar/settlements')
         app.dependency_overrides[get_db] = lambda: db
+        # This standalone business app already replaces get_current_user.
+        # Declare its tenant double too; production main:app is untouched.
+        def declared_test_tenant(request: Request) -> str:
+            return request.headers.get('X-Tenant-ID') or tenant
+        app.dependency_overrides[get_tenant_id] = declared_test_tenant
         user = {'sub':'decision-test','roles':['admin']}
         app.dependency_overrides[get_current_user] = lambda: user
         with TestClient(app) as client:
