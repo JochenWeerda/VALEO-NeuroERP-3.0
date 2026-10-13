@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-BROWSER-RUNTIME-20261013 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Echte neue Browser-Anmeldung mit freigegebener Einkaufsrolle und lesende MCP-Aufrufe abnehmen; veralteten Container-Katalog dauerhaft vermeiden. **Dateibesitz:** docker-compose.yml nur read-only MCP-Katalog-Mount; docs/quality-assurance/beleg-identity-scopes-20261013.md nur Browser-/Runtime-Nachtrag; eigener Workboard-Block. **Abnahme:** Beide Scopes im neuen Token, beleg.arten/suchen 200, fehlender Beleg 404, Compose-Konfiguration validiert. **Risiken:** Positiver Einzelbeleg-Nachweis braucht passende Referenzbelege im autorisierten Testmandanten; Index bleibt fremd gesperrt.
+
 ## BELEG-020 — Teil 1 abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** Teil 1 (Definition und Lesewege) abgeschlossen 2026-10-13; Teil 2 offen.
