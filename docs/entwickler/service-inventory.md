@@ -133,6 +133,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `feeding_reports_service` | Revisionssichere Berichte (FEED-REP-039). |
 | `feeding_requirements_service` | Bewertungssysteme, Bedarfsprofile und Solverlauf-Dokumentation (FEED-CORE-020). |
 | `feeding_supply_service` | Plan-bound supply projection and controlled procurement handoff. |
+| `finance_belegbuchung` | Finance bucht, was die belegfuehrenden Domaenen freigeben: Gutschriften und Storno der Eingangsrechnung. |
 | `finance_clearing_service` | Zahlungseingang / OP-Auszifferung (DOM-FIN-004.3). |
 | `finance_closing_service` | FIN-ABSCHLUSS-STUBS-001 — GoBD-taugliche Periodenabschluss-Fachlogik. |
 | `finance_datev_service` | DATEV-Export (DOM-FIN-004.5). |

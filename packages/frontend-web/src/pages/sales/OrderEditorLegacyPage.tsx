@@ -1181,7 +1181,9 @@ export default function OrderEditorLegacyPage(): JSX.Element {
         payload?: { target_doc_number?: string; target_doc_type?: string }
       }>(`/api/v1/docflow/${orderId}/convert`, {
         target_doc_type: 'sales_invoice',
-        idempotency_key: crypto.randomUUID(),
+        // Ein fester Schluessel je Auftrag: Ein zweiter Klick liefert dieselbe Rechnung, keine zweite.
+        // (Seit 13.10.2026 kann ein Auftrag mehrere Teilrechnungen haben; die verlangen ausdrueckliche Mengen.)
+        idempotency_key: `auftrag-sofortrechnung-${orderId}`,
       })
       const docNumber = res.payload?.target_doc_number
       if (docNumber) {

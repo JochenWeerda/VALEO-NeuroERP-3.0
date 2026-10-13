@@ -9,8 +9,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.database import get_db
+from app.core.tenant import get_tenant_id
+from app.auth.deps import get_current_user
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.services.docflow_service import DocflowService, POS_TYPES
 
@@ -24,7 +25,14 @@ class DocflowOut(BaseSchema):
 
 router = APIRouter()
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+def _docflow_tenant(
+    tenant_id: Optional[str] = Query(None),
+    verified_tenant: str = Depends(get_tenant_id),
+) -> str:
+    """The old selector may confirm the identity, never select another tenant."""
+    if tenant_id is not None and tenant_id != verified_tenant:
+        raise HTTPException(status_code=403, detail="Tenant selector does not match verified identity")
+    return verified_tenant
 
 
 # ── Pydantic schemas ──────────────────────────────────────────────────────────
@@ -40,6 +48,7 @@ class DocflowItemOut(BaseModel):
     unit_price: float
     discount_percent: float
     tax_code: Optional[str] = None
+    expense_account: Optional[str] = None
     tax_rate: float
     line_total_net: float
     line_total_tax: float
@@ -132,6 +141,8 @@ class DocflowLineInput(BaseModel):
     # mitgeschickter Satz wird abgelehnt. Ohne ihn gilt der Satz der Anfrage — gebucht wird so nicht.
     tax_code: Optional[str] = Field(default=None, max_length=2)
     tax_rate: Optional[float] = Field(default=None, ge=0, le=100)
+    # Nur Einkaufsbelege: Aufwandskonto der Position; leer = das des Steuerschluessels.
+    expense_account: Optional[str] = Field(default=None, max_length=20)
     batch_id: Optional[str] = Field(default=None, max_length=64)
     charge: Optional[str] = Field(default=None, max_length=64)
 
@@ -186,8 +197,14 @@ class DocflowUpdateRequest(BaseModel):
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 
-def _svc(db: Session, tenant_id: str) -> DocflowService:
-    return DocflowService(db, tenant_id)
+def _akteur(nutzer: Any) -> Optional[str]:
+    """Die Kennung des angemeldeten Benutzers — aus der geprueften Anmeldung, nie aus der Anfrage."""
+    wert = nutzer.get("sub") if isinstance(nutzer, dict) else getattr(nutzer, "sub", None) or getattr(nutzer, "id", None)
+    return str(wert).strip() or None if wert else None
+
+
+def _svc(db: Session, tenant_id: str, akteur: Optional[str] = None) -> DocflowService:
+    return DocflowService(db, tenant_id, akteur)
 
 
 def _validate_pos_compliance_requirements(doc_type: str, pos: Optional[PosComplianceInput]) -> None:
@@ -246,6 +263,7 @@ def _row_to_header_out(svc: DocflowService, header_id: str) -> DocflowHeaderOut:
                 unit_price=float(i.get("unit_price") or 0),
                 discount_percent=float(i.get("discount_percent") or 0),
                 tax_code=i.get("tax_code"),
+                expense_account=i.get("expense_account"),
                 tax_rate=float(i.get("tax_rate") or 0),
                 line_total_net=float(i.get("line_total_net") or 0),
                 line_total_tax=float(i.get("line_total_tax") or 0),
@@ -260,12 +278,12 @@ def _row_to_header_out(svc: DocflowService, header_id: str) -> DocflowHeaderOut:
 
 @router.get("/", response_model=list[DocflowHeaderOut], summary="Documents auflisten")
 async def list_documents(
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(_docflow_tenant),
     doc_type: Optional[str] = Query(None),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     svc = _svc(db, effective_tenant)
     doc_ids = svc.list_documents(doc_type, limit)
     return [_row_to_header_out(svc, doc_id) for doc_id in doc_ids]
@@ -274,10 +292,10 @@ async def list_documents(
 @router.get("/{doc_id}", response_model=DocflowHeaderOut, summary="Document abrufen")
 async def get_document(
     doc_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(_docflow_tenant),
     db: Session = Depends(get_db),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     svc = _svc(db, effective_tenant)
     bootstrapped = svc.bootstrap_doc(doc_id)
     if not bootstrapped:
@@ -295,12 +313,13 @@ async def get_document(
 )
 async def delete_draft_document(
     doc_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(_docflow_tenant),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ) -> Response:
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     try:
-        _svc(db, effective_tenant).delete_draft_document(doc_id)
+        _svc(db, effective_tenant, _akteur(nutzer)).delete_draft_document(doc_id)
     except EntityNotFoundError as exc:
         db.rollback()
         raise HTTPException(status_code=404, detail=exc.detail)
@@ -310,13 +329,27 @@ async def delete_draft_document(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
+@router.get("/{doc_id}/status-history", response_model=list[dict[str, Any]],
+            summary="Statushistorie und Kommandoprotokoll des Belegs")
+async def get_status_history(
+    doc_id: str,
+    tenant_id: str = Depends(_docflow_tenant),
+    db: Session = Depends(get_db),
+) -> list[dict[str, Any]]:
+    """Jeder Statuswechsel des Belegs: von, nach, Kommando, wer, warum, wann. Unveraenderlich."""
+    svc = _svc(db, tenant_id)
+    if not svc.fetch_header(doc_id):
+        raise HTTPException(status_code=404, detail="Document not found")
+    return svc.fetch_status_history(doc_id)
+
+
 @router.get("/{doc_id}/pos-compliance", response_model=DocflowOut, summary="Pos compliance abrufen")
 async def get_pos_compliance(
     doc_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(_docflow_tenant),
     db: Session = Depends(get_db),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     svc = _svc(db, effective_tenant)
     if not svc.fetch_header(doc_id):
         raise HTTPException(status_code=404, detail="Document not found")
@@ -329,12 +362,13 @@ async def get_pos_compliance(
 @router.post("/", response_model=DocflowHeaderOut, summary="Document anlegen")
 async def create_document(
     payload: DocflowCreateRequest,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(_docflow_tenant),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     _validate_pos_compliance_requirements(payload.doc_type, payload.pos_compliance)
-    svc = _svc(db, effective_tenant)
+    svc = _svc(db, effective_tenant, _akteur(nutzer))
     try:
         doc_id = svc.create_document(payload)
     except (EntityNotFoundError, ValidationFailedError) as exc:
@@ -353,11 +387,12 @@ async def create_document(
 async def update_document(
     doc_id: str,
     payload: DocflowUpdateRequest,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(_docflow_tenant),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    svc = _svc(db, effective_tenant)
+    effective_tenant = tenant_id
+    svc = _svc(db, effective_tenant, _akteur(nutzer))
     header = svc.fetch_header(doc_id)
     if not header:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -387,12 +422,13 @@ async def update_document(
 async def release_document(
     doc_id: str,
     payload: DocflowReleaseRequest,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(_docflow_tenant),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     try:
-        result = _svc(db, effective_tenant).release(doc_id, payload.idempotency_key, payload.expected_version, payload.released_by)
+        result = _svc(db, effective_tenant, _akteur(nutzer)).release(doc_id, payload.idempotency_key, payload.expected_version, payload.released_by)
     except EntityNotFoundError as exc:
         db.rollback()
         raise HTTPException(status_code=404, detail=exc.detail)
@@ -412,11 +448,12 @@ async def release_document(
 async def record_print(
     doc_id: str,
     payload: DocflowRecordPrintRequest,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(_docflow_tenant),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    svc = _svc(db, effective_tenant)
+    effective_tenant = tenant_id
+    svc = _svc(db, effective_tenant, _akteur(nutzer))
     try:
         svc.record_print(doc_id, payload.printed_by)
     except EntityNotFoundError as exc:
@@ -431,11 +468,12 @@ async def record_print(
 async def record_export(
     doc_id: str,
     payload: DocflowRecordExportRequest,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(_docflow_tenant),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    svc = _svc(db, effective_tenant)
+    effective_tenant = tenant_id
+    svc = _svc(db, effective_tenant, _akteur(nutzer))
     try:
         svc.record_export(doc_id, payload.exported_by)
     except EntityNotFoundError as exc:
@@ -450,12 +488,13 @@ async def record_export(
 async def convert_document(
     doc_id: str,
     payload: DocflowConvertRequest,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(_docflow_tenant),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     try:
-        result = _svc(db, effective_tenant).convert(doc_id, payload)
+        result = _svc(db, effective_tenant, _akteur(nutzer)).convert(doc_id, payload)
     except EntityNotFoundError as exc:
         db.rollback()
         raise HTTPException(status_code=404, detail=exc.detail)
@@ -478,12 +517,13 @@ async def convert_document(
 async def post_document(
     doc_id: str,
     payload: DocflowPostRequest,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(_docflow_tenant),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     try:
-        result = _svc(db, effective_tenant).post_document(doc_id, payload)
+        result = _svc(db, effective_tenant, _akteur(nutzer)).post_document(doc_id, payload)
     except EntityNotFoundError as exc:
         db.rollback()
         raise HTTPException(status_code=404, detail=exc.detail)
@@ -503,12 +543,13 @@ async def post_document(
 async def reverse_document(
     doc_id: str,
     payload: DocflowReverseRequest,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(_docflow_tenant),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    effective_tenant = tenant_id
     try:
-        result = _svc(db, effective_tenant).reverse_document(doc_id, payload)
+        result = _svc(db, effective_tenant, _akteur(nutzer)).reverse_document(doc_id, payload)
     except EntityNotFoundError as exc:
         db.rollback()
         raise HTTPException(status_code=404, detail=exc.detail)
@@ -525,7 +566,6 @@ async def reverse_document(
 
 
 # Draft inputs are read-only; tenant identity comes exclusively from request context.
-from app.core.tenant import get_tenant_id
 from app.services.docflow_source_proposals import DocflowSourceProposalService, SourceProposalRequest
 
 

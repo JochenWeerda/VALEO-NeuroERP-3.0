@@ -72,9 +72,15 @@ def buche_eingangsrechnung(
     invoice: dict[str, Any],
     posted_by: Optional[str],
     quelle: str = "ap_invoice",
+    gruppen: Optional[list[Vorsteuergruppe]] = None,
 ) -> tuple[str, list[Vorsteuergruppe]]:
-    """Legt Journal und offenen Posten an (ohne Commit). Wirft ``Steuerklaerung``, wenn nicht gebucht werden darf."""
-    gruppen = vorsteuergruppen(db, tenant_id, positionen(invoice))
+    """Legt Journal und offenen Posten an (ohne Commit). Wirft ``Steuerklaerung``, wenn nicht gebucht werden darf.
+
+    ``gruppen``: vom belegfuehrenden Weg schon ermittelt (DocFlow gibt die Steuer des Belegs mit, damit Beleg
+    und Buchung auf den Cent stimmen); sonst aus den Positionen der Rechnung.
+    """
+    if gruppen is None:
+        gruppen = vorsteuergruppen(db, tenant_id, positionen(invoice))
     _netto, _steuer, brutto = summen(gruppen)
     if brutto <= Decimal("0"):
         raise Steuerklaerung("Der Rechnungsbetrag ist nicht positiv.")

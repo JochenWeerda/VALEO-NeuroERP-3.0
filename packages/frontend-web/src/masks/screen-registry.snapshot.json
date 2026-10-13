@@ -1,0 +1,5672 @@
+{
+ "exports": {
+  "adminPostfaecherScreen": "admin/postfaecher",
+  "betriebsauftragScreen": "verkauf/betriebsauftrag",
+  "financeSteuerschluesselScreen": "finance/steuerschluessel",
+  "frachttabellenScreen": "logistik/frachttabellen",
+  "fuhrparkAusgehendeDokumenteScreen": "fuhrpark/ausgehende-dokumente",
+  "fuhrparkFahrzeugStammScreen": "fuhrpark/fahrzeug-stamm",
+  "fuhrparkFahrzeugeScreen": "fuhrpark/fahrzeuge",
+  "fuhrparkRechnungenScreen": "fuhrpark/rechnungen",
+  "fuhrparkTerminartenScreen": "fuhrpark/terminarten",
+  "fuhrparkUebersichtScreen": "fuhrpark/uebersicht",
+  "logistikFrachtbriefScreen": "logistik/frachtbrief",
+  "logistikVerladungScreen": "logistik/verladung",
+  "nawaroErnterklaerungScreen": "strecke/nawaro-ernterklaerung-drucken",
+  "nawaroLieferungenScreen": "strecke/nawaro-lieferungen",
+  "personalBewerbungEinwilligungScreen": "personal/bewerbung-einwilligung",
+  "personalBewerbungenScreen": "personal/bewerbungen",
+  "personalEinwilligungserklaerungenScreen": "personal/einwilligungserklaerungen",
+  "personalOnboardingScreen": "personal/onboarding",
+  "personalQualifikationenScreen": "personal/qualifikationen",
+  "personalSchulungenScreen": "personal/schulungen",
+  "qualitaetsAbweichungScreen": "strecke/qualitaets-abweichung",
+  "salesGutschriftScreen": "sales/gutschrift",
+  "streckeDispositionScreen": "strecke/disposition",
+  "streckeDokumenteDruckenScreen": "strecke/dokumente-drucken",
+  "streckeStreckengeschaeftScreen": "strecke/streckengeschaeft",
+  "streckeVorlaeufigScreen": "strecke/vorlaeufig",
+  "tourFrachtArbeitsraumScreen": "logistik/tour-fracht-arbeitsraum",
+  "tourenplanungScreen": "logistik/tourenplanung",
+  "transporteFahrerScreen": "transporte/fahrer",
+  "versandAvisScreen": "versand/versand-avis",
+  "versandprofileScreen": "logistik/versandprofile"
+ },
+ "hinweis": "Erzeugt von scripts/generate_screen_registry_snapshot.py aus app/core/screen_definitions*.py. Nicht von Hand aendern.",
+ "screens": {
+  "admin/postfaecher": {
+   "actions": [
+    {
+     "command": "admin.postfachSpeichern",
+     "commandEndpoint": "/api/v1/admin/postfaecher/actions/speichern",
+     "dangerLevel": "safe",
+     "inputFields": [
+      {
+       "key": "kennung",
+       "label": "Kennung",
+       "required": true,
+       "type": "text"
+      },
+      {
+       "key": "absender_email",
+       "label": "Absender",
+       "required": true,
+       "type": "text"
+      },
+      {
+       "key": "anbieter",
+       "label": "Anbieter",
+       "required": true,
+       "type": "select"
+      },
+      {
+       "key": "postfach_id",
+       "label": "Postfach-ID (Update)",
+       "type": "text"
+      }
+     ],
+     "key": "speichern",
+     "kind": "primary",
+     "label": "Postfach speichern",
+     "method": "POST",
+     "permission": "admin.postfach.write",
+     "zone": "header"
+    },
+    {
+     "command": "admin.postfachTesten",
+     "commandEndpoint": "/api/v1/admin/postfaecher/{entity_id}/testen",
+     "dangerLevel": "safe",
+     "inputFields": [
+      {
+       "helpText": "Leer = an die Absender-Adresse selbst.",
+       "key": "empfaenger",
+       "label": "Empfänger",
+       "type": "text"
+      }
+     ],
+     "key": "testen",
+     "kind": "secondary",
+     "label": "Testmail senden",
+     "method": "POST",
+     "permission": "admin.postfach.testen",
+     "zone": "header"
+    },
+    {
+     "command": "admin.postfachAnmelden",
+     "dangerLevel": "safe",
+     "key": "anmelden",
+     "kind": "secondary",
+     "label": "Beim Anbieter anmelden",
+     "stubReason": "Fuehrt zur Anmeldung bei Google bzw. Microsoft fuer das geladene Postfach.",
+     "zone": "header"
+    },
+    {
+     "command": "admin.postfachNeu",
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "secondary",
+     "label": "Neues Postfach",
+     "localEffect": "form_reset",
+     "stubReason": "Leert die Eingabe fuer ein neues Postfach.",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "admin/postfaecher",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/admin/postfaecher",
+     "key": "postfaecher",
+     "pageSize": 200,
+     "table": "domain_shared.mailkonten"
+    }
+   ],
+   "domain": "platform",
+   "fields": [
+    {
+     "helpText": "Kurzname, z. B. info, dispo, fibu, zentrale oder m.meier.",
+     "key": "kennung",
+     "label": "Kennung",
+     "required": true,
+     "type": "text"
+    },
+    {
+     "key": "bezeichnung",
+     "label": "Bezeichnung",
+     "type": "text"
+    },
+    {
+     "key": "absender_email",
+     "label": "Absender-Adresse",
+     "required": true,
+     "type": "text"
+    },
+    {
+     "helpText": "Erscheint beim Empfänger, z. B. Raiffeisen Disposition.",
+     "key": "absender_name",
+     "label": "Absender-Name",
+     "type": "text"
+    },
+    {
+     "key": "anbieter",
+     "label": "Anbieter",
+     "options": [
+      {
+       "label": "IONOS",
+       "value": "ionos"
+      },
+      {
+       "label": "Google / Gmail",
+       "value": "google"
+      },
+      {
+       "label": "Microsoft 365 / Outlook",
+       "value": "microsoft"
+      },
+      {
+       "label": "Anderer Anbieter (SMTP)",
+       "value": "smtp"
+      },
+      {
+       "label": "Alias eines anderen Postfachs",
+       "value": "alias"
+      }
+     ],
+     "required": true,
+     "type": "select"
+    },
+    {
+     "helpText": "Google: App-Passwort oder Anmeldung über Google. Microsoft 365: immer Anmeldung über Microsoft.",
+     "key": "anmeldung",
+     "label": "Anmeldung",
+     "options": [
+      {
+       "label": "Passwort / App-Passwort",
+       "value": "passwort"
+      },
+      {
+       "label": "Beim Anbieter anmelden (Google, Microsoft)",
+       "value": "oauth2"
+      }
+     ],
+     "type": "select"
+    },
+    {
+     "helpText": "Leer lassen, um das hinterlegte Passwort zu behalten. Wird nie angezeigt.",
+     "key": "passwort",
+     "label": "Passwort",
+     "type": "password"
+    },
+    {
+     "helpText": "Leer = Absender-Adresse (IONOS, Google).",
+     "key": "benutzer",
+     "label": "Benutzername",
+     "type": "text"
+    },
+    {
+     "helpText": "Nur bei Anderer Anbieter; IONOS und Google sind vorbelegt.",
+     "key": "smtp_host",
+     "label": "SMTP-Server",
+     "type": "text"
+    },
+    {
+     "key": "smtp_port",
+     "label": "SMTP-Port",
+     "type": "number"
+    },
+    {
+     "key": "sicherheit",
+     "label": "Verschlüsselung",
+     "options": [
+      {
+       "label": "STARTTLS (587)",
+       "value": "starttls"
+      },
+      {
+       "label": "SSL (465)",
+       "value": "ssl"
+      }
+     ],
+     "type": "select"
+    },
+    {
+     "helpText": "Nur bei Alias: Postfach, dessen Anmeldung genutzt wird. Die Adresse muss dort als Absender erlaubt sein.",
+     "key": "zugang_von",
+     "label": "Anmeldung von Postfach",
+     "options": [],
+     "type": "select"
+    },
+    {
+     "helpText": "Dafür wird das Postfach automatisch genommen.",
+     "key": "verwendungen",
+     "label": "Verwendung",
+     "options": [
+      {
+       "label": "Einkauf (Bestellungen, Anfragen)",
+       "value": "einkauf"
+      },
+      {
+       "label": "Verkauf (Angebote, Auftragsbestätigungen)",
+       "value": "verkauf"
+      },
+      {
+       "label": "Finanzbuchhaltung (Rechnungen, Mahnungen)",
+       "value": "fibu"
+      },
+      {
+       "label": "Disposition (Lieferavise, Touren)",
+       "value": "dispo"
+      },
+      {
+       "label": "Newsletter und Rundschreiben",
+       "value": "newsletter"
+      },
+      {
+       "label": "Allgemeine Korrespondenz",
+       "value": "allgemein"
+      }
+     ],
+     "type": "multiselect"
+    },
+    {
+     "helpText": "Keine Rolle und kein Benutzer gewählt = alle im Haus. Die Rollen des Hauses lädt die Seite.",
+     "key": "rollen",
+     "label": "Freigegeben für Rollen",
+     "options": [],
+     "type": "multiselect"
+    },
+    {
+     "helpText": "Kommagetrennte Benutzerkennungen.",
+     "key": "benutzer_freigabe",
+     "label": "Freigegeben für Benutzer",
+     "type": "text"
+    },
+    {
+     "helpText": "Benutzerkennung; dann darf nur diese Person daraus senden.",
+     "key": "persoenlich_fuer",
+     "label": "Persönliches Postfach von",
+     "type": "text"
+    },
+    {
+     "helpText": "Wird genommen, wenn kein Postfach für die Verwendung passt.",
+     "key": "ist_standard",
+     "label": "Standard-Postfach",
+     "type": "boolean"
+    }
+   ],
+   "id": "admin/postfaecher",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "none",
+    "density": "compact",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Postfaecher werden eingerichtet, geprueft und genutzt; es gibt keinen Belegablauf.",
+   "performance": {
+    "bundleGroup": "platform",
+    "initialPayloadBudgetKb": 24,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": false
+   },
+   "schemaVersion": 1,
+   "subtitle": "E-Mail-Versand über die Postfächer des Hauses",
+   "summary": [
+    {
+     "key": "postfaecher",
+     "label": "Postfächer",
+     "value": "0"
+    },
+    {
+     "key": "standard",
+     "label": "Standard",
+     "value": "–"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "key": "kennung",
+       "label": "Kennung",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "filterable": true,
+       "key": "absender_email",
+       "label": "Absender",
+       "priority": "primary"
+      },
+      {
+       "key": "anbieter_text",
+       "label": "Anbieter",
+       "priority": "secondary"
+      },
+      {
+       "key": "verwendung_text",
+       "label": "Verwendung",
+       "priority": "secondary"
+      },
+      {
+       "key": "freigabe_text",
+       "label": "Freigabe",
+       "priority": "secondary"
+      },
+      {
+       "key": "status_text",
+       "label": "Status",
+       "priority": "primary"
+      }
+     ],
+     "dataSourceKey": "postfaecher",
+     "key": "postfaecher",
+     "label": "Postfächer",
+     "pageSize": 50,
+     "rowActions": [
+      {
+       "command": "admin.postfachBearbeiten",
+       "dangerLevel": "safe",
+       "key": "bearbeiten",
+       "label": "Bearbeiten"
+      },
+      {
+       "command": "admin.postfachEntfernen",
+       "dangerLevel": "high",
+       "key": "entfernen",
+       "label": "Entfernen",
+       "requiresConfirmation": true
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": false
+    }
+   ],
+   "title": "Postfächer",
+   "workflow": {
+    "processKey": "admin.postfaecher"
+   }
+  },
+  "finance/steuerschluessel": {
+   "actions": [
+    {
+     "command": "finance.steuerschluesselSpeichern",
+     "commandEndpoint": "/api/v1/finance/tax-keys/actions/speichern",
+     "dangerLevel": "moderate",
+     "forbiddenForAgents": true,
+     "humanApprovalRequired": true,
+     "inputFields": [
+      {
+       "key": "code",
+       "label": "Schlüssel",
+       "required": true,
+       "type": "text"
+      },
+      {
+       "key": "bezeichnung",
+       "label": "Bezeichnung",
+       "required": true,
+       "type": "text"
+      },
+      {
+       "key": "steuersatz",
+       "label": "Steuersatz in %",
+       "required": true,
+       "type": "number"
+      },
+      {
+       "key": "gueltig_von",
+       "label": "Gültig von",
+       "required": true,
+       "type": "date"
+      },
+      {
+       "key": "credit_account",
+       "label": "Umsatzsteuerkonto",
+       "type": "text"
+      },
+      {
+       "key": "revenue_account",
+       "label": "Erlöskonto",
+       "type": "text"
+      },
+      {
+       "key": "debit_account",
+       "label": "Vorsteuerkonto",
+       "type": "text"
+      },
+      {
+       "key": "expense_account",
+       "label": "Aufwandskonto",
+       "type": "text"
+      }
+     ],
+     "key": "speichern",
+     "kind": "primary",
+     "label": "Steuerschlüssel speichern",
+     "method": "POST",
+     "permission": "finance.steuerschluessel.write",
+     "requiresConfirmation": true,
+     "zone": "header"
+    },
+    {
+     "command": "finance.steuerschluesselNeu",
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "secondary",
+     "label": "Neuer Steuerschlüssel",
+     "localEffect": "form_reset",
+     "stubReason": "Leert die Eingabe fuer einen neuen Steuerschluessel.",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "finance/steuerschluessel",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/finance/tax-keys",
+     "key": "steuerschluessel",
+     "pageSize": 200,
+     "table": "domain_erp.tax_keys"
+    },
+    {
+     "endpoint": "/api/v1/finance/tax-keys/kontenvorschlaege",
+     "key": "konten",
+     "table": "domain_erp.chart_of_accounts"
+    }
+   ],
+   "domain": "finance",
+   "fields": [
+    {
+     "helpText": "Ein oder zwei Ziffern. Ein vorhandener Schlüssel wird geändert, ein neuer angelegt.",
+     "key": "code",
+     "label": "Schlüssel",
+     "required": true,
+     "type": "text"
+    },
+    {
+     "key": "bezeichnung",
+     "label": "Bezeichnung",
+     "required": true,
+     "type": "text"
+    },
+    {
+     "helpText": "Es gibt keinen Vorgabewert. Steuerfrei ist 0.",
+     "key": "steuersatz",
+     "label": "Steuersatz in %",
+     "required": true,
+     "type": "number"
+    },
+    {
+     "dataSourceKey": "konten",
+     "helpText": "Verbindlichkeitskonto aus dem Kontenplan, für Verkaufsbelege. Bei einem Satz über 0 Pflicht, damit gebucht wird.",
+     "key": "credit_account",
+     "label": "Umsatzsteuerkonto",
+     "options": [],
+     "type": "select"
+    },
+    {
+     "dataSourceKey": "konten",
+     "helpText": "Erlöskonto aus dem Kontenplan. Ohne Erlöskonto wird mit dem Schlüssel kein Verkaufsbeleg automatisch gebucht.",
+     "key": "revenue_account",
+     "label": "Erlöskonto",
+     "options": [],
+     "type": "select"
+    },
+    {
+     "dataSourceKey": "konten",
+     "helpText": "Aktivkonto aus dem Kontenplan, für Eingangsbelege.",
+     "key": "debit_account",
+     "label": "Vorsteuerkonto",
+     "options": [],
+     "type": "select"
+    },
+    {
+     "dataSourceKey": "konten",
+     "helpText": "Aufwandskonto aus dem Kontenplan, für Eingangsbelege. Leer = die Position der Eingangsrechnung nennt es; fehlt beides, wird nicht gebucht.",
+     "key": "expense_account",
+     "label": "Aufwandskonto",
+     "options": [],
+     "type": "select"
+    },
+    {
+     "key": "par_24_ustg",
+     "label": "Durchschnittssatz nach § 24 UStG",
+     "type": "boolean"
+    },
+    {
+     "helpText": "Verlangt den Steuersatz 0; wird nicht automatisch gebucht.",
+     "key": "reverse_charge",
+     "label": "Reverse Charge (§ 13b UStG)",
+     "type": "boolean"
+    },
+    {
+     "key": "intracom",
+     "label": "Innergemeinschaftlich",
+     "type": "boolean"
+    },
+    {
+     "key": "export",
+     "label": "Ausfuhr",
+     "type": "boolean"
+    },
+    {
+     "key": "ustva_position",
+     "label": "UStVA-Kennzahl",
+     "type": "text"
+    },
+    {
+     "key": "ustva_bezeichnung",
+     "label": "UStVA-Text",
+     "type": "text"
+    },
+    {
+     "key": "gueltig_von",
+     "label": "Gültig von",
+     "required": true,
+     "type": "date"
+    },
+    {
+     "key": "gueltig_bis",
+     "label": "Gültig bis",
+     "type": "date"
+    },
+    {
+     "helpText": "Ein inaktiver Schlüssel steht in keiner Auswahl und bucht nicht.",
+     "key": "active",
+     "label": "Aktiv",
+     "type": "boolean"
+    },
+    {
+     "key": "notizen",
+     "label": "Notizen",
+     "type": "textarea"
+    }
+   ],
+   "id": "finance/steuerschluessel",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "none",
+    "density": "compact",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "financial",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Steuerschluessel sind Stammdaten; sie werden gepflegt, es gibt keinen Belegablauf.",
+   "performance": {
+    "bundleGroup": "finance",
+    "initialPayloadBudgetKb": 24,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": false
+   },
+   "schemaVersion": 1,
+   "subtitle": "Finanzbuchhaltung / Stammdaten",
+   "summary": [
+    {
+     "key": "anzahl",
+     "label": "Steuerschlüssel",
+     "value": "0"
+    },
+    {
+     "key": "ohne_buchung",
+     "label": "Buchen nicht automatisch",
+     "value": "0"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "code",
+       "label": "Schlüssel",
+       "priority": "primary",
+       "sortable": true,
+       "width": 90
+      },
+      {
+       "filterable": true,
+       "key": "bezeichnung",
+       "label": "Bezeichnung",
+       "priority": "primary"
+      },
+      {
+       "key": "satz_text",
+       "label": "Satz",
+       "priority": "primary"
+      },
+      {
+       "key": "credit_account",
+       "label": "Umsatzsteuerkonto",
+       "priority": "secondary"
+      },
+      {
+       "key": "revenue_account",
+       "label": "Erlöskonto",
+       "priority": "secondary"
+      },
+      {
+       "key": "debit_account",
+       "label": "Vorsteuerkonto",
+       "priority": "secondary"
+      },
+      {
+       "key": "expense_account",
+       "label": "Aufwandskonto",
+       "priority": "secondary"
+      },
+      {
+       "key": "kennzeichen_text",
+       "label": "Kennzeichen",
+       "priority": "secondary"
+      },
+      {
+       "key": "verwendung",
+       "label": "Bucht automatisch für",
+       "priority": "primary"
+      },
+      {
+       "key": "status_text",
+       "label": "Status",
+       "priority": "primary",
+       "renderKind": "status"
+      }
+     ],
+     "dataSourceKey": "steuerschluessel",
+     "key": "steuerschluessel",
+     "label": "Steuerschlüssel",
+     "pageSize": 50,
+     "rowActions": [
+      {
+       "command": "finance.steuerschluesselBearbeiten",
+       "dangerLevel": "safe",
+       "key": "bearbeiten",
+       "label": "Bearbeiten"
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": false
+    }
+   ],
+   "title": "Steuerschlüssel",
+   "workflow": {
+    "processKey": "finance.steuerschluessel"
+   }
+  },
+  "fuhrpark/ausgehende-dokumente": {
+   "actions": [
+    {
+     "command": "fuhrpark.saveDokument",
+     "commandEndpoint": "/api/v1/fuhrpark/ausgehende-dokumente/actions/speichern",
+     "dangerLevel": "safe",
+     "key": "speichern",
+     "kind": "primary",
+     "label": "Speichern",
+     "method": "POST",
+     "permission": "logistics:write",
+     "zone": "header"
+    },
+    {
+     "command": "fuhrpark.newDokument",
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "secondary",
+     "label": "Neu",
+     "stubReason": "Leert die Eingabe fuer einen neuen Belegtyp.",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "fuhrpark/ausgehende-dokumente",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/fuhrpark/ausgehende-dokumente",
+     "key": "dokumente",
+     "pageSize": 100
+    }
+   ],
+   "domain": "logistics",
+   "fields": [
+    {
+     "key": "beleg_typ",
+     "label": "Beleg-Typ",
+     "placeholder": "Bezeichnung",
+     "type": "text"
+    },
+    {
+     "key": "formular",
+     "label": "Formular",
+     "type": "text"
+    },
+    {
+     "key": "ziel_modul",
+     "label": "Ziel-Modul",
+     "type": "text"
+    },
+    {
+     "key": "beschreibung",
+     "label": "Beschreibung",
+     "type": "text"
+    },
+    {
+     "key": "aktiv",
+     "label": "Aktiv",
+     "type": "boolean"
+    }
+   ],
+   "id": "fuhrpark/ausgehende-dokumente",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "none",
+    "density": "compact",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Der Stand folgt den Belegtypen und ihren Formularen.",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Belegtypen, Formulare und Zielmodule",
+   "summary": [
+    {
+     "key": "belege",
+     "label": "Belege",
+     "value": "0"
+    },
+    {
+     "key": "ohne_formular",
+     "label": "Ohne Formular",
+     "value": "0"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "beleg_typ",
+       "label": "Beleg-Typ",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "key": "formular",
+       "label": "Formular",
+       "priority": "secondary"
+      },
+      {
+       "key": "ziel_modul",
+       "label": "Ziel-Modul",
+       "priority": "secondary"
+      },
+      {
+       "key": "beschreibung",
+       "label": "Beschreibung",
+       "priority": "tertiary"
+      },
+      {
+       "key": "aktiv",
+       "label": "Aktiv",
+       "priority": "tertiary"
+      }
+     ],
+     "dataSourceKey": "dokumente",
+     "key": "dokumente",
+     "label": "Belegtypen",
+     "pageSize": 50,
+     "rowActions": [
+      {
+       "command": "fuhrpark.deleteDokument",
+       "dangerLevel": "moderate",
+       "disabledWhen": {
+        "field": "gesperrt",
+        "values": [
+         true
+        ]
+       },
+       "key": "loeschen",
+       "label": "Löschen"
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "tiles": [
+    {
+     "key": "frachtdokumente",
+     "label": "Frachtdokumente",
+     "targetRoute": "/versand/frachtdokumente",
+     "targetScreenId": "versand/frachtdokumente"
+    },
+    {
+     "key": "paket",
+     "label": "Paket-Etikett",
+     "targetRoute": "/versand/paket-etikett",
+     "targetScreenId": "versand/paket-etikett"
+    },
+    {
+     "key": "avis",
+     "label": "Versand-Avis",
+     "targetRoute": "/versand/versand-avis",
+     "targetScreenId": "versand/versand-avis"
+    },
+    {
+     "key": "produktion",
+     "label": "Produktions-Dokumente",
+     "targetRoute": "/produktion/produktions-dokumente-drucken",
+     "targetScreenId": "produktion/dokumente-drucken"
+    },
+    {
+     "key": "kommission",
+     "label": "Kommissions-Aufträge",
+     "targetRoute": "/verkauf/kommissions-auftraege",
+     "targetScreenId": "verkauf/kommissions-auftraege"
+    },
+    {
+     "key": "betrieb",
+     "label": "Betriebs-Aufträge",
+     "targetRoute": "/verkauf/betriebs-auftraege",
+     "targetScreenId": "verkauf/betriebsauftrag"
+    }
+   ],
+   "title": "Ausgehende Belege",
+   "workflow": {
+    "processKey": "fuhrpark.ausgehende-dokumente"
+   }
+  },
+  "fuhrpark/fahrzeug-stamm": {
+   "actions": [
+    {
+     "command": "fuhrpark.saveFahrzeug",
+     "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/actions/speichern",
+     "dangerLevel": "safe",
+     "key": "speichern",
+     "kind": "primary",
+     "label": "Speichern",
+     "method": "POST",
+     "permission": "logistics:write",
+     "zone": "header"
+    },
+    {
+     "command": "fuhrpark.openFahrzeugListe",
+     "dangerLevel": "safe",
+     "key": "liste",
+     "kind": "secondary",
+     "label": "Zur Liste",
+     "stubReason": "Wechselt zur Fahrzeugliste.",
+     "zone": "footer"
+    },
+    {
+     "command": "fuhrpark.setupDrucker",
+     "dangerLevel": "safe",
+     "key": "drucker",
+     "kind": "secondary",
+     "label": "Drucker einrichten",
+     "stubReason": "Hinterlegt den Drucker an der Fahrzeugakte.",
+     "zone": "footer"
+    },
+    {
+     "command": "fuhrpark.printAkte",
+     "dangerLevel": "safe",
+     "key": "drucken",
+     "kind": "secondary",
+     "label": "Drucken",
+     "stubReason": "Druckt die Fahrzeugakte.",
+     "zone": "footer"
+    },
+    {
+     "command": "fuhrpark.reportUnfall",
+     "dangerLevel": "moderate",
+     "key": "unfall",
+     "kind": "secondary",
+     "label": "Unfall-Anzeige",
+     "stubReason": "Erfasst eine Unfallanzeige zum Fahrzeug.",
+     "zone": "footer"
+    },
+    {
+     "command": "fuhrpark.deleteFahrzeug",
+     "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/{entity_id}/actions/loeschen",
+     "dangerLevel": "high",
+     "key": "loeschen",
+     "kind": "secondary",
+     "label": "Fahrzeug löschen",
+     "method": "POST",
+     "permission": "logistics:write",
+     "requiresConfirmation": true,
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "fuhrpark/fahrzeug-stamm",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/fuhrpark/fahrzeuge",
+     "key": "fahrzeug",
+     "pageSize": 1
+    }
+   ],
+   "domain": "logistics",
+   "id": "fuhrpark/fahrzeug-stamm",
+   "identityField": "kennzeichen",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "workflow",
+    "density": "compact",
+    "floorplan": "objectPage",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "detail",
+   "noWorkflowReason": "Der Stand folgt Kennzeichen, Typ und den Terminen der Akte.",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 48,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": false
+   },
+   "schemaVersion": 1,
+   "subtitle": "Kennzeichen, Technik, Erwerb und Termine",
+   "summary": [
+    {
+     "key": "kilometerstand",
+     "label": "Km-Stand",
+     "value": "0"
+    },
+    {
+     "key": "tuev",
+     "label": "Naechster TUEV",
+     "value": "offen"
+    }
+   ],
+   "tabs": [
+    {
+     "fields": [
+      {
+       "key": "ro_nummer",
+       "label": "RO-Nummer",
+       "type": "text"
+      },
+      {
+       "key": "is_neu",
+       "label": "Neu",
+       "type": "boolean"
+      },
+      {
+       "key": "betrieb",
+       "label": "Betrieb",
+       "type": "text"
+      },
+      {
+       "key": "bereich",
+       "label": "Bereich",
+       "type": "text"
+      },
+      {
+       "key": "pol_kennzeichen",
+       "label": "Pol. Kennzeichen",
+       "type": "text"
+      },
+      {
+       "key": "kennzeichen",
+       "label": "Kennzeichen",
+       "type": "text"
+      }
+     ],
+     "key": "allgemein",
+     "label": "Allgemein"
+    },
+    {
+     "fields": [
+      {
+       "key": "verwendung",
+       "label": "Verwendung",
+       "type": "text"
+      },
+      {
+       "key": "kfz_brief_nummer",
+       "label": "Kfz-Brief-Nummer",
+       "type": "text"
+      },
+      {
+       "key": "typ",
+       "label": "Typ",
+       "type": "text"
+      },
+      {
+       "key": "schadstoffgruppe",
+       "label": "Schadstoffgruppe",
+       "type": "text"
+      },
+      {
+       "key": "leistung_kw",
+       "label": "Leistung (kW)",
+       "type": "number"
+      },
+      {
+       "key": "kraftstoff",
+       "label": "Kraftstoff",
+       "type": "text"
+      },
+      {
+       "key": "fahrgestellnummer",
+       "label": "Fahrgestellnummer",
+       "type": "text"
+      },
+      {
+       "key": "erstzulassung",
+       "label": "Erstzulassung",
+       "type": "date"
+      },
+      {
+       "key": "ausstattung",
+       "label": "Ausstattung",
+       "type": "textarea"
+      },
+      {
+       "key": "fahrtenschreiber_vorhanden",
+       "label": "Fahrtenschreiber vorhanden",
+       "type": "boolean"
+      },
+      {
+       "key": "ahk_vorhanden",
+       "label": "AHK vorhanden",
+       "type": "boolean"
+      },
+      {
+       "key": "ladekran_vorhanden",
+       "label": "Ladekran vorhanden",
+       "type": "boolean"
+      },
+      {
+       "key": "fahrer_name",
+       "label": "Fahrer Name",
+       "type": "text"
+      },
+      {
+       "key": "fahrer_vorname",
+       "label": "Fahrer Vorname",
+       "type": "text"
+      }
+     ],
+     "key": "technik",
+     "label": "Technik"
+    },
+    {
+     "fields": [
+      {
+       "key": "bestellnummer",
+       "label": "Bestellnummer",
+       "type": "text"
+      },
+      {
+       "key": "bestelldatum",
+       "label": "Bestelldatum",
+       "type": "date"
+      },
+      {
+       "key": "haendler",
+       "label": "Haendler",
+       "type": "text"
+      },
+      {
+       "key": "zustand",
+       "label": "Zustand",
+       "type": "text"
+      },
+      {
+       "key": "kaufsumme_eur",
+       "label": "Kaufsumme EUR",
+       "type": "number"
+      },
+      {
+       "key": "kaufdatum",
+       "label": "Kaufdatum",
+       "type": "date"
+      },
+      {
+       "key": "verkaufsdatum",
+       "label": "Verkaufsdatum",
+       "type": "date"
+      },
+      {
+       "key": "abmeldedatum",
+       "label": "Abmeldedatum",
+       "type": "date"
+      },
+      {
+       "key": "kostenstelle",
+       "label": "Kostenstelle",
+       "type": "text"
+      },
+      {
+       "key": "abschreibungsart",
+       "label": "Abschreibungsart",
+       "type": "text"
+      },
+      {
+       "key": "afa_jahre",
+       "label": "Afa Jahre",
+       "type": "number"
+      },
+      {
+       "key": "afa_eur_jaehrlich",
+       "label": "Afa EUR jaehrlich",
+       "type": "number"
+      },
+      {
+       "key": "afa_eur_monatlich",
+       "label": "Afa EUR monatlich",
+       "type": "number"
+      },
+      {
+       "key": "leasingdauer_monate",
+       "label": "Leasingdauer (Mon.)",
+       "type": "number"
+      },
+      {
+       "key": "leasinggesellschaft",
+       "label": "Leasinggesellschaft",
+       "type": "text"
+      },
+      {
+       "key": "leasingrate_eur",
+       "label": "Leasingrate EUR",
+       "type": "number"
+      },
+      {
+       "key": "kfz_steuer_eur",
+       "label": "KFZ-Steuer EUR",
+       "type": "number"
+      },
+      {
+       "key": "kfz_steuernummer",
+       "label": "KFZ-Steuernummer",
+       "type": "text"
+      },
+      {
+       "key": "kontierung",
+       "label": "Kontierung",
+       "type": "text"
+      },
+      {
+       "key": "finanzamt",
+       "label": "Finanzamt",
+       "type": "text"
+      },
+      {
+       "key": "versicherungs_gesellschaft",
+       "label": "Versicherungs-Gesellschaft",
+       "type": "text"
+      },
+      {
+       "key": "versicherungsschein_nr",
+       "label": "Versicherungsschein-Nr.",
+       "type": "text"
+      },
+      {
+       "key": "versicherung_satz_eur_monat",
+       "label": "Satz EUR / Monat",
+       "type": "number"
+      },
+      {
+       "key": "versicherung_haftpflicht",
+       "label": "Haftpflicht",
+       "type": "boolean"
+      },
+      {
+       "key": "versicherung_kasko",
+       "label": "Kasko",
+       "type": "boolean"
+      }
+     ],
+     "key": "erwerb",
+     "label": "Erwerb"
+    },
+    {
+     "fields": [
+      {
+       "key": "naechster_tuev_termin",
+       "label": "Naechster TUEV-Termin",
+       "type": "date"
+      },
+      {
+       "key": "naechster_asu_termin",
+       "label": "Naechster ASU-Termin",
+       "type": "date"
+      },
+      {
+       "key": "naechste_inspektion",
+       "label": "Naechste Inspektion",
+       "type": "date"
+      },
+      {
+       "key": "kilometerstand",
+       "label": "Km-Stand",
+       "type": "number"
+      },
+      {
+       "key": "km_stand_alle_eintraege",
+       "label": "Alle Eintraege",
+       "type": "boolean"
+      },
+      {
+       "key": "leergewicht_kg",
+       "label": "Leergewicht (kg)",
+       "type": "number"
+      },
+      {
+       "key": "nutzlast_kg",
+       "label": "Nutzlast (kg)",
+       "type": "number"
+      },
+      {
+       "key": "gesamtgewicht_kg",
+       "label": "Gesamtgewicht (kg)",
+       "type": "number"
+      },
+      {
+       "key": "anhaengerlast_kg",
+       "label": "Anhaengerlast (kg)",
+       "type": "number"
+      },
+      {
+       "key": "winterreifen_vorhanden",
+       "label": "Winterreifen vorhanden",
+       "type": "boolean"
+      },
+      {
+       "key": "winterreifen_eingelagert",
+       "label": "Eingelagert",
+       "type": "boolean"
+      },
+      {
+       "key": "handy_freisprecheinrichtung",
+       "label": "Handy-Freispr.-Einr.",
+       "type": "boolean"
+      },
+      {
+       "key": "handy_fabrikat",
+       "label": "Handy-Fabrikat",
+       "type": "text"
+      },
+      {
+       "key": "handy_rufnummer",
+       "label": "Handy-Ruf-Nummer",
+       "type": "text"
+      }
+     ],
+     "key": "termine",
+     "label": "Termine"
+    },
+    {
+     "fields": [
+      {
+       "key": "drucker_name",
+       "label": "Drucker",
+       "placeholder": "Druckername",
+       "type": "text"
+      },
+      {
+       "key": "unfall_ort",
+       "label": "Unfall-Ort",
+       "type": "text"
+      },
+      {
+       "key": "unfall_beschreibung",
+       "label": "Unfall-Beschreibung",
+       "type": "text"
+      }
+     ],
+     "key": "funktionen",
+     "label": "Funktionen"
+    }
+   ],
+   "title": "Fahrzeug-Stamm",
+   "workflow": {
+    "processKey": "fuhrpark.fahrzeug-stamm"
+   }
+  },
+  "fuhrpark/fahrzeuge": {
+   "actions": [
+    {
+     "command": "vehicle.create",
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "primary",
+     "label": "Neues Fahrzeug",
+     "stubReason": "Oeffnet die bestehende Fahrzeug-Erfassung.",
+     "zone": "header"
+    }
+   ],
+   "adapter": {
+    "sourceId": "fuhrpark/fahrzeuge",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/fuhrpark/fahrzeuge",
+     "key": "list",
+     "pageSize": 200
+    }
+   ],
+   "domain": "logistics",
+   "id": "fuhrpark/fahrzeuge",
+   "layout": {
+    "columnNavigation": "listDetail",
+    "contextRail": "none",
+    "density": "expertDense",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Status und Fristen haengen am Fahrzeug. Diese Liste sucht und oeffnet es.",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 40,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Fahrzeuge suchen und öffnen",
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "kennzeichen",
+       "label": "Kennzeichen",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "filterable": true,
+       "key": "status",
+       "label": "Status",
+       "priority": "primary",
+       "renderKind": "status"
+      },
+      {
+       "filterable": true,
+       "key": "typ",
+       "label": "Typ",
+       "priority": "secondary"
+      },
+      {
+       "key": "kilometerstand",
+       "label": "km-Stand",
+       "numeric": true,
+       "priority": "secondary",
+       "sortable": true
+      },
+      {
+       "key": "ro_nummer",
+       "label": "RO-Nr.",
+       "priority": "tertiary",
+       "sortable": true
+      },
+      {
+       "key": "naechste_inspektion",
+       "label": "Inspektion",
+       "priority": "tertiary",
+       "renderKind": "date",
+       "sortable": true
+      }
+     ],
+     "dataSourceKey": "list",
+     "key": "list",
+     "label": "Fahrzeuge",
+     "pageSize": 200,
+     "rowHeight": 36,
+     "rowRouteTemplate": "/fuhrpark/fahrzeug/{id}",
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Fahrzeuge"
+  },
+  "fuhrpark/rechnungen": {
+   "actions": [
+    {
+     "command": "fuhrpark.saveRechnung",
+     "commandEndpoint": "/api/v1/fuhrpark/rechnungen/actions/speichern",
+     "dangerLevel": "safe",
+     "key": "speichern",
+     "kind": "primary",
+     "label": "Speichern",
+     "method": "POST",
+     "permission": "logistics:write",
+     "zone": "header"
+    },
+    {
+     "command": "fuhrpark.newRechnung",
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "secondary",
+     "label": "Neu",
+     "stubReason": "Leert die Eingabe fuer eine neue Rechnung.",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "fuhrpark/rechnungen",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/fuhrpark/rechnungen",
+     "key": "rechnungen",
+     "pageSize": 100
+    }
+   ],
+   "domain": "logistics",
+   "fields": [
+    {
+     "key": "rechnungs_nr",
+     "label": "Rechnungs-Nr",
+     "placeholder": "Nummer",
+     "type": "text"
+    },
+    {
+     "key": "datum",
+     "label": "Datum",
+     "type": "date"
+    },
+    {
+     "key": "fahrzeug_kennzeichen",
+     "label": "Fahrzeug",
+     "type": "text"
+    },
+    {
+     "key": "sachkonto",
+     "label": "Sachkonto",
+     "type": "text"
+    },
+    {
+     "key": "kostenart",
+     "label": "Kostenart",
+     "type": "text"
+    },
+    {
+     "key": "betrag_eur",
+     "label": "Betrag EUR",
+     "type": "number"
+    },
+    {
+     "key": "notiz",
+     "label": "Notiz",
+     "type": "text"
+    }
+   ],
+   "id": "fuhrpark/rechnungen",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "none",
+    "density": "compact",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "financial",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Der Stand folgt den hinterlegten Rechnungen.",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Kostenbelege zu Fahrzeugen",
+   "summary": [
+    {
+     "key": "rechnungen",
+     "label": "Rechnungen",
+     "value": "0"
+    },
+    {
+     "key": "betrag",
+     "label": "Betrag EUR",
+     "value": "0"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "rechnungs_nr",
+       "label": "Nummer",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "key": "datum",
+       "label": "Datum",
+       "priority": "primary",
+       "renderKind": "date",
+       "sortable": true
+      },
+      {
+       "key": "fahrzeug_kennzeichen",
+       "label": "Fahrzeug",
+       "priority": "secondary"
+      },
+      {
+       "key": "betrag_eur",
+       "label": "Betrag EUR",
+       "numeric": true,
+       "priority": "secondary",
+       "renderKind": "currency"
+      },
+      {
+       "key": "sachkonto",
+       "label": "Sachkonto",
+       "priority": "tertiary"
+      },
+      {
+       "key": "kostenart",
+       "label": "Kostenart",
+       "priority": "tertiary"
+      },
+      {
+       "key": "notiz",
+       "label": "Notiz",
+       "priority": "tertiary"
+      }
+     ],
+     "dataSourceKey": "rechnungen",
+     "key": "rechnungen",
+     "label": "Rechnungen",
+     "pageSize": 50,
+     "rowActions": [
+      {
+       "command": "fuhrpark.deleteRechnung",
+       "dangerLevel": "moderate",
+       "disabledWhen": {
+        "field": "gesperrt",
+        "values": [
+         true
+        ]
+       },
+       "key": "loeschen",
+       "label": "Löschen"
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Fuhrpark-Rechnungen",
+   "workflow": {
+    "processKey": "fuhrpark.rechnungen"
+   }
+  },
+  "fuhrpark/terminarten": {
+   "actions": [
+    {
+     "command": "fuhrpark.saveTerminart",
+     "commandEndpoint": "/api/v1/fuhrpark/terminarten/actions/speichern",
+     "dangerLevel": "safe",
+     "key": "speichern",
+     "kind": "primary",
+     "label": "Speichern",
+     "method": "POST",
+     "permission": "logistics:write",
+     "zone": "header"
+    },
+    {
+     "command": "fuhrpark.newTerminart",
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "secondary",
+     "label": "Neu",
+     "stubReason": "Leert die Eingabe fuer eine neue Terminart.",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "fuhrpark/terminarten",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/fuhrpark/terminarten",
+     "key": "terminarten",
+     "pageSize": 100
+    }
+   ],
+   "domain": "logistics",
+   "fields": [
+    {
+     "key": "terminart",
+     "label": "Terminart",
+     "placeholder": "Bezeichnung",
+     "type": "text"
+    },
+    {
+     "key": "intervall_monate",
+     "label": "Intervall Monate",
+     "type": "number"
+    },
+    {
+     "key": "intervall_km",
+     "label": "Intervall km",
+     "type": "number"
+    }
+   ],
+   "id": "fuhrpark/terminarten",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "none",
+    "density": "compact",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Der Stand folgt den hinterlegten Terminarten.",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Wartungsintervalle nach Monaten und Kilometern",
+   "summary": [
+    {
+     "key": "terminarten",
+     "label": "Terminarten",
+     "value": "0"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "terminart",
+       "label": "Terminart",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "key": "intervall_monate",
+       "label": "Monate",
+       "numeric": true,
+       "priority": "secondary"
+      },
+      {
+       "key": "intervall_km",
+       "label": "Kilometer",
+       "numeric": true,
+       "priority": "tertiary"
+      }
+     ],
+     "dataSourceKey": "terminarten",
+     "key": "terminarten",
+     "label": "Terminarten",
+     "pageSize": 50,
+     "rowActions": [
+      {
+       "command": "fuhrpark.deleteTerminart",
+       "dangerLevel": "moderate",
+       "disabledWhen": {
+        "field": "gesperrt",
+        "values": [
+         true
+        ]
+       },
+       "key": "loeschen",
+       "label": "Löschen"
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Terminarten",
+   "workflow": {
+    "processKey": "fuhrpark.terminarten"
+   }
+  },
+  "fuhrpark/uebersicht": {
+   "adapter": {
+    "sourceId": "fuhrpark/uebersicht",
+    "temporary": false,
+    "type": "native"
+   },
+   "domain": "logistics",
+   "id": "fuhrpark/uebersicht",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "workflow",
+    "density": "expertDense",
+    "floorplan": "cockpit",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "touchTargetPx": 44
+   },
+   "mode": "cockpit",
+   "noWorkflowReason": "Die Uebersicht hat keinen eigenen Belegstatus. Jede Kachel oeffnet die bestehende Maske.",
+   "schemaVersion": 1,
+   "subtitle": "Einstieg",
+   "tiles": [
+    {
+     "key": "klassisch",
+     "label": "Fuhrpark (klassisch)",
+     "targetRoute": "/fuhrpark/fuhrpark-klassisch",
+     "targetScreenId": "klassisch",
+     "tone": "neutral"
+    },
+    {
+     "key": "stammdaten",
+     "label": "Stammdaten",
+     "targetRoute": "/fuhrpark/fuhrpark-stammdaten",
+     "targetScreenId": "stammdaten",
+     "tone": "neutral"
+    },
+    {
+     "key": "rechnungen",
+     "label": "Rechnungen",
+     "targetRoute": "/fuhrpark/fuhrpark-rechnungen",
+     "targetScreenId": "rechnungen",
+     "tone": "neutral"
+    },
+    {
+     "key": "auswertung",
+     "label": "Auswertungen",
+     "targetRoute": "/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug",
+     "targetScreenId": "auswertung",
+     "tone": "neutral"
+    },
+    {
+     "key": "belege",
+     "label": "Ausgehende Belege und Dokumente",
+     "targetRoute": "/fuhrpark/ausgehende-belege-dokumente",
+     "targetScreenId": "belege",
+     "tone": "neutral"
+    }
+   ],
+   "title": "Fuhrpark"
+  },
+  "logistik/frachtbrief": {
+   "actions": [
+    {
+     "dangerLevel": "safe",
+     "key": "verladung",
+     "kind": "primary",
+     "label": "Zur Verladung",
+     "navigationRoute": "/verladung",
+     "permission": "logistics:read",
+     "zone": "header"
+    }
+   ],
+   "adapter": {
+    "sourceId": "logistik/frachtbrief",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/logistik/frachtbriefe",
+     "key": "list",
+     "pageSize": 100
+    }
+   ],
+   "domain": "logistics",
+   "id": "logistik/frachtbrief",
+   "layout": {
+    "columnNavigation": "listDetail",
+    "contextRail": "none",
+    "density": "expertDense",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Der Frachtbrief ist der Transportbeleg der Sendung. Statuswechsel haengen an Versand und Zustellung.",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Transportbeleg. Der Lieferschein bleibt der Warenbeleg.",
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "nummer",
+       "label": "Frachtbrief-Nr.",
+       "sortable": true,
+       "width": 150
+      },
+      {
+       "key": "datum",
+       "label": "Datum",
+       "renderKind": "date",
+       "sortable": true,
+       "width": 110
+      },
+      {
+       "key": "absender",
+       "label": "Absender",
+       "width": 160
+      },
+      {
+       "key": "empfaenger",
+       "label": "Empfänger",
+       "sortable": true,
+       "width": 160
+      },
+      {
+       "filterable": true,
+       "key": "kennzeichen",
+       "label": "LKW",
+       "width": 120
+      },
+      {
+       "key": "artikel",
+       "label": "Ware",
+       "width": 160
+      },
+      {
+       "key": "menge",
+       "label": "Menge",
+       "numeric": true,
+       "sortable": true,
+       "width": 100
+      },
+      {
+       "key": "lieferschein_ref",
+       "label": "Lieferschein",
+       "width": 140
+      },
+      {
+       "filterable": true,
+       "key": "status",
+       "label": "Status",
+       "renderKind": "status",
+       "width": 120
+      }
+     ],
+     "dataSourceKey": "list",
+     "key": "list",
+     "label": "Frachtbriefe",
+     "pageSize": 100,
+     "rowHeight": 36,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Frachtbriefe"
+  },
+  "logistik/frachttabellen": {
+   "actions": [
+    {
+     "commandEndpoint": "/api/v1/logistik/frachttabellen/actions/anlegen",
+     "dangerLevel": "safe",
+     "inputFields": [
+      {
+       "key": "tabelle_nr",
+       "label": "Tabelle-Nr",
+       "required": true,
+       "type": "text"
+      },
+      {
+       "key": "bezeichnung",
+       "label": "Bezeichnung",
+       "required": true,
+       "type": "text"
+      },
+      {
+       "key": "einheit",
+       "label": "Einheit",
+       "required": false,
+       "type": "text"
+      },
+      {
+       "key": "waehrung",
+       "label": "Waehrung",
+       "required": false,
+       "type": "text"
+      }
+     ],
+     "key": "anlegen",
+     "kind": "primary",
+     "label": "Tabelle speichern",
+     "method": "POST",
+     "permission": "logistics:write",
+     "zone": "header"
+    },
+    {
+     "command": "fracht.addPosition",
+     "dangerLevel": "safe",
+     "forbiddenForAgents": true,
+     "key": "position",
+     "kind": "secondary",
+     "label": "Position anlegen",
+     "permission": "logistics:write",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "logistik/frachttabellen",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/logistik/frachttabellen",
+     "key": "tabellen",
+     "pageSize": 100
+    }
+   ],
+   "domain": "logistics",
+   "fields": [
+    {
+     "key": "tabelle_nr",
+     "label": "Tabelle-Nr",
+     "placeholder": "Nummer",
+     "type": "text"
+    },
+    {
+     "key": "bezeichnung",
+     "label": "Bezeichnung",
+     "type": "text"
+    },
+    {
+     "key": "einheit",
+     "label": "Einheit",
+     "placeholder": "z. B. t",
+     "type": "text"
+    },
+    {
+     "key": "waehrung",
+     "label": "Währung",
+     "type": "text"
+    },
+    {
+     "key": "staffel",
+     "label": "Staffel",
+     "readOnly": true,
+     "type": "text"
+    },
+    {
+     "key": "ab_menge",
+     "label": "Ab-Menge",
+     "type": "number"
+    },
+    {
+     "key": "frachtsatz_eur",
+     "label": "Frachtsatz EUR",
+     "type": "number"
+    },
+    {
+     "key": "mindestfracht_eur",
+     "label": "Mindestfracht EUR",
+     "type": "number"
+    }
+   ],
+   "id": "logistik/frachttabellen",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "none",
+    "density": "compact",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Die Staffel haengt an der Tabelle. Der Stand folgt den Positionen.",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Frachtkosten-Staffeln nach Menge und Einheit",
+   "summary": [
+    {
+     "key": "tabellen",
+     "label": "Tabellen",
+     "value": "0"
+    },
+    {
+     "key": "positionen",
+     "label": "Positionen",
+     "value": "0"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "tabelle_nr",
+       "label": "Nummer",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "filterable": true,
+       "key": "bezeichnung",
+       "label": "Bezeichnung",
+       "priority": "primary"
+      },
+      {
+       "key": "einheit",
+       "label": "Einheit",
+       "priority": "secondary"
+      },
+      {
+       "key": "waehrung",
+       "label": "Währung",
+       "priority": "tertiary"
+      }
+     ],
+     "dataSourceKey": "tabellen",
+     "key": "tabellen",
+     "label": "Frachttabellen",
+     "pageSize": 100,
+     "rowActions": [
+      {
+       "dangerLevel": "destructive",
+       "disabledWhen": {
+        "field": "gesperrt",
+        "values": [
+         true
+        ]
+       },
+       "key": "loeschen",
+       "label": "Löschen"
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": true
+    },
+    {
+     "columns": [
+      {
+       "key": "ab_menge",
+       "label": "Ab-Menge",
+       "numeric": true,
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "key": "frachtsatz_eur",
+       "label": "Frachtsatz EUR",
+       "numeric": true,
+       "priority": "primary"
+      },
+      {
+       "key": "mindestfracht_eur",
+       "label": "Mindestfracht EUR",
+       "numeric": true,
+       "priority": "secondary"
+      }
+     ],
+     "dataSourceKey": "tabellen",
+     "key": "positionen",
+     "label": "Staffel",
+     "pageSize": 50,
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Frachttabellen",
+   "workflow": {
+    "processKey": "logistik.frachttabellen"
+   }
+  },
+  "logistik/tour-fracht-arbeitsraum": {
+   "actions": [
+    {
+     "dangerLevel": "safe",
+     "key": "touren",
+     "kind": "secondary",
+     "label": "Zur Tourenplanung",
+     "navigationRoute": "/logistik/tourenplanung",
+     "permission": "logistics:read",
+     "zone": "header"
+    },
+    {
+     "dangerLevel": "safe",
+     "key": "fracht",
+     "kind": "secondary",
+     "label": "Zu Frachtbriefen",
+     "navigationRoute": "/logistik/frachtbriefe",
+     "permission": "logistics:read",
+     "zone": "header"
+    },
+    {
+     "dangerLevel": "safe",
+     "key": "tabellen",
+     "kind": "secondary",
+     "label": "Frachttabellen",
+     "navigationRoute": "/logistik/frachttabellen",
+     "permission": "logistics:read",
+     "zone": "header"
+    },
+    {
+     "command": "fracht.calculateProbe",
+     "dangerLevel": "safe",
+     "forbiddenForAgents": true,
+     "key": "probe",
+     "kind": "primary",
+     "label": "Probe berechnen",
+     "permission": "logistics:read",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "logistik/tour-fracht-arbeitsraum",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/logistik/tours",
+     "key": "touren",
+     "pageSize": 50
+    },
+    {
+     "endpoint": "/api/v1/logistik/frachtbriefe",
+     "key": "fracht",
+     "pageSize": 50
+    },
+    {
+     "endpoint": "/api/v1/logistik/freight-tariffs",
+     "key": "tarife",
+     "pageSize": 50
+    }
+   ],
+   "domain": "logistics",
+   "id": "logistik/tour-fracht-arbeitsraum",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "workflow",
+    "density": "compact",
+    "floorplan": "cockpit",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "cockpit",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 48,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Disposition, Frachtbriefe und Tarife",
+   "summary": [
+    {
+     "key": "heute",
+     "label": "Touren heute",
+     "value": "0"
+    },
+    {
+     "key": "geplant",
+     "label": "Geplant",
+     "value": "0"
+    },
+    {
+     "key": "fracht",
+     "label": "Frachtbriefe",
+     "value": "0"
+    },
+    {
+     "key": "tarife",
+     "label": "Aktive Tarife",
+     "value": "0"
+    },
+    {
+     "key": "probe",
+     "label": "Probe",
+     "value": "—"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "key": "ziel",
+       "label": "Ziel",
+       "priority": "primary"
+      },
+      {
+       "filterable": true,
+       "key": "status",
+       "label": "Status",
+       "priority": "primary",
+       "renderKind": "status"
+      },
+      {
+       "key": "fahrzeug",
+       "label": "Fahrzeug",
+       "priority": "secondary"
+      },
+      {
+       "key": "stopps",
+       "label": "Stopps",
+       "numeric": true,
+       "priority": "tertiary"
+      }
+     ],
+     "dataSourceKey": "touren",
+     "key": "touren",
+     "label": "Touren",
+     "pageSize": 20,
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": true
+    },
+    {
+     "columns": [
+      {
+       "key": "nummer",
+       "label": "Nummer",
+       "priority": "primary"
+      },
+      {
+       "filterable": true,
+       "key": "status",
+       "label": "Status",
+       "priority": "primary",
+       "renderKind": "status"
+      },
+      {
+       "key": "kennzeichen",
+       "label": "Fahrzeug",
+       "priority": "secondary"
+      },
+      {
+       "key": "empfaenger",
+       "label": "Empfänger",
+       "priority": "tertiary"
+      }
+     ],
+     "dataSourceKey": "fracht",
+     "key": "fracht",
+     "label": "Frachtbriefe",
+     "pageSize": 20,
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": true
+    },
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "carrier",
+       "label": "Spediteur",
+       "priority": "primary"
+      },
+      {
+       "key": "status",
+       "label": "Status",
+       "priority": "primary",
+       "renderKind": "status"
+      },
+      {
+       "key": "preis",
+       "label": "Preis je 100 kg",
+       "numeric": true,
+       "priority": "secondary"
+      }
+     ],
+     "dataSourceKey": "tarife",
+     "key": "tarife",
+     "label": "Tarife",
+     "pageSize": 20,
+     "rowActions": [
+      {
+       "dangerLevel": "moderate",
+       "key": "storno",
+       "label": "Stornieren",
+       "visibleWhen": {
+        "field": "stornierbar",
+        "values": [
+         true
+        ]
+       }
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Tour & Fracht",
+   "workflow": {
+    "processKey": "logistik.tour-fracht-arbeitsraum"
+   }
+  },
+  "logistik/tourenplanung": {
+   "actions": [
+    {
+     "command": "tour.openWorkspace",
+     "dangerLevel": "safe",
+     "key": "dispo",
+     "kind": "secondary",
+     "label": "Dispo-Arbeitsraum",
+     "stubReason": "Oeffnet den bestehenden Dispo-Arbeitsraum.",
+     "zone": "header"
+    },
+    {
+     "command": "tour.resolveDeliveryNote",
+     "dangerLevel": "safe",
+     "key": "aufloesen",
+     "kind": "secondary",
+     "label": "Auflösen",
+     "stubReason": "Liest den Lieferschein und setzt das Ziel.",
+     "zone": "footer"
+    },
+    {
+     "command": "tour.create",
+     "commandEndpoint": "/api/v1/logistik/tours/actions/anlegen",
+     "dangerLevel": "safe",
+     "enabledWhen": "tour.canCreate",
+     "inputFields": [
+      {
+       "key": "date",
+       "label": "Tourdatum",
+       "type": "datetime"
+      },
+      {
+       "key": "vehicle_id",
+       "label": "Fahrzeug-ID",
+       "type": "text"
+      },
+      {
+       "key": "driver_id",
+       "label": "Fahrer-ID",
+       "type": "text"
+      },
+      {
+       "key": "notes",
+       "label": "Notiz",
+       "type": "text"
+      }
+     ],
+     "key": "anlegen",
+     "kind": "primary",
+     "label": "Tour anlegen",
+     "method": "POST",
+     "permission": "logistik.tour.create",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "logistik/tourenplanung",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/logistik/tours",
+     "key": "touren",
+     "pageSize": 200
+    },
+    {
+     "endpoint": "/api/v1/fuhrpark/fahrzeuge",
+     "key": "fahrzeuge",
+     "pageSize": 200
+    },
+    {
+     "endpoint": "/api/v1/transporte/fahrer",
+     "key": "fahrer",
+     "pageSize": 200
+    }
+   ],
+   "domain": "logistics",
+   "fields": [
+    {
+     "key": "datum",
+     "label": "Datum",
+     "readOnly": true,
+     "type": "date"
+    },
+    {
+     "key": "tour_id",
+     "label": "Tour",
+     "readOnly": true,
+     "type": "text"
+    },
+    {
+     "key": "tour_status",
+     "label": "Status",
+     "readOnly": true,
+     "type": "text"
+    },
+    {
+     "key": "ziel",
+     "label": "Ziel",
+     "readOnly": true,
+     "type": "text"
+    },
+    {
+     "key": "lieferschein",
+     "label": "Lieferschein",
+     "placeholder": "Lieferscheinnummer",
+     "type": "text"
+    },
+    {
+     "dataSourceKey": "fahrzeuge",
+     "key": "fahrzeug_id",
+     "label": "Fahrzeug",
+     "type": "select"
+    },
+    {
+     "dataSourceKey": "fahrer",
+     "key": "fahrer_id",
+     "label": "Fahrer",
+     "type": "select"
+    }
+   ],
+   "id": "logistik/tourenplanung",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "workflow",
+    "density": "compact",
+    "floorplan": "cockpit",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "cockpit",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 48,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Lieferschein, Fahrzeug und Fahrer, danach die Ampel",
+   "summary": [
+    {
+     "key": "heute",
+     "label": "Touren heute",
+     "value": "0"
+    },
+    {
+     "key": "geplant",
+     "label": "Geplant",
+     "value": "0"
+    },
+    {
+     "key": "unterwegs",
+     "label": "Unterwegs",
+     "value": "0"
+    },
+    {
+     "key": "abgeschlossen",
+     "label": "Abgeschlossen",
+     "value": "0"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "key": "ziel",
+       "label": "Ziel",
+       "priority": "primary"
+      },
+      {
+       "key": "kennzeichen",
+       "label": "Fahrzeug",
+       "priority": "primary"
+      },
+      {
+       "key": "fahrer_name",
+       "label": "Fahrer",
+       "priority": "primary"
+      },
+      {
+       "filterable": true,
+       "key": "status",
+       "label": "Status",
+       "priority": "primary",
+       "renderKind": "status"
+      },
+      {
+       "key": "stopps",
+       "label": "Stopps",
+       "numeric": true,
+       "priority": "secondary"
+      },
+      {
+       "key": "strecke",
+       "label": "Strecke",
+       "priority": "secondary"
+      },
+      {
+       "key": "datum",
+       "label": "Datum",
+       "priority": "tertiary",
+       "renderKind": "date",
+       "sortable": true
+      }
+     ],
+     "dataSourceKey": "touren",
+     "key": "touren",
+     "label": "Touren",
+     "pageSize": 50,
+     "rowActions": [
+      {
+       "command": "tour.openLoading",
+       "dangerLevel": "safe",
+       "key": "beladung",
+       "label": "Beladung"
+      },
+      {
+       "command": "tour.showHints",
+       "dangerLevel": "safe",
+       "key": "hinweise",
+       "label": "Hinweise"
+      },
+      {
+       "command": "tour.cancel",
+       "dangerLevel": "moderate",
+       "key": "storno",
+       "label": "Stornieren",
+       "requiresConfirmation": true,
+       "visibleWhen": {
+        "field": "status",
+        "values": [
+         "geplant"
+        ]
+       }
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Tourenplanung",
+   "workflow": {
+    "processKey": "logistik.tourenplanung"
+   }
+  },
+  "logistik/verladung": {
+   "actions": [
+    {
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "primary",
+     "label": "Neue Beladung",
+     "navigationRoute": "/verladung/lkw-beladung",
+     "permission": "logistics:write",
+     "zone": "header"
+    }
+   ],
+   "adapter": {
+    "sourceId": "logistik/verladung",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/verladung",
+     "key": "list",
+     "pageSize": 100
+    }
+   ],
+   "domain": "logistics",
+   "id": "logistik/verladung",
+   "layout": {
+    "columnNavigation": "listDetail",
+    "contextRail": "none",
+    "density": "expertDense",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Die Verladung ist die Ausführung. Der Frachtbrief wird erzeugt, sobald sie verladen ist.",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Fahrzeug, Ware, Menge und Orte. Der Frachtbrief entsteht beim Abschluss.",
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "kennzeichen",
+       "label": "LKW",
+       "sortable": true,
+       "width": 120
+      },
+      {
+       "key": "fahrer",
+       "label": "Fahrer",
+       "width": 140
+      },
+      {
+       "key": "artikel",
+       "label": "Ware",
+       "width": 160
+      },
+      {
+       "key": "menge",
+       "label": "Menge",
+       "numeric": true,
+       "sortable": true,
+       "width": 90
+      },
+      {
+       "key": "einheit",
+       "label": "Einheit",
+       "width": 70
+      },
+      {
+       "key": "ladeort",
+       "label": "Ladeort",
+       "width": 140
+      },
+      {
+       "key": "zielort",
+       "label": "Ablieferstelle",
+       "width": 140
+      },
+      {
+       "key": "kunde",
+       "label": "Empfänger",
+       "width": 140
+      },
+      {
+       "filterable": true,
+       "key": "lieferschein_nr",
+       "label": "Lieferschein",
+       "width": 140
+      },
+      {
+       "key": "datum",
+       "label": "Datum",
+       "renderKind": "date",
+       "sortable": true,
+       "width": 110
+      },
+      {
+       "filterable": true,
+       "key": "status",
+       "label": "Status",
+       "renderKind": "status",
+       "width": 120
+      }
+     ],
+     "dataSourceKey": "list",
+     "key": "list",
+     "label": "Verladung",
+     "pageSize": 100,
+     "rowHeight": 36,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Verladung"
+  },
+  "logistik/versandprofile": {
+   "actions": [
+    {
+     "command": "versand.saveProfile",
+     "dangerLevel": "safe",
+     "key": "profil",
+     "kind": "primary",
+     "label": "Profil speichern",
+     "stubReason": "Legt das Versandprofil an.",
+     "zone": "header"
+    },
+    {
+     "command": "versand.saveAvis",
+     "dangerLevel": "safe",
+     "key": "avis",
+     "kind": "secondary",
+     "label": "Avis speichern",
+     "stubReason": "Legt ein Lieferavis an.",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "logistik/versandprofile",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/logistik/versand/profile",
+     "key": "profile",
+     "pageSize": 100
+    },
+    {
+     "endpoint": "/api/v1/logistik/versand/avise",
+     "key": "avise",
+     "pageSize": 100
+    }
+   ],
+   "domain": "logistics",
+   "id": "logistik/versandprofile",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "none",
+    "density": "compact",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Der Stand folgt den hinterlegten Profilen.",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": true,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Versandkonfiguration und Liefervoranmeldungen",
+   "summary": [
+    {
+     "key": "profile",
+     "label": "Profile",
+     "value": "0"
+    },
+    {
+     "key": "avise",
+     "label": "Avise",
+     "value": "0"
+    }
+   ],
+   "tabs": [
+    {
+     "fields": [
+      {
+       "key": "profil_nr",
+       "label": "Profil-Nr",
+       "placeholder": "Nummer",
+       "type": "text"
+      },
+      {
+       "key": "bezeichnung",
+       "label": "Bezeichnung",
+       "type": "text"
+      },
+      {
+       "key": "versandart",
+       "label": "Versandart",
+       "options": [
+        {
+         "label": "E-Mail",
+         "value": "email"
+        },
+        {
+         "label": "Fax",
+         "value": "fax"
+        },
+        {
+         "label": "EDI",
+         "value": "edi"
+        },
+        {
+         "label": "Post",
+         "value": "post"
+        },
+        {
+         "label": "API",
+         "value": "api"
+        }
+       ],
+       "type": "select"
+      },
+      {
+       "key": "absender_email",
+       "label": "Absender E-Mail",
+       "type": "text"
+      },
+      {
+       "key": "absender_name",
+       "label": "Absender Name",
+       "type": "text"
+      },
+      {
+       "key": "betreff_vorlage",
+       "label": "Betreff-Vorlage",
+       "type": "text"
+      }
+     ],
+     "key": "profile",
+     "label": "Versandprofile",
+     "tables": [
+      {
+       "columns": [
+        {
+         "filterable": true,
+         "key": "profil_nr",
+         "label": "Nummer",
+         "priority": "primary",
+         "sortable": true
+        },
+        {
+         "filterable": true,
+         "key": "bezeichnung",
+         "label": "Bezeichnung",
+         "priority": "primary"
+        },
+        {
+         "key": "versandart",
+         "label": "Versandart",
+         "priority": "secondary"
+        },
+        {
+         "key": "absender_email",
+         "label": "Absender",
+         "priority": "tertiary"
+        }
+       ],
+       "dataSourceKey": "profile",
+       "key": "profile",
+       "label": "Versandprofile",
+       "pageSize": 50,
+       "rowActions": [
+        {
+         "command": "versand.deleteProfile",
+         "dangerLevel": "moderate",
+         "disabledWhen": {
+          "field": "gesperrt",
+          "values": [
+           true
+          ]
+         },
+         "key": "loeschen",
+         "label": "Löschen"
+        }
+       ],
+       "rowDetail": false,
+       "rowHeight": 44,
+       "serverPagination": false,
+       "virtualized": true
+      }
+     ]
+    },
+    {
+     "fields": [
+      {
+       "key": "avis_datum",
+       "label": "Avis-Datum",
+       "type": "date"
+      },
+      {
+       "key": "lieferdatum_erwartet",
+       "label": "Lieferdatum",
+       "type": "date"
+      },
+      {
+       "key": "lieferant_nr",
+       "label": "Lieferant-Nr",
+       "type": "text"
+      },
+      {
+       "key": "kunden_nr",
+       "label": "Kunden-Nr",
+       "type": "text"
+      },
+      {
+       "key": "artikel_nr",
+       "label": "Artikel-Nr",
+       "type": "text"
+      },
+      {
+       "key": "menge",
+       "label": "Menge",
+       "type": "number"
+      },
+      {
+       "key": "notiz",
+       "label": "Notiz",
+       "type": "text"
+      }
+     ],
+     "key": "avise",
+     "label": "Lieferavise",
+     "tables": [
+      {
+       "columns": [
+        {
+         "filterable": true,
+         "key": "avis_datum",
+         "label": "Avis-Datum",
+         "priority": "primary",
+         "renderKind": "date",
+         "sortable": true
+        },
+        {
+         "key": "lieferdatum_erwartet",
+         "label": "Lieferdatum",
+         "priority": "primary",
+         "renderKind": "date"
+        },
+        {
+         "key": "lieferant_nr",
+         "label": "Lieferant",
+         "priority": "secondary"
+        },
+        {
+         "key": "artikel_nr",
+         "label": "Artikel",
+         "priority": "secondary"
+        },
+        {
+         "key": "menge",
+         "label": "Menge",
+         "numeric": true,
+         "priority": "tertiary"
+        },
+        {
+         "key": "notiz",
+         "label": "Notiz",
+         "priority": "tertiary"
+        }
+       ],
+       "dataSourceKey": "avise",
+       "key": "avise",
+       "label": "Lieferavise",
+       "pageSize": 50,
+       "rowDetail": false,
+       "rowHeight": 44,
+       "serverPagination": false,
+       "virtualized": true
+      }
+     ]
+    }
+   ],
+   "title": "Versandprofile",
+   "workflow": {
+    "processKey": "logistik.versandprofile"
+   }
+  },
+  "personal/bewerbung-einwilligung": {
+   "actions": [
+    {
+     "command": "personal.erteileEinwilligung",
+     "dangerLevel": "safe",
+     "key": "erteilen",
+     "kind": "primary",
+     "label": "Einwilligung erteilen",
+     "stubReason": "Erteilt die Einwilligung gegen die gewaehlte Fassung.",
+     "zone": "header"
+    },
+    {
+     "command": "personal.widerrufeEinwilligung",
+     "dangerLevel": "moderate",
+     "key": "widerrufen",
+     "kind": "secondary",
+     "label": "Einwilligung widerrufen",
+     "requiresConfirmation": true,
+     "stubReason": "Widerruft die Einwilligung sofort, ohne Grund.",
+     "zone": "header"
+    },
+    {
+     "command": "personal.openBewerbungen",
+     "dangerLevel": "safe",
+     "key": "zurueck",
+     "kind": "secondary",
+     "label": "Zu den Bewerbungen",
+     "stubReason": "Wechselt zur Bewerbungsliste.",
+     "zone": "footer"
+    },
+    {
+     "command": "personal.openErklaerungen",
+     "dangerLevel": "safe",
+     "key": "erklaerungen",
+     "kind": "secondary",
+     "label": "Einwilligungserklärungen",
+     "stubReason": "Oeffnet die Fassungen der Einwilligungserklaerung.",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "personal/bewerbung-einwilligung",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/personal/applications/{entity_id}",
+     "key": "bewerbung",
+     "pageSize": 1
+    },
+    {
+     "endpoint": "/api/v1/personal/applications/{entity_id}/einwilligung",
+     "key": "einwilligung",
+     "pageSize": 200
+    },
+    {
+     "endpoint": "/api/v1/personal/applications/einwilligungserklaerungen",
+     "key": "fassungen",
+     "pageSize": 200
+    }
+   ],
+   "domain": "hr",
+   "id": "personal/bewerbung-einwilligung",
+   "identityField": "applicant_name",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "workflow",
+    "density": "compact",
+    "floorplan": "objectPage",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "detail",
+   "noProcessChainReason": "Keine Belegkette: Die Einwilligung haengt an einer Bewerbung.",
+   "noWorkflowReason": "Der Stand folgt der letzten Zeile des Verzeichnisses.",
+   "performance": {
+    "bundleGroup": "hr",
+    "initialPayloadBudgetKb": 24,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": false
+   },
+   "schemaVersion": 1,
+   "subtitle": "Talentpool — Art. 6 Abs. 1 lit. a, Art. 7 DSGVO",
+   "summary": [
+    {
+     "key": "stand",
+     "label": "Stand",
+     "value": "keine"
+    },
+    {
+     "key": "laeuft_bis",
+     "label": "Läuft bis",
+     "value": "–"
+    }
+   ],
+   "tabs": [
+    {
+     "fields": [
+      {
+       "key": "applicant_name",
+       "label": "Bewerber",
+       "readOnly": true,
+       "type": "text"
+      },
+      {
+       "key": "position_title",
+       "label": "Stelle",
+       "readOnly": true,
+       "type": "text"
+      },
+      {
+       "key": "stand_gueltig_bis",
+       "label": "Läuft bis",
+       "readOnly": true,
+       "type": "date"
+      },
+      {
+       "key": "stand_erteilt_am",
+       "label": "Erteilt am",
+       "readOnly": true,
+       "type": "date"
+      },
+      {
+       "dataSourceKey": "fassungen",
+       "helpText": "Die Nummer auf dem Formular, das unterschrieben wurde.",
+       "key": "fassung",
+       "label": "Fassung der Erklärung",
+       "required": true,
+       "type": "select"
+      },
+      {
+       "helpText": "Höchstens drei Jahre ab heute.",
+       "key": "gueltig_bis",
+       "label": "Gültig bis",
+       "required": true,
+       "type": "date"
+      },
+      {
+       "key": "kanal",
+       "label": "Eingegangen über",
+       "options": [
+        {
+         "label": "Web",
+         "value": "WEB"
+        },
+        {
+         "label": "E-Mail",
+         "value": "E_MAIL"
+        },
+        {
+         "label": "Papier",
+         "value": "PAPIER"
+        },
+        {
+         "label": "Mündlich",
+         "value": "MUENDLICH"
+        }
+       ],
+       "required": true,
+       "type": "select"
+      },
+      {
+       "key": "wortlaut",
+       "label": "Wortlaut der Fassung",
+       "readOnly": true,
+       "type": "textarea"
+      }
+     ],
+     "key": "einwilligung",
+     "label": "Einwilligung"
+    },
+    {
+     "key": "verzeichnis",
+     "label": "Verzeichnis",
+     "tables": [
+      {
+       "columns": [
+        {
+         "key": "erfolgt_am",
+         "label": "Erfolgt am",
+         "priority": "primary",
+         "renderKind": "datetime",
+         "sortable": true
+        },
+        {
+         "filterable": true,
+         "key": "vorgang",
+         "label": "Vorgang",
+         "priority": "primary",
+         "renderKind": "status"
+        },
+        {
+         "key": "fassung",
+         "label": "Fassung",
+         "priority": "secondary",
+         "renderKind": "number"
+        },
+        {
+         "key": "gueltig_bis",
+         "label": "Gültig bis",
+         "priority": "secondary",
+         "renderKind": "date"
+        },
+        {
+         "key": "kanal",
+         "label": "Kanal",
+         "priority": "tertiary"
+        },
+        {
+         "key": "erfasst_durch",
+         "label": "Erfasst durch",
+         "priority": "tertiary"
+        }
+       ],
+       "dataSourceKey": "einwilligung",
+       "key": "vorgaenge",
+       "label": "Erteilungen und Widerrufe",
+       "pageSize": 50,
+       "rowDetail": false,
+       "rowHeight": 44,
+       "serverPagination": false,
+       "virtualized": false
+      }
+     ]
+    }
+   ],
+   "title": "Einwilligung zur Aufbewahrung",
+   "workflow": {
+    "processKey": "personal.bewerbung-einwilligung"
+   }
+  },
+  "personal/bewerbungen": {
+   "actions": [
+    {
+     "command": "personal.saveBewerbung",
+     "commandEndpoint": "/api/v1/personal/applications/actions/speichern",
+     "dangerLevel": "safe",
+     "inputFields": [
+      {
+       "key": "applicant_name",
+       "label": "Bewerber",
+       "required": true,
+       "type": "text"
+      },
+      {
+       "key": "applicant_email",
+       "label": "E-Mail",
+       "required": true,
+       "type": "text"
+      },
+      {
+       "key": "position_title",
+       "label": "Stelle",
+       "type": "text"
+      },
+      {
+       "key": "source",
+       "label": "Quelle",
+       "type": "text"
+      }
+     ],
+     "key": "speichern",
+     "kind": "primary",
+     "label": "Speichern",
+     "method": "POST",
+     "permission": "personal.bewerbung.write",
+     "zone": "header"
+    },
+    {
+     "command": "personal.newBewerbung",
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "secondary",
+     "label": "Neu",
+     "stubReason": "Leert die Eingabe fuer eine neue Bewerbung.",
+     "zone": "footer"
+    },
+    {
+     "command": "personal.openErklaerungen",
+     "dangerLevel": "safe",
+     "key": "erklaerungen",
+     "kind": "secondary",
+     "label": "Einwilligungserklärungen",
+     "stubReason": "Oeffnet die Fassungen der Einwilligungserklaerung.",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "personal/bewerbungen",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/personal/applications",
+     "key": "bewerbungen",
+     "pageSize": 100
+    }
+   ],
+   "domain": "hr",
+   "fields": [
+    {
+     "key": "applicant_name",
+     "label": "Bewerber",
+     "type": "text"
+    },
+    {
+     "key": "applicant_email",
+     "label": "E-Mail",
+     "type": "text"
+    },
+    {
+     "key": "position_title",
+     "label": "Stelle",
+     "type": "text"
+    },
+    {
+     "key": "source",
+     "label": "Quelle",
+     "type": "text"
+    }
+   ],
+   "id": "personal/bewerbungen",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "none",
+    "density": "compact",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Der Stand folgt den Bewerbungen in der Pipeline.",
+   "performance": {
+    "bundleGroup": "hr",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Bewerbungen und Rekrutierungsprozesse",
+   "summary": [
+    {
+     "key": "gesamt",
+     "label": "Gesamt",
+     "value": "0"
+    },
+    {
+     "key": "offen",
+     "label": "Offen",
+     "value": "0"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "applicant_name",
+       "label": "Bewerber",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "key": "position_title",
+       "label": "Stelle",
+       "priority": "secondary"
+      },
+      {
+       "key": "stage",
+       "label": "Stand",
+       "priority": "secondary"
+      },
+      {
+       "key": "applied_at",
+       "label": "Eingang",
+       "priority": "tertiary",
+       "renderKind": "date"
+      }
+     ],
+     "dataSourceKey": "bewerbungen",
+     "key": "bewerbungen",
+     "label": "Bewerbungen",
+     "pageSize": 50,
+     "rowActions": [
+      {
+       "command": "personal.openEinwilligung",
+       "dangerLevel": "safe",
+       "key": "einwilligung",
+       "label": "Einwilligung"
+      },
+      {
+       "command": "personal.deleteBewerbung",
+       "dangerLevel": "moderate",
+       "disabledWhen": {
+        "field": "gesperrt",
+        "values": [
+         true
+        ]
+       },
+       "key": "loeschen",
+       "label": "Löschen"
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Bewerbungen",
+   "workflow": {
+    "processKey": "personal.bewerbungen"
+   }
+  },
+  "personal/einwilligungserklaerungen": {
+   "actions": [
+    {
+     "command": "personal.saveErklaerung",
+     "commandEndpoint": "/api/v1/personal/applications/einwilligungserklaerungen/actions/anlegen",
+     "dangerLevel": "safe",
+     "inputFields": [
+      {
+       "key": "wortlaut",
+       "label": "Wortlaut",
+       "required": true,
+       "type": "textarea"
+      }
+     ],
+     "key": "anlegen",
+     "kind": "primary",
+     "label": "Fassung anlegen",
+     "method": "POST",
+     "permission": "personal.bewerbung.admin",
+     "requiresConfirmation": true,
+     "zone": "header"
+    },
+    {
+     "command": "personal.newErklaerung",
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "secondary",
+     "label": "Neu",
+     "stubReason": "Leert die Eingabe fuer eine neue Fassung.",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "personal/einwilligungserklaerungen",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/personal/applications/einwilligungserklaerungen",
+     "key": "fassungen",
+     "pageSize": 200
+    }
+   ],
+   "domain": "hr",
+   "fields": [
+    {
+     "helpText": "Genau der Text, der unterschrieben wird. Nach dem Anlegen nicht mehr änderbar.",
+     "key": "wortlaut",
+     "label": "Wortlaut",
+     "required": true,
+     "type": "textarea"
+    }
+   ],
+   "id": "personal/einwilligungserklaerungen",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "none",
+    "density": "compact",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Fassungen haben keinen Ablauf; sie werden angelegt und bleiben.",
+   "performance": {
+    "bundleGroup": "hr",
+    "initialPayloadBudgetKb": 24,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": false
+   },
+   "schemaVersion": 1,
+   "subtitle": "Fassungen für die Aufbewahrung von Bewerbungen",
+   "summary": [
+    {
+     "key": "fassungen",
+     "label": "Fassungen",
+     "value": "0"
+    },
+    {
+     "key": "aktuell",
+     "label": "Neueste",
+     "value": "–"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "key": "fassung",
+       "label": "Fassung",
+       "priority": "primary",
+       "renderKind": "number",
+       "sortable": true
+      },
+      {
+       "filterable": true,
+       "key": "wortlaut",
+       "label": "Wortlaut",
+       "priority": "primary"
+      },
+      {
+       "key": "erstellt_am",
+       "label": "Angelegt",
+       "priority": "secondary",
+       "renderKind": "date"
+      },
+      {
+       "key": "erstellt_durch",
+       "label": "Erstellt durch",
+       "priority": "tertiary"
+      }
+     ],
+     "dataSourceKey": "fassungen",
+     "key": "fassungen",
+     "label": "Fassungen",
+     "pageSize": 50,
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": false
+    }
+   ],
+   "title": "Einwilligungserklärungen",
+   "workflow": {
+    "processKey": "personal.einwilligungserklaerungen"
+   }
+  },
+  "personal/onboarding": {
+   "actions": [
+    {
+     "command": "personal.saveOnboarding",
+     "commandEndpoint": "/api/v1/training/onboarding/runs/actions/speichern",
+     "dangerLevel": "safe",
+     "key": "speichern",
+     "kind": "primary",
+     "label": "Speichern",
+     "permission": "hr:write",
+     "zone": "header"
+    },
+    {
+     "command": "personal.newOnboarding",
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "secondary",
+     "label": "Neu",
+     "stubReason": "Leert die Eingabe fuer einen neuen Lauf.",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "personal/onboarding",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/training/onboarding/runs",
+     "key": "laeufe",
+     "pageSize": 100
+    }
+   ],
+   "domain": "hr",
+   "fields": [
+    {
+     "key": "employee_ref",
+     "label": "Mitarbeiter-Referenz",
+     "type": "text"
+    },
+    {
+     "key": "checklist_id",
+     "label": "Checkliste",
+     "options": [],
+     "type": "select"
+    },
+    {
+     "key": "assigned_by",
+     "label": "Zugewiesen von",
+     "type": "text"
+    },
+    {
+     "key": "due_date",
+     "label": "Faellig bis",
+     "type": "date"
+    }
+   ],
+   "id": "personal/onboarding",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "none",
+    "density": "compact",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Der Stand folgt den Einarbeitungslaeufen.",
+   "performance": {
+    "bundleGroup": "hr",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Checklisten und Einarbeitungslaeufe",
+   "summary": [
+    {
+     "key": "laeufe",
+     "label": "Laeufe",
+     "value": "0"
+    },
+    {
+     "key": "offen",
+     "label": "Offen",
+     "value": "0"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "employee_ref",
+       "label": "Mitarbeiter",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "key": "checkliste",
+       "label": "Checkliste",
+       "priority": "secondary"
+      },
+      {
+       "key": "status",
+       "label": "Stand",
+       "priority": "secondary"
+      },
+      {
+       "key": "fortschritt",
+       "label": "Fortschritt",
+       "priority": "tertiary"
+      },
+      {
+       "key": "due_date",
+       "label": "Faellig",
+       "priority": "tertiary",
+       "renderKind": "date"
+      },
+      {
+       "key": "assigned_by",
+       "label": "Zugewiesen von",
+       "priority": "tertiary"
+      }
+     ],
+     "dataSourceKey": "laeufe",
+     "key": "laeufe",
+     "label": "Laeufe",
+     "pageSize": 50,
+     "rowActions": [
+      {
+       "command": "personal.deleteOnboarding",
+       "dangerLevel": "moderate",
+       "disabledWhen": {
+        "field": "gesperrt",
+        "values": [
+         true
+        ]
+       },
+       "key": "loeschen",
+       "label": "Löschen"
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Onboarding",
+   "workflow": {
+    "processKey": "personal.onboarding"
+   }
+  },
+  "personal/qualifikationen": {
+   "actions": [
+    {
+     "command": "personal.saveQualifikation",
+     "commandEndpoint": "/api/v1/training/qualifications/actions/speichern",
+     "dangerLevel": "safe",
+     "key": "speichern",
+     "kind": "primary",
+     "label": "Speichern",
+     "permission": "hr:write",
+     "zone": "header"
+    },
+    {
+     "command": "personal.newQualifikation",
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "secondary",
+     "label": "Neu",
+     "stubReason": "Leert die Eingabe fuer ein neues Profil.",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "personal/qualifikationen",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/training/qualifications",
+     "key": "qualifikationen",
+     "pageSize": 100
+    }
+   ],
+   "domain": "hr",
+   "fields": [
+    {
+     "key": "employee_ref",
+     "label": "Mitarbeiter-Referenz",
+     "type": "text"
+    },
+    {
+     "key": "role_code",
+     "label": "Rollen-Code",
+     "type": "text"
+    },
+    {
+     "key": "qualification_level",
+     "label": "Level",
+     "options": [
+      {
+       "label": "Grundkenntnis",
+       "value": "basic"
+      },
+      {
+       "label": "Fortgeschritten",
+       "value": "advanced"
+      },
+      {
+       "label": "Experte",
+       "value": "expert"
+      }
+     ],
+     "type": "select"
+    },
+    {
+     "key": "skills",
+     "label": "Skills",
+     "placeholder": "kommagetrennt",
+     "type": "text"
+    },
+    {
+     "key": "valid_until",
+     "label": "Gueltig bis",
+     "type": "date"
+    }
+   ],
+   "id": "personal/qualifikationen",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "none",
+    "density": "compact",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Der Stand folgt den Profilen und ihrer Gueltigkeit.",
+   "performance": {
+    "bundleGroup": "hr",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Rollenbezogene Qualifikationsprofile",
+   "summary": [
+    {
+     "key": "profile",
+     "label": "Profile",
+     "value": "0"
+    },
+    {
+     "key": "ohne_gueltigkeit",
+     "label": "Ohne Gueltigkeit",
+     "value": "0"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "employee_ref",
+       "label": "Mitarbeiter",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "key": "role_code",
+       "label": "Rolle",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "key": "qualification_level",
+       "label": "Level",
+       "priority": "secondary"
+      },
+      {
+       "key": "skills",
+       "label": "Skills",
+       "priority": "tertiary"
+      },
+      {
+       "key": "valid_until",
+       "label": "Gueltig bis",
+       "priority": "tertiary",
+       "renderKind": "date"
+      }
+     ],
+     "dataSourceKey": "qualifikationen",
+     "key": "qualifikationen",
+     "label": "Profile",
+     "pageSize": 50,
+     "rowActions": [
+      {
+       "command": "personal.deleteQualifikation",
+       "dangerLevel": "moderate",
+       "disabledWhen": {
+        "field": "gesperrt",
+        "values": [
+         true
+        ]
+       },
+       "key": "loeschen",
+       "label": "Löschen"
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Qualifikationen",
+   "workflow": {
+    "processKey": "personal.qualifikationen"
+   }
+  },
+  "personal/schulungen": {
+   "actions": [
+    {
+     "command": "personal.saveSchulung",
+     "commandEndpoint": "/api/v1/training/assignments/actions/speichern",
+     "dangerLevel": "safe",
+     "key": "speichern",
+     "kind": "primary",
+     "label": "Speichern",
+     "permission": "hr:write",
+     "zone": "header"
+    },
+    {
+     "command": "personal.newSchulung",
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "secondary",
+     "label": "Neu",
+     "stubReason": "Leert die Eingabe fuer eine neue Zuweisung.",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "personal/schulungen",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/training/assignments",
+     "key": "schulungen",
+     "pageSize": 100
+    }
+   ],
+   "domain": "hr",
+   "fields": [
+    {
+     "key": "employee_ref",
+     "label": "Mitarbeiter-Referenz",
+     "type": "text"
+    },
+    {
+     "key": "course_id",
+     "label": "Schulungskurs",
+     "options": [],
+     "type": "select"
+    },
+    {
+     "key": "assigned_by",
+     "label": "Zugewiesen von",
+     "type": "text"
+    },
+    {
+     "key": "due_date",
+     "label": "Faellig bis",
+     "type": "date"
+    }
+   ],
+   "id": "personal/schulungen",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "none",
+    "density": "compact",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Der Stand folgt den Schulungsnachweisen und ihrer Faelligkeit.",
+   "performance": {
+    "bundleGroup": "hr",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Nachweise suchen und pruefen",
+   "summary": [
+    {
+     "key": "gesamt",
+     "label": "Gesamt",
+     "value": "0"
+    },
+    {
+     "key": "ablaufend",
+     "label": "Ablaufend",
+     "value": "0"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "employee_ref",
+       "label": "Mitarbeiter",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "key": "kurs",
+       "label": "Kurs",
+       "priority": "secondary"
+      },
+      {
+       "key": "status",
+       "label": "Stand",
+       "priority": "secondary"
+      },
+      {
+       "key": "due_date",
+       "label": "Faellig",
+       "priority": "tertiary",
+       "renderKind": "date"
+      },
+      {
+       "key": "assigned_by",
+       "label": "Zugewiesen von",
+       "priority": "tertiary"
+      }
+     ],
+     "dataSourceKey": "schulungen",
+     "key": "schulungen",
+     "label": "Schulungen",
+     "pageSize": 50,
+     "rowActions": [
+      {
+       "command": "personal.deleteSchulung",
+       "dangerLevel": "moderate",
+       "disabledWhen": {
+        "field": "gesperrt",
+        "values": [
+         true
+        ]
+       },
+       "key": "loeschen",
+       "label": "Löschen"
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Schulungen",
+   "workflow": {
+    "processKey": "personal.schulungen"
+   }
+  },
+  "sales/gutschrift": {
+   "actions": [
+    {
+     "command": "sales.gutschriftPosition",
+     "dangerLevel": "safe",
+     "key": "position",
+     "kind": "secondary",
+     "label": "Position übernehmen",
+     "stubReason": "Stellt die Positionseingabe in die Positionsliste der Maske; gespeichert wird erst mit Speichern.",
+     "zone": "header"
+    },
+    {
+     "command": "sales.gutschriftSpeichern",
+     "commandEndpoint": "/api/v1/sales/credit-notes/actions/speichern",
+     "dangerLevel": "safe",
+     "inputFields": [
+      {
+       "key": "credit_note_number",
+       "label": "Gutschriftnummer",
+       "required": true,
+       "type": "text"
+      },
+      {
+       "key": "customer_id",
+       "label": "Kunde (Nr.)",
+       "required": true,
+       "type": "text"
+      },
+      {
+       "key": "reason",
+       "label": "Grund",
+       "required": true,
+       "type": "text"
+      },
+      {
+       "key": "invoice_reference",
+       "label": "Rechnungsnummer (Bezug)",
+       "type": "text"
+      },
+      {
+       "key": "correction_type",
+       "label": "Art",
+       "type": "select"
+      },
+      {
+       "key": "lines",
+       "label": "Positionen (description, quantity, unit_price, tax_code)",
+       "required": true,
+       "type": "table"
+      }
+     ],
+     "key": "speichern",
+     "kind": "primary",
+     "label": "Als Entwurf speichern",
+     "method": "POST",
+     "permission": "sales.gutschrift.write",
+     "zone": "header"
+    },
+    {
+     "command": "sales.gutschriftBuchen",
+     "commandEndpoint": "/api/v1/sales/credit-notes/{entity_id}/actions/buchen",
+     "dangerLevel": "moderate",
+     "forbiddenForAgents": true,
+     "humanApprovalRequired": true,
+     "key": "buchen",
+     "kind": "secondary",
+     "label": "Buchen",
+     "method": "POST",
+     "permission": "sales.gutschrift.post",
+     "requiresConfirmation": true,
+     "zone": "header"
+    },
+    {
+     "command": "sales.gutschriftVorschlagFreigeben",
+     "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
+     "dangerLevel": "moderate",
+     "forbiddenForAgents": true,
+     "humanApprovalRequired": true,
+     "key": "vorschlag_freigeben",
+     "kind": "secondary",
+     "label": "Vorschlag freigeben",
+     "method": "POST",
+     "permission": "sales.gutschrift.post",
+     "requiresConfirmation": true,
+     "zone": "header"
+    },
+    {
+     "auditReasonRequired": true,
+     "command": "sales.gutschriftVorschlagAblehnen",
+     "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen",
+     "dangerLevel": "moderate",
+     "forbiddenForAgents": true,
+     "humanApprovalRequired": true,
+     "inputFields": [
+      {
+       "key": "grund",
+       "label": "Grund der Ablehnung",
+       "required": true,
+       "type": "text"
+      }
+     ],
+     "key": "vorschlag_ablehnen",
+     "kind": "secondary",
+     "label": "Vorschlag ablehnen",
+     "method": "POST",
+     "permission": "sales.gutschrift.post",
+     "zone": "header"
+    },
+    {
+     "command": "sales.gutschriftNeu",
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "secondary",
+     "label": "Neue Gutschrift",
+     "localEffect": "form_reset",
+     "stubReason": "Leert die Eingabe fuer eine neue Gutschrift.",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "sales/gutschrift",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/sales/credit-notes",
+     "key": "gutschriften",
+     "pageSize": 200,
+     "table": "domain_sales.sales_credit_notes"
+    },
+    {
+     "endpoint": "/api/v1/finance/tax-keys",
+     "key": "steuerschluessel",
+     "pageSize": 200,
+     "table": "domain_erp.tax_keys"
+    },
+    {
+     "endpoint": "/api/v1/sales/credit-notes/steuer-vorschau",
+     "key": "steuer",
+     "method": "POST"
+    },
+    {
+     "endpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege",
+     "key": "vorschlaege",
+     "pageSize": 200
+    }
+   ],
+   "domain": "sales",
+   "fields": [
+    {
+     "key": "credit_note_number",
+     "label": "Gutschriftnummer",
+     "required": true,
+     "type": "text"
+    },
+    {
+     "key": "customer_id",
+     "label": "Kunde (Nr.)",
+     "required": true,
+     "type": "text"
+    },
+    {
+     "key": "customer_name",
+     "label": "Kundenname",
+     "type": "text"
+    },
+    {
+     "helpText": "Der offene Posten dieser Rechnung wird um den Bruttobetrag gemindert. Ohne Bezug wird kein Posten gemindert.",
+     "key": "invoice_reference",
+     "label": "Rechnungsnummer (Bezug)",
+     "type": "text"
+    },
+    {
+     "helpText": "Eine Gutschrift nach § 14 UStG ist keine Erlösminderung und wird hier nicht gebucht.",
+     "key": "correction_type",
+     "label": "Art",
+     "options": [
+      {
+       "label": "Rechnungskorrektur (Erlösminderung)",
+       "value": "rechnungskorrektur"
+      },
+      {
+       "label": "Gutschrift nach § 14 UStG (Abrechnung durch den Leistungsempfänger)",
+       "value": "gutschrift_14_ustg"
+      }
+     ],
+     "required": true,
+     "type": "select"
+    },
+    {
+     "key": "reason",
+     "label": "Grund",
+     "options": [
+      {
+       "label": "Retoure",
+       "value": "Retoure"
+      },
+      {
+       "label": "Preisnachlass",
+       "value": "Preisnachlass"
+      },
+      {
+       "label": "Rechnungsfehler",
+       "value": "Rechnungsfehler"
+      },
+      {
+       "label": "Reklamation",
+       "value": "Reklamation"
+      },
+      {
+       "label": "Sonstiges",
+       "value": "Sonstiges"
+      }
+     ],
+     "required": true,
+     "type": "select"
+    },
+    {
+     "key": "reason_text",
+     "label": "Erläuterung",
+     "type": "text"
+    },
+    {
+     "key": "notes",
+     "label": "Notizen",
+     "type": "textarea"
+    },
+    {
+     "key": "pos_description",
+     "label": "Position: Bezeichnung",
+     "type": "text"
+    },
+    {
+     "key": "pos_quantity",
+     "label": "Position: Menge",
+     "type": "number"
+    },
+    {
+     "key": "pos_unit_price",
+     "label": "Position: Einzelpreis netto",
+     "type": "currency"
+    },
+    {
+     "dataSourceKey": "steuerschluessel",
+     "helpText": "Aus der Maske Steuerschlüssel. Es gibt keinen Vorgabewert: Ohne Steuerschlüssel wird die Gutschrift nicht gebucht.",
+     "key": "pos_tax_code",
+     "label": "Position: Steuerschlüssel",
+     "options": [],
+     "type": "select"
+    }
+   ],
+   "id": "sales/gutschrift",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "workflow",
+    "density": "compact",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "statusPlacement": "afterFields",
+    "summaryPlacement": "footer",
+    "tableProfile": "financial",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "performance": {
+    "bundleGroup": "sales",
+    "initialPayloadBudgetKb": 24,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": false
+   },
+   "schemaVersion": 1,
+   "subtitle": "Verkauf / Rechnungskorrektur",
+   "summary": [
+    {
+     "key": "netto",
+     "label": "Netto",
+     "value": "0,00 €"
+    },
+    {
+     "key": "steuer",
+     "label": "Umsatzsteuer",
+     "value": "offen"
+    },
+    {
+     "key": "brutto",
+     "label": "Brutto",
+     "value": "offen"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "key": "nr",
+       "label": "Nr.",
+       "priority": "primary",
+       "sortable": true,
+       "width": 60
+      },
+      {
+       "filterable": true,
+       "key": "description",
+       "label": "Bezeichnung",
+       "priority": "primary"
+      },
+      {
+       "key": "quantity",
+       "label": "Menge",
+       "numeric": true,
+       "priority": "secondary",
+       "renderKind": "number"
+      },
+      {
+       "key": "unit_price",
+       "label": "Einzelpreis netto",
+       "numeric": true,
+       "priority": "secondary",
+       "renderKind": "currency"
+      },
+      {
+       "key": "tax_code_text",
+       "label": "Steuerschlüssel",
+       "priority": "primary"
+      },
+      {
+       "key": "netto",
+       "label": "Netto",
+       "numeric": true,
+       "priority": "primary",
+       "renderKind": "currency"
+      }
+     ],
+     "key": "positionen",
+     "label": "Positionen",
+     "pageSize": 50,
+     "rowActions": [
+      {
+       "command": "sales.gutschriftPositionEntfernen",
+       "dangerLevel": "safe",
+       "key": "entfernen",
+       "label": "Entfernen"
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": false
+    },
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "tax_code_text",
+       "label": "Steuerschlüssel",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "key": "netto",
+       "label": "Netto",
+       "numeric": true,
+       "priority": "primary",
+       "renderKind": "currency"
+      },
+      {
+       "key": "steuer",
+       "label": "Umsatzsteuer",
+       "numeric": true,
+       "priority": "primary",
+       "renderKind": "currency"
+      },
+      {
+       "key": "brutto",
+       "label": "Brutto",
+       "numeric": true,
+       "priority": "primary",
+       "renderKind": "currency"
+      }
+     ],
+     "dataSourceKey": "steuer",
+     "key": "steuer",
+     "label": "Steuerausweis",
+     "pageSize": 25,
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": false
+    },
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "credit_note_number",
+       "label": "Nummer",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "filterable": true,
+       "key": "customer_text",
+       "label": "Kunde",
+       "priority": "primary"
+      },
+      {
+       "key": "invoice_reference",
+       "label": "Rechnung",
+       "priority": "secondary"
+      },
+      {
+       "key": "net_amount",
+       "label": "Netto",
+       "numeric": true,
+       "priority": "secondary",
+       "renderKind": "currency"
+      },
+      {
+       "key": "tax_amount",
+       "label": "Umsatzsteuer",
+       "numeric": true,
+       "priority": "secondary",
+       "renderKind": "currency"
+      },
+      {
+       "key": "total_amount",
+       "label": "Brutto",
+       "numeric": true,
+       "priority": "primary",
+       "renderKind": "currency"
+      },
+      {
+       "key": "status_text",
+       "label": "Status",
+       "priority": "primary",
+       "renderKind": "status"
+      }
+     ],
+     "dataSourceKey": "gutschriften",
+     "key": "gutschriften",
+     "label": "Gutschriften",
+     "pageSize": 50,
+     "rowActions": [
+      {
+       "command": "sales.gutschriftLaden",
+       "dangerLevel": "safe",
+       "key": "laden",
+       "label": "Öffnen"
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": false
+    },
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "credit_note_number",
+       "label": "Gutschrift",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "filterable": true,
+       "key": "vorgeschlagen_von",
+       "label": "Vorgeschlagen von",
+       "priority": "secondary"
+      },
+      {
+       "key": "netto",
+       "label": "Netto",
+       "numeric": true,
+       "priority": "secondary",
+       "renderKind": "currency"
+      },
+      {
+       "key": "steuer",
+       "label": "Umsatzsteuer",
+       "numeric": true,
+       "priority": "secondary",
+       "renderKind": "currency"
+      },
+      {
+       "key": "brutto",
+       "label": "Brutto",
+       "numeric": true,
+       "priority": "primary",
+       "renderKind": "currency"
+      },
+      {
+       "key": "status_text",
+       "label": "Stand",
+       "priority": "primary",
+       "renderKind": "status"
+      }
+     ],
+     "dataSourceKey": "vorschlaege",
+     "key": "vorschlaege",
+     "label": "Buchungsvorschläge von Agenten",
+     "pageSize": 50,
+     "rowActions": [
+      {
+       "command": "sales.gutschriftVorschlagPruefen",
+       "dangerLevel": "safe",
+       "key": "pruefen",
+       "label": "Prüfen"
+      }
+     ],
+     "rowDetail": false,
+     "rowHeight": 44,
+     "serverPagination": false,
+     "virtualized": false
+    }
+   ],
+   "title": "Gutschrift",
+   "workflow": {
+    "documentType": "sales_credit_note",
+    "phases": [
+     {
+      "key": "erfassen",
+      "label": "Erfassen"
+     },
+     {
+      "key": "entwurf",
+      "label": "Entwurf"
+     },
+     {
+      "key": "gebucht",
+      "label": "Gebucht"
+     }
+    ],
+    "processKey": "order-to-cash"
+   }
+  },
+  "strecke/disposition": {
+   "actions": [
+    {
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "primary",
+     "label": "Neue Strecke",
+     "permission": "logistics.strecke.schreiben",
+     "zone": "header"
+    }
+   ],
+   "adapter": {
+    "sourceId": "strecke/disposition",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/tours",
+     "key": "list",
+     "pageSize": 100
+    }
+   ],
+   "domain": "logistics",
+   "id": "strecke/disposition",
+   "layout": {
+    "columnNavigation": "listDetail",
+    "contextRail": "none",
+    "density": "expertDense",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Die Disposition plant Touren. Eine Belegkette haengt nicht an dieser Liste.",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Touren",
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "tour_no",
+       "label": "Strecke-Nr.",
+       "sortable": true,
+       "width": 140
+      },
+      {
+       "key": "date",
+       "label": "Datum",
+       "renderKind": "date",
+       "sortable": true,
+       "width": 120
+      },
+      {
+       "key": "week",
+       "label": "KW",
+       "width": 90
+      },
+      {
+       "filterable": true,
+       "key": "status",
+       "label": "Status",
+       "renderKind": "status",
+       "width": 120
+      },
+      {
+       "key": "notes",
+       "label": "Notiz"
+      }
+     ],
+     "dataSourceKey": "list",
+     "key": "list",
+     "label": "Strecken-Disposition",
+     "pageSize": 100,
+     "rowActions": [
+      {
+       "dangerLevel": "moderate",
+       "key": "loeschen",
+       "label": "Löschen"
+      }
+     ],
+     "rowHeight": 36,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Strecken-Disposition"
+  },
+  "strecke/dokumente-drucken": {
+   "adapter": {
+    "sourceId": "strecke/dokumente-drucken",
+    "temporary": false,
+    "type": "native"
+   },
+   "domain": "logistics",
+   "id": "strecke/dokumente-drucken",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "workflow",
+    "density": "expertDense",
+    "floorplan": "cockpit",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "touchTargetPx": 44
+   },
+   "mode": "cockpit",
+   "noWorkflowReason": "Die Auswahl druckt nicht selbst. Jede Kachel oeffnet die bestehende Druckmaske.",
+   "schemaVersion": 1,
+   "subtitle": "Druckauswahl",
+   "tiles": [
+    {
+     "key": "fracht",
+     "label": "Frachtdokumente",
+     "targetRoute": "/versand/frachtdokumente",
+     "targetScreenId": "fracht",
+     "tone": "neutral"
+    },
+    {
+     "key": "paket",
+     "label": "Paket-Etiketten",
+     "targetRoute": "/versand/paket-etikett",
+     "targetScreenId": "paket",
+     "tone": "neutral"
+    },
+    {
+     "key": "avis",
+     "label": "Versand-Avis",
+     "targetRoute": "/versand/versand-avis",
+     "targetScreenId": "avis",
+     "tone": "neutral"
+    },
+    {
+     "key": "produktion",
+     "label": "Produktions-Dokumente",
+     "targetRoute": "/produktion/produktions-dokumente-drucken",
+     "targetScreenId": "produktion",
+     "tone": "neutral"
+    }
+   ],
+   "title": "Strecken-Dokumente drucken"
+  },
+  "strecke/nawaro-ernterklaerung-drucken": {
+   "adapter": {
+    "sourceId": "strecke/nawaro-ernterklaerung-drucken",
+    "temporary": false,
+    "type": "native"
+   },
+   "domain": "agrar",
+   "id": "strecke/nawaro-ernterklaerung-drucken",
+   "layout": {
+    "columnNavigation": "single",
+    "contextRail": "workflow",
+    "density": "expertDense",
+    "floorplan": "cockpit",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "touchTargetPx": 44
+   },
+   "mode": "cockpit",
+   "noWorkflowReason": "Der Druck haengt an der Mitteilung. Diese Maske oeffnet nur den bestehenden Druck.",
+   "schemaVersion": 1,
+   "subtitle": "Mitteilungsdruck",
+   "tiles": [
+    {
+     "key": "mitteilung",
+     "label": "NaWaRo-Mitteilung drucken",
+     "targetRoute": "/nawaro/mitteilung-drucken",
+     "targetScreenId": "mitteilung",
+     "tone": "neutral"
+    }
+   ],
+   "title": "NaWaRo-Ernterklärung drucken"
+  },
+  "strecke/nawaro-lieferungen": {
+   "adapter": {
+    "sourceId": "strecke/nawaro-lieferungen",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/tours",
+     "key": "list",
+     "pageSize": 100
+    }
+   ],
+   "domain": "agrar",
+   "id": "strecke/nawaro-lieferungen",
+   "layout": {
+    "columnNavigation": "listDetail",
+    "contextRail": "none",
+    "density": "expertDense",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Die Liste zeigt Lieferungen als Touren. Ein eigener NaWaRo-Belegstatus haengt nicht daran.",
+   "performance": {
+    "bundleGroup": "agrar",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Touren",
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "tour_no",
+       "label": "Strecke-Nr.",
+       "sortable": true,
+       "width": 140
+      },
+      {
+       "key": "date",
+       "label": "Datum",
+       "renderKind": "date",
+       "sortable": true,
+       "width": 120
+      },
+      {
+       "key": "type",
+       "label": "Typ",
+       "width": 120
+      },
+      {
+       "filterable": true,
+       "key": "status",
+       "label": "Status",
+       "renderKind": "status",
+       "width": 120
+      },
+      {
+       "key": "notes",
+       "label": "Notiz"
+      }
+     ],
+     "dataSourceKey": "list",
+     "key": "list",
+     "label": "NaWaRo-Lieferungen",
+     "pageSize": 100,
+     "rowHeight": 36,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "NaWaRo-Lieferungen"
+  },
+  "strecke/qualitaets-abweichung": {
+   "adapter": {
+    "sourceId": "strecke/qualitaets-abweichung",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/qualitaet/reklamationen",
+     "key": "list",
+     "pageSize": 200
+    }
+   ],
+   "domain": "qualitaet",
+   "id": "strecke/qualitaets-abweichung",
+   "layout": {
+    "columnNavigation": "listDetail",
+    "contextRail": "none",
+    "density": "expertDense",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Die Liste zeigt Reklamationen. Abschluss und Massnahmen haengen am Reklamationsbeleg.",
+   "performance": {
+    "bundleGroup": "qualitaet",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Reklamationen",
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "nummer",
+       "label": "Nummer",
+       "sortable": true,
+       "width": 140
+      },
+      {
+       "key": "kunde",
+       "label": "Kunde",
+       "sortable": true,
+       "width": 180
+      },
+      {
+       "key": "artikel",
+       "label": "Artikel",
+       "width": 160
+      },
+      {
+       "key": "grund",
+       "label": "Grund",
+       "width": 140
+      },
+      {
+       "key": "datum",
+       "label": "Datum",
+       "renderKind": "date",
+       "sortable": true,
+       "width": 120
+      },
+      {
+       "key": "prioritaet",
+       "label": "Priorität",
+       "width": 110
+      },
+      {
+       "filterable": true,
+       "key": "status",
+       "label": "Status",
+       "renderKind": "status",
+       "width": 140
+      }
+     ],
+     "dataSourceKey": "list",
+     "key": "list",
+     "label": "Qualitätsabweichung",
+     "pageSize": 200,
+     "rowHeight": 36,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Qualitätsabweichung"
+  },
+  "strecke/streckengeschaeft": {
+   "adapter": {
+    "sourceId": "strecke/streckengeschaeft",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/strecke/streckengeschaefte",
+     "key": "list",
+     "pageSize": 200
+    }
+   ],
+   "domain": "logistics",
+   "fields": [
+    {
+     "key": "strecke_nr",
+     "label": "Strecke-Nr.",
+     "type": "text"
+    },
+    {
+     "key": "datum",
+     "label": "Datum",
+     "type": "date"
+    },
+    {
+     "key": "niederlassung",
+     "label": "Niederlassung",
+     "type": "text"
+    },
+    {
+     "key": "partie_nr",
+     "label": "Partie-Nr.",
+     "type": "text"
+    },
+    {
+     "key": "bediener",
+     "label": "Bediener",
+     "type": "text"
+    },
+    {
+     "key": "erledigt",
+     "label": "Erledigt",
+     "type": "boolean"
+    },
+    {
+     "key": "kostenstelle",
+     "label": "Kostenstelle",
+     "type": "text"
+    },
+    {
+     "key": "lagerhalle",
+     "label": "Lagerhalle",
+     "type": "text"
+    },
+    {
+     "key": "nls_nr",
+     "label": "NLS-Nr.",
+     "type": "text"
+    },
+    {
+     "key": "lieferant_nr",
+     "label": "Lieferant-Nr.",
+     "type": "text"
+    },
+    {
+     "key": "lieferant_name",
+     "label": "Lieferant",
+     "type": "text"
+    },
+    {
+     "key": "kontrakt_nr",
+     "label": "Kontrakt-Nr.",
+     "type": "text"
+    },
+    {
+     "key": "artikel",
+     "label": "Artikel",
+     "type": "text"
+    }
+   ],
+   "id": "strecke/streckengeschaeft",
+   "layout": {
+    "columnNavigation": "listDetail",
+    "contextRail": "none",
+    "density": "expertDense",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Die Erfassung legt ein Streckengeschaeft an; eine Belegkette haengt nicht an dieser Liste.",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 40,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Einkauf / Verkauf / Spedition",
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "strecke_nr",
+       "label": "Strecke-Nr.",
+       "sortable": true,
+       "width": 120
+      },
+      {
+       "key": "datum",
+       "label": "Datum",
+       "renderKind": "date",
+       "sortable": true,
+       "width": 110
+      },
+      {
+       "key": "niederlassung",
+       "label": "Niederlassung",
+       "width": 160
+      },
+      {
+       "key": "lieferant_name",
+       "label": "Lieferant",
+       "sortable": true,
+       "width": 180
+      },
+      {
+       "key": "artikel",
+       "label": "Artikel",
+       "width": 180
+      },
+      {
+       "key": "brutto",
+       "label": "Brutto",
+       "numeric": true,
+       "renderKind": "currency",
+       "width": 120
+      },
+      {
+       "key": "erledigt",
+       "label": "Erledigt",
+       "renderKind": "boolean",
+       "width": 90
+      }
+     ],
+     "dataSourceKey": "list",
+     "key": "list",
+     "label": "Streckengeschäft",
+     "pageSize": 200,
+     "rowHeight": 36,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Streckengeschäft"
+  },
+  "strecke/vorlaeufig": {
+   "adapter": {
+    "sourceId": "strecke/vorlaeufig",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/tours",
+     "key": "list",
+     "pageSize": 100
+    }
+   ],
+   "domain": "logistics",
+   "id": "strecke/vorlaeufig",
+   "layout": {
+    "columnNavigation": "listDetail",
+    "contextRail": "none",
+    "density": "expertDense",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Die Liste zeigt Touren. Der Status haengt an der Tour, nicht an einem eigenen Beleg.",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Touren",
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "tour_no",
+       "label": "Strecke-Nr.",
+       "sortable": true,
+       "width": 140
+      },
+      {
+       "key": "date",
+       "label": "Datum",
+       "renderKind": "date",
+       "sortable": true,
+       "width": 120
+      },
+      {
+       "key": "week",
+       "label": "KW",
+       "width": 90
+      },
+      {
+       "filterable": true,
+       "key": "status",
+       "label": "Status",
+       "renderKind": "status",
+       "width": 120
+      },
+      {
+       "key": "type",
+       "label": "Typ",
+       "width": 120
+      },
+      {
+       "key": "notes",
+       "label": "Notiz"
+      }
+     ],
+     "dataSourceKey": "list",
+     "key": "list",
+     "label": "Vorläufige Streckengeschäfte",
+     "pageSize": 100,
+     "rowHeight": 36,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Vorläufige Streckengeschäfte"
+  },
+  "transporte/fahrer": {
+   "actions": [
+    {
+     "command": "driver.create",
+     "dangerLevel": "safe",
+     "key": "neu",
+     "kind": "primary",
+     "label": "Neuer Fahrer",
+     "stubReason": "Oeffnet das bestehende Fahrerformular.",
+     "zone": "header"
+    },
+    {
+     "command": "driver.openAvailable",
+     "dangerLevel": "safe",
+     "enabledWhen": "driver.hasAvailable",
+     "key": "verfuegbar",
+     "kind": "secondary",
+     "label": "Verfügbaren Fahrer öffnen",
+     "stubReason": "Oeffnet den ersten verfuegbaren Fahrer.",
+     "zone": "footer"
+    },
+    {
+     "command": "driver.openTours",
+     "dangerLevel": "safe",
+     "key": "touren",
+     "kind": "secondary",
+     "label": "Tourenplanung",
+     "stubReason": "Wechselt in die Tourenplanung.",
+     "zone": "footer"
+    },
+    {
+     "command": "driver.openDocuments",
+     "dangerLevel": "safe",
+     "key": "dokumente",
+     "kind": "secondary",
+     "label": "Dokumente",
+     "stubReason": "Oeffnet die Dokumentenablage.",
+     "zone": "footer"
+    },
+    {
+     "command": "driver.export",
+     "dangerLevel": "safe",
+     "key": "export",
+     "kind": "secondary",
+     "label": "Export",
+     "stubReason": "Exportiert die sichtbare Fahrerliste.",
+     "zone": "footer"
+    }
+   ],
+   "adapter": {
+    "sourceId": "transporte/fahrer",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/transporte/fahrer",
+     "key": "list",
+     "pageSize": 200
+    },
+    {
+     "endpoint": "/api/v1/logistik/tours",
+     "key": "touren",
+     "pageSize": 200
+    }
+   ],
+   "domain": "logistics",
+   "id": "transporte/fahrer",
+   "layout": {
+    "columnNavigation": "listDetail",
+    "contextRail": "none",
+    "density": "expertDense",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Der Status haengt am Fahrer. Touren heute wird aus den Touren gezaehlt.",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 32,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Fahrer suchen und öffnen",
+   "summary": [
+    {
+     "key": "gesamt",
+     "label": "Fahrer gesamt",
+     "value": "0"
+    },
+    {
+     "key": "verfuegbar",
+     "label": "Verfügbar",
+     "value": "0"
+    },
+    {
+     "key": "unterwegs",
+     "label": "Unterwegs",
+     "value": "0"
+    },
+    {
+     "key": "touren_heute",
+     "label": "Touren heute",
+     "value": "0"
+    }
+   ],
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "name",
+       "label": "Name",
+       "priority": "primary",
+       "sortable": true
+      },
+      {
+       "filterable": true,
+       "key": "status",
+       "label": "Status",
+       "priority": "primary",
+       "renderKind": "status"
+      },
+      {
+       "filterable": true,
+       "key": "fahrzeug",
+       "label": "Fahrzeug",
+       "priority": "secondary"
+      },
+      {
+       "key": "fuehrerschein",
+       "label": "Führerschein",
+       "priority": "secondary"
+      },
+      {
+       "key": "touren_heute",
+       "label": "Touren heute",
+       "numeric": true,
+       "priority": "primary",
+       "sortable": true
+      }
+     ],
+     "dataSourceKey": "list",
+     "key": "list",
+     "label": "Fahrer",
+     "pageSize": 200,
+     "rowHeight": 44,
+     "rowRouteTemplate": "/transporte/fahrer/{id}",
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Fahrer"
+  },
+  "verkauf/betriebsauftrag": {
+   "adapter": {
+    "sourceId": "verkauf/betriebsauftrag",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/sales/orders/",
+     "key": "list",
+     "pageSize": 50
+    }
+   ],
+   "domain": "sales",
+   "fields": [
+    {
+     "key": "auftrag_nr_von",
+     "label": "Auftrag-Nr. von",
+     "type": "text"
+    },
+    {
+     "key": "auftrag_nr_bis",
+     "label": "Auftrag-Nr. bis",
+     "type": "text"
+    },
+    {
+     "key": "nur_geplantes_lieferdatum",
+     "label": "Nur mit geplantem Lieferdatum",
+     "type": "boolean"
+    },
+    {
+     "key": "formular",
+     "label": "Formular",
+     "type": "text"
+    }
+   ],
+   "id": "verkauf/betriebsauftrag",
+   "layout": {
+    "columnNavigation": "listDetail",
+    "contextRail": "none",
+    "density": "expertDense",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "tableProfile": "financial",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Die Maske waehlt Auftraege zum Druck. Der Belegstatus haengt am Verkaufsauftrag.",
+   "performance": {
+    "bundleGroup": "sales",
+    "initialPayloadBudgetKb": 40,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Verkaufsaufträge",
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "order_number",
+       "label": "Auftrag-Nr.",
+       "sortable": true,
+       "width": 140
+      },
+      {
+       "key": "subject",
+       "label": "Betreff",
+       "width": 200
+      },
+      {
+       "key": "delivery_date",
+       "label": "gepl. Lieferdatum",
+       "renderKind": "date",
+       "sortable": true,
+       "width": 150
+      },
+      {
+       "filterable": true,
+       "key": "status",
+       "label": "Status",
+       "renderKind": "status",
+       "width": 120
+      },
+      {
+       "key": "total_amount",
+       "label": "Betrag",
+       "numeric": true,
+       "renderKind": "currency",
+       "width": 120
+      }
+     ],
+     "dataSourceKey": "list",
+     "key": "list",
+     "label": "Betriebsauftrag drucken",
+     "pageSize": 50,
+     "rowHeight": 36,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Betriebsauftrag drucken"
+  },
+  "versand/versand-avis": {
+   "adapter": {
+    "sourceId": "versand/versand-avis",
+    "temporary": false,
+    "type": "native"
+   },
+   "dataSources": [
+    {
+     "endpoint": "/api/v1/logistik/versand/avise",
+     "key": "list",
+     "pageSize": 200
+    }
+   ],
+   "domain": "logistics",
+   "fields": [
+    {
+     "key": "telefax",
+     "label": "Telefax",
+     "type": "text"
+    },
+    {
+     "key": "email",
+     "label": "E-Mail",
+     "type": "text"
+    }
+   ],
+   "id": "versand/versand-avis",
+   "layout": {
+    "columnNavigation": "listDetail",
+    "contextRail": "none",
+    "density": "expertDense",
+    "floorplan": "worklist",
+    "mobileMode": "mobileStack",
+    "preferredMode": "desktopDense",
+    "tableProfile": "standard",
+    "touchTargetPx": 44
+   },
+   "mode": "list",
+   "noWorkflowReason": "Das Versand-Avis ist eine Druckliste, kein Beleg mit eigenem Status.",
+   "performance": {
+    "bundleGroup": "logistics",
+    "initialPayloadBudgetKb": 24,
+    "lookupMinChars": 2,
+    "requiresLazyTabs": false,
+    "requiresVirtualTables": true
+   },
+   "schemaVersion": 1,
+   "subtitle": "Versand",
+   "tables": [
+    {
+     "columns": [
+      {
+       "filterable": true,
+       "key": "avis_nr",
+       "label": "Avis-Nr.",
+       "sortable": true,
+       "width": 120
+      },
+      {
+       "key": "kunden_nr",
+       "label": "Kunden-Nr.",
+       "width": 120
+      },
+      {
+       "key": "lieferant_nr",
+       "label": "Lieferant-Nr.",
+       "width": 120
+      },
+      {
+       "key": "lieferschein_nr",
+       "label": "Lieferschein-Nr.",
+       "width": 140
+      },
+      {
+       "key": "avis_datum",
+       "label": "Avis-Datum",
+       "renderKind": "date",
+       "sortable": true,
+       "width": 120
+      },
+      {
+       "key": "lieferdatum_erwartet",
+       "label": "Lieferdatum",
+       "renderKind": "date",
+       "width": 120
+      },
+      {
+       "key": "artikel_nr",
+       "label": "Artikel",
+       "width": 120
+      },
+      {
+       "key": "menge",
+       "label": "Menge",
+       "numeric": true,
+       "width": 90
+      },
+      {
+       "filterable": true,
+       "key": "status",
+       "label": "Status",
+       "renderKind": "status",
+       "width": 120
+      }
+     ],
+     "dataSourceKey": "list",
+     "key": "list",
+     "label": "Versand-Avis",
+     "pageSize": 50,
+     "rowHeight": 36,
+     "serverPagination": false,
+     "virtualized": true
+    }
+   ],
+   "title": "Versand-Avis"
+  }
+ }
+}

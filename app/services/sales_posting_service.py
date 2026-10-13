@@ -402,7 +402,8 @@ class SalesPostingService:
             ),
             {"tenant_id": self.tenant_id, "invoice_number": invoice_number},
         )
-        self.db.commit()
+        # Mit commit=False besitzt der Aufrufer die Transaktion (Stornobuchung, Nachweis und Belegstatus gemeinsam).
+        self._abschliessen()
         return {
             "journal_entry_id": str(original.id),
             "reversal_entry_id": str(reversal.id),

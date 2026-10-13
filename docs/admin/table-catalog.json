@@ -14599,6 +14599,11 @@
               "name": "created_at",
               "nullable": false,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "request_hash",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -14756,6 +14761,58 @@
             "app/core/gobd_artifact.py",
             "app/services/docflow_artifact_service.py",
             "app/services/settlement_document_archive_service.py"
+          ]
+        },
+        "document_command_log": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "header_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "command",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "actor",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "payload",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "logged_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "placement": "prefix",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/docflow_service.py"
+          ],
+          "written_by": [
+            "app/services/docflow_service.py"
           ]
         },
         "document_followups": {
@@ -15156,6 +15213,11 @@
               "name": "tax_code",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "expense_account",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
@@ -15252,7 +15314,8 @@
             "id"
           ],
           "read_by": [
-            "app/services/docflow_evidence_service.py"
+            "app/services/docflow_evidence_service.py",
+            "app/services/docflow_service.py"
           ],
           "written_by": [
             "app/services/docflow_service.py"
@@ -15512,6 +15575,65 @@
           ],
           "written_by": [
             "app/services/docflow_return_service.py"
+          ]
+        },
+        "document_status_history": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "header_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "from_status",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "to_status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "command",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "actor",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "reason",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "changed_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "placement": "prefix",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/docflow_service.py"
           ]
         },
         "dsfinvk_exports": {
@@ -21377,6 +21499,7 @@
             "app/finance/gobd.py",
             "app/finance/router.py",
             "app/infrastructure/models/journal.py",
+            "app/services/finance_belegbuchung.py",
             "app/services/finance_closing_service.py",
             "app/services/finance_datev_service.py",
             "app/services/finance_read_model_service.py",
@@ -21927,6 +22050,7 @@
             "app/api/v1/endpoints/zinsabrechnung.py",
             "app/services/agrar_settlement_service.py",
             "app/services/einkauf_compat_service.py",
+            "app/services/finance_belegbuchung.py",
             "app/services/finance_clearing_service.py",
             "app/services/finance_dunning_service.py",
             "app/services/finance_eingangsrechnung_buchung.py",
@@ -22688,7 +22812,8 @@
             "app/api/v1/endpoints/vat_return_export.py",
             "app/core/screen_definitions_capture.py",
             "app/finance/steuerschluessel.py",
-            "app/finance/tax_resolver.py"
+            "app/finance/tax_resolver.py",
+            "app/services/docflow_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/tax_keys.py",

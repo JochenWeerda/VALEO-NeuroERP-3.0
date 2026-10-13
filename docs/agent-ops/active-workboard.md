@@ -11,6 +11,69 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## PHASE0-REFERENZBELEGE-REGISTRYABBILD-20261013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Phase 0.7 und der sichere Teil von 0.9.
+**Lieferung 0.7:** `scripts/referenzbelege_anlegen.py --tenant <id> [--apply]` — 17 Referenzbelege ueber DocFlow
+(Verkaufs- und Einkaufskette mit Teilmengen, Gutschriften, je ein nicht buchbarer und ein stornierter Beleg),
+wiederholbar ueber feste Idempotenzschluessel; prueft die Voraussetzungen vorab.
+**Lieferung 0.9:** `scripts/generate_screen_registry_snapshot.py [--check]` schreibt
+`packages/frontend-web/src/masks/screen-registry.snapshot.json`; `tests/test_screen_registry_snapshot.py`
+haelt es aktuell. **Wer eine der 31 ScreenDefinitions aus `capture-screens.ts` in Python aendert, muss das Abbild
+neu erzeugen.** `capture-screens-sync.test.ts` laesst nur die 26 benannten Abweichungen der Handkopie zu.
+QA: `docs/quality-assurance/phase0-referenzbelege-registryabbild-20261013.md`.
+**Befund Journalkette, nicht behoben:** Im Testmandanten `00000000-…-0001` der gewachsenen Datenbank fehlt
+der Buchungssatz mit Folgenummer 1 (vorhanden: 2 bis 14); `FinanceTransactionService` lehnt dort jede neue
+Buchung ab („Journal chain metadata is inconsistent“). Die Referenzbelege sind dort deshalb nur bis zur ersten
+offenen Rechnung angelegt, nichts gebucht. Kette nicht angefasst.
+**Befund, nicht behoben:** 18 Seiten zeichnen die Handkopie ohne Rechte; in elf Masken traegt die Kopie
+`stubReason` statt Kommando-Weg und Recht. Erzeugte man die Kopie aus der Registry, verschwaenden dort die
+Aktionsknoepfe. **An Codex (Identitaet):** Wie folgt ein Recht einer ScreenDefinition (`logistik.tour.create`,
+`logistics:write`, `finance.steuerschluessel.write`) aus den Rollen der Anmeldung? `useScreenPermissions`
+kennt es nur fuer Administratoren und einzelne Bereiche.
+
+## DOCFLOW-EINKAUF-GUTSCHRIFT-20261013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Phase 0.4 und 0.5.
+**Lieferung:** DocFlow-Belegarten `purchase_order`, `goods_receipt`, `purchase_invoice`,
+`purchase_credit_memo` mit Uebergaengen; Steuerrichtung nach Belegart; `document_items.expense_account`
+(Migration `docflow_einkauf_20261013`, ein Head). `post`: Eingangsrechnung ueber
+`finance_eingangsrechnung_buchung` (neuer Parameter `gruppen`), Verkaufs- und Einkaufsgutschrift ueber
+`app/services/finance_belegbuchung.py` mit Minderung des offenen Postens der Bezugsrechnung. `reverse`:
+Eingangsrechnung mit Gegenbuchung; gebuchte Gutschrift wird abgelehnt (Gegenbuchung fehlt noch).
+Keine Doppelberechnung: Auftrag/Bestellung entweder direkt oder ueber Lieferung/Wareneingang.
+Tests 17 + 19, im Gesamtlauf mit Nachbarn 193. QA: `docs/quality-assurance/docflow-einkauf-gutschrift-20261013.md`.
+**Verhaltensaenderung:** `sales_credit_memo` bucht jetzt wirklich (vorher nur Status); ein Auftrag mit
+Lieferung laesst sich nicht mehr direkt berechnen (409).
+**Beruehrung mit DOCFLOW-TOKEN-TENANT (Codex):** in `app/api/v1/endpoints/docflow.py` nur drei Zeilen fuer das
+Feld `expense_account` in Ein- und Ausgabe der Position; keine Mandanten- oder Anmeldezeile.
+
+## DOCFLOW-TEILMENGEN-STATUSHISTORIE-20261013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Phase 0.2 und 0.3; Bedingungen von Codex umgesetzt.
+**Lieferung:** Migration `docflow_teilmengen_statushistorie_20261013` (ein Head). Umwandeln mit Restmenge je
+Position ueber mehrere Folgebelege (`uq_docflow_header_link_pair` statt eines Folgebelegs je Quelle); Teilmengen
+nur ausdruecklich; Belegsperre vor der Idempotenzpruefung; `command_idempotency_keys.request_hash` (gleicher
+Schluessel + anderer Inhalt = 409). `document_status_history` per Trigger, `document_command_log` verbindlich,
+beide unveraenderlich. Storno in einem Commit. Tests 19 (inkl. Parallelzugriff, Rollback) + 360 Nachbarn.
+QA: `docs/quality-assurance/docflow-teilmengen-statushistorie-20261013.md`.
+**An Codex (0.1), Beruehrung in `app/api/v1/endpoints/docflow.py`:** Die neun schreibenden Wege haben jetzt
+`nutzer = Depends(get_current_user)` und reichen `_akteur(nutzer)` an `_svc(db, tenant, akteur)`. Die
+Mandantenermittlung (`tenant_id` aus dem Query-Parameter) habe ich nicht angefasst; die Lesewege haben
+weiterhin keine eigene Anmeldepruefung am Weg.
+**Verhaltensaenderung:** Ein zweiter Umwandlungsaufruf mit neuem Schluessel gibt nicht mehr den vorhandenen
+Folgebeleg zurueck, sondern 409 (ohne Mengen) bzw. einen Teilbeleg (mit Mengen). `POST /docflow/` nimmt
+`posted`/`reversed`/`cancelled` nicht an, `PUT` nicht `posted`/`reversed`.
+`SalesPostingService.reverse_ausgangsrechnung` achtet `commit=False`.
+**Befund:** Die DocFlow-Wege sind `async def` mit blockierenden DB-Aufrufen; ein wartender Aufruf blockiert
+die Ereignisschleife. `infrastructure.audit_log` fehlt in der gewachsenen Datenbank.
+
+## DOCFLOW-TOKEN-TENANT-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Phase 0.1 aus Screen-Framework-Gap: zwoelf DocFlow-Wege verwenden Query/Standardtenant. **Ziel:** DocFlow ausschliesslich an verifizierten Tokenmandanten binden, bisheriger optionaler Query nur gleichlautende Bestaetigung. **Dateibesitz:** app/api/v1/endpoints/docflow.py nur Tenantimport/-Dependency, zwoelf Tenantparameter und Standardfallback; keine Claude-Teilmengen/Audit-/Steuer-/Fachlogik. Neuer echter HTTP-/PostgreSQL-Vertrag mit zwei eigenen Tenants; tests/test_docflow_steuerschluessel.py ausschliesslich explizite Testtenant-Dependency der vorhandenen Miniapp; eigene QA/Workboard/isolierte API-Metadaten. **Abnahme:** fehlende/alte Identitaet und fremde Querywerte vor DB abgewiesen; ohne Query eigener Tokentenant, fremde Belege/Commands ohne Mutation; kanonisches get_tenant_id, keine globale Authattrappe. Bestehender valeo_probe, --status vor DB, eigene Savepointdaten; keine neue DB/Container/Reset/Migration. Aktoren/Fachrollen bleiben eigener offener Identitybefund. Dateibesitz begrenzt, Claudes kommende 0.2/0.3 unveraendert.
+
+**Lieferung:** Kanonischer Tokentenant fuer Hauptwege und neue Statushistorie; Query nur gleichlautende Bestaetigung, kein Standardfallback. 84 echte Sicherheits-/DB-Gegenproben und 52 Nachbarfaelle bestanden, Tenant-Audit gruen. Isolierte produktive OpenAPI 3145 Pfade geprueft. Claudes Fach-/Akteur-/Steueraenderungen erhalten; keine neue DB/Container/Migration/Reset. Nachweis: docflow-token-tenant-20261013.md. Phase 0.6, Fach-/Referenzrechte, GoBD/Logistik und Gesamt-CI bleiben offen.
+
 ## CI-FEED-IDENTITY-ISOLATION-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** beide Feed-Ketten senden dev-token und migrieren/loeschen zur Testvorbereitung und Bereinigung. **Ziel:** signierte Testidentitaeten, eigene Feed-/Bestandsdaten in aeusserer Transaktion mit Savepoints; Fachassertions fuer Verbrauch/Storno/Charge/Bewegungen unveraendert. **Dateibesitz:** tests/test_feed_chain_004.py, tests/test_feed_production_chain.py nur Auth-/DB-/Schema-Fixtures und scoped Sessionzugriff; neue tests/feed_identity_fixture.py; eigene QA/Workboard. **Abnahme:** echte Produktionsmiddleware/RSA/Mandant, vorhandener valeo_probe mit require_db vor Wirkung; keine Migration/DELETE/Demoseed/DB/Container/Reset. JWKS/Sessionstore im vorhandenen Probe-Kontext isoliert; Produktbefunde gegebenenfalls separat claimen.
