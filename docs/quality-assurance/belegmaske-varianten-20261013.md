@@ -52,3 +52,33 @@ sondern die Variante einer Belegmaske — mal mit Preisen, mal nur mit Mengen.
 - **Erfassen und Bearbeiten** eines Belegs in der Maske fehlt; die Variante ist lesend.
 - **Bausteine** (Lieferung, Zahlung, Lager …) hängt noch keine Variante ein.
 - Das Recht `belege.<recht>` der Aktionen ist ein Name der Definition; das Frontend kennt ihn nicht.
+
+## Nachtrag Teil 2a: sichtbar nur im Testmandanten der Sichtprüfung
+
+Entscheidung des Auftraggebers vom 13.10.2026: Die neun Belegdefinitionen dürfen registriert werden,
+zunächst **nur für den autorisierten Testmandanten** `00000000-0000-0000-0000-000000000051`. Das ist
+keine Produktivfreigabe.
+
+- **Nicht in der Registry aller Mandanten.** `scripts/belegmasken_veroeffentlichen.py [--apply]`
+  veröffentlicht die Varianten über den vorhandenen Weg für mandantenbezogene Masken
+  (`studio_draft_store`, Stand `published_temp`). Das Skript nimmt nur Mandanten aus
+  `ERLAUBTE_MANDANTEN` an; jeder andere Mandant bekommt für `beleg/…` weiterhin „nicht gefunden".
+  Wiederholbar: Ein zweiter Lauf ändert nichts, eine geänderte Definition wird erneuert.
+- **Route** `belege/:belegart/:id` → `pages/belege/beleg.tsx`, ein Einstieg von wenigen Zeilen auf
+  `UniversalNativeDetailPage`. Kein Navigationspunkt.
+- In der Entwicklungsdatenbank sind die neun Varianten für den Testmandanten veröffentlicht.
+  `python scripts/belegmasken_veroeffentlichen.py --adressen` nennt die Adressen der 17 Referenzbelege.
+
+Nachweis: `tests/test_belegmasken_veroeffentlichen.py`, 4 bestanden gegen `valeo_probe` (nicht in der
+Registry; fremder Mandant abgelehnt; der freigegebene sieht alle neun, kein anderer; zweiter Lauf und
+Erneuerung). `tsc --noEmit` ohne Befund; Routing-Integrität und Navigationsziele in Ordnung;
+Architektur-Index 940/940.
+
+**Nicht geprüft und weiter offen (Teil 2b):**
+
+- **Die Sichtprüfung im Browser steht aus.** Ich habe die Maske nicht im Browser gesehen; dafür braucht
+  es die Anmeldung der Testkennung mit Bindung an den Testmandanten und Bereichsrollen.
+- **Aktionen:** Ob die Mask-Engine die DocFlow-Kommandos mit Idempotenzschlüssel, Version und Mengen
+  aufruft und die Freigabe (APPROVAL-001) anfragen und erteilen lässt, ist nicht gebaut und nicht
+  geprüft. Bis dahin ist die Maske lesend zu betrachten.
+- Keine Belegliste in der Maske; ein Beleg wird über seine Adresse geöffnet.

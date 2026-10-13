@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-13
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-13T12:15:19Z'
+generated_at: '2026-10-13T12:21:01Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -868,6 +868,7 @@ domains:
     - domain_nachweisraum
     - domain_shared
     frontend_routes:
+    - /belege/:belegart/:id
     - /compliance/bvl-meldungen
     - /compliance/bvl-umsatzmeldung
     - /compliance/cross-compliance
@@ -2083,8 +2084,8 @@ domains:
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 939
-  frontend_routes_mapped: 939
+  frontend_routes_total: 940
+  frontend_routes_mapped: 940
   backend_services_total: 286
   backend_services_mapped: 285
   backend_endpoints_total: 456

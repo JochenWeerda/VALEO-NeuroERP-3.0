@@ -896,6 +896,11 @@
       "source": "navigation"
     },
     {
+      "module": "@/pages/belege/beleg",
+      "path": "belege/:belegart/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/benachrichtigungen/liste",
       "path": "benachrichtigungen",
       "source": "alias"
@@ -4767,6 +4772,7 @@
     "workflowProcess"
   ],
   "paramKeys": [
+    "belegart",
     "domain",
     "entityId",
     "grId",

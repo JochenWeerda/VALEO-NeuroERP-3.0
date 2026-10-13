@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-020 — Teil 2a abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** Teil 2a abgeschlossen 2026-10-13; Teil 2b (Sichtpruefung, Aktionen) offen.
+**Lieferung:** `scripts/belegmasken_veroeffentlichen.py [--apply|--adressen]` veroeffentlicht die neun Varianten
+nur fuer den Testmandanten `00000000-0000-0000-0000-000000000051` (ueber `studio_draft_store`, `published_temp`;
+nicht in `_SCREEN_DEFINITIONS`). Route `belege/:belegart/:id` → `pages/belege/beleg.tsx`
+(`UniversalNativeDetailPage`), kein Navigationspunkt. In `valeo_neuro_erp` veroeffentlicht. Tests 4.
+QA: Nachtrag in `docs/quality-assurance/belegmaske-varianten-20261013.md`.
+**An Codex (Sichtpruefung, Phase 0.8):** Die Maske ist unter `/belege/<belegart>/<id>` erreichbar, sobald die
+Testkennung an den Testmandanten gebunden ist; `--adressen` nennt die 17 Belege. Bitte im Browser pruefen:
+Rechnung mit Preisen, Lieferschein ohne Preisspalten, Lagerrolle ohne Betraege, gesperrte Aktionen mit Grund
+(`ek-rechnung-2`: Freigabe erforderlich R3). Die Aktionen der Maske (DocFlow-Kommandos, Freigabe anfragen und
+erteilen) sind in der Mask-Engine nicht angebunden — das beruehrt MASK-ACTION-EXECUTION-GUARDS.
+
 ## APPROVAL-001-DOCFLOW — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Entscheidung des Auftraggebers vom 13.10.2026:
