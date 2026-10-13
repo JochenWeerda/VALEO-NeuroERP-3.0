@@ -83,3 +83,20 @@ describe('canonical document permission projection', () => {
     expect(getScreenPermissions(documentScreen('beleg/unknown'), user([], ['admin']))).toEqual([])
   })
 })
+
+
+describe('controller supervises document exceptions without posting rights', () => {
+  const controlledScreen: ScreenDefinition = { ...screen, id: 'beleg/purchase-invoice', domain: 'einkauf',
+    actions: ['lesen', 'preise', 'bearbeiten', 'ausstellen', 'buchen', 'stornieren', 'freigeben', 'freigeben_erhoeht']
+      .map(right => ({ key: right, label: right, permission: `belege.${right}` })) }
+  it.each(['controller', 'CONTROLLING'])('projects approval only for %s', role => {
+    expect(getScreenPermissions(controlledScreen, user([], [role])))
+      .toEqual(['belege.freigeben', 'belege.freigeben_erhoeht'])
+    expect(getScreenPermissions(controlledScreen, user(['belege:write', 'admin:all'], [role])))
+      .toEqual(['belege.freigeben', 'belege.freigeben_erhoeht'])
+  })
+  it.each(['controller', 'CONTROLLING'])('combines %s with finance reading without granting posting', role => {
+    expect(getScreenPermissions(controlledScreen, user([], [role, 'FINANCE_LESEN'])))
+      .toEqual(['belege.lesen', 'belege.preise', 'belege.freigeben', 'belege.freigeben_erhoeht'])
+  })
+})
