@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-PUBLISH-SNAPSHOT-20261013 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Atomare Bindung der serverseitigen Publikationspruefung an exakt denselben Entwurfsstand. **Dateibesitz:** app/services/studio_draft_store.py; app/api/v1/endpoints/studio_drafts.py nur Publish-Snapshot; tests/test_studio_publish_snapshot.py; docs/quality-assurance/studio-publish-snapshot-20261013.md. **Abnahme:** Inhalt/Editorwechsel zwischen Validierung und Publikation sperrt; SQL-Schreibwege sperren dieselbe Zeile; Speicherweg serialisiert Writes. **Risiken:** Client-Review-Hash, unveraenderliche Publikationshistorie und Workflow bleiben Folgearbeit; keine Migration/DB-Neuanlage.
+
 ## CONTROLLER-MASK-PROJECTION-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Fehlende UI-Abnahme der kanonisch erzeugten Controller-Freigaberechte (FIN-CONTROL-001). **Dateibesitz:** packages/frontend-web/src/__tests__/components/mask-builder/screen-permissions.test.ts; docs/quality-assurance/controller-mask-projection-20261013.md. **Abnahme:** controller und CONTROLLING erhalten deklarierte Freigaberechte, aber keine Buchung/Bearbeitung/Stornierung daraus; Kombination mit FINANCE_LESEN bleibt lesend plus Kontrolle. **Risiken:** kein neuer Rollenauftrag fuer reale Testkennung; echte Controller-Browser-/Providerabnahme separat. Fremde generierte Arbeitskopien nicht regenerieren oder committen.
