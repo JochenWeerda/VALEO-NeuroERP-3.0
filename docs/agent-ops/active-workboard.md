@@ -50,9 +50,15 @@ BELEG-012 braucht die Zuordnung Recht → Rolle.
 
 **Lieferung:** Alle 15 Regeln, R0–R4, vier geordnete Integrationsstufen mit Abnahmegates, internes YAML-Beispiel und offene Runtime-Migration dokumentiert; AGENTS.md und Architekturindex verweisen verbindlich darauf. Dokumentations- und Staged-Gates; keine Runtime-Freischaltung, DB oder Container.
 
-## MCP-WRITE-EXECUTION-MIGRATION — reserviert, Codex
+## MCP-WRITE-EXECUTION-MIGRATION — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Legacy-Neuro-Transport gegen Token-Fallbacks, Identitaetsheader-Overrides und unbelegte externe/Schreibfreigaben absichern. **Dateibesitz:** app/services/neuro_tool_execution.py; app/services/neuro_tool_broker.py nur Ergebnisstatus; tests/test_neuro_tool_execution.py; tests/test_neuro_tool_broker.py nur zugehoerige Vertragsfaelle; docs/quality-assurance/mcp-execution-boundary-20261013.md. **Abnahme:** Ablehnungen vor Transport, keine Token in Ergebnissen, Broker meldet Ablehnung als Fehler; zielgerichtete Tests. **Risiken:** Separater MCP-ERP-Ausfuehrungsdienst und Domain-Command-Bindung bleiben Folgearbeit; keine externe Freischaltung ohne Zielvertrag.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Legacy-Neuro-Transport gegen Token-Fallbacks, Identitaetsheader-Overrides und unbelegte externe/Schreibfreigaben absichern. **Dateibesitz:** app/services/neuro_tool_execution.py; app/services/neuro_tool_broker.py nur Ergebnisstatus; app/api/v1/endpoints/neuro_pipeline.py nur gepruefter Transporttoken; app/agents/neuro_pipeline.py nur Trennung Transporttoken/Fachkontext; tests/test_neuro_tool_execution.py; tests/test_neuro_pipeline.py nur Identitaetsvertrag; tests/test_neuro_tool_broker.py nur zugehoerige Vertragsfaelle; tests/test_security_outbound_policy.py nur Legacy-Tool-Ablehnung; docs/quality-assurance/mcp-execution-boundary-20261013.md. **Abnahme:** Ablehnungen vor Transport, keine Token in Ergebnissen, Broker meldet Ablehnung als Fehler; zielgerichtete Tests. **Risiken:** Separater MCP-ERP-Ausfuehrungsdienst und Domain-Command-Bindung bleiben Folgearbeit; keine externe Freischaltung ohne Zielvertrag.
+
+**Lieferung:** Legacy-Neuro-Grenze abgesichert: verifizierte RSA-/Mandantenidentitaet, kein Token-Fallback/Identitaetsheader-Override, keine unbelegten externen/Writes, redigierter Trace und gescheiterte Auth bleibt Fehler. REST bindet geprueften Bearer. QA: mcp-execution-boundary-20261013.md. Dies ist nur der Legacy-Transportteil von Stufe 1.
+
+## MCP-WRITE-CANONICAL-ENFORCEMENT — offen
+
+**Owner:** offen. **Ziel:** Separaten MCP-ERP-Ausfuehrungsdienst und Command-/Capability-/Superglue-Pfade gemaess MCP-WRITE-001 bis 015 inventarisieren und durchsetzen; keine Schreibfreischaltung ohne versionierte Domain-Commands und Agentenrollen-Nachweise. **Dateibesitz:** vor Umsetzung separat claimen. **Abnahme:** Mandant/Rechte/Idempotenz/Version/Freigabe/Transaktion/Audit/Outbox sowie Gleichwertigkeit der Adapter.
 
 ## BELEG-010 — abgeschlossen, Claude Code
 
