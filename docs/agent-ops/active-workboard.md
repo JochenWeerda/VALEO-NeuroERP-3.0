@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## CI-COMPLAINT-ISOLATION-20261013 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** drei rote isolierte Complaint-Fachfaelle, tenantbezogene global-loeschende autouse-Fixture kann vor require_db auf Entwicklungsdaten zugreifen. **Ziel:** ausschliesslich eigenen Testmandanten und Savepointrollback nutzen, isolierte Miniapp mit ausdruecklichem Testtenant. **Dateibesitz:** tests/test_process_kernel_wave8_complaint_e2e.py nur DB-/Tenantfixture und dynamische Testtenantwerte; eigene QA/Workboard. Fachassertions unveraendert; kein globaler Authoverride oder Produktionscode. **Abnahme:** require_db vor erster Fachwirkung, keine festen Tenant-Loeschungen/Storebereinigung, vorhandener valeo_probe; DB-/Token-Sicherheit separat pruefen. Keine neue DB/Container/Migration/Reset.
+
 ## TEST-NUMBERING-FILE-ISOLATION-20261013 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** Sales-Orders-Unit-Test fuer Nummerngenerierung verwendet den globalen JSON-Nummernkreis, positive HTTP-Anlage ebenfalls. **Ziel:** echte Nummerngenerierung gegen eigene temporaere Datei testen, HTTP-Testbeleg mit eigener Nummer. **Dateibesitz:** tests/test_sales_orders_api.py nur Nummerngenerator-Unit-Fixture und explizite Nummer im eigenen HTTP-Payload; innerhalb CI-POSITION-SALES-Claim. **Abnahme:** echte Nummerierung bleibt getestet, keine Aenderung gemeinsamer Nummernkreisdateien durch diese Faelle. Keine DB/Container/Reset; eigene QA/Workboard.
