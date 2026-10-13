@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-MASTERPLAN-20261013 — Plan vorgelegt, Claude Code
+
+**Owner:** Claude Code. **Stand:** Plan zur Entscheidung vorgelegt 2026-10-13, nichts umgesetzt.
+**Inhalt:** `docs/design/belegmaske-varianten-masterplan.md` — eine Belegmaske mit Variante je Belegart statt
+einer Maske je Belegschritt; Belegvertrag zwischen Maske und belegfuehrender Domaene; Finance als
+Buchungsautoritaet; Slices BELEG-010 bis BELEG-062; vier offene Entscheidungen (E1–E4).
+**Befund aus der Inventur, nicht behoben:** Die Eingangsrechnung des Einkaufs (`einkauf_rechnungseingaenge`,
+Maske `einkauf/rechnung-eingang-erfassung`) laeuft in keiner Datenbank — frisch fehlt die Spalte `tenant_id`,
+gewachsen fehlen die Tabellen; `_safe_rows` zeigt dann eine leere Liste, Speichern antwortet 503.
+`rechnungseingang_verbuchen` setzt nur den Status. Ein Umbau dieses Wegs ist geparkt, nicht ausgeliefert, bis
+entschieden ist, wo die Eingangsrechnung gefuehrt wird (E1).
+
 ## CI-COMPLAINT-ISOLATION-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** drei rote isolierte Complaint-Fachfaelle, tenantbezogene global-loeschende autouse-Fixture kann vor require_db auf Entwicklungsdaten zugreifen. **Ziel:** ausschliesslich eigenen Testmandanten und Savepointrollback nutzen, isolierte Miniapp mit ausdruecklichem Testtenant. **Dateibesitz:** tests/test_process_kernel_wave8_complaint_e2e.py nur DB-/Tenantfixture und dynamische Testtenantwerte; eigene QA/Workboard. Fachassertions unveraendert; kein globaler Authoverride oder Produktionscode. **Abnahme:** require_db vor erster Fachwirkung, keine festen Tenant-Loeschungen/Storebereinigung, vorhandener valeo_probe; DB-/Token-Sicherheit separat pruefen. Keine neue DB/Container/Migration/Reset.
