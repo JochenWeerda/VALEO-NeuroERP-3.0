@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## IDENTITY-CI-CONTRACT-20261013 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** bestätigte CI-Fehler aus Run 38305586021 schließen. **Dateibesitz:** route-aliases.json nur zwei Kontingentseiten und deren generierte Routen; tenants.py nur gemeinsame verifizierte Tenant-Dependency (Elternclaim bleibt); sales_credit_notes.py ausschließlich geprüfte statische SQL-Suffixannotation; neue Tenant-HTTP-Gegenprobe, eigene QA/Workboard und isolierte OpenAPI. **Abnahme:** Generator erhält beide Routen dauerhaft; Doc-Drift null; Tenant-Dependency vor DB, keine System-Ausnahme; SQL-Suffix nur feste Literale und Werte als Bindparameter, SQL-Gate grün. Keine Fachbuchung, Rechteerweiterung, Migration, neue DB/Container/Reset; fremde WIP erhalten.
+
 ## SNAPSHOT-PAGINATION-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Snapshot-Seiten ohne Vollmaterialisierung, stabiler Cursor bei Zeitgleichheit, begrenzte Seitengroesse. **Dateibesitz:** app/core/read_model_persistence.py nur SnapshotCursor/get_page; read_model_snapshots.py nur Query-Limit; neue fokussierte Vertragsdatei; eigene QA/Workboard und isolierte API-Artefakte. **Abnahme:** Memory-/SQL-Ergebnis gleich, SQL-LIMIT und Cursorfilter vor Materialisierung, fremde Cursor beeinflussen eigene Seite nicht, Limit 1..100 mit HTTP422 ausserhalb. Fehlende Snapshot-Migration ist eigener offener Befund; keine DB/Container/Migration/Reset.
