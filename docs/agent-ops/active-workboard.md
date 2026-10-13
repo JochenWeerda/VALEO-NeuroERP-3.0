@@ -11,6 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-020 — Teil 1 abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** Teil 1 (Definition und Lesewege) abgeschlossen 2026-10-13; Teil 2 offen.
+**Lieferung:** `app/core/screen_definitions_beleg.py` erzeugt aus einem Grundgeruest und der Variante des
+Belegvertrags die ScreenDefinition `beleg/<belegart>` fuer alle neun Belegarten (Preise nur mit Preisen, Aktionen
+aus `belegkommandos.py`). Lesewege `GET /api/v1/belege/{belegart}/{id}/kopf` und `…/tabs/{reiter}` mit denselben
+Rechten wie der Beleg. Tests 24. QA: `docs/quality-assurance/belegmaske-varianten-20261013.md`.
+**Nicht sichtbar:** Die Definitionen sind bewusst nicht in `_SCREEN_DEFINITIONS` eingetragen.
+**Teil 2 (offen, haengt an Phase 0.6/0.8):** Eintrag in die Registry mit Route und Inventaren, Aktionen ueber die
+Mask-Engine, Sichtpruefung im Browser am Mandanten `00000000-0000-0000-0000-000000000051`.
+
 ## BELEG-014 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.

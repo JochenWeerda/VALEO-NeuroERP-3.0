@@ -235441,6 +235441,205 @@
         ]
       }
     },
+    "/api/v1/belege/{belegart}/{beleg_id}/kopf": {
+      "get": {
+        "description": "Der Kopf des Belegs als flache Felder — dieselben Daten und Rechte wie der Belegvertrag.",
+        "operationId": "beleg_kopf_api_v1_belege__belegart___beleg_id__kopf_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "belegart",
+            "required": true,
+            "schema": {
+              "title": "Belegart",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "beleg_id",
+            "required": true,
+            "schema": {
+              "title": "Beleg Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Beleg Kopf Api V1 Belege  Belegart   Beleg Id  Kopf Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Belegkopf fuer die Belegmaske",
+        "tags": [
+          "belege"
+        ]
+      }
+    },
+    "/api/v1/belege/{belegart}/{beleg_id}/tabs/{reiter}": {
+      "get": {
+        "description": "Positionen, Belegkette, Dokumente oder Verlauf als Seite — aus dem Belegvertrag, nicht aus Tabellen.",
+        "operationId": "beleg_reiter_api_v1_belege__belegart___beleg_id__tabs__reiter__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "belegart",
+            "required": true,
+            "schema": {
+              "title": "Belegart",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "beleg_id",
+            "required": true,
+            "schema": {
+              "title": "Beleg Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "reiter",
+            "required": true,
+            "schema": {
+              "title": "Reiter",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Beleg Reiter Api V1 Belege  Belegart   Beleg Id  Tabs  Reiter  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reiter der Belegmaske",
+        "tags": [
+          "belege"
+        ]
+      }
+    },
     "/api/v1/benachrichtigungen": {
       "get": {
         "description": "Benachrichtigungen fuer den aktuellen Mandanten.",
