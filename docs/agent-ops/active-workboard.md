@@ -11,6 +11,23 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STEUERSCHLUESSEL-BELEGE-20261013 — Teil 3 (DocFlow-Rechnung) abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** Teil 3 abgeschlossen 2026-10-13. Architekturentscheidung des Auftraggebers
+vom 13.10.2026: Einkauf/Verkauf fuehren den Rechnungsbeleg, Finance ist Buchungsautoritaet, keine zweite
+Rechnungsverwaltung in der FiBu.
+**Lieferung:** `domain_docflow.document_items.tax_code` (Migration `docflow_steuerschluessel_20261013`, ein
+Head); DocFlow-Positionen nennen den Steuerschluessel, der Satz kommt vom Server; Umwandeln nimmt ihn mit;
+`POST /docflow/{id}/post` bucht die Rechnung je Steuerschluessel ueber `steuergruppen` und
+`SalesPostingService` (ein Commit mit Buchungsnachweis und Belegstatus), ohne Schluessel 409 statt fest
+8400/1776. Maske `sales/invoice-editor` (Navigation): Spalte Steuerschluessel statt „MwSt %“.
+Tests 11 + 66 (DocFlow-Bestand). QA: `docs/quality-assurance/steuerschluessel-belege-20261013.md` (Teil 3).
+**Verhaltensaenderung:** `DocflowLineInput.tax_rate` ist ohne Angabe `None` statt 0; mit `tax_code` wird ein
+abweichender Satz abgelehnt. DocFlow-Rechnungen ohne Schluessel je Position werden nicht mehr gebucht.
+`features/forms/FormBuilder` kennt den Spaltentyp `steuerschluessel`.
+**An Codex (Identitaet) — Befund, nicht behoben:** Die DocFlow-Wege nehmen den Mandanten aus dem
+Query-Parameter `tenant_id` (sonst Vorgabemandant), nicht aus der Anmeldung.
+
 ## PROCUREMENT-FOLLOWUP-EXACT-RESULT-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** realer PostgreSQL-Vertrag: zweite Eskalation speichert Stufe 2, antwortet mit Stufe 1 bei gleichen Zeitstempeln. **Ziel:** angelegte Folgeaktion unmittelbar per INSERT RETURNING liefern, deterministische Liste bei Zeitstempelgleichheit. **Dateibesitz:** app/services/procurement_match_service.py nur Folgeaktionsserialisierung, INSERT-Rueckgabe und Listen-Tiebreak; tests/test_procurement_match_integration.py eigene genaue ID-/Grund-/Stufen-/Persistenzregression innerhalb CI-PROCUREMENT-Claim; eigene QA/Workboard. Keine Rollen-/Buchungs-/Steuer-/Schemaaenderung. **Abnahme:** Rueckgabe gehoert exakt zur angelegten Zeile, zwei Eskalationen mit gleichem Zeitstempel korrekt und verschieden; bisherige Fachfaelle/Sicherheitsgegenproben erhalten; vorhandener valeo_probe ohne Migration/Reset/DB/Container. Parallele Eskalationsnummernvergabe und Aufruferakteur bleiben getrennte offene Befunde.

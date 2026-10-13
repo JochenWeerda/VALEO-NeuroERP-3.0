@@ -187,11 +187,65 @@ entsteht dort nicht.
   `test_eingangsrechnung_mandant.py`: 18 Rollentests rot mit 401 — auf unverändertem `main` ebenso.
 - Vitest: Steuerschlüssel-Maske 8, Bauplan-Cache 3. `tsc --noEmit` ohne Befund.
 
+## Teil 3: DocFlow-Rechnung — der Verkauf führt den Beleg, Finance bucht
+
+Architekturentscheidung des Auftraggebers vom 13.10.2026: „Warenwirtschaft verantwortet den
+Geschäftsvorfall und seine Rechnung. Finance verantwortet seine buchhalterischen Konsequenzen."
+Keine zweite Rechnungsverwaltung in der Finanzbuchhaltung; Finance ist Buchungsautorität; Fehler
+führen zu einem prüfbaren Buchungsstatus.
+
+Für die Ausgangsrechnung heißt das: Belegführend ist DocFlow (`/api/v1/docflow`, Maske
+`sales/invoice-editor` — die Rechnungsmaske der Navigation). Der Weg `/finance/invoices` aus Teil 1
+ist der Nebenweg.
+
+Vorher:
+
+- Die Position trug nur `tax_rate`, Vorgabe 0. Die Maske belegte „MwSt %" mit 19 vor.
+- `POST /docflow/{id}/post` buchte die Kopfsummen fest auf 8400 und 1776, gleich welcher Satz.
+- Die Buchung schrieb sich selbst fest, bevor Buchungsnachweis und Belegstatus geschrieben waren.
+
+Jetzt:
+
+- Migration `docflow_steuerschluessel_20261013` (ein Head): `domain_docflow.document_items.tax_code`.
+- Die Position nennt ihren Steuerschlüssel. Der Satz kommt dann vom Server; ein Schlüssel, der für
+  Verkaufsbelege nicht gilt, oder ein abweichend mitgeschickter Satz wird schon beim Speichern
+  abgelehnt. Ohne Schlüssel gilt weiter der Satz der Anfrage — speicherbar, aber nicht buchbar.
+- Umwandeln (Auftrag → Lieferschein → Rechnung) nimmt den Steuerschlüssel der Quellposition mit.
+- Buchen: Finance (`steuergruppen`, `SalesPostingService`) bucht Erlös und Umsatzsteuer **je
+  Steuerschlüssel** auf dessen Konten. Ohne Schlüssel an jeder Position: 409 „Rechnung … nicht
+  gebucht, bitte prüfen: …", der Beleg bleibt freigegeben.
+- **Beleg und Buchung stimmen auf den Cent:** Die gebuchte Steuer je Schlüssel ist die Summe der
+  Positionssteuern des Belegs, nicht neu gerechnet (drei Positionen zu 0,33 € bei 19 %: Beleg und
+  Buchung 0,18 €).
+- Buchung, Buchungsnachweis (`document_postings`) und Belegstatus werden gemeinsam festgeschrieben.
+- Anlegen, Ändern und Umwandeln benutzen eine Positionsanlage; vorher gab es sie dreimal wortgleich.
+- Maske `sales/invoice-editor`: Spalte „Steuerschlüssel" (gemeinsames Auswahlfeld) statt „MwSt %";
+  die Vorgabe 19 ist entfernt. Die Maske zeichnet ihre Positionen aus
+  `domain-schemas/sales_invoice.schema.json` über `features/forms/FormBuilder` — ein drittes
+  Maskengerüst neben Mask Builder und Handbau, nur von dieser Seite benutzt. Der Neubau als
+  ScreenDefinition steht aus.
+
+### Nachweis Teil 3
+
+- `tests/test_docflow_steuerschluessel.py`: 11 bestanden gegen `valeo_probe` — Satz aus dem
+  Schlüssel, drei beim Speichern abgelehnte Fälle, Ändern, Buchung je Schlüssel, Cent-Gleichheit,
+  drei Fälle ohne Schlüssel (gespeichert, nicht gebucht, Status nicht „posted"), Umwandeln.
+- Bestehende DocFlow-Tests (zehn Dateien): 66 bestanden.
+- Vitest: Positionsraster mit Steuerschlüssel-Spalte 2. `tsc --noEmit`, ESLint ohne Befund.
+
+### Befunde, nicht behoben
+
+- **DocFlow nimmt den Mandanten aus der Anfrage** (`tenant_id` als Query-Parameter, sonst der
+  Vorgabemandant), nicht aus der Anmeldung. An Codex (Identität).
+- **Positionen aus Lieferscheinen der alten Tabellen** (`_bootstrap_sales_delivery`) kommen mit
+  `mwst_prozent` und ohne Schlüssel in DocFlow an; solche Rechnungen lassen sich erst buchen, wenn
+  die Positionen einen Schlüssel bekommen.
+- **Kasse:** Die Maske `pos/terminal` weist im Bon fest 19 % aus, auch bei 7-%-Artikeln (unverändert).
+
 ## Noch mit Prozentsatz (Teil 2 ff.)
 
 | Maske | Stand heute |
 |---|---|
-| `sales/invoice-editor` | schickt `tax_rate` je Position |
 | `einkauf/rechnung-eingang-erfassung` | `mwstProzent`, Vorgabe 19; Tabellen-Default 19,00 |
 | `einkauf/rechnungseingang` | feste Liste `VAT_19`/`VAT_7`/`VAT_0` |
 | `finance/ap-invoice-form` | Eingangsrechnung Finanz |
@@ -202,4 +256,3 @@ entsteht dort nicht.
 | `agrar/zinsabrechnung` | „MwSt-Satz (%)", Vorgabe 19 |
 | `pos/terminal` | Bon weist immer 19 % aus (`mwst_zeilen` fest), auch bei 7-%-Artikeln |
 | `agrar/ernte-annahme-erfassung` | `vat_rate_percent` aus dem Artikel |
-| DocFlow | Buchung fest 8400/1776 |

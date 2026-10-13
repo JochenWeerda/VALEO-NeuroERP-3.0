@@ -51862,6 +51862,17 @@
             ],
             "title": "Source Line Id"
           },
+          "tax_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Code"
+          },
           "tax_rate": {
             "title": "Tax Rate",
             "type": "number"
@@ -51953,12 +51964,30 @@
             "title": "Quantity",
             "type": "number"
           },
+          "tax_code": {
+            "anyOf": [
+              {
+                "maxLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Code"
+          },
           "tax_rate": {
-            "default": 0,
-            "maximum": 100.0,
-            "minimum": 0.0,
-            "title": "Tax Rate",
-            "type": "number"
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Rate"
           },
           "unit": {
             "anyOf": [

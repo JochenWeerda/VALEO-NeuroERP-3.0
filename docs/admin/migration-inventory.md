@@ -165,6 +165,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `docflow_pos_tse_compliance_20260215` | docflow pos tse compliance table |
 | `docflow_print_event_20260301` | Docflow: Druck/Export als Ereignis (printed_at, print_count) — GoBD Schritt 3 |
 | `docflow_returns_20260821` | Document return worklist and immutable status audit. |
+| `docflow_steuerschluessel_20261013` | DocFlow-Positionen tragen ihren Steuerschluessel. |
 | `document_control_20260821` | Document control exception worklist and audit. |
 | `domain_schemas_baseline_20260409` | domain_* PostgreSQL-Schemas: idempotent anlegen (Baseline fuer ORM/create_all) |
 | `driver_time_events_20260516` | add driver_time_events table |
