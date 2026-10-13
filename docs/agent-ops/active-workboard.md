@@ -24,13 +24,19 @@ MCP-Werkzeuge fuer Belege zuerst nur lesend. Naechster Slice: BELEG-013.
 **Offen, an Codex (Identitaet):** Der Belegweg prueft noch kein Recht des Lesers (Preisrecht, Aktionen) —
 BELEG-012 braucht die Zuordnung Recht → Rolle.
 
-## MCP-WRITE-STANDARD-20261013 — reserviert, Codex
+## MCP-WRITE-STANDARD-20261013 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-13.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13.
 **Ziel:** Verbindliche Regeln MCP-WRITE-001 bis 015 und geordnete Integration festsetzen.
 **Dateibesitz:** docs/architecture/mcp-write-standard.md; additive Verweise in AGENTS.md und docs/architecture/index.md; eigener Workboard-Block.
 **Abnahme:** 15 Regeln, R0–R4, vier Integrationsstufen mit Gates, explizite Trennung Standard/Laufzeitnachweis; Links und Staged-Gates.
 **Risiken:** Bestehende Adapter sind noch nicht durchgaengig konform; keine Runtime-Freischaltung in diesem Dokumentationsslice.
+
+**Lieferung:** Alle 15 Regeln, R0–R4, vier geordnete Integrationsstufen mit Abnahmegates, internes YAML-Beispiel und offene Runtime-Migration dokumentiert; AGENTS.md und Architekturindex verweisen verbindlich darauf. Dokumentations- und Staged-Gates; keine Runtime-Freischaltung, DB oder Container.
+
+## MCP-WRITE-EXECUTION-MIGRATION — offen
+
+**Owner:** offen. **Ziel:** Stufe 1 des MCP-Schreibstandards umsetzen; Token-/Header-Fallbacks und Freischaltgrenzen inventarisieren und absichern. **Dateibesitz:** vor Umsetzung separat claimen. **Abnahme:** Identitaets-, Mandanten-, Rechte- und Freischaltungs-Negativtests ohne Geschaeftsaenderung; nachfolgende Stufen gemaess Architekturstandard.
 
 ## BELEG-010 — abgeschlossen, Claude Code
 

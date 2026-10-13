@@ -206,3 +206,7 @@ Die nächste sinnvolle ADR-Pipeline verschiebt sich jetzt von Grundsatzarchitekt
 | 49 | Notification, Lock | process_notification_contracts_wave49, workflow_lock_contracts |
 | 50 | Archiv, Metriken | process_archive_contracts, workflow_metrics_contracts |
 | 51–67 | Cache, Schema, Concurrency, Validation, Lineage, Exception, Simulation, Consent, Cost, Observability, Priority, Dependency, Retry, Circuit Breaker, Rate Limit, Capacity | process_cache_contracts, workflow_schema_migration_contracts, process_concurrency_contracts, workflow_resource_lock_contracts, process_validation_contracts, workflow_collaboration_contracts, process_lineage_contracts, workflow_simulation_contracts_wave64, process_exception_pattern_contracts, workflow_remediation_contracts, process_consent_contracts, workflow_trigger_contracts, process_cost_allocation_contracts, workflow_audit_trail_contracts, process_observability_contracts, workflow_versioning_contracts_wave57, process_priority_contracts, workflow_rollback_contracts, process_dependency_contracts, workflow_signal_contracts, process_retry_contracts, workflow_checkpoint_contracts_wave54, process_circuit_breaker_contracts, workflow_event_sourcing_contracts, process_rate_limit_contracts, workflow_idempotency_contracts, process_capacity_contracts_wave51, workflow_compensation_contracts |
+
+## Verbindliche Integrationsstandards
+
+- [MCP-WRITE-001 bis 015: Kontrollierte schreibende Agentenaktionen](mcp-write-standard.md) — Risikoklassen R0–R4 und verbindliche Integrationsreihenfolge.

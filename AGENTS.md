@@ -119,3 +119,10 @@ Wenn eine Session neu startet:
 - [Parallel Work Protocol](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/parallel-work-protocol.md)
 - [Handoff Template](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/handoff-template.md)
 - [Resume Packet Template](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/resume-packet-template.md)
+
+## Verbindlicher MCP-Schreibstandard
+
+Fuer alle schreibenden MCP-Adapter gilt [MCP-WRITE-001 bis 015](docs/architecture/mcp-write-standard.md).
+Integrationsreihenfolge: Ausfuehrung absichern, bestehende Register vereinheitlichen,
+Kanalvertraege pruefen, Masken und MCP ableiten. Unabgenommene Writes bleiben deaktiviert;
+Freischaltung erfolgt ausdruecklich pro Capability und Agentenrolle.
