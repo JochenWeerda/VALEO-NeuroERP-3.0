@@ -8,10 +8,11 @@ from copy import deepcopy
 from datetime import UTC, datetime
 from typing import Any
 from threading import RLock
+from functools import wraps
 from uuid import uuid4
 
 from sqlalchemy import text
-from sqlalchemy.exc import IntegrityError, ProgrammingError, OperationalError
+from sqlalchemy.exc import IntegrityError, ProgrammingError, OperationalError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 _DRAFTS: dict[str, dict[str, Any]] = {}
@@ -20,6 +21,20 @@ _prefer_memory = False
 _table_ok: bool | None = None
 _EDITABLE = frozenset({"draft", "review", "retired"})
 _STATUSES = frozenset({"draft", "review", "published_temp", "retired"})
+
+
+class StudioStorageUnavailable(RuntimeError):
+    """Persistence failure; never substitute volatile state for durable drafts."""
+
+
+def _durable_operation(operation):
+    @wraps(operation)
+    def guarded(*args, **kwargs):
+        try:
+            return operation(*args, **kwargs)
+        except SQLAlchemyError as error:
+            raise StudioStorageUnavailable("studio_persistenz_nicht_verfuegbar") from error
+    return guarded
 
 
 def reset_studio_drafts() -> None:
@@ -53,12 +68,14 @@ def _with_revision(item: dict[str, Any]) -> dict[str, Any]:
     return record
 
 
+@_durable_operation
 def list_drafts(tenant_id: str) -> list[dict[str, Any]]:
     if _use_sql():
         return [_with_revision(item) for item in _sql_list(tenant_id)]
     return [_with_revision(item) for item in _DRAFTS.values() if item["tenant_id"] == tenant_id]
 
 
+@_durable_operation
 def get_draft(tenant_id: str, draft_id: str) -> dict[str, Any] | None:
     if _use_sql():
         item = _sql_get(tenant_id, draft_id)
@@ -69,6 +86,7 @@ def get_draft(tenant_id: str, draft_id: str) -> dict[str, Any] | None:
     return _with_revision(item)
 
 
+@_durable_operation
 def save_draft(
     tenant_id: str,
     actor: str,
@@ -97,6 +115,7 @@ def _assert_transition(current: str, target: str) -> None:
         raise ValueError(f"statuswechsel_{current}_nach_{target}_unzulässig")
 
 
+@_durable_operation
 def set_status(
     tenant_id: str, draft_id: str, actor: str, status: str,
     *, expected_snapshot: dict[str, Any] | None = None,
@@ -121,38 +140,25 @@ def set_status(
         return _with_revision(item)
 
 
+@_durable_operation
 def get_published_definition(tenant_id: str, screen_id: str) -> dict[str, Any] | None:
     """Runtime-Lookup fuer published_temp. Native IDs werden nie aus Drafts geliefert."""
     if _is_native(screen_id):
         return None
-    published = _memory_published(tenant_id, screen_id)
-    if published is not None:
-        return published
     if _prefer_memory:
-        return None
+        return _memory_published(tenant_id, screen_id)
     return _sql_published(tenant_id, screen_id)
 
 
+@_durable_operation
 def list_published_definitions(tenant_id: str) -> list[dict[str, Any]]:
-    items: list[dict[str, Any]] = []
-    seen: set[str] = set()
-    for item in _DRAFTS.values():
-        if item["tenant_id"] != tenant_id or item["status"] != "published_temp":
-            continue
-        screen_id = str(item.get("screen_id") or "")
-        if not screen_id or _is_native(screen_id):
-            continue
-        items.append(deepcopy(item["definition"]))
-        seen.add(screen_id)
     if _prefer_memory:
-        return items
-    for definition in _sql_list_published(tenant_id):
-        screen_id = str(definition.get("id") or "")
-        if not screen_id or screen_id in seen or _is_native(screen_id):
-            continue
-        items.append(definition)
-        seen.add(screen_id)
-    return items
+        with _memory_lock:
+            return [deepcopy(item["definition"]) for item in _DRAFTS.values()
+                    if item["tenant_id"] == tenant_id and item["status"] == "published_temp"
+                    and item.get("screen_id") and not _is_native(item["screen_id"])]
+    return [definition for definition in _sql_list_published(tenant_id)
+            if definition.get("id") and not _is_native(str(definition["id"]))]
 
 
 def studio_run_route(screen_id: str) -> str:
@@ -226,7 +232,7 @@ def _find_memory_by_screen(tenant_id: str, screen_id: str) -> dict[str, Any] | N
 
 
 def _use_sql() -> bool:
-    return not _prefer_memory and _table_exists()
+    return not _prefer_memory
 
 
 def _table_exists() -> bool:
@@ -384,10 +390,7 @@ def _sql_set_status(
 def _sql_published(tenant_id: str, screen_id: str) -> dict[str, Any] | None:
     from app.infrastructure.models.studio_models import ScreenDefinitionDraft
 
-    try:
-        session = _sql_session()
-    except Exception:
-        return None
+    session = _sql_session()
     try:
         row = (
             session.query(ScreenDefinitionDraft)
@@ -397,8 +400,6 @@ def _sql_published(tenant_id: str, screen_id: str) -> dict[str, Any] | None:
         if row is None or not isinstance(row.definition, dict):
             return None
         return deepcopy(row.definition)
-    except (ProgrammingError, OperationalError):
-        return None
     finally:
         session.close()
 
@@ -406,10 +407,7 @@ def _sql_published(tenant_id: str, screen_id: str) -> dict[str, Any] | None:
 def _sql_list_published(tenant_id: str) -> list[dict[str, Any]]:
     from app.infrastructure.models.studio_models import ScreenDefinitionDraft
 
-    try:
-        session = _sql_session()
-    except Exception:
-        return []
+    session = _sql_session()
     try:
         rows = (
             session.query(ScreenDefinitionDraft)
@@ -417,8 +415,6 @@ def _sql_list_published(tenant_id: str) -> list[dict[str, Any]]:
             .all()
         )
         return [deepcopy(row.definition) for row in rows if isinstance(row.definition, dict)]
-    except (ProgrammingError, OperationalError):
-        return []
     finally:
         session.close()
 
