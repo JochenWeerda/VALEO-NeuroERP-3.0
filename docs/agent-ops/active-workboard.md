@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-PILOT-ROUTING-PREVIEW-20261013 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Realen Beleg-Pilot-Routenfehler (unsupported page group) und Weiterlaufen nach fehlgeschlagener Vorschau beheben. **Dateibesitz:** app/page-module-loader.ts; app/page-module-groups/finance.ts; components/mask-builder/UniversalNativeDetailPage.tsx; bestehender __tests__/app/page-module-loader.test.ts; neuer __tests__/components/mask-builder/native-detail-preview.test.tsx; docs/quality-assurance/beleg-pilot-routing-preview-20261013.md (Frontend-Pfade unter packages/frontend-web/src). **Abnahme:** Belegmodul laedt, fehlgeschlagene Vorschau fuehrt nie execute aus, echte Browser-Rechnung renderbar/Screenshot soweit Runtime-Vertrag laedt. **Risiken:** Command-Adapter und Aktionszustand bleiben eigene Arbeit; keine fachlichen Belege mutieren.
+
 ## BELEG-020 — Teil 2a abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** Teil 2a abgeschlossen 2026-10-13; Teil 2b (Sichtpruefung, Aktionen) offen.
