@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from app.auth.beleg_roles import verlange
+from app.auth.beleg_roles import rollen_von
 from app.auth.deps import get_current_user
 from app.core.database import get_db
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
@@ -31,6 +31,11 @@ class FreigabeEntscheidung(BaseModel):
     note: Optional[str] = Field(default=None, max_length=300)
 
 
+def _verlange(nutzer: Any, rollen: frozenset[str], was: str) -> None:
+    if not rollen_von(nutzer) & rollen:
+        raise HTTPException(status_code=403, detail=f"Keine Berechtigung: {was}.")
+
+
 def _vorgang(engine: Any, subject_id: str, aktion: str = "post") -> Any:
     try:
         return engine.vorgang(subject_id, aktion)
@@ -47,7 +52,7 @@ def freigaben(
     nutzer: Any = Depends(get_current_user),
 ) -> list[dict[str, Any]]:
     engine = engine_fuer(subject_type, db, tenant_id)
-    verlange(nutzer, "lesen", _vorgang(engine, subject_id).belegart)
+    _verlange(nutzer, engine.leserollen(_vorgang(engine, subject_id)), "Freigaben lesen")
     return engine.liste(subject_id)
 
 
@@ -63,8 +68,8 @@ def freigabe_anfragen(
 ) -> dict[str, Any]:
     """Anfragen darf, wer die Aktion selbst ausfuehren duerfte. Der Antragsteller kommt aus der Anmeldung."""
     engine = engine_fuer(subject_type, db, tenant_id)
-    belegart = _vorgang(engine, subject_id, payload.action).belegart
-    verlange(nutzer, "buchen" if payload.action == "post" else "stornieren", belegart)
+    _verlange(nutzer, engine.anfragerollen(_vorgang(engine, subject_id, payload.action), payload.action),
+              "Freigabe anfragen")
     antragsteller = str(nutzer.get("sub") or "").strip() if isinstance(nutzer, dict) else ""
     try:
         return engine.beantrage(subject_id, payload.action, antragsteller, payload.reason)

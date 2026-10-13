@@ -20,7 +20,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import EntityNotFoundError
-from app.core.freigabe import anforderung
+from app.core.freigabe import HAUPTBUCHBUCHUNG, ZAHLUNGSLAUF, anforderung
 from app.finance.steuerschluessel import Steuerklaerung, vorsteuergruppen
 from app.services.finance_eingangsrechnung_buchung import positionen, summen
 from app.services.freigabe_engine import FreigabeEngine, Vorgang
@@ -183,6 +183,137 @@ def verlange_storno_ausgangsrechnung(db: Session, tenant_id: str, nummer: str, a
     verlange_oder_409(engine, engine.vorgang(nummer, "reverse"), "reverse", akteur)
 
 
+_FINANZ_LESEN = frozenset({"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"})
+_FINANZ_SCHREIBEN = frozenset({"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"})
+_FINANZ_LEITUNG = frozenset({"FINANCE_ADMIN", "admin"})
+
+
+class HauptbuchFreigabe(FreigabeEngine):
+    """Manuelle Hauptbuchbuchung (``domain_erp.journal_entries``)."""
+
+    SUBJEKT = "journal_entry"
+
+    def vorgang(self, subject_id: str, aktion: str) -> Vorgang:
+        kopf = self.db.execute(
+            text(
+                "SELECT id, entry_number, reference, document_number, status, total_debit, source, entry_date, posting_date "
+                "FROM domain_erp.journal_entries WHERE id = :id AND tenant_id = :t"
+            ),
+            {"id": subject_id, "t": self.tenant_id},
+        ).mappings().first()
+        if not kopf:
+            raise EntityNotFoundError("JournalEntry", subject_id)
+        zeilen = self.db.execute(
+            text(
+                "SELECT account_id, debit_amount, credit_amount FROM domain_erp.journal_entry_lines "
+                "WHERE journal_entry_id = :id ORDER BY line_number, id"
+            ),
+            {"id": subject_id},
+        ).fetchall()
+        # Wer die Buchung angelegt hat, steht im FiBu-Audit; die Buchung selbst fuehrt ihn nicht.
+        ersteller = self.db.execute(
+            text(
+                "SELECT user_id FROM domain_shared.audit_logs WHERE tenant_id = :t AND entity_type = 'journal_entry' "
+                "AND entity_id = :id AND action = 'create' ORDER BY timestamp LIMIT 1"
+            ),
+            {"t": self.tenant_id, "id": subject_id},
+        ).scalar()
+        stand = str(kopf["status"] or "")
+        return Vorgang(
+            subject_id=str(kopf["id"]), belegart=HAUPTBUCHBUCHUNG, brutto=_d(kopf["total_debit"]), gebucht=stand == "posted",
+            beendet=stand == "reversed", ersteller=str(ersteller) if ersteller else None,
+            inhalt={
+                "nummer": kopf["entry_number"], "bezug": kopf["reference"], "herkunft": kopf["source"],
+                "datum": str(kopf["entry_date"]), "buchungsdatum": str(kopf["posting_date"]),
+                "zeilen": [[str(z[0]), str(_d(z[1])), str(_d(z[2]))] for z in zeilen],
+            },
+        )
+
+    def leserollen(self, v: Vorgang) -> frozenset[str]:
+        return _FINANZ_LESEN
+
+    def anfragerollen(self, v: Vorgang, aktion: str) -> frozenset[str]:
+        return _FINANZ_SCHREIBEN
+
+    def freigaberollen(self, v: Vorgang, risiko: str) -> frozenset[str]:
+        return _FINANZ_LEITUNG if risiko == "R4" else _FINANZ_SCHREIBEN
+
+
+class ZahlungslaufFreigabe(FreigabeEngine):
+    """Zahlungslauf (``domain_erp.payment_runs``). Freigabe ist die Zahlungsfreigabe (R4)."""
+
+    SUBJEKT = "payment_run"
+
+    def vorgang(self, subject_id: str, aktion: str) -> Vorgang:
+        lauf = self.db.execute(
+            text(
+                "SELECT id, run_number, execution_date, initiator_iban, total_amount, payment_count, status, created_by "
+                "FROM domain_erp.payment_runs WHERE id = :id AND tenant_id = :t"
+            ),
+            {"id": subject_id, "t": self.tenant_id},
+        ).mappings().first()
+        if not lauf:
+            raise EntityNotFoundError("PaymentRun", subject_id)
+        posten = self.db.execute(
+            text(
+                "SELECT creditor_id, iban, amount, op_id, invoice_number FROM domain_erp.payment_run_items "
+                "WHERE payment_run_id = :id AND tenant_id = :t ORDER BY id"
+            ),
+            {"id": subject_id, "t": self.tenant_id},
+        ).fetchall()
+        stand = str(lauf["status"] or "")
+        return Vorgang(
+            subject_id=str(lauf["id"]), belegart=ZAHLUNGSLAUF, brutto=_d(lauf["total_amount"]), gebucht=stand == "executed",
+            beendet=stand in ("cancelled", "storniert"), ersteller=(str(lauf["created_by"]).strip() or None) if lauf["created_by"] else None,
+            # Wohin wie viel geht: Aendert sich ein Empfaenger, eine IBAN oder ein Betrag, gilt die Freigabe nicht mehr.
+            inhalt={
+                "nummer": lauf["run_number"], "ausfuehrung": str(lauf["execution_date"]), "auftraggeber": lauf["initiator_iban"],
+                "summe": str(_d(lauf["total_amount"])), "anzahl": int(lauf["payment_count"] or 0),
+                "zahlungen": [[str(z[0]), z[1], str(_d(z[2])), str(z[3]), z[4]] for z in posten],
+            },
+        )
+
+    def leserollen(self, v: Vorgang) -> frozenset[str]:
+        return _FINANZ_LESEN
+
+    def anfragerollen(self, v: Vorgang, aktion: str) -> frozenset[str]:
+        return _FINANZ_SCHREIBEN
+
+    def freigaberollen(self, v: Vorgang, risiko: str) -> frozenset[str]:
+        return _FINANZ_LEITUNG
+
+
+def verlange_hauptbuchbuchung(db: Session, tenant_id: str, entry_id: str, akteur: Optional[str] = None) -> None:
+    """Vor dem Buchen einer manuellen Hauptbuchbuchung: die Freigabe einer zweiten Person, sonst 409."""
+    engine = HauptbuchFreigabe(db, tenant_id)
+    try:
+        vorgang = engine.vorgang(entry_id, "post")
+    except EntityNotFoundError:
+        return  # Der Buchungsweg meldet die fehlende Buchung selbst.
+    verlange_oder_409(engine, vorgang, "post", akteur)
+
+
+def verlange_hauptbuchstorno(db: Session, tenant_id: str, entry_id: str, akteur: Optional[str] = None) -> None:
+    """Vor dem Storno einer Hauptbuchbuchung.
+
+    Die Buchung eines Belegs wird ueber den Beleg storniert: Sonst bliebe er „gebucht", waehrend seine Buchung
+    zurueckgenommen ist. Jede andere gebuchte Buchung braucht die Freigabe einer zweiten Person mit erhoehter
+    Berechtigung.
+    """
+    engine = HauptbuchFreigabe(db, tenant_id)
+    try:
+        vorgang = engine.vorgang(entry_id, "reverse")
+    except EntityNotFoundError:
+        return
+    for bezug in (vorgang.inhalt.get("bezug"), vorgang.inhalt.get("nummer")):
+        if bezug and gehoert_docflow(db, tenant_id, str(bezug)):
+            raise HTTPException(
+                status_code=409,
+                detail=f"Die Buchung gehört zum Beleg {bezug} und wird über den Belegweg storniert.",
+            )
+    verlange_oder_409(engine, vorgang, "reverse", akteur)
+
+
 SUBJEKTE: dict[str, type[FreigabeEngine]] = {}
 
 
@@ -192,7 +323,7 @@ def engine_fuer(subject_type: str, db: Session, tenant_id: str) -> FreigabeEngin
         from app.services.docflow_freigabe import DocflowFreigabe
 
         for klasse in (DocflowFreigabe, EingangsrechnungFreigabe, VerkaufsgutschriftFreigabe,
-                       AusgangsrechnungStornoFreigabe):
+                       AusgangsrechnungStornoFreigabe, HauptbuchFreigabe, ZahlungslaufFreigabe):
             SUBJEKTE[klasse.SUBJEKT] = klasse
     klasse = SUBJEKTE.get(subject_type)
     if klasse is None:

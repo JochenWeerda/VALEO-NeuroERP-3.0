@@ -680,6 +680,21 @@ async def approve_payment_run(
     freigeber = str(user.get("sub") or "").strip()
     try:
         pruefe_freigabe(db, run_id, tenant_id, freigeber)
+        # Die Zahlungsfreigabe ist eine Freigabe der zentralen Approval Engine (APPROVAL-001): gebunden an Empfaenger,
+        # IBAN und Betraege des Laufs, 24 Stunden gueltig, im gemeinsamen Protokoll. Angefragt hat, wer den Lauf
+        # angelegt hat; entschieden wird hier.
+        from app.core.exceptions import ConflictError, ValidationFailedError
+        from app.services.finance_freigabe import ZahlungslaufFreigabe
+
+        engine = ZahlungslaufFreigabe(db, tenant_id)
+        try:
+            lauf = engine.vorgang(run_id, "post")
+            anfrage = engine.beantrage(run_id, "post", lauf.ersteller or "", "Zahlungslauf")
+            if anfrage["status"] == "requested":
+                engine.entscheide(run_id, str(anfrage["id"]), user, True)
+        except (ConflictError, ValidationFailedError) as abgelehnt:
+            db.rollback()
+            raise HTTPException(status_code=409, detail=str(abgelehnt.detail)) from abgelehnt
         update_query = text("""
             UPDATE domain_erp.payment_runs
             SET status = 'approved', approved_at = NOW(), approved_by = :approved_by, updated_at = NOW()
@@ -714,7 +729,8 @@ async def execute_payment_run(
     run_id: str,
     request: ExecutePaymentRunRequest,
     tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(finance_admin),
 ):
     """
     Execute a payment run (generate SEPA XML and settle open items).
@@ -732,6 +748,12 @@ async def execute_payment_run(
 
         if payment_run.status != "approved":
             raise HTTPException(status_code=400, detail="Payment run must be approved before execution")
+        # Ausgefuehrt wird nur mit gueltiger Zahlungsfreigabe fuer genau diesen Inhalt (APPROVAL-001). Sie wird hier
+        # verbraucht, in der Transaktion der Ausfuehrung.
+        from app.services.finance_freigabe import ZahlungslaufFreigabe, verlange_oder_409
+
+        engine = ZahlungslaufFreigabe(db, tenant_id)
+        verlange_oder_409(engine, engine.vorgang(run_id, "post"), "post", str(user.get("sub") or "") or None)
 
         if (
             len(payment_run.payments) != payment_run.payment_count

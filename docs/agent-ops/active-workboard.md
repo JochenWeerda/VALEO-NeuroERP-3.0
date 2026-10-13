@@ -11,6 +11,20 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## APPROVAL-001-HAUPTBUCH-ZAHLUNG — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** Manuelle Hauptbuchbuchung (buchen R3, stornieren R4) und Zahlungslauf (R4) an der Approval Engine
+(`HauptbuchFreigabe`, `ZahlungslaufFreigabe` in `app/services/finance_freigabe.py`). `/payment-runs/{id}/approve`
+entscheidet jetzt eine Engine-Freigabe; `/execute` verlangt sie. Jeder Bereich der Engine bestimmt seine Rollen
+(`leserollen`, `anfragerollen`, `freigaberollen`). Tests 8 neu.
+QA: Nachtrag in `docs/quality-assurance/approval-001-freigabe-20261013.md`.
+**VERHALTENSAENDERUNG fuer alle:** `POST /journal-entries/{id}/post` und `/reverse` antworten ohne
+Freigabe 409; die Buchung eines DocFlow-Belegs storniert das Hauptbuch nicht mehr.
+**Vorbestehend rot (auch auf `main`, `401 Missing bearer token`):** `tests/test_finance_payment_runs_api.py`,
+`tests/test_payment_execution_atomicity.py`, `tests/test_zahlungslauf_mandant.py` — zusammen 53. **An Codex
+(Identitaet):** Diese Tests kennen die Anmeldegrenze nicht; ebenso `tests/test_eingangsrechnung_mandant.py` (18).
+
 ## BELEG-ACTION-STATE-BINDING-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Vom Server gesetzte Beleg-Aktionsbedingungen an Renderer und direkte Aufrufe binden; fehlender Zustand sperrt bedingte Aktionen. **Dateibesitz:** components/mask-builder/UniversalNativeDetailPage.tsx; governance/screen-context.ts; bestehender native-detail-preview.test.tsx; neuer action-state.test.ts; docs/quality-assurance/beleg-action-state-binding-20261013.md (Frontend-Pfade unter packages/frontend-web/src). **Abnahme:** Bedingungen im gemeinsamen Renderer, direkte gesperrte Aktion ohne Dispatch, Sperrgrund sichtbar, kein Freigabe-Bypass; reale stornierte Rechnung ohne aktiven Knopf. **Risiken:** Command-Adapter und Freigabeanfragen bleiben Folgearbeit; keine Fachdaten mutieren.

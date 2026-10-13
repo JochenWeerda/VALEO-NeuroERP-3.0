@@ -327,7 +327,8 @@ async def post_journal_entry(
     entry_id: str,
     request: Request,
     tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    nutzer: dict = Depends(finance_write),
 ):
     """
     Post a journal entry.
@@ -338,6 +339,11 @@ async def post_journal_entry(
     try:
         from app.core.blockchain_anchor_runtime import anchor_journal_entry_event
 
+        # Eine manuelle Hauptbuchbuchung braucht die Freigabe einer zweiten Person (APPROVAL-001).
+        from app.services import finance_freigabe
+
+        akteur = str(nutzer.get("sub") or "") if isinstance(nutzer, dict) else None
+        finance_freigabe.verlange_hauptbuchbuchung(db, tenant_id, entry_id, akteur)
         entry_repo = container.resolve(JournalEntryRepository)
         success = await entry_repo.post_entry(entry_id, tenant_id)
         if not success:
@@ -371,7 +377,8 @@ async def reverse_journal_entry(
     request: Request,
     reason: str = Query(..., description="Reason for reversal"),
     tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    nutzer: dict = Depends(finance_write),
 ):
     """
     Create a reversal entry.
@@ -381,6 +388,12 @@ async def reverse_journal_entry(
     try:
         from app.core.blockchain_anchor_runtime import anchor_journal_entry_event
 
+        # Storno einer gebuchten Buchung: zweite Person mit erhoehter Berechtigung; die Buchung eines Belegs wird
+        # ueber den Beleg storniert (APPROVAL-001).
+        from app.services import finance_freigabe
+
+        akteur = str(nutzer.get("sub") or "") if isinstance(nutzer, dict) else None
+        finance_freigabe.verlange_hauptbuchstorno(db, tenant_id, entry_id, akteur)
         entry_repo = container.resolve(JournalEntryRepository)
         reversal_entry = await entry_repo.reverse_entry(entry_id, reason, tenant_id)
         if not reversal_entry:

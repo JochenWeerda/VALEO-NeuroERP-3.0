@@ -161,3 +161,60 @@ sie durch dieselbe Engine.
   überführt.
 - Die Einkaufsgutschriften und Belastungen unter `/einkauf/credit-memos`, `/einkauf/debit-memos` und
   die Kasse habe ich nicht untersucht.
+
+## Nachtrag: Manuelle Hauptbuchbuchung und Zahlungslauf (APPROVAL-001-HAUPTBUCH-ZAHLUNG)
+
+| Vorgang | Jetzt |
+|---|---|
+| Manuelle Hauptbuchbuchung buchen, `POST /journal-entries/{id}/post` | braucht die Freigabe einer zweiten Person (R3) |
+| Gebuchte Hauptbuchbuchung stornieren, `POST …/{id}/reverse` | braucht die Freigabe einer zweiten Person mit erhöhter Berechtigung (R4) |
+| Buchung eines DocFlow-Belegs über das Hauptbuch stornieren | geht nicht mehr: 409, storniert wird über den Beleg |
+| Zahlungslauf freigeben, `POST /finance/payment-runs/{id}/approve` | die Freigabe ist jetzt eine Freigabe der zentralen Engine (R4) |
+| Zahlungslauf ausführen, `POST /finance/payment-runs/{id}/execute` | nur mit gültiger Engine-Freigabe für genau diesen Inhalt |
+
+- **Wer entscheidet:** Hauptbuch R3 — Buchhaltung und Finanzleitung (`FINANCE_BEARBEITEN`, `FINANCE_ADMIN`,
+  `manager`, `admin`); R4 und Zahlung — nur Finanzleitung (`FINANCE_ADMIN`, `admin`). Lesen und anfragen
+  nur Finanzrollen. Jeder Bereich der Engine bestimmt seine Rollen selbst (`leserollen`,
+  `anfragerollen`, `freigaberollen`); Belege benutzen weiter `app/auth/beleg_roles.py`.
+- **Zahlungslauf:** Das bisherige Vier-Augen-Verfahren (`pruefe_freigabe`) bleibt und läuft jetzt in die
+  Engine: Angefragt hat, wer den Lauf angelegt hat; der Aufruf von `/approve` entscheidet. Die Freigabe
+  ist an Empfänger, IBAN und Beträge gebunden — ändert sich nach der Freigabe eine Zahlung, wird nicht
+  ausgeführt. Ein Lauf, der nur den Status „freigegeben" trägt, wird nicht ausgeführt.
+- **Hauptbuch:** Der Abdruck umfasst Nummer, Bezug, Daten und jede Zeile (Konto, Soll, Haben).
+
+### Befund dabei
+
+- **Umgehungsweg geschlossen:** `POST /journal-entries/{id}/reverse` stornierte jede Buchung
+  des Mandanten, auch die einer DocFlow-Rechnung — der Beleg blieb „gebucht". Jetzt 409 mit Verweis auf
+  den Belegweg.
+- **Vorbestehend rot, nicht von mir:** Die Tests der Zahlungsläufe schlagen auf `main` fehl
+  (`test_finance_payment_runs_api`, `test_payment_execution_atomicity`, `test_zahlungslauf_mandant`:
+  zusammen 53, Ursache `401 Missing bearer token` — die Tests kennen die Anmeldegrenze noch nicht).
+  Die Ausführung eines Zahlungslaufs mit SEPA und Ausgleich ist deshalb **nicht** durch einen
+  bestehenden Test abgedeckt; meine Tests prüfen die Freigabe davor.
+
+### Nachweis
+
+`tests/test_freigabe_hauptbuch_zahlung.py`, 8 bestanden gegen `valeo_probe`: Matrix; manuelle Buchung
+nur mit zweiter Person (Verkauf darf weder anfragen noch entscheiden, Antragstellerin nicht
+entscheiden); Storno nur mit Finanzleitung; geänderte Buchung verliert ihre Freigabe; Buchung eines
+DocFlow-Belegs nicht über das Hauptbuch stornierbar; Zahlungsfreigabe als Engine-Freigabe mit
+Antragsteller und Entscheider, ungültig nach geänderter IBAN; Lauf mit bloßem Status wird nicht
+ausgeführt; Rollen je Bereich. Gesamtlauf über 17 Testdateien: 950 bestanden.
+
+### Auslegungen (meine, nicht entschieden)
+
+- **Jede manuelle Hauptbuchbuchung braucht die zweite Person** — die Ausnahme der Matrix („sofern keine
+  genehmigte automatisierte Buchungsregel greift") gibt es nicht, weil es keine solchen Regeln gibt.
+  Das ändert die Entscheidung vom 11.10.2026, nach der die Buchhaltung ihre Buchungen allein bucht und
+  storniert.
+- **Zahlungsberechtigung = Finanzleitung.** Eine eigene, delegierbare Zahlungsrolle gibt es nicht.
+
+### Weiter offen
+
+- **Wer eine Hauptbuchbuchung angelegt hat**, steht nur im FiBu-Audit; fehlt der Eintrag, greift die
+  Funktionstrennung nur gegenüber dem Antragsteller.
+- **Massenimport** (`POST /finance/bulk-journal-import/csv`) bucht ohne die Engine.
+- **Zahlungsläufe, die vor dieser Änderung freigegeben wurden**, tragen keine Engine-Freigabe und
+  werden nicht ausgeführt; sie müssen neu angelegt werden.
+- Rücklastschrift (`return-payment`) und SEPA-Datei habe ich nicht angefasst.

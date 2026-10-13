@@ -27,7 +27,7 @@ from typing import Any, Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.auth.beleg_roles import darf, rollen_von
+from app.auth.beleg_roles import rollen_fuer, rollen_von
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.freigabe import AKTIONEN, GRUPPE, GUELTIGKEIT_STUNDEN, Anforderung, anforderung, wirksame_grenze
 
@@ -64,6 +64,18 @@ class FreigabeEngine:
 
     def protokolliere_am_vorgang(self, subject_id: str, kommando: str, akteur: Optional[str], daten: dict[str, Any]) -> None:
         """Zusaetzlicher Eintrag in der Historie des Bereichs (z. B. Kommandoprotokoll des Belegs)."""
+
+    # ── Wer darf — je Bereich ueberschreibbar ─────────────────────────────────
+
+    def leserollen(self, v: Vorgang) -> frozenset[str]:
+        return rollen_fuer("lesen", v.belegart)
+
+    def anfragerollen(self, v: Vorgang, aktion: str) -> frozenset[str]:
+        """Anfragen darf, wer die Aktion selbst ausfuehren duerfte."""
+        return rollen_fuer("buchen" if aktion == "post" else "stornieren", v.belegart)
+
+    def freigaberollen(self, v: Vorgang, risiko: str) -> frozenset[str]:
+        return rollen_fuer("freigeben_erhoeht" if risiko == "R4" else "freigeben", v.belegart)
 
     # ── Regel ─────────────────────────────────────────────────────────────────
 
@@ -199,8 +211,7 @@ class FreigabeEngine:
                      ValidationFailedError)
         if technisches_konto(entscheider):
             ablehnen("Ein technisches Konto erteilt keine Freigabe.", ValidationFailedError)
-        recht = "freigeben_erhoeht" if freigabe["risk"] == "R4" else "freigeben"
-        if not darf(entscheider, recht, v.belegart):
+        if not rollen_von(entscheider) & self.freigaberollen(v, str(freigabe["risk"])):
             ablehnen(f"Keine Berechtigung für diese Freigabe ({freigabe['risk']}).", ValidationFailedError)
 
         self.db.execute(
