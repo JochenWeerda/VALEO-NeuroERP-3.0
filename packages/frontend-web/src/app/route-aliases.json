@@ -2473,6 +2473,10 @@
       "path": "verkauf/rechnung/:id"
     },
     {
+      "module": "@/pages/belege/beleg",
+      "path": "belege/:belegart/:id"
+    },
+    {
       "module": "@/pages/einkauf/bestellung-native",
       "path": "einkauf/bestellung/:id"
     },

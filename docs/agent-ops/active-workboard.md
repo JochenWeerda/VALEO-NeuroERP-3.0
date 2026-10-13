@@ -11,6 +11,26 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-PILOT-ROUTING-PREVIEW-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Realen Beleg-Pilot-Routenfehler (unsupported page group) und Weiterlaufen nach fehlgeschlagener Vorschau beheben. **Dateibesitz:** app/page-module-loader.ts; app/page-module-groups/finance.ts; components/mask-builder/UniversalNativeDetailPage.tsx; bestehender __tests__/app/page-module-loader.test.ts; neuer __tests__/components/mask-builder/native-detail-preview.test.tsx; docs/quality-assurance/beleg-pilot-routing-preview-20261013.md (Frontend-Pfade unter packages/frontend-web/src). **Abnahme:** Belegmodul laedt, fehlgeschlagene Vorschau fuehrt nie execute aus, echte Browser-Rechnung renderbar/Screenshot soweit Runtime-Vertrag laedt. **Risiken:** Command-Adapter und Aktionszustand bleiben eigene Arbeit; keine fachlichen Belege mutieren.
+
+**Lieferung:** Realen Pilot-PageGroup-Fehler behoben; gemeinsame Vorschau bricht bei success=false vor execute ab. 22 Vitest-Faelle bestanden. Browser: Schema 200, alter Backend-Kopfweg 404; Prozess aktualisiert, volle Sicht-/Aktionsabnahme weiter offen. QA: beleg-pilot-routing-preview-20261013.md.
+
+## BELEG-020 — Teil 2a abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** Teil 2a abgeschlossen 2026-10-13; Teil 2b (Sichtpruefung, Aktionen) offen.
+**Lieferung:** `scripts/belegmasken_veroeffentlichen.py [--apply|--adressen]` veroeffentlicht die neun Varianten
+nur fuer den Testmandanten `00000000-0000-0000-0000-000000000051` (ueber `studio_draft_store`, `published_temp`;
+nicht in `_SCREEN_DEFINITIONS`). Route `belege/:belegart/:id` → `pages/belege/beleg.tsx`
+(`UniversalNativeDetailPage`), kein Navigationspunkt. In `valeo_neuro_erp` veroeffentlicht. Tests 4.
+QA: Nachtrag in `docs/quality-assurance/belegmaske-varianten-20261013.md`.
+**An Codex (Sichtpruefung, Phase 0.8):** Die Maske ist unter `/belege/<belegart>/<id>` erreichbar, sobald die
+Testkennung an den Testmandanten gebunden ist; `--adressen` nennt die 17 Belege. Bitte im Browser pruefen:
+Rechnung mit Preisen, Lieferschein ohne Preisspalten, Lagerrolle ohne Betraege, gesperrte Aktionen mit Grund
+(`ek-rechnung-2`: Freigabe erforderlich R3). Die Aktionen der Maske (DocFlow-Kommandos, Freigabe anfragen und
+erteilen) sind in der Mask-Engine nicht angebunden — das beruehrt MASK-ACTION-EXECUTION-GUARDS.
+
 ## APPROVAL-001-DOCFLOW — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Entscheidung des Auftraggebers vom 13.10.2026:

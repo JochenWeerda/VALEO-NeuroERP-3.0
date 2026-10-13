@@ -22,6 +22,7 @@ const GROUP_BY_PREFIX: Record<string, PageModuleGroupName> = {
   artikel: 'operations',
   auth: 'core',
   banken: 'finance',
+  belege: 'finance',
   benachrichtigungen: 'core',
   charge: 'operations',
   compliance: 'finance',

@@ -250,6 +250,13 @@ function NativeExistingDetailPage({
         payload: pending.payload,
         mode: 'dryRun',
       })
+      if (!result.success) {
+        setStage(null)
+        setPendingAction(null)
+        setActionError(result.error ?? 'Die Vorschau ist fehlgeschlagen. Keine Ausfuehrung.')
+        setValidationErrors(result.validationErrors ?? [])
+        return
+      }
       if (result.proposedChanges && result.proposedChanges.length > 0) {
         setDryRunResult(result)
         setPendingAction(pending)
