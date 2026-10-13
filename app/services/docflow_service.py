@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from datetime import date, datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP
@@ -60,7 +61,10 @@ def _line_amounts(
 
 
 class DocflowService:
-    def __init__(self, db: Session, tenant_id: str) -> None:
+    def __init__(self, db: Session, tenant_id: str, akteur: Optional[str] = None) -> None:
+        # Wer handelt: die Kennung aus der geprueften Anmeldung. Ist sie gesetzt, gilt sie fuer Statushistorie
+        # und Protokoll — nicht das, was die Anfrage als ``*_by`` mitschickt.
+        self.akteur = (akteur or "").strip() or None
         self.db = db
         self.tenant_id = tenant_id
 
@@ -134,6 +138,7 @@ class DocflowService:
         ).first()
         if posting:
             raise ValidationFailedError("Posted documents cannot be deleted")
+        self._kommando("delete_draft")
         self.db.execute(
             text("""
                 UPDATE domain_docflow.document_headers
@@ -142,6 +147,7 @@ class DocflowService:
             """),
             {"tenant_id": self.tenant_id, "id": doc_id},
         )
+        self._protokolliere("delete_draft", doc_id, {"status": header.get("status")})
         self.best_effort_audit(
             "docflow_delete_draft",
             "docflow_document",
@@ -372,27 +378,81 @@ class DocflowService:
             {"id": str(uuid4()), "tenant_id": self.tenant_id, "k": idempotency_key, "doc_id": doc_id},
         )
 
-    def load_idempotent_response(self, command_name: str, resource_id: str, idempotency_key: str) -> Optional[dict[str, Any]]:
+    def _wer(self, angabe: Optional[str]) -> Optional[str]:
+        return self.akteur or angabe
+
+    def _sperre(self, doc_id: str) -> None:
+        """Sperrt den Beleg bis zum Ende der Transaktion: Zwei Kommandos auf demselben Beleg laufen nacheinander.
+
+        Erst danach wird die Idempotenz geprueft — sonst saehen zwei gleichzeitige Wiederholungen beide „neu“.
+        """
+        self.db.execute(
+            text("SELECT id FROM domain_docflow.document_headers WHERE id = :id AND tenant_id = :t FOR UPDATE"),
+            {"id": doc_id, "t": self.tenant_id},
+        )
+
+    @staticmethod
+    def _anfrage_hash(inhalt: Optional[dict[str, Any]]) -> Optional[str]:
+        if inhalt is None:
+            return None
+        return hashlib.sha256(json.dumps(inhalt, sort_keys=True, default=str).encode("utf-8")).hexdigest()
+
+    def load_idempotent_response(self, command_name: str, resource_id: str, idempotency_key: str,
+                                 inhalt: Optional[dict[str, Any]] = None) -> Optional[dict[str, Any]]:
+        """Die Antwort auf denselben Auftrag — oder ``None``. Derselbe Schluessel mit anderem Inhalt ist ein Konflikt."""
         row = self.db.execute(
             text("""
-                SELECT response_payload FROM domain_docflow.command_idempotency_keys
+                SELECT response_payload, request_hash FROM domain_docflow.command_idempotency_keys
                 WHERE tenant_id=:t AND command_name=:c AND resource_id=:r AND idempotency_key=:k
             """),
             {"t": self.tenant_id, "c": command_name, "r": resource_id, "k": idempotency_key},
         ).mappings().first()
-        return dict(row["response_payload"]) if row and row.get("response_payload") else None
+        if not row or not row.get("response_payload"):
+            return None
+        neu = self._anfrage_hash(inhalt)
+        if neu is not None and row.get("request_hash") and row["request_hash"] != neu:
+            raise ConflictError(
+                "Der Idempotenzschlüssel wurde bereits mit anderem Inhalt verwendet; für eine andere Anfrage einen neuen Schlüssel nehmen."
+            )
+        return dict(row["response_payload"])
 
-    def store_idempotent_response(self, command_name: str, resource_id: str, idempotency_key: str, response_payload: dict[str, Any]) -> None:
+    def store_idempotent_response(self, command_name: str, resource_id: str, idempotency_key: str,
+                                  response_payload: dict[str, Any], inhalt: Optional[dict[str, Any]] = None) -> None:
         self.db.execute(
             text("""
                 INSERT INTO domain_docflow.command_idempotency_keys
-                (id, tenant_id, command_name, resource_id, idempotency_key, response_payload, created_at)
-                VALUES (:id, :t, :c, :r, :k, CAST(:p AS jsonb), NOW())
+                (id, tenant_id, command_name, resource_id, idempotency_key, response_payload, request_hash, created_at)
+                VALUES (:id, :t, :c, :r, :k, CAST(:p AS jsonb), :h, NOW())
                 ON CONFLICT ON CONSTRAINT uq_docflow_command_idempotency
-                DO UPDATE SET response_payload = EXCLUDED.response_payload
+                DO UPDATE SET response_payload = EXCLUDED.response_payload, request_hash = EXCLUDED.request_hash
             """),
-            {"id": str(uuid4()), "t": self.tenant_id, "c": command_name, "r": resource_id, "k": idempotency_key, "p": json.dumps(response_payload)},
+            {"id": str(uuid4()), "t": self.tenant_id, "c": command_name, "r": resource_id, "k": idempotency_key,
+             "p": json.dumps(response_payload), "h": self._anfrage_hash(inhalt)},
         )
+
+    def _protokolliere(self, command: str, doc_id: str, payload: dict[str, Any]) -> None:
+        """Haelt das Kommando verbindlich fest — in dieser Transaktion. Scheitert der Eintrag, scheitert das Kommando.
+
+        ``best_effort_audit`` spiegelt zusaetzlich ins zentrale Audit-Log, wo es eines gibt; verlassen kann sich
+        der Beleg nur auf dieses Protokoll.
+        """
+        self.db.execute(
+            text(
+                "INSERT INTO domain_docflow.document_command_log (tenant_id, header_id, command, actor, payload) "
+                "VALUES (:t, :h, :c, :a, CAST(:p AS jsonb))"
+            ),
+            {"t": self.tenant_id, "h": doc_id, "c": command, "a": self.akteur, "p": json.dumps(payload, default=str)},
+        )
+
+    def fetch_command_log(self, doc_id: str) -> list[dict[str, Any]]:
+        zeilen = self.db.execute(
+            text(
+                "SELECT command, actor, payload, logged_at FROM domain_docflow.document_command_log "
+                "WHERE tenant_id = :t AND header_id = :id ORDER BY logged_at, id"
+            ),
+            {"t": self.tenant_id, "id": doc_id},
+        ).mappings().all()
+        return [dict(z) for z in zeilen]
 
     # ── outbox & audit ────────────────────────────────────────────────────────
 
@@ -407,6 +467,50 @@ class DocflowService:
             {"id": event_id, "event_type": event_type, "aggregate_id": aggregate_id, "payload": json.dumps(payload), "tenant_id": self.tenant_id},
         )
         return event_id
+
+    def _kommando(self, name: str, grund: Optional[str] = None) -> None:
+        """Nennt der Statushistorie Kommando und Grund dieser Transaktion.
+
+        Die Historie selbst schreibt ein Trigger auf ``document_headers`` — sie kann nicht vergessen werden
+        und nicht still ausfallen. Hier kommt nur dazu, *welches* Kommando den Wechsel ausloest.
+        """
+        self.db.execute(
+            text("SELECT set_config('valeo.docflow_command', :n, true), set_config('valeo.docflow_reason', :g, true)"),
+            {"n": name, "g": grund or ""},
+        )
+
+    def umgewandelte_mengen(self, doc_id: str, relation_type: str) -> dict[str, Decimal]:
+        """Je Quellposition die Menge, die schon in Folgebelege dieser Art gegangen ist.
+
+        Stornierte, abgebrochene und geloeschte Folgebelege zaehlen nicht: Ihre Menge ist wieder frei.
+        """
+        zeilen = self.db.execute(
+            text(
+                """
+                SELECT l.from_item_id, COALESCE(SUM(l.quantity_linked), 0)
+                FROM domain_docflow.document_links l
+                JOIN domain_docflow.document_headers z ON z.id = l.to_header_id AND z.tenant_id = l.tenant_id
+                WHERE l.tenant_id = :t AND l.from_header_id = :f AND l.relation_type = :r
+                  AND z.deleted_at IS NULL AND z.status NOT IN ('reversed', 'cancelled')
+                GROUP BY l.from_item_id
+                """
+            ),
+            {"t": self.tenant_id, "f": doc_id, "r": relation_type},
+        ).fetchall()
+        return {str(z[0]): Decimal(str(z[1])) for z in zeilen}
+
+    def fetch_status_history(self, doc_id: str) -> list[dict[str, Any]]:
+        zeilen = self.db.execute(
+            text(
+                """
+                SELECT from_status, to_status, command, actor, reason, changed_at
+                FROM domain_docflow.document_status_history
+                WHERE tenant_id = :t AND header_id = :id ORDER BY changed_at, id
+                """
+            ),
+            {"t": self.tenant_id, "id": doc_id},
+        ).mappings().all()
+        return [dict(z) for z in zeilen]
 
     def best_effort_audit(self, action: str, resource_type: str, resource_id: str, payload: dict[str, Any]) -> None:
         try:
@@ -527,8 +631,13 @@ class DocflowService:
             existing = self.load_create_idempotency(payload.idempotency_key)
             if existing:
                 return existing
+        if payload.status in {"posted", "reversed", "cancelled"}:
+            raise ValidationFailedError(
+                f"Ein Beleg wird nicht im Status {payload.status} angelegt; gebucht und storniert wird über die Kommandos."
+            )
         now = datetime.now(timezone.utc)
         doc_id = str(uuid4())
+        self._kommando("create")
         total_net, total_tax, total_gross = Decimal("0"), Decimal("0"), Decimal("0")
         self.db.execute(
             text("""
@@ -547,7 +656,7 @@ class DocflowService:
                 "total_net": _money(total_net), "total_tax": _money(total_tax), "total_gross": _money(total_gross),
                 "document_date": payload.document_date or now,
                 "posting_date": payload.posting_date,
-                "created_by": payload.created_by, "updated_by": payload.created_by,
+                "created_by": self._wer(payload.created_by), "updated_by": self._wer(payload.created_by),
             },
         )
         total_net, total_tax, total_gross = self._insert_items(doc_id, payload.items)
@@ -556,6 +665,7 @@ class DocflowService:
             {"id": doc_id, "tenant_id": self.tenant_id, "n": _money(total_net), "t": _money(total_tax), "g": _money(total_gross)},
         )
         self.upsert_pos_compliance(doc_id, payload.pos_compliance)
+        self._protokolliere("create", doc_id, {"doc_type": payload.doc_type, "doc_number": payload.doc_number, "status": payload.status})
         self.best_effort_audit("docflow_create", "docflow_document", doc_id,
                                {"doc_type": payload.doc_type, "doc_number": payload.doc_number, "status": payload.status})
         if payload.idempotency_key:
@@ -580,7 +690,12 @@ class DocflowService:
         current_status = str(header.get("status") or "draft")
         if payload.items is not None and current_status != "draft":
             raise ValidationFailedError("Positionen können nur im Status Entwurf (draft) ersetzt werden")
-        updates: dict[str, Any] = {"id": doc_id, "tenant_id": self.tenant_id, "updated_by": payload.updated_by}
+        if payload.status in {"posted", "reversed"}:
+            raise ValidationFailedError(
+                f"Der Status {payload.status} wird nicht gesetzt, sondern entsteht durch Buchen bzw. Stornieren."
+            )
+        self._kommando("update")
+        updates: dict[str, Any] = {"id": doc_id, "tenant_id": self.tenant_id, "updated_by": self._wer(payload.updated_by)}
         set_parts = ["updated_at = NOW()", "version = version + 1", "updated_by = :updated_by"]
         for field in ("status", "customer_id", "source_system", "source_ref", "supplier_id", "currency", "document_date", "posting_date"):
             val = getattr(payload, field, None)
@@ -602,12 +717,17 @@ class DocflowService:
                 {"id": doc_id, "tenant_id": self.tenant_id, "n": _money(total_net), "t": _money(total_tax), "g": _money(total_gross)},
             )
         self.upsert_pos_compliance(doc_id, payload.pos_compliance)
-        self.best_effort_audit("docflow_update", "docflow_document", doc_id, {"updated_by": payload.updated_by})
+        self._protokolliere("update", doc_id, {"felder": sorted(k for k in updates if k not in ("id", "tenant_id", "updated_by")),
+                                               "positionen_ersetzt": payload.items is not None})
+        self.best_effort_audit("docflow_update", "docflow_document", doc_id, {"updated_by": self._wer(payload.updated_by)})
         self.db.commit()
 
     def release(self, doc_id: str, idempotency_key: str, expected_version: Optional[int], released_by: Optional[str]) -> dict[str, Any]:
-        cached = self.load_idempotent_response("release", doc_id, idempotency_key)
+        self._sperre(doc_id)
+        cached = self.load_idempotent_response("release", doc_id, idempotency_key, {})
         if cached:
+            # Die Belegsperre nicht ueber die Rueckkehr hinaus halten: Der naechste Aufruf wartete sonst darauf.
+            self.db.rollback()
             return {**cached, "idempotent_hit": True}
         header = self.fetch_header(doc_id)
         if not header:
@@ -617,15 +737,17 @@ class DocflowService:
         if str(header.get("status")) != "draft":
             raise ValidationFailedError("Nur Dokumente im Status Entwurf (draft) können freigegeben werden")
         now = datetime.now(timezone.utc)
+        self._kommando("release")
         new_number = self.allocate_doc_number(str(header.get("doc_type") or ""), now)
         self.db.execute(
             text("UPDATE domain_docflow.document_headers SET doc_number=:doc_number, status='open', updated_at=NOW(), version=version+1, updated_by=:updated_by WHERE id=:id AND tenant_id=:tenant_id"),
-            {"id": doc_id, "tenant_id": self.tenant_id, "doc_number": new_number, "updated_by": released_by},
+            {"id": doc_id, "tenant_id": self.tenant_id, "doc_number": new_number, "updated_by": self._wer(released_by)},
         )
         response = {"command": "release", "source_doc_id": doc_id, "target_doc_id": None, "status": "ok",
                     "payload": {"doc_number": new_number, "doc_type": str(header.get("doc_type") or "")}}
-        self.store_idempotent_response("release", doc_id, idempotency_key, response)
-        self.best_effort_audit("docflow_release", "docflow_document", doc_id, {"doc_number": new_number, "released_by": released_by})
+        self.store_idempotent_response("release", doc_id, idempotency_key, response, {})
+        self._protokolliere("release", doc_id, {"doc_number": new_number})
+        self.best_effort_audit("docflow_release", "docflow_document", doc_id, {"doc_number": new_number, "released_by": self._wer(released_by)})
         self.db.commit()
         return response
 
@@ -634,9 +756,10 @@ class DocflowService:
             raise EntityNotFoundError("DocflowDocument", doc_id)
         self.db.execute(
             text("UPDATE domain_docflow.document_headers SET printed_at=NOW(), printed_by=:printed_by, print_count=COALESCE(print_count,0)+1, updated_at=NOW() WHERE id=:id AND tenant_id=:tenant_id"),
-            {"id": doc_id, "tenant_id": self.tenant_id, "printed_by": printed_by},
+            {"id": doc_id, "tenant_id": self.tenant_id, "printed_by": self._wer(printed_by)},
         )
-        self.best_effort_audit("docflow_record_print", "docflow_document", doc_id, {"printed_by": printed_by})
+        self._protokolliere("record_print", doc_id, {})
+        self.best_effort_audit("docflow_record_print", "docflow_document", doc_id, {"printed_by": self._wer(printed_by)})
         self.db.commit()
 
     def record_export(self, doc_id: str, exported_by: Optional[str]) -> None:
@@ -644,18 +767,27 @@ class DocflowService:
             raise EntityNotFoundError("DocflowDocument", doc_id)
         self.db.execute(
             text("UPDATE domain_docflow.document_headers SET exported_at=NOW(), exported_by=:exported_by, updated_at=NOW() WHERE id=:id AND tenant_id=:tenant_id"),
-            {"id": doc_id, "tenant_id": self.tenant_id, "exported_by": exported_by},
+            {"id": doc_id, "tenant_id": self.tenant_id, "exported_by": self._wer(exported_by)},
         )
-        self.best_effort_audit("docflow_record_export", "docflow_document", doc_id, {"exported_by": exported_by})
+        self._protokolliere("record_export", doc_id, {})
+        self.best_effort_audit("docflow_record_export", "docflow_document", doc_id, {"exported_by": self._wer(exported_by)})
         self.db.commit()
 
     def convert(self, doc_id: str, payload: Any) -> dict[str, Any]:
-        cached = self.load_idempotent_response("convert", doc_id, payload.idempotency_key)
-        if cached:
-            return {**cached, "idempotent_hit": True}
         source = self.bootstrap_doc(doc_id)
         if not source:
             raise EntityNotFoundError("DocflowDocument", doc_id)
+        # Zwei Umwandlungen derselben Quelle laufen nacheinander: Restmenge und Idempotenz stimmen nur so.
+        self._sperre(doc_id)
+        inhalt = {
+            "target_doc_type": payload.target_doc_type,
+            "quantities": {str(k): str(Decimal(str(v)).normalize()) for k, v in (payload.quantities_by_source_item_id or {}).items()},
+        }
+        cached = None if payload.dry_run else self.load_idempotent_response("convert", doc_id, payload.idempotency_key, inhalt)
+        if cached:
+            # Die Belegsperre nicht ueber die Rueckkehr hinaus halten: Der naechste Aufruf wartete sonst darauf.
+            self.db.rollback()
+            return {**cached, "idempotent_hit": True}
         if payload.target_doc_type == "sales_invoice":
             self._assert_invoice_customer_allowed(source.get("customer_id"))
         if payload.expected_version and int(source.get("version") or 1) != payload.expected_version:
@@ -664,27 +796,28 @@ class DocflowService:
         relation_type = TRANSITIONS.get(source_type, {}).get(payload.target_doc_type)
         if not relation_type:
             raise ValidationFailedError(f"Transition not allowed: {source_type} -> {payload.target_doc_type}")
-        existing_link = self.db.execute(
-            text("SELECT to_header_id FROM domain_docflow.document_header_links WHERE tenant_id=:t AND from_header_id=:f AND relation_type=:r"),
-            {"t": self.tenant_id, "f": doc_id, "r": relation_type},
-        ).mappings().first()
-        if existing_link:
-            existing_target_id = str(existing_link["to_header_id"])
-            existing_header = self.fetch_header(existing_target_id)
-            target_doc_number = str(existing_header.get("doc_number") or "") if existing_header else ""
-            response = {"command": "convert", "source_doc_id": doc_id, "target_doc_id": existing_target_id, "status": "ok",
-                        "payload": {"target_doc_number": target_doc_number, "target_doc_type": payload.target_doc_type, "total_gross": 0, "item_count": 0}}
-            self.store_idempotent_response("convert", doc_id, payload.idempotency_key, response)
-            self.db.commit()
-            return response
+        # Ein Auftrag kann mehrere Teillieferscheine und mehrere Rechnungen haben.
+        schon = self.umgewandelte_mengen(doc_id, relation_type)
+        if any(menge > 0 for menge in schon.values()) and not payload.quantities_by_source_item_id:
+            # Ein blosser Wiederholungsaufruf erzeugt keinen weiteren Folgebeleg: Teilmengen werden ausdruecklich verlangt.
+            raise ConflictError(
+                f"Der Beleg ist für {payload.target_doc_type} bereits (teilweise) umgewandelt. Für einen weiteren "
+                "Folgebeleg die Mengen je Position ausdrücklich angeben."
+            )
         source_pos = self.fetch_pos_compliance(doc_id)
         if payload.target_doc_type in POS_TYPES and not source_pos:
             raise ValidationFailedError("POS conversion requires source POS compliance")
         source_items = self.fetch_items(doc_id)
         selected_items: list[dict[str, Any]] = []
+        rest_gesamt = Decimal("0")
         for item in source_items:
             src_qty = Decimal(str(item.get("quantity") or 0))
-            target_qty = src_qty
+            rest = src_qty - schon.get(str(item["id"]), Decimal("0"))
+            if rest < 0:
+                rest = Decimal("0")
+            rest_gesamt += rest
+            # Ohne Mengenangabe geht der ganze Rest in den Folgebeleg.
+            target_qty = rest
             if payload.quantities_by_source_item_id:
                 raw = payload.quantities_by_source_item_id.get(str(item["id"]))
                 if raw is None:
@@ -692,10 +825,18 @@ class DocflowService:
                 target_qty = Decimal(str(raw))
                 if target_qty < 0:
                     raise ValidationFailedError("Negative quantity in partial conversion")
-                if target_qty > src_qty:
-                    raise ValidationFailedError("Partial conversion exceeds source quantity")
+                if target_qty > rest:
+                    raise ValidationFailedError(
+                        f"Position {item.get('line_number')}: Menge {_qty(target_qty).normalize():f} übersteigt die "
+                        f"Restmenge {_qty(rest).normalize():f} (Beleg {_qty(src_qty).normalize():f}, bereits umgewandelt "
+                        f"{_qty(src_qty - rest).normalize():f})."
+                    )
             if target_qty > 0:
                 selected_items.append({"item": item, "target_qty": _qty(target_qty)})
+        if source_items and rest_gesamt <= 0:
+            raise ConflictError(
+                f"Der Beleg ist für {payload.target_doc_type} vollständig umgewandelt; es gibt keine Restmenge."
+            )
         if not selected_items:
             raise ValidationFailedError("No convertible item quantities provided")
         total_net = total_tax = total_gross = Decimal("0")
@@ -708,6 +849,7 @@ class DocflowService:
             )
             total_net += line_net; total_tax += line_tax; total_gross += line_gross
         if payload.dry_run:
+            self.db.rollback()  # Trockenlauf: nichts geschrieben, Sperre frei
             return {"command": "convert", "source_doc_id": doc_id, "target_doc_id": None, "status": "dry_run",
                     "payload": {"source_doc_type": source_type, "target_doc_type": payload.target_doc_type,
                                 "relation_type": relation_type, "item_count": len(selected_items),
@@ -715,6 +857,7 @@ class DocflowService:
                                 "total_gross": float(_money(total_gross))}}
         now = datetime.now(timezone.utc)
         target_id = str(uuid4())
+        self._kommando("convert", f"aus {source_type} {source.get('doc_number')}")
         target_number = self.allocate_doc_number(payload.target_doc_type, now)
         self.db.execute(
             text("""
@@ -730,7 +873,7 @@ class DocflowService:
                 "customer_id": source.get("customer_id"), "supplier_id": source.get("supplier_id"),
                 "currency": source.get("currency") or "EUR",
                 "total_net": _money(total_net), "total_tax": _money(total_tax), "total_gross": _money(total_gross),
-                "document_date": now, "created_by": payload.created_by, "updated_by": payload.created_by,
+                "document_date": now, "created_by": self._wer(payload.created_by), "updated_by": self._wer(payload.created_by),
             },
         )
         self.db.execute(
@@ -801,12 +944,15 @@ class DocflowService:
         })
         self.db.execute(
             text("UPDATE domain_docflow.document_headers SET updated_at=NOW(), version=version+1, updated_by=:updated_by WHERE id=:id AND tenant_id=:tenant_id"),
-            {"id": doc_id, "tenant_id": self.tenant_id, "updated_by": payload.created_by},
+            {"id": doc_id, "tenant_id": self.tenant_id, "updated_by": self._wer(payload.created_by)},
         )
         response = {"command": "convert", "source_doc_id": doc_id, "target_doc_id": target_id, "status": "ok",
                     "payload": {"target_doc_number": target_number, "target_doc_type": payload.target_doc_type,
                                 "outbox_event_id": event_id, "total_gross": float(_money(total_gross)), "item_count": len(selected_items)}}
-        self.store_idempotent_response("convert", doc_id, payload.idempotency_key, response)
+        self.store_idempotent_response("convert", doc_id, payload.idempotency_key, response, inhalt)
+        self._protokolliere("convert", doc_id, {"target_doc_id": target_id, "target_doc_type": payload.target_doc_type,
+                                                "quantities": {str(e["item"]["id"]): str(e["target_qty"]) for e in selected_items}})
+        self._protokolliere("create", target_id, {"aus": doc_id, "doc_type": payload.target_doc_type})
         self.best_effort_audit("docflow_convert", "docflow_document", target_id, response)
         self.db.commit()
         return response
@@ -834,8 +980,11 @@ class DocflowService:
         return gruppen
 
     def post_document(self, doc_id: str, payload: Any) -> dict[str, Any]:
-        cached = self.load_idempotent_response("post", doc_id, payload.idempotency_key)
+        self._sperre(doc_id)
+        cached = self.load_idempotent_response("post", doc_id, payload.idempotency_key, {"posting_date": str(payload.posting_date or "")})
         if cached:
+            # Die Belegsperre nicht ueber die Rueckkehr hinaus halten: Der naechste Aufruf wartete sonst darauf.
+            self.db.rollback()
             return {**cached, "idempotent_hit": True}
         header = self.bootstrap_doc(doc_id)
         if not header:
@@ -865,9 +1014,10 @@ class DocflowService:
                 net_amount=Decimal(str(header.get("total_net") or 0)),
                 tax_amount=Decimal(str(header.get("total_tax") or 0)),
                 gross_amount=Decimal(str(header.get("total_gross") or 0)),
-                posted_by=payload.posted_by,
+                posted_by=self._wer(payload.posted_by),
                 steuergruppen=gruppen,
             )
+        self._kommando("post")
         posting_id = str(uuid4())
         outbox_event_id = self.upsert_outbox_event("docflow.document.posted", doc_id, {
             "doc_id": doc_id, "doc_type": header.get("doc_type"), "idempotency_key": payload.idempotency_key,
@@ -884,24 +1034,28 @@ class DocflowService:
                 "currency": header.get("currency") or "EUR",
                 "journal_entry_id": finance_result.get("journal_entry_id"),
                 "idempotency_key": payload.idempotency_key, "outbox_event_id": outbox_event_id,
-                "posted_by": payload.posted_by,
+                "posted_by": self._wer(payload.posted_by),
             },
         )
         self.db.execute(
             text("UPDATE domain_docflow.document_headers SET status='posted', posting_date=:posting_date, updated_at=NOW(), updated_by=:updated_by, version=version+1 WHERE id=:id AND tenant_id=:tenant_id"),
-            {"id": doc_id, "tenant_id": self.tenant_id, "posting_date": payload.posting_date or date.today(), "updated_by": payload.posted_by},
+            {"id": doc_id, "tenant_id": self.tenant_id, "posting_date": payload.posting_date or date.today(), "updated_by": self._wer(payload.posted_by)},
         )
         response = {"command": "post", "source_doc_id": doc_id, "posting_id": posting_id, "status": "ok",
                     "payload": {"outbox_event_id": outbox_event_id, "posting_date": str(payload.posting_date or date.today()),
                                 **finance_result}}
-        self.store_idempotent_response("post", doc_id, payload.idempotency_key, response)
+        self.store_idempotent_response("post", doc_id, payload.idempotency_key, response, {"posting_date": str(payload.posting_date or "")})
+        self._protokolliere("post", doc_id, {"posting_id": posting_id, **finance_result})
         self.best_effort_audit("docflow_post", "docflow_document", doc_id, response)
         self.db.commit()
         return response
 
     def reverse_document(self, doc_id: str, payload: Any) -> dict[str, Any]:
-        cached = self.load_idempotent_response("reverse", doc_id, payload.idempotency_key)
+        self._sperre(doc_id)
+        cached = self.load_idempotent_response("reverse", doc_id, payload.idempotency_key, {"reason": payload.reason})
         if cached:
+            # Die Belegsperre nicht ueber die Rueckkehr hinaus halten: Der naechste Aufruf wartete sonst darauf.
+            self.db.rollback()
             return {**cached, "idempotent_hit": True}
         header = self.fetch_header(doc_id)
         if not header:
@@ -914,12 +1068,14 @@ class DocflowService:
         if str(header.get("doc_type") or "") == "sales_invoice":
             if str(header.get("status")) != "posted":
                 raise ValidationFailedError("Only posted sales invoices can be reversed")
+            # Kein eigener Commit: Stornobuchung, Nachweis, Statushistorie und Belegstatus gemeinsam.
             finance_result = SalesPostingService(
-                self.db, self.tenant_id
+                self.db, self.tenant_id, commit=False
             ).reverse_ausgangsrechnung(
                 invoice_number=str(header["doc_number"]),
                 reason=payload.reason,
             )
+        self._kommando("reverse", payload.reason)
         posting_id = str(uuid4())
         outbox_event_id = self.upsert_outbox_event("docflow.document.reversed", doc_id, {
             "doc_id": doc_id, "doc_type": header.get("doc_type"), "reason": payload.reason, "idempotency_key": payload.idempotency_key,
@@ -936,17 +1092,18 @@ class DocflowService:
                 "currency": header.get("currency") or "EUR",
                 "journal_entry_id": finance_result.get("reversal_entry_id"),
                 "idempotency_key": payload.idempotency_key, "outbox_event_id": outbox_event_id,
-                "posted_by": payload.reversed_by,
+                "posted_by": self._wer(payload.reversed_by),
             },
         )
         self.db.execute(
             text("UPDATE domain_docflow.document_headers SET status='reversed', updated_at=NOW(), updated_by=:updated_by, version=version+1 WHERE id=:id AND tenant_id=:tenant_id"),
-            {"id": doc_id, "tenant_id": self.tenant_id, "updated_by": payload.reversed_by},
+            {"id": doc_id, "tenant_id": self.tenant_id, "updated_by": self._wer(payload.reversed_by)},
         )
         response = {"command": "reverse", "source_doc_id": doc_id, "posting_id": posting_id, "status": "ok",
                     "payload": {"reason": payload.reason, "outbox_event_id": outbox_event_id,
                                 **finance_result}}
-        self.store_idempotent_response("reverse", doc_id, payload.idempotency_key, response)
+        self.store_idempotent_response("reverse", doc_id, payload.idempotency_key, response, {"reason": payload.reason})
+        self._protokolliere("reverse", doc_id, {"posting_id": posting_id, "reason": payload.reason, **finance_result})
         self.best_effort_audit("docflow_reverse", "docflow_document", doc_id, response)
         self.db.commit()
         return response

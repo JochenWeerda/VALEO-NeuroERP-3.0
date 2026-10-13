@@ -23,6 +23,7 @@ from app.api.v1.endpoints import docflow
 from app.core.database import SessionLocal
 from app.finance.steuerschluessel import richte_skr03_ein
 from app.services import docflow_service
+from testgrenze import ersetze_nutzer
 
 
 @pytest.fixture
@@ -41,12 +42,19 @@ def haus(monkeypatch):
     monkeypatch.setattr(docflow_service, "assert_customer_allowed_for_invoice", lambda *_a, **_k: None)
     app = FastAPI()
     app.include_router(docflow.router, prefix="/docflow")
+    # Schreibende DocFlow-Wege verlangen seit dem 13.10.2026 die Anmeldung (Akteur der Statushistorie).
+    ersetze_nutzer(app, "admin")
     try:
         with TestClient(app, raise_server_exceptions=False) as client:
             yield {"lauf": lauf, "mandant": mandant, "client": client}
     finally:
         with SessionLocal() as db:
+            # Statushistorie und Kommandoprotokoll sind unveraenderlich; Aufraeumen nur mit Wartungsschalter.
+            db.execute(text("SELECT set_config('valeo.docflow_wartung', 'loeschen', true)"))
             for sql in (
+                "DELETE FROM domain_docflow.document_status_history WHERE tenant_id = :t",
+                "DELETE FROM domain_docflow.document_command_log WHERE tenant_id = :t",
+                "DELETE FROM domain_docflow.command_idempotency_keys WHERE tenant_id = :t",
                 "DELETE FROM domain_erp.journal_entry_lines WHERE journal_entry_id IN "
                 "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
                 "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",

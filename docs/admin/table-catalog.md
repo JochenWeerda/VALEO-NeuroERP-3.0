@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 670 Tabellen, 8849 Spalten.**
+**31 Schemas, 672 Tabellen, 8866 Spalten.**
 
 ## Schemas
 
@@ -30,7 +30,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_controlling` | `finance` | 9 | 88 |
 | `domain_crm` | `crm` | 45 | 801 |
 | `domain_dev_mock` | `platform` | 1 | 7 |
-| `domain_docflow` | `dms-compliance` | 22 | 287 |
+| `domain_docflow` | `dms-compliance` | 24 | 304 |
 | `domain_docs` | `platform` | 2 | 25 |
 | `domain_einkauf` | `procurement` | 19 | 378 |
 | `domain_erp` | `finance` | 46 | 594 |
@@ -229,14 +229,16 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_docflow.command_idempotency_keys` | `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
 | `domain_docflow.create_request_idempotency` | `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
 | `domain_docflow.document_artifacts` | `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py`, `app/core/gobd_artifact.py`, `app/services/docflow_artifact_service.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_return_service.py`, `app/services/settlement_document_archive_service.py` | `app/api/v1/endpoints/gobd_archiv.py`, `app/core/gobd_artifact.py`, `app/services/docflow_artifact_service.py`, `app/services/settlement_document_archive_service.py` | — |
+| `domain_docflow.document_command_log` | `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
 | `domain_docflow.document_followups` | `app/services/docflow_followup_service.py` | `app/services/docflow_followup_service.py` | — |
-| `domain_docflow.document_header_links` | `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
+| `domain_docflow.document_header_links` | — | `app/services/docflow_service.py` | — |
 | `domain_docflow.document_headers` | `app/api/v1/endpoints/admin_pos.py`, `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py`, `app/core/gobd_artifact.py`, `app/services/docflow_artifact_service.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_followup_service.py`, `app/services/docflow_return_service.py`, `app/services/docflow_service.py`, `app/services/settlement_document_archive_service.py` | `app/core/gobd_artifact.py`, `app/services/docflow_gobd_service.py`, `app/services/docflow_service.py`, `app/services/settlement_document_archive_service.py` | — |
 | `domain_docflow.document_items` | `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py`, `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
-| `domain_docflow.document_links` | `app/services/docflow_evidence_service.py` | `app/services/docflow_service.py` | — |
+| `domain_docflow.document_links` | `app/services/docflow_evidence_service.py`, `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
 | `domain_docflow.document_postings` | `app/services/docflow_evidence_service.py`, `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
 | `domain_docflow.document_return_audit` | `app/services/docflow_return_service.py` | `app/services/docflow_return_service.py` | — |
 | `domain_docflow.document_return_cases` | `app/services/docflow_return_service.py` | `app/services/docflow_return_service.py` | — |
+| `domain_docflow.document_status_history` | `app/services/docflow_service.py` | — | — |
 | `domain_docflow.dsfinvk_exports` | `app/api/v1/endpoints/admin_pos.py` | `app/api/v1/endpoints/admin_pos.py` | — |
 | `domain_docflow.invoice_xml_store` | `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py` | `app/api/v1/endpoints/gobd_archiv.py` | — |
 | `domain_docflow.number_series` | `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
@@ -919,9 +921,10 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 
 | Tabelle | Domain | Lage | PK | Spalten |
 |---|---|---|---|---|
-| `command_idempotency_keys` | `dms-compliance` | native | `id` | id, tenant_id, command_name, resource_id, idempotency_key, response_payload, created_at |
+| `command_idempotency_keys` | `dms-compliance` | native | `id` | id, tenant_id, command_name, resource_id, idempotency_key, response_payload, created_at, request_hash |
 | `create_request_idempotency` | `dms-compliance` | native | `id` | id, tenant_id, idempotency_key, doc_id, created_at |
 | `document_artifacts` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, artifact_type, content_hash_sha256, storage_key, file_name, created_at, created_by, version, freigabe_status, freigegeben_at, freigegeben_by, content_bytes |
+| `document_command_log` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, command, actor, payload, logged_at |
 | `document_followups` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, art, betreff, text, faellig_am, status, erledigt_at, erledigt_von, created_at, created_by |
 | `document_header_links` | `dms-compliance` | prefix | `id` | id, tenant_id, from_header_id, to_header_id, relation_type, created_at |
 | `document_headers` | `dms-compliance` | prefix | `id` | id, tenant_id, doc_type, doc_number, status, source_system, source_ref, customer_id, supplier_id, currency, total_net, total_tax, total_gross, document_date, posting_date, version, created_by, updated_by, created_at, updated_at, deleted_at, printed_at, printed_by, print_count, exported_at, exported_by |
@@ -930,6 +933,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `document_postings` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, posting_type, journal_entry_id, amount, currency, idempotency_key, outbox_event_id, posted_by, posted_at |
 | `document_return_audit` | `dms-compliance` | prefix | `id` | id, tenant_id, case_id, action, old_value, new_value, actor, reason, created_at |
 | `document_return_cases` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, artifact_id, subject_type, subject_ref, contact_ref, assigned_user, tags, shipping_status, return_status, due_at, sent_at, returned_at, source_route, created_at, updated_at |
+| `document_status_history` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, from_status, to_status, command, actor, reason, changed_at |
 | `dsfinvk_exports` | `dms-compliance` | native | `id` | id, tenant_id, period_from, period_to, status, file_path, checksum_sha256, row_count, generated_by, generated_at, error_message, created_at, updated_at |
 | `invoice_xml_store` | `dms-compliance` | native | `id` | id, tenant_id, header_id, content_hash_sha256, storage_key, format_type, validation_status, validation_errors, created_at, created_by |
 | `number_series` | `dms-compliance` | native | `id` | id, tenant_id, doc_type, year, prefix, counter, width, updated_at |

@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from ....core.config import settings
 from ....core.database import get_db
+from app.auth.deps import get_current_user
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.services.docflow_service import DocflowService, POS_TYPES
 
@@ -186,8 +187,14 @@ class DocflowUpdateRequest(BaseModel):
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 
-def _svc(db: Session, tenant_id: str) -> DocflowService:
-    return DocflowService(db, tenant_id)
+def _akteur(nutzer: Any) -> Optional[str]:
+    """Die Kennung des angemeldeten Benutzers — aus der geprueften Anmeldung, nie aus der Anfrage."""
+    wert = nutzer.get("sub") if isinstance(nutzer, dict) else getattr(nutzer, "sub", None) or getattr(nutzer, "id", None)
+    return str(wert).strip() or None if wert else None
+
+
+def _svc(db: Session, tenant_id: str, akteur: Optional[str] = None) -> DocflowService:
+    return DocflowService(db, tenant_id, akteur)
 
 
 def _validate_pos_compliance_requirements(doc_type: str, pos: Optional[PosComplianceInput]) -> None:
@@ -297,10 +304,11 @@ async def delete_draft_document(
     doc_id: str,
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ) -> Response:
     effective_tenant = tenant_id or DEFAULT_TENANT
     try:
-        _svc(db, effective_tenant).delete_draft_document(doc_id)
+        _svc(db, effective_tenant, _akteur(nutzer)).delete_draft_document(doc_id)
     except EntityNotFoundError as exc:
         db.rollback()
         raise HTTPException(status_code=404, detail=exc.detail)
@@ -308,6 +316,20 @@ async def delete_draft_document(
         db.rollback()
         raise HTTPException(status_code=409, detail=exc.detail)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/{doc_id}/status-history", response_model=list[dict[str, Any]],
+            summary="Statushistorie und Kommandoprotokoll des Belegs")
+async def get_status_history(
+    doc_id: str,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+) -> list[dict[str, Any]]:
+    """Jeder Statuswechsel des Belegs: von, nach, Kommando, wer, warum, wann. Unveraenderlich."""
+    svc = _svc(db, tenant_id or DEFAULT_TENANT)
+    if not svc.fetch_header(doc_id):
+        raise HTTPException(status_code=404, detail="Document not found")
+    return svc.fetch_status_history(doc_id)
 
 
 @router.get("/{doc_id}/pos-compliance", response_model=DocflowOut, summary="Pos compliance abrufen")
@@ -331,10 +353,11 @@ async def create_document(
     payload: DocflowCreateRequest,
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id or DEFAULT_TENANT
     _validate_pos_compliance_requirements(payload.doc_type, payload.pos_compliance)
-    svc = _svc(db, effective_tenant)
+    svc = _svc(db, effective_tenant, _akteur(nutzer))
     try:
         doc_id = svc.create_document(payload)
     except (EntityNotFoundError, ValidationFailedError) as exc:
@@ -355,9 +378,10 @@ async def update_document(
     payload: DocflowUpdateRequest,
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id or DEFAULT_TENANT
-    svc = _svc(db, effective_tenant)
+    svc = _svc(db, effective_tenant, _akteur(nutzer))
     header = svc.fetch_header(doc_id)
     if not header:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -389,10 +413,11 @@ async def release_document(
     payload: DocflowReleaseRequest,
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id or DEFAULT_TENANT
     try:
-        result = _svc(db, effective_tenant).release(doc_id, payload.idempotency_key, payload.expected_version, payload.released_by)
+        result = _svc(db, effective_tenant, _akteur(nutzer)).release(doc_id, payload.idempotency_key, payload.expected_version, payload.released_by)
     except EntityNotFoundError as exc:
         db.rollback()
         raise HTTPException(status_code=404, detail=exc.detail)
@@ -414,9 +439,10 @@ async def record_print(
     payload: DocflowRecordPrintRequest,
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id or DEFAULT_TENANT
-    svc = _svc(db, effective_tenant)
+    svc = _svc(db, effective_tenant, _akteur(nutzer))
     try:
         svc.record_print(doc_id, payload.printed_by)
     except EntityNotFoundError as exc:
@@ -433,9 +459,10 @@ async def record_export(
     payload: DocflowRecordExportRequest,
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id or DEFAULT_TENANT
-    svc = _svc(db, effective_tenant)
+    svc = _svc(db, effective_tenant, _akteur(nutzer))
     try:
         svc.record_export(doc_id, payload.exported_by)
     except EntityNotFoundError as exc:
@@ -452,10 +479,11 @@ async def convert_document(
     payload: DocflowConvertRequest,
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id or DEFAULT_TENANT
     try:
-        result = _svc(db, effective_tenant).convert(doc_id, payload)
+        result = _svc(db, effective_tenant, _akteur(nutzer)).convert(doc_id, payload)
     except EntityNotFoundError as exc:
         db.rollback()
         raise HTTPException(status_code=404, detail=exc.detail)
@@ -480,10 +508,11 @@ async def post_document(
     payload: DocflowPostRequest,
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id or DEFAULT_TENANT
     try:
-        result = _svc(db, effective_tenant).post_document(doc_id, payload)
+        result = _svc(db, effective_tenant, _akteur(nutzer)).post_document(doc_id, payload)
     except EntityNotFoundError as exc:
         db.rollback()
         raise HTTPException(status_code=404, detail=exc.detail)
@@ -505,10 +534,11 @@ async def reverse_document(
     payload: DocflowReverseRequest,
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id or DEFAULT_TENANT
     try:
-        result = _svc(db, effective_tenant).reverse_document(doc_id, payload)
+        result = _svc(db, effective_tenant, _akteur(nutzer)).reverse_document(doc_id, payload)
     except EntityNotFoundError as exc:
         db.rollback()
         raise HTTPException(status_code=404, detail=exc.detail)
