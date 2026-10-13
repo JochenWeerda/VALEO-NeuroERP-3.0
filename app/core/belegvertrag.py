@@ -98,7 +98,7 @@ class Summen(_Teil):
 class Buchung(_Teil):
     """Buchungsstand, gespeist von Finance."""
 
-    stand: Literal["nicht_gebucht", "gebucht", "pruefen"] = "nicht_gebucht"
+    stand: Literal["nicht_gebucht", "gebucht", "storniert", "pruefen"] = "nicht_gebucht"
     journal_id: str | None = None
     grund: str | None = None
 
@@ -234,7 +234,7 @@ def pruefe(beleg: Beleg) -> list[str]:
 
     if not variante.bucht and beleg.buchung.stand != "nicht_gebucht":
         fehler.append(f"{variante.bezeichnung} wird nicht gebucht.")
-    if beleg.buchung.stand == "gebucht" and not beleg.buchung.journal_id:
+    if beleg.buchung.stand in ("gebucht", "storniert") and not beleg.buchung.journal_id:
         fehler.append("Gebucht ohne Journalbezug.")
     if beleg.buchung.stand == "pruefen" and not beleg.buchung.grund:
         fehler.append("Pruefvermerk ohne Grund.")

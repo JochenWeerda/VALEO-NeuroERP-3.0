@@ -20170,6 +20170,419 @@
         "title": "BedarfsVorschlagOut",
         "type": "object"
       },
+      "Beleg": {
+        "additionalProperties": false,
+        "properties": {
+          "aktionen": {
+            "items": {
+              "$ref": "#/components/schemas/Belegaktion"
+            },
+            "title": "Aktionen",
+            "type": "array"
+          },
+          "bausteine": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Bausteine",
+            "type": "object"
+          },
+          "beleg_id": {
+            "title": "Beleg Id",
+            "type": "string"
+          },
+          "beleg_nr": {
+            "title": "Beleg Nr",
+            "type": "string"
+          },
+          "belegart": {
+            "title": "Belegart",
+            "type": "string"
+          },
+          "belegdatum": {
+            "format": "date",
+            "title": "Belegdatum",
+            "type": "string"
+          },
+          "buchung": {
+            "$ref": "#/components/schemas/app__core__belegvertrag__Buchung"
+          },
+          "buchungsdatum": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Buchungsdatum"
+          },
+          "dokumente": {
+            "items": {
+              "$ref": "#/components/schemas/Belegdokument"
+            },
+            "title": "Dokumente",
+            "type": "array"
+          },
+          "historie": {
+            "items": {
+              "$ref": "#/components/schemas/Historieneintrag"
+            },
+            "title": "Historie",
+            "type": "array"
+          },
+          "kette": {
+            "items": {
+              "$ref": "#/components/schemas/Kettenglied"
+            },
+            "title": "Kette",
+            "type": "array"
+          },
+          "partner": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Partner"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "positionen": {
+            "items": {
+              "$ref": "#/components/schemas/Belegposition"
+            },
+            "title": "Positionen",
+            "type": "array"
+          },
+          "preise_sichtbar": {
+            "default": true,
+            "title": "Preise Sichtbar",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "summen": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Summen"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "version": {
+            "default": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "vertragsversion": {
+            "default": "1.0",
+            "title": "Vertragsversion",
+            "type": "string"
+          },
+          "waehrung": {
+            "default": "EUR",
+            "title": "Waehrung",
+            "type": "string"
+          }
+        },
+        "required": [
+          "beleg_id",
+          "belegart",
+          "beleg_nr",
+          "status",
+          "belegdatum"
+        ],
+        "title": "Beleg",
+        "type": "object"
+      },
+      "Belegaktion": {
+        "additionalProperties": false,
+        "description": "Was der Leser mit diesem Beleg jetzt tun darf — vom Server entschieden, nicht von der Maske.",
+        "properties": {
+          "bezeichnung": {
+            "title": "Bezeichnung",
+            "type": "string"
+          },
+          "erlaubt": {
+            "default": true,
+            "title": "Erlaubt",
+            "type": "boolean"
+          },
+          "folgebelegart": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Folgebelegart"
+          },
+          "freigabe_noetig": {
+            "default": false,
+            "title": "Freigabe Noetig",
+            "type": "boolean"
+          },
+          "grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grund"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "kommando": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kommando"
+          }
+        },
+        "required": [
+          "key",
+          "bezeichnung"
+        ],
+        "title": "Belegaktion",
+        "type": "object"
+      },
+      "Belegdokument": {
+        "additionalProperties": false,
+        "properties": {
+          "art": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Art"
+          },
+          "bezeichnung": {
+            "title": "Bezeichnung",
+            "type": "string"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "dokument_id": {
+            "title": "Dokument Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dokument_id",
+          "bezeichnung"
+        ],
+        "title": "Belegdokument",
+        "type": "object"
+      },
+      "Belegposition": {
+        "additionalProperties": false,
+        "properties": {
+          "artikel_nr": {
+            "title": "Artikel Nr",
+            "type": "string"
+          },
+          "aufwandskonto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aufwandskonto"
+          },
+          "bausteine": {
+            "additionalProperties": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Bausteine",
+            "type": "object"
+          },
+          "bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezeichnung"
+          },
+          "brutto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brutto"
+          },
+          "charge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Charge"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "einzelpreis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einzelpreis"
+          },
+          "menge": {
+            "title": "Menge",
+            "type": "string"
+          },
+          "menge_offen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Offen"
+          },
+          "menge_uebernommen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge Uebernommen"
+          },
+          "netto": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Netto"
+          },
+          "pos_nr": {
+            "title": "Pos Nr",
+            "type": "integer"
+          },
+          "rabatt_prozent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rabatt Prozent"
+          },
+          "steuer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuer"
+          },
+          "steuersatz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuersatz"
+          },
+          "steuerschluessel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuerschluessel"
+          }
+        },
+        "required": [
+          "pos_nr",
+          "artikel_nr",
+          "menge"
+        ],
+        "title": "Belegposition",
+        "type": "object"
+      },
       "BenchmarkApiOut": {
         "additionalProperties": true,
         "description": "Response schema for benchmark api endpoints.",
@@ -25816,55 +26229,6 @@
               }
             ],
             "title": "Betrag"
-          },
-          "datum": {
-            "format": "date",
-            "title": "Datum",
-            "type": "string"
-          },
-          "haben_konto": {
-            "title": "Haben Konto",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "soll_konto": {
-            "title": "Soll Konto",
-            "type": "string"
-          },
-          "text": {
-            "title": "Text",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "belegnr",
-          "datum",
-          "soll_konto",
-          "haben_konto",
-          "betrag",
-          "text",
-          "belegart"
-        ],
-        "title": "Buchung",
-        "type": "object"
-      },
-      "Buchung-Output": {
-        "properties": {
-          "belegart": {
-            "title": "Belegart",
-            "type": "string"
-          },
-          "belegnr": {
-            "title": "Belegnr",
-            "type": "string"
-          },
-          "betrag": {
-            "title": "Betrag",
-            "type": "string"
           },
           "datum": {
             "format": "date",
@@ -80305,6 +80669,70 @@
         "title": "HerdOut",
         "type": "object"
       },
+      "Historieneintrag": {
+        "additionalProperties": false,
+        "properties": {
+          "akteur": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Akteur"
+          },
+          "grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grund"
+          },
+          "kommando": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kommando"
+          },
+          "nach_status": {
+            "title": "Nach Status",
+            "type": "string"
+          },
+          "von_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Von Status"
+          },
+          "zeitpunkt": {
+            "format": "date-time",
+            "title": "Zeitpunkt",
+            "type": "string"
+          }
+        },
+        "required": [
+          "zeitpunkt",
+          "nach_status"
+        ],
+        "title": "Historieneintrag",
+        "type": "object"
+      },
       "HistoryResponse": {
         "properties": {
           "conversation": {
@@ -87144,6 +87572,61 @@
           "periode"
         ],
         "title": "KennzahlSubmitRequest",
+        "type": "object"
+      },
+      "Kettenglied": {
+        "additionalProperties": false,
+        "properties": {
+          "beleg_id": {
+            "title": "Beleg Id",
+            "type": "string"
+          },
+          "beleg_nr": {
+            "title": "Beleg Nr",
+            "type": "string"
+          },
+          "belegart": {
+            "title": "Belegart",
+            "type": "string"
+          },
+          "menge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Menge"
+          },
+          "richtung": {
+            "enum": [
+              "vorgaenger",
+              "nachfolger"
+            ],
+            "title": "Richtung",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "richtung",
+          "belegart",
+          "beleg_id",
+          "beleg_nr"
+        ],
+        "title": "Kettenglied",
         "type": "object"
       },
       "KnowledgeGraphPathRequest": {
@@ -116674,6 +117157,46 @@
           "created_at"
         ],
         "title": "PartiestammOut",
+        "type": "object"
+      },
+      "Partner": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nummer"
+          },
+          "rolle": {
+            "enum": [
+              "kunde",
+              "lieferant"
+            ],
+            "title": "Rolle",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rolle"
+        ],
+        "title": "Partner",
         "type": "object"
       },
       "PartnerActivationIn": {
@@ -152186,6 +152709,41 @@
         "title": "SteuerVorschauOut",
         "type": "object"
       },
+      "Steuergruppe": {
+        "additionalProperties": false,
+        "properties": {
+          "netto": {
+            "title": "Netto",
+            "type": "string"
+          },
+          "steuer": {
+            "title": "Steuer",
+            "type": "string"
+          },
+          "steuersatz": {
+            "title": "Steuersatz",
+            "type": "string"
+          },
+          "steuerschluessel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuerschluessel"
+          }
+        },
+        "required": [
+          "steuersatz",
+          "netto",
+          "steuer"
+        ],
+        "title": "Steuergruppe",
+        "type": "object"
+      },
       "StockMovement": {
         "description": "Eine gebuchte Lagerbewegung, so wie sie im Bestandsbuch steht.\n\nDie Schreibregeln der Basisklasse gelten hier nicht: Das Bestandsbuch fuehrt\nsieben Bewegungsvokabulare (``wareneingang``, ``EINLAGERUNG``, ``ABGANG`` …)\nund Altwerte wie ``ownership_type = 'eigen'``. Bis 07.10.2026 erbte das\nLesemodell die Muster des Anlegens, und eine einzige solche Zeile liess die\nganze Liste mit 500 scheitern.",
         "properties": {
@@ -155455,6 +156013,37 @@
           "requires_human_approval"
         ],
         "title": "SubstitutesOut",
+        "type": "object"
+      },
+      "Summen": {
+        "additionalProperties": false,
+        "properties": {
+          "brutto": {
+            "title": "Brutto",
+            "type": "string"
+          },
+          "netto": {
+            "title": "Netto",
+            "type": "string"
+          },
+          "steuer": {
+            "title": "Steuer",
+            "type": "string"
+          },
+          "steuergruppen": {
+            "items": {
+              "$ref": "#/components/schemas/Steuergruppe"
+            },
+            "title": "Steuergruppen",
+            "type": "array"
+          }
+        },
+        "required": [
+          "netto",
+          "steuer",
+          "brutto"
+        ],
+        "title": "Summen",
         "type": "object"
       },
       "SuperglueConnectorConfigRequest": {
@@ -182331,6 +182920,47 @@
         "title": "AmendmentCreate",
         "type": "object"
       },
+      "app__core__belegvertrag__Buchung": {
+        "additionalProperties": false,
+        "description": "Buchungsstand, gespeist von Finance.",
+        "properties": {
+          "grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grund"
+          },
+          "journal_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Journal Id"
+          },
+          "stand": {
+            "default": "nicht_gebucht",
+            "enum": [
+              "nicht_gebucht",
+              "gebucht",
+              "storniert",
+              "pruefen"
+            ],
+            "title": "Stand",
+            "type": "string"
+          }
+        },
+        "title": "Buchung",
+        "type": "object"
+      },
       "app__crm__schemas__Activity": {
         "properties": {
           "contact_id": {
@@ -183777,6 +184407,55 @@
           "reason"
         ],
         "title": "AmendmentCreate",
+        "type": "object"
+      },
+      "app__routers__fibu_router__Buchung-Output": {
+        "properties": {
+          "belegart": {
+            "title": "Belegart",
+            "type": "string"
+          },
+          "belegnr": {
+            "title": "Belegnr",
+            "type": "string"
+          },
+          "betrag": {
+            "title": "Betrag",
+            "type": "string"
+          },
+          "datum": {
+            "format": "date",
+            "title": "Datum",
+            "type": "string"
+          },
+          "haben_konto": {
+            "title": "Haben Konto",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "soll_konto": {
+            "title": "Soll Konto",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "belegnr",
+          "datum",
+          "soll_konto",
+          "haben_konto",
+          "betrag",
+          "text",
+          "belegart"
+        ],
+        "title": "Buchung",
         "type": "object"
       },
       "app__routers__numbering_router__StatusResponse": {
@@ -234678,6 +235357,63 @@
         ]
       }
     },
+    "/api/v1/belege/{belegart}/{beleg_id}": {
+      "get": {
+        "description": "Kopf, Partner, Positionen, Summen, Buchungsstand, Belegkette, Historie und die im Zustand moeglichen Aktionen.",
+        "operationId": "beleg_lesen_api_v1_belege__belegart___beleg_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "belegart",
+            "required": true,
+            "schema": {
+              "title": "Belegart",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "beleg_id",
+            "required": true,
+            "schema": {
+              "title": "Beleg Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Beleg"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Beleg in Vertragsform lesen",
+        "tags": [
+          "belege"
+        ]
+      }
+    },
     "/api/v1/benachrichtigungen": {
       "get": {
         "description": "Benachrichtigungen fuer den aktuellen Mandanten.",
@@ -281527,7 +282263,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/Buchung-Output"
+                    "$ref": "#/components/schemas/app__routers__fibu_router__Buchung-Output"
                   },
                   "title": "Response Get Buchungen Api V1 Fibu Buchungen Get",
                   "type": "array"
@@ -281584,7 +282320,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Buchung-Output"
+                  "$ref": "#/components/schemas/app__routers__fibu_router__Buchung-Output"
                 }
               }
             },

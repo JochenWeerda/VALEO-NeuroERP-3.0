@@ -11,6 +11,19 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-011 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** `GET /api/v1/belege/{belegart}/{beleg_id}` (`app/api/v1/endpoints/belege.py`) liefert DocFlow-Belege
+in der Form des Belegvertrags; Adapter `app/services/docflow_belegadapter.py` (nur lesend, kein Nachziehen von
+Kopien). Mandant aus der geprueften Anmeldung. Buchungsstand und gesperrte Aktionen mit Grund aus denselben
+Pruefungen wie `post` und `convert`. Vertrag: Buchungsstand `storniert` neu. Tests 10 + 27.
+QA: `docs/quality-assurance/belege-lesen-20261013.md`.
+**Entschieden vom Auftraggeber 13.10.2026:** Zielbild „eine Fachaktion, mehrere Zugaenge“ gilt (Masterplan C1);
+MCP-Werkzeuge fuer Belege zuerst nur lesend. Naechster Slice: BELEG-013.
+**Offen, an Codex (Identitaet):** Der Belegweg prueft noch kein Recht des Lesers (Preisrecht, Aktionen) —
+BELEG-012 braucht die Zuordnung Recht → Rolle.
+
 ## MCP-WRITE-STANDARD-20261013 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-13.
