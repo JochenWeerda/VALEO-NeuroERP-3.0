@@ -165,6 +165,7 @@ def test_native_screen_is_never_shadowed_by_studio_draft() -> None:
         "anna",
         {**propose_studio_draft("Kunden"), "id": "crm/customer-360"},
     )
+    set_status(tenant_id, poisoned["id"], "anna", "review")
     set_status(tenant_id, poisoned["id"], "berta", "published_temp")
     still_native = get_screen_definition("crm/customer-360", tenant_id=tenant_id)
     assert still_native is not None
@@ -187,6 +188,7 @@ def test_retire_removes_mask_from_runtime_catalog() -> None:
     record = _publish_sample(client)
     retired = client.post(
         f"/api/v1/studio/drafts/{record['id']}/retire",
+        json={"expected_revision": record["revision"]},
         headers={**_HEADERS, "X-Actor-ID": "clara"},
     )
     assert retired.status_code == 200, retired.text

@@ -54,8 +54,8 @@ export async function saveStudioDraft(definition: ScreenDefinition, draftId?: st
   return response.data as StudioReport & StudioDraftRecord
 }
 
-export async function submitStudioReview(draftId: string) {
-  const response = await apiClient.post(`/api/v1/studio/drafts/${draftId}/submit-review`, {})
+export async function submitStudioReview(draftId: string, expectedRevision: string) {
+  const response = await apiClient.post(`/api/v1/studio/drafts/${draftId}/submit-review`, { expected_revision: expectedRevision })
   return response.data as StudioDraftRecord
 }
 

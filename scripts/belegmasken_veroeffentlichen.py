@@ -49,12 +49,12 @@ def veroeffentliche(tenant_id: str, *, erlaubte: frozenset[str] = ERLAUBTE_MANDA
         if alt and alt.get("status") == "published_temp" and alt.get("definition") == definition:
             bericht[kennung] = "aktuell"
             continue
-        if alt and alt.get("status") not in ("draft", "review"):
+        if alt and alt.get("status") == "published_temp":
             # Eine veroeffentlichte Maske wird erst zurueckgenommen, dann neu vorgelegt.
-            studio_draft_store.set_status(tenant_id, str(alt["id"]), BEARBEITER, "draft")
+            studio_draft_store.set_status(tenant_id, str(alt["id"]), VEROEFFENTLICHER, "retired", expected_snapshot=alt)
         entwurf = studio_draft_store.save_draft(tenant_id, BEARBEITER, definition, draft_id=str(alt["id"]) if alt else None)
-        studio_draft_store.set_status(tenant_id, str(entwurf["id"]), BEARBEITER, "review")
-        studio_draft_store.set_status(tenant_id, str(entwurf["id"]), VEROEFFENTLICHER, "published_temp")
+        entwurf = studio_draft_store.set_status(tenant_id, str(entwurf["id"]), BEARBEITER, "review", expected_snapshot=entwurf)
+        studio_draft_store.set_status(tenant_id, str(entwurf["id"]), VEROEFFENTLICHER, "published_temp", expected_snapshot=entwurf)
         bericht[kennung] = "erneuert" if alt else "veroeffentlicht"
     return bericht
 
