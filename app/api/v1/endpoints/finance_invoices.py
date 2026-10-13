@@ -128,7 +128,14 @@ def _post_sales_invoice_financials(
     tenant_id: str,
     gruppen: Optional[list[Steuergruppe]] = None,
 ) -> dict[str, str]:
-    """Buchung + offener Posten in der Transaktion des Aufrufers (kein eigener Commit)."""
+    """Buchung + offener Posten in der Transaktion des Aufrufers (kein eigener Commit).
+
+    Dieser Weg legt an und bucht in einem Schritt und kann keine Freigabe einholen: Er bucht nur, was die
+    Freigabematrix dem Rollenrecht ueberlaesst (APPROVAL-001).
+    """
+    from app.services import finance_freigabe
+
+    finance_freigabe.nur_mit_rollenrecht(db, tenant_id, "sales_invoice", "post", brutto=invoice.totalGross, gebucht=False)
     return SalesPostingService(db, tenant_id, commit=False).post_ausgangsrechnung_with_op(
         invoice_number=invoice.number,
         invoice_date=invoice.date,
@@ -367,6 +374,7 @@ async def storno_invoice(
     invoice_number: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    nutzer: dict = Depends(beleg_write),
 ) -> dict:
     """Storniert eine gebuchte Rechnung: erzeugt Gegenbuchung (Reversal) via GoBD-Hashkette.
 
@@ -391,6 +399,11 @@ async def storno_invoice(
         if not row:
             raise HTTPException(status_code=404, detail=f"Keine Buchung für Rechnung {invoice_number} gefunden")
 
+        # Zentrale Freigabe (APPROVAL-001); eine DocFlow-Rechnung storniert dieser Weg nicht.
+        from app.services import finance_freigabe
+
+        akteur = str(nutzer.get("sub") or "") if isinstance(nutzer, dict) else None
+        finance_freigabe.verlange_storno_ausgangsrechnung(db, tenant_id, invoice_number, akteur)
         je_id = str(row[0])
         fin = FinanceTransactionService(db, tenant_id)
         from app.core.exceptions import ValidationFailedError as _VFE
@@ -430,7 +443,8 @@ async def storno_invoice(
             {"invoice_number": invoice_number, "reversal_id": str(reversal.id)},
         )
         logger.info("Invoice storno: %s → reversal %s", invoice_number, reversal.id)
-        return {"ok": True, "original_entry_id": je_id, "reversal_entry_id": str(reversal.id)}
+        # ``success`` verlangt das Antwortmodell; ohne es stornierte der Weg und antwortete 500.
+        return {"success": True, "ok": True, "original_entry_id": je_id, "reversal_entry_id": str(reversal.id)}
     except HTTPException:
         raise
     except Exception as e:

@@ -1027,6 +1027,14 @@ api_router.include_router(
     tags=["crm", "ownership"]
 )
 
+from app.api.v1.endpoints import approvals  # noqa: E402
+
+api_router.include_router(
+    approvals.router,
+    prefix="/approvals",
+    tags=["approvals"]
+)
+
 from app.api.v1.endpoints import belege  # noqa: E402
 
 api_router.include_router(

@@ -82,3 +82,26 @@ Architektur-Index 940/940.
   aufruft und die Freigabe (APPROVAL-001) anfragen und erteilen lässt, ist nicht gebaut und nicht
   geprüft. Bis dahin ist die Maske lesend zu betrachten.
 - Keine Belegliste in der Maske; ein Beleg wird über seine Adresse geöffnet.
+
+## Nachtrag Teil 2b: Knöpfe hängen am Zustand des Belegs (Serverseite)
+
+Befund der Sichtprüfung im Browser (Codex, `beleg-pilot-routing-preview-20261013.md`): Buchen, Freigeben
+und Folgebeleg waren an einem stornierten Beleg aktiv.
+
+- **Jede Aktion der Definition trägt `enabledWhen`** auf ein Kopffeld `aktion_<schlüssel>`
+  (`zustandsfeld` in `screen_definitions_beleg.py`).
+- **Der Kopfweg setzt diese Felder** aus `aktionen` des Belegvertrags — also aus Zustand, Recht und
+  Freigabe. Was der Beleg nicht anbietet, fehlt; ein fehlendes Feld sperrt den Knopf.
+- **`aktionshinweis`** im Kopf nennt je gesperrter Aktion den Grund vom Server („Buchen: Freigabe
+  erforderlich (R3) …").
+- Für den Testmandanten neu veröffentlicht.
+
+Nachweis: `tests/test_beleg_screen_definition.py`, jetzt 25 bestanden — stornierter Beleg ohne aktive
+Aktion; offene Rechnung buchbar, nicht stornierbar; Eingangsrechnung über der Grenze gesperrt mit Grund
+und „Freigabe anfragen" aktiv; gebuchte Rechnung ohne „Buchen"; ohne Recht nichts aktiv.
+
+**Noch nicht wirksam im Browser:** Die Detailseite (`UniversalNativeDetailPage`) gibt dem Renderer
+keinen `screenContext` mit; ohne ihn wertet `actionIsEnabled` kein `enabledWhen` aus und lässt jeden
+Knopf aktiv. Das betrifft jede native Detailmaske, nicht nur die Belegmaske. Die Datei ist bei Codex in
+Arbeit (Laufzeit der Maskenaktionen); ich habe sie nicht angefasst. Nötig ist dort: `screenContext` mit
+den Kopfdaten des Belegs als `data` an `UniversalMaskRenderer` geben.

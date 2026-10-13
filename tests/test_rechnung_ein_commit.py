@@ -128,6 +128,9 @@ def test_buchung_ohne_eigenen_commit(monkeypatch):
             return {}
 
     monkeypatch.setattr(modul, "SalesPostingService", Dienst)
+    # Hier geht es um den Commit; die Freigabematrix prueft tests/test_freigabe_zweitwege.py.
+    from app.services import finance_freigabe
+    monkeypatch.setattr(finance_freigabe, "nur_mit_rollenrecht", lambda *_a, **_k: None)
     from app.documents.models import SalesInvoice
 
     modul._post_sales_invoice_financials(None, SalesInvoice(**rechnung("RE-X")), HAUS)

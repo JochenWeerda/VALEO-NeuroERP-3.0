@@ -11,6 +11,62 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-ACTION-STATE-BINDING-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Vom Server gesetzte Beleg-Aktionsbedingungen an Renderer und direkte Aufrufe binden; fehlender Zustand sperrt bedingte Aktionen. **Dateibesitz:** components/mask-builder/UniversalNativeDetailPage.tsx; governance/screen-context.ts; bestehender native-detail-preview.test.tsx; neuer action-state.test.ts; docs/quality-assurance/beleg-action-state-binding-20261013.md (Frontend-Pfade unter packages/frontend-web/src). **Abnahme:** Bedingungen im gemeinsamen Renderer, direkte gesperrte Aktion ohne Dispatch, Sperrgrund sichtbar, kein Freigabe-Bypass; reale stornierte Rechnung ohne aktiven Knopf. **Risiken:** Command-Adapter und Freigabeanfragen bleiben Folgearbeit; keine Fachdaten mutieren.
+
+**Lieferung:** NativeDetail uebergibt Serverzustand an screenContext; fehlender Zustand sperrt bedingte Aktionen. Direkter Handler und execute pruefen Rechte/Zustand vor Dispatch. 37 Vitest-Faelle bestanden. Reale stornierte Referenzrechnung: drei Knoepfe deaktiviert, Stornogrund sichtbar; Screenshot lokal. QA: beleg-action-state-binding-20261013.md. Command-/Approval-Adapter und weitere Varianten-/Preisabnahmen offen.
+
+## GIT-INDEX-SPERRE-20261013 — Befund, Claude Code
+
+**Owner:** Claude Code. **Stand:** Befund 2026-10-13, Ursache nicht bewiesen. Auftrag des Auftraggebers: Herkunft
+der wiederkehrenden leeren `.git/index.lock` im Hauptverzeichnis untersuchen; nur nach Pruefung entfernen.
+**Beobachtet:** Sperren um 13:42, 13:47, 13:56, 14:17:58, 14:56:55 und 15:18:09, jeweils 0 Byte, kein laufender
+Git-Prozess, von keinem Prozess geoeffnet. Vier davon entstanden innerhalb einer Minute nach einem Git-Aufruf von
+mir im Hauptverzeichnis (Auslieferung oder deren Probelauf), eine (14:56:55) waehrend ich dort nichts tat und
+Codex committete. **Meine fruehere Vermutung im Block APPROVAL-001-DOCFLOW, die Sperre stamme von den
+Codex-Prozessen, ist damit nicht haltbar** — sie trifft mindestens ebenso meine eigenen Aufrufe.
+**Nicht reproduziert:** `git diff --quiet`, `git status`, `git status | head` und ein Probelauf des Lieferskripts
+hinterliessen bei gezielten Versuchen keine Sperre.
+**Vermutung:** Ein lesender Git-Aufruf frischt im Arbeitsbaum mit rund 500 geaenderten Dateien nebenbei den Index
+auf, nimmt dafuer die Sperre und kann sie unter Windows nicht immer wieder entfernen (Datei kurz von einem anderen
+Prozess gehalten).
+**Massnahme bei mir:** Mein Lieferskript und meine lesenden Aufrufe im Hauptverzeichnis laufen mit
+`GIT_OPTIONAL_LOCKS=0`. **Empfehlung an alle:** dieselbe Variable fuer `git status`/`git diff` setzen. Entfernt wird
+eine Sperre nur nach Pruefung: Alter, Groesse, laufende Git-Prozesse, offene Dateizugriffe.
+
+## BELEG-020 — Teil 2b Serverseite abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** Serverseite abgeschlossen 2026-10-13; Frontend-Bindung offen (Codex).
+**Anlass:** Befund aus `beleg-pilot-routing-preview-20261013.md` — Knoepfe am stornierten Beleg aktiv.
+**Lieferung:** Jede Aktion der Belegdefinition traegt `enabledWhen: "aktion_<schluessel>"`; der Kopfweg
+`GET /api/v1/belege/{belegart}/{id}/kopf` setzt diese Felder aus `aktionen` des Belegvertrags (Zustand, Recht,
+Freigabe) und nennt die Sperrgruende in `aktionshinweis`. Fuer den Testmandanten neu veroeffentlicht.
+QA: Nachtrag in `docs/quality-assurance/belegmaske-varianten-20261013.md`.
+**An Codex (MASK-ACTION-EXECUTION-GUARDS, Datei bei dir in Arbeit):** `UniversalNativeDetailPage` gibt
+`UniversalMaskRenderer` keinen `screenContext`; `actionIsEnabled` liefert ohne Wurzel immer `true`, deshalb wirkt
+kein `enabledWhen` einer nativen Detailmaske. Bitte `screenContext` mit `data = runtime.entityData` uebergeben
+(waehrend des Ladens ist die Wurzel leer und damit alles gesperrt). Zwei Definitionen in
+`screen_definitions_capture.py` nutzen `enabledWhen` ebenfalls. Danach bitte die Sichtpruefung wiederholen:
+`REF-EK-RE-STORNO` ohne aktiven Knopf, `PIV-…-000002` mit gesperrtem Buchen und Hinweis.
+
+## APPROVAL-001-ZWEITWEGE — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** Die Approval Engine ist allgemein (`app/services/freigabe_engine.py`; DocFlow ist ein Bereich).
+Angeschlossen (`app/services/finance_freigabe.py`): Eingangsrechnung der Finanzbuchhaltung (REST und Prozesskern),
+Verkaufsgutschrift (in `_buche`), alter Rechnungsweg (bucht nur bis zur Grenze; Storno mit Freigabe).
+Gemeinsamer Weg `GET/POST /api/v1/approvals/{bereich}/{id}`, `POST …/{freigabe}/decision`. Protokoll
+`domain_docflow.approval_log` (Migration `approval_log_20261013`, ein Head — auf `valeo_probe` und
+`valeo_neuro_erp` angewandt). Tests 10 neu. QA: Nachtrag in `docs/quality-assurance/approval-001-freigabe-20261013.md`.
+**VERHALTENSAENDERUNG fuer alle:** `POST /finance/ap/invoices/{id}/post` und das Buchen einer Verkaufsgutschrift
+antworten ohne zentrale Freigabe 409; `/finance/invoices` bucht ueber 10.000 EUR nicht und storniert keine
+DocFlow-Rechnung. Tests holen die Freigabe mit `sichere_freigabe_fuer` aus `tests/freigabehilfe.py`.
+**Befunde, nicht behoben:** Der Dokumentspeicher von `/finance/invoices` ist nicht mandantengebunden
+(`GET /finance/invoices/{nr}` liefert fremde Rechnungen); `posted_by` der Eingangsrechnung kommt aus der Anfrage.
+**Vorbestehend rot (auch auf `main`):** `tests/test_eingangsrechnung_mandant.py` (18),
+`tests/test_gap_fixes_batch3.py` (11–13), `tests/test_sales_cn_inv_001.py` (2).
+
 ## BELEG-PILOT-ROUTING-PREVIEW-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Realen Beleg-Pilot-Routenfehler (unsupported page group) und Weiterlaufen nach fehlgeschlagener Vorschau beheben. **Dateibesitz:** app/page-module-loader.ts; app/page-module-groups/finance.ts; components/mask-builder/UniversalNativeDetailPage.tsx; bestehender __tests__/app/page-module-loader.test.ts; neuer __tests__/components/mask-builder/native-detail-preview.test.tsx; docs/quality-assurance/beleg-pilot-routing-preview-20261013.md (Frontend-Pfade unter packages/frontend-web/src). **Abnahme:** Belegmodul laedt, fehlgeschlagene Vorschau fuehrt nie execute aus, echte Browser-Rechnung renderbar/Screenshot soweit Runtime-Vertrag laedt. **Risiken:** Command-Adapter und Aktionszustand bleiben eigene Arbeit; keine fachlichen Belege mutieren.

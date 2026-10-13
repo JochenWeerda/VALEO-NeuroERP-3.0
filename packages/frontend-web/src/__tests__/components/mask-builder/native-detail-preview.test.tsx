@@ -2,10 +2,10 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
 
-const { executeAction } = vi.hoisted(() => ({ executeAction: vi.fn() }))
+const { executeAction, state } = vi.hoisted(() => ({ executeAction: vi.fn(), state: { data: { aktion_buchen: true, aktionshinweis: '' } as Record<string, unknown> } }))
 vi.mock('@/components/mask-builder', () => ({
   useHumanActionDispatch: () => ({ executeAction }),
-  useUniversalMaskRuntime: () => ({ plan: {}, entityData: {}, tableRows: {}, messages: [], refetch: vi.fn() }),
+  useUniversalMaskRuntime: () => ({ plan: {}, entityData: state.data, tableRows: {}, messages: [], refetch: vi.fn() }),
   UniversalMaskRenderer: ({ onAction, messages }: { onAction: (key: string, payload: object) => void; messages: { message: string }[] }) => (
     <div><button onClick={() => onAction('buchen', {})}>Buchen</button>{messages.map((m, i) => <p key={i}>{m.message}</p>)}</div>
   ),
@@ -17,11 +17,12 @@ vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 vi.mock('@/lib/api-client', () => ({ apiClient: { post: vi.fn().mockResolvedValue({}) }, getAxiosErrorMessage: () => '' }))
 vi.mock('@/lib/api/masks', () => ({ useScreenDefinition: () => ({ data: {
   id: 'beleg/purchase-invoice', title: 'Rechnung', adapter: { temporary: false },
-  actions: [{ key: 'buchen', label: 'Buchen', dangerLevel: 'moderate', commandEndpoint: '/api/v1/docflow/test/post' }],
+  actions: [{ key: 'buchen', label: 'Buchen', enabledWhen: 'aktion_buchen', dangerLevel: 'moderate', commandEndpoint: '/api/v1/docflow/test/post' }],
 }, isFetching: false }) }))
 
 describe('native detail preview failure boundary', () => {
   it.each(['Freigabe erforderlich', 'DocFlow-Vorschau gesperrt'])('never executes after rejected preview: %s', async (error) => {
+    state.data = { aktion_buchen: true }
     executeAction.mockReset().mockResolvedValue({ success: false, error, proposedChanges: [] })
     render(<UniversalNativeDetailPage screenId="beleg/purchase-invoice" entityId="test" />)
     fireEvent.click(screen.getByRole('button', { name: 'Buchen' }))
@@ -30,3 +31,15 @@ describe('native detail preview failure boundary', () => {
     expect(executeAction.mock.calls[0][0].mode).toBe('dryRun')
   })
 })
+
+
+it.each([{}, { aktion_buchen: false }, { aktion_buchen: false, aktionshinweis: 'Beleg ist storniert.' }])(
+  'blocks direct dispatch without a permitted document state: %j', async (data) => {
+    state.data = data
+    executeAction.mockReset()
+    render(<UniversalNativeDetailPage screenId="beleg/purchase-invoice" entityId="test" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Buchen' }))
+    await waitFor(() => expect(screen.getByText(data.aktionshinweis || 'Diese Aktion ist im aktuellen Belegzustand gesperrt.')).toBeInTheDocument())
+    expect(executeAction).not.toHaveBeenCalled()
+  },
+)

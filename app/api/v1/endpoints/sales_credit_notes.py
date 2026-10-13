@@ -652,7 +652,14 @@ def _buchungsplan(db: Session, tenant_id: str, cn_id: str) -> dict:
 
 
 def _buche(db: Session, plan: dict, tenant_id: str) -> str:
-    """Schreibt Buchungskopf, Zeilen, Status und OP-Minderung — ohne Festschreiben. Gibt den Satz zurueck."""
+    """Schreibt Buchungskopf, Zeilen, Status und OP-Minderung — ohne Festschreiben. Gibt den Satz zurueck.
+
+    Jede Gutschrift braucht die Freigabe einer zweiten Person (APPROVAL-001); sie wird hier verbraucht, in der
+    Transaktion der Buchung. Die Stelle gilt fuer jeden Weg, der eine Gutschrift bucht.
+    """
+    from app.services import finance_freigabe
+
+    finance_freigabe.verlange_gutschrift(db, tenant_id, str(plan["id"]))
     je_id = uuid7()
     db.execute(
         text("""

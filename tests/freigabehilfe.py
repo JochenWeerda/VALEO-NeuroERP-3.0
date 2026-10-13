@@ -32,3 +32,22 @@ def sichere_freigabe(mandant: str, doc_id: str, aktion: str = "post", antragstel
         if anfrage["status"] == "requested":
             engine.entscheide(doc_id, str(anfrage["id"]), ZWEITE, True, "Test")
         return str(anfrage["id"])
+
+
+def sichere_freigabe_fuer(klasse: type, mandant: str, subject_id: str, aktion: str = "post",
+                          antragsteller: str = ERSTE) -> str | None:
+    """Wie ``sichere_freigabe``, fuer jeden Bereich der Approval Engine (Eingangsrechnung, Gutschrift …)."""
+    with SessionLocal() as db:
+        engine = klasse(db, mandant)
+        vorgang = engine.vorgang(subject_id, aktion)
+        if not engine.anforderung(vorgang, aktion).zweitfreigabe:
+            db.rollback()
+            return None
+        vorhanden = engine.gueltige_fuer(vorgang, aktion)
+        if vorhanden:
+            db.rollback()
+            return str(vorhanden["id"])
+        anfrage = engine.beantrage(subject_id, aktion, antragsteller, "Test")
+        if anfrage["status"] == "requested":
+            engine.entscheide(subject_id, str(anfrage["id"]), ZWEITE, True, "Test")
+        return str(anfrage["id"])

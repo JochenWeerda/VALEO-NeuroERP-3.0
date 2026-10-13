@@ -34,9 +34,13 @@ class TestFinStornoStoreBelegbruch:
             patch("app.api.v1.endpoints.finance_invoices.get_from_store", return_value=invoice_data),
             patch("app.api.v1.endpoints.finance_invoices.save_to_store") as mock_save,
             patch("app.api.v1.endpoints.finance_invoices.log_fibu_audit"),
+            # Nachgestellte Datenbank: Die Freigabe des Stornos prueft tests/test_freigabe_zweitwege.py an der echten.
+            patch("app.services.finance_freigabe.verlange_storno_ausgangsrechnung") as freigabe,
         ):
             mock_svc.return_value.reverse.return_value = (MagicMock(id="JE-001"), reversal_mock)
-            result = await storno_invoice(invoice_number="RG-2026-200", tenant_id=TENANT, db=db)
+            result = await storno_invoice(invoice_number="RG-2026-200", tenant_id=TENANT, db=db, nutzer={"sub": "b-1"})
+
+        freigabe.assert_called_once_with(db, TENANT, "RG-2026-200", "b-1")
 
         assert result["ok"] is True
         assert mock_save.called

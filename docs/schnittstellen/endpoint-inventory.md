@@ -53,6 +53,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `annahme` | Annahme — Eingangs-Warteschlange (Ernte-Annahme / Wareneingang) |
 | `ap_approval_workflow` | AP Approval Workflow API |
 | `ap_invoices` | Accounts Payable (AP) Invoices API |
+| `approvals` | Der gemeinsame Freigabeweg (APPROVAL-001): anfragen, entscheiden, einsehen — fuer jeden Bereich gleich. |
 | `article_extensions` | Article extension endpoints (l3c-artikel extras) |
 | `articles` | Inventory Articles management endpoints. |
 | `artikel_bestandteile` | Artikel-Bestandteile — Qualitätsmerkmale und Inhaltsstoffe. |

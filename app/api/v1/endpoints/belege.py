@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.auth.beleg_roles import darf, verlange
 from app.auth.deps import get_current_user
 from app.core.belegvertrag import BELEGARTEN, Beleg
+from app.core.screen_definitions_beleg import zustandsfeld
 from app.core.database import get_db
 from app.core.mask_screen_summary_common import build_tab_page
 from app.core.tenant import get_tenant_id
@@ -44,7 +45,12 @@ def beleg_kopf(
         "preise_sichtbar": beleg.preise_sichtbar,
         "buchungsstand": beleg.buchung.stand, "buchungsgrund": beleg.buchung.grund,
         "aktionen": [a.model_dump(mode="json") for a in beleg.aktionen],
+        # Was gerade nicht geht, und warum — fuer den Menschen an der Maske.
+        "aktionshinweis": "\n".join(f"{a.bezeichnung}: {a.grund}" for a in beleg.aktionen if not a.erlaubt and a.grund) or None,
     }
+    # Je Aktion ein Feld, an dem der Knopf der Maske haengt (``enabledWhen``). Was der Beleg nicht anbietet, fehlt.
+    for aktion in beleg.aktionen:
+        kopf[zustandsfeld(aktion.key)] = aktion.erlaubt
     if beleg.summen is not None:
         kopf.update(waehrung=beleg.waehrung, netto=str(beleg.summen.netto), steuer=str(beleg.summen.steuer),
                     brutto=str(beleg.summen.brutto))

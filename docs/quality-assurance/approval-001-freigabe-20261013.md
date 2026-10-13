@@ -92,3 +92,72 @@ Anwendung fachlich abzunehmen.
 
 **Produktivfreigabe:** Buchen, Stornieren und schreibende MCP-Aktionen bleiben gesperrt, bis die
 Integrationstests über alle Zugänge und die fachliche Abnahme der Schwellen vorliegen.
+
+## Nachtrag: Die Buchungswege neben DocFlow (APPROVAL-001-ZWEITWEGE)
+
+Drei Wege buchten, ohne dass der Beleg in DocFlow steht — und damit an der Freigabe vorbei. Jetzt gehen
+sie durch dieselbe Engine.
+
+- **Die Engine ist allgemein** (`app/services/freigabe_engine.py`): Ein Bereich schließt sich an, indem
+  er liefert, was sein Vorgang ist (Belegart, Betrag, Stand, Ersteller, freigaberelevanter Inhalt).
+  Regel, Funktionstrennung, Bindung an den Inhalt, Ablauf und Verbrauch sind für alle gleich.
+  DocFlow ist einer dieser Bereiche (`docflow_freigabe.py`).
+- **Ein gemeinsamer Freigabeweg:** `GET/POST /api/v1/approvals/{bereich}/{id}` und
+  `POST …/{freigabe}/decision` für `docflow_document`, `finance_ap_invoice`, `sales_credit_note`,
+  `finance_sales_invoice`.
+- **Ein gemeinsames Protokoll:** `domain_docflow.approval_log` (Migration `approval_log_20261013`, ein
+  Head), unveränderlich. DocFlow-Belege tragen den Eintrag zusätzlich in ihrem Kommandoprotokoll.
+
+| Weg | Jetzt |
+|---|---|
+| Eingangsrechnung der Finanzbuchhaltung, `POST /finance/ap/invoices/{id}/post` | Bucht erst mit zentraler Freigabe. Eine Finanzrechnung hat weder Bestellung noch Wareneingang, also keinen Rechnungsabgleich — sie braucht immer die zweite Person. Wer angelegt hat, steht jetzt am Beleg (`createdBy`) und gibt nicht frei. |
+| Derselbe Beleg über den Prozesskern (`PostAPInvoice`) | Bucht ohne gültige Freigabe nicht. |
+| Verkaufsgutschrift, `POST /sales/credit-notes/{id}/post` und `…/actions/buchen` | Jede Gutschrift braucht die zweite Person, über 1.000 € die erhöhte Berechtigung; Gutschriften zur selben Rechnung zählen zusammen. Die Prüfung sitzt in der Buchung selbst und gilt damit auch für den Weg über den Buchungsvorschlag eines Agenten. |
+| Alter Rechnungsweg, `POST/PUT /finance/invoices` | Legt an und bucht in einem Schritt und kann keine Freigabe einholen: Er bucht nur bis 10.000 €; darüber 409 mit Verweis auf den Belegweg, und es entsteht kein Beleg. |
+| Storno über den alten Rechnungsweg, `POST /finance/invoices/{nr}/storno` | Braucht die Freigabe einer zweiten Person mit erhöhter Berechtigung. **Eine DocFlow-Rechnung storniert er nicht mehr.** |
+
+### Befunde dabei
+
+- **Umgehungsweg geschlossen:** Der Storno des alten Rechnungswegs fand die Buchung über die
+  Rechnungsnummer — auch die einer DocFlow-Rechnung — und nahm sie ohne Beleg, Statushistorie und
+  Freigabe zurück. Der DocFlow-Beleg wäre „gebucht" geblieben.
+- **Behoben:** Derselbe Storno antwortete immer 500, obwohl er storniert hatte (dem Antwortmodell fehlte
+  ein Pflichtfeld).
+- **Behoben:** Der alte Rechnungsweg legt für sein Archivstück einen DocFlow-Kopf an
+  (`source_system = gobd_artifact`). Belegweg und `beleg.suchen` hielten ihn für einen Beleg; jetzt nicht
+  mehr.
+- **Nicht behoben:** Der Dokumentspeicher des alten Rechnungswegs kennt keinen Mandanten —
+  `GET /finance/invoices/{nr}` liefert die Rechnung jedes Mandanten. Der Storno-Vorgang der Engine
+  stützt sich deshalb auf die Buchung, nicht auf diesen Speicher.
+- **Nicht behoben:** Der Buchende der Eingangsrechnung (`posted_by`) kommt weiter aus der Anfrage, nicht
+  aus der Anmeldung; im Freigabeprotokoll steht die Anmeldung.
+
+### Nachweis
+
+- `tests/test_freigabe_zweitwege.py`: 10 bestanden gegen `valeo_probe` — Finanzrechnung nur mit zweiter
+  Person, Antragstellerin und Erstellerin geben nicht frei, Prozesskern bucht nicht ohne Freigabe;
+  Gutschrift auf beiden Buchungswegen, R4 über 1.000 € und bei Stückelung; alter Rechnungsweg nur bis
+  zur Grenze, darüber entsteht nichts; Storno mit erhöhter Freigabe; **der alte Weg storniert keine
+  DocFlow-Rechnung**; gemeinsamer Weg je Bereich, Lesen ist nicht Buchen, fremder Mandant.
+- Vorhandene Tests der drei Wege holen die Freigabe über die Engine (`tests/freigabehilfe.py`). Ein
+  Test änderte das Aufwandskonto nach der Freigabe und scheiterte daran zu Recht.
+- Gesamtlauf über 37 Testdateien (Finanzwege, DocFlow, Belegweg, Rechte, MCP): 2.104 bestanden, 31
+  fehlgeschlagen. Dieselben drei Testdateien schlagen ohne meine Änderung fehl (33 im Vergleichslauf
+  auf `main`: `test_eingangsrechnung_mandant`, `test_gap_fixes_batch3`, `test_sales_cn_inv_001`).
+
+### Auslegungen (meine, nicht entschieden)
+
+- **Jede Finanzrechnung braucht die zweite Person**, auch unter 5.000 €: Die Matrix verlangt für das
+  Rollenrecht einen erfolgreichen Rechnungsabgleich, den es ohne Bestellung nicht gibt. Der
+  Freigabeablauf des AP-Moduls (`ap_approval_workflow`) bleibt daneben bestehen — das sind vorerst
+  zwei Schritte. Für wiederkehrende Finanzrechnungen (Miete, Versicherung) wäre eine vorab genehmigte
+  Richtlinie der passende Weg; die gibt es noch nicht.
+- **Der alte Rechnungsweg bekommt keinen Freigabeablauf**, weil er ohnehin abgelöst wird.
+
+### Weiter offen
+
+- Manuelle Hauptbuchbuchung (R3) und Zahlungsfreigabe (R4) rufen die Engine nicht auf.
+- Der zweite Freigabeablauf der Eingangsrechnung (`ap_approval_workflow`) ist nicht in die Engine
+  überführt.
+- Die Einkaufsgutschriften und Belastungen unter `/einkauf/credit-memos`, `/einkauf/debit-memos` und
+  die Kasse habe ich nicht untersucht.

@@ -112,6 +112,7 @@ AUFRAEUMEN = (
     "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
     "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",
     "DELETE FROM domain_erp.offene_posten WHERE tenant_id = :t",
+    "DELETE FROM domain_docflow.approval_log WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.approvals WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.document_status_history WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.document_command_log WHERE tenant_id = :t",
@@ -210,3 +211,34 @@ def test_kette_und_verlauf_sind_lesbar_beschriftet_und_blaettern(http, satz):
     assert seite1["total"] == 3 and len(seite1["items"]) == 2 and len(seite2["items"]) == 1
     verlauf = http("admin").get(f"/api/v1/belege/sales_invoice/{satz['vk-rechnung-storno']['id']}/tabs/historie").json()
     assert [v["nach_status"] for v in verlauf["items"]][-2:] == ["posted", "reversed"]
+
+
+def test_jeder_knopf_haengt_am_zustand_den_der_server_liefert(http, satz):
+    """Bis 13.10.2026 waren die Knoepfe der Maske immer aktiv — auch am stornierten Beleg (Befund der Sichtpruefung)."""
+    for belegart in bv.BELEGARTEN:
+        for aktion in sdb.build_beleg_screen_definition(belegart)["actions"]:
+            assert aktion["enabledWhen"] == sdb.zustandsfeld(aktion["key"]) and ":" not in aktion["enabledWhen"]
+
+    def kopf(rolle: str, *rollen: str) -> dict:
+        b = satz[rolle]
+        return http(*(rollen or ("admin",))).get(f"/api/v1/belege/{b['doc_type']}/{b['id']}/kopf").json()
+
+    storniert = kopf("ek-rechnung-storno")
+    assert not [k for k, v in storniert.items() if k.startswith("aktion_") and v is True]
+    # Offene Ausgangsrechnung unter der Grenze: buchen geht, stornieren (nicht gebucht) nicht.
+    offen = kopf("vk-rechnung-2")
+    assert offen["aktion_buchen"] is True and offen["aktion_stornieren"] is False
+    assert "Stornieren: Storniert wird nur ein gebuchter Beleg." in offen["aktionshinweis"]
+    # Eingangsrechnung ueber der Grenze: buchen gesperrt mit Grund, Freigabe anfragen moeglich.
+    gross = kopf("ek-rechnung-2")
+    assert gross["aktion_buchen"] is False and "Buchen: Freigabe erforderlich (R3)" in gross["aktionshinweis"]
+    assert gross["aktion_freigabe_anfordern_post"] is True
+    # Gebuchte Rechnung: buchen wird gar nicht angeboten; Gutschrift erstellen ja.
+    gebucht = kopf("vk-rechnung-1")
+    assert "aktion_buchen" not in gebucht and gebucht["aktion_umwandeln_sales_credit_memo"] is True
+    # Ohne Recht ist nichts aktiv.
+    leser = kopf("vk-rechnung-2", "SALES_LESEN")
+    assert not [k for k, v in leser.items() if k.startswith("aktion_") and v is True]
+    # Auftrag mit Lieferungen: Rechnung direkt gesperrt.
+    auftrag = kopf("vk-auftrag")
+    assert auftrag["aktion_umwandeln_sales_invoice"] is False and "Rechnung erstellen:" in auftrag["aktionshinweis"]

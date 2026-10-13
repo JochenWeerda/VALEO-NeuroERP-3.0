@@ -48,7 +48,8 @@ def lies_beleg(svc: DocflowService, doc_id: str, darf: Optional[Darf] = None,
     if not header:
         return None
     variante = BELEGARTEN.get(str(header["doc_type"]))
-    if variante is None:
+    # Ein Kopf, der nur ein Archivstueck des alten Rechnungswegs traegt, ist kein DocFlow-Beleg.
+    if variante is None or str(header.get("source_system") or "") == "gobd_artifact":
         return None
     items = svc.fetch_items(doc_id)
     status = str(header["status"])

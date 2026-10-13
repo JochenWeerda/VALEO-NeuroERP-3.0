@@ -24,6 +24,8 @@ from app.api.v1.endpoints import ap_approval_workflow, ap_invoices
 from app.core.database import SessionLocal
 from app.core.exceptions import register_domain_exception_handlers
 from app.finance.steuerschluessel import Steuerklaerung, richte_skr03_ein, vorsteuergruppen
+from app.services.finance_freigabe import EingangsrechnungFreigabe
+from freigabehilfe import sichere_freigabe_fuer
 from testgrenze import ersetze_mandant, ersetze_nutzer
 
 WEG = "/ap/invoices"
@@ -111,7 +113,12 @@ def _freigeben(nummer: str) -> None:
         db.execute(text(
             "UPDATE documents SET data = jsonb_set(CAST(data AS jsonb), '{status}', '\"FREIGEGEBEN\"') "
             "WHERE doc_type = 'ap_invoice' AND doc_number = :n"), {"n": nummer})
+        mandant = db.execute(text(
+            "SELECT CAST(data AS jsonb)->>'tenantId' FROM documents WHERE doc_type = 'ap_invoice' AND doc_number = :m"),
+            {"m": nummer}).scalar()
         db.commit()
+    # Zentrale Freigabe (APPROVAL-001): Eine Finanzrechnung braucht eine zweite Person.
+    sichere_freigabe_fuer(EingangsrechnungFreigabe, mandant, nummer)
 
 
 def _beleg(nummer: str) -> dict:
@@ -163,12 +170,13 @@ def test_bucht_aufwand_und_vorsteuer_im_soll_und_den_kreditor_im_haben(haus):
 
 def test_das_aufwandskonto_der_rechnung_geht_dem_des_schluessels_vor(haus):
     nummer = _anlegen(haus, [("9", None, 1, 100)], expenseAccountId="4980")
-    _freigeben(nummer)
     with SessionLocal() as db:
         db.execute(text(
             "UPDATE documents SET data = jsonb_set(CAST(data AS jsonb), '{expenseAccountId}', '\"4980\"') "
             "WHERE doc_type = 'ap_invoice' AND doc_number = :n"), {"n": nummer})
         db.commit()
+    # Erst der endgueltige Inhalt, dann die Freigabe: Eine Aenderung danach machte sie ungueltig.
+    _freigeben(nummer)
     assert _buchen(haus, nummer).status_code == 200
     assert ("4980", Decimal("100.00"), Decimal("0.00")) in _buchung(haus["mandant"])
 

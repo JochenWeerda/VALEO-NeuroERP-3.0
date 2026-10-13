@@ -68,6 +68,18 @@ def post_ap_invoice_kernel_sync(
         logger.warning("PostAPInvoice: Periode %s ist %s", period, gesperrt)
         return
 
+    # Zentrale Freigabe (APPROVAL-001): ohne gueltige Freigabe einer zweiten Person bucht auch der Kernel nicht.
+    from app.core.exceptions import ConflictError
+    from app.services.finance_freigabe import EingangsrechnungFreigabe
+
+    freigabe = EingangsrechnungFreigabe(db, inv_tenant)
+    try:
+        freigabe.verlange_fuer(freigabe.vorgang_aus(invoice_id, invoice), "post", posted_by)
+    except ConflictError as fehlt:
+        db.rollback()
+        logger.warning("PostAPInvoice: %s nicht gebucht: %s", invoice_id, fehlt.detail)
+        return
+
     # Derselbe Buchungsweg wie REST: Aufwand und Vorsteuer je Steuerschluessel im Soll, Kreditor im Haben.
     try:
         je_id, gruppen = buche_eingangsrechnung(
