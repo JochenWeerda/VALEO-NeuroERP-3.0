@@ -94,4 +94,28 @@ describe('ScreenStudioPage', () => {
     await waitFor(() => expect(screen.getByTestId('studio-gates')).toHaveTextContent('action_confirmation_fehlt'))
     expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
   })
+
+  it('requires saving local changes before review or publication', async () => {
+    const response = async (url: string, body: { definition?: unknown }) => ({ data: {
+      id: 'draft-a', status: 'draft', definition: body.definition,
+      violations: [], canPublish: true, readiness: { errors: [] },
+    } })
+    postMock.mockImplementation(response)
+    putMock.mockImplementation(response)
+    renderStudio()
+    fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Prüfung' })).toBeEnabled())
+    expect(screen.getByRole('button', { name: 'Freigeben' })).toBeEnabled()
+    fireEvent.change(screen.getByLabelText('Titel'), { target: { value: 'Ungespeicherter Entwurf' } })
+    expect(screen.getByRole('button', { name: 'Prüfung' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
+    expect(screen.getByText('Änderungen zuerst speichern, danach erneut prüfen.')).toBeInTheDocument()
+    putMock.mockRejectedValueOnce(new Error('Speichern fehlgeschlagen'))
+    fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
+    await waitFor(() => expect(screen.getByText('Speichern fehlgeschlagen')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Freigeben' })).toBeEnabled())
+  })
+
 })

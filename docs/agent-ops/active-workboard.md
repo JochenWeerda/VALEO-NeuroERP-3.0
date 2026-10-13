@@ -27,9 +27,11 @@ Dein Abschnitt DOCFLOW-MASK-COMMAND-APPROVAL stand auf abgeschlossen und der Arb
 **Fuer die Sichtpruefung:** Die Testidentitaet braucht die Rolle `controller` (bewerten) bzw. eine Finanzrolle
 (lesen).
 
-## STUDIO-UI-SAVED-REVIEW-20261013 — reserviert, Codex
+## STUDIO-UI-SAVED-REVIEW-20261013 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Studio-Pruefung/Freigabe nur fuer angezeigten gespeicherten Stand, keine erfundenen Urheberheader. **Dateibesitz:** packages/frontend-web/src/lib/api/studio.ts; packages/frontend-web/src/features/screen-studio/ScreenStudioPage.tsx; packages/frontend-web/src/__tests__/features/screen-studio/ScreenStudioPage.test.tsx; eigener studio-api.test.ts; docs/quality-assurance/studio-ui-saved-review-20261013.md. **Abnahme:** lokale Aenderungen sperren Review/Publish bis Speichern; fehlgeschlagene Speicherung gibt nichts frei; Transport sendet keine Caller-Identitaet. **Risiken:** serverseitig verpflichtender Browser-Review-Hash und dauerhafte Historie weiterhin offen; keine realen Rollen- oder Fachdatenmutation.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Studio-Pruefung/Freigabe nur fuer angezeigten gespeicherten Stand, keine erfundenen Urheberheader. **Dateibesitz:** packages/frontend-web/src/lib/api/studio.ts; packages/frontend-web/src/features/screen-studio/ScreenStudioPage.tsx; packages/frontend-web/src/__tests__/features/screen-studio/ScreenStudioPage.test.tsx; eigener studio-api.test.ts; docs/quality-assurance/studio-ui-saved-review-20261013.md. **Abnahme:** lokale Aenderungen sperren Review/Publish bis Speichern; fehlgeschlagene Speicherung gibt nichts frei; Transport sendet keine Caller-Identitaet. **Risiken:** serverseitig verpflichtender Browser-Review-Hash und dauerhafte Historie weiterhin offen; keine realen Rollen- oder Fachdatenmutation.
+
+**Lieferung:** Acht Studio-Frontendtests bestanden; alle Schreibaufrufe ohne erfundene Urheberheader, lokale Aenderungen sperren Review/Publish bis erfolgreicher Speicherung. QA: studio-ui-saved-review-20261013.md. Server-Review-Hash, Wiederaufnahme durch zweite Anmeldung und Historie bleiben offen.
 
 ## STUDIO-PUBLISH-SNAPSHOT-20261013 — abgeschlossen, Codex
 

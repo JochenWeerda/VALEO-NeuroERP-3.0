@@ -24,12 +24,14 @@ export function ScreenStudioPage(): JSX.Element {
   const [definition, dispatch] = useReducer(studioReducer, emptyStudioDraft())
   const [intent, setIntent] = useState('Lieferanten bewerten und auswählen')
   const [draftId, setDraftId] = useState<string>()
+  const [savedSignature, setSavedSignature] = useState<string>()
   const [publishedRoute, setPublishedRoute] = useState<string>()
   const [report, setReport] = useState<StudioReport>()
   const [pending, setPending] = useState<string>()
   const [feedback, setFeedback] = useState<string | null>(null)
   const catalog = useQuery({ queryKey: ['studio-catalog'], queryFn: fetchStudioCatalog })
   const plan = useMemo(() => compileRenderPlanFromScreenDefinition(definition), [definition])
+  const dirty = savedSignature !== JSON.stringify(definition)
   const tables = useMemo(() => mockRowsFor(definition), [definition])
 
   useEffect(() => {
@@ -101,18 +103,22 @@ export function ScreenStudioPage(): JSX.Element {
           <Button type="button" disabled={Boolean(pending)} onClick={() => void run('save', async () => {
             const saved = await saveStudioDraft(definition, draftId)
             setDraftId(saved.id)
+            setSavedSignature(JSON.stringify(saved.definition))
+            setPublishedRoute(undefined)
             setReport(saved)
             setFeedback(`Gespeichert (${saved.status}).`)
           })}>
             {pending === 'save' ? 'Speichern…' : 'Speichern'}
           </Button>
-          <Button type="button" variant="outline" disabled={!draftId || Boolean(pending)} onClick={() => void run('review', async () => {
+          <Button type="button" variant="outline" disabled={!draftId || dirty || Boolean(pending)} onClick={() => void run('review', async () => {
+            if (dirty) return
             await submitStudioReview(draftId ?? '')
             setFeedback('Zur Prüfung gegeben.')
           })}>
             Prüfung
           </Button>
-          <Button type="button" variant="outline" disabled={!draftId || Boolean(pending) || !report?.canPublish} onClick={() => void run('publish', async () => {
+          <Button type="button" variant="outline" disabled={!draftId || dirty || Boolean(pending) || !report?.canPublish} onClick={() => void run('publish', async () => {
+            if (dirty) return
             const published = await publishStudioDraft(draftId ?? '')
             setReport(published)
             setPublishedRoute(published.route)
@@ -121,8 +127,10 @@ export function ScreenStudioPage(): JSX.Element {
             Freigeben
           </Button>
         </div>
+        <p className="text-sm text-muted-foreground">Freigabe erfolgt durch eine andere angemeldete menschliche Administration.</p>
+        {draftId && dirty ? <p role="status">Änderungen zuerst speichern, danach erneut prüfen.</p> : null}
         {feedback ? <p className="text-sm" role="status">{feedback}</p> : null}
-        {publishedRoute ? (
+        {publishedRoute && !dirty ? (
           <a className="text-sm underline" href={publishedRoute} data-testid="studio-run-link">
             Freigegebene Maske öffnen
           </a>
