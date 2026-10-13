@@ -117,10 +117,39 @@ def _is_db_reachable() -> bool:
         return False
 
 
+def _test_database_authorized(effective_url: str) -> bool:
+    """No implicit development DB; CI reuses only its declared job database."""
+    from sqlalchemy.engine import make_url
+    from sqlalchemy.exc import ArgumentError
+    from dotenv import dotenv_values
+
+    ci = os.environ.get("CI", "").lower() == "true"
+    declared = os.environ.get("TEST_DATABASE_URL")
+    if ci:
+        declared = declared or os.environ.get("DATABASE_URL")
+    if not declared:
+        return False
+    try:
+        effective, test = make_url(effective_url), make_url(declared)
+        if effective != test:
+            return False
+        if ci:
+            return True
+        development = os.environ.get("DEVELOPMENT_DATABASE_URL") or dotenv_values(".env").get("DATABASE_URL")
+        return not development or test.database != make_url(development).database
+    except (ArgumentError, ValueError, TypeError):
+        return False
+
+
+def _database_fixtures_authorized() -> bool:
+    from app.core.database import engine
+    return _test_database_authorized(engine.url.render_as_string(hide_password=False))
+
+
 @pytest.fixture(scope="session", autouse=True)
 def _seed_contract_test_tenants():
     """Ensure tenant fixtures referenced by DB integration tests exist."""
-    if not _is_db_reachable():
+    if not _database_fixtures_authorized() or not _is_db_reachable():
         yield
         return
 
@@ -156,6 +185,11 @@ def _seed_contract_test_tenants():
 @pytest.fixture
 def require_db():
     """Fixture: skipt den Test wenn die Datenbank nicht erreichbar ist."""
+    if not _database_fixtures_authorized():
+        message = "Explicit TEST_DATABASE_URL must match DATABASE_URL and must not select the development database."
+        if os.environ.get("PYTEST_REQUIRE_DB_STRICT") == "1":
+            pytest.fail(message)
+        pytest.skip(message)
     if not _is_db_reachable():
         if os.environ.get("PYTEST_REQUIRE_DB_STRICT") == "1":
             pytest.fail(

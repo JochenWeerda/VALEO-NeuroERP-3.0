@@ -28,9 +28,11 @@ vorhandener valeo_probe, Revision steuerschluessel_aufwandskonto_20261013.
 DATABASE_URL und TEST_DATABASE_URL waren beide auf diesen Pruefstand gesetzt.
 Keine neue Datenbank, kein Container, kein Reset, keine Migration.
 
-Offen bleiben die weiteren zehn CI-Dateien. Workflow ist separat geclaimt;
+Workflow und die globale Fixture-Schreibgrenze sind inzwischen geliefert,
+Nachweis: [CI-Identitaet und Testdatenisolation](ci-identity-test-isolation-20261013.md).
+Offen bleiben neun weitere CI-Dateien;
 RFQ bereitet sein Schema noch selbst vor und verwendet gemeinsame Demodaten.
-Die globale autouse-Tenantseed-Fixture braucht zudem eine ausdrueckliche
-Testdatenbankgrenze, bevor beliebige lokale pytest-Aufrufe als sicher gelten.
+Die globale autouse-Tenantseed-Fixture besitzt jetzt eine ausdrueckliche
+Testdatenbankgrenze; direkte Datenbankzugriffe anderer Tests sind separat zu pruefen.
 Workflowtabellen ohne Mandantenfeld und Payloadrollen sind eigenstaendige
 Produktionsbefunde, die nicht durch gruene Testfixtures geschlossen werden.
