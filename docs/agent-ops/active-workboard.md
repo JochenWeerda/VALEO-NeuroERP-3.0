@@ -32,9 +32,11 @@ Belegweg, DocFlow und MCP fragen, ob eine Anmeldung ein Recht hat (`darf`, `verl
 `app/auth/beleg_permissions.py` eigene Belegrollen, gehoeren sie in `rollen_fuer` — nicht als zweite Pruefung
 daneben. Ich fasse `beleg_permissions.py` und die Keycloak-Dateien nicht an.
 
-## BELEG-IDENTITY-SCOPES-20261013 — reserviert, Codex
+## BELEG-IDENTITY-SCOPES-20261013 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Explizite Beleg-Lese-/Bearbeitungsrollen mit rollenbeschraenkten Keycloak-Scopes bereitstellen und lokal verifizieren. **Dateibesitz:** neues app/auth/beleg_permissions.py; neues scripts/keycloak_document_scopes.py; scripts/provision_identity_provider.py nur Beleg-Scopes; config/keycloak/fachrollen.json nur generierte Belegrollen; neue tests/test_beleg_identity_scopes.py; docs/quality-assurance/beleg-identity-scopes-20261013.md. **Abnahme:** Provisionierung wiederholbar, unbekannte Rollen/Scope-Abweichungen blockieren, echte lokale Token-Evaluation mit/ohne Rechte; kein implizites admin- oder MCP-Schreibrecht. **Risiken:** Belegarten-/Preis-/Aktionsrechte und MCP-Write-Freischaltung sind eigene Folgegates.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** belege:read/write aus den vorhandenen Bereichsrollen in finance_roles.py als rollenbeschraenkte Keycloak-Scopes bereitstellen; keine neuen Belegrollen/kein zweites Rechtesystem. **Dateibesitz:** app/auth/finance_roles.py nur geteilte vorhandene Rollentupel; neues scripts/keycloak_document_scopes.py; scripts/provision_identity_provider.py nur Beleg-Scopes; neue tests/test_beleg_identity_scopes.py; docs/quality-assurance/beleg-identity-scopes-20261013.md. **Abnahme:** Provisionierung wiederholbar, unbekannte Rollen/Scope-Abweichungen blockieren, echte lokale Token-Evaluation mit/ohne Rechte; MCP-Schreibfreischaltung unabhaengig. **Risiken:** Preis-/Aktionsrechte und MCP-Write-Freischaltung sind Folgegates.
+
+**Lieferung:** belege:read/write aus unveraenderten Bereichsrollen in finance_roles.py; keine neuen Belegrollen. Lokaler Keycloak fuer beide ERP-Clients integriert, sechs Provider-Scope-Evaluationen mit/ohne Rechte bestanden; eigene Pruefidentitaeten geloescht. 24 Vertragstests bestanden, Fachrollen-Katalog 34 unveraendert. QA: beleg-identity-scopes-20261013.md. Neue Anmeldung fuer neue Token; MCP-Write-Freischaltung und konkrete Fach-/Preis-/Aktionsrechte bleiben unabhaengige Gates.
 
 ## BELEG-013 — abgeschlossen, Claude Code
 

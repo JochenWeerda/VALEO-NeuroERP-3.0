@@ -10,10 +10,13 @@ import copy
 import json
 import os
 import secrets
+import sys
 from pathlib import Path
 import httpx
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 
 def standard_login_scopes() -> list[dict]:
@@ -50,7 +53,8 @@ def prepared_realm(source: dict) -> dict:
     realm['users'] = []
     scopes=realm.setdefault('clientScopes',[])
     existing_scopes={scope['name'] for scope in scopes}
-    scopes.extend(scope for scope in standard_login_scopes() if scope['name'] not in existing_scopes)
+    from scripts.keycloak_document_scopes import document_scopes, ERP_CLIENT_IDS
+    scopes.extend(scope for scope in standard_login_scopes() + document_scopes() if scope['name'] not in existing_scopes)
     catalog = json.loads((ROOT / 'config/keycloak/fachrollen.json').read_text(encoding='utf-8'))
     roles = realm.setdefault('roles', {}).setdefault('realm', [])
     known = {role['name'] for role in roles}
@@ -62,6 +66,10 @@ def prepared_realm(source: dict) -> dict:
                  ssoSessionMaxLifespan=28800, revokeRefreshToken=True, refreshTokenMaxReuse=0)
     available_scopes={scope['name'] for scope in scopes}|{'offline_access'}
     for client in realm.get('clients', []):
+        if client.get('clientId') in ERP_CLIENT_IDS:
+            defaults = client.setdefault('defaultClientScopes', [])
+            for name in ('belege:read', 'belege:write'):
+                if name not in defaults: defaults.append(name)
         # Remove unused imported optional references that never had a scope.
         if 'optionalClientScopes' in client:
             client['optionalClientScopes']=[name for name in client['optionalClientScopes'] if name in available_scopes]
@@ -147,6 +155,8 @@ def provision(client: httpx.Client, username: str, password: str, source: dict, 
         raise RuntimeError(f'Realm inventory failed ({exists.status_code})')
     reconcile_realm_roles(client, headers, name, realm['roles']['realm'])
     scope_ids=reconcile_client_scopes(client,headers,name,realm['clientScopes'])
+    from scripts.keycloak_document_scopes import reconcile_document_scope_roles
+    reconcile_document_scope_roles(client, headers, name, scope_ids)
     for desired in realm.get('clients',[]):
         found=client.get(f'/admin/realms/{name}/clients',headers=headers,params={'clientId':desired['clientId']})
         found.raise_for_status()
