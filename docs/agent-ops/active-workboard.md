@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## LOGIN-RUNTIME-ISSUER-20261013 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** reale Anmeldung und lesender Backendnachweis: erwarteter issuer http://keycloak:8080, Browserprovider issuer http://localhost:8080. **Ziel:** öffentlichen Token-Aussteller vom internen JWKS-Transport trennen. **Dateibesitz:** docker-compose.yml backend nur OIDC_ISSUER_URL/OIDC_JWKS_URL; lokaler begrenzter Runtimeoverride ohne init_db und ohne Schemaänderung; eigener Konfigurationsvertrag, QA/Handbuch/Workboard. **Abnahme:** tatsächliche Backendkonfiguration korrekt, bestehender Backenddienst rekonfiguriert ohne neue DB/Container pro Test oder Migration; keine Änderung bestehender Nutzer/Rollen/Realmrichtlinien, echter Browser-Recheck. Persönliche Kennungen nicht versionieren. Produktions-Deploymentkonfiguration bleibt eigener offener Befund.
+
 ## STEUERSCHLUESSEL-MASKE-SD-20261013 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Auftrag: Maske Steuerschluessel vereinheitlichen,
