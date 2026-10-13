@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MASK-ACTION-EXECUTION-GUARDS-20261013 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Direkte Maskenaktionsaufrufe pruefen deklarierte Rechte; DocFlow-Vorschau ohne vereinbarten Adapter darf keinen schreibenden HTTP-Aufruf senden. **Dateibesitz:** runtime/ActionRuntime.ts; runtime/useActionRuntime.ts; bestehende ActionRuntime.test.ts und useActionRuntime.input-flow.test.ts unter packages/frontend-web/src/components/mask-builder bzw. __tests__/components/mask-builder/runtime; docs/quality-assurance/mask-action-execution-guards-20261013.md. **Abnahme:** Mensch/Agent ohne Aktionsrecht vor HTTP abgewiesen, erlaubtes Recht bleibt moeglich; DocFlow dryRun/validate/propose ohne Mutation; bisherige Human-Form-Sperre gruen. **Risiken:** Kein vollständiger DocFlow-Adapter, Registry-/Routen-/Maskensichtpruefung noch offen.
+
 ## BELEG-MASK-PERMISSION-PROJECTION-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Bestehende kanonische Belegrechte in den gemeinsamen Masken-Permission-Resolver projizieren, ohne zweite Rollenmatrix; Voraussetzung fuer BELEG-020 Teil 2. **Dateibesitz:** neues scripts/generate_beleg_permission_projection.py; neue runtime/beleg-permissions.generated.json; runtime/screen-permissions.ts; bestehender screen-permissions.test.ts; neuer tests/test_beleg_permission_projection.py; docs/quality-assurance/beleg-mask-permissions-20261013.md. Frontend-Pfade unter packages/frontend-web/src/components/mask-builder/ bzw. __tests__/components/mask-builder/. **Abnahme:** Drift-Gate, richtige Rechte nach Belegart/Rolle, keine Freigabe allein durch Scope/Schema und keine unbekannten Belegrechte. **Risiken:** Noch keine Registry-/Route-Aktivierung, Maskensichtpruefung bleibt offen.
