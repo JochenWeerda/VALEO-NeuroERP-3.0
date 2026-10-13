@@ -156,6 +156,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin/identity-budgets",
+      "path": "admin/identity-budgets",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/admin/integrationen-quarantaene",
       "path": "admin/integrationen-quarantaene",
       "source": "auto"
@@ -229,6 +234,11 @@
       "module": "@/pages/admin/terminologie",
       "path": "admin/terminologie",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/admin/token-consumption",
+      "path": "admin/token-consumption",
+      "source": "alias"
     },
     {
       "module": "@/pages/admin/voice-channel",

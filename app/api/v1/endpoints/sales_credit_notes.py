@@ -350,7 +350,7 @@ def _vorschlag(db: Session, tenant_id: str, proposal_id: str, *, sperren: bool =
             "execution_result FROM public.agent_proposals "
             "WHERE proposal_id = :id AND tenant_id = :tid AND action_type = :art"
             + (" FOR UPDATE" if sperren else "")
-        ),
+        ),  # nosec B608  # reviewed-safe: only fixed FOR UPDATE/empty suffix; id, tenant and action are bound parameters
         {"id": proposal_id, "tid": tenant_id, "art": VORSCHLAG_ART},
     ).mappings().first()
     if not zeile:

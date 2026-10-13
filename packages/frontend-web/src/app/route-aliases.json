@@ -1,6 +1,14 @@
 {
   "aliases": [
     {
+      "module": "@/pages/admin/identity-budgets",
+      "path": "admin/identity-budgets"
+    },
+    {
+      "module": "@/pages/admin/token-consumption",
+      "path": "admin/token-consumption"
+    },
+    {
       "module": "@/pages/hilfe",
       "path": "hilfe"
     },

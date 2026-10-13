@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## IDENTITY-CI-CONTRACT-20261013 — reserviert, Codex
+## IDENTITY-CI-CONTRACT-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** bestätigte CI-Fehler aus Run 38305586021 schließen. **Dateibesitz:** route-aliases.json nur zwei Kontingentseiten und deren generierte Routen; tenants.py nur gemeinsame verifizierte Tenant-Dependency (Elternclaim bleibt); sales_credit_notes.py ausschließlich geprüfte statische SQL-Suffixannotation; neue Tenant-HTTP-Gegenprobe, eigene QA/Workboard und isolierte OpenAPI. **Abnahme:** Generator erhält beide Routen dauerhaft; Doc-Drift null; Tenant-Dependency vor DB, keine System-Ausnahme; SQL-Suffix nur feste Literale und Werte als Bindparameter, SQL-Gate grün. Keine Fachbuchung, Rechteerweiterung, Migration, neue DB/Container/Reset; fremde WIP erhalten.
+
+**Lieferung:** Dauerhafte Aliasquelle fuer beide Kontingentseiten, 941 Routen; gemeinsame Tenant-Dependency vor DB, sechs HTTP-Gegenproben bestanden. Fester SQL-Suffix mit Bindparametern geprueft. SQL-/Tenant-/Doc-Drift-Gates und Routingintegritaet bestanden, isolierte produktive OpenAPI geprueft. Nachweis: identity-ci-contract-20261013.md. Katalog, Snapshot-Migration, Agenten-/Auditintegration und Gesamtabnahme bleiben offen. Keine DB/Container/Reset.
 
 ## SNAPSHOT-PAGINATION-20261012 — abgeschlossen, Codex
 
