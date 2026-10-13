@@ -2,51 +2,15 @@
 
 from __future__ import annotations
 
-import os
-import subprocess
-import sys
 import uuid
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
+from feed_identity_fixture import keys, probe, feed_context
 
 TENANT_ID = "00000000-0000-0000-0000-000000000001"
-HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": TENANT_ID}
-FEED_CHAIN_004_REVISION = "feed_chain_article_map_20260623"
-
-
-def _column_ready() -> bool:
-    from app.core.database import SessionLocal
-
-    db = SessionLocal()
-    try:
-        n = db.execute(
-            text(
-                "SELECT count(*) FROM information_schema.columns "
-                "WHERE table_schema = 'domain_shared' "
-                "AND table_name = 'futtermittel_einzelfutter' "
-                "AND column_name = 'inventory_article_id'"
-            ),
-        ).scalar()
-        return int(n or 0) == 1
-    finally:
-        db.close()
-
-
-def _ensure_schema() -> None:
-    if _column_ready():
-        return
-    result = subprocess.run(
-        [sys.executable, "-m", "alembic", "upgrade", FEED_CHAIN_004_REVISION],
-        text=True,
-        capture_output=True,
-        env={**os.environ},
-        timeout=180,
-        check=False,
-    )
-    if result.returncode != 0 or not _column_ready():
-        pytest.skip(f"FEED-CHAIN-004-Schema nicht migrierbar: {(result.stderr or '')[-400:]}")
+HEADERS = {}
 
 
 def _ensure_warehouse(db) -> str:
@@ -73,9 +37,10 @@ def _ensure_warehouse(db) -> str:
 
 
 @pytest.fixture
-def feed004_seed(require_db):
-    _ensure_schema()
-    from app.core.database import SessionLocal
+def feed004_seed(feed_context, monkeypatch):
+    monkeypatch.setitem(globals(), 'TENANT_ID', feed_context.tenant)
+    monkeypatch.setitem(globals(), 'HEADERS', feed_context.headers)
+    from feed_identity_fixture import scoped_session as SessionLocal
 
     suffix = uuid.uuid4().hex[:8]
     db = SessionLocal()
@@ -131,44 +96,6 @@ def feed004_seed(require_db):
         db.commit()
         yield ids
     finally:
-        db.rollback()
-        for ef in (ids["ef1"], ids["ef2"]):
-            aid = db.execute(
-                text(
-                    "SELECT inventory_article_id FROM domain_shared.futtermittel_einzelfutter WHERE id = :i"
-                ),
-                {"i": ef},
-            ).scalar()
-            if aid:
-                db.execute(
-                    text(
-                        "DELETE FROM domain_inventory.inventory_stock_movements "
-                        "WHERE article_id = :a AND tenant_id = :t"
-                    ),
-                    {"a": aid, "t": TENANT_ID},
-                )
-                db.execute(
-                    text("DELETE FROM domain_inventory.articles WHERE id = :a AND tenant_id = :t"),
-                    {"a": aid, "t": TENANT_ID},
-                )
-        db.execute(
-            text("DELETE FROM domain_ops.ops_chargen WHERE produktionsprozess->>'rezept_id' = :r"),
-            {"r": ids["rezept"]},
-        )
-        db.execute(
-            text("DELETE FROM domain_shared.futtermittel_produktionsauftraege WHERE rezept_id = :r"),
-            {"r": ids["rezept"]},
-        )
-        db.execute(
-            text("DELETE FROM domain_shared.futtermittel_rezept_komponenten WHERE rezept_id = :r"),
-            {"r": ids["rezept"]},
-        )
-        db.execute(text("DELETE FROM domain_shared.futtermittel_rezepte WHERE id = :r"), {"r": ids["rezept"]})
-        db.execute(
-            text("DELETE FROM domain_shared.futtermittel_einzelfutter WHERE id IN (:e1, :e2)"),
-            {"e1": ids["ef1"], "e2": ids["ef2"]},
-        )
-        db.commit()
         db.close()
 
 
@@ -176,11 +103,12 @@ def feed004_seed(require_db):
 @pytest.mark.needs_live_db
 class TestFeedChain004:
     @pytest.fixture(autouse=True)
-    def _client(self):
+    def _client(self, feed_context):
         from main import app
 
         self.client = TestClient(app, raise_server_exceptions=False, base_url="http://localhost")
         yield
+        self.client.close()
 
     def test_ensure_article_link_creates_mapping(self, feed004_seed):
         r = self.client.post(
@@ -192,7 +120,7 @@ class TestFeedChain004:
         assert body["ok"] is True
         assert body["article_id"]
 
-        from app.core.database import SessionLocal
+        from feed_identity_fixture import scoped_session as SessionLocal
 
         db = SessionLocal()
         try:
@@ -232,7 +160,7 @@ class TestFeedChain004:
         )
         assert freigegeben.status_code == 200, freigegeben.text
 
-        from app.core.database import SessionLocal
+        from feed_identity_fixture import scoped_session as SessionLocal
 
         db = SessionLocal()
         try:
@@ -270,7 +198,7 @@ class TestFeedChain004:
         )
         assert storno.status_code == 200, storno.text
 
-        from app.core.database import SessionLocal
+        from feed_identity_fixture import scoped_session as SessionLocal
 
         db = SessionLocal()
         try:

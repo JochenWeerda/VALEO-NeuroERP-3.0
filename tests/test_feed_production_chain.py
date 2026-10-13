@@ -8,9 +8,6 @@ Snapshot (auch nach Rezeptänderung); ``fertig`` erzeugt die Fertigwaren-Charge 
 
 from __future__ import annotations
 
-import os
-import subprocess
-import sys
 import uuid
 from decimal import Decimal
 from types import SimpleNamespace
@@ -18,6 +15,7 @@ from types import SimpleNamespace
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
+from feed_identity_fixture import keys, probe, feed_context
 
 from app.services.feed_production_chain_service import (
     compute_verbrauch,
@@ -25,8 +23,7 @@ from app.services.feed_production_chain_service import (
 )
 
 TENANT_ID = "00000000-0000-0000-0000-000000000001"
-HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": TENANT_ID}
-FEED_REVISION = "feed_chain_verbrauch_20260612"
+HEADERS = {}
 
 
 def _komp(name: str, anteil: float, ef_id: str | None, sortierung: int = 0):
@@ -64,44 +61,12 @@ class TestVerbrauchLogik:
 pytestmark_integration = [pytest.mark.integration, pytest.mark.needs_live_db]
 
 
-def _feed_columns_ready() -> bool:
-    from app.core.database import SessionLocal
-
-    db = SessionLocal()
-    try:
-        n = db.execute(
-            text(
-                "SELECT count(*) FROM information_schema.columns "
-                "WHERE table_schema = 'domain_shared' "
-                "AND table_name = 'futtermittel_produktionsauftraege' "
-                "AND column_name IN ('verbrauch','charge_id')"
-            ),
-        ).scalar()
-        return int(n or 0) == 2
-    finally:
-        db.close()
-
-
-def _ensure_feed_schema() -> None:
-    if _feed_columns_ready():
-        return
-    result = subprocess.run(
-        [sys.executable, "-m", "alembic", "upgrade", FEED_REVISION],
-        text=True,
-        capture_output=True,
-        env={**os.environ},
-        timeout=180,
-        check=False,
-    )
-    if result.returncode != 0 or not _feed_columns_ready():
-        pytest.skip(f"Feed-Chain-Schema nicht migrierbar: {(result.stderr or '')[-400:]}")
-
-
 @pytest.fixture
-def feed_seed(require_db):
-    """Einzelfutter (2x) + Rezept mit Komponenten anlegen; alles wieder aufräumen."""
-    _ensure_feed_schema()
-    from app.core.database import SessionLocal
+def feed_seed(feed_context, monkeypatch):
+    """Own feed/recipe data; the context's outer rollback owns cleanup."""
+    monkeypatch.setitem(globals(), 'TENANT_ID', feed_context.tenant)
+    monkeypatch.setitem(globals(), 'HEADERS', feed_context.headers)
+    from feed_identity_fixture import scoped_session as SessionLocal
 
     suffix = uuid.uuid4().hex[:8]
     db = SessionLocal()
@@ -144,32 +109,11 @@ def feed_seed(require_db):
         db.commit()
         yield ids
     finally:
-        db.rollback()
-        db.execute(
-            text(
-                "DELETE FROM domain_ops.ops_chargen WHERE produktionsprozess->>'rezept_id' = :r"
-            ),
-            {"r": ids["rezept"]},
-        )
-        db.execute(
-            text("DELETE FROM domain_shared.futtermittel_produktionsauftraege WHERE rezept_id = :r"),
-            {"r": ids["rezept"]},
-        )
-        db.execute(
-            text("DELETE FROM domain_shared.futtermittel_rezept_komponenten WHERE rezept_id = :r"),
-            {"r": ids["rezept"]},
-        )
-        db.execute(text("DELETE FROM domain_shared.futtermittel_rezepte WHERE id = :r"), {"r": ids["rezept"]})
-        db.execute(
-            text("DELETE FROM domain_shared.futtermittel_einzelfutter WHERE id IN (:e1, :e2)"),
-            {"e1": ids["ef1"], "e2": ids["ef2"]},
-        )
-        db.commit()
         db.close()
 
 
 def _bestand(ef_id: str) -> float:
-    from app.core.database import SessionLocal
+    from feed_identity_fixture import scoped_session as SessionLocal
 
     db = SessionLocal()
     try:
@@ -186,11 +130,12 @@ def _bestand(ef_id: str) -> float:
 @pytest.mark.needs_live_db
 class TestFeedProductionChainIntegration:
     @pytest.fixture(autouse=True)
-    def _client(self):
+    def _client(self, feed_context):
         from main import app
 
         self.client = TestClient(app, raise_server_exceptions=False, base_url="http://localhost")
         yield
+        self.client.close()
 
     def _create_auftrag(self, rezept_id: str, menge_t: float = 10.0):
         r = self.client.post(
@@ -250,7 +195,7 @@ class TestFeedProductionChainIntegration:
         self._patch_status(auftrag["id"], "fertig", expected=409)
 
     def test_storno_restauriert_snapshot_trotz_rezeptaenderung(self, feed_seed):
-        from app.core.database import SessionLocal
+        from feed_identity_fixture import scoped_session as SessionLocal
 
         auftrag = self._create_auftrag(feed_seed["rezept"], 10.0)
         self._patch_status(auftrag["id"], "freigegeben")
@@ -278,7 +223,7 @@ class TestFeedProductionChainIntegration:
     def test_freigabe_fail_closed_bei_unterdeckung(self, feed_seed):
         auftrag = self._create_auftrag(feed_seed["rezept"], 10.0)
 
-        from app.core.database import SessionLocal
+        from feed_identity_fixture import scoped_session as SessionLocal
 
         db = SessionLocal()
         try:
@@ -299,7 +244,7 @@ class TestFeedProductionChainIntegration:
         assert _bestand(feed_seed["ef1"]) == pytest.approx(1.0)
 
     def test_fertig_fail_closed_bei_fremder_chargen_id(self, feed_seed):
-        from app.core.database import SessionLocal
+        from feed_identity_fixture import scoped_session as SessionLocal
 
         fremd_chargen_id = f"IT-FREMD-{uuid.uuid4().hex[:8]}"
         db = SessionLocal()
