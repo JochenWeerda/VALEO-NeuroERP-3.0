@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## LOGIN-ROUTE-COLLISION-20261013 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** echte Browserwarnung: auth/callback matched protected _app/auth/Callback. **Ziel:** kanonische öffentliche Anmelderouten gegen automatische Groß-/Kleinschreibungsduplikate schützen. **Dateibesitz:** generate-tanstack-routes.mjs ausschließlich öffentliche Authpfade und deren generierte Routen/Inventar; neuer tatsächlicher TanStack-Matching-Vertrag; eigene QA/Workboard. **Abnahme:** login/auth/login/auth/callback samt Großschreibung matchen außerhalb _app; andere ERP-Routen bleiben geschützt; Generator stabil und echter positiver Browser-Recheck. Keine Authlockerung, keine persönlichen Kennungen, keine DB/Container/Reset; fremdes Styling erhalten.
+
 ## LOGIN-CALLBACK-REENTRANCY-20261013 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** reale gültige Kennwortanmeldung des eigenen synthetischen Nutzers kehrt zur Loginseite zurück; wiederholte Callbackfehler. **Dateibesitz:** pages/auth/Callback.tsx nur Import/effect-Ausführungsgrenze, keine fremden Stylinghunks; neue React-StrictMode-Verträge; eigene QA/Workboard. Elternclaim LOGIN-VARIANTS behält komplette Abnahme. **Abnahme:** genau ein Callback pro gemounteter Seite auch bei StrictMode und instabiler Hook-Funktionsreferenz; PKCE/State/Nonce und Replay-Abweisung bleiben bestehen; echter Browser-Recheck und synthetische Screenshots. Fremdes Styling erhalten, keine persönlichen Kennungen, keine DB/Container/Reset.
