@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## CI-PROCUREMENT-IDENTITY-ISOLATION-20261013 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** PostgreSQL-CI sechs Beschaffungs-Match-Fehler und zwei RFQ-Setupfehler; dev-token, Migrationen im Test, gemeinsame Demo-Seeds und manuelle Loeschbereinigung. **Ziel:** signierte ausdrueckliche Testidentitaeten und eigene transaktionale Fachdatensaetze am vorhandenen Pruefstand. **Dateibesitz:** tests/test_rfq_integration.py, tests/test_procurement_match_integration.py nur Fixtures/negative Sicherheitsfaelle, neue tests/procurement_identity_fixture.py; eigene QA/Workboard. Bestehende Erfolgs-/Preis-/Abgleichassertions erhalten. **Abnahme:** echte Produktionsmiddleware und RSA-Verifikation; fremde Tenantheader/alte Tokens abgewiesen; eigene Tenant-/Lieferanten-/Belegdaten durch Savepointrollback isoliert, kein Demo-Seeding, Migration oder DELETE in Vorbereitung/Bereinigung. Schema vom bestehenden Pruefstand/CI-Job; keine neue DB/Container/Reset. JWKS-Transport und Sessionstore nur in ausdruecklichem vorhandenen Probe-Kontext isoliert; Produktions-Rollen-/Akteur-/Steuerschluesselbefunde separat offen.
+
 ## STEUERSCHLUESSEL-BELEGE-20261013 — Teil 2 (Eingangsrechnung) abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** Teil 2 abgeschlossen 2026-10-13; naechster Teil: DocFlow-Rechnung
