@@ -30,6 +30,24 @@ storniert), Gutschriften mit gemindertem offenen Posten und je ein Beleg, den Fi
 Preisrecht an der API gibt es noch nicht (BELEG-012). Kunde und Lieferant sind Platzhalter
 (`REF-KUNDE`, `REF-LIEFERANT`), keine Stammdatensätze.
 
+### Lauf im Testmandanten der gewachsenen Datenbank (13.10.2026): abgebrochen
+
+`--apply` für den Testmandanten in `valeo_neuro_erp` hat Angebot, Auftrag, zwei Teillieferscheine und die
+erste Rechnung angelegt und ist beim ersten Buchen abgebrochen: „Journal chain metadata is inconsistent".
+Gebucht ist nichts; die angelegten Belege sind offen und stören nicht — ein späterer Lauf setzt dort fort.
+
+**Ursache, nicht behoben:** Die Journalkette dieses Mandanten hat eine Lücke. Seine 13 Buchungssätze tragen
+die Folgenummern 2 bis 14; **Nummer 1 fehlt**, und der Vorgänger-Hash des ersten vorhandenen Satzes zeigt
+ins Leere. `FinanceTransactionService` prüft die Kette vor jeder neuen Buchung und lehnt ab. Für diesen
+Mandanten lässt sich deshalb über den Buchungsdienst nichts mehr buchen — weder Rechnung noch
+Eingangsrechnung noch Gutschrift. Wann und wodurch der erste Satz verschwand, ist nicht geklärt (die
+vorhandenen Sätze stammen vom 09.06. bis 27.09.2026).
+
+Ich habe die Kette nicht angefasst: Ein Eingriff in Folgenummern oder Hashes eines Journals ist keine
+Reparatur, die nebenbei geschieht. Für die Sichtprüfung ist ein eigener, frischer Testmandant ohnehin
+vorgesehen (Entscheidung vom 13.10.2026: isolierte Umgebung mit eigenem Testmandanten); dort läuft das
+Skript, sobald Mandant und Testkennung eingerichtet sind.
+
 ## 0.9 Eine Quelle für ScreenDefinitions
 
 Die kanonische Quelle ist die Python-Registry. Daneben stehen 31 Definitionen ein zweites Mal von Hand

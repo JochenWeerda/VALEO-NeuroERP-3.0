@@ -22,6 +22,10 @@ wiederholbar ueber feste Idempotenzschluessel; prueft die Voraussetzungen vorab.
 haelt es aktuell. **Wer eine der 31 ScreenDefinitions aus `capture-screens.ts` in Python aendert, muss das Abbild
 neu erzeugen.** `capture-screens-sync.test.ts` laesst nur die 26 benannten Abweichungen der Handkopie zu.
 QA: `docs/quality-assurance/phase0-referenzbelege-registryabbild-20261013.md`.
+**Befund Journalkette, nicht behoben:** Im Testmandanten `00000000-…-0001` der gewachsenen Datenbank fehlt
+der Buchungssatz mit Folgenummer 1 (vorhanden: 2 bis 14); `FinanceTransactionService` lehnt dort jede neue
+Buchung ab („Journal chain metadata is inconsistent“). Die Referenzbelege sind dort deshalb nur bis zur ersten
+offenen Rechnung angelegt, nichts gebucht. Kette nicht angefasst.
 **Befund, nicht behoben:** 18 Seiten zeichnen die Handkopie ohne Rechte; in elf Masken traegt die Kopie
 `stubReason` statt Kommando-Weg und Recht. Erzeugte man die Kopie aus der Registry, verschwaenden dort die
 Aktionsknoepfe. **An Codex (Identitaet):** Wie folgt ein Recht einer ScreenDefinition (`logistik.tour.create`,
