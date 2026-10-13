@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-DURABLE-STORAGE-20261013 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Kein automatischer fluechtiger Speicher bei fehlender/unerreichbarer SQL-Persistenz; Storageausfaelle in Studio-API kontrolliert abweisen. **Dateibesitz:** app/services/studio_draft_store.py; app/api/v1/endpoints/studio_drafts.py; tests/test_studio_storage_boundary.py; docs/quality-assurance/studio-durable-storage-20261013.md. **Abnahme:** SQL-Ausfall legt keine Speicherdrafts an, API meldet 503 ohne Verbindungsdetails, Runtime-Ausfaelle verschwinden nicht als leerer Katalog; expliziter Testspeicher bleibt moeglich. **Risiken:** unveraenderliche Historie/Idempotenz und Prozesssimulation folgen; keine Migration/DB-Neuanlage.
+
 ## STUDIO-REVIEW-LIFECYCLE-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Einreichung vor Publikation, Bearbeitung entwertet Review, Retirement nur nach Publikation; alle HTTP-Uebergaenge revisionsgebunden. **Dateibesitz:** app/services/studio_draft_store.py; app/api/v1/endpoints/studio_drafts.py; Studio-API/Page samt bestehenden Tests; Studio-Python-Tests/Testhelfer; scripts/belegmasken_veroeffentlichen.py samt betroffenen Tests; docs/quality-assurance/studio-review-lifecycle-20261013.md. **Abnahme:** kein draft->published, kein published->review/draft; Aenderung eines Reviewentwurfs ergibt draft; veraltete Review-/Retire-Revision sperrt. **Risiken:** unveraenderliche Historie/Produktionsfreigabe bleiben offen; fremde alte Handbuchkopien erhalten.
