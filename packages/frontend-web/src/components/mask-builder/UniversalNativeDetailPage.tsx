@@ -61,6 +61,9 @@ interface PendingAction {
   requiresConfirmation: boolean
   auditReasonRequired: boolean
   hasDryRun: boolean
+  expectedVersion?: number
+  approvalId?: string
+  bindingSnapshot?: string
 }
 
 interface ProposedChange {
@@ -155,6 +158,7 @@ function NativeExistingDetailPage({
     screenId,
     entityId,
     permissions,
+    entityData: runtime.entityData,
   })
 
   function actionIsAvailable(actionKey: string): boolean {
@@ -170,7 +174,8 @@ function NativeExistingDetailPage({
   }
 
   // --- Worker: final execute (no UI state ownership) ---
-  async function doExecute(actionKey: string, payload: Record<string, unknown>, reason?: string): Promise<void> {
+  async function doExecute(pending: PendingAction, reason?: string): Promise<void> {
+    const { actionKey, payload, expectedVersion, approvalId, bindingSnapshot } = pending
     if (!actionIsAvailable(actionKey)) {
       reportUnavailableAction()
       return
@@ -181,6 +186,9 @@ function NativeExistingDetailPage({
       payload,
       mode: 'execute',
       auditReason: reason,
+      expectedVersion,
+      approvalId,
+      bindingSnapshot,
     })
     if (!result.success) {
       const errs = result.validationErrors ?? []
@@ -231,16 +239,22 @@ function NativeExistingDetailPage({
     const hasDryRun = Boolean(
       actionDef?.commandEndpoint &&
       !actionDef?.stubReason &&
-      MODERATE_OR_ABOVE.has(actionDef?.dangerLevel ?? 'safe'),
+      (actionDef.commandBinding ? actionDef.commandBinding.preview : MODERATE_OR_ABOVE.has(actionDef?.dangerLevel ?? 'safe')),
     )
+    const serverActions = runtime.entityData.aktionen as { key: string; approval_id?: string }[] | undefined
+    const approvalId = serverActions?.find(action => action.key === (actionDef?.commandBinding?.stateAction ?? actionKey))?.approval_id
     const pending: PendingAction = {
       actionKey,
-      payload,
+      // Renderer payload is document context; bound commands collect only declared inputs.
+      payload: actionDef?.commandBinding ? {} : payload,
       label: actionDef?.label ?? actionKey,
       dangerLevel: actionDef?.dangerLevel ?? 'safe',
       requiresConfirmation: actionDef?.requiresConfirmation ?? false,
       auditReasonRequired: actionDef?.auditReasonRequired ?? false,
       hasDryRun,
+      expectedVersion: typeof runtime.entityData.version === 'number' ? runtime.entityData.version : undefined,
+      approvalId,
+      bindingSnapshot: actionDef?.commandBinding ? JSON.stringify(actionDef.commandBinding) : undefined,
     }
 
     // Deklarierte Eingaben zuerst (Screen Definition -> ActionInputDialog).
@@ -270,6 +284,8 @@ function NativeExistingDetailPage({
         entityId,
         payload: pending.payload,
         mode: 'dryRun',
+        expectedVersion: pending.expectedVersion,
+        bindingSnapshot: pending.bindingSnapshot,
       })
       if (!result.success) {
         setStage(null)
@@ -297,7 +313,7 @@ function NativeExistingDetailPage({
       return
     }
     closeDialogs()
-    await doExecute(pending.actionKey, pending.payload)
+    await doExecute(pending)
   }
 
   // --- Step 3: after AuditReasonDialog ---
@@ -306,7 +322,7 @@ function NativeExistingDetailPage({
     const pending = pendingAction
     const reason = auditReason
     closeDialogs()
-    await doExecute(pending.actionKey, pending.payload, reason)
+    await doExecute(pending, reason)
   }
 
   function closeDialogs(): void {

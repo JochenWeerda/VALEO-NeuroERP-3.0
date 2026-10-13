@@ -296,6 +296,7 @@ def _freigabe_einrechnen(engine: DocflowFreigabe, header: dict[str, Any], aktion
         selbst = leser is not None and leser in {str(offene["requested_by"]), str(header.get("created_by") or "")}
         aktionen.append(Belegaktion(
             key=f"freigabe_erteilen:{aktion_name}", bezeichnung="Freigabe erteilen", kommando="docflow.approval_decide",
+            approval_id=str(offene["id"]),
             erlaubt=not selbst,
             grund="Funktionstrennung: Wer den Beleg angelegt oder die Freigabe angefragt hat, entscheidet nicht."
             if selbst else None,

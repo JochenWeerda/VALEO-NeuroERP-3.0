@@ -17,8 +17,11 @@ export interface ActionRequest {
   entityId?: string
   payload?: Record<string, unknown>
   mode: ActionExecutionMode
-  /** Agent-supplied idempotency key (ignored for human-triggered execute) */
+  /** Stable intent key, reused after an uncertain outcome. */
   idempotencyKey?: string
+  expectedVersion?: number
+  approvalId?: string
+  bindingSnapshot?: string
   /** Required when auditReasonRequired: true */
   auditReason?: string
   /** Herkunft des Ausloesers (Default 'mask') — fuers Audit (UIX-070). */
@@ -57,6 +60,7 @@ export interface ActionRuntimeOptions {
   entityId?: string
   permissions: string[]
   isAgentCaller?: boolean
+  entityData?: Record<string, unknown>
 }
 
 /**

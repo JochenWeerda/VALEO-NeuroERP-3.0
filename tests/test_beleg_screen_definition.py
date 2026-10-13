@@ -95,13 +95,25 @@ def test_aktionen_kommen_aus_dem_verzeichnis_und_der_variante(belegart):
     variante = bv.BELEGARTEN[belegart]
     aktionen = {a["key"]: a for a in sdb.build_beleg_screen_definition(belegart)["actions"]}
     erwartet = {"freigeben", "stornieren"} | {f"umwandeln:{f}" for f in variante.folgebelege}
+    for fachaktion in (("post", "reverse") if variante.bucht else ("reverse",)):
+        erwartet |= {f"freigabe_{verb}:{fachaktion}" for verb in ("anfordern", "erteilen", "ablehnen")}
     assert set(aktionen) == erwartet | ({"buchen"} if variante.bucht else set())
     for aktion in aktionen.values():
         kommando = BELEGKOMMANDOS[aktion["kommando"]]
         assert aktion["commandEndpoint"] == f"/api/v1{kommando.pfad}".replace("{doc_id}", "{entity_id}")
-        assert aktion["method"] == kommando.methode and aktion["permission"] == f"belege.{kommando.recht}"
+        assert aktion["method"] == kommando.methode
+        if aktion["key"].startswith("freigabe_"):
+            reverse = aktion["key"].endswith(":reverse")
+            recht = ("stornieren" if reverse else "buchen") if "anfordern" in aktion["key"] else (
+                "freigeben_erhoeht" if reverse else "freigeben")
+            assert aktion["permission"] == f"belege.{recht}"
+        else:
+            assert aktion["permission"] == f"belege.{kommando.recht}"
+        assert aktion["commandBinding"]["adapter"] == "docflow.v1"
+        assert aktion["commandBinding"]["command"] == kommando.name.removeprefix("docflow.")
+        assert aktion["forbiddenForAgents"] is True
         # Ab R3 bestaetigt der Mensch ausdruecklich.
-        assert aktion["requiresConfirmation"] is kommando.freigabe_noetig
+        assert aktion["requiresConfirmation"] is (kommando.freigabe_noetig or kommando.name == "docflow.approval_decide")
     assert aktionen["stornieren"]["dangerLevel"] == "critical"
 
 
@@ -217,7 +229,8 @@ def test_jeder_knopf_haengt_am_zustand_den_der_server_liefert(http, satz):
     """Bis 13.10.2026 waren die Knoepfe der Maske immer aktiv — auch am stornierten Beleg (Befund der Sichtpruefung)."""
     for belegart in bv.BELEGARTEN:
         for aktion in sdb.build_beleg_screen_definition(belegart)["actions"]:
-            assert aktion["enabledWhen"] == sdb.zustandsfeld(aktion["key"]) and ":" not in aktion["enabledWhen"]
+            state_key = aktion["commandBinding"].get("stateAction", aktion["key"])
+            assert aktion["enabledWhen"] == sdb.zustandsfeld(state_key) and ":" not in aktion["enabledWhen"]
 
     def kopf(rolle: str, *rollen: str) -> dict:
         b = satz[rolle]
@@ -242,3 +255,17 @@ def test_jeder_knopf_haengt_am_zustand_den_der_server_liefert(http, satz):
     # Auftrag mit Lieferungen: Rechnung direkt gesperrt.
     auftrag = kopf("vk-auftrag")
     assert auftrag["aktion_umwandeln_sales_invoice"] is False and "Rechnung erstellen:" in auftrag["aktionshinweis"]
+
+
+def test_offene_freigabe_id_kommt_vom_server(http, satz):
+    from app.services.docflow_freigabe import DocflowFreigabe
+    doc = satz["ek-rechnung-2"]
+    with SessionLocal() as db:
+        approval = DocflowFreigabe(db, satz["mandant"]).beantrage(doc["id"], "post", "requesting-person", "Pruefen")
+    response = http("FINANCE_ADMIN").get(f"/api/v1/belege/purchase_invoice/{doc['id']}/kopf")
+    assert response.status_code == 200, response.text
+    action = next(a for a in response.json()["aktionen"] if a["key"] == "freigabe_erteilen:post")
+    assert approval["action"] == "post" and "subject_version" in approval
+    assert "subject_id" not in approval and "subject_type" not in approval
+    assert action["approval_id"] == str(approval["id"])
+    assert action["erlaubt"] is True

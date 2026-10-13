@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { apiClient } from '@/lib/api-client'
 import type { ScreenActionDefinition } from '../schema'
+import { prepareDocflowCommand, docflowCommandResult, docflowErrorResult } from './docflow-command-adapter'
 import {
   buildActionPolicy,
   checkActionPolicy,
@@ -29,6 +30,7 @@ export function useActionRuntime(
   const [loadingActionKey, setLoadingActionKey] = useState<string | null>(null)
   const [lastResult, setLastResult] = useState<ActionResult | null>(null)
   const pendingRef = useRef(false)
+  const intentRef = useRef<{ signature: string; key: string } | null>(null)
 
   const executeAction = useCallback(
     async (req: ActionRequest): Promise<ActionResult> => {
@@ -55,9 +57,13 @@ export function useActionRuntime(
 
       // DocFlow exposes domain-command bodies, not the generic _mode envelope.
       // Until a versioned adapter is registered, a preview must never mutate a document.
-      if (req.mode !== 'execute' && /^\/api\/v1\/docflow(?:\/|$)/.test(actionDef.commandEndpoint ?? '')) {
+      if (req.mode !== 'execute' && !actionDef.commandBinding && /^\/api\/v1\/docflow(?:\/|$)/.test(actionDef.commandEndpoint ?? '')) {
         return { actionKey: req.actionKey, mode: req.mode, success: false,
           error: 'DocFlow-Vorschau ist ohne passenden Command-Adapter gesperrt.' }
+      }
+
+      if (req.mode === 'execute' && !actionDef.commandBinding && /^\/api\/v1\/docflow(?:\/|$)/.test(actionDef.commandEndpoint ?? '')) {
+        return { actionKey: req.actionKey, mode: req.mode, success: false, error: 'DocFlow-Command-Adapter fehlt.' }
       }
 
       if (!actionDef.commandEndpoint) {
@@ -79,6 +85,18 @@ export function useActionRuntime(
       setLoadingActionKey(req.actionKey)
 
       try {
+        if (actionDef.commandBinding) {
+          const signature = JSON.stringify([opts.screenId, opts.entityId, req.actionKey,
+            req.expectedVersion ?? opts.entityData?.version, req.payload ?? {}, req.auditReason ?? '', actionDef.commandBinding])
+          if (intentRef.current?.signature !== signature) {
+            intentRef.current = { signature, key: crypto.randomUUID() }
+          }
+          const prepared = prepareDocflowCommand(actionDef, req, opts, req.idempotencyKey ?? intentRef.current.key)
+          const response = await apiClient.request<unknown>({ method: 'POST', url: prepared.url, data: prepared.body })
+          const result = docflowCommandResult(actionDef, req, opts, response.data)
+          setLastResult(result)
+          return result
+        }
         const method = actionDef.method ?? 'POST'
         const endpoint = actionDef.commandEndpoint
           .replace('{entity_id}', opts.entityId ?? '')
@@ -101,6 +119,11 @@ export function useActionRuntime(
         setLastResult(result)
         return result
       } catch (err) {
+        if (actionDef.commandBinding) {
+          const result = docflowErrorResult(req, err)
+          setLastResult(result)
+          return result
+        }
         const errorMessage = err instanceof Error ? err.message : 'Unbekannter Fehler'
         const result: ActionResult = { actionKey: req.actionKey, mode: req.mode, success: false, error: errorMessage }
         setLastResult(result)
