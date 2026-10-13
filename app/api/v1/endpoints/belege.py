@@ -10,6 +10,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.auth.beleg_roles import darf, verlange
 from app.auth.deps import get_current_user
 from app.core.belegvertrag import BELEGARTEN, Beleg
 from app.core.database import get_db
@@ -26,12 +27,17 @@ def beleg_lesen(
     beleg_id: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-    _nutzer: Any = Depends(get_current_user),
+    nutzer: Any = Depends(get_current_user),
 ) -> Beleg:
-    """Kopf, Partner, Positionen, Summen, Buchungsstand, Belegkette, Historie und die im Zustand moeglichen Aktionen."""
+    """Kopf, Partner, Positionen, Summen, Buchungsstand, Belegkette, Historie und Aktionen.
+
+    Ohne Preisrecht kommen weder Preisfelder noch Summen; Aktionen ohne Recht sind gesperrt.
+    """
     if belegart not in BELEGARTEN:
         raise HTTPException(status_code=404, detail="Belegart nicht bekannt")
-    beleg = lies_beleg(DocflowService(db, tenant_id), beleg_id)
+    # Vor dem ersten Datenbankzugriff: Wer die Belegart nicht lesen darf, erfaehrt auch nicht, ob es den Beleg gibt.
+    verlange(nutzer, "lesen", belegart)
+    beleg = lies_beleg(DocflowService(db, tenant_id), beleg_id, lambda recht, art: darf(nutzer, recht, art))
     # Ein Beleg anderer Art unter dieser Adresse ist nicht dieser Beleg.
     if beleg is None or beleg.belegart != belegart:
         raise HTTPException(status_code=404, detail="Beleg nicht gefunden")

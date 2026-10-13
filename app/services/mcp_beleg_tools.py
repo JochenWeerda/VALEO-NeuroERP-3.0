@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.auth.beleg_roles import darf
 from app.core.belegkommandos import BELEGKOMMANDOS, als_dict
 from app.core.belegvertrag import BELEGARTEN, PREISFELDER, STATUS, VERTRAGSVERSION
 from app.services.docflow_belegadapter import lies_beleg
@@ -54,9 +55,9 @@ def _eingabe(modell: type[BaseModel], request: Any, was: str) -> Any:
     return opened
 
 
-def beleg_arten(db: Session, request: Any, actor: str, tenant: str) -> dict:
+def beleg_arten(db: Session, request: Any, actor: str, tenant: str, nutzer: Any = None) -> dict:
     """Welche Belegarten es gibt, was sie tragen und welche Kommandos es fuer Belege gibt."""
-    del db, actor, tenant
+    del db, actor, tenant, nutzer
     _eingabe(BelegArtenInput, request, "document type")
     return {
         "success": True,
@@ -76,9 +77,13 @@ def beleg_arten(db: Session, request: Any, actor: str, tenant: str) -> dict:
     }
 
 
-def beleg_suchen(db: Session, request: Any, actor: str, tenant: str) -> dict:
+def beleg_suchen(db: Session, request: Any, actor: str, tenant: str, nutzer: Any = None) -> dict:
     del actor
     opened = _eingabe(BelegSuchenInput, request, "document search")
+    # Der Scope oeffnet das Werkzeug; welche Belegarten es zeigt, entscheidet die Rolle der Anmeldung.
+    lesbar = sorted(a for a in ([opened.belegart] if opened.belegart else BELEGARTEN) if darf(nutzer, "lesen", a))
+    if opened.belegart and not lesbar:
+        raise HTTPException(403, "Missing role for this document type")
     try:
         zeilen = db.execute(
             text(
@@ -95,7 +100,7 @@ def beleg_suchen(db: Session, request: Any, actor: str, tenant: str) -> dict:
                 """
             ),
             {
-                "tenant": tenant, "arten": [opened.belegart] if opened.belegart else sorted(BELEGARTEN),
+                "tenant": tenant, "arten": lesbar,
                 "status": opened.status, "nr": opened.beleg_nr, "partner": opened.partner_nr, "lim": opened.limit,
             },
         ).mappings().all()
@@ -103,6 +108,7 @@ def beleg_suchen(db: Session, request: Any, actor: str, tenant: str) -> dict:
         for z in zeilen:
             variante = BELEGARTEN[str(z["doc_type"])]
             datum = z["document_date"]
+            mit_betrag = variante.mit_preisen and darf(nutzer, "preise", variante.belegart)
             items.append({
                 "beleg_id": str(z["id"]),
                 "belegart": variante.belegart,
@@ -111,9 +117,9 @@ def beleg_suchen(db: Session, request: Any, actor: str, tenant: str) -> dict:
                 "status": str(z["status"]),
                 "belegdatum": (datum.date() if hasattr(datum, "date") else datum).isoformat(),
                 "partner_nr": z["supplier_id"] if variante.partnerrolle == "lieferant" else z["customer_id"],
-                # Ohne Preise in der Variante auch kein Betrag in der Trefferliste.
-                "brutto": str(z["total_gross"]) if variante.mit_preisen else None,
-                "waehrung": str(z["currency"] or "EUR") if variante.mit_preisen else None,
+                # Ohne Preise in der Variante oder ohne Preisrecht auch kein Betrag in der Trefferliste.
+                "brutto": str(z["total_gross"]) if mit_betrag else None,
+                "waehrung": str(z["currency"] or "EUR") if mit_betrag else None,
             })
         result = {"success": True, "mode": request.mode, "items": items, "count": len(items)}
         db.rollback()
@@ -126,11 +132,13 @@ def beleg_suchen(db: Session, request: Any, actor: str, tenant: str) -> dict:
         raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
 
 
-def beleg_lesen(db: Session, request: Any, actor: str, tenant: str) -> dict:
+def beleg_lesen(db: Session, request: Any, actor: str, tenant: str, nutzer: Any = None) -> dict:
     del actor
     opened = _eingabe(BelegLesenInput, request, "document read")
+    if not darf(nutzer, "lesen", opened.belegart):
+        raise HTTPException(403, "Missing role for this document type")
     try:
-        beleg = lies_beleg(DocflowService(db, tenant), opened.beleg_id)
+        beleg = lies_beleg(DocflowService(db, tenant), opened.beleg_id, lambda recht, art: darf(nutzer, recht, art))
         if beleg is None or beleg.belegart != opened.belegart:
             raise HTTPException(404, "Document not found in the authenticated tenant")
         result = {"success": True, "mode": request.mode, "beleg": beleg.model_dump(mode="json")}

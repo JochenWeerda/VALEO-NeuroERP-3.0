@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from sqlalchemy import text
 
@@ -31,8 +31,15 @@ def _datum(wert: Any) -> Optional[date]:
     return wert.date() if isinstance(wert, datetime) else wert
 
 
-def lies_beleg(svc: DocflowService, doc_id: str) -> Optional[Beleg]:
-    """Der Beleg in Vertragsform — oder ``None``, wenn es ihn nicht gibt oder seine Belegart keine Variante hat."""
+Darf = Callable[[str, str], bool]
+
+
+def lies_beleg(svc: DocflowService, doc_id: str, darf: Optional[Darf] = None) -> Optional[Beleg]:
+    """Der Beleg in Vertragsform — oder ``None``, wenn es ihn nicht gibt oder seine Belegart keine Variante hat.
+
+    ``darf(recht, belegart)`` ist das Recht des Lesers. Ohne Preisrecht kommen weder Preisfelder noch Summen,
+    und eine Aktion ohne Recht ist gesperrt. Ohne Angabe (Skripte, Tests des Adapters) gilt alles als erlaubt.
+    """
     header = svc.fetch_header(doc_id)
     if not header:
         return None
@@ -98,9 +105,11 @@ def lies_beleg(svc: DocflowService, doc_id: str) -> Optional[Beleg]:
             )
             for h in svc.fetch_status_history(doc_id)
         ],
-        aktionen=_aktionen(svc, doc_id, variante, status, buchung, offen),
+        aktionen=_aktionen(svc, doc_id, variante, status, buchung, offen, darf),
     )
-    return beleg if variante.mit_preisen else ohne_preise(beleg)
+    if not variante.mit_preisen or (darf is not None and not darf("preise", variante.belegart)):
+        return ohne_preise(beleg)
+    return beleg
 
 
 def _offene_mengen(svc: DocflowService, doc_id: str, variante: Belegvariante, items: list[dict[str, Any]]) -> dict[str, Decimal]:
@@ -193,8 +202,21 @@ def _aktion(key: str, bezeichnung: str, kommando: str, *, grund: Optional[str] =
 
 
 def _aktionen(svc: DocflowService, doc_id: str, variante: Belegvariante, status: str, buchung: Buchung,
-              offen: dict[str, Decimal]) -> list[Belegaktion]:
-    """Was mit dem Beleg in seinem Zustand geht. Das Recht des Lesers ist hier noch nicht eingerechnet (BELEG-012)."""
+              offen: dict[str, Decimal], darf: Optional[Darf] = None) -> list[Belegaktion]:
+    """Was mit dem Beleg in seinem Zustand geht — und was davon der Leser darf."""
+    aktionen = _aktionen_im_zustand(svc, doc_id, variante, status, buchung, offen)
+    if darf is None:
+        return aktionen
+    for aktion in aktionen:
+        # Ein Folgebeleg braucht das Recht an der Belegart, die entsteht.
+        if aktion.erlaubt and not darf(BELEGKOMMANDOS[aktion.kommando].recht, aktion.folgebelegart or variante.belegart):
+            aktion.erlaubt = False
+            aktion.grund = "Keine Berechtigung."
+    return aktionen
+
+
+def _aktionen_im_zustand(svc: DocflowService, doc_id: str, variante: Belegvariante, status: str, buchung: Buchung,
+                         offen: dict[str, Decimal]) -> list[Belegaktion]:
     aktionen: list[Belegaktion] = []
     if status == "draft":
         aktionen.append(_aktion("bearbeiten", "Bearbeiten", "docflow.update"))

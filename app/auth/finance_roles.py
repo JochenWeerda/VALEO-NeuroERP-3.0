@@ -21,13 +21,14 @@ finance_admin = require_roles("FINANCE_ADMIN", "admin")
 # Offene Posten lesen auch Verkauf, Vertrieb und Einkauf: Wer einen Auftrag annimmt oder eine
 # Bestellung ausloest, muss sehen, was der Kunde schuldet und was dem Lieferanten zusteht.
 # Aendern, ausgleichen und mahnen bleibt ``finance_write``; loeschen ``finance_admin``.
-open_items_read = require_roles(
+BELEG_READ_ROLES = (
     "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN",
     "SALES_LESEN", "SALES_BEARBEITEN", "SALES_ADMIN",
     "CRM_LESEN", "CRM_BEARBEITEN", "CRM_ADMIN",
     "EINKAUF_LESEN", "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN",
     "admin", "manager",
 )
+open_items_read = require_roles(*BELEG_READ_ROLES)
 
 # Den Kontenplan liest auch der Einkauf: Der Rechnungseingang kontiert damit. Salden und Buchungen
 # bleiben ``finance_read``.
@@ -52,9 +53,11 @@ KONTENRAHMEN_PFLEGE = frozenset({"KONTENRAHMEN_PFLEGE", "admin"})
 # Eingangsbelege, gesperrte Lieferscheine). Lesen wie die offenen Posten; bearbeiten die Sachbearbeitung
 # der drei Bereiche. Loeschen bleibt ``finance_admin``.
 beleg_read = open_items_read
-beleg_write = require_roles(
+BELEG_WRITE_ROLES = (
     "FINANCE_BEARBEITEN", "FINANCE_ADMIN",
     "SALES_BEARBEITEN", "SALES_ADMIN",
     "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN",
     "admin", "manager",
 )
+
+beleg_write = require_roles(*BELEG_WRITE_ROLES)

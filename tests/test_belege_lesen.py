@@ -75,7 +75,7 @@ def client():
     app = FastAPI()
     app.include_router(belege_endpunkt.router, prefix="/belege")
     ersetze_mandant(app)
-    ersetze_nutzer(app, "sachbearbeitung")
+    ersetze_nutzer(app, "admin")  # Rechte prueft tests/test_beleg_rechte.py
     return TestClient(app)
 
 

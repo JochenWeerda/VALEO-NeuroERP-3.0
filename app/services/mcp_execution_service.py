@@ -709,7 +709,7 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
     if request.tool_name == "dms.gobd.export_status":
         return _gobd_export_status(db, request, actor, tenant)
     if request.tool_name in _BELEG_TOOLS:
-        return _BELEG_TOOLS[request.tool_name](db, request, actor, tenant)
+        return _BELEG_TOOLS[request.tool_name](db, request, actor, tenant, user)
     if request.tool_name == "compliance.gate.status":
         return _compliance_gate_status(db, request, actor, tenant)
     if request.tool_name == "compliance.sanctions.check":
