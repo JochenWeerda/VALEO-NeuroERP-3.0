@@ -48,8 +48,10 @@ Das Backend bleibt fuer Signatur, Aussteller, Audience, Rollen und Mandant zusta
 
 ## Offen
 
-Realer Ablauf-/Refresh-Recheck wird gesondert nach natuerlichem Tokenablauf
-festgehalten. Kennwortwechsel/MFA im Browser, persoenliche Erstanmeldung,
+Realer Ablauf-/Refresh-Recheck bestanden: Providerlaufzeit lesend mit 300
+Sekunden bestaetigt; nach mehr als 333 Sekunden erneut geladen, geschuetzter
+Arbeitsplatz und dieselbe synthetische Kennung sichtbar, ohne Kennworteingabe.
+Die Aufnahme steht im Handbuch. Kennwortwechsel/MFA im Browser, persoenliche Erstanmeldung,
 weitere Provider, Dockerfrontend auf Port 3000 und volle GitHub-Abnahme bleiben
 offen. Der private ERP-Layoutzweig ist stets durch ProtectedRoute geschuetzt;
 VITE_AUTH_REQUIRED erlaubt keinen UI-Bypass mehr. Sechs neue Layoutfaelle fuer
@@ -60,3 +62,13 @@ Die Produktions-Compose-Ausstellerkonfiguration ist separat zu korrigieren.
 Die eigene Providerfixture bleibt fuer die weiteren Browserfaelle lokal erhalten;
 keine vorhandenen Benutzer, Rollen oder Realmrichtlinien wurden geaendert.
 Keine neuen Datenbanken/Testcontainer, keine Ruecksetzung oder Migration.
+
+
+## GitHub-Zwischenstand
+
+Meilenstein 2d6a78a63 nach main gepusht und develop nachgezogen. Docs Governance,
+Docs Build und Security Agent waren erfolgreich; andere Jobs liefen noch.
+PostgreSQL-Lauf 38360982633 ist rot: 90 fehlgeschlagen, 260 bestanden, fuenf
+uebersprungen, zwei Fehler. RFQ- und Workflowmeldungen zeigen unter anderem
+503 / Identity provider unavailable. Kein Gesamt-CI-Erfolg behauptet; korrekte
+Provider-/Testgrenzen innerhalb der bestehenden Identity-Claims bleiben offen.
