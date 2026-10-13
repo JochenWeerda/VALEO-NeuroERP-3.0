@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MASK-ACTION-ERROR-PERSISTENCE-20261013 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Ablehnungen der finalen Maskenaktion nach Dialogabschluss sichtbar halten. **Dateibesitz:** packages/frontend-web/src/components/mask-builder/UniversalNativeDetailPage.tsx; packages/frontend-web/src/__tests__/components/mask-builder/native-detail-preview.test.tsx; docs/quality-assurance/mask-action-error-persistence-20261013.md. **Abnahme:** Serverfehler und Feldvalidierung bleiben nach execute sichtbar; fehlgeschlagene Vorschau dispatcht weiterhin nicht. **Risiken:** Domain-Command-Adapter und Freigabemasken bleiben offen; keine Fachdatenmutation.
+
 ## APPROVAL-001-HAUPTBUCH-ZAHLUNG — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
