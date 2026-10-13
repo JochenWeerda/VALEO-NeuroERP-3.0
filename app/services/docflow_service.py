@@ -12,6 +12,7 @@ from uuid import NAMESPACE_URL, uuid4, uuid5
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.belegvertrag import BELEGARTEN
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.finance.steuerschluessel import Steuerklaerung, satz_des_schluessels, steuergruppen, vorsteuergruppen
 from app.services.finance_belegbuchung import (
@@ -503,6 +504,36 @@ class DocflowService:
             text("SELECT set_config('valeo.docflow_command', :n, true), set_config('valeo.docflow_reason', :g, true)"),
             {"n": name, "g": grund or ""},
         )
+
+    # ── Freigabe (APPROVAL-001) ───────────────────────────────────────────────
+
+    def _freigabe_vor_buchung(self, doc_id: str, header: dict[str, Any]) -> None:
+        """Braucht die Buchung eine zweite Person, muss ihre Freigabe vorliegen — in jedem Zugang.
+
+        Erst die Pruefung von Finance: Ein Beleg, der sich nicht buchen laesst, meldet das und nicht die fehlende
+        Freigabe. Die Freigabe wird in dieser Transaktion verbraucht; scheitert die Buchung, bleibt sie erteilt.
+        """
+        art = str(header.get("doc_type") or "")
+        variante = BELEGARTEN.get(art)
+        if variante is None or not variante.bucht:
+            return
+        nummer = str(header["doc_number"])
+        if variante.richtung == "einkauf":
+            self._vorsteuergruppen_des_belegs(doc_id, nummer)
+        else:
+            self._steuergruppen_der_rechnung(doc_id, nummer)
+        from app.services.docflow_freigabe import DocflowFreigabe
+        DocflowFreigabe(self.db, self.tenant_id).verlange(header, "post", self.akteur)
+
+    def _freigabe_vor_storno(self, header: dict[str, Any]) -> None:
+        """Der Storno eines gebuchten Belegs braucht die Freigabe einer zweiten Person mit erhoehter Berechtigung."""
+        art, stand = str(header.get("doc_type") or ""), str(header.get("status") or "")
+        variante = BELEGARTEN.get(art)
+        # Nur wo der Storno sachlich moeglich ist: Eine gebuchte Gutschrift wird noch gar nicht storniert.
+        if variante is None or not variante.bucht or stand != "posted" or art.endswith("_credit_memo"):
+            return
+        from app.services.docflow_freigabe import DocflowFreigabe
+        DocflowFreigabe(self.db, self.tenant_id).verlange(header, "reverse", self.akteur)
 
     def _aktive_folgebelege(self, doc_id: str, relation_type: str) -> int:
         return int(self.db.execute(
@@ -1110,6 +1141,7 @@ class DocflowService:
         if str(header.get("doc_type") or "") in POS_TYPES:
             if not self.fetch_pos_compliance(doc_id):
                 raise ValidationFailedError("POS posting requires POS/TSE compliance payload")
+        self._freigabe_vor_buchung(doc_id, header)
         finance_result: dict[str, str] = {}
         if str(header.get("doc_type") or "") == "sales_invoice":
             customer_id = str(header.get("customer_id") or "")
@@ -1203,6 +1235,7 @@ class DocflowService:
             raise ConflictError("Version conflict")
         if str(header.get("status")) == "reversed":
             raise ConflictError("Document already reversed")
+        self._freigabe_vor_storno(header)
         finance_result: dict[str, str] = {}
         if str(header.get("doc_type") or "") == "sales_invoice":
             if str(header.get("status")) != "posted":

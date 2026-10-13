@@ -22,6 +22,7 @@ from app.api.v1.endpoints import docflow
 from app.core.database import SessionLocal
 from app.finance.steuerschluessel import richte_skr03_ein
 from app.services import docflow_service
+from freigabehilfe import sichere_freigabe
 from testgrenze import ersetze_mandant, ersetze_nutzer
 
 
@@ -59,6 +60,7 @@ def haus(monkeypatch):
                 "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
                 "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",
                 "DELETE FROM domain_erp.offene_posten WHERE tenant_id = :t",
+                "DELETE FROM domain_docflow.approvals WHERE tenant_id = :t",
                 "DELETE FROM domain_docflow.document_status_history WHERE tenant_id = :t",
                 "DELETE FROM domain_docflow.document_command_log WHERE tenant_id = :t",
                 "DELETE FROM domain_docflow.command_idempotency_keys WHERE tenant_id = :t",
@@ -101,10 +103,13 @@ def _wandle(haus, doc_id: str, ziel: str, mengen=None):
 
 
 def _buche(haus, doc_id: str):
+    # Braucht die Buchung eine zweite Person (APPROVAL-001), erteilt sie hier eine zweite Kennung.
+    sichere_freigabe(haus["mandant"], doc_id, "post")
     return haus["client"].post(f"/docflow/{doc_id}/post", params=haus["t"], json={"idempotency_key": f"buchen-{doc_id}"})
 
 
 def _storniere(haus, doc_id: str):
+    sichere_freigabe(haus["mandant"], doc_id, "reverse")
     return haus["client"].post(f"/docflow/{doc_id}/reverse", params=haus["t"],
                                json={"idempotency_key": f"storno-{doc_id}", "reason": "Falscher Lieferant"})
 

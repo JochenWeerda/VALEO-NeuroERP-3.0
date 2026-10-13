@@ -95,6 +95,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `docflow_belegadapter` | DocFlow-Belege in der Form des Belegvertrags (BELEG-011). |
 | `docflow_evidence_service` | Dokument-Nachweisraum (DOM-DOC-004) — GoBD-Artefakt-/Vorgangs-Sicht. |
 | `docflow_followup_service` | Bescheid/Rückmeldung & Wiedervorlage am Vorgang (DOM-DOC-004.3). |
+| `docflow_freigabe` | Approval Engine fuer DocFlow-Belege (APPROVAL-001). |
 | `docflow_gobd_service` | GoBD-Exportpaket & DMS-/Paperless-Liveprobe (DOM-DOC-004.4). |
 | `docflow_return_service` | Document-return worklist on top of canonical Docflow headers and artifacts. |
 | `docflow_service` | Service layer for the canonical Docflow command pipeline (DOCFLOW-P0-01..03). |

@@ -22,6 +22,7 @@ from app.core.belegkommandos import BELEGKOMMANDOS
 from app.core.database import SessionLocal
 from app.services import docflow_service
 from app.services.mcp_execution_service import ToolExecutionRequest, execute_mcp_tool
+from freigabehilfe import sichere_freigabe
 from testgrenze import ersetze_mandant, ersetze_nutzer
 
 WURZEL = pathlib.Path(__file__).resolve().parent.parent
@@ -39,6 +40,7 @@ AUFRAEUMEN = (
     "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
     "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",
     "DELETE FROM domain_erp.offene_posten WHERE tenant_id = :t",
+    "DELETE FROM domain_docflow.approvals WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.document_status_history WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.document_command_log WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.command_idempotency_keys WHERE tenant_id = :t",
@@ -114,7 +116,7 @@ def _buchungen(satz) -> int:
 def test_jedes_kommando_nennt_ein_bekanntes_recht():
     assert {k.recht for k in BELEGKOMMANDOS.values()} <= set(RECHTE)
     assert {k.name: k.recht for k in BELEGKOMMANDOS.values() if k.freigabe_noetig} == {
-        "docflow.release": "ausstellen", "docflow.post": "buchen", "docflow.reverse": "stornieren"}
+        "docflow.post": "buchen", "docflow.reverse": "stornieren"}
 
 
 def test_der_beleg_gehoert_seinem_bereich():
@@ -183,11 +185,12 @@ def test_sachbearbeitung_bucht_aber_storniert_nichts_gebuchtes(http, satz):
     offen = _beleg(http, satz, "vk-rechnung-2", "SALES_BEARBEITEN").json()
     assert _aktion(offen, "buchen")["erlaubt"] is True
     gebucht = _beleg(http, satz, "vk-rechnung-1", "SALES_BEARBEITEN").json()
-    assert _aktion(gebucht, "stornieren") == {
-        **_aktion(gebucht, "stornieren"), "erlaubt": False, "grund": "Keine Berechtigung."}
+    # Der Storno eines gebuchten Belegs braucht eine zweite Person; die Sachbearbeitung darf ihn nicht einmal anfragen.
+    assert _aktion(gebucht, "stornieren")["erlaubt"] is False
+    assert _aktion(gebucht, "freigabe_anfordern:reverse")["grund"] == "Keine Berechtigung."
     assert _aktion(gebucht, "umwandeln:sales_credit_memo")["erlaubt"] is True
     for rollen in (("FINANCE_BEARBEITEN",), ("SALES_ADMIN",)):
-        assert _aktion(_beleg(http, satz, "vk-rechnung-1", *rollen).json(), "stornieren")["erlaubt"] is True
+        assert _aktion(_beleg(http, satz, "vk-rechnung-1", *rollen).json(), "freigabe_anfordern:reverse")["erlaubt"] is True
     # Die Buchhaltung bucht, erstellt aber keine Gutschrift des Verkaufs.
     finanz = _beleg(http, satz, "vk-rechnung-1", "FINANCE_BEARBEITEN").json()
     assert _aktion(finanz, "umwandeln:sales_credit_memo")["grund"] == "Keine Berechtigung."
@@ -279,6 +282,10 @@ def test_buchhaltung_bucht_und_storniert(http, satz):
     gebucht = http("FINANCE_BEARBEITEN").post(f"/docflow/{offen}/post", json={"idempotency_key": "recht-buchen"})
     assert gebucht.status_code == 200, gebucht.text
     assert _status(satz, "vk-rechnung-2") == "posted"
+    ohne = http("FINANCE_BEARBEITEN").post(
+        f"/docflow/{offen}/reverse", json={"idempotency_key": "recht-storno-ohne", "reason": "Test der Rechte"})
+    assert ohne.status_code == 409 and "Freigabe erforderlich (R4)" in ohne.json()["detail"]
+    sichere_freigabe(satz["mandant"], offen, "reverse")
     storno = http("FINANCE_BEARBEITEN").post(
         f"/docflow/{offen}/reverse", json={"idempotency_key": "recht-storno", "reason": "Test der Rechte"})
     assert storno.status_code == 200, storno.text

@@ -7,7 +7,9 @@ haelt Verzeichnis und DocFlow-Wege deckungsgleich.
 
 Verhaeltnis zum Standard MCP-WRITE (``docs/architecture/mcp-write-standard.md``, verbindlich seit 13.10.2026):
 
-* Die Risikoklassen sind die des Standards (R0 Lesen … R4 kritisch); ab R3 braucht es eine Freigabe.
+* Die Risikoklassen sind die des Standards (R0 Lesen … R4 kritisch). Hier steht die **hoechste** Klasse, die ein
+  Kommando erreichen kann; welche Freigabe ein bestimmter Beleg braucht, sagt die Freigabematrix
+  (``app/core/freigabe.py``): eine Ausgangsrechnung bis 10.000 EUR bucht mit Rollenrecht, darueber mit zweiter Person.
 * Das Verzeichnis ist **keine zweite Capability-Registry**. Es beschreibt die vorhandenen DocFlow-Wege und ist
   die Zuarbeit der Belege fuer Stufe 2 des Standards („Bestehende Register vereinheitlichen"); dort werden die
   Namen auf die kanonischen Capability- und Command-Identitaeten abgebildet.
@@ -46,7 +48,7 @@ class Belegkommando:
 
     @property
     def freigabe_noetig(self) -> bool:
-        """Ab R3: ausdrueckliche Freigabe oder vorab genehmigte, passende Richtlinie."""
+        """Ob das Kommando eine Freigabe brauchen *kann* (ab R3). Je Beleg entscheidet die Freigabematrix."""
         return self.risiko in {"R3", "R4"}
 
 
@@ -60,8 +62,13 @@ BELEGKOMMANDOS: dict[str, Belegkommando] = {
         Belegkommando("docflow.convert", "Folgebeleg erstellen", "POST", "/docflow/{doc_id}/convert", "R2", "bearbeiten", idempotent=True),
         Belegkommando("docflow.record_print", "Druck vermerken", "POST", "/docflow/{doc_id}/record-print", "R2", "bearbeiten"),
         Belegkommando("docflow.record_export", "Export vermerken", "POST", "/docflow/{doc_id}/record-export", "R2", "bearbeiten"),
-        # Freigeben vergibt die endgueltige Belegnummer: Der Beleg ist danach ausgestellt.
-        Belegkommando("docflow.release", "Beleg freigeben", "POST", "/docflow/{doc_id}/release", "R3", "ausstellen", idempotent=True),
+        Belegkommando("docflow.release", "Beleg freigeben", "POST", "/docflow/{doc_id}/release", "R2", "ausstellen", idempotent=True),
+        # Freigabe durch eine zweite Person (APPROVAL-001). Anfragen darf, wer die Aktion selbst ausfuehren duerfte;
+        # entscheiden prueft die Approval Engine (Recht ``freigeben`` bzw. ``freigeben_erhoeht``, Funktionstrennung).
+        Belegkommando("docflow.approval_request", "Freigabe anfragen", "POST", "/docflow/{doc_id}/approvals", "R1",
+                      "buchen", idempotent=True),
+        Belegkommando("docflow.approval_decide", "Freigabe entscheiden", "POST",
+                      "/docflow/{doc_id}/approvals/{approval_id}/decision", "R2", "freigeben"),
         Belegkommando("docflow.post", "Beleg buchen", "POST", "/docflow/{doc_id}/post", "R3", "buchen", idempotent=True),
         Belegkommando("docflow.reverse", "Beleg stornieren", "POST", "/docflow/{doc_id}/reverse", "R4", "stornieren", idempotent=True),
     )

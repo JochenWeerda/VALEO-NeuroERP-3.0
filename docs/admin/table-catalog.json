@@ -11956,6 +11956,7 @@
             "app/services/business_partner_service.py",
             "app/services/customer_reference.py",
             "app/services/customer_service.py",
+            "app/services/docflow_belegadapter.py",
             "app/services/finance_dunning_service.py",
             "app/services/kunden_merge.py",
             "app/services/mcp_execution_service.py",
@@ -13399,6 +13400,7 @@
             "app/services/customer_reference.py",
             "app/services/customer_sales_eligibility.py",
             "app/services/customer_service.py",
+            "app/services/docflow_belegadapter.py",
             "app/services/finance_dunning_service.py",
             "app/services/kunden_merge.py",
             "app/services/mcp_execution_service.py",
@@ -14563,6 +14565,113 @@
     },
     "domain_docflow": {
       "tables": {
+        "approvals": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "subject_type",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "subject_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "subject_version",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "action",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "amount",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "risk",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "fingerprint",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "reason",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "requested_by",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "requested_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "decided_by",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "decided_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "decision_note",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "expires_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "consumed_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/docflow_freigabe.py"
+          ],
+          "written_by": [
+            "app/services/docflow_freigabe.py"
+          ]
+        },
         "command_idempotency_keys": {
           "columns": [
             {
@@ -14752,6 +14861,7 @@
             "app/core/dms_ocr_contracts.py",
             "app/core/gobd_artifact.py",
             "app/services/docflow_artifact_service.py",
+            "app/services/docflow_belegadapter.py",
             "app/services/docflow_evidence_service.py",
             "app/services/docflow_return_service.py",
             "app/services/settlement_document_archive_service.py"
@@ -14812,6 +14922,7 @@
             "app/services/docflow_service.py"
           ],
           "written_by": [
+            "app/services/docflow_freigabe.py",
             "app/services/docflow_service.py"
           ]
         },
@@ -14942,6 +15053,8 @@
             "id"
           ],
           "read_by": [
+            "app/services/docflow_belegadapter.py",
+            "app/services/docflow_freigabe.py",
             "app/services/docflow_service.py"
           ],
           "written_by": [
@@ -15094,10 +15207,13 @@
             "app/core/dms_ocr_contracts.py",
             "app/core/gobd_artifact.py",
             "app/services/docflow_artifact_service.py",
+            "app/services/docflow_belegadapter.py",
             "app/services/docflow_evidence_service.py",
             "app/services/docflow_followup_service.py",
+            "app/services/docflow_freigabe.py",
             "app/services/docflow_return_service.py",
             "app/services/docflow_service.py",
+            "app/services/mcp_beleg_tools.py",
             "app/services/settlement_document_archive_service.py"
           ],
           "written_by": [
@@ -15235,6 +15351,7 @@
           "read_by": [
             "app/api/v1/endpoints/gobd_archiv.py",
             "app/core/dms_ocr_contracts.py",
+            "app/services/docflow_freigabe.py",
             "app/services/docflow_service.py"
           ],
           "written_by": [
@@ -15314,7 +15431,9 @@
             "id"
           ],
           "read_by": [
+            "app/services/docflow_belegadapter.py",
             "app/services/docflow_evidence_service.py",
+            "app/services/docflow_freigabe.py",
             "app/services/docflow_service.py"
           ],
           "written_by": [
@@ -15392,6 +15511,7 @@
             "id"
           ],
           "read_by": [
+            "app/services/docflow_belegadapter.py",
             "app/services/docflow_evidence_service.py",
             "app/services/docflow_service.py"
           ],
@@ -18590,6 +18710,7 @@
             "app/infrastructure/models/einkauf_models.py",
             "app/services/bestell_kommunikation_service.py",
             "app/services/customer_reference.py",
+            "app/services/docflow_belegadapter.py",
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py",
@@ -56942,7 +57063,8 @@
           "read_by": [
             "app/api/v1/endpoints/compat.py",
             "app/finance/steuerschluessel.py",
-            "app/infrastructure/models/l3c_models.py"
+            "app/infrastructure/models/l3c_models.py",
+            "app/services/docflow_freigabe.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/compat.py",

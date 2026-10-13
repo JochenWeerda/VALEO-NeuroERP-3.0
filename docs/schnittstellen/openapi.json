@@ -20227,6 +20227,13 @@
             "title": "Dokumente",
             "type": "array"
           },
+          "freigaben": {
+            "items": {
+              "$ref": "#/components/schemas/Freigabestand"
+            },
+            "title": "Freigaben",
+            "type": "array"
+          },
           "historie": {
             "items": {
               "$ref": "#/components/schemas/Historieneintrag"
@@ -51734,6 +51741,57 @@
         "title": "DocLine",
         "type": "object"
       },
+      "DocflowApprovalDecision": {
+        "properties": {
+          "granted": {
+            "title": "Granted",
+            "type": "boolean"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "required": [
+          "granted"
+        ],
+        "title": "DocflowApprovalDecision",
+        "type": "object"
+      },
+      "DocflowApprovalRequest": {
+        "properties": {
+          "action": {
+            "pattern": "^(post|reverse)$",
+            "title": "Action",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "DocflowApprovalRequest",
+        "type": "object"
+      },
       "DocflowCommandResult": {
         "properties": {
           "command": {
@@ -73034,6 +73092,114 @@
           "preis_eur_t"
         ],
         "title": "FrachttarifPayload",
+        "type": "object"
+      },
+      "Freigabestand": {
+        "additionalProperties": false,
+        "description": "Eine Freigabe durch eine zweite Person (APPROVAL-001) — angefragt, erteilt, verbraucht …",
+        "properties": {
+          "aktion": {
+            "enum": [
+              "post",
+              "reverse"
+            ],
+            "title": "Aktion",
+            "type": "string"
+          },
+          "angefragt_am": {
+            "format": "date-time",
+            "title": "Angefragt Am",
+            "type": "string"
+          },
+          "angefragt_von": {
+            "title": "Angefragt Von",
+            "type": "string"
+          },
+          "betrag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Betrag"
+          },
+          "entschieden_am": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entschieden Am"
+          },
+          "entschieden_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entschieden Von"
+          },
+          "freigabe_id": {
+            "title": "Freigabe Id",
+            "type": "string"
+          },
+          "grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grund"
+          },
+          "gueltig_bis": {
+            "format": "date-time",
+            "title": "Gueltig Bis",
+            "type": "string"
+          },
+          "risiko": {
+            "enum": [
+              "R3",
+              "R4"
+            ],
+            "title": "Risiko",
+            "type": "string"
+          },
+          "stand": {
+            "enum": [
+              "angefragt",
+              "erteilt",
+              "abgelehnt",
+              "verbraucht",
+              "abgelaufen",
+              "ungueltig"
+            ],
+            "title": "Stand",
+            "type": "string"
+          }
+        },
+        "required": [
+          "freigabe_id",
+          "aktion",
+          "risiko",
+          "stand",
+          "angefragt_von",
+          "angefragt_am",
+          "gueltig_bis"
+        ],
+        "title": "Freigabestand",
         "type": "object"
       },
       "FreightCalcIn": {
@@ -269581,6 +269747,233 @@
           }
         ],
         "summary": "Document aktualisieren",
+        "tags": [
+          "docflow"
+        ]
+      }
+    },
+    "/api/v1/docflow/{doc_id}/approvals": {
+      "get": {
+        "operationId": "list_approvals_api_v1_docflow__doc_id__approvals_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "doc_id",
+            "required": true,
+            "schema": {
+              "title": "Doc Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Approvals Api V1 Docflow  Doc Id  Approvals Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Freigaben des Belegs",
+        "tags": [
+          "docflow"
+        ]
+      },
+      "post": {
+        "description": "Anfragen darf, wer die Aktion selbst ausfuehren duerfte. Der Antragsteller kommt aus der Anmeldung.",
+        "operationId": "request_approval_api_v1_docflow__doc_id__approvals_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "doc_id",
+            "required": true,
+            "schema": {
+              "title": "Doc Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocflowApprovalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Request Approval Api V1 Docflow  Doc Id  Approvals Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Freigabe durch eine zweite Person anfragen",
+        "tags": [
+          "docflow"
+        ]
+      }
+    },
+    "/api/v1/docflow/{doc_id}/approvals/{approval_id}/decision": {
+      "post": {
+        "description": "Recht, Funktionstrennung, Ablauf und unveraenderter Inhalt prueft die Approval Engine.",
+        "operationId": "decide_approval_api_v1_docflow__doc_id__approvals__approval_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "doc_id",
+            "required": true,
+            "schema": {
+              "title": "Doc Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "approval_id",
+            "required": true,
+            "schema": {
+              "title": "Approval Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocflowApprovalDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Decide Approval Api V1 Docflow  Doc Id  Approvals  Approval Id  Decision Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Freigabe erteilen oder ablehnen",
         "tags": [
           "docflow"
         ]

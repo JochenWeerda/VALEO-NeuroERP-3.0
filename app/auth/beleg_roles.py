@@ -4,7 +4,7 @@ Bis zum 13.10.2026 konnte jeder angemeldete Benutzer eines Mandanten jeden DocFl
 buchen und stornieren. Jetzt entscheidet die Rolle der Anmeldung, je Recht und Belegart. Die Rollen sind die
 vorhandenen der Bereiche (``app/auth/finance_roles.py``); es gibt kein zweites Rechtesystem.
 
-Sechs Rechte:
+Acht Rechte:
 
 * ``lesen``       — den Beleg sehen (Mengen, Stand, Kette)
 * ``preise``      — dazu Preise, Rabatte, Steuer und Summen
@@ -12,6 +12,7 @@ Sechs Rechte:
 * ``ausstellen``  — freigeben (endgueltige Belegnummer)
 * ``buchen``      — an Finance uebergeben
 * ``stornieren``  — zuruecknehmen
+* ``freigeben``, ``freigeben_erhoeht`` — als zweite Person freigeben (R3 bzw. R4), siehe ``app/core/freigabe.py``
 
 Auslegung (die einfachste, die zu den vorhandenen Rollen passt):
 
@@ -23,8 +24,8 @@ Auslegung (die einfachste, die zu den vorhandenen Rollen passt):
   Sachbearbeitung. Einen Beleg, den Finance nicht bucht (Angebot, Auftrag, Lieferschein, Bestellung,
   Wareneingang), nimmt zurueck, wer ihn bearbeiten darf.
 
-Freigabe im Sinn des Standards MCP-WRITE (ab R3) ist hier das aktionsgebundene Recht einer angemeldeten Person.
-Eine eigene Freigabe mit Bindung an Belegversion und Frist, oder ein Vier-Augen-Schritt, ist das nicht.
+Das Recht ist die erste Bedingung. Ob ein Vorgang dazu die Freigabe einer zweiten Person braucht, entscheidet die
+Freigabematrix (``app/core/freigabe.py``, APPROVAL-001) — durchgesetzt in ``app/services/docflow_freigabe.py``.
 """
 from __future__ import annotations
 
@@ -34,7 +35,9 @@ from fastapi import HTTPException, status
 
 from app.core.belegvertrag import BELEGARTEN
 
-RECHTE: tuple[str, ...] = ("lesen", "preise", "bearbeiten", "ausstellen", "buchen", "stornieren")
+RECHTE: tuple[str, ...] = (
+    "lesen", "preise", "bearbeiten", "ausstellen", "buchen", "stornieren", "freigeben", "freigeben_erhoeht",
+)
 
 _IMMER = frozenset({"admin"})
 _FINANZ_LESEN = frozenset({"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN"})
@@ -71,6 +74,12 @@ def rollen_fuer(recht: str, belegart: str) -> frozenset[str]:
         return bearbeiten
     if recht == "buchen":
         return _IMMER | manager | bereich["bearbeiten"] | _FINANZ_BUCHEN
+    # Freigabe als zweite Person (APPROVAL-001): Leitung des Bereichs und Buchhaltung; ab R4 nur Leitung und
+    # Finanzleitung. Die Funktionstrennung prueft die Approval Engine — sie gilt auch fuer ``admin``.
+    if recht == "freigeben":
+        return _IMMER | manager | bereich["leitung"] | _FINANZ_BUCHEN
+    if recht == "freigeben_erhoeht":
+        return _IMMER | bereich["leitung"] | frozenset({"FINANCE_ADMIN"})
     if recht == "stornieren":
         return (_IMMER | bereich["leitung"] | _FINANZ_BUCHEN) if variante.bucht else bearbeiten
     raise KeyError(recht)

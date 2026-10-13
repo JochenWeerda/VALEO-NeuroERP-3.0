@@ -14,6 +14,7 @@ from app.core.tenant import get_tenant_id
 from app.auth.beleg_roles import darf, verlange
 from app.auth.deps import get_current_user
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.services.docflow_freigabe import DocflowFreigabe
 from app.services.docflow_service import DocflowService, POS_TYPES
 
 from app.api.v1.schemas.base import BaseSchema
@@ -439,6 +440,79 @@ async def update_document(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"update failed: {exc}") from exc
     return _row_to_header_out(svc, doc_id)
+
+
+# ── Freigaben (APPROVAL-001) ──────────────────────────────────────────────────
+
+class DocflowApprovalRequest(BaseModel):
+    action: str = Field(..., pattern="^(post|reverse)$")
+    reason: Optional[str] = Field(default=None, max_length=300)
+
+
+class DocflowApprovalDecision(BaseModel):
+    granted: bool
+    note: Optional[str] = Field(default=None, max_length=300)
+
+
+@router.get("/{doc_id}/approvals", response_model=list[dict[str, Any]], summary="Freigaben des Belegs")
+def list_approvals(
+    doc_id: str,
+    tenant_id: str = Depends(_docflow_tenant),
+    db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
+) -> list[dict[str, Any]]:
+    svc = _svc(db, tenant_id)
+    if not svc.fetch_header(doc_id):
+        raise HTTPException(status_code=404, detail="Document not found")
+    _recht(svc, doc_id, nutzer, "lesen")
+    return DocflowFreigabe(db, tenant_id).liste(doc_id)
+
+
+@router.post("/{doc_id}/approvals", response_model=dict[str, Any], summary="Freigabe durch eine zweite Person anfragen")
+def request_approval(
+    doc_id: str,
+    payload: DocflowApprovalRequest,
+    tenant_id: str = Depends(_docflow_tenant),
+    db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Anfragen darf, wer die Aktion selbst ausfuehren duerfte. Der Antragsteller kommt aus der Anmeldung."""
+    svc = _svc(db, tenant_id)
+    if not svc.fetch_header(doc_id):
+        raise HTTPException(status_code=404, detail="Document not found")
+    _recht(svc, doc_id, nutzer, "buchen" if payload.action == "post" else "stornieren")
+    try:
+        return DocflowFreigabe(db, tenant_id).beantrage(doc_id, payload.action, _akteur(nutzer) or "", payload.reason)
+    except EntityNotFoundError as exc:
+        db.rollback()
+        raise HTTPException(status_code=404, detail=exc.detail)
+    except (ConflictError, ValidationFailedError) as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=exc.detail)
+
+
+@router.post("/{doc_id}/approvals/{approval_id}/decision", response_model=dict[str, Any],
+             summary="Freigabe erteilen oder ablehnen")
+def decide_approval(
+    doc_id: str,
+    approval_id: str,
+    payload: DocflowApprovalDecision,
+    tenant_id: str = Depends(_docflow_tenant),
+    db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Recht, Funktionstrennung, Ablauf und unveraenderter Inhalt prueft die Approval Engine."""
+    try:
+        return DocflowFreigabe(db, tenant_id).entscheide(doc_id, approval_id, nutzer, payload.granted, payload.note)
+    except EntityNotFoundError as exc:
+        db.rollback()
+        raise HTTPException(status_code=404, detail=exc.detail)
+    except ConflictError as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=exc.detail)
+    except ValidationFailedError as exc:
+        db.rollback()
+        raise HTTPException(status_code=403, detail=exc.detail)
 
 
 @router.post("/{doc_id}/release", response_model=DocflowCommandResult, summary="Document freigeben")

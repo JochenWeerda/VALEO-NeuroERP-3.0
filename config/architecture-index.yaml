@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-13
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-13T11:53:26Z'
+generated_at: '2026-10-13T12:15:19Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -933,6 +933,7 @@ domains:
     - docflow_belegadapter
     - docflow_evidence_service
     - docflow_followup_service
+    - docflow_freigabe
     - docflow_gobd_service
     - docflow_return_service
     - docflow_service
@@ -2084,8 +2085,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 939
   frontend_routes_mapped: 939
-  backend_services_total: 285
-  backend_services_mapped: 284
+  backend_services_total: 286
+  backend_services_mapped: 285
   backend_endpoints_total: 456
   backend_endpoints_mapped: 456
 unmapped:

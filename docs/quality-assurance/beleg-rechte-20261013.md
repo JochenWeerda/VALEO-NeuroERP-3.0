@@ -59,9 +59,8 @@ vorhandenen Rollen der Bereiche; ein zweites Rechtesystem gibt es nicht.
 - **Gebuchtes stornieren ohne `manager`** und ohne Sachbearbeitung (Risikoklasse R4).
 - **Das Lager liest alle Belege ohne Preise.**
 - **Vertrieb (`CRM_*`) liest Verkaufsbelege mit Preisen**, wie er schon offene Posten liest.
-- **Freigabe ab R3 ist das aktionsgebundene Recht einer angemeldeten Person.** Eine eigene Freigabe,
-  gebunden an Belegversion, Inhalt und Frist (MCP-WRITE-008), und ein Vier-Augen-Schritt sind das
-  nicht.
+- **Freigabe:** Seit APPROVAL-001 entscheidet die Freigabematrix, ob ein Vorgang zusätzlich eine zweite
+  Person braucht — siehe [Risikobasierte Freigabe](approval-001-freigabe-20261013.md).
 
 ## Folgen für den Betrieb
 

@@ -57,6 +57,18 @@
         "LAGER_BEARBEITEN",
         "admin",
         "manager"
+      ],
+      "belege.freigeben": [
+        "EINKAUF_ADMIN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.freigeben_erhoeht": [
+        "EINKAUF_ADMIN",
+        "FINANCE_ADMIN",
+        "admin"
       ]
     },
     "beleg/purchase-credit-memo": {
@@ -107,6 +119,18 @@
         "EINKAUF_ADMIN",
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
+        "admin"
+      ],
+      "belege.freigeben": [
+        "EINKAUF_ADMIN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.freigeben_erhoeht": [
+        "EINKAUF_ADMIN",
+        "FINANCE_ADMIN",
         "admin"
       ]
     },
@@ -159,6 +183,18 @@
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "admin"
+      ],
+      "belege.freigeben": [
+        "EINKAUF_ADMIN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.freigeben_erhoeht": [
+        "EINKAUF_ADMIN",
+        "FINANCE_ADMIN",
+        "admin"
       ]
     },
     "beleg/purchase-order": {
@@ -210,6 +246,18 @@
         "EINKAUF_BEARBEITEN",
         "admin",
         "manager"
+      ],
+      "belege.freigeben": [
+        "EINKAUF_ADMIN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.freigeben_erhoeht": [
+        "EINKAUF_ADMIN",
+        "FINANCE_ADMIN",
+        "admin"
       ]
     },
     "beleg/sales-credit-memo": {
@@ -265,6 +313,18 @@
       "belege.stornieren": [
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
+        "SALES_ADMIN",
+        "admin"
+      ],
+      "belege.freigeben": [
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "SALES_ADMIN",
+        "admin",
+        "manager"
+      ],
+      "belege.freigeben_erhoeht": [
+        "FINANCE_ADMIN",
         "SALES_ADMIN",
         "admin"
       ]
@@ -330,6 +390,18 @@
         "SALES_BEARBEITEN",
         "admin",
         "manager"
+      ],
+      "belege.freigeben": [
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "SALES_ADMIN",
+        "admin",
+        "manager"
+      ],
+      "belege.freigeben_erhoeht": [
+        "FINANCE_ADMIN",
+        "SALES_ADMIN",
+        "admin"
       ]
     },
     "beleg/sales-invoice": {
@@ -385,6 +457,18 @@
       "belege.stornieren": [
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
+        "SALES_ADMIN",
+        "admin"
+      ],
+      "belege.freigeben": [
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "SALES_ADMIN",
+        "admin",
+        "manager"
+      ],
+      "belege.freigeben_erhoeht": [
+        "FINANCE_ADMIN",
         "SALES_ADMIN",
         "admin"
       ]
@@ -444,6 +528,18 @@
         "SALES_BEARBEITEN",
         "admin",
         "manager"
+      ],
+      "belege.freigeben": [
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "SALES_ADMIN",
+        "admin",
+        "manager"
+      ],
+      "belege.freigeben_erhoeht": [
+        "FINANCE_ADMIN",
+        "SALES_ADMIN",
+        "admin"
       ]
     },
     "beleg/sales-order": {
@@ -501,6 +597,18 @@
         "SALES_BEARBEITEN",
         "admin",
         "manager"
+      ],
+      "belege.freigeben": [
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "SALES_ADMIN",
+        "admin",
+        "manager"
+      ],
+      "belege.freigeben_erhoeht": [
+        "FINANCE_ADMIN",
+        "SALES_ADMIN",
+        "admin"
       ]
     }
   }
