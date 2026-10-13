@@ -325581,6 +325581,167 @@
         ]
       }
     },
+    "/api/v1/kontrolle/lagebild": {
+      "get": {
+        "operationId": "lage_api_v1_kontrolle_lagebild_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Lage Api V1 Kontrolle Lagebild Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pruefkorb: Lagebild fuer den Controller",
+        "tags": [
+          "kontrolle"
+        ]
+      }
+    },
+    "/api/v1/kontrolle/pruefkorb": {
+      "get": {
+        "description": "Ohne Filter auf den Stand: die offenen Befunde, kritische zuerst, darin die aeltesten.",
+        "operationId": "arbeitsliste_api_v1_kontrolle_pruefkorb_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 120,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 40,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_dir",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(asc|desc)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort Dir"
+            }
+          },
+          {
+            "description": "JSON-Spaltenfilter der Maskenlaufzeit",
+            "in": "query",
+            "name": "filter_plan",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "JSON-Spaltenfilter der Maskenlaufzeit",
+              "title": "Filter Plan"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Arbeitsliste Api V1 Kontrolle Pruefkorb Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pruefkorb: Arbeitsliste des Controllers",
+        "tags": [
+          "kontrolle"
+        ]
+      }
+    },
     "/api/v1/kostenrechnung/bab": {
       "get": {
         "description": "Berechnet den BAB für eine Periode.\n\nLogik:\n  Primärkosten = Summe Kostenstellen-Buchungen im Monat der Periode\n  Umlage-Eingang = Summe umlagebetrag_eur wo diese KST = nach_kostenstelle_id\n  Umlage-Ausgang = Summe umlagebetrag_eur wo diese KST = von_kostenstelle_id\n  Gesamtkosten = Primär + Eingang - Ausgang",

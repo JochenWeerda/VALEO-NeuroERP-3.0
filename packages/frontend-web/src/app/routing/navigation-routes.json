@@ -119,6 +119,7 @@
   ,{ "path": "auswertungen/duengemittelmengen", "module": "@/pages/auswertungen/duengemittelmengen" }
   ,{ "path": "auswertungen/auftrags-kontrolle", "module": "@/pages/auswertungen/auftrags-kontrolle" }
   ,{ "path": "auswertungen/beleg-kontrolle", "module": "@/pages/auswertungen/beleg-kontrolle" }
+  ,{ "path": "finance/pruefkorb", "module": "@/pages/finance/pruefkorb" }
   ,{ "path": "auswertungen/lieferschein-kontrolle", "module": "@/pages/auswertungen/lieferschein-kontrolle" }
   ,{ "path": "abrechnung/eb-lieferschein-kontrolle", "module": "@/pages/abrechnung/eb-lieferschein-kontrolle" }
   ,{ "path": "produktion/chargen-bearbeiten", "module": "@/pages/produktion/chargen-bearbeiten" }

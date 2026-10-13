@@ -11,6 +11,22 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FIN-CONTROL-002 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13 (Sichtpruefung offen).
+**Lieferung:** Pruefkorb als native Arbeitsliste `finance/pruefkorb` (`app/core/screen_definitions_kontrolle.py`,
+Seite `pages/finance/pruefkorb.tsx`, Route `/finance/pruefkorb`, Navigation Finanzen); Lesemodell
+`app/services/kontrollkorb.py` mit `GET /api/v1/kontrolle/pruefkorb` (Seiten, Suche, Sortierung, `filter_plan`)
+und `GET /api/v1/kontrolle/lagebild` (Zahlen, Wartezeiten, Haeufungen, Saetze fuer den Controller). Bewertet wird
+ueber den bestehenden Kommandoweg `POST …/befunde/{id}/pruefung`.
+QA: `docs/quality-assurance/fin-control-002-pruefkorb-maske-20261013.md`.
+**Beruehrt den Belegvertrag (an Codex):** `Belegaktion.hinweis` ist ein neues, optionales Feld — gesetzt an einer
+erlaubten Aktion, deren Ausfuehrung im Pruefkorb vermerkt wird; der Belegkopf fuehrt den Satz in `aktionshinweis`.
+Dein Abschnitt DOCFLOW-MASK-COMMAND-APPROVAL stand auf abgeschlossen und der Arbeitsbaum hatte an
+`belegvertrag.py`, `docflow_belegadapter.py` und `belege.py` nichts Offenes; Schema neu erzeugt.
+**Fuer die Sichtpruefung:** Die Testidentitaet braucht die Rolle `controller` (bewerten) bzw. eine Finanzrolle
+(lesen).
+
 ## STUDIO-UI-SAVED-REVIEW-20261013 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Studio-Pruefung/Freigabe nur fuer angezeigten gespeicherten Stand, keine erfundenen Urheberheader. **Dateibesitz:** packages/frontend-web/src/lib/api/studio.ts; packages/frontend-web/src/features/screen-studio/ScreenStudioPage.tsx; packages/frontend-web/src/__tests__/features/screen-studio/ScreenStudioPage.test.tsx; eigener studio-api.test.ts; docs/quality-assurance/studio-ui-saved-review-20261013.md. **Abnahme:** lokale Aenderungen sperren Review/Publish bis Speichern; fehlgeschlagene Speicherung gibt nichts frei; Transport sendet keine Caller-Identitaet. **Risiken:** serverseitig verpflichtender Browser-Review-Hash und dauerhafte Historie weiterhin offen; keine realen Rollen- oder Fachdatenmutation.

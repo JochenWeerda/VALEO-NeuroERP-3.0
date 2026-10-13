@@ -2536,6 +2536,30 @@
       ]
     },
     {
+      "mask_id": "finance/pruefkorb",
+      "title": "Prüfkorb",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/finance__pruefkorb/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/pruefkorb/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/pruefkorb/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/pruefkorb/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "ausgeloest_von",
+        "geprueft_von",
+        "bewertung",
+        "betrag"
+      ],
+      "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
       "mask_id": "finance/rechnungstapel",
       "title": "Rechnungstapel",
       "domain": "finance",
@@ -5274,5 +5298,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 97
+  "event_count": 98
 }

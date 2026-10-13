@@ -160,6 +160,8 @@ class Belegaktion(_Teil):
     kommando: str | None = None
     freigabe_noetig: bool = False
     approval_id: str | None = None  # konkrete offene Freigabe, vom Server gebunden
+    # Eine Auffaelligkeit, die die Aktion nicht sperrt: Sie wird ausgefuehrt und im Pruefkorb vermerkt.
+    hinweis: str | None = None
 
 
 class Beleg(_Teil):

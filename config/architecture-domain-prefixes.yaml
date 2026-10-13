@@ -371,6 +371,7 @@ domains:
       - dms_
       - connector_
       - freigabe_
+      - kontrollkorb
       - docflow_
       - doc_nachweisraum_
       - audit_hardening

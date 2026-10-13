@@ -186,6 +186,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `kontrakt_position_service` | Rohwaren-Positionsmonitor: Long/Short-Berechnung pro Artikel. |
 | `kontrakte_adapters` | — |
 | `kontrakte_service` | — |
+| `kontrollkorb` | Lesemodell des Pruefkorbs (FIN-CONTROL-002): Arbeitsliste und Lagebild fuer den Controller. |
 | `kunden_backfill` | Phase 2D Schritt 3: Backfill public.kunden -> Domänensatelliten. |
 | `kunden_geocode_service` | Befüllt public.kunden_geo mit präzisen Koordinaten je Kunde. |
 | `kunden_merge` | Kunden/Business-Partner-Merge — Dry-Run / Reconciliation (Phase 2A). |

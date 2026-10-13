@@ -54,6 +54,18 @@
      "default": null,
      "title": "Grund"
     },
+    "hinweis": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Hinweis"
+    },
     "key": {
      "title": "Key",
      "type": "string"

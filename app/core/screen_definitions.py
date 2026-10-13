@@ -6,6 +6,7 @@ import re
 from typing import Any
 
 from app.core.screen_definitions_identity import IDENTITY_SCREEN_BUILDERS
+from app.core.screen_definitions_kontrolle import KONTROLLE_ROUTEN, KONTROLLE_SCREEN_BUILDERS, KONTROLLE_SYNONYME
 from app.core.mask_rollout_catalog import ROLLOUT_WAVES_42_51
 from app.core.screen_definitions_capture import (
     build_strecke_disposition_screen_definition,
@@ -4484,6 +4485,7 @@ def _build_sanctions_scope_screen_definition(
 
 _SCREEN_DEFINITIONS: dict[str, Any] = {
     **IDENTITY_SCREEN_BUILDERS,
+    **KONTROLLE_SCREEN_BUILDERS,
     "schnittstelle/legacy-adapter-monitor": lambda: {
         "schemaVersion": 1, "id": "schnittstelle/legacy-adapter-monitor", "domain": "integration", "mode": "list",
         "title": "Standard-/Unimet-Adapter", "subtitle": "Eingang, Fehlerkorb, Staging und Reconciliation",
@@ -5397,6 +5399,7 @@ for _spec in ROLLOUT_WAVES_42_51:
 # Intent-Compiler. Zentral gepflegt statt je SD, damit der Katalog
 # (/ui/mask-registry/omnibox-catalog) eine Wartungsstelle hat.
 _AGENT_SYNONYMS: dict[str, list[str]] = {
+    **KONTROLLE_SYNONYME,
     # Fuetterungsberatung: die Masken kamen mit dem Programm dazu, die
     # Suchbegriffe nicht. Ohne Synonyme findet weder Omnibox noch Agent sie
     # unter den Woertern, die im Stall und in der Beratung benutzt werden.
@@ -5520,6 +5523,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    **KONTROLLE_ROUTEN,
     "admin/identity-budgets": "/admin/identity-budgets",
     "admin/token-consumption": "/admin/token-consumption",
     "schnittstelle/legacy-adapter-monitor": "/schnittstelle/legacy-adapter-monitor",
