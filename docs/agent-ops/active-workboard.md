@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## CONTROLLER-MASK-PROJECTION-20261013 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Fehlende UI-Abnahme der kanonisch erzeugten Controller-Freigaberechte (FIN-CONTROL-001). **Dateibesitz:** packages/frontend-web/src/__tests__/components/mask-builder/screen-permissions.test.ts; docs/quality-assurance/controller-mask-projection-20261013.md. **Abnahme:** controller und CONTROLLING erhalten deklarierte Freigaberechte, aber keine Buchung/Bearbeitung/Stornierung daraus; Kombination mit FINANCE_LESEN bleibt lesend plus Kontrolle. **Risiken:** kein neuer Rollenauftrag fuer reale Testkennung; echte Controller-Browser-/Providerabnahme separat. Fremde generierte Arbeitskopien nicht regenerieren oder committen.
+
 ## FIN-CONTROL-001 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Entscheidung des Auftraggebers vom Abend des
