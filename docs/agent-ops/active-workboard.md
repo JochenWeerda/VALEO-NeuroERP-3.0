@@ -11,6 +11,32 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-BROWSER-RUNTIME-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Echte neue Browser-Anmeldung mit freigegebener Einkaufsrolle und lesende MCP-Aufrufe abnehmen; veralteten Container-Katalog dauerhaft vermeiden. **Dateibesitz:** docker-compose.yml nur read-only MCP-Katalog-Mount; docs/quality-assurance/beleg-identity-scopes-20261013.md nur Browser-/Runtime-Nachtrag; eigener Workboard-Block. **Abnahme:** Beide Scopes im neuen Token, beleg.arten/suchen 200, fehlender Beleg 404, Compose-Konfiguration validiert. **Risiken:** Positiver Einzelbeleg-Nachweis braucht passende Referenzbelege im autorisierten Testmandanten; Index bleibt fremd gesperrt.
+
+**Lieferung:** Reale Neuanmeldung, beide Beleg-Scopes; lesende Werkzeuge arten/suchen 200, fehlender Einzelbeleg 404. Container-Katalog aus gepushtem Stand aktualisiert; Compose bindet Katalog kuenftig read-only ein. Positiver Einzelbelegabruf und Testmandantenbindung bleiben offen. QA: beleg-identity-scopes-20261013.md (Nachtrag).
+
+## BELEG-020 — Teil 1 abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** Teil 1 (Definition und Lesewege) abgeschlossen 2026-10-13; Teil 2 offen.
+**Lieferung:** `app/core/screen_definitions_beleg.py` erzeugt aus einem Grundgeruest und der Variante des
+Belegvertrags die ScreenDefinition `beleg/<belegart>` fuer alle neun Belegarten (Preise nur mit Preisen, Aktionen
+aus `belegkommandos.py`). Lesewege `GET /api/v1/belege/{belegart}/{id}/kopf` und `…/tabs/{reiter}` mit denselben
+Rechten wie der Beleg. Tests 24. QA: `docs/quality-assurance/belegmaske-varianten-20261013.md`.
+**Nicht sichtbar:** Die Definitionen sind bewusst nicht in `_SCREEN_DEFINITIONS` eingetragen.
+**Teil 2 (offen, haengt an Phase 0.6/0.8):** Eintrag in die Registry mit Route und Inventaren, Aktionen ueber die
+Mask-Engine, Sichtpruefung im Browser am Mandanten `00000000-0000-0000-0000-000000000051`.
+
+## BELEG-014 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** Der Belegvertrag traegt den Partner mit fachlicher Nummer und Name (Kunde aus
+`domain_crm.customers`, Lieferant aus `domain_einkauf.lieferanten`, nur eigener Mandant) und die Anhaenge aus
+`domain_docflow.document_artifacts` (Version, Freigabestand, juengste Version). Nur lesend, im Adapter
+`app/services/docflow_belegadapter.py`; Vertrag: `Belegdokument.version`, `.stand`, `.aktuell`.
+Tests 3 neu. QA: Nachtrag in `docs/quality-assurance/belege-lesen-20261013.md`.
+
 ## BELEG-012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Auftrag des Auftraggebers: das noch nicht Geltende

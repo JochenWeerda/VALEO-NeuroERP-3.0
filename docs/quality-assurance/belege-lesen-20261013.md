@@ -59,3 +59,22 @@ möglich sind.
   der Weg nicht (Entscheidung E2 im Masterplan).
 - **Keine Liste, keine Suche** — folgt mit den lesenden MCP-Werkzeugen.
 - Noch liest keine Maske über diesen Weg.
+
+## Nachtrag BELEG-014: Partnername und Anhänge
+
+Zwei der Grenzen oben sind geschlossen:
+
+- **Partner:** Nummer und Name kommen aus den Stammdaten des Bereichs — der Kunde aus
+  `domain_crm.customers` (Name des Geschäftspartners, sonst Firmenname), der Lieferant aus
+  `domain_einkauf.lieferanten`. Gesucht wird im eigenen Mandanten über Kennung oder Nummer; der Vertrag
+  zeigt die fachliche Nummer, auch wenn der Beleg die Kennung trägt. Ohne Stammsatz bleibt die Kennung
+  des Belegs stehen, ohne Namen.
+- **Dokumente:** Die Anhänge kommen aus dem revisionssicheren Artefaktspeicher
+  (`domain_docflow.document_artifacts`): jede Version mit Art, Dateiname, Freigabestand und der Angabe,
+  ob sie die jüngste ist. Der Vertrag trägt dafür `version`, `stand` und `aktuell` am Dokument.
+
+Nachweis: `tests/test_belege_partner_anhaenge.py`, 3 bestanden gegen `valeo_probe`.
+
+**Grenzen:** Der Inhalt eines Anhangs wird hier nicht ausgeliefert (dafür gibt es die Wege unter
+`/docflow/…/artifacts`). Dokumente im Nachweisraum, die nur über eine Referenz am Beleg hängen, sind
+nicht dabei. Die Referenzbelege haben weiter keine Stammsätze für `REF-KUNDE` und `REF-LIEFERANT`.

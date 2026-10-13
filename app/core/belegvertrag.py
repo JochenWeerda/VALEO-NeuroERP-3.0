@@ -117,6 +117,10 @@ class Belegdokument(_Teil):
     bezeichnung: str
     art: str | None = None
     datum: datetime | None = None
+    version: int | None = None
+    # Freigabestand des Anhangs (entwurf, freigegeben …), nicht des Belegs.
+    stand: str | None = None
+    aktuell: bool = True
 
 
 class Historieneintrag(_Teil):

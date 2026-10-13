@@ -80,3 +80,32 @@ nicht als DB-Abnahme verwendet. Kein Gesamt-CI-/Browser-Gruen aus diesen Nachwei
 
 - [Keycloak: Client scopes und Rollenbindung](https://github.com/keycloak/keycloak/blob/main/docs/documentation/server_admin/topics/clients/con-client-scopes.adoc)
 - [MCP-Schreibstandard](../architecture/mcp-write-standard.md)
+
+## Reale Browser-/Runtime-Abnahme (Nachtrag 2026-10-13)
+
+Der Auftraggeber hat EINKAUF_BEARBEITEN fuer die vorhandene synthetische Browser-
+Testkennung ausdruecklich freigegeben. Die Rolle ist lokal additiv zugewiesen;
+Kennwort, MFA und andere Rollen wurden nicht geaendert. Die Neuanmeldung lief ueber
+regulaeres Logout, Keycloak-Passwortanmeldung und OIDC-PKCE-Callback. Im tatsaechlich
+neu ausgestellten Browser-Token wurden belege:read, belege:write und die vorhandene
+Einkaufsrolle bestaetigt; ausgegeben wurden nur Boolesche Pruefergebnisse.
+
+Der erste reale Aufruf lieferte Unknown ERP tool (404): app-Code war eingebunden,
+config/mcp_erp_tools.yaml dagegen nur als alter Image-Stand vorhanden. Der gepushte
+Katalog wurde gezielt in den bestehenden Backend-Container uebertragen und der
+Prozess neu gestartet. Kein Container/DB neu angelegt; Worker starten langsam.
+Die Compose-Definition bindet den kanonischen Katalog jetzt read-only ein, damit
+spaetere Container-Neuerstellungen nicht erneut einen alten Katalog verwenden.
+Der bestehende Container hat bis zur naechsten regulaeren Neuerstellung noch die
+kopierte Katalogfassung; fuer aktuelle Aufrufe ist sie aktiv.
+
+Reale Browser-Aufrufe mit dieser Sitzung: beleg.arten 200 (neun Arten), beleg.suchen
+200 (null sichtbare Belege), beleg.lesen fuer eine absichtlich nicht vorhandene
+Einkaufsbeleg-ID 404 mit mandantenbezogener Ablehnung. Kein Fachdaten-Schreibzugriff.
+Ein positiver Einzelbelegabruf ist damit **noch nicht abgenommen**; er erfordert
+passende Referenzbelege und die autorisierte Testmandantenbindung. Die vorhandenen
+MCP-Schreibsperren wurden nicht aufgehoben.
+
+Screenshot ohne Kennwort/Token: artifacts/beleg-relogin-granted-20261013.png
+(lokales Arbeitsartefakt). Der geteilte Git-Index war weiterhin gesperrt; keine
+fremde Sperre geloescht und keine fremden staged Aenderungen zurueckgesetzt.
