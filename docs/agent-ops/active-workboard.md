@@ -11,6 +11,14 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MCP-WRITE-STANDARD-20261013 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-13.
+**Ziel:** Verbindliche Regeln MCP-WRITE-001 bis 015 und geordnete Integration festsetzen.
+**Dateibesitz:** docs/architecture/mcp-write-standard.md; additive Verweise in AGENTS.md und docs/architecture/index.md; eigener Workboard-Block.
+**Abnahme:** 15 Regeln, R0–R4, vier Integrationsstufen mit Gates, explizite Trennung Standard/Laufzeitnachweis; Links und Staged-Gates.
+**Risiken:** Bestehende Adapter sind noch nicht durchgaengig konform; keine Runtime-Freischaltung in diesem Dokumentationsslice.
+
 ## BELEG-010 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
