@@ -11,6 +11,21 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-020 — Teil 2b Serverseite abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** Serverseite abgeschlossen 2026-10-13; Frontend-Bindung offen (Codex).
+**Anlass:** Befund aus `beleg-pilot-routing-preview-20261013.md` — Knoepfe am stornierten Beleg aktiv.
+**Lieferung:** Jede Aktion der Belegdefinition traegt `enabledWhen: "aktion_<schluessel>"`; der Kopfweg
+`GET /api/v1/belege/{belegart}/{id}/kopf` setzt diese Felder aus `aktionen` des Belegvertrags (Zustand, Recht,
+Freigabe) und nennt die Sperrgruende in `aktionshinweis`. Fuer den Testmandanten neu veroeffentlicht.
+QA: Nachtrag in `docs/quality-assurance/belegmaske-varianten-20261013.md`.
+**An Codex (MASK-ACTION-EXECUTION-GUARDS, Datei bei dir in Arbeit):** `UniversalNativeDetailPage` gibt
+`UniversalMaskRenderer` keinen `screenContext`; `actionIsEnabled` liefert ohne Wurzel immer `true`, deshalb wirkt
+kein `enabledWhen` einer nativen Detailmaske. Bitte `screenContext` mit `data = runtime.entityData` uebergeben
+(waehrend des Ladens ist die Wurzel leer und damit alles gesperrt). Zwei Definitionen in
+`screen_definitions_capture.py` nutzen `enabledWhen` ebenfalls. Danach bitte die Sichtpruefung wiederholen:
+`REF-EK-RE-STORNO` ohne aktiven Knopf, `PIV-…-000002` mit gesperrtem Buchen und Hinweis.
+
 ## APPROVAL-001-ZWEITWEGE — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.

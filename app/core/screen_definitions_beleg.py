@@ -14,7 +14,8 @@ Mengen (Lieferschein).
 
 Die Definition beschreibt, was die Maske zeigen *kann*. Was der Leser sieht und darf, entscheidet der Server je
 Beleg: ohne Preisrecht kommen die Preisfelder leer, und welche Aktion im Zustand des Belegs moeglich ist, sagt
-``aktionen`` des Belegvertrags.
+``aktionen`` des Belegvertrags. Jede Aktion der Definition haengt ueber ``enabledWhen`` an einem Kopffeld
+``aktion_<schluessel>``, das der Kopfweg aus ``aktionen`` setzt; die Sperrgruende stehen in ``aktionshinweis``.
 
 Stand: Die Definitionen sind erzeugbar und geprueft, aber noch nicht in der Registry der Masken eingetragen —
 der Eintrag folgt mit der Sichtpruefung im Browser (Entscheidung E4: keine Maskenmigration ohne sie).
@@ -34,6 +35,11 @@ _GEFAHR = {"R1": "safe", "R2": "low", "R3": "moderate", "R4": "critical"}
 
 def screen_id(belegart: str) -> str:
     return f"beleg/{belegart.replace('_', '-')}"
+
+
+def zustandsfeld(aktion_key: str) -> str:
+    """Das Kopffeld, das sagt, ob eine Aktion fuer diesen Beleg und diesen Leser jetzt moeglich ist."""
+    return "aktion_" + aktion_key.replace(":", "_")
 
 
 def _pfad(belegart: str, rest: str = "") -> str:
@@ -89,12 +95,17 @@ def kopffelder(variante: Belegvariante) -> list[dict[str, Any]]:
         ]
     if variante.bucht:
         felder += [feld("buchungsstand", "Buchung"), feld("buchungsgrund", "Hinweis zur Buchung")]
+    # Warum eine Aktion gerade nicht geht: der Sperrgrund vom Server, nicht eine Vermutung der Maske.
+    felder.append(feld("aktionshinweis", "Hinweise zu Aktionen", "textarea"))
     return felder
 
 
 def _aktion(key: str, label: str, kommando: Belegkommando, *, kind: str = "secondary", **mehr: Any) -> dict[str, Any]:
     return {
         "key": key, "label": label, "kind": kind,
+        # Der Knopf ist nur aktiv, wenn der Server die Aktion fuer diesen Beleg und diesen Leser erlaubt
+        # (Zustand, Recht, Freigabe). Fehlt das Feld, ist er gesperrt.
+        "enabledWhen": zustandsfeld(key),
         "dangerLevel": _GEFAHR[kommando.risiko],
         # Ab R3 bestaetigt der Mensch die Aktion ausdruecklich.
         "requiresConfirmation": kommando.freigabe_noetig,
