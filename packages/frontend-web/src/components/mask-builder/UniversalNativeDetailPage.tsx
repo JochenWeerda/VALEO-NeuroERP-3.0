@@ -36,6 +36,7 @@ import {
 import { UniversalMaskRenderer, useHumanActionDispatch, useUniversalMaskRuntime } from '@/components/mask-builder'
 import { UniversalNativeCreatePage } from './UniversalNativeCreatePage'
 import { useScreenPermissions } from './runtime/screen-permissions'
+import { actionIsEnabled } from './governance/screen-context'
 import { nativeDetailLoadState } from '@/components/mask-builder/native-detail-load-state'
 import { resolveNavigationRoute } from '@/components/mask-builder/runtime/navigation-route'
 import { useMaskPilotState } from '@/features/mask-pilot/use-mask-pilot-state'
@@ -156,8 +157,24 @@ function NativeExistingDetailPage({
     permissions,
   })
 
+  function actionIsAvailable(actionKey: string): boolean {
+    const action = schemaQuery.data?.actions?.find(candidate => candidate.key === actionKey)
+    return Boolean(action && (!action.permission || permissions.includes(action.permission))
+      && actionIsEnabled(action, runtime.entityData))
+  }
+
+  function reportUnavailableAction(): void {
+    const reason = runtime.entityData.aktionshinweis
+    setActionError(typeof reason === 'string' && reason ? reason : 'Diese Aktion ist im aktuellen Belegzustand gesperrt.')
+    setValidationErrors([])
+  }
+
   // --- Worker: final execute (no UI state ownership) ---
   async function doExecute(actionKey: string, payload: Record<string, unknown>, reason?: string): Promise<void> {
+    if (!actionIsAvailable(actionKey)) {
+      reportUnavailableAction()
+      return
+    }
     const result = await actionRuntime.executeAction({
       actionKey,
       entityId,
@@ -187,6 +204,10 @@ function NativeExistingDetailPage({
   async function handleAction(actionKey: string, payload: Record<string, unknown>): Promise<void> {
     setActionError(null)
     setValidationErrors([])
+    if (!actionIsAvailable(actionKey)) {
+      reportUnavailableAction()
+      return
+    }
     const actionDef = schemaQuery.data?.actions?.find((a) => a.key === actionKey)
     const routeTemplate = actionDef?.navigationRoute
     if (routeTemplate) {
@@ -385,6 +406,13 @@ function NativeExistingDetailPage({
         <UniversalMaskRenderer
           plan={runtime.plan}
           allowedPermissions={permissions}
+          screenContext={{
+            data: runtime.entityData,
+            permissions: { granted: permissions },
+            state: { values: {}, policies: {} },
+            actions: {},
+            navigation: { push: route => { void navigate({ to: route as never }) } },
+          }}
           data={runtime.entityData}
           entityId={entityId}
           tables={runtime.tableRows}

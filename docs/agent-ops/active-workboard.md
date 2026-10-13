@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BELEG-ACTION-STATE-BINDING-20261013 — reserviert, Codex
+## BELEG-ACTION-STATE-BINDING-20261013 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Vom Server gesetzte Beleg-Aktionsbedingungen an Renderer und direkte Aufrufe binden; fehlender Zustand sperrt bedingte Aktionen. **Dateibesitz:** components/mask-builder/UniversalNativeDetailPage.tsx; governance/screen-context.ts; bestehender native-detail-preview.test.tsx; neuer action-state.test.ts; docs/quality-assurance/beleg-action-state-binding-20261013.md (Frontend-Pfade unter packages/frontend-web/src). **Abnahme:** Bedingungen im gemeinsamen Renderer, direkte gesperrte Aktion ohne Dispatch, Sperrgrund sichtbar, kein Freigabe-Bypass; reale stornierte Rechnung ohne aktiven Knopf. **Risiken:** Command-Adapter und Freigabeanfragen bleiben Folgearbeit; keine Fachdaten mutieren.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Vom Server gesetzte Beleg-Aktionsbedingungen an Renderer und direkte Aufrufe binden; fehlender Zustand sperrt bedingte Aktionen. **Dateibesitz:** components/mask-builder/UniversalNativeDetailPage.tsx; governance/screen-context.ts; bestehender native-detail-preview.test.tsx; neuer action-state.test.ts; docs/quality-assurance/beleg-action-state-binding-20261013.md (Frontend-Pfade unter packages/frontend-web/src). **Abnahme:** Bedingungen im gemeinsamen Renderer, direkte gesperrte Aktion ohne Dispatch, Sperrgrund sichtbar, kein Freigabe-Bypass; reale stornierte Rechnung ohne aktiven Knopf. **Risiken:** Command-Adapter und Freigabeanfragen bleiben Folgearbeit; keine Fachdaten mutieren.
+
+**Lieferung:** NativeDetail uebergibt Serverzustand an screenContext; fehlender Zustand sperrt bedingte Aktionen. Direkter Handler und execute pruefen Rechte/Zustand vor Dispatch. 37 Vitest-Faelle bestanden. Reale stornierte Referenzrechnung: drei Knoepfe deaktiviert, Stornogrund sichtbar; Screenshot lokal. QA: beleg-action-state-binding-20261013.md. Command-/Approval-Adapter und weitere Varianten-/Preisabnahmen offen.
 
 ## GIT-INDEX-SPERRE-20261013 — Befund, Claude Code
 
