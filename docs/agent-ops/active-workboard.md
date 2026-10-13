@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-TOKEN-IDENTITY-20261013 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Studio-Urheber aus gepruefter Anmeldung; Publizieren/Zurueckziehen nur verifizierte menschliche bestehende Adminrolle; Status Review darf den letzten Inhaltseditor nicht umdeuten. **Dateibesitz:** app/api/v1/endpoints/studio_drafts.py; app/services/studio_draft_store.py nur Editorbindung bei Review; tests/test_meridian_screen_studio_api.py; tests/test_meridian_screen_studio_persistence.py samt eigener Datenisolation; eigener tests/test_studio_token_identity.py; docs/quality-assurance/studio-token-identity-20261013.md. **Abnahme:** fremder X-Actor-ID ohne Wirkung, kein unbekannter Urheberfallback, Dienstkonto/fehlende Adminrolle ohne Publikation, zwei echte Testidentitaeten statt Headerwechsel, Review-Status kein Selbstfreigabebypass. **Risiken:** Inhalts-/Versionsbindung, dauerhafte Publikationsauditkette, Studio-Frontend-Anmeldewechsel und BELEG-021-Konsolidierung bleiben Folgearbeit. Keine neue DB/Container, keine gemeinsamen Daten loeschen.
+
 ## STUDIO-METADATA-POLICY-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Sicherheitskatalog fuer Agenten-/Menschenvorschlaege auf verschachtelte Maskenaktionen anwenden und Weglassen/Umdeuten von Schutzmetadaten verhindern. **Dateibesitz:** app/services/studio_validation.py; tests/test_uix090_studio_validation.py; docs/quality-assurance/studio-metadata-policy-20261013.md. **Abnahme:** Tabellen-/Reiteraktionen unterliegen denselben Katalog-, Endpoint-, Method-, Rollen- und Agentensperren; malformed Metadaten werden abgewiesen; vorhandene Vorschlaege bleiben validierbar. **Risiken:** Studio-Tokenurheber und inhaltsgebundener Publikationsworkflow bleiben anschliessend zu schliessen. BELEG-021-Konsolidierung ist offen: zusaetzlicher Serveradapter inzwischen geliefert, keine ungesicherte Umstellung oder fremder Rueckbau in diesem Slice.
