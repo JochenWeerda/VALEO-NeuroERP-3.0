@@ -44,7 +44,8 @@ Rumpf, der Router erstellt bei Zugriff noch Tabellen und schreibt Auditakteure
 als None. Gruene Fachtests ersetzen deren Sicherheitsreparatur nicht.
 Die neue DB-Grenze sperrt beliebige andere Datenbankzugriffe ausserhalb dieser
 Fixtures nicht automatisch; die verbleibenden Tests muessen einzeln geprueft
-werden. RFQ-Migrationsaufruf und Demoseed werden vor lokaler Ausfuehrung entfernt.
+werden. RFQ und Procurement-Matching sind inzwischen mit eigener Datenisolation
+repariert; Nachweis: [Beschaffungs-Testisolation](ci-procurement-identity-isolation-20261013.md).
 
 
 ## Gemeinsamer Abschlussnachweis
@@ -55,3 +56,10 @@ und Produktionsauthfaelle sowie zehn neue Datenbankgrenzvertraege.
 Beide DB-URLs auf valeo_probe, Status vorher gelesen, Revision
 steuerschluessel_aufwandskonto_20261013; keine neue DB, Container, Migration oder
 Ruecksetzung. Log: artifacts/ci-identity-milestone-proof.log.
+
+
+## Folge-Meilenstein
+
+RFQ und Beschaffungsabgleich sind geliefert. Sieben der urspruenglich roten
+Fachdateien bleiben offen; den aktuellen Nachweis und den dabei entdeckten
+Produktfehler beschreibt die verlinkte Beschaffungs-QA.
