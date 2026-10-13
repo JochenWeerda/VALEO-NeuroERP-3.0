@@ -284,6 +284,9 @@ def _freigabe_einrechnen(engine: DocflowFreigabe, header: dict[str, Any], aktion
         aktion.freigabe_noetig = bedarf.zweitfreigabe
         # Ein sachlicher Sperrgrund bleibt stehen; dann stellt sich die Frage der Freigabe noch nicht.
         if not bedarf.zweitfreigabe or not aktion.erlaubt or engine.gueltige(header, aktion_name):
+            if aktion.erlaubt and bedarf.befunde:
+                # Vorab sagen, was die Kontroll-Engine beim Ausfuehren festhalten wird (FIN-CONTROL-001).
+                aktion.hinweis = "Wird im Prüfkorb des Controllers vermerkt: " + " ".join(b.text for b in bedarf.befunde)
             continue
         aktion.erlaubt = False
         aktion.grund = f"Freigabe erforderlich ({bedarf.risiko}): {bedarf.grund}"

@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (104 Masken).
+> Generiert aus `app/core/screen_definitions.py` (105 Masken).
 
 ## Übersicht
 
@@ -64,6 +64,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/debitor` | Debitor | finance | niedrig | — | `GET /api/v1/masks/finance/debitor/agent-contract` |
 | `finance/kreditor` | Kreditor | finance | niedrig | — | `GET /api/v1/masks/finance/kreditor/agent-contract` |
 | `finance/payment-run` | Zahlungslauf | finance | niedrig | `procure-to-pay`, `order-to-cash`, `finance-to-close` | `GET /api/v1/masks/finance/payment-run/agent-contract` |
+| `finance/pruefkorb` | Prüfkorb | finance | niedrig | — | `GET /api/v1/masks/finance/pruefkorb/agent-contract` |
 | `finance/rechnungstapel` | Rechnungstapel | finance | niedrig | — | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
 | `finance/steuerschluessel` | Steuerschlüssel | finance | mittel | — | `GET /api/v1/masks/finance/steuerschluessel/agent-contract` |
 | `fuhrpark/ausgehende-dokumente` | Ausgehende Belege | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/ausgehende-dokumente/agent-contract` |
@@ -1945,6 +1946,40 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `freigeben` | Zahlungslauf freigeben | critical | ja | `/api/v1/finance/payment-runs/{entity_id}/actions/freigeben` |
+
+---
+
+### `finance/pruefkorb` — Prüfkorb
+
+**Zweck:** Auffälligkeiten an Buchungen, Stornos und Importen für den Controller priorisieren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/finance/pruefkorb/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/finance/pruefkorb/agent-contract` |
+| Readiness | `GET /api/v1/masks/finance/pruefkorb/readiness` |
+| Rollout-Route | `/mask-rollout/finance__pruefkorb/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/kontrolle/lagebild`
+- `befunde` → `/api/v1/kontrolle/pruefkorb`
+
+**MCP-Tools (Domäne):**
+
+- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
+- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Befunde sind im Prüfkorb offen?
+- Zeige die kritischen Befunde.
+- Welche Auffälligkeiten warten seit mehr als einer Woche?
+
+**Sensible Felder:** `ausgeloest_von, geprueft_von, bewertung, betrag`
 
 ---
 

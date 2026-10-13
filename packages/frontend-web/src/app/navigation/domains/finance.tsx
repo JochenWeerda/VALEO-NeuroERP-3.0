@@ -412,6 +412,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:write' },
       },
       {
+        id: 'finanz-pruefkorb',
+        label: 'Prüfkorb',
+        icon: ShieldCheck,
+        module: '@/pages/finance/pruefkorb',
+        preferredPath: 'finance/pruefkorb',
+        keywords: ['prüfkorb', 'pruefkorb', 'controller', 'auffälligkeit', 'dublette', 'befund', 'kontrolle', 'worklist'],
+        mcp: { businessDomain: 'finance', scope: 'finance:read' },
+      },
+      {
         id: 'beleg-kontrolle',
         label: 'Beleg-Kontrolle',
         icon: ShieldCheck,

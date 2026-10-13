@@ -245,6 +245,7 @@ def test_jeder_knopf_haengt_am_zustand_den_der_server_liefert(http, satz):
     # Eingangsrechnung ueber der Schwelle: buchbar; der Betrag allein sperrt nicht (FIN-CONTROL-001).
     gross = kopf("ek-rechnung-2")
     assert gross["aktion_buchen"] is True and "aktion_freigabe_anfordern_post" not in gross
+    assert "Buchen: Wird im Prüfkorb des Controllers vermerkt:" in gross["aktionshinweis"]
     # Gebuchte Rechnung: buchen wird gar nicht angeboten; Gutschrift erstellen ja.
     gebucht = kopf("vk-rechnung-1")
     assert "aktion_buchen" not in gebucht and gebucht["aktion_umwandeln_sales_credit_memo"] is True

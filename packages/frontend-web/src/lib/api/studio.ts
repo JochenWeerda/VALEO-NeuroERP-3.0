@@ -25,39 +25,28 @@ export async function validateStudioDraft(definition: ScreenDefinition): Promise
 }
 
 export async function proposeStudioDraft(intent: string): Promise<StudioReport> {
-  const response = await apiClient.post('/api/v1/studio/propose', { intent }, {
-    headers: { 'X-Actor-ID': currentStudioActor() },
-  })
+  const response = await apiClient.post('/api/v1/studio/propose', { intent })
   return response.data as StudioReport
 }
 
 export async function saveStudioDraft(definition: ScreenDefinition, draftId?: string) {
   const payload = { definition }
-  const headers = { 'X-Actor-ID': currentStudioActor() }
   const response = draftId
-    ? await apiClient.put(`/api/v1/studio/drafts/${draftId}`, payload, { headers })
-    : await apiClient.post('/api/v1/studio/drafts', payload, { headers })
+    ? await apiClient.put(`/api/v1/studio/drafts/${draftId}`, payload)
+    : await apiClient.post('/api/v1/studio/drafts', payload)
   return response.data as StudioReport & { id: string; status: string }
 }
 
 export async function submitStudioReview(draftId: string) {
-  const response = await apiClient.post(`/api/v1/studio/drafts/${draftId}/submit-review`, {}, {
-    headers: { 'X-Actor-ID': currentStudioActor() },
-  })
+  const response = await apiClient.post(`/api/v1/studio/drafts/${draftId}/submit-review`, {})
   return response.data
 }
 
-export async function publishStudioDraft(draftId: string, actor = 'studio-reviewer') {
-  const response = await apiClient.post(`/api/v1/studio/drafts/${draftId}/publish`, {}, {
-    headers: { 'X-Actor-ID': actor },
-  })
+export async function publishStudioDraft(draftId: string) {
+  const response = await apiClient.post(`/api/v1/studio/drafts/${draftId}/publish`, {})
   return response.data as StudioReport & { id: string; status: string; route?: string }
 }
 
 export function studioRunPath(screenId: string) {
   return `/studio/run/${screenId.replace(/\//g, '__')}`
-}
-
-function currentStudioActor(): string {
-  return 'studio-editor'
 }

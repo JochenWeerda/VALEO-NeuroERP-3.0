@@ -6,6 +6,7 @@ sie; wer gebucht hat, prueft seinen Befund nicht selbst.
 """
 from __future__ import annotations
 
+import json
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -17,6 +18,7 @@ from app.auth.deps import get_current_user
 from app.core.database import get_db
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.tenant import get_tenant_id
+from app.services import kontrollkorb
 from app.services.freigabe_engine import KONTROLLROLLEN, pruefe_befund, pruefkorb
 
 router = APIRouter()
@@ -40,6 +42,46 @@ def befunde(
     if not rollen_von(nutzer) & _LESEN:
         raise HTTPException(status_code=403, detail="Keine Berechtigung für den Prüfkorb.")
     return pruefkorb(db, tenant_id, status, limit)
+
+
+def _nur_leser(nutzer: Any) -> None:
+    if not rollen_von(nutzer) & _LESEN:
+        raise HTTPException(status_code=403, detail="Keine Berechtigung für den Prüfkorb.")
+
+
+@router.get("/pruefkorb", response_model=dict[str, Any], summary="Pruefkorb: Arbeitsliste des Controllers")
+def arbeitsliste(
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=200),
+    q: Optional[str] = Query(None, max_length=120),
+    sort: Optional[str] = Query(None, max_length=40),
+    sort_dir: Optional[str] = Query(None, pattern="^(asc|desc)$"),
+    filter_plan: Optional[str] = Query(None, description="JSON-Spaltenfilter der Maskenlaufzeit"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Ohne Filter auf den Stand: die offenen Befunde, kritische zuerst, darin die aeltesten."""
+    _nur_leser(nutzer)
+    plan: dict[str, Any] = {}
+    if filter_plan:
+        try:
+            plan = json.loads(filter_plan)
+        except (ValueError, TypeError) as fehler:
+            raise HTTPException(status_code=422, detail="filter_plan ist kein gültiges JSON") from fehler
+        if not isinstance(plan, dict):
+            raise HTTPException(status_code=422, detail="filter_plan muss ein Objekt sein")
+    return kontrollkorb.seite(db, tenant_id, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, filter_plan=plan)
+
+
+@router.get("/lagebild", response_model=dict[str, Any], summary="Pruefkorb: Lagebild fuer den Controller")
+def lage(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
+) -> dict[str, Any]:
+    _nur_leser(nutzer)
+    return kontrollkorb.lagebild(db, tenant_id)
 
 
 @router.post("/befunde/{befund_id}/pruefung", response_model=dict[str, Any], summary="Befund als geprueft bewerten")

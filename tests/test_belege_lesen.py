@@ -152,6 +152,9 @@ def test_offene_rechnungen_sind_buchbar_auch_ueber_der_schwelle(client, satz):
         assert beleg["buchung"] == {"stand": "nicht_gebucht", "journal_id": None, "grund": None}
         buchen = _aktion(beleg, "buchen")
         assert buchen["erlaubt"] is True and buchen["kommando"] == "docflow.post" and buchen["freigabe_noetig"] is False
+        # Die Eingangsrechnung liegt ueber ihrer Schwelle (5.000 EUR): Das sagt der Beleg vorab.
+        vermerkt = (buchen["hinweis"] or "").startswith("Wird im Prüfkorb des Controllers vermerkt:")
+        assert vermerkt is (rolle == "ek-rechnung-2")
         assert beleg["freigaben"] == [] and _aktion(beleg, "freigabe_anfordern:post") is None
 
 

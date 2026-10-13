@@ -2606,6 +2606,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/finance/pruefkorb",
+      "path": "finance/pruefkorb",
+      "source": "navigation"
+    },
+    {
       "module": "@/pages/finance/rechnungstapel",
       "path": "finance/rechnungstapel",
       "source": "navigation"

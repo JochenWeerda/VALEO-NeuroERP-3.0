@@ -48,7 +48,11 @@ def beleg_kopf(
         "buchungsstand": beleg.buchung.stand, "buchungsgrund": beleg.buchung.grund,
         "aktionen": [a.model_dump(mode="json") for a in beleg.aktionen],
         # Was gerade nicht geht, und warum — fuer den Menschen an der Maske.
-        "aktionshinweis": "\n".join(f"{a.bezeichnung}: {a.grund}" for a in beleg.aktionen if not a.erlaubt and a.grund) or None,
+        # Dazu, was beim Ausfuehren im Pruefkorb vermerkt wird (``hinweis`` an einer erlaubten Aktion).
+        "aktionshinweis": "\n".join(
+            f"{a.bezeichnung}: {a.hinweis if a.erlaubt else a.grund}"
+            for a in beleg.aktionen if (a.hinweis if a.erlaubt else a.grund)
+        ) or None,
     }
     # Je Aktion ein Feld, an dem der Knopf der Maske haengt (``enabledWhen``). Was der Beleg nicht anbietet, fehlt.
     for aktion in beleg.aktionen:

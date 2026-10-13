@@ -191,6 +191,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 |---|---|---|
 | `...` | outbox | `scripts/extract_events.py` |
 | `admin.postfach.saved` | outbox | `app/api/v1/endpoints/mailkonto.py` |
+| `beleg.aktion.ausgefuehrt` | outbox | `app/api/v1/endpoints/belege.py` |
 | `cash_closing.posted` | outbox | `app/api/v1/endpoints/compat.py` |
 | `collab.note.created` | outbox | `app/api/v1/endpoints/collab_notes.py` |
 | `compliance.sanctions.checked` | outbox | `app/api/v1/endpoints/sanctions_compliance.py` |

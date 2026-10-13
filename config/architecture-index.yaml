@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-13
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-13T18:58:31Z'
+generated_at: '2026-10-13T19:16:09Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -944,6 +944,7 @@ domains:
     - document_control_service
     - eudr_register_service
     - freigabe_engine
+    - kontrollkorb
     - pii_detector
     - schaden_service
     backend_endpoints:
@@ -1157,6 +1158,7 @@ domains:
     - /finance/payments
     - /finance/periodenabschluss
     - /finance/periods
+    - /finance/pruefkorb
     - /finance/rechnungstapel
     - /finance/reports
     - /finance/skonto-optimizer
@@ -2089,10 +2091,10 @@ domains:
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 940
-  frontend_routes_mapped: 940
-  backend_services_total: 289
-  backend_services_mapped: 288
+  frontend_routes_total: 941
+  frontend_routes_mapped: 941
+  backend_services_total: 290
+  backend_services_mapped: 289
   backend_endpoints_total: 458
   backend_endpoints_mapped: 458
 unmapped:
