@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## LOGIN-PRIVATE-LAYOUT-20261013 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** privater ERP-Layoutzweig umgeht ProtectedRoute bei leerem/falschem VITE_AUTH_REQUIRED. **Ziel:** Anmeldung fuer private ERP-Masken stets durchsetzen. **Dateibesitz:** app/routing/route-layouts.tsx nur AppRouteLayout; neue React-Vertraege und eigene QA/Workboard. Keine Portallayout-, Masken-, Rollen- oder Stylingaenderung. **Abnahme:** wahr/falsch/fehlendes Entwicklungsflag erlauben keinen privaten Layout-Bypass; OIDC-Callback bleibt oeffentlich, vorhandene Rollen-/Mandantengrenze erhalten; TypeScript und Routingvertraege gruen. Keine DB/Container/Reset oder persoenlichen Kennungen.
+
 ## LOGIN-REFRESH-20261013 — in arbeit, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** reale Sitzung endet nach Zugriffstokenablauf; beide HTTP-Clients erneuern Token nicht und Kaltstart verwirft Refresh. **Ziel:** Providererneuerung vor HTTP-Transport und beim Wiederladen, ohne abgelaufene Token zu akzeptieren. **Dateibesitz:** lib/auth.ts, hooks/useAuth.ts, lib/api-client.ts, lib/axios.ts ausschliesslich Sitzungserneuerung innerhalb eigener Identity-Elternclaims; auth.test.ts und neue fokussierte Vertraege, eigene QA/Workboard. **Abnahme:** Kaltstart ohne vorzeitige Freigabe, parallele Anfragen teilen einen Refresh, Logout gewinnt gegen laufende Erneuerung, fehlgeschlagener Refresh sperrt Zugang; realer Browser-Recheck. Keine persoenlichen Kennungen, DB/Container/Reset.
