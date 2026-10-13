@@ -93,6 +93,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `doc_nachweisraum_lifecycle_service` | DOM-DOC-004.2 — Dokumenten-Nachweisraum Lifecycle (Upload/Freigabe/GoBD). |
 | `docflow_artifact_service` | Artefakt-Upload, Versionierung & Freigabe (DOM-DOC-004.2). |
 | `docflow_belegadapter` | DocFlow-Belege in der Form des Belegvertrags (BELEG-011). |
+| `docflow_belegaktionen` | Aktionen der Belegmaske auf den Kommandos von DocFlow und der Approval Engine (BELEG-021). |
 | `docflow_evidence_service` | Dokument-Nachweisraum (DOM-DOC-004) — GoBD-Artefakt-/Vorgangs-Sicht. |
 | `docflow_followup_service` | Bescheid/Rückmeldung & Wiedervorlage am Vorgang (DOM-DOC-004.3). |
 | `docflow_freigabe` | DocFlow-Belege an der zentralen Approval Engine (APPROVAL-001). |

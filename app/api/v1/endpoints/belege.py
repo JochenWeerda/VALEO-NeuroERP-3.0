@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.auth.beleg_roles import darf, verlange
@@ -17,7 +17,9 @@ from app.core.screen_definitions_beleg import zustandsfeld
 from app.core.database import get_db
 from app.core.mask_screen_summary_common import build_tab_page
 from app.core.tenant import get_tenant_id
+from app.services import docflow_belegaktionen
 from app.services.docflow_belegadapter import lies_beleg
+from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
 from app.services.docflow_service import DocflowService
 
 router = APIRouter()
@@ -82,6 +84,38 @@ def beleg_reiter(
             z["richtung"] = "Vorgänger" if z["richtung"] == "vorgaenger" else "Nachfolger"
     return build_tab_page(tab_key=reiter, table_key=reiter, items=zeilen, page=page, limit=limit, q=q,
                           sort=sort, sort_dir=sort_dir)
+
+
+@router.post("/{belegart}/{beleg_id}/actions/{aktion}", response_model=MaskActionResult,
+             summary="Aktion der Belegmaske ausfuehren (Masken-CommandEndpoint)")
+async def beleg_aktion(
+    belegart: str,
+    beleg_id: str,
+    aktion: str,
+    body: dict[str, Any] = Body(default_factory=dict),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
+) -> MaskActionResult:
+    """Buchen, Stornieren, Freigeben, Folgebeleg erstellen, Freigabe anfragen und entscheiden.
+
+    ``aktion`` ist der Schluessel aus ``aktionen`` des Belegvertrags. Der Trockenlauf nennt den Sperrgrund, ohne zu
+    schreiben; ausgefuehrt wird das eine Fachkommando von DocFlow bzw. der Approval Engine.
+    """
+    if belegart not in BELEGARTEN:
+        raise HTTPException(status_code=404, detail="Belegart nicht bekannt")
+    verlange(nutzer, "lesen", belegart)
+
+    async def pruefe(pruef_db: Session, eingaben: dict[str, Any], entity_id: str, tid: str) -> list[dict[str, Any]]:
+        return docflow_belegaktionen.pruefe(pruef_db, tid, belegart, entity_id, aktion, nutzer, eingaben)
+
+    async def fuehre_aus(schreib_db: Session, eingaben: dict[str, Any], entity_id: str, tid: str) -> str:
+        return docflow_belegaktionen.fuehre_aus(schreib_db, tid, belegart, entity_id, aktion, nutzer, eingaben)
+
+    return await run_delegated_mask_action(
+        db, action_key=aktion, entity_type=f"beleg_{belegart}", entity_id=beleg_id, tenant_id=tenant_id,
+        body=body, check_fn=pruefe, delegate_fn=fuehre_aus, outbox_event_type="beleg.aktion.ausgefuehrt",
+    )
 
 
 @router.get("/{belegart}/{beleg_id}", response_model=Beleg, summary="Beleg in Vertragsform lesen")

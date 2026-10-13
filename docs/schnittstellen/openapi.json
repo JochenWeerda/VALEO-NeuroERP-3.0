@@ -235875,6 +235875,83 @@
         ]
       }
     },
+    "/api/v1/belege/{belegart}/{beleg_id}/actions/{aktion}": {
+      "post": {
+        "description": "Buchen, Stornieren, Freigeben, Folgebeleg erstellen, Freigabe anfragen und entscheiden.\n\n``aktion`` ist der Schluessel aus ``aktionen`` des Belegvertrags. Der Trockenlauf nennt den Sperrgrund, ohne zu\nschreiben; ausgefuehrt wird das eine Fachkommando von DocFlow bzw. der Approval Engine.",
+        "operationId": "beleg_aktion_api_v1_belege__belegart___beleg_id__actions__aktion__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "belegart",
+            "required": true,
+            "schema": {
+              "title": "Belegart",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "beleg_id",
+            "required": true,
+            "schema": {
+              "title": "Beleg Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "aktion",
+            "required": true,
+            "schema": {
+              "title": "Aktion",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Aktion der Belegmaske ausfuehren (Masken-CommandEndpoint)",
+        "tags": [
+          "belege"
+        ]
+      }
+    },
     "/api/v1/belege/{belegart}/{beleg_id}/kopf": {
       "get": {
         "description": "Der Kopf des Belegs als flache Felder — dieselben Daten und Rechte wie der Belegvertrag.",

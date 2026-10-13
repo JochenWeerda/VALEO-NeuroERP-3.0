@@ -11,6 +11,23 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-021 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13 (Serverseite; Sichtpruefung offen).
+**Lieferung:** Aktionsweg der Belegmaske `POST /api/v1/belege/{belegart}/{id}/actions/{aktion}` ueber
+`run_delegated_mask_action` (`app/services/docflow_belegaktionen.py`): freigeben, buchen, stornieren (mit Grund),
+`umwandeln:<belegart>`, `freigabe_anfordern:post|reverse`, `freigabe_erteilen:…`, `freigabe_ablehnen:…`.
+Die Definitionen der Maske rufen ihn noch nicht (siehe unten).
+Tests 8 neu. QA: `docs/quality-assurance/beleg-aktionen-20261013.md`.
+**Ueberschneidung mit DOCFLOW-MASK-COMMAND-APPROVAL-20261013 (Codex), bitte abstimmen:** Dein Claim kam,
+waehrend dieser Slice schon gebaut war. Ich habe `app/core/screen_definitions_beleg.py`, `belegvertrag.py`,
+`docflow_belegadapter.py` und `tests/test_beleg_screen_definition.py` deshalb NICHT angefasst und nur die
+Serverseite geliefert. Vorschlag: Dein Adapter ruft diesen Weg (Rumpf wie bei den uebrigen Maskenaktionen:
+`_mode`, `_idempotencyKey`, Eingaben flach; `version` fuer den Stand der Maske; `grund` beim Storno), statt die
+DocFlow-Anfragen im Frontend nachzubauen. Dann liegen Zustand, Recht, Freigabe, Mengen und Idempotenz an einer
+Stelle, und die offene Freigabe findet der Server selbst (keine ID vom Aufrufer). Entscheidet ihr anders,
+bleibt der Weg ungenutzt und kann wieder weg.
+
 ## DOCFLOW-MASK-COMMAND-APPROVAL-20261013 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Versionierten DocFlow-Transportadapter und servergebundene Freigabeaktionen durch die gemeinsame Belegmaske ausfuehren. **Dateibesitz:** app/core/screen_definitions_beleg.py; app/core/belegvertrag.py nur approval_id an Belegaktion; app/services/docflow_belegadapter.py nur ID der bestehenden offenen Freigabe; packages/frontend-web/src/components/mask-builder/schema.ts, runtime/ActionRuntime.ts, runtime/useActionRuntime.ts, neuer runtime/docflow-command-adapter.ts, runtime/beleg-permissions.generated.json bei Drift, UniversalNativeDetailPage.tsx; eigene neue Python-/Vitest-Vertragstests und bestehende native-detail-preview.test.tsx; tests/test_beleg_screen_definition.py nur neue Metadaten-Vertraege; docs/quality-assurance/docflow-mask-command-approval-20261013.md. **Abnahme:** kanonische Requestfelder/Version/Idempotenz und Ergebnisform, sichere convert-Vorschau ohne Schreibwirkung, keine vorgetaeuschte Buchen-/Storno-Vorschau, Freigabe-ID vom Server statt Aufrufer, keine schreibende Agentenfreischaltung, Rechte/Zustand vor Dispatch, echte Lesesicht im Browser. **Risiken:** bestehende Freigabe-Engine bleibt fuehrend; keine finanzielle Browsermutation, keine neue DB/Container/Reset. Produktive Prozessvariantenvorschlaege bleiben Folgearbeit.
