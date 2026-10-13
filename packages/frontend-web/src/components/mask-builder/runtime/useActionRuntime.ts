@@ -53,6 +53,13 @@ export function useActionRuntime(
           error: 'Diese Aktion erfordert die Eingabe und Bestaetigung in der Maske.' }
       }
 
+      // DocFlow exposes domain-command bodies, not the generic _mode envelope.
+      // Until a versioned adapter is registered, a preview must never mutate a document.
+      if (req.mode !== 'execute' && /^\/api\/v1\/docflow(?:\/|$)/.test(actionDef.commandEndpoint ?? '')) {
+        return { actionKey: req.actionKey, mode: req.mode, success: false,
+          error: 'DocFlow-Vorschau ist ohne passenden Command-Adapter gesperrt.' }
+      }
+
       if (!actionDef.commandEndpoint) {
         // No endpoint — stub result for actions not yet fully wired
         const result: ActionResult = {

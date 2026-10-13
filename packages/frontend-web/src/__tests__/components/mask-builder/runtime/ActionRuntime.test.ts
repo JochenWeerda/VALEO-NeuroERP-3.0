@@ -50,3 +50,18 @@ describe('checkActionPolicy', () => {
     expect(checkActionPolicy(p, { ...baseOpts, isAgentCaller: true })).toBeUndefined()
   })
 })
+
+
+describe('declared action rights are enforced on direct calls', () => {
+  const policy = buildActionPolicy({ key: 'post', permission: 'belege.buchen' })
+  it.each([false, true])('denies caller without declared right (agent=%s)', (isAgentCaller) => {
+    expect(checkActionPolicy(policy, { screenId: 'beleg/purchase-invoice', permissions: [], isAgentCaller }))
+      .toMatch(/Keine Berechtigung/)
+  })
+  it('allows the exact declared right, without wildcard expansion', () => {
+    expect(checkActionPolicy(policy, { screenId: 'beleg/purchase-invoice', permissions: ['belege.buchen'] }))
+      .toBeUndefined()
+    expect(checkActionPolicy(policy, { screenId: 'beleg/purchase-invoice', permissions: ['belege:write'] }))
+      .toMatch(/Keine Berechtigung/)
+  })
+})

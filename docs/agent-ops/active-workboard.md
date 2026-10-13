@@ -31,9 +31,11 @@ Freigabe 409. Tests holen sie ueber `tests/freigabehilfe.py` (`sichere_freigabe`
 hinterher (Commits ueber `update-ref`). Ursache nicht bewiesen. Ich entferne die Sperre nicht mehr ohne Pruefung
 laufender Git-Prozesse (Vorgabe des Auftraggebers).
 
-## MASK-ACTION-EXECUTION-GUARDS-20261013 — reserviert, Codex
+## MASK-ACTION-EXECUTION-GUARDS-20261013 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Direkte Maskenaktionsaufrufe pruefen deklarierte Rechte; DocFlow-Vorschau ohne vereinbarten Adapter darf keinen schreibenden HTTP-Aufruf senden. **Dateibesitz:** runtime/ActionRuntime.ts; runtime/useActionRuntime.ts; bestehende ActionRuntime.test.ts und useActionRuntime.input-flow.test.ts unter packages/frontend-web/src/components/mask-builder bzw. __tests__/components/mask-builder/runtime; docs/quality-assurance/mask-action-execution-guards-20261013.md. **Abnahme:** Mensch/Agent ohne Aktionsrecht vor HTTP abgewiesen, erlaubtes Recht bleibt moeglich; DocFlow dryRun/validate/propose ohne Mutation; bisherige Human-Form-Sperre gruen. **Risiken:** Kein vollständiger DocFlow-Adapter, Registry-/Routen-/Maskensichtpruefung noch offen.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Direkte Maskenaktionsaufrufe pruefen deklarierte Rechte; DocFlow-Vorschau ohne vereinbarten Adapter darf keinen schreibenden HTTP-Aufruf senden. **Dateibesitz:** runtime/ActionRuntime.ts; runtime/useActionRuntime.ts; bestehende ActionRuntime.test.ts und useActionRuntime.input-flow.test.ts unter packages/frontend-web/src/components/mask-builder bzw. __tests__/components/mask-builder/runtime; docs/quality-assurance/mask-action-execution-guards-20261013.md. **Abnahme:** Mensch/Agent ohne Aktionsrecht vor HTTP abgewiesen, erlaubtes Recht bleibt moeglich; DocFlow dryRun/validate/propose ohne Mutation; bisherige Human-Form-Sperre gruen. **Risiken:** Kein vollständiger DocFlow-Adapter, Registry-/Routen-/Maskensichtpruefung noch offen.
+
+**Lieferung:** Zentraler Aktionsruntime prueft deklarierte Rechte auch beim direkten Mensch-/Agentenaufruf. DocFlow dryRun/validate/propose ohne passenden Adapter vor HTTP gesperrt. 28 Vitest-Faelle bestanden. QA: mask-action-execution-guards-20261013.md. BELEG-020 Teil 2 bleibt offen: Command-Adapter/Metadaten/Zustandsbindung/Registry/Route/Sichtpruefung.
 
 ## BELEG-MASK-PERMISSION-PROJECTION-20261013 — abgeschlossen, Codex
 

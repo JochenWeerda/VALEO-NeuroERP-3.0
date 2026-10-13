@@ -42,6 +42,7 @@ export interface ActionResult {
 
 export interface ActionPolicy {
   actionKey: string
+  permission?: string
   dangerLevel: ActionDangerLevel
   requiresConfirmation: boolean
   requiresHumanApproval: boolean
@@ -66,6 +67,9 @@ export function checkActionPolicy(
   policy: ActionPolicy,
   opts: ActionRuntimeOptions,
 ): string | undefined {
+  if (policy.permission && !opts.permissions.includes(policy.permission)) {
+    return `Keine Berechtigung fuer Aktion "${policy.actionKey}".`
+  }
   if (opts.isAgentCaller && policy.forbiddenForAgents) {
     return `Action "${policy.actionKey}" ist für Agent-Aufrufe gesperrt.`
   }
@@ -81,6 +85,7 @@ export function checkActionPolicy(
  */
 export function buildActionPolicy(actionDef: {
   key: string
+  permission?: string
   dangerLevel?: ActionDangerLevel
   requiresConfirmation?: boolean
   humanApprovalRequired?: boolean
@@ -90,6 +95,7 @@ export function buildActionPolicy(actionDef: {
 }): ActionPolicy {
   return {
     actionKey: actionDef.key,
+    permission: actionDef.permission,
     dangerLevel: actionDef.dangerLevel ?? 'safe',
     requiresConfirmation: actionDef.requiresConfirmation ?? false,
     requiresHumanApproval: actionDef.humanApprovalRequired ?? false,
