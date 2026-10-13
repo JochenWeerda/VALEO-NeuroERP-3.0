@@ -153,9 +153,13 @@ def studio_publish(
     if not report["canPublish"]:
         raise HTTPException(status_code=400, detail={"violations": report["violations"], "readiness": report["readiness"]})
     try:
-        record = set_status(tenant_id, draft_id, _actor(user), "published_temp")
+        record = set_status(tenant_id, draft_id, _actor(user), "published_temp", expected_snapshot=item)
     except PermissionError as error:
         raise HTTPException(status_code=403, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    except KeyError as error:
+        raise HTTPException(status_code=404, detail="draft_nicht_gefunden") from error
     screen_id = str(record.get("screen_id") or (record.get("definition") or {}).get("id") or "")
     return {**record, **report, "route": studio_run_route(screen_id) if screen_id else None}
 

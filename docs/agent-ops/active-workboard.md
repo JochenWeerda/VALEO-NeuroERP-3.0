@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## STUDIO-PUBLISH-SNAPSHOT-20261013 — reserviert, Codex
+## STUDIO-PUBLISH-SNAPSHOT-20261013 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Atomare Bindung der serverseitigen Publikationspruefung an exakt denselben Entwurfsstand. **Dateibesitz:** app/services/studio_draft_store.py; app/api/v1/endpoints/studio_drafts.py nur Publish-Snapshot; tests/test_studio_publish_snapshot.py; docs/quality-assurance/studio-publish-snapshot-20261013.md. **Abnahme:** Inhalt/Editorwechsel zwischen Validierung und Publikation sperrt; SQL-Schreibwege sperren dieselbe Zeile; Speicherweg serialisiert Writes. **Risiken:** Client-Review-Hash, unveraenderliche Publikationshistorie und Workflow bleiben Folgearbeit; keine Migration/DB-Neuanlage.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Atomare Bindung der serverseitigen Publikationspruefung an exakt denselben Entwurfsstand. **Dateibesitz:** app/services/studio_draft_store.py; app/api/v1/endpoints/studio_drafts.py nur Publish-Snapshot; tests/test_studio_publish_snapshot.py; docs/quality-assurance/studio-publish-snapshot-20261013.md. **Abnahme:** Inhalt/Editorwechsel zwischen Validierung und Publikation sperrt; SQL-Schreibwege sperren dieselbe Zeile; Speicherweg serialisiert Writes. **Risiken:** Client-Review-Hash, unveraenderliche Publikationshistorie und Workflow bleiben Folgearbeit; keine Migration/DB-Neuanlage.
+
+**Lieferung:** 78 Studio-Faelle bestanden inklusive veraltetem SQL-Snapshot und intervenierenden HTTP-Aenderungen. Publikation vergleicht serverseitig geprueften Inhalt/Editor/Status/Zeit unter Schreibsperre. QA: studio-publish-snapshot-20261013.md. Browser-Review-Hash, Publikationshistorie und Statusmodell bleiben offen.
 
 ## CONTROLLER-MASK-PROJECTION-20261013 — abgeschlossen, Codex
 
