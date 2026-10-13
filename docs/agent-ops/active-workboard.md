@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-UI-SAVED-REVIEW-20261013 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Studio-Pruefung/Freigabe nur fuer angezeigten gespeicherten Stand, keine erfundenen Urheberheader. **Dateibesitz:** packages/frontend-web/src/lib/api/studio.ts; packages/frontend-web/src/features/screen-studio/ScreenStudioPage.tsx; packages/frontend-web/src/__tests__/features/screen-studio/ScreenStudioPage.test.tsx; eigener studio-api.test.ts; docs/quality-assurance/studio-ui-saved-review-20261013.md. **Abnahme:** lokale Aenderungen sperren Review/Publish bis Speichern; fehlgeschlagene Speicherung gibt nichts frei; Transport sendet keine Caller-Identitaet. **Risiken:** serverseitig verpflichtender Browser-Review-Hash und dauerhafte Historie weiterhin offen; keine realen Rollen- oder Fachdatenmutation.
+
 ## STUDIO-PUBLISH-SNAPSHOT-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Atomare Bindung der serverseitigen Publikationspruefung an exakt denselben Entwurfsstand. **Dateibesitz:** app/services/studio_draft_store.py; app/api/v1/endpoints/studio_drafts.py nur Publish-Snapshot; tests/test_studio_publish_snapshot.py; docs/quality-assurance/studio-publish-snapshot-20261013.md. **Abnahme:** Inhalt/Editorwechsel zwischen Validierung und Publikation sperrt; SQL-Schreibwege sperren dieselbe Zeile; Speicherweg serialisiert Writes. **Risiken:** Client-Review-Hash, unveraenderliche Publikationshistorie und Workflow bleiben Folgearbeit; keine Migration/DB-Neuanlage.
