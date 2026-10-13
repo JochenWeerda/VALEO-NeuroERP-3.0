@@ -134,9 +134,9 @@ Fehlendes wird gebaut; Altes wird erst nach nachgewiesener Funktionsgleichheit e
 | 0.4 | DocFlow: Einkaufsbelegarten mit Übergängen; Eingangsrechnung bucht über Finance — **erledigt 13.10.2026** (`docflow-einkauf-gutschrift-20261013.md`) | Bestellung → Wareneingang → Eingangsrechnung mit Bezug je Position; Buchungsstatus prüfbar | Claude Code |
 | 0.5 | DocFlow: Gutschrift bucht über Finance; Storno in einem Commit — **erledigt 13.10.2026**, offen: Storno gebuchter Gutschriften | eine Gutschriftstruktur | Claude Code |
 | 0.6 | Testbenutzer im Keycloak (lokal und Staging), Zugangsdaten nur in der Umgebung | Playwright meldet sich über OIDC/PKCE an | Identität (Codex) mit Auftraggeber |
-| 0.7 | Referenzbelege im Testmandanten (Positionen, Steuerarten, Status, Rechte) als wiederholbares Skript | Belege entstehen reproduzierbar | Claude Code |
+| 0.7 | Referenzbelege im Testmandanten (Positionen, Steuerarten, Status, Rechte) als wiederholbares Skript — **erledigt 13.10.2026** ohne Rechtefälle (`phase0-referenzbelege-registryabbild-20261013.md`) | Belege entstehen reproduzierbar | Claude Code |
 | 0.8 | Bildschirmfoto-Baselines mit Playwright; manuelle Sichtabnahme als Schritt | reproduzierbarer Lauf mit Fotos | Claude Code |
-| 0.9 | Kanonisches Schema festschreiben: ScreenDefinition ist die eine Quelle; TS-Kopie (K2) wird erzeugt oder entfällt; Variante als Begriff | keine von Hand gepflegte Zweitdefinition | Claude Code |
+| 0.9 | Kanonisches Schema festschreiben: ScreenDefinition ist die eine Quelle; TS-Kopie (K2) wird erzeugt oder entfällt; Variante als Begriff — **teilweise 13.10.2026:** Abweichung gemessen und eingefroren; Umstellung je Maske und Variante offen | keine von Hand gepflegte Zweitdefinition | Claude Code |
 
 **Phase 1 — Referenzimplementierung:** universelle Eingangsbelegmaske auf DocFlow, mit den dafür
 fehlenden Framework-Teilen in dieser Reihenfolge: Variante (0.9), Positionsbaustein, Value Help für

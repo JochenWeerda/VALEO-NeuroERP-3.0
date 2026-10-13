@@ -11,6 +11,23 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## PHASE0-REFERENZBELEGE-REGISTRYABBILD-20261013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Phase 0.7 und der sichere Teil von 0.9.
+**Lieferung 0.7:** `scripts/referenzbelege_anlegen.py --tenant <id> [--apply]` — 17 Referenzbelege ueber DocFlow
+(Verkaufs- und Einkaufskette mit Teilmengen, Gutschriften, je ein nicht buchbarer und ein stornierter Beleg),
+wiederholbar ueber feste Idempotenzschluessel; prueft die Voraussetzungen vorab.
+**Lieferung 0.9:** `scripts/generate_screen_registry_snapshot.py [--check]` schreibt
+`packages/frontend-web/src/masks/screen-registry.snapshot.json`; `tests/test_screen_registry_snapshot.py`
+haelt es aktuell. **Wer eine der 31 ScreenDefinitions aus `capture-screens.ts` in Python aendert, muss das Abbild
+neu erzeugen.** `capture-screens-sync.test.ts` laesst nur die 26 benannten Abweichungen der Handkopie zu.
+QA: `docs/quality-assurance/phase0-referenzbelege-registryabbild-20261013.md`.
+**Befund, nicht behoben:** 18 Seiten zeichnen die Handkopie ohne Rechte; in elf Masken traegt die Kopie
+`stubReason` statt Kommando-Weg und Recht. Erzeugte man die Kopie aus der Registry, verschwaenden dort die
+Aktionsknoepfe. **An Codex (Identitaet):** Wie folgt ein Recht einer ScreenDefinition (`logistik.tour.create`,
+`logistics:write`, `finance.steuerschluessel.write`) aus den Rollen der Anmeldung? `useScreenPermissions`
+kennt es nur fuer Administratoren und einzelne Bereiche.
+
 ## DOCFLOW-EINKAUF-GUTSCHRIFT-20261013 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Phase 0.4 und 0.5.
