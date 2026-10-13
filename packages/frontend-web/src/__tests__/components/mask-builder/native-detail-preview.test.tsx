@@ -2,12 +2,12 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
 
-const { executeAction, state } = vi.hoisted(() => ({ executeAction: vi.fn(), state: { audit: false, data: { aktion_buchen: true, aktionshinweis: '' } as Record<string, unknown> } }))
+const { executeAction, state } = vi.hoisted(() => ({ executeAction: vi.fn(), state: { binding: false, audit: false, data: { aktion_buchen: true, aktionshinweis: '' } as Record<string, unknown> } }))
 vi.mock('@/components/mask-builder', () => ({
   useHumanActionDispatch: () => ({ executeAction }),
   useUniversalMaskRuntime: () => ({ plan: {}, entityData: state.data, tableRows: {}, messages: [], refetch: vi.fn() }),
   UniversalMaskRenderer: ({ onAction, messages }: { onAction: (key: string, payload: object) => void; messages: { message: string }[] }) => (
-    <div><button onClick={() => onAction('buchen', {})}>Buchen</button>{messages.map((m, i) => <p key={i}>{m.message}</p>)}</div>
+    <div><button onClick={() => onAction('buchen', state.data)}>Buchen</button>{messages.map((m, i) => <p key={i}>{m.message}</p>)}</div>
   ),
 }))
 vi.mock('@/app/routing/typed-router', () => ({ useNavigate: () => vi.fn() }))
@@ -17,7 +17,7 @@ vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: vi.fn() }) }))
 vi.mock('@/lib/api-client', () => ({ apiClient: { post: vi.fn().mockResolvedValue({}) }, getAxiosErrorMessage: () => '' }))
 vi.mock('@/lib/api/masks', () => ({ useScreenDefinition: () => ({ data: {
   id: 'beleg/purchase-invoice', title: 'Rechnung', adapter: { temporary: false },
-  actions: [{ key: 'buchen', label: 'Buchen', enabledWhen: 'aktion_buchen', dangerLevel: 'moderate', commandEndpoint: '/api/v1/docflow/test/post', auditReasonRequired: state.audit }],
+  actions: [{ key: 'buchen', label: 'Buchen', enabledWhen: 'aktion_buchen', dangerLevel: 'moderate', commandEndpoint: '/api/v1/docflow/test/post', auditReasonRequired: state.audit, requiresConfirmation: state.binding, commandBinding: state.binding ? { adapter: 'docflow.v1', command: 'post', preview: false } : undefined }],
 }, isFetching: false }) }))
 
 describe('native detail preview failure boundary', () => {
@@ -69,4 +69,19 @@ describe('native detail final execution failure', () => {
     if (result.audit) expect(executeAction.mock.calls[1][0].auditReason).toBe('Fachliche Fehlerkorrektur')
     state.audit = false
   })
+})
+
+
+it('confirms a bound post without inventing a dry-run and carries the displayed version', async () => {
+  state.binding = true
+  state.data = { aktion_buchen: true, version: 7 }
+  executeAction.mockReset().mockResolvedValue({ success: false, error: 'Freigabe erforderlich' })
+  render(<UniversalNativeDetailPage screenId="beleg/purchase-invoice" entityId="test" />)
+  fireEvent.click(screen.getByRole('button', { name: 'Buchen' }))
+  expect(executeAction).not.toHaveBeenCalled()
+  fireEvent.click(await screen.findByRole('button', { name: 'Bestätigen' }))
+  await waitFor(() => expect(screen.getByText('Freigabe erforderlich')).toBeInTheDocument())
+  expect(executeAction).toHaveBeenCalledTimes(1)
+  expect(executeAction.mock.calls[0][0]).toMatchObject({ mode: 'execute', expectedVersion: 7, payload: {}, bindingSnapshot: JSON.stringify({ adapter: 'docflow.v1', command: 'post', preview: false }) })
+  state.binding = false
 })

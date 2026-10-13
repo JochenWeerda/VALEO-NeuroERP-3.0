@@ -113,6 +113,10 @@ def _aktion(key: str, label: str, kommando: Belegkommando, *, kind: str = "secon
         "commandEndpoint": f"/api/v1{kommando.pfad}".replace("{doc_id}", "{entity_id}"),
         "method": kommando.methode,
         "kommando": kommando.name,
+        "commandBinding": {"adapter": "docflow.v1", "command": kommando.name.removeprefix("docflow."),
+                           "preview": kommando.name == "docflow.convert"},
+        "forbiddenForAgents": True,  # MCP-WRITE-014: keine schreibende Freischaltung durch Maskenmetadaten
+        "auditReasonRequired": kommando.name == "docflow.reverse",
         **mehr,
     }
 
@@ -126,8 +130,30 @@ def aktionen(variante: Belegvariante) -> list[dict[str, Any]]:
         liste.append(_aktion(
             f"umwandeln:{folgeart}", f"{BELEGARTEN[folgeart].bezeichnung} erstellen", BELEGKOMMANDOS["docflow.convert"],
             folgebelegart=folgeart,
+            commandBinding={"adapter": "docflow.v1", "command": "convert", "preview": True,
+                            "defaults": {"target_doc_type": folgeart}},
         ))
     liste.append(_aktion("stornieren", "Stornieren", BELEGKOMMANDOS["docflow.reverse"]))
+    for fachaktion in (("post", "reverse") if variante.bucht else ("reverse",)):
+        recht = "buchen" if fachaktion == "post" else "stornieren"
+        freigaberecht = "freigeben" if fachaktion == "post" else "freigeben_erhoeht"
+        bezug = "Buchung" if fachaktion == "post" else "Storno"
+        liste.append(_aktion(
+            f"freigabe_anfordern:{fachaktion}", f"{bezug}: Freigabe anfragen", BELEGKOMMANDOS["docflow.approval_request"],
+            permission=f"belege.{recht}",
+            commandBinding={"adapter": "docflow.v1", "command": "approval_request", "preview": False,
+                            "defaults": {"action": fachaktion}},
+            inputFields=[{"key": "reason", "label": "Grund der Anfrage", "type": "textarea"}],
+        ))
+        for erteilt, verb in ((True, "erteilen"), (False, "ablehnen")):
+            state_action = f"freigabe_erteilen:{fachaktion}"
+            liste.append(_aktion(
+                f"freigabe_{verb}:{fachaktion}", f"{bezug}: Freigabe {verb}", BELEGKOMMANDOS["docflow.approval_decide"],
+                permission=f"belege.{freigaberecht}", enabledWhen=zustandsfeld(state_action), requiresConfirmation=True,
+                commandBinding={"adapter": "docflow.v1", "command": "approval_decide", "preview": False,
+                                "stateAction": state_action, "defaults": {"granted": erteilt, "action": fachaktion}},
+                inputFields=[{"key": "note", "label": "Pruefvermerk", "type": "textarea", "required": True}],
+            ))
     haupt = "buchen" if variante.bucht else (f"umwandeln:{variante.folgebelege[0]}" if variante.folgebelege else "freigeben")
     for aktion in liste:
         if aktion["key"] == haupt:

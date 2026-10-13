@@ -159,6 +159,7 @@ class Belegaktion(_Teil):
     # Die Fachaktion dahinter. Maske, MCP-Werkzeug und Kommandozeile rufen dieselbe auf.
     kommando: str | None = None
     freigabe_noetig: bool = False
+    approval_id: str | None = None  # konkrete offene Freigabe, vom Server gebunden
 
 
 class Beleg(_Teil):

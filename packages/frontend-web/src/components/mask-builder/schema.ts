@@ -180,6 +180,14 @@ export interface ScreenActionDefinition {
   disabled?: boolean
   // Action Runtime (Phase 026)
   commandEndpoint?: string
+  /** Versioned transport only; domain authorization/approvals remain server-side. */
+  commandBinding?: {
+    adapter: 'docflow.v1'
+    command: 'release' | 'post' | 'reverse' | 'convert' | 'approval_request' | 'approval_decide'
+    preview: boolean
+    defaults?: Record<string, unknown>
+    stateAction?: string
+  }
   /** Navigates instead of mutating. Placeholders: {entity_id}, {business_partner_id}. */
   navigationRoute?: string
   /** Eingaben, die die Aktion braucht — deklarativ, vom Mask-Builder gezeichnet. */
