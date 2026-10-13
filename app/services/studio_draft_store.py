@@ -77,7 +77,8 @@ def set_status(tenant_id: str, draft_id: str, actor: str, status: str) -> dict[s
     _assert_four_eyes(item["updated_by"], actor, status)
     item = deepcopy(item)
     item["status"] = status
-    item["updated_by"] = actor
+    if status != "review":
+        item["updated_by"] = actor
     item["updated_at"] = datetime.now(UTC).isoformat()
     _DRAFTS[draft_id] = item
     return deepcopy(item)
@@ -320,7 +321,8 @@ def _sql_set_status(tenant_id: str, draft_id: str, actor: str, status: str) -> d
             raise KeyError(draft_id)
         _assert_four_eyes(row.updated_by, actor, status)
         row.status = status
-        row.updated_by = actor
+        if status != "review":
+            row.updated_by = actor
         row.updated_at = datetime.now(UTC)
         session.commit()
         session.refresh(row)
