@@ -12,6 +12,8 @@ Drei Wege buchen, ohne dass der Beleg in DocFlow steht: die Eingangsrechnung der
 """
 from __future__ import annotations
 
+import hashlib
+import re
 from decimal import Decimal
 from typing import Any, Optional
 
@@ -314,6 +316,97 @@ def verlange_hauptbuchstorno(db: Session, tenant_id: str, entry_id: str, akteur:
     verlange_oder_409(engine, vorgang, "reverse", akteur)
 
 
+class BuchungsimportFreigabe(FreigabeEngine):
+    """Massenimport von Hauptbuchbuchungen. Der Vorgang ist der Abdruck von Mandant, Periode und Datei.
+
+    Die Datei liegt nicht auf dem Server: Der Probelauf nennt ihren Abdruck, die zweite Person gibt genau diesen
+    frei, und der Import laeuft nur mit einer Datei, die denselben Abdruck hat.
+    """
+
+    SUBJEKT = "journal_import"
+
+    def vorgang(self, subject_id: str, aktion: str) -> Vorgang:
+        if not re.fullmatch(r"[0-9a-f]{64}", subject_id or ""):
+            raise EntityNotFoundError("JournalImport", subject_id)
+        return Vorgang(subject_id=subject_id, belegart=HAUPTBUCHBUCHUNG, brutto=Decimal("0"), gebucht=False,
+                       inhalt={"abdruck": subject_id})
+
+    def leserollen(self, v: Vorgang) -> frozenset[str]:
+        return _FINANZ_LESEN
+
+    def anfragerollen(self, v: Vorgang, aktion: str) -> frozenset[str]:
+        return _FINANZ_LEITUNG  # der Massenimport ist der Finanzleitung vorbehalten
+
+    def freigaberollen(self, v: Vorgang, risiko: str) -> frozenset[str]:
+        return _FINANZ_LEITUNG
+
+
+def importabdruck(tenant_id: str, period: str, inhalt: bytes) -> str:
+    return hashlib.sha256(f"{tenant_id}|{period}|".encode("utf-8") + inhalt).hexdigest()
+
+
+def verlange_buchungsimport(db: Session, tenant_id: str, abdruck: str, akteur: Optional[str] = None) -> None:
+    """Vor dem Massenimport: die Freigabe einer zweiten Person fuer genau diese Datei, sonst 409."""
+    engine = BuchungsimportFreigabe(db, tenant_id)
+    verlange_oder_409(engine, engine.vorgang(abdruck, "post"), "post", akteur)
+
+
+class _EinkaufsmemoFreigabe(FreigabeEngine):
+    """Lieferantengutschrift bzw. -belastung des Einkaufs (Dokumentspeicher)."""
+
+    SPEICHER = ""
+
+    def vorgang(self, subject_id: str, aktion: str) -> Vorgang:
+        from app.documents.router_helpers import get_from_store, get_repository
+
+        memo = get_from_store(self.SPEICHER, subject_id, get_repository(self.db))
+        return self.vorgang_aus(subject_id, memo)
+
+    def vorgang_aus(self, subject_id: str, memo: Optional[dict[str, Any]]) -> Vorgang:
+        # Ein Beleg ohne Mandant (vor dem 13.10.2026 angelegt) gehoert niemandem nachweislich und wird nicht gebucht.
+        if not memo or str(memo.get("tenantId") or "") != self.tenant_id:
+            raise EntityNotFoundError("PurchaseMemo", subject_id)
+        return Vorgang(
+            subject_id=subject_id, belegart="purchase_credit_memo", brutto=_d(memo.get("grossAmount")),
+            gebucht=bool(memo.get("booked")), ersteller=memo.get("createdBy"),
+            # Buchungs- und Verrechnungsstand gehoeren nicht zum Abdruck: Eine Freigabe gilt fuer den Geschaeftsvorfall.
+            inhalt={
+                "nummer": memo.get("number"), "lieferant": memo.get("supplierId"), "rechnung": memo.get("invoiceId"),
+                "abrechnung": memo.get("settlementId"), "grund": memo.get("reason"),
+                "summen": [str(_d(memo.get(k))) for k in ("netAmount", "taxAmount", "grossAmount")],
+                "positionen": memo.get("items") or [],
+            },
+        )
+
+
+class EinkaufsgutschriftFreigabe(_EinkaufsmemoFreigabe):
+    SUBJEKT = "einkauf_credit_memo"
+    SPEICHER = "credit_memo"
+
+
+class EinkaufsbelastungFreigabe(_EinkaufsmemoFreigabe):
+    SUBJEKT = "einkauf_debit_memo"
+    SPEICHER = "debit_memo"
+
+
+def verlange_einkaufsmemo(db: Session, tenant_id: str, memo_type: str, memo_id: str, memo: Optional[dict[str, Any]],
+                          akteur: Optional[str] = None) -> None:
+    """Vor dem Buchen oder Verrechnen einer Lieferantengutschrift oder -belastung.
+
+    Die Freigabe gilt fuer den Geschaeftsvorfall: Wurde sie beim Buchen verbraucht und ist der Inhalt unveraendert,
+    deckt sie auch die Verrechnung (und umgekehrt).
+    """
+    engine = (EinkaufsgutschriftFreigabe if memo_type == "credit_memo" else EinkaufsbelastungFreigabe)(db, tenant_id)
+    try:
+        vorgang = engine.vorgang_aus(memo_id, memo)
+    except EntityNotFoundError as fehlt:
+        raise HTTPException(status_code=404, detail="Beleg nicht gefunden") from fehlt
+    abdruck = engine.abdruck(vorgang, "post")
+    if any(f["action"] == "post" and f["status"] == "consumed" and f["fingerprint"] == abdruck for f in engine.liste(memo_id)):
+        return
+    verlange_oder_409(engine, vorgang, "post", akteur)
+
+
 SUBJEKTE: dict[str, type[FreigabeEngine]] = {}
 
 
@@ -323,7 +416,8 @@ def engine_fuer(subject_type: str, db: Session, tenant_id: str) -> FreigabeEngin
         from app.services.docflow_freigabe import DocflowFreigabe
 
         for klasse in (DocflowFreigabe, EingangsrechnungFreigabe, VerkaufsgutschriftFreigabe,
-                       AusgangsrechnungStornoFreigabe, HauptbuchFreigabe, ZahlungslaufFreigabe):
+                       AusgangsrechnungStornoFreigabe, HauptbuchFreigabe, ZahlungslaufFreigabe,
+                       BuchungsimportFreigabe, EinkaufsgutschriftFreigabe, EinkaufsbelastungFreigabe):
             SUBJEKTE[klasse.SUBJEKT] = klasse
     klasse = SUBJEKTE.get(subject_type)
     if klasse is None:

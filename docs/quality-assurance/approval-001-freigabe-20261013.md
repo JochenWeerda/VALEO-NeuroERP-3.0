@@ -218,3 +218,52 @@ ausgeführt; Rollen je Bereich. Gesamtlauf über 17 Testdateien: 950 bestanden.
 - **Zahlungsläufe, die vor dieser Änderung freigegeben wurden**, tragen keine Engine-Freigabe und
   werden nicht ausgeführt; sie müssen neu angelegt werden.
 - Rücklastschrift (`return-payment`) und SEPA-Datei habe ich nicht angefasst.
+
+## Nachtrag: Massenimport und Lieferantengutschriften/-belastungen (APPROVAL-001-IMPORT-EINKAUFSMEMO)
+
+| Vorgang | Jetzt |
+|---|---|
+| Massenimport von Buchungen, `POST /finance/bulk-journal-import/csv` | bucht nur mit Freigabe einer zweiten Person aus der Finanzleitung für **genau diese Datei** |
+| Lieferantengutschrift und -belastung buchen, `POST /einkauf/credit-memos/{id}/buchung`, `…/debit-memos/…` | braucht die zweite Person, über 1.000 € die erhöhte Berechtigung |
+| Dieselben verrechnen, `…/settle` | braucht dieselbe Freigabe; sie gilt für den Geschäftsvorfall (einmal erteilt, deckt sie Buchen und Verrechnen bei unverändertem Inhalt) |
+
+- **Massenimport:** Der Vorgang ist der Abdruck von Mandant, Periode und Datei. Der Probelauf
+  (`dry_run=true`) nennt ihn als `approval_subject`; angefragt und entschieden wird über
+  `/api/v1/approvals/journal_import/{abdruck}`. Eine andere Datei ist ein anderer Vorgang; dieselbe
+  Datei ein zweites Mal braucht eine neue Freigabe.
+- **Gutschrift/Belastung:** Mandant und Ersteller kommen jetzt aus der Anmeldung und stehen am Beleg.
+  Anlegen verlangt das Recht des Einkaufs, Buchen und Verrechnen das Buchungsrecht.
+
+### Befunde dabei
+
+- **Behoben — fremder Mandant beim Massenimport:** Der Mandant kam aus der Anfrage (Vorgabe „system").
+  Wer importieren durfte, konnte in jeden Mandanten buchen. Jetzt gilt der Mandant der Anmeldung; die
+  Angabe darf ihn nur bestätigen (sonst 403).
+- **Behoben für die Schreibwege — kein Mandant, kein Recht:** Die Gutschriften und Belastungen des
+  Einkaufs hatten weder Mandant noch Rollenprüfung; der Ersteller kam aus dem Kopf `X-User-ID`, den
+  jeder setzen kann. Anlegen, Buchen und Verrechnen sind jetzt an Mandant, Recht und Freigabe gebunden.
+- **Nicht behoben — Lesen und die modul-eigene Freigabe:** `GET /einkauf/credit-memos`, `…/{id}` und
+  die Wege `…/freigabe` sind weiter ohne Mandant und ohne Recht.
+- **Nicht behoben — „gebucht" ohne Buchung:** `…/buchung` schreibt einen Buchungsvermerk in den
+  Dokumentspeicher mit einer ausgedachten Journalnummer; im Hauptbuch entsteht nichts. Die Verrechnung
+  mindert dagegen wirklich offene Posten. Führend für Einkaufsgutschriften ist DocFlow
+  (`purchase_credit_memo`), das über Finance bucht.
+- **Folge:** Belege dieses Weges, die vor dem 13.10.2026 angelegt wurden, tragen keinen Mandanten und
+  werden nicht mehr gebucht oder verrechnet.
+
+### Nachweis
+
+`tests/test_freigabe_import_einkaufsmemo.py`, 9 bestanden gegen `valeo_probe`: Import nur mit Freigabe
+für genau diese Datei (andere Datei abgewiesen, zweiter Lauf braucht neue Freigabe, nur die
+Finanzleitung fragt an und entscheidet); **Import nur in den Mandanten der Anmeldung**; Gutschrift und
+Belastung nur mit zweiter Person, Mandant und Ersteller aus der Anmeldung; Verrechnen nur mit Recht
+und Freigabe; über 1.000 € erhöhte Berechtigung; Beleg eines anderen Mandanten 404; ohne Recht kein
+Anlegen. Angepasst: `test_process_kernel_wave100_settlement_completion` (nachgestellte Datenbank,
+Freigabe dort ausgeblendet), `test_process_kernel_wave31_dq_finance_import_paths`.
+
+### Weiter offen
+
+- Die Abrechnungskorrektur des Agrarbereichs erzeugt Gutschriften und Belastungen über diesen Weg
+  (`settlementId`); sie braucht jetzt je Beleg die zweite Person. Ob das im Ernteablauf trägt, ist
+  fachlich zu prüfen.
+- Kasse und Rücklastschrift habe ich nicht untersucht.

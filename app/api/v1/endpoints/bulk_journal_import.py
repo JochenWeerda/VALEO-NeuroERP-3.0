@@ -31,6 +31,9 @@ from app.api.v1.schemas.bulk_journal_import_schemas import BulkJournalImportOut
 from app.core import finance_periods
 
 
+from app.core.tenant import get_tenant_id  # noqa: E402
+from app.services import finance_freigabe  # noqa: E402
+
 router = APIRouter(prefix="/bulk-journal-import", tags=["finance", "import"])
 
 
@@ -51,6 +54,9 @@ class ImportResult(BaseModel):
     created_entry_ids: List[str]
     import_id: str
     imported_at: datetime
+    # Der Abdruck von Mandant, Periode und Datei. Fuer ihn wird die Freigabe angefragt:
+    # POST /api/v1/approvals/journal_import/{approval_subject}
+    approval_subject: Optional[str] = None
 
 
 class JournalEntryImportRow(BaseModel):
@@ -173,11 +179,13 @@ def validate_and_parse_row(
 async def import_journal_entries_csv(
     file: UploadFile = File(...),
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_wahl: Optional[str] = Query(None, alias="tenant_id", description="Bestaetigt den Mandanten der Anmeldung; waehlt keinen anderen"),
     delimiter: str = Query(",", description="CSV delimiter"),
     dry_run: bool = Query(False, description="Dry run mode (validate only, don't import)"),
     db: Session = Depends(get_db),
     request: Request = None,
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(finance_admin),
 ):
     """
     Import journal entries from CSV file.
@@ -194,9 +202,15 @@ async def import_journal_entries_csv(
     - profit_center (or kostentraeger): Optional profit center
     - reference (or beleg): Optional reference
     """
+    # Bis 13.10.2026 kam der Mandant aus der Anfrage (Vorgabe "system"): Wer importieren durfte, konnte in jeden
+    # Mandanten buchen. Jetzt gilt der Mandant der Anmeldung; die Angabe darf ihn nur bestaetigen.
+    if tenant_wahl is not None and tenant_wahl != tenant_id:
+        raise HTTPException(status_code=403, detail="Tenant selector does not match verified identity")
     try:
         # Read file content
         file_content = await file.read()
+        # Der Abdruck von Mandant, Periode und Datei: Ihn gibt die zweite Person frei (APPROVAL-001).
+        abdruck = finance_freigabe.importabdruck(tenant_id, period, file_content)
         
         # Parse CSV
         rows = parse_csv_file(file_content, delimiter)
@@ -233,6 +247,10 @@ async def import_journal_entries_csv(
                 successful_entries.append(entry)
 
         if not dry_run:
+            # Ein Massenimport bucht manuell erfasste Buchungen: nur mit Freigabe einer zweiten Person fuer genau
+            # diese Datei. Der Probelauf nennt den Abdruck (``approval_subject``).
+            akteur = str(nutzer.get("sub") or "") if isinstance(nutzer, dict) else None
+            finance_freigabe.verlange_buchungsimport(db, tenant_id, abdruck, akteur)
             gesperrt = finance_periods.gesperrter_zustand(db, tenant_id, period)
             if gesperrt:
                 raise HTTPException(
@@ -363,7 +381,8 @@ async def import_journal_entries_csv(
             errors=errors,
             created_entry_ids=created_entry_ids if not dry_run else [],
             import_id=import_id,
-            imported_at=datetime.now()
+            imported_at=datetime.now(),
+            approval_subject=abdruck,
         )
         
     except HTTPException:

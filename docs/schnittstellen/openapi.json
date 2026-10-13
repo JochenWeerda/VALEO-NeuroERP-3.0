@@ -82758,6 +82758,17 @@
       "ImportResult": {
         "description": "Result of bulk import",
         "properties": {
+          "approval_subject": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Subject"
+          },
           "created_entry_ids": {
             "items": {
               "type": "string"
@@ -291394,15 +291405,21 @@
             }
           },
           {
-            "description": "Tenant ID",
+            "description": "Bestaetigt den Mandanten der Anmeldung; waehlt keinen anderen",
             "in": "query",
             "name": "tenant_id",
             "required": false,
             "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Bestaetigt den Mandanten der Anmeldung; waehlt keinen anderen",
+              "title": "Tenant Id"
             }
           },
           {
