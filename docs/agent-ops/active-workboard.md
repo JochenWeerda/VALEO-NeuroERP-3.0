@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## CI-WORKFLOW-IDENTITY-ISOLATION-20261013 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** 13 rote Workflow-HTTP-Faelle senden dev-token; Fixture loescht alle gemeinsamen Workflowdaten und erstellt Tabellen. **Ziel:** Produktionsmiddleware mit signierter ausdruecklicher Testidentitaet nutzen und Fachdaten ueber eigene Belegnummern/Savepointrollback isolieren. **Dateibesitz:** tests/test_workflow_api.py nur Auth-/DB-Fixture und Testbelegnummern; bestehende Assertions unveraendert; eigene QA/Workboard. **Abnahme:** echte RSA-Validierung bleibt aktiv, nur JWKS-Transport und Sitzungsstore im ausdruecklichen vorhandenen Probe-Kontext isoliert; keine globalen Authoverrides/Tabellenresets/DDL zur Vorbereitung; fremde Datensaetze bleiben erhalten. Vorhandener valeo_probe mit --status, keine Migration/DB/Container/Reset. Workflowmodell ohne Tenant und Payloadrollen bleiben dokumentierte offene Produktionsbefunde im Identity-Elternclaim.
+
 ## CI-ISOLATED-TENANT-FIXTURES-20261013 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** PostgreSQL-CI 38360982633: 19 eBilanz- und zehn Lead/PDF-Faelle scheitern an nachgezogener Tenant-Dependency. **Ziel:** bereits isolierte Fach-Testapps mit ausdruecklichem Testmandanten versehen. **Dateibesitz:** tests/test_ebilanz_honest_persistence.py und tests/test_user_decisions_lead_pdf.py ausschliesslich deren Miniapp-Fixture; eigene QA/Workboard. **Abnahme:** Fach-/Rollen-/Persistenzpruefungen bleiben unveraendert, Savepointrollback isoliert eigene Daten; kein Override im Produktionsdienst, echte RSA-/Tenantabnahme separat unveraendert. Vorhandenen valeo_probe mit --status pruefen, keine Migration/DB/Container/Reset. Weitere zehn CI-Dateien bleiben offen und werden einzeln inventarisiert.
