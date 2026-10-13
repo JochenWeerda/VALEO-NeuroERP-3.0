@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## MASK-ACTION-ERROR-PERSISTENCE-20261013 — reserviert, Codex
+## MASK-ACTION-ERROR-PERSISTENCE-20261013 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Ablehnungen der finalen Maskenaktion nach Dialogabschluss sichtbar halten. **Dateibesitz:** packages/frontend-web/src/components/mask-builder/UniversalNativeDetailPage.tsx; packages/frontend-web/src/__tests__/components/mask-builder/native-detail-preview.test.tsx; docs/quality-assurance/mask-action-error-persistence-20261013.md. **Abnahme:** Serverfehler und Feldvalidierung bleiben nach execute sichtbar; fehlgeschlagene Vorschau dispatcht weiterhin nicht. **Risiken:** Domain-Command-Adapter und Freigabemasken bleiben offen; keine Fachdatenmutation.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Ablehnungen der finalen Maskenaktion nach Dialogabschluss sichtbar halten. **Dateibesitz:** packages/frontend-web/src/components/mask-builder/UniversalNativeDetailPage.tsx; packages/frontend-web/src/__tests__/components/mask-builder/native-detail-preview.test.tsx; docs/quality-assurance/mask-action-error-persistence-20261013.md. **Abnahme:** Serverfehler und Feldvalidierung bleiben nach execute sichtbar; fehlgeschlagene Vorschau dispatcht weiterhin nicht. **Risiken:** Domain-Command-Adapter und Freigabemasken bleiben offen; keine Fachdatenmutation.
+
+**Lieferung:** Dialogzustand wird vor execute geschlossen; finale Ablehnungen bleiben sichtbar. 13 Regressionstests bestanden, einschliesslich Begruendungsweg und Vorschau-Sperre. QA: mask-action-error-persistence-20261013.md. Command-/Approval-Adapter bleiben offen.
 
 ## APPROVAL-001-HAUPTBUCH-ZAHLUNG — abgeschlossen, Claude Code
 
