@@ -3,11 +3,12 @@ from fastapi import Response, APIRouter, Depends, Query
 from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.services.tenant_lifecycle_service import TenantLifecycleService
 from app.api.v1.schemas.shared import TenantCreate, TenantUpdate, Tenant
 from app.api.v1.schemas.base import PaginatedResponse
 
-router=APIRouter(tags=['tenants'])
+router=APIRouter(tags=['tenants'],dependencies=[Depends(get_tenant_id)])
 
 
 class LifecycleReason(BaseModel):

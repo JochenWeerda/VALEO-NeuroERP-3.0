@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## IDENTITY-CI-CONTRACT-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** bestätigte CI-Fehler aus Run 38305586021 schließen. **Dateibesitz:** route-aliases.json nur zwei Kontingentseiten und deren generierte Routen; tenants.py nur gemeinsame verifizierte Tenant-Dependency (Elternclaim bleibt); sales_credit_notes.py ausschließlich geprüfte statische SQL-Suffixannotation; neue Tenant-HTTP-Gegenprobe, eigene QA/Workboard und isolierte OpenAPI. **Abnahme:** Generator erhält beide Routen dauerhaft; Doc-Drift null; Tenant-Dependency vor DB, keine System-Ausnahme; SQL-Suffix nur feste Literale und Werte als Bindparameter, SQL-Gate grün. Keine Fachbuchung, Rechteerweiterung, Migration, neue DB/Container/Reset; fremde WIP erhalten.
+
+**Lieferung:** Dauerhafte Aliasquelle fuer beide Kontingentseiten, 941 Routen; gemeinsame Tenant-Dependency vor DB, sechs HTTP-Gegenproben bestanden. Fester SQL-Suffix mit Bindparametern geprueft. SQL-/Tenant-/Doc-Drift-Gates und Routingintegritaet bestanden, isolierte produktive OpenAPI geprueft. Nachweis: identity-ci-contract-20261013.md. Katalog, Snapshot-Migration, Agenten-/Auditintegration und Gesamtabnahme bleiben offen. Keine DB/Container/Reset.
+
+## SNAPSHOT-PAGINATION-20261012 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Ziel:** Snapshot-Seiten ohne Vollmaterialisierung, stabiler Cursor bei Zeitgleichheit, begrenzte Seitengroesse. **Dateibesitz:** app/core/read_model_persistence.py nur SnapshotCursor/get_page; read_model_snapshots.py nur Query-Limit; neue fokussierte Vertragsdatei; eigene QA/Workboard und isolierte API-Artefakte. **Abnahme:** Memory-/SQL-Ergebnis gleich, SQL-LIMIT und Cursorfilter vor Materialisierung, fremde Cursor beeinflussen eigene Seite nicht, Limit 1..100 mit HTTP422 ausserhalb. Fehlende Snapshot-Migration ist eigener offener Befund; keine DB/Container/Migration/Reset.
+
+**Lieferung:** SQL-Keyset-Paginierung mit LIMIT vor Materialisierung und stabiler Zeit-/ID-Ordnung; Seitengroesse 1..100, HTTP422 ausserhalb. 41 SQL-/Memory-/HTTP-/Bestandsvertraege bestanden; isolierte produktive OpenAPI erzeugt und geprueft. Nachweis: snapshot-pagination-20261012.md. Snapshot-Migration, Store-Einzelzugriffe und Gesamtabnahme bleiben offen. Keine DB/Container/Reset.
+
 ## GUTSCHRIFT-AGENT-FREIGABE-20261012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-12. Entscheidung des Auftraggebers: Agent bucht
@@ -134,9 +146,11 @@ QA: `docs/quality-assurance/buchung-nicht-still-20261012.md`.
 **Offen:** Gutschrift ohne Umsatzsteuerkorrektur; `POST /inventory/counts` setzt Pflichtfeld `counted_by` nicht;
 Inventur-Wege ohne Lagerrolle; Frontend ruft nicht vorhandenes `PUT /inventory/counts/{id}`.
 
-## IDENTITY-REMAINING-WIRING-20261012 — reserviert, Codex
+## IDENTITY-REMAINING-WIRING-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** uebrigen roten Wiring-Fall der Belegprojektion reparieren, ohne Produktionsauth zu mocken. **Dateibesitz:** tests/test_document_control_projection.py nur lokaler Import der ausdruecklichen Kompatibilitaets-App im registrierten Projektionsweg; QA/Workboard. Claudes committete Modulimportkorrektur bleibt erhalten. **Abnahme:** echter HTTP-Wiring-Vertrag mit FakeProjection besteht, gepruefter Rollenvertrag bleibt separat; keine DB/Container/Reset. **Risiko:** zwei Snapshot-Tests haben eine fehlende kanonische Migration; nicht durch Sicherheitslockerung verdecken.
+
+**Lieferung:** Explizite Kompatibilitaets-App fuer den HTTP-Wiring-Vertrag; vier vorhandene Projektionsvertraege bestanden in 22,54s. Produktionsauth unveraendert, kein RSA-Nachweis aus diesem Test abgeleitet. Nachweis: document-projection-wiring-20261012.md. Zwei Snapshot-Faelle mit fehlender kanonischer Migration bleiben offen. Keine DB/Container/Reset.
 
 ## TESTGRENZE-FINANZ-HAUPTAPP-20261012 — abgeschlossen, Claude Code
 
