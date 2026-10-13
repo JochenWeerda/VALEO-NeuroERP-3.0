@@ -296,22 +296,28 @@ function NativeExistingDetailPage({
       setStage('audit')
       return
     }
+    closeDialogs()
     await doExecute(pending.actionKey, pending.payload)
-    resetDialogs()
   }
 
   // --- Step 3: after AuditReasonDialog ---
   async function advanceFromAudit(): Promise<void> {
     if (!pendingAction) return
-    await doExecute(pendingAction.actionKey, pendingAction.payload, auditReason)
-    resetDialogs()
+    const pending = pendingAction
+    const reason = auditReason
+    closeDialogs()
+    await doExecute(pending.actionKey, pending.payload, reason)
   }
 
-  function resetDialogs(): void {
+  function closeDialogs(): void {
     setPendingAction(null)
     setStage(null)
     setDryRunResult(null)
     setAuditReason('')
+  }
+
+  function resetDialogs(): void {
+    closeDialogs()
     setActionError(null)
     setValidationErrors([])
   }

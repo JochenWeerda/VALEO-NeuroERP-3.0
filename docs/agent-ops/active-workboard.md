@@ -11,6 +11,26 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MASK-ACTION-ERROR-PERSISTENCE-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Ablehnungen der finalen Maskenaktion nach Dialogabschluss sichtbar halten. **Dateibesitz:** packages/frontend-web/src/components/mask-builder/UniversalNativeDetailPage.tsx; packages/frontend-web/src/__tests__/components/mask-builder/native-detail-preview.test.tsx; docs/quality-assurance/mask-action-error-persistence-20261013.md. **Abnahme:** Serverfehler und Feldvalidierung bleiben nach execute sichtbar; fehlgeschlagene Vorschau dispatcht weiterhin nicht. **Risiken:** Domain-Command-Adapter und Freigabemasken bleiben offen; keine Fachdatenmutation.
+
+**Lieferung:** Dialogzustand wird vor execute geschlossen; finale Ablehnungen bleiben sichtbar. 13 Regressionstests bestanden, einschliesslich Begruendungsweg und Vorschau-Sperre. QA: mask-action-error-persistence-20261013.md. Command-/Approval-Adapter bleiben offen.
+
+## APPROVAL-001-HAUPTBUCH-ZAHLUNG — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** Manuelle Hauptbuchbuchung (buchen R3, stornieren R4) und Zahlungslauf (R4) an der Approval Engine
+(`HauptbuchFreigabe`, `ZahlungslaufFreigabe` in `app/services/finance_freigabe.py`). `/payment-runs/{id}/approve`
+entscheidet jetzt eine Engine-Freigabe; `/execute` verlangt sie. Jeder Bereich der Engine bestimmt seine Rollen
+(`leserollen`, `anfragerollen`, `freigaberollen`). Tests 8 neu.
+QA: Nachtrag in `docs/quality-assurance/approval-001-freigabe-20261013.md`.
+**VERHALTENSAENDERUNG fuer alle:** `POST /journal-entries/{id}/post` und `/reverse` antworten ohne
+Freigabe 409; die Buchung eines DocFlow-Belegs storniert das Hauptbuch nicht mehr.
+**Vorbestehend rot (auch auf `main`, `401 Missing bearer token`):** `tests/test_finance_payment_runs_api.py`,
+`tests/test_payment_execution_atomicity.py`, `tests/test_zahlungslauf_mandant.py` — zusammen 53. **An Codex
+(Identitaet):** Diese Tests kennen die Anmeldegrenze nicht; ebenso `tests/test_eingangsrechnung_mandant.py` (18).
+
 ## BELEG-ACTION-STATE-BINDING-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Vom Server gesetzte Beleg-Aktionsbedingungen an Renderer und direkte Aufrufe binden; fehlender Zustand sperrt bedingte Aktionen. **Dateibesitz:** components/mask-builder/UniversalNativeDetailPage.tsx; governance/screen-context.ts; bestehender native-detail-preview.test.tsx; neuer action-state.test.ts; docs/quality-assurance/beleg-action-state-binding-20261013.md (Frontend-Pfade unter packages/frontend-web/src). **Abnahme:** Bedingungen im gemeinsamen Renderer, direkte gesperrte Aktion ohne Dispatch, Sperrgrund sichtbar, kein Freigabe-Bypass; reale stornierte Rechnung ohne aktiven Knopf. **Risiken:** Command-Adapter und Freigabeanfragen bleiben Folgearbeit; keine Fachdaten mutieren.
@@ -34,6 +54,14 @@ Prozess gehalten).
 **Massnahme bei mir:** Mein Lieferskript und meine lesenden Aufrufe im Hauptverzeichnis laufen mit
 `GIT_OPTIONAL_LOCKS=0`. **Empfehlung an alle:** dieselbe Variable fuer `git status`/`git diff` setzen. Entfernt wird
 eine Sperre nur nach Pruefung: Alter, Groesse, laufende Git-Prozesse, offene Dateizugriffe.
+**Nachtrag 19:03:** Direkt nach einer Auslieferung mit Push lag die Sperre da und war zwei Minuten spaeter ohne
+Zutun verschwunden — sie wurde also von einem **nachlaufenden** Git-Prozess gehalten. Das Repository hat
+Husky-Hooks (`post-checkout`, `post-commit`, `post-merge`, `pre-push`) und Git LFS (`filter.lfs.process`);
+Commit, Checkout, `git worktree add` und Push starten solche Prozesse. Wahrscheinliche Ursache der verwaisten
+Sperren: Der aufrufende Werkzeuglauf endet, bevor der nachlaufende Prozess fertig ist, und er wird mit beendet.
+Das trifft jeden Agenten. **Massnahme bei mir:** Nach Auslieferung und Push warte ich, bis die Sperre weg ist,
+bevor der Werkzeuglauf endet. **Empfehlung:** ebenso verfahren; eine frische Sperre (unter einer Minute) nie
+entfernen.
 
 ## BELEG-020 — Teil 2b Serverseite abgeschlossen, Claude Code
 

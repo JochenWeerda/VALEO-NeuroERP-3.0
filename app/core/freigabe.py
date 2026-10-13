@@ -17,6 +17,9 @@ fachlich abzunehmen. Ein Mandant kann sie fuer sich enger setzen, nicht weiter (
 | Gutschrift darueber | R4 — zweite Person mit erhoehter Berechtigung |
 | Nicht gebuchten Beleg zuruecknehmen | R2 — Rollenrecht und Begruendung |
 | Gebuchten Beleg stornieren | R4 — zweite Person mit erhoehter Berechtigung, gleich welcher Betrag |
+| Manuelle Hauptbuchbuchung buchen | R3 — zweite Person |
+| Gebuchte Hauptbuchbuchung stornieren | R4 — zweite Person mit erhoehter Berechtigung |
+| Zahlungslauf ausfuehren | R4 — zweite Person mit Zahlungsberechtigung |
 
 Eine Stueckelung unter die Grenze (mehrere Belege aus demselben Vorgang) zaehlt wie der Gesamtbetrag.
 """
@@ -44,6 +47,10 @@ GRUPPE: dict[str, str] = {
 }
 
 AKTIONEN: tuple[str, ...] = ("post", "reverse")
+
+# Vorgaenge der Finanzbuchhaltung, die keine Belegart des Belegvertrags sind.
+HAUPTBUCHBUCHUNG = "manual_journal"
+ZAHLUNGSLAUF = "payment_run"
 
 
 @dataclass(frozen=True)
@@ -84,6 +91,13 @@ def anforderung(
     ``brutto_des_vorgangs`` ist die Summe aller Belege derselben Art aus demselben Vorgang (Stueckelung);
     ``abgleich_in_ordnung`` gilt nur fuer die Eingangsrechnung.
     """
+    if belegart == HAUPTBUCHBUCHUNG and aktion in AKTIONEN:
+        if aktion == "reverse":
+            return (Anforderung("R4", "Storno einer gebuchten Hauptbuchbuchung: zweite Person mit erhöhter Berechtigung.")
+                    if gebucht else Anforderung("R2", "Rollenrecht und Begründung genügen."))
+        return Anforderung("R3", "Manuelle Hauptbuchbuchung: zweite Person.")
+    if belegart == ZAHLUNGSLAUF and aktion == "post":
+        return Anforderung("R4", "Zahlungsfreigabe: zweite Person mit Zahlungsberechtigung.")
     variante = BELEGARTEN.get(belegart)
     if variante is None or aktion not in AKTIONEN:
         return Anforderung("R2", "Rollenrecht genügt.")
