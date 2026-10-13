@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## LOGIN-TOPBAR-IDENTITY-20261013 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** reales Benutzermenü zeigt festes Test-Admin-Profil, Abmelden-Schaltfläche hat keinen Handler. **Ziel:** kanonische angemeldete Identität anzeigen und realen Logout auslösen. **Dateibesitz:** TopBar.tsx nur Authimport, Profilwerte und Logout-Handler/Status; keine Gestaltung; neue React-Verträge; eigene QA/Workboard/Handbuch. Elternclaim IDENTITY-CONTROL behält lib/auth.ts und LOGIN-VARIANTS Gesamtabnahme. **Abnahme:** echter Testnutzer statt Attrappe sichtbar, Abmelden ruft zentralen Widerruf auf, keine erfundene Adminidentität; Browser-Screenshots/Logout-Recheck, bestehende Sicherheitsverträge bleiben erhalten. Keine persönlichen Benutzerwerte versionieren, keine DB/Container/Reset.
+
 ## LOGIN-RUNTIME-ISSUER-20261013 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** reale Anmeldung und lesender Backendnachweis: erwarteter issuer http://keycloak:8080, Browserprovider issuer http://localhost:8080. **Ziel:** öffentlichen Token-Aussteller vom internen JWKS-Transport trennen. **Dateibesitz:** docker-compose.yml backend nur OIDC_ISSUER_URL/OIDC_JWKS_URL; lokaler begrenzter Runtimeoverride ohne init_db und ohne Schemaänderung; eigener Konfigurationsvertrag, QA/Handbuch/Workboard. **Abnahme:** tatsächliche Backendkonfiguration korrekt, bestehender Backenddienst rekonfiguriert ohne neue DB/Container pro Test oder Migration; keine Änderung bestehender Nutzer/Rollen/Realmrichtlinien, echter Browser-Recheck. Persönliche Kennungen nicht versionieren. Produktions-Deploymentkonfiguration bleibt eigener offener Befund.
