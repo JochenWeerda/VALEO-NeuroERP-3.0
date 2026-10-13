@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-IDENTITY-SCOPES-20261013 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Explizite Beleg-Lese-/Bearbeitungsrollen mit rollenbeschraenkten Keycloak-Scopes bereitstellen und lokal verifizieren. **Dateibesitz:** neues app/auth/beleg_permissions.py; neues scripts/keycloak_document_scopes.py; scripts/provision_identity_provider.py nur Beleg-Scopes; config/keycloak/fachrollen.json nur generierte Belegrollen; neue tests/test_beleg_identity_scopes.py; docs/quality-assurance/beleg-identity-scopes-20261013.md. **Abnahme:** Provisionierung wiederholbar, unbekannte Rollen/Scope-Abweichungen blockieren, echte lokale Token-Evaluation mit/ohne Rechte; kein implizites admin- oder MCP-Schreibrecht. **Risiken:** Belegarten-/Preis-/Aktionsrechte und MCP-Write-Freischaltung sind eigene Folgegates.
+
 ## BELEG-013 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
