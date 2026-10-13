@@ -97,7 +97,7 @@ describe('ScreenStudioPage', () => {
 
   it('requires saving local changes before review or publication', async () => {
     const response = async (url: string, body: { definition?: unknown }) => ({ data: {
-      id: 'draft-a', status: 'draft', revision: 'revision-a', definition: body.definition,
+      id: 'draft-a', status: url.endsWith('/submit-review') ? 'review' : 'draft', revision: 'revision-a', definition: body.definition,
       violations: [], canPublish: true, readiness: { errors: [] },
     } })
     postMock.mockImplementation(response)
@@ -105,7 +105,9 @@ describe('ScreenStudioPage', () => {
     renderStudio()
     fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
     await waitFor(() => expect(screen.getByRole('button', { name: 'Prüfung' })).toBeEnabled())
-    expect(screen.getByRole('button', { name: 'Freigeben' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Prüfung' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Freigeben' })).toBeEnabled())
     fireEvent.change(screen.getByLabelText('Titel'), { target: { value: 'Ungespeicherter Entwurf' } })
     expect(screen.getByRole('button', { name: 'Prüfung' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
@@ -115,7 +117,8 @@ describe('ScreenStudioPage', () => {
     await waitFor(() => expect(screen.getByText('Speichern fehlgeschlagen')).toBeInTheDocument())
     expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Freigeben' })).toBeEnabled())
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Prüfung' })).toBeEnabled())
+    expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
   })
 
 

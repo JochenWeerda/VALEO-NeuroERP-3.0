@@ -46,7 +46,7 @@ def test_header_change_cannot_impersonate_an_independent_publisher(probe):
     record = create(client)
     response = publish_reviewed(client, '/studio/drafts/'+record['id']+'/publish', headers={'X-Actor-ID': 'another-person'})
     assert response.status_code == 403
-    assert store.get_draft('studio-test-tenant', record['id'])['status'] == 'draft'
+    assert store.get_draft('studio-test-tenant', record['id'])['status'] == 'review'
 
 
 @pytest.mark.parametrize('identity_type,roles', [('service', ['admin']), (None, ['admin']), ('human', []), ('human', ['FINANCE_ADMIN'])])
@@ -64,7 +64,7 @@ def test_review_submission_cannot_relabel_the_content_editor(probe):
     client, user = probe
     record = create(client)
     user['sub'] = 'other-submitter'
-    review = client.post('/studio/drafts/'+record['id']+'/submit-review')
+    review = client.post('/studio/drafts/'+record['id']+'/submit-review', json={'expected_revision': record['revision']})
     assert review.status_code == 200
     assert review.json()['updated_by'] == 'editor'
     user['sub'] = 'editor'

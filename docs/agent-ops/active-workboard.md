@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-REVIEW-LIFECYCLE-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Einreichung vor Publikation, Bearbeitung entwertet Review, Retirement nur nach Publikation; alle HTTP-Uebergaenge revisionsgebunden. **Dateibesitz:** app/services/studio_draft_store.py; app/api/v1/endpoints/studio_drafts.py; Studio-API/Page samt bestehenden Tests; Studio-Python-Tests/Testhelfer; scripts/belegmasken_veroeffentlichen.py samt betroffenen Tests; docs/quality-assurance/studio-review-lifecycle-20261013.md. **Abnahme:** kein draft->published, kein published->review/draft; Aenderung eines Reviewentwurfs ergibt draft; veraltete Review-/Retire-Revision sperrt. **Risiken:** unveraenderliche Historie/Produktionsfreigabe bleiben offen; fremde alte Handbuchkopien erhalten.
+
+**Lieferung:** 88 Python/SQL- und neun UI-Faelle bestanden; Einreichung zwingend, Bearbeitung entwertet Review, drei HTTP-Uebergaenge revisionsgebunden. Pilot-Installer folgt Retirement/Review. Committed Handbuch generatorgleich; fremde alte Arbeitskopien erhalten. QA: studio-review-lifecycle-20261013.md. Historie/Idempotenz und reale Browserabnahme bleiben offen.
+
 ## STUDIO-REVIEW-REVISION-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** HTTP-Freigabe verlangt Revision des angezeigten gespeicherten Entwurfs; mandantengebundener Einzelabruf fuer zweite Anmeldung. **Dateibesitz:** app/api/v1/endpoints/studio_drafts.py; app/services/studio_draft_store.py; packages/frontend-web/src/lib/api/studio.ts; ScreenStudioPage.tsx samt Tests; Studio-Python-Vertragstests und eigener Testhelfer; docs/quality-assurance/studio-review-revision-20261013.md. **Abnahme:** fehlende/veraltete Revision sperrt Publikation, aktueller Einzelabruf ist mandantengebunden, bestehende Snapshot-Sperre bleibt. **Risiken:** unveraenderliche Historie/Statusmodell bleiben Folgearbeit; keine Migration oder neue DB.

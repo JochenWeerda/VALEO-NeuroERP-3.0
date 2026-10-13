@@ -28,6 +28,7 @@ export function ScreenStudioPage(): JSX.Element {
   const [draftId, setDraftId] = useState<string>()
   const [savedSignature, setSavedSignature] = useState<string>()
   const [savedRevision, setSavedRevision] = useState<string>()
+  const [savedStatus, setSavedStatus] = useState<string>()
   const [publishedRoute, setPublishedRoute] = useState<string>()
   const [report, setReport] = useState<StudioReport>()
   const [pending, setPending] = useState<string>()
@@ -80,6 +81,7 @@ export function ScreenStudioPage(): JSX.Element {
                 setDraftId(item.id)
                 setSavedSignature(JSON.stringify(item.definition))
                 setSavedRevision(item.revision)
+            setSavedStatus(item.status)
                 setPublishedRoute(undefined)
                 setReport(undefined)
                 setFeedback(`Entwurf geladen (${item.status}).`)
@@ -130,6 +132,7 @@ export function ScreenStudioPage(): JSX.Element {
             setDraftId(saved.id)
             setSavedSignature(JSON.stringify(saved.definition))
             setSavedRevision(saved.revision)
+            setSavedStatus(saved.status)
             void drafts.refetch()
             setPublishedRoute(undefined)
             setReport(saved)
@@ -137,20 +140,22 @@ export function ScreenStudioPage(): JSX.Element {
           })}>
             {pending === 'save' ? 'Speichern…' : 'Speichern'}
           </Button>
-          <Button type="button" variant="outline" disabled={!draftId || dirty || Boolean(pending)} onClick={() => void run('review', async () => {
-            if (dirty) return
-            const reviewed = await submitStudioReview(draftId ?? '')
+          <Button type="button" variant="outline" disabled={!draftId || !savedRevision || savedStatus !== 'draft' || dirty || Boolean(pending)} onClick={() => void run('review', async () => {
+            if (dirty || !savedRevision || savedStatus !== 'draft') return
+            const reviewed = await submitStudioReview(draftId ?? '', savedRevision)
             setSavedRevision(reviewed.revision)
+            setSavedStatus(reviewed.status)
             void drafts.refetch()
             setFeedback('Zur Prüfung gegeben.')
           })}>
             Prüfung
           </Button>
-          <Button type="button" variant="outline" disabled={!draftId || !savedRevision || dirty || Boolean(pending) || !report?.canPublish} onClick={() => void run('publish', async () => {
-            if (dirty || !savedRevision) return
+          <Button type="button" variant="outline" disabled={!draftId || !savedRevision || savedStatus !== 'review' || dirty || Boolean(pending) || !report?.canPublish} onClick={() => void run('publish', async () => {
+            if (dirty || !savedRevision || savedStatus !== 'review') return
             const published = await publishStudioDraft(draftId ?? '', savedRevision)
             setReport(published)
             setSavedRevision(published.revision)
+            setSavedStatus(published.status)
             void drafts.refetch()
             setPublishedRoute(published.route)
             setFeedback(`Veröffentlicht als ${published.status}.`)

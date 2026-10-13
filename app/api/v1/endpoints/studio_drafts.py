@@ -32,7 +32,7 @@ class StudioProposeIn(BaseModel):
     intent: str = Field(min_length=1)
 
 
-class StudioPublishIn(BaseModel):
+class StudioRevisionIn(BaseModel):
     expected_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
@@ -149,16 +149,17 @@ def studio_update_draft(
 @router.post("/drafts/{draft_id}/submit-review", summary="Studio-Entwurf zur Vier-Augen-Prüfung geben")
 def studio_submit_review(
     draft_id: str,
+    body: StudioRevisionIn,
     tenant_id: str = Depends(get_tenant_id),
     user: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
-    return _transition(draft_id, tenant_id, _actor(user), "review")
+    return _transition(draft_id, tenant_id, _actor(user), "review", body.expected_revision)
 
 
 @router.post("/drafts/{draft_id}/publish", summary="Studio-Entwurf als published_temp freigeben")
 def studio_publish(
     draft_id: str,
-    body: StudioPublishIn,
+    body: StudioRevisionIn,
     tenant_id: str = Depends(get_tenant_id),
     user: dict = Depends(_publisher),
 ) -> dict[str, Any]:
@@ -185,16 +186,24 @@ def studio_publish(
 @router.post("/drafts/{draft_id}/retire", summary="Freigegebene Studio-Maske zurückziehen")
 def studio_retire(
     draft_id: str,
+    body: StudioRevisionIn,
     tenant_id: str = Depends(get_tenant_id),
     user: dict = Depends(_publisher),
 ) -> dict[str, Any]:
-    return _transition(draft_id, tenant_id, _actor(user), "retired")
+    return _transition(draft_id, tenant_id, _actor(user), "retired", body.expected_revision)
 
 
-def _transition(draft_id: str, tenant_id: str, actor: str, status: str) -> dict[str, Any]:
+def _transition(draft_id: str, tenant_id: str, actor: str, status: str, revision: str) -> dict[str, Any]:
+    item = get_draft(tenant_id, draft_id)
+    if item is None:
+        raise HTTPException(404, "draft_nicht_gefunden")
+    if item["revision"] != revision:
+        raise HTTPException(409, "entwurf_seit_anzeige_geaendert")
     try:
-        return set_status(tenant_id, draft_id, actor, status)
+        return set_status(tenant_id, draft_id, actor, status, expected_snapshot=item)
     except KeyError as error:
         raise HTTPException(status_code=404, detail="draft_nicht_gefunden") from error
     except PermissionError as error:
         raise HTTPException(status_code=403, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error

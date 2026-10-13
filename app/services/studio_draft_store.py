@@ -18,7 +18,7 @@ _DRAFTS: dict[str, dict[str, Any]] = {}
 _memory_lock = RLock()
 _prefer_memory = False
 _table_ok: bool | None = None
-_EDITABLE = frozenset({"draft", "review"})
+_EDITABLE = frozenset({"draft", "review", "retired"})
 _STATUSES = frozenset({"draft", "review", "published_temp", "retired"})
 
 
@@ -91,6 +91,12 @@ def _assert_snapshot(item: dict[str, Any], expected: dict[str, Any] | None) -> N
         raise ValueError("entwurf_seit_pruefung_geaendert")
 
 
+def _assert_transition(current: str, target: str) -> None:
+    allowed = {"draft": {"review"}, "review": {"published_temp"}, "published_temp": {"retired"}, "retired": set()}
+    if target not in allowed.get(current, set()):
+        raise ValueError(f"statuswechsel_{current}_nach_{target}_unzulässig")
+
+
 def set_status(
     tenant_id: str, draft_id: str, actor: str, status: str,
     *, expected_snapshot: dict[str, Any] | None = None,
@@ -104,6 +110,7 @@ def set_status(
         if item is None or item["tenant_id"] != tenant_id:
             raise KeyError(draft_id)
         _assert_snapshot(item, expected_snapshot)
+        _assert_transition(item["status"], status)
         _assert_four_eyes(item["updated_by"], actor, status)
         item = deepcopy(item)
         item["status"] = status
@@ -199,7 +206,7 @@ def _memory_save(
         "screen_id": definition.get("id"),
         "base_screen_id": definition.get("baseScreenId"),
         "definition": deepcopy(definition),
-        "status": existing["status"] if existing else "draft",
+        "status": "draft",
         "readiness": deepcopy(readiness) if readiness is not None else (existing or {}).get("readiness"),
         "created_by": existing["created_by"] if existing else actor,
         "updated_by": actor,
@@ -327,6 +334,7 @@ def _sql_save(
             session.add(row)
         row.screen_id = screen_id
         row.base_screen_id = definition.get("baseScreenId")
+        row.status = "draft"
         row.definition = deepcopy(definition)
         row.readiness = deepcopy(readiness) if readiness is not None else row.readiness
         row.updated_by = actor
@@ -357,6 +365,7 @@ def _sql_set_status(
         if row is None:
             raise KeyError(draft_id)
         _assert_snapshot(_row_to_dict(row), expected_snapshot)
+        _assert_transition(row.status, status)
         _assert_four_eyes(row.updated_by, actor, status)
         row.status = status
         if status != "review":
