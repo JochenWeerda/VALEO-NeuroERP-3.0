@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import logging
 from functools import wraps
-from typing import Callable
+from typing import Any, Callable
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +85,18 @@ def _expose_resolved_signature(fn: Callable, wrapper: Callable) -> None:
     )
 
 
+def _zu_json(wert: Any) -> Any:
+    """Was ``json`` nicht kennt: Pydantic-Modelle als ihre Felder, alles andere als Text.
+
+    Bis zum 13.10.2026 stand hier nur ``str``. Ein Handler, der Pydantic-Modelle zurueckgibt, legte damit
+    deren Textdarstellung in den Cache; der naechste gleiche Aufruf bekam eine Liste von Zeichenketten und
+    scheiterte an der Antwortpruefung (500) — so lange, bis der Eintrag ablief.
+    """
+    if hasattr(wert, "model_dump"):
+        return wert.model_dump(mode="json")
+    return str(wert)
+
+
 def cached_read_model(prefix: str, ttl: int = 30):
     """
     Dekorator für synchrone und asynchrone GET-Handler. Cached das Ergebnis in Redis.
@@ -126,7 +138,7 @@ def cached_read_model(prefix: str, ttl: int = 30):
                 result = await fn(*args, **kwargs)
                 if r is not None:
                     try:
-                        r.setex(key, ttl, json.dumps(result, default=str))
+                        r.setex(key, ttl, json.dumps(result, default=_zu_json))
                     except Exception as exc:
                         logger.debug("Cache-write fehlgeschlagen: %s", exc)
                 return result
@@ -149,7 +161,7 @@ def cached_read_model(prefix: str, ttl: int = 30):
             result = fn(*args, **kwargs)
             if r is not None:
                 try:
-                    r.setex(key, ttl, json.dumps(result, default=str))
+                    r.setex(key, ttl, json.dumps(result, default=_zu_json))
                 except Exception as exc:
                     logger.debug("Cache-write fehlgeschlagen: %s", exc)
             return result

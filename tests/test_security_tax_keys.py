@@ -62,6 +62,7 @@ def _tax_key_row():
         datetime.utcnow(),
         "8400",
         False,
+        None,  # expense_account
     )
 
 

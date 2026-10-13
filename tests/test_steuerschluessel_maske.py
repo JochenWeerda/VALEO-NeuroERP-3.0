@@ -98,6 +98,15 @@ def test_die_liste_zeigt_den_neuen_schluessel_sofort(haus):
     assert _liste(haus)["5"]["revenue_account"] == "8400"
 
 
+def test_die_liste_laesst_sich_zweimal_hintereinander_lesen(haus):
+    """Der zweite gleiche Aufruf kommt aus dem Cache. Bis zum 13.10.2026 lag dort die Textdarstellung der
+    Antwort, und der Aufruf endete mit 500 — bis der Eintrag nach einer Stunde ablief."""
+    erste = haus["client"].get("/tax-keys", params={"active_only": True})
+    zweite = haus["client"].get("/tax-keys", params={"active_only": True})
+    assert (erste.status_code, zweite.status_code) == (200, 200), zweite.text
+    assert zweite.json() == erste.json() and {k["code"] for k in zweite.json()} == {"2", "3", "8", "9"}
+
+
 def test_aendert_den_vorhandenen_schluessel_und_nennt_die_aenderung(haus):
     assert haus["client"].post(WEG, json=_eingabe()).json()["success"]
     ergebnis = haus["client"].post(WEG, json=_eingabe(steuersatz="16", revenue_account="8300")).json()
@@ -238,6 +247,21 @@ def test_ein_konto_der_falschen_art_wird_abgelehnt(haus, abweichend, meldung):
     assert ergebnis["success"] is False, ergebnis
     assert meldung in ergebnis["validationErrors"][0]["message"], ergebnis
     assert _zeilen(haus["mandant"], "5") == []
+
+
+def test_aufwandskonto_fuer_eingangsbelege_wird_vorgeschlagen_gespeichert_und_geprueft(haus):
+    """Das Gegenstueck zum Erloeskonto: Aus ihm bucht die Eingangsrechnung den Nettobetrag."""
+    v = _vorschlaege(haus, "19")["expense_account"]
+    assert v[0] == {"account_number": "3400", "account_name": "Wareneingang 19 % Vorsteuer", "grund": "passt zum Satz 19 %"}
+    assert "1576" not in {k["account_number"] for k in v}
+    assert haus["client"].post(WEG, json=_eingabe(
+        code="6", credit_account="", revenue_account="", debit_account="1576", expense_account="3400")).json()["success"]
+    assert _liste(haus)["6"]["expense_account"] == "3400"
+    # Die SKR03-Grundausstattung traegt es fuer die Vorsteuerschluessel schon.
+    assert (_liste(haus)["8"]["expense_account"], _liste(haus)["9"]["expense_account"]) == ("3300", "3400")
+    abgelehnt = haus["client"].post(WEG, json=_eingabe(code="6", expense_account="1576")).json()
+    assert abgelehnt["success"] is False
+    assert "Aufwandskonto 1576 (Abziehbare Vorsteuer 19 %) ist kein Aufwandskonto" in abgelehnt["validationErrors"][0]["message"]
 
 
 # --- Zugang und Ladefehler ----------------------------------------------------------------------

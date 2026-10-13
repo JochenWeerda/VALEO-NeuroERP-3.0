@@ -11,6 +11,25 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STEUERSCHLUESSEL-BELEGE-20261013 — Teil 2 (Eingangsrechnung) abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** Teil 2 abgeschlossen 2026-10-13; naechster Teil: DocFlow-Rechnung
+(`sales/invoice-editor`, die Rechnungsmaske der Navigation) und `/einkauf/rechnungseingaenge`.
+**Lieferung:** `app/services/finance_eingangsrechnung_buchung.py` — ein Buchungsweg fuer REST
+(`/finance/ap/invoices/{id}/post`) und Kernel (`PostAPInvoice`): Aufwand und Vorsteuer je Steuerschluessel im
+Soll, Kreditor brutto im Haben, Journal + OP + Beleg in einer Transaktion, ohne eindeutige Angabe 409 statt
+Buchung. Vorher: seitenverkehrt, Kontonummern 3300/6000 als Konto-ID, ein Vorsteuerkonto nach dem hoechsten
+Satz (notfalls 1576), „verbucht“ auch bei gescheiterter Buchung, OP-Anlage mit nicht vorhandener Spalte
+`op_betrag`. Neu: `tax_keys.expense_account` (Migration `steuerschluessel_aufwandskonto_20261013`, ein Head),
+Feld Aufwandskonto in der Maske `finance/steuerschluessel`. Tests 13 + 33.
+QA: `docs/quality-assurance/steuerschluessel-belege-20261013.md` (Teil 2, mit Altlasten-Pruefung).
+**Kern-Datei geaendert (alle Leser des Lese-Caches):** `app/core/read_model_cache.py` schrieb Pydantic-Antworten
+als Textdarstellung in den Cache; der zweite gleiche Aufruf endete mit 500. Korrigiert (`_zu_json`).
+**Verhaltensaenderung:** `richte_skr03_ein` legt Konten als eigene Konten des Mandanten an, auch wenn `system`
+die Nummer fuehrt. `calculate_invoice_totals` (AP) hat die neuen Parameter `db`, `tenant_id`.
+**Befunde, nicht behoben:** `POST /einkauf/rechnungseingaenge/{id}/verbuchen` setzt nur den Status, bucht nicht;
+`create_ap_invoice` ueberschreibt das Rechnungsdatum mit dem Tagesdatum; DocFlow bucht fest 8400/1776.
+
 ## TEST-DATABASE-WRITE-BOUNDARY-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** globale autouse-Tenantseed-Fixture verbindet sich ohne Test-DB-Freigabe mit der konfigurierten Entwicklungsdatenbank. **Ziel:** lokale DB-Fixtures nur auf ausdruecklich freigegebenem bestehendem Testpruefstand schreiben lassen; CI darf ausschliesslich seine bereitgestellte DB verwenden. **Dateibesitz:** tests/conftest.py nur Datenbankautorisierung vor Seed/require_db; neue fokussierte Grenzvertraege; eigene QA/Workboard. **Abnahme:** keine DB-Verbindung fuer unkonfigurierte Unit-Tests; effektive und deklarierte Test-URL stimmen ueberein, lokale Entwicklungsdatenbank bleibt gesperrt; CI-job-DB ohne neue Ressourcen erlaubt. Bestehender valeo_probe, keine Migration/Reset/Container/DB. Authfixtures und Produktionscode unveraendert.

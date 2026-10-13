@@ -135,12 +135,14 @@ class TestCalculateInvoiceTotals:
                 {"article": "Item B", "qty": 5, "price": 50.0, "vatRate": 7.0},
             ],
         )
-        result = calculate_invoice_totals(inv)
+        # Ohne Steuerschluessel bleibt die Vorsteuer offen: Ein Satz allein sagt nicht, auf welches Konto.
+        # (Mit Schluesseln rechnet der Server: tests/test_eingangsrechnung_steuerschluessel.py.)
+        result = calculate_invoice_totals(inv, None, "tenant-1")
         # 10*100 = 1000 + 5*50 = 250 -> net = 1250
         assert result.subtotalNet == 1250.0
-        # tax: 1000*0.19=190 + 250*0.07=17.5 -> 207.5
-        assert result.totalTax == 207.5
-        assert result.totalGross == 1457.5
+        assert result.totalTax == 0.0
+        assert result.totalGross == 1250.0
+        assert "Position 1, 2 hat keinen Steuerschlüssel" in result.steuerPruefgrund
 
     def test_zero_lines(self):
         from app.api.v1.endpoints.ap_invoices import calculate_invoice_totals
@@ -153,7 +155,7 @@ class TestCalculateInvoiceTotals:
             dueDate="2026-05-10",
             lines=[],
         )
-        result = calculate_invoice_totals(inv)
+        result = calculate_invoice_totals(inv, None, "tenant-1")
         assert result.subtotalNet == 0.0
         assert result.totalTax == 0.0
         assert result.totalGross == 0.0

@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-12
+last_reviewed: 2026-10-13
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -137,6 +137,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `finance_closing_service` | FIN-ABSCHLUSS-STUBS-001 — GoBD-taugliche Periodenabschluss-Fachlogik. |
 | `finance_datev_service` | DATEV-Export (DOM-FIN-004.5). |
 | `finance_dunning_service` | Mahnlauf & Mahnstufen-Eskalation (DOM-FIN-004.2). |
+| `finance_eingangsrechnung_buchung` | Eingangsrechnung buchen: Aufwand und Vorsteuer je Steuerschluessel im Soll, Kreditor brutto im Haben. |
 | `finance_mahnstufe_service` | DOM-FINANCE-004.4 — Mahnstufen-Eskalation-Trail Service (append-only). |
 | `finance_op_service` | Offene-Posten-Cockpit / OP-Aging (DOM-FIN-004). |
 | `finance_period_service` | Periodenabschluss & Storno-Konsistenz (DOM-FIN-004.4). |

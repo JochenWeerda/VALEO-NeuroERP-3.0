@@ -26,6 +26,8 @@ export type Steuerschluessel = {
   debit_account?: string | null
   credit_account?: string | null
   revenue_account?: string | null
+  /** Aufwandskonto fuer Eingangsbelege; leer = die Position der Rechnung nennt es. */
+  expense_account?: string | null
   active: boolean
   /** Wofuer der Schluessel automatisch bucht — oder warum nicht. Vom Server, aus der Regel der Buchung. */
   verwendung?: string | null
@@ -48,6 +50,7 @@ export type SteuerschluesselEingabe = {
   debit_account: string | null
   credit_account: string | null
   revenue_account: string | null
+  expense_account: string | null
   active: boolean
 }
 
@@ -59,7 +62,10 @@ export type Kontovorschlag = {
   grund?: string | null
 }
 
-export type Kontenvorschlaege = Record<'credit_account' | 'debit_account' | 'revenue_account', Kontovorschlag[]>
+export type Kontenvorschlaege = Record<
+  'credit_account' | 'debit_account' | 'revenue_account' | 'expense_account',
+  Kontovorschlag[]
+>
 
 /** Konten je Feld, die fachlich naechsten zuerst. Der Server reiht; gewaehlt wird hier nichts. */
 export async function ladeKontenvorschlaege(steuersatz: string): Promise<Kontenvorschlaege> {

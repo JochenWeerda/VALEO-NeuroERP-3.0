@@ -5,10 +5,8 @@ FIBU-AP-02: Eingangsrechnungen
 
 from fastapi import APIRouter, HTTPException, Depends, Query, Body
 from sqlalchemy.orm import Session
-from sqlalchemy import text
 from typing import List, Optional, Any
 from datetime import datetime, timedelta
-from decimal import Decimal
 import logging
 
 from app.core.database import get_db
@@ -26,10 +24,11 @@ from app.documents.router_helpers import get_repository, save_to_store, get_from
 from app.domains.shared.events import get_event_publisher
 from app.domains.shared.process_events import APInvoicePosted
 from app.infrastructure.eventbus.outbox import OutboxPublisher
-from app.finance.tax_resolver import resolve_partner_country, resolve_tax_key_accounts
+from app.finance.steuerschluessel import Steuerklaerung, vorsteuergruppen
+from app.services.finance_eingangsrechnung_buchung import buche_eingangsrechnung, positionen, summen
 
 logger = logging.getLogger(__name__)
-from app.api.v1.schemas.base import BaseSchema, StatusResponse, TypedObjectOut
+from app.api.v1.schemas.base import StatusResponse, TypedObjectOut
 from app.api.v1.schemas.ap_invoices_schemas import ApInvoicesOut
 from app.api.v1.schemas.mask_entity_contracts import FinanceApInvoiceOut, ap_invoice_mask_aliases
 from app.core import finance_periods
@@ -117,18 +116,30 @@ async def _store_ap_invoice_posted_event_in_outbox(
     await outbox.store_event(event, tenant_id=tenant_id)
 
 
-# Helper to calculate totals (same as AR invoices)
-def calculate_invoice_totals(invoice: SalesInvoice) -> SalesInvoice:
-    """Berechnet Summen für Eingangsrechnung."""
-    subtotal_net = 0.0
-    total_tax = 0.0
+def calculate_invoice_totals(invoice: SalesInvoice, db: Session, tenant_id: str) -> SalesInvoice:
+    """Netto, Vorsteuer und Brutto der Eingangsrechnung aus den Steuerschluesseln ihrer Positionen.
+
+    Bis zum 13.10.2026 rechnete der Weg mit dem Satz der Position (``vatRate``), den die Maske frei eingab.
+    Laesst sich die Vorsteuer nicht eindeutig bestimmen, bleibt sie offen: Netto aus den Positionen, Steuer 0,
+    und der Beleg traegt den Pruefgrund. Gebucht wird so eine Rechnung nicht.
+    """
+    daten = invoice.model_dump()
+    try:
+        gruppen = vorsteuergruppen(db, tenant_id, positionen(daten))
+    except Steuerklaerung as klaerung:
+        netto = sum(line.qty * (line.price or 0) for line in invoice.lines)
+        invoice.subtotalNet = round(netto, 2)
+        invoice.totalTax = 0.0
+        invoice.totalGross = invoice.subtotalNet
+        invoice.steuerPruefgrund = str(klaerung)
+        return invoice
+    netto, steuer, brutto = summen(gruppen)
+    saetze = {g.tax_code: g.satz for g in gruppen}
     for line in invoice.lines:
-        line_net = line.qty * (line.price or 0)
-        subtotal_net += line_net
-        total_tax += line_net * ((line.vatRate or 0) / 100)
-    invoice.subtotalNet = round(subtotal_net, 2)
-    invoice.totalTax = round(total_tax, 2)
-    invoice.totalGross = round(subtotal_net + total_tax, 2)
+        line.taxCode = str(line.taxCode).strip()
+        line.vatRate = float(saetze[line.taxCode])
+    invoice.subtotalNet, invoice.totalTax, invoice.totalGross = float(netto), float(steuer), float(brutto)
+    invoice.steuerPruefgrund = None
     return invoice
 
 
@@ -158,7 +169,7 @@ async def create_ap_invoice(
         doc.dueDate = (datetime.now() + timedelta(days=30)).isoformat()[:10]  # Default 30 days due
         doc.status = "ENTWURF"  # Initial status
 
-        doc = calculate_invoice_totals(doc)  # Calculate totals
+        doc = calculate_invoice_totals(doc, db, tenant_id)
         dq_result = evaluate_ap_invoice_datensatz(_build_ap_invoice_dq_datensatz(doc))
         if not dq_result.bestanden:
             raise HTTPException(status_code=422, detail=build_dq_error_detail("APRechnung", dq_result))
@@ -203,7 +214,7 @@ async def update_ap_invoice(
     _rechnung(repo, invoice_id, tenant_id)
 
     doc.number = invoice_id  # Ensure number matches ID
-    doc = calculate_invoice_totals(doc)  # Recalculate totals
+    doc = calculate_invoice_totals(doc, db, tenant_id)
     dq_result = evaluate_ap_invoice_datensatz(_build_ap_invoice_dq_datensatz(doc))
     if not dq_result.bestanden:
         raise HTTPException(status_code=422, detail=build_dq_error_detail("APRechnung", dq_result))
@@ -364,160 +375,41 @@ async def post_ap_invoice(
             detail=finance_periods.meldung(period, gesperrt),
         )
 
-    # Update status to posted
+    # Journal, offener Posten und Beleg in einer Transaktion. Scheitert etwas, bleibt die Rechnung freigegeben.
+    try:
+        je_id, gruppen = buche_eingangsrechnung(
+            db, tenant_id, invoice_id=invoice_id, invoice=invoice, posted_by=posted_by)
+    except Steuerklaerung as klaerung:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail=f"Eingangsrechnung {invoice.get('number', invoice_id)} nicht gebucht, bitte prüfen: {klaerung}",
+        ) from klaerung
+    except Exception:
+        db.rollback()
+        raise
+    netto, steuer, brutto = summen(gruppen)
+    invoice["subtotalNet"], invoice["totalTax"], invoice["totalGross"] = float(netto), float(steuer), float(brutto)
+    invoice["steuerPruefgrund"] = None
     invoice["status"] = "VERBUCHT"
     invoice["postedBy"] = posted_by
     invoice["postedAt"] = datetime.now().isoformat()
-
-    # Create GL journal entry
+    invoice["journalEntryId"] = je_id
+    log_fibu_audit(
+        db, tenant_id, "create", "journal_entry", je_id,
+        {"source": "ap_invoice", "invoice_id": invoice_id},
+        request=None,
+    )
+    result = repo.save_document("ap_invoice", invoice_id, invoice, commit=False) if repo is not None \
+        else save_to_store("ap_invoice", invoice_id, invoice, repo)
+    db.commit()
     try:
-        from app.api.v1.schemas.finance import JournalEntryCreate, JournalEntryLine
-        
-        # Extract invoice data
-        invoice_date = invoice.get("date", datetime.now().isoformat()[:10])
-        invoice_number = invoice.get("number", invoice_id)
-        total_gross = float(invoice.get("totalGross", 0))
-        subtotal_net = float(invoice.get("subtotalNet", 0))
-        total_tax = float(invoice.get("totalTax", 0))
-        tenant_id = invoice.get("tenantId", "system")
-        supplier_partner_id = invoice.get("customerId", "") or invoice.get("supplierId", "")
-        invoice_country = invoice.get("country") or resolve_partner_country(db, supplier_partner_id, "DE")
-        max_rate = Decimal("0.00")
-        line_rates = []
-        for line in (invoice.get("lines") or []):
-            try:
-                line_rates.append(Decimal(str(line.get("vatRate", 0) or 0)).quantize(Decimal("0.01")))
-            except Exception:
-                continue
-        if line_rates:
-            max_rate = max(line_rates)
-        tax_key_cfg = resolve_tax_key_accounts(db, tenant_id, max_rate, invoice_country)
-        input_tax_account = tax_key_cfg.get("debit_account") or "1576"
-        reverse_charge = bool(tax_key_cfg.get("reverse_charge"))
-        
-        # Determine period from invoice date
-        period = invoice_date[:7]  # YYYY-MM format
-        
-        # Create journal entry lines
-        from app.api.v1.schemas.finance import JournalEntryLine  # noqa: F811
-        
-        journal_lines = [
-            JournalEntryLine(
-                account_id=invoice.get("supplierAccountId", "3300"),  # Kreditorenkonto
-                debit_amount=Decimal(str(total_gross)),
-                credit_amount=Decimal("0.00"),
-                line_number=1,
-                description=f"Eingangsrechnung {invoice_number}"
-            ),
-            JournalEntryLine(
-                account_id=invoice.get("expenseAccountId", "6000"),  # Aufwandskonto
-                debit_amount=Decimal("0.00"),
-                credit_amount=Decimal(str(subtotal_net)),
-                line_number=2,
-                description="Aufwand"
-            )
-        ]
-        
-        # Add tax line if tax > 0
-        if total_tax > 0:
-            journal_lines.append(
-                JournalEntryLine(
-                    account_id=input_tax_account,
-                    debit_amount=Decimal("0.00"),
-                    credit_amount=Decimal(str(total_tax)),
-                    line_number=3,
-                    description="Vorsteuer (Reverse-Charge)" if reverse_charge else "Vorsteuer"
-                )
-            )
-        
-        # Create journal entry
-        journal_entry_data = JournalEntryCreate(
-            date=invoice_date,
-            period=period,
-            description=f"Eingangsrechnung {invoice_number}",
-            lines=journal_lines,
-            document_type="AP_INVOICE",
-            document_id=invoice_id,
-            tenant_id=tenant_id
+        await _store_ap_invoice_posted_event_in_outbox(
+            db, tenant_id=tenant_id, invoice_id=invoice_id, posted_by=posted_by, journal_entry_id=je_id,
         )
-        
-        # Create journal entry directly via repository
-        from app.infrastructure.repositories import JournalEntryRepository
-        from app.core.dependency_container import container
-        
-        entry_repo = container.resolve(JournalEntryRepository)
-        
-        # Convert to dict for repository
-        entry_dict = journal_entry_data.model_dump()
-        entry_dict['total_debit'] = total_gross
-        entry_dict['total_credit'] = subtotal_net + total_tax
-        
-        journal_entry = await entry_repo.create(entry_dict, tenant_id)
-        je_id = str(journal_entry.id) if hasattr(journal_entry, 'id') else str(journal_entry.get('id', ''))
-        log_fibu_audit(
-            db, tenant_id, "create", "journal_entry", je_id,
-            {"source": "ap_invoice", "invoice_id": invoice_id},
-            request=None,
-        )
-        # Store journal entry ID in invoice
-        invoice["journalEntryId"] = je_id
-        logger.info(f"Created GL journal entry {invoice.get('journalEntryId')} for AP invoice {invoice_id}")
-        
-    except Exception as e:
-        logger.error(f"Could not create GL journal entry: {e}", exc_info=True)
-        # Continue without GL entry - invoice is still posted
-        invoice["journalEntryError"] = str(e)
-
-    # Create open item (OP) for AP invoice
-    try:
-        op_insert = text("""
-            INSERT INTO domain_erp.offene_posten
-            (id, tenant_id, konto_typ, op_status, rechnungsnr, rechnungsdatum, datum, faelligkeit, op_betrag, betrag, offen,
-             lieferant_id, lieferant_name, waehrung, zahlbar, created_at, updated_at)
-            VALUES (:id, :tenant_id, 'kreditoren', 'offen', :rechnungsnr, :rechnungsdatum, :datum, :faelligkeit, :op_betrag, :betrag, :offen,
-                    :lieferant_id, :lieferant_name, :waehrung, :zahlbar, NOW(), NOW())
-            ON CONFLICT (id) DO UPDATE SET
-                offen = EXCLUDED.offen,
-                op_status = EXCLUDED.op_status,
-                updated_at = NOW()
-        """)
-        
-        db.execute(op_insert, {
-            "id": f"OP-AP-{invoice_id}",
-            "tenant_id": invoice.get("tenantId", "system"),
-            "rechnungsnr": invoice.get("number", invoice_id),
-            "rechnungsdatum": invoice.get("date", datetime.now().isoformat()[:10]),
-            "datum": invoice.get("date", datetime.now().isoformat()[:10]),
-            "faelligkeit": invoice.get("dueDate", (datetime.now() + timedelta(days=30)).isoformat()[:10]),
-            "op_betrag": invoice.get("totalGross", 0),
-            "betrag": invoice.get("totalGross", 0),
-            "offen": invoice.get("totalGross", 0),
-            "lieferant_id": invoice.get("customerId", "") or invoice.get("supplierId", ""),
-            "lieferant_name": invoice.get("supplierName", "") or invoice.get("customerName", ""),
-            "waehrung": invoice.get("currency", "EUR"),
-            "zahlbar": True
-        })
-        db.commit()
-        logger.info(f"Created open item for AP invoice {invoice_id}")
-        
-    except Exception as e:
-        logger.warning(f"Could not create open item (table may not exist): {e}")
+    except Exception as exc:  # noqa: BLE001 — das Ereignis ist Benachrichtigung; die Buchung steht
         db.rollback()
-        # Continue without OP for now
-
-    result = save_to_store("ap_invoice", invoice_id, invoice, repo)
-    journal_entry_id = invoice.get("journalEntryId")
-    if journal_entry_id:
-        try:
-            await _store_ap_invoice_posted_event_in_outbox(
-                db,
-                tenant_id=invoice.get("tenantId", "system"),
-                invoice_id=invoice_id,
-                posted_by=posted_by,
-                journal_entry_id=journal_entry_id,
-            )
-        except Exception as exc:
-            logger.warning("Could not store AP invoice posted outbox event: %s", exc)
+        logger.warning("Could not store AP invoice posted outbox event: %s", exc)
     return {"status": "ok", "message": "AP Invoice posted", "data": result}
 
 

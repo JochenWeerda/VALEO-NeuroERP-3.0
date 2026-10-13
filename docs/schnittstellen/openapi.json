@@ -157485,6 +157485,19 @@
             "description": "Debit account for tax",
             "title": "Debit Account"
           },
+          "expense_account": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Aufwandskonto fuer Eingangsbelege; leer = die Position nennt es",
+            "title": "Expense Account"
+          },
           "export": {
             "default": false,
             "description": "Export outside EU",
@@ -157650,6 +157663,17 @@
               }
             ],
             "title": "Debit Account"
+          },
+          "expense_account": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expense Account"
           },
           "export": {
             "title": "Export",
@@ -157850,6 +157874,18 @@
               }
             ],
             "title": "Debit Account"
+          },
+          "expense_account": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expense Account"
           },
           "export": {
             "anyOf": [

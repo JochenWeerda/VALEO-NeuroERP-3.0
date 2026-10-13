@@ -58,6 +58,7 @@ beforeEach(() => {
       { account_number: '8400', account_name: 'Erlöse 19 % USt', grund: null },
       { account_number: '8300', account_name: 'Erlöse 7 % USt', grund: null },
     ],
+    expense_account: [{ account_number: '3400', account_name: 'Wareneingang 19 % Vorsteuer', grund: 'nach Bezeichnung' }],
   }))
 })
 
@@ -70,6 +71,8 @@ describe('Steuerschlüssel', () => {
     expect(screen.getByLabelText(/^Umsatzsteuerkonto/)).toHaveValue('')
     expect(screen.getByLabelText(/^Erlöskonto/)).toHaveValue('')
     expect(screen.getByLabelText(/^Vorsteuerkonto/)).toHaveValue('')
+    // Das Gegenstueck zum Erloeskonto fuer Eingangsbelege.
+    expect(screen.getByLabelText(/^Aufwandskonto/)).toHaveValue('')
     expect(screen.getByLabelText(/^Gültig von/)).toHaveValue('')
     expect(screen.getByLabelText(/§ 24 UStG/)).toBeInTheDocument()
   })
@@ -137,7 +140,7 @@ describe('Steuerschlüssel', () => {
     const [daten, auftrag] = mocks.speichern.mock.calls[0]
     expect(daten).toMatchObject({
       code: '5', bezeichnung: 'Steuerfrei', steuersatz: '0', revenue_account: '8400', credit_account: null,
-      debit_account: null, par_24_ustg: false, reverse_charge: false, active: true, gueltig_von: '2021-01-01',
+      debit_account: null, expense_account: null, par_24_ustg: false, reverse_charge: false, active: true, gueltig_von: '2021-01-01',
     })
     expect(auftrag).toMatch(/^steuerschluessel-speichern-/)
     await waitFor(() => expect(mocks.toast.success).toHaveBeenCalledWith('Steuerschlüssel gespeichert', expect.anything()))

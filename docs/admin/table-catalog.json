@@ -21904,7 +21904,6 @@
             "sales/delivery-note"
           ],
           "written_by": [
-            "app/api/v1/endpoints/ap_invoices.py",
             "app/api/v1/endpoints/collective_documents.py",
             "app/api/v1/endpoints/credit_debit_memos.py",
             "app/api/v1/endpoints/dauerauftraege.py",
@@ -21922,7 +21921,7 @@
             "app/api/v1/endpoints/strecke.py",
             "app/api/v1/endpoints/zinsabrechnung.py",
             "app/services/agrar_settlement_service.py",
-            "app/services/ap_invoice_kernel_posting.py",
+            "app/services/eingangsrechnung_buchung.py",
             "app/services/einkauf_compat_service.py",
             "app/services/finance_clearing_service.py",
             "app/services/finance_dunning_service.py",
@@ -22665,6 +22664,11 @@
               "name": "par_24_ustg",
               "nullable": false,
               "type": "boolean"
+            },
+            {
+              "name": "expense_account",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
