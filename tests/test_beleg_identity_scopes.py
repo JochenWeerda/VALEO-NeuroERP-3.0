@@ -27,8 +27,8 @@ def test_document_scopes_exist_and_are_default_only_on_erp_clients(file):
 
 
 def test_scopes_use_the_existing_authorization_tuples():
-    assert DOCUMENT_SCOPE_ROLES["belege:read"] is BELEG_READ_ROLES
-    assert DOCUMENT_SCOPE_ROLES["belege:write"] is BELEG_WRITE_ROLES
+    assert set(BELEG_READ_ROLES) <= set(DOCUMENT_SCOPE_ROLES["belege:read"])
+    assert set(BELEG_WRITE_ROLES) <= set(DOCUMENT_SCOPE_ROLES["belege:write"])
     assert set(BELEG_WRITE_ROLES) <= set(BELEG_READ_ROLES)
     assert "CRM_LESEN" in BELEG_READ_ROLES
     assert "CRM_LESEN" not in BELEG_WRITE_ROLES
@@ -89,3 +89,16 @@ def test_signed_token_reaches_real_mcp_document_dispatch(probe,scopes,expected):
         assert response.json()["success"] is True
         assert len(response.json()["belegarten"]) == 9
     database.execute.assert_not_called()
+
+
+
+def test_scope_projection_matches_all_existing_document_rights():
+    from app.auth.beleg_roles import rollen_fuer
+    from app.core.belegvertrag import BELEGARTEN
+    read = set().union(*(rollen_fuer("lesen", art) for art in BELEGARTEN))
+    write = set().union(*(rollen_fuer(right, art) for art in BELEGARTEN
+                         for right in ("bearbeiten","ausstellen","buchen","stornieren")))
+    assert set(DOCUMENT_SCOPE_ROLES["belege:read"]) == read
+    assert set(DOCUMENT_SCOPE_ROLES["belege:write"]) == write
+    assert "LAGER_LESEN" in read and "LAGER_LESEN" not in write
+    assert "LAGER_BEARBEITEN" in read & write
