@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## BELEG-SCOPE-PARITY-20261013 — reserviert, Codex
+## BELEG-SCOPE-PARITY-20261013 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Token-Scopes aus bestehenden Belegrechten ableiten, Lagerrollen konsistent projizieren, vorhandene LAGER_BEARBEITEN im Fachrollenkatalog nachziehen und positiven Browserbelegabruf dokumentieren. **Dateibesitz:** scripts/keycloak_document_scopes.py; tests/test_beleg_identity_scopes.py; config/keycloak/fachrollen.json nur Generator; docs/quality-assurance/beleg-identity-scopes-20261013.md nur Nachtrag. **Abnahme:** Kein zweites Rechtesystem, Scope-/Belegrollen-Paritaet, Katalog-Drift gruen, bestehende Provisionierung und positiver echter Belegabruf. **Risiken:** Keine zusaetzliche Rollenvergabe an Testkennung; Preis-/Lager-Browserabnahme und MCP-Writes bleiben Folgearbeit.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Token-Scopes aus bestehenden Belegrechten ableiten, Lagerrollen konsistent projizieren, vorhandene LAGER_BEARBEITEN im Fachrollenkatalog nachziehen und positiven Browserbelegabruf dokumentieren. **Dateibesitz:** scripts/keycloak_document_scopes.py; tests/test_beleg_identity_scopes.py; config/keycloak/fachrollen.json nur Generator; docs/quality-assurance/beleg-identity-scopes-20261013.md nur Nachtrag. **Abnahme:** Kein zweites Rechtesystem, Scope-/Belegrollen-Paritaet, Katalog-Drift gruen, bestehende Provisionierung und positiver echter Belegabruf. **Risiken:** Keine zusaetzliche Rollenvergabe an Testkennung; Preis-/Lager-Browserabnahme und MCP-Writes bleiben Folgearbeit.
+
+**Lieferung:** Scope-Projektion aus kanonischen Belegrechten inkl. Lager; Fachrollenkatalog gruen (35). Zehn echte Provider-Evaluationen, temporaere Pruefidentitaeten geloescht. Freigegebene Browserkennung im Referenzmandanten neu angemeldet; acht sichtbare Einkaufsbelege, positiver Einzelbelegabruf 200. QA: beleg-identity-scopes-20261013.md (Nachtrag). Kein MCP-Write aktiviert; BELEG-020 Teil 2 und Lager-Preis-Browserabnahme offen.
 
 ## BELEG-BROWSER-RUNTIME-20261013 — abgeschlossen, Codex
 

@@ -109,3 +109,38 @@ MCP-Schreibsperren wurden nicht aufgehoben.
 Screenshot ohne Kennwort/Token: artifacts/beleg-relogin-granted-20261013.png
 (lokales Arbeitsartefakt). Der geteilte Git-Index war weiterhin gesperrt; keine
 fremde Sperre geloescht und keine fremden staged Aenderungen zurueckgesetzt.
+
+## Kanonische Rollenparitaet und positiver Belegabruf (Nachtrag 2026-10-13)
+
+Aktueller Projektionsstand: DOCUMENT_SCOPE_ROLES wird aus rollen_fuer in
+app/auth/beleg_roles.py ueber die vorhandenen Belegarten erzeugt. Diese Stelle ist
+nach BELEG-012 die vorhandene fachliche Rechteentscheidung; die Token-Projektion
+pflegt keine parallele Rollenliste. Lesen entspricht der Vereinigung der Leserechte,
+Write der Vereinigung von bearbeiten/ausstellen/buchen/stornieren. Konkrete Belegart,
+Preisrecht und Aktion werden weiterhin am Domain-Weg geprueft. Die fruehere direkte
+finance_roles-Tupelprojektion oben beschreibt die Anfangslieferung.
+
+LAGER_LESEN bekommt read, keinen write-Scope. LAGER_BEARBEITEN bekommt read/write,
+wie vom vorhandenen Fachcode fuer Lagerbelege vorgesehen. Die bereits im Fachcode
+vorhandene Rolle LAGER_BEARBEITEN fehlte im generierten Katalog; nachgezogen,
+check_fachrollen --check gruen (35 Rollen). Lokal nur diese fehlende Realm-Rolle
+angelegt und die Scope-Rollenbindungen erweitert, keine zusaetzlichen Rollen an die
+Browser-Testkennung vergeben. Zehn echte Provider-Evaluationen fuer beide ERP-Clients
+(ohne Bereichsrolle, Einkaufsleser/-bearbeiter, Lagerleser/-bearbeiter) bestanden;
+fuenf temporaere Provider-Identitaeten danach geloescht.
+
+Der Auftraggeber hat die vorhandene synthetische Browser-Testkennung ausdruecklich
+an den Sichtpruefungsmandanten 00000000-0000-0000-0000-000000000051 binden lassen.
+Nur dieses administrativ geschuetzte Attribut geaendert; bestehende freigegebene
+EINKAUF_BEARBEITEN-Rolle und Zugangsdaten erhalten. Anschliessend regulaer ab- und neu
+angemeldet: neuer Token bindet den genehmigten Mandanten. beleg.suchen antwortet
+HTTP 200 mit acht sichtbaren Einkaufsbelegen, beleg.lesen fuer einen Treffer
+HTTP 200/success. Damit ist der vorher offene positive Einzelbelegabruf geschlossen.
+Keine Geschaeftsdaten angelegt oder gebucht. Screenshot der angemeldeten Testkennung:
+artifacts/beleg-reference-login-20261013.png (lokal, kein Token/Kennwort).
+
+Die Sichtpruefung der neuen Belegmasken (BELEG-020 Teil 2), die Lagerkennung ohne
+Preise, konkrete starke Freigaben sowie schreibende MCP-Capabilities bleiben offen.
+Die Git-Sperre wird von anderer Arbeit weiter aktualisiert; kein Lock entfernt.
+
+25 gezielte Identitaets-/Provider-/Katalogtests bestanden (eine vorhandene TestClient-Warnung).
