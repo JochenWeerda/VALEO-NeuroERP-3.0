@@ -12796,6 +12796,32 @@
             "title": "Skontofaehig",
             "type": "boolean"
           },
+          "steuerschluessel_einkauf": {
+            "anyOf": [
+              {
+                "maxLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Steuerschlüssel für Eingangsbelege (tax_keys.code des Mandanten)",
+            "title": "Steuerschluessel Einkauf"
+          },
+          "steuerschluessel_verkauf": {
+            "anyOf": [
+              {
+                "maxLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Steuerschlüssel für Verkaufsbelege (tax_keys.code des Mandanten)",
+            "title": "Steuerschluessel Verkauf"
+          },
           "subcategory": {
             "anyOf": [
               {
@@ -13741,6 +13767,32 @@
             "description": "Discountable (skonto)",
             "title": "Skontofaehig",
             "type": "boolean"
+          },
+          "steuerschluessel_einkauf": {
+            "anyOf": [
+              {
+                "maxLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Steuerschlüssel für Eingangsbelege (tax_keys.code des Mandanten)",
+            "title": "Steuerschluessel Einkauf"
+          },
+          "steuerschluessel_verkauf": {
+            "anyOf": [
+              {
+                "maxLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Steuerschlüssel für Verkaufsbelege (tax_keys.code des Mandanten)",
+            "title": "Steuerschluessel Verkauf"
           },
           "subcategory": {
             "anyOf": [
@@ -14940,6 +14992,32 @@
             ],
             "description": "Kurzbezeichnung (Short description)",
             "title": "Short Description"
+          },
+          "steuerschluessel_einkauf": {
+            "anyOf": [
+              {
+                "maxLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Steuerschlüssel für Eingangsbelege (tax_keys.code des Mandanten)",
+            "title": "Steuerschluessel Einkauf"
+          },
+          "steuerschluessel_verkauf": {
+            "anyOf": [
+              {
+                "maxLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Steuerschlüssel für Verkaufsbelege (tax_keys.code des Mandanten)",
+            "title": "Steuerschluessel Verkauf"
           },
           "subcategory": {
             "anyOf": [
@@ -51234,6 +51312,17 @@
               }
             ],
             "title": "Sdsreference"
+          },
+          "taxCode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taxcode"
           },
           "vatRate": {
             "anyOf": [
@@ -141865,6 +141954,17 @@
             "title": "Status",
             "type": "string"
           },
+          "steuerPruefgrund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steuerpruefgrund"
+          },
           "subtotalNet": {
             "default": 0.0,
             "title": "Subtotalnet",
@@ -145681,6 +145781,40 @@
           }
         },
         "title": "SchlagUpdate",
+        "type": "object"
+      },
+      "Schluesselwahl": {
+        "description": "Ein Steuerschluessel, wie ihn eine Maske zur Auswahl anbietet.",
+        "properties": {
+          "bezeichnung": {
+            "title": "Bezeichnung",
+            "type": "string"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "par_24_ustg": {
+            "default": false,
+            "title": "Par 24 Ustg",
+            "type": "boolean"
+          },
+          "reverse_charge": {
+            "default": false,
+            "title": "Reverse Charge",
+            "type": "boolean"
+          },
+          "steuersatz": {
+            "title": "Steuersatz",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "bezeichnung",
+          "steuersatz"
+        ],
+        "title": "Schluesselwahl",
         "type": "object"
       },
       "SchnellerfassungBuchenPayload": {
@@ -302189,6 +302323,63 @@
           }
         ],
         "summary": "Steuerschlüssel anlegen oder ändern (Masken-CommandEndpoint)",
+        "tags": [
+          "finance",
+          "tax",
+          "finance",
+          "tax"
+        ]
+      }
+    },
+    "/api/v1/finance/tax-keys/auswahl": {
+      "get": {
+        "description": "Die heute gültigen Steuerschlüssel des Mandanten für die Richtung. Die eine Auswahl aller Masken.",
+        "operationId": "list_schluessel_auswahl_api_v1_finance_tax_keys_auswahl_get",
+        "parameters": [
+          {
+            "description": "verkauf oder einkauf",
+            "in": "query",
+            "name": "richtung",
+            "required": true,
+            "schema": {
+              "description": "verkauf oder einkauf",
+              "title": "Richtung",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Schluesselwahl"
+                  },
+                  "title": "Response List Schluessel Auswahl Api V1 Finance Tax Keys Auswahl Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Steuerschlüssel zur Auswahl in Belegen und Stammdaten (Verkauf oder Einkauf)",
         "tags": [
           "finance",
           "tax",

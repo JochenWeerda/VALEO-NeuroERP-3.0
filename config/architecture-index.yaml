@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-10-12
+# Architecture Index — generiert 2026-10-13
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-12T20:28:01Z'
+generated_at: '2026-10-13T07:11:48Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1690,6 +1690,7 @@ domains:
     - /admin/data-quality
     - /admin/externe-gates
     - /admin/gap-pipeline
+    - /admin/identity-budgets
     - /admin/integrationen-quarantaene
     - /admin/monitoring/alerts
     - /admin/monitoring/regeln
@@ -1705,6 +1706,7 @@ domains:
     - /admin/setup
     - /admin/setup/dms-integration
     - /admin/terminologie
+    - /admin/token-consumption
     - /admin/voice-channel
     - /admin/vordruck-editor
     - /admin/webhooks
@@ -2077,8 +2079,8 @@ domains:
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 939
-  frontend_routes_mapped: 939
+  frontend_routes_total: 941
+  frontend_routes_mapped: 941
   backend_services_total: 281
   backend_services_mapped: 280
   backend_endpoints_total: 455

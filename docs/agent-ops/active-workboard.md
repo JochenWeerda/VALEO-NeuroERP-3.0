@@ -11,6 +11,25 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STEUERSCHLUESSEL-BELEGE-20261013 — Teil 1 abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** Teil 1 abgeschlossen 2026-10-13; Teil 2 ff. offen (Tabelle im QA-Dokument).
+Auftrag: alle Masken mit Prozentsatz auf einheitlich Steuerschluessel.
+**Lieferung Teil 1:** eine Auswahl fuer alle Masken (`GET /finance/tax-keys/auswahl?richtung=verkauf|einkauf`,
+`components/finance/SteuerschluesselSelect.tsx`); Artikelstamm mit `steuerschluessel_verkauf`/`_einkauf`
+(Migration `artikel_steuerschluessel_20261013`, ein Head; `mehrwertsteuer_prozent` ist Abbild des
+Verkaufsschluessels; Bestand ueber `scripts/artikel_steuerschluessel_zuordnen.py`, nicht ausgefuehrt);
+Ausgangsrechnung `/finance/invoices`: Position traegt `taxCode`, Server rechnet die Summen, Buchung je
+Steuerschluessel auf dessen Erloes- und Steuerkonto, ohne eindeutige Steuer 409 statt Buchung; Entwurf traegt
+`steuerPruefgrund`. Tests 10 + 11, Vitest 8. QA: `docs/quality-assurance/steuerschluessel-belege-20261013.md`.
+**Verhaltensaenderung fuer andere Aufrufer:** `POST/PUT /finance/invoices` bucht nur noch mit `taxCode` je
+Position; `vatRate` allein und Rechnungen ohne Positionen werden nur als Entwurf gespeichert.
+`SalesPostingService.post_ausgangsrechnung_with_op` hat den neuen Parameter `steuergruppen`; ohne ihn gilt der
+alte feste Weg (8400/1776) — den nutzt nur noch DocFlow.
+**Befunde, nicht behoben:** DocFlow bucht fest 8400/1776 (`document_items` ohne Schluessel);
+`FinanceTransactionService` bebucht nur Konten des Mandanten, Steuerschluessel-Maske und Gutschrift auch den
+gemeinsamen Rahmen `system`; Kasse `pos/terminal` weist im Bon immer 19 % aus.
+
 ## LOGIN-PRIVATE-LAYOUT-20261013 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** privater ERP-Layoutzweig umgeht ProtectedRoute bei leerem/falschem VITE_AUTH_REQUIRED. **Ziel:** Anmeldung fuer private ERP-Masken stets durchsetzen. **Dateibesitz:** app/routing/route-layouts.tsx nur AppRouteLayout; neue React-Vertraege und eigene QA/Workboard. Keine Portallayout-, Masken-, Rollen- oder Stylingaenderung. **Abnahme:** wahr/falsch/fehlendes Entwicklungsflag erlauben keinen privaten Layout-Bypass; OIDC-Callback bleibt oeffentlich, vorhandene Rollen-/Mandantengrenze erhalten; TypeScript und Routingvertraege gruen. Keine DB/Container/Reset oder persoenlichen Kennungen.

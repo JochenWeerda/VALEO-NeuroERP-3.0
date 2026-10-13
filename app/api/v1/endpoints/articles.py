@@ -17,6 +17,7 @@ from ....infrastructure.models import BusinessPartnerDiscountItem, BusinessPartn
 from ....infrastructure.models import StockMovement
 from ..schemas.base import PaginatedResponse
 from ..schemas.inventory import Article, ArticleCreate, ArticleUpdate
+from app.finance.steuerschluessel import Steuerklaerung, satz_des_schluessels
 from app.services.inventory_movement_direction import direction_sql
 from app.services.articles_service import (
     resolve_article_tenant as _resolve_article_tenant,
@@ -118,6 +119,32 @@ async def get_article(
     return _to_article_schema(article)
 
 
+def _steuerschluessel_pruefen(db: Session, tenant_id: str, werte: dict) -> None:
+    """Die Steuerschlüssel des Artikels müssen dem Mandanten gehören und zur Richtung passen.
+
+    Der Satz in ``mehrwertsteuer_prozent`` ist nur noch das Abbild des Verkaufsschlüssels: Mit einem
+    Schlüssel wird er daraus gesetzt, ein abweichend mitgeschickter Satz wird abgelehnt.
+    """
+    for feld, richtung in (("steuerschluessel_verkauf", "verkauf"), ("steuerschluessel_einkauf", "einkauf")):
+        if feld not in werte:
+            continue
+        werte[feld] = (werte[feld] or "").strip() or None
+        if werte[feld] is None:
+            continue
+        try:
+            satz = satz_des_schluessels(db, tenant_id, werte[feld], richtung)
+        except Steuerklaerung as klaerung:
+            raise HTTPException(status_code=422, detail=str(klaerung)) from klaerung
+        if richtung == "verkauf":
+            angegeben = werte.get("mehrwertsteuer_prozent")
+            if angegeben is not None and angegeben != satz:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Steuersatz {angegeben} % widerspricht dem Steuerschlüssel {werte[feld]} ({satz.normalize():f} %).",
+                )
+            werte["mehrwertsteuer_prozent"] = satz
+
+
 @router.post("/", response_model=Article, status_code=status.HTTP_201_CREATED, summary="Article anlegen")
 async def create_article(
     article_data: ArticleCreate,
@@ -142,6 +169,13 @@ async def create_article(
     if duplicate:
         raise HTTPException(status_code=409, detail="Article number already exists")
 
+    steuer = {
+        "steuerschluessel_verkauf": article_data.steuerschluessel_verkauf,
+        "steuerschluessel_einkauf": article_data.steuerschluessel_einkauf,
+        "mehrwertsteuer_prozent": article_data.mehrwertsteuer_prozent,
+    }
+    _steuerschluessel_pruefen(db, effective_tenant, steuer)
+
     article = ArticleModel(
         tenant_id=effective_tenant,
         article_number=article_data.article_number,
@@ -156,7 +190,9 @@ async def create_article(
         naehrwertangaben=article_data.naehrwertangaben,
         mhd_erforderlich=article_data.mhd_erforderlich,
         lagerartikel=article_data.lagerartikel,
-        mehrwertsteuer_prozent=article_data.mehrwertsteuer_prozent,
+        mehrwertsteuer_prozent=steuer["mehrwertsteuer_prozent"],
+        steuerschluessel_verkauf=steuer["steuerschluessel_verkauf"],
+        steuerschluessel_einkauf=steuer["steuerschluessel_einkauf"],
         warengruppe=article_data.warengruppe,
         gefahrgutklasse=article_data.gefahrgutklasse,
         gefahrgut_un_nummer=article_data.gefahrgut_un_nummer,
@@ -270,6 +306,12 @@ async def update_article(
     dq_result = evaluate_article_datensatz(_build_article_dq_datensatz(effective_payload))
     if not dq_result.bestanden:
         raise HTTPException(status_code=422, detail=build_dq_error_detail("Artikel", dq_result))
+
+    # Ein neuer Satz ohne neuen Schluessel wird gegen den hinterlegten Verkaufsschluessel geprueft.
+    if "mehrwertsteuer_prozent" in payload and "steuerschluessel_verkauf" not in payload \
+            and getattr(article, "steuerschluessel_verkauf", None):
+        payload["steuerschluessel_verkauf"] = article.steuerschluessel_verkauf
+    _steuerschluessel_pruefen(db, effective_tenant, payload)
 
     for key, value in payload.items():
         setattr(article, key, value)

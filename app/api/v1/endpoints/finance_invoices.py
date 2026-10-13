@@ -5,6 +5,7 @@ Spezifische Endpoints für Finance-Modul Invoices
 
 from app.auth.finance_roles import beleg_read, beleg_write, finance_admin
 from datetime import datetime, timedelta
+from decimal import Decimal
 import logging
 from typing import Optional
 
@@ -20,6 +21,7 @@ from app.services.finance_transaction_service import FinanceTransactionService
 from app.core.fibu_audit import log_fibu_audit
 from app.core.gobd_artifact import register_artifact, sha256_hex
 from app.core.tenant import get_tenant_id
+from app.finance.steuerschluessel import Steuergruppe, Steuerklaerung, steuergruppen
 from app.documents.models import SalesInvoice
 from app.documents.router_helpers import (
     delete_from_store,
@@ -79,10 +81,52 @@ def _resolve_customer_name(db: Session, customer_id: str, tenant_id: str | None 
     return customer_name
 
 
+def _steuer(db: Session, tenant_id: str, invoice: SalesInvoice, *, wird_gebucht: bool) -> Optional[list[Steuergruppe]]:
+    """Netto, Umsatzsteuer und Brutto der Rechnung aus den Steuerschluesseln ihrer Positionen.
+
+    Bis zum 13.10.2026 kamen die Summen aus der Anfrage, und wo sie fehlten, rechnete der Server mit
+    ``vatRate or 0.19`` geteilt durch 100 — also mit 0,19 Promille. Gebucht wurde jede Steuer auf 1776 und
+    jeder Erloes auf 8400, gleich welcher Satz.
+
+    Jetzt: Die Position nennt ihren Steuerschluessel, die Summen rechnet der Server. Laesst sich die Steuer
+    nicht eindeutig bestimmen, wird eine Rechnung nicht gebucht (409 mit Pruefgrund). Ein Entwurf wird
+    gespeichert und traegt den Pruefgrund; seine Steuer bleibt offen.
+    """
+    zeilen = [
+        (nr, line.taxCode, line.vatRate, Decimal(str(line.qty)) * Decimal(str(line.price or 0)))
+        for nr, line in enumerate(invoice.lines, 1)
+    ]
+    try:
+        gruppen = steuergruppen(db, tenant_id, zeilen)
+    except Steuerklaerung as klaerung:
+        if wird_gebucht:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Rechnung {invoice.number} nicht gebucht, bitte prüfen: {klaerung}",
+            ) from klaerung
+        invoice.steuerPruefgrund = str(klaerung)
+        if invoice.lines:
+            # Netto steht fest, die Steuer nicht: kein Brutto unterstellen, das es so nicht gibt.
+            invoice.subtotalNet = float(sum(z[3] for z in zeilen))
+            invoice.totalTax = 0.0
+            invoice.totalGross = invoice.subtotalNet
+        return None
+    saetze = {g.tax_code: g.satz for g in gruppen}
+    for line in invoice.lines:
+        line.taxCode = str(line.taxCode).strip()
+        line.vatRate = float(saetze[line.taxCode])
+    invoice.steuerPruefgrund = None
+    invoice.subtotalNet = float(sum(g.netto for g in gruppen))
+    invoice.totalTax = float(sum(g.steuer for g in gruppen))
+    invoice.totalGross = invoice.subtotalNet + invoice.totalTax
+    return gruppen
+
+
 def _post_sales_invoice_financials(
     db: Session,
     invoice: SalesInvoice,
     tenant_id: str,
+    gruppen: Optional[list[Steuergruppe]] = None,
 ) -> dict[str, str]:
     """Buchung + offener Posten in der Transaktion des Aufrufers (kein eigener Commit)."""
     return SalesPostingService(db, tenant_id, commit=False).post_ausgangsrechnung_with_op(
@@ -93,6 +137,7 @@ def _post_sales_invoice_financials(
         tax_amount=invoice.totalTax,
         gross_amount=invoice.totalGross,
         due_date=invoice.dueDate,
+        steuergruppen=gruppen,
     )
 
 
@@ -115,17 +160,7 @@ async def create_invoice(
             assert_customer_allowed_for_invoice(db, tenant_id, str(invoice.customerId))
         repo = get_repository(db)
 
-        if invoice.subtotalNet == 0.0 and invoice.lines:
-            invoice.subtotalNet = sum(line.qty * (line.price or 0.0) for line in invoice.lines)
-
-        if invoice.totalTax == 0.0 and invoice.lines:
-            invoice.totalTax = sum(
-                line.qty * (line.price or 0.0) * (line.vatRate or 0.19) / 100
-                for line in invoice.lines
-            )
-
-        if invoice.totalGross == 0.0:
-            invoice.totalGross = invoice.subtotalNet + invoice.totalTax
+        gruppen = _steuer(db, tenant_id, invoice, wird_gebucht=invoice.status != "ENTWURF")
 
         if not invoice.dueDate:
             payment_days = 30
@@ -144,7 +179,7 @@ async def create_invoice(
         result = _beleg_speichern(repo, invoice.number, doc_data)
 
         if invoice.status != "ENTWURF":
-            _post_sales_invoice_financials(db, invoice, tenant_id)
+            _post_sales_invoice_financials(db, invoice, tenant_id, gruppen)
             canonical = f"{invoice.number}|{invoice.date}|{invoice.totalGross}|{invoice.customerId}"
             content_hash = sha256_hex(canonical.encode("utf-8"))
             register_artifact(
@@ -233,23 +268,17 @@ async def update_invoice(
         if not existing:
             raise HTTPException(status_code=404, detail=f"Invoice {invoice_number} not found")
 
-        if invoice.subtotalNet == 0.0 and invoice.lines:
-            invoice.subtotalNet = sum(line.qty * (line.price or 0.0) for line in invoice.lines)
-
-        if invoice.totalTax == 0.0 and invoice.lines:
-            invoice.totalTax = sum(
-                line.qty * (line.price or 0.0) * (line.vatRate or 0.19) / 100
-                for line in invoice.lines
-            )
-
-        if invoice.totalGross == 0.0:
-            invoice.totalGross = invoice.subtotalNet + invoice.totalTax
+        old_status = existing.get("status", "ENTWURF")
+        # Eine gebuchte Rechnung wird nicht neu gerechnet; nur der Entwurf nimmt die Steuer aus den Schluesseln.
+        gruppen = (
+            _steuer(db, tenant_id, invoice, wird_gebucht=invoice.status != "ENTWURF")
+            if old_status == "ENTWURF" else None
+        )
 
         result = _beleg_speichern(repo, invoice_number, invoice.model_dump())
 
-        old_status = existing.get("status", "ENTWURF")
         if old_status == "ENTWURF" and invoice.status != "ENTWURF":
-            _post_sales_invoice_financials(db, invoice, tenant_id)
+            _post_sales_invoice_financials(db, invoice, tenant_id, gruppen)
         # Beleg und Buchung gemeinsam (wie beim Anlegen).
         db.commit()
 

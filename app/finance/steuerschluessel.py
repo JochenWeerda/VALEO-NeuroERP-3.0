@@ -118,6 +118,62 @@ def steuergruppen(db: Session, tenant_id: str, zeilen: list[tuple]) -> list[Steu
     return gruppen
 
 
+# --- Auswahl fuer Belege und Stammdaten ---------------------------------------------------------
+
+# Ein Schluessel mit nur einem Vorsteuerkonto gehoert nicht in einen Verkaufsbeleg, einer mit nur einem
+# Umsatzsteuerkonto nicht in einen Eingangsbeleg. Schluessel ohne Steuerkonto (steuerfrei) gelten fuer beide.
+RICHTUNGEN = {
+    "verkauf": "(credit_account IS NOT NULL OR debit_account IS NULL)",
+    "einkauf": "(debit_account IS NOT NULL OR credit_account IS NULL)",
+}
+
+
+class Schluesselwahl(BaseModel):
+    """Ein Steuerschluessel, wie ihn eine Maske zur Auswahl anbietet."""
+
+    code: str
+    bezeichnung: str
+    steuersatz: Decimal
+    par_24_ustg: bool = False
+    reverse_charge: bool = False
+
+
+def schluessel_auswahl(db: Session, tenant_id: str, richtung: str) -> list[Schluesselwahl]:
+    """Die heute gueltigen, aktiven Steuerschluessel des Mandanten fuer Verkaufs- oder Eingangsbelege."""
+    if richtung not in RICHTUNGEN:
+        raise ValueError(f"Unbekannte Richtung {richtung!r}; erlaubt: verkauf, einkauf.")
+    zeilen = db.execute(
+        text(
+            "SELECT code, bezeichnung, steuersatz, par_24_ustg, reverse_charge FROM domain_erp.tax_keys "
+            "WHERE tenant_id = :tid AND active AND gueltig_von <= CURRENT_DATE "
+            "AND (gueltig_bis IS NULL OR gueltig_bis >= CURRENT_DATE) "
+            # Die Richtung ist eine der beiden festen Bedingungen aus RICHTUNGEN.
+            "AND CASE WHEN :richtung = 'verkauf' THEN (credit_account IS NOT NULL OR debit_account IS NULL) "
+            "         ELSE (debit_account IS NOT NULL OR credit_account IS NULL) END "
+            "ORDER BY LPAD(code, 2, '0')"
+        ),
+        {"tid": tenant_id, "richtung": richtung},
+    ).fetchall()
+    return [
+        Schluesselwahl(code=str(z[0]), bezeichnung=str(z[1]), steuersatz=Decimal(str(z[2])),
+                       par_24_ustg=bool(z[3]), reverse_charge=bool(z[4]))
+        for z in zeilen
+    ]
+
+
+def satz_des_schluessels(db: Session, tenant_id: str, code: str, richtung: str) -> Decimal:
+    """Der Satz des Schluessels — oder eine ``Steuerklaerung``, wenn er fuer die Richtung nicht gilt.
+
+    Belege und Stammdaten speichern den Satz nur noch als Abbild des Schluessels; angegeben wird der Schluessel.
+    """
+    code = (code or "").strip()
+    for wahl in schluessel_auswahl(db, tenant_id, richtung):
+        if wahl.code == code:
+            return wahl.steuersatz
+    art = "Verkaufsbelege" if richtung == "verkauf" else "Eingangsbelege"
+    raise Steuerklaerung(f"Steuerschlüssel {code or '(leer)'} ist für {art} nicht bekannt oder nicht gültig.")
+
+
 # --- Konten aus dem Kontenplan ------------------------------------------------------------------
 
 # Welche Kontenart ein Feld des Steuerschluessels verlangt, und woran ein passendes Konto zu erkennen ist.

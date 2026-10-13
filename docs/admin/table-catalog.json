@@ -19913,6 +19913,7 @@
             "app/api/v1/endpoints/sales_credit_notes.py",
             "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py",
             "app/core/connectors/workflow.py",
+            "app/core/screen_definitions_capture.py",
             "app/domains/inventory/api/storage_fees.py",
             "app/finance/steuerschluessel.py",
             "app/infrastructure/models/__init__.py",
@@ -22676,6 +22677,7 @@
           "read_by": [
             "app/api/v1/endpoints/tax_keys.py",
             "app/api/v1/endpoints/vat_return_export.py",
+            "app/core/screen_definitions_capture.py",
             "app/finance/steuerschluessel.py",
             "app/finance/tax_resolver.py"
           ],
@@ -29172,6 +29174,16 @@
               "name": "analyse_sonstiges",
               "nullable": true,
               "type": "text"
+            },
+            {
+              "name": "steuerschluessel_verkauf",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "steuerschluessel_einkauf",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
@@ -45541,6 +45553,8 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/sales_credit_notes.py",
+            "app/core/screen_definitions_capture.py",
+            "app/services/mcp_execution_service.py",
             "app/services/sales_storno_service.py"
           ],
           "written_by": [

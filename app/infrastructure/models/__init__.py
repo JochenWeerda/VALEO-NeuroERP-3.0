@@ -779,7 +779,10 @@ class Article(Base):
     naehrwertangaben = Column(Text, nullable=True)
     mhd_erforderlich = Column(Boolean, nullable=False, default=False)
     lagerartikel = Column(Boolean, nullable=False, default=True)
+    # Abbild des Satzes von ``steuerschluessel_verkauf``; angegeben wird der Schluessel.
     mehrwertsteuer_prozent = Column(DECIMAL(5, 2), nullable=True)
+    steuerschluessel_verkauf = Column(String(2), nullable=True)
+    steuerschluessel_einkauf = Column(String(2), nullable=True)
     warengruppe = Column(String(80), nullable=True)
     # Dangerous goods
     gefahrgutklasse = Column(String(40), nullable=True)

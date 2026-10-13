@@ -38,6 +38,8 @@ import {
   Edit,
 } from 'lucide-react'
 import { Callout } from '@/components/ui/callout'
+import { SteuerschluesselSelect } from '@/components/finance/SteuerschluesselSelect'
+import { schluesselText, useSteuerschluesselAuswahl } from '@/lib/api/steuerschluessel-auswahl'
 import { useToast } from '@/components/ui/toast-provider'
 import { ErrorState } from '@/components/ErrorState'
 import { Badge } from '@/components/ui/badge'
@@ -107,7 +109,9 @@ type ArtikelData = {
   chargenpflicht: boolean
   qsPruefungErforderlich: boolean
   // Pricing
-  mwstProzent: number
+  /** Steuerschluessel statt Prozentsatz: einer fuer Verkaufs-, einer fuer Eingangsbelege. Leer = nicht zugeordnet. */
+  steuerschluesselVerkauf: string
+  steuerschluesselEinkauf: string
   vkPreis: number
   ekPreis: number
   bestand: number
@@ -178,7 +182,8 @@ const DEFAULT_ARTIKEL: ArtikelData = {
   lagerartikel: true,
   chargenpflicht: false,
   qsPruefungErforderlich: false,
-  mwstProzent: 19,
+  steuerschluesselVerkauf: '',
+  steuerschluesselEinkauf: '',
   vkPreis: 0,
   ekPreis: 0,
   bestand: 0,
@@ -304,7 +309,8 @@ function mapApiToForm(article: Article): ArtikelData {
     chargenpflicht: Boolean(article.chargenpflicht),
     qsPruefungErforderlich: Boolean(article.qs_pruefung_erforderlich),
     // Pricing
-    mwstProzent: Number(article.mehrwertsteuer_prozent ?? 19),
+    steuerschluesselVerkauf: String(article.steuerschluessel_verkauf ?? ''),
+    steuerschluesselEinkauf: String(article.steuerschluessel_einkauf ?? ''),
     vkPreis: Number(article.sales_price ?? 0),
     ekPreis: Number(article.purchase_price ?? 0),
     bestand: Number(article.current_stock ?? 0),
@@ -361,6 +367,7 @@ export default function ArtikelStammPage(): JSX.Element {
   const isNew = !id || id === 'neu'
 
   const [artikel, setArtikel] = useState<ArtikelData>(DEFAULT_ARTIKEL)
+  const verkaufsschluessel = useSteuerschluesselAuswahl('verkauf')
 
   // Query for loading article data
   const articleQuery = useQuery({
@@ -492,7 +499,9 @@ export default function ArtikelStammPage(): JSX.Element {
         chargenpflicht: artikel.chargenpflicht,
         qs_pruefung_erforderlich: artikel.qsPruefungErforderlich,
         // Pricing
-        mehrwertsteuer_prozent: artikel.mwstProzent,
+        // Der Satz ist das Abbild des Verkaufsschluessels; der Server setzt ihn.
+        steuerschluessel_verkauf: artikel.steuerschluesselVerkauf || null,
+        steuerschluessel_einkauf: artikel.steuerschluesselEinkauf || null,
         sales_price: artikel.vkPreis,
         purchase_price: artikel.ekPreis,
         min_stock: artikel.minBestand,
@@ -776,12 +785,23 @@ export default function ArtikelStammPage(): JSX.Element {
                     />
                   </div>
                   <div>
-                    <Label>MwSt %</Label>
-                    <Input
-                      type="number"
-                      value={artikel.mwstProzent}
-                      step="0.01"
-                      onChange={(e) => setArtikel((prev) => ({ ...prev, mwstProzent: Number(e.target.value || 0) }))}
+                    <Label htmlFor="artikel-steuerschluessel-verkauf">Steuerschlüssel Verkauf</Label>
+                    <SteuerschluesselSelect
+                      id="artikel-steuerschluessel-verkauf"
+                      ariaLabel="Steuerschlüssel Verkauf"
+                      richtung="verkauf"
+                      value={artikel.steuerschluesselVerkauf}
+                      onChange={(code) => setArtikel((prev) => ({ ...prev, steuerschluesselVerkauf: code ?? '' }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="artikel-steuerschluessel-einkauf">Steuerschlüssel Einkauf</Label>
+                    <SteuerschluesselSelect
+                      id="artikel-steuerschluessel-einkauf"
+                      ariaLabel="Steuerschlüssel Einkauf"
+                      richtung="einkauf"
+                      value={artikel.steuerschluesselEinkauf}
+                      onChange={(code) => setArtikel((prev) => ({ ...prev, steuerschluesselEinkauf: code ?? '' }))}
                     />
                   </div>
                 </div>
@@ -1418,8 +1438,8 @@ export default function ArtikelStammPage(): JSX.Element {
                     </div>
                   </div>
                   <div>
-                    <Label>MwSt</Label>
-                    <div className="text-xl font-bold">{artikel.mwstProzent}%</div>
+                    <Label>Steuerschlüssel Verkauf</Label>
+                    <div className="text-xl font-bold">{schluesselText(verkaufsschluessel.data, artikel.steuerschluesselVerkauf)}</div>
                   </div>
                 </div>
               </div>

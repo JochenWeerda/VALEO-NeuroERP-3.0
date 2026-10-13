@@ -22,6 +22,9 @@ export interface Article {
   mhd_erforderlich: boolean
   lagerartikel: boolean
   mehrwertsteuer_prozent?: number
+  /** Steuerschluessel des Mandanten (tax_keys.code); der Satz ist das Abbild des Verkaufsschluessels. */
+  steuerschluessel_verkauf?: string | null
+  steuerschluessel_einkauf?: string | null
   warengruppe?: string
   gefahrgutklasse?: string
   gefahrgut_un_nummer?: string
@@ -112,6 +115,9 @@ export interface ArticleCreate {
   mhd_erforderlich?: boolean
   lagerartikel?: boolean
   mehrwertsteuer_prozent?: number
+  /** Steuerschluessel des Mandanten (tax_keys.code); der Satz ist das Abbild des Verkaufsschluessels. */
+  steuerschluessel_verkauf?: string | null
+  steuerschluessel_einkauf?: string | null
   warengruppe?: string
   gefahrgutklasse?: string
   lagerorte?: string[]
@@ -192,6 +198,9 @@ export interface ArticleUpdate {
   mhd_erforderlich?: boolean
   lagerartikel?: boolean
   mehrwertsteuer_prozent?: number
+  /** Steuerschluessel des Mandanten (tax_keys.code); der Satz ist das Abbild des Verkaufsschluessels. */
+  steuerschluessel_verkauf?: string | null
+  steuerschluessel_einkauf?: string | null
   warengruppe?: string
   gefahrgutklasse?: string
   lagerorte?: string[]

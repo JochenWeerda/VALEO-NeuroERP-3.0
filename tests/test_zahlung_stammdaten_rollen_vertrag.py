@@ -151,6 +151,7 @@ WEGE = {
         ("GET", "/tax-keys/code/{code}", "offen"),
         ("POST", "/tax-keys/actions/speichern", "write"),
         ("GET", "/tax-keys/kontenvorschlaege", "offen"),
+        ("GET", "/tax-keys/auswahl", "offen"),
     ],
     "exchange_rates": [
         ("GET", "/exchange-rates", "offen"),

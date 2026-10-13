@@ -32,6 +32,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiClient, getAxiosErrorMessage } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { SteuerschluesselSelect } from '@/components/finance/SteuerschluesselSelect'
 
 const CUSTOMER_SEARCH_DEBOUNCE_MS = 300;
 const MIN_SEARCH_LENGTH = 2;
@@ -43,7 +44,10 @@ interface InvoiceLine {
   description: string;
   qty: number;
   price: number;
-  vatRate: number;
+  /** Steuerschluessel des Mandanten; leer = nicht gewaehlt. Es gibt keinen Vorgabewert. */
+  taxCode: string;
+  /** Abbild des Satzes des Schluessels; `null`, solange kein Schluessel gewaehlt ist. */
+  vatRate: number | null;
   netAmount: number;
   taxAmount: number;
   grossAmount: number;
@@ -126,7 +130,8 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
         description: "",
         qty: 1,
         price: 0,
-        vatRate: 19,
+        taxCode: "",
+        vatRate: null,
         netAmount: 0,
         taxAmount: 0,
         grossAmount: 0,
@@ -138,9 +143,9 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
     setLines(lines.filter((_, i) => i !== index));
   };
 
-  const updateLine = (index: number, field: keyof InvoiceLine, value: string | number) => {
+  const updateLine = (index: number, aenderung: Partial<InvoiceLine>) => {
     const updated = [...lines];
-    updated[index] = { ...updated[index], [field]: value };
+    updated[index] = { ...updated[index], ...aenderung };
     
     // Berechne Beträge für diese Zeile
     const qty = updated[index].qty;
@@ -148,7 +153,8 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
     const vatRate = updated[index].vatRate;
     
     const netAmount = qty * price;
-    const taxAmount = netAmount * (vatRate / 100);
+    // Ohne Steuerschluessel gibt es keine Steuer zu zeigen; gerechnet und gebucht wird auf dem Server.
+    const taxAmount = vatRate === null ? 0 : netAmount * (vatRate / 100);
     const grossAmount = netAmount + taxAmount;
     
     updated[index].netAmount = netAmount;
@@ -205,11 +211,9 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
           article: line.article,
           qty: line.qty,
           price: line.price,
-          vatRate: line.vatRate,
+          taxCode: line.taxCode || undefined,
         })),
-        subtotalNet,
-        totalTax,
-        totalGross,
+        // Netto, Steuer und Brutto rechnet der Server aus den Steuerschluesseln.
       };
 
       await apiClient.post("/api/v1/finance/invoices", invoiceData);
@@ -230,6 +234,7 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
       setLoading(false);
     }
   };
+  const steuerOffen = lines.some((line) => !line.taxCode);
   const operationalStatus = normalizeOperationalStatus(
     totalGross > 0 ? (customerId ? 'in_pruefung' : 'wartet_auf_mensch') : 'offen'
   )
@@ -246,8 +251,8 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
       title: 'Wirtschaftslage',
       items: [
         { label: 'Netto', value: `${subtotalNet.toFixed(2)} EUR` },
-        { label: 'Steuer', value: `${totalTax.toFixed(2)} EUR` },
-        { label: 'Brutto', value: `${totalGross.toFixed(2)} EUR` },
+        { label: 'Steuer', value: steuerOffen ? 'offen' : `${totalTax.toFixed(2)} EUR` },
+        { label: 'Brutto', value: steuerOffen ? 'offen' : `${totalGross.toFixed(2)} EUR` },
       ],
     },
     {
@@ -404,15 +409,15 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
                     <Label>Artikel</Label>
                     <Input
                       value={line.article}
-                      onChange={(e) => updateLine(index, "article", e.target.value)}
+                      onChange={(e) => updateLine(index, { article: e.target.value })}
                       placeholder="Artikel-Nr."
                     />
                   </div>
-                  <div className="col-span-4">
+                  <div className="col-span-3">
                     <Label>Beschreibung</Label>
                     <Input
                       value={line.description}
-                      onChange={(e) => updateLine(index, "description", e.target.value)}
+                      onChange={(e) => updateLine(index, { description: e.target.value })}
                       placeholder="Beschreibung"
                     />
                   </div>
@@ -421,7 +426,7 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
                     <Input
                       type="number"
                       value={line.qty}
-                      onChange={(e) => updateLine(index, "qty", parseFloat(e.target.value) || 0)}
+                      onChange={(e) => updateLine(index, { qty: parseFloat(e.target.value) || 0 })}
                       min="0"
                       step="0.01"
                     />
@@ -431,19 +436,19 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
                     <Input
                       type="number"
                       value={line.price}
-                      onChange={(e) => updateLine(index, "price", parseFloat(e.target.value) || 0)}
+                      onChange={(e) => updateLine(index, { price: parseFloat(e.target.value) || 0 })}
                       min="0"
                       step="0.01"
                     />
                   </div>
-                  <div className="col-span-1">
-                    <Label>MwSt %</Label>
-                    <Input
-                      type="number"
-                      value={line.vatRate}
-                      onChange={(e) => updateLine(index, "vatRate", parseFloat(e.target.value) || 0)}
-                      min="0"
-                      max="100"
+                  <div className="col-span-2">
+                    <Label htmlFor={`steuerschluessel-${index}`}>Steuerschlüssel</Label>
+                    <SteuerschluesselSelect
+                      id={`steuerschluessel-${index}`}
+                      ariaLabel={`Steuerschlüssel Position ${index + 1}`}
+                      richtung="verkauf"
+                      value={line.taxCode}
+                      onChange={(code, wahl) => updateLine(index, { taxCode: code ?? "", vatRate: wahl ? Number(wahl.steuersatz) : null })}
                     />
                   </div>
                   <div className="col-span-1 flex gap-1">
@@ -479,12 +484,18 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
               </div>
               <div className="flex justify-between">
                 <span>Summe MwSt:</span>
-                <span className="font-semibold">{totalTax.toFixed(2)} €</span>
+                <span className="font-semibold">{steuerOffen ? "offen" : `${totalTax.toFixed(2)} €`}</span>
               </div>
               <div className="flex justify-between text-lg font-bold border-t pt-2">
                 <span>Summe Brutto:</span>
-                <span>{totalGross.toFixed(2)} €</span>
+                <span>{steuerOffen ? "offen" : `${totalGross.toFixed(2)} €`}</span>
               </div>
+              {steuerOffen ? (
+                <p className="text-sm text-status-warning">
+                  Mindestens eine Position hat keinen Steuerschlüssel. Als Entwurf lässt sich die Rechnung speichern;
+                  gebucht wird sie erst, wenn jede Position einen Steuerschlüssel hat.
+                </p>
+              ) : null}
             </div>
           </CardContent>
         </Card>
