@@ -27,6 +27,10 @@ class ArticleBase(BaseSchema):
     mhd_erforderlich: bool = Field(default=False, description="Best-before date required")
     lagerartikel: bool = Field(default=True, description="Is stock-managed article")
     mehrwertsteuer_prozent: Optional[Decimal] = Field(None, ge=0, le=100, description="VAT percentage")
+    steuerschluessel_verkauf: Optional[str] = Field(
+        None, max_length=2, description="Steuerschlüssel für Verkaufsbelege (tax_keys.code des Mandanten)")
+    steuerschluessel_einkauf: Optional[str] = Field(
+        None, max_length=2, description="Steuerschlüssel für Eingangsbelege (tax_keys.code des Mandanten)")
     warengruppe: Optional[str] = Field(None, max_length=80, description="Product group")
     # Dangerous goods
     gefahrgutklasse: Optional[str] = Field(None, max_length=40, description="Dangerous goods class")
@@ -123,6 +127,10 @@ class ArticleUpdate(BaseSchema):
     mhd_erforderlich: Optional[bool] = Field(None, description="Best-before date required")
     lagerartikel: Optional[bool] = Field(None, description="Is stock-managed article")
     mehrwertsteuer_prozent: Optional[Decimal] = Field(None, ge=0, le=100, description="VAT percentage")
+    steuerschluessel_verkauf: Optional[str] = Field(
+        None, max_length=2, description="Steuerschlüssel für Verkaufsbelege (tax_keys.code des Mandanten)")
+    steuerschluessel_einkauf: Optional[str] = Field(
+        None, max_length=2, description="Steuerschlüssel für Eingangsbelege (tax_keys.code des Mandanten)")
     warengruppe: Optional[str] = Field(None, max_length=80, description="Product group")
     # Dangerous goods
     gefahrgutklasse: Optional[str] = Field(None, max_length=40, description="Dangerous goods class")

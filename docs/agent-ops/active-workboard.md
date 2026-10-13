@@ -11,11 +11,38 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## LOGIN-REFRESH-20261013 — in arbeit, Codex
+## STEUERSCHLUESSEL-BELEGE-20261013 — Teil 1 abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** Teil 1 abgeschlossen 2026-10-13; Teil 2 ff. offen (Tabelle im QA-Dokument).
+Auftrag: alle Masken mit Prozentsatz auf einheitlich Steuerschluessel.
+**Lieferung Teil 1:** eine Auswahl fuer alle Masken (`GET /finance/tax-keys/auswahl?richtung=verkauf|einkauf`,
+`components/finance/SteuerschluesselSelect.tsx`); Artikelstamm mit `steuerschluessel_verkauf`/`_einkauf`
+(Migration `artikel_steuerschluessel_20261013`, ein Head; `mehrwertsteuer_prozent` ist Abbild des
+Verkaufsschluessels; Bestand ueber `scripts/artikel_steuerschluessel_zuordnen.py`, nicht ausgefuehrt);
+Ausgangsrechnung `/finance/invoices`: Position traegt `taxCode`, Server rechnet die Summen, Buchung je
+Steuerschluessel auf dessen Erloes- und Steuerkonto, ohne eindeutige Steuer 409 statt Buchung; Entwurf traegt
+`steuerPruefgrund`. Tests 10 + 11, Vitest 8. QA: `docs/quality-assurance/steuerschluessel-belege-20261013.md`.
+**Verhaltensaenderung fuer andere Aufrufer:** `POST/PUT /finance/invoices` bucht nur noch mit `taxCode` je
+Position; `vatRate` allein und Rechnungen ohne Positionen werden nur als Entwurf gespeichert.
+`SalesPostingService.post_ausgangsrechnung_with_op` hat den neuen Parameter `steuergruppen`; ohne ihn gilt der
+alte feste Weg (8400/1776) — den nutzt nur noch DocFlow.
+**Befunde, nicht behoben:** DocFlow bucht fest 8400/1776 (`document_items` ohne Schluessel);
+`FinanceTransactionService` bebucht nur Konten des Mandanten, Steuerschluessel-Maske und Gutschrift auch den
+gemeinsamen Rahmen `system`; Kasse `pos/terminal` weist im Bon immer 19 % aus.
+
+## LOGIN-PRIVATE-LAYOUT-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** privater ERP-Layoutzweig umgeht ProtectedRoute bei leerem/falschem VITE_AUTH_REQUIRED. **Ziel:** Anmeldung fuer private ERP-Masken stets durchsetzen. **Dateibesitz:** app/routing/route-layouts.tsx nur AppRouteLayout; neue React-Vertraege und eigene QA/Workboard. Keine Portallayout-, Masken-, Rollen- oder Stylingaenderung. **Abnahme:** wahr/falsch/fehlendes Entwicklungsflag erlauben keinen privaten Layout-Bypass; OIDC-Callback bleibt oeffentlich, vorhandene Rollen-/Mandantengrenze erhalten; TypeScript und Routingvertraege gruen. Keine DB/Container/Reset oder persoenlichen Kennungen.
+
+**Lieferung:** Private ERP-Seiten verwenden ProtectedRoute stets, auch bei falschem oder fehlendem Entwicklungsflag. Sechs neue Layoutfaelle plus sieben Routing- und drei Bootstrapfaelle bestanden. Oeffentliche Auth-/Portallayouts unveraendert. Nachweis: login-variants-20261013.md. Keine DB/Container/Reset.
+
+## LOGIN-REFRESH-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** reale Sitzung endet nach Zugriffstokenablauf; beide HTTP-Clients erneuern Token nicht und Kaltstart verwirft Refresh. **Ziel:** Providererneuerung vor HTTP-Transport und beim Wiederladen, ohne abgelaufene Token zu akzeptieren. **Dateibesitz:** lib/auth.ts, hooks/useAuth.ts, lib/api-client.ts, lib/axios.ts ausschliesslich Sitzungserneuerung innerhalb eigener Identity-Elternclaims; auth.test.ts und neue fokussierte Vertraege, eigene QA/Workboard. **Abnahme:** Kaltstart ohne vorzeitige Freigabe, parallele Anfragen teilen einen Refresh, Logout gewinnt gegen laufende Erneuerung, fehlgeschlagener Refresh sperrt Zugang; realer Browser-Recheck. Keine persoenlichen Kennungen, DB/Container/Reset.
 
 **Lieferung:** Kaltstart und HTTP-Erneuerung implementiert, elf neue Frontendvertraege bestanden; realer Ablauf-Recheck noch offen. Nachweis: login-variants-20261013.md. Keine persoenlichen Kennungen, neue DB/Container oder Migration.
+
+**Abnahme:** Reale Providerlaufzeit 300 Sekunden lesend bestaetigt; nach ueber 333 Sekunden Neuladen mit derselben synthetischen Kennung im stets geschuetzten Layout erfolgreich. Handbuchaufnahme 12 und QA aktualisiert; TypeScript bestanden. Gesamtvarianten/MFA und rote CI-Testgrenzen bleiben offen.
 
 ## STEUERSCHLUESSEL-KONTENVORSCHLAG-20261013 — abgeschlossen, Claude Code
 

@@ -90,6 +90,8 @@ def test_scheitert_die_buchung_bleibt_keine_rechnung_zurueck(engine, client, num
     def buchung_scheitert(*_a, **_k):
         raise ValidationFailedError("Konto 1400 fehlt")
 
+    # Die Steuer ist hier nicht der Gegenstand; ohne Positionen wuerde die Rechnung vorher abgelehnt.
+    monkeypatch.setattr(modul, "_steuer", lambda *_a, **_k: [])
     monkeypatch.setattr(modul, "_post_sales_invoice_financials", buchung_scheitert)
     antwort = client.post(WEG, headers=kopf(), json=rechnung(nummer))
     assert antwort.status_code >= 400
@@ -100,6 +102,7 @@ def test_scheitert_das_archiv_bleibt_keine_rechnung_zurueck(engine, client, numm
     from app.api.v1.endpoints import finance_invoices as modul
     from app.core.gobd_artifact import GobdArtifactError
 
+    monkeypatch.setattr(modul, "_steuer", lambda *_a, **_k: [])
     monkeypatch.setattr(modul, "_post_sales_invoice_financials", lambda *_a, **_k: {})
 
     def archiv_scheitert(*_a, **_k):

@@ -176,8 +176,14 @@ class SalesPostingService:
         gross_amount: Decimal | float,
         posted_by: str | None = None,
         due_date: date | str | None = None,
+        steuergruppen: list[Any] | None = None,
     ) -> dict[str, str]:
-        """Create or reuse the posted AR journal entry and debtor open item."""
+        """Create or reuse the posted AR journal entry and debtor open item.
+
+        ``steuergruppen`` (``app.finance.steuerschluessel.Steuergruppe``): Erloes netto auf das Erloeskonto und
+        Umsatzsteuer auf das Steuerkonto **je Steuerschluessel**. Ohne sie gilt der alte feste Weg
+        (alles auf 8400 und 1776) — nur noch fuer DocFlow, bis dessen Positionen Steuerschluessel tragen.
+        """
         net = Decimal(str(net_amount)).quantize(Decimal("0.01"))
         tax = Decimal(str(tax_amount)).quantize(Decimal("0.01"))
         gross = Decimal(str(gross_amount)).quantize(Decimal("0.01"))
@@ -218,14 +224,32 @@ class SalesPostingService:
                     "credit_amount": 0,
                     "description": f"Forderung {invoice_number}",
                 },
-                {
-                    "account_id": self._fin.account_id_for_number(self.ACCOUNT_REVENUE),
-                    "debit_amount": 0,
-                    "credit_amount": float(net),
-                    "description": "Umsatzerloes",
-                },
             ]
-            if tax > Decimal("0.00"):
+            if steuergruppen is not None:
+                for gruppe in steuergruppen:
+                    lines.append({
+                        "account_id": self._fin.account_id_for_number(gruppe.erloeskonto),
+                        "debit_amount": 0,
+                        "credit_amount": float(gruppe.netto),
+                        "description": f"Umsatzerloes Steuerschluessel {gruppe.tax_code}",
+                    })
+                    if gruppe.steuer > Decimal("0.00"):
+                        lines.append({
+                            "account_id": self._fin.account_id_for_number(gruppe.steuerkonto),
+                            "debit_amount": 0,
+                            "credit_amount": float(gruppe.steuer),
+                            "description": f"Umsatzsteuer {gruppe.satz.normalize():f} % Steuerschluessel {gruppe.tax_code}",
+                        })
+            else:
+                lines.append(
+                    {
+                        "account_id": self._fin.account_id_for_number(self.ACCOUNT_REVENUE),
+                        "debit_amount": 0,
+                        "credit_amount": float(net),
+                        "description": "Umsatzerloes",
+                    }
+                )
+            if steuergruppen is None and tax > Decimal("0.00"):
                 lines.append(
                     {
                         "account_id": self._fin.account_id_for_number(self.ACCOUNT_TAX),

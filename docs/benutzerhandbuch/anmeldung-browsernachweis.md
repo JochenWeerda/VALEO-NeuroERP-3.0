@@ -36,3 +36,13 @@ Erstanmeldung bleibt wie vereinbart vertagt.
 
 Technische Nachweise und offene Varianten stehen in der
 [Login-Testmatrix](../quality-assurance/login-variants-20261013.md).
+
+## Sitzung nach Ablauf des ersten Zugriffstokens
+
+Der lokale Anmeldedienst war auf 300 Sekunden Zugriffstokenlaufzeit eingestellt.
+Nach mehr als 333 Sekunden wurde die Seite erneut geladen. Der geschuetzte
+Arbeitsplatz und dieselbe synthetische Kennung blieben sichtbar, ohne erneute
+Kennworteingabe. Die Providererneuerung erhaelt den Zugang; fehlgeschlagene oder
+widerrufene Erneuerungen erlauben keinen Zugriff.
+
+![Geschuetzter Arbeitsplatz nach Ablauf und erneutem Laden](img/login-20261013/12-session-after-token-lifetime.jpg)

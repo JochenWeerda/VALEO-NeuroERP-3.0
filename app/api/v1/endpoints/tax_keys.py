@@ -18,7 +18,9 @@ from ....core.database import get_db
 from app.core.read_model_cache import cached_read_model, invalidate_tenant_prefix
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
-from app.finance.steuerschluessel import Kontovorschlag, konto_hindernis, kontenvorschlaege, verwendung
+from app.finance.steuerschluessel import (
+    RICHTUNGEN, Kontovorschlag, Schluesselwahl, konto_hindernis, kontenvorschlaege, schluessel_auswahl, verwendung,
+)
 from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
 
 logger = logging.getLogger(__name__)
@@ -203,6 +205,19 @@ async def list_tax_keys(
         logger.error("Error listing tax keys: %s", e, exc_info=True)
         # Ein Ladefehler ist kein leerer Bestand; die leere Liste laege sonst eine Stunde im Cache.
         raise HTTPException(status_code=500, detail="Steuerschlüssel konnten nicht geladen werden.") from e
+
+
+@router.get("/auswahl", response_model=List[Schluesselwahl],
+            summary="Steuerschlüssel zur Auswahl in Belegen und Stammdaten (Verkauf oder Einkauf)")
+async def list_schluessel_auswahl(
+    richtung: str = Query(..., description="verkauf oder einkauf"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> List[Schluesselwahl]:
+    """Die heute gültigen Steuerschlüssel des Mandanten für die Richtung. Die eine Auswahl aller Masken."""
+    if richtung not in RICHTUNGEN:
+        raise HTTPException(status_code=422, detail="richtung: verkauf oder einkauf")
+    return schluessel_auswahl(db, tenant_id, richtung)
 
 
 @router.get("/kontenvorschlaege", response_model=dict[str, List[Kontovorschlag]],
