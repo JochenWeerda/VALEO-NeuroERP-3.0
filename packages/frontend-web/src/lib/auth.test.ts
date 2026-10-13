@@ -92,3 +92,49 @@ describe('provider authentication', () => {
     expect(auth.isAuthenticated()).toBe(false)
   })
 })
+
+
+describe('session renewal before transport', () => {
+  it('restores expired access only after provider renewal succeeds', async () => {
+    localStorage.setItem('access_token', jwt({ sub: 'synthetic-person', exp: Math.floor(Date.now() / 1000) - 1 }))
+    localStorage.setItem('refresh_token', 'synthetic-refresh')
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(response(discovery)).mockResolvedValueOnce(response({ access_token: access(), refresh_token: 'rotated-refresh' })))
+    const auth = new AuthService(config)
+    expect(auth.isAuthenticated()).toBe(false)
+    expect(auth.getAccessToken()).toBeNull()
+    expect(await auth.getFreshAccessToken()).toBeTruthy()
+    expect(auth.isAuthenticated()).toBe(true)
+    expect(localStorage.getItem('refresh_token')).toBe('rotated-refresh')
+  })
+
+  it('renews once for simultaneous requests near expiry', async () => {
+    localStorage.setItem('access_token', jwt({ sub: 'synthetic-person', exp: Math.floor(Date.now() / 1000) + 5 }))
+    localStorage.setItem('refresh_token', 'synthetic-refresh')
+    const fresh = access()
+    const fetcher = vi.fn().mockResolvedValueOnce(response(discovery)).mockResolvedValueOnce(response({ access_token: fresh, refresh_token: 'rotated-refresh' }))
+    vi.stubGlobal('fetch', fetcher)
+    const auth = new AuthService(config)
+    expect(await Promise.all([auth.getFreshAccessToken(), auth.getFreshAccessToken()])).toEqual([fresh, fresh])
+    expect(fetcher.mock.calls.filter(([url]) => url === discovery.token_endpoint)).toHaveLength(1)
+  })
+
+  it('avoids a provider call while sufficient token lifetime remains', async () => {
+    const token = access()
+    localStorage.setItem('access_token', token)
+    const fetcher = vi.fn()
+    vi.stubGlobal('fetch', fetcher)
+    const auth = new AuthService(config)
+    expect(await auth.getFreshAccessToken()).toBe(token)
+    expect(fetcher).not.toHaveBeenCalled()
+  })
+
+  it('denies access after provider renewal fails', async () => {
+    localStorage.setItem('access_token', jwt({ sub: 'synthetic-person', exp: Math.floor(Date.now() / 1000) - 1 }))
+    localStorage.setItem('refresh_token', 'synthetic-refresh')
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(response(discovery)).mockResolvedValueOnce(response({}, false)))
+    const auth = new AuthService(config)
+    expect(await auth.getFreshAccessToken()).toBeNull()
+    expect(auth.isAuthenticated()).toBe(false)
+    expect(localStorage.getItem('refresh_token')).toBeNull()
+  })
+})

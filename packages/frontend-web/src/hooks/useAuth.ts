@@ -22,7 +22,7 @@ const safeRedirect = (target: string): void => {
 
 export function useAuth(): AuthHook {
   const [user, setUser] = useState<User | null>(auth.getUser())
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(() => !auth.isAuthenticated() && auth.canRefresh())
   const isMountedRef = useRef(true)
 
   useEffect(() => {
@@ -30,7 +30,18 @@ export function useAuth(): AuthHook {
     const sync = (): void => setUser(auth.getUser())
     sync()
     window.addEventListener('valeo-auth-changed', sync)
+    let active = true
+    if (!auth.isAuthenticated() && auth.canRefresh()) {
+      setLoading(true)
+      void auth.getFreshAccessToken().finally(() => {
+        if (active) {
+          sync()
+          setLoading(false)
+        }
+      })
+    }
     return () => {
+      active = false
       window.removeEventListener('valeo-auth-changed', sync)
       isMountedRef.current = false
     }

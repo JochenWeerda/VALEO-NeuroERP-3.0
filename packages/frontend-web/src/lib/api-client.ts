@@ -102,8 +102,8 @@ class APIClient {
 
     // Request Interceptor (Auth Token)
     this.client.interceptors.request.use(
-      (config) => {
-        const token = auth.getAccessToken()
+      async (config) => {
+        const token = await auth.getFreshAccessToken()
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
         }

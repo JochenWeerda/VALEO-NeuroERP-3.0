@@ -1,6 +1,6 @@
 import axios from "axios"
 import { v4 as uuidv4 } from "uuid"
-import { getAccessToken, handleUnauthorized } from "@/lib/auth"
+import { auth, handleUnauthorized } from "@/lib/auth"
 import { tenantFromToken } from "@/lib/tenant-from-token"
 
 function normalizeApiBaseUrl(value: string | undefined): string {
@@ -104,11 +104,11 @@ const logHttpError = (payload: Record<string, unknown>): void => {
   consoleCandidate?.error?.("HTTP request failed", payload)
 }
 
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(async (config) => {
   const cfg = config as InternalRequestConfig & { metadata?: RequestMetadata }
   const headers = ensureHeaders(cfg)
 
-  const token = getAccessToken()
+  const token = await auth.getFreshAccessToken()
   const finalToken = token
   if (finalToken !== null && readHeader(headers, "Authorization") === undefined) {
     writeHeader(headers, "Authorization", `Bearer ${finalToken}`)

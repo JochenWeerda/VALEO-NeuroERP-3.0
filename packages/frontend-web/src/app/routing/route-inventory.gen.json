@@ -876,19 +876,9 @@
       "source": "system"
     },
     {
-      "module": "@/pages/auth/Callback",
-      "path": "auth/Callback",
-      "source": "alias"
-    },
-    {
       "module": "@/pages/auth/Login",
       "path": "auth/login",
       "source": "system"
-    },
-    {
-      "module": "@/pages/auth/Login",
-      "path": "auth/Login",
-      "source": "alias"
     },
     {
       "module": "@/pages/banken/konten",
