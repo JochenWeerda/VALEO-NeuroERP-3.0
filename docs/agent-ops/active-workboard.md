@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FINANCE-TEST-IDENTITY-APPROVAL-20261013 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Gemeldete Finanztests an die explizite Test-Anmeldegrenze und zentrale Freigabe anpassen, ohne Produktionsschutz zu lockern. **Dateibesitz:** tests/test_finance_payment_runs_api.py; tests/test_payment_execution_atomicity.py; tests/test_zahlungslauf_mandant.py; tests/test_eingangsrechnung_mandant.py; eigener tests/finance_identity_fixture.py falls notwendig; docs/quality-assurance/finance-test-identity-approval-20261013.md. **Abnahme:** vier gemeldete Dateien auf gemeinsamem valeo_probe; Rollen vor DB, Mandantentrennung, Vier Augen und atomarer Zahlungsabschluss weiter geprueft. **Risiken:** Fake-SQL braucht aktualisierten Engine-Vertrag; keine Freigabe-Bypasses im Produktionscode. DocFlow-Frontendadapter folgt separat.
+
 ## APPROVAL-001-IMPORT-EINKAUFSMEMO — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
