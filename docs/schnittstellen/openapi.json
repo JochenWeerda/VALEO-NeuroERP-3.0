@@ -51827,6 +51827,17 @@
             "title": "Discount Percent",
             "type": "number"
           },
+          "expense_account": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expense Account"
+          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -51957,6 +51968,18 @@
             "minimum": 0.0,
             "title": "Discount Percent",
             "type": "number"
+          },
+          "expense_account": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expense Account"
           },
           "quantity": {
             "default": 0,

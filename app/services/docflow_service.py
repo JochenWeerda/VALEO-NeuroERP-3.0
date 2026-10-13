@@ -13,7 +13,11 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
-from app.finance.steuerschluessel import Steuerklaerung, satz_des_schluessels, steuergruppen
+from app.finance.steuerschluessel import Steuerklaerung, satz_des_schluessels, steuergruppen, vorsteuergruppen
+from app.services.finance_belegbuchung import (
+    buche_einkaufsgutschrift, buche_verkaufsgutschrift, storniere_eingangsrechnung,
+)
+from app.services.finance_eingangsrechnung_buchung import buche_eingangsrechnung
 from app.services.customer_sales_eligibility import assert_customer_allowed_for_invoice
 from app.services.sales_posting_service import SalesPostingService
 
@@ -26,7 +30,24 @@ TRANSITIONS: dict[str, dict[str, str]] = {
     "sales_invoice": {"sales_credit_memo": "invoice_to_credit_memo"},
     "pos_receipt": {"sales_invoice": "receipt_to_invoice", "pos_storno": "receipt_to_storno", "pos_retoure": "receipt_to_retoure"},
     "pos_retoure": {"sales_credit_memo": "retoure_to_credit_memo"},
+    # Einkauf (seit 13.10.2026): dieselbe Kette in Gegenrichtung.
+    "purchase_order": {"goods_receipt": "order_to_receipt", "purchase_invoice": "order_to_purchase_invoice"},
+    "goods_receipt": {"purchase_invoice": "receipt_to_purchase_invoice"},
+    "purchase_invoice": {"purchase_credit_memo": "purchase_invoice_to_credit_memo"},
 }
+
+# Einkaufsbelege nehmen Vorsteuerschluessel; alles andere Umsatzsteuerschluessel.
+EINKAUF_TYPES: frozenset[str] = frozenset({"purchase_order", "goods_receipt", "purchase_invoice", "purchase_credit_memo"})
+# Rechnung aus dem Auftrag direkt oder aus dessen Lieferungen — nie beides (sonst waere die Menge doppelt fakturiert).
+RECHNUNGSWEGE: dict[str, tuple[str, str, str]] = {
+    # Auftragsart: (Folgeart Lieferung, Uebergang Auftrag->Rechnung, Uebergang Lieferung->Rechnung)
+    "sales_order": ("sales_delivery", "order_to_invoice", "delivery_to_invoice"),
+    "purchase_order": ("goods_receipt", "order_to_purchase_invoice", "receipt_to_purchase_invoice"),
+}
+
+
+def steuerrichtung(doc_type: str) -> str:
+    return "einkauf" if doc_type in EINKAUF_TYPES else "verkauf"
 
 DOC_PREFIX: dict[str, str] = {
     "sales_offer": "SOF",
@@ -37,6 +58,10 @@ DOC_PREFIX: dict[str, str] = {
     "pos_receipt": "POS",
     "pos_storno": "PST",
     "pos_retoure": "PRT",
+    "purchase_order": "POR",
+    "goods_receipt": "GRN",
+    "purchase_invoice": "PIV",
+    "purchase_credit_memo": "PCM",
 }
 
 POS_TYPES: frozenset[str] = frozenset({"pos_receipt", "pos_storno", "pos_retoure"})
@@ -479,6 +504,89 @@ class DocflowService:
             {"n": name, "g": grund or ""},
         )
 
+    def _aktive_folgebelege(self, doc_id: str, relation_type: str) -> int:
+        return int(self.db.execute(
+            text(
+                """
+                SELECT count(*) FROM domain_docflow.document_header_links k
+                JOIN domain_docflow.document_headers z ON z.id = k.to_header_id AND z.tenant_id = k.tenant_id
+                WHERE k.tenant_id = :t AND k.from_header_id = :f AND k.relation_type = :r
+                  AND z.deleted_at IS NULL AND z.status NOT IN ('reversed', 'cancelled')
+                """
+            ),
+            {"t": self.tenant_id, "f": doc_id, "r": relation_type},
+        ).scalar() or 0)
+
+    def _pruefe_rechnungsweg(self, doc_id: str, source_type: str, relation_type: str) -> None:
+        """Ein Auftrag wird direkt fakturiert oder ueber seine Lieferungen — nicht beides.
+
+        Die Restmenge gilt je Folgeart; ohne diese Regel liesse sich derselbe Auftrag einmal direkt und noch
+        einmal ueber den Lieferschein berechnen.
+        """
+        for auftragsart, (lieferart, direkt, ueber_lieferung) in RECHNUNGSWEGE.items():
+            if source_type == auftragsart and relation_type == direkt:
+                if self._aktive_folgebelege(doc_id, TRANSITIONS[auftragsart][lieferart]):
+                    raise ConflictError(
+                        "Der Auftrag hat bereits Lieferungen; berechnet wird dann aus der Lieferung, nicht aus dem Auftrag."
+                    )
+            if source_type == lieferart and relation_type == ueber_lieferung:
+                auftraege = self.db.execute(
+                    text(
+                        "SELECT from_header_id FROM domain_docflow.document_header_links "
+                        "WHERE tenant_id = :t AND to_header_id = :z AND relation_type = :r"
+                    ),
+                    {"t": self.tenant_id, "z": doc_id, "r": TRANSITIONS[auftragsart][lieferart]},
+                ).fetchall()
+                for (auftrag_id,) in auftraege:
+                    if self._aktive_folgebelege(str(auftrag_id), direkt):
+                        raise ConflictError(
+                            "Der Auftrag dieser Lieferung ist bereits direkt berechnet; eine zweite Rechnung aus der "
+                            "Lieferung waere eine Doppelberechnung."
+                        )
+
+    def _bezugsnummer(self, doc_id: str, relation_type: str) -> Optional[str]:
+        """Die Nummer des Belegs, aus dem dieser entstanden ist (Rechnung einer Gutschrift)."""
+        return self.db.execute(
+            text(
+                "SELECT q.doc_number FROM domain_docflow.document_header_links k "
+                "JOIN domain_docflow.document_headers q ON q.id = k.from_header_id AND q.tenant_id = k.tenant_id "
+                "WHERE k.tenant_id = :t AND k.to_header_id = :z AND k.relation_type = :r LIMIT 1"
+            ),
+            {"t": self.tenant_id, "z": doc_id, "r": relation_type},
+        ).scalar()
+
+    def _vorsteuergruppen_des_belegs(self, doc_id: str, nummer: str) -> list[Any]:
+        """Aufwand und Vorsteuer des Einkaufsbelegs je Steuerschluessel und Aufwandskonto — oder der Pruefgrund.
+
+        Wie im Verkauf: Die Steuer je Gruppe ist die Summe der Positionssteuern des Belegs.
+        """
+        items = self.fetch_items(doc_id)
+        try:
+            gruppen = vorsteuergruppen(self.db, self.tenant_id, [
+                (int(i.get("line_number") or 0), i.get("tax_code"), i.get("tax_rate"),
+                 Decimal(str(i.get("line_total_net") or 0)), i.get("expense_account"))
+                for i in items
+            ])
+        except Steuerklaerung as klaerung:
+            raise ConflictError(f"Beleg {nummer} nicht gebucht, bitte prüfen: {klaerung}") from klaerung
+        # Eine Position ohne eigenes Aufwandskonto gehoert zur Gruppe des Kontos ihres Steuerschluessels.
+        schluesselkonto = {
+            str(z[0]): (z[1] or "").strip()
+            for z in self.db.execute(
+                text("SELECT code, expense_account FROM domain_erp.tax_keys WHERE tenant_id = :t AND code = ANY(:codes)"),
+                {"t": self.tenant_id, "codes": sorted({g.tax_code for g in gruppen})},
+            ).fetchall()
+        }
+        for gruppe in gruppen:
+            eigene = [
+                i for i in items
+                if str(i.get("tax_code") or "").strip() == gruppe.tax_code
+                and ((i.get("expense_account") or "").strip() or schluesselkonto.get(gruppe.tax_code, "")) == gruppe.aufwandskonto
+            ]
+            gruppe.netto = _money(sum((Decimal(str(i.get("line_total_net") or 0)) for i in eigene), Decimal("0")))
+            gruppe.steuer = _money(sum((Decimal(str(i.get("line_total_tax") or 0)) for i in eigene), Decimal("0")))
+        return gruppen
+
     def umgewandelte_mengen(self, doc_id: str, relation_type: str) -> dict[str, Decimal]:
         """Je Quellposition die Menge, die schon in Folgebelege dieser Art gegangen ist.
 
@@ -571,10 +679,11 @@ class DocflowService:
 
     # ── line helpers ──────────────────────────────────────────────────────────
 
-    def _steuer_der_position(self, nr: int, line: Any, saetze: dict[str, Decimal]) -> tuple[Optional[str], Decimal]:
+    def _steuer_der_position(self, nr: int, line: Any, saetze: dict[str, Decimal],
+                             richtung: str = "verkauf") -> tuple[Optional[str], Decimal]:
         """Steuerschluessel und Satz der Position. Mit Schluessel kommt der Satz aus ``tax_keys``.
 
-        DocFlow fuehrt Verkaufsbelege; der Schluessel muss fuer Verkaufsbelege gelten.
+        Der Schluessel muss zur Belegart passen: Umsatzsteuerschluessel im Verkauf, Vorsteuerschluessel im Einkauf.
         """
         code = (getattr(line, "tax_code", None) or "").strip() or None
         angegeben = getattr(line, "tax_rate", None)
@@ -582,7 +691,7 @@ class DocflowService:
             return None, Decimal(str(angegeben or 0))
         if code not in saetze:
             try:
-                saetze[code] = satz_des_schluessels(self.db, self.tenant_id, code, "verkauf")
+                saetze[code] = satz_des_schluessels(self.db, self.tenant_id, code, richtung)
             except Steuerklaerung as klaerung:
                 raise ValidationFailedError(f"Position {nr}: {klaerung}") from klaerung
         if angegeben is not None and Decimal(str(angegeben)) != saetze[code]:
@@ -592,23 +701,23 @@ class DocflowService:
             )
         return code, saetze[code]
 
-    def _insert_items(self, header_id: str, items: list[Any]) -> tuple[Decimal, Decimal, Decimal]:
+    def _insert_items(self, header_id: str, items: list[Any], richtung: str = "verkauf") -> tuple[Decimal, Decimal, Decimal]:
         total_net = total_tax = total_gross = Decimal("0")
         saetze: dict[str, Decimal] = {}
         for idx, line in enumerate(items, start=1):
             qty = _qty(Decimal(str(line.quantity)))
             price = Decimal(str(line.unit_price))
             discount = Decimal(str(line.discount_percent))
-            tax_code, tax_rate = self._steuer_der_position(idx, line, saetze)
+            tax_code, tax_rate = self._steuer_der_position(idx, line, saetze, richtung)
             line_net, line_tax, line_gross = _line_amounts(qty, price, discount, tax_rate)
             total_net += line_net; total_tax += line_tax; total_gross += line_gross
             self.db.execute(
                 text("""
                     INSERT INTO domain_docflow.document_items
                     (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit,
-                     unit_price, discount_percent, tax_code, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, created_at, updated_at)
+                     unit_price, discount_percent, tax_code, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, expense_account, created_at, updated_at)
                     VALUES (:id, :tenant_id, :header_id, :line_number, NULL, :article_number, :description, :quantity, :unit,
-                     :unit_price, :discount_percent, :tax_code, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :batch_id, :charge, NOW(), NOW())
+                     :unit_price, :discount_percent, :tax_code, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :batch_id, :charge, :expense_account, NOW(), NOW())
                 """),
                 {
                     "id": str(uuid4()), "tenant_id": self.tenant_id, "header_id": header_id,
@@ -617,6 +726,7 @@ class DocflowService:
                     "tax_code": tax_code, "tax_rate": tax_rate, "line_total_net": line_net, "line_total_tax": line_tax,
                     "line_total_gross": line_gross, "batch_id": getattr(line, "batch_id", None),
                     "charge": getattr(line, "charge", None),
+                    "expense_account": (getattr(line, "expense_account", None) or "").strip() or None,
                 },
             )
         return total_net, total_tax, total_gross
@@ -659,7 +769,7 @@ class DocflowService:
                 "created_by": self._wer(payload.created_by), "updated_by": self._wer(payload.created_by),
             },
         )
-        total_net, total_tax, total_gross = self._insert_items(doc_id, payload.items)
+        total_net, total_tax, total_gross = self._insert_items(doc_id, payload.items, steuerrichtung(payload.doc_type))
         self.db.execute(
             text("UPDATE domain_docflow.document_headers SET total_net=:n, total_tax=:t, total_gross=:g WHERE id=:id AND tenant_id=:tenant_id"),
             {"id": doc_id, "tenant_id": self.tenant_id, "n": _money(total_net), "t": _money(total_tax), "g": _money(total_gross)},
@@ -711,7 +821,7 @@ class DocflowService:
                 text("DELETE FROM domain_docflow.document_items WHERE tenant_id = :tenant_id AND header_id = :header_id"),
                 {"tenant_id": self.tenant_id, "header_id": doc_id},
             )
-            total_net, total_tax, total_gross = self._insert_items(doc_id, payload.items)
+            total_net, total_tax, total_gross = self._insert_items(doc_id, payload.items, steuerrichtung(effective_doc_type))
             self.db.execute(
                 text("UPDATE domain_docflow.document_headers SET total_net=:n, total_tax=:t, total_gross=:g WHERE id=:id AND tenant_id=:tenant_id"),
                 {"id": doc_id, "tenant_id": self.tenant_id, "n": _money(total_net), "t": _money(total_tax), "g": _money(total_gross)},
@@ -796,6 +906,7 @@ class DocflowService:
         relation_type = TRANSITIONS.get(source_type, {}).get(payload.target_doc_type)
         if not relation_type:
             raise ValidationFailedError(f"Transition not allowed: {source_type} -> {payload.target_doc_type}")
+        self._pruefe_rechnungsweg(doc_id, source_type, relation_type)
         # Ein Auftrag kann mehrere Teillieferscheine und mehrere Rechnungen haben.
         schon = self.umgewandelte_mengen(doc_id, relation_type)
         if any(menge > 0 for menge in schon.values()) and not payload.quantities_by_source_item_id:
@@ -896,16 +1007,17 @@ class DocflowService:
                 text("""
                     INSERT INTO domain_docflow.document_items
                     (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity,
-                     unit, unit_price, discount_percent, tax_code, tax_rate, line_total_net, line_total_tax, line_total_gross, metadata, created_at, updated_at)
+                     unit, unit_price, discount_percent, tax_code, tax_rate, line_total_net, line_total_tax, line_total_gross, expense_account, metadata, created_at, updated_at)
                     VALUES (:id, :tenant_id, :header_id, :line_number, :source_line_id, :article_number, :description, :quantity,
-                     :unit, :unit_price, :discount_percent, :tax_code, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, CAST(:metadata AS jsonb), NOW(), NOW())
+                     :unit, :unit_price, :discount_percent, :tax_code, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :expense_account, CAST(:metadata AS jsonb), NOW(), NOW())
                 """),
                 {
                     "id": target_item_id, "tenant_id": self.tenant_id, "header_id": target_id,
                     "line_number": line_no, "source_line_id": str(src["id"]),
                     "article_number": src.get("article_number") or "", "description": src.get("description"),
                     "quantity": qty, "unit": src.get("unit"), "unit_price": price, "discount_percent": discount,
-                    "tax_code": src.get("tax_code"), "tax_rate": tax_rate, "line_total_net": line_net,
+                    "tax_code": src.get("tax_code"), "expense_account": src.get("expense_account"),
+                    "tax_rate": tax_rate, "line_total_net": line_net,
                     "line_total_tax": line_tax,
                     "line_total_gross": line_gross, "metadata": json.dumps({"converted_from": str(src["id"])}),
                 },
@@ -1017,6 +1129,33 @@ class DocflowService:
                 posted_by=self._wer(payload.posted_by),
                 steuergruppen=gruppen,
             )
+        doc_type = str(header.get("doc_type") or "")
+        nummer = str(header["doc_number"])
+        wer = self._wer(payload.posted_by)
+        try:
+            if doc_type == "sales_credit_memo":
+                gruppen = self._steuergruppen_der_rechnung(doc_id, nummer)
+                finance_result = {"journal_entry_id": buche_verkaufsgutschrift(
+                    self.db, self.tenant_id, nummer=nummer, datum=header.get("document_date"), gruppen=gruppen,
+                    rechnungsnummer=self._bezugsnummer(doc_id, "invoice_to_credit_memo"), posted_by=wer)}
+            elif doc_type in {"purchase_invoice", "purchase_credit_memo"}:
+                if not str(header.get("supplier_id") or ""):
+                    raise ValidationFailedError("Ein Einkaufsbeleg wird nur mit Lieferant gebucht.")
+                gruppen = self._vorsteuergruppen_des_belegs(doc_id, nummer)
+                beleg = {"number": nummer, "date": str(header.get("document_date") or "")[:10] or None,
+                         "customerId": header.get("supplier_id"), "currency": header.get("currency")}
+                if doc_type == "purchase_invoice":
+                    journal_id, _gruppen = buche_eingangsrechnung(
+                        self.db, self.tenant_id, invoice_id=doc_id, invoice=beleg, posted_by=wer,
+                        quelle="purchase_invoice", gruppen=gruppen)
+                else:
+                    journal_id = buche_einkaufsgutschrift(
+                        self.db, self.tenant_id, nummer=nummer, datum=header.get("document_date"), gruppen=gruppen,
+                        rechnungsnummer=self._bezugsnummer(doc_id, "purchase_invoice_to_credit_memo"),
+                        posted_by=wer, beleg=beleg)
+                finance_result = {"journal_entry_id": journal_id}
+        except Steuerklaerung as klaerung:
+            raise ConflictError(f"Beleg {nummer} nicht gebucht, bitte prüfen: {klaerung}") from klaerung
         self._kommando("post")
         posting_id = str(uuid4())
         outbox_event_id = self.upsert_outbox_event("docflow.document.posted", doc_id, {
@@ -1074,6 +1213,17 @@ class DocflowService:
             ).reverse_ausgangsrechnung(
                 invoice_number=str(header["doc_number"]),
                 reason=payload.reason,
+            )
+        doc_type = str(header.get("doc_type") or "")
+        if doc_type == "purchase_invoice":
+            if str(header.get("status")) != "posted":
+                raise ValidationFailedError("Nur eine gebuchte Eingangsrechnung wird storniert.")
+            finance_result = storniere_eingangsrechnung(
+                self.db, self.tenant_id, nummer=str(header["doc_number"]), grund=payload.reason)
+        elif doc_type in {"sales_credit_memo", "purchase_credit_memo"} and str(header.get("status")) == "posted":
+            # Ohne Gegenbuchung waere der Beleg „storniert“ und die Buchung stuende weiter.
+            raise ValidationFailedError(
+                "Eine gebuchte Gutschrift wird hier noch nicht storniert: Die Gegenbuchung dafür fehlt."
             )
         self._kommando("reverse", payload.reason)
         posting_id = str(uuid4())

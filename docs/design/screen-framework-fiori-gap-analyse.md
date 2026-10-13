@@ -131,8 +131,8 @@ Fehlendes wird gebaut; Altes wird erst nach nachgewiesener Funktionsgleichheit e
 | 0.1 | DocFlow: Mandant aus der Anmeldung | kein Weg nimmt den Mandanten aus der Anfrage | Identität (Codex) |
 | 0.2 | DocFlow: Teilmengen über mehrere Folgebelege mit Restmengenrechnung — **erledigt 13.10.2026** (`docflow-teilmengen-statushistorie-20261013.md`) | ein Auftrag → drei Teillieferscheine → zwei Rechnungen; Überlieferung wird abgelehnt | Claude Code |
 | 0.3 | DocFlow: Statushistorie und Protokoll, die nicht ausfallen dürfen (wer, wann, von, nach, Grund) — **erledigt 13.10.2026** | kein Statuswechsel ohne Eintrag; Fehler bricht den Wechsel ab | Claude Code |
-| 0.4 | DocFlow: Einkaufsbelegarten mit Übergängen; Eingangsrechnung bucht über Finance | Bestellung → Wareneingang → Eingangsrechnung mit Bezug je Position; Buchungsstatus prüfbar | Claude Code |
-| 0.5 | DocFlow: Gutschrift bucht über Finance; Storno in einem Commit | eine Gutschriftstruktur | Claude Code |
+| 0.4 | DocFlow: Einkaufsbelegarten mit Übergängen; Eingangsrechnung bucht über Finance — **erledigt 13.10.2026** (`docflow-einkauf-gutschrift-20261013.md`) | Bestellung → Wareneingang → Eingangsrechnung mit Bezug je Position; Buchungsstatus prüfbar | Claude Code |
+| 0.5 | DocFlow: Gutschrift bucht über Finance; Storno in einem Commit — **erledigt 13.10.2026**, offen: Storno gebuchter Gutschriften | eine Gutschriftstruktur | Claude Code |
 | 0.6 | Testbenutzer im Keycloak (lokal und Staging), Zugangsdaten nur in der Umgebung | Playwright meldet sich über OIDC/PKCE an | Identität (Codex) mit Auftraggeber |
 | 0.7 | Referenzbelege im Testmandanten (Positionen, Steuerarten, Status, Rechte) als wiederholbares Skript | Belege entstehen reproduzierbar | Claude Code |
 | 0.8 | Bildschirmfoto-Baselines mit Playwright; manuelle Sichtabnahme als Schritt | reproduzierbarer Lauf mit Fotos | Claude Code |

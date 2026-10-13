@@ -41,6 +41,7 @@ class DocflowItemOut(BaseModel):
     unit_price: float
     discount_percent: float
     tax_code: Optional[str] = None
+    expense_account: Optional[str] = None
     tax_rate: float
     line_total_net: float
     line_total_tax: float
@@ -133,6 +134,8 @@ class DocflowLineInput(BaseModel):
     # mitgeschickter Satz wird abgelehnt. Ohne ihn gilt der Satz der Anfrage — gebucht wird so nicht.
     tax_code: Optional[str] = Field(default=None, max_length=2)
     tax_rate: Optional[float] = Field(default=None, ge=0, le=100)
+    # Nur Einkaufsbelege: Aufwandskonto der Position; leer = das des Steuerschluessels.
+    expense_account: Optional[str] = Field(default=None, max_length=20)
     batch_id: Optional[str] = Field(default=None, max_length=64)
     charge: Optional[str] = Field(default=None, max_length=64)
 
@@ -253,6 +256,7 @@ def _row_to_header_out(svc: DocflowService, header_id: str) -> DocflowHeaderOut:
                 unit_price=float(i.get("unit_price") or 0),
                 discount_percent=float(i.get("discount_percent") or 0),
                 tax_code=i.get("tax_code"),
+                expense_account=i.get("expense_account"),
                 tax_rate=float(i.get("tax_rate") or 0),
                 line_total_net=float(i.get("line_total_net") or 0),
                 line_total_tax=float(i.get("line_total_tax") or 0),

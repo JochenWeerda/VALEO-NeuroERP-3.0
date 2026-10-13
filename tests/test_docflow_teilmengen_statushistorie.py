@@ -164,13 +164,21 @@ def test_vollstaendige_umwandlung_ohne_mengen_und_keine_zweite(haus):
     assert len(_folgebelege(haus, auftrag["id"])) == 1
 
 
-def test_lieferschein_und_rechnung_haben_je_eigene_restmengen(haus):
+def test_teilrechnungen_aus_dem_lieferschein_bis_zur_gelieferten_menge(haus):
+    """Geliefert 10: zwei Teilrechnungen zu 6 und 4, eine dritte nicht.
+
+    Berechnet wird aus dem Lieferschein — ein Auftrag mit Lieferung laesst sich nicht zusaetzlich direkt
+    berechnen (``test_docflow_einkauf_gutschrift.py``).
+    """
     auftrag = _auftrag(haus, mengen=(10,))
-    pos = auftrag["items"][0]["id"]
-    assert _wandle(haus, auftrag["id"], ziel="sales_delivery", mengen={pos: 10}).status_code == 200
-    assert _wandle(haus, auftrag["id"], ziel="sales_invoice", mengen={pos: 6}).status_code == 200
-    assert _wandle(haus, auftrag["id"], ziel="sales_invoice", mengen={pos: 4}).status_code == 200
-    assert [art for art, _menge in _folgebelege(haus, auftrag["id"])] == ["sales_delivery", "sales_invoice", "sales_invoice"]
+    lieferschein = _wandle(haus, auftrag["id"], ziel="sales_delivery").json()["target_doc_id"]
+    with SessionLocal() as db:
+        pos = db.execute(text(
+            "SELECT id FROM domain_docflow.document_items WHERE header_id = :h"), {"h": lieferschein}).scalar()
+    assert _wandle(haus, lieferschein, ziel="sales_invoice", mengen={pos: 6}).status_code == 200
+    assert _wandle(haus, lieferschein, ziel="sales_invoice", mengen={pos: 4}).status_code == 200
+    assert _wandle(haus, lieferschein, ziel="sales_invoice", mengen={pos: 1}).status_code == 400
+    assert _folgebelege(haus, lieferschein) == [("sales_invoice", Decimal("6")), ("sales_invoice", Decimal("4"))]
 
 
 # --- Idempotenz ---------------------------------------------------------------------------------

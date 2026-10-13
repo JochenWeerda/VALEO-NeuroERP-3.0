@@ -11,6 +11,22 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOCFLOW-EINKAUF-GUTSCHRIFT-20261013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Phase 0.4 und 0.5.
+**Lieferung:** DocFlow-Belegarten `purchase_order`, `goods_receipt`, `purchase_invoice`,
+`purchase_credit_memo` mit Uebergaengen; Steuerrichtung nach Belegart; `document_items.expense_account`
+(Migration `docflow_einkauf_20261013`, ein Head). `post`: Eingangsrechnung ueber
+`finance_eingangsrechnung_buchung` (neuer Parameter `gruppen`), Verkaufs- und Einkaufsgutschrift ueber
+`app/services/finance_belegbuchung.py` mit Minderung des offenen Postens der Bezugsrechnung. `reverse`:
+Eingangsrechnung mit Gegenbuchung; gebuchte Gutschrift wird abgelehnt (Gegenbuchung fehlt noch).
+Keine Doppelberechnung: Auftrag/Bestellung entweder direkt oder ueber Lieferung/Wareneingang.
+Tests 17 + 19, im Gesamtlauf mit Nachbarn 193. QA: `docs/quality-assurance/docflow-einkauf-gutschrift-20261013.md`.
+**Verhaltensaenderung:** `sales_credit_memo` bucht jetzt wirklich (vorher nur Status); ein Auftrag mit
+Lieferung laesst sich nicht mehr direkt berechnen (409).
+**Beruehrung mit DOCFLOW-TOKEN-TENANT (Codex):** in `app/api/v1/endpoints/docflow.py` nur drei Zeilen fuer das
+Feld `expense_account` in Ein- und Ausgabe der Position; keine Mandanten- oder Anmeldezeile.
+
 ## DOCFLOW-TEILMENGEN-STATUSHISTORIE-20261013 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Phase 0.2 und 0.3; Bedingungen von Codex umgesetzt.

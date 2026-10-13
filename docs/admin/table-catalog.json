@@ -14941,6 +14941,9 @@
           "primary_key": [
             "id"
           ],
+          "read_by": [
+            "app/services/docflow_service.py"
+          ],
           "written_by": [
             "app/services/docflow_service.py"
           ]
@@ -15208,6 +15211,11 @@
             },
             {
               "name": "tax_code",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "expense_account",
               "nullable": true,
               "type": "character varying"
             }
@@ -21491,6 +21499,7 @@
             "app/finance/gobd.py",
             "app/finance/router.py",
             "app/infrastructure/models/journal.py",
+            "app/services/finance_belegbuchung.py",
             "app/services/finance_closing_service.py",
             "app/services/finance_datev_service.py",
             "app/services/finance_read_model_service.py",
@@ -22041,6 +22050,7 @@
             "app/api/v1/endpoints/zinsabrechnung.py",
             "app/services/agrar_settlement_service.py",
             "app/services/einkauf_compat_service.py",
+            "app/services/finance_belegbuchung.py",
             "app/services/finance_clearing_service.py",
             "app/services/finance_dunning_service.py",
             "app/services/finance_eingangsrechnung_buchung.py",
@@ -22802,7 +22812,8 @@
             "app/api/v1/endpoints/vat_return_export.py",
             "app/core/screen_definitions_capture.py",
             "app/finance/steuerschluessel.py",
-            "app/finance/tax_resolver.py"
+            "app/finance/tax_resolver.py",
+            "app/services/docflow_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/tax_keys.py",
