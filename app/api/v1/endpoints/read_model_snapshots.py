@@ -51,7 +51,7 @@ def get_snapshot_page(
     model_name: str = Query(...),
     tenant_id: str = Query(...),
     last_snapshot_id: Optional[str] = Query(None),
-    limit: int = Query(20),
+    limit: int = Query(20, ge=1, le=100),
     store: ReadModelSnapshotStore = Depends(_get_store),
 ):
     cursor = SnapshotCursor(last_snapshot_id=last_snapshot_id, limit=limit)

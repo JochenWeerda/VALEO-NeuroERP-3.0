@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## SNAPSHOT-PAGINATION-20261012 — reserviert, Codex
+## SNAPSHOT-PAGINATION-20261012 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** Snapshot-Seiten ohne Vollmaterialisierung, stabiler Cursor bei Zeitgleichheit, begrenzte Seitengroesse. **Dateibesitz:** app/core/read_model_persistence.py nur SnapshotCursor/get_page; read_model_snapshots.py nur Query-Limit; neue fokussierte Vertragsdatei; eigene QA/Workboard und isolierte API-Artefakte. **Abnahme:** Memory-/SQL-Ergebnis gleich, SQL-LIMIT und Cursorfilter vor Materialisierung, fremde Cursor beeinflussen eigene Seite nicht, Limit 1..100 mit HTTP422 ausserhalb. Fehlende Snapshot-Migration ist eigener offener Befund; keine DB/Container/Migration/Reset.
+
+**Lieferung:** SQL-Keyset-Paginierung mit LIMIT vor Materialisierung und stabiler Zeit-/ID-Ordnung; Seitengroesse 1..100, HTTP422 ausserhalb. 41 SQL-/Memory-/HTTP-/Bestandsvertraege bestanden; isolierte produktive OpenAPI erzeugt und geprueft. Nachweis: snapshot-pagination-20261012.md. Snapshot-Migration, Store-Einzelzugriffe und Gesamtabnahme bleiben offen. Keine DB/Container/Reset.
 
 ## GUTSCHRIFT-AGENT-FREIGABE-20261012 — abgeschlossen, Claude Code
 
