@@ -88235,6 +88235,35 @@
         "title": "KontoLookupResult",
         "type": "object"
       },
+      "Kontovorschlag": {
+        "properties": {
+          "account_name": {
+            "title": "Account Name",
+            "type": "string"
+          },
+          "account_number": {
+            "title": "Account Number",
+            "type": "string"
+          },
+          "grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grund"
+          }
+        },
+        "required": [
+          "account_number",
+          "account_name"
+        ],
+        "title": "Kontovorschlag",
+        "type": "object"
+      },
       "KontraktCreate": {
         "properties": {
           "bezeichnung": {
@@ -302211,6 +302240,73 @@
           }
         ],
         "summary": "Tax key by code abrufen",
+        "tags": [
+          "finance",
+          "tax",
+          "finance",
+          "tax"
+        ]
+      }
+    },
+    "/api/v1/finance/tax-keys/kontenvorschlaege": {
+      "get": {
+        "description": "Umsatzsteuer-, Vorsteuer- und Erlöskonten des Mandanten, die fachlich nächsten zuerst. Wählt nichts vor.",
+        "operationId": "list_kontenvorschlaege_api_v1_finance_tax_keys_kontenvorschlaege_get",
+        "parameters": [
+          {
+            "description": "Steuersatz in Prozent; reiht passende Konten nach vorn",
+            "in": "query",
+            "name": "steuersatz",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Steuersatz in Prozent; reiht passende Konten nach vorn",
+              "title": "Steuersatz"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "items": {
+                      "$ref": "#/components/schemas/Kontovorschlag"
+                    },
+                    "type": "array"
+                  },
+                  "title": "Response List Kontenvorschlaege Api V1 Finance Tax Keys Kontenvorschlaege Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Konten aus dem Kontenplan je Feld des Steuerschlüssels vorschlagen",
         "tags": [
           "finance",
           "tax",

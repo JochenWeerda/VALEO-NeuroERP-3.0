@@ -122,5 +122,42 @@ Anmeldung ohne Anbieterkonto.
   Bestellung, Zinsabrechnung, Artikelstamm, Kasse, Ernteannahme).
 - Die alten Wege `POST`/`PUT`/`DELETE /finance/tax-keys` bestehen weiter (ohne Audit, ohne
   Kontenprüfung). Die Maske nutzt sie nicht mehr.
-- Kontonummern sind Freitext mit Serverprüfung, keine Auswahl aus dem Kontenplan.
 - Vorschlagsweg für Agenten und Schlüssel mit Gültigkeitszeiträumen: Tax Rules Service (geplant).
+
+## Nachtrag: Konten aus dem Kontenplan (`STEUERSCHLUESSEL-KONTENVORSCHLAG-20261013`)
+
+Auftrag vom 13.10.2026: „Kontonummern aus Kontenplan vorschlagen (fachliche kontextuelle Zuordnung)."
+
+- Umsatzsteuer-, Erlös- und Vorsteuerkonto sind in der Maske eine **Auswahl aus dem Kontenplan** des
+  Mandanten, kein Freitext mehr. Quelle: `GET /api/v1/finance/tax-keys/kontenvorschlaege?steuersatz=…`
+  (`kontenvorschlaege` in `app/finance/steuerschluessel.py`).
+- **Zuordnung nach Kontenart:** Umsatzsteuerkonto = Verbindlichkeitskonto, Vorsteuerkonto = Aktivkonto,
+  Erlöskonto = Erlöskonto. Je Feld erscheinen nur Konten dieser Art, die bebuchbar sind (aktiv, nicht
+  gesperrt, kein Summenkonto). Ein eigenes Konto des Mandanten geht dem gemeinsamen Rahmen vor.
+- **Reihenfolge:** zuerst Konten, deren Bezeichnung zur Rolle **und** zum eingegebenen Satz passt
+  („1776 – Umsatzsteuer 19 % (Vorschlag: passt zum Satz 19 %)"), dann Konten, die nur zur Rolle passen
+  (Bezeichnung oder Kategorie „tax"), dann die übrigen der Art. „7 %" trifft „17 %" nicht.
+- **Vorgeschlagen, nicht gewählt.** Die Felder bleiben leer, bis jemand wählt. Bei Satz 0 wird kein
+  Steuerkonto als zum Satz passend gereiht.
+- **Der Server prüft dieselbe Regel beim Speichern** (`konto_hindernis`): Ein Konto der falschen Art
+  wird abgelehnt — „Umsatzsteuerkonto 1400 (Forderungen aus Lieferungen und Leistungen) ist kein
+  Verbindlichkeitskonto." 1400 war die Vorgabe der alten Maske. Gesperrte Konten werden weder
+  vorgeschlagen noch angenommen.
+- Ein hinterlegtes Konto, das der Kontenplan nicht mehr anbietet, bleibt beim Bearbeiten sichtbar
+  („nicht im Kontenplan, gesperrt oder falsche Kontenart").
+
+**Auslegung (meine):** „fachlich kontextuell" heißt hier Kontenart plus Bezeichnung und Satz. Der
+Kontenplan trägt kein eigenes Merkmal „Steuerkonto für Satz X"; die Kategorie `tax` ist nur bei den
+am 12.10. angelegten Konten gesetzt, die gemeinsamen Konten 1576/1776 stehen unter
+`current_assets`/`current_liabilities`. Die Reihung nach Bezeichnung ist deshalb eine Hilfe und
+keine Zusicherung.
+
+**Mask Builder, zweiter Cache-Fehler:** `schemaVolatility` nahm von Auswahlfeldern nur die Werte,
+nicht die Beschriftung, in den Cache-Schlüssel. Bei gleichen Werten und neuer Beschriftung zeichnete
+der Builder die alte Auswahl. Korrigiert, Test in `render-plan-cache.test.ts`.
+
+**Nachweis:** `tests/test_steuerschluessel_maske.py` 31 bestanden gegen `valeo_probe` (neu: Reihung
+nach Satz, 7 gegen 17, ohne Satz und bei 0, gesperrte Konten, drei Konten falscher Art). Gegen
+`valeo_neuro_erp` von Hand: 19 % → 1776/1576/8400, 7 % → 1771/1571/8300. Vitest: Maske 8,
+Bauplan-Cache 3, zusammen mit Mask-Builder-Verzeichnis und Gutschrift 231. `tsc`, ESLint ohne Befund.
+Rollenvertrag: neuer Leseweg eingetragen. Nicht im Browser geprüft.

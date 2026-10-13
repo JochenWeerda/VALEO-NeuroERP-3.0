@@ -6,11 +6,13 @@ import SteuerschluesselPage from '@/pages/finance/steuerschluessel'
 const mocks = vi.hoisted(() => ({
   liste: vi.fn(),
   speichern: vi.fn(),
+  konten: vi.fn(),
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 vi.mock('@/lib/api/steuerschluessel', () => ({
   listeSteuerschluessel: mocks.liste,
   speichereSteuerschluessel: mocks.speichern,
+  ladeKontenvorschlaege: mocks.konten,
 }))
 vi.mock('sonner', () => ({ toast: mocks.toast }))
 vi.mock('@/app/routing/typed-router', () => ({
@@ -46,6 +48,17 @@ function trage(feld: RegExp, wert: string): void {
 beforeEach(() => {
   vi.clearAllMocks()
   mocks.liste.mockResolvedValue(SCHLUESSEL)
+  mocks.konten.mockImplementation(async (satz: string) => ({
+    credit_account: [
+      { account_number: '1776', account_name: 'Umsatzsteuer 19 %', grund: satz === '19' ? 'passt zum Satz 19 %' : 'nach Bezeichnung' },
+      { account_number: '1771', account_name: 'Umsatzsteuer 7 %', grund: 'nach Bezeichnung' },
+    ],
+    debit_account: [{ account_number: '1576', account_name: 'Abziehbare Vorsteuer 19 %', grund: 'nach Bezeichnung' }],
+    revenue_account: [
+      { account_number: '8400', account_name: 'Erlöse 19 % USt', grund: null },
+      { account_number: '8300', account_name: 'Erlöse 7 % USt', grund: null },
+    ],
+  }))
 })
 
 // Die Maske kommt aus der Screen Definition finance/steuerschluessel. Aus den Schluesseln nehmen alle
@@ -59,6 +72,31 @@ describe('Steuerschlüssel', () => {
     expect(screen.getByLabelText(/^Vorsteuerkonto/)).toHaveValue('')
     expect(screen.getByLabelText(/^Gültig von/)).toHaveValue('')
     expect(screen.getByLabelText(/§ 24 UStG/)).toBeInTheDocument()
+  })
+
+  it('bietet Konten aus dem Kontenplan an, reiht nach dem Satz und waehlt keines vor', async () => {
+    zeichnen()
+    const ust = await screen.findByLabelText(/^Umsatzsteuerkonto/)
+    await waitFor(() => expect(within(ust).getByRole('option', { name: '1776 – Umsatzsteuer 19 %' })).toBeInTheDocument())
+    expect(mocks.konten).toHaveBeenCalledWith('')
+    trage(/^Steuersatz in %/, '19')
+    await waitFor(() => expect(mocks.konten).toHaveBeenCalledWith('19'))
+    await waitFor(() => expect(
+      within(ust).getByRole('option', { name: '1776 – Umsatzsteuer 19 % (Vorschlag: passt zum Satz 19 %)' })).toBeInTheDocument())
+    // Vorgeschlagen, nicht gewaehlt.
+    expect(ust).toHaveValue('')
+    expect(screen.getByLabelText(/^Erlöskonto/)).toHaveValue('')
+    // Je Feld nur seine Konten: kein Erloeskonto unter den Umsatzsteuerkonten.
+    expect(within(ust).queryByRole('option', { name: /8400/ })).toBeNull()
+  })
+
+  it('zeigt ein hinterlegtes Konto, das der Kontenplan nicht mehr anbietet', async () => {
+    mocks.liste.mockResolvedValue([{ ...SCHLUESSEL[0], revenue_account: '8999' }])
+    zeichnen()
+    fireEvent.click(await screen.findByTestId('row-action-bearbeiten'))
+    const erloes = screen.getByLabelText(/^Erlöskonto/)
+    await waitFor(() => expect(erloes).toHaveValue('8999'))
+    expect(within(erloes).getByRole('option', { name: /^8999 – nicht im Kontenplan/ })).toBeInTheDocument()
   })
 
   it('zeigt je Schluessel, wofuer er bucht oder warum nicht', async () => {

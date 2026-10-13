@@ -18,7 +18,7 @@ from ....core.database import get_db
 from app.core.read_model_cache import cached_read_model, invalidate_tenant_prefix
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
-from app.finance.steuerschluessel import verwendung
+from app.finance.steuerschluessel import Kontovorschlag, konto_hindernis, kontenvorschlaege, verwendung
 from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
 
 logger = logging.getLogger(__name__)
@@ -203,6 +203,23 @@ async def list_tax_keys(
         logger.error("Error listing tax keys: %s", e, exc_info=True)
         # Ein Ladefehler ist kein leerer Bestand; die leere Liste laege sonst eine Stunde im Cache.
         raise HTTPException(status_code=500, detail="Steuerschlüssel konnten nicht geladen werden.") from e
+
+
+@router.get("/kontenvorschlaege", response_model=dict[str, List[Kontovorschlag]],
+            summary="Konten aus dem Kontenplan je Feld des Steuerschlüssels vorschlagen")
+async def list_kontenvorschlaege(
+    steuersatz: Optional[str] = Query(None, description="Steuersatz in Prozent; reiht passende Konten nach vorn"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict[str, List[Kontovorschlag]]:
+    """Umsatzsteuer-, Vorsteuer- und Erlöskonten des Mandanten, die fachlich nächsten zuerst. Wählt nichts vor."""
+    satz: Optional[Decimal] = None
+    if steuersatz and steuersatz.strip():
+        try:
+            satz = Decimal(steuersatz.strip().replace(",", "."))
+        except ArithmeticError:
+            satz = None  # eine unfertige Eingabe reiht nur nicht; abgelehnt wird beim Speichern
+    return kontenvorschlaege(db, tenant_id, satz)
 
 
 @router.get("/{tax_key_id}", response_model=TaxKeyResponse, summary="Tax key abrufen")
@@ -634,20 +651,9 @@ async def action_steuerschluessel_speichern(
         werte, fehler = _lies_eingabe(payload)
         if fehler:
             return fehler
-        nummern = sorted({werte[feld] for feld, _name in _KONTEN if werte[feld]})
-        bekannt = {
-            str(r[0]) for r in pruef_db.execute(
-                text(
-                    "SELECT account_number FROM domain_erp.chart_of_accounts "
-                    "WHERE tenant_id IN (:tid, 'system') AND account_number = ANY(:nummern)"
-                ),
-                {"tid": tid, "nummern": nummern},
-            ).fetchall()
-        } if nummern else set()
-        return [
-            _fehler(feld, f"{name} {werte[feld]} steht nicht im Kontenplan.")
-            for feld, name in _KONTEN if werte[feld] and werte[feld] not in bekannt
-        ]
+        # Das Konto muss im Kontenplan stehen, bebuchbar sein und der Art nach in das Feld gehoeren.
+        hindernisse = [(feld, konto_hindernis(pruef_db, tid, feld, werte[feld])) for feld, _name in _KONTEN if werte[feld]]
+        return [_fehler(feld, meldung) for feld, meldung in hindernisse if meldung]
 
     async def schreibe(schreib_db: Session, payload: dict[str, Any], _entity_id: str, tid: str) -> str:
         werte, _fehlerliste = _lies_eingabe(payload)

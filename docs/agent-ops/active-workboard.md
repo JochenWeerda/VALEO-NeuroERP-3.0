@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STEUERSCHLUESSEL-KONTENVORSCHLAG-20261013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Auftrag: Kontonummern aus dem Kontenplan vorschlagen
+(fachliche kontextuelle Zuordnung).
+**Lieferung:** `GET /finance/tax-keys/kontenvorschlaege?steuersatz=` — je Feld (Umsatzsteuer = Verbindlichkeit,
+Vorsteuer = Aktiv, Erloes = Erloes) die bebuchbaren Konten der Art, zum Satz und zur Rolle passende zuerst; die
+Maske `finance/steuerschluessel` zeigt sie als Auswahl, waehlt nichts vor. Speichern lehnt ein Konto der falschen
+Art ab (`konto_hindernis`). Tests 31 / Vitest 231. QA: Nachtrag in
+`docs/quality-assurance/steuerschluessel-maske-sd-20261013.md`.
+**Mask Builder (alle Masken):** `schemaVolatility` nahm von Auswahlfeldern nur Werte, nicht Beschriftungen, in den
+Cache-Schluessel; korrigiert.
+
 ## LOGIN-TOPBAR-IDENTITY-20261013 — reserviert, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** reales Benutzermenü zeigt festes Test-Admin-Profil, Abmelden-Schaltfläche hat keinen Handler. **Ziel:** kanonische angemeldete Identität anzeigen und realen Logout auslösen. **Dateibesitz:** TopBar.tsx nur Authimport, Profilwerte und Logout-Handler/Status; keine Gestaltung; neue React-Verträge; eigene QA/Workboard/Handbuch. Elternclaim IDENTITY-CONTROL behält lib/auth.ts und LOGIN-VARIANTS Gesamtabnahme. **Abnahme:** echter Testnutzer statt Attrappe sichtbar, Abmelden ruft zentralen Widerruf auf, keine erfundene Adminidentität; Browser-Screenshots/Logout-Recheck, bestehende Sicherheitsverträge bleiben erhalten. Keine persönlichen Benutzerwerte versionieren, keine DB/Container/Reset.

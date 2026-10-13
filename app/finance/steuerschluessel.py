@@ -14,6 +14,7 @@ Nichts wird angenommen: Fehlt eine Angabe oder widersprechen sich Angaben, gibt 
 
 from __future__ import annotations
 
+import re
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Optional
@@ -115,6 +116,89 @@ def steuergruppen(db: Session, tenant_id: str, zeilen: list[tuple]) -> list[Steu
             steuerkonto=str(steuerkonto).strip() if satz > 0 else None,
         ))
     return gruppen
+
+
+# --- Konten aus dem Kontenplan ------------------------------------------------------------------
+
+# Welche Kontenart ein Feld des Steuerschluessels verlangt, und woran ein passendes Konto zu erkennen ist.
+# Umsatzsteuer ist eine Schuld gegenueber dem Finanzamt, Vorsteuer eine Forderung, der Erloes ein Ertrag.
+KONTENROLLEN: dict[str, tuple[str, str, str, tuple[str, ...]]] = {
+    # Feld: (Name, Kontenart, Kontenart in Worten, Stichworte im Kontonamen)
+    "credit_account": ("Umsatzsteuerkonto", "liability", "Verbindlichkeitskonto", ("umsatzsteuer", "ust", "mehrwertsteuer")),
+    "debit_account": ("Vorsteuerkonto", "asset", "Aktivkonto", ("vorsteuer", "vst")),
+    "revenue_account": ("Erlöskonto", "revenue", "Erlöskonto", ("erlös", "erloes", "erlos", "umsatz")),
+}
+
+
+class Kontovorschlag(BaseModel):
+    account_number: str
+    account_name: str
+    # Warum das Konto vorgeschlagen wird; ``None`` = passt der Art nach, ohne besonderen Hinweis.
+    grund: Optional[str] = None
+
+
+def _konten(db: Session, tenant_id: str, nummern: Optional[list[str]] = None) -> dict[str, tuple[str, str, str]]:
+    """Bebuchbare Konten des Mandanten: Nummer -> (Name, Kontenart, Kategorie). Das eigene Konto geht dem gemeinsamen vor."""
+    konten: dict[str, tuple[str, str, str]] = {}
+    for nr, name, art, kategorie, _eigen in db.execute(
+        text(
+            "SELECT account_number, account_name, account_type, COALESCE(category, ''), tenant_id = :tid AS eigen "
+            "FROM domain_erp.chart_of_accounts "
+            "WHERE tenant_id IN (:tid, 'system') AND COALESCE(is_active, true) AND deleted_at IS NULL "
+            "AND NOT posting_blocked AND NOT COALESCE(is_summary, false) "
+            "AND (CAST(:nummern AS varchar[]) IS NULL OR account_number = ANY(CAST(:nummern AS varchar[]))) "
+            "ORDER BY eigen, account_number"
+        ),
+        {"tid": tenant_id, "nummern": nummern},
+    ).fetchall():
+        konten[str(nr)] = (str(name), str(art), str(kategorie))
+    return konten
+
+
+def konto_hindernis(db: Session, tenant_id: str, feld: str, nummer: str) -> Optional[str]:
+    """Warum das Konto nicht in das Feld des Steuerschluessels gehoert — oder ``None``."""
+    name, art, art_text, _stichworte = KONTENROLLEN[feld]
+    konto = _konten(db, tenant_id, [nummer]).get(nummer)
+    if konto is None:
+        return f"{name} {nummer} steht nicht im Kontenplan oder ist gesperrt."
+    if konto[1] != art:
+        return f"{name} {nummer} ({konto[0]}) ist kein {art_text}."
+    return None
+
+
+def kontenvorschlaege(db: Session, tenant_id: str, satz: Optional[Decimal]) -> dict[str, list[Kontovorschlag]]:
+    """Je Feld die Konten der passenden Art, die fachlich naechsten zuerst.
+
+    Vorgeschlagen wird, gewaehlt wird nicht: Die Reihenfolge ist eine Hilfe, kein Vorgabewert.
+    """
+    satz_text, satz_muster = "", None
+    if satz is not None:
+        zahl = f"{satz.normalize():f}"
+        satz_text = f"{zahl.replace('.', ',')} %"
+        # „7 %“ darf „17 %“ nicht treffen; Komma und Punkt gelten beide.
+        satz_muster = re.compile(
+            rf"(?<![\d.,]){re.escape(zahl).replace(chr(92) + '.', '[.,]')}\s?%" + ("|steuerfrei" if satz == 0 else ""))
+    konten = _konten(db, tenant_id)
+    ergebnis: dict[str, list[Kontovorschlag]] = {}
+    for feld, (_name, art, _art_text, stichworte) in KONTENROLLEN.items():
+        gereiht: list[tuple[int, str, Kontovorschlag]] = []
+        for nummer, (name, konto_art, kategorie) in konten.items():
+            if konto_art != art:
+                continue
+            klein = name.lower()
+            zum_satz = bool(satz_muster and satz_muster.search(klein))
+            zur_rolle = (kategorie == "tax" and feld != "revenue_account") or any(w in klein for w in stichworte)
+            if feld != "revenue_account" and satz == 0:
+                zum_satz = False  # ein steuerfreier Schluessel braucht kein Steuerkonto
+            grund = (
+                f"passt zum Satz {satz_text}" if zum_satz and zur_rolle
+                else "nach Bezeichnung" if zur_rolle
+                else None
+            )
+            gereiht.append((0 if zum_satz and zur_rolle else 1 if zur_rolle else 2, nummer,
+                            Kontovorschlag(account_number=nummer, account_name=name, grund=grund)))
+        ergebnis[feld] = [v for _rang, _nr, v in sorted(gereiht, key=lambda e: (e[0], e[1]))]
+    return ergebnis
 
 
 # --- Grundausstattung SKR03 ----------------------------------------------------------------------

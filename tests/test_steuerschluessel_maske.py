@@ -172,6 +172,74 @@ def test_die_liste_sagt_wofuer_ein_schluessel_bucht(haus):
     assert liste["24"]["ustva_position"] is None
 
 
+# --- Konten aus dem Kontenplan -------------------------------------------------------------------
+
+def _vorschlaege(haus, satz: str | None) -> dict[str, list[dict]]:
+    antwort = haus["client"].get("/tax-keys/kontenvorschlaege", params={"steuersatz": satz} if satz else None)
+    assert antwort.status_code == 200, antwort.text
+    return antwort.json()
+
+
+def test_schlaegt_je_feld_konten_der_passenden_art_vor_und_reiht_nach_satz(haus):
+    v = _vorschlaege(haus, "7")
+    assert (v["credit_account"][0], v["debit_account"][0], v["revenue_account"][0]) == (
+        {"account_number": "1771", "account_name": "Umsatzsteuer 7 %", "grund": "passt zum Satz 7 %"},
+        {"account_number": "1571", "account_name": "Abziehbare Vorsteuer 7 %", "grund": "passt zum Satz 7 %"},
+        {"account_number": "8300", "account_name": "Erlöse 7 % USt", "grund": "passt zum Satz 7 %"},
+    )
+    v = _vorschlaege(haus, "19,0")
+    assert [k[0]["account_number"] for k in (v["credit_account"], v["debit_account"], v["revenue_account"])] == [
+        "1776", "1576", "8400"]
+    # Das andere Steuerkonto bleibt waehlbar, steht aber dahinter.
+    nach_nr = {k["account_number"]: k for k in v["credit_account"]}
+    assert nach_nr["1771"]["grund"] == "nach Bezeichnung"
+    # Nur Konten der passenden Art: kein Forderungs- und kein Erloeskonto als Umsatzsteuerkonto.
+    assert not {"1400", "1576", "8400"} & set(nach_nr)
+    assert "1776" not in {k["account_number"] for k in v["revenue_account"]}
+
+
+def test_sieben_prozent_trifft_nicht_siebzehn(haus):
+    with SessionLocal() as db:
+        db.execute(text(
+            "INSERT INTO domain_erp.chart_of_accounts (id, tenant_id, account_number, account_name, account_type, "
+            " category, is_active) VALUES (:id, :t, '1777', 'Umsatzsteuer 17 %', 'liability', 'tax', true)"),
+            {"id": f"{haus['mandant']}-1777", "t": haus["mandant"]})
+        db.commit()
+    nach_nr = {k["account_number"]: k["grund"] for k in _vorschlaege(haus, "7")["credit_account"]}
+    assert (nach_nr["1771"], nach_nr["1777"]) == ("passt zum Satz 7 %", "nach Bezeichnung")
+
+
+def test_ohne_satz_und_bei_null_wird_kein_steuerkonto_zum_satz_gereiht(haus):
+    for satz in (None, "0", "neunzehn"):
+        v = _vorschlaege(haus, satz)
+        assert {k["grund"] for k in v["credit_account"] if k["account_number"] in ("1771", "1776")} == {"nach Bezeichnung"}
+
+
+def test_gesperrte_konten_werden_nicht_vorgeschlagen_und_nicht_angenommen(haus):
+    with SessionLocal() as db:
+        db.execute(text(
+            "UPDATE domain_erp.chart_of_accounts SET posting_blocked = true WHERE tenant_id = :t AND account_number = '8300'"),
+            {"t": haus["mandant"]})
+        db.commit()
+    assert "8300" not in {k["account_number"] for k in _vorschlaege(haus, "7")["revenue_account"]}
+    ergebnis = haus["client"].post(WEG, json=_eingabe(revenue_account="8300")).json()
+    assert ergebnis["success"] is False
+    assert "Erlöskonto 8300 steht nicht im Kontenplan oder ist gesperrt" in ergebnis["validationErrors"][0]["message"]
+
+
+@pytest.mark.parametrize("abweichend,meldung", [
+    # 1400 war bis zum 13.10.2026 die Vorgabe der Maske fuer das „Konto Soll“.
+    ({"credit_account": "1400"}, "Umsatzsteuerkonto 1400 (Forderungen aus Lieferungen und Leistungen) ist kein Verbindlichkeitskonto"),
+    ({"debit_account": "1776"}, "Vorsteuerkonto 1776 (Umsatzsteuer 19 %) ist kein Aktivkonto"),
+    ({"revenue_account": "1776"}, "Erlöskonto 1776 (Umsatzsteuer 19 %) ist kein Erlöskonto"),
+])
+def test_ein_konto_der_falschen_art_wird_abgelehnt(haus, abweichend, meldung):
+    ergebnis = haus["client"].post(WEG, json=_eingabe(**abweichend)).json()
+    assert ergebnis["success"] is False, ergebnis
+    assert meldung in ergebnis["validationErrors"][0]["message"], ergebnis
+    assert _zeilen(haus["mandant"], "5") == []
+
+
 # --- Zugang und Ladefehler ----------------------------------------------------------------------
 
 def test_lesen_reicht_nicht_zum_speichern(haus):
@@ -215,6 +283,9 @@ def test_maske_ist_eine_screen_definition_ohne_vorgabewert():
     # Erloeskonto und Paragraf 24 fehlten der handgebauten Maske.
     assert {"revenue_account", "par_24_ustg", "credit_account", "debit_account"} <= set(felder)
     assert not [k for k, f in felder.items() if "default" in f or "defaultValue" in f]
+    # Konten sind eine Auswahl aus dem Kontenplan, kein Freitext.
+    for konto in ("credit_account", "debit_account", "revenue_account"):
+        assert (felder[konto]["type"], felder[konto]["dataSourceKey"]) == ("select", "konten")
     # Jedes Feld der Maske kennt der Kommando-Weg.
     assert set(felder) <= {"code", *tax_keys._SPALTEN}
     speichern = next(a for a in sd["actions"] if a["key"] == "speichern")

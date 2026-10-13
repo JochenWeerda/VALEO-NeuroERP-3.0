@@ -51,6 +51,23 @@ export type SteuerschluesselEingabe = {
   active: boolean
 }
 
+/** Ein Konto aus dem Kontenplan, das der Art nach in ein Feld des Steuerschluessels passt. */
+export type Kontovorschlag = {
+  account_number: string
+  account_name: string
+  /** Warum es vorn steht (z. B. „passt zum Satz 19 %“); leer = passt nur der Art nach. */
+  grund?: string | null
+}
+
+export type Kontenvorschlaege = Record<'credit_account' | 'debit_account' | 'revenue_account', Kontovorschlag[]>
+
+/** Konten je Feld, die fachlich naechsten zuerst. Der Server reiht; gewaehlt wird hier nichts. */
+export async function ladeKontenvorschlaege(steuersatz: string): Promise<Kontenvorschlaege> {
+  return (
+    await apiClient.get<Kontenvorschlaege>(`${WEG}/kontenvorschlaege`, { params: steuersatz ? { steuersatz } : undefined })
+  ).data
+}
+
 /** Alle Schluessel des Mandanten, auch inaktive. */
 export async function listeSteuerschluessel(): Promise<Steuerschluessel[]> {
   return (await apiClient.get<Steuerschluessel[]>(WEG, { params: { active_only: false } })).data

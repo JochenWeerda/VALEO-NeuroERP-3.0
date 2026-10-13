@@ -1997,6 +1997,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Data Sources:**
 
 - `steuerschluessel` → `/api/v1/finance/tax-keys`
+- `konten` → `/api/v1/finance/tax-keys/kontenvorschlaege`
 
 **MCP-Tools (Domäne):**
 

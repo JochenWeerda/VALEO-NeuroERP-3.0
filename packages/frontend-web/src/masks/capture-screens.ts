@@ -2915,6 +2915,11 @@ export const financeSteuerschluesselScreen = {
       "endpoint": "/api/v1/finance/tax-keys",
       "pageSize": 200,
       "table": "domain_erp.tax_keys"
+    },
+    {
+      "key": "konten",
+      "endpoint": "/api/v1/finance/tax-keys/kontenvorschlaege",
+      "table": "domain_erp.chart_of_accounts"
     }
   ],
   "summary": [
@@ -2953,20 +2958,26 @@ export const financeSteuerschluesselScreen = {
     {
       "key": "credit_account",
       "label": "Umsatzsteuerkonto",
-      "type": "text",
-      "helpText": "Für Verkaufsbelege. Bei einem Satz über 0 Pflicht, damit gebucht wird."
+      "type": "select",
+      "options": [],
+      "dataSourceKey": "konten",
+      "helpText": "Verbindlichkeitskonto aus dem Kontenplan, für Verkaufsbelege. Bei einem Satz über 0 Pflicht, damit gebucht wird."
     },
     {
       "key": "revenue_account",
       "label": "Erlöskonto",
-      "type": "text",
-      "helpText": "Ohne Erlöskonto wird mit dem Schlüssel kein Verkaufsbeleg automatisch gebucht."
+      "type": "select",
+      "options": [],
+      "dataSourceKey": "konten",
+      "helpText": "Erlöskonto aus dem Kontenplan. Ohne Erlöskonto wird mit dem Schlüssel kein Verkaufsbeleg automatisch gebucht."
     },
     {
       "key": "debit_account",
       "label": "Vorsteuerkonto",
-      "type": "text",
-      "helpText": "Für Eingangsbelege."
+      "type": "select",
+      "options": [],
+      "dataSourceKey": "konten",
+      "helpText": "Aktivkonto aus dem Kontenplan, für Eingangsbelege."
     },
     {
       "key": "par_24_ustg",

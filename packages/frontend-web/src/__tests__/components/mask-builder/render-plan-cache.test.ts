@@ -23,6 +23,16 @@ describe('Bauplan-Cache', () => {
     expect(feld(offen, 'code')?.readOnly).toBe(false)
   })
 
+  it('uebernimmt eine neu beschriftete Auswahl bei gleichen Werten', () => {
+    const mit = (label: string): ScreenDefinition => ({
+      ...offen,
+      fields: offen.fields.map((f) => (f.key === 'credit_account' ? { ...f, options: [{ value: '1776', label }] } : f)),
+    })
+    expect(feld(mit('1776 – Umsatzsteuer 19 %'), 'credit_account')?.options?.[0].label).toBe('1776 – Umsatzsteuer 19 %')
+    expect(feld(mit('1776 – Umsatzsteuer 19 % (Vorschlag)'), 'credit_account')?.options?.[0].label)
+      .toBe('1776 – Umsatzsteuer 19 % (Vorschlag)')
+  })
+
   it('uebernimmt einen geaenderten Untertitel', () => {
     const plan = compileRenderPlanFromScreenDefinition({ ...offen, subtitle: 'Schlüssel 3 bearbeiten' }, { permissions: [] })
     expect(JSON.stringify(plan)).toContain('Schlüssel 3 bearbeiten')

@@ -22,8 +22,10 @@ import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useTouchDevice } from '@/hooks/useTouchDevice'
 import { financeSteuerschluesselScreen } from '@/masks/capture-screens'
 import {
+  ladeKontenvorschlaege,
   listeSteuerschluessel,
   speichereSteuerschluessel,
+  type Kontovorschlag,
   type Steuerschluessel,
   type SteuerschluesselEingabe,
 } from '@/lib/api/steuerschluessel'
@@ -34,6 +36,9 @@ import {
  *
  * Aus diesen Schluesseln nehmen alle Belege Satz und Konten. Deshalb gibt es keinen Vorgabewert,
  * weder fuer den Satz noch fuer ein Konto; geprueft wird auf dem Server.
+ *
+ * Die Konten sind eine Auswahl aus dem Kontenplan: je Feld nur Konten der passenden Art, die zum
+ * Satz passenden zuerst. Der Server reiht, die Seite waehlt nichts vor.
  */
 
 const leer: Record<string, unknown> = {
@@ -46,6 +51,19 @@ const PFLICHT = ['code', 'bezeichnung', 'steuersatz', 'gueltig_von']
 const RECHTE = ['finance.steuerschluessel.write']
 const LISTE = ['finance', 'tax-keys']
 const BUCHT_NICHT = 'Bucht nicht automatisch'
+const KONTENFELDER = ['credit_account', 'revenue_account', 'debit_account'] as const
+type Kontenfeld = (typeof KONTENFELDER)[number]
+
+function kontenAuswahl(vorschlaege: Kontovorschlag[], gewaehlt: string): Array<{ value: string; label: string }> {
+  const auswahl = vorschlaege.map((k) => ({
+    value: k.account_number,
+    label: `${k.account_number} – ${k.account_name}${k.grund?.startsWith('passt') ? ` (Vorschlag: ${k.grund})` : ''}`,
+  }))
+  // Ein hinterlegtes Konto, das der Kontenplan nicht mehr anbietet, bleibt sichtbar — der Server lehnt es beim Speichern ab.
+  return gewaehlt && !auswahl.some((o) => o.value === gewaehlt)
+    ? [{ value: gewaehlt, label: `${gewaehlt} – nicht im Kontenplan, gesperrt oder falsche Kontenart` }, ...auswahl]
+    : auswahl
+}
 
 function text(wert: unknown): string {
   return String(wert ?? '').trim()
@@ -72,6 +90,13 @@ export default function SteuerschluesselPage(): JSX.Element {
   const schluessel = useMemo(() => liste.data ?? [], [liste.data])
 
   const [geladen, setGeladen] = useState<Steuerschluessel | null>(null)
+  // Der Satz aus der Eingabe reiht die Kontenvorschlaege.
+  const [satz, setSatz] = useState('')
+  const konten = useQuery({
+    queryKey: [...LISTE, 'kontenvorschlaege', satz],
+    queryFn: () => ladeKontenvorschlaege(satz),
+    placeholderData: (vorher) => vorher,
+  })
   const [laeuft, setLaeuft] = useState(false)
   const [fragen, setFragen] = useState<SteuerschluesselEingabe | null>(null)
   const sperre = useRef(false)
@@ -81,6 +106,9 @@ export default function SteuerschluesselPage(): JSX.Element {
   useEffect(() => {
     if (liste.isError) toast.error('Steuerschlüssel nicht geladen', { description: getAxiosErrorMessage(liste.error) })
   }, [liste.error, liste.isError])
+  useEffect(() => {
+    if (konten.isError) toast.error('Kontenplan nicht geladen', { description: getAxiosErrorMessage(konten.error) })
+  }, [konten.error, konten.isError])
 
   const schema = useMemo<ScreenDefinition>(() => ({
     ...financeSteuerschluesselScreen,
@@ -93,13 +121,24 @@ export default function SteuerschluesselPage(): JSX.Element {
         : schluessel.filter((k) => k.active && (k.verwendung ?? '').startsWith(BUCHT_NICHT)).length),
     })),
     // Der Schluessel entscheidet ueber Anlage oder Aenderung; beim Bearbeiten steht er fest.
-    fields: financeSteuerschluesselScreen.fields.map((feld) => ({ ...feld, readOnly: feld.key === 'code' && geladen !== null })),
+    fields: financeSteuerschluesselScreen.fields.map((feld) => ({
+      ...feld,
+      readOnly: feld.key === 'code' && geladen !== null,
+      ...(KONTENFELDER.includes(feld.key as Kontenfeld)
+        ? {
+            options: kontenAuswahl(konten.data?.[feld.key as Kontenfeld] ?? [], geladen?.[feld.key as Kontenfeld] ?? ''),
+            placeholder: 'Kein Konto',
+          }
+        : {}),
+    })),
     actions: financeSteuerschluesselScreen.actions.map((aktion) => ({ ...aktion, disabled: laeuft })),
-  }), [geladen, isTouch, laeuft, schluessel])
+  }), [geladen, isTouch, konten.data, laeuft, schluessel])
 
   const plan = useMemo(() => compileRenderPlanFromScreenDefinition(schema, { permissions: RECHTE }), [schema])
   const form = useUniversalFormState({ screen: schema, initialValues: leer })
   const { resetForm } = form
+  const satzEingabe = text(form.values.steuersatz)
+  useEffect(() => setSatz(satzEingabe), [satzEingabe])
 
   const zeige = useCallback((k: Steuerschluessel | null) => {
     setGeladen(k)

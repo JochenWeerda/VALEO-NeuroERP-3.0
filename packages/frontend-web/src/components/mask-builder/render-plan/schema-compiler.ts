@@ -213,7 +213,8 @@ export function compileTwin(schema: ScreenDefinition): RenderTwinPlan | undefine
 function schemaVolatility(schema: ScreenDefinition): string {
   const summary = (schema.summary ?? []).map((item) => `${item.key}:${String(item.value)}`).join(',')
   const options = (schema.fields ?? []).map((field) => (
-    field.options ? `${field.key}=${field.options.map((option) => String(option.value)).join('|')}` : ''
+    // Auch die Beschriftung: Eine Auswahl kann bei gleichen Werten neu beschriftet werden (Vorschlagshinweis).
+    field.options ? `${field.key}=${field.options.map((option) => `${String(option.value)}~${option.label}`).join('|')}` : ''
   )).join(';')
   const actions = (schema.actions ?? []).map((action) => `${action.key}${action.disabled ? '!' : ''}`).join(',')
   // Schreibschutz und Untertitel aendern sich zur Laufzeit (ein geladener Datensatz sperrt sein

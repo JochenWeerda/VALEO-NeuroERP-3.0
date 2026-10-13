@@ -3103,6 +3103,9 @@ def build_finance_steuerschluessel_screen_definition() -> dict[str, Any]:
         "dataSources": [
             {"key": "steuerschluessel", "endpoint": "/api/v1/finance/tax-keys", "pageSize": 200,
              "table": "domain_erp.tax_keys"},
+            # Konten der passenden Art aus dem Kontenplan, die fachlich naechsten zuerst.
+            {"key": "konten", "endpoint": "/api/v1/finance/tax-keys/kontenvorschlaege",
+             "table": "domain_erp.chart_of_accounts"},
         ],
         "summary": [
             {"key": "anzahl", "label": "Steuerschlüssel", "value": "0"},
@@ -3114,12 +3117,19 @@ def build_finance_steuerschluessel_screen_definition() -> dict[str, Any]:
             {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
             {"key": "steuersatz", "label": "Steuersatz in %", "type": "number", "required": True,
              "helpText": "Es gibt keinen Vorgabewert. Steuerfrei ist 0."},
-            {"key": "credit_account", "label": "Umsatzsteuerkonto", "type": "text",
-             "helpText": "Für Verkaufsbelege. Bei einem Satz über 0 Pflicht, damit gebucht wird."},
-            {"key": "revenue_account", "label": "Erlöskonto", "type": "text",
-             "helpText": "Ohne Erlöskonto wird mit dem Schlüssel kein Verkaufsbeleg automatisch gebucht."},
-            {"key": "debit_account", "label": "Vorsteuerkonto", "type": "text",
-             "helpText": "Für Eingangsbelege."},
+            # Die Auswahl kommt aus dem Kontenplan: je Feld nur Konten der passenden Art, zum Satz passende
+            # zuerst. Vorgeschlagen wird, gewaehlt wird nicht — es gibt keinen Vorgabewert.
+            {"key": "credit_account", "label": "Umsatzsteuerkonto", "type": "select", "options": [],
+             "dataSourceKey": "konten",
+             "helpText": "Verbindlichkeitskonto aus dem Kontenplan, für Verkaufsbelege. "
+                         "Bei einem Satz über 0 Pflicht, damit gebucht wird."},
+            {"key": "revenue_account", "label": "Erlöskonto", "type": "select", "options": [],
+             "dataSourceKey": "konten",
+             "helpText": "Erlöskonto aus dem Kontenplan. Ohne Erlöskonto wird mit dem Schlüssel kein "
+                         "Verkaufsbeleg automatisch gebucht."},
+            {"key": "debit_account", "label": "Vorsteuerkonto", "type": "select", "options": [],
+             "dataSourceKey": "konten",
+             "helpText": "Aktivkonto aus dem Kontenplan, für Eingangsbelege."},
             {"key": "par_24_ustg", "label": "Durchschnittssatz nach § 24 UStG", "type": "boolean"},
             {"key": "reverse_charge", "label": "Reverse Charge (§ 13b UStG)", "type": "boolean",
              "helpText": "Verlangt den Steuersatz 0; wird nicht automatisch gebucht."},
