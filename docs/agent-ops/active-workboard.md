@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## TEST-DATABASE-WRITE-BOUNDARY-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** globale autouse-Tenantseed-Fixture verbindet sich ohne Test-DB-Freigabe mit der konfigurierten Entwicklungsdatenbank. **Ziel:** lokale DB-Fixtures nur auf ausdruecklich freigegebenem bestehendem Testpruefstand schreiben lassen; CI darf ausschliesslich seine bereitgestellte DB verwenden. **Dateibesitz:** tests/conftest.py nur Datenbankautorisierung vor Seed/require_db; neue fokussierte Grenzvertraege; eigene QA/Workboard. **Abnahme:** keine DB-Verbindung fuer unkonfigurierte Unit-Tests; effektive und deklarierte Test-URL stimmen ueberein, lokale Entwicklungsdatenbank bleibt gesperrt; CI-job-DB ohne neue Ressourcen erlaubt. Bestehender valeo_probe, keine Migration/Reset/Container/DB. Authfixtures und Produktionscode unveraendert.
+
+**Lieferung:** Globale Seed/require_db-Fixtures verbinden nur mit ausdruecklich autorisiertem Testpruefstand; zehn Grenzfaelle bestanden, inklusive Stopp vor Verbindung und CI-Job-URL. Direkte DB-Zugriffe weiterer Tests bleiben zu pruefen. Gemeinsam 101 Faelle streng auf vorhandenem valeo_probe bestanden; keine neue DB/Container/Migration/Reset. Nachweis: ci-identity-test-isolation-20261013.md. Gesamt-CI und neun weitere Fachdateien bleiben offen.
+
+## CI-WORKFLOW-IDENTITY-ISOLATION-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** 13 rote Workflow-HTTP-Faelle senden dev-token; Fixture loescht alle gemeinsamen Workflowdaten und erstellt Tabellen. **Ziel:** Produktionsmiddleware mit signierter ausdruecklicher Testidentitaet nutzen und Fachdaten ueber eigene Belegnummern/Savepointrollback isolieren. **Dateibesitz:** tests/test_workflow_api.py nur Auth-/DB-Fixture und Testbelegnummern; bestehende Assertions unveraendert; eigene QA/Workboard. **Abnahme:** echte RSA-Validierung bleibt aktiv, nur JWKS-Transport und Sitzungsstore im ausdruecklichen vorhandenen Probe-Kontext isoliert; keine globalen Authoverrides/Tabellenresets/DDL zur Vorbereitung; fremde Datensaetze bleiben erhalten. Vorhandener valeo_probe mit --status, keine Migration/DB/Container/Reset. Workflowmodell ohne Tenant und Payloadrollen bleiben dokumentierte offene Produktionsbefunde im Identity-Elternclaim.
+
+**Lieferung:** 13 Workflowfaelle mit signierter Identitaet und eigener Savepoint-Isolation bestanden, keine pauschale Loeschung/DDL in der Testvorbereitung. Produktionsbefunde Mandantenmodell/Payloadrollen/Audit bleiben offen. Gemeinsam 101 Faelle streng auf vorhandenem valeo_probe bestanden; keine neue DB/Container/Migration/Reset. Nachweis: ci-identity-test-isolation-20261013.md. Gesamt-CI und neun weitere Fachdateien bleiben offen.
+
+## CI-ISOLATED-TENANT-FIXTURES-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** PostgreSQL-CI 38360982633: 19 eBilanz- und zehn Lead/PDF-Faelle scheitern an nachgezogener Tenant-Dependency. **Ziel:** bereits isolierte Fach-Testapps mit ausdruecklichem Testmandanten versehen. **Dateibesitz:** tests/test_ebilanz_honest_persistence.py und tests/test_user_decisions_lead_pdf.py ausschliesslich deren Miniapp-Fixture; eigene QA/Workboard. **Abnahme:** Fach-/Rollen-/Persistenzpruefungen bleiben unveraendert, Savepointrollback isoliert eigene Daten; kein Override im Produktionsdienst, echte RSA-/Tenantabnahme separat unveraendert. Vorhandenen valeo_probe mit --status pruefen, keine Migration/DB/Container/Reset. Weitere zehn CI-Dateien bleiben offen und werden einzeln inventarisiert.
+
+**Lieferung:** Zwei isolierte Fach-Testapps deklarieren ihren Testmandanten, Produktionsauth unveraendert. 78 Faelle bestanden, darunter 29 vorher rote Fachfaelle und unveraenderte RSA-/Produktionsauth-Gegenproben. Bestehender valeo_probe, Transaktionsrollback, kein Reset/Migration. Nachweis: ci-isolated-tenant-fixtures-20261013.md. Weitere CI-Dateien und globale Testdatenbankgrenze bleiben offen.
+
 ## STEUERSCHLUESSEL-BELEGE-20261013 — Teil 1 abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** Teil 1 abgeschlossen 2026-10-13; Teil 2 ff. offen (Tabelle im QA-Dokument).
