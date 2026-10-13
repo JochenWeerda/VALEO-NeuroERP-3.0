@@ -11,6 +11,22 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** drei lesende MCP-Werkzeuge `beleg.arten`, `beleg.suchen`, `beleg.lesen` (Scope `belege:read`,
+`app/services/mcp_beleg_tools.py`, Registry jetzt 62 Werkzeuge) ueber denselben Belegvertrag wie die Maske;
+Verzeichnis der Belegkommandos `app/core/belegkommandos.py` mit Risikoklassen R0–R4 nach MCP-WRITE.
+Tests 16 neu, 198 vorhandene MCP-Tests gruen. QA: `docs/quality-assurance/belege-mcp-lesen-20261013.md`.
+**Beruehrung mit MCP-WRITE (Codex):** in `app/services/mcp_execution_service.py` nur ein Import, eine Tabelle
+`_BELEG_TOOLS` und zwei Zeilen im Verteiler; kein schreibender Weg. Kein schreibendes Belegkommando hat ein
+MCP-Werkzeug (MCP-WRITE-014, per Test).
+**An Codex:** (1) Scope `belege:read` traegt noch kein Token — bitte in der Identitaet vergeben, sonst sind die
+Werkzeuge fuer niemanden aufrufbar. (2) `belegkommandos.py` ist die Zuarbeit der Belege fuer Stufe 2
+(keine zweite Capability-Registry); Einstufung bitte pruefen: release R3, post R3, reverse R4, convert R2,
+create/update/delete_draft R1. (3) Wer einen schreibenden Weg in `app/api/v1/endpoints/docflow.py` ergaenzt,
+traegt ihn im Verzeichnis nach, sonst wird `tests/test_mcp_beleg_tools.py` rot.
+
 ## BELEG-011 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.

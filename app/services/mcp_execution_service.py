@@ -24,7 +24,7 @@ from app.api.v1.endpoints.reklamation_api import (
 )
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.reklamation import ReklamationsStatus, ReklamationZustandsmaschine
-from app.services import crm_lead_service
+from app.services import crm_lead_service, mcp_beleg_tools
 from app.services.crm_kontakt_service import CrmKontaktService
 from app.services.document_allocation_service import LineToRegister
 from app.services.einkauf_compat_service import EinkaufCompatService, _NICHT_BESTELLBAR
@@ -648,6 +648,14 @@ def _rows_or_empty(db: Session, sql: str, params: dict) -> list[dict]:
         return []
 
 
+# Lesende Belegwerkzeuge (BELEG-013): derselbe Belegvertrag wie die Maske.
+_BELEG_TOOLS = {
+    "beleg.arten": mcp_beleg_tools.beleg_arten,
+    "beleg.suchen": mcp_beleg_tools.beleg_suchen,
+    "beleg.lesen": mcp_beleg_tools.beleg_lesen,
+}
+
+
 def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, tenant_header: str | None) -> dict:
     """Use the verified identity, never a tenant or actor from tool arguments."""
     actor = user.get("sub")
@@ -700,6 +708,8 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _document_search(db, request, actor, tenant)
     if request.tool_name == "dms.gobd.export_status":
         return _gobd_export_status(db, request, actor, tenant)
+    if request.tool_name in _BELEG_TOOLS:
+        return _BELEG_TOOLS[request.tool_name](db, request, actor, tenant)
     if request.tool_name == "compliance.gate.status":
         return _compliance_gate_status(db, request, actor, tenant)
     if request.tool_name == "compliance.sanctions.check":

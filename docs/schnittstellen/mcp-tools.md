@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 59 Tools in 18 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 62 Tools in 19 Domaenen.
 
 ## Uebersicht
 
@@ -27,6 +27,9 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 59 Tools in 18 Domaenen.
 | `agrar.feeding.supply_handoff` | agrar | `agrar:write` | ja | mittel | nein |
 | `agrar.ration.transition` | agrar | `agrar:write` | ja | mittel | nein |
 | `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein |
+| `beleg.arten` | belege | `belege:read` | ja | niedrig | nein |
+| `beleg.lesen` | belege | `belege:read` | ja | niedrig | nein |
+| `beleg.suchen` | belege | `belege:read` | ja | niedrig | nein |
 | `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein |
 | `compliance.sanctions.check` | compliance | `compliance:write` | ja | mittel | nein |
 | `crm.activity.create` | crm | `crm:write` | ja | mittel | nein |
@@ -584,6 +587,188 @@ Listet Wiegescheine des Authentifizierungs-Mandanten optional nach ticket_id, Ko
     "limit": {
       "type": "integer",
       "default": 50
+    }
+  },
+  "required": []
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array"
+    },
+    "count": {
+      "type": "integer"
+    }
+  }
+}
+```
+
+## Domaene: belege
+
+### `beleg.arten` — Belegarten und Belegkommandos beschreiben
+
+Beschreibt die Belegarten des Belegvertrags (Bezeichnung, Partnerrolle, Steuerrichtung, mit oder ohne Preise, ob Finance bucht, Folgebelege) und das Verzeichnis der Belegkommandos (schreibend, Risiko, Freigabe, Idempotenz, Adresse). Keine Parameter. HTTP tool_name=beleg.arten. Scope belege:read; nur Lesen.
+
+- **Scope:** `belege:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {},
+  "required": []
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "vertragsversion": {
+      "type": "string"
+    },
+    "status": {
+      "type": "array"
+    },
+    "preisfelder": {
+      "type": "array"
+    },
+    "belegarten": {
+      "type": "array"
+    },
+    "kommandos": {
+      "type": "array"
+    }
+  }
+}
+```
+
+### `beleg.lesen` — Beleg lesen
+
+Liefert einen Beleg des Authentifizierungs-Mandanten in der Form des Belegvertrags (docs/schnittstellen/contracts/belegvertrag.schema.json): Kopf, Partner, Positionen mit offener Menge, Summen je Steuerschluessel, Buchungsstand mit Grund, Belegkette, Statushistorie und die im Zustand moeglichen Aktionen mit Kommando und Sperrgrund. Dieselbe Antwort wie GET /api/v1/belege/{belegart}/{beleg_id}. HTTP tool_name=beleg.lesen. Scope belege:read; nur Lesen.
+
+- **Scope:** `belege:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "belegart": {
+      "type": "string",
+      "enum": [
+        "sales_offer",
+        "sales_order",
+        "sales_delivery",
+        "sales_invoice",
+        "sales_credit_memo",
+        "purchase_order",
+        "goods_receipt",
+        "purchase_invoice",
+        "purchase_credit_memo"
+      ]
+    },
+    "beleg_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "belegart",
+    "beleg_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "beleg": {
+      "type": "object"
+    }
+  }
+}
+```
+
+### `beleg.suchen` — Belege suchen
+
+Sucht Belege im Authentifizierungs-Mandanten nach Belegart, Status, Teil der Belegnummer oder Partnernummer; neueste zuerst, hoechstens 50. Belegarten ohne Preise (Lieferschein, Wareneingang) kommen ohne Betrag. HTTP tool_name=beleg.suchen. Scope belege:read; nur Lesen.
+
+- **Scope:** `belege:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "belegart": {
+      "type": "string",
+      "nullable": true,
+      "enum": [
+        "sales_offer",
+        "sales_order",
+        "sales_delivery",
+        "sales_invoice",
+        "sales_credit_memo",
+        "purchase_order",
+        "goods_receipt",
+        "purchase_invoice",
+        "purchase_credit_memo"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "nullable": true,
+      "enum": [
+        "draft",
+        "open",
+        "released",
+        "posted",
+        "reversed",
+        "cancelled"
+      ]
+    },
+    "beleg_nr": {
+      "type": "string",
+      "nullable": true,
+      "description": "Teil der Belegnummer"
+    },
+    "partner_nr": {
+      "type": "string",
+      "nullable": true,
+      "description": "Kunden- bzw. Lieferantennummer"
+    },
+    "limit": {
+      "type": "integer",
+      "default": 20
     }
   },
   "required": []

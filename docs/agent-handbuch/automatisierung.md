@@ -38,6 +38,9 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `agrar.feeding.supply_handoff` | agrar | `agrar:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `agrar.ration.transition` | agrar | `agrar:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `agrar.weighing_ticket.list` | agrar | `agrar:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `beleg.arten` | belege | `belege:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `beleg.lesen` | belege | `belege:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `beleg.suchen` | belege | `belege:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `compliance.gate.status` | compliance | `compliance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `compliance.sanctions.check` | compliance | `compliance:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `crm.activity.create` | crm | `crm:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |

@@ -378,6 +378,7 @@ domains:
       - compliance
       - dms
       - archive
+      - belege
       - docflow
       - dokumente
       - doc_nachweisraum

@@ -4896,6 +4896,33 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
+      "tool_id": "beleg.arten",
+      "domain": "belege",
+      "scope": "belege:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "beleg.suchen",
+      "domain": "belege",
+      "scope": "belege:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "beleg.lesen",
+      "domain": "belege",
+      "scope": "belege:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
       "tool_id": "compliance.gate.status",
       "domain": "compliance",
       "scope": "compliance:read",
