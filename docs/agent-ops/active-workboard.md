@@ -11,6 +11,19 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-010 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** `app/core/belegvertrag.py` — die eine Form, in der eine Belegmaske einen Beleg liest (`Beleg`),
+neun Varianten (`BELEGARTEN`), Pruefung `pruefe`, `ohne_preise`, Abbildung der Feldnamen der fuenf
+Beleg-ScreenDefinitions (`ABBILDUNG`). Erzeugt: `docs/schnittstellen/contracts/belegvertrag.schema.json`,
+`docs/schnittstellen/belegvertrag.md` (`scripts/generate_belegvertrag.py [--check]`). Tests 27.
+QA: `docs/quality-assurance/belegvertrag-20261013.md`.
+**Fuer alle:** Wer in `sales/sales-order`, `sales/delivery-note`, `sales/invoice`, `einkauf/purchase-order` oder
+`finance/ap-invoice` ein Kopffeld oder eine Positionsspalte aendert, traegt es in `ABBILDUNG` nach und erzeugt
+die beiden Dateien neu; wer in DocFlow `TRANSITIONS` aendert, zieht `BELEGARTEN` nach. Sonst wird
+`tests/test_belegvertrag.py` rot.
+
 ## SICHTPRUEFUNG-MANDANT-20261013 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Entscheidung des Auftraggebers: eigener Mandant
