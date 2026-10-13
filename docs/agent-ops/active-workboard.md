@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-DRAFT-WRITE-CAS-20261013 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Inhaltsupdate verlangt angezeigte Revision unter SQL-/Speicherschreibsperre; Anlegen ersetzt keinen bestehenden Entwurf. **Dateibesitz:** app/services/studio_draft_store.py; app/api/v1/endpoints/studio_drafts.py; Studio-API/Page und Tests; Studio-Python-Tests; scripts/belegmasken_veroeffentlichen.py; docs/quality-assurance/studio-draft-write-cas-20261013.md. **Abnahme:** stale/missing Revision schreibt nichts, gleichzeitige Bearbeiter verlieren keine Aenderung still; POST-Dublette meldet Konflikt statt Upsert. **Risiken:** eigene transaktionale Freigabehistorie/Idempotenz folgen; zentrales Audit verlangt lokale Benutzer/E-Mail und darf keine erfundenen Identitaeten bekommen. Keine Migration/DB-Neuanlage.
+
 ## STUDIO-DURABLE-STORAGE-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Kein automatischer fluechtiger Speicher bei fehlender/unerreichbarer SQL-Persistenz; Storageausfaelle in Studio-API kontrolliert abweisen. **Dateibesitz:** app/services/studio_draft_store.py; app/api/v1/endpoints/studio_drafts.py; tests/test_studio_storage_boundary.py; docs/quality-assurance/studio-durable-storage-20261013.md. **Abnahme:** SQL-Ausfall legt keine Speicherdrafts an, API meldet 503 ohne Verbindungsdetails, Runtime-Ausfaelle verschwinden nicht als leerer Katalog; expliziter Testspeicher bleibt moeglich. **Risiken:** unveraenderliche Historie/Idempotenz und Prozesssimulation folgen; keine Migration/DB-Neuanlage.
