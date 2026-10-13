@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
 from decimal import Decimal
 import pytest
 
@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.auth.deps import get_current_user
+from testgrenze import ersetze_mandant
 
 from app.api.v1.endpoints import payment_runs
 from app.core.database import get_db
@@ -18,6 +19,18 @@ class _FakeResult:
         self._fetchone = fetchone
         self._fetchall = list(fetchall or [])
         self.rowcount = rowcount
+
+    def mappings(self):
+        return self
+
+    def first(self):
+        return self._fetchone
+
+    def all(self):
+        return list(self._fetchall)
+
+    def scalar(self):
+        return self._fetchone
 
     def fetchone(self):
         return self._fetchone
@@ -35,6 +48,7 @@ class FakeDb:
             "run-1": {
                 "id": "run-1",
                 "tenant_id": "system",
+                "created_by": "creator",
                 "run_number": "ZL-0001",
                 "execution_date": date(2026, 4, 20),
                 "initiator_name": "VALEO Test GmbH",
@@ -74,6 +88,7 @@ class FakeDb:
             ]
         }
         self.returns = []
+        self.approvals = []
 
     def _run_tuple(self, run):
         return (
@@ -114,6 +129,24 @@ class FakeDb:
     def execute(self, statement, params=None):
         sql = " ".join(str(statement).split())
         params = params or {}
+
+        if "SELECT id, run_number, execution_date, initiator_iban" in sql:
+            run = self.runs.get(params["id"])
+            return _FakeResult(fetchone=run if run and run["tenant_id"] == params["t"] else None)
+        if "SELECT creditor_id, iban, amount, op_id, invoice_number" in sql:
+            return _FakeResult(fetchall=[tuple(item[k] for k in ("creditor_id", "iban", "amount", "op_id", "invoice_number"))
+                                        for item in self.items.get(params["id"], []) if item["tenant_id"] == params["t"]])
+        if "FROM domain_shared.system_properties" in sql:
+            return _FakeResult()
+        if "FROM domain_docflow.approvals" in sql:
+            return _FakeResult(fetchall=self.approvals if params["t"] == "system" and params["id"] == "run-1" else [])
+        if "UPDATE domain_docflow.approvals SET status = 'consumed'" in sql:
+            for approval in self.approvals:
+                if approval["id"] == params["id"]:
+                    approval["status"] = "consumed"
+            return _FakeResult()
+        if "INSERT INTO domain_docflow.approval_log" in sql:
+            return _FakeResult()
 
         if "FROM domain_erp.offene_posten WHERE tenant_id = :tenant_id AND konto_typ = 'kreditoren' AND offen > 0" in sql:
             return _FakeResult(fetchall=[("op-1", "KRED-001", "Lieferant A", Decimal("500.00"), "RE-1", "EUR")])
@@ -243,6 +276,7 @@ class FakeDb:
 
 def _build_client(db: FakeDb) -> TestClient:
     app = FastAPI()
+    ersetze_mandant(app)
     app.include_router(payment_runs.router, prefix="/finance")
     app.dependency_overrides[get_db] = lambda: db
     # Seit 07.10.2026 verlangen die Wege eine Finanzrolle (Rollenmatrix:
@@ -332,6 +366,13 @@ def test_nonexistent_paths_return_404():
 
 def test_execute_and_return_payment_cover_operator_paths(monkeypatch):
     db = FakeDb()
+    # Unit-SQL-Attrappe liefert eine inhaltsgebundene erteilte Freigabe.
+    # Echte Anfrage/Entscheidung und Rollback prueft test_payment_execution_atomicity.
+    from app.services.finance_freigabe import ZahlungslaufFreigabe
+    engine = ZahlungslaufFreigabe(db, "system")
+    db.approvals = [{"id": "approval-1", "action": "post", "status": "granted",
+                     "fingerprint": engine.abdruck(engine.vorgang("run-1", "post"), "post"),
+                     "expires_at": datetime.now(timezone.utc) + timedelta(hours=1), "decided_by": "controller"}]
     client = _build_client(db)
 
     async def _noop(*args, **kwargs):

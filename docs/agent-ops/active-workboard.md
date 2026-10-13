@@ -11,6 +11,27 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FINANCE-TEST-IDENTITY-APPROVAL-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Gemeldete Finanztests an die explizite Test-Anmeldegrenze und zentrale Freigabe anpassen, ohne Produktionsschutz zu lockern. **Dateibesitz:** tests/test_finance_payment_runs_api.py; tests/test_payment_execution_atomicity.py; tests/test_zahlungslauf_mandant.py; tests/test_eingangsrechnung_mandant.py; eigener tests/finance_identity_fixture.py falls notwendig; docs/quality-assurance/finance-test-identity-approval-20261013.md. **Abnahme:** vier gemeldete Dateien auf gemeinsamem valeo_probe; Rollen vor DB, Mandantentrennung, Vier Augen und atomarer Zahlungsabschluss weiter geprueft. **Risiken:** Fake-SQL braucht aktualisierten Engine-Vertrag; keine Freigabe-Bypasses im Produktionscode. DocFlow-Frontendadapter folgt separat.
+
+**Lieferung:** Explizite Test-Mandantengrenze statt Dev-Token-Annahme; echte Zahlungsfreigabe durch zweite Person, Verbrauch und Erhalt bei Rollback geprueft. Vier Finanzdateien und RSA/Token-Nachbarn geprueft; keine Produktionsauth geaendert. QA: finance-test-identity-approval-20261013.md. DocFlow-Frontendadapter folgt separat.
+
+## APPROVAL-001-IMPORT-EINKAUFSMEMO — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** Massenimport von Buchungen (`journal_import`, Freigabe fuer den Abdruck von Mandant, Periode und
+Datei) und Lieferantengutschrift/-belastung (`einkauf_credit_memo`, `einkauf_debit_memo`) an der Approval Engine.
+Tests 9 neu. QA: Nachtrag in `docs/quality-assurance/approval-001-freigabe-20261013.md`.
+**VERHALTENSAENDERUNG fuer alle:** `POST /finance/bulk-journal-import/csv` nimmt den Mandanten aus der Anmeldung
+(`tenant_id` in der Anfrage darf ihn nur bestaetigen) und bucht nur mit Freigabe. `POST /einkauf/credit-memos`,
+`/debit-memos`, `…/buchung`, `…/settle` verlangen Anmeldung, Mandant, Recht des Einkaufs und (Buchen, Verrechnen)
+die Freigabe.
+**An Codex (Identitaet), nicht behoben:** `GET /einkauf/credit-memos`, `/debit-memos`, `…/{id}` und `…/freigabe`
+sind ohne Mandant und ohne Recht; `GET /finance/invoices/{nr}` ebenso (Dokumentspeicher ohne Mandant).
+**Befund:** `…/buchung` der Einkaufsgutschrift schreibt nur einen Vermerk mit ausgedachter Journalnummer — im
+Hauptbuch entsteht nichts; fuehrend ist DocFlow `purchase_credit_memo`.
+
 ## MASK-ACTION-ERROR-PERSISTENCE-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Ablehnungen der finalen Maskenaktion nach Dialogabschluss sichtbar halten. **Dateibesitz:** packages/frontend-web/src/components/mask-builder/UniversalNativeDetailPage.tsx; packages/frontend-web/src/__tests__/components/mask-builder/native-detail-preview.test.tsx; docs/quality-assurance/mask-action-error-persistence-20261013.md. **Abnahme:** Serverfehler und Feldvalidierung bleiben nach execute sichtbar; fehlgeschlagene Vorschau dispatcht weiterhin nicht. **Risiken:** Domain-Command-Adapter und Freigabemasken bleiben offen; keine Fachdatenmutation.

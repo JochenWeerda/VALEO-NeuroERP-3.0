@@ -280,7 +280,8 @@ def test_der_alte_weg_storniert_keine_docflow_rechnung(haus):
 def test_der_gemeinsame_weg_kennt_jeden_bereich_und_nur_den_eigenen_mandanten(haus):
     engine_fuer("docflow_document", None, "x")
     assert set(SUBJEKTE) == {"docflow_document", "finance_ap_invoice", "sales_credit_note", "finance_sales_invoice",
-                             "journal_entry", "payment_run"}
+                             "journal_entry", "payment_run", "journal_import", "einkauf_credit_memo",
+                             "einkauf_debit_memo"}
     nummer = _eingangsrechnung(haus, ANNA)
     assert haus["als"](ANNA).get("/approvals/lohnabrechnung/x").status_code == 404
     assert haus["als"](ANNA).get(f"/approvals/finance_ap_invoice/{uuid.uuid4().hex}").status_code == 404

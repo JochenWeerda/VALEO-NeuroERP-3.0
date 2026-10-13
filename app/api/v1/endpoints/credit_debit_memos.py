@@ -12,7 +12,11 @@ import logging
 from app.core.uuid7 import uuid7
 
 from sqlalchemy import text
+from app.auth.beleg_roles import verlange
+from app.auth.deps import get_current_user
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
+from app.services import finance_freigabe
 from app.documents.router_helpers import get_repository, save_to_store, get_from_store, list_from_store
 
 logger = logging.getLogger(__name__)
@@ -21,6 +25,18 @@ from app.api.v1.schemas.credit_debit_memos_schemas import CreditDebitMemosOut
 
 
 router = APIRouter(prefix="/einkauf", tags=["procurement", "ap", "memos"])
+
+
+def _akteur(nutzer) -> str:
+    """Die Kennung der geprueften Anmeldung — nicht der Kopf ``X-User-ID``, den jeder setzen kann."""
+    return str(nutzer.get("sub") or "").strip() if isinstance(nutzer, dict) else ""
+
+
+def _memo_des_mandanten(memo_type: str, memo_id: str, repo, tenant_id: str) -> dict:
+    memo = get_from_store(memo_type, memo_id, repo)
+    if not memo or str(memo.get("tenantId") or "") != tenant_id:
+        raise HTTPException(status_code=404, detail=f"{memo_type} not found")
+    return memo
 
 
 def _get_user_id_from_request(request: Request | None) -> str | None:
@@ -176,8 +192,11 @@ async def create_credit_memo(
     memo: CreditMemoCreate,
     db: Session = Depends(get_db),
     request: Request = None,
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> CreditMemoResponse:
     """Erstellt eine neue Gutschrift (Credit Memo)."""
+    verlange(nutzer, "bearbeiten", "purchase_credit_memo")
     logger.info(f"Creating credit memo for supplier {memo.supplierId}")
     try:
         repo = get_repository(db)
@@ -227,6 +246,9 @@ async def create_credit_memo(
             "createdBy": _get_user_id_from_request(request) or "system",
         }
 
+        # Mandant und Ersteller aus der Anmeldung (bis 13.10.2026: kein Mandant, Ersteller aus einem Kopf).
+        credit_memo["tenantId"] = tenant_id
+        credit_memo["createdBy"] = _akteur(nutzer) or credit_memo["createdBy"]
         # Speichere in Store
         save_to_store("credit_memo", memo_id, credit_memo, repo)
         
@@ -242,8 +264,11 @@ async def create_debit_memo(
     memo: DebitMemoCreate,
     db: Session = Depends(get_db),
     request: Request = None,
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> DebitMemoResponse:
     """Erstellt eine neue Belastung (Debit Memo)."""
+    verlange(nutzer, "bearbeiten", "purchase_credit_memo")
     logger.info(f"Creating debit memo for supplier {memo.supplierId}")
     try:
         repo = get_repository(db)
@@ -292,6 +317,9 @@ async def create_debit_memo(
             "createdBy": _get_user_id_from_request(request) or "system",
         }
 
+        # Mandant und Ersteller aus der Anmeldung (bis 13.10.2026: kein Mandant, Ersteller aus einem Kopf).
+        debit_memo["tenantId"] = tenant_id
+        debit_memo["createdBy"] = _akteur(nutzer) or debit_memo["createdBy"]
         # Speichere in Store
         save_to_store("debit_memo", memo_id, debit_memo, repo)
         
@@ -426,10 +454,17 @@ async def get_debit_memo(
 async def settle_credit_memo(
     memo_id: str,
     settlement: SettlementRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> dict:
     """Verrechnet eine Gutschrift mit offenen Rechnungen."""
+    verlange(nutzer, "buchen", "purchase_credit_memo")
     logger.info(f"Settling credit memo {memo_id} with invoices {settlement.invoiceIds}")
+    # Die Verrechnung mindert offene Posten: nur mit Freigabe einer zweiten Person (APPROVAL-001).
+    _repo = get_repository(db)
+    finance_freigabe.verlange_einkaufsmemo(
+        db, tenant_id, "credit_memo", memo_id, _memo_des_mandanten("credit_memo", memo_id, _repo, tenant_id), _akteur(nutzer))
     try:
         repo = get_repository(db)
         
@@ -505,10 +540,17 @@ async def settle_credit_memo(
 async def settle_debit_memo(
     memo_id: str,
     settlement: SettlementRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> dict:
     """Verrechnet eine Belastung mit offenen Rechnungen."""
+    verlange(nutzer, "buchen", "purchase_credit_memo")
     logger.info(f"Settling debit memo {memo_id} with invoices {settlement.invoiceIds}")
+    # Die Verrechnung mindert offene Posten: nur mit Freigabe einer zweiten Person (APPROVAL-001).
+    _repo = get_repository(db)
+    finance_freigabe.verlange_einkaufsmemo(
+        db, tenant_id, "debit_memo", memo_id, _memo_des_mandanten("debit_memo", memo_id, _repo, tenant_id), _akteur(nutzer))
     try:
         repo = get_repository(db)
         
@@ -672,10 +714,16 @@ async def book_credit_memo(
     memo_id: str,
     db: Session = Depends(get_db),
     request: Request = None,
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> dict:
     """Fuehrt eine Journal-/Fibu-Buchung fuer eine Gutschrift aus."""
     try:
         repo = get_repository(db)
+        verlange(nutzer, "buchen", "purchase_credit_memo")
+        # Jede Gutschrift und Belastung braucht die Freigabe einer zweiten Person (APPROVAL-001).
+        finance_freigabe.verlange_einkaufsmemo(
+            db, tenant_id, "credit_memo", memo_id, _memo_des_mandanten("credit_memo", memo_id, repo, tenant_id), _akteur(nutzer))
         booking = _book_memo_to_store(
             memo_type="credit_memo",
             memo_id=memo_id,
@@ -703,10 +751,16 @@ async def book_debit_memo(
     memo_id: str,
     db: Session = Depends(get_db),
     request: Request = None,
+    tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ) -> dict:
     """Fuehrt eine Journal-/Fibu-Buchung fuer eine Belastung aus."""
     try:
         repo = get_repository(db)
+        verlange(nutzer, "buchen", "purchase_credit_memo")
+        # Jede Gutschrift und Belastung braucht die Freigabe einer zweiten Person (APPROVAL-001).
+        finance_freigabe.verlange_einkaufsmemo(
+            db, tenant_id, "debit_memo", memo_id, _memo_des_mandanten("debit_memo", memo_id, repo, tenant_id), _akteur(nutzer))
         booking = _book_memo_to_store(
             memo_type="debit_memo",
             memo_id=memo_id,

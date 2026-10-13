@@ -18,16 +18,15 @@ import pytest
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 
-DB_URL = os.environ.get(
-    "TEST_DATABASE_URL",
-    os.environ.get("DATABASE_URL", "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_probe"),
-)
-os.environ.setdefault("DATABASE_URL", DB_URL)
-os.environ.setdefault("API_DEV_TOKEN", "dev-token")
+DB_URL = os.environ.get("TEST_DATABASE_URL") or os.environ.get("DATABASE_URL")
+if DB_URL:
+    os.environ.setdefault("DATABASE_URL", DB_URL)
 
 from app.api.v1.endpoints import ap_approval_workflow as workflow  # noqa: E402
 from app.api.v1.endpoints import ap_invoices as endpoint  # noqa: E402
 from app.auth.deps import get_current_user  # noqa: E402
+from testgrenze import ersetze_mandant
+from app.core.tenant import get_tenant_id
 from app.core.database import get_db  # noqa: E402
 
 PREFIX = "/api/v1/finance/ap/invoices"
@@ -59,6 +58,7 @@ CASES = [
 @pytest.fixture
 def grenze():
     app = FastAPI()
+    ersetze_mandant(app)
     app.include_router(endpoint.router, prefix="/api/v1/finance")
     app.include_router(workflow.router, prefix="/api/v1/finance")
     aufrufe = []
@@ -113,7 +113,13 @@ NUMMERN: list[str] = []
 @pytest.fixture(scope="module")
 def engine():
     from sqlalchemy import create_engine, text
+    from sqlalchemy.engine import make_url
 
+    if not DB_URL:
+        pytest.skip("Explicit shared PostgreSQL test database required")
+    database = make_url(DB_URL).database or ""
+    if database != "valeo_probe" and "test" not in database.lower():
+        pytest.fail("Never write finance test data into a development database")
     try:
         motor = create_engine(DB_URL)
         with motor.connect() as v:
@@ -133,10 +139,12 @@ def client(engine):
         for haus in (HAUS_A, HAUS_B):
             v.execute(text("INSERT INTO domain_shared.tenants (id, name) VALUES (:i, :n) ON CONFLICT (id) DO NOTHING"),
                       {"i": haus, "n": f"Pruefbetrieb {haus}"})
+    ersetze_mandant(app)
     nutzer = {"sub": "kasse", "roles": ["FINANCE_ADMIN"]}
     app.dependency_overrides[get_current_user] = lambda: nutzer
     yield TestClient(app)
     app.dependency_overrides.pop(get_current_user, None)
+    app.dependency_overrides.pop(get_tenant_id, None)
     with engine.begin() as v:
         v.execute(text("DELETE FROM documents WHERE doc_type = 'ap_invoice' AND doc_number = ANY(:n)"), {"n": NUMMERN})
 
