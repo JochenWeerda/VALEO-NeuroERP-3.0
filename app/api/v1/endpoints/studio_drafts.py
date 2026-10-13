@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from collections.abc import Callable
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -11,7 +12,7 @@ from app.api.v1.endpoints.mask_screen_definition import _check_readiness
 from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS
 from app.core.tenant import get_tenant_id
 from app.auth.deps import get_current_user
-from app.services.studio_draft_store import get_draft, list_drafts, save_draft, set_status, studio_run_route
+from app.services.studio_draft_store import StudioStorageUnavailable, get_draft, list_drafts, save_draft, set_status, studio_run_route
 from app.services.studio_propose import propose_studio_draft
 from app.services.studio_validation import load_studio_catalog, validate_studio_draft
 
@@ -34,6 +35,13 @@ class StudioProposeIn(BaseModel):
 
 class StudioRevisionIn(BaseModel):
     expected_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+def _storage_call(operation: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
+    try:
+        return operation(*args, **kwargs)
+    except StudioStorageUnavailable as error:
+        raise HTTPException(503, "Studio-Persistenz derzeit nicht verfuegbar") from error
 
 
 def _actor(user: dict[str, Any]) -> str:
@@ -94,7 +102,7 @@ def studio_propose(body: StudioProposeIn, user: dict = Depends(get_current_user)
 
 @router.get("/drafts", summary="Studio-Entwürfe des Mandanten auflisten")
 def studio_list_drafts(tenant_id: str = Depends(get_tenant_id), user: dict = Depends(get_current_user)) -> dict[str, Any]:
-    return {"drafts": list_drafts(tenant_id)}
+    return {"drafts": _storage_call(list_drafts, tenant_id)}
 
 
 @router.get("/drafts/{draft_id}", summary="Gespeicherten Studio-Entwurf zur Pruefung abrufen")
@@ -102,7 +110,7 @@ def studio_get_draft(
     draft_id: str, tenant_id: str = Depends(get_tenant_id),
     user: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
-    item = get_draft(tenant_id, draft_id)
+    item = _storage_call(get_draft, tenant_id, draft_id)
     if item is None:
         raise HTTPException(404, "draft_nicht_gefunden")
     return item
@@ -117,7 +125,7 @@ def studio_create_draft(
     report = _report(body.definition)
     if report["violations"]:
         raise HTTPException(status_code=400, detail={"violations": report["violations"]})
-    record = save_draft(tenant_id, _actor(user), body.definition, readiness=report["readiness"])
+    record = _storage_call(save_draft, tenant_id, _actor(user), body.definition, readiness=report["readiness"])
     return {**record, **report}
 
 
@@ -132,7 +140,7 @@ def studio_update_draft(
     if report["violations"]:
         raise HTTPException(status_code=400, detail={"violations": report["violations"]})
     try:
-        record = save_draft(
+        record = _storage_call(save_draft,
             tenant_id,
             _actor(user),
             body.definition,
@@ -163,7 +171,7 @@ def studio_publish(
     tenant_id: str = Depends(get_tenant_id),
     user: dict = Depends(_publisher),
 ) -> dict[str, Any]:
-    item = get_draft(tenant_id, draft_id)
+    item = _storage_call(get_draft, tenant_id, draft_id)
     if item is None:
         raise HTTPException(status_code=404, detail="draft_nicht_gefunden")
     if body.expected_revision != item["revision"]:
@@ -172,7 +180,7 @@ def studio_publish(
     if not report["canPublish"]:
         raise HTTPException(status_code=400, detail={"violations": report["violations"], "readiness": report["readiness"]})
     try:
-        record = set_status(tenant_id, draft_id, _actor(user), "published_temp", expected_snapshot=item)
+        record = _storage_call(set_status, tenant_id, draft_id, _actor(user), "published_temp", expected_snapshot=item)
     except PermissionError as error:
         raise HTTPException(status_code=403, detail=str(error)) from error
     except ValueError as error:
@@ -194,13 +202,13 @@ def studio_retire(
 
 
 def _transition(draft_id: str, tenant_id: str, actor: str, status: str, revision: str) -> dict[str, Any]:
-    item = get_draft(tenant_id, draft_id)
+    item = _storage_call(get_draft, tenant_id, draft_id)
     if item is None:
         raise HTTPException(404, "draft_nicht_gefunden")
     if item["revision"] != revision:
         raise HTTPException(409, "entwurf_seit_anzeige_geaendert")
     try:
-        return set_status(tenant_id, draft_id, actor, status, expected_snapshot=item)
+        return _storage_call(set_status, tenant_id, draft_id, actor, status, expected_snapshot=item)
     except KeyError as error:
         raise HTTPException(status_code=404, detail="draft_nicht_gefunden") from error
     except PermissionError as error:
