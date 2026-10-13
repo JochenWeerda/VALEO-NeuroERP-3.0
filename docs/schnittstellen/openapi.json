@@ -20369,6 +20369,11 @@
       "Belegdokument": {
         "additionalProperties": false,
         "properties": {
+          "aktuell": {
+            "default": true,
+            "title": "Aktuell",
+            "type": "boolean"
+          },
           "art": {
             "anyOf": [
               {
@@ -20399,6 +20404,28 @@
           "dokument_id": {
             "title": "Dokument Id",
             "type": "string"
+          },
+          "stand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stand"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
           }
         },
         "required": [

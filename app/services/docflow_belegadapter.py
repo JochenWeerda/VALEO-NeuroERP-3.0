@@ -11,10 +11,11 @@ from decimal import Decimal
 from typing import Any, Callable, Optional
 
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from app.core.belegkommandos import BELEGKOMMANDOS
 from app.core.belegvertrag import (
-    BELEGARTEN, Beleg, Belegaktion, Belegposition, Belegvariante, Buchung, Historieneintrag, Kettenglied, Partner,
+    BELEGARTEN, Beleg, Belegaktion, Belegdokument, Belegposition, Belegvariante, Buchung, Historieneintrag, Kettenglied, Partner,
     Steuergruppe, Summen, ohne_preise,
 )
 from app.core.exceptions import ConflictError
@@ -67,7 +68,7 @@ def lies_beleg(svc: DocflowService, doc_id: str, darf: Optional[Darf] = None) ->
         buchungsdatum=_datum(header.get("posting_date")),
         waehrung=str(header.get("currency") or "EUR"),
         version=int(header.get("version") or 1),
-        partner=Partner(rolle=variante.partnerrolle, nummer=str(partner_nr)) if partner_nr else None,
+        partner=_partner(svc, variante, partner_nr),
         positionen=[
             Belegposition(
                 pos_nr=int(i.get("line_number") or 0),
@@ -98,6 +99,7 @@ def lies_beleg(svc: DocflowService, doc_id: str, darf: Optional[Darf] = None) ->
         ),
         buchung=buchung,
         kette=_kette(svc, doc_id),
+        dokumente=_dokumente(svc, doc_id),
         historie=[
             Historieneintrag(
                 zeitpunkt=h["changed_at"], von_status=h.get("from_status"), nach_status=h["to_status"],
@@ -110,6 +112,58 @@ def lies_beleg(svc: DocflowService, doc_id: str, darf: Optional[Darf] = None) ->
     if not variante.mit_preisen or (darf is not None and not darf("preise", variante.belegart)):
         return ohne_preise(beleg)
     return beleg
+
+
+def _partner(svc: DocflowService, variante: Belegvariante, wert: Any) -> Optional[Partner]:
+    """Nummer und Name des Partners aus den Stammdaten des Bereichs.
+
+    DocFlow fuehrt am Beleg nur eine Kennung. Gefunden wird der Kunde ueber seine Kennung oder Kundennummer, der
+    Lieferant ueber Kennung oder Lieferantennummer. Ohne Treffer bleibt die Kennung des Belegs stehen, ohne Namen.
+    """
+    if not wert:
+        return None
+    kennung = str(wert)
+    if variante.partnerrolle == "lieferant":
+        sql = ("SELECT lieferantennummer, firmenname FROM domain_einkauf.lieferanten "
+               "WHERE tenant_id = :t AND (id::text = :p OR lieferantennummer = :p) LIMIT 1")
+    else:
+        sql = ("SELECT c.customer_number, COALESCE(NULLIF(bp.name_1, ''), c.company_name) "
+               "FROM domain_crm.customers c LEFT JOIN domain_crm.business_partners bp "
+               "ON bp.partner_id = c.business_partner_id AND bp.tenant_id = c.tenant_id "
+               "WHERE c.tenant_id = :t AND (c.id = :p OR c.customer_number = :p) LIMIT 1")
+    try:
+        # Eigener Sicherungspunkt: Fehlen die Stammdatentabellen, bleibt die Transaktion des Lesens gesund.
+        with svc.db.begin_nested():
+            zeile = svc.db.execute(text(sql), {"t": svc.tenant_id, "p": kennung}).first()
+    except (OperationalError, ProgrammingError):
+        zeile = None
+    if not zeile:
+        return Partner(rolle=variante.partnerrolle, nummer=kennung)
+    return Partner(rolle=variante.partnerrolle, nummer=str(zeile[0] or kennung), name=(zeile[1] or None))
+
+
+def _dokumente(svc: DocflowService, doc_id: str) -> list[Belegdokument]:
+    """Die Anhaenge des Belegs aus dem revisionssicheren Artefaktspeicher — jede Version, die juengste als aktuell."""
+    zeilen = svc.db.execute(
+        text(
+            "SELECT id, artifact_type, file_name, COALESCE(version, 1) AS version, "
+            "COALESCE(freigabe_status, 'entwurf') AS stand, created_at "
+            "FROM domain_docflow.document_artifacts WHERE tenant_id = :t AND header_id = :id "
+            "ORDER BY artifact_type, version"
+        ),
+        {"t": svc.tenant_id, "id": doc_id},
+    ).mappings().all()
+    juengste: dict[str, int] = {}
+    for z in zeilen:
+        juengste[z["artifact_type"]] = max(juengste.get(z["artifact_type"], 0), int(z["version"]))
+    return [
+        Belegdokument(
+            dokument_id=str(z["id"]), bezeichnung=str(z["file_name"] or z["artifact_type"]), art=str(z["artifact_type"]),
+            datum=z["created_at"], version=int(z["version"]), stand=str(z["stand"]),
+            aktuell=int(z["version"]) == juengste[z["artifact_type"]],
+        )
+        for z in zeilen
+    ]
 
 
 def _offene_mengen(svc: DocflowService, doc_id: str, variante: Belegvariante, items: list[dict[str, Any]]) -> dict[str, Decimal]:

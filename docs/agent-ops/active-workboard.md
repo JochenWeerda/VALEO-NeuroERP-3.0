@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-014 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** Der Belegvertrag traegt den Partner mit fachlicher Nummer und Name (Kunde aus
+`domain_crm.customers`, Lieferant aus `domain_einkauf.lieferanten`, nur eigener Mandant) und die Anhaenge aus
+`domain_docflow.document_artifacts` (Version, Freigabestand, juengste Version). Nur lesend, im Adapter
+`app/services/docflow_belegadapter.py`; Vertrag: `Belegdokument.version`, `.stand`, `.aktuell`.
+Tests 3 neu. QA: Nachtrag in `docs/quality-assurance/belege-lesen-20261013.md`.
+
 ## BELEG-012 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Auftrag des Auftraggebers: das noch nicht Geltende
