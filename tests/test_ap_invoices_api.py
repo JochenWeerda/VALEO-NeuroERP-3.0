@@ -80,7 +80,7 @@ def _make_invoice(lines=None) -> SalesInvoice:
 
 def test_calculate_totals_empty():
     doc = _make_invoice()
-    result = calculate_invoice_totals(doc)
+    result = calculate_invoice_totals(doc, None, "tenant-1")
     assert result.subtotalNet == 0.0
     assert result.totalTax == 0.0
     assert result.totalGross == 0.0
@@ -89,16 +89,18 @@ def test_calculate_totals_empty():
 def test_calculate_totals_single_line():
     line = DocLine(article="Weizen", qty=10, price=100.0, vatRate=19.0)
     doc = _make_invoice([line])
-    result = calculate_invoice_totals(doc)
+    result = calculate_invoice_totals(doc, None, "tenant-1")
     assert result.subtotalNet == pytest.approx(1000.0)
-    assert result.totalTax == pytest.approx(190.0)
-    assert result.totalGross == pytest.approx(1190.0)
+    # Ein Satz ohne Steuerschluessel: Die Vorsteuer bleibt offen, es wird kein Brutto unterstellt.
+    assert result.totalTax == pytest.approx(0.0)
+    assert result.totalGross == pytest.approx(1000.0)
+    assert "keinen Steuerschlüssel" in result.steuerPruefgrund
 
 
 def test_calculate_totals_zero_vat():
     line = DocLine(article="Weizen", qty=5, price=200.0, vatRate=0.0)
     doc = _make_invoice([line])
-    result = calculate_invoice_totals(doc)
+    result = calculate_invoice_totals(doc, None, "tenant-1")
     assert result.totalTax == pytest.approx(0.0)
     assert result.totalGross == pytest.approx(1000.0)
 

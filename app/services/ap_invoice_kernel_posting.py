@@ -9,8 +9,7 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import asdict
-from datetime import datetime, timedelta
-from decimal import Decimal
+from datetime import datetime
 from uuid import uuid4
 
 from sqlalchemy import text
@@ -18,12 +17,11 @@ from sqlalchemy.orm import Session
 
 from app.core.business_time import business_today
 from app.core.fibu_audit import log_fibu_audit
-from app.core.uuid7 import uuid7
 from app.documents.router_helpers import get_from_store, get_repository
 from app.domains.shared.process_events import APInvoicePosted
-from app.finance.tax_resolver import resolve_partner_country, resolve_tax_key_accounts
+from app.finance.steuerschluessel import Steuerklaerung
+from app.services.finance_eingangsrechnung_buchung import buche_eingangsrechnung, summen
 from app.infrastructure.eventbus.outbox import OutboxEvent
-from app.infrastructure.models.journal import JournalEntry, JournalEntryLine
 from app.core import finance_periods
 
 logger = logging.getLogger(__name__)
@@ -70,91 +68,15 @@ def post_ap_invoice_kernel_sync(
         logger.warning("PostAPInvoice: Periode %s ist %s", period, gesperrt)
         return
 
-    invoice_number = str(invoice.get("number") or invoice_id)
-    total_gross = float(invoice.get("totalGross", 0) or 0)
-    subtotal_net = float(invoice.get("subtotalNet", 0) or 0)
-    total_tax = float(invoice.get("totalTax", 0) or 0)
-    supplier_partner_id = str(
-        invoice.get("customerId") or invoice.get("supplierId") or ""
-    )
-    invoice_country = invoice.get("country") or resolve_partner_country(
-        db, supplier_partner_id, "DE"
-    )
-    line_rates: list[Decimal] = []
-    for line in invoice.get("lines") or []:
-        try:
-            line_rates.append(
-                Decimal(str(line.get("vatRate", 0) or 0)).quantize(Decimal("0.01"))
-            )
-        except Exception:
-            continue
-    max_rate = max(line_rates) if line_rates else Decimal("0.00")
-    tax_key_cfg = resolve_tax_key_accounts(db, inv_tenant, max_rate, invoice_country)
-    input_tax_account = str(tax_key_cfg.get("debit_account") or "1576")
-    reverse_charge = bool(tax_key_cfg.get("reverse_charge"))
-
-    je_id = str(uuid7())
-    entry_number = f"AP-{invoice_number}"[:20]
-    now = datetime.utcnow()
-    entry_date = datetime.fromisoformat(invoice_date + "T12:00:00")
-
-    je = JournalEntry(
-        id=je_id,
-        entry_number=entry_number,
-        entry_date=entry_date,
-        posting_date=entry_date,
-        description=f"Eingangsrechnung {invoice_number}"[:200],
-        reference=invoice_number[:50],
-        source="ap_invoice_kernel",
-        status="posted",
-        total_debit=Decimal(str(total_gross)),
-        total_credit=Decimal(str(subtotal_net + total_tax)),
-        posted_by=None,
-        posted_at=now,
-        tenant_id=inv_tenant,
-    )
-    db.add(je)
-    db.flush()
-
-    db.add(
-        JournalEntryLine(
-            id=str(uuid7()),
-            journal_entry_id=je_id,
-            account_id=str(invoice.get("supplierAccountId") or "3300"),
-            tenant_id=inv_tenant,
-            debit=Decimal(str(total_gross)),
-            credit=Decimal("0"),
-            description=f"Eingangsrechnung {invoice_number}"[:200],
-        )
-    )
-    db.add(
-        JournalEntryLine(
-            id=str(uuid7()),
-            journal_entry_id=je_id,
-            account_id=str(invoice.get("expenseAccountId") or "6000"),
-            tenant_id=inv_tenant,
-            debit=Decimal("0"),
-            credit=Decimal(str(subtotal_net)),
-            description="Aufwand"[:200],
-        )
-    )
-    if total_tax > 0:
-        db.add(
-            JournalEntryLine(
-                id=str(uuid7()),
-                journal_entry_id=je_id,
-                account_id=input_tax_account,
-                tenant_id=inv_tenant,
-                debit=Decimal("0"),
-                credit=Decimal(str(total_tax)),
-                description=(
-                    "Vorsteuer (Reverse-Charge)"
-                    if reverse_charge
-                    else "Vorsteuer"
-                )[:200],
-            )
-        )
-    db.flush()
+    # Derselbe Buchungsweg wie REST: Aufwand und Vorsteuer je Steuerschluessel im Soll, Kreditor im Haben.
+    try:
+        je_id, gruppen = buche_eingangsrechnung(
+            db, inv_tenant, invoice_id=invoice_id, invoice=invoice, posted_by=posted_by, quelle="ap_invoice_kernel")
+    except Steuerklaerung as klaerung:
+        logger.warning("PostAPInvoice: %s nicht gebucht, bitte pruefen: %s", invoice_id, klaerung)
+        return
+    netto, steuer, brutto = summen(gruppen)
+    invoice["subtotalNet"], invoice["totalTax"], invoice["totalGross"] = float(netto), float(steuer), float(brutto)
 
     log_fibu_audit(
         db,
@@ -170,46 +92,6 @@ def post_ap_invoice_kernel_sync(
     invoice["postedBy"] = posted_by
     invoice["postedAt"] = datetime.now().isoformat()
     invoice["journalEntryId"] = je_id
-
-    try:
-        op_insert = text(
-            """
-            INSERT INTO domain_erp.offene_posten
-            (id, tenant_id, konto_typ, op_status, rechnungsnr, rechnungsdatum, datum, faelligkeit, op_betrag, betrag, offen,
-             lieferant_id, lieferant_name, waehrung, zahlbar, created_at, updated_at)
-            VALUES (:id, :tenant_id, 'kreditoren', 'offen', :rechnungsnr, :rechnungsdatum, :datum, :faelligkeit, :op_betrag, :betrag, :offen,
-                    :lieferant_id, :lieferant_name, :waehrung, :zahlbar, NOW(), NOW())
-            ON CONFLICT (id) DO UPDATE SET
-                offen = EXCLUDED.offen,
-                op_status = EXCLUDED.op_status,
-                updated_at = NOW()
-            """
-        )
-        db.execute(
-            op_insert,
-            {
-                "id": f"OP-AP-{invoice_id}",
-                "tenant_id": inv_tenant,
-                "rechnungsnr": invoice_number,
-                "rechnungsdatum": invoice_date,
-                "datum": invoice_date,
-                "faelligkeit": str(
-                    invoice.get("dueDate")
-                    or (datetime.now() + timedelta(days=30)).isoformat()[:10]
-                ),
-                "op_betrag": total_gross,
-                "betrag": total_gross,
-                "offen": total_gross,
-                "lieferant_id": supplier_partner_id,
-                "lieferant_name": str(
-                    invoice.get("supplierName") or invoice.get("customerName") or ""
-                ),
-                "waehrung": str(invoice.get("currency") or "EUR"),
-                "zahlbar": True,
-            },
-        )
-    except Exception as exc:
-        logger.warning("PostAPInvoice: OP-Insert optional fehlgeschlagen: %s", exc)
 
     doc_row = db.execute(
         text(

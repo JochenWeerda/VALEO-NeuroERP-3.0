@@ -72,7 +72,8 @@ type SalesInvoice = {
     article: string
     qty: number
     price: number
-    vatRate: number
+    /** Steuerschluessel des Mandanten; leer = nicht gewaehlt. Es gibt keinen Vorgabewert. */
+    taxCode: string
   }>
   subtotalNet: number
   totalTax: number
@@ -105,7 +106,7 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
       .slice(0, ISO_DATE_LENGTH),
     status: "ENTWURF",
     notes: "",
-    lines: [{ article: "", qty: 1, price: 0, vatRate: 19 }],
+    lines: [{ article: "", qty: 1, price: 0, taxCode: "" }],
     subtotalNet: 0,
     totalTax: 0,
     totalGross: 0,
@@ -146,6 +147,7 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
             article_number?: string
             quantity?: number
             unit_price?: number
+            tax_code?: string | null
             tax_rate?: number
           }>
           total_net?: number
@@ -165,7 +167,7 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
                 article: it.article_number ?? '',
                 qty: Number(it.quantity ?? 0),
                 price: Number(it.unit_price ?? 0),
-                vatRate: Number(it.tax_rate ?? 0),
+                taxCode: it.tax_code ?? '',
               }))
             : prev.lines,
           subtotalNet: Number(doc.total_net ?? prev.subtotalNet),
@@ -200,7 +202,8 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
           quantity: Number(line.qty || 0),
           unit_price: Number(line.price || 0),
           discount_percent: 0,
-          tax_rate: Number(line.vatRate || 0),
+          // Der Satz kommt vom Server aus dem Steuerschluessel; ohne Schluessel wird nicht gebucht.
+          tax_code: line.taxCode || null,
         })),
       }
       if (docId) {

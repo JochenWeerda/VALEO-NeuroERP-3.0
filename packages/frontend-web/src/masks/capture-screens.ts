@@ -2980,6 +2980,14 @@ export const financeSteuerschluesselScreen = {
       "helpText": "Aktivkonto aus dem Kontenplan, für Eingangsbelege."
     },
     {
+      "key": "expense_account",
+      "label": "Aufwandskonto",
+      "type": "select",
+      "options": [],
+      "dataSourceKey": "konten",
+      "helpText": "Aufwandskonto aus dem Kontenplan, für Eingangsbelege. Leer = die Position der Eingangsrechnung nennt es; fehlt beides, wird nicht gebucht."
+    },
+    {
       "key": "par_24_ustg",
       "label": "Durchschnittssatz nach § 24 UStG",
       "type": "boolean"
@@ -3089,6 +3097,11 @@ export const financeSteuerschluesselScreen = {
           "key": "debit_account",
           "label": "Vorsteuerkonto",
           "type": "text"
+        },
+        {
+          "key": "expense_account",
+          "label": "Aufwandskonto",
+          "type": "text"
         }
       ]
     },
@@ -3146,6 +3159,11 @@ export const financeSteuerschluesselScreen = {
         {
           "key": "debit_account",
           "label": "Vorsteuerkonto",
+          "priority": "secondary"
+        },
+        {
+          "key": "expense_account",
+          "label": "Aufwandskonto",
           "priority": "secondary"
         },
         {

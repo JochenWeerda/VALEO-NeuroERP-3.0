@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-13
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-13T07:11:48Z'
+generated_at: '2026-10-13T07:40:00Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1205,6 +1205,7 @@ domains:
     - finance_closing_service
     - finance_datev_service
     - finance_dunning_service
+    - finance_eingangsrechnung_buchung
     - finance_mahnstufe_service
     - finance_op_service
     - finance_period_service
@@ -1713,8 +1714,6 @@ domains:
     - /admin/webshop
     - /alerts
     - /analytics
-    - /auth/Callback
-    - /auth/Login
     - /auth/callback
     - /auth/login
     - /copilot
@@ -2079,10 +2078,10 @@ domains:
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 941
-  frontend_routes_mapped: 941
-  backend_services_total: 281
-  backend_services_mapped: 280
+  frontend_routes_total: 939
+  frontend_routes_mapped: 939
+  backend_services_total: 282
+  backend_services_mapped: 281
   backend_endpoints_total: 455
   backend_endpoints_mapped: 455
 unmapped:

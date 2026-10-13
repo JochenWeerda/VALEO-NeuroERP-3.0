@@ -118,6 +118,83 @@ def steuergruppen(db: Session, tenant_id: str, zeilen: list[tuple]) -> list[Steu
     return gruppen
 
 
+# --- Eingangsbelege -----------------------------------------------------------------------------
+
+class Vorsteuergruppe(BaseModel):
+    """Alle Positionen eines Eingangsbelegs mit demselben Steuerschluessel und Aufwandskonto."""
+
+    tax_code: str
+    satz: Decimal
+    netto: Decimal
+    steuer: Decimal
+    aufwandskonto: str
+    vorsteuerkonto: Optional[str] = None
+
+
+def vorsteuergruppen(db: Session, tenant_id: str, zeilen: list[tuple]) -> list[Vorsteuergruppe]:
+    """Netto und Vorsteuer je Steuerschluessel aus Eingangspositionen ``(nr, tax_code, tax_rate, netto, aufwandskonto)``.
+
+    Das Gegenstueck zu ``steuergruppen``: Die Position nennt ihren Steuerschluessel; ein Satz allein genuegt nicht.
+    Das Aufwandskonto nennt die Position — oder es kommt aus dem Steuerschluessel. Fehlt beides, wird nicht gebucht.
+    """
+    if not zeilen:
+        raise Steuerklaerung("Der Beleg hat keine Positionen; die Vorsteuer lässt sich nicht bestimmen.")
+    ohne = [str(z[0]) for z in zeilen if not (z[1] or "").strip()]
+    if ohne:
+        raise Steuerklaerung(f"Position {', '.join(ohne)} hat keinen Steuerschlüssel.")
+
+    codes = sorted({str(z[1]).strip() for z in zeilen})
+    bekannt: dict[str, tuple] = {}
+    for r in db.execute(
+        text(
+            "SELECT code, steuersatz, debit_account, expense_account, reverse_charge, credit_account "
+            "FROM domain_erp.tax_keys "
+            "WHERE tenant_id = :tid AND code = ANY(:codes) AND active "
+            "AND gueltig_von <= CURRENT_DATE AND (gueltig_bis IS NULL OR gueltig_bis >= CURRENT_DATE)"
+        ),
+        {"codes": codes, "tid": tenant_id},
+    ).fetchall():
+        bekannt[str(r[0])] = tuple(r)
+    unbekannt = [c for c in codes if c not in bekannt]
+    if unbekannt:
+        raise Steuerklaerung(f"Steuerschlüssel {', '.join(unbekannt)} ist nicht bekannt oder nicht gültig.")
+
+    summen: dict[tuple[str, str], Decimal] = {}
+    for zeile in zeilen:
+        nr, code, satz, netto = zeile[0], str(zeile[1]).strip(), zeile[2], zeile[3]
+        _code, rate, vorsteuerkonto, aufwand_des_schluessels, reverse_charge, umsatzsteuerkonto = bekannt[code]
+        satz_des_schluessels_ = Decimal(str(rate))
+        if satz is not None and Decimal(str(satz)) != satz_des_schluessels_:
+            raise Steuerklaerung(
+                f"Position {nr}: Steuersatz {Decimal(str(satz)).normalize():f} % widerspricht dem "
+                f"Steuerschlüssel {code} ({satz_des_schluessels_.normalize():f} %)."
+            )
+        if reverse_charge:
+            raise Steuerklaerung(f"Steuerschlüssel {code} (Reverse Charge) wird nicht automatisch gebucht.")
+        if (umsatzsteuerkonto or "").strip() and not (vorsteuerkonto or "").strip():
+            raise Steuerklaerung(f"Steuerschlüssel {code} ist ein Umsatzsteuerschlüssel und gilt nicht für Eingangsbelege.")
+        if satz_des_schluessels_ > 0 and not (vorsteuerkonto or "").strip():
+            raise Steuerklaerung(f"Für Steuerschlüssel {code} ist kein Vorsteuerkonto hinterlegt.")
+        aufwand = (str(zeile[4]).strip() if len(zeile) > 4 and zeile[4] else "") or (aufwand_des_schluessels or "").strip()
+        if not aufwand:
+            raise Steuerklaerung(
+                f"Position {nr}: kein Aufwandskonto — weder in der Position noch im Steuerschlüssel {code}."
+            )
+        summen[(code, aufwand)] = summen.get((code, aufwand), Decimal("0")) + Decimal(str(netto or 0))
+
+    gruppen: list[Vorsteuergruppe] = []
+    for (code, aufwand), summe in sorted(summen.items()):
+        satz = Decimal(str(bekannt[code][1]))
+        netto = summe.quantize(CENT, rounding=ROUND_HALF_UP)
+        gruppen.append(Vorsteuergruppe(
+            tax_code=code, satz=satz, netto=netto,
+            steuer=(netto * satz / Decimal("100")).quantize(CENT, rounding=ROUND_HALF_UP),
+            aufwandskonto=aufwand,
+            vorsteuerkonto=str(bekannt[code][2]).strip() if satz > 0 else None,
+        ))
+    return gruppen
+
+
 # --- Auswahl fuer Belege und Stammdaten ---------------------------------------------------------
 
 # Ein Schluessel mit nur einem Vorsteuerkonto gehoert nicht in einen Verkaufsbeleg, einer mit nur einem
@@ -183,6 +260,7 @@ KONTENROLLEN: dict[str, tuple[str, str, str, tuple[str, ...]]] = {
     "credit_account": ("Umsatzsteuerkonto", "liability", "Verbindlichkeitskonto", ("umsatzsteuer", "ust", "mehrwertsteuer")),
     "debit_account": ("Vorsteuerkonto", "asset", "Aktivkonto", ("vorsteuer", "vst")),
     "revenue_account": ("Erlöskonto", "revenue", "Erlöskonto", ("erlös", "erloes", "erlos", "umsatz")),
+    "expense_account": ("Aufwandskonto", "expense", "Aufwandskonto", ("wareneingang", "aufwand", "einkauf")),
 }
 
 
@@ -243,8 +321,9 @@ def kontenvorschlaege(db: Session, tenant_id: str, satz: Optional[Decimal]) -> d
                 continue
             klein = name.lower()
             zum_satz = bool(satz_muster and satz_muster.search(klein))
-            zur_rolle = (kategorie == "tax" and feld != "revenue_account") or any(w in klein for w in stichworte)
-            if feld != "revenue_account" and satz == 0:
+            steuerkonto = feld in ("credit_account", "debit_account")
+            zur_rolle = (kategorie == "tax" and steuerkonto) or any(w in klein for w in stichworte)
+            if steuerkonto and satz == 0:
                 zum_satz = False  # ein steuerfreier Schluessel braucht kein Steuerkonto
             grund = (
                 f"passt zum Satz {satz_text}" if zum_satz and zur_rolle
@@ -269,6 +348,10 @@ SKR03_STEUERSCHLUESSEL = (
     ("8", "Vorsteuer 7 %", Decimal("7"), "66", "Abziehbare Vorsteuer", "1571", None, None),
     ("9", "Vorsteuer 19 %", Decimal("19"), "66", "Abziehbare Vorsteuer", "1576", None, None),
 )
+# Aufwandskonto der Vorsteuerschluessel: Wareneingang zum Satz.
+SKR03_AUFWANDSKONTEN = {"8": "3300", "9": "3400"}
+# Sammelkonto der Verbindlichkeiten aus Lieferungen und Leistungen je Kontenrahmen.
+KREDITORENKONTO = {"SKR03": "1600", "SKR04": "3300"}
 SKR03_KONTEN = (
     ("1571", "Abziehbare Vorsteuer 7 %", "asset", "tax"),
     ("1576", "Abziehbare Vorsteuer 19 %", "asset", "tax"),
@@ -276,6 +359,9 @@ SKR03_KONTEN = (
     ("1776", "Umsatzsteuer 19 %", "liability", "tax"),
     ("8300", "Erlöse 7 % USt", "revenue", "revenue"),
     ("8400", "Erlöse 19 % USt", "revenue", "revenue"),
+    ("3300", "Wareneingang 7 % Vorsteuer", "expense", "cost_of_goods_sold"),
+    ("3400", "Wareneingang 19 % Vorsteuer", "expense", "cost_of_goods_sold"),
+    ("1600", "Verbindlichkeiten aus Lieferungen und Leistungen", "liability", "current_liabilities"),
 )
 
 
@@ -294,8 +380,9 @@ def kontenrahmen(db: Session, tenant_id: str) -> Optional[str]:
 def richte_skr03_ein(db: Session, tenant_id: str, gueltig_von: date = date(2021, 1, 1)) -> dict[str, list[str]]:
     """Legt fuer den Mandanten den Kontenrahmen SKR03, die vier Regel-Steuerschluessel und fehlende Konten an.
 
-    Bestehendes bleibt unberuehrt: Ein Schluessel, den es fuer den Mandanten schon gibt, und ein Konto,
-    das er oder der gemeinsame Rahmen schon hat, werden nicht angefasst. Der Aufrufer schreibt fest.
+    Bestehendes bleibt unberuehrt: Ein Schluessel und ein Konto, die der Mandant schon hat, werden nicht
+    angefasst. Konten legt er als **eigene** an, auch wenn der gemeinsame Rahmen die Nummer fuehrt — der
+    Buchungsdienst bebucht nur eigene Konten. Der Aufrufer schreibt fest.
     """
     angelegt: dict[str, list[str]] = {"steuerschluessel": [], "konten": []}
 
@@ -313,7 +400,8 @@ def richte_skr03_ein(db: Session, tenant_id: str, gueltig_von: date = date(2021,
         str(r[0]) for r in db.execute(
             text(
                 "SELECT account_number FROM domain_erp.chart_of_accounts "
-                "WHERE tenant_id IN (:tid, 'system') AND account_number = ANY(:nummern)"
+                # Nur eigene Konten zaehlen: Der Buchungsdienst bebucht kein Konto des gemeinsamen Rahmens.
+                "WHERE tenant_id = :tid AND account_number = ANY(:nummern)"
             ),
             {"tid": tenant_id, "nummern": [k[0] for k in SKR03_KONTEN]},
         ).fetchall()
@@ -343,12 +431,13 @@ def richte_skr03_ein(db: Session, tenant_id: str, gueltig_von: date = date(2021,
             text(
                 "INSERT INTO domain_erp.tax_keys "
                 "(id, tenant_id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung, "
-                " gueltig_von, debit_account, credit_account, revenue_account, country, active) "
-                "VALUES (:id, :tid, :code, :name, :satz, :pos, :postext, :von, :vst, :ust, :erloes, 'DE', true)"
+                " gueltig_von, debit_account, credit_account, revenue_account, expense_account, country, active) "
+                "VALUES (:id, :tid, :code, :name, :satz, :pos, :postext, :von, :vst, :ust, :erloes, :aufwand, 'DE', true)"
             ),
             {
                 "id": uuid7(), "tid": tenant_id, "code": code, "name": name, "satz": satz, "pos": position,
                 "postext": positionstext, "von": gueltig_von, "vst": vorsteuer, "ust": umsatzsteuer, "erloes": erloes,
+                "aufwand": SKR03_AUFWANDSKONTEN.get(code),
             },
         )
         angelegt["steuerschluessel"].append(code)

@@ -12,6 +12,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.finance.steuerschluessel import Steuerklaerung, satz_des_schluessels, steuergruppen
 from app.services.customer_sales_eligibility import assert_customer_allowed_for_invoice
 from app.services.sales_posting_service import SalesPostingService
 
@@ -466,28 +467,50 @@ class DocflowService:
 
     # ── line helpers ──────────────────────────────────────────────────────────
 
+    def _steuer_der_position(self, nr: int, line: Any, saetze: dict[str, Decimal]) -> tuple[Optional[str], Decimal]:
+        """Steuerschluessel und Satz der Position. Mit Schluessel kommt der Satz aus ``tax_keys``.
+
+        DocFlow fuehrt Verkaufsbelege; der Schluessel muss fuer Verkaufsbelege gelten.
+        """
+        code = (getattr(line, "tax_code", None) or "").strip() or None
+        angegeben = getattr(line, "tax_rate", None)
+        if code is None:
+            return None, Decimal(str(angegeben or 0))
+        if code not in saetze:
+            try:
+                saetze[code] = satz_des_schluessels(self.db, self.tenant_id, code, "verkauf")
+            except Steuerklaerung as klaerung:
+                raise ValidationFailedError(f"Position {nr}: {klaerung}") from klaerung
+        if angegeben is not None and Decimal(str(angegeben)) != saetze[code]:
+            raise ValidationFailedError(
+                f"Position {nr}: Steuersatz {Decimal(str(angegeben)).normalize():f} % widerspricht dem "
+                f"Steuerschlüssel {code} ({saetze[code].normalize():f} %)."
+            )
+        return code, saetze[code]
+
     def _insert_items(self, header_id: str, items: list[Any]) -> tuple[Decimal, Decimal, Decimal]:
         total_net = total_tax = total_gross = Decimal("0")
+        saetze: dict[str, Decimal] = {}
         for idx, line in enumerate(items, start=1):
             qty = _qty(Decimal(str(line.quantity)))
             price = Decimal(str(line.unit_price))
             discount = Decimal(str(line.discount_percent))
-            tax_rate = Decimal(str(line.tax_rate))
+            tax_code, tax_rate = self._steuer_der_position(idx, line, saetze)
             line_net, line_tax, line_gross = _line_amounts(qty, price, discount, tax_rate)
             total_net += line_net; total_tax += line_tax; total_gross += line_gross
             self.db.execute(
                 text("""
                     INSERT INTO domain_docflow.document_items
                     (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit,
-                     unit_price, discount_percent, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, created_at, updated_at)
+                     unit_price, discount_percent, tax_code, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, created_at, updated_at)
                     VALUES (:id, :tenant_id, :header_id, :line_number, NULL, :article_number, :description, :quantity, :unit,
-                     :unit_price, :discount_percent, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :batch_id, :charge, NOW(), NOW())
+                     :unit_price, :discount_percent, :tax_code, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :batch_id, :charge, NOW(), NOW())
                 """),
                 {
                     "id": str(uuid4()), "tenant_id": self.tenant_id, "header_id": header_id,
                     "line_number": idx, "article_number": line.article_number, "description": line.description,
                     "quantity": qty, "unit": line.unit, "unit_price": price, "discount_percent": discount,
-                    "tax_rate": tax_rate, "line_total_net": line_net, "line_total_tax": line_tax,
+                    "tax_code": tax_code, "tax_rate": tax_rate, "line_total_net": line_net, "line_total_tax": line_tax,
                     "line_total_gross": line_gross, "batch_id": getattr(line, "batch_id", None),
                     "charge": getattr(line, "charge", None),
                 },
@@ -507,12 +530,6 @@ class DocflowService:
         now = datetime.now(timezone.utc)
         doc_id = str(uuid4())
         total_net, total_tax, total_gross = Decimal("0"), Decimal("0"), Decimal("0")
-        for line in payload.items:
-            line_net, line_tax, line_gross = _line_amounts(
-                _qty(Decimal(str(line.quantity))), Decimal(str(line.unit_price)),
-                Decimal(str(line.discount_percent)), Decimal(str(line.tax_rate)),
-            )
-            total_net += line_net; total_tax += line_tax; total_gross += line_gross
         self.db.execute(
             text("""
                 INSERT INTO domain_docflow.document_headers
@@ -533,29 +550,11 @@ class DocflowService:
                 "created_by": payload.created_by, "updated_by": payload.created_by,
             },
         )
-        for idx, line in enumerate(payload.items, start=1):
-            qty = _qty(Decimal(str(line.quantity)))
-            price = Decimal(str(line.unit_price))
-            discount = Decimal(str(line.discount_percent))
-            tax_rate = Decimal(str(line.tax_rate))
-            line_net, line_tax, line_gross = _line_amounts(qty, price, discount, tax_rate)
-            self.db.execute(
-                text("""
-                    INSERT INTO domain_docflow.document_items
-                    (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit,
-                     unit_price, discount_percent, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, created_at, updated_at)
-                    VALUES (:id, :tenant_id, :header_id, :line_number, NULL, :article_number, :description, :quantity, :unit,
-                     :unit_price, :discount_percent, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :batch_id, :charge, NOW(), NOW())
-                """),
-                {
-                    "id": str(uuid4()), "tenant_id": self.tenant_id, "header_id": doc_id,
-                    "line_number": idx, "article_number": line.article_number, "description": line.description,
-                    "quantity": qty, "unit": line.unit, "unit_price": price, "discount_percent": discount,
-                    "tax_rate": tax_rate, "line_total_net": line_net, "line_total_tax": line_tax,
-                    "line_total_gross": line_gross, "batch_id": getattr(line, "batch_id", None),
-                    "charge": getattr(line, "charge", None),
-                },
-            )
+        total_net, total_tax, total_gross = self._insert_items(doc_id, payload.items)
+        self.db.execute(
+            text("UPDATE domain_docflow.document_headers SET total_net=:n, total_tax=:t, total_gross=:g WHERE id=:id AND tenant_id=:tenant_id"),
+            {"id": doc_id, "tenant_id": self.tenant_id, "n": _money(total_net), "t": _money(total_tax), "g": _money(total_gross)},
+        )
         self.upsert_pos_compliance(doc_id, payload.pos_compliance)
         self.best_effort_audit("docflow_create", "docflow_document", doc_id,
                                {"doc_type": payload.doc_type, "doc_number": payload.doc_number, "status": payload.status})
@@ -597,31 +596,7 @@ class DocflowService:
                 text("DELETE FROM domain_docflow.document_items WHERE tenant_id = :tenant_id AND header_id = :header_id"),
                 {"tenant_id": self.tenant_id, "header_id": doc_id},
             )
-            total_net = total_tax = total_gross = Decimal("0")
-            for idx, line in enumerate(payload.items, start=1):
-                qty = _qty(Decimal(str(line.quantity)))
-                price = Decimal(str(line.unit_price))
-                discount = Decimal(str(line.discount_percent))
-                tax_rate = Decimal(str(line.tax_rate))
-                line_net, line_tax, line_gross = _line_amounts(qty, price, discount, tax_rate)
-                total_net += line_net; total_tax += line_tax; total_gross += line_gross
-                self.db.execute(
-                    text("""
-                        INSERT INTO domain_docflow.document_items
-                        (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit,
-                         unit_price, discount_percent, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, created_at, updated_at)
-                        VALUES (:id, :tenant_id, :header_id, :line_number, NULL, :article_number, :description, :quantity, :unit,
-                         :unit_price, :discount_percent, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :batch_id, :charge, NOW(), NOW())
-                    """),
-                    {
-                        "id": str(uuid4()), "tenant_id": self.tenant_id, "header_id": doc_id,
-                        "line_number": idx, "article_number": line.article_number, "description": line.description,
-                        "quantity": qty, "unit": line.unit, "unit_price": price, "discount_percent": discount,
-                        "tax_rate": tax_rate, "line_total_net": line_net, "line_total_tax": line_tax,
-                        "line_total_gross": line_gross, "batch_id": getattr(line, "batch_id", None),
-                        "charge": getattr(line, "charge", None),
-                    },
-                )
+            total_net, total_tax, total_gross = self._insert_items(doc_id, payload.items)
             self.db.execute(
                 text("UPDATE domain_docflow.document_headers SET total_net=:n, total_tax=:t, total_gross=:g WHERE id=:id AND tenant_id=:tenant_id"),
                 {"id": doc_id, "tenant_id": self.tenant_id, "n": _money(total_net), "t": _money(total_tax), "g": _money(total_gross)},
@@ -778,16 +753,17 @@ class DocflowService:
                 text("""
                     INSERT INTO domain_docflow.document_items
                     (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity,
-                     unit, unit_price, discount_percent, tax_rate, line_total_net, line_total_tax, line_total_gross, metadata, created_at, updated_at)
+                     unit, unit_price, discount_percent, tax_code, tax_rate, line_total_net, line_total_tax, line_total_gross, metadata, created_at, updated_at)
                     VALUES (:id, :tenant_id, :header_id, :line_number, :source_line_id, :article_number, :description, :quantity,
-                     :unit, :unit_price, :discount_percent, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, CAST(:metadata AS jsonb), NOW(), NOW())
+                     :unit, :unit_price, :discount_percent, :tax_code, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, CAST(:metadata AS jsonb), NOW(), NOW())
                 """),
                 {
                     "id": target_item_id, "tenant_id": self.tenant_id, "header_id": target_id,
                     "line_number": line_no, "source_line_id": str(src["id"]),
                     "article_number": src.get("article_number") or "", "description": src.get("description"),
                     "quantity": qty, "unit": src.get("unit"), "unit_price": price, "discount_percent": discount,
-                    "tax_rate": tax_rate, "line_total_net": line_net, "line_total_tax": line_tax,
+                    "tax_code": src.get("tax_code"), "tax_rate": tax_rate, "line_total_net": line_net,
+                    "line_total_tax": line_tax,
                     "line_total_gross": line_gross, "metadata": json.dumps({"converted_from": str(src["id"])}),
                 },
             )
@@ -835,6 +811,28 @@ class DocflowService:
         self.db.commit()
         return response
 
+    def _steuergruppen_der_rechnung(self, doc_id: str, nummer: str) -> list[Any]:
+        """Erloes und Umsatzsteuer der Rechnung je Steuerschluessel — oder der Grund, warum nicht gebucht wird.
+
+        Bis zum 13.10.2026 gingen die Kopfsummen fest auf 8400 und 1776, gleich welcher Satz in den Positionen
+        stand. Finance ist die Buchungsautoritaet: Konten und Satz kommen aus ``tax_keys``; der Beleg nennt je
+        Position nur den Schluessel. Beleg und Buchung stimmen auf den Cent — die Steuer je Schluessel ist die
+        Summe der Positionssteuern des Belegs, nicht neu gerechnet.
+        """
+        items = self.fetch_items(doc_id)
+        try:
+            gruppen = steuergruppen(self.db, self.tenant_id, [
+                (int(i.get("line_number") or 0), i.get("tax_code"), i.get("tax_rate"), Decimal(str(i.get("line_total_net") or 0)))
+                for i in items
+            ])
+        except Steuerklaerung as klaerung:
+            raise ConflictError(f"Rechnung {nummer} nicht gebucht, bitte prüfen: {klaerung}") from klaerung
+        for gruppe in gruppen:
+            eigene = [i for i in items if str(i.get("tax_code") or "").strip() == gruppe.tax_code]
+            gruppe.netto = _money(sum((Decimal(str(i.get("line_total_net") or 0)) for i in eigene), Decimal("0")))
+            gruppe.steuer = _money(sum((Decimal(str(i.get("line_total_tax") or 0)) for i in eigene), Decimal("0")))
+        return gruppen
+
     def post_document(self, doc_id: str, payload: Any) -> dict[str, Any]:
         cached = self.load_idempotent_response("post", doc_id, payload.idempotency_key)
         if cached:
@@ -856,8 +854,10 @@ class DocflowService:
             customer_id = str(header.get("customer_id") or "")
             if not customer_id:
                 raise ValidationFailedError("Sales invoice posting requires customer_id")
+            gruppen = self._steuergruppen_der_rechnung(doc_id, str(header["doc_number"]))
+            # Kein eigener Commit: Buchung, Buchungsnachweis und Belegstatus werden gemeinsam festgeschrieben.
             finance_result = SalesPostingService(
-                self.db, self.tenant_id
+                self.db, self.tenant_id, commit=False
             ).post_ausgangsrechnung_with_op(
                 invoice_number=str(header["doc_number"]),
                 invoice_date=header.get("document_date"),
@@ -866,6 +866,7 @@ class DocflowService:
                 tax_amount=Decimal(str(header.get("total_tax") or 0)),
                 gross_amount=Decimal(str(header.get("total_gross") or 0)),
                 posted_by=payload.posted_by,
+                steuergruppen=gruppen,
             )
         posting_id = str(uuid4())
         outbox_event_id = self.upsert_outbox_event("docflow.document.posted", doc_id, {

@@ -11,6 +11,54 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STEUERSCHLUESSEL-BELEGE-20261013 — Teil 3 (DocFlow-Rechnung) abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** Teil 3 abgeschlossen 2026-10-13. Architekturentscheidung des Auftraggebers
+vom 13.10.2026: Einkauf/Verkauf fuehren den Rechnungsbeleg, Finance ist Buchungsautoritaet, keine zweite
+Rechnungsverwaltung in der FiBu.
+**Lieferung:** `domain_docflow.document_items.tax_code` (Migration `docflow_steuerschluessel_20261013`, ein
+Head); DocFlow-Positionen nennen den Steuerschluessel, der Satz kommt vom Server; Umwandeln nimmt ihn mit;
+`POST /docflow/{id}/post` bucht die Rechnung je Steuerschluessel ueber `steuergruppen` und
+`SalesPostingService` (ein Commit mit Buchungsnachweis und Belegstatus), ohne Schluessel 409 statt fest
+8400/1776. Maske `sales/invoice-editor` (Navigation): Spalte Steuerschluessel statt „MwSt %“.
+Tests 11 + 66 (DocFlow-Bestand). QA: `docs/quality-assurance/steuerschluessel-belege-20261013.md` (Teil 3).
+**Verhaltensaenderung:** `DocflowLineInput.tax_rate` ist ohne Angabe `None` statt 0; mit `tax_code` wird ein
+abweichender Satz abgelehnt. DocFlow-Rechnungen ohne Schluessel je Position werden nicht mehr gebucht.
+`features/forms/FormBuilder` kennt den Spaltentyp `steuerschluessel`.
+**An Codex (Identitaet) — Befund, nicht behoben:** Die DocFlow-Wege nehmen den Mandanten aus dem
+Query-Parameter `tenant_id` (sonst Vorgabemandant), nicht aus der Anmeldung.
+
+## PROCUREMENT-FOLLOWUP-EXACT-RESULT-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** realer PostgreSQL-Vertrag: zweite Eskalation speichert Stufe 2, antwortet mit Stufe 1 bei gleichen Zeitstempeln. **Ziel:** angelegte Folgeaktion unmittelbar per INSERT RETURNING liefern, deterministische Liste bei Zeitstempelgleichheit. **Dateibesitz:** app/services/procurement_match_service.py nur Folgeaktionsserialisierung, INSERT-Rueckgabe und Listen-Tiebreak; tests/test_procurement_match_integration.py eigene genaue ID-/Grund-/Stufen-/Persistenzregression innerhalb CI-PROCUREMENT-Claim; eigene QA/Workboard. Keine Rollen-/Buchungs-/Steuer-/Schemaaenderung. **Abnahme:** Rueckgabe gehoert exakt zur angelegten Zeile, zwei Eskalationen mit gleichem Zeitstempel korrekt und verschieden; bisherige Fachfaelle/Sicherheitsgegenproben erhalten; vorhandener valeo_probe ohne Migration/Reset/DB/Container. Parallele Eskalationsnummernvergabe und Aufruferakteur bleiben getrennte offene Befunde.
+
+**Lieferung:** INSERT RETURNING gibt die exakt angelegte Folgeaktion zurueck, ohne zusaetzliche Listenabfrage; deterministische Gleichstandsreihenfolge, reale Regression mit gleichen Zeitstempeln/verschiedenen IDs/korrekter Stufe bestanden. Produktdatei acht Zeilen kleiner; parallele Stufenvergabe und Aufruferakteur bleiben offen. 70 strenge Faelle auf vorhandenem valeo_probe und 35 reine Nachbarfaelle bestanden; Pagination gruen, keine neue DB/Container/Migration/Reset. Nachweis: ci-procurement-identity-isolation-20261013.md. Gesamt-CI und sieben weitere Fachdateien bleiben offen.
+
+## CI-PROCUREMENT-IDENTITY-ISOLATION-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** PostgreSQL-CI sechs Beschaffungs-Match-Fehler und zwei RFQ-Setupfehler; dev-token, Migrationen im Test, gemeinsame Demo-Seeds und manuelle Loeschbereinigung. **Ziel:** signierte ausdrueckliche Testidentitaeten und eigene transaktionale Fachdatensaetze am vorhandenen Pruefstand. **Dateibesitz:** tests/test_rfq_integration.py, tests/test_procurement_match_integration.py nur Fixtures/negative Sicherheitsfaelle, neue tests/procurement_identity_fixture.py; eigene QA/Workboard. Bestehende Erfolgs-/Preis-/Abgleichassertions erhalten. **Abnahme:** echte Produktionsmiddleware und RSA-Verifikation; fremde Tenantheader/alte Tokens abgewiesen; eigene Tenant-/Lieferanten-/Belegdaten durch Savepointrollback isoliert, kein Demo-Seeding, Migration oder DELETE in Vorbereitung/Bereinigung. Schema vom bestehenden Pruefstand/CI-Job; keine neue DB/Container/Reset. JWKS-Transport und Sessionstore nur in ausdruecklichem vorhandenen Probe-Kontext isoliert; Produktions-Rollen-/Akteur-/Steuerschluesselbefunde separat offen.
+
+**Lieferung:** RFQ und Beschaffungs-Matching mit signierten ausdruecklichen Testidentitaeten und eigenen rollback-isolierten Datensaetzen; kein Testmigrationsaufruf/Demoseed/Loeschbereinigung. Alte/fehlende Tokens und fremde Header abgewiesen. 70 strenge Faelle auf vorhandenem valeo_probe und 35 reine Nachbarfaelle bestanden; Pagination gruen, keine neue DB/Container/Migration/Reset. Nachweis: ci-procurement-identity-isolation-20261013.md. Gesamt-CI und sieben weitere Fachdateien bleiben offen.
+
+## STEUERSCHLUESSEL-BELEGE-20261013 — Teil 2 (Eingangsrechnung) abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** Teil 2 abgeschlossen 2026-10-13; naechster Teil: DocFlow-Rechnung
+(`sales/invoice-editor`, die Rechnungsmaske der Navigation) und `/einkauf/rechnungseingaenge`.
+**Lieferung:** `app/services/finance_eingangsrechnung_buchung.py` — ein Buchungsweg fuer REST
+(`/finance/ap/invoices/{id}/post`) und Kernel (`PostAPInvoice`): Aufwand und Vorsteuer je Steuerschluessel im
+Soll, Kreditor brutto im Haben, Journal + OP + Beleg in einer Transaktion, ohne eindeutige Angabe 409 statt
+Buchung. Vorher: seitenverkehrt, Kontonummern 3300/6000 als Konto-ID, ein Vorsteuerkonto nach dem hoechsten
+Satz (notfalls 1576), „verbucht“ auch bei gescheiterter Buchung, OP-Anlage mit nicht vorhandener Spalte
+`op_betrag`. Neu: `tax_keys.expense_account` (Migration `steuerschluessel_aufwandskonto_20261013`, ein Head),
+Feld Aufwandskonto in der Maske `finance/steuerschluessel`. Tests 13 + 33.
+QA: `docs/quality-assurance/steuerschluessel-belege-20261013.md` (Teil 2, mit Altlasten-Pruefung).
+**Kern-Datei geaendert (alle Leser des Lese-Caches):** `app/core/read_model_cache.py` schrieb Pydantic-Antworten
+als Textdarstellung in den Cache; der zweite gleiche Aufruf endete mit 500. Korrigiert (`_zu_json`).
+**Verhaltensaenderung:** `richte_skr03_ein` legt Konten als eigene Konten des Mandanten an, auch wenn `system`
+die Nummer fuehrt. `calculate_invoice_totals` (AP) hat die neuen Parameter `db`, `tenant_id`.
+**Befunde, nicht behoben:** `POST /einkauf/rechnungseingaenge/{id}/verbuchen` setzt nur den Status, bucht nicht;
+`create_ap_invoice` ueberschreibt das Rechnungsdatum mit dem Tagesdatum; DocFlow bucht fest 8400/1776.
+
 ## TEST-DATABASE-WRITE-BOUNDARY-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** globale autouse-Tenantseed-Fixture verbindet sich ohne Test-DB-Freigabe mit der konfigurierten Entwicklungsdatenbank. **Ziel:** lokale DB-Fixtures nur auf ausdruecklich freigegebenem bestehendem Testpruefstand schreiben lassen; CI darf ausschliesslich seine bereitgestellte DB verwenden. **Dateibesitz:** tests/conftest.py nur Datenbankautorisierung vor Seed/require_db; neue fokussierte Grenzvertraege; eigene QA/Workboard. **Abnahme:** keine DB-Verbindung fuer unkonfigurierte Unit-Tests; effektive und deklarierte Test-URL stimmen ueberein, lokale Entwicklungsdatenbank bleibt gesperrt; CI-job-DB ohne neue Ressourcen erlaubt. Bestehender valeo_probe, keine Migration/Reset/Container/DB. Authfixtures und Produktionscode unveraendert.

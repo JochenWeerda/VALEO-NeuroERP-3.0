@@ -1,3 +1,4 @@
+import { SteuerschluesselSelect } from "@/components/finance/SteuerschluesselSelect"
 import * as React from "react"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -212,9 +213,11 @@ export function FormBuilder<T extends Record<string, unknown>>({
 type LineCol = {
   name: string
   label: string
-  type: "string" | "number" | "lookup"
+  /** `steuerschluessel`: Auswahl aus den Steuerschluesseln des Mandanten statt eines Prozentfelds. */
+  type: "string" | "number" | "lookup" | "steuerschluessel"
   required?: boolean
   lookup?: string
+  richtung?: "verkauf" | "einkauf"
 }
 
 function LinesEditor({
@@ -292,7 +295,16 @@ function LinesEditor({
             <div className="text-sm opacity-70">{index + 1}</div>
             {columns.map((column): JSX.Element => (
               <div key={column.name}>
-                {column.type === "number" ? (
+                {column.type === "steuerschluessel" ? (
+                  <SteuerschluesselSelect
+                    richtung={column.richtung ?? "verkauf"}
+                    ariaLabel={`${column.label} Position ${index + 1}`}
+                    value={String(row[column.name] ?? "")}
+                    onChange={(code): void => {
+                      void setCell(index, column.name, code ?? "")
+                    }}
+                  />
+                ) : column.type === "number" ? (
                   <Input
                     type="number"
                     value={Number(row[column.name] ?? 0)}

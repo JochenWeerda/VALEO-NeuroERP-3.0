@@ -165,6 +165,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `docflow_pos_tse_compliance_20260215` | docflow pos tse compliance table |
 | `docflow_print_event_20260301` | Docflow: Druck/Export als Ereignis (printed_at, print_count) — GoBD Schritt 3 |
 | `docflow_returns_20260821` | Document return worklist and immutable status audit. |
+| `docflow_steuerschluessel_20261013` | DocFlow-Positionen tragen ihren Steuerschluessel. |
 | `document_control_20260821` | Document control exception worklist and audit. |
 | `domain_schemas_baseline_20260409` | domain_* PostgreSQL-Schemas: idempotent anlegen (Baseline fuer ORM/create_all) |
 | `driver_time_events_20260516` | add driver_time_events table |
@@ -412,6 +413,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `seed_anlage1_abzugstabelle_template_20260303` | seed Anlage 1 (Abzugstabelle Qualität) amendment template |
 | `seed_default_tenant_20260214` | seed default tenant for foreign-key constrained domain tables |
 | `steuernachweis_mandant_20261001` | Steuerliche Nachweise bekommen eine Migration — und einen Mandanten. |
+| `steuerschluessel_aufwandskonto_20261013` | Steuerschluessel tragen ein Aufwandskonto fuer Eingangsbelege. |
 | `steuerschluessel_einheit_20261012` | Steuerschluessel: eine Quelle. Erloeskonto und Paragraf-24-Kennzeichen an ``tax_keys``. |
 | `streckengeschaefte_table_merge_20260424` | Streckengeschaefte persistent (public.streckengeschaefte); merge mehrerer Alembic-Heads. |
 | `supply_chain_events_20260610` | supply_chain_events — append-only Ketten-Ereignis-Log (DOM-SUPPLY-004.2) |

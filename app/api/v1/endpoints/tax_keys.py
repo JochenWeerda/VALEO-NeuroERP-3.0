@@ -49,6 +49,8 @@ class TaxKeyCreate(BaseModel):
     revenue_account: Optional[str] = Field(
         None, max_length=20, description="Erloeskonto fuer Verkaufsbelege; leer = nicht automatisch buchen")
     par_24_ustg: bool = Field(default=False, description="Durchschnittssatz nach Paragraf 24 UStG")
+    expense_account: Optional[str] = Field(
+        None, max_length=20, description="Aufwandskonto fuer Eingangsbelege; leer = die Position nennt es")
     country: str = Field(default="DE", max_length=2, description="Country code (ISO 3166-1 alpha-2)")
     region: Optional[str] = Field(None, max_length=50, description="Region/state if applicable")
     active: bool = Field(default=True, description="Active status")
@@ -101,6 +103,7 @@ class TaxKeyUpdate(BaseModel):
     credit_account: Optional[str] = Field(None, max_length=20)
     revenue_account: Optional[str] = Field(None, max_length=20)
     par_24_ustg: Optional[bool] = None
+    expense_account: Optional[str] = Field(None, max_length=20)
     country: Optional[str] = Field(None, max_length=2)
     region: Optional[str] = Field(None, max_length=50)
     active: Optional[bool] = None
@@ -139,6 +142,7 @@ class TaxKeyResponse(BaseModel):
     updated_at: datetime
     revenue_account: Optional[str] = None
     par_24_ustg: bool = False
+    expense_account: Optional[str] = None
     # Wofuer der Schluessel automatisch bucht (Verkauf, Einkauf) oder warum nicht.
     verwendung: Optional[str] = None
 
@@ -158,7 +162,7 @@ def _antwort(row: Any) -> TaxKeyResponse:
         debit_account=_oder_leer(row[12]), credit_account=_oder_leer(row[13]),
         country=str(row[14]), region=_oder_leer(row[15]), active=bool(row[16]),
         created_at=row[17], updated_at=row[18],
-        revenue_account=_oder_leer(row[19]), par_24_ustg=bool(row[20]),
+        revenue_account=_oder_leer(row[19]), par_24_ustg=bool(row[20]), expense_account=_oder_leer(row[21]),
         verwendung=verwendung(str(row[1]), satz, row[13], row[12], row[19], bool(row[8])),
     )
 
@@ -189,7 +193,7 @@ async def list_tax_keys(
             SELECT id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
                    intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
                    debit_account, credit_account, country, region, active,
-                   created_at, updated_at, revenue_account, par_24_ustg
+                   created_at, updated_at, revenue_account, par_24_ustg, expense_account
             FROM domain_erp.tax_keys
             WHERE {' AND '.join(where_clauses)}
             ORDER BY code
@@ -251,7 +255,7 @@ async def get_tax_key(
             SELECT id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
                    intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
                    debit_account, credit_account, country, region, active,
-                   created_at, updated_at, revenue_account, par_24_ustg
+                   created_at, updated_at, revenue_account, par_24_ustg, expense_account
             FROM domain_erp.tax_keys
             WHERE id = :tax_key_id AND tenant_id = :tenant_id
         """)
@@ -305,16 +309,16 @@ async def create_tax_key(
             (id, tenant_id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
              intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
              debit_account, credit_account, country, region, active, created_at, updated_at,
-             revenue_account, par_24_ustg)
+             revenue_account, par_24_ustg, expense_account)
             VALUES
             (:id, :tenant_id, :code, :bezeichnung, :steuersatz, :ustva_position, :ustva_bezeichnung,
              :intracom, :export, :reverse_charge, :gueltig_von, :gueltig_bis, :notizen,
              :debit_account, :credit_account, :country, :region, :active, NOW(), NOW(),
-             :revenue_account, :par_24_ustg)
+             :revenue_account, :par_24_ustg, :expense_account)
             RETURNING id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
                       intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
                       debit_account, credit_account, country, region, active,
-                      created_at, updated_at, revenue_account, par_24_ustg
+                      created_at, updated_at, revenue_account, par_24_ustg, expense_account
         """)
         
         row = db.execute(insert_query, {
@@ -338,6 +342,7 @@ async def create_tax_key(
             "active": tax_key.active,
             "revenue_account": tax_key.revenue_account,
             "par_24_ustg": tax_key.par_24_ustg,
+            "expense_account": tax_key.expense_account,
         }).fetchone()
         
         db.commit()
@@ -431,6 +436,9 @@ async def update_tax_key(
             # Leere Angabe nimmt die Einordnung zurueck: Dann wird mit dem Schluessel nicht gebucht.
             update_fields.append("revenue_account = :revenue_account")
             params["revenue_account"] = tax_key.revenue_account.strip() or None
+        if tax_key.expense_account is not None:
+            update_fields.append("expense_account = :expense_account")
+            params["expense_account"] = tax_key.expense_account.strip() or None
         if tax_key.par_24_ustg is not None:
             update_fields.append("par_24_ustg = :par_24_ustg")
             params["par_24_ustg"] = tax_key.par_24_ustg
@@ -456,7 +464,7 @@ async def update_tax_key(
             RETURNING id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
                       intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
                       debit_account, credit_account, country, region, active,
-                      created_at, updated_at, revenue_account, par_24_ustg
+                      created_at, updated_at, revenue_account, par_24_ustg, expense_account
         """)  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         
         row = db.execute(update_query, params).fetchone()
@@ -526,7 +534,7 @@ async def get_tax_key_by_code(
             SELECT id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
                    intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
                    debit_account, credit_account, country, region, active,
-                   created_at, updated_at, revenue_account, par_24_ustg
+                   created_at, updated_at, revenue_account, par_24_ustg, expense_account
             FROM domain_erp.tax_keys
             WHERE code = :code AND tenant_id = :tenant_id AND active = true
             ORDER BY gueltig_von DESC
@@ -554,12 +562,14 @@ async def get_tax_key_by_code(
 # Masken-Kommando (ScreenDefinition finance/steuerschluessel)
 # ---------------------------------------------------------------------------
 
-_KONTEN = (("credit_account", "Umsatzsteuerkonto"), ("debit_account", "Vorsteuerkonto"), ("revenue_account", "Erlöskonto"))
+_KONTEN = (("credit_account", "Umsatzsteuerkonto"), ("debit_account", "Vorsteuerkonto"), ("revenue_account", "Erlöskonto"),
+           ("expense_account", "Aufwandskonto"))
 _KENNZEICHEN = ("par_24_ustg", "intracom", "export", "reverse_charge", "active")
 _FELDTEXT = {
     "bezeichnung": "Bezeichnung", "steuersatz": "Steuersatz", "ustva_position": "UStVA-Kennzahl",
     "ustva_bezeichnung": "UStVA-Text", "credit_account": "Umsatzsteuerkonto", "debit_account": "Vorsteuerkonto",
-    "revenue_account": "Erlöskonto", "par_24_ustg": "§ 24 UStG", "intracom": "Innergemeinschaftlich",
+    "revenue_account": "Erlöskonto", "expense_account": "Aufwandskonto", "par_24_ustg": "§ 24 UStG",
+    "intracom": "Innergemeinschaftlich",
     "export": "Ausfuhr", "reverse_charge": "Reverse Charge", "gueltig_von": "Gültig von",
     "gueltig_bis": "Gültig bis", "notizen": "Notizen", "active": "Aktiv",
 }
@@ -634,7 +644,8 @@ def _bestand(db: Session, tenant_id: str, code: str) -> list[Any]:
         text(
             # Spaltenfolge wie _SPALTEN.
             "SELECT id, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung, credit_account, debit_account, "
-            "revenue_account, par_24_ustg, intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen, active "
+            "revenue_account, expense_account, par_24_ustg, intracom, export, reverse_charge, gueltig_von, gueltig_bis, "
+            "notizen, active "
             "FROM domain_erp.tax_keys WHERE tenant_id = :tid AND code = :code"
         ),
         {"tid": tenant_id, "code": code},
@@ -682,10 +693,11 @@ async def action_steuerschluessel_speichern(
             schreib_db.execute(
                 text(
                     "INSERT INTO domain_erp.tax_keys (id, tenant_id, code, bezeichnung, steuersatz, ustva_position, "
-                    "ustva_bezeichnung, credit_account, debit_account, revenue_account, par_24_ustg, intracom, export, "
+                    "ustva_bezeichnung, credit_account, debit_account, revenue_account, expense_account, par_24_ustg, "
+                    "intracom, export, "
                     "reverse_charge, gueltig_von, gueltig_bis, notizen, active) "
                     "VALUES (:id, :tid, :code, :bezeichnung, :steuersatz, :ustva_position, :ustva_bezeichnung, "
-                    ":credit_account, :debit_account, :revenue_account, :par_24_ustg, :intracom, :export, "
+                    ":credit_account, :debit_account, :revenue_account, :expense_account, :par_24_ustg, :intracom, :export, "
                     ":reverse_charge, :gueltig_von, :gueltig_bis, :notizen, :active)"
                 ),
                 {**werte, "id": uuid7(), "tid": tid},
@@ -704,6 +716,7 @@ async def action_steuerschluessel_speichern(
                 "UPDATE domain_erp.tax_keys SET bezeichnung = :bezeichnung, steuersatz = :steuersatz, "
                 "ustva_position = :ustva_position, ustva_bezeichnung = :ustva_bezeichnung, "
                 "credit_account = :credit_account, debit_account = :debit_account, revenue_account = :revenue_account, "
+                "expense_account = :expense_account, "
                 "par_24_ustg = :par_24_ustg, intracom = :intracom, export = :export, reverse_charge = :reverse_charge, "
                 "gueltig_von = :gueltig_von, gueltig_bis = :gueltig_bis, notizen = :notizen, active = :active, "
                 "updated_at = NOW() WHERE id = :id AND tenant_id = :tid"

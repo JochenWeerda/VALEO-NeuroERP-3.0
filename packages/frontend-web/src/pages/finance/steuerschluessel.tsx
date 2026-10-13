@@ -43,6 +43,7 @@ import {
 
 const leer: Record<string, unknown> = {
   code: '', bezeichnung: '', steuersatz: '', credit_account: '', revenue_account: '', debit_account: '',
+  expense_account: '',
   par_24_ustg: false, reverse_charge: false, intracom: false, export: false,
   ustva_position: '', ustva_bezeichnung: '', gueltig_von: '', gueltig_bis: '', active: true, notizen: '',
 }
@@ -51,7 +52,7 @@ const PFLICHT = ['code', 'bezeichnung', 'steuersatz', 'gueltig_von']
 const RECHTE = ['finance.steuerschluessel.write']
 const LISTE = ['finance', 'tax-keys']
 const BUCHT_NICHT = 'Bucht nicht automatisch'
-const KONTENFELDER = ['credit_account', 'revenue_account', 'debit_account'] as const
+const KONTENFELDER = ['credit_account', 'revenue_account', 'debit_account', 'expense_account'] as const
 type Kontenfeld = (typeof KONTENFELDER)[number]
 
 function kontenAuswahl(vorschlaege: Kontovorschlag[], gewaehlt: string): Array<{ value: string; label: string }> {
@@ -147,6 +148,7 @@ export default function SteuerschluesselPage(): JSX.Element {
           ...leer,
           code: k.code, bezeichnung: k.bezeichnung, steuersatz: String(Number(k.steuersatz)),
           credit_account: k.credit_account ?? '', revenue_account: k.revenue_account ?? '', debit_account: k.debit_account ?? '',
+          expense_account: k.expense_account ?? '',
           par_24_ustg: k.par_24_ustg, reverse_charge: k.reverse_charge, intracom: k.intracom, export: k.export,
           ustva_position: k.ustva_position ?? '', ustva_bezeichnung: k.ustva_bezeichnung ?? '',
           gueltig_von: k.gueltig_von, gueltig_bis: k.gueltig_bis ?? '', active: k.active, notizen: k.notizen ?? '',
@@ -173,6 +175,7 @@ export default function SteuerschluesselPage(): JSX.Element {
       credit_account: text(werte.credit_account) || null,
       revenue_account: text(werte.revenue_account) || null,
       debit_account: text(werte.debit_account) || null,
+      expense_account: text(werte.expense_account) || null,
       par_24_ustg: werte.par_24_ustg === true,
       reverse_charge: werte.reverse_charge === true,
       intracom: werte.intracom === true,
@@ -248,6 +251,7 @@ export default function SteuerschluesselPage(): JSX.Element {
             credit_account: k.credit_account ?? '–',
             revenue_account: k.revenue_account ?? '–',
             debit_account: k.debit_account ?? '–',
+            expense_account: k.expense_account ?? '–',
             kennzeichen_text: kennzeichen(k),
             verwendung: k.verwendung ?? '–',
             status_text: k.active ? 'Aktiv' : 'Inaktiv',

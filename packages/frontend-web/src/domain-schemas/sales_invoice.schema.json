@@ -118,10 +118,10 @@
         "required": true
       },
       {
-        "name": "vatRate",
-        "label": "MwSt %",
-        "type": "number",
-        "required": true
+        "name": "taxCode",
+        "label": "Steuerschlüssel",
+        "type": "steuerschluessel",
+        "richtung": "verkauf"
       }
     ]
   }

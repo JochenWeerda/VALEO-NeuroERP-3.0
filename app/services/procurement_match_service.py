@@ -16,7 +16,7 @@ from __future__ import annotations
 import json
 import uuid
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any, Mapping, Optional
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -31,6 +31,16 @@ _FOLLOW_UP_ACTIONS = frozenset({"nachforderung", "reklamation", "eskalation", "f
 
 def _f(v):
     return float(v) if isinstance(v, Decimal) else v
+
+
+def _follow_up_row(row: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        'id': str(row['id']), 'action_type': row['action_type'],
+        'ausnahme_code': row['ausnahme_code'], 'grund': row['grund'],
+        'eskalationsstufe': int(row['eskalationsstufe'] or 1),
+        'created_at': row['created_at'].isoformat() if row['created_at'] else None,
+        'created_by': row['created_by'],
+    }
 
 
 def match_position(bestellt: Decimal, geliefert: Decimal,
@@ -371,22 +381,11 @@ class ProcurementMatchService:
                 "SELECT id, action_type, ausnahme_code, grund, eskalationsstufe, created_at, created_by "
                 "FROM domain_einkauf.procurement_follow_up "
                 "WHERE tenant_id = :t AND bestellnummer = :po "
-                "ORDER BY created_at DESC LIMIT :lim"
+                "ORDER BY created_at DESC, eskalationsstufe DESC, id DESC LIMIT :lim"
             ),
             {"t": self.tenant_id, "po": bestellnummer, "lim": max(1, min(limit, 200))},
         ).mappings().all()
-        return [
-            {
-                "id": str(r["id"]),
-                "action_type": r["action_type"],
-                "ausnahme_code": r["ausnahme_code"],
-                "grund": r["grund"],
-                "eskalationsstufe": int(r["eskalationsstufe"] or 1),
-                "created_at": r["created_at"].isoformat() if r["created_at"] else None,
-                "created_by": r["created_by"],
-            }
-            for r in rows
-        ]
+        return [_follow_up_row(row) for row in rows]
 
     def create_follow_up(
         self,
@@ -417,11 +416,12 @@ class ProcurementMatchService:
             eskalationsstufe = int((row or {}).get("max_stufe") or 0) + 1
 
         entry_id = str(uuid.uuid4())
-        self.db.execute(
+        inserted = self.db.execute(
             text(
                 "INSERT INTO domain_einkauf.procurement_follow_up "
                 "(id, tenant_id, bestellnummer, action_type, ausnahme_code, grund, eskalationsstufe, created_by) "
-                "VALUES (:id, :t, :po, :action, :code, :grund, :stufe, :by)"
+                "VALUES (:id, :t, :po, :action, :code, :grund, :stufe, :by) "
+                "RETURNING id, action_type, ausnahme_code, grund, eskalationsstufe, created_at, created_by"
             ),
             {
                 "id": entry_id,
@@ -433,17 +433,9 @@ class ProcurementMatchService:
                 "stufe": eskalationsstufe,
                 "by": created_by,
             },
-        )
+        ).mappings().one()
         self.db.commit()
-        items = self.list_follow_ups(bestellnummer, limit=1)
-        return items[0] if items else {
-            "id": entry_id,
-            "action_type": action,
-            "ausnahme_code": ausnahme_code,
-            "grund": reason,
-            "eskalationsstufe": eskalationsstufe,
-            "created_by": created_by,
-        }
+        return _follow_up_row(inserted)
 
     def list_ers_credits(self, bestellnummer: str, limit: int = 20) -> list[dict]:
         rows = self.db.execute(
