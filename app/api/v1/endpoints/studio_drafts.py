@@ -4,12 +4,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from app.api.v1.endpoints.mask_screen_definition import _check_readiness
 from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS
 from app.core.tenant import get_tenant_id
+from app.auth.deps import get_current_user
 from app.services.studio_draft_store import get_draft, list_drafts, save_draft, set_status, studio_run_route
 from app.services.studio_propose import propose_studio_draft
 from app.services.studio_validation import load_studio_catalog, validate_studio_draft
@@ -31,9 +32,20 @@ class StudioProposeIn(BaseModel):
     intent: str = Field(min_length=1)
 
 
-def _actor(x_actor_id: str | None) -> str:
-    actor = (x_actor_id or "").strip()
-    return actor or "studio-user"
+def _actor(user: dict[str, Any]) -> str:
+    subject = user.get("sub")
+    if not isinstance(subject, str) or not subject.strip():
+        raise HTTPException(403, "Gepruefter Studio-Urheber fehlt")
+    return subject.strip()
+
+
+def _publisher(user: dict[str, Any] = Depends(get_current_user)) -> dict[str, Any]:
+    # Same verified identity_type/admin boundary as identity administration.
+    claims = user.get("raw") or {}
+    if claims.get("identity_type") != "human" or "admin" not in (user.get("roles") or []):
+        raise HTTPException(403, "Menschliche Administration fuer Studio-Publikation erforderlich")
+    _actor(user)
+    return user
 
 
 def _native_ids() -> set[str]:
@@ -53,7 +65,7 @@ def _report(definition: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.get("/catalog", summary="Studio-Katalog für Floorplans, Datenquellen und Actions")
-def studio_catalog() -> dict[str, Any]:
+def studio_catalog(user: dict = Depends(get_current_user)) -> dict[str, Any]:
     catalog = load_studio_catalog()
     return {
         "version": catalog["version"],
@@ -66,18 +78,18 @@ def studio_catalog() -> dict[str, Any]:
 
 
 @router.post("/validate", summary="Studio-ScreenDefinition gegen Katalog und Gates prüfen")
-def studio_validate(body: StudioDefinitionIn) -> dict[str, Any]:
+def studio_validate(body: StudioDefinitionIn, user: dict = Depends(get_current_user)) -> dict[str, Any]:
     return _report(body.definition)
 
 
 @router.post("/propose", summary="Studio-ScreenDefinition aus einer Absicht vorschlagen")
-def studio_propose(body: StudioProposeIn) -> dict[str, Any]:
+def studio_propose(body: StudioProposeIn, user: dict = Depends(get_current_user)) -> dict[str, Any]:
     definition = propose_studio_draft(body.intent)
     return _report(definition)
 
 
 @router.get("/drafts", summary="Studio-Entwürfe des Mandanten auflisten")
-def studio_list_drafts(tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
+def studio_list_drafts(tenant_id: str = Depends(get_tenant_id), user: dict = Depends(get_current_user)) -> dict[str, Any]:
     return {"drafts": list_drafts(tenant_id)}
 
 
@@ -85,12 +97,12 @@ def studio_list_drafts(tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any
 def studio_create_draft(
     body: StudioDefinitionIn,
     tenant_id: str = Depends(get_tenant_id),
-    x_actor_id: str | None = Header(default=None, alias="X-Actor-ID"),
+    user: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
     report = _report(body.definition)
     if report["violations"]:
         raise HTTPException(status_code=400, detail={"violations": report["violations"]})
-    record = save_draft(tenant_id, _actor(x_actor_id), body.definition, readiness=report["readiness"])
+    record = save_draft(tenant_id, _actor(user), body.definition, readiness=report["readiness"])
     return {**record, **report}
 
 
@@ -99,7 +111,7 @@ def studio_update_draft(
     draft_id: str,
     body: StudioDefinitionIn,
     tenant_id: str = Depends(get_tenant_id),
-    x_actor_id: str | None = Header(default=None, alias="X-Actor-ID"),
+    user: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
     report = _report(body.definition)
     if report["violations"]:
@@ -107,7 +119,7 @@ def studio_update_draft(
     try:
         record = save_draft(
             tenant_id,
-            _actor(x_actor_id),
+            _actor(user),
             body.definition,
             draft_id=draft_id,
             readiness=report["readiness"],
@@ -123,16 +135,16 @@ def studio_update_draft(
 def studio_submit_review(
     draft_id: str,
     tenant_id: str = Depends(get_tenant_id),
-    x_actor_id: str | None = Header(default=None, alias="X-Actor-ID"),
+    user: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
-    return _transition(draft_id, tenant_id, _actor(x_actor_id), "review")
+    return _transition(draft_id, tenant_id, _actor(user), "review")
 
 
 @router.post("/drafts/{draft_id}/publish", summary="Studio-Entwurf als published_temp freigeben")
 def studio_publish(
     draft_id: str,
     tenant_id: str = Depends(get_tenant_id),
-    x_actor_id: str | None = Header(default=None, alias="X-Actor-ID"),
+    user: dict = Depends(_publisher),
 ) -> dict[str, Any]:
     item = get_draft(tenant_id, draft_id)
     if item is None:
@@ -141,7 +153,7 @@ def studio_publish(
     if not report["canPublish"]:
         raise HTTPException(status_code=400, detail={"violations": report["violations"], "readiness": report["readiness"]})
     try:
-        record = set_status(tenant_id, draft_id, _actor(x_actor_id), "published_temp")
+        record = set_status(tenant_id, draft_id, _actor(user), "published_temp")
     except PermissionError as error:
         raise HTTPException(status_code=403, detail=str(error)) from error
     screen_id = str(record.get("screen_id") or (record.get("definition") or {}).get("id") or "")
@@ -152,9 +164,9 @@ def studio_publish(
 def studio_retire(
     draft_id: str,
     tenant_id: str = Depends(get_tenant_id),
-    x_actor_id: str | None = Header(default=None, alias="X-Actor-ID"),
+    user: dict = Depends(_publisher),
 ) -> dict[str, Any]:
-    return _transition(draft_id, tenant_id, _actor(x_actor_id), "retired")
+    return _transition(draft_id, tenant_id, _actor(user), "retired")
 
 
 def _transition(draft_id: str, tenant_id: str, actor: str, status: str) -> dict[str, Any]:

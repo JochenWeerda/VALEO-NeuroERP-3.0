@@ -11,6 +11,40 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## CONTROLLER-MASK-PROJECTION-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Fehlende UI-Abnahme der kanonisch erzeugten Controller-Freigaberechte (FIN-CONTROL-001). **Dateibesitz:** packages/frontend-web/src/__tests__/components/mask-builder/screen-permissions.test.ts; docs/quality-assurance/controller-mask-projection-20261013.md. **Abnahme:** controller und CONTROLLING erhalten deklarierte Freigaberechte, aber keine Buchung/Bearbeitung/Stornierung daraus; Kombination mit FINANCE_LESEN bleibt lesend plus Kontrolle. **Risiken:** kein neuer Rollenauftrag fuer reale Testkennung; echte Controller-Browser-/Providerabnahme separat. Fremde generierte Arbeitskopien nicht regenerieren oder committen.
+
+**Lieferung:** 14 Frontend-Rechtevertraege bestanden; controller/CONTROLLING erhalten Freigaben ohne Buchungsrechte, FINANCE_LESEN ergaenzt nur Lesen/Preise. QA: controller-mask-projection-20261013.md. Reale Controller-Anmeldung bleibt getrennte Abnahme; keine reale Rollenvergabe oder fremde Generatoraenderung.
+
+## FIN-CONTROL-001 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Entscheidung des Auftraggebers vom Abend des
+13.10.2026: „Der Finanzbuchhalter hat den Hut auf. Der Controller ueberwacht die Ausnahmen.“ **Ersetzt die
+Freigabematrix der Bloecke APPROVAL-001-…** (Engine, Freigabeweg und Protokoll bleiben).
+**Lieferung:** `app/core/freigabe.py` ist jetzt die Kontrollregel (Befund: Warnung oder kritisch). Warnungen
+lassen den Vorgang zu und stehen im Pruefkorb `domain_docflow.control_findings` (Migration
+`control_findings_20261013`, ein Head — auf `valeo_probe` und `valeo_neuro_erp` angewandt); nur kritische Befunde
+(Dublette, Abweichung vom Vorgaenger, geschuetztes Konto, Gutschrift ohne Bezug) sperren bis zur unabhaengigen
+Freigabe. Wege `GET /api/v1/kontrolle/befunde`, `POST …/{id}/pruefung`. Der Controller (`controller`,
+`CONTROLLING`) gibt kritische Befunde frei und prueft den Korb.
+QA: `docs/quality-assurance/fin-control-001-kontroll-engine-20261013.md`.
+**VERHALTENSAENDERUNG fuer alle (gegenueber heute Nachmittag):** Gutschriften, Stornos, manuelle
+Hauptbuchbuchungen, Finanzrechnungen und Betraege ueber der Schwelle buchen wieder mit Rollenrecht. Gesperrt (409)
+sind nur noch kritische Befunde und der Zahlungslauf ohne Freigabe. `sichere_freigabe*` in
+`tests/freigabehilfe.py` bleibt und tut nichts, wo keine Freigabe noetig ist.
+**An Codex (Auftrag des Auftraggebers):** Kasse und Ruecklastschriften zuerst auf bestehende Buchungs-, Storno-
+und Berechtigungswege untersuchen; die Befunde dafuer (Kassendifferenz, dritte Ruecklastschrift in 90 Tagen)
+koennen danach in dieselbe Engine (`Vorgang.befunde`). Die Rollen `controller`/`CONTROLLING` braucht die
+Testidentitaet fuer die Sichtpruefung des Pruefkorbs. `app/core/belegvertrag.py` und `docflow_belegadapter.py`
+habe ich nicht angefasst (bei dir in Arbeit); ein Hinweis „geht in den Pruefkorb“ an der Aktion fehlt deshalb.
+
+## STUDIO-TOKEN-IDENTITY-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Studio-Urheber aus gepruefter Anmeldung; Publizieren/Zurueckziehen nur verifizierte menschliche bestehende Adminrolle; Status Review darf den letzten Inhaltseditor nicht umdeuten. **Dateibesitz:** app/api/v1/endpoints/studio_drafts.py; app/services/studio_draft_store.py nur Editorbindung bei Review; tests/test_meridian_screen_studio_api.py; tests/test_meridian_screen_studio_persistence.py samt eigener Datenisolation; eigener tests/test_studio_token_identity.py; docs/quality-assurance/studio-token-identity-20261013.md. **Abnahme:** fremder X-Actor-ID ohne Wirkung, kein unbekannter Urheberfallback, Dienstkonto/fehlende Adminrolle ohne Publikation, zwei echte Testidentitaeten statt Headerwechsel, Review-Status kein Selbstfreigabebypass. **Risiken:** Inhalts-/Versionsbindung, dauerhafte Publikationsauditkette, Studio-Frontend-Anmeldewechsel und BELEG-021-Konsolidierung bleiben Folgearbeit. Keine neue DB/Container, keine gemeinsamen Daten loeschen.
+
+**Lieferung:** Studio benutzt verifizierten Token-Subject statt X-Actor-ID; Publikation/Zurueckziehen verlangen menschliche bestehende Adminrolle. Review aendert den Inhaltseditor nicht. 73 API-/Persistenz-/Policy-Faelle bestanden; SQL-Tests isolieren eigene Zeilen statt alle Entwuerfe zu loeschen. QA: studio-token-identity-20261013.md. Inhaltsbindung, Publikationsaudit und Frontend-Anmeldewechsel bleiben offen.
+
 ## STUDIO-METADATA-POLICY-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Sicherheitskatalog fuer Agenten-/Menschenvorschlaege auf verschachtelte Maskenaktionen anwenden und Weglassen/Umdeuten von Schutzmetadaten verhindern. **Dateibesitz:** app/services/studio_validation.py; tests/test_uix090_studio_validation.py; docs/quality-assurance/studio-metadata-policy-20261013.md. **Abnahme:** Tabellen-/Reiteraktionen unterliegen denselben Katalog-, Endpoint-, Method-, Rollen- und Agentensperren; malformed Metadaten werden abgewiesen; vorhandene Vorschlaege bleiben validierbar. **Risiken:** Studio-Tokenurheber und inhaltsgebundener Publikationsworkflow bleiben anschliessend zu schliessen. BELEG-021-Konsolidierung ist offen: zusaetzlicher Serveradapter inzwischen geliefert, keine ungesicherte Umstellung oder fremder Rueckbau in diesem Slice.

@@ -14791,6 +14791,104 @@
             "app/services/docflow_service.py"
           ]
         },
+        "control_findings": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "subject_type",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "subject_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "action",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "code",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "severity",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "text",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "amount",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "actor",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "approval_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "reviewed_by",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "reviewed_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "review_note",
+              "nullable": true,
+              "type": "text"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Custodian domain_docflow / Domain dms-compliance.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/finance_freigabe.py",
+            "app/services/freigabe_engine.py"
+          ],
+          "written_by": [
+            "app/services/freigabe_engine.py"
+          ]
+        },
         "create_request_idempotency": {
           "columns": [
             {
@@ -20230,6 +20328,7 @@
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/journal.py",
             "app/services/finance_closing_service.py",
+            "app/services/finance_freigabe.py",
             "app/services/finance_transaction_service.py"
           ],
           "written_by": [
@@ -21826,7 +21925,8 @@
             "app/core/connectors/workflow.py",
             "app/infrastructure/models/journal.py",
             "app/services/finance_closing_service.py",
-            "app/services/finance_datev_service.py"
+            "app/services/finance_datev_service.py",
+            "app/services/finance_freigabe.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/booking_templates.py",
@@ -22460,6 +22560,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/payment_runs.py",
+            "app/services/finance_freigabe.py",
             "app/services/mask_rollout_summary_service.py"
           ],
           "written_by": [
@@ -22568,6 +22669,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/payment_runs.py",
+            "app/services/finance_freigabe.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/payment_run_freigabe.py"
           ],
@@ -22998,7 +23100,8 @@
             "app/core/screen_definitions_capture.py",
             "app/finance/steuerschluessel.py",
             "app/finance/tax_resolver.py",
-            "app/services/docflow_service.py"
+            "app/services/docflow_service.py",
+            "app/services/finance_freigabe.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/tax_keys.py",
@@ -48455,7 +48558,8 @@
             "app/finance/gobd.py",
             "app/infrastructure/models/__init__.py",
             "app/security/dashboard.py",
-            "app/services/audit_hardening.py"
+            "app/services/audit_hardening.py",
+            "app/services/finance_freigabe.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/payment_matching.py",
@@ -57129,6 +57233,7 @@
             "app/api/v1/endpoints/compat.py",
             "app/finance/steuerschluessel.py",
             "app/infrastructure/models/l3c_models.py",
+            "app/services/finance_freigabe.py",
             "app/services/freigabe_engine.py"
           ],
           "written_by": [

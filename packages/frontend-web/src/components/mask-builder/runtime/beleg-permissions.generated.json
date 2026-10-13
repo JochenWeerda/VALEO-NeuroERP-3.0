@@ -59,16 +59,20 @@
         "manager"
       ],
       "belege.freigeben": [
+        "CONTROLLING",
         "EINKAUF_ADMIN",
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "admin",
+        "controller",
         "manager"
       ],
       "belege.freigeben_erhoeht": [
+        "CONTROLLING",
         "EINKAUF_ADMIN",
         "FINANCE_ADMIN",
-        "admin"
+        "admin",
+        "controller"
       ]
     },
     "beleg/purchase-credit-memo": {
@@ -122,16 +126,20 @@
         "admin"
       ],
       "belege.freigeben": [
+        "CONTROLLING",
         "EINKAUF_ADMIN",
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "admin",
+        "controller",
         "manager"
       ],
       "belege.freigeben_erhoeht": [
+        "CONTROLLING",
         "EINKAUF_ADMIN",
         "FINANCE_ADMIN",
-        "admin"
+        "admin",
+        "controller"
       ]
     },
     "beleg/purchase-invoice": {
@@ -185,16 +193,20 @@
         "admin"
       ],
       "belege.freigeben": [
+        "CONTROLLING",
         "EINKAUF_ADMIN",
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "admin",
+        "controller",
         "manager"
       ],
       "belege.freigeben_erhoeht": [
+        "CONTROLLING",
         "EINKAUF_ADMIN",
         "FINANCE_ADMIN",
-        "admin"
+        "admin",
+        "controller"
       ]
     },
     "beleg/purchase-order": {
@@ -248,16 +260,20 @@
         "manager"
       ],
       "belege.freigeben": [
+        "CONTROLLING",
         "EINKAUF_ADMIN",
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "admin",
+        "controller",
         "manager"
       ],
       "belege.freigeben_erhoeht": [
+        "CONTROLLING",
         "EINKAUF_ADMIN",
         "FINANCE_ADMIN",
-        "admin"
+        "admin",
+        "controller"
       ]
     },
     "beleg/sales-credit-memo": {
@@ -317,16 +333,20 @@
         "admin"
       ],
       "belege.freigeben": [
+        "CONTROLLING",
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "admin",
+        "controller",
         "manager"
       ],
       "belege.freigeben_erhoeht": [
+        "CONTROLLING",
         "FINANCE_ADMIN",
         "SALES_ADMIN",
-        "admin"
+        "admin",
+        "controller"
       ]
     },
     "beleg/sales-delivery": {
@@ -392,16 +412,20 @@
         "manager"
       ],
       "belege.freigeben": [
+        "CONTROLLING",
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "admin",
+        "controller",
         "manager"
       ],
       "belege.freigeben_erhoeht": [
+        "CONTROLLING",
         "FINANCE_ADMIN",
         "SALES_ADMIN",
-        "admin"
+        "admin",
+        "controller"
       ]
     },
     "beleg/sales-invoice": {
@@ -461,16 +485,20 @@
         "admin"
       ],
       "belege.freigeben": [
+        "CONTROLLING",
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "admin",
+        "controller",
         "manager"
       ],
       "belege.freigeben_erhoeht": [
+        "CONTROLLING",
         "FINANCE_ADMIN",
         "SALES_ADMIN",
-        "admin"
+        "admin",
+        "controller"
       ]
     },
     "beleg/sales-offer": {
@@ -530,16 +558,20 @@
         "manager"
       ],
       "belege.freigeben": [
+        "CONTROLLING",
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "admin",
+        "controller",
         "manager"
       ],
       "belege.freigeben_erhoeht": [
+        "CONTROLLING",
         "FINANCE_ADMIN",
         "SALES_ADMIN",
-        "admin"
+        "admin",
+        "controller"
       ]
     },
     "beleg/sales-order": {
@@ -599,16 +631,20 @@
         "manager"
       ],
       "belege.freigeben": [
+        "CONTROLLING",
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "admin",
+        "controller",
         "manager"
       ],
       "belege.freigeben_erhoeht": [
+        "CONTROLLING",
         "FINANCE_ADMIN",
         "SALES_ADMIN",
-        "admin"
+        "admin",
+        "controller"
       ]
     }
   }

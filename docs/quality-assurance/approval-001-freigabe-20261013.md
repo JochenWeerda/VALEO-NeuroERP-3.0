@@ -4,6 +4,11 @@ Stand: 2026-10-13 · Slice `APPROVAL-001-DOCFLOW` · Entscheidung des Auftraggeb
 Folge aus [Rechte an Belegen](beleg-rechte-20261013.md) · gebunden an
 [MCP-WRITE](../architecture/mcp-write-standard.md) (Regel 008)
 
+> **Überholt in der Regel, gültig in der Technik.** Die Freigabematrix dieses Dokuments ist seit dem Abend
+> des 13.10.2026 durch [FIN-CONTROL-001](fin-control-001-kontroll-engine-20261013.md) ersetzt: Routine
+> bucht die Buchhaltung selbst, nur kritische Befunde sperren. Engine, gemeinsamer Freigabeweg, Protokoll,
+> Funktionstrennung und die geschlossenen Umgehungswege gelten weiter.
+
 ## Entscheidung
 
 Buchen und Stornieren unterliegen einer risikobasierten Freigabe — kein generelles Vier-Augen-Prinzip,

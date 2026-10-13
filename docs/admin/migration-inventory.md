@@ -139,6 +139,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `config_openitems_tables_20260412` | Create connectors, reporting_units, schedules, and open_items tables in domain_shared |
 | `connectors_lohn_quadriga_20260301` | Connectors: Lohn-Import-Läufe und Quadriga/Connector-Konfiguration (domain_erp) |
 | `consignment_storage_fee_engine_20260215` | add consignment storage fee run and charge tables |
+| `control_findings_20261013` | Pruefkorb des Controllers: Befunde der Kontroll-Engine (FIN-CONTROL-001). |
 | `controlling_budget_abschluss_20260623` | DOM-CONTROLLING-004 — controlling_budgets, ist_werte, kst_abschluss. |
 | `controlling_module_initial_20260215` | controlling module initial tables |
 | `crm360_o2c_delivery_20260608` | Repair canonical sales delivery-note tables for CRM360 O2C. |

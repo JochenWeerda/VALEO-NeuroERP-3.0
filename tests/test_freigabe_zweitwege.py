@@ -1,4 +1,6 @@
-"""Die Buchungswege neben DocFlow gehen durch dieselbe Approval Engine (APPROVAL-001).
+"""Die Buchungswege neben DocFlow gehen durch dieselbe Kontroll-Engine (FIN-CONTROL-001).
+
+Routine bucht die Buchhaltung selbst; Auffaelliges steht im Pruefkorb; nur ein kritischer Befund sperrt.
 
 Geprueft gegen die echte Datenbank: Eingangsrechnung der Finanzbuchhaltung, Verkaufsgutschrift, alter Rechnungsweg
 und der gemeinsame Freigabeweg ``/approvals``.
@@ -15,7 +17,9 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
-from app.api.v1.endpoints import ap_approval_workflow, ap_invoices, approvals, docflow, finance_invoices, sales_credit_notes
+from app.api.v1.endpoints import (
+    ap_approval_workflow, ap_invoices, approvals, docflow, finance_invoices, kontrolle, sales_credit_notes,
+)
 from app.auth.deps import get_current_user
 from app.core.database import SessionLocal
 from app.core.exceptions import register_domain_exception_handlers
@@ -28,12 +32,14 @@ ANNA = {"sub": "anna", "name": "a.petersen", "roles": ["FINANCE_ADMIN", "SALES_B
 BERND = {"sub": "bernd", "name": "b.dirks", "roles": ["FINANCE_BEARBEITEN"]}
 CLARA = {"sub": "clara", "name": "c.onken", "roles": ["FINANCE_ADMIN"]}
 LESER = {"sub": "lea", "name": "l.meyer", "roles": ["LAGER_LESEN"]}
+CARL = {"sub": "carl", "name": "c.boekhoff", "roles": ["controller"]}
 
 AUFRAEUMEN = (
     "DELETE FROM domain_erp.journal_entry_lines WHERE journal_entry_id IN "
     "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
     "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",
     "DELETE FROM domain_erp.offene_posten WHERE tenant_id = :t",
+    "DELETE FROM domain_docflow.control_findings WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.approval_log WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.approvals WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.document_status_history WHERE tenant_id = :t",
@@ -80,6 +86,7 @@ def haus(monkeypatch):
     app.include_router(finance_invoices.router)
     app.include_router(docflow.router, prefix="/docflow")
     app.include_router(approvals.router, prefix="/approvals")
+    app.include_router(kontrolle.router, prefix="/kontrolle")
     ersetze_mandant(app, mandant)
     client = TestClient(app, raise_server_exceptions=False)
 
@@ -118,69 +125,80 @@ def _entscheide(haus, wer: dict, subjekt: str, kennung: str, fid: str):
 
 # ── Eingangsrechnung der Finanzbuchhaltung ────────────────────────────────────
 
-def _eingangsrechnung(haus, wer: dict, preis: float = 100) -> str:
+def _korb(haus) -> list[tuple[str, str, str]]:
+    antwort = haus["als"](CARL).get("/kontrolle/befunde")
+    assert antwort.status_code == 200, antwort.text
+    return sorted((b["subject_type"], b["code"], b["severity"]) for b in antwort.json())
+
+
+def _eingangsrechnung(haus, wer: dict, preis: float = 100, datum: str = "2026-10-13") -> str:
     nummer = f"ER-{uuid.uuid4().hex[:8]}"
     antwort = haus["als"](wer).post("/ap/invoices/", json={
-        "number": nummer, "date": "2026-10-13", "customerId": "lieferant-1", "dueDate": "2026-11-12",
+        "number": nummer, "date": datum, "customerId": "lieferant-1", "dueDate": "2026-11-12",
         "lines": [{"article": "Miete", "qty": 1, "price": preis, "taxCode": "9"}]})
     assert antwort.status_code == 201, antwort.text
     with SessionLocal() as db:
+        # Das Anlegen setzt das Tagesdatum; fuer die Tests zaehlt das angegebene.
         db.execute(text(
-            "UPDATE documents SET data = jsonb_set(CAST(data AS jsonb), '{status}', '\"FREIGEGEBEN\"') "
-            "WHERE doc_type = 'ap_invoice' AND doc_number = :n"), {"n": nummer})
+            "UPDATE documents SET data = jsonb_set(jsonb_set(CAST(data AS jsonb), '{status}', '\"FREIGEGEBEN\"'), "
+            "'{date}', to_jsonb(CAST(:d AS text))) WHERE doc_type = 'ap_invoice' AND doc_number = :n"),
+            {"n": nummer, "d": datum})
         db.commit()
     return nummer
 
 
-def test_die_finanzrechnung_bucht_erst_mit_der_freigabe_einer_zweiten_person(haus):
-    nummer = _eingangsrechnung(haus, ANNA)
-    ohne = haus["als"](ANNA).post(f"/ap/invoices/{nummer}/post", params={"posted_by": "x"})
-    assert ohne.status_code == 409 and "Freigabe erforderlich (R3)" in ohne.text and "Finanzrechnung ohne Bestellung" in ohne.text
-    assert _buchungen(haus) == 0
+def _buche_er(haus, wer: dict, nummer: str):
+    return haus["als"](wer).post(f"/ap/invoices/{nummer}/post", params={"posted_by": "x"})
 
-    anfrage = _frage(haus, ANNA, "finance_ap_invoice", nummer)
-    assert anfrage.status_code == 200, anfrage.text
-    fid = anfrage.json()["id"]
-    # Anna hat angelegt und angefragt: Sie entscheidet nicht, auch nicht als Finanzleitung.
-    selbst = _entscheide(haus, ANNA, "finance_ap_invoice", nummer, fid)
-    assert selbst.status_code == 403 and "Funktionstrennung" in selbst.text
-    assert _entscheide(haus, LESER, "finance_ap_invoice", nummer, fid).status_code == 403
-    assert _entscheide(haus, BERND, "finance_ap_invoice", nummer, fid).status_code == 200
 
-    gebucht = haus["als"](ANNA).post(f"/ap/invoices/{nummer}/post", params={"posted_by": "x"})
-    assert gebucht.status_code == 200, gebucht.text
+def test_die_wiederkehrende_finanzrechnung_bucht_die_buchhaltung_selbst(haus):
+    for monat in ("2026-08-13", "2026-09-13", "2026-10-13"):
+        assert _buche_er(haus, ANNA, _eingangsrechnung(haus, ANNA, 1000, monat)).status_code == 200
+    assert _buchungen(haus) == 3 and _korb(haus) == []
+    # Mehr als 10 % ueber dem ueblichen Betrag: gebucht, aber der Controller sieht es.
+    teurer = _eingangsrechnung(haus, ANNA, 1150, "2026-11-13")
+    assert _buche_er(haus, ANNA, teurer).status_code == 200
+    assert _korb(haus) == [("finance_ap_invoice", "abweichung_ueblich", "warnung")]
+    # Innerhalb von 10 % faellt nichts auf.
+    assert _buche_er(haus, ANNA, _eingangsrechnung(haus, ANNA, 1050, "2026-12-13")).status_code == 200
+    assert len(_korb(haus)) == 1 and _buchungen(haus) == 5
+
+
+def test_die_doppelte_finanzrechnung_sperrt_bis_zur_unabhaengigen_freigabe(haus):
+    assert _buche_er(haus, ANNA, _eingangsrechnung(haus, ANNA, 500)).status_code == 200
+    doppelt = _eingangsrechnung(haus, ANNA, 500)                     # derselbe Lieferant, Betrag und Tag
+    gesperrt = _buche_er(haus, ANNA, doppelt)
+    assert gesperrt.status_code == 409 and "Mögliche Dublette" in gesperrt.text
     assert _buchungen(haus) == 1
-    assert [f["status"] for f in haus["als"](BERND).get(f"/approvals/finance_ap_invoice/{nummer}").json()] == ["consumed"]
-    ereignisse = _log(haus, "finance_ap_invoice", nummer)
-    assert ereignisse[0] == ("approval_request", "anna") and ereignisse[-2:] == [("approval_grant", "bernd"), ("approval_consume", "anna")]
-    assert ("approval_refused", "anna") in ereignisse
+
+    fid = _frage(haus, ANNA, "finance_ap_invoice", doppelt).json()["id"]
+    selbst = _entscheide(haus, ANNA, "finance_ap_invoice", doppelt, fid)   # angelegt und angefragt
+    assert selbst.status_code == 403 and "Funktionstrennung" in selbst.text
+    assert _entscheide(haus, LESER, "finance_ap_invoice", doppelt, fid).status_code == 403
+    assert _entscheide(haus, CARL, "finance_ap_invoice", doppelt, fid).status_code == 200   # der Controller
+    assert _buche_er(haus, ANNA, doppelt).status_code == 200
+    assert _buchungen(haus) == 2
+    assert ("finance_ap_invoice", "dublette", "kritisch") in _korb(haus)
+    ereignisse = _log(haus, "finance_ap_invoice", doppelt)
+    assert ereignisse[0] == ("approval_request", "anna") and ereignisse[-2:] == [("approval_grant", "carl"), ("approval_consume", "anna")]
 
 
-def test_wer_die_finanzrechnung_angelegt_hat_gibt_sie_nicht_frei(haus):
-    nummer = _eingangsrechnung(haus, CLARA)             # Clara legt an
-    fid = _frage(haus, ANNA, "finance_ap_invoice", nummer).json()["id"]  # Anna fragt an
-    nein = _entscheide(haus, CLARA, "finance_ap_invoice", nummer, fid)
-    assert nein.status_code == 403 and "Funktionstrennung" in nein.text
-    assert _entscheide(haus, BERND, "finance_ap_invoice", nummer, fid).status_code == 200
-
-
-def test_auch_der_kernel_bucht_die_finanzrechnung_nicht_ohne_freigabe(haus):
+def test_auch_der_kernel_bucht_routine_und_sperrt_die_dublette(haus):
     from app.services.ap_invoice_kernel_posting import post_ap_invoice_kernel_sync
 
-    nummer = _eingangsrechnung(haus, ANNA)
+    erste = _eingangsrechnung(haus, ANNA, 700)
     with SessionLocal() as db:
-        post_ap_invoice_kernel_sync(db, invoice_id=nummer, tenant_id=haus["mandant"], posted_by="kernel")
-    assert _buchungen(haus) == 0
-    fid = _frage(haus, ANNA, "finance_ap_invoice", nummer).json()["id"]
-    assert _entscheide(haus, BERND, "finance_ap_invoice", nummer, fid).status_code == 200
+        post_ap_invoice_kernel_sync(db, invoice_id=erste, tenant_id=haus["mandant"], posted_by="kernel")
+    assert _buchungen(haus) == 1
+    doppelt = _eingangsrechnung(haus, ANNA, 700)
     with SessionLocal() as db:
-        post_ap_invoice_kernel_sync(db, invoice_id=nummer, tenant_id=haus["mandant"], posted_by="kernel")
+        post_ap_invoice_kernel_sync(db, invoice_id=doppelt, tenant_id=haus["mandant"], posted_by="kernel")
     assert _buchungen(haus) == 1
 
 
 # ── Verkaufsgutschrift ────────────────────────────────────────────────────────
 
-def _gutschrift(haus, netto: float, rechnung: str = "RE-1") -> str:
+def _gutschrift(haus, netto: float, rechnung: str | None = "RE-1") -> str:
     gs = f"gu-{uuid.uuid4().hex[:8]}"
     brutto = round(netto * 1.19, 2)
     with SessionLocal() as db:
@@ -197,33 +215,31 @@ def _gutschrift(haus, netto: float, rechnung: str = "RE-1") -> str:
     return gs
 
 
-def test_jede_gutschrift_braucht_die_zweite_person_auf_beiden_buchungswegen(haus):
-    gs = _gutschrift(haus, 100)
-    for weg in (f"/sales/credit-notes/{gs}/post",):
-        ohne = haus["als"](ANNA).post(weg)
-        assert ohne.status_code == 409 and "Freigabe erforderlich (R3)" in ohne.text
-    kommando = haus["als"](ANNA).post(f"/sales/credit-notes/{gs}/actions/buchen", json={"_mode": "execute"})
-    assert kommando.json().get("success") is not True and "Freigabe erforderlich" in kommando.text
-    assert _buchungen(haus) == 0
-
-    fid = _frage(haus, ANNA, "sales_credit_note", gs).json()["id"]
-    assert _entscheide(haus, ANNA, "sales_credit_note", gs, fid).status_code == 403
-    assert _entscheide(haus, BERND, "sales_credit_note", gs, fid).status_code == 200
-    assert haus["als"](ANNA).post(f"/sales/credit-notes/{gs}/post").status_code == 200
-    assert _buchungen(haus) == 1
+def test_die_gutschrift_mit_rechnungsbezug_ist_routine_auf_beiden_buchungswegen(haus):
+    assert haus["als"](ANNA).post(f"/sales/credit-notes/{_gutschrift(haus, 100)}/post").status_code == 200
+    kommando = haus["als"](ANNA).post(f"/sales/credit-notes/{_gutschrift(haus, 100, 'RE-2')}/actions/buchen", json={"_mode": "execute"})
+    assert kommando.json().get("success") is True, kommando.text
+    assert _buchungen(haus) == 2 and _korb(haus) == []
 
 
-def test_gutschrift_ueber_1000_und_gestueckelt_braucht_die_erhoehte_berechtigung(haus):
-    gross = _gutschrift(haus, 1000, "RE-A")  # 1.190 EUR
-    anfrage = _frage(haus, ANNA, "sales_credit_note", gross).json()
-    assert anfrage["risk"] == "R4"
-    assert _entscheide(haus, BERND, "sales_credit_note", gross, anfrage["id"]).status_code == 403
-    assert _entscheide(haus, CLARA, "sales_credit_note", gross, anfrage["id"]).status_code == 200
-    # Zwei Gutschriften zu 595 EUR zur selben Rechnung zaehlen zusammen.
+def test_grosse_und_gestueckelte_gutschriften_sieht_der_controller(haus):
+    assert haus["als"](ANNA).post(f"/sales/credit-notes/{_gutschrift(haus, 1000, 'RE-A')}/post").status_code == 200  # 1.190 EUR
     _gutschrift(haus, 500, "RE-B")
-    zweite = _gutschrift(haus, 500, "RE-B")
-    assert _frage(haus, ANNA, "sales_credit_note", zweite).json()["risk"] == "R4"
-    assert _frage(haus, ANNA, "sales_credit_note", _gutschrift(haus, 500, "RE-C")).json()["risk"] == "R3"
+    assert haus["als"](ANNA).post(f"/sales/credit-notes/{_gutschrift(haus, 500, 'RE-B')}/post").status_code == 200   # zusammen 1.190
+    assert _korb(haus) == [("sales_credit_note", "betrag", "warnung"), ("sales_credit_note", "stueckelung", "warnung")]
+
+
+def test_die_gutschrift_ohne_rechnungsbezug_ueber_der_schwelle_ist_gesperrt(haus):
+    ohne = _gutschrift(haus, 1000, None)
+    gesperrt = haus["als"](ANNA).post(f"/sales/credit-notes/{ohne}/post")
+    assert gesperrt.status_code == 409 and "ohne Bezugsrechnung" in gesperrt.text
+    assert _buchungen(haus) == 0
+    fid = _frage(haus, ANNA, "sales_credit_note", ohne).json()["id"]
+    assert _entscheide(haus, ANNA, "sales_credit_note", ohne, fid).status_code == 403
+    assert _entscheide(haus, BERND, "sales_credit_note", ohne, fid).status_code == 200
+    assert haus["als"](ANNA).post(f"/sales/credit-notes/{ohne}/post").status_code == 200
+    # Klein und ohne Bezug: Routine.
+    assert haus["als"](ANNA).post(f"/sales/credit-notes/{_gutschrift(haus, 100, None)}/post").status_code == 200
 
 
 # ── Alter Rechnungsweg ────────────────────────────────────────────────────────
@@ -233,34 +249,19 @@ def _alte_rechnung(nummer: str, preis: float, status: str = "VERSENDET") -> dict
             "lines": [{"article": "Weizen", "qty": 1, "price": preis, "taxCode": "3"}]}
 
 
-def test_der_alte_rechnungsweg_bucht_nur_was_dem_rollenrecht_bleibt(haus):
-    klein = f"AR-{uuid.uuid4().hex[:8]}"
+def test_der_alte_rechnungsweg_bucht_und_storniert_mit_rollenrecht(haus):
+    klein, gross = f"AR-{uuid.uuid4().hex[:8]}", f"AR-{uuid.uuid4().hex[:8]}"
     assert haus["als"](ANNA).post("/finance/invoices", json=_alte_rechnung(klein, 100)).status_code == 200
-    assert _buchungen(haus) == 1
-    gross = f"AR-{uuid.uuid4().hex[:8]}"
-    antwort = haus["als"](ANNA).post("/finance/invoices", json=_alte_rechnung(gross, 9000))  # 10.710 EUR
-    assert antwort.status_code == 409 and "Freigabe erforderlich (R3)" in antwort.text and "Belegweg" in antwort.text
-    assert _buchungen(haus) == 1
-    with SessionLocal() as db:  # Auch der Beleg ist nicht entstanden.
-        assert db.execute(text("SELECT count(*) FROM documents WHERE doc_number = :n"), {"n": gross}).scalar() == 0
-
-
-def test_storno_ueber_den_alten_weg_braucht_die_erhoehte_freigabe(haus):
-    nummer = f"AR-{uuid.uuid4().hex[:8]}"
-    assert haus["als"](ANNA).post("/finance/invoices", json=_alte_rechnung(nummer, 100)).status_code == 200
-    ohne = haus["als"](ANNA).post(f"/finance/invoices/{nummer}/storno")
-    assert ohne.status_code == 409 and "Freigabe erforderlich (R4)" in ohne.text
-    assert _buchungen(haus) == 1
-    fid = _frage(haus, ANNA, "finance_sales_invoice", nummer, "reverse").json()["id"]
-    assert _entscheide(haus, BERND, "finance_sales_invoice", nummer, fid).status_code == 403  # R4: erhoehte Berechtigung
-    assert _entscheide(haus, CLARA, "finance_sales_invoice", nummer, fid).status_code == 200
-    storno = haus["als"](ANNA).post(f"/finance/invoices/{nummer}/storno")
-    assert storno.status_code == 200, storno.text
+    assert haus["als"](ANNA).post("/finance/invoices", json=_alte_rechnung(gross, 9000)).status_code == 200  # 10.710 EUR
     assert _buchungen(haus) == 2
+    # Ein regelkonformer Storno: ohne zweite Person.
+    storno = haus["als"](ANNA).post(f"/finance/invoices/{klein}/storno")
+    assert storno.status_code == 200, storno.text
+    assert _buchungen(haus) == 3
 
 
 def test_der_alte_weg_storniert_keine_docflow_rechnung(haus):
-    """Bis 13.10.2026 fand er ihre Buchung ueber die Nummer und nahm sie ohne Beleg und Freigabe zurueck."""
+    """Bis 13.10.2026 fand er ihre Buchung ueber die Nummer und nahm sie ohne Beleg zurueck."""
     nummer = f"DF-{uuid.uuid4().hex[:8]}"
     beleg = haus["als"](ANNA).post("/docflow/", json={
         "doc_type": "sales_invoice", "doc_number": nummer, "status": "open", "customer_id": "kunde-1",
@@ -287,18 +288,9 @@ def test_der_gemeinsame_weg_kennt_jeden_bereich_und_nur_den_eigenen_mandanten(ha
     assert haus["als"](ANNA).get(f"/approvals/finance_ap_invoice/{uuid.uuid4().hex}").status_code == 404
     assert haus["als"](LESER).get(f"/approvals/finance_ap_invoice/{nummer}").status_code == 200
     assert _frage(haus, LESER, "finance_ap_invoice", nummer).status_code == 403  # Lesen ist nicht Buchen
-    # Ein anderer Mandant sieht den Vorgang nicht.
+    assert _frage(haus, ANNA, "finance_ap_invoice", nummer).status_code == 409   # Routine: nichts freizugeben
     with SessionLocal() as db:
         from app.core.exceptions import EntityNotFoundError
         with pytest.raises(EntityNotFoundError):
             engine_fuer("finance_ap_invoice", db, "anderer-mandant").vorgang(nummer, "post")
-        db.rollback()
-
-
-def test_unter_der_grenze_fragt_niemand_eine_freigabe_an(haus):
-    nummer = f"AR-{uuid.uuid4().hex[:8]}"
-    assert haus["als"](ANNA).post("/finance/invoices", json=_alte_rechnung(nummer, 100)).status_code == 200
-    with SessionLocal() as db:
-        v = engine_fuer("finance_sales_invoice", db, haus["mandant"]).vorgang(nummer, "post")
-        assert v.gebucht and v.brutto == Decimal("119.00")
         db.rollback()

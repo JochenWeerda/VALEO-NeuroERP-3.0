@@ -265,6 +265,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `kontrakt_klassen` | Kontrakt-Klassen und Kontraktvarianten (Agrar-Spezialsoftware Feature). |
 | `kontrakt_mengenzeitraum` | Kontraktmengenzeitraum — Ratierliche Lieferpläne für Rohwarenkontrakte. |
 | `kontrakte` | Kontrakte endpoints — contract CRUD, movements, amendments, dispositionen. |
+| `kontrolle` | Pruefkorb des Controllers (FIN-CONTROL-001). |
 | `kostenrechnung` | Kostenrechnung: Kostenstellen, Kostenarten, Kostenstellen-Buchungen. |
 | `kundenbanken` | Kundenbanken — IBAN/BIC-Bankverbindungen pro Kunde. |
 | `l3_report_catalog` | Prioritized fixed L3 report catalog API. |

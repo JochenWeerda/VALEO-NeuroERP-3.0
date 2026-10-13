@@ -242,10 +242,9 @@ def test_jeder_knopf_haengt_am_zustand_den_der_server_liefert(http, satz):
     offen = kopf("vk-rechnung-2")
     assert offen["aktion_buchen"] is True and offen["aktion_stornieren"] is False
     assert "Stornieren: Storniert wird nur ein gebuchter Beleg." in offen["aktionshinweis"]
-    # Eingangsrechnung ueber der Grenze: buchen gesperrt mit Grund, Freigabe anfragen moeglich.
+    # Eingangsrechnung ueber der Schwelle: buchbar; der Betrag allein sperrt nicht (FIN-CONTROL-001).
     gross = kopf("ek-rechnung-2")
-    assert gross["aktion_buchen"] is False and "Buchen: Freigabe erforderlich (R3)" in gross["aktionshinweis"]
-    assert gross["aktion_freigabe_anfordern_post"] is True
+    assert gross["aktion_buchen"] is True and "aktion_freigabe_anfordern_post" not in gross
     # Gebuchte Rechnung: buchen wird gar nicht angeboten; Gutschrift erstellen ja.
     gebucht = kopf("vk-rechnung-1")
     assert "aktion_buchen" not in gebucht and gebucht["aktion_umwandeln_sales_credit_memo"] is True
@@ -261,6 +260,11 @@ def test_offene_freigabe_id_kommt_vom_server(http, satz):
     from app.services.docflow_freigabe import DocflowFreigabe
     doc = satz["ek-rechnung-2"]
     with SessionLocal() as db:
+        # Eine Freigabe gibt es nur noch fuer kritische Befunde (FIN-CONTROL-001): dieselbe Fremdnummer an zwei
+        # Eingangsrechnungen desselben Lieferanten ist eine moegliche Dublette.
+        db.execute(text("UPDATE domain_docflow.document_headers SET source_ref = 'LR-4711' WHERE id IN (:a, :b)"),
+                   {"a": doc["id"], "b": satz["ek-rechnung-ohne-schluessel"]["id"]})
+        db.commit()
         approval = DocflowFreigabe(db, satz["mandant"]).beantrage(doc["id"], "post", "requesting-person", "Pruefen")
     response = http("FINANCE_ADMIN").get(f"/api/v1/belege/purchase_invoice/{doc['id']}/kopf")
     assert response.status_code == 200, response.text

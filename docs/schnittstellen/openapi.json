@@ -20170,6 +20170,21 @@
         "title": "BedarfsVorschlagOut",
         "type": "object"
       },
+      "Befundpruefung": {
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Note",
+            "type": "string"
+          }
+        },
+        "required": [
+          "note"
+        ],
+        "title": "Befundpruefung",
+        "type": "object"
+      },
       "Beleg": {
         "additionalProperties": false,
         "properties": {
@@ -20314,6 +20329,17 @@
         "additionalProperties": false,
         "description": "Was der Leser mit diesem Beleg jetzt tun darf — vom Server entschieden, nicht von der Maske.",
         "properties": {
+          "approval_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Id"
+          },
           "bezeichnung": {
             "title": "Bezeichnung",
             "type": "string"
@@ -325420,6 +325446,138 @@
         "summary": "Mengenzeitraum aktualisieren",
         "tags": [
           "Kontrakt - Mengenzeitraum & Zu-/Abschläge"
+        ]
+      }
+    },
+    "/api/v1/kontrolle/befunde": {
+      "get": {
+        "operationId": "befunde_api_v1_kontrolle_befunde_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^(offen|geprueft)$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "offen",
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Befunde Api V1 Kontrolle Befunde Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pruefkorb: Befunde der Kontroll-Engine",
+        "tags": [
+          "kontrolle"
+        ]
+      }
+    },
+    "/api/v1/kontrolle/befunde/{befund_id}/pruefung": {
+      "post": {
+        "operationId": "befund_pruefen_api_v1_kontrolle_befunde__befund_id__pruefung_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "befund_id",
+            "required": true,
+            "schema": {
+              "title": "Befund Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Befundpruefung"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Befund Pruefen Api V1 Kontrolle Befunde  Befund Id  Pruefung Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Befund als geprueft bewerten",
+        "tags": [
+          "kontrolle"
         ]
       }
     },

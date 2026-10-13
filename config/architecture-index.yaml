@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-13
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-13T18:22:34Z'
+generated_at: '2026-10-13T18:58:31Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -975,6 +975,7 @@ domains:
     - gdpr_art30_ropa
     - gdpr_art33_breach
     - gdpr_requests
+    - kontrolle
     - labor
     - policies
     - quadriga_connector
@@ -2092,8 +2093,8 @@ mapping_stats:
   frontend_routes_mapped: 940
   backend_services_total: 289
   backend_services_mapped: 288
-  backend_endpoints_total: 457
-  backend_endpoints_mapped: 457
+  backend_endpoints_total: 458
+  backend_endpoints_mapped: 458
 unmapped:
   frontend_routes: []
   backend_services:

@@ -6,6 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.auth.deps import get_current_user
 from app.core.screen_definitions import get_screen_definition
 from app.services.studio_draft_store import reset_studio_drafts, save_draft, set_status
 from app.services.studio_propose import propose_studio_draft
@@ -19,10 +20,21 @@ _HEADERS = {
 }
 
 
+_USER = {"sub": "anna", "roles": ["admin"], "raw": {"identity_type": "human"}}
+
+
 @pytest.fixture(autouse=True)
 def _reset_drafts():
+    _USER.clear()
+    _USER.update(sub="anna", roles=["admin"], raw={"identity_type": "human"})
+    previous_user = app.dependency_overrides.get(get_current_user)
+    app.dependency_overrides[get_current_user] = lambda: _USER
     reset_studio_drafts()
     yield
+    if previous_user is None:
+        app.dependency_overrides.pop(get_current_user, None)
+    else:
+        app.dependency_overrides[get_current_user] = previous_user
     reset_studio_drafts()
 
 
@@ -72,6 +84,7 @@ def test_save_and_same_actor_cannot_publish() -> None:
         headers={**_HEADERS, "X-Actor-ID": "anna"},
     )
     assert forbidden.status_code == 403
+    _USER["sub"] = "berta"
     published = client.post(
         f"/api/v1/studio/drafts/{draft_id}/publish",
         headers={**_HEADERS, "X-Actor-ID": "berta"},
@@ -117,6 +130,7 @@ def _publish_sample(client: TestClient, intent: str = "Lieferanten bewerten") ->
         json={"definition": draft},
     )
     assert created.status_code == 200, created.text
+    _USER["sub"] = "berta"
     published = client.post(
         f"/api/v1/studio/drafts/{created.json()['id']}/publish",
         headers={**_HEADERS, "X-Actor-ID": "berta"},
