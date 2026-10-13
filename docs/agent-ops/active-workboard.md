@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOCFLOW-TOKEN-TENANT-20261013 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Phase 0.1 aus Screen-Framework-Gap: zwoelf DocFlow-Wege verwenden Query/Standardtenant. **Ziel:** DocFlow ausschliesslich an verifizierten Tokenmandanten binden, bisheriger optionaler Query nur gleichlautende Bestaetigung. **Dateibesitz:** app/api/v1/endpoints/docflow.py nur Tenantimport/-Dependency, zwoelf Tenantparameter und Standardfallback; keine Claude-Teilmengen/Audit-/Steuer-/Fachlogik. Neuer echter HTTP-/PostgreSQL-Vertrag mit zwei eigenen Tenants; tests/test_docflow_steuerschluessel.py ausschliesslich explizite Testtenant-Dependency der vorhandenen Miniapp; eigene QA/Workboard/isolierte API-Metadaten. **Abnahme:** fehlende/alte Identitaet und fremde Querywerte vor DB abgewiesen; ohne Query eigener Tokentenant, fremde Belege/Commands ohne Mutation; kanonisches get_tenant_id, keine globale Authattrappe. Bestehender valeo_probe, --status vor DB, eigene Savepointdaten; keine neue DB/Container/Reset/Migration. Aktoren/Fachrollen bleiben eigener offener Identitybefund. Dateibesitz begrenzt, Claudes kommende 0.2/0.3 unveraendert.
+
 ## CI-FEED-IDENTITY-ISOLATION-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** beide Feed-Ketten senden dev-token und migrieren/loeschen zur Testvorbereitung und Bereinigung. **Ziel:** signierte Testidentitaeten, eigene Feed-/Bestandsdaten in aeusserer Transaktion mit Savepoints; Fachassertions fuer Verbrauch/Storno/Charge/Bewegungen unveraendert. **Dateibesitz:** tests/test_feed_chain_004.py, tests/test_feed_production_chain.py nur Auth-/DB-/Schema-Fixtures und scoped Sessionzugriff; neue tests/feed_identity_fixture.py; eigene QA/Workboard. **Abnahme:** echte Produktionsmiddleware/RSA/Mandant, vorhandener valeo_probe mit require_db vor Wirkung; keine Migration/DELETE/Demoseed/DB/Container/Reset. JWKS/Sessionstore im vorhandenen Probe-Kontext isoliert; Produktbefunde gegebenenfalls separat claimen.
