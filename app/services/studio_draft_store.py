@@ -5,6 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from datetime import UTC, datetime
 from typing import Any
+from threading import RLock
 from uuid import uuid4
 
 from sqlalchemy import text
@@ -12,6 +13,7 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError, OperationalError
 from sqlalchemy.orm import Session
 
 _DRAFTS: dict[str, dict[str, Any]] = {}
+_memory_lock = RLock()
 _prefer_memory = False
 _table_ok: bool | None = None
 _EDITABLE = frozenset({"draft", "review"})
@@ -63,25 +65,39 @@ def save_draft(
 ) -> dict[str, Any]:
     if _use_sql():
         return _sql_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness)
-    return _memory_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness)
+    with _memory_lock:
+        return _memory_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness)
 
 
-def set_status(tenant_id: str, draft_id: str, actor: str, status: str) -> dict[str, Any]:
+def _assert_snapshot(item: dict[str, Any], expected: dict[str, Any] | None) -> None:
+    if expected is not None and any(
+        item.get(key) != expected.get(key)
+        for key in ("id", "tenant_id", "definition", "updated_at", "updated_by", "status")
+    ):
+        raise ValueError("entwurf_seit_pruefung_geaendert")
+
+
+def set_status(
+    tenant_id: str, draft_id: str, actor: str, status: str,
+    *, expected_snapshot: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     if status not in _STATUSES:
         raise ValueError(f"status_{status}_unbekannt")
     if _use_sql():
-        return _sql_set_status(tenant_id, draft_id, actor, status)
-    item = _DRAFTS.get(draft_id)
-    if item is None or item["tenant_id"] != tenant_id:
-        raise KeyError(draft_id)
-    _assert_four_eyes(item["updated_by"], actor, status)
-    item = deepcopy(item)
-    item["status"] = status
-    if status != "review":
-        item["updated_by"] = actor
-    item["updated_at"] = datetime.now(UTC).isoformat()
-    _DRAFTS[draft_id] = item
-    return deepcopy(item)
+        return _sql_set_status(tenant_id, draft_id, actor, status, expected_snapshot=expected_snapshot)
+    with _memory_lock:
+        item = _DRAFTS.get(draft_id)
+        if item is None or item["tenant_id"] != tenant_id:
+            raise KeyError(draft_id)
+        _assert_snapshot(item, expected_snapshot)
+        _assert_four_eyes(item["updated_by"], actor, status)
+        item = deepcopy(item)
+        item["status"] = status
+        if status != "review":
+            item["updated_by"] = actor
+        item["updated_at"] = datetime.now(UTC).isoformat()
+        _DRAFTS[draft_id] = item
+        return deepcopy(item)
 
 
 def get_published_definition(tenant_id: str, screen_id: str) -> dict[str, Any] | None:
@@ -272,12 +288,15 @@ def _sql_save(
     screen_id = str(definition.get("id") or "")
     session = _sql_session()
     try:
-        row = session.get(ScreenDefinitionDraft, draft_id) if draft_id else None
+        row = (session.query(ScreenDefinitionDraft).filter_by(id=draft_id, tenant_id=tenant_id)
+               .with_for_update().one_or_none()) if draft_id else None
+        if draft_id and row is None:
+            raise KeyError(draft_id)
         if row is None and not draft_id and screen_id:
             row = (
                 session.query(ScreenDefinitionDraft)
                 .filter_by(tenant_id=tenant_id, screen_id=screen_id)
-                .one_or_none()
+                .with_for_update().one_or_none()
             )
         if row is not None and row.tenant_id != tenant_id:
             raise KeyError(draft_id or row.id)
@@ -311,14 +330,19 @@ def _sql_save(
         session.close()
 
 
-def _sql_set_status(tenant_id: str, draft_id: str, actor: str, status: str) -> dict[str, Any]:
+def _sql_set_status(
+    tenant_id: str, draft_id: str, actor: str, status: str,
+    *, expected_snapshot: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     from app.infrastructure.models.studio_models import ScreenDefinitionDraft
 
     session = _sql_session()
     try:
-        row = session.get(ScreenDefinitionDraft, draft_id)
-        if row is None or row.tenant_id != tenant_id:
+        row = (session.query(ScreenDefinitionDraft).filter_by(id=draft_id, tenant_id=tenant_id)
+               .with_for_update().one_or_none())
+        if row is None:
             raise KeyError(draft_id)
+        _assert_snapshot(_row_to_dict(row), expected_snapshot)
         _assert_four_eyes(row.updated_by, actor, status)
         row.status = status
         if status != "review":
