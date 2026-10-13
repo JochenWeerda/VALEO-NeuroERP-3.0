@@ -34,9 +34,9 @@ BELEG-012 braucht die Zuordnung Recht → Rolle.
 
 **Lieferung:** Alle 15 Regeln, R0–R4, vier geordnete Integrationsstufen mit Abnahmegates, internes YAML-Beispiel und offene Runtime-Migration dokumentiert; AGENTS.md und Architekturindex verweisen verbindlich darauf. Dokumentations- und Staged-Gates; keine Runtime-Freischaltung, DB oder Container.
 
-## MCP-WRITE-EXECUTION-MIGRATION — offen
+## MCP-WRITE-EXECUTION-MIGRATION — reserviert, Codex
 
-**Owner:** offen. **Ziel:** Stufe 1 des MCP-Schreibstandards umsetzen; Token-/Header-Fallbacks und Freischaltgrenzen inventarisieren und absichern. **Dateibesitz:** vor Umsetzung separat claimen. **Abnahme:** Identitaets-, Mandanten-, Rechte- und Freischaltungs-Negativtests ohne Geschaeftsaenderung; nachfolgende Stufen gemaess Architekturstandard.
+**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Legacy-Neuro-Transport gegen Token-Fallbacks, Identitaetsheader-Overrides und unbelegte externe/Schreibfreigaben absichern. **Dateibesitz:** app/services/neuro_tool_execution.py; app/services/neuro_tool_broker.py nur Ergebnisstatus; tests/test_neuro_tool_execution.py; tests/test_neuro_tool_broker.py nur zugehoerige Vertragsfaelle; docs/quality-assurance/mcp-execution-boundary-20261013.md. **Abnahme:** Ablehnungen vor Transport, keine Token in Ergebnissen, Broker meldet Ablehnung als Fehler; zielgerichtete Tests. **Risiken:** Separater MCP-ERP-Ausfuehrungsdienst und Domain-Command-Bindung bleiben Folgearbeit; keine externe Freischaltung ohne Zielvertrag.
 
 ## BELEG-010 — abgeschlossen, Claude Code
 
