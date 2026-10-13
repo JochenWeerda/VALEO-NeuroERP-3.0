@@ -1,49 +1,47 @@
-"""Freigabematrix (APPROVAL-001): welche Freigabe ein Vorgang braucht.
+"""Kontrollregel der Finanzbuchhaltung (FIN-CONTROL-001): was auffaellt und was sperrt.
 
-Entscheidung des Auftraggebers vom 13.10.2026: Buchen und Stornieren unterliegen einer risikobasierten Freigabe —
-kein generelles Vier-Augen-Prinzip, sondern Betragsgrenzen, Risikoklassen und Funktionstrennung. Hier steht nur
-die Regel, ohne Datenbank; durchgesetzt wird sie in ``app/services/docflow_freigabe.py``.
+Entscheidung des Auftraggebers vom 13.10.2026 (abends), sie korrigiert die Freigabematrix vom selben Tag:
+„Der Finanzbuchhalter hat den Hut auf. Der Controller ueberwacht die Ausnahmen – nicht jede einzelne
+Routinebuchung." Nicht der Betrag allein entscheidet, sondern das Risiko, die Abweichung vom Standardprozess und die
+finanzielle Auswirkung.
 
-Die Betraege sind Startwerte der ERP-Governance, **keine gesetzlichen Schwellen**, und vor produktiver Anwendung
-fachlich abzunehmen. Ein Mandant kann sie fuer sich enger setzen, nicht weiter (restriktive Systemvorgabe).
+Zwei Stufen:
 
-| Vorgang | Freigabe |
+* **Warnung** — der Vorgang bleibt zulaessig und wird ausgefuehrt; der Befund geht in den Pruefkorb des Controllers.
+* **Kritischer Befund** — der Vorgang ist gesperrt, bis der Controller oder eine andere unabhaengige berechtigte
+  Person ihn freigibt.
+
+Hier steht nur die Regel, ohne Datenbank. Befunde, die Daten brauchen (Dublette, Abweichung vom Vorgaenger,
+geschuetzte Konten, Haeufung), liefert der Bereich; die Betragsschwellen stehen hier. Durchgesetzt wird in
+``app/services/freigabe_engine.py``.
+
+| Vorgang | Regel |
 |---|---|
-| Ausgangsrechnung buchen bis 10.000 EUR brutto | R2 — Rollenrecht |
-| Ausgangsrechnung buchen darueber | R3 — zweite Person |
-| Eingangsrechnung buchen bis 5.000 EUR brutto, Rechnungsabgleich in Ordnung | R2 — Rollenrecht |
-| Eingangsrechnung darueber, mit Abweichung oder ohne Abgleich | R3 — zweite Person |
-| Gutschrift buchen bis 1.000 EUR brutto | R3 — zweite Person |
-| Gutschrift darueber | R4 — zweite Person mit erhoehter Berechtigung |
-| Nicht gebuchten Beleg zuruecknehmen | R2 — Rollenrecht und Begruendung |
-| Gebuchten Beleg stornieren | R4 — zweite Person mit erhoehter Berechtigung, gleich welcher Betrag |
-| Manuelle Hauptbuchbuchung buchen | R3 — zweite Person |
-| Gebuchte Hauptbuchbuchung stornieren | R4 — zweite Person mit erhoehter Berechtigung |
-| Zahlungslauf ausfuehren | R4 — zweite Person mit Zahlungsberechtigung |
+| Routine: Rechnung, Gutschrift, manuelle Hauptbuchbuchung, regelkonformer Storno | Rollenrecht |
+| Betrag ueber der Schwelle, Stueckelung | Warnung |
+| Moegliche Dublette, Abweichung vom Vorgaenger, geschuetztes Konto, Gutschrift ohne Bezug ueber der Schwelle | kritisch |
+| Zahlungslauf ausfuehren | immer unabhaengige Freigabe (Zahlungsberechtigung) |
 
-Eine Stueckelung unter die Grenze (mehrere Belege aus demselben Vorgang) zaehlt wie der Gesamtbetrag.
+Die Schwellen sind Startwerte fuer Tests, **keine gesetzlichen Schwellen und keine endgueltige Risikopolitik**; sie
+sind je Mandant einstellbar. Ein kritischer Befund gilt unabhaengig vom Betrag.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import Iterable, Literal
 
 from app.core.belegvertrag import BELEGARTEN
 
 GUELTIGKEIT_STUNDEN = 24
 
-# Grenze je Gruppe in EUR brutto; bis einschliesslich genuegt die niedrigere Stufe.
+# Schwelle je Gruppe in EUR; darueber eine Warnung.
 STANDARDGRENZEN: dict[str, Decimal] = {
     "ausgangsrechnung": Decimal("10000"),
     "eingangsrechnung": Decimal("5000"),
     "gutschrift": Decimal("1000"),
-}
-
-GRUPPE: dict[str, str] = {
-    "sales_invoice": "ausgangsrechnung",
-    "purchase_invoice": "eingangsrechnung",
-    "sales_credit_memo": "gutschrift",
-    "purchase_credit_memo": "gutschrift",
+    "hauptbuch": Decimal("10000"),
+    "agrar_korrektur": Decimal("250"),
 }
 
 AKTIONEN: tuple[str, ...] = ("post", "reverse")
@@ -52,11 +50,29 @@ AKTIONEN: tuple[str, ...] = ("post", "reverse")
 HAUPTBUCHBUCHUNG = "manual_journal"
 ZAHLUNGSLAUF = "payment_run"
 
+GRUPPE: dict[str, str] = {
+    "sales_invoice": "ausgangsrechnung",
+    "purchase_invoice": "eingangsrechnung",
+    "sales_credit_memo": "gutschrift",
+    "purchase_credit_memo": "gutschrift",
+    HAUPTBUCHBUCHUNG: "hauptbuch",
+}
+
+
+@dataclass(frozen=True)
+class Befund:
+    """Was die Kontrolle an einem Vorgang findet."""
+
+    code: str
+    schwere: Literal["warnung", "kritisch"]
+    text: str
+
 
 @dataclass(frozen=True)
 class Anforderung:
-    risiko: str  # R2, R3 oder R4
+    risiko: str  # R2 Rollenrecht, R3 unabhaengige Freigabe, R4 Zahlungsberechtigung
     grund: str
+    befunde: tuple[Befund, ...] = ()
 
     @property
     def zweitfreigabe(self) -> bool:
@@ -66,13 +82,16 @@ class Anforderung:
     def erhoeht(self) -> bool:
         return self.risiko == "R4"
 
+    @property
+    def warnungen(self) -> tuple[Befund, ...]:
+        return tuple(b for b in self.befunde if b.schwere == "warnung")
+
 
 def wirksame_grenze(gruppe: str, mandantenwert: Decimal | None) -> Decimal:
-    """Der Mandant kann die Grenze enger setzen, nicht weiter."""
-    standard = STANDARDGRENZEN[gruppe]
+    """Die Schwelle des Mandanten, sonst der Startwert."""
     if mandantenwert is None or mandantenwert < 0:
-        return standard
-    return min(standard, mandantenwert)
+        return STANDARDGRENZEN[gruppe]
+    return mandantenwert
 
 
 def anforderung(
@@ -82,45 +101,33 @@ def anforderung(
     brutto: Decimal,
     gebucht: bool,
     grenze: Decimal | None = None,
-    abgleich_in_ordnung: bool = True,
-    abgleich_hinweis: str = "",
+    befunde: Iterable[Befund] = (),
     brutto_des_vorgangs: Decimal | None = None,
 ) -> Anforderung:
-    """Die Freigabe, die dieser Vorgang braucht.
+    """Was dieser Vorgang braucht — und was an ihm auffaellt.
 
-    ``brutto_des_vorgangs`` ist die Summe aller Belege derselben Art aus demselben Vorgang (Stueckelung);
-    ``abgleich_in_ordnung`` gilt nur fuer die Eingangsrechnung.
+    ``befunde`` liefert der Bereich. ``brutto_des_vorgangs`` ist die Summe aller Belege derselben Art aus demselben
+    Vorgang (Stueckelung). ``gebucht`` bleibt Teil der Auskunft, entscheidet aber nichts mehr: Ein regelkonformer
+    Storno braucht Rollenrecht und Begruendung.
     """
-    if belegart == HAUPTBUCHBUCHUNG and aktion in AKTIONEN:
-        if aktion == "reverse":
-            return (Anforderung("R4", "Storno einer gebuchten Hauptbuchbuchung: zweite Person mit erhöhter Berechtigung.")
-                    if gebucht else Anforderung("R2", "Rollenrecht und Begründung genügen."))
-        return Anforderung("R3", "Manuelle Hauptbuchbuchung: zweite Person.")
+    liste = list(befunde)
+    if aktion not in AKTIONEN:
+        return Anforderung("R2", "Rollenrecht genügt.", tuple(liste))
     if belegart == ZAHLUNGSLAUF and aktion == "post":
-        return Anforderung("R4", "Zahlungsfreigabe: zweite Person mit Zahlungsberechtigung.")
-    variante = BELEGARTEN.get(belegart)
-    if variante is None or aktion not in AKTIONEN:
-        return Anforderung("R2", "Rollenrecht genügt.")
-    if aktion == "reverse":
-        if variante.bucht and gebucht:
-            return Anforderung("R4", "Storno eines gebuchten Belegs: zweite Person mit erhöhter Berechtigung.")
-        return Anforderung("R2", "Rollenrecht und Begründung genügen.")
+        return Anforderung("R4", "Zahlungsfreigabe: unabhängige Person mit Zahlungsberechtigung.", tuple(liste))
     gruppe = GRUPPE.get(belegart)
-    if gruppe is None:
-        return Anforderung("R2", "Rollenrecht genügt.")
-    g = grenze if grenze is not None else STANDARDGRENZEN[gruppe]
-    gestueckelt = brutto <= g and brutto_des_vorgangs is not None and brutto_des_vorgangs > g
-    ueber = brutto > g or gestueckelt
-    warum = (
-        f"mehrere Belege desselben Vorgangs ergeben zusammen {brutto_des_vorgangs} EUR und überschreiten {g} EUR"
-        if gestueckelt else f"Betrag {brutto} EUR über {g} EUR"
-    )
-    if gruppe == "gutschrift":
-        if ueber:
-            return Anforderung("R4", f"Gutschrift, {warum}: zweite Person mit erhöhter Berechtigung.")
-        return Anforderung("R3", "Gutschrift: Freigabe durch eine zweite Person (Funktionstrennung).")
-    if ueber:
-        return Anforderung("R3", f"{variante.bezeichnung}, {warum}: zweite Person.")
-    if gruppe == "eingangsrechnung" and not abgleich_in_ordnung:
-        return Anforderung("R3", f"Eingangsrechnung ohne erfolgreichen Rechnungsabgleich ({abgleich_hinweis}): zweite Person.")
-    return Anforderung("R2", "Rollenrecht genügt.")
+    if aktion == "post" and gruppe is not None:
+        g = grenze if grenze is not None else STANDARDGRENZEN[gruppe]
+        name = "Manuelle Hauptbuchbuchung" if belegart == HAUPTBUCHBUCHUNG else BELEGARTEN[belegart].bezeichnung
+        # Hauptbuch: „ab" der Schwelle; Belege: darueber.
+        if brutto >= g if belegart == HAUPTBUCHBUCHUNG else brutto > g:
+            liste.append(Befund("betrag", "warnung", f"{name}: Betrag {brutto} EUR, Schwelle {g} EUR."))
+        elif brutto_des_vorgangs is not None and brutto_des_vorgangs > g:
+            liste.append(Befund(
+                "stueckelung", "warnung",
+                f"{name}: mehrere Belege desselben Vorgangs ergeben zusammen {brutto_des_vorgangs} EUR und "
+                f"überschreiten {g} EUR."))
+    kritisch = [b for b in liste if b.schwere == "kritisch"]
+    if kritisch:
+        return Anforderung("R3", f"{kritisch[0].text} Unabhängige Freigabe erforderlich.", tuple(liste))
+    return Anforderung("R2", "Rollenrecht genügt.", tuple(liste))

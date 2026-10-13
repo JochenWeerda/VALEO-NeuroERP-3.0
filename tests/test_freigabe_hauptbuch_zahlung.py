@@ -14,7 +14,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
-from app.api.v1.endpoints import approvals, docflow, journal_entries, payment_runs
+from app.api.v1.endpoints import approvals, docflow, journal_entries, kontrolle, payment_runs
 from app.auth.deps import get_current_user
 from app.core.database import SessionLocal
 from app.core.exceptions import ConflictError, register_domain_exception_handlers
@@ -29,6 +29,7 @@ ANNA = {"sub": "anna", "name": "a.petersen", "roles": ["FINANCE_ADMIN", "SALES_B
 BERND = {"sub": "bernd", "name": "b.dirks", "roles": ["FINANCE_BEARBEITEN"]}
 CLARA = {"sub": "clara", "name": "c.onken", "roles": ["FINANCE_ADMIN"]}
 VERKAUF = {"sub": "vera", "name": "v.kruse", "roles": ["SALES_ADMIN"]}
+CARL = {"sub": "carl", "name": "c.boekhoff", "roles": ["controller"]}
 
 AUFRAEUMEN = (
     "DELETE FROM domain_shared.blockchain_anchors WHERE tenant_id = :t",
@@ -38,6 +39,7 @@ AUFRAEUMEN = (
     "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
     "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",
     "DELETE FROM domain_erp.offene_posten WHERE tenant_id = :t",
+    "DELETE FROM domain_docflow.control_findings WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.approval_log WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.approvals WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.document_status_history WHERE tenant_id = :t",
@@ -99,6 +101,7 @@ def haus(monkeypatch):
     app.include_router(payment_runs.router)
     app.include_router(docflow.router, prefix="/docflow")
     app.include_router(approvals.router, prefix="/approvals")
+    app.include_router(kontrolle.router, prefix="/kontrolle")
     ersetze_mandant(app, mandant)
     client = TestClient(app, raise_server_exceptions=False)
 
@@ -121,14 +124,14 @@ def _konto(mandant: str, nummer: str) -> str:
             {"t": mandant, "n": nummer}).scalar())
 
 
-def _buchung(haus, betrag: str = "250.00") -> str:
-    """Eine manuelle Buchung im Entwurf."""
+def _buchung(haus, betrag: str = "250.00", soll: str = "8300", haben: str = "8400") -> str:
+    """Eine manuelle Buchung im Entwurf — ohne Angabe eine Umbuchung zwischen zwei Erloeskonten."""
     with SessionLocal() as db:
         eintrag = FinanceTransactionService(db, haus["mandant"]).create(
             entry_number=f"MB-{uuid.uuid4().hex[:8]}", description="Umbuchung", entry_date=datetime(2026, 10, 13),
             reference=f"UMB-{uuid.uuid4().hex[:6]}", source="manual",
-            lines=[{"account_id": _konto(haus["mandant"], "1400"), "debit_amount": Decimal(betrag), "credit_amount": Decimal("0")},
-                   {"account_id": _konto(haus["mandant"], "8400"), "debit_amount": Decimal("0"), "credit_amount": Decimal(betrag)}])
+            lines=[{"account_id": _konto(haus["mandant"], soll), "debit_amount": Decimal(betrag), "credit_amount": Decimal("0")},
+                   {"account_id": _konto(haus["mandant"], haben), "debit_amount": Decimal("0"), "credit_amount": Decimal(betrag)}])
         return str(eintrag.id)
 
 
@@ -145,54 +148,75 @@ def _entscheide(haus, wer: dict, subjekt: str, kennung: str, fid: str):
     return haus["als"](wer).post(f"/approvals/{subjekt}/{kennung}/{fid}/decision", json={"granted": True})
 
 
-# ── Matrix ────────────────────────────────────────────────────────────────────
+# ── Regel ─────────────────────────────────────────────────────────────────────
 
-def test_hauptbuch_und_zahlung_in_der_matrix():
-    assert anforderung("manual_journal", "post", brutto=Decimal("0.01"), gebucht=False).risiko == "R3"
-    assert anforderung("manual_journal", "reverse", brutto=Decimal("1"), gebucht=True).risiko == "R4"
-    assert anforderung("manual_journal", "reverse", brutto=Decimal("1"), gebucht=False).risiko == "R2"
+def test_hauptbuch_und_zahlung_in_der_regel():
+    assert anforderung("manual_journal", "post", brutto=Decimal("9999"), gebucht=False).befunde == ()
+    gross = anforderung("manual_journal", "post", brutto=Decimal("10000"), gebucht=False)
+    assert gross.risiko == "R2" and [b.code for b in gross.befunde] == ["betrag"]
+    assert anforderung("manual_journal", "reverse", brutto=Decimal("1"), gebucht=True).risiko == "R2"
     assert anforderung("payment_run", "post", brutto=Decimal("1"), gebucht=False).risiko == "R4"
+
+
+def _korb(haus) -> list[tuple[str, str]]:
+    antwort = haus["als"](CARL).get("/kontrolle/befunde")
+    assert antwort.status_code == 200, antwort.text
+    return sorted((b["code"], b["severity"]) for b in antwort.json())
 
 
 # ── Manuelle Hauptbuchbuchung ─────────────────────────────────────────────────
 
-def test_die_manuelle_buchung_bucht_erst_mit_der_zweiten_person(haus):
+def test_routinebuchung_bucht_die_buchhaltung_selbst(haus):
     eintrag = _buchung(haus)
-    ohne = haus["als"](ANNA).post(f"/journal-entries/{eintrag}/post")
-    assert ohne.status_code == 409 and "Freigabe erforderlich (R3)" in ohne.text and "Manuelle Hauptbuchbuchung" in ohne.text
-    assert _stand("journal_entries", eintrag) == "draft"
-
-    assert _frage(haus, VERKAUF, "journal_entry", eintrag).status_code == 403  # der Verkauf fragt keine Hauptbuchbuchung an
-    fid = _frage(haus, ANNA, "journal_entry", eintrag).json()["id"]
-    assert _entscheide(haus, ANNA, "journal_entry", eintrag, fid).status_code == 403   # Funktionstrennung
-    assert _entscheide(haus, VERKAUF, "journal_entry", eintrag, fid).status_code == 403  # keine Finanzrolle
-    assert _entscheide(haus, BERND, "journal_entry", eintrag, fid).status_code == 200
-    gebucht = haus["als"](ANNA).post(f"/journal-entries/{eintrag}/post")
+    assert haus["als"](VERKAUF).post(f"/journal-entries/{eintrag}/post").status_code == 403   # keine Finanzrolle
+    gebucht = haus["als"](BERND).post(f"/journal-entries/{eintrag}/post")
     assert gebucht.status_code == 200, gebucht.text
-    assert _stand("journal_entries", eintrag) == "posted"
-
-
-def test_storno_einer_gebuchten_buchung_braucht_die_erhoehte_freigabe(haus):
-    eintrag = _buchung(haus)
-    fid = _frage(haus, ANNA, "journal_entry", eintrag).json()["id"]
-    assert _entscheide(haus, BERND, "journal_entry", eintrag, fid).status_code == 200
-    assert haus["als"](ANNA).post(f"/journal-entries/{eintrag}/post").status_code == 200
-
-    ohne = haus["als"](CLARA).post(f"/journal-entries/{eintrag}/reverse", params={"reason": "Falsches Konto"})
-    assert ohne.status_code == 409 and "Freigabe erforderlich (R4)" in ohne.text
-    assert _stand("journal_entries", eintrag) == "posted"
-    fid = _frage(haus, ANNA, "journal_entry", eintrag, "reverse").json()["id"]
-    assert _entscheide(haus, BERND, "journal_entry", eintrag, fid).status_code == 403  # R4: nur die Finanzleitung
-    assert _entscheide(haus, CLARA, "journal_entry", eintrag, fid).status_code == 200
-    storno = haus["als"](ANNA).post(f"/journal-entries/{eintrag}/reverse", params={"reason": "Falsches Konto"})
+    assert _stand("journal_entries", eintrag) == "posted" and _korb(haus) == []
+    # Ein regelkonformer Storno: ohne zweite Person, mit Begruendung.
+    storno = haus["als"](BERND).post(f"/journal-entries/{eintrag}/reverse", params={"reason": "Falsches Konto"})
     assert storno.status_code == 200, storno.text
     assert _stand("journal_entries", eintrag) == "reversed"
 
 
+def test_ab_10000_euro_sieht_der_controller_die_buchung(haus):
+    eintrag = _buchung(haus, "12000.00")
+    assert haus["als"](BERND).post(f"/journal-entries/{eintrag}/post").status_code == 200
+    assert _stand("journal_entries", eintrag) == "posted" and _korb(haus) == [("betrag", "warnung")]
+
+
+def test_die_manuelle_buchung_auf_ein_geschuetztes_konto_ist_gesperrt(haus):
+    """Forderungen, Verbindlichkeiten und Steuerkonten werden sonst nur ueber Belege bebucht."""
+    eintrag = _buchung(haus, "50.00", soll="1400")
+    gesperrt = haus["als"](BERND).post(f"/journal-entries/{eintrag}/post")
+    assert gesperrt.status_code == 409 and "geschütztem Konto 1400" in gesperrt.text
+    assert _stand("journal_entries", eintrag) == "draft"
+
+    assert _frage(haus, VERKAUF, "journal_entry", eintrag).status_code == 403
+    fid = _frage(haus, BERND, "journal_entry", eintrag).json()["id"]
+    assert _entscheide(haus, BERND, "journal_entry", eintrag, fid).status_code == 403    # Funktionstrennung
+    assert _entscheide(haus, VERKAUF, "journal_entry", eintrag, fid).status_code == 403  # keine Finanz- oder Kontrollrolle
+    assert _entscheide(haus, CARL, "journal_entry", eintrag, fid).status_code == 200     # der Controller
+    assert haus["als"](BERND).post(f"/journal-entries/{eintrag}/post").status_code == 200
+    assert _stand("journal_entries", eintrag) == "posted" and _korb(haus) == [("geschuetztes_konto", "kritisch")]
+    # Auch ein Steuerkonto ist geschuetzt.
+    steuer = _buchung(haus, "19.00", soll="1776")
+    assert "geschütztem Konto 1776" in haus["als"](BERND).post(f"/journal-entries/{steuer}/post").text
+
+
+def test_der_mandant_legt_die_geschuetzten_konten_fest(haus):
+    with SessionLocal() as db:
+        db.execute(text(
+            "INSERT INTO domain_shared.system_properties (id, tenant_id, property_key, property_value) "
+            "VALUES (:id, :t, 'kontrolle.geschuetzte_konten', '8300')"), {"id": str(uuid.uuid4()), "t": haus["mandant"]})
+        db.commit()
+    assert "geschütztem Konto 8300" in haus["als"](BERND).post(f"/journal-entries/{_buchung(haus)}/post").text
+    assert haus["als"](BERND).post(f"/journal-entries/{_buchung(haus, '10.00', soll='1400')}/post").status_code == 200
+
+
 def test_eine_geaenderte_buchung_verliert_ihre_freigabe(haus):
-    eintrag = _buchung(haus)
+    eintrag = _buchung(haus, "50.00", soll="1400")
     fid = _frage(haus, ANNA, "journal_entry", eintrag).json()["id"]
-    assert _entscheide(haus, BERND, "journal_entry", eintrag, fid).status_code == 200
+    assert _entscheide(haus, CARL, "journal_entry", eintrag, fid).status_code == 200
     with SessionLocal() as db:  # Betrag nach der Freigabe geaendert
         db.execute(text("UPDATE domain_erp.journal_entry_lines SET debit_amount = debit_amount * 4, credit_amount = credit_amount * 4 "
                         "WHERE journal_entry_id = :id"), {"id": eintrag})
@@ -203,7 +227,8 @@ def test_eine_geaenderte_buchung_verliert_ihre_freigabe(haus):
 
 
 def test_die_buchung_eines_belegs_wird_nicht_ueber_das_hauptbuch_storniert(haus):
-    """Sonst bliebe der Beleg „gebucht", waehrend seine Buchung zurueckgenommen ist — an Beleg und Freigabe vorbei."""
+    """Sonst bliebe der Beleg „gebucht", waehrend seine Buchung zurueckgenommen ist — eine festgeschriebene Buchung
+    unzulaessig veraendert."""
     nummer = f"DF-{uuid.uuid4().hex[:8]}"
     beleg = haus["als"](ANNA).post("/docflow/", json={
         "doc_type": "sales_invoice", "doc_number": nummer, "status": "open", "customer_id": "kunde-1",
@@ -281,7 +306,8 @@ def test_nur_die_finanzleitung_gibt_zahlungen_frei_und_nur_finanzrollen_sehen_si
         v = engine.vorgang(lauf, "post")
         assert engine.freigaberollen(v, "R4") == {"FINANCE_ADMIN", "admin"}
         haupt = HauptbuchFreigabe(db, haus["mandant"])
-        assert "FINANCE_BEARBEITEN" in haupt.freigaberollen(v, "R3") and "FINANCE_BEARBEITEN" not in haupt.freigaberollen(v, "R4")
+        assert {"FINANCE_BEARBEITEN", "controller"} <= haupt.freigaberollen(v, "R3")
+        assert "FINANCE_BEARBEITEN" not in haupt.freigaberollen(v, "R4")
         db.rollback()
     assert haus["als"](VERKAUF).get(f"/approvals/payment_run/{lauf}").status_code == 403
     assert haus["als"](BERND).get(f"/approvals/payment_run/{lauf}").status_code == 200

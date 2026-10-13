@@ -22,7 +22,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import EntityNotFoundError
-from app.core.freigabe import HAUPTBUCHBUCHUNG, ZAHLUNGSLAUF, anforderung
+from app.core.freigabe import HAUPTBUCHBUCHUNG, STANDARDGRENZEN, ZAHLUNGSLAUF, Befund, anforderung
 from app.finance.steuerschluessel import Steuerklaerung, vorsteuergruppen
 from app.services.finance_eingangsrechnung_buchung import positionen, summen
 from app.services.freigabe_engine import FreigabeEngine, Vorgang
@@ -62,9 +62,40 @@ class EingangsrechnungFreigabe(FreigabeEngine):
                 "aufwandskonto": invoice.get("expenseAccountId"),
                 "positionen": [[str(z[0]), z[1], str(z[2]), str(z[3]), z[4]] for z in zeilen],
             },
-            # Eine Finanzrechnung hat weder Bestellung noch Wareneingang, gegen die sie abgeglichen werden koennte.
-            abgleich_in_ordnung=False, abgleich_hinweis="Finanzrechnung ohne Bestellung oder Wareneingang",
+            befunde=self._ap_befunde(subject_id, invoice, brutto),
         )
+
+
+    def _ap_befunde(self, subject_id: str, invoice: dict[str, Any], brutto: Decimal) -> list[Befund]:
+        """Wiederkehrende Finanzrechnungen bucht die Buchhaltung selbst (FIN-CONTROL-001). Auffaellig ist eine
+        moegliche Dublette (sperrt) und eine Abweichung von mehr als 10 % vom ueblichen Betrag des Lieferanten.
+        """
+        lieferant = invoice.get("customerId") or invoice.get("supplierId")
+        if not lieferant:
+            return []
+        andere = self.db.execute(
+            text(
+                "SELECT doc_number, CAST(data AS jsonb)->>'date', CAST(data AS jsonb)->>'totalGross', "
+                "CAST(data AS jsonb)->>'status' FROM documents WHERE doc_type = 'ap_invoice' AND doc_number <> :nr "
+                "AND CAST(data AS jsonb)->>'tenantId' = :t "
+                "AND COALESCE(CAST(data AS jsonb)->>'customerId', CAST(data AS jsonb)->>'supplierId') = :s"
+            ),
+            {"nr": subject_id, "t": self.tenant_id, "s": str(lieferant)},
+        ).fetchall()
+        befunde: list[Befund] = []
+        for nummer, datum, betrag, stand in andere:
+            if stand != "STORNIERT" and brutto > 0 and _d(betrag) == brutto and str(datum) == str(invoice.get("date")):
+                befunde.append(Befund("dublette", "kritisch", f"Mögliche Dublette der Eingangsrechnung {nummer}."))
+                break
+        gebucht = [_d(b) for _n, _d_, b, stand in andere if stand == "VERBUCHT" and _d(b) > 0]
+        if gebucht:
+            ueblich = sum(gebucht, Decimal("0")) / len(gebucht)
+            if abs(brutto - ueblich) > ueblich * Decimal("0.10"):
+                befunde.append(Befund(
+                    "abweichung_ueblich", "warnung",
+                    f"Eingangsrechnung {brutto} EUR weicht um mehr als 10 % vom üblichen Betrag "
+                    f"({ueblich.quantize(Decimal('0.01'))} EUR) dieses Lieferanten ab."))
+        return befunde
 
 
 class VerkaufsgutschriftFreigabe(FreigabeEngine):
@@ -101,6 +132,10 @@ class VerkaufsgutschriftFreigabe(FreigabeEngine):
                 "art": zeile["correction_type"], "waehrung": zeile["currency"],
             },
             brutto_des_vorgangs=_d(gesamt) if gesamt is not None else None,
+            befunde=[Befund(
+                "gutschrift_ohne_bezug", "kritisch",
+                f"Gutschrift über {self.grenze('sales_credit_memo')} EUR ohne Bezugsrechnung (Forderungsverzicht ohne Beleg).",
+            )] if not rechnung and _d(zeile["total_amount"]) > (self.grenze("sales_credit_memo") or Decimal("0")) else [],
         )
 
 
@@ -188,6 +223,8 @@ def verlange_storno_ausgangsrechnung(db: Session, tenant_id: str, nummer: str, a
 _FINANZ_LESEN = frozenset({"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"})
 _FINANZ_SCHREIBEN = frozenset({"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"})
 _FINANZ_LEITUNG = frozenset({"FINANCE_ADMIN", "admin"})
+# Der Controller ueberwacht die Ausnahmen: Er gibt kritische Befunde frei, bucht aber nicht (FIN-CONTROL-001).
+_CONTROLLING = frozenset({"controller", "CONTROLLING"})
 
 
 class HauptbuchFreigabe(FreigabeEngine):
@@ -229,7 +266,47 @@ class HauptbuchFreigabe(FreigabeEngine):
                 "datum": str(kopf["entry_date"]), "buchungsdatum": str(kopf["posting_date"]),
                 "zeilen": [[str(z[0]), str(_d(z[1])), str(_d(z[2]))] for z in zeilen],
             },
+            befunde=self._konten_befunde(subject_id) if aktion == "post" else [],
         )
+
+    def geschuetzte_konten(self) -> set[str]:
+        """Konten, die nur ueber Belege bebucht werden: Forderungen, Verbindlichkeiten, Steuerkonten.
+
+        Der Mandant kann die Liste setzen (``kontrolle.geschuetzte_konten``, kommagetrennt).
+        """
+        eigene = self.db.execute(
+            text("SELECT property_value FROM domain_shared.system_properties WHERE tenant_id = :t AND property_key = :k"),
+            {"t": self.tenant_id, "k": "kontrolle.geschuetzte_konten"},
+        ).scalar()
+        if eigene is not None:
+            return {k.strip() for k in str(eigene).split(",") if k.strip()}
+        konten = {"1400"}
+        for zeile in self.db.execute(
+            text("SELECT debit_account, credit_account FROM domain_erp.tax_keys WHERE tenant_id = :t"), {"t": self.tenant_id}
+        ).fetchall():
+            konten |= {str(k).strip() for k in zeile if k and str(k).strip()}
+        try:
+            from app.services.finance_eingangsrechnung_buchung import kreditorenkonto
+
+            konten.add(str(kreditorenkonto(self.db, self.tenant_id, {})))
+        except Exception:  # noqa: BLE001 — ohne Kontenrahmen gibt es kein Kreditorenkonto zu schuetzen
+            pass
+        return konten
+
+    def _konten_befunde(self, entry_id: str) -> list[Befund]:
+        bebucht = {str(z[0]) for z in self.db.execute(
+            text(
+                "SELECT k.account_number FROM domain_erp.journal_entry_lines l "
+                "JOIN domain_erp.chart_of_accounts k ON k.id = l.account_id WHERE l.journal_entry_id = :id"
+            ),
+            {"id": entry_id},
+        ).fetchall()}
+        treffer = sorted(bebucht & self.geschuetzte_konten())
+        if not treffer:
+            return []
+        return [Befund(
+            "geschuetztes_konto", "kritisch",
+            f"Manuelle Buchung auf geschütztem Konto {', '.join(treffer)} (sonst nur über Belege bebucht).")]
 
     def leserollen(self, v: Vorgang) -> frozenset[str]:
         return _FINANZ_LESEN
@@ -238,7 +315,7 @@ class HauptbuchFreigabe(FreigabeEngine):
         return _FINANZ_SCHREIBEN
 
     def freigaberollen(self, v: Vorgang, risiko: str) -> frozenset[str]:
-        return _FINANZ_LEITUNG if risiko == "R4" else _FINANZ_SCHREIBEN
+        return (_FINANZ_LEITUNG if risiko == "R4" else _FINANZ_SCHREIBEN) | _CONTROLLING
 
 
 class ZahlungslaufFreigabe(FreigabeEngine):
@@ -328,8 +405,19 @@ class BuchungsimportFreigabe(FreigabeEngine):
     def vorgang(self, subject_id: str, aktion: str) -> Vorgang:
         if not re.fullmatch(r"[0-9a-f]{64}", subject_id or ""):
             raise EntityNotFoundError("JournalImport", subject_id)
+        befunde = [Befund("massenimport", "warnung", "Massenimport von Hauptbuchbuchungen.")]
+        # Dieselbe Datei fuer dieselbe Periode noch einmal: eine Dublette, unabhaengig vom Betrag.
+        schon = self.db.execute(
+            text(
+                "SELECT 1 FROM domain_docflow.control_findings WHERE tenant_id = :t AND subject_type = :s "
+                "AND subject_id = :id AND action = 'post' LIMIT 1"
+            ),
+            {"t": self.tenant_id, "s": self.SUBJEKT, "id": subject_id},
+        ).first()
+        if schon:
+            befunde.append(Befund("dublette", "kritisch", "Diese Datei wurde für diese Periode bereits importiert."))
         return Vorgang(subject_id=subject_id, belegart=HAUPTBUCHBUCHUNG, brutto=Decimal("0"), gebucht=False,
-                       inhalt={"abdruck": subject_id})
+                       inhalt={"abdruck": subject_id}, befunde=befunde)
 
     def leserollen(self, v: Vorgang) -> frozenset[str]:
         return _FINANZ_LESEN
@@ -338,7 +426,7 @@ class BuchungsimportFreigabe(FreigabeEngine):
         return _FINANZ_LEITUNG  # der Massenimport ist der Finanzleitung vorbehalten
 
     def freigaberollen(self, v: Vorgang, risiko: str) -> frozenset[str]:
-        return _FINANZ_LEITUNG
+        return _FINANZ_LEITUNG | _CONTROLLING
 
 
 def importabdruck(tenant_id: str, period: str, inhalt: bytes) -> str:
@@ -376,6 +464,11 @@ class _EinkaufsmemoFreigabe(FreigabeEngine):
                 "summen": [str(_d(memo.get(k))) for k in ("netAmount", "taxAmount", "grossAmount")],
                 "positionen": memo.get("items") or [],
             },
+            # Die Abrechnungskorrektur der Ernte ist ein normaler Vorgang; ab der Schwelle sieht sie der Controller.
+            befunde=[Befund(
+                "agrar_korrektur", "warnung",
+                f"Abrechnungskorrektur {_d(memo.get('grossAmount'))} EUR ab {STANDARDGRENZEN['agrar_korrektur']} EUR.",
+            )] if memo.get("settlementId") and _d(memo.get("grossAmount")) >= STANDARDGRENZEN["agrar_korrektur"] else [],
         )
 
 

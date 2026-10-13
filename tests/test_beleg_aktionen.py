@@ -35,6 +35,7 @@ AUFRAEUMEN = (
     "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
     "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",
     "DELETE FROM domain_erp.offene_posten WHERE tenant_id = :t",
+    "DELETE FROM domain_docflow.control_findings WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.approval_log WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.approvals WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.document_status_history WHERE tenant_id = :t",
@@ -122,8 +123,8 @@ def test_der_trockenlauf_nennt_was_geht_und_was_nicht_und_schreibt_nichts(satz, 
     vorher = (_buchungen(satz), _status(satz, "vk-rechnung-2"))
     geht = aktion(VERA, "vk-rechnung-2", "buchen", _mode="dryRun")
     assert geht["http"] == 200 and geht["success"] is True and geht["mode"] == "dryRun"
-    gesperrt = aktion(EVA, "ek-rechnung-2", "buchen", _mode="dryRun")
-    assert gesperrt["success"] is False and gesperrt["error"].startswith("Freigabe erforderlich (R3)")
+    gesperrt = aktion(EVA, "ek-rechnung-ohne-schluessel", "buchen", _mode="dryRun")
+    assert gesperrt["success"] is False and "prüfen" in gesperrt["error"]
     falscher_stand = aktion(VERA, "vk-rechnung-1", "buchen", _mode="dryRun")
     assert falscher_stand["success"] is False and "nicht möglich" in falscher_stand["error"]
     unbekannt = aktion(VERA, "vk-rechnung-2", "verschenken", _mode="dryRun")
@@ -182,10 +183,21 @@ def test_buchen_aus_der_maske_und_der_veraltete_stand_wird_abgewiesen(satz, mask
     assert akteur == "vera"
 
 
+def _mache_zur_dublette(satz, rolle: str, andere: str) -> None:
+    """Dieselbe Fremdnummer an zwei Eingangsrechnungen desselben Lieferanten: ein kritischer Befund (FIN-CONTROL-001)."""
+    with SessionLocal() as db:
+        db.execute(text("UPDATE domain_docflow.document_headers SET source_ref = 'LR-4711' WHERE id IN (:a, :b)"),
+                   {"a": satz[rolle]["id"], "b": satz[andere]["id"]})
+        db.commit()
+
+
 def test_freigabe_anfragen_und_erteilen_aus_der_maske(satz, maske):
     aktion, kopf = maske
     vorher = _buchungen(satz)
-    assert kopf(EVA, "ek-rechnung-2")["aktion_freigabe_anfordern_post"] is True
+    _mache_zur_dublette(satz, "ek-rechnung-2", "ek-rechnung-ohne-schluessel")
+    gesperrt = kopf(EVA, "ek-rechnung-2")
+    assert gesperrt["aktion_buchen"] is False and "Mögliche Dublette" in gesperrt["aktionshinweis"]
+    assert gesperrt["aktion_freigabe_anfordern_post"] is True
     angefragt = aktion(EVA, "ek-rechnung-2", "freigabe_anfordern:post")
     assert angefragt["success"] is True and "Freigabe angefragt (R3)" in angefragt["summary"], angefragt
 
@@ -198,6 +210,7 @@ def test_freigabe_anfragen_und_erteilen_aus_der_maske(satz, maske):
     assert ohne_recht["success"] is False and ohne_recht["error"] == "Keine Berechtigung."
     assert aktion(EVA, "ek-rechnung-2", "buchen")["success"] is False and _buchungen(satz) == vorher
 
+    # Der Controller liest den Beleg nicht als Einkauf — er gibt frei, wenn er die Belegart lesen darf.
     assert kopf(EMIL, "ek-rechnung-2")["aktion_freigabe_erteilen_post"] is True
     erteilt = aktion(EMIL, "ek-rechnung-2", "freigabe_erteilen:post")
     assert erteilt["success"] is True and "Freigabe erteilt" in erteilt["summary"], erteilt
@@ -208,38 +221,26 @@ def test_freigabe_anfragen_und_erteilen_aus_der_maske(satz, maske):
     assert _status(satz, "ek-rechnung-2") == "posted" and _buchungen(satz) == vorher + 1
 
 
-def test_storno_aus_der_maske_braucht_grund_und_erhoehte_freigabe(satz, maske):
+def test_storno_aus_der_maske_braucht_einen_grund_und_das_recht(satz, maske):
     aktion, _ = maske
     vorher = _buchungen(satz)
-    ohne = aktion(BERND, "vk-rechnung-1", "stornieren", grund="Falscher Kunde")
-    assert ohne["success"] is False and ohne["error"].startswith("Freigabe erforderlich (R4)")
-    assert aktion(VERA, "vk-rechnung-1", "freigabe_anfordern:reverse")["success"] is False  # Sachbearbeitung fragt keinen Storno an
-    assert aktion(BERND, "vk-rechnung-1", "freigabe_anfordern:reverse")["success"] is True
-    assert aktion(BERND | {"sub": "britta"}, "vk-rechnung-1", "freigabe_erteilen:reverse")["success"] is False  # R4: nicht die Buchhaltung
-    assert aktion(CLARA, "vk-rechnung-1", "freigabe_erteilen:reverse")["success"] is True
+    assert aktion(VERA, "vk-rechnung-1", "stornieren", grund="Falscher Kunde")["error"] == "Keine Berechtigung."
     ohne_grund = aktion(BERND, "vk-rechnung-1", "stornieren")
     assert ohne_grund["success"] is False and ohne_grund["validationErrors"][0]["field"] == "grund"
     assert _status(satz, "vk-rechnung-1") == "posted" and _buchungen(satz) == vorher
+    # Ein regelkonformer Storno: die Buchhaltung entscheidet und begruendet (FIN-CONTROL-001).
     storniert = aktion(BERND, "vk-rechnung-1", "stornieren", grund="Falscher Kunde")
     assert storniert["success"] is True and "storniert" in storniert["summary"], storniert
     assert _status(satz, "vk-rechnung-1") == "reversed" and _buchungen(satz) == vorher + 1
 
 
-def test_eine_abgelehnte_freigabe_gilt_nicht(satz, maske):
+def test_die_gutschrift_mit_bezugsrechnung_bucht_die_sachbearbeitung(satz, maske):
+    """Sie stammt aus ihrer Rechnung: Routine, ohne zweite Person (FIN-CONTROL-001)."""
     aktion, kopf = maske
     vorher = _buchungen(satz)
-    # Jede Gutschrift braucht die zweite Person.
-    assert aktion(VERA, "neue-gutschrift", "buchen")["error"].startswith("Freigabe erforderlich")
-    assert aktion(VERA, "neue-gutschrift", "freigabe_anfordern:post")["success"] is True
-    # Zusammen mit der ersten Gutschrift zur selben Rechnung liegt sie ueber 1.000 EUR: Es entscheidet die Leitung.
-    assert aktion(BERND, "neue-gutschrift", "freigabe_ablehnen:post")["error"] == "Keine Berechtigung."
-    abgelehnt = aktion(CLARA, "neue-gutschrift", "freigabe_ablehnen:post", grund="Betrag unklar")
-    assert abgelehnt["success"] is True and "Freigabe abgelehnt" in abgelehnt["summary"], abgelehnt
-    assert aktion(VERA, "neue-gutschrift", "buchen")["success"] is False and _buchungen(satz) == vorher
-    # Nach der Ablehnung laesst sich neu anfragen; erteilen gibt es erst wieder mit einer offenen Anfrage.
-    danach = kopf(VERA, "neue-gutschrift")
-    assert danach["aktion_freigabe_anfordern_post"] is True and "aktion_freigabe_erteilen_post" not in danach
-    assert aktion(CLARA, "neue-gutschrift", "freigabe_erteilen:post")["success"] is False
+    assert "aktion_freigabe_anfordern_post" not in kopf(VERA, "neue-gutschrift")
+    assert aktion(VERA, "neue-gutschrift", "buchen")["success"] is True
+    assert _buchungen(satz) == vorher + 1
 
 
 def test_wo_ein_sachgrund_sperrt_wird_keine_freigabe_angefragt(satz, maske):

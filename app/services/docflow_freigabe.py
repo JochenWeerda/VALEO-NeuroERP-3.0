@@ -2,8 +2,8 @@
 
 ``DocflowService`` ruft die Pruefung im Kommando selbst auf — nicht der Endpunkt. Damit gilt sie fuer jeden Zugang:
 Maske, REST, Skript, MCP. Die Engine und ihre Regeln stehen in ``app/services/freigabe_engine.py``; hier steht nur,
-was ein DocFlow-Beleg fuer sie ist: Betrag, Stand, Ersteller, freigaberelevanter Inhalt, Rechnungsabgleich und
-Stueckelung.
+was ein DocFlow-Beleg fuer sie ist: Betrag, Stand, Ersteller, freigaberelevanter Inhalt — und was an ihm auffaellt
+(Abweichung vom Vorgaenger, Dublette, Gutschrift ohne Bezug, gehaeufte Stornos, Stueckelung).
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from sqlalchemy import text
 
 from app.core.belegvertrag import BELEGARTEN
 from app.core.exceptions import EntityNotFoundError
-from app.core.freigabe import AKTIONEN, GRUPPE, Anforderung, anforderung
+from app.core.freigabe import AKTIONEN, GRUPPE, Anforderung, Befund, anforderung
 from app.services.freigabe_engine import FreigabeEngine, Vorgang
 
 SUBJEKT = "docflow_document"
@@ -51,9 +51,6 @@ class DocflowFreigabe(FreigabeEngine):
 
     def _vorgang_aus(self, header: dict[str, Any], aktion: str) -> Vorgang:
         doc_id, belegart, stand = str(header["id"]), str(header["doc_type"]), str(header.get("status") or "")
-        abgleich, hinweis = (True, "")
-        if aktion == "post" and belegart == "purchase_invoice":
-            abgleich, hinweis = self._abgleich(doc_id)
         return Vorgang(
             subject_id=doc_id, belegart=belegart, brutto=_d(header.get("total_gross")), gebucht=stand == "posted",
             beendet=stand in _ENDE, version=int(header.get("version") or 1), ersteller=header.get("created_by"),
@@ -68,15 +65,40 @@ class DocflowFreigabe(FreigabeEngine):
                     for i in self._items(doc_id)
                 ],
             },
-            abgleich_in_ordnung=abgleich, abgleich_hinweis=hinweis,
+            befunde=self._befunde(header, aktion),
             brutto_des_vorgangs=self._brutto_des_vorgangs(header) if aktion == "post" and belegart in GRUPPE else None,
         )
 
-    def _abgleich(self, doc_id: str) -> tuple[bool, str]:
-        """Rechnungsabgleich der Eingangsrechnung gegen ihren Vorgaenger (Bestellung oder Wareneingang).
+    def _befunde(self, header: dict[str, Any], aktion: str) -> list[Befund]:
+        """Was an diesem Beleg auffaellt (FIN-CONTROL-001). Betragsschwellen kommen aus der Regel dazu."""
+        doc_id, art, stand = str(header["id"]), str(header["doc_type"]), str(header.get("status") or "")
+        befunde: list[Befund] = []
+        if aktion == "post" and art == "purchase_invoice":
+            befunde += [Befund("abweichung_vorgaenger", "kritisch", f"Eingangsrechnung weicht von Bestellung bzw. "
+                               f"Wareneingang ab: {a}.") for a in self._abweichungen(doc_id)[:1]]
+            doppelt = self._dublette(header)
+            if doppelt:
+                befunde.append(Befund("dublette", "kritisch", f"Mögliche Dublette der Eingangsrechnung {doppelt}."))
+        if aktion == "post" and art.endswith("_credit_memo") and not self._hat_vorgaenger(doc_id):
+            grenze = self.grenze(art)
+            if grenze is not None and _d(header.get("total_gross")) > grenze:
+                befunde.append(Befund(
+                    "gutschrift_ohne_bezug", "kritisch",
+                    f"Gutschrift über {grenze} EUR ohne Bezugsrechnung (Forderungsverzicht ohne Beleg)."))
+        if aktion == "reverse" and stand == "posted":
+            weitere = self._stornos_des_partners(header)
+            if weitere >= 2:
+                befunde.append(Befund(
+                    "storno_haeufung", "warnung",
+                    f"Storno: bereits {weitere} stornierte Belege dieses Partners in den letzten 90 Tagen."))
+        return befunde
 
-        In Ordnung ist: Jede Position stammt aus einer Position des Vorgaengers, mit dessen Preis und hoechstens
-        dessen Menge. Eine frei erfasste Eingangsrechnung hat nichts, wogegen sie abgeglichen werden koennte.
+    def _abweichungen(self, doc_id: str) -> list[str]:
+        """Abweichungen der Eingangsrechnung von ihrem Vorgaenger (Bestellung oder Wareneingang).
+
+        Eine frei erfasste Eingangsrechnung hat keinen Vorgaenger und damit keine Abweichung — sie ist Routine der
+        Buchhaltung. Stammt die Rechnung aus einem Vorgaenger, faellt auf: ein anderer Preis, eine hoehere Menge,
+        eine Position, die der Vorgaenger nicht kennt.
         """
         zeilen = self.db.execute(
             text(
@@ -91,16 +113,58 @@ class DocflowFreigabe(FreigabeEngine):
             ),
             {"t": self.tenant_id, "id": doc_id},
         ).fetchall()
-        if not zeilen:
-            return False, "keine Positionen"
+        if not any(z[3] is not None for z in zeilen):
+            return []
+        abweichungen = []
         for nr, menge, preis, q_menge, q_preis in zeilen:
             if q_menge is None:
-                return False, f"Position {nr} ohne Bestellung oder Wareneingang"
-            if _d(preis) != _d(q_preis):
-                return False, f"Position {nr}: Preis {_d(preis)} weicht von {_d(q_preis)} ab"
-            if _d(menge) > _d(q_menge):
-                return False, f"Position {nr}: Menge {_d(menge)} über {_d(q_menge)}"
-        return True, ""
+                abweichungen.append(f"Position {nr} ohne Bestellung oder Wareneingang")
+            elif _d(preis) != _d(q_preis):
+                abweichungen.append(f"Position {nr}: Preis {_d(preis)} statt {_d(q_preis)}")
+            elif _d(menge) > _d(q_menge):
+                abweichungen.append(f"Position {nr}: Menge {_d(menge)} über {_d(q_menge)}")
+        return abweichungen
+
+    def _dublette(self, header: dict[str, Any]) -> Optional[str]:
+        """Eine andere aktive Eingangsrechnung desselben Lieferanten mit derselben Fremdnummer oder demselben Betrag
+        am selben Tag — unabhaengig vom Betrag ein Grund zu sperren."""
+        if not header.get("supplier_id"):
+            return None
+        return self.db.execute(
+            text(
+                """
+                SELECT doc_number FROM domain_docflow.document_headers
+                WHERE tenant_id = :t AND doc_type = 'purchase_invoice' AND id <> :id AND supplier_id = :s
+                  AND deleted_at IS NULL AND status NOT IN ('reversed', 'cancelled')
+                  AND ((CAST(:ref AS text) IS NOT NULL AND source_ref = :ref)
+                       OR (total_gross = :brutto AND total_gross > 0 AND document_date::date = CAST(:tag AS date)))
+                ORDER BY created_at LIMIT 1
+                """
+            ),
+            {"t": self.tenant_id, "id": header["id"], "s": header["supplier_id"], "ref": header.get("source_ref") or None,
+             "brutto": _d(header.get("total_gross")), "tag": header["document_date"]},
+        ).scalar()
+
+    def _hat_vorgaenger(self, doc_id: str) -> bool:
+        return bool(self.db.execute(
+            text("SELECT 1 FROM domain_docflow.document_header_links WHERE tenant_id = :t AND to_header_id = :id LIMIT 1"),
+            {"t": self.tenant_id, "id": doc_id},
+        ).first())
+
+    def _stornos_des_partners(self, header: dict[str, Any]) -> int:
+        partner = header.get("supplier_id") or header.get("customer_id")
+        if not partner:
+            return 0
+        return int(self.db.execute(
+            text(
+                """
+                SELECT count(*) FROM domain_docflow.document_headers
+                WHERE tenant_id = :t AND id <> :id AND status = 'reversed' AND deleted_at IS NULL
+                  AND COALESCE(supplier_id, customer_id) = :p AND updated_at > now() - interval '90 days'
+                """
+            ),
+            {"t": self.tenant_id, "id": header["id"], "p": partner},
+        ).scalar() or 0)
 
     def _brutto_des_vorgangs(self, header: dict[str, Any]) -> Decimal:
         """Summe der aktiven Belege derselben Art aus demselben Vorgaenger — sonst desselben Partners am selben Tag."""

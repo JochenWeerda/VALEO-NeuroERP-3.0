@@ -284,7 +284,9 @@ async def import_journal_entries_csv(
                 # Generate entry number if not provided
                 entry_number = first_line.entry_number
                 if not entry_number:
-                    entry_number = f"IMP-{entry_date.strftime('%Y%m%d')}-{uuid7()[:6].upper()}"
+                    # Das Ende der Kennung ist zufaellig; ihr Anfang ist die Zeit und war fuer zwei Importe kurz
+                    # nacheinander gleich (doppelte Buchungsnummer, 500).
+                    entry_number = f"IMP-{entry_date.strftime('%Y%m%d')}-{uuid7()[-8:].upper()}"
                 
                 # Create journal entry
                 entry_id = uuid7()

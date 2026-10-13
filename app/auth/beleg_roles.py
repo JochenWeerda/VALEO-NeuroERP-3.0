@@ -45,6 +45,8 @@ _FINANZ_BUCHEN = frozenset({"FINANCE_BEARBEITEN", "FINANCE_ADMIN"})
 _LAGER_LESEN = frozenset({"LAGER_LESEN", "LAGER_BEARBEITEN", "LAGER_ADMIN"})
 _LAGER_BEARBEITEN = frozenset({"LAGER_BEARBEITEN", "LAGER_ADMIN"})
 _LAGERBELEGE = frozenset({"sales_delivery", "goods_receipt"})
+# Der Controller ueberwacht die Ausnahmen (FIN-CONTROL-001): Er gibt kritische Befunde frei, bucht aber nicht.
+_CONTROLLING = frozenset({"controller", "CONTROLLING"})
 
 _BEREICH: dict[str, dict[str, frozenset[str]]] = {
     "verkauf": {
@@ -77,10 +79,12 @@ def rollen_fuer(recht: str, belegart: str) -> frozenset[str]:
     # Freigabe als zweite Person (APPROVAL-001): Leitung des Bereichs und Buchhaltung; ab R4 nur Leitung und
     # Finanzleitung. Die Funktionstrennung prueft die Approval Engine — sie gilt auch fuer ``admin``.
     if recht == "freigeben":
-        return _IMMER | manager | bereich["leitung"] | _FINANZ_BUCHEN
+        return _IMMER | manager | bereich["leitung"] | _FINANZ_BUCHEN | _CONTROLLING
     if recht == "freigeben_erhoeht":
-        return _IMMER | bereich["leitung"] | frozenset({"FINANCE_ADMIN"})
+        return _IMMER | bereich["leitung"] | frozenset({"FINANCE_ADMIN"}) | _CONTROLLING
     if recht == "stornieren":
+        # Ein regelkonformer Storno ist Sache der Buchhaltung und der Leitung des Bereichs; die Sachbearbeitung
+        # nimmt zurueck, was Finance nicht bucht.
         return (_IMMER | bereich["leitung"] | _FINANZ_BUCHEN) if variante.bucht else bearbeiten
     raise KeyError(recht)
 

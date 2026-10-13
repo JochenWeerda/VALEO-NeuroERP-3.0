@@ -186,12 +186,12 @@ def test_sachbearbeitung_bucht_aber_storniert_nichts_gebuchtes(http, satz):
     offen = _beleg(http, satz, "vk-rechnung-2", "SALES_BEARBEITEN").json()
     assert _aktion(offen, "buchen")["erlaubt"] is True
     gebucht = _beleg(http, satz, "vk-rechnung-1", "SALES_BEARBEITEN").json()
-    # Der Storno eines gebuchten Belegs braucht eine zweite Person; die Sachbearbeitung darf ihn nicht einmal anfragen.
-    assert _aktion(gebucht, "stornieren")["erlaubt"] is False
-    assert _aktion(gebucht, "freigabe_anfordern:reverse")["grund"] == "Keine Berechtigung."
+    # Einen gebuchten Beleg storniert die Buchhaltung oder die Leitung des Bereichs (FIN-CONTROL-001), nicht die
+    # Sachbearbeitung.
+    assert _aktion(gebucht, "stornieren")["grund"] == "Keine Berechtigung."
     assert _aktion(gebucht, "umwandeln:sales_credit_memo")["erlaubt"] is True
     for rollen in (("FINANCE_BEARBEITEN",), ("SALES_ADMIN",)):
-        assert _aktion(_beleg(http, satz, "vk-rechnung-1", *rollen).json(), "freigabe_anfordern:reverse")["erlaubt"] is True
+        assert _aktion(_beleg(http, satz, "vk-rechnung-1", *rollen).json(), "stornieren")["erlaubt"] is True
     # Die Buchhaltung bucht, erstellt aber keine Gutschrift des Verkaufs.
     finanz = _beleg(http, satz, "vk-rechnung-1", "FINANCE_BEARBEITEN").json()
     assert _aktion(finanz, "umwandeln:sales_credit_memo")["grund"] == "Keine Berechtigung."
@@ -283,10 +283,7 @@ def test_buchhaltung_bucht_und_storniert(http, satz):
     gebucht = http("FINANCE_BEARBEITEN").post(f"/docflow/{offen}/post", json={"idempotency_key": "recht-buchen"})
     assert gebucht.status_code == 200, gebucht.text
     assert _status(satz, "vk-rechnung-2") == "posted"
-    ohne = http("FINANCE_BEARBEITEN").post(
-        f"/docflow/{offen}/reverse", json={"idempotency_key": "recht-storno-ohne", "reason": "Test der Rechte"})
-    assert ohne.status_code == 409 and "Freigabe erforderlich (R4)" in ohne.json()["detail"]
-    sichere_freigabe(satz["mandant"], offen, "reverse")
+    # Ein regelkonformer Storno: die Buchhaltung entscheidet und begruendet, ohne zweite Person.
     storno = http("FINANCE_BEARBEITEN").post(
         f"/docflow/{offen}/reverse", json={"idempotency_key": "recht-storno", "reason": "Test der Rechte"})
     assert storno.status_code == 200, storno.text

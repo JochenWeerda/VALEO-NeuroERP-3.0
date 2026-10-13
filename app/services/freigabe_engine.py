@@ -12,6 +12,8 @@ Ein Bereich schliesst sich an, indem er ``FreigabeEngine`` erbt und ``vorgang`` 
 * Funktionstrennung: Wer den Vorgang angelegt oder die Freigabe angefragt hat, entscheidet nicht — auch nicht als
   Administrator. Ein technisches Konto entscheidet nie.
 * Eine erteilte Freigabe wird beim Ausfuehren verbraucht, in der Transaktion des Kommandos.
+* Seit FIN-CONTROL-001 braucht nur ein **kritischer Befund** (oder der Zahlungslauf) eine Freigabe. Was sonst
+  auffaellt, wird ausgefuehrt und steht im Pruefkorb des Controllers (``domain_docflow.control_findings``).
 * Jede Anfrage, Entscheidung, Ablehnung und jeder Verbrauch steht im unveraenderlichen Freigabeprotokoll
   (``domain_docflow.approval_log``).
 """
@@ -29,7 +31,9 @@ from sqlalchemy.orm import Session
 
 from app.auth.beleg_roles import rollen_fuer, rollen_von
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
-from app.core.freigabe import AKTIONEN, GRUPPE, GUELTIGKEIT_STUNDEN, Anforderung, anforderung, wirksame_grenze
+from app.core.freigabe import (
+    AKTIONEN, GRUPPE, GUELTIGKEIT_STUNDEN, Anforderung, Befund, anforderung, wirksame_grenze,
+)
 
 
 @dataclass
@@ -44,8 +48,8 @@ class Vorgang:
     version: int = 1
     ersteller: Optional[str] = None
     inhalt: dict[str, Any] = field(default_factory=dict)  # alles Freigaberelevante
-    abgleich_in_ordnung: bool = True
-    abgleich_hinweis: str = ""
+    # Was die Kontrolle des Bereichs an diesem Vorgang findet (Dublette, Abweichung, geschuetztes Konto …).
+    befunde: list[Befund] = field(default_factory=list)
     brutto_des_vorgangs: Optional[Decimal] = None
 
 
@@ -90,14 +94,13 @@ class FreigabeEngine:
         try:
             eigener = Decimal(str(roh)) if roh not in (None, "") else None
         except InvalidOperation:
-            eigener = None  # Ein unlesbarer Wert lockert nichts: Es gilt die Systemvorgabe.
+            eigener = None  # Ein unlesbarer Wert aendert nichts: Es gilt der Startwert.
         return wirksame_grenze(gruppe, eigener)
 
     def anforderung(self, v: Vorgang, aktion: str) -> Anforderung:
         return anforderung(
             v.belegart, aktion, brutto=v.brutto, gebucht=v.gebucht, grenze=self.grenze(v.belegart),
-            abgleich_in_ordnung=v.abgleich_in_ordnung, abgleich_hinweis=v.abgleich_hinweis,
-            brutto_des_vorgangs=v.brutto_des_vorgangs,
+            befunde=v.befunde, brutto_des_vorgangs=v.brutto_des_vorgangs,
         )
 
     def abdruck(self, v: Vorgang, aktion: str) -> str:
@@ -143,6 +146,20 @@ class FreigabeEngine:
              "a": akteur, "p": json.dumps(daten, default=str)},
         )
         self.protokolliere_am_vorgang(subject_id, kommando, akteur, daten)
+
+    def _in_den_pruefkorb(self, v: Vorgang, aktion: str, bedarf: Anforderung, akteur: Optional[str],
+                          freigabe_id: Optional[str]) -> None:
+        """Jeder Befund eines ausgefuehrten Vorgangs steht einmal im Pruefkorb — in der Transaktion des Kommandos."""
+        for befund in bedarf.befunde:
+            self.db.execute(
+                text(
+                    "INSERT INTO domain_docflow.control_findings (tenant_id, subject_type, subject_id, action, code, "
+                    "severity, text, amount, actor, approval_id) VALUES (:t, :s, :id, :a, :c, :sev, :txt, :betrag, :wer, :fid) "
+                    "ON CONFLICT ON CONSTRAINT control_findings_einmal DO NOTHING"
+                ),
+                {"t": self.tenant_id, "s": self.SUBJEKT, "id": v.subject_id, "a": aktion, "c": befund.code,
+                 "sev": befund.schwere, "txt": befund.text, "betrag": v.brutto, "wer": akteur, "fid": freigabe_id},
+            )
 
     def beantrage(self, subject_id: str, aktion: str, antragsteller: str, grund: Optional[str] = None) -> dict[str, Any]:
         if aktion not in AKTIONEN:
@@ -235,10 +252,13 @@ class FreigabeEngine:
         """
         bedarf = self.anforderung(v, aktion)
         if not bedarf.zweitfreigabe:
+            # Zulaessig. Was auffaellt, geht in den Pruefkorb des Controllers.
+            self._in_den_pruefkorb(v, aktion, bedarf, akteur, None)
             return None
         freigabe = self.gueltige_fuer(v, aktion)
         if freigabe is None:
             raise ConflictError(f"Freigabe erforderlich ({bedarf.risiko}): {bedarf.grund}")
+        self._in_den_pruefkorb(v, aktion, bedarf, akteur, str(freigabe["id"]))
         self.db.execute(
             text("UPDATE domain_docflow.approvals SET status = 'consumed', consumed_at = clock_timestamp() WHERE id = :id"),
             {"id": freigabe["id"]},
@@ -247,6 +267,52 @@ class FreigabeEngine:
                         {"approval_id": freigabe["id"], "action": aktion, "risk": bedarf.risiko,
                          "decided_by": freigabe["decided_by"]})
         return str(freigabe["id"])
+
+
+KONTROLLROLLEN = frozenset({"controller", "CONTROLLING", "FINANCE_ADMIN", "admin"})
+
+
+def pruefkorb(db: Session, tenant_id: str, status: Optional[str] = "offen", limit: int = 100) -> list[dict[str, Any]]:
+    """Die Befunde des Mandanten, neueste zuerst."""
+    zeilen = db.execute(
+        text(
+            "SELECT id, subject_type, subject_id, action, code, severity, text, amount, actor, approval_id, created_at, "
+            "status, reviewed_by, reviewed_at, review_note FROM domain_docflow.control_findings "
+            "WHERE tenant_id = :t AND (CAST(:s AS text) IS NULL OR status = :s) ORDER BY created_at DESC, id LIMIT :lim"
+        ),
+        {"t": tenant_id, "s": status, "lim": limit},
+    ).mappings().all()
+    return [dict(z) for z in zeilen]
+
+
+def pruefe_befund(db: Session, tenant_id: str, befund_id: str, pruefer: Any, notiz: Optional[str]) -> dict[str, Any]:
+    """Der Controller hat den Befund gesehen und bewertet. Wer gebucht hat, prueft nicht selbst."""
+    wer = str((pruefer or {}).get("sub") or "").strip() if isinstance(pruefer, dict) else ""
+    zeile = db.execute(
+        text("SELECT actor, status FROM domain_docflow.control_findings WHERE id = :id AND tenant_id = :t"),
+        {"id": befund_id, "t": tenant_id},
+    ).first()
+    if zeile is None:
+        raise EntityNotFoundError("ControlFinding", befund_id)
+    if not wer or technisches_konto(pruefer):
+        raise ValidationFailedError("Einen Befund prüft nur eine angemeldete Person.")
+    if not rollen_von(pruefer) & KONTROLLROLLEN:
+        raise ValidationFailedError("Keine Berechtigung für den Prüfkorb.")
+    if zeile[0] and str(zeile[0]) == wer:
+        raise ValidationFailedError("Wer gebucht hat, prüft den Befund nicht selbst.")
+    if zeile[1] != "offen":
+        raise ConflictError("Der Befund ist bereits geprüft.")
+    if len((notiz or "").strip()) < 3:
+        raise ValidationFailedError("Die Prüfung braucht eine Bewertung.")
+    db.execute(
+        text(
+            "UPDATE domain_docflow.control_findings SET status = 'geprueft', reviewed_by = :wer, "
+            "reviewed_at = clock_timestamp(), review_note = :n WHERE id = :id AND tenant_id = :t AND status = 'offen'"
+        ),
+        {"wer": wer, "n": notiz.strip(), "id": befund_id, "t": tenant_id},
+    )
+    db.commit()
+    return next(b for b in pruefkorb(db, tenant_id, None, 500) if b["id"] == befund_id)
 
 
 def technisches_konto(nutzer: Any) -> bool:

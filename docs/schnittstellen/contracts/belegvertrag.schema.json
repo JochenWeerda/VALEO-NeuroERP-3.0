@@ -4,6 +4,18 @@
    "additionalProperties": false,
    "description": "Was der Leser mit diesem Beleg jetzt tun darf — vom Server entschieden, nicht von der Maske.",
    "properties": {
+    "approval_id": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Approval Id"
+    },
     "bezeichnung": {
      "title": "Bezeichnung",
      "type": "string"
