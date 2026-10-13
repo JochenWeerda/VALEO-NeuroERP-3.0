@@ -101,6 +101,29 @@ Finance (Buchungsautorität)     Steuerschlüssel → Konten → Journal, offene
 - **Fachliche Sonderteile** (Wiegedaten, Qualitätsparameter, Fracht, Kontraktbezug) sind eigene
   Bausteine, die eine Variante einhängt — keine Sonderfälle im Grundgerüst.
 
+## C1. Zielbild Fachaktionen: eine Fähigkeit, mehrere Zugänge (entschieden 13.10.2026)
+
+Vom Auftraggeber eingebracht und am 13.10.2026 bestätigt, MCP-Werkzeuge zuerst nur lesend: Jede Belegfunktion wird einmal als
+Fachaktion umgesetzt und ist über Maske, MCP-Werkzeug, Kommandozeile und REST erreichbar. Alle Zugänge
+unterliegen derselben Validierung, Mandantentrennung, Rechteprüfung und demselben Nachweis. Ein
+ausgeblendetes Feld ist keine Berechtigung. Kein neues Gerüst neben Mask Builder und ScreenDefinition;
+vorhandene Fachaktionen bekommen maschinenlesbare Angaben, statt neu gebaut zu werden.
+
+| Baustein des Zielbilds | Bestand | Lücke |
+|---|---|---|
+| Fachaktion einmal, serverseitig | DocFlow-Kommandos (anlegen, umwandeln, freigeben, buchen, stornieren) mit Idempotenz, Versionsprüfung, Pflichtprotokoll und Akteur aus der Anmeldung; Mask-Aktionen über `run_delegated_mask_action` | Kein gemeinsames Verzeichnis: DocFlow-Kommandos und Mask-Aktionen sind getrennt beschrieben |
+| Aktionen an der Maske | `actions` der ScreenDefinition mit Kommando-Weg, Recht, Gefahrenstufe; Aktionskatalog und MCP-Aktionskarte werden erzeugt und in CI geprüft | 11 Masken der Handkopie tragen `stubReason` statt Kommando-Weg (Phase 0.9) |
+| Agent versteht die Maske | `agentContract` je ScreenDefinition, Agenten-Handbuch | Kein Werkzeug „erlaubte Aktionen im jetzigen Zustand" — der Belegvertrag liefert sie künftig in `aktionen[]` (mit `kommando`, `freigabe_noetig`) |
+| MCP-Werkzeuge für Belege | — | In `docs/schnittstellen/mcp-tools.md` gibt es kein Werkzeug für die DocFlow-Belegkommandos |
+| Kommandozeile | — | Ein Kommandozeilenzugang für Fachaktionen ist nicht geprüft |
+| Agentenidentität, Rechte | Identitätsarbeit bei Codex (Mandant und Akteur aus der Anmeldung) | Zuordnung der Rechte einer ScreenDefinition zu Rollen offen |
+| CI-Prüfungen | Ratschen für Aktionskatalog, MCP-Aktionskarte, OpenAPI, Registry-Abbild, Belegvertrag | Kein Test „gleiche Aktion über jeden Zugang, gleiche Rechte" |
+
+Folge für den Plan, ohne die Reihenfolge zu ändern: BELEG-011 liefert `aktionen[]` aus dem Zustand des
+Belegs und dem Recht des Lesers; danach ein Verzeichnis der Belegkommandos (ein Eintrag je Kommando:
+Name, Recht, Risiko, Freigabe, Idempotenz), aus dem MCP-Werkzeuge — zuerst nur lesende — und die
+Aktionen der Belegmaske abgeleitet und in CI gegeneinander geprüft werden.
+
 ## D0. Entschieden am 13.10.2026 (Auftraggeber)
 
 - **E1: DocFlow wird die führende Belegstruktur** (Belegidentität, Versionierung, Belegkette,
@@ -143,8 +166,9 @@ so, dass früh etwas Sichtbares entsteht und kein Schritt eine neue Sonderarchit
 
 | Slice | Inhalt | Fertig, wenn |
 |---|---|---|
-| BELEG-010 | **Belegvertrag** als Schema und Vertragstest: Felder, Namen, was je Variante fehlen darf. Ableitung aus den fünf vorhandenen Beleg-ScreenDefinitions (B-1) | Vertragstest läuft; Abbildungstabelle alter Feldnamen auf den Vertrag liegt vor |
-| BELEG-011 | **Lesender Belegweg** `GET /belege/{belegart}/{id}` für die DocFlow-Belegarten des Verkaufs; je Domäne ein Adapter | Angebot, Auftrag, Lieferschein, Rechnung aus DocFlow kommen in Vertragsform |
+| BELEG-010 | **Belegvertrag** als Schema und Vertragstest: Felder, Namen, was je Variante fehlen darf. Ableitung aus den fünf vorhandenen Beleg-ScreenDefinitions (B-1) | Vertragstest läuft; Abbildungstabelle alter Feldnamen auf den Vertrag liegt vor — **erledigt 13.10.2026** (`belegvertrag-20261013.md`) |
+| BELEG-011 | **Lesender Belegweg** `GET /belege/{belegart}/{id}` für die DocFlow-Belegarten des Verkaufs; je Domäne ein Adapter | Angebot, Auftrag, Lieferschein, Rechnung aus DocFlow kommen in Vertragsform — **erledigt 13.10.2026** für alle neun DocFlow-Belegarten (`belege-lesen-20261013.md`) |
+| BELEG-013 | **Lesende MCP-Werkzeuge für Belege** über denselben Belegweg: Belegarten beschreiben, Belege suchen, Beleg lesen; Verzeichnis der Belegkommandos (Name, Recht, Risiko, Freigabe, Idempotenz) | Agent liest denselben Beleg wie die Maske; Werkzeuge und Verzeichnis in CI gegeneinander geprüft |
 | BELEG-012 | **Preisrecht an der API:** ohne Recht keine Preis-, Rabatt- und Summenfelder im Belegvertrag | Test: gleicher Beleg, zwei Benutzer, zwei Antworten |
 | BELEG-020 | **Variante in der Engine:** `build_beleg_screen_definition(belegart)` erzeugt aus Grundgerüst + Variantenangabe eine ScreenDefinition; Registry, Agenten-Synonyme, TS-Kopie, Governance und Inventare kennen Varianten | Zwei Varianten aus einer Quelle; Bereitschaftsprüfung 1,0; keine ausgeschriebene Kopie |
 

@@ -11,6 +11,58 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-011 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** `GET /api/v1/belege/{belegart}/{beleg_id}` (`app/api/v1/endpoints/belege.py`) liefert DocFlow-Belege
+in der Form des Belegvertrags; Adapter `app/services/docflow_belegadapter.py` (nur lesend, kein Nachziehen von
+Kopien). Mandant aus der geprueften Anmeldung. Buchungsstand und gesperrte Aktionen mit Grund aus denselben
+Pruefungen wie `post` und `convert`. Vertrag: Buchungsstand `storniert` neu. Tests 10 + 27.
+QA: `docs/quality-assurance/belege-lesen-20261013.md`.
+**Entschieden vom Auftraggeber 13.10.2026:** Zielbild „eine Fachaktion, mehrere Zugaenge“ gilt (Masterplan C1);
+MCP-Werkzeuge fuer Belege zuerst nur lesend. Naechster Slice: BELEG-013.
+**Offen, an Codex (Identitaet):** Der Belegweg prueft noch kein Recht des Lesers (Preisrecht, Aktionen) —
+BELEG-012 braucht die Zuordnung Recht → Rolle.
+
+## MCP-WRITE-STANDARD-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13.
+**Ziel:** Verbindliche Regeln MCP-WRITE-001 bis 015 und geordnete Integration festsetzen.
+**Dateibesitz:** docs/architecture/mcp-write-standard.md; additive Verweise in AGENTS.md und docs/architecture/index.md; eigener Workboard-Block.
+**Abnahme:** 15 Regeln, R0–R4, vier Integrationsstufen mit Gates, explizite Trennung Standard/Laufzeitnachweis; Links und Staged-Gates.
+**Risiken:** Bestehende Adapter sind noch nicht durchgaengig konform; keine Runtime-Freischaltung in diesem Dokumentationsslice.
+
+**Lieferung:** Alle 15 Regeln, R0–R4, vier geordnete Integrationsstufen mit Abnahmegates, internes YAML-Beispiel und offene Runtime-Migration dokumentiert; AGENTS.md und Architekturindex verweisen verbindlich darauf. Dokumentations- und Staged-Gates; keine Runtime-Freischaltung, DB oder Container.
+
+## MCP-WRITE-EXECUTION-MIGRATION — offen
+
+**Owner:** offen. **Ziel:** Stufe 1 des MCP-Schreibstandards umsetzen; Token-/Header-Fallbacks und Freischaltgrenzen inventarisieren und absichern. **Dateibesitz:** vor Umsetzung separat claimen. **Abnahme:** Identitaets-, Mandanten-, Rechte- und Freischaltungs-Negativtests ohne Geschaeftsaenderung; nachfolgende Stufen gemaess Architekturstandard.
+
+## BELEG-010 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** `app/core/belegvertrag.py` — die eine Form, in der eine Belegmaske einen Beleg liest (`Beleg`),
+neun Varianten (`BELEGARTEN`), Pruefung `pruefe`, `ohne_preise`, Abbildung der Feldnamen der fuenf
+Beleg-ScreenDefinitions (`ABBILDUNG`). Erzeugt: `docs/schnittstellen/contracts/belegvertrag.schema.json`,
+`docs/schnittstellen/belegvertrag.md` (`scripts/generate_belegvertrag.py [--check]`). Tests 27.
+QA: `docs/quality-assurance/belegvertrag-20261013.md`.
+**Fuer alle:** Wer in `sales/sales-order`, `sales/delivery-note`, `sales/invoice`, `einkauf/purchase-order` oder
+`finance/ap-invoice` ein Kopffeld oder eine Positionsspalte aendert, traegt es in `ABBILDUNG` nach und erzeugt
+die beiden Dateien neu; wer in DocFlow `TRANSITIONS` aendert, zieht `BELEGARTEN` nach. Sonst wird
+`tests/test_belegvertrag.py` rot.
+
+## SICHTPRUEFUNG-MANDANT-20261013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Entscheidung des Auftraggebers: eigener Mandant
+fuer die Sichtpruefung statt des alten Testmandanten (dessen Journalkette eine Luecke hat).
+**Lieferung:** `scripts/sichtpruefung_mandant_einrichten.py [--tenant <id>] [--apply] [--belege]` — legt den
+Mandanten an, richtet SKR03 mit den Steuerschluesseln 2, 3, 8, 9 und Konto 1400 ein und legt auf Wunsch die
+17 Referenzbelege an; wiederholbar. Test `tests/test_sichtpruefung_mandant.py` (2, gegen `valeo_probe`).
+**In der Entwicklungsdatenbank eingerichtet:** Mandant `00000000-0000-0000-0000-000000000051`
+(„Sichtpruefung (Referenzbelege)“) mit 17 Belegen, 8 Buchungen, 4 offenen Posten.
+**An Codex (Phase 0.6):** Bitte die synthetische Testkennung an diesen Mandanten binden; die Browserpruefung
+(0.8) laeuft dann dort. Zugangsdaten bleiben ausserhalb des Repositorys.
+
 ## PHASE0-REFERENZBELEGE-REGISTRYABBILD-20261013 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Phase 0.7 und der sichere Teil von 0.9.

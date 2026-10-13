@@ -92,6 +92,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `customer_service` | Service layer for CRM Customer management (crm-core + monolith bridge). |
 | `doc_nachweisraum_lifecycle_service` | DOM-DOC-004.2 — Dokumenten-Nachweisraum Lifecycle (Upload/Freigabe/GoBD). |
 | `docflow_artifact_service` | Artefakt-Upload, Versionierung & Freigabe (DOM-DOC-004.2). |
+| `docflow_belegadapter` | DocFlow-Belege in der Form des Belegvertrags (BELEG-011). |
 | `docflow_evidence_service` | Dokument-Nachweisraum (DOM-DOC-004) — GoBD-Artefakt-/Vorgangs-Sicht. |
 | `docflow_followup_service` | Bescheid/Rückmeldung & Wiedervorlage am Vorgang (DOM-DOC-004.3). |
 | `docflow_gobd_service` | GoBD-Exportpaket & DMS-/Paperless-Liveprobe (DOM-DOC-004.4). |

@@ -1027,6 +1027,14 @@ api_router.include_router(
     tags=["crm", "ownership"]
 )
 
+from app.api.v1.endpoints import belege  # noqa: E402
+
+api_router.include_router(
+    belege.router,
+    prefix="/belege",
+    tags=["belege"]
+)
+
 from app.api.v1.endpoints import docflow_evidence  # noqa: E402
 
 api_router.include_router(

@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-12
+last_reviewed: 2026-10-13
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -74,6 +74,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `batch` | OData-style $batch endpoint for bundling multiple read requests. |
 | `bedarfsdeckung` | Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — Lücke je Betrieb × Produktgruppe. |
 | `beleg_vordrucke` | Belegformular-Vordruck-Editor (Admin) — Druckvorlagen für Papier/PDF-Ausdrucke. |
+| `belege` | Lesender Belegweg: jeder Beleg in der Form des Belegvertrags (BELEG-011). |
 | `benchmark_api` | — |
 | `benchmark_cockpit` | — |
 | `betriebsstaetten` | Betriebsstätten/Filialen — Filialsystem-Stammdaten. |
