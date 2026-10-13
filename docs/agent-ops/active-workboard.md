@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## LOGIN-REFRESH-20261013 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** reale Sitzung endet nach Zugriffstokenablauf; beide HTTP-Clients erneuern Token nicht und Kaltstart verwirft Refresh. **Ziel:** Providererneuerung vor HTTP-Transport und beim Wiederladen, ohne abgelaufene Token zu akzeptieren. **Dateibesitz:** lib/auth.ts, hooks/useAuth.ts, lib/api-client.ts, lib/axios.ts ausschliesslich Sitzungserneuerung innerhalb eigener Identity-Elternclaims; auth.test.ts und neue fokussierte Vertraege, eigene QA/Workboard. **Abnahme:** Kaltstart ohne vorzeitige Freigabe, parallele Anfragen teilen einen Refresh, Logout gewinnt gegen laufende Erneuerung, fehlgeschlagener Refresh sperrt Zugang; realer Browser-Recheck. Keine persoenlichen Kennungen, DB/Container/Reset.
+
 ## STEUERSCHLUESSEL-KONTENVORSCHLAG-20261013 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Auftrag: Kontonummern aus dem Kontenplan vorschlagen
