@@ -3,75 +3,53 @@ from __future__ import annotations
 from datetime import date, timedelta
 
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.testclient import TestClient
 
-from app.core.database import SessionLocal, get_db
-from app.domains.operations.models import ReklamationDB
+from app.core.database import engine, get_db
+from app.core.tenant import get_tenant_id
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+from uuid import uuid4
 from app.api.v1.endpoints import reklamation_api
 
-# Tenant-IDs used by the three tests — cleaned up before/after each test.
-_TEST_TENANTS = {"TENANT-REK-1", "TENANT-REK-2", "TENANT-REK-3"}
+@pytest.fixture
+def tenant_id():
+    return str(uuid4())
 
 
 def _headers(tenant_id: str) -> dict[str, str]:
-    return {"X-Tenant-ID": tenant_id}
-
-
-def _db_reachable() -> bool:
-    try:
-        db = SessionLocal()
-        from sqlalchemy import text
-        db.execute(text("SELECT 1"))
-        db.close()
-        return True
-    except Exception:
-        return False
-
-
-@pytest.fixture(autouse=True)
-def _clear_store():
-    # _store is an empty dict kept for API compatibility; clearing it is a no-op.
-    reklamation_api._store.clear()
-    _purge_test_rows()
-    yield
-    reklamation_api._store.clear()
-    _purge_test_rows()
-
-
-def _purge_test_rows():
-    """Remove any reklamationen rows created by these tests."""
-    if not _db_reachable():
-        return
-    db = SessionLocal()
-    try:
-        db.query(ReklamationDB).filter(
-            ReklamationDB.tenant_id.in_(_TEST_TENANTS)
-        ).delete(synchronize_session=False)
-        db.commit()
-    finally:
-        db.close()
+    return {'X-Tenant-ID': tenant_id}
 
 
 @pytest.fixture
-def client(require_db) -> TestClient:
-    """Standalone FastAPI app wired to the real PostgreSQL DB via get_db override."""
-    def override_get_db():
-        db = SessionLocal()
+def client(require_db, tenant_id) -> TestClient:
+    """Isolated business router: explicit tenant double, real rollback-only DB."""
+    with engine.connect() as connection:
+        outer = connection.begin()
+        db = Session(bind=connection, join_transaction_mode='create_savepoint')
         try:
-            yield db
+            db.execute(text('INSERT INTO domain_shared.tenants (id,name,domain,is_active) VALUES (:id,:name,:domain,TRUE)'),
+                       {'id': tenant_id, 'name': 'Synthetic complaint tenant', 'domain': tenant_id+'.test.invalid'})
+            db.commit()
+            app = FastAPI()
+            app.dependency_overrides[get_db] = lambda: db
+            def declared_test_tenant(request: Request) -> str:
+                if request.headers.get('X-Tenant-ID') != tenant_id:
+                    raise HTTPException(403, 'Outside the explicit business test context')
+                return tenant_id
+            app.dependency_overrides[get_tenant_id] = declared_test_tenant
+            app.include_router(reklamation_api.router)
+            with TestClient(app, raise_server_exceptions=True) as client:
+                yield client
         finally:
             db.close()
-
-    app = FastAPI()
-    app.dependency_overrides[get_db] = override_get_db
-    app.include_router(reklamation_api.router)
-    return TestClient(app, raise_server_exceptions=True)
+            outer.rollback()
 
 
-def test_create_reklamation_surfaces_crm_dms_and_sla_state(client: TestClient):
+def test_create_reklamation_surfaces_crm_dms_and_sla_state(client: TestClient, tenant_id: str):
     payload = {
-        "tenant_id": "TENANT-REK-1",
+        "tenant_id": tenant_id,
         "lieferant_id": "LF-100",
         "typ": "qualitaet",
         "positionen": [
@@ -105,7 +83,7 @@ def test_create_reklamation_surfaces_crm_dms_and_sla_state(client: TestClient):
         "aktor_id": "crm-user",
     }
 
-    response = client.post("/reklamationen", json=payload, headers=_headers("TENANT-REK-1"))
+    response = client.post("/reklamationen", json=payload, headers=_headers(tenant_id))
 
     assert response.status_code == 201
     body = response.json()
@@ -118,11 +96,11 @@ def test_create_reklamation_surfaces_crm_dms_and_sla_state(client: TestClient):
     assert body["audit_integritaet_ok"] is True
 
 
-def test_reklamation_transition_records_audit_and_overdue_state(client: TestClient):
+def test_reklamation_transition_records_audit_and_overdue_state(client: TestClient, tenant_id: str):
     create = client.post(
         "/reklamationen",
         json={
-            "tenant_id": "TENANT-REK-2",
+            "tenant_id": tenant_id,
             "lieferant_id": "LF-200",
             "typ": "menge",
             "positionen": [
@@ -138,18 +116,18 @@ def test_reklamation_transition_records_audit_and_overdue_state(client: TestClie
             "frist_datum": (date.today() - timedelta(days=1)).isoformat(),
             "aktor_id": "service-user",
         },
-        headers=_headers("TENANT-REK-2"),
+        headers=_headers(tenant_id),
     )
     reklamation_id = create.json()["reklamation_id"]
 
-    overdue = client.get("/reklamationen/ueberfaellige/TENANT-REK-2", headers=_headers("TENANT-REK-2"))
+    overdue = client.get(f"/reklamationen/ueberfaellige/{tenant_id}", headers=_headers(tenant_id))
     assert overdue.status_code == 200
     assert any(item["reklamation_id"] == reklamation_id for item in overdue.json())
 
     transition_1 = client.post(
         f"/reklamationen/{reklamation_id}/transition",
         json={"neuer_status": "abgelehnt", "aktor_id": "reviewer-1", "kommentar": "Teilweise unklar"},
-        headers=_headers("TENANT-REK-2"),
+        headers=_headers(tenant_id),
     )
     assert transition_1.status_code == 200
     assert transition_1.json()["status"] == "abgelehnt"
@@ -157,14 +135,14 @@ def test_reklamation_transition_records_audit_and_overdue_state(client: TestClie
     transition_2 = client.post(
         f"/reklamationen/{reklamation_id}/transition",
         json={"neuer_status": "geschlossen", "aktor_id": "reviewer-2"},
-        headers=_headers("TENANT-REK-2"),
+        headers=_headers(tenant_id),
     )
     assert transition_2.status_code == 200
     assert transition_2.json()["status"] == "geschlossen"
     assert transition_2.json()["sla_status"] == "erledigt"
     assert transition_2.json()["ist_ueberfaellig"] is False
 
-    audit = client.get(f"/reklamationen/{reklamation_id}/audit", headers=_headers("TENANT-REK-2"))
+    audit = client.get(f"/reklamationen/{reklamation_id}/audit", headers=_headers(tenant_id))
     assert audit.status_code == 200
     audit_body = audit.json()
     assert audit_body["count"] == 3
@@ -172,11 +150,11 @@ def test_reklamation_transition_records_audit_and_overdue_state(client: TestClie
     assert audit_body["audit_trail"][-1]["aktion"] == "status_geaendert"
 
 
-def test_crm_and_dms_reference_endpoints_update_existing_complaint(client: TestClient):
+def test_crm_and_dms_reference_endpoints_update_existing_complaint(client: TestClient, tenant_id: str):
     create = client.post(
         "/reklamationen",
         json={
-            "tenant_id": "TENANT-REK-3",
+            "tenant_id": tenant_id,
             "lieferant_id": "LF-300",
             "typ": "preis",
             "positionen": [
@@ -191,7 +169,7 @@ def test_crm_and_dms_reference_endpoints_update_existing_complaint(client: TestC
             "zustaendiger": "Klara Rolle",
             "frist_datum": (date.today() + timedelta(days=5)).isoformat(),
         },
-        headers=_headers("TENANT-REK-3"),
+        headers=_headers(tenant_id),
     )
     reklamation_id = create.json()["reklamation_id"]
 
@@ -206,7 +184,7 @@ def test_crm_and_dms_reference_endpoints_update_existing_complaint(client: TestC
                 "crm_url": "https://crm.example/cases/CRM-CASE-2002",
             },
         },
-        headers=_headers("TENANT-REK-3"),
+        headers=_headers(tenant_id),
     )
     assert crm_update.status_code == 200
     assert crm_update.json()["crm_referenz"]["crm_case_id"] == "CRM-CASE-2002"
@@ -224,13 +202,13 @@ def test_crm_and_dms_reference_endpoints_update_existing_complaint(client: TestC
                 }
             ],
         },
-        headers=_headers("TENANT-REK-3"),
+        headers=_headers(tenant_id),
     )
     assert dms_update.status_code == 200
     assert dms_update.json()["gobd_beleg_id"] == "DMS-REK-2002"
     assert dms_update.json()["audit_eintrag_anzahl"] >= 3
 
-    crm_lookup = client.get("/reklamationen/crm/CRM-CASE-2002", headers=_headers("TENANT-REK-3"))
+    crm_lookup = client.get("/reklamationen/crm/CRM-CASE-2002", headers=_headers(tenant_id))
     assert crm_lookup.status_code == 200
     assert len(crm_lookup.json()) == 1
     assert crm_lookup.json()[0]["reklamation_id"] == reklamation_id

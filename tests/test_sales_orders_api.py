@@ -9,7 +9,12 @@ import pytest
 from fastapi.testclient import TestClient
 
 from main import app
-from conftest import skip_if_db_unavailable
+from uuid import uuid4
+from types import SimpleNamespace
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+from app.core.database import engine, get_db
+from test_system_tenant_binding import keys, probe
 from app.api.v1.endpoints.sales_orders import (
     _line_total,
     _resolve_order_number,
@@ -18,8 +23,35 @@ from app.api.v1.endpoints.sales_orders import (
     SalesOrderItemInput,
 )
 
-_HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "test-tenant"}
+_HEADERS = {}
 _client = TestClient(app, raise_server_exceptions=False)
+
+
+@pytest.fixture
+def sales_context(require_db, probe, monkeypatch):
+    tenant, customer = str(uuid4()), str(uuid4())
+    number = 'IT-'+uuid4().hex[:12]
+    previous = app.dependency_overrides.get(get_db)
+    with engine.connect() as connection:
+        outer = connection.begin()
+        db = Session(bind=connection, join_transaction_mode='create_savepoint')
+        try:
+            db.execute(text('INSERT INTO domain_shared.tenants (id,name,domain,is_active) VALUES (:id,:name,:domain,TRUE)'),
+                       {'id': tenant, 'name': 'Synthetic sales tenant', 'domain': tenant+'.test.invalid'})
+            db.execute(text('INSERT INTO domain_crm.customers (id,tenant_id,customer_number,company_name,is_active) VALUES (:id,:tenant,:number,:name,TRUE)'),
+                       {'id': customer, 'tenant': tenant, 'number': number, 'name': 'Synthetic Sales Customer'})
+            db.commit()
+            app.dependency_overrides[get_db] = lambda: db
+            monkeypatch.setitem(globals(), '_HEADERS', {
+                'Authorization': 'Bearer '+probe.token(tenant, changes={'roles': ['admin']}), 'X-Tenant-ID': tenant})
+            yield SimpleNamespace(db=db, tenant=tenant, customer=customer, customer_number=number)
+        finally:
+            if previous is None:
+                app.dependency_overrides.pop(get_db, None)
+            else:
+                app.dependency_overrides[get_db] = previous
+            db.close()
+            outer.rollback()
 
 
 # ---------------------------------------------------------------------------
@@ -50,7 +82,10 @@ def test_line_total_fractional():
 # _resolve_order_number unit tests
 # ---------------------------------------------------------------------------
 
-def test_resolve_order_number_generates_when_none():
+def test_resolve_order_number_generates_when_none(monkeypatch, tmp_path):
+    from app.services.numbering_service import NumberingService
+    numbering = NumberingService(str(tmp_path / 'series.json'))
+    monkeypatch.setattr('app.api.v1.endpoints.sales_orders.get_numbering', lambda: numbering)
     result = _resolve_order_number(None)
     assert result.startswith("SO-")
 
@@ -106,84 +141,69 @@ def test_sales_order_item_validation_rejects_negative_price():
 # HTTP smoke tests
 # ---------------------------------------------------------------------------
 
-def test_list_sales_orders_returns_200():
+def test_list_sales_orders_returns_200(sales_context):
     resp = _client.get("/api/v1/sales/orders/", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
     assert resp.status_code == 200
 
 
-def test_get_nonexistent_order_returns_404():
+def test_get_nonexistent_order_returns_404(sales_context):
     resp = _client.get("/api/v1/sales/orders/does-not-exist", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
     assert resp.status_code == 404
 
 
-def test_create_order_missing_fields_returns_422():
+def test_create_order_missing_fields_returns_422(sales_context):
     resp = _client.post("/api/v1/sales/orders/", json={}, headers=_HEADERS)
-    skip_if_db_unavailable(resp)
     assert resp.status_code == 422
 
 
-def test_create_order_valid_payload_accepted():
+def test_create_order_valid_payload_accepted(sales_context):
     import uuid
     payload = {
-        "customer_id": "C-001",
+        "customer_id": sales_context.customer,
+        "order_number": "IT-SO-"+uuid.uuid4().hex[:12],
         "subject": f"Test Order {uuid.uuid4().hex[:6]}",
         "total_amount": 1000.0,
     }
     resp = _client.post("/api/v1/sales/orders/", json=payload, headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code in (200, 201, 422)
+    assert resp.status_code == 201, resp.text
+    created = resp.json()
+    assert created['customer_id'] == sales_context.customer
+    detail = _client.get('/api/v1/sales/orders/'+created['id'], headers=_HEADERS)
+    assert detail.status_code == 200, detail.text
+    assert detail.json()['subject'] == payload['subject']
 
 
-def test_order_detail_names_the_crm_customer(require_db):
-    """Der Maskenkopf zeigt den Kundennamen; die Partner-ID ist ein interner Schluessel."""
-    import uuid
-    from sqlalchemy import text
-    from app.core.database import SessionLocal
-
-    suffix = uuid.uuid4().hex[:8]
-    customer_id = f"cust-{suffix}"
-    order_id = f"so-{suffix}"
-    tenant = _HEADERS["X-Tenant-ID"]
-    with SessionLocal() as db:
-        db.execute(
-            text(
-                "INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name) "
-                "VALUES (:id, :tid, :no, 'Landhandel Hofmann GmbH')"
-            ),
-            {"id": customer_id, "tid": tenant, "no": f"K-{suffix}"},
-        )
-        db.execute(
-            text(
-                # description, total_amount, currency und status sind NOT NULL
-                # (519e0d90cd66) — die dortigen `default=` sind Python-seitig
-                # und greifen bei rohem SQL nicht. Eine gewachsene
-                # Entwicklungsdatenbank hat die Bedingungen nicht mehr, eine
-                # frische schon; deshalb lief das lokal durch und in CI nicht.
-                "INSERT INTO domain_crm.sales_orders "
-                "(id, tenant_id, order_number, customer_id, subject, description, "
-                " total_amount, currency, status, version) "
-                "VALUES (:id, :tid, :no, :cid, 'Weizen Ernte', '', 0, 'EUR', 'ENTWURF', 1)"
-            ),
-            {"id": order_id, "tid": tenant, "no": f"SO-{suffix}", "cid": customer_id},
-        )
-        db.commit()
-    try:
-        resp = _client.get(f"/api/v1/sales/orders/{order_id}", headers=_HEADERS)
-        assert resp.status_code == 200, resp.text
-        body = resp.json()
-        assert body["customer_id"] == customer_id
-        assert body["customer_name"] == "Landhandel Hofmann GmbH"
-        assert body["customer_number"] == f"K-{suffix}"
-    finally:
-        with SessionLocal() as db:
-            db.execute(text("DELETE FROM domain_crm.sales_orders WHERE id = :id"), {"id": order_id})
-            db.execute(text("DELETE FROM domain_crm.customers WHERE id = :id"), {"id": customer_id})
-            db.commit()
+def test_order_detail_names_the_crm_customer(sales_context):
+    """The mask heading resolves the own tenant's actual CRM customer."""
+    order_id, order_number = str(uuid4()), 'IT-SO-'+uuid4().hex[:12]
+    sales_context.db.execute(text(
+        "INSERT INTO domain_crm.sales_orders "
+        "(id,tenant_id,order_number,customer_id,subject,description,total_amount,currency,status,version) "
+        "VALUES (:id,:tenant,:number,:customer,'Test wheat','',0,'EUR','ENTWURF',1)"),
+        {'id': order_id, 'tenant': sales_context.tenant, 'number': order_number, 'customer': sales_context.customer})
+    sales_context.db.commit()
+    response = _client.get('/api/v1/sales/orders/'+order_id, headers=_HEADERS)
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body['customer_id'] == sales_context.customer
+    assert body['customer_name'] == 'Synthetic Sales Customer'
+    assert body['customer_number'] == sales_context.customer_number
 
 
-def test_delete_nonexistent_order_returns_404():
+def test_delete_nonexistent_order_returns_404(sales_context):
     resp = _client.delete("/api/v1/sales/orders/does-not-exist", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code in (404, 204)
+    assert resp.status_code == 404, resp.text
+
+
+@pytest.mark.parametrize('credential', [None, 'dev-token'])
+def test_sales_orders_reject_missing_or_legacy_identity(sales_context, credential):
+    headers = {'X-Tenant-ID': sales_context.tenant}
+    if credential:
+        headers['Authorization'] = 'Bearer '+credential
+    response = _client.get('/api/v1/sales/orders/', headers=headers)
+    assert response.status_code == 401
+
+
+def test_sales_orders_reject_foreign_tenant_selector(sales_context):
+    response = _client.get('/api/v1/sales/orders/', headers={**_HEADERS, 'X-Tenant-ID': str(uuid4())})
+    assert response.status_code == 403

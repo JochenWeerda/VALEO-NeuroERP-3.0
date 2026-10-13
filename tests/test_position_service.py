@@ -8,10 +8,12 @@ from decimal import Decimal
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import event
+from sqlalchemy import text
+from uuid import uuid4
+from test_system_tenant_binding import keys, probe
 from sqlalchemy.orm import Session
 
-from app.core.database import SessionLocal, engine
+from app.core.database import engine, get_db
 from app.services.position_service import (
     PositionCalculationService,
     _period_key,
@@ -25,48 +27,40 @@ from app.services.position_guard_service import PositionGuardService
 from app.domains.operations.models import PosPositionRule, PosPositionOverride, KonContract, KonContractLine
 from app.domains.operations.models import KonContractMovement, PosPositionSnapshot
 
-try:
-    from main import app
-except ImportError:
-    try:
-        from app.main import app
-    except ImportError:
-        app = None
+from main import app
 
 TENANT = "test-tenant-pos-001"
 BRANCH = "NL-TEST"
 
 
 @pytest.fixture
-def db(require_db) -> Session:
-    connection = engine.connect()
-    outer_tx = connection.begin()
-    session = SessionLocal(bind=connection)
+def db(require_db, monkeypatch) -> Session:
+    tenant = str(uuid4())
+    monkeypatch.setitem(globals(), 'TENANT', tenant)
+    with engine.connect() as connection:
+        outer = connection.begin()
+        session = Session(bind=connection, join_transaction_mode='create_savepoint')
+        try:
+            session.execute(text('INSERT INTO domain_shared.tenants (id,name,domain,is_active) VALUES (:id,:name,:domain,TRUE)'),
+                            {'id': tenant, 'name': 'Synthetic positions tenant', 'domain': tenant+'.test.invalid'})
+            session.commit()
+            yield session
+        finally:
+            session.close()
+            outer.rollback()
 
-    # The position-service tests share a fixed tenant id and call commit() inside the
-    # test body. Clean that tenant deterministically so persisted leftovers from
-    # earlier runs cannot leak back through the real database.
-    session.query(PosPositionSnapshot).filter(PosPositionSnapshot.tenant_id == TENANT).delete(synchronize_session=False)
-    session.query(PosPositionOverride).filter(PosPositionOverride.tenant_id == TENANT).delete(synchronize_session=False)
-    session.query(PosPositionRule).filter(PosPositionRule.tenant_id == TENANT).delete(synchronize_session=False)
-    session.query(KonContractMovement).filter(KonContractMovement.tenant_id == TENANT).delete(synchronize_session=False)
-    session.query(KonContractLine).filter(KonContractLine.tenant_id == TENANT).delete(synchronize_session=False)
-    session.query(KonContract).filter(KonContract.tenant_id == TENANT).delete(synchronize_session=False)
-    session.flush()
 
-    session.begin_nested()
-
-    @event.listens_for(session, "after_transaction_end")
-    def _restart_savepoint(sess, trans):
-        if trans.nested and not trans._parent.nested:
-            sess.begin_nested()
-
+@pytest.fixture
+def identity_headers(db, probe):
+    previous = app.dependency_overrides.get(get_db)
+    app.dependency_overrides[get_db] = lambda: db
     try:
-        yield session
+        yield {'Authorization': 'Bearer '+probe.token(TENANT, changes={'roles': ['admin']}), 'X-Tenant-ID': TENANT}
     finally:
-        session.close()
-        outer_tx.rollback()
-        connection.close()
+        if previous is None:
+            app.dependency_overrides.pop(get_db, None)
+        else:
+            app.dependency_overrides[get_db] = previous
 
 
 class TestPeriodHelpers:
@@ -356,42 +350,56 @@ class TestPositionGuardService:
         assert row.status == "REQUESTED"
 
 
-@pytest.mark.skipif(app is None, reason="main app not importable")
 class TestPositionsAPI:
     def test_get_matrix_requires_auth(self):
         client = TestClient(app)
         r = client.get("/api/v1/positions/matrix?period_from=2026-04&period_to=2026-05")
         assert r.status_code in (401, 403)
 
-    def test_get_matrix_with_dev_token(self, require_db):
+    def test_get_matrix_with_provider_token(self, identity_headers):
         client = TestClient(app)
         r = client.get(
             "/api/v1/positions/matrix?period_from=2026-04&period_to=2026-05",
-            headers={"Authorization": "Bearer dev-token", "X-Tenant-ID": TENANT},
+            headers=identity_headers,
         )
         assert r.status_code == 200
         data = r.json()
         assert "period_keys" in data
         assert "rows" in data
 
-    def test_get_kpi_with_dev_token(self, require_db):
+    def test_get_kpi_with_provider_token(self, identity_headers):
         client = TestClient(app)
         r = client.get(
             "/api/v1/positions/kpi?period_from=2026-04&period_to=2026-05",
-            headers={"Authorization": "Bearer dev-token", "X-Tenant-ID": TENANT},
+            headers=identity_headers,
         )
         assert r.status_code == 200
         data = r.json()
         assert "short_cell_count" in data
         assert "max_short_qty" in data
 
-    def test_get_matrix_accepts_view_mode(self, require_db):
+    def test_get_matrix_accepts_view_mode(self, identity_headers):
         client = TestClient(app)
         r = client.get(
             "/api/v1/positions/matrix?period_from=2026-04&period_to=2026-05&view_mode=inkl_archiv",
-            headers={"Authorization": "Bearer dev-token", "X-Tenant-ID": TENANT},
+            headers=identity_headers,
         )
         assert r.status_code == 200
         data = r.json()
         assert "period_keys" in data
         assert "rows" in data
+
+
+@pytest.mark.parametrize('credential', [None, 'dev-token'])
+def test_positions_reject_missing_or_legacy_identity(identity_headers, credential):
+    headers = {'X-Tenant-ID': TENANT}
+    if credential:
+        headers['Authorization'] = 'Bearer '+credential
+    response = TestClient(app).get('/api/v1/positions/matrix?period_from=2026-04&period_to=2026-05', headers=headers)
+    assert response.status_code == 401
+
+
+def test_positions_reject_foreign_tenant_selector(identity_headers):
+    response = TestClient(app).get('/api/v1/positions/matrix?period_from=2026-04&period_to=2026-05',
+                                  headers={**identity_headers, 'X-Tenant-ID': str(uuid4())})
+    assert response.status_code == 403
