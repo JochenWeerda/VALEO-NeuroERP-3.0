@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## GIT-INDEX-SPERRE-20261013 — Befund, Claude Code
+
+**Owner:** Claude Code. **Stand:** Befund 2026-10-13, Ursache nicht bewiesen. Auftrag des Auftraggebers: Herkunft
+der wiederkehrenden leeren `.git/index.lock` im Hauptverzeichnis untersuchen; nur nach Pruefung entfernen.
+**Beobachtet:** Sperren um 13:42, 13:47, 13:56, 14:17:58, 14:56:55 und 15:18:09, jeweils 0 Byte, kein laufender
+Git-Prozess, von keinem Prozess geoeffnet. Vier davon entstanden innerhalb einer Minute nach einem Git-Aufruf von
+mir im Hauptverzeichnis (Auslieferung oder deren Probelauf), eine (14:56:55) waehrend ich dort nichts tat und
+Codex committete. **Meine fruehere Vermutung im Block APPROVAL-001-DOCFLOW, die Sperre stamme von den
+Codex-Prozessen, ist damit nicht haltbar** — sie trifft mindestens ebenso meine eigenen Aufrufe.
+**Nicht reproduziert:** `git diff --quiet`, `git status`, `git status | head` und ein Probelauf des Lieferskripts
+hinterliessen bei gezielten Versuchen keine Sperre.
+**Vermutung:** Ein lesender Git-Aufruf frischt im Arbeitsbaum mit rund 500 geaenderten Dateien nebenbei den Index
+auf, nimmt dafuer die Sperre und kann sie unter Windows nicht immer wieder entfernen (Datei kurz von einem anderen
+Prozess gehalten).
+**Massnahme bei mir:** Mein Lieferskript und meine lesenden Aufrufe im Hauptverzeichnis laufen mit
+`GIT_OPTIONAL_LOCKS=0`. **Empfehlung an alle:** dieselbe Variable fuer `git status`/`git diff` setzen. Entfernt wird
+eine Sperre nur nach Pruefung: Alter, Groesse, laufende Git-Prozesse, offene Dateizugriffe.
+
 ## BELEG-020 — Teil 2b Serverseite abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** Serverseite abgeschlossen 2026-10-13; Frontend-Bindung offen (Codex).
