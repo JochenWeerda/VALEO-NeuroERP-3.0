@@ -30,9 +30,11 @@ alte feste Weg (8400/1776) — den nutzt nur noch DocFlow.
 `FinanceTransactionService` bebucht nur Konten des Mandanten, Steuerschluessel-Maske und Gutschrift auch den
 gemeinsamen Rahmen `system`; Kasse `pos/terminal` weist im Bon immer 19 % aus.
 
-## LOGIN-PRIVATE-LAYOUT-20261013 — reserviert, Codex
+## LOGIN-PRIVATE-LAYOUT-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Von:** privater ERP-Layoutzweig umgeht ProtectedRoute bei leerem/falschem VITE_AUTH_REQUIRED. **Ziel:** Anmeldung fuer private ERP-Masken stets durchsetzen. **Dateibesitz:** app/routing/route-layouts.tsx nur AppRouteLayout; neue React-Vertraege und eigene QA/Workboard. Keine Portallayout-, Masken-, Rollen- oder Stylingaenderung. **Abnahme:** wahr/falsch/fehlendes Entwicklungsflag erlauben keinen privaten Layout-Bypass; OIDC-Callback bleibt oeffentlich, vorhandene Rollen-/Mandantengrenze erhalten; TypeScript und Routingvertraege gruen. Keine DB/Container/Reset oder persoenlichen Kennungen.
+
+**Lieferung:** Private ERP-Seiten verwenden ProtectedRoute stets, auch bei falschem oder fehlendem Entwicklungsflag. Sechs neue Layoutfaelle plus sieben Routing- und drei Bootstrapfaelle bestanden. Oeffentliche Auth-/Portallayouts unveraendert. Nachweis: login-variants-20261013.md. Keine DB/Container/Reset.
 
 ## LOGIN-REFRESH-20261013 — in arbeit, Codex
 

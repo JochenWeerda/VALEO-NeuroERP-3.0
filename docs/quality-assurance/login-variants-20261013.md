@@ -51,8 +51,11 @@ Das Backend bleibt fuer Signatur, Aussteller, Audience, Rollen und Mandant zusta
 Realer Ablauf-/Refresh-Recheck wird gesondert nach natuerlichem Tokenablauf
 festgehalten. Kennwortwechsel/MFA im Browser, persoenliche Erstanmeldung,
 weitere Provider, Dockerfrontend auf Port 3000 und volle GitHub-Abnahme bleiben
-offen. Das private ERP-Layout hat noch eine VITE_AUTH_REQUIRED-Abschaltbedingung;
-der Backendzugang bleibt tokengebunden, die UI-Grenze braucht einen eigenen Slice.
+offen. Der private ERP-Layoutzweig ist stets durch ProtectedRoute geschuetzt;
+VITE_AUTH_REQUIRED erlaubt keinen UI-Bypass mehr. Sechs neue Layoutfaelle fuer
+wahr/falsch/fehlendes Flag bestanden zusammen mit sieben Routing- und drei
+Bootstrapfaellen (16 bestanden). Die UI-Mockgrenze prueft die Verkabelung; die
+Tokenverifikation wird durch Backendvertraege und realen Providerlogin belegt.
 Die Produktions-Compose-Ausstellerkonfiguration ist separat zu korrigieren.
 Die eigene Providerfixture bleibt fuer die weiteren Browserfaelle lokal erhalten;
 keine vorhandenen Benutzer, Rollen oder Realmrichtlinien wurden geaendert.
