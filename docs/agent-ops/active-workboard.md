@@ -11,6 +11,24 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## CI-COMPLAINT-ISOLATION-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** drei rote isolierte Complaint-Fachfaelle, tenantbezogene global-loeschende autouse-Fixture kann vor require_db auf Entwicklungsdaten zugreifen. **Ziel:** ausschliesslich eigenen Testmandanten und Savepointrollback nutzen, isolierte Miniapp mit ausdruecklichem Testtenant. **Dateibesitz:** tests/test_process_kernel_wave8_complaint_e2e.py nur DB-/Tenantfixture und dynamische Testtenantwerte; eigene QA/Workboard. Fachassertions unveraendert; kein globaler Authoverride oder Produktionscode. **Abnahme:** require_db vor erster Fachwirkung, keine festen Tenant-Loeschungen/Storebereinigung, vorhandener valeo_probe; DB-/Token-Sicherheit separat pruefen. Keine neue DB/Container/Migration/Reset.
+
+**Lieferung:** Drei isolierte Miniapp-Fachvertraege mit ausdruecklichem Testtenant, require_db vor Verbindung und Savepointrollback; feste Tenant-Loeschung und Storebereinigung entfernt. Keine Produktionsauth gelockert. Gemeinsam 98 Faelle streng auf vorhandenem valeo_probe bestanden; keine neue DB/Container/Migration/Reset. Nachweis: ci-position-sales-complaint-isolation-20261013.md. Gesamt-CI und vier weitere Fachdateien bleiben offen.
+
+## TEST-NUMBERING-FILE-ISOLATION-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Sales-Orders-Unit-Test fuer Nummerngenerierung verwendet den globalen JSON-Nummernkreis, positive HTTP-Anlage ebenfalls. **Ziel:** echte Nummerngenerierung gegen eigene temporaere Datei testen, HTTP-Testbeleg mit eigener Nummer. **Dateibesitz:** tests/test_sales_orders_api.py nur Nummerngenerator-Unit-Fixture und explizite Nummer im eigenen HTTP-Payload; innerhalb CI-POSITION-SALES-Claim. **Abnahme:** echte Nummerierung bleibt getestet, keine Aenderung gemeinsamer Nummernkreisdateien durch diese Faelle. Keine DB/Container/Reset; eigene QA/Workboard.
+
+**Lieferung:** Echter NumberingService im Unit-Test auf eigener temporaerer Datei; HTTP-Testbeleg mit eigener expliziter Nummer. Gemeinsame Nummernkreisdatei nicht zurueckgesetzt oder entfernt. Gemeinsam 98 Faelle streng auf vorhandenem valeo_probe bestanden; keine neue DB/Container/Migration/Reset. Nachweis: ci-position-sales-complaint-isolation-20261013.md. Gesamt-CI und vier weitere Fachdateien bleiben offen.
+
+## CI-POSITION-SALES-IDENTITY-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** verbliebene Positions-/Sales-Orders-CI-Faelle senden dev-token; Positionsfixture loescht den gemeinsamen Testtenant, Sales-Smokes akzeptieren Fehler und koennen ausserhalb Test-DB schreiben. **Ziel:** signierte Testidentitaeten, eigene Mandanten/Belege, transaktionale Isolation und konkrete Erfolgsassertions. **Dateibesitz:** tests/test_position_service.py nur DB-/HTTP-Fixtures und Header/negative Authfaelle; tests/test_sales_orders_api.py nur HTTP-Fixtures und echte Erfolgs-/Persistenzassertions; eigene QA/Workboard. Keine Produktions-/Rollen-/Fachlogikaenderung. **Abnahme:** echte Middleware/JWT, alte Tokens/fremde Header abgewiesen, bestehende Fachfaelle erhalten; kein shared DELETE/Seed/Migration, alle schreibenden Smokes fordern freigegebene DB, eigene Daten per Savepointrollback. JWKS/Sessionstore im vorhandenen Probe-Kontext isoliert; Gesamt-CI weiter offen. Bestehender valeo_probe, keine neue DB/Container/Reset.
+
+**Lieferung:** Positionen/Sales-Orders mit signierten Testidentitaeten und eigenen rollback-isolierten Mandanten/Belegen; kein gemeinsamer Tenant-DELETE. Alle Sales-HTTP-Faelle fordern Test-DB-Freigabe, echte Anlage/GET statt alternativ akzeptiertem 422, negative Token-/Tenantfaelle bestanden. Gemeinsam 98 Faelle streng auf vorhandenem valeo_probe bestanden; keine neue DB/Container/Migration/Reset. Nachweis: ci-position-sales-complaint-isolation-20261013.md. Gesamt-CI und vier weitere Fachdateien bleiben offen.
+
 ## STEUERSCHLUESSEL-BELEGE-20261013 — Teil 3 (DocFlow-Rechnung) abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** Teil 3 abgeschlossen 2026-10-13. Architekturentscheidung des Auftraggebers

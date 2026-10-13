@@ -61,3 +61,10 @@ bleiben innerhalb der bestehenden Identity-Claims zu schliessen.
 Sieben weitere rote Fachdateien des Ausgangslaufs sind noch offen: GoBD, die
 beiden Feed-Ketten, Logistik, Positionen, Complaint-E2E und Sales-Orders.
 Es wird kein vollstaendig gruener GitHub-Lauf behauptet.
+
+
+## Folge-Meilenstein
+
+Positionen, Sales-Orders und Complaint-E2E sind inzwischen geliefert;
+[Nachweis und vier verbleibende Fachdateien](ci-position-sales-complaint-isolation-20261013.md).
+Die oben genannten sieben offenen Dateien beschreiben den damaligen Stand.
