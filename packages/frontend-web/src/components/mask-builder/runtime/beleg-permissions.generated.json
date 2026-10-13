@@ -1,0 +1,507 @@
+{
+  "schemaVersion": 1,
+  "source": "app/auth/beleg_roles.py",
+  "screens": {
+    "beleg/goods-receipt": {
+      "belege.lesen": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "EINKAUF_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "LAGER_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.preise": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "EINKAUF_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.bearbeiten": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.ausstellen": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.buchen": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.stornieren": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "admin",
+        "manager"
+      ]
+    },
+    "beleg/purchase-credit-memo": {
+      "belege.lesen": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "EINKAUF_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "LAGER_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.preise": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "EINKAUF_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.bearbeiten": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.ausstellen": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.buchen": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.stornieren": [
+        "EINKAUF_ADMIN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "admin"
+      ]
+    },
+    "beleg/purchase-invoice": {
+      "belege.lesen": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "EINKAUF_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "LAGER_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.preise": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "EINKAUF_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.bearbeiten": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.ausstellen": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.buchen": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.stornieren": [
+        "EINKAUF_ADMIN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "admin"
+      ]
+    },
+    "beleg/purchase-order": {
+      "belege.lesen": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "EINKAUF_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "LAGER_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.preise": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "EINKAUF_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.bearbeiten": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.ausstellen": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.buchen": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.stornieren": [
+        "EINKAUF_ADMIN",
+        "EINKAUF_BEARBEITEN",
+        "admin",
+        "manager"
+      ]
+    },
+    "beleg/sales-credit-memo": {
+      "belege.lesen": [
+        "CRM_ADMIN",
+        "CRM_BEARBEITEN",
+        "CRM_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "LAGER_LESEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "SALES_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.preise": [
+        "CRM_ADMIN",
+        "CRM_BEARBEITEN",
+        "CRM_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "SALES_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.bearbeiten": [
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.ausstellen": [
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.buchen": [
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.stornieren": [
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "SALES_ADMIN",
+        "admin"
+      ]
+    },
+    "beleg/sales-delivery": {
+      "belege.lesen": [
+        "CRM_ADMIN",
+        "CRM_BEARBEITEN",
+        "CRM_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "LAGER_LESEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "SALES_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.preise": [
+        "CRM_ADMIN",
+        "CRM_BEARBEITEN",
+        "CRM_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "SALES_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.bearbeiten": [
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.ausstellen": [
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.buchen": [
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.stornieren": [
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ]
+    },
+    "beleg/sales-invoice": {
+      "belege.lesen": [
+        "CRM_ADMIN",
+        "CRM_BEARBEITEN",
+        "CRM_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "LAGER_LESEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "SALES_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.preise": [
+        "CRM_ADMIN",
+        "CRM_BEARBEITEN",
+        "CRM_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "SALES_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.bearbeiten": [
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.ausstellen": [
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.buchen": [
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.stornieren": [
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "SALES_ADMIN",
+        "admin"
+      ]
+    },
+    "beleg/sales-offer": {
+      "belege.lesen": [
+        "CRM_ADMIN",
+        "CRM_BEARBEITEN",
+        "CRM_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "LAGER_LESEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "SALES_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.preise": [
+        "CRM_ADMIN",
+        "CRM_BEARBEITEN",
+        "CRM_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "SALES_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.bearbeiten": [
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.ausstellen": [
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.buchen": [
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.stornieren": [
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ]
+    },
+    "beleg/sales-order": {
+      "belege.lesen": [
+        "CRM_ADMIN",
+        "CRM_BEARBEITEN",
+        "CRM_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "LAGER_LESEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "SALES_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.preise": [
+        "CRM_ADMIN",
+        "CRM_BEARBEITEN",
+        "CRM_LESEN",
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "FINANCE_LESEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "SALES_LESEN",
+        "admin",
+        "manager"
+      ],
+      "belege.bearbeiten": [
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.ausstellen": [
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.buchen": [
+        "FINANCE_ADMIN",
+        "FINANCE_BEARBEITEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ],
+      "belege.stornieren": [
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin",
+        "manager"
+      ]
+    }
+  }
+}

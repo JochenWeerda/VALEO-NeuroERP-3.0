@@ -54,3 +54,32 @@ describe('platform capacity remains explicit', () => {
     expect(getScreenPermissions(administration, null)).toEqual([])
   })
 })
+
+
+describe('canonical document permission projection', () => {
+  const documentScreen = (id: string): ScreenDefinition => ({ ...screen, id, domain: 'einkauf',
+    actions: ['lesen', 'preise', 'bearbeiten', 'ausstellen', 'buchen', 'stornieren'].map(right => ({
+      key: right, label: right, permission: `belege.${right}`,
+    })) })
+  it('keeps purchase and sales rights separate for the existing buyer role', () => {
+    expect(getScreenPermissions(documentScreen('beleg/purchase-invoice'), user([], ['EINKAUF_BEARBEITEN'])))
+      .toEqual(['belege.lesen', 'belege.preise', 'belege.bearbeiten', 'belege.ausstellen', 'belege.buchen'])
+    expect(getScreenPermissions(documentScreen('beleg/sales-invoice'), user([], ['EINKAUF_BEARBEITEN'])))
+      .toEqual([])
+  })
+  it('lets warehouse readers read without prices or mutations', () => {
+    expect(getScreenPermissions(documentScreen('beleg/goods-receipt'), user(['belege:read'], ['LAGER_LESEN'])))
+      .toEqual(['belege.lesen'])
+  })
+  it('keeps finance reversal distinct from buyer editing and manager access', () => {
+    expect(getScreenPermissions(documentScreen('beleg/purchase-invoice'), user([], ['FINANCE_BEARBEITEN'])))
+      .toEqual(['belege.lesen', 'belege.preise', 'belege.buchen', 'belege.stornieren'])
+    expect(getScreenPermissions(documentScreen('beleg/purchase-invoice'), user([], ['manager'])))
+      .not.toContain('belege.stornieren')
+  })
+  it('does not grant document actions from transport scopes or schema declarations', () => {
+    expect(getScreenPermissions(documentScreen('beleg/purchase-invoice'), user(['belege:write', 'admin:all'])))
+      .toEqual([])
+    expect(getScreenPermissions(documentScreen('beleg/unknown'), user([], ['admin']))).toEqual([])
+  })
+})
