@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from ....core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.auth.beleg_roles import darf, verlange
 from app.auth.deps import get_current_user
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.services.docflow_service import DocflowService, POS_TYPES
@@ -207,6 +208,16 @@ def _svc(db: Session, tenant_id: str, akteur: Optional[str] = None) -> DocflowSe
     return DocflowService(db, tenant_id, akteur)
 
 
+def _recht(svc: DocflowService, doc_id: str, nutzer: Any, recht: str) -> None:
+    """403 ohne das Recht an der Belegart dieses Belegs (``app/auth/beleg_roles.py``).
+
+    Steht der Beleg noch nicht in DocFlow, ist er ein Auftrag oder Lieferschein des Verkaufs, der beim ersten
+    Zugriff nachgezogen wird — geprueft wird dann das Recht am Auftrag.
+    """
+    header = svc.fetch_header(doc_id)
+    verlange(nutzer, recht, str(header["doc_type"]) if header else "sales_order")
+
+
 def _validate_pos_compliance_requirements(doc_type: str, pos: Optional[PosComplianceInput]) -> None:
     if doc_type in POS_TYPES and pos is None:
         raise HTTPException(status_code=400, detail="pos_compliance is required for POS documents")
@@ -282,11 +293,16 @@ async def list_documents(
     doc_type: Optional[str] = Query(None),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id
     svc = _svc(db, effective_tenant)
+    if doc_type:
+        verlange(nutzer, "preise", doc_type)
     doc_ids = svc.list_documents(doc_type, limit)
-    return [_row_to_header_out(svc, doc_id) for doc_id in doc_ids]
+    belege = [_row_to_header_out(svc, doc_id) for doc_id in doc_ids]
+    # Dieser Weg liefert Preise; ohne Preisrecht an der Belegart erscheint der Beleg nicht.
+    return [b for b in belege if b.doc_type in POS_TYPES or darf(nutzer, "preise", b.doc_type)]
 
 
 @router.get("/{doc_id}", response_model=DocflowHeaderOut, summary="Document abrufen")
@@ -294,9 +310,11 @@ async def get_document(
     doc_id: str,
     tenant_id: str = Depends(_docflow_tenant),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id
     svc = _svc(db, effective_tenant)
+    _recht(svc, doc_id, nutzer, "preise")
     bootstrapped = svc.bootstrap_doc(doc_id)
     if not bootstrapped:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -318,6 +336,7 @@ async def delete_draft_document(
     nutzer: Any = Depends(get_current_user),
 ) -> Response:
     effective_tenant = tenant_id
+    _recht(_svc(db, effective_tenant), doc_id, nutzer, "bearbeiten")
     try:
         _svc(db, effective_tenant, _akteur(nutzer)).delete_draft_document(doc_id)
     except EntityNotFoundError as exc:
@@ -335,9 +354,11 @@ async def get_status_history(
     doc_id: str,
     tenant_id: str = Depends(_docflow_tenant),
     db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
 ) -> list[dict[str, Any]]:
     """Jeder Statuswechsel des Belegs: von, nach, Kommando, wer, warum, wann. Unveraenderlich."""
     svc = _svc(db, tenant_id)
+    _recht(svc, doc_id, nutzer, "lesen")
     if not svc.fetch_header(doc_id):
         raise HTTPException(status_code=404, detail="Document not found")
     return svc.fetch_status_history(doc_id)
@@ -367,6 +388,7 @@ async def create_document(
     nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id
+    verlange(nutzer, "bearbeiten", payload.doc_type)
     _validate_pos_compliance_requirements(payload.doc_type, payload.pos_compliance)
     svc = _svc(db, effective_tenant, _akteur(nutzer))
     try:
@@ -397,6 +419,7 @@ async def update_document(
     if not header:
         raise HTTPException(status_code=404, detail="Document not found")
     effective_doc_type = str(header.get("doc_type") or "")
+    verlange(nutzer, "bearbeiten", effective_doc_type)
     _validate_pos_compliance_requirements(effective_doc_type, payload.pos_compliance)
     try:
         svc.update_document(doc_id, payload)
@@ -427,6 +450,7 @@ async def release_document(
     nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id
+    _recht(_svc(db, effective_tenant), doc_id, nutzer, "ausstellen")
     try:
         result = _svc(db, effective_tenant, _akteur(nutzer)).release(doc_id, payload.idempotency_key, payload.expected_version, payload.released_by)
     except EntityNotFoundError as exc:
@@ -454,6 +478,7 @@ async def record_print(
 ):
     effective_tenant = tenant_id
     svc = _svc(db, effective_tenant, _akteur(nutzer))
+    _recht(svc, doc_id, nutzer, "bearbeiten")
     try:
         svc.record_print(doc_id, payload.printed_by)
     except EntityNotFoundError as exc:
@@ -474,6 +499,7 @@ async def record_export(
 ):
     effective_tenant = tenant_id
     svc = _svc(db, effective_tenant, _akteur(nutzer))
+    _recht(svc, doc_id, nutzer, "bearbeiten")
     try:
         svc.record_export(doc_id, payload.exported_by)
     except EntityNotFoundError as exc:
@@ -493,6 +519,8 @@ async def convert_document(
     nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id
+    # Ein Folgebeleg braucht das Recht an der Belegart, die entsteht.
+    verlange(nutzer, "bearbeiten", payload.target_doc_type)
     try:
         result = _svc(db, effective_tenant, _akteur(nutzer)).convert(doc_id, payload)
     except EntityNotFoundError as exc:
@@ -522,6 +550,7 @@ async def post_document(
     nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id
+    _recht(_svc(db, effective_tenant), doc_id, nutzer, "buchen")
     try:
         result = _svc(db, effective_tenant, _akteur(nutzer)).post_document(doc_id, payload)
     except EntityNotFoundError as exc:
@@ -548,6 +577,7 @@ async def reverse_document(
     nutzer: Any = Depends(get_current_user),
 ):
     effective_tenant = tenant_id
+    _recht(_svc(db, effective_tenant), doc_id, nutzer, "stornieren")
     try:
         result = _svc(db, effective_tenant, _akteur(nutzer)).reverse_document(doc_id, payload)
     except EntityNotFoundError as exc:

@@ -11,6 +11,27 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## BELEG-012 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Auftrag des Auftraggebers: das noch nicht Geltende
+umsetzen.
+**Lieferung:** `app/auth/beleg_roles.py` — sechs Rechte (lesen, preise, bearbeiten, ausstellen, buchen,
+stornieren) je Belegart aus den vorhandenen Bereichsrollen. Durchgesetzt am Belegweg (403, ohne Preisrecht keine
+Preisfelder, Aktionen gesperrt), an allen DocFlow-Kommandos und DocFlow-Lesewegen, an den MCP-Belegwerkzeugen.
+Recht je Kommando im Verzeichnis `app/core/belegkommandos.py`. Tests 14 neu, 358 Nachbarn gruen.
+QA: `docs/quality-assurance/beleg-rechte-20261013.md`.
+**VERHALTENSAENDERUNG fuer alle:** DocFlow-Wege (`/api/v1/docflow/…`) antworten ohne passende Rolle 403.
+Tests an diesen Wegen brauchen eine Rolle (`ersetze_nutzer(app, "admin")` oder die Bereichsrolle).
+**An Codex (Identitaet):** (1) Die Testkennung der Sichtpruefung braucht Bereichsrollen, sonst sieht sie keinen
+Beleg — fuer die Abnahme z. B. `SALES_BEARBEITEN`, `EINKAUF_BEARBEITEN`, `FINANCE_BEARBEITEN`, dazu eine zweite
+Kennung nur mit `LAGER_LESEN` fuer den Fall ohne Preise. (2) Die Rollenzuordnung in `beleg_roles.py` ist meine
+Auslegung nach dem Muster von `finance_roles.py`; bitte gegen das Zielbild der Rechte pruefen.
+(3) Kassenbelege sind bewusst nicht erfasst.
+**Beruehrung mit BELEG-IDENTITY-SCOPES-20261013 (Codex):** `app/auth/beleg_roles.py` ist die eine Stelle, an der
+Belegweg, DocFlow und MCP fragen, ob eine Anmeldung ein Recht hat (`darf`, `verlange`, `rollen_fuer`). Kommen aus
+`app/auth/beleg_permissions.py` eigene Belegrollen, gehoeren sie in `rollen_fuer` — nicht als zweite Pruefung
+daneben. Ich fasse `beleg_permissions.py` und die Keycloak-Dateien nicht an.
+
 ## BELEG-IDENTITY-SCOPES-20261013 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Explizite Beleg-Lese-/Bearbeitungsrollen mit rollenbeschraenkten Keycloak-Scopes bereitstellen und lokal verifizieren. **Dateibesitz:** neues app/auth/beleg_permissions.py; neues scripts/keycloak_document_scopes.py; scripts/provision_identity_provider.py nur Beleg-Scopes; config/keycloak/fachrollen.json nur generierte Belegrollen; neue tests/test_beleg_identity_scopes.py; docs/quality-assurance/beleg-identity-scopes-20261013.md. **Abnahme:** Provisionierung wiederholbar, unbekannte Rollen/Scope-Abweichungen blockieren, echte lokale Token-Evaluation mit/ohne Rechte; kein implizites admin- oder MCP-Schreibrecht. **Risiken:** Belegarten-/Preis-/Aktionsrechte und MCP-Write-Freischaltung sind eigene Folgegates.

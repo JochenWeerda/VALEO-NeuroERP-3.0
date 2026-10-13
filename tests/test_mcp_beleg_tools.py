@@ -75,7 +75,9 @@ def satz():
 
 
 def _agent(mandant: str, *scopes: str) -> dict:
-    return {"sub": "agent-belegleser", "scopes": list(scopes or ("belege:read",)), "raw": {"tenant_id": mandant}}
+    # Rolle mit allen Rechten: Die Rechte je Rolle prueft tests/test_beleg_rechte.py.
+    return {"sub": "agent-belegleser", "scopes": list(scopes or ("belege:read",)),
+            "raw": {"tenant_id": mandant, "realm_access": {"roles": ["admin"]}}}
 
 
 def _rufe(werkzeug: str, parameter: dict, nutzer: dict, modus: str = "dryRun") -> dict:
@@ -149,7 +151,7 @@ def test_arten_nennt_varianten_und_kommandos(satz):
     buchen = next(k for k in antwort["kommandos"] if k["name"] == "docflow.post")
     assert buchen == {
         "name": "docflow.post", "bezeichnung": "Beleg buchen", "methode": "POST",
-        "pfad": "/api/v1/docflow/{doc_id}/post", "schreibend": True, "risiko": "R3",
+        "pfad": "/api/v1/docflow/{doc_id}/post", "schreibend": True, "recht": "buchen", "risiko": "R3",
         "risiko_bezeichnung": "Geschäftlich verbindlich", "freigabe_noetig": True, "idempotent": True,
         "ueber_mcp": False,
     }
@@ -161,7 +163,7 @@ def test_agent_liest_denselben_beleg_wie_die_maske(satz):
     app = FastAPI()
     app.include_router(belege_endpunkt.router, prefix="/belege")
     ersetze_mandant(app, satz["mandant"])
-    ersetze_nutzer(app, "sachbearbeitung")
+    ersetze_nutzer(app, "admin")
     maske = TestClient(app)
     for rolle in (r for r in satz if r != "mandant"):
         b = satz[rolle]

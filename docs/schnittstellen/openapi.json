@@ -235359,7 +235359,7 @@
     },
     "/api/v1/belege/{belegart}/{beleg_id}": {
       "get": {
-        "description": "Kopf, Partner, Positionen, Summen, Buchungsstand, Belegkette, Historie und die im Zustand moeglichen Aktionen.",
+        "description": "Kopf, Partner, Positionen, Summen, Buchungsstand, Belegkette, Historie und Aktionen.\n\nOhne Preisrecht kommen weder Preisfelder noch Summen; Aktionen ohne Recht sind gesperrt.",
         "operationId": "beleg_lesen_api_v1_belege__belegart___beleg_id__get",
         "parameters": [
           {

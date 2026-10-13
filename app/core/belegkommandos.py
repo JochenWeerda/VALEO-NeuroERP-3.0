@@ -14,7 +14,8 @@ Verhaeltnis zum Standard MCP-WRITE (``docs/architecture/mcp-write-standard.md``,
 * Kein schreibendes Belegkommando hat ein MCP-Werkzeug (MCP-WRITE-014: zunaechst deaktiviert). Ueber MCP gibt es
   nur die lesenden Werkzeuge ``beleg.arten``, ``beleg.suchen``, ``beleg.lesen``.
 
-Noch offen: Recht, Schemaversion und Freischaltzustand je Kommando (Stufe 1 und 2 des Standards, Identitaet).
+Das Recht je Kommando steht hier und wird an den DocFlow-Wegen durchgesetzt (``app/auth/beleg_roles.py``).
+Noch offen: Schemaversion und Freischaltzustand je Kommando (Stufe 2 des Standards).
 """
 from __future__ import annotations
 
@@ -36,6 +37,7 @@ class Belegkommando:
     methode: str
     pfad: str  # unter /api/v1
     risiko: str  # R0–R4 nach MCP-WRITE
+    recht: str  # eines der Rechte aus app/auth/beleg_roles.py
     idempotent: bool = False  # Wiederholung mit demselben Idempotenzschluessel liefert dasselbe Ergebnis
 
     @property
@@ -51,17 +53,17 @@ class Belegkommando:
 BELEGKOMMANDOS: dict[str, Belegkommando] = {
     k.name: k
     for k in (
-        Belegkommando("beleg.lesen", "Beleg lesen", "GET", "/belege/{belegart}/{beleg_id}", "R0", idempotent=True),
-        Belegkommando("docflow.create", "Beleg anlegen", "POST", "/docflow/", "R1", idempotent=True),
-        Belegkommando("docflow.update", "Beleg bearbeiten", "PUT", "/docflow/{doc_id}", "R1"),
-        Belegkommando("docflow.delete_draft", "Entwurf löschen", "DELETE", "/docflow/{doc_id}", "R1"),
-        Belegkommando("docflow.convert", "Folgebeleg erstellen", "POST", "/docflow/{doc_id}/convert", "R2", idempotent=True),
-        Belegkommando("docflow.record_print", "Druck vermerken", "POST", "/docflow/{doc_id}/record-print", "R2"),
-        Belegkommando("docflow.record_export", "Export vermerken", "POST", "/docflow/{doc_id}/record-export", "R2"),
+        Belegkommando("beleg.lesen", "Beleg lesen", "GET", "/belege/{belegart}/{beleg_id}", "R0", "lesen", idempotent=True),
+        Belegkommando("docflow.create", "Beleg anlegen", "POST", "/docflow/", "R1", "bearbeiten", idempotent=True),
+        Belegkommando("docflow.update", "Beleg bearbeiten", "PUT", "/docflow/{doc_id}", "R1", "bearbeiten"),
+        Belegkommando("docflow.delete_draft", "Entwurf löschen", "DELETE", "/docflow/{doc_id}", "R1", "bearbeiten"),
+        Belegkommando("docflow.convert", "Folgebeleg erstellen", "POST", "/docflow/{doc_id}/convert", "R2", "bearbeiten", idempotent=True),
+        Belegkommando("docflow.record_print", "Druck vermerken", "POST", "/docflow/{doc_id}/record-print", "R2", "bearbeiten"),
+        Belegkommando("docflow.record_export", "Export vermerken", "POST", "/docflow/{doc_id}/record-export", "R2", "bearbeiten"),
         # Freigeben vergibt die endgueltige Belegnummer: Der Beleg ist danach ausgestellt.
-        Belegkommando("docflow.release", "Beleg freigeben", "POST", "/docflow/{doc_id}/release", "R3", idempotent=True),
-        Belegkommando("docflow.post", "Beleg buchen", "POST", "/docflow/{doc_id}/post", "R3", idempotent=True),
-        Belegkommando("docflow.reverse", "Beleg stornieren", "POST", "/docflow/{doc_id}/reverse", "R4", idempotent=True),
+        Belegkommando("docflow.release", "Beleg freigeben", "POST", "/docflow/{doc_id}/release", "R3", "ausstellen", idempotent=True),
+        Belegkommando("docflow.post", "Beleg buchen", "POST", "/docflow/{doc_id}/post", "R3", "buchen", idempotent=True),
+        Belegkommando("docflow.reverse", "Beleg stornieren", "POST", "/docflow/{doc_id}/reverse", "R4", "stornieren", idempotent=True),
     )
 }
 
@@ -74,7 +76,7 @@ KEIN_BELEGKOMMANDO: dict[tuple[str, str], str] = {
 def als_dict(kommando: Belegkommando) -> dict[str, object]:
     return {
         "name": kommando.name, "bezeichnung": kommando.bezeichnung, "methode": kommando.methode,
-        "pfad": f"/api/v1{kommando.pfad}", "schreibend": kommando.schreibend, "risiko": kommando.risiko,
+        "pfad": f"/api/v1{kommando.pfad}", "schreibend": kommando.schreibend, "recht": kommando.recht, "risiko": kommando.risiko,
         "risiko_bezeichnung": RISIKOKLASSEN[kommando.risiko], "freigabe_noetig": kommando.freigabe_noetig,
         "idempotent": kommando.idempotent, "ueber_mcp": not kommando.schreibend,
     }
