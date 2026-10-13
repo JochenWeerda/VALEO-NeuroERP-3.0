@@ -132,6 +132,22 @@ class Historieneintrag(_Teil):
     grund: str | None = None
 
 
+class Freigabestand(_Teil):
+    """Eine Freigabe durch eine zweite Person (APPROVAL-001) — angefragt, erteilt, verbraucht …"""
+
+    freigabe_id: str
+    aktion: Literal["post", "reverse"]
+    risiko: Literal["R3", "R4"]
+    stand: Literal["angefragt", "erteilt", "abgelehnt", "verbraucht", "abgelaufen", "ungueltig"]
+    betrag: Decimal | None = None
+    grund: str | None = None
+    angefragt_von: str
+    angefragt_am: datetime
+    entschieden_von: str | None = None
+    entschieden_am: datetime | None = None
+    gueltig_bis: datetime
+
+
 class Belegaktion(_Teil):
     """Was der Leser mit diesem Beleg jetzt tun darf — vom Server entschieden, nicht von der Maske."""
 
@@ -164,6 +180,7 @@ class Beleg(_Teil):
     dokumente: list[Belegdokument] = Field(default_factory=list)
     historie: list[Historieneintrag] = Field(default_factory=list)
     aktionen: list[Belegaktion] = Field(default_factory=list)
+    freigaben: list[Freigabestand] = Field(default_factory=list)
     bausteine: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
 
@@ -251,6 +268,8 @@ def pruefe(beleg: Beleg) -> list[str]:
             if vor is None or beleg.belegart not in vor.folgebelege:
                 fehler.append(f"{glied.belegart!r} ist kein Vorgaenger von {variante.bezeichnung}.")
     for aktion in beleg.aktionen:
+        if aktion.freigabe_noetig and not variante.bucht:
+            fehler.append(f"Aktion {aktion.key!r}: {variante.bezeichnung} wird nicht gebucht und braucht keine Freigabe.")
         if aktion.folgebelegart and aktion.folgebelegart not in variante.folgebelege:
             fehler.append(f"Aktion {aktion.key!r}: {aktion.folgebelegart!r} ist kein Folgebeleg von {variante.bezeichnung}.")
         if not aktion.erlaubt and not aktion.grund:
@@ -368,7 +387,7 @@ ABBILDUNG: dict[str, dict[str, dict[str, str]]] = {
 
 _LISTEN: dict[str, type[BaseModel]] = {
     "positionen": Belegposition, "kette": Kettenglied, "dokumente": Belegdokument,
-    "historie": Historieneintrag, "aktionen": Belegaktion,
+    "historie": Historieneintrag, "aktionen": Belegaktion, "freigaben": Freigabestand,
 }
 _TEILE: dict[str, type[BaseModel]] = {"partner": Partner, "summen": Summen, "buchung": Buchung}
 

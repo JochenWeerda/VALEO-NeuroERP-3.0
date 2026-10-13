@@ -43,9 +43,14 @@ from app.api.v1.endpoints.docflow import (  # noqa: E402
     DocflowReverseRequest,
 )
 from app.core.database import SessionLocal  # noqa: E402
+from app.services.docflow_freigabe import DocflowFreigabe  # noqa: E402
 from app.services.docflow_service import DocflowService  # noqa: E402
 
 AKTEUR = "referenzbelege"
+# Die zweite Person der Referenzdaten. Buchen und Stornieren gehen auch hier durch die Approval Engine
+# (APPROVAL-001): Das Skript fragt als AKTEUR an und entscheidet als diese zweite, ausgewiesene Kennung.
+# Es ist ein Werkzeug fuer Testmandanten, kein Weg an der Freigabe vorbei — beide Kennungen stehen im Protokoll.
+ZWEITPERSON = {"sub": "referenzbelege-zweitfreigabe", "name": "referenzbelege-zweitfreigabe", "roles": ["admin"]}
 KUNDE = "REF-KUNDE"
 LIEFERANT = "REF-LIEFERANT"
 # (Artikel, Bezeichnung, Menge, Einheit, Preis, Steuerschluessel)
@@ -144,11 +149,26 @@ class Satz:
         ))
         return self._merke(db, str(antwort["target_doc_id"]), rolle)
 
+    def _freigabe(self, db, doc_id: str, aktion: str) -> None:
+        """Liegt fuer den Vorgang keine gueltige Freigabe vor und braucht er eine, wird sie angefragt und erteilt."""
+        engine = DocflowFreigabe(db, self.tenant_id)
+        kopf = self._svc(db).fetch_header(doc_id)
+        erledigt = "posted" if aktion == "post" else "reversed"
+        if not kopf or str(kopf["status"]) in (erledigt, "reversed"):
+            return
+        if not engine.anforderung_fuer(kopf, aktion).zweitfreigabe or engine.gueltige(kopf, aktion):
+            return
+        anfrage = engine.beantrage(doc_id, aktion, AKTEUR, "Referenzbeleg für die Sichtprüfung")
+        if anfrage["status"] == "requested":
+            engine.entscheide(doc_id, str(anfrage["id"]), ZWEITPERSON, True, "Referenzdaten")
+
     def buchen(self, db, doc_id: str, rolle: str) -> None:
+        self._freigabe(db, doc_id, "post")
         self._svc(db).post_document(doc_id, DocflowPostRequest(idempotency_key=f"referenz-buchen-{rolle}"))
         self._merke(db, doc_id, rolle)
 
     def stornieren(self, db, doc_id: str, rolle: str) -> None:
+        self._freigabe(db, doc_id, "reverse")
         self._svc(db).reverse_document(doc_id, DocflowReverseRequest(
             idempotency_key=f"referenz-storno-{rolle}", reason="Referenzbeleg: Storno zur Sichtpruefung"))
         self._merke(db, doc_id, rolle)

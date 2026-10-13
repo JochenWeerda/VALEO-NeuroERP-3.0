@@ -11,6 +11,32 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## APPROVAL-001-DOCFLOW — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Entscheidung des Auftraggebers vom 13.10.2026:
+risikobasierte Freigabe mit Betragsgrenzen und Funktionstrennung, eine zentrale Approval Engine.
+**Lieferung:** `app/core/freigabe.py` (Matrix), `app/services/docflow_freigabe.py` (Engine),
+`domain_docflow.approvals` (Migration `approval_engine_20261013`, ein Head — auf `valeo_probe` und
+`valeo_neuro_erp` angewandt). `DocflowService.post_document`/`reverse_document` verlangen die Freigabe im Kommando.
+Wege `GET/POST /docflow/{id}/approvals`, `POST …/decision`. Rechte `freigeben`, `freigeben_erhoeht`.
+Belegvertrag: `freigaben[]`. Tests 27 neu, Nachbarn gruen. QA: `docs/quality-assurance/approval-001-freigabe-20261013.md`.
+**VERHALTENSAENDERUNG fuer alle:** Buchen einer Gutschrift, einer Ausgangsrechnung ueber 10.000 EUR, einer
+Eingangsrechnung ueber 5.000 EUR oder ohne Bestellbezug sowie jeder Storno eines gebuchten Belegs antworten ohne
+Freigabe 409. Tests holen sie ueber `tests/freigabehilfe.py` (`sichere_freigabe`) — es gibt keinen Schalter.
+**An Codex (Pruefauftrag des Auftraggebers: Rechteausweitung, Selbstfreigabe):** bitte `beleg_roles.py`
+(`freigeben`, `freigeben_erhoeht`) und `docflow_freigabe.entscheide` pruefen; die Erkennung technischer Konten
+(`_technisches_konto`) ist eine Annahme ueber die Token und gehoert in die Identitaet.
+**Befund Git-Sperre:** Die leere `.git/index.lock` im Hauptverzeichnis entsteht jeweils zeitgleich mit Commits
+(13:42, 13:47, 13:56); dabei lief kein Git-Prozess und keine IDE, nur die Codex-Prozesse. Der Index hinkt HEAD
+hinterher (Commits ueber `update-ref`). Ursache nicht bewiesen. Ich entferne die Sperre nicht mehr ohne Pruefung
+laufender Git-Prozesse (Vorgabe des Auftraggebers).
+
+## MASK-ACTION-EXECUTION-GUARDS-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Direkte Maskenaktionsaufrufe pruefen deklarierte Rechte; DocFlow-Vorschau ohne vereinbarten Adapter darf keinen schreibenden HTTP-Aufruf senden. **Dateibesitz:** runtime/ActionRuntime.ts; runtime/useActionRuntime.ts; bestehende ActionRuntime.test.ts und useActionRuntime.input-flow.test.ts unter packages/frontend-web/src/components/mask-builder bzw. __tests__/components/mask-builder/runtime; docs/quality-assurance/mask-action-execution-guards-20261013.md. **Abnahme:** Mensch/Agent ohne Aktionsrecht vor HTTP abgewiesen, erlaubtes Recht bleibt moeglich; DocFlow dryRun/validate/propose ohne Mutation; bisherige Human-Form-Sperre gruen. **Risiken:** Kein vollständiger DocFlow-Adapter, Registry-/Routen-/Maskensichtpruefung noch offen.
+
+**Lieferung:** Zentraler Aktionsruntime prueft deklarierte Rechte auch beim direkten Mensch-/Agentenaufruf. DocFlow dryRun/validate/propose ohne passenden Adapter vor HTTP gesperrt. 28 Vitest-Faelle bestanden. QA: mask-action-execution-guards-20261013.md. BELEG-020 Teil 2 bleibt offen: Command-Adapter/Metadaten/Zustandsbindung/Registry/Route/Sichtpruefung.
+
 ## BELEG-MASK-PERMISSION-PROJECTION-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Bestehende kanonische Belegrechte in den gemeinsamen Masken-Permission-Resolver projizieren, ohne zweite Rollenmatrix; Voraussetzung fuer BELEG-020 Teil 2. **Dateibesitz:** neues scripts/generate_beleg_permission_projection.py; neue runtime/beleg-permissions.generated.json; runtime/screen-permissions.ts; bestehender screen-permissions.test.ts; neuer tests/test_beleg_permission_projection.py; docs/quality-assurance/beleg-mask-permissions-20261013.md. Frontend-Pfade unter packages/frontend-web/src/components/mask-builder/ bzw. __tests__/components/mask-builder/. **Abnahme:** Drift-Gate, richtige Rechte nach Belegart/Rolle, keine Freigabe allein durch Scope/Schema und keine unbekannten Belegrechte. **Risiken:** Noch keine Registry-/Route-Aktivierung, Maskensichtpruefung bleibt offen.

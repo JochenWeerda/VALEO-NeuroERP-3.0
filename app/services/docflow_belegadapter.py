@@ -6,7 +6,7 @@ Rechnungsweg, die auch ``convert`` benutzt.
 """
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from decimal import Decimal
 from typing import Any, Callable, Optional
 
@@ -15,10 +15,11 @@ from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from app.core.belegkommandos import BELEGKOMMANDOS
 from app.core.belegvertrag import (
-    BELEGARTEN, Beleg, Belegaktion, Belegdokument, Belegposition, Belegvariante, Buchung, Historieneintrag, Kettenglied, Partner,
+    BELEGARTEN, Beleg, Belegaktion, Belegdokument, Belegposition, Freigabestand, Belegvariante, Buchung, Historieneintrag, Kettenglied, Partner,
     Steuergruppe, Summen, ohne_preise,
 )
 from app.core.exceptions import ConflictError
+from app.services.docflow_freigabe import DocflowFreigabe
 from app.services.docflow_service import TRANSITIONS, DocflowService
 
 _ENDE = {"reversed", "cancelled"}
@@ -35,11 +36,13 @@ def _datum(wert: Any) -> Optional[date]:
 Darf = Callable[[str, str], bool]
 
 
-def lies_beleg(svc: DocflowService, doc_id: str, darf: Optional[Darf] = None) -> Optional[Beleg]:
+def lies_beleg(svc: DocflowService, doc_id: str, darf: Optional[Darf] = None,
+               leser: Optional[str] = None) -> Optional[Beleg]:
     """Der Beleg in Vertragsform — oder ``None``, wenn es ihn nicht gibt oder seine Belegart keine Variante hat.
 
     ``darf(recht, belegart)`` ist das Recht des Lesers. Ohne Preisrecht kommen weder Preisfelder noch Summen,
     und eine Aktion ohne Recht ist gesperrt. Ohne Angabe (Skripte, Tests des Adapters) gilt alles als erlaubt.
+    ``leser`` ist die Kennung der Anmeldung — fuer die Funktionstrennung bei Freigaben.
     """
     header = svc.fetch_header(doc_id)
     if not header:
@@ -107,7 +110,8 @@ def lies_beleg(svc: DocflowService, doc_id: str, darf: Optional[Darf] = None) ->
             )
             for h in svc.fetch_status_history(doc_id)
         ],
-        aktionen=_aktionen(svc, doc_id, variante, status, buchung, offen, darf),
+        aktionen=_aktionen(svc, header, variante, status, buchung, offen, darf, leser),
+        freigaben=_freigaben(DocflowFreigabe(svc.db, svc.tenant_id), doc_id) if variante.bucht else [],
     )
     if not variante.mit_preisen or (darf is not None and not darf("preise", variante.belegart)):
         return ohne_preise(beleg)
@@ -246,24 +250,79 @@ def _kette(svc: DocflowService, doc_id: str) -> list[Kettenglied]:
     ]
 
 
+_FREIGABESTAND = {"requested": "angefragt", "granted": "erteilt", "denied": "abgelehnt", "consumed": "verbraucht",
+                  "expired": "abgelaufen", "invalidated": "ungueltig"}
+
+
+def _freigaben(engine: DocflowFreigabe, doc_id: str) -> list[Freigabestand]:
+    jetzt = datetime.now(timezone.utc)
+    return [
+        Freigabestand(
+            freigabe_id=str(f["id"]), aktion=f["action"], risiko=f["risk"],
+            stand="abgelaufen" if f["status"] in ("requested", "granted") and f["expires_at"] <= jetzt
+            else _FREIGABESTAND[f["status"]],
+            betrag=f["amount"], grund=f["reason"], angefragt_von=str(f["requested_by"]), angefragt_am=f["requested_at"],
+            entschieden_von=f["decided_by"], entschieden_am=f["decided_at"], gueltig_bis=f["expires_at"],
+        )
+        for f in engine.liste(doc_id)
+    ]
+
+
+def _freigabe_einrechnen(engine: DocflowFreigabe, header: dict[str, Any], aktionen: list[Belegaktion],
+                         leser: Optional[str]) -> dict[str, str]:
+    """Buchen und Stornieren nach der Freigabematrix: gesperrt, solange die zweite Person fehlt.
+
+    Gibt je zusaetzlicher Aktion das Recht zurueck, das sie braucht.
+    """
+    rechte: dict[str, str] = {}
+    for key, aktion_name in (("buchen", "post"), ("stornieren", "reverse")):
+        aktion = next((a for a in aktionen if a.key == key), None)
+        if aktion is None:
+            continue
+        bedarf = engine.anforderung_fuer(header, aktion_name)
+        aktion.freigabe_noetig = bedarf.zweitfreigabe
+        # Ein sachlicher Sperrgrund bleibt stehen; dann stellt sich die Frage der Freigabe noch nicht.
+        if not bedarf.zweitfreigabe or not aktion.erlaubt or engine.gueltige(header, aktion_name):
+            continue
+        aktion.erlaubt = False
+        aktion.grund = f"Freigabe erforderlich ({bedarf.risiko}): {bedarf.grund}"
+        offene = engine.offene(header, aktion_name)
+        if offene is None:
+            aktionen.append(Belegaktion(key=f"freigabe_anfordern:{aktion_name}", bezeichnung="Freigabe anfragen",
+                                        kommando="docflow.approval_request"))
+            rechte[f"freigabe_anfordern:{aktion_name}"] = "buchen" if aktion_name == "post" else "stornieren"
+            continue
+        selbst = leser is not None and leser in {str(offene["requested_by"]), str(header.get("created_by") or "")}
+        aktionen.append(Belegaktion(
+            key=f"freigabe_erteilen:{aktion_name}", bezeichnung="Freigabe erteilen", kommando="docflow.approval_decide",
+            erlaubt=not selbst,
+            grund="Funktionstrennung: Wer den Beleg angelegt oder die Freigabe angefragt hat, entscheidet nicht."
+            if selbst else None,
+        ))
+        rechte[f"freigabe_erteilen:{aktion_name}"] = "freigeben_erhoeht" if bedarf.erhoeht else "freigeben"
+    return rechte
+
+
 def _aktion(key: str, bezeichnung: str, kommando: str, *, grund: Optional[str] = None,
             folgebelegart: Optional[str] = None) -> Belegaktion:
-    """Eine Aktion des Belegs; ob sie eine Freigabe braucht, sagt das Verzeichnis der Belegkommandos."""
+    """Eine Aktion des Belegs. Ob sie eine zweite Person braucht, rechnet ``_freigabe_einrechnen`` je Beleg ein."""
     return Belegaktion(
         key=key, bezeichnung=bezeichnung, kommando=kommando, folgebelegart=folgebelegart,
-        freigabe_noetig=BELEGKOMMANDOS[kommando].freigabe_noetig, erlaubt=grund is None, grund=grund,
+        erlaubt=grund is None, grund=grund,
     )
 
 
-def _aktionen(svc: DocflowService, doc_id: str, variante: Belegvariante, status: str, buchung: Buchung,
-              offen: dict[str, Decimal], darf: Optional[Darf] = None) -> list[Belegaktion]:
+def _aktionen(svc: DocflowService, header: dict[str, Any], variante: Belegvariante, status: str, buchung: Buchung,
+              offen: dict[str, Decimal], darf: Optional[Darf] = None, leser: Optional[str] = None) -> list[Belegaktion]:
     """Was mit dem Beleg in seinem Zustand geht — und was davon der Leser darf."""
-    aktionen = _aktionen_im_zustand(svc, doc_id, variante, status, buchung, offen)
+    aktionen = _aktionen_im_zustand(svc, str(header["id"]), variante, status, buchung, offen)
+    eigene_rechte = _freigabe_einrechnen(DocflowFreigabe(svc.db, svc.tenant_id), header, aktionen, leser)
     if darf is None:
         return aktionen
     for aktion in aktionen:
+        recht = eigene_rechte.get(aktion.key) or BELEGKOMMANDOS[aktion.kommando].recht
         # Ein Folgebeleg braucht das Recht an der Belegart, die entsteht.
-        if aktion.erlaubt and not darf(BELEGKOMMANDOS[aktion.kommando].recht, aktion.folgebelegart or variante.belegart):
+        if aktion.erlaubt and not darf(recht, aktion.folgebelegart or variante.belegart):
             aktion.erlaubt = False
             aktion.grund = "Keine Berechtigung."
     return aktionen

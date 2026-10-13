@@ -40,6 +40,7 @@ AUFRAEUMEN = (
     "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
     "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",
     "DELETE FROM domain_erp.offene_posten WHERE tenant_id = :t",
+    "DELETE FROM domain_docflow.approvals WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.document_status_history WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.document_command_log WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.command_idempotency_keys WHERE tenant_id = :t",
@@ -122,7 +123,7 @@ def test_risikoklassen_nach_mcp_write_freigabe_ab_r3_und_wiederholbar():
             assert kommando.idempotent, kommando.name
     assert {k.name for k in BELEGKOMMANDOS.values() if not k.schreibend} == {"beleg.lesen"}
     assert {k.name: k.risiko for k in BELEGKOMMANDOS.values() if k.freigabe_noetig} == {
-        "docflow.release": "R3", "docflow.post": "R3", "docflow.reverse": "R4"}
+        "docflow.post": "R3", "docflow.reverse": "R4"}
 
 
 # ── Registry ──────────────────────────────────────────────────────────────────
@@ -172,9 +173,10 @@ def test_agent_liest_denselben_beleg_wie_die_maske(satz):
         assert ueber_mcp["beleg"] == ueber_maske, rolle
         beleg = bv.Beleg.model_validate(ueber_mcp["beleg"])
         assert bv.pruefe(beleg) == [], rolle
-        # Jede Aktion nennt ein Kommando aus dem Verzeichnis, mit dessen Freigabepflicht.
+        # Jede Aktion nennt ein Kommando aus dem Verzeichnis; eine Freigabe braucht nur, was sie brauchen kann.
         for aktion in beleg.aktionen:
-            assert aktion.freigabe_noetig == BELEGKOMMANDOS[aktion.kommando].freigabe_noetig, (rolle, aktion.key)
+            assert aktion.kommando in BELEGKOMMANDOS, (rolle, aktion.key)
+            assert not aktion.freigabe_noetig or BELEGKOMMANDOS[aktion.kommando].freigabe_noetig, (rolle, aktion.key)
 
 
 def test_suchen_filtert_und_zeigt_ohne_preise_keinen_betrag(satz):

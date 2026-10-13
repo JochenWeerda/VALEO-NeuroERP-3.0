@@ -133,12 +133,11 @@ def beleg_suchen(db: Session, request: Any, actor: str, tenant: str, nutzer: Any
 
 
 def beleg_lesen(db: Session, request: Any, actor: str, tenant: str, nutzer: Any = None) -> dict:
-    del actor
     opened = _eingabe(BelegLesenInput, request, "document read")
     if not darf(nutzer, "lesen", opened.belegart):
         raise HTTPException(403, "Missing role for this document type")
     try:
-        beleg = lies_beleg(DocflowService(db, tenant), opened.beleg_id, lambda recht, art: darf(nutzer, recht, art))
+        beleg = lies_beleg(DocflowService(db, tenant), opened.beleg_id, lambda recht, art: darf(nutzer, recht, art), actor)
         if beleg is None or beleg.belegart != opened.belegart:
             raise HTTPException(404, "Document not found in the authenticated tenant")
         result = {"success": True, "mode": request.mode, "beleg": beleg.model_dump(mode="json")}

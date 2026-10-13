@@ -94,7 +94,8 @@ def beleg_lesen(
         raise HTTPException(status_code=404, detail="Belegart nicht bekannt")
     # Vor dem ersten Datenbankzugriff: Wer die Belegart nicht lesen darf, erfaehrt auch nicht, ob es den Beleg gibt.
     verlange(nutzer, "lesen", belegart)
-    beleg = lies_beleg(DocflowService(db, tenant_id), beleg_id, lambda recht, art: darf(nutzer, recht, art))
+    leser = str(nutzer.get("sub") or "") if isinstance(nutzer, dict) else None
+    beleg = lies_beleg(DocflowService(db, tenant_id), beleg_id, lambda recht, art: darf(nutzer, recht, art), leser)
     # Ein Beleg anderer Art unter dieser Adresse ist nicht dieser Beleg.
     if beleg is None or beleg.belegart != belegart:
         raise HTTPException(status_code=404, detail="Beleg nicht gefunden")

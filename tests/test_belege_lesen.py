@@ -35,6 +35,7 @@ AUFRAEUMEN = (
     "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
     "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",
     "DELETE FROM domain_erp.offene_posten WHERE tenant_id = :t",
+    "DELETE FROM domain_docflow.approvals WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.document_status_history WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.document_command_log WHERE tenant_id = :t",
     "DELETE FROM domain_docflow.command_idempotency_keys WHERE tenant_id = :t",
@@ -111,7 +112,11 @@ def test_gebuchte_rechnung_traegt_journal_kette_und_summen_je_steuerschluessel(c
     assert [(k["belegart"], k["beleg_nr"]) for k in nach] == [("sales_credit_memo", satz["vk-gutschrift"]["doc_number"])]
     gruppen = rechnung["summen"]["steuergruppen"]
     assert len(gruppen) == 2 and {g["steuerschluessel"] for g in gruppen} == {"2", "3"}
-    assert _aktion(rechnung, "stornieren")["erlaubt"] is True
+    # Der Storno eines gebuchten Belegs braucht eine zweite Person (APPROVAL-001).
+    storno = _aktion(rechnung, "stornieren")
+    assert storno["erlaubt"] is False and storno["freigabe_noetig"] is True
+    assert storno["grund"].startswith("Freigabe erforderlich (R4)")
+    assert _aktion(rechnung, "freigabe_anfordern:reverse")["kommando"] == "docflow.approval_request"
     assert _aktion(rechnung, "buchen") is None
     # Ein Teil ist gutgeschrieben; der Rest bleibt offen.
     assert any(float(p["menge_uebernommen"]) > 0 for p in rechnung["positionen"])
@@ -140,12 +145,23 @@ def test_beleg_ohne_steuerschluessel_steht_auf_pruefen_und_laesst_sich_nicht_buc
         assert _aktion(beleg, "stornieren")["erlaubt"] is False
 
 
-def test_offene_rechnung_ist_buchbar(client, satz):
-    for rolle in ("vk-rechnung-2", "ek-rechnung-2"):
-        beleg = _lies(client, satz, rolle)
-        assert beleg["buchung"] == {"stand": "nicht_gebucht", "journal_id": None, "grund": None}
-        buchen = _aktion(beleg, "buchen")
-        assert buchen["erlaubt"] is True and buchen["kommando"] == "docflow.post" and buchen["freigabe_noetig"] is True
+def test_offene_rechnung_ist_buchbar_ueber_der_grenze_erst_mit_zweiter_person(client, satz):
+    # Ausgangsrechnung 4.165 EUR: unter 10.000 EUR genuegt das Rollenrecht (APPROVAL-001).
+    verkauf = _lies(client, satz, "vk-rechnung-2")
+    assert verkauf["buchung"] == {"stand": "nicht_gebucht", "journal_id": None, "grund": None}
+    buchen = _aktion(verkauf, "buchen")
+    assert buchen["erlaubt"] is True and buchen["kommando"] == "docflow.post" and buchen["freigabe_noetig"] is False
+    assert verkauf["freigaben"] == [] and _aktion(verkauf, "freigabe_anfordern:post") is None
+    # Eingangsrechnung 5.355 EUR: ueber 5.000 EUR bucht erst die Freigabe einer zweiten Person.
+    einkauf = _lies(client, satz, "ek-rechnung-2")
+    buchen = _aktion(einkauf, "buchen")
+    assert buchen["erlaubt"] is False and buchen["freigabe_noetig"] is True
+    assert buchen["grund"].startswith("Freigabe erforderlich (R3)") and "5000" in buchen["grund"]
+    assert _aktion(einkauf, "freigabe_anfordern:post")["erlaubt"] is True
+    # Die gebuchten Referenzbelege tragen ihre verbrauchte Freigabe mit beiden Kennungen.
+    gebucht = _lies(client, satz, "ek-rechnung-1")
+    assert [(f["aktion"], f["stand"], f["angefragt_von"], f["entschieden_von"]) for f in gebucht["freigaben"]] == [
+        ("post", "verbraucht", "referenzbelege", "referenzbelege-zweitfreigabe")]
 
 
 def test_stornierter_beleg_zeigt_die_stornierung_und_bietet_nichts_mehr_an(client, satz):

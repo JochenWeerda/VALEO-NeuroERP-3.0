@@ -42,6 +42,7 @@ def mandant(monkeypatch):
             "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
             "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",
             "DELETE FROM domain_erp.offene_posten WHERE tenant_id = :t",
+            "DELETE FROM domain_docflow.approvals WHERE tenant_id = :t",
             "DELETE FROM domain_docflow.document_status_history WHERE tenant_id = :t",
             "DELETE FROM domain_docflow.document_command_log WHERE tenant_id = :t",
             "DELETE FROM domain_docflow.command_idempotency_keys WHERE tenant_id = :t",

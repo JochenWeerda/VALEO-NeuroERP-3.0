@@ -401,6 +401,121 @@
    "title": "Buchung",
    "type": "object"
   },
+  "Freigabestand": {
+   "additionalProperties": false,
+   "description": "Eine Freigabe durch eine zweite Person (APPROVAL-001) — angefragt, erteilt, verbraucht …",
+   "properties": {
+    "aktion": {
+     "enum": [
+      "post",
+      "reverse"
+     ],
+     "title": "Aktion",
+     "type": "string"
+    },
+    "angefragt_am": {
+     "format": "date-time",
+     "title": "Angefragt Am",
+     "type": "string"
+    },
+    "angefragt_von": {
+     "title": "Angefragt Von",
+     "type": "string"
+    },
+    "betrag": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Betrag"
+    },
+    "entschieden_am": {
+     "anyOf": [
+      {
+       "format": "date-time",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Entschieden Am"
+    },
+    "entschieden_von": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Entschieden Von"
+    },
+    "freigabe_id": {
+     "title": "Freigabe Id",
+     "type": "string"
+    },
+    "grund": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Grund"
+    },
+    "gueltig_bis": {
+     "format": "date-time",
+     "title": "Gueltig Bis",
+     "type": "string"
+    },
+    "risiko": {
+     "enum": [
+      "R3",
+      "R4"
+     ],
+     "title": "Risiko",
+     "type": "string"
+    },
+    "stand": {
+     "enum": [
+      "angefragt",
+      "erteilt",
+      "abgelehnt",
+      "verbraucht",
+      "abgelaufen",
+      "ungueltig"
+     ],
+     "title": "Stand",
+     "type": "string"
+    }
+   },
+   "required": [
+    "freigabe_id",
+    "aktion",
+    "risiko",
+    "stand",
+    "angefragt_von",
+    "angefragt_am",
+    "gueltig_bis"
+   ],
+   "title": "Freigabestand",
+   "type": "object"
+  },
   "Historieneintrag": {
    "additionalProperties": false,
    "properties": {
@@ -736,6 +851,13 @@
     "$ref": "#/$defs/Belegdokument"
    },
    "title": "Dokumente",
+   "type": "array"
+  },
+  "freigaben": {
+   "items": {
+    "$ref": "#/$defs/Freigabestand"
+   },
+   "title": "Freigaben",
    "type": "array"
   },
   "historie": {

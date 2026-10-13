@@ -30,3 +30,30 @@ describe('human input flow dispatch', () => {
     expect(apiClient.request).not.toHaveBeenCalled()
   })
 })
+
+
+describe('DocFlow execution boundary', () => {
+  const post: ScreenActionDefinition = { key: 'post', label: 'Buchen', permission: 'belege.buchen',
+    commandEndpoint: '/api/v1/docflow/{entity_id}/post', method: 'POST' }
+  it.each(['dryRun', 'validate', 'propose'] as const)('does not mutate DocFlow in %s', async (mode) => {
+    vi.mocked(apiClient.request).mockClear()
+    const { result } = renderHook(() => useActionRuntime([post], {
+      screenId: 'beleg/purchase-invoice', entityId: 'test-document', permissions: ['belege.buchen'],
+    }))
+    const response = await result.current.executeAction({ actionKey: 'post', mode,
+      payload: { idempotency_key: 'synthetic-idempotency-key' } })
+    expect(response.success).toBe(false)
+    expect(response.error).toContain('Command-Adapter')
+    expect(apiClient.request).not.toHaveBeenCalled()
+  })
+  it('does not send an execute request without its permission', async () => {
+    vi.mocked(apiClient.request).mockClear()
+    const { result } = renderHook(() => useActionRuntime([post], {
+      screenId: 'beleg/purchase-invoice', entityId: 'test-document', permissions: [],
+    }))
+    const response = await result.current.executeAction({ actionKey: 'post', mode: 'execute' })
+    expect(response.success).toBe(false)
+    expect(response.error).toContain('Berechtigung')
+    expect(apiClient.request).not.toHaveBeenCalled()
+  })
+})

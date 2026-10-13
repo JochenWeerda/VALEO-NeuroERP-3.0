@@ -32,6 +32,7 @@ from app.core.database import SessionLocal
 from app.finance.steuerschluessel import richte_skr03_ein
 from app.services import docflow_service
 from app.services.docflow_service import DocflowService
+from freigabehilfe import sichere_freigabe
 from testgrenze import ersetze_mandant, ersetze_nutzer
 
 
@@ -67,6 +68,7 @@ def haus(monkeypatch):
                 "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
                 "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",
                 "DELETE FROM domain_erp.offene_posten WHERE tenant_id = :t",
+                "DELETE FROM domain_docflow.approvals WHERE tenant_id = :t",
                 "DELETE FROM domain_docflow.document_status_history WHERE tenant_id = :t",
                 "DELETE FROM domain_docflow.document_command_log WHERE tenant_id = :t",
                 "DELETE FROM domain_docflow.command_idempotency_keys WHERE tenant_id = :t",
@@ -254,6 +256,7 @@ def test_stornierte_rechnung_gibt_ihre_menge_wieder_frei(haus):
     assert _wandle(haus, auftrag["id"], ziel="sales_invoice", mengen={pos: 1}).status_code == 400
     assert haus["client"].post(f"/docflow/{rechnung}/post", params=haus["t"],
                                json={"idempotency_key": f"buchen-{rechnung}"}).status_code == 200
+    sichere_freigabe(haus["mandant"], rechnung, "reverse")  # Storno eines gebuchten Belegs: zweite Person
     storno = haus["client"].post(f"/docflow/{rechnung}/reverse", params=haus["t"],
                                  json={"idempotency_key": f"storno-{rechnung}", "reason": "Falsche Menge"})
     assert storno.status_code == 200, storno.text
