@@ -75,7 +75,7 @@ def test_display_revision_expires_after_edit(probe):
     record = create(client)
     changed = deepcopy(record['definition'])
     changed['title'] = 'Geaendert'
-    updated = client.put('/studio/drafts/'+record['id'], json={'definition': changed}).json()
+    updated = client.put('/studio/drafts/'+record['id'], json={'definition': changed, 'expected_revision': record['revision']}).json()
     assert updated['revision'] != record['revision']
     user['sub'] = 'reviewer'
     rejected = client.post('/studio/drafts/'+record['id']+'/publish', json={'expected_revision': record['revision']})
@@ -95,7 +95,7 @@ def test_review_is_required_and_edit_invalidates_it(probe):
     assert reviewed.status_code == 200
     changed = deepcopy(record['definition'])
     changed['title'] = 'Nach Einreichung geaendert'
-    edited = client.put(path, json={'definition': changed}).json()
+    edited = client.put(path, json={'definition': changed, 'expected_revision': reviewed.json()['revision']}).json()
     assert edited['status'] == 'draft'
     assert client.post(path+'/publish', json={'expected_revision': edited['revision']}).status_code == 409
     assert client.post(path+'/submit-review', json={'expected_revision': reviewed.json()['revision']}).status_code == 409
@@ -104,12 +104,12 @@ def test_review_is_required_and_edit_invalidates_it(probe):
     published = client.post(path+'/publish', json={'expected_revision': latest['revision']}).json()
     assert published['status'] == 'published_temp'
     assert client.post(path+'/submit-review', json={'expected_revision': published['revision']}).status_code == 409
-    assert client.put(path, json={'definition': changed}).status_code == 409
+    assert client.put(path, json={'definition': changed, 'expected_revision': published['revision']}).status_code == 409
     assert client.post(path+'/retire', json={'expected_revision': latest['revision']}).status_code == 409
     retired = client.post(path+'/retire', json={'expected_revision': published['revision']})
     assert retired.status_code == 200
     assert client.post(path+'/submit-review', json={'expected_revision': retired.json()['revision']}).status_code == 409
-    reopened = client.put(path, json={'definition': changed})
+    reopened = client.put(path, json={'definition': changed, 'expected_revision': retired.json()['revision']})
     assert reopened.status_code == 200
     assert reopened.json()['status'] == 'draft'
 
@@ -128,3 +128,53 @@ def test_sql_edit_invalidates_review(studio_db):
         store.set_status(_TENANT_A, record['id'], 'reviewer', 'published_temp', expected_snapshot=reviewed)
     with pytest.raises(ValueError, match='statuswechsel'):
         store.set_status(_TENANT_A, record['id'], 'reviewer', 'published_temp', expected_snapshot=edited)
+
+
+def test_http_update_requires_current_display_revision(probe):
+    client, _ = probe
+    record = create(client)
+    path = '/studio/drafts/'+record['id']
+    changed = deepcopy(record['definition'])
+    changed['title'] = 'Erster Bearbeiter'
+    assert client.put(path, json={'definition': changed}).status_code == 422
+    first = client.put(path, json={'definition': changed, 'expected_revision': record['revision']})
+    assert first.status_code == 200
+    second = deepcopy(changed)
+    second['title'] = 'Veralteter zweiter Bearbeiter'
+    assert client.put(path, json={'definition': second, 'expected_revision': record['revision']}).status_code == 409
+    assert client.get(path).json()['definition'] == changed
+
+
+def test_create_does_not_overwrite_existing_screen(probe):
+    client, _ = probe
+    record = create(client)
+    duplicate = deepcopy(record['definition'])
+    duplicate['title'] = 'Unbeabsichtigte Ueberschreibung'
+    assert client.post('/studio/drafts', json={'definition': duplicate}).status_code == 409
+    assert client.get('/studio/drafts/'+record['id']).json()['definition'] == record['definition']
+
+
+@pytest.mark.integration
+def test_sql_revision_conflict_preserves_first_writer(studio_db):
+    from test_meridian_screen_studio_persistence import _TENANT_A
+    from app.services.studio_propose import propose_studio_draft
+    record = store.save_draft(_TENANT_A, 'editor', propose_studio_draft('Artikel'))
+    changed = deepcopy(record['definition'])
+    changed['title'] = 'Erster Stand'
+    first = store.save_draft(_TENANT_A, 'first-editor', changed, draft_id=record['id'], expected_revision=record['revision'])
+    with pytest.raises(ValueError, match='entwurf_seit_anzeige_geaendert'):
+        store.save_draft(_TENANT_A, 'second-editor', record['definition'], draft_id=record['id'], expected_revision=record['revision'])
+    with pytest.raises(ValueError, match='screen_id_bereits_vorhanden'):
+        store.save_draft(_TENANT_A, 'second-editor', record['definition'])
+    assert store.get_draft(_TENANT_A, record['id']) == first
+
+
+def test_foreign_update_is_hidden_before_revision_comparison(probe):
+    client, _ = probe
+    from app.services.studio_propose import propose_studio_draft
+    foreign = store.save_draft('foreign-tenant', 'foreign-editor', propose_studio_draft('Artikel'))
+    response = client.put('/studio/drafts/'+foreign['id'], json={
+        'definition': foreign['definition'], 'expected_revision': '0' * 64,
+    })
+    assert response.status_code == 404
+    assert store.get_draft('foreign-tenant', foreign['id']) == foreign

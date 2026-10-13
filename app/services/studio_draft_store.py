@@ -94,11 +94,12 @@ def save_draft(
     *,
     draft_id: str | None = None,
     readiness: dict[str, Any] | None = None,
+    expected_revision: str | None = None,
 ) -> dict[str, Any]:
     if _use_sql():
-        return _with_revision(_sql_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness))
+        return _with_revision(_sql_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness, expected_revision=expected_revision))
     with _memory_lock:
-        return _with_revision(_memory_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness))
+        return _with_revision(_memory_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness, expected_revision=expected_revision))
 
 
 def _assert_snapshot(item: dict[str, Any], expected: dict[str, Any] | None) -> None:
@@ -198,12 +199,19 @@ def _memory_save(
     *,
     draft_id: str | None,
     readiness: dict[str, Any] | None,
+    expected_revision: str | None = None,
 ) -> dict[str, Any]:
     existing = _DRAFTS.get(draft_id) if draft_id else None
     if existing is None and draft_id is None:
         existing = _find_memory_by_screen(tenant_id, str(definition.get("id") or ""))
+    if draft_id and existing is None:
+        raise KeyError(draft_id)
+    if not draft_id and existing is not None:
+        raise ValueError("screen_id_bereits_vorhanden")
     if existing is not None and existing["tenant_id"] != tenant_id:
         raise KeyError(draft_id or existing["id"])
+    if existing is not None and expected_revision is not None and _with_revision(existing)["revision"] != expected_revision:
+        raise ValueError("entwurf_seit_anzeige_geaendert")
     if existing is not None and existing["status"] not in _EDITABLE:
         raise ValueError(f"status_{existing['status']}_nicht_editierbar")
     record = {
@@ -309,6 +317,7 @@ def _sql_save(
     *,
     draft_id: str | None,
     readiness: dict[str, Any] | None,
+    expected_revision: str | None = None,
 ) -> dict[str, Any]:
     from app.infrastructure.models.studio_models import ScreenDefinitionDraft
 
@@ -325,6 +334,10 @@ def _sql_save(
                 .filter_by(tenant_id=tenant_id, screen_id=screen_id)
                 .with_for_update().one_or_none()
             )
+        if not draft_id and row is not None:
+            raise ValueError("screen_id_bereits_vorhanden")
+        if row is not None and expected_revision is not None and _with_revision(_row_to_dict(row))["revision"] != expected_revision:
+            raise ValueError("entwurf_seit_anzeige_geaendert")
         if row is not None and row.tenant_id != tenant_id:
             raise KeyError(draft_id or row.id)
         if row is not None and row.status not in _EDITABLE:

@@ -46,8 +46,9 @@ export async function proposeStudioDraft(intent: string): Promise<StudioReport> 
   return response.data as StudioReport
 }
 
-export async function saveStudioDraft(definition: ScreenDefinition, draftId?: string) {
-  const payload = { definition }
+export async function saveStudioDraft(definition: ScreenDefinition, draftId?: string, expectedRevision?: string) {
+  if (draftId && !expectedRevision) throw new Error('Gespeicherten Entwurfsstand zuerst laden.')
+  const payload = draftId ? { definition, expected_revision: expectedRevision } : { definition }
   const response = draftId
     ? await apiClient.put(`/api/v1/studio/drafts/${draftId}`, payload)
     : await apiClient.post('/api/v1/studio/drafts', payload)
