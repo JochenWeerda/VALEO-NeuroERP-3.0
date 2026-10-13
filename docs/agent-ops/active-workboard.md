@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## CI-FEED-IDENTITY-ISOLATION-20261013 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** beide Feed-Ketten senden dev-token und migrieren/loeschen zur Testvorbereitung und Bereinigung. **Ziel:** signierte Testidentitaeten, eigene Feed-/Bestandsdaten in aeusserer Transaktion mit Savepoints; Fachassertions fuer Verbrauch/Storno/Charge/Bewegungen unveraendert. **Dateibesitz:** tests/test_feed_chain_004.py, tests/test_feed_production_chain.py nur Auth-/DB-/Schema-Fixtures und scoped Sessionzugriff; neue tests/feed_identity_fixture.py; eigene QA/Workboard. **Abnahme:** echte Produktionsmiddleware/RSA/Mandant, vorhandener valeo_probe mit require_db vor Wirkung; keine Migration/DELETE/Demoseed/DB/Container/Reset. JWKS/Sessionstore im vorhandenen Probe-Kontext isoliert; Produktbefunde gegebenenfalls separat claimen.
+
 ## SCREEN-FRAMEWORK-GAP-20261013 — Bestandspruefung vorgelegt, Claude Code
 
 **Owner:** Claude Code. **Stand:** Analyse vorgelegt 2026-10-13, nichts am Code geaendert.
