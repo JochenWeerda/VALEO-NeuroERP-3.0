@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-METADATA-POLICY-20261013 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Sicherheitskatalog fuer Agenten-/Menschenvorschlaege auf verschachtelte Maskenaktionen anwenden und Weglassen/Umdeuten von Schutzmetadaten verhindern. **Dateibesitz:** app/services/studio_validation.py; tests/test_uix090_studio_validation.py; docs/quality-assurance/studio-metadata-policy-20261013.md. **Abnahme:** Tabellen-/Reiteraktionen unterliegen denselben Katalog-, Endpoint-, Method-, Rollen- und Agentensperren; malformed Metadaten werden abgewiesen; vorhandene Vorschlaege bleiben validierbar. **Risiken:** Studio-Tokenurheber und inhaltsgebundener Publikationsworkflow bleiben anschliessend zu schliessen. BELEG-021-Konsolidierung ist offen: zusaetzlicher Serveradapter inzwischen geliefert, keine ungesicherte Umstellung oder fremder Rueckbau in diesem Slice.
+
+**Lieferung:** Verschachtelte Aktionen/Quellen, weggelassene Schutzflags, alternative Transportwege und widerspruechliche Agentenvertraege werden am bestehenden Katalog abgewiesen. 51 Unit-Faelle und vier echte Vorschlags-Readiness-Pfade bestanden. QA: studio-metadata-policy-20261013.md. Tokenurheber, Publikationsworkflow und BELEG-021-Konsolidierung bleiben offen.
+
 ## BELEG-021 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13 (Serverseite; Sichtpruefung offen).
