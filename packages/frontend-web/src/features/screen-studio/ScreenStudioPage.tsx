@@ -128,7 +128,7 @@ export function ScreenStudioPage(): JSX.Element {
         </p>
         <div className="flex flex-wrap gap-2">
           <Button type="button" disabled={Boolean(pending)} onClick={() => void run('save', async () => {
-            const saved = await saveStudioDraft(definition, draftId)
+            const saved = await saveStudioDraft(definition, draftId, savedRevision)
             setDraftId(saved.id)
             setSavedSignature(JSON.stringify(saved.definition))
             setSavedRevision(saved.revision)

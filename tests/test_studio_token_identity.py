@@ -36,7 +36,7 @@ def test_creator_and_editor_ignore_caller_identity_headers(probe):
     assert record['created_by'] == record['updated_by'] == 'editor'
     user['sub'] = 'second-editor'
     updated = client.put('/studio/drafts/'+record['id'], headers={'X-Actor-ID': 'forged-editor'},
-                         json={'definition': record['definition']})
+                         json={'definition': record['definition'], 'expected_revision': record['revision']})
     assert updated.status_code == 200, updated.text
     assert updated.json()['updated_by'] == 'second-editor'
 

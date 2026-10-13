@@ -33,6 +33,10 @@ class StudioProposeIn(BaseModel):
     intent: str = Field(min_length=1)
 
 
+class StudioUpdateIn(StudioDefinitionIn):
+    expected_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
 class StudioRevisionIn(BaseModel):
     expected_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
 
@@ -125,14 +129,17 @@ def studio_create_draft(
     report = _report(body.definition)
     if report["violations"]:
         raise HTTPException(status_code=400, detail={"violations": report["violations"]})
-    record = _storage_call(save_draft, tenant_id, _actor(user), body.definition, readiness=report["readiness"])
+    try:
+        record = _storage_call(save_draft, tenant_id, _actor(user), body.definition, readiness=report["readiness"])
+    except ValueError as error:
+        raise HTTPException(409, str(error)) from error
     return {**record, **report}
 
 
 @router.put("/drafts/{draft_id}", summary="Studio-Entwurf aktualisieren")
 def studio_update_draft(
     draft_id: str,
-    body: StudioDefinitionIn,
+    body: StudioUpdateIn,
     tenant_id: str = Depends(get_tenant_id),
     user: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
@@ -146,6 +153,7 @@ def studio_update_draft(
             body.definition,
             draft_id=draft_id,
             readiness=report["readiness"],
+            expected_revision=body.expected_revision,
         )
     except KeyError as error:
         raise HTTPException(status_code=404, detail="draft_nicht_gefunden") from error

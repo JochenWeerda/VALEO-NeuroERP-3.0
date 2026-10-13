@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## STUDIO-DRAFT-WRITE-CAS-20261013 — reserviert, Codex
+## STUDIO-DRAFT-WRITE-CAS-20261013 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-13. **Ziel:** Inhaltsupdate verlangt angezeigte Revision unter SQL-/Speicherschreibsperre; Anlegen ersetzt keinen bestehenden Entwurf. **Dateibesitz:** app/services/studio_draft_store.py; app/api/v1/endpoints/studio_drafts.py; Studio-API/Page und Tests; Studio-Python-Tests; scripts/belegmasken_veroeffentlichen.py; docs/quality-assurance/studio-draft-write-cas-20261013.md. **Abnahme:** stale/missing Revision schreibt nichts, gleichzeitige Bearbeiter verlieren keine Aenderung still; POST-Dublette meldet Konflikt statt Upsert. **Risiken:** eigene transaktionale Freigabehistorie/Idempotenz folgen; zentrales Audit verlangt lokale Benutzer/E-Mail und darf keine erfundenen Identitaeten bekommen. Keine Migration/DB-Neuanlage.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Inhaltsupdate verlangt angezeigte Revision unter SQL-/Speicherschreibsperre; Anlegen ersetzt keinen bestehenden Entwurf. **Dateibesitz:** app/services/studio_draft_store.py; app/api/v1/endpoints/studio_drafts.py; Studio-API/Page und Tests; Studio-Python-Tests; scripts/belegmasken_veroeffentlichen.py; docs/quality-assurance/studio-draft-write-cas-20261013.md. **Abnahme:** stale/missing Revision schreibt nichts, gleichzeitige Bearbeiter verlieren keine Aenderung still; POST-Dublette meldet Konflikt statt Upsert. **Risiken:** eigene transaktionale Freigabehistorie/Idempotenz folgen; zentrales Audit verlangt lokale Benutzer/E-Mail und darf keine erfundenen Identitaeten bekommen. Keine Migration/DB-Neuanlage.
+
+**Lieferung:** 111 Python/SQL- und neun UI-Faelle bestanden; Inhaltsupdates verlangen aktuelle Revision unter Sperre, POST-Dublette kein Upsert, fremdes Update 404 vor Versionsvergleich. Pilotinstaller uebergibt aktuelle Revision. QA: studio-draft-write-cas-20261013.md. Transaktionale Subject-Historie/Idempotenz bleiben offen.
 
 ## STUDIO-DURABLE-STORAGE-20261013 — abgeschlossen, Codex
 
