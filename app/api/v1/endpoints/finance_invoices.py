@@ -148,6 +148,18 @@ def _post_sales_invoice_financials(
     )
 
 
+def _rechnung_des_mandanten(repo, number: str, tenant_id: str) -> dict:
+    """Die Rechnung dieses Mandanten — fremd oder mandantenlos ist 404.
+
+    Bis 13.10.2026 trug der Beleg keinen Mandanten: Wer Belege lesen durfte, las die Rechnungen aller Mandanten,
+    und Aendern, Loeschen oder Anlegen unter einer vergebenen Nummer traf den Beleg eines anderen.
+    """
+    beleg = get_from_store("sales_invoice", number, repo)
+    if not beleg or str(beleg.get("tenantId") or "") != tenant_id:
+        raise HTTPException(status_code=404, detail=f"Invoice {number} not found")
+    return beleg
+
+
 def _beleg_speichern(repo, number: str, data: dict) -> dict:
     """Rechnungsbeleg ohne eigenen Commit; ohne Datenbank (kein Repository) der Prozessspeicher."""
     if repo is None:
@@ -179,7 +191,11 @@ async def create_invoice(
             invoice_date = datetime.strptime(invoice.date, "%Y-%m-%d")
             invoice.dueDate = (invoice_date + timedelta(days=payment_days)).strftime("%Y-%m-%d")
 
+        vorhanden = get_from_store("sales_invoice", invoice.number, repo)
+        if vorhanden and str(vorhanden.get("tenantId") or "") != tenant_id:
+            raise HTTPException(status_code=409, detail=f"Die Rechnungsnummer {invoice.number} ist bereits vergeben.")
         doc_data = invoice.model_dump()
+        doc_data["tenantId"] = tenant_id
         # Beleg, Buchung, offener Posten, Archiv und Lieferscheinbezug: ein Commit am
         # Ende. Bis 08.10.2026 committete der Dokumentspeicher zuerst; scheiterte die
         # Buchung, stand die Rechnung ohne Buchung und ohne offenen Posten da.
@@ -242,18 +258,17 @@ async def create_invoice(
         raise HTTPException(status_code=500, detail=f"Failed to create invoice: {str(e)}")
 
 
-@router.get("/{invoice_number}", response_model=StatusResponse, summary="Invoice abrufen", dependencies=[Depends(beleg_read)])
+# Antwortmodell: bis 13.10.2026 ``StatusResponse`` (Pflichtfeld ``success``) — der Weg antwortete immer mit 500.
+@router.get("/{invoice_number}", response_model=FinanceInvoicesOut, summary="Invoice abrufen", dependencies=[Depends(beleg_read)])
 async def get_invoice(
     invoice_number: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ) -> dict:
-    """Ruft eine Rechnung anhand der Rechnungsnummer ab."""
+    """Ruft eine Rechnung des Mandanten anhand der Rechnungsnummer ab."""
     try:
         repo = get_repository(db)
-        invoice = get_from_store("sales_invoice", invoice_number, repo)
-        if not invoice:
-            raise HTTPException(status_code=404, detail=f"Invoice {invoice_number} not found")
-        return {"ok": True, "invoice": invoice}
+        return {"ok": True, "invoice": _rechnung_des_mandanten(repo, invoice_number, tenant_id)}
     except HTTPException:
         raise
     except Exception as e:
@@ -271,9 +286,7 @@ async def update_invoice(
     """Aktualisiert eine bestehende Rechnung."""
     try:
         repo = get_repository(db)
-        existing = get_from_store("sales_invoice", invoice_number, repo)
-        if not existing:
-            raise HTTPException(status_code=404, detail=f"Invoice {invoice_number} not found")
+        existing = _rechnung_des_mandanten(repo, invoice_number, tenant_id)
 
         old_status = existing.get("status", "ENTWURF")
         # Eine gebuchte Rechnung wird nicht neu gerechnet; nur der Entwurf nimmt die Steuer aus den Schluesseln.
@@ -282,7 +295,7 @@ async def update_invoice(
             if old_status == "ENTWURF" else None
         )
 
-        result = _beleg_speichern(repo, invoice_number, invoice.model_dump())
+        result = _beleg_speichern(repo, invoice_number, {**invoice.model_dump(), "tenantId": tenant_id})
 
         if old_status == "ENTWURF" and invoice.status != "ENTWURF":
             _post_sales_invoice_financials(db, invoice, tenant_id, gruppen)
@@ -312,9 +325,10 @@ async def list_invoices(
     limit: int = Query(100, ge=1, le=1000),
     status: Optional[str] = None,
     customer_id: Optional[str] = None,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ) -> dict:
-    """Listet alle Rechnungen auf mit Filterung."""
+    """Listet die Rechnungen des Mandanten auf, mit Filterung."""
     try:
         repo = get_repository(db)
         payload = list_from_store(
@@ -322,7 +336,8 @@ async def list_invoices(
         )
         all_invoices = payload.get("data") or []
 
-        filtered = all_invoices
+        # Ein Beleg ohne Mandant gehoert niemandem und wird nicht ausgeliefert.
+        filtered = [inv for inv in all_invoices if str(inv.get("tenantId") or "") == tenant_id]
         if status:
             filtered = [inv for inv in filtered if inv.get("status") == status]
         if customer_id:
@@ -355,9 +370,7 @@ async def delete_invoice(
     """Löscht eine Rechnung im Entwurfsstatus."""
     try:
         repo = get_repository(db)
-        existing = get_from_store("sales_invoice", invoice_number, repo)
-        if not existing:
-            raise HTTPException(status_code=404, detail=f"Invoice {invoice_number} not found")
+        existing = _rechnung_des_mandanten(repo, invoice_number, tenant_id)
         if existing.get("status", "ENTWURF") not in ("ENTWURF", "DRAFT", "draft"):
             raise HTTPException(status_code=400, detail="Only draft invoices can be deleted")
         delete_from_store("sales_invoice", invoice_number, repo)

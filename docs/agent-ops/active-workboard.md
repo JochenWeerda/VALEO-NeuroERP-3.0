@@ -11,6 +11,32 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## FIN-LESEWEGE-MANDANT-20261013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** Lieferantengutschriften/-belastungen (`credit_debit_memos.py`) und der alte Rechnungsweg
+(`finance_invoices.py`) lesen, aendern, loeschen und geben frei nur noch im Mandanten der Anmeldung; der
+Handelnde kommt aus der Anmeldung statt aus `X-User-ID`/ungeprueftem Token/`posted_by`. Altbelege ohne Mandant
+werden niemandem ausgeliefert; `scripts/belege_mandant_nachtragen.py` ordnet zu, was die Buchung eindeutig nennt.
+QA mit Befundtabelle: `docs/quality-assurance/fin-lesewege-mandant-20261013.md`.
+**Offen, fuer alle:** `DocumentRepository.list_documents/count_documents` filtern „dieser Mandant ODER kein
+Mandant“ — mandantenlose Belege des alten Dokumentspeichers gehen an jeden, der sich auf den Filter verlaesst.
+Nicht geaendert (trifft Belegarten anderer Bereiche); braucht Bestandsaufnahme und Entscheidung.
+
+## GIT-INDEX-SPERRE-20261013 — Nachtrag 22:20, Claude Code
+
+Sperre gefunden 22:18: `.git/index.lock`, erstellt 21:28:56, 0 Bytes, kein Git-Prozess, nicht geoeffnet — nach
+Pruefung entfernt (50 Minuten alt). **Beobachtung zur Herkunft (Indiz, kein Beweis):** Der Index selbst traegt
+den Stand 21:27:51 (meine Lieferung FIN-CONTROL-002). Vier Sekunden nach der Sperre, 21:29:00, entstand der
+Commit `d819e4166` (Workboard-Claim), danach bis 21:52 sieben weitere — alle mit leerem Reflog-Eintrag und ohne
+dass sich der Index aenderte. Die Commits sind also am Index vorbei entstanden (Plumbing: `commit-tree` +
+`update-ref`), waehrend die Sperre lag. Naheliegend: Ein indexschreibender Git-Aufruf zu Beginn dieses
+Commit-Wegs wurde abgebrochen und liess die Sperre zurueck; die folgenden Commits brauchten den Index nicht und
+bemerkten sie nicht. **Bitte an Codex:** den ersten Git-Aufruf deines Commit-Wegs pruefen (alles, was den Index
+oeffnet: `git add`, `git status` ohne `GIT_OPTIONAL_LOCKS=0`, `git commit`) und ob er bei Zeitueberschreitung
+beendet wird. Folge fuer den Arbeitsbaum: Der Index des Hauptbaums steht hinter HEAD; `git status` dort zeigt
+bereits committete Studio-Aenderungen als Abweichung.
+
 ## STUDIO-DRAFT-WRITE-CAS-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Inhaltsupdate verlangt angezeigte Revision unter SQL-/Speicherschreibsperre; Anlegen ersetzt keinen bestehenden Entwurf. **Dateibesitz:** app/services/studio_draft_store.py; app/api/v1/endpoints/studio_drafts.py; Studio-API/Page und Tests; Studio-Python-Tests; scripts/belegmasken_veroeffentlichen.py; docs/quality-assurance/studio-draft-write-cas-20261013.md. **Abnahme:** stale/missing Revision schreibt nichts, gleichzeitige Bearbeiter verlieren keine Aenderung still; POST-Dublette meldet Konflikt statt Upsert. **Risiken:** eigene transaktionale Freigabehistorie/Idempotenz folgen; zentrales Audit verlangt lokale Benutzer/E-Mail und darf keine erfundenen Identitaeten bekommen. Keine Migration/DB-Neuanlage.

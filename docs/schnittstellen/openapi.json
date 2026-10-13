@@ -20376,6 +20376,17 @@
             ],
             "title": "Grund"
           },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hinweis"
+          },
           "key": {
             "title": "Key",
             "type": "string"
@@ -155686,6 +155697,40 @@
         "title": "StudioProposeIn",
         "type": "object"
       },
+      "StudioRevisionIn": {
+        "properties": {
+          "expected_revision": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Expected Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_revision"
+        ],
+        "title": "StudioRevisionIn",
+        "type": "object"
+      },
+      "StudioUpdateIn": {
+        "properties": {
+          "definition": {
+            "additionalProperties": true,
+            "title": "Definition",
+            "type": "object"
+          },
+          "expected_revision": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Expected Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "definition",
+          "expected_revision"
+        ],
+        "title": "StudioUpdateIn",
+        "type": "object"
+      },
       "StuecklisteCreate": {
         "properties": {
           "artikel_nr": {
@@ -275558,7 +275603,7 @@
     },
     "/api/v1/einkauf/credit-memos": {
       "get": {
-        "description": "Listet alle Gutschriften auf.",
+        "description": "Listet die Gutschriften des Mandanten auf (bis 13.10.2026: aller Mandanten, ohne Rolle).",
         "operationId": "list_credit_memos_api_v1_einkauf_credit_memos_get",
         "parameters": [
           {
@@ -275930,7 +275975,7 @@
     },
     "/api/v1/einkauf/debit-memos": {
       "get": {
-        "description": "Listet alle Belastungen auf.",
+        "description": "Listet die Belastungen des Mandanten auf (bis 13.10.2026: aller Mandanten, ohne Rolle).",
         "operationId": "list_debit_memos_api_v1_einkauf_debit_memos_get",
         "parameters": [
           {
@@ -288242,12 +288287,21 @@
             }
           },
           {
+            "description": "Unbeachtet: Es bucht, wer angemeldet ist.",
             "in": "query",
             "name": "posted_by",
-            "required": true,
+            "required": false,
             "schema": {
-              "title": "Posted By",
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Unbeachtet: Es bucht, wer angemeldet ist.",
+              "title": "Posted By"
             }
           }
         ],
@@ -298910,7 +298964,7 @@
     },
     "/api/v1/finance/invoices": {
       "get": {
-        "description": "Listet alle Rechnungen auf mit Filterung.",
+        "description": "Listet die Rechnungen des Mandanten auf, mit Filterung.",
         "operationId": "list_invoices_api_v1_finance_invoices_get",
         "parameters": [
           {
@@ -299097,7 +299151,7 @@
         ]
       },
       "get": {
-        "description": "Ruft eine Rechnung anhand der Rechnungsnummer ab.",
+        "description": "Ruft eine Rechnung des Mandanten anhand der Rechnungsnummer ab.",
         "operationId": "get_invoice_api_v1_finance_invoices__invoice_number__get",
         "parameters": [
           {
@@ -299115,7 +299169,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__base__StatusResponse"
+                  "$ref": "#/components/schemas/FinanceInvoicesOut"
                 }
               }
             },
@@ -397210,24 +397264,6 @@
       },
       "post": {
         "operationId": "studio_create_draft_api_v1_studio_drafts_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Actor-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Actor-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -397276,6 +397312,55 @@
       }
     },
     "/api/v1/studio/drafts/{draft_id}": {
+      "get": {
+        "operationId": "studio_get_draft_api_v1_studio_drafts__draft_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "draft_id",
+            "required": true,
+            "schema": {
+              "title": "Draft Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Studio Get Draft Api V1 Studio Drafts  Draft Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gespeicherten Studio-Entwurf zur Pruefung abrufen",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      },
       "put": {
         "operationId": "studio_update_draft_api_v1_studio_drafts__draft_id__put",
         "parameters": [
@@ -397287,29 +397372,13 @@
               "title": "Draft Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Actor-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Actor-Id"
-            }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/StudioDefinitionIn"
+                "$ref": "#/components/schemas/StudioUpdateIn"
               }
             }
           },
@@ -397364,24 +397433,18 @@
               "title": "Draft Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Actor-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Actor-Id"
-            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudioRevisionIn"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
@@ -397431,24 +397494,18 @@
               "title": "Draft Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Actor-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Actor-Id"
-            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudioRevisionIn"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
@@ -397498,24 +397555,18 @@
               "title": "Draft Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Actor-ID",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Actor-Id"
-            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudioRevisionIn"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
