@@ -100,3 +100,21 @@ Belegvertrag (BELEG-010) voraus; ein Feld ohne Wirkung wollte ich nicht einführ
   4 offene Posten, erwartete Stände); ein zweiter Lauf liefert dieselben Belege und ändert keine Zahl.
 - `tests/test_screen_registry_snapshot.py`: 2 bestanden.
 - Vitest `capture-screens-sync.test.ts`: 33 bestanden. `tsc --noEmit` ohne Befund.
+
+## Nachtrag: eigener Mandant für die Sichtprüfung
+
+Entscheidung des Auftraggebers vom 13.10.2026: Die Sichtprüfung bekommt einen eigenen Mandanten. Der alte
+Testmandant bleibt unangetastet; seine Journalkette wird nicht umgebaut.
+
+`scripts/sichtpruefung_mandant_einrichten.py [--tenant <id>] [--apply] [--belege]` legt an, was fehlt:
+den Mandanten, SKR03 mit den Steuerschlüsseln 2, 3, 8, 9 und ihren Konten, das Forderungskonto 1400 —
+und mit `--belege` die Referenzbelege. Ohne `--apply` zeigt es nur.
+
+In der Entwicklungsdatenbank eingerichtet: Mandant `00000000-0000-0000-0000-000000000051`,
+17 Belege, 8 Buchungen, 4 offene Posten; ein zweiter Lauf ändert keine Zahl.
+
+Nachweis: `tests/test_sichtpruefung_mandant.py`, 2 bestanden gegen `valeo_probe` (zweiter Lauf legt nichts
+an und der Mandant trägt die 17 Referenzbelege; ohne `--apply` bleibt nichts zurück).
+
+**Offen:** Die Testkennung für die Browserprüfung ist noch nicht an diesen Mandanten gebunden (Phase 0.6,
+Identität).

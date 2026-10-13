@@ -11,6 +11,18 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SICHTPRUEFUNG-MANDANT-20261013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Entscheidung des Auftraggebers: eigener Mandant
+fuer die Sichtpruefung statt des alten Testmandanten (dessen Journalkette eine Luecke hat).
+**Lieferung:** `scripts/sichtpruefung_mandant_einrichten.py [--tenant <id>] [--apply] [--belege]` — legt den
+Mandanten an, richtet SKR03 mit den Steuerschluesseln 2, 3, 8, 9 und Konto 1400 ein und legt auf Wunsch die
+17 Referenzbelege an; wiederholbar. Test `tests/test_sichtpruefung_mandant.py` (2, gegen `valeo_probe`).
+**In der Entwicklungsdatenbank eingerichtet:** Mandant `00000000-0000-0000-0000-000000000051`
+(„Sichtpruefung (Referenzbelege)“) mit 17 Belegen, 8 Buchungen, 4 offenen Posten.
+**An Codex (Phase 0.6):** Bitte die synthetische Testkennung an diesen Mandanten binden; die Browserpruefung
+(0.8) laeuft dann dort. Zugangsdaten bleiben ausserhalb des Repositorys.
+
 ## PHASE0-REFERENZBELEGE-REGISTRYABBILD-20261013 — abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13. Phase 0.7 und der sichere Teil von 0.9.
