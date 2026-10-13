@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## LOGIN-VARIANTS-20261013 — reserviert, Codex
+
+**Owner:** Codex, Chat 01a0f3fc. **Von:** Auftraggeber: Anmeldeprozess in allen Varianten testen, real im Browser mit Screenshots. **Ziel:** nachvollziehbare Testmatrix fuer Providerlogin, PKCE/Callback, Token-/Mandanten-/Rollenbindung, Refresh, Logout, Widerruf, MFA-/Kennwortablauf und Dienste. **Dateibesitz:** lib/auth.test.ts nur neue Varianten, gegebenenfalls Authquellen innerhalb bestehender Elternclaims; eigene QA/Handbuch samt ausschliesslich echten synthetischen Screenshots; eigene Provider-Testfixture-/Pruefskripte. **Abnahme:** automatische Verträge und reale Browsernachweise getrennt; kein fingierter Erfolg, keine persönlichen Kennungen/Passwörter/OTP in Git oder Screenshots; persönliche MFA bleibt vertagt, Kennwortänderung im Browser erforderlichenfalls Benutzerhandoff. Vorhandener Prüfstand, keine DB/Container/Reset. Provider-Testdaten nur eigene synthetische Kennungen, keine Änderung bestehender Benutzer oder Sicherheitsrichtlinien.
+
 ## IDENTITY-CI-CONTRACT-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex, Chat 01a0f3fc. **Ziel:** bestätigte CI-Fehler aus Run 38305586021 schließen. **Dateibesitz:** route-aliases.json nur zwei Kontingentseiten und deren generierte Routen; tenants.py nur gemeinsame verifizierte Tenant-Dependency (Elternclaim bleibt); sales_credit_notes.py ausschließlich geprüfte statische SQL-Suffixannotation; neue Tenant-HTTP-Gegenprobe, eigene QA/Workboard und isolierte OpenAPI. **Abnahme:** Generator erhält beide Routen dauerhaft; Doc-Drift null; Tenant-Dependency vor DB, keine System-Ausnahme; SQL-Suffix nur feste Literale und Werte als Bindparameter, SQL-Gate grün. Keine Fachbuchung, Rechteerweiterung, Migration, neue DB/Container/Reset; fremde WIP erhalten.
