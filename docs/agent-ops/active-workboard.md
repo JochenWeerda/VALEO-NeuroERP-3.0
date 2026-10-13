@@ -17,6 +17,8 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Lieferung:** Realen Pilot-PageGroup-Fehler behoben; gemeinsame Vorschau bricht bei success=false vor execute ab. 22 Vitest-Faelle bestanden. Browser: Schema 200, alter Backend-Kopfweg 404; Prozess aktualisiert, volle Sicht-/Aktionsabnahme weiter offen. QA: beleg-pilot-routing-preview-20261013.md.
 
+**Runtime-Nachweis nach Neustart:** Kopfweg 200; echte Eingangsrechnung mit Kopf/Preisen/Positionen im zentralen Renderer sichtbar. Screenshot lokal: artifacts/beleg-invoice-pilot-20261013.png. Neuer offener Befund: aktive Knöpfe am stornierten Beleg — serverseitige Zustands-/Aktionsbindung muss noch in der Runtime wirken; keine Fachaktion ausgefuehrt.
+
 ## BELEG-020 — Teil 2a abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** Teil 2a abgeschlossen 2026-10-13; Teil 2b (Sichtpruefung, Aktionen) offen.

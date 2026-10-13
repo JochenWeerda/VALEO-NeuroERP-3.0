@@ -34,3 +34,12 @@ NativeDetail-Ladezustand; Schema-API 200, Kopf-Leseweg 404 im noch alten Backend
 Prozess. Bestehender Backend-Container neu gestartet, um die vorhandenen Kopf-/Tab-
 Routen zu laden. Vollstaendige Rechnung-/Tab-/Aktions-/Preis-Sichtpruefung bleibt
 bis zum erfolgreichen Runtime-Nachweis offen. Keine Abnahme aus einem Fehlerbild.
+
+## Reale Anzeige nach Prozessstart
+
+Kopf-Leseweg jetzt HTTP 200. Eingangsrechnung REF-EK-RE-STORNO im zentralen
+Renderer mit Kopf, Status Gegengebucht/Buchung storniert, Preisen und einer
+Position sichtbar. Screenshot: artifacts/beleg-invoice-pilot-20261013.png (lokal).
+**Weiterer Befund:** Buchen/Freigeben/Folgebeleg-Knoepfe sind trotz storniertem
+Beleg aktiv; Zustands-/Aktionsbindung ist noch nicht umgesetzt. Kein Knopf
+ausgeloest, keine Fachmutation. Keine vollstaendige Aktionsabnahme behauptet.
