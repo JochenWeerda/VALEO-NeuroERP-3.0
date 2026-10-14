@@ -11,6 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-ARTIFACT-VERSION-20261014 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Erster P0-Slice der API-Artefaktsynchronisierung: Quellversion im externen Agentenmanifest und MCP-Vertrag erhalten, Regression gegen abweichende Version. **Dateibesitz:** app/core/agent_tool_contract_manifest.py; app/core/mcp_tool_contracts.py nur MCP-Versionsmetadaten; tests/test_agent_tool_contracts.py; eigene QA. **Abnahme:** Quellversion wird unveraendert projiziert; unterschiedliche Vertragsschemaversionen fallen im Regressionstest auf. **Risiken:** Keine Behauptung einer freigegebenen Capability-Version: Freigaberegister, echter REST/CLI-Abgleich und CI-Gate folgen; Historienanzeige und Prozesssimulation bleiben im Gesamtauftrag. Keine Migration, keine neue DB/Container.
+
+**Lieferung:** Quellversion im Manifest, MCP-Metadaten und REST-Vertragsansicht erhalten; zusaetzlich agent_tool_contracts.py nur Versionsprojektion. QA: studio-artifact-version-20261014.md. Vollstaendiges CI-Gate, Freigabeversion, CLI-Bindung, Historienanzeige und Simulation weiterhin offen.
+
+## PORTAL-KUNDE-001 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Nutzerentscheidung TENANT-DOC-001 Punkt 1: Kundenkonto im Portal nur serverseitig aus der Anmeldung und ihrer geprueften Zuordnung; nie aus Parametern. Neue Zuordnung `domain_portal.kundenzugaenge` (Anmeldung → CRM-Kunde je Mandant, Mehrfachzuordnung, Widerruf statt Loeschen); Kundenkontext-Abhaengigkeit `app/auth/portal_kunde.py` (Portalkunde: nur zugeordnete Konten; interne Belegrollen: Auswahl eines Kunden des Mandanten); Verwaltung der Zuordnungen; die zehn `/portal/*`-Wege in compat filtern nach Kunde. Folgeslices: portal_shop (Mandant aus Query!), Feldbuch/Lohndienste/Empfehlungen. **Dateibesitz:** neue Migration portal_kundenzugaenge_20261014 (nach studio_history_20261014); app/auth/portal_kunde.py; app/api/v1/endpoints/portal_kundenzugaenge.py; compat.py (nur `/portal/*`-Wege); portal_compat_service.py (Portal-Listen); compat_helpers.list_docs (Kundenfilter); Registrierung in api.py; tests/test_portal_kunde_*.py; docs/quality-assurance/portal-kunde-001-20261014.md. **Migrationsclaim:** additive Tabelle auf valeo_probe; gewachsene DB nicht migriert. **Abnahme:** Negativtests fremde Kunden-ID (Kopf, Parameter), fremder Mandant, widerrufene Zuordnung, ohne Zuordnung/Rolle 403.
+
 ## STUDIO-SAVE-IDEMPOTENCY-20261014 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Create/Update mit UUID-Schluessel und exakt gebundenem Inhalt wiederholbar; keine Doppelhistorie oder stille Ueberschreibung bei unklarem Commit-Ergebnis. **Dateibesitz:** studio_draft_store.py; studio_drafts.py; Studio-Client und bestehende Python/Vitest-Vertraege; neuer test_studio_save_idempotency.py; eigene QA. **Abnahme:** gespeichertes Snapshot-Replay mit Mandant/Actor/Aktion/Ziel/Inhalt/Revision, gleiche SQL-Schluessel transaktional serialisiert, Konflikte bleiben ohne Wirkung. **Risiken:** Historienanzeige, Korrelationsattribute und Prozesssimulation folgen; keine neue DB/Migration, bestehende Historie weiterverwenden.
