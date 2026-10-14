@@ -16809,10 +16809,6 @@
             ],
             "title": "Kultur"
           },
-          "kunden_nr": {
-            "title": "Kunden Nr",
-            "type": "string"
-          },
           "menge_dt": {
             "anyOf": [
               {
@@ -16885,7 +16881,6 @@
           }
         },
         "required": [
-          "kunden_nr",
           "typ"
         ],
         "title": "AuftragCreateBody",
@@ -355233,24 +355228,6 @@
     "/api/v1/portal/empfehlungen/generieren/ration": {
       "post": {
         "operationId": "generiere_aus_ration_api_v1_portal_empfehlungen_generieren_ration_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -355300,24 +355277,6 @@
     "/api/v1/portal/empfehlungen/generieren/schlagkartei": {
       "post": {
         "operationId": "generiere_aus_schlagkartei_api_v1_portal_empfehlungen_generieren_schlagkartei_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -355389,7 +355348,7 @@
           },
           {
             "in": "header",
-            "name": "x-tenant-id",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -355400,7 +355359,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -355446,15 +355405,6 @@
         "parameters": [
           {
             "in": "path",
-            "name": "kunden_nr",
-            "required": true,
-            "schema": {
-              "title": "Kunden Nr",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
             "name": "empfehlung_id",
             "required": true,
             "schema": {
@@ -355463,8 +355413,17 @@
             }
           },
           {
+            "in": "path",
+            "name": "kunden_nr",
+            "required": true,
+            "schema": {
+              "title": "Kunden Nr",
+              "type": "string"
+            }
+          },
+          {
             "in": "header",
-            "name": "x-tenant-id",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -355475,7 +355434,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -355530,7 +355489,7 @@
           },
           {
             "in": "header",
-            "name": "x-tenant-id",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -355541,7 +355500,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -358427,22 +358386,6 @@
         "parameters": [
           {
             "in": "query",
-            "name": "kunden_nr",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Kunden Nr"
-            }
-          },
-          {
-            "in": "query",
             "name": "typ",
             "required": false,
             "schema": {
@@ -358475,7 +358418,7 @@
           },
           {
             "in": "header",
-            "name": "x-tenant-id",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -358486,7 +358429,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -358530,7 +358473,7 @@
         "parameters": [
           {
             "in": "header",
-            "name": "x-tenant-id",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -358541,7 +358484,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -358606,7 +358549,7 @@
           },
           {
             "in": "header",
-            "name": "x-tenant-id",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -358617,7 +358560,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -358668,22 +358611,6 @@
             "schema": {
               "title": "Auftrag Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],

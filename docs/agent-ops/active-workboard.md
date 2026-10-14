@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## PORTAL-LOHN-EMPF-KUNDE-20261014 — abgeschlossen, Claude Code
+
+**Lieferung:** `/portal/lohndienste` und `/portal/empfehlungen` nehmen Mandant aus der Anmeldung statt rohem `X-Tenant-ID`, Kunde nur ueber `portal_kunde` (`kundennummer()` neu in portal_kunde.py). Lohndienst-Status und Empfehlungen-Erzeugen nur mit `sales_order` bearbeiten. Portalseite Empfehlungen ohne Demo-Nummer. 3 neue Negativtests (28 gruen, frisch); OpenAPI nur diese Pfade + AuftragCreateBody. QA: `docs/quality-assurance/portal-lohndienst-empfehlung-kunde-20261014.md`. **Damit TENANT-DOC-001 Punkt 1 serverseitig durch.** **Offen, fuer alle:** beide Dienste nur im Prozessspeicher (keine Tabellen); interne Kunden-Schlagkartei braucht Kundenwahl; Kontowahl im Frontend.
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-14. **Ziel:** TENANT-DOC-001 Punkt 1, letzter Folgeslice von PORTAL-KUNDE-001. **Dateibesitz:** app/api/v1/endpoints/portal_lohndienst.py; app/api/v1/endpoints/portal_intelligence.py; app/auth/portal_kunde.py (nur neue Helfer); packages/frontend-web/src/pages/portal/empfehlungen.tsx (nur Kontoauswahl); tests/test_portal_kunde_trennung.py; OpenAPI nur diese Pfade; eigene QA. **Abnahme:** fremde Kundennummer in Pfad/Body/Query wirkungslos oder 404, ohne Zuordnung 403, interne Wege mit Rolle. Keine Migration.
+
 ## PORTAL-FELDBUCH-KUNDE-20261014 — abgeschlossen, Claude Code
 
 **Lieferung:** `portal_feldbuch._get_customer_id` nur noch aus `portal_kunde` — alle 30 Feldbuchwege; Parameter `customer_id` und Rueckfall `dev-customer` entfernt. Interne Betreuung liest mit Belegleserolle, aendert nur mit `AGRAR_BEARBEITEN`/`AGRAR_ADMIN`/`admin`. 4 neue Negativtests (frisch), Regression Feldbuch 50 + Portal gruen; OpenAPI nur die Feldbuchpfade. QA: `docs/quality-assurance/portal-feldbuch-kunde-20261014.md`. **Offen, fuer alle:** `seed_simulation_rations_acker.py` braucht Zuordnung; Lohndienste, Empfehlungen; `created_by` nennt den Kunden statt der Anmeldung.

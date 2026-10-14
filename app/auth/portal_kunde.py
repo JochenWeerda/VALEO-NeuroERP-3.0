@@ -95,3 +95,21 @@ def portal_kunde(
         return PortalKunde(tenant_id, gewaehlt, subject, intern=True)
 
     raise HTTPException(status_code=403, detail="Kein Kundenkonto zugeordnet")
+
+
+def kundennummer_des_mandanten(db: Session, tenant_id: str, kunden_nr: str) -> bool:
+    """Gehoert die fachliche Kundennummer zu einem Kunden dieses Mandanten? (Interne Wege, die sie nennen.)"""
+    return db.execute(text(
+        "SELECT 1 FROM domain_crm.customers WHERE customer_number = :n AND tenant_id = :t AND deleted_at IS NULL"),
+        {"n": kunden_nr, "t": tenant_id}).first() is not None
+
+
+def kundennummer(db: Session, kunde: PortalKunde) -> str:
+    """Die fachliche Kundennummer des gewaehlten Kontos — Schluessel der Lohndienste und Empfehlungen."""
+    zeile = db.execute(text(
+        "SELECT customer_number FROM domain_crm.customers WHERE id = :c AND tenant_id = :t AND deleted_at IS NULL"),
+        {"c": kunde.customer_id, "t": kunde.tenant_id}).first()
+    if zeile is None or not zeile[0]:
+        raise HTTPException(status_code=404, detail="Kunde nicht gefunden")
+    return str(zeile[0])
+

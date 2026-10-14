@@ -22,6 +22,8 @@ from sqlalchemy.exc import DBAPIError
 from app.api.v1.endpoints.compat import router as compat_router
 from app.api.v1.endpoints.portal_kundenzugaenge import router as zugang_router
 from app.api.v1.endpoints.portal_feldbuch import router as feldbuch_router
+from app.api.v1.endpoints.portal_intelligence import router as empfehlung_router
+from app.api.v1.endpoints.portal_lohndienst import router as lohndienst_router
 from app.api.v1.endpoints.portal_shop import router as shop_router
 from app.auth.deps import get_current_user
 from app.core.database import SessionLocal
@@ -77,6 +79,8 @@ def welt():
     app.include_router(zugang_router, prefix="/api/v1")
     app.include_router(shop_router, prefix="/api/v1/portal")
     app.include_router(feldbuch_router, prefix="/api/v1/portal")
+    app.include_router(lohndienst_router, prefix="/api/v1")
+    app.include_router(empfehlung_router, prefix="/api/v1")
     client = TestClient(app, raise_server_exceptions=False)
 
     def als(t: str, subject: str, *rollen: str) -> TestClient:
@@ -386,3 +390,57 @@ def test_feldbuch_interne_betreuung_liest_und_schreibt_nur_mit_agrarrolle(welt):
                         json={"name": "Vom Berater", "flaeche": 2.0}).status_code == 201
     fremd = welt["als"](welt["b"], "berater-b", "SALES_LESEN", "AGRAR_BEARBEITEN")
     assert fremd.get("/api/v1/portal/feldbuch/schlaege", headers=kopf).status_code == 404
+
+
+# ── Lohndienste und Empfehlungen: Mandant aus ``X-Tenant-ID``, Kunde aus ``kunden_nr`` ──
+# Die Kundennummer der Testkunden ist ihre ID (siehe ``welt``).
+
+
+def test_lohndienst_nur_fuer_das_eigene_konto(welt):
+    welt["zuordnen"](welt["a"], "hof-1", welt["k1"])
+    welt["zuordnen"](welt["a"], "hof-2", welt["k2"])
+    nachbar = welt["als"](welt["a"], "hof-2").post("/api/v1/portal/lohndienste", json={"typ": "lohn_spritz"})
+    assert nachbar.status_code == 201, nachbar.text
+    c = welt["als"](welt["a"], "hof-1")
+    eigen = c.post("/api/v1/portal/lohndienste", json={"typ": "lohn_spritz", "kunden_nr": welt["k2"]})
+    assert eigen.status_code == 201 and eigen.json()["kunden_nr"] == welt["k1"]
+    liste = c.get("/api/v1/portal/lohndienste", params={"kunden_nr": welt["k2"]})
+    assert {a["auftrag_id"] for a in liste.json()["items"]} == {eigen.json()["auftrag_id"]}
+    assert c.get(f"/api/v1/portal/lohndienste/{nachbar.json()['auftrag_id']}").status_code == 404
+    assert welt["als"](welt["a"], "irgendwer", "user").get("/api/v1/portal/lohndienste").status_code == 403
+
+
+def test_lohndienst_status_nur_innendienst_des_mandanten(welt):
+    welt["zuordnen"](welt["a"], "hof-1", welt["k1"])
+    auftrag = welt["als"](welt["a"], "hof-1").post("/api/v1/portal/lohndienste", json={"typ": "lohn_spritz"})
+    weg = f"/api/v1/portal/lohndienste/{auftrag.json()['auftrag_id']}/status"
+    neu = {"neuer_status": "bestaetigt"}
+    assert welt["als"](welt["a"], "hof-1").post(weg, json=neu).status_code == 403
+    assert welt["als"](welt["a"], "innendienst", "SALES_LESEN").post(weg, json=neu).status_code == 403
+    assert welt["als"](welt["b"], "innendienst-b", "SALES_BEARBEITEN").post(weg, json=neu).status_code == 404
+    assert welt["als"](welt["a"], "innendienst", "SALES_BEARBEITEN").post(weg, json=neu).status_code == 200
+
+
+def test_empfehlungen_nur_unter_der_eigenen_kundennummer(welt):
+    welt["zuordnen"](welt["a"], "hof-1", welt["k1"])
+    innen = welt["als"](welt["a"], "innendienst", "SALES_BEARBEITEN")
+    kontext = {"kulturen": ["Winterweizen", "Raps"], "flaeche_ha": 50.0, "ernte_jahr": 2026}
+    for kunde in (welt["k1"], welt["k2"]):
+        r = innen.post("/api/v1/portal/empfehlungen/generieren/schlagkartei", json={**kontext, "kunden_nr": kunde})
+        assert r.status_code == 201, r.text
+    assert innen.post("/api/v1/portal/empfehlungen/generieren/schlagkartei",
+                      json={**kontext, "kunden_nr": welt["k1b"]}).status_code == 404
+    assert welt["als"](welt["a"], "innendienst", "SALES_LESEN").post(
+        "/api/v1/portal/empfehlungen/generieren/schlagkartei",
+        json={**kontext, "kunden_nr": welt["k1"]}).status_code == 403
+    c = welt["als"](welt["a"], "hof-1")
+    eigen = c.get(f"/api/v1/portal/empfehlungen/{welt['k1']}")
+    assert eigen.status_code == 200 and eigen.json()["count"] > 0
+    assert {e["kunden_nr"] for e in eigen.json()["items"]} == {welt["k1"]}
+    assert c.get(f"/api/v1/portal/empfehlungen/{welt['k2']}").status_code == 404
+    assert c.get(f"/api/v1/portal/empfehlungen/{welt['k2']}/zusammenfassung").status_code == 404
+    fremde = welt["als"](welt["a"], "innendienst", "SALES_BEARBEITEN").get(
+        f"/api/v1/portal/empfehlungen/{welt['k2']}", headers={"X-Kundenkonto": welt["k2"]})
+    assert fremde.status_code == 200 and fremde.json()["count"] > 0
+    assert welt["als"](welt["a"], "hof-1").post(f"/api/v1/portal/empfehlungen/{welt['k2']}/gesehen/{fremde.json()['items'][0]['empfehlung_id']}"
+                  ).status_code == 404
