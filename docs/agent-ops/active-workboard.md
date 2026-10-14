@@ -11,9 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## DOC-ROUTER-MANDANT-20261014 — in Arbeit, Claude Code
+## DOC-ROUTER-MANDANT-20261014 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Der generische Belegrouter
+**Lieferung:** `/api/mcp/documents/*` nur im Mandanten der Anmeldung: fremd/mandantenlos 404, Anlage unter fremder
+Nummer 409, Anlage setzt den Mandanten, Liste aus der Datenbank, Sammelloeschung nur eigene, Loeschen ohne stillen
+Rueckfall. Dabei gefunden: der Nachhaltigkeitsexport (CSV/PDF, Portal) rechnete ueber alle Mandanten — behoben.
+16 Tests (frisch); OpenAPI fuer die 15 Pfade nachgezogen. QA: `docs/quality-assurance/doc-router-mandant-20261014.md`.
+**Offen, fuer alle:** keine Rollenpruefung auf dem Router (Rechnungen/Gutschriften anlegen, aendern, loeschen fuer
+jede angemeldete Person); `/customers/search`, `/articles/search`, sechs `/analytics/…` verdeckt und tot; weitere
+Einzelabrufe des Dokumentspeichers (`ap_approval_workflow`, `sales_credit_notes`, … — Liste in der QA) ungeprueft.
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Der generische Belegrouter
 `/api/mcp/documents/*` liest, aendert, loescht und legt Belege nur im Mandanten der Anmeldung an. Bisher trafen
 GET/PUT/DELETE per Nummer jede Belegart jedes Mandanten (auch Gutschriften und Rechnungen, an den Finanzwegen
 vorbei); Anlegen ueberschrieb fremde Belege gleicher Nummer und setzte keinen Mandanten. **Dateibesitz:**
