@@ -220,7 +220,7 @@ def test_all_transactions_have_audit_trail(db: Session):
 def test_datev_export_format_valid():
     """Test that DATEV export has correct format."""
     from fastapi.testclient import TestClient
-    from main import app
+    from app.main import app
     
     client = TestClient(app)
     headers = {"Authorization": "Bearer dev-token"}

@@ -17,10 +17,13 @@ from app.core.iot_telemetry import DeviceManifest, DeviceStatus, DeviceType
 from app.core.process_mining import build_process_mining_report
 from app.core.runtime_operations import ComponentHealth, RuntimeComponent, RuntimeHealthReport
 from app.core.tenant import get_tenant_id
+from testgrenze import ALLE_FACHROLLEN, ersetze_bearer, ersetze_mandant
 
 
 def test_external_agent_integration_catalog_surfaces_eleven_use_cases():
     app = FastAPI()
+    ersetze_mandant(app)
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(external_agent_integrations.router)
     client = TestClient(app)
 
@@ -38,6 +41,8 @@ def test_external_agent_integration_catalog_surfaces_eleven_use_cases():
 
 def test_external_agent_install_pack_exposes_entrypoints_and_headers():
     app = FastAPI()
+    ersetze_mandant(app)
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(external_agent_integrations.router)
     client = TestClient(app)
 
@@ -52,6 +57,8 @@ def test_external_agent_install_pack_exposes_entrypoints_and_headers():
 
 def test_workflow_sandbox_preview_alias_returns_preview_result():
     app = FastAPI()
+    ersetze_mandant(app)
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(workflow_simulation.router)
     client = TestClient(app)
 
@@ -115,6 +122,10 @@ def test_process_mining_top_processes_and_drilldown(monkeypatch):
     monkeypatch.setattr(_gw, "_telemetry_reading_store", {"tenant-a": {}})
 
     app = FastAPI()
+
+    ersetze_mandant(app)
+
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(process_mining_api.router)
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
     client = TestClient(app)
@@ -134,6 +145,8 @@ def test_process_mining_top_processes_and_drilldown(monkeypatch):
 
 def test_job_catalog_surfaces_queue_contracts():
     app = FastAPI()
+    ersetze_mandant(app)
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(job_runner.router, prefix="/api/v1/jobs")
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
     client = TestClient(app)
@@ -149,6 +162,8 @@ def test_job_catalog_surfaces_queue_contracts():
 
 def test_runtime_shield_surfaces_rate_limits_and_cache_configs():
     app = FastAPI()
+    ersetze_mandant(app)
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(tenant_governance.router)
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
     client = TestClient(app)
@@ -164,6 +179,8 @@ def test_runtime_shield_surfaces_rate_limits_and_cache_configs():
 
 def test_reklamation_e2e_overview_contains_crm_and_dms_links():
     app = FastAPI()
+    ersetze_mandant(app)
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(reklamation_api.router)
     client = TestClient(app)
 

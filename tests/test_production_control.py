@@ -10,7 +10,7 @@ from app.services.production_control_service import (
     ProductionControlService,
     valid_status_transition,
 )
-from main import app
+from app.main import app
 
 pytestmark = pytest.mark.unit
 

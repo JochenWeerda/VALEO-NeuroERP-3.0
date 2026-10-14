@@ -36,7 +36,7 @@ def test_lookup_sales_delivery_note_formats_row():
 
 
 def test_resolve_sales_delivery_note_by_ref_requires_tenant():
-    from main import app
+    from app.main import app
 
     client = TestClient(app, raise_server_exceptions=True)
     res = client.get(

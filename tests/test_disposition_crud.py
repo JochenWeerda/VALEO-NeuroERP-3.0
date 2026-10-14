@@ -12,7 +12,7 @@ from pydantic import ValidationError
 from fastapi.testclient import TestClient
 
 from app.core.config import settings
-from main import app
+from app.main import app
 from app.api.v1.endpoints.disposition import (
     DispositionPositionCreate,
     DispositionPositionUpdate,

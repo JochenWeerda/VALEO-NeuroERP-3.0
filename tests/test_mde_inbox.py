@@ -10,7 +10,7 @@ from app.services.mobile_sync_service import (
     next_mobile_failure_status,
     validate_mobile_event_payload,
 )
-from main import app
+from app.main import app
 
 
 pytestmark = pytest.mark.unit

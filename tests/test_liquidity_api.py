@@ -27,7 +27,7 @@ def _skip_if_table_missing(resp):
 
 @pytest.fixture
 def client():
-    from main import app
+    from app.main import app
     return TestClient(app, raise_server_exceptions=False)
 
 

@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import text
 
 from app.core.database import SessionLocal
-from main import app
+from app.main import app
 
 pytestmark = [pytest.mark.integration, pytest.mark.needs_live_db]
 

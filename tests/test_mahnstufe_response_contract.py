@@ -7,6 +7,7 @@ import pytest
 
 from app.api.v1.endpoints.finance_actions import router
 from app.core.database import get_db
+from testgrenze import ersetze_mandant, ersetze_nutzer
 
 
 @pytest.mark.parametrize("current,next_stage", [(None, "1"), ("1", "2"), ("2", "3"), ("3", "INKASSO")])
@@ -16,6 +17,8 @@ def test_escalation_serializes_service_and_audit_stages(current, next_stage):
         {"stufe": current} if current is not None else None
     )
     app = FastAPI()
+    ersetze_mandant(app)
+    ersetze_nutzer(app, "FINANCE_BEARBEITEN")
     app.include_router(router, prefix="/finance")
     app.dependency_overrides[get_db] = lambda: db
     with TestClient(app) as client:
@@ -32,6 +35,8 @@ def test_maximum_stage_remains_rejected_without_another_write():
     db = MagicMock()
     db.execute.return_value.mappings.return_value.first.return_value = {"stufe": "INKASSO"}
     app = FastAPI()
+    ersetze_mandant(app)
+    ersetze_nutzer(app, "FINANCE_BEARBEITEN")
     app.include_router(router, prefix="/finance")
     app.dependency_overrides[get_db] = lambda: db
     with TestClient(app) as client:

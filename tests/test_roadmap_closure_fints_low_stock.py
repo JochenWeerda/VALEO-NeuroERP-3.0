@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from fastapi.testclient import TestClient
 
-from main import app
+from app.main import app
 from app.services.fints_connector import (
     bestaetige_tan,
     get_tan_medien,

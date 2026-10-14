@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.services.billing_batch_service import BillingBatchError, BillingBatchService
-from main import app
+from app.main import app
 
 pytestmark = pytest.mark.unit
 HEADERS = {

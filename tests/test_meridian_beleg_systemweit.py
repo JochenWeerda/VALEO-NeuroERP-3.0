@@ -497,12 +497,8 @@ def test_lieferschein_nennt_die_niederlassung(client, stamm: dict) -> None:
 def test_lagerbewegung_nennt_das_lager(client, stamm: dict, monkeypatch) -> None:
     from sqlalchemy import text
 
-    from app.core import security
-    from app.main import app
-
-    # Die Lager-API prueft die Claims des Dev-Tokens selbst; die globale
-    # Bearer-Abkuerzung der Suite liesse sie leer.
-    monkeypatch.delitem(app.dependency_overrides, security.require_bearer_token, raising=False)
+    # Die Lager-API liest die Rollen aus den Token-Claims; die Testidentitaet des conftest setzt sie (seit 14.10.2026
+    # gibt es keinen Dev-Token-Weg mehr, der hier abgeschaltet werden muesste).
     bewegung = f"mv-{uuid.uuid4().hex[:8]}"
     with stamm["engine"].begin() as v:
         v.execute(text(

@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from testgrenze import ALLE_FACHROLLEN, ersetze_bearer, ersetze_mandant
 
 
 @pytest.mark.unit
@@ -10,6 +11,10 @@ def test_pos_dsfinvk_export_fails_closed_without_provider_configuration():
     from app.api.v1.endpoints import pos_dsfinvk
 
     app = FastAPI()
+
+    ersetze_mandant(app)
+
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(pos_dsfinvk.router)
     client = TestClient(app)
 

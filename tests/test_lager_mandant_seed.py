@@ -126,11 +126,11 @@ class TestSeed:
 def client(engine, _enable_dev_token):
     from fastapi.testclient import TestClient
 
-    from app.core import security
     from app.main import app
 
     # Echter Dev-Token-Weg: die Lager-Adminrolle liest die Token-Claims.
-    app.dependency_overrides.pop(security.require_bearer_token, None)
+    # Bis 12.10.2026 wurde hier die conftest-Identitaet abgeschaltet, um den Dev-Token-Weg zu nehmen; den
+    # gibt es nicht mehr. Die conftest-Identitaet setzt die Token-Claims (Rolle) selbst.
     return TestClient(app, raise_server_exceptions=False)
 
 
