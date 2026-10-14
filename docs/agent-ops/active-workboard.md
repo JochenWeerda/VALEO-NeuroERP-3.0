@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WORKFLOW-MIGRATION-INPUT-20261014 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Echter Workflow-Vergleich statt stiller identischer Demodaten: typisierte REST-Eingabe, explizite alte/neue Schritte, MCP-Transport, inhaltsgebundener Ergebnisfingerprint. **Dateibesitz:** process_kernel_api.py nur /workflow-migration/check und Schemaimport; neue schemas/workflow_migration_input.py; mcp_tool_contracts.py nur migration_check; neuro_tool_execution.py nur Migrationseingaben; Tests dieses Vertrags; docs/schnittstellen/openapi.json nur betroffener Pfad/Komponenten auf HEAD-Basis, fremde Arbeitskopie bleibt erhalten; eigene QA. **Abnahme:** fehlende/doppelte/falsch typisierte Schritte 422 ohne Demo; geloeschter Pflichtschritt BREAKING; Agentenpayload transportiert beide Staende unveraendert; Ergebnis an Inhalt gebunden. **Risiken:** Fingerprint ist keine Genehmigung; vollstaendige Simulation/Release-Sperre und andere POST-Vertraege bleiben offen. Keine Migration/DB/Container.
+
+**Lieferung:** Explizite typisierte Vergleichsstaende statt Demo; MCP-Schema aus REST-Modell (Version 2), Transportvorpruefung, Inhaltsfingerprint. mcp_rest_binding.py und check_mcp_rest_bindings.py um kanonischen POST-Schemavergleich erweitert. Elf Lese- und ein POST-Schemavertrag live gruen; 89 Regressionen und danach 30 gezielte Faelle bestanden (ueberschneidend). QA: workflow-migration-input-20261014.md. Vollstaendige Simulation/Freigabe und weitere Kanalvertraege offen.
+
 ## MCP-PROD-TRANSPORT-20261014 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Default-Neurotransport verwendet produktive main-App mit denselben REST-Berechtigungen statt Test-Kompatibilitaets-App. **Dateibesitz:** app/services/neuro_tool_execution.py nur _get_client; neuer tests/test_neuro_production_transport.py; eigene QA. **Abnahme:** produktive App ausgewaehlt, 403 wird durchgereicht, Token redigiert, fehlende Produktions-App kein Testfallback. **Risiken:** POST-Schematransformationen, vollstaendiger Kanalabgleich, Historienanzeige und Prozesssimulation bleiben offen. Keine Migration/DB-Neuanlage.

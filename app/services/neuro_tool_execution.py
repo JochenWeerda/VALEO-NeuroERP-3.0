@@ -52,7 +52,7 @@ class NeuroToolExecutionService:
         except HTTPException as exc:
             return {
                 "mode": "execution_rejected", "tool_name": contract.tool_name,
-                "http_status": exc.status_code, "rejection_reason": "tenant_selector_rejected",
+                "http_status": exc.status_code, "rejection_reason": ("invalid_contract_payload" if exc.status_code == 422 else "tenant_selector_rejected"),
                 "request": {}, "response": None,
             }
 
@@ -231,6 +231,13 @@ class NeuroToolExecutionService:
         context: dict[str, Any],
         tenant_id: str,
     ) -> dict[str, Any]:
+        if contract.tool_name == "valeo_workflow_migration_check":
+            from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
+            from pydantic import ValidationError
+            try:
+                return WorkflowMigrationCheckIn.model_validate(parameters).model_dump(mode="json")
+            except ValidationError:
+                raise HTTPException(422, "Explicit valid workflow snapshots required") from None
         if contract.request_payload_mode == MCPRequestPayloadMode.DATASET_VALIDATION:
             return {
                 "entity_typ": merged.get("entity_typ") or "ARTIKEL",

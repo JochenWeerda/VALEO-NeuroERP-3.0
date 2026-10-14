@@ -6,6 +6,8 @@ Prozessreferenz-Kontext und Explainability.
 """
 from __future__ import annotations
 
+from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
+
 from datetime import datetime
 from typing import Any
 
@@ -1075,62 +1077,21 @@ def get_trocknungs_regelsets() -> dict[str, Any]:
 
 
 @router.post("/workflow-migration/check", response_model=ProcessKernelOut, summary="Workflow migration prüfen")
-def check_workflow_migration(body: dict) -> dict[str, Any]:
-    """
-    Prueft ob eine Workflow-Migrations-Definition sicher ist (Gap 011).
-
-    Body: { "prozess_key": str, "von_version": str, "zu_version": str,
-            "alt_schritte": [...], "neu_schritte": [...] }
-    """
-    prozess_key = body.get("prozess_key", "agrar_settlement")
-    von_version = body.get("von_version", "1.0")
-    zu_version = body.get("zu_version", "1.1")
-
-    def _parse_schritte(raw: list) -> list[WorkflowSchrittSnapshot]:
-        return [
-            WorkflowSchrittSnapshot(
-                schritt_id=s.get("schritt_id", ""),
-                pflicht=bool(s.get("pflicht", True)),
-                reihenfolge=int(s.get("reihenfolge", 0)),
-                terminal=bool(s.get("terminal", False)),
-                rolle=s.get("rolle", ""),
-            )
-            for s in raw
-            if s.get("schritt_id")
-        ]
-
-    alt_schritte = _parse_schritte(body.get("alt_schritte", []))
-    neu_schritte = _parse_schritte(body.get("neu_schritte", []))
-
-    # Defaults wenn keine Schritte uebergeben: agrar_settlement Demo
-    if not alt_schritte:
-        schritte = get_default_agrar_settlement_schritte()
-        alt_schritte = [
-            WorkflowSchrittSnapshot(
-                schritt_id=s.schritt_id,
-                pflicht=s.pflicht,
-                reihenfolge=s.reihenfolge,
-                terminal=(s.schritt_id == "AS-06-VERBUCHUNG"),
-                rolle=s.rolle,
-            )
-            for s in schritte
-        ]
-        neu_schritte = alt_schritte[:]  # identisch â†’ SAFE
-
+def check_workflow_migration(body: WorkflowMigrationCheckIn) -> dict[str, Any]:
+    """Compare the explicitly supplied versions; never substitute demo steps."""
     alt_snap = WorkflowDefinitionSnapshot(
-        prozess_key=prozess_key,
-        version=von_version,
-        schema_version=1,
-        schritte=alt_schritte,
+        prozess_key=body.prozess_key, version=body.von_version,
+        schema_version=body.alt_schema_version,
+        schritte=[WorkflowSchrittSnapshot(**step.model_dump()) for step in body.alt_schritte],
     )
     neu_snap = WorkflowDefinitionSnapshot(
-        prozess_key=prozess_key,
-        version=zu_version,
-        schema_version=1,
-        schritte=neu_schritte,
+        prozess_key=body.prozess_key, version=body.zu_version,
+        schema_version=body.neu_schema_version,
+        schritte=[WorkflowSchrittSnapshot(**step.model_dump()) for step in body.neu_schritte],
     )
-    result = validate_workflow_migration(alt_snap, neu_snap)
-    return result.as_dict()
+    result = validate_workflow_migration(alt_snap, neu_snap).as_dict()
+    result["comparison_revision"] = body.comparison_revision()
+    return result
 
 
 # ---------------------------------------------------------------------------
