@@ -11,6 +11,17 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOC-ROUTER-MANDANT-20261014 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Der generische Belegrouter
+`/api/mcp/documents/*` liest, aendert, loescht und legt Belege nur im Mandanten der Anmeldung an. Bisher trafen
+GET/PUT/DELETE per Nummer jede Belegart jedes Mandanten (auch Gutschriften und Rechnungen, an den Finanzwegen
+vorbei); Anlegen ueberschrieb fremde Belege gleicher Nummer und setzte keinen Mandanten. **Dateibesitz:**
+app/documents/router.py (CRUD- und Listenwege); tests/test_belegrouter_mandant.py;
+docs/quality-assurance/doc-router-mandant-20261014.md. **Abnahme:** fremder/mandantenloser Beleg 404 beim Lesen,
+Aendern, Loeschen; Anlegen unter fremder Nummer 409 ohne Schreibzugriff; neuer Beleg traegt den Mandanten, PUT kann
+ihn nicht umsetzen; Liste aus der Datenbank je Mandant; Sammelloeschung nur eigene. Keine Migration.
+
 ## STUDIO-REVISION-HISTORY-20261014 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Studio-Speicher-/Statusaenderungen mit ihrem Revisionsinhalt atomar protokollieren; SQL-Historie append-only, lesend im angemeldeten Mandanten. **Dateibesitz:** studio_draft_store.py; studio_drafts.py; studio_models.py; neue Migration studio_history_20261014 (nach control_findings_20261013); tests/test_studio_revision_history.py; Studio-/Pilot-SQL-Fixtures nur rollbackbasierte Historienisolation; eigene QA/Platform-Impact-Doku. **Abnahme:** Historie und Zustand gemeinsame Transaktion, SQL sperrt UPDATE/DELETE, fremde Historie leer/404; bestehende Suites weiter gruen. **Migrationsclaim:** additive Tabelle/Trigger auf bestehendem valeo_probe und lokaler Entwicklungsdatenbank, kein Reset/keine neue DB; keine anderen offenen Migrationsclaims gefunden. **Risiken:** Idempotenz und getrennte Agenten-/Korrelationsidentitaet folgen; Historie ersetzt keine Produktionsfreigabe.
