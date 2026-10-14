@@ -18,17 +18,27 @@ it('uses the authenticated client without caller-selected identities on all stud
   await publishStudioDraft('draft-a', 'reviewed-revision')
   expect(client.post.mock.calls).toEqual([
     ['/api/v1/studio/propose', { intent: 'Kunden' }],
-    ['/api/v1/studio/drafts', { definition }],
+    ['/api/v1/studio/drafts', { definition, idempotency_key: expect.any(String) }],
     ['/api/v1/studio/drafts/draft-a/submit-review', { expected_revision: 'draft-revision', idempotency_key: expect.any(String) }],
     ['/api/v1/studio/drafts/draft-a/publish', { expected_revision: 'reviewed-revision', idempotency_key: expect.any(String) }],
   ])
-  expect(client.put).toHaveBeenCalledWith('/api/v1/studio/drafts/draft-a', { definition, expected_revision: 'draft-revision' })
+  expect(client.put).toHaveBeenCalledWith('/api/v1/studio/drafts/draft-a', { definition, expected_revision: 'draft-revision', idempotency_key: expect.any(String) })
 })
 
 it('keeps one key for repeated status intent but separates changed revisions', async () => {
   await publishStudioDraft('retry-draft', 'revision-a')
   await publishStudioDraft('retry-draft', 'revision-a')
   await publishStudioDraft('retry-draft', 'revision-b')
+  const bodies = client.post.mock.calls.map(call => call[1])
+  expect(bodies[0].idempotency_key).toBe(bodies[1].idempotency_key)
+  expect(bodies[0].idempotency_key).not.toBe(bodies[2].idempotency_key)
+})
+
+it('binds save retry keys to definition and displayed revision', async () => {
+  const definition = emptyStudioDraft()
+  await saveStudioDraft(definition)
+  await saveStudioDraft({ ...definition })
+  await saveStudioDraft({ ...definition, title: 'Changed' })
   const bodies = client.post.mock.calls.map(call => call[1])
   expect(bodies[0].idempotency_key).toBe(bodies[1].idempotency_key)
   expect(bodies[0].idempotency_key).not.toBe(bodies[2].idempotency_key)

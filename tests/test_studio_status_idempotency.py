@@ -57,7 +57,7 @@ def test_revoked_publisher_cannot_replay(probe):
 def test_sql_unknown_ack_replays_committed_history_once(studio_db, monkeypatch):
     client = _client()
     prefix = '/api/v1/studio/drafts'
-    created = client.post(prefix, headers=_HEADERS_A, json={'definition': propose_studio_draft('Kunden')}).json()
+    created = client.post(prefix, headers=_HEADERS_A, json={'definition': propose_studio_draft('Kunden'), 'idempotency_key': str(uuid4())}).json()
     path = prefix+'/'+created['id']
     reviewed = client.post(path+'/submit-review', headers=_HEADERS_A, json=body(created['revision'])).json()
     _USER['sub'] = 'berta'

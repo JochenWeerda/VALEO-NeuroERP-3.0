@@ -48,7 +48,15 @@ export async function proposeStudioDraft(intent: string): Promise<StudioReport> 
 
 export async function saveStudioDraft(definition: ScreenDefinition, draftId?: string, expectedRevision?: string) {
   if (draftId && !expectedRevision) throw new Error('Gespeicherten Entwurfsstand zuerst laden.')
-  const payload = draftId ? { definition, expected_revision: expectedRevision } : { definition }
+  const normalize = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(normalize)
+    if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([key, item]) => [key, normalize(item)]))
+    return value
+  }
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(normalize(JSON.parse(JSON.stringify(definition))))))
+  const fingerprint = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('')
+  const idempotencyKey = statusKey(draftId ? 'update' : 'create', draftId ?? definition.id, `${expectedRevision ?? ''}:${fingerprint}`)
+  const payload = draftId ? { definition, expected_revision: expectedRevision, idempotency_key: idempotencyKey } : { definition, idempotency_key: idempotencyKey }
   const response = draftId
     ? await apiClient.put(`/api/v1/studio/drafts/${draftId}`, payload)
     : await apiClient.post('/api/v1/studio/drafts', payload)

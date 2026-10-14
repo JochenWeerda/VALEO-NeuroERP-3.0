@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## STUDIO-SAVE-IDEMPOTENCY-20261014 — reserviert, Codex
+## STUDIO-SAVE-IDEMPOTENCY-20261014 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Create/Update mit UUID-Schluessel und exakt gebundenem Inhalt wiederholbar; keine Doppelhistorie oder stille Ueberschreibung bei unklarem Commit-Ergebnis. **Dateibesitz:** studio_draft_store.py; studio_drafts.py; Studio-Client und bestehende Python/Vitest-Vertraege; neuer test_studio_save_idempotency.py; eigene QA. **Abnahme:** gespeichertes Snapshot-Replay mit Mandant/Actor/Aktion/Ziel/Inhalt/Revision, gleiche SQL-Schluessel transaktional serialisiert, Konflikte bleiben ohne Wirkung. **Risiken:** Historienanzeige, Korrelationsattribute und Prozesssimulation folgen; keine neue DB/Migration, bestehende Historie weiterverwenden.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Create/Update mit UUID-Schluessel und exakt gebundenem Inhalt wiederholbar; keine Doppelhistorie oder stille Ueberschreibung bei unklarem Commit-Ergebnis. **Dateibesitz:** studio_draft_store.py; studio_drafts.py; Studio-Client und bestehende Python/Vitest-Vertraege; neuer test_studio_save_idempotency.py; eigene QA. **Abnahme:** gespeichertes Snapshot-Replay mit Mandant/Actor/Aktion/Ziel/Inhalt/Revision, gleiche SQL-Schluessel transaktional serialisiert, Konflikte bleiben ohne Wirkung. **Risiken:** Historienanzeige, Korrelationsattribute und Prozesssimulation folgen; keine neue DB/Migration, bestehende Historie weiterverwenden.
+
+**Lieferung:** 125 Python/SQL- und elf UI-Faelle, danach elf Lock/Replay- und drei finale Transportfaelle bestanden. Create/Update replayen atomare Historienergebnisse; Inhalt/Actor/Revision gebunden, SQL-Keylock auch vor CREATE. QA: studio-save-idempotency-20261014.md. API-Artefaktsynchronisierung, Historienanzeige und Prozesssimulation offen.
 
 ## EINVOICE-ROLLEN-20261014 — abgeschlossen, Claude Code
 

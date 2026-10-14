@@ -34,7 +34,11 @@ class StudioProposeIn(BaseModel):
     intent: str = Field(min_length=1)
 
 
-class StudioUpdateIn(StudioDefinitionIn):
+class StudioSaveIn(StudioDefinitionIn):
+    idempotency_key: UUID
+
+
+class StudioUpdateIn(StudioSaveIn):
     expected_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
@@ -144,7 +148,7 @@ def studio_history(
 
 @router.post("/drafts", summary="Studio-Entwurf anlegen")
 def studio_create_draft(
-    body: StudioDefinitionIn,
+    body: StudioSaveIn,
     tenant_id: str = Depends(get_tenant_id),
     user: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
@@ -152,7 +156,7 @@ def studio_create_draft(
     if report["violations"]:
         raise HTTPException(status_code=400, detail={"violations": report["violations"]})
     try:
-        record = _storage_call(save_draft, tenant_id, _actor(user), body.definition, readiness=report["readiness"])
+        record = _storage_call(save_draft, tenant_id, _actor(user), body.definition, readiness=report["readiness"], idempotency_key=str(body.idempotency_key))
     except ValueError as error:
         raise HTTPException(409, str(error)) from error
     return {**record, **report}
@@ -176,6 +180,7 @@ def studio_update_draft(
             draft_id=draft_id,
             readiness=report["readiness"],
             expected_revision=body.expected_revision,
+            idempotency_key=str(body.idempotency_key),
         )
     except KeyError as error:
         raise HTTPException(status_code=404, detail="draft_nicht_gefunden") from error

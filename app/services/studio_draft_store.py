@@ -103,6 +103,26 @@ def _sql_replay(session: Session, key: str, tenant: str, draft: str, actor: str,
     return _matching_replay(entry, tenant, draft, actor, action, revision)
 
 
+def _matching_save_replay(entry, tenant, actor, draft, definition, revision):
+    if entry is None:
+        return None
+    action = "update" if draft else "create"
+    snapshot = _matching_replay(entry, tenant, draft or entry["draft_id"], actor, action, revision)
+    encode = lambda value: json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    if encode(snapshot["definition"]) != encode(definition):
+        raise ValueError("idempotenzschluessel_anderer_inhalt")
+    return snapshot
+
+
+def _sql_save_replay(session, key, tenant, actor, draft, definition, revision):
+    from app.infrastructure.models.studio_models import ScreenDefinitionHistory
+    row = session.get(ScreenDefinitionHistory, key)
+    entry = {field: getattr(row, field) for field in (
+        "tenant_id", "draft_id", "actor", "action", "previous_revision", "snapshot"
+    )} if row is not None else None
+    return _matching_save_replay(entry, tenant, actor, draft, definition, revision)
+
+
 @_durable_operation
 def get_status_replay(tenant: str, draft: str, actor: str, action: str, revision: str, key: str):
     if _prefer_memory:
@@ -160,11 +180,12 @@ def save_draft(
     draft_id: str | None = None,
     readiness: dict[str, Any] | None = None,
     expected_revision: str | None = None,
+    idempotency_key: str | None = None,
 ) -> dict[str, Any]:
     if _use_sql():
-        return _with_revision(_sql_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness, expected_revision=expected_revision))
+        return _with_revision(_sql_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness, expected_revision=expected_revision, idempotency_key=idempotency_key))
     with _memory_lock:
-        return _with_revision(_memory_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness, expected_revision=expected_revision))
+        return _with_revision(_memory_save(tenant_id, actor, definition, draft_id=draft_id, readiness=readiness, expected_revision=expected_revision, idempotency_key=idempotency_key))
 
 
 def _assert_snapshot(item: dict[str, Any], expected: dict[str, Any] | None) -> None:
@@ -272,7 +293,13 @@ def _memory_save(
     draft_id: str | None,
     readiness: dict[str, Any] | None,
     expected_revision: str | None = None,
+    idempotency_key: str | None = None,
 ) -> dict[str, Any]:
+    if idempotency_key:
+        entry = next((e for e in _HISTORY if e["id"] == idempotency_key), None)
+        replay = _matching_save_replay(entry, tenant_id, actor, draft_id, definition, expected_revision)
+        if replay is not None:
+            return replay
     existing = _DRAFTS.get(draft_id) if draft_id else None
     if existing is None and draft_id is None:
         existing = _find_memory_by_screen(tenant_id, str(definition.get("id") or ""))
@@ -298,7 +325,7 @@ def _memory_save(
         "updated_by": actor,
         "updated_at": _now(),
     }
-    _HISTORY.append(_history_entry(record, actor, "update" if existing else "create", _with_revision(existing)["revision"] if existing else None))
+    _HISTORY.append(_history_entry(record, actor, "update" if existing else "create", _with_revision(existing)["revision"] if existing else None, idempotency_key))
     _DRAFTS[record["id"]] = record
     return deepcopy(record)
 
@@ -391,12 +418,19 @@ def _sql_save(
     draft_id: str | None,
     readiness: dict[str, Any] | None,
     expected_revision: str | None = None,
+    idempotency_key: str | None = None,
 ) -> dict[str, Any]:
     from app.infrastructure.models.studio_models import ScreenDefinitionDraft
 
     screen_id = str(definition.get("id") or "")
     session = _sql_session()
     try:
+        if idempotency_key:
+            # Same UUID is serialized even when two CREATEs have no row yet.
+            session.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"), {"key": idempotency_key})
+            replay = _sql_save_replay(session, idempotency_key, tenant_id, actor, draft_id, definition, expected_revision)
+            if replay is not None:
+                return replay
         row = (session.query(ScreenDefinitionDraft).filter_by(id=draft_id, tenant_id=tenant_id)
                .with_for_update().one_or_none()) if draft_id else None
         if draft_id and row is None:
@@ -433,13 +467,13 @@ def _sql_save(
         row.updated_by = actor
         row.updated_at = now
         session.flush()
-        _append_sql_history(session, _row_to_dict(row), actor, "update" if previous else "create", previous)
+        _append_sql_history(session, _row_to_dict(row), actor, "update" if previous else "create", previous, idempotency_key)
         session.commit()
         session.refresh(row)
         return _row_to_dict(row)
     except IntegrityError as error:
         session.rollback()
-        raise ValueError("screen_id_bereits_vorhanden") from error
+        raise ValueError("idempotenz_oder_screen_id_konflikt" if idempotency_key else "screen_id_bereits_vorhanden") from error
     except Exception:
         session.rollback()
         raise

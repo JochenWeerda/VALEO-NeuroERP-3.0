@@ -137,7 +137,7 @@ def test_http_update_requires_current_display_revision(probe):
     path = '/studio/drafts/'+record['id']
     changed = deepcopy(record['definition'])
     changed['title'] = 'Erster Bearbeiter'
-    assert client.put(path, json={'definition': changed}).status_code == 422
+    assert client.put(path, json={'definition': changed, 'idempotency_key': str(uuid4())}).status_code == 422
     first = client.put(path, json={'definition': changed, 'expected_revision': record['revision'], 'idempotency_key': str(uuid4())})
     assert first.status_code == 200
     second = deepcopy(changed)
@@ -151,7 +151,7 @@ def test_create_does_not_overwrite_existing_screen(probe):
     record = create(client)
     duplicate = deepcopy(record['definition'])
     duplicate['title'] = 'Unbeabsichtigte Ueberschreibung'
-    assert client.post('/studio/drafts', json={'definition': duplicate}).status_code == 409
+    assert client.post('/studio/drafts', json={'definition': duplicate, 'idempotency_key': str(uuid4())}).status_code == 409
     assert client.get('/studio/drafts/'+record['id']).json()['definition'] == record['definition']
 
 
