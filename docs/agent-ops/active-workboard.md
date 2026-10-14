@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HARVEST-RELEASE-SAFETY-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Gefundene Ernteannahme-Folgerisiken: Release-Rennen, fremde Kernreferenzen, Payload-Identitaet und fehlende ERP-Rollen vor Fachzugriff. **Dateibesitz:** harvest_acceptance_service.py, partie_service.py (eigene laufende Claims); harvest_acceptance.py nur Rollen-/Actorgrenze und Bindung; eigene Tests/QA. **Abnahme:** vorhandene Belegrollen, kein Header-/System-Autor, serialisierte Freigabe, eigene Artikel/Lager/Wiegescheine/Kontrakte, keine Teilwirkung; gemeinsamer Pruefstand, keine Migration/DB/Container. Keine neue Rechtewelt.
+
 ## STUDIO-EDITOR-CONTROLS-20261014 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Studio-Bedienung fuer modellierte lesende Agrar-Entwuerfe, ohne unmodellierte Fachaktionen als simuliert auszugeben. **Dateibesitz:** studio-reducer.ts, ScreenStudioPage.tsx und gezielte UI-/Reducer-Tests (innerhalb bestehendem Studio-Claim). **Abnahme:** Fachbereich und Agent-Vertrag konsistent; Fachaktionen lassen sich ausdruecklich entfernen, alle Ebenen; keine Berechtigungs- oder Fachregelvermutung, bestehende native Runtime bleibt fuehrend.
