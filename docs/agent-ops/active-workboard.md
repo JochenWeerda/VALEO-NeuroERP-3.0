@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SLO-CANONICAL-INPUT-20261014 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Keine erfundenen SLO-Messwerte/IDs; ausdruecklicher gemeinsamer REST-/MCP-Vertrag mit endlichen Zahlen oder ausdruecklichem null. **Dateibesitz:** process_kernel_api.py nur check_slo/Schemaimport; neues schemas/slo_input.py; mcp_tool_contracts.py nur finance_sla_check/process_slo_check; neuro_tool_execution.py nur SLO-Vorvalidierung/Entfernung Ersatzwerte; neue tests/test_slo_canonical_input.py und QA; OpenAPI nur SLO-Eingabe/Beschreibung/Komponente auf HEAD-Basis. **Abnahme:** missing/string/bool/NaN/Inf 422 vor HTTP; explicit null bleibt UNBEKANNT, null und 0 unterscheidbar; zwei MCP-Version-2-Vertraege gleicher REST-Schemaabgleich. **Risiken:** Skontoberechnung im Broker ist fachlich falsch an SLO gebunden und braucht eigenen Ersatz; kein Fachfreigabenachweis. Andere POSTs/Historie/Simulation offen. Keine Migration/DB/Container.
+
 ## PORTAL-SHOP-KUNDE-20261014 — abgeschlossen, Claude Code
 
 **Lieferung:** Kundenwege des Portalshops (`products`, `orders`, `orders/{id}`, `contracts`, `pre-purchases`) nehmen Mandant und Kunde nur aus `portal_kunde`; `tenant_id`/`customer_id` entfernt, Rueckfall `customer-demo-001` entfernt. Interne Wege (Status, Abgleich, Beobachtung) Mandant aus Anmeldung, Rechte wie Auftraege (`sales_order` lesen/bearbeiten). Migration `portal_order_idempotency_20261014`: fehlende Spalte `idempotency_key` (Shop-Bestellwege bisher 500, auch in der gewachsenen DB), eindeutig je Mandant/Kunde. Frontend `portal-service.ts` ohne `VITE_TENANT_ID`. 4 neue Negativtests + 17 bestehende, Vertragstest umgestellt (frisch). QA: `docs/quality-assurance/portal-shop-kunde-20261014.md`. **Offen, fuer alle:** portal_feldbuch, Lohndienste, Empfehlungen; Migration auf gewachsener DB; `customer_orders.order_number` systemweit eindeutig.
