@@ -402,6 +402,9 @@ def test_mitarbeiter_sieht_nur_zugewiesene_schlaege(welt):
     assert (stats["schlaege"], stats["massnahmen"]) == (1, 1)
     assert m.post("/api/v1/portal/feldbuch/schlaege", json={"name": "Neu", "flaeche": 1}).status_code == 403
     assert m.get("/api/v1/portal/feldbuch/duengebilanz").status_code == 403
+    kontext = m.get("/api/v1/portal/feldbuch/arbeitskontext",
+                    params={"wirtschaftsjahr": 2026, "rolle": "betriebsleiter", "betrieb_name": "Erfunden"}).json()
+    assert (kontext["rolle"], kontext["betriebName"]) == ("Betriebsmitarbeiter", k1)
 
 
 # ── Empfehlungen ─────────────────────────────────────────────────────────────

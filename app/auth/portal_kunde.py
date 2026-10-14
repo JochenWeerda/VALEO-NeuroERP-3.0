@@ -86,6 +86,12 @@ PORTAL_RECHTE: dict[str, frozenset[str]] = {
 }
 assert set(PORTAL_RECHTE) == set(BETRIEBSROLLEN)
 
+ROLLEN_BEZEICHNUNG: dict[str, str] = {
+    "inhaber": "Betriebsinhaber", "betriebsleiter": "Betriebsleiter", "mitarbeiter": "Betriebsmitarbeiter",
+    "buchhaltung": "Buchhaltung des Betriebs", "berater": "Externer Berater", "lohndienstleister": "Lohndienstleister",
+    "aussendienst": "Aussendienst", "intern": "Innendienst",
+}
+
 # Interne Betreuung: alles ausser der Benutzerverwaltung eines Betriebs (die laeuft ueber die Leitung des Hauses);
 # Schreibwege pruefen zusaetzlich die Fachrollen des Hauses.
 INTERNE_RECHTE = frozenset().union(*PORTAL_RECHTE.values()) - {ZUGAENGE_VERWALTEN, LOHNDIENST_AUSFUEHREN}

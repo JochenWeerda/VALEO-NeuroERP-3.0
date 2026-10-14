@@ -15,7 +15,7 @@ import { usePortalDashboard, type PortalDashboard as PortalDashboardApi } from '
 import { ErrorState } from '@/components/ErrorState'
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
-import { kontoDarf, usePortalKonto } from '@/lib/portal-konto'
+import { kontoDarf, usePortalKonto, type PortalKundenkonto } from '@/lib/portal-konto'
 import {
   ShoppingCart,
   Package,
@@ -44,11 +44,11 @@ type PortalDashboardView = {
     kundennummer: string
   }
   kpis: {
-    offeneBestellungen: number
-    laufendeVertraege: number
-    offeneRechnungen: number
-    offenerBetrag: number
-    verfuegbareDokumente: number
+    offeneBestellungen: number | null
+    laufendeVertraege: number | null
+    offeneRechnungen: number | null
+    offenerBetrag: number | null
+    verfuegbareDokumente: number | null
   }
   letzteBestellungen: Array<{
     id: string
@@ -76,26 +76,29 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
   'abgeschlossen': { label: 'Abgeschlossen', color: 'bg-emerald-100 text-emerald-800', icon: <CheckCircle2 className="h-3 w-3" /> },
 }
 
-function mapPortalDashboard(data: PortalDashboardApi): PortalDashboardView {
-  const pickNumber = (label: string) => {
+// Kennzahlen unter den Bezeichnungen, die /portal/dashboard liefert (portal_compat_service). Fehlt eine — weil die
+// Portalrolle sie nicht sehen darf oder das Backend sie nicht berechnet —, ist sie null und die Kachel entfaellt;
+// bis 14.10.2026 suchte die Seite andere Bezeichnungen und zeigte ueberall 0.
+function mapPortalDashboard(data: PortalDashboardApi, konto: PortalKundenkonto | null): PortalDashboardView {
+  const pickNumber = (label: string): number | null => {
     const raw = (data.kpis ?? []).find((k) => k.label.toLowerCase() === label.toLowerCase())?.value
-    if (!raw) return 0
-    const normalized = raw.replace(',', '.').replace(/[^\d.-]/g, '')
+    if (raw === undefined || raw === null || raw === '') return null
+    const normalized = String(raw).replace(',', '.').replace(/[^\d.-]/g, '')
     const num = Number(normalized)
-    return Number.isFinite(num) ? num : 0
+    return Number.isFinite(num) ? num : null
   }
 
   return {
     kunde: {
-      name: 'Portal-Kunde',
-      kundennummer: 'PORTAL',
+      name: konto?.name ?? 'Kundenportal',
+      kundennummer: konto?.customer_number ?? '',
     },
     kpis: {
-      offeneBestellungen: pickNumber('Offene Bestellungen'),
-      laufendeVertraege: pickNumber('Vertragsstatus'),
-      offeneRechnungen: pickNumber('Offene Rechnungen'),
-      offenerBetrag: pickNumber('Letzte Rechnung'),
-      verfuegbareDokumente: pickNumber('Neue Dokumente'),
+      offeneBestellungen: pickNumber('Bestellungen'),
+      laufendeVertraege: pickNumber('Laufende Vertraege'),
+      offeneRechnungen: pickNumber('Rechnungen offen'),
+      offenerBetrag: pickNumber('Offener Betrag'),
+      verfuegbareDokumente: pickNumber('Dokumente'),
     },
     letzteBestellungen: (data.letzteBestellungen ?? []).map((b) => ({
       id: b.nummer || b.id,
@@ -272,6 +275,9 @@ function EmpfehlungsBanner() {
 
 export default function PortalDashboard() {
   const { toast } = useToast()
+  const konto = usePortalKonto((state) => state.aktiv)
+  // Nur, was die Portalrolle nutzen darf (PORTAL-CONTEXT-001); der Server prueft dasselbe.
+  const darf = (recht: string) => kontoDarf(konto, recht)
   const { data: portalData, isLoading, isError, error, refetch } = usePortalDashboard()
 
   if (isLoading) {
@@ -286,42 +292,50 @@ export default function PortalDashboard() {
     return <ErrorState error={new Error('Keine Dashboard-Daten verfuegbar.')} onRetry={() => { void refetch() }} />
   }
 
-  const data = mapPortalDashboard(portalData)
+  const data = mapPortalDashboard(portalData, konto)
 
   return (
     <div className="space-y-6">
       {/* Willkommens-Header */}
       <div className="rounded-2xl bg-linear-to-r from-emerald-600 to-emerald-800 p-6 text-white shadow-xl">
         <h1 className="text-2xl font-bold">Willkommen, {data.kunde.name}!</h1>
-        <p className="mt-1 text-status-success">Kundennummer: {data.kunde.kundennummer}</p>
+        {data.kunde.kundennummer && (
+          <p className="mt-1 text-status-success">Kundennummer: {data.kunde.kundennummer}</p>
+        )}
         <div className="mt-4 flex flex-wrap gap-2">
-          <Link to="/portal/shop">
-            <Button variant="secondary" className="h-auto gap-2 py-2">
-              <ShoppingCart className="h-5 w-5" />
-              <div className="text-left">
-                <div className="font-semibold">Bestellportal</div>
-                <div className="text-xs font-normal opacity-80">Futter- und Betriebsmittel bestellen</div>
-              </div>
-            </Button>
-          </Link>
-          <Link to="/portal/anfragen">
-            <Button variant="outline" className="gap-2 border-white/30 bg-white/10 text-white hover:bg-white/20">
-              <FileText className="h-4 w-4" />
-              Anfrage stellen
-            </Button>
-          </Link>
+          {darf('verkauf') && (
+            <Link to="/portal/shop">
+              <Button variant="secondary" className="h-auto gap-2 py-2">
+                <ShoppingCart className="h-5 w-5" />
+                <div className="text-left">
+                  <div className="font-semibold">Bestellportal</div>
+                  <div className="text-xs font-normal opacity-80">Futter- und Betriebsmittel bestellen</div>
+                </div>
+              </Button>
+            </Link>
+          )}
+          {darf('verkauf') && (
+            <Link to="/portal/anfragen">
+              <Button variant="outline" className="gap-2 border-white/30 bg-white/10 text-white hover:bg-white/20">
+                <FileText className="h-4 w-4" />
+                Anfrage stellen
+              </Button>
+            </Link>
+          )}
           <Link to="/portal/preisspiegel">
             <Button variant="outline" className="gap-2 border-white/30 bg-white/10 text-white hover:bg-white/20">
               <TrendingUp className="h-4 w-4" />
               Getreidekurse
             </Button>
           </Link>
-          <Link to="/portal/lohndienste">
-            <Button variant="outline" className="gap-2 border-white/30 bg-white/10 text-white hover:bg-white/20">
-              <Tractor className="h-4 w-4" />
-              Lohndienste buchen
-            </Button>
-          </Link>
+          {darf('lohndienst_beauftragen') && (
+            <Link to="/portal/lohndienste">
+              <Button variant="outline" className="gap-2 border-white/30 bg-white/10 text-white hover:bg-white/20">
+                <Tractor className="h-4 w-4" />
+                Lohndienste buchen
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -330,35 +344,45 @@ export default function PortalDashboard() {
 
       {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KPICard
-          title="Offene Bestellungen"
-          value={data.kpis.offeneBestellungen}
-          icon={<Package className="h-5 w-5" />}
-          link="/portal/bestellungen"
-          color="blue"
-        />
-        <KPICard
-          title="Laufende Verträge"
-          value={data.kpis.laufendeVertraege}
-          icon={<FileText className="h-5 w-5" />}
-          link="/portal/vertraege"
-          color="emerald"
-        />
-        <KPICard
-          title="Offene Rechnungen"
-          value={data.kpis.offeneRechnungen}
-          icon={<Receipt className="h-5 w-5" />}
-          link="/portal/rechnungen"
-          suffix={`€ ${data.kpis.offenerBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`}
-          color="amber"
-        />
-        <KPICard
-          title="Neue Dokumente"
-          value={data.kpis.verfuegbareDokumente}
-          icon={<Download className="h-5 w-5" />}
-          link="/portal/dokumente"
-          color="purple"
-        />
+        {data.kpis.offeneBestellungen !== null && (
+          <KPICard
+            title="Bestellungen"
+            value={data.kpis.offeneBestellungen}
+            icon={<Package className="h-5 w-5" />}
+            link="/portal/bestellungen"
+            color="blue"
+          />
+        )}
+        {data.kpis.laufendeVertraege !== null && (
+          <KPICard
+            title="Laufende Verträge"
+            value={data.kpis.laufendeVertraege}
+            icon={<FileText className="h-5 w-5" />}
+            link="/portal/vertraege"
+            color="emerald"
+          />
+        )}
+        {data.kpis.offeneRechnungen !== null && (
+          <KPICard
+            title="Offene Rechnungen"
+            value={data.kpis.offeneRechnungen}
+            icon={<Receipt className="h-5 w-5" />}
+            link="/portal/rechnungen"
+            suffix={data.kpis.offenerBetrag !== null
+              ? `€ ${data.kpis.offenerBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`
+              : undefined}
+            color="amber"
+          />
+        )}
+        {data.kpis.verfuegbareDokumente !== null && (
+          <KPICard
+            title="Dokumente"
+            value={data.kpis.verfuegbareDokumente}
+            icon={<Download className="h-5 w-5" />}
+            link="/portal/dokumente"
+            color="purple"
+          />
+        )}
       </div>
 
       {/* Preisspiegel-Widget (volle Breite) */}
@@ -367,88 +391,92 @@ export default function PortalDashboard() {
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Letzte Bestellungen */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div>
-              <CardTitle className="text-lg">Letzte Bestellungen</CardTitle>
-              <CardDescription>Ihre aktuellen Bestellungen</CardDescription>
-            </div>
-            <Link to="/portal/bestellungen">
-              <Button variant="ghost" className="min-h-touch gap-1">
-                Alle <ChevronRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {data.letzteBestellungen.map((bestellung) => {
-                const status = statusConfig[bestellung.status]
-                return (
-                  <div
-                    key={bestellung.id}
-                    className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{bestellung.id}</span>
-                        <Badge className={`${status.color} gap-1`}>
-                          {status.icon}
-                          {status.label}
-                        </Badge>
+        {darf('verkauf') && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div>
+                <CardTitle className="text-lg">Letzte Bestellungen</CardTitle>
+                <CardDescription>Ihre aktuellen Bestellungen</CardDescription>
+              </div>
+              <Link to="/portal/bestellungen">
+                <Button variant="ghost" className="min-h-touch gap-1">
+                  Alle <ChevronRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {data.letzteBestellungen.map((bestellung) => {
+                  const status = statusConfig[bestellung.status]
+                  return (
+                    <div
+                      key={bestellung.id}
+                      className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{bestellung.id}</span>
+                          <Badge className={`${status.color} gap-1`}>
+                            {status.icon}
+                            {status.label}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{bestellung.artikel}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground">{bestellung.artikel}</p>
+                      <div className="text-right">
+                        <p className="font-semibold">€ {bestellung.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</p>
+                        <p className="text-xs text-muted-foreground">{bestellung.datum}</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold">€ {bestellung.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</p>
-                      <p className="text-xs text-muted-foreground">{bestellung.datum}</p>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </CardContent>
-        </Card>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Neue Dokumente */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div>
-              <CardTitle className="text-lg">Neue Dokumente</CardTitle>
-              <CardDescription>Kürzlich bereitgestellt</CardDescription>
-            </div>
-            <Link to="/portal/dokumente">
-              <Button variant="ghost" className="min-h-touch gap-1">
-                Alle <ChevronRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {data.neueDokumente.map((dokument) => (
-                <div
-                  key={dokument.id}
-                  className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                      <Download className="h-5 w-5 text-muted-foreground" />
+        {darf('finanzen') && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div>
+                <CardTitle className="text-lg">Neue Dokumente</CardTitle>
+                <CardDescription>Kürzlich bereitgestellt</CardDescription>
+              </div>
+              <Link to="/portal/dokumente">
+                <Button variant="ghost" className="min-h-touch gap-1">
+                  Alle <ChevronRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {data.neueDokumente.map((dokument) => (
+                  <div
+                    key={dokument.id}
+                    className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                        <Download className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{dokument.name}</p>
+                        <p className="text-xs text-muted-foreground">{dokument.datum}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{dokument.name}</p>
-                      <p className="text-xs text-muted-foreground">{dokument.datum}</p>
-                    </div>
+                    <Button variant="ghost" className="min-h-touch" onClick={() => toast({
+                      title: 'Download nicht angebunden',
+                      description: 'Dokumente öffnen Sie unter Dokumente im Kundenportal.',
+                    })}>
+                      Herunterladen
+                    </Button>
                   </div>
-                  <Button variant="ghost" className="min-h-touch" onClick={() => toast({
-                    title: 'Download nicht angebunden',
-                    description: 'Dokumente öffnen Sie unter Dokumente im Kundenportal.',
-                  })}>
-                    Herunterladen
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Schnellzugriff */}
@@ -469,61 +497,75 @@ export default function PortalDashboard() {
                 link="/portal/preisspiegel"
                 color="emerald"
               />
-              <QuickAccessCard
-                title="Empfehlungen"
-                description="Angebote & Kontrakte für Sie"
-                icon={<Sparkles className="h-6 w-6" />}
-                link="/portal/empfehlungen"
-                color="amber"
-              />
-              <QuickAccessCard
-                title="Lohndienste buchen"
-                description="Spritz, Mahl+Misch, TMR"
-                icon={<Tractor className="h-6 w-6" />}
-                link="/portal/lohndienste"
-                color="blue"
-              />
-              <QuickAccessCard
-                title="Rationsberechnung"
-                description="Kostenoptimale Ration"
-                icon={<Calculator className="h-6 w-6" />}
-                link="/portal/rationsoptimierung"
-                color="emerald"
-              />
+              {darf('empfehlungen') && (
+                <QuickAccessCard
+                  title="Empfehlungen"
+                  description="Angebote & Kontrakte für Sie"
+                  icon={<Sparkles className="h-6 w-6" />}
+                  link="/portal/empfehlungen"
+                  color="amber"
+                />
+              )}
+              {darf('lohndienst_beauftragen') && (
+                <QuickAccessCard
+                  title="Lohndienste buchen"
+                  description="Spritz, Mahl+Misch, TMR"
+                  icon={<Tractor className="h-6 w-6" />}
+                  link="/portal/lohndienste"
+                  color="blue"
+                />
+              )}
+              {darf('auswertungen') && (
+                <QuickAccessCard
+                  title="Rationsberechnung"
+                  description="Kostenoptimale Ration"
+                  icon={<Calculator className="h-6 w-6" />}
+                  link="/portal/rationsoptimierung"
+                  color="emerald"
+                />
+              )}
             </div>
           </div>
           {/* Feldbuch & Dokumente */}
           <div>
             <p className="text-2xs font-semibold tracking-wide uppercase text-muted-foreground mb-2">Flächen & Dokumente</p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <QuickAccessCard
-                title="Ackerschlagkartei"
-                description="Feldbuch & Maßnahmen"
-                icon={<Leaf className="h-6 w-6" />}
-                link="/portal/feldbuch"
-                color="emerald"
-              />
-              <QuickAccessCard
-                title="Nährstoffbilanzen"
-                description="Jahresübersichten"
-                icon={<Wheat className="h-6 w-6" />}
-                link="/portal/naehrstoffbilanzen"
-                color="blue"
-              />
-              <QuickAccessCard
-                title="Zertifikate"
-                description="GMP, VLOG, QS..."
-                icon={<FileText className="h-6 w-6" />}
-                link="/portal/zertifikate"
-                color="amber"
-              />
-              <QuickAccessCard
-                title="CSV Export"
-                description="Daten exportieren"
-                icon={<Download className="h-6 w-6" />}
-                link="/portal/feldbuch?tab=export"
-                color="purple"
-              />
+              {darf('feldbuch_lesen') && (
+                <QuickAccessCard
+                  title="Ackerschlagkartei"
+                  description="Feldbuch & Maßnahmen"
+                  icon={<Leaf className="h-6 w-6" />}
+                  link="/portal/feldbuch"
+                  color="emerald"
+                />
+              )}
+              {darf('auswertungen') && (
+                <QuickAccessCard
+                  title="Nährstoffbilanzen"
+                  description="Jahresübersichten"
+                  icon={<Wheat className="h-6 w-6" />}
+                  link="/portal/naehrstoffbilanzen"
+                  color="blue"
+                />
+              )}
+              {darf('auswertungen') && (
+                <QuickAccessCard
+                  title="Zertifikate"
+                  description="GMP, VLOG, QS..."
+                  icon={<FileText className="h-6 w-6" />}
+                  link="/portal/zertifikate"
+                  color="amber"
+                />
+              )}
+              {darf('auswertungen') && (
+                <QuickAccessCard
+                  title="CSV Export"
+                  description="Daten exportieren"
+                  icon={<Download className="h-6 w-6" />}
+                  link="/portal/feldbuch?tab=export"
+                  color="purple"
+                />
+              )}
             </div>
           </div>
         </CardContent>

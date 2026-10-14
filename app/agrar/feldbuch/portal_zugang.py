@@ -9,7 +9,12 @@ from typing import Optional
 from fastapi import Depends, HTTPException, Request
 
 from app.auth.deps import get_current_user
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
 from app.auth.portal_kunde import (
+    ROLLEN_BEZEICHNUNG,
     AUSWERTUNGEN,
     FELDBUCH_LESEN,
     FELDBUCH_SCHREIBEN,
@@ -61,6 +66,15 @@ def feldbuch_kunde(
     ):
         raise HTTPException(status_code=403, detail="Keine Berechtigung: Feldbuch des Kunden bearbeiten.")
     return kunde.customer_id
+
+
+def arbeitskontext_anzeige(kunde: PortalKunde = Depends(portal_kunde),
+                           db: Session = Depends(get_db)) -> tuple[str, str]:
+    """Betriebsname und Rollenbezeichnung fuer den Arbeitskontext — aus Anmeldung und CRM, nie aus Parametern."""
+    name = db.execute(text(
+        "SELECT company_name FROM domain_crm.customers WHERE id = :c AND tenant_id = :t"),
+        {"c": kunde.customer_id, "t": kunde.tenant_id}).scalar()
+    return str(name or kunde.customer_id), ROLLEN_BEZEICHNUNG.get(kunde.rolle or "intern", kunde.rolle or "")
 
 
 def schlag_bereich(kunde: PortalKunde = Depends(portal_kunde)) -> Optional[tuple[str, ...]]:

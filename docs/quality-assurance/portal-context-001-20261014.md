@@ -101,6 +101,49 @@ Feldern; sie enthaelt jetzt die tatsaechlich genutzten Schemas.
 - Entfernt: `tests/test_portal_innendienst.py` (Fake-Datenbank, schrieb verschluckte Fehler fest) — ersetzt durch Test
   gegen die echte Datenbank.
 
+## Sichtpruefung (echter OIDC/PKCE-Ablauf, 14.10.2026)
+
+Gewachsene Datenbank vorher gesichert (`valeo_neuro_erp-full-20261014-vor-portal-migration.dump`, sha256
+`c87b15cd…`, ausserhalb des Repos) und auf `portal_lohndienst_persistenz_20261014` migriert. Zwei synthetische
+Keycloak-Kennungen (Mandant per Attribut, Zugangsdaten nur lokal, nie im Repo) und Zuordnungen: Betriebsinhaber auf
+„Hof Janssen GbR“ und „Agrargenossenschaft Wesermarsch“, Betriebsmitarbeiter auf „Hof Janssen GbR“ mit einem
+zugewiesenen Schlag. Anmeldung jeweils ueber „Mit SSO anmelden“ → Keycloak-Formular → Ruecksprung (kein gesetztes
+Token), Vite :3001, Backend-Container mit dem neuen Code.
+
+| Bild | Befund |
+| --- | --- |
+| ![Kontowahl](../benutzerhandbuch/img/portal-context-20261014/01-kontowahl.jpg) | Zwei Betriebe → Auswahl vor jedem Kundeninhalt |
+| ![Inhaber](../benutzerhandbuch/img/portal-context-20261014/02-inhaber-uebersicht.jpg) | Betrieb und Kundennummer aus der Zuordnung, Kacheln mit echten Kennzahlen |
+| ![Lohndienst](../benutzerhandbuch/img/portal-context-20261014/03-lohndienst-angefragt.jpg) | Lohndienst angefragt (201, persistent), Liste des Kontos |
+| ![Mitarbeiter](../benutzerhandbuch/img/portal-context-20261014/04-mitarbeiter-uebersicht.jpg) | Mitarbeiter: Navigation nur Uebersicht/Ackerschlagkartei, keine Kacheln, keine Bestell-/Lohndienstknoepfe |
+| ![Feldbuch](../benutzerhandbuch/img/portal-context-20261014/05-mitarbeiter-feldbuch.jpg) | Nur der zugewiesene Schlag; nur Sammelduengung und Info; Arbeitskontext mit Betrieb und Rolle |
+
+Die Sichtpruefung fand vier Fehler, die kein Test fand — alle behoben:
+
+1. Die Uebersicht suchte Kennzahlen unter Bezeichnungen, die das Backend nie liefert: alle Kacheln zeigten immer 0.
+   Jetzt die gelieferten Bezeichnungen; fehlt eine (Rolle darf sie nicht sehen), entfaellt die Kachel.
+2. Die Uebersicht begruesste mit dem Platzhalter „Portal-Kunde / PORTAL“ — jetzt Betrieb und Kundennummer.
+3. Schaltflaechen und Schnellzugriffe ohne Recht (Bestellportal, Lohndienst buchen, Feldbuch-Import,
+   Jahreswechsel, Export, Schlaege pflegen) wurden angezeigt und haetten 403 geliefert — jetzt nach Portalrecht
+   ausgeblendet (der Server prueft unveraendert).
+4. Der Feldbuch-Arbeitskontext nahm Rolle und Betriebsname aus Query/Body (Standard „betriebsleiter“, Name = rohe
+   Kunden-ID) — jetzt aus Anmeldung und CRM, mit deutscher Rollenbezeichnung; Parameter entfernt.
+
+Hinweis Bedienung: Die Kontowahl liegt nur im Arbeitsspeicher; nach einem harten Neuladen fragt das Portal bei
+mehreren Betrieben erneut (bewusst, kein localStorage ohne Einwilligung).
+
+Die Testkennungen, ihre Zuordnungen und der angefragte Testauftrag bleiben in der Entwicklungsumgebung fuer weitere
+Sichtpruefungen (Zuordnungen werden widerrufen, Auftraege storniert — geloescht wird beides nicht).
+
+## Nebenbefunde
+
+- `docker-compose.yml` enthaelt das Keycloak-Admin-Kennwort im Klartext (committet).
+- Die 18 Schlaege des Entwicklungsmandanten gehoeren dem Ersatzkunden `dev-customer` (alter Rueckfall des
+  Feldbuchs) und sind jetzt fuer niemanden erreichbar — Klaerung/Bereinigung braucht eine Entscheidung.
+- Die Glocke im Portalkopf zeigt eine feste Zahl (3), keine echten Benachrichtigungen.
+- `tsconfig.typecheck.json` (fokussierte Typpruefung) erfasst `pages/portal`, `layouts` und grosse Teile von `lib`
+  nicht; geprueft wurde deshalb mit der vollen Konfiguration (einziger Fehler: fremde Datei `lib/api/studio.ts`).
+
 ## Offen
 
 - **MCP/CLI:** Lohndienst und Empfehlungen sind noch nicht als Agentenwerkzeuge registriert (MCP-Vertraege bearbeitet

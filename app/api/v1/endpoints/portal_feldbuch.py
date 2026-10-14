@@ -25,7 +25,7 @@ from app.core.data_quality_enforcement import evaluate_feldbuch_massnahme_datens
 from app.core.database import get_db
 from app.core.data_quality_enforcement import DQValidationException
 from app.core.tenant import get_tenant_id
-from app.agrar.feldbuch.portal_zugang import feldbuch_kunde, im_bereich, schlag_bereich
+from app.agrar.feldbuch.portal_zugang import arbeitskontext_anzeige, feldbuch_kunde, im_bereich, schlag_bereich
 from app.api.v1.schemas.portal_feldbuch_schemas import (
     _NUTRIENT_INPUT_KEYS,
     PortalMassnahmeCreate,
@@ -1372,10 +1372,9 @@ async def portal_offline_sync(
 
 
 class _ArbeitskontextBody(BaseModel):
-    betrieb_name: Optional[str] = None
+    # Betrieb und Rolle kommen aus der Anmeldung (PORTAL-CONTEXT-001); bis 14.10.2026 setzte der Client beide frei.
     wirtschaftsjahr: int
     erntejahr: Optional[int] = None
-    rolle: str = "betriebsleiter"
     betriebsstaette: Optional[str] = None
 
 
@@ -1384,10 +1383,9 @@ class _ArbeitskontextBody(BaseModel):
 )
 async def portal_arbeitskontext_get(
     wirtschaftsjahr: int = Query(...),
-    betrieb_name: Optional[str] = Query(None),
     erntejahr: Optional[int] = Query(None),
-    rolle: str = Query("betriebsleiter"),
     customer_id: str = Depends(_get_customer_id),
+    anzeige: tuple[str, str] = Depends(arbeitskontext_anzeige),
 ) -> dict[str, Any]:
     """ASK Kap. 5: aktiver Betrieb-/Jahreskontext für die Portal-Ackerschlagkartei."""
     from app.agrar.feldbuch.arbeitskontext import build_arbeitskontext
@@ -1395,10 +1393,10 @@ async def portal_arbeitskontext_get(
     try:
         return build_arbeitskontext(
             customer_id=customer_id,
-            betrieb_name=betrieb_name or customer_id,
+            betrieb_name=anzeige[0],
             wirtschaftsjahr=wirtschaftsjahr,
             erntejahr=erntejahr,
-            rolle=rolle,
+            rolle=anzeige[1],
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -1410,16 +1408,17 @@ async def portal_arbeitskontext_get(
 async def portal_arbeitskontext_set(
     body: _ArbeitskontextBody,
     customer_id: str = Depends(_get_customer_id),
+    anzeige: tuple[str, str] = Depends(arbeitskontext_anzeige),
 ) -> dict[str, Any]:
     from app.agrar.feldbuch.arbeitskontext import build_arbeitskontext
 
     try:
         return build_arbeitskontext(
             customer_id=customer_id,
-            betrieb_name=body.betrieb_name or customer_id,
+            betrieb_name=anzeige[0],
             wirtschaftsjahr=body.wirtschaftsjahr,
             erntejahr=body.erntejahr,
-            rolle=body.rolle,
+            rolle=anzeige[1],
             betriebsstaette=body.betriebsstaette,
         )
     except ValueError as exc:

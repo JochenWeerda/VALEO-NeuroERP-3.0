@@ -175795,17 +175795,6 @@
       },
       "_ArbeitskontextBody": {
         "properties": {
-          "betrieb_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Betrieb Name"
-          },
           "betriebsstaette": {
             "anyOf": [
               {
@@ -175827,11 +175816,6 @@
               }
             ],
             "title": "Erntejahr"
-          },
-          "rolle": {
-            "default": "betriebsleiter",
-            "title": "Rolle",
-            "type": "string"
           },
           "wirtschaftsjahr": {
             "title": "Wirtschaftsjahr",
@@ -356080,22 +356064,6 @@
           },
           {
             "in": "query",
-            "name": "betrieb_name",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Betrieb Name"
-            }
-          },
-          {
-            "in": "query",
             "name": "erntejahr",
             "required": false,
             "schema": {
@@ -356108,16 +356076,6 @@
                 }
               ],
               "title": "Erntejahr"
-            }
-          },
-          {
-            "in": "query",
-            "name": "rolle",
-            "required": false,
-            "schema": {
-              "default": "betriebsleiter",
-              "title": "Rolle",
-              "type": "string"
             }
           },
           {

@@ -77,6 +77,7 @@ import {
   Upload,
   AlertTriangle,
 } from 'lucide-react'
+import { kontoDarf, usePortalKonto } from '@/lib/portal-konto'
 
 // ── Typ-Konfiguration ──────────────────────────────────────────────────────
 
@@ -845,6 +846,9 @@ function FeldbuchSkeleton() {
 // ── Hauptkomponente ────────────────────────────────────────────────────────
 
 export default function PortalFeldbuch() {
+  // Nur Aktionen, die die Portalrolle nutzen darf (PORTAL-CONTEXT-001); der Server prueft dasselbe.
+  const konto = usePortalKonto((state) => state.aktiv)
+  const darf = (recht: string) => kontoDarf(konto, recht)
   const isTouch = useTouchDevice()
   const currentYear = new Date().getFullYear()
   const [activeTab, setActiveTab] = useState('schlaege')
@@ -980,26 +984,34 @@ export default function PortalFeldbuch() {
               label: `WJ ${y}`,
             }))}
           />
-          <Button variant="outline" onClick={() => setShowSammelDialog(true)} className="min-h-touch gap-2">
-            <Droplets className="h-4 w-4" />
-            Sammeldüngung
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => void handleJahreswechsel()}
-            disabled={jahreswechsel.isPending}
-            className="min-h-touch gap-2"
-          >
-            Jahreswechsel
-          </Button>
-          <Button variant="outline" onClick={() => setShowImportDialog(true)} className="min-h-touch gap-2">
-            <Upload className="h-4 w-4" />
-            Import
-          </Button>
-          <Button variant="outline" onClick={() => setShowExportDialog(true)} className="min-h-touch gap-2">
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
+          {darf('feldbuch_schreiben') && (
+            <Button variant="outline" onClick={() => setShowSammelDialog(true)} className="min-h-touch gap-2">
+              <Droplets className="h-4 w-4" />
+              Sammeldüngung
+            </Button>
+          )}
+          {darf('feldbuch_verwalten') && (
+            <Button
+              variant="outline"
+              onClick={() => void handleJahreswechsel()}
+              disabled={jahreswechsel.isPending}
+              className="min-h-touch gap-2"
+            >
+              Jahreswechsel
+            </Button>
+          )}
+          {darf('feldbuch_verwalten') && (
+            <Button variant="outline" onClick={() => setShowImportDialog(true)} className="min-h-touch gap-2">
+              <Upload className="h-4 w-4" />
+              Import
+            </Button>
+          )}
+          {darf('auswertungen') && (
+            <Button variant="outline" onClick={() => setShowExportDialog(true)} className="min-h-touch gap-2">
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
+          )}
         </div>
       </div>
 
@@ -1103,7 +1115,7 @@ export default function PortalFeldbuch() {
             <TabsTrigger value="schlaege" className="min-h-touch">Schläge ({schlaege.length})</TabsTrigger>
             <TabsTrigger value="massnahmen" className="min-h-touch">Maßnahmen ({massnahmen.length})</TabsTrigger>
           </TabsList>
-          {activeTab === 'schlaege' && (
+          {activeTab === 'schlaege' && darf('feldbuch_verwalten') && (
             <Button
               data-testid="schlag-create"
               onClick={() => { setEditSchlag(null); setShowSchlagDialog(true) }}
@@ -1113,7 +1125,7 @@ export default function PortalFeldbuch() {
               Schlag anlegen
             </Button>
           )}
-          {activeTab === 'massnahmen' && (
+          {activeTab === 'massnahmen' && darf('feldbuch_schreiben') && (
             <Button
               data-testid="massnahme-create"
               onClick={() => { setEditMassnahme(null); setShowMassnahmeDialog(true) }}
@@ -1171,26 +1183,30 @@ export default function PortalFeldbuch() {
                           <Button variant="ghost" className="min-h-touch" onClick={() => setSchlaginfoId(schlag.id)} aria-label={`Info ${schlag.name}`}>
                             Info
                           </Button>
-                          <Button
-                            variant="ghost"
-                            className="min-h-touch"
-                            aria-label={`Bearbeiten ${schlag.name}`}
-                            data-testid={`schlag-edit-${schlag.id}`}
-                            onClick={() => { setEditSchlag(schlag); setShowSchlagDialog(true) }}
-                            disabled={rowBusy}
-                          >
-                            Bearbeiten
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            className="min-h-touch"
-                            aria-label={`Löschen ${schlag.name}`}
-                            data-testid={`schlag-delete-${schlag.id}`}
-                            onClick={() => handleDeleteSchlag(schlag)}
-                            disabled={rowBusy}
-                          >
-                            Löschen
-                          </Button>
+                          {darf('feldbuch_verwalten') && (
+                            <Button
+                              variant="ghost"
+                              className="min-h-touch"
+                              aria-label={`Bearbeiten ${schlag.name}`}
+                              data-testid={`schlag-edit-${schlag.id}`}
+                              onClick={() => { setEditSchlag(schlag); setShowSchlagDialog(true) }}
+                              disabled={rowBusy}
+                            >
+                              Bearbeiten
+                            </Button>
+                          )}
+                          {darf('feldbuch_verwalten') && (
+                            <Button
+                              variant="ghost"
+                              className="min-h-touch"
+                              aria-label={`Löschen ${schlag.name}`}
+                              data-testid={`schlag-delete-${schlag.id}`}
+                              onClick={() => handleDeleteSchlag(schlag)}
+                              disabled={rowBusy}
+                            >
+                              Löschen
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -1273,26 +1289,30 @@ export default function PortalFeldbuch() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            className="min-h-touch"
-                            aria-label={`Bearbeiten Maßnahme ${m.datum}`}
-                            data-testid={`massnahme-edit-${m.id}`}
-                            disabled={isErp || rowBusy}
-                            onClick={() => { setEditMassnahme(m); setShowMassnahmeDialog(true) }}
-                          >
-                            Bearbeiten
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            className="min-h-touch"
-                            aria-label={`Löschen Maßnahme ${m.datum}`}
-                            data-testid={`massnahme-delete-${m.id}`}
-                            disabled={isErp || rowBusy}
-                            onClick={() => handleDeleteMassnahme(m)}
-                          >
-                            Löschen
-                          </Button>
+                          {darf('feldbuch_schreiben') && (
+                            <Button
+                              variant="ghost"
+                              className="min-h-touch"
+                              aria-label={`Bearbeiten Maßnahme ${m.datum}`}
+                              data-testid={`massnahme-edit-${m.id}`}
+                              disabled={isErp || rowBusy}
+                              onClick={() => { setEditMassnahme(m); setShowMassnahmeDialog(true) }}
+                            >
+                              Bearbeiten
+                            </Button>
+                          )}
+                          {darf('feldbuch_schreiben') && (
+                            <Button
+                              variant="ghost"
+                              className="min-h-touch"
+                              aria-label={`Löschen Maßnahme ${m.datum}`}
+                              data-testid={`massnahme-delete-${m.id}`}
+                              disabled={isErp || rowBusy}
+                              onClick={() => handleDeleteMassnahme(m)}
+                            >
+                              Löschen
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
