@@ -120,17 +120,21 @@ async def upsert_connector(
     """Create or update connector."""
     from uuid import uuid4
     from sqlalchemy import text
-    uid = str(uuid4())
-    db.execute(
+    # Anlegen oder aendern je (Mandant, Schluessel). Bis 14.10.2026: ON CONFLICT DO NOTHING und danach Abruf unter der
+    # nie gespeicherten neuen ID — ein zweites PUT lieferte 404.
+    uid = db.execute(
         text(
             """
             INSERT INTO domain_shared.connectors (id, tenant_id, connector_key, connector_type, display_name, config_json, is_active)
             VALUES (:id, :tid, :key, :type, :dn, :cfg, :active)
-            ON CONFLICT DO NOTHING
+            ON CONFLICT (tenant_id, connector_key) DO UPDATE SET
+              connector_type = EXCLUDED.connector_type, display_name = EXCLUDED.display_name,
+              config_json = EXCLUDED.config_json, is_active = EXCLUDED.is_active, updated_at = now()
+            RETURNING id
             """
         ),
         {
-            "id": uid,
+            "id": str(uuid4()),
             "tid": tenant_id,
             "key": payload.connector_key,
             "type": payload.connector_type,
@@ -138,9 +142,9 @@ async def upsert_connector(
             "cfg": payload.config_json,
             "active": payload.is_active,
         }
-    )
+    ).scalar()
     db.commit()
-    return await get_connector(uid, db, tenant_id)
+    return await get_connector(str(uid), db, tenant_id)
 
 
 @router.patch("/connectors/{connector_id}", response_model=ConnectorOut, summary="Connector aktualisieren")
@@ -265,16 +269,20 @@ async def upsert_reporting_unit(
     """Create or update reporting unit."""
     from uuid import uuid4
     from sqlalchemy import text
-    uid = str(uuid4())
-    db.execute(
+    # Anlegen oder aendern je (Mandant, Schluessel); bis 14.10.2026 lieferte ein zweites PUT 500.
+    uid = db.execute(
         text(
             """
             INSERT INTO domain_shared.reporting_units (id, tenant_id, unit_key, display_name, connector_id, config_json, is_active)
             VALUES (:id, :tid, :key, :dn, :conn_id, :cfg, :active)
+            ON CONFLICT (tenant_id, unit_key) DO UPDATE SET
+              display_name = EXCLUDED.display_name, connector_id = EXCLUDED.connector_id,
+              config_json = EXCLUDED.config_json, is_active = EXCLUDED.is_active, updated_at = now()
+            RETURNING id
             """
         ),
         {
-            "id": uid,
+            "id": str(uuid4()),
             "tid": tenant_id,
             "key": payload.unit_key,
             "dn": payload.display_name,
@@ -282,7 +290,7 @@ async def upsert_reporting_unit(
             "cfg": payload.config_json,
             "active": payload.is_active,
         }
-    )
+    ).scalar()
     db.commit()
     row = db.execute(
         text(
@@ -462,16 +470,22 @@ async def upsert_schedule(
     """Create or update schedule."""
     from uuid import uuid4
     from sqlalchemy import text
-    uid = str(uuid4())
-    db.execute(
+    # Anlegen oder aendern je (Mandant, Schluessel); bis 14.10.2026 lieferte ein zweites PUT 500.
+    uid = db.execute(
         text(
             """
             INSERT INTO domain_shared.schedules (id, tenant_id, schedule_key, display_name, reporting_unit_id, cron_expr, lead_days, use_workday_rule, output_format, config_json, is_active)
             VALUES (:id, :tid, :key, :dn, :ru_id, :cron, :lead, :workday, :fmt, CAST(:cfg AS jsonb), :active)
+            ON CONFLICT (tenant_id, schedule_key) DO UPDATE SET
+              display_name = EXCLUDED.display_name, reporting_unit_id = EXCLUDED.reporting_unit_id,
+              cron_expr = EXCLUDED.cron_expr, lead_days = EXCLUDED.lead_days,
+              use_workday_rule = EXCLUDED.use_workday_rule, output_format = EXCLUDED.output_format,
+              config_json = EXCLUDED.config_json, is_active = EXCLUDED.is_active, updated_at = now()
+            RETURNING id
             """
         ),
         {
-            "id": uid,
+            "id": str(uuid4()),
             "tid": tenant_id,
             "key": payload.schedule_key,
             "dn": payload.display_name,
@@ -483,7 +497,7 @@ async def upsert_schedule(
             "cfg": payload.config_json,
             "active": payload.is_active,
         }
-    )
+    ).scalar()
     db.commit()
     row = db.execute(
         text(

@@ -156205,12 +156205,38 @@
             "pattern": "^[0-9a-f]{64}$",
             "title": "Expected Revision",
             "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
           }
         },
         "required": [
+          "idempotency_key",
           "expected_revision"
         ],
         "title": "StudioRevisionIn",
+        "type": "object"
+      },
+      "StudioSaveIn": {
+        "properties": {
+          "definition": {
+            "additionalProperties": true,
+            "title": "Definition",
+            "type": "object"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "definition",
+          "idempotency_key"
+        ],
+        "title": "StudioSaveIn",
         "type": "object"
       },
       "StudioUpdateIn": {
@@ -156224,10 +156250,16 @@
             "pattern": "^[0-9a-f]{64}$",
             "title": "Expected Revision",
             "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
           }
         },
         "required": [
           "definition",
+          "idempotency_key",
           "expected_revision"
         ],
         "title": "StudioUpdateIn",
@@ -398560,7 +398592,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/StudioDefinitionIn"
+                "$ref": "#/components/schemas/StudioSaveIn"
               }
             }
           },
@@ -398706,6 +398738,80 @@
           }
         ],
         "summary": "Studio-Entwurf aktualisieren",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/studio/drafts/{draft_id}/history": {
+      "get": {
+        "operationId": "studio_history_api_v1_studio_drafts__draft_id__history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "draft_id",
+            "required": true,
+            "schema": {
+              "title": "Draft Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Studio History Api V1 Studio Drafts  Draft Id  History Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unveraenderliche Studio-Revisionshistorie lesen",
         "tags": [
           "ui",
           "studio",

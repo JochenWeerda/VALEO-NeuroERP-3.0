@@ -19,6 +19,7 @@ from app.services.docflow_service import DocflowService, POS_TYPES
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.api.v1.schemas.base import TypedObjectOut
 
 
 class DocflowOut(BaseSchema):
@@ -349,7 +350,7 @@ async def delete_draft_document(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/{doc_id}/status-history", response_model=list[dict[str, Any]],
+@router.get("/{doc_id}/status-history", response_model=list[TypedObjectOut],
             summary="Statushistorie und Kommandoprotokoll des Belegs")
 async def get_status_history(
     doc_id: str,
@@ -454,7 +455,7 @@ class DocflowApprovalDecision(BaseModel):
     note: Optional[str] = Field(default=None, max_length=300)
 
 
-@router.get("/{doc_id}/approvals", response_model=list[dict[str, Any]], summary="Freigaben des Belegs")
+@router.get("/{doc_id}/approvals", response_model=list[TypedObjectOut], summary="Freigaben des Belegs")
 def list_approvals(
     doc_id: str,
     tenant_id: str = Depends(_docflow_tenant),
@@ -468,7 +469,7 @@ def list_approvals(
     return DocflowFreigabe(db, tenant_id).liste(doc_id)
 
 
-@router.post("/{doc_id}/approvals", response_model=dict[str, Any], summary="Freigabe durch eine zweite Person anfragen")
+@router.post("/{doc_id}/approvals", response_model=TypedObjectOut, summary="Freigabe durch eine zweite Person anfragen")
 def request_approval(
     doc_id: str,
     payload: DocflowApprovalRequest,
@@ -491,7 +492,7 @@ def request_approval(
         raise HTTPException(status_code=409, detail=exc.detail)
 
 
-@router.post("/{doc_id}/approvals/{approval_id}/decision", response_model=dict[str, Any],
+@router.post("/{doc_id}/approvals/{approval_id}/decision", response_model=TypedObjectOut,
              summary="Freigabe erteilen oder ablehnen")
 def decide_approval(
     doc_id: str,

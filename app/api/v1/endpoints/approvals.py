@@ -17,6 +17,7 @@ from app.core.database import get_db
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.tenant import get_tenant_id
 from app.services.finance_freigabe import engine_fuer
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter()
 
@@ -43,7 +44,7 @@ def _vorgang(engine: Any, subject_id: str, aktion: str = "post") -> Any:
         raise HTTPException(status_code=404, detail="Vorgang nicht gefunden") from exc
 
 
-@router.get("/{subject_type}/{subject_id}", response_model=list[dict[str, Any]], summary="Freigaben eines Vorgangs")
+@router.get("/{subject_type}/{subject_id}", response_model=list[TypedObjectOut], summary="Freigaben eines Vorgangs")
 def freigaben(
     subject_type: str,
     subject_id: str,
@@ -56,7 +57,7 @@ def freigaben(
     return engine.liste(subject_id)
 
 
-@router.post("/{subject_type}/{subject_id}", response_model=dict[str, Any],
+@router.post("/{subject_type}/{subject_id}", response_model=TypedObjectOut,
              summary="Freigabe durch eine zweite Person anfragen")
 def freigabe_anfragen(
     subject_type: str,
@@ -81,7 +82,7 @@ def freigabe_anfragen(
         raise HTTPException(status_code=409, detail=exc.detail)
 
 
-@router.post("/{subject_type}/{subject_id}/{approval_id}/decision", response_model=dict[str, Any],
+@router.post("/{subject_type}/{subject_id}/{approval_id}/decision", response_model=TypedObjectOut,
              summary="Freigabe erteilen oder ablehnen")
 def freigabe_entscheiden(
     subject_type: str,

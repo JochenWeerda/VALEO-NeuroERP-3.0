@@ -11,6 +11,7 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session
 
 from app.api.v1.endpoints import journal_entries
+from testgrenze import pruefstand_erlaubt
 
 
 @pytest.fixture
@@ -18,7 +19,7 @@ def accounts():
     raw = os.environ.get('TEST_DATABASE_URL')
     assert raw, 'Existing shared probe connection required'
     url = make_url(raw)
-    assert url.database == 'valeo_probe' or 'test' in url.database.lower()
+    assert pruefstand_erlaubt(url), "Nur Pruefstand oder CI-Testdatenbank"
     engine = create_engine(url)
     tenant = str(uuid4())
     ids = {number: str(uuid4()) for number in ['1500', '1400', '1600']}

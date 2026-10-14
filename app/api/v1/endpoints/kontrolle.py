@@ -20,6 +20,7 @@ from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFa
 from app.core.tenant import get_tenant_id
 from app.services import kontrollkorb
 from app.services.freigabe_engine import KONTROLLROLLEN, pruefe_befund, pruefkorb
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter()
 
@@ -31,7 +32,7 @@ class Befundpruefung(BaseModel):
     note: str = Field(..., min_length=3, max_length=500)
 
 
-@router.get("/befunde", response_model=list[dict[str, Any]], summary="Pruefkorb: Befunde der Kontroll-Engine")
+@router.get("/befunde", response_model=list[TypedObjectOut], summary="Pruefkorb: Befunde der Kontroll-Engine")
 def befunde(
     status: Optional[str] = Query("offen", pattern="^(offen|geprueft)$"),
     limit: int = Query(100, ge=1, le=500),
@@ -49,7 +50,7 @@ def _nur_leser(nutzer: Any) -> None:
         raise HTTPException(status_code=403, detail="Keine Berechtigung für den Prüfkorb.")
 
 
-@router.get("/pruefkorb", response_model=dict[str, Any], summary="Pruefkorb: Arbeitsliste des Controllers")
+@router.get("/pruefkorb", response_model=TypedObjectOut, summary="Pruefkorb: Arbeitsliste des Controllers")
 def arbeitsliste(
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=200),
@@ -74,7 +75,7 @@ def arbeitsliste(
     return kontrollkorb.seite(db, tenant_id, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, filter_plan=plan)
 
 
-@router.get("/lagebild", response_model=dict[str, Any], summary="Pruefkorb: Lagebild fuer den Controller")
+@router.get("/lagebild", response_model=TypedObjectOut, summary="Pruefkorb: Lagebild fuer den Controller")
 def lage(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -84,7 +85,7 @@ def lage(
     return kontrollkorb.lagebild(db, tenant_id)
 
 
-@router.post("/befunde/{befund_id}/pruefung", response_model=dict[str, Any], summary="Befund als geprueft bewerten")
+@router.post("/befunde/{befund_id}/pruefung", response_model=TypedObjectOut, summary="Befund als geprueft bewerten")
 def befund_pruefen(
     befund_id: str,
     payload: Befundpruefung,

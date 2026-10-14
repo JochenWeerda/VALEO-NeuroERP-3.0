@@ -13,6 +13,7 @@ from app.infrastructure.models.journal import JournalEntry
 from app.infrastructure.eventbus.outbox import OutboxEvent
 from app.services import tenant_lifecycle_service as lifecycle
 from test_identity_sessions import session
+from testgrenze import pruefstand_erlaubt
 
 
 @pytest.fixture
@@ -20,7 +21,7 @@ def database():
     raw=os.getenv('TEST_DATABASE_URL')
     if not raw: pytest.skip('Existing shared test database required')
     url=make_url(raw)
-    assert url.database=='valeo_probe' or 'test' in url.database.lower()
+    assert pruefstand_erlaubt(url), "Nur Pruefstand oder CI-Testdatenbank"
     engine=create_engine(url)
     with engine.connect() as connection:
         transaction=connection.begin()

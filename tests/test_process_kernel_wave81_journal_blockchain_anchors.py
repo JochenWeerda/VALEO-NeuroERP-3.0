@@ -61,6 +61,10 @@ def _client(monkeypatch) -> TestClient:
     app.dependency_overrides[journal_entries_module.get_db] = lambda: object()
     monkeypatch.setattr(journal_entries_module.container, "resolve", lambda cls: _DummyRepo())
     monkeypatch.setattr(journal_entries_module, "log_fibu_audit", lambda *args, **kwargs: None)
+    # Geprueft wird hier nur der Anker in der Antwort. Die Vier-Augen-Freigabe vor Buchung und Storno hat eigene
+    # Vertragstests (tests/test_freigabe_hauptbuch_zahlung.py) gegen eine echte Datenbank.
+    monkeypatch.setattr("app.services.finance_freigabe.verlange_hauptbuchbuchung", lambda *a, **k: None)
+    monkeypatch.setattr("app.services.finance_freigabe.verlange_hauptbuchstorno", lambda *a, **k: None)
     monkeypatch.setattr(
         "app.core.blockchain_anchor_runtime.anchor_journal_entry_event",
         lambda db, tenant_id, entry_id, action, payload: _DummyAnchor(entry_id),

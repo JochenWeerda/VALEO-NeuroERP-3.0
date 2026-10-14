@@ -14,29 +14,6 @@
         "summary": "Kassenabschluss ohne Bewertungsmodell gesperrt",
         "description": "Reject the retired synthetic closing until cash valuation is defined.",
         "operationId": "cash_close_day_api_v1_finance_cash_close_day_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "X-Tenant-ID",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "responses": {
           "409": {
             "description": "Kein belegter Kassenbestand und keine Gegenkontierung; keine Journalbuchung.",
@@ -45,18 +22,13 @@
                 "schema": {}
               }
             }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
           }
-        }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     }
   },

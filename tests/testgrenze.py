@@ -62,3 +62,24 @@ def _alle_fachrollen() -> tuple[str, ...]:
 
 
 ALLE_FACHROLLEN = _alle_fachrollen()
+
+
+def pruefstand_erlaubt(url) -> bool:
+    """Schreibende Datenbanktests nur gegen den Pruefstand ``valeo_probe``, eine Test-Datenbank oder — in CI — die
+    erklaerte Job-Datenbank (``TEST_DATABASE_URL``/``DATABASE_URL``). Nie gegen die Entwicklungsdatenbank.
+
+    Bis 14.10.2026 stand in elf Tests ein fester Name; in CI heisst die eigens angelegte Job-Datenbank anders, die
+    Tests brachen dort im Setup ab.
+    """
+    import os
+
+    from sqlalchemy.engine import make_url
+
+    ziel = url if hasattr(url, "database") else make_url(str(url))
+    name = (ziel.database or "").lower()
+    if name == "valeo_probe" or "test" in name:
+        return True
+    if os.environ.get("CI", "").lower() == "true":
+        erklaert = os.environ.get("TEST_DATABASE_URL") or os.environ.get("DATABASE_URL")
+        return bool(erklaert) and make_url(erklaert).database == ziel.database
+    return False
