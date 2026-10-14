@@ -13,6 +13,7 @@ Naming Convention: valeo_{domain}_{operation}
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from copy import deepcopy
 from enum import Enum
 from typing import Any, Optional
 
@@ -112,6 +113,7 @@ class MCPToolContract:
     api_endpoint: Optional[str] = None     # REST-Endpunkt der das Tool implementiert
     request_payload_mode: MCPRequestPayloadMode = MCPRequestPayloadMode.DEFAULT
     schema_version: int = MCP_CONTRACT_SCHEMA_VERSION
+    input_schema: Optional[dict[str, Any]] = None
 
     def validate_name(self) -> bool:
         """Prueft ob tool_name der valeo_{domain}_{operation}-Konvention entspricht."""
@@ -139,7 +141,7 @@ class MCPToolContract:
             "name": self.tool_name,
             "description": self.beschreibung,
             "_meta": {"valeo/schemaVersion": self.schema_version},
-            "inputSchema": {
+            "inputSchema": deepcopy(self.input_schema) if self.input_schema is not None else {
                 "type": "object",
                 "properties": props,
                 "required": required,
@@ -241,6 +243,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
     Mindestens 20 Tools in 6 Domains:
       agrar (6), finance (5), workflow (4), compliance (3), process (3), inventory (2)
     """
+    from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
     tools: list[MCPToolContract] = [
 
         # ---------------------------------------------------------------
@@ -475,6 +478,8 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_workflow_migration_check",
+            schema_version=2,
+            input_schema=WorkflowMigrationCheckIn.model_json_schema(),
             domain="workflow",
             operation="migration_check",
             beschreibung="Prueft Breaking Changes eines Workflow-Migrationspfads",
@@ -485,6 +490,10 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
                 _p_str("prozess_key", "Workflow-Prozess-Key", True, "agrar_settlement"),
                 _p_str("von_version", "Quell-Version", True, "1.0.0"),
                 _p_str("zu_version", "Ziel-Version", True, "1.1.0"),
+                MCPToolParameter("alt_schritte", MCPParameterTyp.ARRAY, "Gepruefter Ausgangsstand", True),
+                MCPToolParameter("neu_schritte", MCPParameterTyp.ARRAY, "Zu pruefender Zielstand", True),
+                _p_int("alt_schema_version", "Ausgangsschema", False),
+                _p_int("neu_schema_version", "Zielschema", False),
             ],
         ),
 

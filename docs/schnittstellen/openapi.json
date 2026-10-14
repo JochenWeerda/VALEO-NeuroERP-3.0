@@ -172254,6 +172254,104 @@
         "title": "WorkflowInstanceSummary",
         "type": "object"
       },
+      "WorkflowMigrationCheckIn": {
+        "additionalProperties": false,
+        "properties": {
+          "alt_schema_version": {
+            "default": 1,
+            "minimum": 1.0,
+            "title": "Alt Schema Version",
+            "type": "integer"
+          },
+          "alt_schritte": {
+            "items": {
+              "$ref": "#/components/schemas/WorkflowMigrationStepIn"
+            },
+            "minItems": 1,
+            "title": "Alt Schritte",
+            "type": "array"
+          },
+          "neu_schema_version": {
+            "default": 1,
+            "minimum": 1.0,
+            "title": "Neu Schema Version",
+            "type": "integer"
+          },
+          "neu_schritte": {
+            "items": {
+              "$ref": "#/components/schemas/WorkflowMigrationStepIn"
+            },
+            "title": "Neu Schritte",
+            "type": "array"
+          },
+          "prozess_key": {
+            "minLength": 1,
+            "title": "Prozess Key",
+            "type": "string"
+          },
+          "von_version": {
+            "minLength": 1,
+            "title": "Von Version",
+            "type": "string"
+          },
+          "zu_version": {
+            "minLength": 1,
+            "title": "Zu Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "prozess_key",
+          "von_version",
+          "zu_version",
+          "alt_schritte",
+          "neu_schritte"
+        ],
+        "title": "WorkflowMigrationCheckIn",
+        "type": "object"
+      },
+      "WorkflowMigrationStepIn": {
+        "additionalProperties": false,
+        "properties": {
+          "pflicht": {
+            "default": true,
+            "title": "Pflicht",
+            "type": "boolean"
+          },
+          "reihenfolge": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Reihenfolge",
+            "type": "integer"
+          },
+          "rolle": {
+            "default": "",
+            "title": "Rolle",
+            "type": "string"
+          },
+          "schema_version": {
+            "default": 1,
+            "minimum": 1.0,
+            "title": "Schema Version",
+            "type": "integer"
+          },
+          "schritt_id": {
+            "minLength": 1,
+            "title": "Schritt Id",
+            "type": "string"
+          },
+          "terminal": {
+            "default": false,
+            "title": "Terminal",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "schritt_id"
+        ],
+        "title": "WorkflowMigrationStepIn",
+        "type": "object"
+      },
       "WorkflowReplayRequestIn": {
         "properties": {
           "reason": {
@@ -378072,15 +378170,13 @@
     },
     "/api/v1/process/workflow-migration/check": {
       "post": {
-        "description": "Prueft ob eine Workflow-Migrations-Definition sicher ist (Gap 011).\n\nBody: { \"prozess_key\": str, \"von_version\": str, \"zu_version\": str,\n        \"alt_schritte\": [...], \"neu_schritte\": [...] }",
+        "description": "Compare the explicitly supplied versions; never substitute demo steps.",
         "operationId": "check_workflow_migration_api_v1_process_workflow_migration_check_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
+                "$ref": "#/components/schemas/WorkflowMigrationCheckIn"
               }
             }
           },

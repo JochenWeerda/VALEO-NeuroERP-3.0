@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from app.core.mcp_rest_binding import check_read_binding
+from app.core.mcp_rest_binding import check_read_binding, check_request_binding
 from app.core.mcp_tool_contracts import get_process_kernel_mcp_tools
 
 
@@ -22,13 +22,14 @@ def main() -> int:
         from scripts.generate_openapi import build_spec
         spec = build_spec()
     tools = get_process_kernel_mcp_tools().tools
-    errors = [error for tool in tools for error in check_read_binding(spec, tool)]
+    errors = [error for tool in tools for error in check_read_binding(spec, tool) + check_request_binding(spec, tool)]
     for error in errors:
         print(error, file=sys.stderr)
     if errors:
         return 1
     count = sum(tool.api_endpoint.startswith(("GET ", "HEAD ")) for tool in tools)
-    print(f"OK: {count} read-tool REST bindings checked; POST/approval/CLI parity not covered.")
+    structured = sum(tool.input_schema is not None for tool in tools)
+    print(f"OK: {count} read bindings and {structured} canonical request schemas checked; remaining POST/approval/CLI parity not covered.")
     return 0
 
 

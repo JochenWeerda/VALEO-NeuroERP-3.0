@@ -59,3 +59,46 @@ def check_read_binding(spec: dict[str, Any], contract: MCPToolContract) -> list[
                     (bound == "maximum" and actual > required)):
                 errors.append(f"{prefix}: weaker {bound} for {name}")
     return errors
+
+
+def _expanded_schema(document: dict[str, Any], value: Any, seen: frozenset[str] = frozenset()) -> Any:
+    if isinstance(value, list):
+        return [_expanded_schema(document, item, seen) for item in value]
+    if not isinstance(value, dict):
+        return value
+    if "$ref" in value:
+        ref = value["$ref"]
+        if not ref.startswith("#/"):
+            raise ValueError("External schema reference is not allowed")
+        if ref in seen:
+            return {"$ref": ref.rsplit("/", 1)[-1]}
+        target: Any = document
+        for part in ref[2:].split("/"):
+            target = target[part.replace("~1", "/").replace("~0", "~")]
+        return _expanded_schema(document, target, seen | {ref})
+    result = {}
+    for key, item in value.items():
+        if key in {"$defs", "title"}:
+            continue
+        if key in {"properties", "patternProperties"}:
+            result[key] = {name: _expanded_schema(document, schema, seen)
+                           for name, schema in item.items()}
+        else:
+            result[key] = _expanded_schema(document, item, seen)
+    return result
+
+
+def check_request_binding(spec: dict[str, Any], contract: MCPToolContract) -> list[str]:
+    """Compare an explicitly canonical MCP request schema to real REST JSON input."""
+    if contract.input_schema is None:
+        return []
+    method, path = (contract.api_endpoint or "").split(" ", 1)
+    operation = spec.get("paths", {}).get(path, {}).get(method.lower(), {})
+    body = operation.get("requestBody", {}).get("content", {}).get("application/json", {}).get("schema")
+    if body is None:
+        return [f"{contract.tool_name}: missing REST JSON request schema"]
+    expected = _expanded_schema(contract.input_schema, contract.input_schema)
+    actual = _expanded_schema(spec, body)
+    if expected != actual:
+        return [f"{contract.tool_name}: MCP/REST request schema drift"]
+    return []
