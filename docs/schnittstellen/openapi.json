@@ -230987,8 +230987,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Freigaben Api V1 Approvals  Subject Type   Subject Id  Get",
                   "type": "array"
@@ -231056,9 +231055,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Freigabe Anfragen Api V1 Approvals  Subject Type   Subject Id  Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -231134,9 +231131,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Freigabe Entscheiden Api V1 Approvals  Subject Type   Subject Id   Approval Id  Decision Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -236772,9 +236767,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Beleg Kopf Api V1 Belege  Belegart   Beleg Id  Kopf Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -236912,9 +236905,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Beleg Reiter Api V1 Belege  Belegart   Beleg Id  Tabs  Reiter  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -270924,8 +270915,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Approvals Api V1 Docflow  Doc Id  Approvals Get",
                   "type": "array"
@@ -271000,9 +270990,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Request Approval Api V1 Docflow  Doc Id  Approvals Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -271085,9 +271073,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Decide Approval Api V1 Docflow  Doc Id  Approvals  Approval Id  Decision Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -271653,8 +271639,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Get Status History Api V1 Docflow  Doc Id  Status History Get",
                   "type": "array"
@@ -326236,8 +326221,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Befunde Api V1 Kontrolle Befunde Get",
                   "type": "array"
@@ -326297,9 +326281,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Befund Pruefen Api V1 Kontrolle Befunde  Befund Id  Pruefung Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -326335,9 +326317,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Lage Api V1 Kontrolle Lagebild Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -326458,9 +326438,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Arbeitsliste Api V1 Kontrolle Pruefkorb Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },

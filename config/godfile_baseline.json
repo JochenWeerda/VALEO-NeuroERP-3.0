@@ -13,8 +13,8 @@
     "app/api/v1/endpoints/logistics_tours.py": 1020,
     "app/api/v1/endpoints/mask_frontend_bridges.py": 1467,
     "app/api/v1/endpoints/personal.py": 3083,
-    "app/api/v1/endpoints/portal_feldbuch.py": 1946,
-    "app/api/v1/endpoints/process_kernel_api.py": 6252,
+    "app/api/v1/endpoints/portal_feldbuch.py": 1945,
+    "app/api/v1/endpoints/process_kernel_api.py": 6184,
     "app/api/v1/endpoints/rations_optimization.py": 8866,
     "app/api/v1/endpoints/sales_orders.py": 1185
   }

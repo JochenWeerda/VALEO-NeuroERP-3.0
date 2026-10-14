@@ -107,9 +107,6 @@
     "app/api/v1/endpoints/open_items.py": {
       "date.today": 2
     },
-    "app/api/v1/endpoints/payment_runs.py": {
-      "date.today": 1
-    },
     "app/api/v1/endpoints/periodische_buchungen.py": {
       "date.today": 1
     },
@@ -306,7 +303,7 @@
       "date.today": 1
     },
     "app/services/portal_intelligence_service.py": {
-      "date.today": 2
+      "date.today": 1
     },
     "app/services/portal_preisspiegel_service.py": {
       "date.today": 4

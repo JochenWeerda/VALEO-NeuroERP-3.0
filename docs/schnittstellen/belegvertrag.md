@@ -1,3 +1,14 @@
+---
+title: Belegvertrag
+type: reference
+audience: [entwickler, integrator, agent]
+owner: Codex
+status: aktiv
+last_reviewed: 2026-10-15
+version: 1.0.0
+description: Eine Form fuer alle Belegarten — Varianten, Bausteine und Abbildung der bisherigen Feldnamen.
+---
+
 # Belegvertrag
 
 Erzeugt von `scripts/generate_belegvertrag.py` aus `app/core/belegvertrag.py`. Nicht von Hand ändern.

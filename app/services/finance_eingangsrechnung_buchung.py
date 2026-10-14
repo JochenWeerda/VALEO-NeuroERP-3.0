@@ -28,6 +28,7 @@ from app.finance.steuerschluessel import (
     vorsteuergruppen,
 )
 from app.services.finance_transaction_service import FinanceTransactionService
+from app.core.business_time import business_today
 
 
 def positionen(invoice: dict[str, Any]) -> list[tuple]:
@@ -85,7 +86,7 @@ def buche_eingangsrechnung(
     if brutto <= Decimal("0"):
         raise Steuerklaerung("Der Rechnungsbetrag ist nicht positiv.")
     nummer = str(invoice.get("number") or invoice_id)
-    tag = date.fromisoformat(str(invoice.get("date") or date.today().isoformat())[:10])
+    tag = date.fromisoformat(str(invoice.get("date") or business_today().isoformat())[:10])
 
     fin = FinanceTransactionService(db, tenant_id, commit_on_success=False)
     zeilen: list[dict[str, Any]] = []
