@@ -55,13 +55,26 @@ export async function saveStudioDraft(definition: ScreenDefinition, draftId?: st
   return response.data as StudioReport & StudioDraftRecord
 }
 
+const statusKeys = new Map<string, string>()
+function statusKey(action: string, draftId: string, revision: string): string {
+  const intent = `valeo.studio.status:${action}:${draftId}:${revision}`
+  const cached = statusKeys.get(intent)
+  if (cached) return cached
+  let key: string | null = null
+  try { key = sessionStorage.getItem(intent) } catch { /* memory fallback for unavailable browser storage */ }
+  key ??= crypto.randomUUID()
+  statusKeys.set(intent, key)
+  try { sessionStorage.setItem(intent, key) } catch { /* retained in this client instance */ }
+  return key
+}
+
 export async function submitStudioReview(draftId: string, expectedRevision: string) {
-  const response = await apiClient.post(`/api/v1/studio/drafts/${draftId}/submit-review`, { expected_revision: expectedRevision })
+  const response = await apiClient.post(`/api/v1/studio/drafts/${draftId}/submit-review`, { expected_revision: expectedRevision, idempotency_key: statusKey('review', draftId, expectedRevision) })
   return response.data as StudioDraftRecord
 }
 
 export async function publishStudioDraft(draftId: string, expectedRevision: string) {
-  const response = await apiClient.post(`/api/v1/studio/drafts/${draftId}/publish`, { expected_revision: expectedRevision })
+  const response = await apiClient.post(`/api/v1/studio/drafts/${draftId}/publish`, { expected_revision: expectedRevision, idempotency_key: statusKey('publish', draftId, expectedRevision) })
   return response.data as StudioReport & StudioDraftRecord & { route?: string }
 }
 

@@ -1,3 +1,4 @@
+from uuid import uuid4
 """Durable studio operations never fall back to per-process drafts."""
 import pytest
 from sqlalchemy.exc import OperationalError, ProgrammingError
@@ -49,7 +50,7 @@ def test_studio_http_storage_failure_is_sanitized_503(probe, monkeypatch, method
     def unavailable():
         raise OperationalError('private-connection-detail', {}, RuntimeError('private-password'))
     monkeypatch.setattr(store, '_sql_session', unavailable)
-    payload = {'definition': propose_studio_draft('Kunden'), 'expected_revision': '0' * 64} if body == 'definition' else {'expected_revision': '0' * 64}
+    payload = {'definition': propose_studio_draft('Kunden'), 'expected_revision': '0' * 64, 'idempotency_key': str(uuid4())} if body == 'definition' else {'expected_revision': '0' * 64, 'idempotency_key': str(uuid4())}
     response = getattr(client, method)(path, **({'json': payload} if method != 'get' else {}))
     assert response.status_code == 503, response.text
     assert 'private-' not in response.text

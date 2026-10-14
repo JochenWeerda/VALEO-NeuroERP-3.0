@@ -1,6 +1,7 @@
 """Studio API: catalog, propose, validate, four-eyes publish."""
 
 from __future__ import annotations
+from uuid import uuid4
 from studio_review_helper import publish_reviewed
 
 import pytest
@@ -188,7 +189,7 @@ def test_retire_removes_mask_from_runtime_catalog() -> None:
     record = _publish_sample(client)
     retired = client.post(
         f"/api/v1/studio/drafts/{record['id']}/retire",
-        json={"expected_revision": record["revision"]},
+        json={"expected_revision": record["revision"], 'idempotency_key': str(uuid4())},
         headers={**_HEADERS, "X-Actor-ID": "clara"},
     )
     assert retired.status_code == 200, retired.text

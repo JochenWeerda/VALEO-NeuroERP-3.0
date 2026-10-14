@@ -1,3 +1,4 @@
+from uuid import uuid4
 from studio_review_helper import publish_reviewed
 """Publication rejects changes made after the server validates a snapshot."""
 from copy import deepcopy
@@ -60,7 +61,7 @@ def test_sql_rejects_stale_snapshot(studio_db):
     assert published['definition'] == changed
 
 
-@pytest.mark.parametrize('body', [None, {}, {'expected_revision': '0' * 64}])
+@pytest.mark.parametrize('body', [None, {}, {'expected_revision': '0' * 64, 'idempotency_key': str(uuid4())}])
 def test_missing_or_wrong_display_revision_cannot_publish(probe, body):
     client, user = probe
     record = create(client)
@@ -75,14 +76,14 @@ def test_display_revision_expires_after_edit(probe):
     record = create(client)
     changed = deepcopy(record['definition'])
     changed['title'] = 'Geaendert'
-    updated = client.put('/studio/drafts/'+record['id'], json={'definition': changed, 'expected_revision': record['revision']}).json()
+    updated = client.put('/studio/drafts/'+record['id'], json={'definition': changed, 'expected_revision': record['revision'], 'idempotency_key': str(uuid4())}).json()
     assert updated['revision'] != record['revision']
     user['sub'] = 'reviewer'
-    rejected = client.post('/studio/drafts/'+record['id']+'/publish', json={'expected_revision': record['revision']})
+    rejected = client.post('/studio/drafts/'+record['id']+'/publish', json={'expected_revision': record['revision'], 'idempotency_key': str(uuid4())})
     assert rejected.status_code == 409
-    fetched = client.post('/studio/drafts/'+record['id']+'/submit-review', json={'expected_revision': updated['revision']}).json()
+    fetched = client.post('/studio/drafts/'+record['id']+'/submit-review', json={'expected_revision': updated['revision'], 'idempotency_key': str(uuid4())}).json()
     assert fetched['definition'] == changed
-    assert client.post('/studio/drafts/'+record['id']+'/publish', json={'expected_revision': fetched['revision']}).status_code == 200
+    assert client.post('/studio/drafts/'+record['id']+'/publish', json={'expected_revision': fetched['revision'], 'idempotency_key': str(uuid4())}).status_code == 200
 
 
 def test_review_is_required_and_edit_invalidates_it(probe):
@@ -90,26 +91,26 @@ def test_review_is_required_and_edit_invalidates_it(probe):
     record = create(client)
     user['sub'] = 'reviewer'
     path = '/studio/drafts/'+record['id']
-    assert client.post(path+'/publish', json={'expected_revision': record['revision']}).status_code == 409
-    reviewed = client.post(path+'/submit-review', json={'expected_revision': record['revision']})
+    assert client.post(path+'/publish', json={'expected_revision': record['revision'], 'idempotency_key': str(uuid4())}).status_code == 409
+    reviewed = client.post(path+'/submit-review', json={'expected_revision': record['revision'], 'idempotency_key': str(uuid4())})
     assert reviewed.status_code == 200
     changed = deepcopy(record['definition'])
     changed['title'] = 'Nach Einreichung geaendert'
-    edited = client.put(path, json={'definition': changed, 'expected_revision': reviewed.json()['revision']}).json()
+    edited = client.put(path, json={'definition': changed, 'expected_revision': reviewed.json()['revision'], 'idempotency_key': str(uuid4())}).json()
     assert edited['status'] == 'draft'
-    assert client.post(path+'/publish', json={'expected_revision': edited['revision']}).status_code == 409
-    assert client.post(path+'/submit-review', json={'expected_revision': reviewed.json()['revision']}).status_code == 409
-    latest = client.post(path+'/submit-review', json={'expected_revision': edited['revision']}).json()
+    assert client.post(path+'/publish', json={'expected_revision': edited['revision'], 'idempotency_key': str(uuid4())}).status_code == 409
+    assert client.post(path+'/submit-review', json={'expected_revision': reviewed.json()['revision'], 'idempotency_key': str(uuid4())}).status_code == 409
+    latest = client.post(path+'/submit-review', json={'expected_revision': edited['revision'], 'idempotency_key': str(uuid4())}).json()
     user['sub'] = 'third-person'
-    published = client.post(path+'/publish', json={'expected_revision': latest['revision']}).json()
+    published = client.post(path+'/publish', json={'expected_revision': latest['revision'], 'idempotency_key': str(uuid4())}).json()
     assert published['status'] == 'published_temp'
-    assert client.post(path+'/submit-review', json={'expected_revision': published['revision']}).status_code == 409
-    assert client.put(path, json={'definition': changed, 'expected_revision': published['revision']}).status_code == 409
-    assert client.post(path+'/retire', json={'expected_revision': latest['revision']}).status_code == 409
-    retired = client.post(path+'/retire', json={'expected_revision': published['revision']})
+    assert client.post(path+'/submit-review', json={'expected_revision': published['revision'], 'idempotency_key': str(uuid4())}).status_code == 409
+    assert client.put(path, json={'definition': changed, 'expected_revision': published['revision'], 'idempotency_key': str(uuid4())}).status_code == 409
+    assert client.post(path+'/retire', json={'expected_revision': latest['revision'], 'idempotency_key': str(uuid4())}).status_code == 409
+    retired = client.post(path+'/retire', json={'expected_revision': published['revision'], 'idempotency_key': str(uuid4())})
     assert retired.status_code == 200
-    assert client.post(path+'/submit-review', json={'expected_revision': retired.json()['revision']}).status_code == 409
-    reopened = client.put(path, json={'definition': changed, 'expected_revision': retired.json()['revision']})
+    assert client.post(path+'/submit-review', json={'expected_revision': retired.json()['revision'], 'idempotency_key': str(uuid4())}).status_code == 409
+    reopened = client.put(path, json={'definition': changed, 'expected_revision': retired.json()['revision'], 'idempotency_key': str(uuid4())})
     assert reopened.status_code == 200
     assert reopened.json()['status'] == 'draft'
 
@@ -137,11 +138,11 @@ def test_http_update_requires_current_display_revision(probe):
     changed = deepcopy(record['definition'])
     changed['title'] = 'Erster Bearbeiter'
     assert client.put(path, json={'definition': changed}).status_code == 422
-    first = client.put(path, json={'definition': changed, 'expected_revision': record['revision']})
+    first = client.put(path, json={'definition': changed, 'expected_revision': record['revision'], 'idempotency_key': str(uuid4())})
     assert first.status_code == 200
     second = deepcopy(changed)
     second['title'] = 'Veralteter zweiter Bearbeiter'
-    assert client.put(path, json={'definition': second, 'expected_revision': record['revision']}).status_code == 409
+    assert client.put(path, json={'definition': second, 'expected_revision': record['revision'], 'idempotency_key': str(uuid4())}).status_code == 409
     assert client.get(path).json()['definition'] == changed
 
 
@@ -174,7 +175,6 @@ def test_foreign_update_is_hidden_before_revision_comparison(probe):
     from app.services.studio_propose import propose_studio_draft
     foreign = store.save_draft('foreign-tenant', 'foreign-editor', propose_studio_draft('Artikel'))
     response = client.put('/studio/drafts/'+foreign['id'], json={
-        'definition': foreign['definition'], 'expected_revision': '0' * 64,
-    })
+        'definition': foreign['definition'], 'expected_revision': '0' * 64, 'idempotency_key': str(uuid4())})
     assert response.status_code == 404
     assert store.get_draft('foreign-tenant', foreign['id']) == foreign

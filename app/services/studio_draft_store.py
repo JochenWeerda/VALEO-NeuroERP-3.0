@@ -71,16 +71,49 @@ def _with_revision(item: dict[str, Any]) -> dict[str, Any]:
     return record
 
 
-def _history_entry(record: dict[str, Any], actor: str, action: str, previous: str | None) -> dict[str, Any]:
+def _history_entry(record: dict[str, Any], actor: str, action: str, previous: str | None, key: str | None = None) -> dict[str, Any]:
     snapshot = _with_revision(record)
-    return {"id": str(uuid4()), "tenant_id": record["tenant_id"], "draft_id": record["id"],
+    return {"id": key or str(uuid4()), "tenant_id": record["tenant_id"], "draft_id": record["id"],
             "actor": actor, "action": action, "previous_revision": previous,
             "revision": snapshot["revision"], "snapshot": snapshot, "recorded_at": datetime.now(UTC)}
 
 
-def _append_sql_history(session: Session, record: dict[str, Any], actor: str, action: str, previous: str | None) -> None:
+def _append_sql_history(session: Session, record: dict[str, Any], actor: str, action: str, previous: str | None, key: str | None = None) -> None:
     from app.infrastructure.models.studio_models import ScreenDefinitionHistory
-    session.add(ScreenDefinitionHistory(**_history_entry(record, actor, action, previous)))
+    session.add(ScreenDefinitionHistory(**_history_entry(record, actor, action, previous, key)))
+
+
+def _matching_replay(entry: dict[str, Any] | None, tenant: str, draft: str, actor: str, action: str, revision: str | None):
+    if entry is None:
+        return None
+    if any(entry[field] != value for field, value in (
+        ("tenant_id", tenant), ("draft_id", draft), ("actor", actor),
+        ("action", action), ("previous_revision", revision),
+    )):
+        raise ValueError("idempotenzschluessel_anderer_auftrag")
+    return deepcopy(entry["snapshot"])
+
+
+def _sql_replay(session: Session, key: str, tenant: str, draft: str, actor: str, action: str, revision: str | None):
+    from app.infrastructure.models.studio_models import ScreenDefinitionHistory
+    row = session.get(ScreenDefinitionHistory, key)
+    entry = {field: getattr(row, field) for field in (
+        "tenant_id", "draft_id", "actor", "action", "previous_revision", "snapshot"
+    )} if row is not None else None
+    return _matching_replay(entry, tenant, draft, actor, action, revision)
+
+
+@_durable_operation
+def get_status_replay(tenant: str, draft: str, actor: str, action: str, revision: str, key: str):
+    if _prefer_memory:
+        with _memory_lock:
+            entry = next((e for e in _HISTORY if e["id"] == key), None)
+            return _matching_replay(entry, tenant, draft, actor, action, revision)
+    session = _sql_session()
+    try:
+        return _sql_replay(session, key, tenant, draft, actor, action, revision)
+    finally:
+        session.close()
 
 
 @_durable_operation
@@ -152,15 +185,20 @@ def _assert_transition(current: str, target: str) -> None:
 def set_status(
     tenant_id: str, draft_id: str, actor: str, status: str,
     *, expected_snapshot: dict[str, Any] | None = None,
+    idempotency_key: str | None = None, request_revision: str | None = None,
 ) -> dict[str, Any]:
     if status not in _STATUSES:
         raise ValueError(f"status_{status}_unbekannt")
     if _use_sql():
-        return _with_revision(_sql_set_status(tenant_id, draft_id, actor, status, expected_snapshot=expected_snapshot))
+        return _with_revision(_sql_set_status(tenant_id, draft_id, actor, status, expected_snapshot=expected_snapshot, idempotency_key=idempotency_key, request_revision=request_revision))
     with _memory_lock:
         item = _DRAFTS.get(draft_id)
         if item is None or item["tenant_id"] != tenant_id:
             raise KeyError(draft_id)
+        if idempotency_key:
+            replay = get_status_replay(tenant_id, draft_id, actor, status, request_revision, idempotency_key)
+            if replay is not None:
+                return replay
         _assert_snapshot(item, expected_snapshot)
         _assert_transition(item["status"], status)
         _assert_four_eyes(item["updated_by"], actor, status)
@@ -170,7 +208,7 @@ def set_status(
         if status != "review":
             item["updated_by"] = actor
         item["updated_at"] = datetime.now(UTC).isoformat()
-        _HISTORY.append(_history_entry(item, actor, status, previous))
+        _HISTORY.append(_history_entry(item, actor, status, previous, idempotency_key))
         _DRAFTS[draft_id] = item
         return _with_revision(item)
 
@@ -412,6 +450,7 @@ def _sql_save(
 def _sql_set_status(
     tenant_id: str, draft_id: str, actor: str, status: str,
     *, expected_snapshot: dict[str, Any] | None = None,
+    idempotency_key: str | None = None, request_revision: str | None = None,
 ) -> dict[str, Any]:
     from app.infrastructure.models.studio_models import ScreenDefinitionDraft
 
@@ -421,6 +460,10 @@ def _sql_set_status(
                .with_for_update().one_or_none())
         if row is None:
             raise KeyError(draft_id)
+        if idempotency_key:
+            replay = _sql_replay(session, idempotency_key, tenant_id, draft_id, actor, status, request_revision)
+            if replay is not None:
+                return replay
         _assert_snapshot(_row_to_dict(row), expected_snapshot)
         _assert_transition(row.status, status)
         _assert_four_eyes(row.updated_by, actor, status)
@@ -430,10 +473,15 @@ def _sql_set_status(
             row.updated_by = actor
         row.updated_at = datetime.now(UTC)
         session.flush()
-        _append_sql_history(session, _row_to_dict(row), actor, status, previous)
+        _append_sql_history(session, _row_to_dict(row), actor, status, previous, idempotency_key)
         session.commit()
         session.refresh(row)
         return _row_to_dict(row)
+    except IntegrityError as error:
+        session.rollback()
+        if idempotency_key:
+            raise ValueError("idempotenzschluessel_anderer_auftrag") from error
+        raise
     except Exception:
         session.rollback()
         raise

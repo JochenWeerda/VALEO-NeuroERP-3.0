@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## STUDIO-STATUS-IDEMPOTENCY-20261014 — reserviert, Codex
+## STUDIO-STATUS-IDEMPOTENCY-20261014 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Einreichung/Publikation/Retirement verwenden explizite UUID-Idempotenzschluessel und atomare Historienergebnisse. **Dateibesitz:** studio_draft_store.py; studio_drafts.py; Studio-Client und bestehende Vertrage/Testhelfer; neue tests/test_studio_status_idempotency.py; eigene QA. **Abnahme:** identische Wiederholung liefert gespeicherten Snapshot ohne zweiten Eintrag, Schluessel an Mandant/Actor/Aktion/Entwurf/Revision gebunden; Rechte vor Replay. **Risiken:** Create/Update-Idempotenz, vollstaendige Korrelationsattribute und Browserabnahme folgen. Historientabelle wiederverwenden, keine Migration/DB-Neuanlage.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Einreichung/Publikation/Retirement verwenden explizite UUID-Idempotenzschluessel und atomare Historienergebnisse. **Dateibesitz:** studio_draft_store.py; studio_drafts.py; Studio-Client und bestehende Vertrage/Testhelfer; neue tests/test_studio_status_idempotency.py; eigene QA. **Abnahme:** identische Wiederholung liefert gespeicherten Snapshot ohne zweiten Eintrag, Schluessel an Mandant/Actor/Aktion/Entwurf/Revision gebunden; Rechte vor Replay. **Risiken:** Create/Update-Idempotenz, vollstaendige Korrelationsattribute und Browserabnahme folgen. Historientabelle wiederverwenden, keine Migration/DB-Neuanlage.
+
+**Lieferung:** 119 Python/SQL- und zehn UI-Faelle, danach neun Replay/Historienfaelle mit Kollisions-Rollback bestanden. Statusauftraege speichern UUID-Ergebnis atomar in Historie; identischer Kontext replayt ohne Doppelwirkung, geaenderter Kontext/entzogene Rechte abgewiesen. QA: studio-status-idempotency-20261014.md. Create/Update-Idempotenz, Korrelationsattribute und Browserabnahme offen.
 
 ## DOC-EINZELABRUF-MANDANT-20261014 — in Arbeit, Claude Code
 

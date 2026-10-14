@@ -139,7 +139,7 @@ describe('ScreenStudioPage', () => {
     await waitFor(() => expect(screen.getByDisplayValue('Entwurf einer anderen Person')).toBeInTheDocument())
     await waitFor(() => expect(screen.getByRole('button', { name: 'Freigeben' })).toBeEnabled())
     fireEvent.click(screen.getByRole('button', { name: 'Freigeben' }))
-    await waitFor(() => expect(postMock).toHaveBeenCalledWith('/api/v1/studio/drafts/draft-review/publish', { expected_revision: 'loaded-revision' }))
+    await waitFor(() => expect(postMock).toHaveBeenCalledWith('/api/v1/studio/drafts/draft-review/publish', { expected_revision: 'loaded-revision', idempotency_key: expect.any(String) }))
   })
 
 })

@@ -1,3 +1,4 @@
+from uuid import uuid4
 from studio_review_helper import publish_reviewed
 """Explicit HTTP identity doubles; no production authentication override."""
 import pytest
@@ -36,7 +37,7 @@ def test_creator_and_editor_ignore_caller_identity_headers(probe):
     assert record['created_by'] == record['updated_by'] == 'editor'
     user['sub'] = 'second-editor'
     updated = client.put('/studio/drafts/'+record['id'], headers={'X-Actor-ID': 'forged-editor'},
-                         json={'definition': record['definition'], 'expected_revision': record['revision']})
+                         json={'definition': record['definition'], 'expected_revision': record['revision'], 'idempotency_key': str(uuid4())})
     assert updated.status_code == 200, updated.text
     assert updated.json()['updated_by'] == 'second-editor'
 
@@ -64,7 +65,7 @@ def test_review_submission_cannot_relabel_the_content_editor(probe):
     client, user = probe
     record = create(client)
     user['sub'] = 'other-submitter'
-    review = client.post('/studio/drafts/'+record['id']+'/submit-review', json={'expected_revision': record['revision']})
+    review = client.post('/studio/drafts/'+record['id']+'/submit-review', json={'expected_revision': record['revision'], 'idempotency_key': str(uuid4())})
     assert review.status_code == 200
     assert review.json()['updated_by'] == 'editor'
     user['sub'] = 'editor'
