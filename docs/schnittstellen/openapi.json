@@ -355036,20 +355036,8 @@
         "operationId": "list_contracts_api_v1_portal_contracts_get",
         "parameters": [
           {
-            "description": "Mandanten-ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "description": "Mandanten-ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Kunden-ID",
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -355060,8 +355048,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Kunden-ID",
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -358899,35 +358886,6 @@
         "operationId": "list_orders_api_v1_portal_orders_get",
         "parameters": [
           {
-            "description": "Mandanten-ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "description": "Mandanten-ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Kunden-ID",
-            "in": "query",
-            "name": "customer_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Kunden-ID",
-              "title": "Customer Id"
-            }
-          },
-          {
             "description": "Filter nach Status",
             "in": "query",
             "name": "status_filter",
@@ -358966,6 +358924,22 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -359008,20 +358982,8 @@
         "operationId": "create_order_api_v1_portal_orders_post",
         "parameters": [
           {
-            "description": "Mandanten-ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "description": "Mandanten-ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Kunden-ID",
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -359032,8 +358994,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Kunden-ID",
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -359086,19 +359047,6 @@
       "get": {
         "description": "C5: Observability — KPI-Übersicht für Portal-Bestellungen.",
         "operationId": "get_orders_observability_api_v1_portal_orders_observability_get",
-        "parameters": [
-          {
-            "description": "Mandanten-ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "description": "Mandanten-ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -359109,16 +359057,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -359139,17 +359077,6 @@
         "description": "C4: Reconciliation — findet Bestellungen in inkonsistentem Zustand.\n- SUBMITTED seit > stale_hours ohne Bestätigung\n- CONFIRMED seit > stale_hours ohne Bearbeitung\n- Orders ohne Positionen",
         "operationId": "reconcile_orders_api_v1_portal_orders_reconciliation_get",
         "parameters": [
-          {
-            "description": "Mandanten-ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "description": "Mandanten-ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
           {
             "description": "Stunden ohne Statusänderung",
             "in": "query",
@@ -359215,20 +359142,8 @@
             }
           },
           {
-            "description": "Mandanten-ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "description": "Mandanten-ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Kunden-ID",
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -359239,8 +359154,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Kunden-ID",
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -359305,17 +359219,6 @@
             }
           },
           {
-            "description": "Mandanten-ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "description": "Mandanten-ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
             "in": "query",
             "name": "internal_notes",
             "required": false,
@@ -359373,20 +359276,8 @@
         "operationId": "list_pre_purchases_api_v1_portal_pre_purchases_get",
         "parameters": [
           {
-            "description": "Mandanten-ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "description": "Mandanten-ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Kunden-ID",
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -359397,8 +359288,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Kunden-ID",
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -359685,35 +359575,6 @@
         "operationId": "get_portal_products_api_v1_portal_products_get",
         "parameters": [
           {
-            "description": "Mandanten-ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "description": "Mandanten-ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Kunden-ID (falls nicht aus Token)",
-            "in": "query",
-            "name": "customer_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Kunden-ID (falls nicht aus Token)",
-              "title": "Customer Id"
-            }
-          },
-          {
             "description": "Filter nach Kategorie",
             "in": "query",
             "name": "kategorie",
@@ -359770,6 +359631,22 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
             }
           }
         ],

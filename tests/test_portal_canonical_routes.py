@@ -23,11 +23,10 @@ def portal_spec():
     ("orders/{order_id}", "get", "OrderResponse"),
     ("orders", "post", "OrderResponse"),
 ])
-def test_portal_documents_actual_response_and_required_tenant(portal_spec, suffix, method, model):
+def test_portal_documents_actual_response_without_tenant_or_customer_parameter(portal_spec, suffix, method, model):
+    """Mandant und Kunde kommen aus Anmeldung und Zuordnung (TENANT-DOC-001), nie aus Parametern."""
     operation = portal_spec["paths"][settings.API_V1_STR + "/portal/" + suffix][method]
-    tenant = next(p for p in operation["parameters"] if p["name"] == "tenant_id")
-    assert tenant["required"] is True
-    assert tenant["in"] == "query"
+    assert not {p["name"] for p in operation.get("parameters", [])} & {"tenant_id", "customer_id"}
     success = "201" if method == "post" else "200"
     assert operation["responses"][success]["content"]["application/json"]["schema"] == {
         "$ref": "#/components/schemas/" + model}
@@ -42,7 +41,7 @@ def test_portal_entitlements_have_the_actual_list_contract(portal_spec, suffix):
     response = operation["responses"]["200"]["content"]["application/json"]["schema"]
     assert response["type"] == "array"
     assert response["items"] == {"$ref": "#/components/schemas/PortalShopOut"}
-    assert next(p for p in operation["parameters"] if p["name"] == "tenant_id")["required"]
+    assert not {p["name"] for p in operation.get("parameters", [])} & {"tenant_id", "customer_id"}
 
 
 @pytest.mark.parametrize("suffix,endpoint", [

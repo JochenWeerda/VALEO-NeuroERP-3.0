@@ -10,13 +10,16 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Optional
 from app.core.uuid7 import uuid7_short_suffix
+from app.auth.beleg_roles import verlange
+from app.auth.deps import get_current_user
+from app.auth.portal_kunde import PortalKunde, portal_kunde
+from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
-from app.core.security import get_user_id_from_request
 from sqlalchemy import and_, or_, desc
 
 from app.core.database import get_db
@@ -43,23 +46,24 @@ from app.api.v1.schemas.portal_shop_schemas import PortalShopOut
 
 router = APIRouter()
 
+# Mandant und Kunde kommen nur aus Anmeldung und gepruefter Zuordnung (TENANT-DOC-001, ``app/auth/portal_kunde.py``).
+# Bis 14.10.2026 nahm dieser Router den Mandanten aus dem Parameter ``tenant_id`` und den Kunden aus ``customer_id``,
+# der Anmeldekennung oder dem Rueckfall ``customer-demo-001``; die internen Wege pruefte keine Rolle.
 
-def get_customer_id_from_token(request: Request, tenant_id: str) -> str:
-    """
-    Extrahiert Kunden-ID aus JWT (token_claims.sub) oder X-User-ID.
-    Im Portal-Kontext ist sub bzw. X-User-ID oft die Kunden-/Partner-ID.
-    """
-    uid = get_user_id_from_request(request)
-    if uid and uid not in ("system", "dev-user"):
-        return uid
-    return "customer-demo-001"
+
+def _verkauf(recht: str):
+    """Interne Wege der Kundenbestellungen: Rechte wie fuer Auftraege (``app/auth/beleg_roles.py``)."""
+
+    def _pruefen(nutzer: dict = Depends(get_current_user)) -> None:
+        verlange(nutzer, recht, "sales_order")
+
+    return _pruefen
 
 
 @router.get("/products", response_model=PortalProductList, summary="Portal products abrufen")
 async def get_portal_products(
     request: Request,
-    tenant_id: str = Query(..., description="Mandanten-ID"),
-    customer_id: Optional[str] = Query(None, description="Kunden-ID (falls nicht aus Token)"),
+    kunde: PortalKunde = Depends(portal_kunde),
     kategorie: Optional[str] = Query(None, description="Filter nach Kategorie"),
     search: Optional[str] = Query(None, description="Suchbegriff"),
     skip: int = Query(0, ge=0),
@@ -74,7 +78,7 @@ async def get_portal_products(
     - Vorkauf-Guthaben falls vorhanden
     - Letzte Bestellung für "Erneut bestellen" Funktion
     """
-    effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
+    tenant_id, effective_customer = kunde.tenant_id, kunde.customer_id
     
     # Basis-Query für Artikel
     query = db.query(ArticleModel).filter(
@@ -239,8 +243,7 @@ async def get_portal_products(
 async def create_order(
     request: Request,
     order_data: OrderCreate,
-    tenant_id: str = Query(..., description="Mandanten-ID"),
-    customer_id: Optional[str] = Query(None, description="Kunden-ID"),
+    kunde: PortalKunde = Depends(portal_kunde),
     db: Session = Depends(get_db)
 ):
     """
@@ -253,7 +256,7 @@ async def create_order(
     
     Idempotency: Header X-Idempotency-Key verhindert doppelte Bestellungen.
     """
-    effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
+    tenant_id, effective_customer = kunde.tenant_id, kunde.customer_id
 
     # C3: Idempotency — gleicher Key liefert die vorhandene Bestellung zurück
     idempotency_key = request.headers.get("X-Idempotency-Key")
@@ -518,15 +521,14 @@ async def create_order(
 @router.get("/orders", response_model=OrderList, summary="Orders auflisten")
 async def list_orders(
     request: Request,
-    tenant_id: str = Query(..., description="Mandanten-ID"),
-    customer_id: Optional[str] = Query(None, description="Kunden-ID"),
+    kunde: PortalKunde = Depends(portal_kunde),
     status_filter: Optional[OrderStatus] = Query(None, description="Filter nach Status"),
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db)
 ):
     """Listet Bestellungen des Kunden"""
-    effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
+    tenant_id, effective_customer = kunde.tenant_id, kunde.customer_id
     
     query = db.query(CustomerOrder).filter(
         and_(
@@ -575,12 +577,11 @@ async def list_orders(
 @router.get("/contracts", response_model=list[PortalShopOut], summary="Contracts auflisten")
 async def list_contracts(
     request: Request,
-    tenant_id: str = Query(..., description="Mandanten-ID"),
-    customer_id: Optional[str] = Query(None, description="Kunden-ID"),
+    kunde: PortalKunde = Depends(portal_kunde),
     db: Session = Depends(get_db)
 ):
     """Listet alle aktiven Kontrakte des Kunden"""
-    effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
+    tenant_id, effective_customer = kunde.tenant_id, kunde.customer_id
     
     contracts = db.query(CustomerContract).filter(
         and_(
@@ -611,12 +612,11 @@ async def list_contracts(
 @router.get("/pre-purchases", response_model=list[PortalShopOut], summary="Pre purchases auflisten")
 async def list_pre_purchases(
     request: Request,
-    tenant_id: str = Query(..., description="Mandanten-ID"),
-    customer_id: Optional[str] = Query(None, description="Kunden-ID"),
+    kunde: PortalKunde = Depends(portal_kunde),
     db: Session = Depends(get_db)
 ):
     """Listet alle aktiven Vorkäufe/Guthaben des Kunden"""
-    effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
+    tenant_id, effective_customer = kunde.tenant_id, kunde.customer_id
     
     pre_purchases = db.query(CustomerPrePurchase).filter(
         and_(
@@ -646,13 +646,13 @@ async def list_pre_purchases(
 
 
 @router.patch("/orders/{order_id}/status", summary="Order status aktualisieren",
-    response_model=PortalShopOut
+    response_model=PortalShopOut, dependencies=[Depends(_verkauf("bearbeiten"))]
 )
 async def update_order_status(
     request: Request,
     order_id: str,
     new_status: str = Query(..., description="Neuer Status"),
-    tenant_id: str = Query(..., description="Mandanten-ID"),
+    tenant_id: str = Depends(get_tenant_id),
     internal_notes: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
@@ -705,10 +705,10 @@ async def update_order_status(
 
 
 @router.get("/orders/reconciliation", summary="Orders reconcile",
-    response_model=PortalShopOut
+    response_model=PortalShopOut, dependencies=[Depends(_verkauf("lesen"))]
 )
 async def reconcile_orders(
-    tenant_id: str = Query(..., description="Mandanten-ID"),
+    tenant_id: str = Depends(get_tenant_id),
     stale_hours: int = Query(48, ge=1, le=720, description="Stunden ohne Statusänderung"),
     db: Session = Depends(get_db),
 ):
@@ -766,10 +766,10 @@ async def reconcile_orders(
 
 
 @router.get("/orders/observability", summary="Orders observability abrufen",
-    response_model=PortalShopOut
+    response_model=PortalShopOut, dependencies=[Depends(_verkauf("lesen"))]
 )
 async def get_orders_observability(
-    tenant_id: str = Query(..., description="Mandanten-ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """
@@ -832,12 +832,11 @@ async def get_orders_observability(
 async def get_order(
     request: Request,
     order_id: str,
-    tenant_id: str = Query(..., description="Mandanten-ID"),
-    customer_id: Optional[str] = Query(None, description="Kunden-ID"),
+    kunde: PortalKunde = Depends(portal_kunde),
     db: Session = Depends(get_db)
 ):
     """Liefert Details einer Bestellung"""
-    effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
+    tenant_id, effective_customer = kunde.tenant_id, kunde.customer_id
     
     order = db.query(CustomerOrder).filter(
         and_(

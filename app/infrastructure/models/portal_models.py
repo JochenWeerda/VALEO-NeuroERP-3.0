@@ -12,7 +12,7 @@ from app.core.uuid7 import uuid7
 
 from sqlalchemy import (
     Boolean, Column, DateTime, ForeignKey, Integer,
-    Numeric, String, Text, Enum as SQLEnum
+    Numeric, String, Text, UniqueConstraint, Enum as SQLEnum
 )
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -169,7 +169,12 @@ class CustomerOrder(Base):
     Kundenbestellung aus dem Portal
     """
     __tablename__ = "customer_orders"
-    __table_args__ = {"schema": "domain_portal"}
+    # Der Idempotenzschluessel waehlt der Client: eindeutig je Mandant und Kunde, nicht systemweit — sonst kollidiert
+    # er mit der Bestellung eines anderen Kunden (Migration portal_order_idempotency_20261014).
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "customer_id", "idempotency_key", name="ux_customer_orders_idempotency"),
+        {"schema": "domain_portal"},
+    )
     
     id = Column(String(36), primary_key=True, default=uuid7)
     
@@ -199,7 +204,7 @@ class CustomerOrder(Base):
     internal_notes = Column(Text, nullable=True)
 
     # Idempotency (C3): verhindert doppelte Bestellungen bei Retry
-    idempotency_key = Column(String(128), nullable=True, unique=True, index=True)
+    idempotency_key = Column(String(128), nullable=True)
 
     # Metadaten
     created_at = Column(DateTime(timezone=True), server_default=func.now())
