@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## STUDIO-PREVIEW-CACHE-20261015 — reserviert, Codex
+## STUDIO-PREVIEW-CACHE-20261015 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** In der Browserabnahme gefundenen veralteten Maskentitel nach Umbenennung zentral im RenderPlan-Cache korrigieren. **Dateibesitz:** schema-compiler.ts nur schemaVolatility; schema-compiler.test.ts eigener Titelvertrag; QA/Workboard. **Abnahme:** gleicher Screen mit neuem Titel liefert neuen Plan; bestehende Compiler- und Studio-Vertraege bleiben gruen, keine einzelne Maske umgestalten.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** In der Browserabnahme gefundenen veralteten Maskentitel nach Umbenennung zentral im RenderPlan-Cache korrigieren. **Dateibesitz:** schema-compiler.ts nur schemaVolatility; schema-compiler.test.ts eigener Titelvertrag; QA/Workboard. **Abnahme:** gleicher Screen mit neuem Titel liefert neuen Plan; bestehende Compiler- und Studio-Vertraege bleiben gruen, keine einzelne Maske umgestalten.
+
+**Abschluss des abgegrenzten Slice:** Maskentitel im zentralen RenderPlan-Cache beruecksichtigt; 28 Compiler-/Studio-Faelle bestanden, acht SQL-Lebenszyklusfaelle strikt ohne Skips bestanden. Positive Studio-Browserfreigabe ist weiterhin Teil des offenen STUDIO-CLOSURE-Claims.
 
 ## HARVEST-RELEASE-SAFETY-20261015 — abgeschlossen, Codex
 

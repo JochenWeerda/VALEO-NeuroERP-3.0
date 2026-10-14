@@ -40,6 +40,15 @@ const legacyMask: MaskConfig = {
   api: { baseUrl: '/api/v1/crm/customers', endpoints: {} },
 }
 
+it('does not reuse a previous title for the same screen after renaming', () => {
+  invalidateRenderPlanCache()
+  const definition = crmSchema()
+  const original = compileRenderPlanFromScreenDefinition(definition)
+  const renamed = compileRenderPlanFromScreenDefinition({ ...definition, title: 'Geprüfte neue Bezeichnung' })
+  expect(renamed).not.toBe(original)
+  expect(renamed.shell.title).toBe('Geprüfte neue Bezeichnung')
+})
+
 function crmSchema() {
   return adaptMaskConfigToScreenDefinition(legacyMask, {
     id: 'crm/customer-360',
