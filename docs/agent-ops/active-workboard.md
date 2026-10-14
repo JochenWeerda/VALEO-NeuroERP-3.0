@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## EINVOICE-ROLLEN-20261014 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Die E-Rechnungswege (`/api/v1/sales/invoices/{nr}/einvoice/xrechnung|zugferd`) pruefen die Rolle vor dem ersten Datenbankzugriff: Erzeugen mit Archiveintrag `beleg_write`, Abrufen ohne Archiveintrag `beleg_read`. Bisher genuegte eine Anmeldung. **Dateibesitz:** app/api/v1/endpoints/sales_invoice_einvoice.py (nur Abhaengigkeiten); tests/test_einvoice_rollen.py; tests/test_sales_invoice_einvoice_endpoints.py; docs/quality-assurance/einvoice-rollen-20261014.md. **Abnahme:** ohne Belegrolle 403 ohne Archiveintrag; Lese- und Schreibrollen wie bei `/finance/invoices`. Keine Migration.
+
 ## DOC-ROUTER-ROLLEN-20261014 — abgeschlossen, Claude Code
 
 **Lieferung:** `ROUTER_BELEGARTEN` (sieben Arten); PUT/DELETE/Sammelloeschung fuer alle anderen Belegarten und POST `/sales_invoice`, `/payment_received` antworten 403 ohne Schreibzugriff. 19 Tests (frisch); test_belegrouter_mandant auf Router-Belegarten umgestellt; OpenAPI: Beschreibung der vier POST-Pfade. QA: `docs/quality-assurance/doc-router-rollen-20261014.md`. **Offen, fuer alle:** die sieben Router-Belegarten haben weiterhin keine Rollenpruefung.
