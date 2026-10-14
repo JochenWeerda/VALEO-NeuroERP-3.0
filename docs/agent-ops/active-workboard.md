@@ -11,6 +11,19 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOC-STORE-MANDANT-20261014 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Der alte Dokumentspeicher (`documents`) liefert
+Listen nur im Mandanten der Anmeldung: kein „oder ohne Mandant“, kein Lesen ohne Mandant, kein Rueckfall auf alle
+Mandanten oder den Prozessspeicher. **Dateibesitz:** app/documents/repository.py (list/count);
+app/documents/router_helpers.py (In-Memory-Filter); app/services/compat_helpers.py (`list_docs`);
+app/api/v1/endpoints/compat.py nur `_list_docs` und `/sales/{doc_type}`; app/services/portal_compat_service.py nur
+`list_docs`-Aufrufe; app/services/purchase_order_service.py nur Rueckfaelle; tests/test_dokumentspeicher_mandant.py;
+docs/quality-assurance/doc-store-mandant-20261014.md. **Abnahme:** Liste/Zaehlung je Mandant, Altbeleg ohne Mandant
+fuer niemanden, Aufruf ohne Mandant liefert nichts, Portal und `/sales/{doc_type}` nur eigener Mandant, Bestellweg ohne
+Rueckfall. **Nicht im Umfang:** Einzelabruf `get_document` (Nummer systemweit), Kundentrennung im Portal,
+`ops_dokumente`/`ops_rahmenvertraege`/`ops_zertifikate` ohne Mandantenspalte — werden ausgewiesen. Keine Migration.
+
 ## AGENT-PROPOSAL-SAVE-TENANT-20261014 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-14. **Elternclaim:** IDENTITY-INTEGRATION-REST-20261012 (eigener Codex-Claim). **Ziel:** Fremde persistente Agentenvorschlaege koennen nicht per Save-ID ueberschrieben werden; Proposal-Mandant und Aufrufmandant stimmen zwingend ueberein. **Dateibesitz:** app/repositories/agent_proposal_repository.py nur Save-Mandantengrenze; tests/test_agent_proposal_save_tenant.py; docs/quality-assurance/agent-proposal-save-tenant-20261014.md. **Abnahme:** fremder Save veraendert keinen Inhalt/Review, eigener Save bleibt moeglich, falscher Proposal-Mandant wird vor Writes abgewiesen. **Risiken:** Vorschlagshistorie/Idempotenz/Studioanbindung bleiben offen; keine neue DB oder Container.
