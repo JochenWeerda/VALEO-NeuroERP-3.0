@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOC-ROUTER-ROLLEN-20261014 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Nutzerentscheidung 14.10.: Der generische Belegrouter aendert und loescht nur die Belegarten, die allein ueber ihn gefuehrt werden (Anfrage, Angebot, Auftrag, Lieferschein, Bedarfsmeldung, Lieferantenangebot, Bestellung). Finanzbelege (Ausgangs-/Eingangsrechnung, Zahlungseingang, Gutschrift, Belastung, …) laufen ausschliesslich ueber ihre Fachwege mit Rollenpruefung; auch `POST /sales_invoice` und `/payment_received` des Routers werden geschlossen (ohne Aufrufer). **Dateibesitz:** app/documents/router.py (Schreibwege); tests/test_belegrouter_rollen.py; tests/test_belegrouter_mandant.py; docs/quality-assurance/doc-router-rollen-20261014.md. **Abnahme:** PUT/DELETE/Sammelloeschung/POST fuer Finanzbelege 403 ohne Schreibzugriff; die sieben Router-Belegarten unveraendert. Keine Migration.
+
 ## STUDIO-STATUS-IDEMPOTENCY-20261014 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Einreichung/Publikation/Retirement verwenden explizite UUID-Idempotenzschluessel und atomare Historienergebnisse. **Dateibesitz:** studio_draft_store.py; studio_drafts.py; Studio-Client und bestehende Vertrage/Testhelfer; neue tests/test_studio_status_idempotency.py; eigene QA. **Abnahme:** identische Wiederholung liefert gespeicherten Snapshot ohne zweiten Eintrag, Schluessel an Mandant/Actor/Aktion/Entwurf/Revision gebunden; Rechte vor Replay. **Risiken:** Create/Update-Idempotenz, vollstaendige Korrelationsattribute und Browserabnahme folgen. Historientabelle wiederverwenden, keine Migration/DB-Neuanlage.
