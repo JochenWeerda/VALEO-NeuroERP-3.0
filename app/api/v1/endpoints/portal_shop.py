@@ -12,7 +12,7 @@ from typing import Optional
 from app.core.uuid7 import uuid7_short_suffix
 from app.auth.beleg_roles import verlange
 from app.auth.deps import get_current_user
-from app.auth.portal_kunde import PortalKunde, portal_kunde
+from app.auth.portal_kunde import KONTRAKTE, VERKAUF, PortalKunde, portal_recht
 from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ def _verkauf(recht: str):
 @router.get("/products", response_model=PortalProductList, summary="Portal products abrufen")
 async def get_portal_products(
     request: Request,
-    kunde: PortalKunde = Depends(portal_kunde),
+    kunde: PortalKunde = Depends(portal_recht(VERKAUF)),
     kategorie: Optional[str] = Query(None, description="Filter nach Kategorie"),
     search: Optional[str] = Query(None, description="Suchbegriff"),
     skip: int = Query(0, ge=0),
@@ -243,7 +243,7 @@ async def get_portal_products(
 async def create_order(
     request: Request,
     order_data: OrderCreate,
-    kunde: PortalKunde = Depends(portal_kunde),
+    kunde: PortalKunde = Depends(portal_recht(VERKAUF)),
     db: Session = Depends(get_db)
 ):
     """
@@ -521,7 +521,7 @@ async def create_order(
 @router.get("/orders", response_model=OrderList, summary="Orders auflisten")
 async def list_orders(
     request: Request,
-    kunde: PortalKunde = Depends(portal_kunde),
+    kunde: PortalKunde = Depends(portal_recht(VERKAUF)),
     status_filter: Optional[OrderStatus] = Query(None, description="Filter nach Status"),
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
@@ -577,7 +577,7 @@ async def list_orders(
 @router.get("/contracts", response_model=list[PortalShopOut], summary="Contracts auflisten")
 async def list_contracts(
     request: Request,
-    kunde: PortalKunde = Depends(portal_kunde),
+    kunde: PortalKunde = Depends(portal_recht(KONTRAKTE)),
     db: Session = Depends(get_db)
 ):
     """Listet alle aktiven Kontrakte des Kunden"""
@@ -612,7 +612,7 @@ async def list_contracts(
 @router.get("/pre-purchases", response_model=list[PortalShopOut], summary="Pre purchases auflisten")
 async def list_pre_purchases(
     request: Request,
-    kunde: PortalKunde = Depends(portal_kunde),
+    kunde: PortalKunde = Depends(portal_recht(KONTRAKTE)),
     db: Session = Depends(get_db)
 ):
     """Listet alle aktiven Vorkäufe/Guthaben des Kunden"""
@@ -832,7 +832,7 @@ async def get_orders_observability(
 async def get_order(
     request: Request,
     order_id: str,
-    kunde: PortalKunde = Depends(portal_kunde),
+    kunde: PortalKunde = Depends(portal_recht(VERKAUF)),
     db: Session = Depends(get_db)
 ):
     """Liefert Details einer Bestellung"""

@@ -1709,6 +1709,13 @@ api_router.include_router(
     compat.router
 )
 
+# Portalwege des Kundenportals (aus compat ausgelagert, PORTAL-CONTEXT-001)
+from app.api.v1.endpoints import portal_kundenwege  # noqa: E402
+
+api_router.include_router(
+    portal_kundenwege.router
+)
+
 api_router.include_router(
     einkauf_lieferschein.router
 )

@@ -7,6 +7,7 @@ import { auth } from './auth'
 import { rollenHinweis } from './role-hint'
 import { tenantFromToken } from './tenant-from-token'
 import { toast } from 'sonner'
+import { aktivesKundenkonto, KUNDENKONTO_KOPF } from '@/lib/portal-konto'
 
 
 function normalizeApiBaseUrl(value: string | undefined): string {
@@ -109,6 +110,11 @@ class APIClient {
         }
         const tenantId = tenantFromToken(token)
         if (tenantId) config.headers['X-Tenant-ID'] = tenantId
+        // Portalwege: das gewaehlte Kundenkonto (PORTAL-CONTEXT-001); der Server prueft es gegen die Zuordnung.
+        const konto = aktivesKundenkonto()
+        if (konto && config.url?.includes('/portal/') && !config.headers[KUNDENKONTO_KOPF]) {
+          config.headers[KUNDENKONTO_KOPF] = konto
+        }
         return config
       },
       (error) => Promise.reject(error),

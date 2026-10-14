@@ -176,7 +176,7 @@ class HarvestAcceptanceService:
         result = _to_dict_with_positions(obj, self.db)
 
         if obj.invoice_id:
-            billing_repo = SelfBillingRepositoryImpl(self.db)
+            billing_repo = SelfBillingRepositoryImpl(self.db, commit_on_success=False)
             invoice = billing_repo.get_invoice_by_id(obj.invoice_id)
             if invoice:
                 result["invoice"] = {
@@ -620,7 +620,7 @@ class HarvestAcceptanceService:
             else:
                 vat_rate_percent = Decimal("19.0")
 
-            billing_repo = SelfBillingRepositoryImpl(self.db)
+            billing_repo = SelfBillingRepositoryImpl(self.db, commit_on_success=False)
             credit_note_input = CreditNoteCreate(
                 tenant_id=self.tenant_id,
                 harvest_acceptance_id=acceptance_id,
@@ -652,43 +652,44 @@ class HarvestAcceptanceService:
         return _to_dict_with_positions(obj, self.db)
 
     def _book_self_billing_credit_note(self, invoice: Any, delivery_date: Any) -> None:
-        """Book self-billing credit note into GL: Debit 3100 / Credit 4000 + 1576 (non-blocking)."""
+        """Create an input-side journal draft in the acceptance transaction."""
+        from sqlalchemy import text
+        from app.finance.steuerschluessel import Steuerklaerung, vorsteuergruppen
+        from app.services.finance_eingangsrechnung_buchung import kreditorenkonto, summen
+        from app.services.finance_transaction_service import FinanceTransactionService
+
+        code = self.db.execute(text(
+            "SELECT property_value FROM domain_shared.system_properties "
+            "WHERE tenant_id=:tenant AND property_key='agrar.self_billing.tax_code'"
+        ), {"tenant": self.tenant_id}).scalar()
+        if not isinstance(code, str) or not code.strip():
+            raise ValidationFailedError("Self-Billing benötigt einen ausdrücklich konfigurierten Eingangssteuerschlüssel.")
         try:
-            from app.services.finance_transaction_service import FinanceTransactionService
-            fin = FinanceTransactionService(self.db, self.tenant_id)
-            net = Decimal(str(invoice.total_net_amount_eur or 0))
-            vat = Decimal(str(invoice.total_vat_amount_eur or 0))
-            gross = Decimal(str(invoice.total_gross_amount_eur or 0))
-            if gross == Decimal("0"):
-                return
-            entry_date = delivery_date
-            if entry_date is None:
-                from app.core.business_time import business_today
-                entry_date = business_today()
-            period = str(entry_date)[:7]
-            lines = [
-                {"account_id": fin.account_id_for_number("3100"), "debit_amount": float(gross), "credit_amount": 0,
-                 "description": f"Verbindlichkeit Self-Billing {invoice.invoice_number}"},
-                {"account_id": fin.account_id_for_number("4000"), "debit_amount": 0, "credit_amount": float(net),
-                 "description": "Wareneinkauf Ernte"},
-            ]
-            if vat > Decimal("0"):
-                lines.append({
-                    "account_id": fin.account_id_for_number("1576"), "debit_amount": 0, "credit_amount": float(vat),
-                    "description": "Vorsteuer Self-Billing",
-                })
-            fin.create(
-                entry_number=f"SB-{invoice.invoice_number}",
-                description=f"Self-Billing Gutschrift {invoice.invoice_number}",
-                entry_date=entry_date,
-                lines=lines,
-                reference=invoice.invoice_number,
-                source="self_billing",
-                document_type="credit_note",
-                period=period,
-            )
-        except Exception:
-            pass  # booking failure must not block release
+            groups = vorsteuergruppen(self.db, self.tenant_id, [(
+                1, code.strip(), invoice.vat_rate_percent, invoice.total_net_amount_eur, None,
+            )])
+            net, vat, gross = summen(groups)
+            if (net, vat, gross) != (invoice.total_net_amount_eur, invoice.total_vat_amount_eur, invoice.total_gross_amount_eur):
+                raise Steuerklaerung("Self-Billing-Beleg und Steuerschlüssel widersprechen sich.")
+            liability = kreditorenkonto(self.db, self.tenant_id, {})
+        except Steuerklaerung as error:
+            raise ValidationFailedError(str(error)) from error
+        fin = FinanceTransactionService(self.db, self.tenant_id, commit_on_success=False)
+        lines = []
+        for group in groups:
+            lines.append({"account_id": fin.account_id_for_number(group.aufwandskonto),
+                          "debit_amount": group.netto, "credit_amount": 0, "description": "Wareneinkauf Ernte"})
+            if group.steuer:
+                lines.append({"account_id": fin.account_id_for_number(group.vorsteuerkonto),
+                              "debit_amount": group.steuer, "credit_amount": 0, "description": "Vorsteuer Self-Billing"})
+        lines.append({"account_id": fin.account_id_for_number(liability), "debit_amount": 0,
+                      "credit_amount": gross, "description": "Verbindlichkeit Self-Billing"})
+        if delivery_date is None:
+            from app.core.business_time import business_today
+            delivery_date = business_today()
+        fin.create(entry_number=f"SB-{invoice.invoice_number}", description=f"Self-Billing {invoice.invoice_number}",
+                   entry_date=delivery_date, lines=lines, reference=invoice.invoice_number,
+                   source="self_billing", document_type="credit_note", period=str(delivery_date)[:7])
 
     def calculate_settlement(self, acceptance_id: str) -> dict:
         from decimal import Decimal

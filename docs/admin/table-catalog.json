@@ -5284,7 +5284,9 @@
           "read_by": [
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/portal_innendienst.py",
-            "app/infrastructure/models/agrar_models.py"
+            "app/api/v1/endpoints/portal_kundenzugaenge.py",
+            "app/infrastructure/models/agrar_models.py",
+            "app/services/portal_lohndienst_service.py"
           ]
         },
         "harvest_acceptances": {
@@ -13390,7 +13392,9 @@
             "app/api/v1/endpoints/crm_360_sql.py",
             "app/api/v1/endpoints/customers.py",
             "app/api/v1/endpoints/mask_frontend_bridges.py",
+            "app/api/v1/endpoints/portal_kundenzugaenge.py",
             "app/api/v1/schemas/crm.py",
+            "app/auth/portal_kunde.py",
             "app/domains/logistik/strecke.py",
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/agrar_models.py",
@@ -13404,6 +13408,8 @@
             "app/services/finance_dunning_service.py",
             "app/services/kunden_merge.py",
             "app/services/mcp_execution_service.py",
+            "app/services/portal_intelligence_service.py",
+            "app/services/portal_lohndienst_service.py",
             "app/services/sales_credit_service.py",
             "app/services/sales_posting_service.py",
             "app/services/whatsapp_agent_service.py"
@@ -43910,6 +43916,128 @@
             "app/infrastructure/models/portal_models.py"
           ]
         },
+        "empfehlungen": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "customer_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "typ",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "prioritaet",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "titel",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "beschreibung",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "cta_label",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "cta_ziel",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "kontext_schluessel",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "kontext_wert",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "artikel_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "betrag_indikativ",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "gueltig_bis",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "herkunft",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "modell",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "gesehen_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "gesehen_von",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "erzeugt_von",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "erzeugt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "customer_id",
+              "references": "domain_crm.customers.id"
+            }
+          ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_portal / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/portal_intelligence_service.py"
+          ],
+          "written_by": [
+            "app/services/portal_intelligence_service.py"
+          ]
+        },
         "kundenzugaenge": {
           "columns": [
             {
@@ -43961,6 +44089,11 @@
               "name": "widerrufen_am",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "schlag_ids",
+              "nullable": true,
+              "type": "jsonb"
             }
           ],
           "foreign_keys": [],
@@ -43972,10 +44105,245 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/portal_kundenzugaenge.py",
+            "app/api/v1/endpoints/portal_lohndienst.py",
             "app/auth/portal_kunde.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/portal_kundenzugaenge.py"
+          ]
+        },
+        "lohndienst_auftraege": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "customer_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "typ",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "schlag_ids",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "schlag_beschreibung",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "flaeche_ha",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "wunsch_datum",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "geplant_datum",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "getreide_art",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "menge_dt",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "tierart",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "tiere_anzahl",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "psm_mittel",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "kultur",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "anmerkung",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "innendienst_notiz",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "preis_indikativ_eur",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "dienstleister_subject",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "version",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "angelegt_von",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "angelegt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "geaendert_von",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "geaendert_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "customer_id",
+              "references": "domain_crm.customers.id"
+            }
+          ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_portal / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/portal_lohndienst_service.py"
+          ],
+          "written_by": [
+            "app/services/portal_lohndienst_service.py"
+          ]
+        },
+        "lohndienst_ereignisse": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "auftrag_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "aktion",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "von_status",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "nach_status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "version",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "akteur",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "kanal",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "idempotenz_schluessel",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "anfrage_hash",
+              "nullable": false,
+              "type": "character"
+            },
+            {
+              "name": "daten",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "erfasst_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "auftrag_id",
+              "references": "domain_portal.lohndienst_auftraege.id"
+            }
+          ],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_portal / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/portal_lohndienst_service.py"
+          ],
+          "written_by": [
+            "app/services/portal_lohndienst_service.py"
           ]
         }
       }

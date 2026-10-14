@@ -8,11 +8,11 @@
  *  - TMR-Mischwagenservice ohne Mahlen
  *  - Lohnsaat, Lohndrusch
  *
- * API: GET  /portal/lohndienste?kunden_nr=...
- *      POST /portal/lohndienste
+ * API: GET  /portal/lohndienste (Kundenkonto aus Anmeldung + Kontowahl, PORTAL-CONTEXT-001)
+ *      POST /portal/lohndienste mit X-Idempotency-Key — eine Wiederholung legt keinen zweiten Auftrag an
  */
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLocation } from '@/app/routing/typed-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -34,10 +34,10 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
+import { usePortalKonto } from '@/lib/portal-konto'
 import { useToast } from '@/hooks/use-toast'
 import { Tractor, Plus, Clock, CheckCircle2, XCircle, Calendar, Wheat, Droplets } from 'lucide-react'
 
-const DEMO_KUNDEN_NR = 'K-10001'
 
 type LohnAuftrag = {
   auftrag_id: string
@@ -147,14 +147,15 @@ export default function LohndienstePage() {
   const [form, setForm] = useState<FormState>(FORM_INIT)
   const [saving, setSaving] = useState(false)
 
+  const konto = usePortalKonto((state) => state.aktiv)
+  // Ein Schluessel je Anfrage: bleibt bei einem erneuten Versuch gleich, neu erst nach Erfolg.
+  const anfrageSchluessel = useRef<string>(crypto.randomUUID())
+
   const { data, isLoading } = useQuery<{ items: LohnAuftrag[]; count: number }>({
-    queryKey: ['portal-lohndienste', DEMO_KUNDEN_NR],
-    queryFn: async () => {
-      const res = await apiClient.get<{ items: LohnAuftrag[]; count: number }>(
-        `/api/v1/portal/lohndienste?kunden_nr=${DEMO_KUNDEN_NR}`,
-      )
-      return res.data
-    },
+    queryKey: ['portal-lohndienste', konto?.customer_id],
+    enabled: Boolean(konto),
+    queryFn: async () =>
+      (await apiClient.get<{ items: LohnAuftrag[]; count: number }>('/api/v1/portal/lohndienste')).data,
   })
 
   const handleSave = async () => {
@@ -162,7 +163,6 @@ export default function LohndienstePage() {
     setSaving(true)
     try {
       await apiClient.post('/api/v1/portal/lohndienste', {
-        kunden_nr: DEMO_KUNDEN_NR,
         typ: form.typ,
         schlag_beschreibung: form.schlag_beschreibung,
         flaeche_ha: form.flaeche_ha ? parseFloat(form.flaeche_ha) : null,
@@ -173,7 +173,8 @@ export default function LohndienstePage() {
         getreide_art: form.getreide_art || null,
         menge_dt: form.menge_dt ? parseFloat(form.menge_dt) : null,
         anmerkung: form.anmerkung || null,
-      })
+      }, { headers: { 'X-Idempotency-Key': anfrageSchluessel.current } })
+      anfrageSchluessel.current = crypto.randomUUID()
       toast({ title: 'Anfrage gesendet', description: 'Wir melden uns zeitnah bei Ihnen.' })
       qc.invalidateQueries({ queryKey: ['portal-lohndienste'] })
       setOpen(false)

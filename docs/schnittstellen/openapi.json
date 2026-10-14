@@ -8756,6 +8756,16 @@
         "title": "AisleIn",
         "type": "object"
       },
+      "Aktion": {
+        "enum": [
+          "bestaetigen",
+          "einplanen",
+          "abschliessen",
+          "stornieren"
+        ],
+        "title": "Aktion",
+        "type": "string"
+      },
       "Alert": {
         "description": "Alert für Policy-Matching",
         "properties": {
@@ -16768,6 +16778,7 @@
           "anmerkung": {
             "anyOf": [
               {
+                "maxLength": 4000,
                 "type": "string"
               },
               {
@@ -16779,6 +16790,7 @@
           "flaeche_ha": {
             "anyOf": [
               {
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -16790,6 +16802,7 @@
           "getreide_art": {
             "anyOf": [
               {
+                "maxLength": 200,
                 "type": "string"
               },
               {
@@ -16801,6 +16814,7 @@
           "kultur": {
             "anyOf": [
               {
+                "maxLength": 200,
                 "type": "string"
               },
               {
@@ -16812,6 +16826,7 @@
           "menge_dt": {
             "anyOf": [
               {
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -16821,29 +16836,31 @@
             "title": "Menge Dt"
           },
           "psm_mittel": {
-            "default": [],
             "items": {
               "type": "string"
             },
+            "maxItems": 100,
             "title": "Psm Mittel",
             "type": "array"
           },
           "schlag_beschreibung": {
             "default": "",
+            "maxLength": 2000,
             "title": "Schlag Beschreibung",
             "type": "string"
           },
           "schlag_ids": {
-            "default": [],
             "items": {
               "type": "string"
             },
+            "maxItems": 500,
             "title": "Schlag Ids",
             "type": "array"
           },
           "tierart": {
             "anyOf": [
               {
+                "maxLength": 200,
                 "type": "string"
               },
               {
@@ -16855,6 +16872,7 @@
           "tiere_anzahl": {
             "anyOf": [
               {
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -16864,8 +16882,7 @@
             "title": "Tiere Anzahl"
           },
           "typ": {
-            "title": "Typ",
-            "type": "string"
+            "$ref": "#/components/schemas/LohndienstTyp"
           },
           "wunsch_datum": {
             "anyOf": [
@@ -93035,6 +93052,13 @@
             ],
             "title": "Name"
           },
+          "rechte": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Rechte",
+            "type": "array"
+          },
           "rolle": {
             "title": "Rolle",
             "type": "string"
@@ -93081,6 +93105,20 @@
           "rolle": {
             "title": "Rolle",
             "type": "string"
+          },
+          "schlag_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schlag Ids"
           },
           "subject": {
             "title": "Subject",
@@ -93142,15 +93180,33 @@
             "title": "Gueltig Bis"
           },
           "rolle": {
-            "description": "Rolle der Person im Betrieb",
+            "description": "Portalrolle der Person",
             "enum": [
               "inhaber",
+              "betriebsleiter",
               "mitarbeiter",
               "buchhaltung",
-              "berater"
+              "berater",
+              "lohndienstleister",
+              "aussendienst"
             ],
             "title": "Rolle",
             "type": "string"
+          },
+          "schlag_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Nur Mitarbeiter: zugewiesene Schlaege; leer = alle",
+            "title": "Schlag Ids"
           },
           "subject": {
             "description": "Kennung der Anmeldung (OIDC sub)",
@@ -99903,6 +99959,29 @@
         ],
         "title": "LohnImportTrigger",
         "type": "object"
+      },
+      "LohndienstStatus": {
+        "enum": [
+          "angefragt",
+          "bestaetigt",
+          "eingeplant",
+          "abgeschlossen",
+          "storniert"
+        ],
+        "title": "LohndienstStatus",
+        "type": "string"
+      },
+      "LohndienstTyp": {
+        "enum": [
+          "lohn_spritz",
+          "mahl_misch",
+          "lohn_mahlen",
+          "tmr_wagon",
+          "lohn_saatbett",
+          "lohn_ernte"
+        ],
+        "title": "LohndienstTyp",
+        "type": "string"
       },
       "LotActionOut": {
         "description": "Antwort der Lot-Folgeaktionen Sperre / QS-Freigabe / Schwund.\n\n``bestand_kg`` liefert nur die Schwundbuchung.",
@@ -120749,6 +120828,17 @@
             ],
             "title": "Cta Ziel"
           },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
           "empfehlung_id": {
             "anyOf": [
               {
@@ -120782,6 +120872,17 @@
             ],
             "title": "Gesehen"
           },
+          "gesehen_am": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gesehen Am"
+          },
           "gueltig_bis": {
             "anyOf": [
               {
@@ -120792,6 +120893,28 @@
               }
             ],
             "title": "Gueltig Bis"
+          },
+          "herkunft": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Herkunft"
+          },
+          "ki_generiert": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ki Generiert"
           },
           "kontext_schluessel": {
             "anyOf": [
@@ -120825,6 +120948,17 @@
               }
             ],
             "title": "Kunden Nr"
+          },
+          "modell": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modell"
           },
           "prioritaet": {
             "anyOf": [
@@ -121237,6 +121371,17 @@
             ],
             "title": "Aktualisiert Am"
           },
+          "angelegt_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Angelegt Von"
+          },
           "anmerkung": {
             "anyOf": [
               {
@@ -121259,6 +121404,39 @@
             ],
             "title": "Auftrag Id"
           },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "dienstleister_subject": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dienstleister Subject"
+          },
+          "dienstleister_zugewiesen": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dienstleister Zugewiesen"
+          },
           "erstellt_am": {
             "anyOf": [
               {
@@ -121280,6 +121458,17 @@
               }
             ],
             "title": "Flaeche Ha"
+          },
+          "geaendert_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geaendert Von"
           },
           "geplant_datum": {
             "anyOf": [
@@ -121363,6 +121552,14 @@
               "type": "string"
             },
             "title": "Psm Mittel",
+            "type": "array"
+          },
+          "schlaege": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Schlaege",
             "type": "array"
           },
           "schlag_beschreibung": {
@@ -121449,6 +121646,28 @@
             ],
             "title": "Typ Bezeichnung"
           },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "wiederholung": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wiederholung"
+          },
           "wunsch_datum": {
             "anyOf": [
               {
@@ -121462,6 +121681,60 @@
           }
         },
         "title": "PortalLohndienstAuftragOut",
+        "type": "object"
+      },
+      "PortalLohndienstEreignisOut": {
+        "properties": {
+          "akteur": {
+            "title": "Akteur",
+            "type": "string"
+          },
+          "aktion": {
+            "title": "Aktion",
+            "type": "string"
+          },
+          "erfasst_am": {
+            "title": "Erfasst Am",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kanal": {
+            "title": "Kanal",
+            "type": "string"
+          },
+          "nach_status": {
+            "title": "Nach Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "von_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Von Status"
+          }
+        },
+        "required": [
+          "id",
+          "aktion",
+          "nach_status",
+          "version",
+          "akteur",
+          "kanal",
+          "erfasst_am"
+        ],
+        "title": "PortalLohndienstEreignisOut",
         "type": "object"
       },
       "PortalLohndienstListOut": {
@@ -133850,22 +134123,26 @@
       "RationContext": {
         "properties": {
           "benoetigt_rohwaren": {
-            "default": [],
             "items": {
               "type": "string"
             },
+            "maxItems": 100,
             "title": "Benoetigt Rohwaren",
             "type": "array"
           },
           "kunden_nr": {
+            "minLength": 1,
             "title": "Kunden Nr",
             "type": "string"
           },
           "tier_kategorie": {
+            "maxLength": 200,
+            "minLength": 1,
             "title": "Tier Kategorie",
             "type": "string"
           },
           "tiere_anzahl": {
+            "minimum": 0.0,
             "title": "Tiere Anzahl",
             "type": "integer"
           }
@@ -146555,10 +146832,13 @@
       "SchlagContext": {
         "properties": {
           "ernte_jahr": {
+            "maximum": 2100.0,
+            "minimum": 2000.0,
             "title": "Ernte Jahr",
             "type": "integer"
           },
           "flaeche_ha": {
+            "minimum": 0.0,
             "title": "Flaeche Ha",
             "type": "number"
           },
@@ -146566,10 +146846,12 @@
             "items": {
               "type": "string"
             },
+            "maxItems": 100,
             "title": "Kulturen",
             "type": "array"
           },
           "kunden_nr": {
+            "minLength": 1,
             "title": "Kunden Nr",
             "type": "string"
           }
@@ -175513,17 +175795,6 @@
       },
       "_ArbeitskontextBody": {
         "properties": {
-          "betrieb_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Betrieb Name"
-          },
           "betriebsstaette": {
             "anyOf": [
               {
@@ -175545,11 +175816,6 @@
               }
             ],
             "title": "Erntejahr"
-          },
-          "rolle": {
-            "default": "betriebsleiter",
-            "title": "Rolle",
-            "type": "string"
           },
           "wirtschaftsjahr": {
             "title": "Wirtschaftsjahr",
@@ -180257,6 +180523,27 @@
       },
       "app__api__v1__endpoints__portal_lohndienst__StatusWechselBody": {
         "properties": {
+          "aktion": {
+            "$ref": "#/components/schemas/Aktion"
+          },
+          "dienstleister_subject": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Anmeldung des Lohndienstleisters",
+            "title": "Dienstleister Subject"
+          },
+          "erwartete_version": {
+            "minimum": 1.0,
+            "title": "Erwartete Version",
+            "type": "integer"
+          },
           "geplant_datum": {
             "anyOf": [
               {
@@ -180272,6 +180559,7 @@
           "innendienst_notiz": {
             "anyOf": [
               {
+                "maxLength": 4000,
                 "type": "string"
               },
               {
@@ -180279,10 +180567,6 @@
               }
             ],
             "title": "Innendienst Notiz"
-          },
-          "neuer_status": {
-            "title": "Neuer Status",
-            "type": "string"
           },
           "preis_indikativ_eur": {
             "anyOf": [
@@ -180297,7 +180581,8 @@
           }
         },
         "required": [
-          "neuer_status"
+          "aktion",
+          "erwartete_version"
         ],
         "title": "StatusWechselBody",
         "type": "object"
@@ -317040,17 +317325,17 @@
         ]
       }
     },
-    "/api/v1/innendienst/kunden/{kunden_nr}/massnahmen": {
+    "/api/v1/innendienst/kunden/{kunden_id}/massnahmen": {
       "get": {
-        "description": "Maßnahmen-Spritztagebuch eines Kunden — für Innendienst.",
-        "operationId": "kunden_massnahmen_api_v1_innendienst_kunden__kunden_nr__massnahmen_get",
+        "description": "Maßnahmen-Spritztagebuch eines Kunden.",
+        "operationId": "kunden_massnahmen_api_v1_innendienst_kunden__kunden_id__massnahmen_get",
         "parameters": [
           {
             "in": "path",
-            "name": "kunden_nr",
+            "name": "kunden_id",
             "required": true,
             "schema": {
-              "title": "Kunden Nr",
+              "title": "Kunden Id",
               "type": "string"
             }
           },
@@ -317088,7 +317373,7 @@
           },
           {
             "in": "header",
-            "name": "x-tenant-id",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -317099,7 +317384,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -317139,23 +317424,23 @@
         ]
       }
     },
-    "/api/v1/innendienst/kunden/{kunden_nr}/schlaege": {
+    "/api/v1/innendienst/kunden/{kunden_id}/schlaege": {
       "get": {
-        "description": "Schlagkartei eines Kunden — für Innendienst-Auftragsvoorbereitung (Lohnspritz etc.).",
-        "operationId": "kunden_schlaege_api_v1_innendienst_kunden__kunden_nr__schlaege_get",
+        "description": "Schlagkartei eines Kunden — für die Auftragsvorbereitung (Lohnspritz etc.).",
+        "operationId": "kunden_schlaege_api_v1_innendienst_kunden__kunden_id__schlaege_get",
         "parameters": [
           {
             "in": "path",
-            "name": "kunden_nr",
+            "name": "kunden_id",
             "required": true,
             "schema": {
-              "title": "Kunden Nr",
+              "title": "Kunden Id",
               "type": "string"
             }
           },
           {
             "in": "header",
-            "name": "x-tenant-id",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -317166,7 +317451,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -317210,24 +317495,6 @@
       "get": {
         "description": "Cross-Sell-Gap-Analyse fuer Aussendienstler.\n\nZeigt: Welche Kunden bauen Kulturen an, haben aber keinen aktiven Ankaufskontrakt?\nWelche haben Viehbestand, nutzen keinen Rationierungsservice?",
         "operationId": "potential_analyse_api_v1_innendienst_potential_get",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "content": {
@@ -317238,16 +317505,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -355225,6 +355482,73 @@
         ]
       }
     },
+    "/api/v1/portal/empfehlungen": {
+      "get": {
+        "operationId": "empfehlungen_des_kontos_api_v1_portal_empfehlungen_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "nur_ungesehen",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Nur Ungesehen",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalEmpfehlungListOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cross-Sell-Empfehlungen des Kundenkontos",
+        "tags": [
+          "portal",
+          "intelligence",
+          "portal",
+          "intelligence"
+        ]
+      }
+    },
     "/api/v1/portal/empfehlungen/generieren/ration": {
       "post": {
         "operationId": "generiere_aus_ration_api_v1_portal_empfehlungen_generieren_ration_post",
@@ -355740,22 +356064,6 @@
           },
           {
             "in": "query",
-            "name": "betrieb_name",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Betrieb Name"
-            }
-          },
-          {
-            "in": "query",
             "name": "erntejahr",
             "required": false,
             "schema": {
@@ -355768,16 +356076,6 @@
                 }
               ],
               "title": "Erntejahr"
-            }
-          },
-          {
-            "in": "query",
-            "name": "rolle",
-            "required": false,
-            "schema": {
-              "default": "betriebsleiter",
-              "title": "Rolle",
-              "type": "string"
             }
           },
           {
@@ -358391,7 +358689,7 @@
             "schema": {
               "anyOf": [
                 {
-                  "type": "string"
+                  "$ref": "#/components/schemas/LohndienstTyp"
                 },
                 {
                   "type": "null"
@@ -358407,7 +358705,7 @@
             "schema": {
               "anyOf": [
                 {
-                  "type": "string"
+                  "$ref": "#/components/schemas/LohndienstStatus"
                 },
                 {
                   "type": "null"
@@ -358460,7 +358758,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Lohndienst-Auftraege auflisten",
+        "summary": "Lohndienst-Auftraege des Kundenkontos",
         "tags": [
           "portal",
           "lohndienste",
@@ -358485,6 +358783,17 @@
                 }
               ],
               "title": "X-Kundenkonto"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 100,
+              "minLength": 8,
+              "title": "X-Idempotency-Key",
+              "type": "string"
             }
           }
         ],
@@ -358526,6 +358835,80 @@
           }
         ],
         "summary": "Lohndienst-Auftrag anlegen",
+        "tags": [
+          "portal",
+          "lohndienste",
+          "portal",
+          "lohndienste"
+        ]
+      }
+    },
+    "/api/v1/portal/lohndienste/disposition": {
+      "get": {
+        "description": "Alle Auftraege des Mandanten fuer die Disposition — ueber alle Kunden, nur mit Fachrolle des Hauses.",
+        "operationId": "disposition_api_v1_portal_lohndienste_disposition_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "typ",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/LohndienstTyp"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Typ"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/LohndienstStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalLohndienstListOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lohndienst-Disposition (Innendienst)",
         "tags": [
           "portal",
           "lohndienste",
@@ -358600,6 +358983,76 @@
         ]
       }
     },
+    "/api/v1/portal/lohndienste/{auftrag_id}/historie": {
+      "get": {
+        "operationId": "historie_api_v1_portal_lohndienste__auftrag_id__historie_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "auftrag_id",
+            "required": true,
+            "schema": {
+              "title": "Auftrag Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PortalLohndienstEreignisOut"
+                  },
+                  "title": "Response Historie Api V1 Portal Lohndienste  Auftrag Id  Historie Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Statushistorie eines Lohndienst-Auftrags",
+        "tags": [
+          "portal",
+          "lohndienste",
+          "portal",
+          "lohndienste"
+        ]
+      }
+    },
     "/api/v1/portal/lohndienste/{auftrag_id}/status": {
       "post": {
         "operationId": "status_wechsel_api_v1_portal_lohndienste__auftrag_id__status_post",
@@ -358610,6 +359063,33 @@
             "required": true,
             "schema": {
               "title": "Auftrag Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 100,
+              "minLength": 8,
+              "title": "X-Idempotency-Key",
               "type": "string"
             }
           }
@@ -358651,7 +359131,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Lohndienst-Auftragsstatus wechseln",
+        "summary": "Lohndienst-Auftrag fortschreiben (bestaetigen, einplanen, abschliessen, stornieren)",
         "tags": [
           "portal",
           "lohndienste",

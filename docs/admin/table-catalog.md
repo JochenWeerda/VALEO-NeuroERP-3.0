@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, architect, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-11
+last_reviewed: 2026-10-14
 version: 1.0.0
 description: Generierter Katalog der domain_*-Tabellen aus information_schema.
 ---
@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 676 Tabellen, 8920 Spalten.**
+**31 Schemas, 679 Tabellen, 8980 Spalten.**
 
 ## Schemas
 
@@ -46,7 +46,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_mfg` | `inventory` | 3 | 15 |
 | `domain_nachweisraum` | `dms-compliance` | 3 | 31 |
 | `domain_ops` | `inventory` | 76 | 1062 |
-| `domain_portal` | `crm` | 6 | 90 |
+| `domain_portal` | `crm` | 9 | 150 |
 | `domain_pos` | `finance` | 4 | 41 |
 | `domain_pricing` | `finance` | 5 | 48 |
 | `domain_procurement` | `procurement` | 5 | 50 |
@@ -130,7 +130,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_agrar.feeding_tenant_policies` | `app/api/v1/endpoints/feeding_governance.py`, `app/services/rations_lifecycle_service.py` | `app/api/v1/endpoints/feeding_governance.py` | — |
 | `domain_agrar.feeding_unit_definitions` | `app/services/rations_reference_data_service.py` | — | — |
 | `domain_agrar.feldbuch_massnahmen` | `app/api/v1/endpoints/portal_innendienst.py`, `app/infrastructure/models/agrar_models.py` | — | — |
-| `domain_agrar.feldbuch_schlaege` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/portal_innendienst.py`, `app/infrastructure/models/agrar_models.py` | — | — |
+| `domain_agrar.feldbuch_schlaege` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/portal_innendienst.py`, `app/api/v1/endpoints/portal_kundenzugaenge.py`, `app/infrastructure/models/agrar_models.py`, `app/services/portal_lohndienst_service.py` | — | — |
 | `domain_agrar.harvest_acceptances` | `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/rohware_sammelabrechnung.py`, `app/services/wf_trigger_service.py` | `app/api/v1/endpoints/self_billing.py`, `app/services/mobile_sync_service.py`, `app/services/qs_charge_service.py` | — |
 | `domain_agrar.herd_data_connections` | `app/api/v1/endpoints/rations_integrations.py`, `app/api/v1/schemas/rations_integrations_schemas.py`, `app/services/rations_herd_data_sync_service.py`, `app/workers/herd_data_sync_worker.py` | `app/api/v1/endpoints/rations_integrations.py` | — |
 | `domain_agrar.herd_data_observations` | `app/api/v1/endpoints/rations_integrations.py`, `app/api/v1/schemas/rations_integrations_schemas.py`, `app/services/feeding_herd_snapshot_service.py` | `app/services/rations_herd_data_sync_service.py` | — |
@@ -215,7 +215,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_crm.crm_opportunities` | `app/api/v1/endpoints/crm_360_reads.py`, `app/api/v1/endpoints/crm_reports.py`, `app/api/v1/endpoints/opportunities.py`, `app/domains/crm/models.py`, `app/services/mask_rollout_summary_service.py` | `app/services/crm_lead_service.py` | — |
 | `domain_crm.crm_segment_members` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/crm/router.py` | `app/crm/router.py` | — |
 | `domain_crm.crm_segments` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/crm/router.py` | `app/crm/router.py` | — |
-| `domain_crm.customers` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance_dsgvo.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_sql.py`, `app/api/v1/endpoints/customers.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/schemas/crm.py`, `app/domains/logistik/strecke.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/agrar_models.py`, `app/infrastructure/models/l3c_models.py`, `app/services/business_partner_service.py`, `app/services/crm_lead_service.py`, `app/services/customer_reference.py`, `app/services/customer_sales_eligibility.py`, `app/services/customer_service.py`, `app/services/docflow_belegadapter.py`, `app/services/finance_dunning_service.py`, `app/services/kunden_merge.py`, `app/services/mcp_execution_service.py`, `app/services/sales_credit_service.py`, `app/services/sales_posting_service.py`, `app/services/whatsapp_agent_service.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance_dsgvo.py`, `app/services/business_partner_service.py`, `app/services/customer_service.py` | — |
+| `domain_crm.customers` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance_dsgvo.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_sql.py`, `app/api/v1/endpoints/customers.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/portal_kundenzugaenge.py`, `app/api/v1/schemas/crm.py`, `app/auth/portal_kunde.py`, `app/domains/logistik/strecke.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/agrar_models.py`, `app/infrastructure/models/l3c_models.py`, `app/services/business_partner_service.py`, `app/services/crm_lead_service.py`, `app/services/customer_reference.py`, `app/services/customer_sales_eligibility.py`, `app/services/customer_service.py`, `app/services/docflow_belegadapter.py`, `app/services/finance_dunning_service.py`, `app/services/kunden_merge.py`, `app/services/mcp_execution_service.py`, `app/services/portal_intelligence_service.py`, `app/services/portal_lohndienst_service.py`, `app/services/sales_credit_service.py`, `app/services/sales_posting_service.py`, `app/services/whatsapp_agent_service.py` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance_dsgvo.py`, `app/services/business_partner_service.py`, `app/services/customer_service.py` | — |
 | `domain_crm.farm_profiles` | `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.leads` | `app/api/v1/endpoints/compliance_dsgvo.py`, `app/infrastructure/models/__init__.py`, `app/services/interessent_service.py` | `app/api/v1/endpoints/compliance_dsgvo.py` | — |
 | `domain_crm.mail_workspace_attachments` | `app/services/mail_workspace_service.py` | `app/services/mail_workspace_service.py` | — |
@@ -545,7 +545,10 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_portal.customer_order_items` | `app/infrastructure/models/portal_models.py`, `app/services/ist_aggregation_service.py` | — | — |
 | `domain_portal.customer_orders` | `app/core/sql_identifiers.py`, `app/infrastructure/models/portal_models.py`, `app/services/geo_pipeline.py`, `app/services/ist_aggregation_service.py` | — | — |
 | `domain_portal.customer_pre_purchases` | `app/infrastructure/models/portal_models.py` | — | — |
-| `domain_portal.kundenzugaenge` | `app/api/v1/endpoints/portal_kundenzugaenge.py`, `app/auth/portal_kunde.py` | `app/api/v1/endpoints/portal_kundenzugaenge.py` | — |
+| `domain_portal.empfehlungen` | `app/services/portal_intelligence_service.py` | `app/services/portal_intelligence_service.py` | — |
+| `domain_portal.kundenzugaenge` | `app/api/v1/endpoints/portal_kundenzugaenge.py`, `app/api/v1/endpoints/portal_lohndienst.py`, `app/auth/portal_kunde.py` | `app/api/v1/endpoints/portal_kundenzugaenge.py` | — |
+| `domain_portal.lohndienst_auftraege` | `app/services/portal_lohndienst_service.py` | `app/services/portal_lohndienst_service.py` | — |
+| `domain_portal.lohndienst_ereignisse` | `app/services/portal_lohndienst_service.py` | `app/services/portal_lohndienst_service.py` | — |
 | `domain_pos.payment_methods` | `app/api/v1/endpoints/pos_payments.py` | — | — |
 | `domain_pos.pos_tagesabschluesse` | `app/api/v1/endpoints/pos_payments.py`, `app/services/pos_tagesabschluss_service.py` | `app/services/pos_tagesabschluss_service.py` | — |
 | `domain_pos.pos_tagesabschluss_log` | — | `app/services/pos_tagesabschluss_service.py` | — |
@@ -1337,7 +1340,10 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `customer_order_items` | `crm` | native | `id` | id, order_id, article_id, article_number, article_name, quantity, unit, unit_price, total_price, price_source, contract_id, pre_purchase_id, quantity_from_credit, quantity_at_list_price |
 | `customer_orders` | `crm` | native | `id` | id, tenant_id, customer_id, customer_number, customer_name, order_number, order_date, status, total_net, total_gross, delivery_address, delivery_date_requested, customer_notes, internal_notes, created_at, updated_at, idempotency_key |
 | `customer_pre_purchases` | `crm` | native | `id` | id, tenant_id, customer_id, article_id, article_number, article_name, pre_purchase_number, pre_purchase_price, current_list_price, unit, total_quantity, remaining_quantity, payment_date, payment_reference, valid_until, is_active, notes, created_at, updated_at |
-| `kundenzugaenge` | `crm` | native | `id` | id, tenant_id, subject, customer_id, rolle, gueltig_bis, angelegt_von, angelegt_am, widerrufen_von, widerrufen_am |
+| `empfehlungen` | `crm` | native | `id` | id, tenant_id, customer_id, typ, prioritaet, titel, beschreibung, cta_label, cta_ziel, kontext_schluessel, kontext_wert, artikel_id, betrag_indikativ, gueltig_bis, herkunft, modell, gesehen_am, gesehen_von, erzeugt_von, erzeugt_am |
+| `kundenzugaenge` | `crm` | native | `id` | id, tenant_id, subject, customer_id, rolle, gueltig_bis, angelegt_von, angelegt_am, widerrufen_von, widerrufen_am, schlag_ids |
+| `lohndienst_auftraege` | `crm` | native | `id` | id, tenant_id, customer_id, typ, status, schlag_ids, schlag_beschreibung, flaeche_ha, wunsch_datum, geplant_datum, getreide_art, menge_dt, tierart, tiere_anzahl, psm_mittel, kultur, anmerkung, innendienst_notiz, preis_indikativ_eur, dienstleister_subject, version, angelegt_von, angelegt_am, geaendert_von, geaendert_am |
+| `lohndienst_ereignisse` | `crm` | native | `id` | id, tenant_id, auftrag_id, aktion, von_status, nach_status, version, akteur, kanal, idempotenz_schluessel, anfrage_hash, daten, erfasst_am |
 
 ## `domain_pos`
 

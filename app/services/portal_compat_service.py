@@ -161,17 +161,25 @@ class PortalCompatService:
 
     # ── Full-featured dashboard (with Dokument ORM) ───────────────────────────
 
-    def get_portal_dashboard_full(self) -> dict:
-        orders = self._kundenbelege("sales_order", 20)
-        invoices = self._kundenbelege("sales_invoice", 20)
-        docs = self._kundendokumente()
+    def get_portal_dashboard_full(self, rechte: Optional[frozenset] = None) -> dict:
+        """Startseite — nur die Kacheln, die die Portalrolle sehen darf (``app/auth/portal_kunde.PORTAL_RECHTE``).
+
+        Ohne ``rechte`` (interne Aufrufe) alles.
+        """
+        verkauf = rechte is None or "verkauf" in rechte
+        finanzen = rechte is None or "finanzen" in rechte
+        orders = self._kundenbelege("sales_order", 20) if verkauf else []
+        invoices = self._kundenbelege("sales_invoice", 20) if finanzen else []
+        docs = self._kundendokumente() if finanzen else []
         offene_rechnungen = sum(1 for i in invoices if str(i.get("status", "")).lower() in {"offen", "ueberfaellig"})
+        kpis = []
+        if verkauf:
+            kpis.append({"label": "Bestellungen", "value": str(len(orders))})
+        if finanzen:
+            kpis.append({"label": "Rechnungen offen", "value": str(offene_rechnungen)})
+            kpis.append({"label": "Dokumente", "value": str(len(docs))})
         return {
-            "kpis": [
-                {"label": "Bestellungen", "value": str(len(orders))},
-                {"label": "Rechnungen offen", "value": str(offene_rechnungen)},
-                {"label": "Dokumente", "value": str(len(docs))},
-            ],
+            "kpis": kpis,
             "letzteBestellungen": [
                 {
                     "id": o.get("id") or o.get("number"),
@@ -243,16 +251,18 @@ class PortalCompatService:
             for d in docs
         ]
 
-    def list_portal_feldbuch(self) -> list:
+    def list_portal_feldbuch(self, schlag_ids: Optional[tuple] = None) -> list:
+        """``schlag_ids``: zugewiesene Schlaege eines Mitarbeiters; dann ohne Rueckfall auf Lieferscheine."""
         from app.infrastructure.models.agrar_models import FeldbuchSchlag
         if not self.tenant_id or not self.customer_id:
             return []
-        schlaege = (
-            self.db.query(FeldbuchSchlag)
-            .filter(FeldbuchSchlag.tenant_id == self.tenant_id, FeldbuchSchlag.customer_id == self.customer_id)
-            .order_by(FeldbuchSchlag.name)
-            .all()
-        )
+        abfrage = self.db.query(FeldbuchSchlag).filter(
+            FeldbuchSchlag.tenant_id == self.tenant_id, FeldbuchSchlag.customer_id == self.customer_id)
+        if schlag_ids is not None:
+            abfrage = abfrage.filter(FeldbuchSchlag.id.in_(list(schlag_ids)))
+        schlaege = abfrage.order_by(FeldbuchSchlag.name).all()
+        if schlag_ids is not None and not schlaege:
+            return []
         if schlaege:
             return [
                 {"id": s.id, "schlag": s.name, "kultur": s.kultur or "",

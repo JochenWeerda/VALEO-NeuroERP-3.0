@@ -13,7 +13,7 @@ import logging
 from datetime import datetime
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, Response, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Response, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.exc import OperationalError, ProgrammingError
@@ -25,8 +25,14 @@ from app.core.data_quality_enforcement import evaluate_feldbuch_massnahme_datens
 from app.core.database import get_db
 from app.core.data_quality_enforcement import DQValidationException
 from app.core.tenant import get_tenant_id
-from app.auth.deps import get_current_user
-from app.auth.portal_kunde import PortalKunde, portal_kunde
+from app.agrar.feldbuch.portal_zugang import arbeitskontext_anzeige, feldbuch_kunde, im_bereich, schlag_bereich
+from app.api.v1.schemas.portal_feldbuch_schemas import (
+    _NUTRIENT_INPUT_KEYS,
+    PortalMassnahmeCreate,
+    PortalMassnahmeUpdate,
+    PortalSchlagCreate,
+    PortalSchlagUpdate,
+)
 from app.core.uuid7 import uuid7
 from app.infrastructure.models.agrar_models import FeldbuchMassnahme, FeldbuchSchlag
 
@@ -120,139 +126,11 @@ def _validate_portal_feldbuch_csv(content: bytes) -> None:
             raise HTTPException(status_code=422, detail=f"Zeile {row_num}: {detail}")
 
 
-# ────────────────────────────────────────────────────────────────────────────
-# Kundenkonto — nur aus Anmeldung und gepruefter Zuordnung (TENANT-DOC-001)
-# ────────────────────────────────────────────────────────────────────────────
-
-# Bis 14.10.2026 nahm dieses Feldbuch den Kunden aus dem Parameter ``customer_id``, der Anmeldekennung oder dem
-# Rueckfall ``dev-customer`` — wer eine fremde Kunden-ID in die URL schrieb, las und aenderte deren Schlaege.
-# Interne Betreuung (``app/auth/portal_kunde.py``) liest das Feldbuch des gewaehlten Kunden; aendern darf sie es nur
-# mit einer Agrar-Bearbeiterrolle.
-_AGRAR_WRITE_ROLES = frozenset({"AGRAR_BEARBEITEN", "AGRAR_ADMIN", "admin"})
-
-
-def _get_customer_id(
-    request: Request,
-    kunde: PortalKunde = Depends(portal_kunde),
-    nutzer: dict = Depends(get_current_user),
-) -> str:
-    if kunde.intern and request.method not in ("GET", "HEAD") and not (
-        set((nutzer or {}).get("roles") or []) & _AGRAR_WRITE_ROLES
-    ):
-        raise HTTPException(status_code=403, detail="Keine Berechtigung: Feldbuch des Kunden bearbeiten.")
-    return kunde.customer_id
-
-
-# ────────────────────────────────────────────────────────────────────────────
-# Pydantic Schemas
-# ────────────────────────────────────────────────────────────────────────────
-
-class _SchlagDuevFields(BaseModel):
-    # AS-W2 (DüV): N-Düngebedarf-Grundlagen
-    n_sollwert_kg_ha: Optional[float] = None
-    ertragsniveau_dt_ha: Optional[float] = None
-    # AS-W5 (DüV): Nmin + Bodenuntersuchung
-    nmin_fruehjahr_kg_ha: Optional[float] = None
-    nmin_in_bedarf: Optional[bool] = None
-    boden_p2o5_mg: Optional[float] = None
-    boden_k2o_mg: Optional[float] = None
-    boden_mgo_mg: Optional[float] = None
-    boden_ph: Optional[float] = None
-    boden_datum: Optional[datetime] = None
-    versorgungsstufe: Optional[str] = None
-
-
-class PortalSchlagCreate(_SchlagDuevFields):
-    name: str
-    flik: Optional[str] = None
-    flaeche: float
-    kultur: Optional[str] = None
-    vorkultur: Optional[str] = None
-    gemeinde: Optional[str] = None
-    gemarkung: Optional[str] = None
-    bodenart: Optional[str] = None
-    ackerzahl: Optional[float] = None
-    status: str = "aktiv"
-    wirtschaftsjahr: Optional[int] = None
-
-
-class PortalSchlagUpdate(_SchlagDuevFields):
-    name: Optional[str] = None
-    flik: Optional[str] = None
-    flaeche: Optional[float] = None
-    kultur: Optional[str] = None
-    vorkultur: Optional[str] = None
-    gemeinde: Optional[str] = None
-    gemarkung: Optional[str] = None
-    bodenart: Optional[str] = None
-    ackerzahl: Optional[float] = None
-    status: Optional[str] = None
-    wirtschaftsjahr: Optional[int] = None
-
-
-# Nicht-Spalten-Eingaben (nur zur Berechnung), werden vor dem Persistieren entfernt.
-_NUTRIENT_INPUT_KEYS = ("n_gehalt", "p2o5_gehalt", "k2o_gehalt", "mgo_gehalt", "s_gehalt", "preis_je_einheit")
-
-
-class PortalMassnahmeBase(BaseModel):
-    # AS-W1: Düngung — Reinnährstoffe werden aus Gehalten (% des Produkts) berechnet
-    n_gehalt: Optional[float] = None
-    p2o5_gehalt: Optional[float] = None
-    k2o_gehalt: Optional[float] = None
-    mgo_gehalt: Optional[float] = None
-    s_gehalt: Optional[float] = None
-    preis_je_einheit: Optional[float] = None   # €/kg bzw. €/l Produkt → kosten_eur
-    duenger_form: Optional[str] = None         # 'M' | 'O'
-    # AS-W4: Pflanzenschutz
-    wirkungsbereich: Optional[str] = None
-    begruendung: Optional[str] = None
-    sachkunde_nummer: Optional[str] = None
-    sachkunde_gueltig_bis: Optional[datetime] = None
-    # AS-W6: Ernte
-    ertrag_dt_ha: Optional[float] = None
-    qualitaet: Optional[str] = None
-    erloes_eur: Optional[float] = None
-    nebenleistung_eur: Optional[float] = None
-    kosten_eur: Optional[float] = None
-    # Open-Gaps
-    sorte: Optional[str] = None
-    wassermenge_mm: Optional[float] = None
-    aum_code: Optional[str] = None
-    register_daten: Optional[dict[str, Any]] = None
-    lager_artikel_id: Optional[str] = None
-    lager_charge: Optional[str] = None
-    lager_verbrauch: Optional[float] = None
-    client_ref: Optional[str] = None
-    mittel_id: Optional[str] = None
-    mittel_typ: Optional[str] = None
-
-
-class PortalMassnahmeCreate(PortalMassnahmeBase):
-    schlag_id: Optional[str] = None
-    datum: datetime
-    uhrzeit: Optional[str] = None
-    typ: str
-    bezeichnung: Optional[str] = None
-    mittel: Optional[str] = None
-    menge: Optional[float] = None
-    einheit: Optional[str] = None
-    flaeche: Optional[float] = None
-    anwender: Optional[str] = None
-    bemerkung: Optional[str] = None
-
-
-class PortalMassnahmeUpdate(PortalMassnahmeBase):
-    schlag_id: Optional[str] = None
-    datum: Optional[datetime] = None
-    uhrzeit: Optional[str] = None
-    typ: Optional[str] = None
-    bezeichnung: Optional[str] = None
-    mittel: Optional[str] = None
-    menge: Optional[float] = None
-    einheit: Optional[str] = None
-    flaeche: Optional[float] = None
-    anwender: Optional[str] = None
-    bemerkung: Optional[str] = None
+# Kundenkonto und Portalrechte: app/agrar/feldbuch/portal_zugang.py; Eingabeschemas:
+# app/api/v1/schemas/portal_feldbuch_schemas.py.
+_get_customer_id = feldbuch_kunde
+_schlag_bereich = schlag_bereich
+_im_bereich = im_bereich
 
 
 _NON_COLUMN_KEYS = _NUTRIENT_INPUT_KEYS + (
@@ -442,6 +320,7 @@ def _require_portal_massnahme(
     customer_id: str,
     tenant_id: str,
     db: Session,
+    bereich: Optional[tuple[str, ...]] = None,
 ) -> FeldbuchMassnahme:
     m = (
         db.query(FeldbuchMassnahme)
@@ -454,6 +333,7 @@ def _require_portal_massnahme(
     )
     if not m:
         raise HTTPException(status_code=404, detail="Maßnahme nicht gefunden")
+    _im_bereich(bereich, m.schlag_id, "Maßnahme")
     return m
 
 
@@ -473,6 +353,7 @@ async def portal_list_schlaege(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
+    bereich: Optional[tuple[str, ...]] = Depends(_schlag_bereich),
 ) -> list[dict[str, Any]]:
     try:
         schlaege = (
@@ -480,6 +361,7 @@ async def portal_list_schlaege(
             .filter(
                 FeldbuchSchlag.tenant_id == tenant_id,
                 FeldbuchSchlag.customer_id == customer_id,
+                *([FeldbuchSchlag.id.in_(bereich)] if bereich is not None else []),
             )
             .order_by(FeldbuchSchlag.name)
             .offset(skip).limit(limit)
@@ -535,7 +417,9 @@ async def portal_get_schlag(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
+    bereich: Optional[tuple[str, ...]] = Depends(_schlag_bereich),
 ) -> dict[str, Any]:
+    _im_bereich(bereich, schlag_id)
     schlag = (
         db.query(FeldbuchSchlag)
         .filter(
@@ -652,6 +536,7 @@ async def portal_list_massnahmen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
+    bereich: Optional[tuple[str, ...]] = Depends(_schlag_bereich),
 ) -> list[dict[str, Any]]:
     try:
         q = (
@@ -661,6 +546,8 @@ async def portal_list_massnahmen(
                 FeldbuchMassnahme.customer_id == customer_id,
             )
         )
+        if bereich is not None:
+            q = q.filter(FeldbuchMassnahme.schlag_id.in_(bereich))
         if schlag_id:
             q = q.filter(FeldbuchMassnahme.schlag_id == schlag_id)
         if typ:
@@ -700,7 +587,9 @@ async def portal_create_massnahme(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
+    bereich: Optional[tuple[str, ...]] = Depends(_schlag_bereich),
 ) -> dict[str, Any]:
+    _im_bereich(bereich, data.schlag_id)
     payload = _normalize_register_payload(_apply_duengung_nutrients(data.model_dump()))
     if data.client_ref:
         existing = (
@@ -739,8 +628,9 @@ async def portal_get_massnahme(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
+    bereich: Optional[tuple[str, ...]] = Depends(_schlag_bereich),
 ) -> dict[str, Any]:
-    massnahme = _require_portal_massnahme(massnahme_id, customer_id, tenant_id, db)
+    massnahme = _require_portal_massnahme(massnahme_id, customer_id, tenant_id, db, bereich)
     return _massnahme_to_dict(massnahme)
 
 
@@ -756,8 +646,9 @@ async def portal_update_massnahme(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
+    bereich: Optional[tuple[str, ...]] = Depends(_schlag_bereich),
 ) -> dict[str, Any]:
-    massnahme = _require_portal_massnahme(massnahme_id, customer_id, tenant_id, db)
+    massnahme = _require_portal_massnahme(massnahme_id, customer_id, tenant_id, db, bereich)
     # Nur eigene Einträge editierbar (nicht VALEO-Dienste)
     if massnahme.quelle in ("erp_service", "erp_lieferschein"):
         raise HTTPException(
@@ -787,8 +678,9 @@ async def portal_delete_massnahme(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
+    bereich: Optional[tuple[str, ...]] = Depends(_schlag_bereich),
 ) -> Response:
-    massnahme = _require_portal_massnahme(massnahme_id, customer_id, tenant_id, db)
+    massnahme = _require_portal_massnahme(massnahme_id, customer_id, tenant_id, db, bereich)
     # VALEO-Dienstleistungen (erp_*) sind Nachweise und dürfen nicht gelöscht werden.
     if massnahme.quelle in ("erp_service", "erp_lieferschein"):
         raise HTTPException(
@@ -1368,10 +1260,11 @@ async def portal_lagerverbrauch(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
+    bereich: Optional[tuple[str, ...]] = Depends(_schlag_bereich),
 ) -> dict[str, Any]:
     from app.agrar.feldbuch.lagerverbrauch import plane_lagerverbrauch
 
-    m = _require_portal_massnahme(body.massnahme_id, customer_id, tenant_id, db)
+    m = _require_portal_massnahme(body.massnahme_id, customer_id, tenant_id, db, bereich)
     try:
         buchung = plane_lagerverbrauch(
             massnahme_id=body.massnahme_id,
@@ -1405,6 +1298,7 @@ async def portal_offline_sync(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
+    bereich: Optional[tuple[str, ...]] = Depends(_schlag_bereich),
 ) -> dict[str, Any]:
     """ASK-MOB-001: idempotente Offline-Ops (create_massnahme) nach client_ref."""
     from app.agrar.feldbuch.offline_queue import merge_offline_ops
@@ -1436,6 +1330,7 @@ async def portal_offline_sync(
             ids.append(str(existing.id))
             continue
         payload = dict(op.get("payload") or {})
+        _im_bereich(bereich, payload.get("schlag_id"))
         payload = _apply_duengung_nutrients(payload)
         datum = payload.get("datum") or datetime.now()
         if isinstance(datum, str):
@@ -1477,10 +1372,9 @@ async def portal_offline_sync(
 
 
 class _ArbeitskontextBody(BaseModel):
-    betrieb_name: Optional[str] = None
+    # Betrieb und Rolle kommen aus der Anmeldung (PORTAL-CONTEXT-001); bis 14.10.2026 setzte der Client beide frei.
     wirtschaftsjahr: int
     erntejahr: Optional[int] = None
-    rolle: str = "betriebsleiter"
     betriebsstaette: Optional[str] = None
 
 
@@ -1489,10 +1383,9 @@ class _ArbeitskontextBody(BaseModel):
 )
 async def portal_arbeitskontext_get(
     wirtschaftsjahr: int = Query(...),
-    betrieb_name: Optional[str] = Query(None),
     erntejahr: Optional[int] = Query(None),
-    rolle: str = Query("betriebsleiter"),
     customer_id: str = Depends(_get_customer_id),
+    anzeige: tuple[str, str] = Depends(arbeitskontext_anzeige),
 ) -> dict[str, Any]:
     """ASK Kap. 5: aktiver Betrieb-/Jahreskontext für die Portal-Ackerschlagkartei."""
     from app.agrar.feldbuch.arbeitskontext import build_arbeitskontext
@@ -1500,10 +1393,10 @@ async def portal_arbeitskontext_get(
     try:
         return build_arbeitskontext(
             customer_id=customer_id,
-            betrieb_name=betrieb_name or customer_id,
+            betrieb_name=anzeige[0],
             wirtschaftsjahr=wirtschaftsjahr,
             erntejahr=erntejahr,
-            rolle=rolle,
+            rolle=anzeige[1],
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -1515,16 +1408,17 @@ async def portal_arbeitskontext_get(
 async def portal_arbeitskontext_set(
     body: _ArbeitskontextBody,
     customer_id: str = Depends(_get_customer_id),
+    anzeige: tuple[str, str] = Depends(arbeitskontext_anzeige),
 ) -> dict[str, Any]:
     from app.agrar.feldbuch.arbeitskontext import build_arbeitskontext
 
     try:
         return build_arbeitskontext(
             customer_id=customer_id,
-            betrieb_name=body.betrieb_name or customer_id,
+            betrieb_name=anzeige[0],
             wirtschaftsjahr=body.wirtschaftsjahr,
             erntejahr=body.erntejahr,
-            rolle=body.rolle,
+            rolle=anzeige[1],
             betriebsstaette=body.betriebsstaette,
         )
     except ValueError as exc:
@@ -1540,12 +1434,14 @@ async def portal_schlaginfo(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
+    bereich: Optional[tuple[str, ...]] = Depends(_schlag_bereich),
 ) -> dict[str, Any]:
     """ASK Kap. 19: schlagbezogene Gesamtdokumentation inkl. Direktkostenfreier Leistung."""
     from sqlalchemy import extract
 
     from app.agrar.feldbuch.schlaginfo import build_schlaginfo
 
+    _im_bereich(bereich, schlag_id)
     schlag = (
         db.query(FeldbuchSchlag)
         .filter(
@@ -1609,6 +1505,7 @@ async def portal_schlaginfo_text(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
+    bereich: Optional[tuple[str, ...]] = Depends(_schlag_bereich),
 ) -> Response:
     from app.agrar.feldbuch.schlaginfo_export import render_schlaginfo_text
 
@@ -1618,6 +1515,7 @@ async def portal_schlaginfo_text(
         db=db,
         tenant_id=tenant_id,
         customer_id=customer_id,
+        bereich=bereich,
     )
     return Response(
         content=render_schlaginfo_text(info),
@@ -1756,12 +1654,15 @@ async def portal_sammel_duengung(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
+    bereich: Optional[tuple[str, ...]] = Depends(_schlag_bereich),
 ) -> dict[str, Any]:
     """ASK Kap. 31: eine Düngung auf mehrere Schläge mit flächenproportionaler Nährstoffrechnung."""
     from app.agrar.feldbuch.sammelbuchung import plane_sammel_duengung
 
     if not body.schlag_ids:
         raise HTTPException(status_code=422, detail="schlag_ids sind Pflicht")
+    for sid in body.schlag_ids:
+        _im_bereich(bereich, sid)
     schlaege = (
         db.query(FeldbuchSchlag)
         .filter(
@@ -1846,6 +1747,7 @@ async def portal_feldbuch_stats(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
+    bereich: Optional[tuple[str, ...]] = Depends(_schlag_bereich),
 ) -> dict[str, Any]:
     try:
         schlaege = (
@@ -1854,6 +1756,7 @@ async def portal_feldbuch_stats(
                 FeldbuchSchlag.tenant_id == tenant_id,
                 FeldbuchSchlag.customer_id == customer_id,
                 FeldbuchSchlag.status == "aktiv",
+                *([FeldbuchSchlag.id.in_(bereich)] if bereich is not None else []),
             )
             .all()
         )
@@ -1862,6 +1765,7 @@ async def portal_feldbuch_stats(
             .filter(
                 FeldbuchMassnahme.tenant_id == tenant_id,
                 FeldbuchMassnahme.customer_id == customer_id,
+                *([FeldbuchMassnahme.schlag_id.in_(bereich)] if bereich is not None else []),
             )
             .all()
         )

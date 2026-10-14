@@ -20,8 +20,9 @@ from modules.agrar.services.self_billing_service import (
 class SelfBillingRepositoryImpl:
     """SQLAlchemy-Implementierung des Self-Billing Repository."""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, *, commit_on_success: bool = True):
         self.db = db
+        self.commit_on_success = commit_on_success
     
     def _to_service_invoice(self, db_model: SelfBillingInvoice) -> ServiceSelfBillingInvoice:
         """Konvertiert DB-Model zu Service-Model."""
@@ -102,7 +103,10 @@ class SelfBillingRepositoryImpl:
         """Erstellt eine neue Gutschrift."""
         db_model = self._from_service_invoice(invoice)
         self.db.add(db_model)
-        self.db.commit()
+        if self.commit_on_success:
+            self.db.commit()
+        else:
+            self.db.flush()
         self.db.refresh(db_model)
         return self._to_service_invoice(db_model)
     
@@ -145,7 +149,10 @@ class SelfBillingRepositoryImpl:
         if "updated_at" not in updates:
             db_model.updated_at = datetime.now()
         
-        self.db.commit()
+        if self.commit_on_success:
+            self.db.commit()
+        else:
+            self.db.flush()
         self.db.refresh(db_model)
         return self._to_service_invoice(db_model)
     
@@ -168,7 +175,10 @@ class SelfBillingRepositoryImpl:
             updated_by=dispute.updated_by,
         )
         self.db.add(db_model)
-        self.db.commit()
+        if self.commit_on_success:
+            self.db.commit()
+        else:
+            self.db.flush()
         self.db.refresh(db_model)
         return self._to_service_dispute(db_model)
     
@@ -199,7 +209,10 @@ class SelfBillingRepositoryImpl:
                 setattr(db_model, k, v)
         if "updated_at" not in updates:
             db_model.updated_at = datetime.now()
-        self.db.commit()
+        if self.commit_on_success:
+            self.db.commit()
+        else:
+            self.db.flush()
         self.db.refresh(db_model)
         return self._to_service_dispute(db_model)
 

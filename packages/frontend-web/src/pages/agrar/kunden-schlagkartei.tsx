@@ -8,7 +8,7 @@
  *  - Ankaufsangebot erstellen    → POST /portal/empfehlungen/generieren/schlagkartei
  */
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from '@/app/routing/typed-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -30,6 +30,8 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
+import { usePortalKonto, type PortalKundenkonto } from '@/lib/portal-konto'
+import { PortalKontoGate, PortalKontoWahl } from '@/components/portal/PortalKontoWahl'
 import { useToast } from '@/hooks/use-toast'
 import { useTouchDevice } from '@/hooks/useTouchDevice'
 import {
@@ -64,8 +66,8 @@ type Massnahme = {
   bemerkung?: string
 }
 
-// Produktiv aus Route-Params; hier Demo
-const DEMO_KUNDEN_NR = 'K-10001'
+// Der Kunde kommt aus der Kontowahl (PORTAL-CONTEXT-001): genau eine Zuordnung wird automatisch gewaehlt, bei
+// mehreren wird gewaehlt, der Innendienst waehlt einen Kunden des Mandanten. Ohne Wahl kein Auftrag.
 
 // ─── Lohndienst-Dialog (Lohnspritz + Mahl+Misch) ─────────────────────────────
 
@@ -95,11 +97,13 @@ function LohndienstDialog({
   const [mengeDt, setMengeDt] = useState<string>('')
   const [anmerkung, setAnmerkung] = useState<string>('')
 
+  // Ein Schluessel je Auftrag: ein erneuter Versuch legt keinen zweiten an; neu erst nach Erfolg.
+  const anfrageSchluessel = useRef<string>(crypto.randomUUID())
+
   const mutation = useMutation({
     mutationFn: async () => {
       const schlagObj = schlaege.find((s) => s.id === schlagId)
       await apiClient.post('/portal/lohndienste', {
-        kunden_nr: kundenNr,
         typ,
         schlag_ids: schlagId ? [schlagId] : [],
         schlag_beschreibung: schlagObj?.name ?? (schlaege.map((s) => s.name).join(', ')),
@@ -111,9 +115,10 @@ function LohndienstDialog({
         getreide_art: typ === 'mahl_misch' ? (getreideArt || null) : null,
         menge_dt: mengeDt ? parseFloat(mengeDt) : null,
         anmerkung: anmerkung || null,
-      })
+      }, { headers: { 'X-Idempotency-Key': anfrageSchluessel.current } })
     },
     onSuccess: () => {
+      anfrageSchluessel.current = crypto.randomUUID()
       toast({
         title: typ === 'lohn_spritz' ? 'Lohnspritz-Auftrag angelegt' : 'Mahl+Misch-Termin angefragt',
         description: `Auftrag für Kunde ${kundenNr} wurde erfolgreich übermittelt.`,
@@ -401,28 +406,38 @@ function AnkaufsangebotDialog({
 // ─── Hauptseite ───────────────────────────────────────────────────────────────
 
 export default function KundenSchlagkarteiPage() {
+  const konto = usePortalKonto((state) => state.aktiv)
+  return (
+    <div className="mx-auto max-w-5xl p-3 md:p-6">
+      <PortalKontoGate intern>{konto && <SchlagkarteiFuerKunde kunde={konto} />}</PortalKontoGate>
+    </div>
+  )
+}
+
+function SchlagkarteiFuerKunde({ kunde }: { kunde: PortalKundenkonto }) {
   const navigate = useNavigate()
   const isTouch = useTouchDevice()
-  const kundenNr = DEMO_KUNDEN_NR
+  const kundenId = kunde.customer_id
+  const kundenNr = kunde.customer_number ?? kunde.customer_id
   const [massnahmeTypFilter, setMassnahmeTypFilter] = useState<string>('')
   const [dialog, setDialog] = useState<'lohn_spritz' | 'mahl_misch' | 'ankauf' | null>(null)
 
   const { data: schlaege, isLoading: loadingS } = useQuery<{ schlaege: Schlag[]; count: number }>({
-    queryKey: ['innendienst-schlaege', kundenNr],
+    queryKey: ['innendienst-schlaege', kundenId],
     queryFn: async () => {
       const res = await apiClient.get<{ schlaege: Schlag[]; count: number }>(
-        `/innendienst/kunden/${kundenNr}/schlaege`,
+        `/innendienst/kunden/${encodeURIComponent(kundenId)}/schlaege`,
       )
       return res.data
     },
   })
 
   const { data: massnahmen, isLoading: loadingM } = useQuery<{ massnahmen: Massnahme[]; count: number }>({
-    queryKey: ['innendienst-massnahmen', kundenNr, massnahmeTypFilter],
+    queryKey: ['innendienst-massnahmen', kundenId, massnahmeTypFilter],
     queryFn: async () => {
       const params = massnahmeTypFilter ? `?massnahme_typ=${massnahmeTypFilter}` : ''
       const res = await apiClient.get<{ massnahmen: Massnahme[]; count: number }>(
-        `/innendienst/kunden/${kundenNr}/massnahmen${params}`,
+        `/innendienst/kunden/${encodeURIComponent(kundenId)}/massnahmen${params}`,
       )
       return res.data
     },
@@ -433,7 +448,7 @@ export default function KundenSchlagkarteiPage() {
   const kulturen = [...new Set(alleSchlaege.map((s) => s.kultur).filter(Boolean))]
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-3 md:p-6">
+    <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
         <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate(-1)}>
           Zurück
@@ -444,6 +459,9 @@ export default function KundenSchlagkarteiPage() {
             Schlagkartei — Kunde {kundenNr}
           </h1>
           <p className="text-sm text-muted-foreground">Lohnspritz, Mahl+Misch und Ankauf vorbereiten</p>
+        </div>
+        <div className="sm:ml-auto">
+          <PortalKontoWahl />
         </div>
       </div>
 
