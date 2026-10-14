@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-SAVE-IDEMPOTENCY-20261014 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Create/Update mit UUID-Schluessel und exakt gebundenem Inhalt wiederholbar; keine Doppelhistorie oder stille Ueberschreibung bei unklarem Commit-Ergebnis. **Dateibesitz:** studio_draft_store.py; studio_drafts.py; Studio-Client und bestehende Python/Vitest-Vertraege; neuer test_studio_save_idempotency.py; eigene QA. **Abnahme:** gespeichertes Snapshot-Replay mit Mandant/Actor/Aktion/Ziel/Inhalt/Revision, gleiche SQL-Schluessel transaktional serialisiert, Konflikte bleiben ohne Wirkung. **Risiken:** Historienanzeige, Korrelationsattribute und Prozesssimulation folgen; keine neue DB/Migration, bestehende Historie weiterverwenden.
+
 ## EINVOICE-ROLLEN-20261014 — in Arbeit, Claude Code
 
 **Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Die E-Rechnungswege (`/api/v1/sales/invoices/{nr}/einvoice/xrechnung|zugferd`) pruefen die Rolle vor dem ersten Datenbankzugriff: Erzeugen mit Archiveintrag `beleg_write`, Abrufen ohne Archiveintrag `beleg_read`. Bisher genuegte eine Anmeldung. **Dateibesitz:** app/api/v1/endpoints/sales_invoice_einvoice.py (nur Abhaengigkeiten); tests/test_einvoice_rollen.py; tests/test_sales_invoice_einvoice_endpoints.py; docs/quality-assurance/einvoice-rollen-20261014.md. **Abnahme:** ohne Belegrolle 403 ohne Archiveintrag; Lese- und Schreibrollen wie bei `/finance/invoices`. Keine Migration.
