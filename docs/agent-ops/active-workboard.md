@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## SLO-CANONICAL-INPUT-20261014 — reserviert, Codex
+## SLO-CANONICAL-INPUT-20261014 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Keine erfundenen SLO-Messwerte/IDs; ausdruecklicher gemeinsamer REST-/MCP-Vertrag mit endlichen Zahlen oder ausdruecklichem null. **Dateibesitz:** process_kernel_api.py nur check_slo/Schemaimport; neues schemas/slo_input.py; mcp_tool_contracts.py nur finance_sla_check/process_slo_check; neuro_tool_execution.py nur SLO-Vorvalidierung/Entfernung Ersatzwerte; neue tests/test_slo_canonical_input.py und QA; OpenAPI nur SLO-Eingabe/Beschreibung/Komponente auf HEAD-Basis. **Abnahme:** missing/string/bool/NaN/Inf 422 vor HTTP; explicit null bleibt UNBEKANNT, null und 0 unterscheidbar; zwei MCP-Version-2-Vertraege gleicher REST-Schemaabgleich. **Risiken:** Skontoberechnung im Broker ist fachlich falsch an SLO gebunden und braucht eigenen Ersatz; kein Fachfreigabenachweis. Andere POSTs/Historie/Simulation offen. Keine Migration/DB/Container.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Keine erfundenen SLO-Messwerte/IDs; ausdruecklicher gemeinsamer REST-/MCP-Vertrag mit endlichen Zahlen oder ausdruecklichem null. **Dateibesitz:** process_kernel_api.py nur check_slo/Schemaimport; neues schemas/slo_input.py; mcp_tool_contracts.py nur finance_sla_check/process_slo_check; neuro_tool_execution.py nur SLO-Vorvalidierung/Entfernung Ersatzwerte; neue tests/test_slo_canonical_input.py und QA; OpenAPI nur SLO-Eingabe/Beschreibung/Komponente auf HEAD-Basis. **Abnahme:** missing/string/bool/NaN/Inf 422 vor HTTP; explicit null bleibt UNBEKANNT, null und 0 unterscheidbar; zwei MCP-Version-2-Vertraege gleicher REST-Schemaabgleich. **Risiken:** Skontoberechnung im Broker ist fachlich falsch an SLO gebunden und braucht eigenen Ersatz; kein Fachfreigabenachweis. Andere POSTs/Historie/Simulation offen. Keine Migration/DB/Container.
+
+**Lieferung:** Gemeinsame SLO-Eingabe, beide MCP-Vertraege Version 2, keine Ersatzwerte/ID; Roh-NaN/Infinity sauber 422. 99 Regressionen und 57 gezielte Faelle bestanden; Live-Schemaabgleich gruen. QA: slo-canonical-input-20261014.md. Vier kanonische Tool-Schemas auf drei POST-Wegen; Skontoberechnung im Broker und andere Kanal-/Studio-Gates offen.
 
 ## PORTAL-SHOP-KUNDE-20261014 — abgeschlossen, Claude Code
 

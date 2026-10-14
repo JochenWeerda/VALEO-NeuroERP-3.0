@@ -151339,6 +151339,33 @@
         "title": "SliceMetricOut",
         "type": "object"
       },
+      "SloCheckIn": {
+        "additionalProperties": false,
+        "properties": {
+          "ist_wert": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ist Wert"
+          },
+          "slo_id": {
+            "minLength": 1,
+            "title": "Slo Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slo_id",
+          "ist_wert"
+        ],
+        "title": "SloCheckIn",
+        "type": "object"
+      },
       "SnapshotOut": {
         "properties": {
           "condensed_at": {
@@ -376685,15 +376712,13 @@
     },
     "/api/v1/process/slo/check": {
       "post": {
-        "description": "Prueft ob ein Ist-Wert ein SLO erfuellt.\n\nBody: { \"slo_id\": str, \"ist_wert\": float | null }",
+        "description": "Check the explicit measurement; null is unknown and never synthetic zero.",
         "operationId": "check_slo_api_v1_process_slo_check_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
+                "$ref": "#/components/schemas/SloCheckIn"
               }
             }
           },

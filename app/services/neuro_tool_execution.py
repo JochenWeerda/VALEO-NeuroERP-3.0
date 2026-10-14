@@ -231,6 +231,13 @@ class NeuroToolExecutionService:
         context: dict[str, Any],
         tenant_id: str,
     ) -> dict[str, Any]:
+        if contract.tool_name in {"valeo_finance_sla_check", "valeo_process_slo_check"}:
+            from app.api.v1.schemas.slo_input import SloCheckIn
+            from pydantic import ValidationError
+            try:
+                return SloCheckIn.model_validate(parameters).model_dump(mode="json")
+            except ValidationError:
+                raise HTTPException(422, "Explicit finite SLO measurement required") from None
         if contract.tool_name == "valeo_process_data_quality_validate":
             from app.api.v1.schemas.data_quality_input import DataQualityCheckIn
             from pydantic import ValidationError
@@ -269,11 +276,6 @@ class NeuroToolExecutionService:
                     "tenant_id": tenant_id,
                     **dict(parameters),
                 },
-            }
-        if contract.tool_name == "valeo_finance_sla_check":
-            return {
-                "slo_id": merged.get("slo_id", "SLO-API-VERF-01"),
-                "ist_wert": merged.get("ist_wert", 0),
             }
         body: dict[str, Any] = {}
         for param in contract.parameter:

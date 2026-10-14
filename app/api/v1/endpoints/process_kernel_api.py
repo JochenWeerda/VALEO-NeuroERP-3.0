@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
 from app.api.v1.schemas.data_quality_input import DataQualityCheckIn
+from app.api.v1.schemas.slo_input import SloCheckIn, reject_nonfinite_slo_json
 
 from datetime import datetime
 from typing import Any
@@ -1308,17 +1309,12 @@ def get_slo_registry(dienst: str = "") -> dict[str, Any]:
     return registry.as_dict()
 
 
-@router.post("/slo/check", response_model=ProcessKernelOut, summary="Slo prÃ¼fen")
-def check_slo(body: dict) -> dict[str, Any]:
-    """
-    Prueft ob ein Ist-Wert ein SLO erfuellt.
-
-    Body: { "slo_id": str, "ist_wert": float | null }
-    """
-    slo_id: str = body.get("slo_id", "")
-    ist_wert = body.get("ist_wert")
-    if not slo_id:
-        raise HTTPException(status_code=422, detail="slo_id ist erforderlich")
+@router.post("/slo/check", response_model=ProcessKernelOut, summary="Slo prÃ¼fen",
+             dependencies=[Depends(reject_nonfinite_slo_json)])
+def check_slo(body: SloCheckIn) -> dict[str, Any]:
+    """Check the explicit measurement; null is unknown and never synthetic zero."""
+    slo_id = body.slo_id
+    ist_wert = body.ist_wert
     registry = get_process_kernel_slos()
     slo = registry.by_slo_id(slo_id)
     if slo is None:
