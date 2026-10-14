@@ -33,7 +33,7 @@ from app.services.mask_action_runtime_service import MaskActionResult, run_deleg
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
-from app.documents.router_helpers import get_repository, get_from_store, save_to_store
+from app.documents.router_helpers import eigener_beleg, get_repository, save_to_store
 
 
 router = APIRouter(prefix="/sales", tags=["sales", "credit-notes", "returns"])
@@ -211,7 +211,7 @@ async def create_credit_note(
     if payload.invoice_reference:
         try:
             repo = get_repository(db)
-            inv = get_from_store("sales_invoice", payload.invoice_reference, repo)
+            inv = eigener_beleg("sales_invoice", payload.invoice_reference, tid, repo)
             if inv and inv.get("status") not in ("STORNIERT", "GUTGESCHRIEBEN"):
                 inv["status"] = "GUTGESCHRIEBEN"
                 save_to_store("sales_invoice", payload.invoice_reference, inv, repo)
@@ -911,7 +911,7 @@ async def create_return(
     if payload.invoice_reference:
         try:
             repo = get_repository(db)
-            inv = get_from_store("sales_invoice", payload.invoice_reference, repo)
+            inv = eigener_beleg("sales_invoice", payload.invoice_reference, tid, repo)
             if inv and inv.get("status") not in ("STORNIERT", "GUTGESCHRIEBEN"):
                 inv["status"] = "GUTGESCHRIEBEN"
                 save_to_store("sales_invoice", payload.invoice_reference, inv, repo)

@@ -44,6 +44,24 @@ def _eigener_beleg(doc_type: str, doc_number: str, repo, tenant_id: str) -> Opti
     return doc
 
 
+# Belegarten, die allein ueber diesen Router gefuehrt werden. Nur sie aendert und loescht er (Nutzerentscheidung
+# 14.10.2026). Finanzbelege — Ausgangs- und Eingangsrechnung, Zahlungseingang, Gutschrift, Belastung — laufen
+# ausschliesslich ueber ihre Fachwege mit Rollenpruefung; bis dahin konnte hier jede angemeldete Person des
+# Mandanten sie anlegen, aendern und loeschen.
+ROUTER_BELEGARTEN = frozenset({
+    "customer_inquiry", "sales_offer", "sales_order", "sales_delivery",
+    "purchase_request", "purchase_offer", "purchase_order",
+})
+
+
+def _nur_router_belegart(doc_type: str) -> None:
+    if doc_type not in ROUTER_BELEGARTEN:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Belegart {doc_type} wird nicht ueber den allgemeinen Belegweg geschrieben, sondern ueber ihren Fachweg.",
+        )
+
+
 def _bestand_fuer_anlage(doc_type: str, doc_number: str, repo, tenant_id: str) -> Optional[dict]:
     """Der eigene Bestand zur Nummer; gehoert sie einem anderen oder keinem Mandanten, wird nichts ueberschrieben."""
     doc = get_from_store(doc_type, doc_number, repo)
@@ -337,7 +355,8 @@ async def upsert_sales_delivery(
 async def upsert_sales_invoice(
     doc: SalesInvoice, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict:
-    """Erstellt oder aktualisiert Rechnung"""
+    """Geschlossen: Rechnungen entstehen ueber ``/api/v1/finance/invoices`` (Rollenpruefung, Buchung, Archiv)."""
+    _nur_router_belegart("sales_invoice")
     try:
         repo = get_repository(db)
         # Berechne Gesamtbeträge falls nicht gesetzt
@@ -385,7 +404,8 @@ async def upsert_sales_invoice(
 async def upsert_payment_received(
     doc: PaymentReceived, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict:
-    """Erstellt oder aktualisiert Zahlungseingang"""
+    """Geschlossen: Zahlungseingaenge laufen ueber den Fachweg der Finanzbuchhaltung (Rollenpruefung, Auszifferung)."""
+    _nur_router_belegart("payment_received")
     try:
         repo = get_repository(db)
         # Status-Transition-Logik
@@ -604,6 +624,7 @@ async def update_document(
     db: Session = Depends(get_db),
 ) -> dict:
     """Aktualisiert einen Beleg"""
+    _nur_router_belegart(doc_type)
     try:
         repo = get_repository(db)
         existing = _eigener_beleg(doc_type, doc_number, repo, tenant_id)
@@ -636,6 +657,7 @@ async def delete_document(
     doc_type: str, doc_number: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     """Löscht einen Beleg"""
+    _nur_router_belegart(doc_type)
     try:
         repo = get_repository(db)
         doc = _eigener_beleg(doc_type, doc_number, repo, tenant_id)
@@ -674,6 +696,7 @@ async def bulk_delete_documents(
     db: Session = Depends(get_db),
 ) -> dict:
     """Löscht mehrere Belege gleichzeitig — nur eigene. Bis 14.10.2026 nur im Prozessspeicher und ohne Mandant."""
+    _nur_router_belegart(doc_type)
     try:
         deleted = []
         failed = []

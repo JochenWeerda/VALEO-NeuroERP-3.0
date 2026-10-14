@@ -66,7 +66,7 @@ def test_propose_builds_tenant_worklist() -> None:
 def test_validate_rejects_foreign_endpoint() -> None:
     draft = propose_studio_draft("Lieferanten")
     draft["dataSources"][0]["endpoint"] = "https://evil.example/x"
-    response = _client().post("/api/v1/studio/validate", headers=_HEADERS, json={"definition": draft})
+    response = _client().post("/api/v1/studio/validate", headers=_HEADERS, json={"definition": draft, 'idempotency_key': str(uuid4())})
     assert response.status_code == 200
     assert any(item.startswith("datenquelle_nicht_im_katalog") for item in response.json()["violations"])
 
@@ -77,7 +77,7 @@ def test_save_and_same_actor_cannot_publish() -> None:
     created = client.post(
         "/api/v1/studio/drafts",
         headers={**_HEADERS, "X-Actor-ID": "anna"},
-        json={"definition": draft},
+        json={"definition": draft, 'idempotency_key': str(uuid4())},
     )
     assert created.status_code == 200, created.text
     draft_id = created.json()["id"]
@@ -101,7 +101,7 @@ def test_tenant_isolation() -> None:
     created = client.post(
         "/api/v1/studio/drafts",
         headers={**_HEADERS, "X-Actor-ID": "anna"},
-        json={"definition": draft},
+        json={"definition": draft, 'idempotency_key': str(uuid4())},
     )
     draft_id = created.json()["id"]
     other = client.get(
@@ -129,7 +129,7 @@ def _publish_sample(client: TestClient, intent: str = "Lieferanten bewerten") ->
     created = client.post(
         "/api/v1/studio/drafts",
         headers={**_HEADERS, "X-Actor-ID": "anna"},
-        json={"definition": draft},
+        json={"definition": draft, 'idempotency_key': str(uuid4())},
     )
     assert created.status_code == 200, created.text
     _USER["sub"] = "berta"

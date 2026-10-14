@@ -82,7 +82,7 @@ def test_sql_save_survives_process_memory_reset(studio_db) -> None:
     created = client.post(
         "/api/v1/studio/drafts",
         headers={**_HEADERS_A, "X-Actor-ID": "anna"},
-        json={"definition": draft},
+        json={"definition": draft, 'idempotency_key': str(uuid4())},
     )
     assert created.status_code == 200, created.text
     draft_id = created.json()["id"]
@@ -105,7 +105,7 @@ def test_sql_tenant_isolation_and_four_eyes(studio_db) -> None:
     created = client.post(
         "/api/v1/studio/drafts",
         headers={**_HEADERS_A, "X-Actor-ID": "anna"},
-        json={"definition": draft},
+        json={"definition": draft, 'idempotency_key': str(uuid4())},
     )
     assert created.status_code == 200, created.text
     draft_id = created.json()["id"]

@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.finance_clearing_service import ClearingError, FinanceClearingService
-from app.documents.router_helpers import get_repository, get_from_store, save_to_store
+from app.documents.router_helpers import eigener_beleg, get_repository, save_to_store
 from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter(prefix="/finance", tags=["finance", "fibu", "op"])
@@ -61,7 +61,9 @@ def record_payment(
     if result.get("voll_ausgeziffert"):
         try:
             repo = get_repository(db)
-            inv = get_from_store("sales_invoice", body.rechnungsnr, repo)
+            # Nur die eigene Rechnung: die Nummer ist im Speicher systemweit eindeutig, ein fremder Beleg gleicher Nummer
+            # wurde bis 14.10.2026 mit auf BEZAHLT gesetzt.
+            inv = eigener_beleg("sales_invoice", body.rechnungsnr, tenant_id, repo)
             if inv and inv.get("status") not in ("BEZAHLT", "STORNIERT"):
                 inv["status"] = "BEZAHLT"
                 save_to_store("sales_invoice", body.rechnungsnr, inv, repo)
