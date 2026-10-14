@@ -11,6 +11,34 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-GRAIN-CHAIN-20261014 — in arbeit, Codex
+
+**Owner:** Codex. **Stand:** in arbeit 2026-10-14. **Ziel:** Durch reale Studio-Simulation gefundene Modellbrueche der Ernteannahme beheben. **Dateibesitz:** modules/agrar/services/partie_service.py; app/services/harvest_acceptance_service.py nur betroffene Teilpositionen und verbindliche Status-/Buchungsinvarianten; eigene Tests und QA. **Abnahme:** Mandant ueber Annahmekopf, keine unbekannten ORM-Felder; reale Kette auf gemeinsamem valeo_probe rollbackisoliert. Keine neue Datenbank/Container; keine fremden Aenderungen.
+
+**Zwischenstand:** Modellbrueche und verbindliche Annahmezustaende korrigiert; bestehender Unit-Vertrag auf echtes remarks-Feld und expliziten Rechnungsverweis angepasst. 23 gezielte Backendfaelle, neun Studio-UI-Faelle bestanden. Reale Rollbackkette bleibt wegen Vorsteuer rot; keine erfolgreiche Release-Abnahme. QA: studio-grain-chain-20261014.md.
+
+## ALTBELEG-QUARANTAENE-20261014 — abgeschlossen, Claude Code
+
+**Lieferung:** Inventar der sieben mandantenlosen Altbelege (6 `INV-Q-…`, `AP-TEST-001`): Testartefakte, keine Bezuege in 780 Tabellen. Vollsicherung + Wiederherstellbarkeit geprueft (`C:/Users/Jochen/valeo-backups/`, sha256 im QA). **Auf ausdrueckliche Freigabe des Nutzers (14.10.) geloescht statt Quarantaene** — Quarantaene-Register/Trigger/Skript damit gegenstandslos, nicht im Repo. `DocumentRepository.save_document` weist Belege ohne `tenantId` ab (`BelegOhneMandant`). 6 Tests (frisch); Beleg-Regression 1232 gruen, 60 rot vorbestehend (58 × 401 alter Dev-Token, 2 auch ohne Aenderung). QA: `docs/quality-assurance/altbelege-mandantenpflicht-20261014.md`. Keine Migration.
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-14. **Ziel:** PORTAL-CONTEXT-001 / TENANT-DOC-001 Punkt 2. **Dateibesitz:** app/documents/repository.py (nur Mandantenpflicht beim Speichern); tests/test_beleg_mandantenpflicht.py; eigene QA. **Abnahme:** keine mandantenlosen Belege mehr, neue werden abgewiesen, Sicherung wiederherstellbar.
+
+## STUDIO-CLOSURE-20261014 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Zusammenhaengender Nutzer-Abschlussauftrag: verbleibende POST-Vertraege, native Historienanzeige und echte revisionsgebundene Prozesssimulation mit STUDIO-RELEASE-001. **Dateibesitz:** process_kernel_api.py nur Policy-/Approval-Eingaben; neue gemeinsame Schemas; mcp_tool_contracts.py/neuro_tool_execution.py/neuro_tool_broker.py nur verbleibende Bindungen; Studio-API/Speicher/Release-Service und Tests; neue native Studio-Historien-ScreenDefinition und Registrierung; ScreenStudioPage/API/gezielte UI-Tests; kanonische Release-Architekturdoku und QA. Generierte OpenAPI/Handbuch-Artefakte nur eigene Projektionen auf HEAD; fremde Arbeitskopien erhalten. **Abnahme:** gemeinsame POST-Schemas/negative Kanaltests; History zeigt Actor/Zeit/Status/Version/Differenz; Simulation trifft echte Fachregeln ohne Geschaefts-/Bestands-/externe Wirkung, bindet Freigabe an unveraenderlichen Inhalt; unbekannte oder unvollstaendige Profile sperren. **Risiken:** vorhandene Workflow-Simulatoren sind Szenario-Platzhalter und kein Buchungskettennachweis; kein Ersatzbericht als Freigabe ausgeben. Keine neue Test-DB/Container; nur gemeinsamer Pruefstand und eigene rollbackisolierte Daten. Zwischenmeilensteine erlaubt, Gesamtclaim bleibt offen bis alle Abnahmen erreicht.
+
+## PORTAL-LOHN-EMPF-KUNDE-20261014 — abgeschlossen, Claude Code
+
+**Lieferung:** `/portal/lohndienste` und `/portal/empfehlungen` nehmen Mandant aus der Anmeldung statt rohem `X-Tenant-ID`, Kunde nur ueber `portal_kunde` (`kundennummer()` neu in portal_kunde.py). Lohndienst-Status und Empfehlungen-Erzeugen nur mit `sales_order` bearbeiten. Portalseite Empfehlungen ohne Demo-Nummer. 3 neue Negativtests (28 gruen, frisch); OpenAPI nur diese Pfade + AuftragCreateBody. QA: `docs/quality-assurance/portal-lohndienst-empfehlung-kunde-20261014.md`. **Damit TENANT-DOC-001 Punkt 1 serverseitig durch.** **Offen, fuer alle:** beide Dienste nur im Prozessspeicher (keine Tabellen); interne Kunden-Schlagkartei braucht Kundenwahl; Kontowahl im Frontend.
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-14. **Ziel:** TENANT-DOC-001 Punkt 1, letzter Folgeslice von PORTAL-KUNDE-001. **Dateibesitz:** app/api/v1/endpoints/portal_lohndienst.py; app/api/v1/endpoints/portal_intelligence.py; app/auth/portal_kunde.py (nur neue Helfer); packages/frontend-web/src/pages/portal/empfehlungen.tsx (nur Kontoauswahl); tests/test_portal_kunde_trennung.py; OpenAPI nur diese Pfade; eigene QA. **Abnahme:** fremde Kundennummer in Pfad/Body/Query wirkungslos oder 404, ohne Zuordnung 403, interne Wege mit Rolle. Keine Migration.
+
+## PORTAL-FELDBUCH-KUNDE-20261014 — abgeschlossen, Claude Code
+
+**Lieferung:** `portal_feldbuch._get_customer_id` nur noch aus `portal_kunde` — alle 30 Feldbuchwege; Parameter `customer_id` und Rueckfall `dev-customer` entfernt. Interne Betreuung liest mit Belegleserolle, aendert nur mit `AGRAR_BEARBEITEN`/`AGRAR_ADMIN`/`admin`. 4 neue Negativtests (frisch), Regression Feldbuch 50 + Portal gruen; OpenAPI nur die Feldbuchpfade. QA: `docs/quality-assurance/portal-feldbuch-kunde-20261014.md`. **Offen, fuer alle:** `seed_simulation_rations_acker.py` braucht Zuordnung; Lohndienste, Empfehlungen; `created_by` nennt den Kunden statt der Anmeldung.
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-14. **Ziel:** TENANT-DOC-001 Punkt 1, Folgeslice von PORTAL-KUNDE-001. **Dateibesitz:** app/api/v1/endpoints/portal_feldbuch.py (nur Kundenabhaengigkeit); tests/test_portal_kunde_trennung.py; OpenAPI nur `/api/v1/portal/feldbuch/*`; eigene QA. **Abnahme:** fremde Kunden-ID in URL wirkungslos, fremder Schlag 404, ohne Zuordnung 403, interne Schreibwege nur mit Agrarrolle. Keine Migration.
+
 ## SLO-CANONICAL-INPUT-20261014 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Keine erfundenen SLO-Messwerte/IDs; ausdruecklicher gemeinsamer REST-/MCP-Vertrag mit endlichen Zahlen oder ausdruecklichem null. **Dateibesitz:** process_kernel_api.py nur check_slo/Schemaimport; neues schemas/slo_input.py; mcp_tool_contracts.py nur finance_sla_check/process_slo_check; neuro_tool_execution.py nur SLO-Vorvalidierung/Entfernung Ersatzwerte; neue tests/test_slo_canonical_input.py und QA; OpenAPI nur SLO-Eingabe/Beschreibung/Komponente auf HEAD-Basis. **Abnahme:** missing/string/bool/NaN/Inf 422 vor HTTP; explicit null bleibt UNBEKANNT, null und 0 unterscheidbar; zwei MCP-Version-2-Vertraege gleicher REST-Schemaabgleich. **Risiken:** Skontoberechnung im Broker ist fachlich falsch an SLO gebunden und braucht eigenen Ersatz; kein Fachfreigabenachweis. Andere POSTs/Historie/Simulation offen. Keine Migration/DB/Container.

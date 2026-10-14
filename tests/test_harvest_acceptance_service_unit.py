@@ -1,6 +1,13 @@
 """Unit tests for HarvestAcceptanceService."""
 from unittest.mock import MagicMock, patch, PropertyMock
 import pytest
+
+
+@pytest.fixture(autouse=True)
+def _enable_dev_token():
+    """Pure mocked services require no compatibility-app initialization."""
+    yield
+
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 
 
@@ -12,6 +19,7 @@ def _make_svc(tenant_id="t1"):
 
 def _mock_obj(**kwargs):
     obj = MagicMock()
+    obj.invoice_id = None
     for k, v in kwargs.items():
         setattr(obj, k, v)
     return obj
@@ -92,12 +100,12 @@ def test_cancel_already_cancelled_raises():
 
 def test_cancel_success():
     svc, db = _make_svc()
-    obj = _mock_obj(release_status="draft", notes="")
+    obj = _mock_obj(release_status="draft", remarks="")
     _stub_get(db, obj)
     with patch("app.services.harvest_acceptance_service._to_dict_with_positions", return_value={"id": "id-1"}):
         result = svc.cancel("id-1", "test reason")
     assert obj.release_status == "cancelled"
-    assert "STORNIERT" in obj.notes
+    assert "STORNIERT" in obj.remarks
     db.commit.assert_called_once()
 
 

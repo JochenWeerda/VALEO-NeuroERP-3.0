@@ -369,12 +369,12 @@ class HarvestAcceptanceService:
 
     def cancel(self, acceptance_id: str, reason: str) -> Any:
         obj = self._get_or_raise(acceptance_id)
-        if obj.release_status == "final":
+        if obj.release_status in {"final", "credit_note_created", "paid"} or obj.invoice_id:
             raise ValidationFailedError("Endgültig freigegebene Annahmen können nicht storniert werden")
         if obj.release_status == "cancelled":
             raise ConflictError("Annahme ist bereits storniert")
         obj.release_status = "cancelled"
-        obj.notes = f"[STORNIERT: {reason}] " + (obj.notes or "")
+        obj.remarks = f"[STORNIERT: {reason}] " + (obj.remarks or "")
         self.db.commit()
         self.db.refresh(obj)
         return _to_dict_with_positions(obj, self.db)
@@ -499,7 +499,7 @@ class HarvestAcceptanceService:
         from modules.agrar.services.tax_profile_service import get_taxation_type_for_supplier
 
         obj = self._get_or_raise(acceptance_id)
-        if obj.release_status == "final":
+        if obj.release_status in {"final", "credit_note_created", "paid"} or obj.invoice_id:
             raise ValidationFailedError("Harvest acceptance is already final")
         if obj.release_status == "cancelled":
             raise ValidationFailedError("Cannot release cancelled harvest acceptance")
@@ -602,7 +602,6 @@ class HarvestAcceptanceService:
                 lot_id = generate_lot_number(self.db, acceptance_id, self.tenant_id)
                 line = HarvestAcceptanceLine(
                     id=_uuid7(),
-                    tenant_id=self.tenant_id,
                     harvest_acceptance_id=acceptance_id,
                     line_number=1,
                     lot_id=lot_id,

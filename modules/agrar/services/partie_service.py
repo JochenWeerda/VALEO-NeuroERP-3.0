@@ -50,8 +50,11 @@ def generate_lot_number(
         date_str = datetime.now().strftime("%Y%m%d")
     
     # Zähle bestehende Partien für dieses Datum
-    count = db.query(func.count(HarvestAcceptanceLine.id)).filter(
-        HarvestAcceptanceLine.tenant_id == tenant_id,
+    count = db.query(func.count(HarvestAcceptanceLine.id)).join(
+        HarvestAcceptance,
+        HarvestAcceptanceLine.harvest_acceptance_id == HarvestAcceptance.id,
+    ).filter(
+        HarvestAcceptance.tenant_id == tenant_id,
         HarvestAcceptanceLine.lot_id.like(f"{prefix}-{date_str}-%"),
     ).scalar() or 0
     
@@ -98,7 +101,6 @@ def create_harvest_acceptance_lines(
         
         line = HarvestAcceptanceLine(
             id=uuid7(),
-            tenant_id=tenant_id,
             harvest_acceptance_id=acceptance_id,
             line_number=line_number,
             silo_id=allocation.get("silo_id"),
