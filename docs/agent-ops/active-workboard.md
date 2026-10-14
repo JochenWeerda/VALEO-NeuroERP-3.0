@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DQ-CANONICAL-INPUT-20261014 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** DQ prueft den expliziten Datensatz statt Parameterhuelle/ungeparstem JSON-Text; gleicher versionierter Eingabevertrag fuer REST/MCP, Broker adaptiert eigene Schritte. **Dateibesitz:** process_kernel_api.py nur validate_dq/Schemaimport; neues schemas/data_quality_input.py; mcp_tool_contracts.py nur DQ-Vertrag/Schemaimport; neuro_tool_execution.py nur DQ-Vorvalidierung; neuro_tool_broker.py nur DQ-Payload; eigene tests/test_dq_canonical_input.py und QA; OpenAPI nur DQ-Eingabe/Beschreibung/Komponente auf HEAD-Basis. **Abnahme:** Fachobjekt unveraendert, fehlende/falsche Objekte 422 vor HTTP, Begrenzungen erhalten, MCP-/REST-Schemas identisch, bestehende Brokervertraege. **Risiken:** Kein neues Schreibrecht; andere POSTs, Capability-Freigabeversion, Historie/Simulation bleiben offen. Keine Migration/DB/Container.
+
 ## WORKFLOW-MIGRATION-INPUT-20261014 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Echter Workflow-Vergleich statt stiller identischer Demodaten: typisierte REST-Eingabe, explizite alte/neue Schritte, MCP-Transport, inhaltsgebundener Ergebnisfingerprint. **Dateibesitz:** process_kernel_api.py nur /workflow-migration/check und Schemaimport; neue schemas/workflow_migration_input.py; mcp_tool_contracts.py nur migration_check; neuro_tool_execution.py nur Migrationseingaben; Tests dieses Vertrags; docs/schnittstellen/openapi.json nur betroffener Pfad/Komponenten auf HEAD-Basis, fremde Arbeitskopie bleibt erhalten; eigene QA. **Abnahme:** fehlende/doppelte/falsch typisierte Schritte 422 ohne Demo; geloeschter Pflichtschritt BREAKING; Agentenpayload transportiert beide Staende unveraendert; Ergebnis an Inhalt gebunden. **Risiken:** Fingerprint ist keine Genehmigung; vollstaendige Simulation/Release-Sperre und andere POST-Vertraege bleiben offen. Keine Migration/DB/Container.
