@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MCP-PROD-TRANSPORT-20261014 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Default-Neurotransport verwendet produktive main-App mit denselben REST-Berechtigungen statt Test-Kompatibilitaets-App. **Dateibesitz:** app/services/neuro_tool_execution.py nur _get_client; neuer tests/test_neuro_production_transport.py; eigene QA. **Abnahme:** produktive App ausgewaehlt, 403 wird durchgereicht, Token redigiert, fehlende Produktions-App kein Testfallback. **Risiken:** POST-Schematransformationen, vollstaendiger Kanalabgleich, Historienanzeige und Prozesssimulation bleiben offen. Keine Migration/DB-Neuanlage.
+
+**Lieferung:** Defaulttransport auf produktive main-App umgestellt, kein Kompatibilitaetsfallback. 16 Transport-/Gatefaelle bestanden, darunter unterschiedliche synthetische Apps mit Produktions-403 und Tokenredaktion. QA: mcp-prod-transport-20261014.md. Vollstaendige fachliche Rechteabnahme und POST-Vertraege weiterhin offen.
+
 ## MCP-REST-BINDING-20261014 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** P0-Vertragsabgleich lesender Process-Kernel-Tools gegen reale REST-Parameter, echte Operation-IDs und CI-Negativtests; schreibende Qualitaetsfreigabe richtig einstufen. **Dateibesitz:** app/core/mcp_tool_contracts.py; neuer app/core/mcp_rest_binding.py; scripts/check_mcp_rest_bindings.py; tests/test_mcp_rest_bindings.py; betroffene MCP-/Broker-Tests; .github/workflows/openapi-drift.yml nur Gate; eigene QA. **Abnahme:** produktive GET-Bindungen gegen erzeugte OpenAPI, unbekannte/fehlende/falsch typisierte Parameter scheitern; Qualitaetsfreigabe unter Write-Sperre. **Risiken:** Versionierte Capability-Freigabe, POST-Payload-Transformationen, ERP-Katalog, CLI, Historienanzeige und Simulation bleiben eigene Folgeschritte. Keine Migration, keine neue DB/Container.
