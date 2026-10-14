@@ -187832,7 +187832,7 @@
     },
     "/api/mcp/documents/payment_received": {
       "post": {
-        "description": "Erstellt oder aktualisiert Zahlungseingang",
+        "description": "Geschlossen: Zahlungseingaenge laufen ueber den Fachweg der Finanzbuchhaltung (Rollenpruefung, Auszifferung).",
         "operationId": "upsert_payment_received_api_mcp_documents_payment_received_post",
         "requestBody": {
           "content": {
@@ -188077,7 +188077,7 @@
     },
     "/api/mcp/documents/sales_invoice": {
       "post": {
-        "description": "Erstellt oder aktualisiert Rechnung",
+        "description": "Geschlossen: Rechnungen entstehen ueber ``/api/v1/finance/invoices`` (Rollenpruefung, Buchung, Archiv).",
         "operationId": "upsert_sales_invoice_api_mcp_documents_sales_invoice_post",
         "requestBody": {
           "content": {
@@ -229592,7 +229592,7 @@
     },
     "/api/v1/api/mcp/documents/payment_received": {
       "post": {
-        "description": "Erstellt oder aktualisiert Zahlungseingang",
+        "description": "Geschlossen: Zahlungseingaenge laufen ueber den Fachweg der Finanzbuchhaltung (Rollenpruefung, Auszifferung).",
         "operationId": "upsert_payment_received_api_v1_api_mcp_documents_payment_received_post",
         "requestBody": {
           "content": {
@@ -229847,7 +229847,7 @@
     },
     "/api/v1/api/mcp/documents/sales_invoice": {
       "post": {
-        "description": "Erstellt oder aktualisiert Rechnung",
+        "description": "Geschlossen: Rechnungen entstehen ueber ``/api/v1/finance/invoices`` (Rollenpruefung, Buchung, Archiv).",
         "operationId": "upsert_sales_invoice_api_v1_api_mcp_documents_sales_invoice_post",
         "requestBody": {
           "content": {

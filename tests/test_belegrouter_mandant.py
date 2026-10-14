@@ -94,10 +94,10 @@ def test_die_liste_kommt_aus_der_datenbank_und_nur_aus_dem_eigenen_mandanten(hau
 
 
 def test_ein_fremder_beleg_ist_nicht_aenderbar(haus):
-    fremd = haus["ablegen"]("credit_memo", haus["anderer"], totalGross=100)
-    antwort = haus["als"](haus["mandant"]).put(f"{WEG}/credit_memo/{fremd}", json={"totalGross": 1})
+    fremd = haus["ablegen"]("purchase_order", haus["anderer"], totalGross=100)
+    antwort = haus["als"](haus["mandant"]).put(f"{WEG}/purchase_order/{fremd}", json={"totalGross": 1})
     assert antwort.status_code == 404
-    assert haus["beleg"]("credit_memo", fremd)["totalGross"] == 100
+    assert haus["beleg"]("purchase_order", fremd)["totalGross"] == 100
 
 
 def test_aendern_kann_den_mandanten_nicht_umsetzen(haus):
@@ -110,15 +110,15 @@ def test_aendern_kann_den_mandanten_nicht_umsetzen(haus):
 
 
 def test_ein_fremder_beleg_ist_nicht_loeschbar(haus):
-    fremd = haus["ablegen"]("sales_invoice", haus["anderer"])
-    assert haus["als"](haus["mandant"]).delete(f"{WEG}/sales_invoice/{fremd}").status_code == 404
-    assert haus["beleg"]("sales_invoice", fremd) is not None
+    fremd = haus["ablegen"]("sales_order", haus["anderer"])
+    assert haus["als"](haus["mandant"]).delete(f"{WEG}/sales_order/{fremd}").status_code == 404
+    assert haus["beleg"]("sales_order", fremd) is not None
 
 
 def test_der_eigene_beleg_ist_loeschbar(haus):
-    eigen = haus["ablegen"]("sales_invoice", haus["mandant"])
-    assert haus["als"](haus["mandant"]).delete(f"{WEG}/sales_invoice/{eigen}").status_code == 200
-    assert haus["beleg"]("sales_invoice", eigen) is None
+    eigen = haus["ablegen"]("sales_order", haus["mandant"])
+    assert haus["als"](haus["mandant"]).delete(f"{WEG}/sales_order/{eigen}").status_code == 200
+    assert haus["beleg"]("sales_order", eigen) is None
 
 
 def test_die_sammelloeschung_trifft_nur_eigene_belege(haus):
@@ -149,7 +149,8 @@ def test_der_nachhaltigkeitsexport_rechnet_nur_eigene_lieferscheine(haus):
 ANLAGE = {
     "purchase_order": {"date": "2026-10-14", "supplierId": "SUP-1", "status": "ENTWURF"},
     "sales_order": {"date": "2026-10-14", "customerId": "K-1", "status": "ENTWURF"},
-    "sales_invoice": {"date": "2026-10-14", "customerId": "K-1", "dueDate": "2026-11-14", "status": "ENTWURF"},
+    # Rechnungen legt dieser Weg nicht mehr an (DOC-ROUTER-ROLLEN); siehe test_belegrouter_rollen.py.
+    "sales_offer": {"date": "2026-10-14", "customerId": "K-1", "status": "ENTWURF"},
 }
 
 

@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## DOC-ROUTER-ROLLEN-20261014 — in Arbeit, Claude Code
+## DOC-ROUTER-ROLLEN-20261014 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Nutzerentscheidung 14.10.: Der generische Belegrouter aendert und loescht nur die Belegarten, die allein ueber ihn gefuehrt werden (Anfrage, Angebot, Auftrag, Lieferschein, Bedarfsmeldung, Lieferantenangebot, Bestellung). Finanzbelege (Ausgangs-/Eingangsrechnung, Zahlungseingang, Gutschrift, Belastung, …) laufen ausschliesslich ueber ihre Fachwege mit Rollenpruefung; auch `POST /sales_invoice` und `/payment_received` des Routers werden geschlossen (ohne Aufrufer). **Dateibesitz:** app/documents/router.py (Schreibwege); tests/test_belegrouter_rollen.py; tests/test_belegrouter_mandant.py; docs/quality-assurance/doc-router-rollen-20261014.md. **Abnahme:** PUT/DELETE/Sammelloeschung/POST fuer Finanzbelege 403 ohne Schreibzugriff; die sieben Router-Belegarten unveraendert. Keine Migration.
+**Lieferung:** `ROUTER_BELEGARTEN` (sieben Arten); PUT/DELETE/Sammelloeschung fuer alle anderen Belegarten und POST `/sales_invoice`, `/payment_received` antworten 403 ohne Schreibzugriff. 19 Tests (frisch); test_belegrouter_mandant auf Router-Belegarten umgestellt; OpenAPI: Beschreibung der vier POST-Pfade. QA: `docs/quality-assurance/doc-router-rollen-20261014.md`. **Offen, fuer alle:** die sieben Router-Belegarten haben weiterhin keine Rollenpruefung.
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Nutzerentscheidung 14.10.: Der generische Belegrouter aendert und loescht nur die Belegarten, die allein ueber ihn gefuehrt werden (Anfrage, Angebot, Auftrag, Lieferschein, Bedarfsmeldung, Lieferantenangebot, Bestellung). Finanzbelege (Ausgangs-/Eingangsrechnung, Zahlungseingang, Gutschrift, Belastung, …) laufen ausschliesslich ueber ihre Fachwege mit Rollenpruefung; auch `POST /sales_invoice` und `/payment_received` des Routers werden geschlossen (ohne Aufrufer). **Dateibesitz:** app/documents/router.py (Schreibwege); tests/test_belegrouter_rollen.py; tests/test_belegrouter_mandant.py; docs/quality-assurance/doc-router-rollen-20261014.md. **Abnahme:** PUT/DELETE/Sammelloeschung/POST fuer Finanzbelege 403 ohne Schreibzugriff; die sieben Router-Belegarten unveraendert. Keine Migration.
 
 ## STUDIO-STATUS-IDEMPOTENCY-20261014 — abgeschlossen, Codex
 
