@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## CI-GRUEN-20261014 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Nutzerauftrag „alles Offene und Risiken schliessen“: main-CI wieder gruen (Stand 35dc18532: 505 failed/28 errors in der Vollsuite, OpenAPI-Drift, Frontend-Typecheck, Doku-Staleness, business-time/godfile-Ratschen, axe, E2E, Service-Security) plus Restpunkte aus PORTAL-CONTEXT-001 (MCP-Lesewerkzeuge Lohndienst/Empfehlungen, Zugangspflege, Keycloak-Kennwort in docker-compose, Glocke). **Vorgehen:** Ursachen buendeln (63 Dateien testen main:app mit abgeschafftem Dev-Token → app.main-Testgrenze), je Ursache ein Commit. **Dateibesitz:** nur Testdateien der jeweiligen Ursache, Konfiguration der Gates, eigene Portal-Dateien; **nicht** angefasst werden Dateien aktiver Codex-Slices (SELF-BILLING-ATOMIC, STUDIO-GRAIN-CHAIN, STUDIO-CLOSURE) — Befunde dort gehen als Hinweis an Codex. Keine Migration ohne eigenen Claim.
+
 ## SELF-BILLING-ATOMIC-20261014 — in arbeit, Codex
 
 **Owner:** Codex. **Stand:** in arbeit 2026-10-14. **Ziel:** Self-Billing-Eingangsjournal aus kanonischen mandantengebundenen Steuerschluesseln statt festen verkehrten Konten; keine Zwischencommits. **Dateibesitz:** harvest_acceptance_service.py Buchungsweg (eigener laufender Claim); modules/agrar/repositories/self_billing_repo.py nur optionale Commit-Grenze; eigene Tests, QA und Simulator-Fixdaten. **Abnahme:** Aufwand/Vorsteuer Soll, Verbindlichkeit Haben, expliziter Steuervertrag, Konflikt ohne Teilcommit; gemeinsamer Pruefstand mit Rollback. Keine neue DB/Container.
