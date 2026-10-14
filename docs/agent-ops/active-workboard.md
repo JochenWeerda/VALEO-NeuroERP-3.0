@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SELF-BILLING-ATOMIC-20261014 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Self-Billing-Eingangsjournal aus kanonischen mandantengebundenen Steuerschluesseln statt festen verkehrten Konten; keine Zwischencommits. **Dateibesitz:** harvest_acceptance_service.py Buchungsweg (eigener laufender Claim); modules/agrar/repositories/self_billing_repo.py nur optionale Commit-Grenze; eigene Tests, QA und Simulator-Fixdaten. **Abnahme:** Aufwand/Vorsteuer Soll, Verbindlichkeit Haben, expliziter Steuervertrag, Konflikt ohne Teilcommit; gemeinsamer Pruefstand mit Rollback. Keine neue DB/Container.
+
 ## PORTAL-CONTEXT-001-20261014 — abgeschlossen, Claude Code
 
 **Lieferung:** Lohndienst-Auftraege und Empfehlungen in PostgreSQL (Migration `portal_lohndienst_persistenz_20261014`: Auftraege mit Version, nur fortschreibbare Ereignis-Historie mit Idempotenzschluessel, Empfehlungen mit Herkunft regel/ki und Duplikatschutz). Sieben Portalrollen zentral in `app/auth/portal_kunde.PORTAL_RECHTE`, an allen Portalwegen geprueft; Mitarbeiter auf zugewiesene Schlaege, Lohndienstleister auf zugewiesene Auftraege, Aussendienst nur mit Fachrolle, Inhaber verwaltet eigene Benutzer. `portal_innendienst` (roher Mandantenkopf, keine Rolle, nie funktionierende Massnahmenabfrage) behoben. Frontend: Kontowahl, keine Demo-Kunden, Navigation nach Rechten, Idempotenzschluessel; Seed-Skript nur mit expliziter Umgebung/Mandant/Konto. Portalwege aus compat in `portal_kundenwege.py`, Feldbuch-Rechte/Schemas ausgelagert (Godfile gesenkt). 17 neue Tests inkl. echter Mehrprozess-, Neustart-, Idempotenz- und Konkurrenzfaelle; Regression gruen (frisch). QA: `docs/quality-assurance/portal-context-001-20261014.md`. **Offen, fuer alle:** MCP-Werkzeuge fuer Lohndienst/Empfehlungen; Profil-/Zugangsmaske; gewachsene DB migrieren.
