@@ -513,6 +513,32 @@ class NeuroToolBroker:
             },
         }
 
+    @staticmethod
+    def _dq_entity_type(value: Any) -> str | None:
+        from app.core.data_quality_rules import get_default_dq_rulesets
+        if not isinstance(value, str) or not value.strip():
+            return None
+        aliases = {"supplier": "Lieferant", "customer": "Debitor", "article": "Artikel",
+                   "master_data": "Artikel", "invoice": "APRechnung",
+                   "purchase_order": "Artikel", "sales_order": "Debitor"}
+        text = value.strip()
+        canonical = {name.casefold(): name for name in get_default_dq_rulesets()}
+        return aliases.get(text.casefold(), canonical.get(text.casefold(), text))
+
+    @staticmethod
+    def _dq_parameters(step: PlanStep, context: dict[str, Any]) -> dict[str, Any]:
+        # Broker plan attributes become an explicit REST request. Direct MCP
+        # callers must already provide the canonical object; no transport fallback.
+        if "datensatz" in step.parameters:
+            return dict(step.parameters)
+        return {
+            "entity_typ": NeuroToolBroker._dq_entity_type(
+                step.parameters.get("entity_typ") or step.parameters.get("entity_type") or step.entity_type
+            ),
+            "datensatz": dict(step.parameters),
+            "kontext_datensaetze": context.get("comparison_records"),
+        }
+
     def _execute_tool_contract(
         self,
         step: PlanStep,
@@ -529,9 +555,12 @@ class NeuroToolBroker:
                     "result": {"error": f"Unknown tool contract '{binding.target_name}'"},
                 },
             }
+        parameters = step.parameters
+        if contract.tool_name == "valeo_process_data_quality_validate":
+            parameters = self._dq_parameters(step, context)
         payload = self._tool_execution_service.execute_contract(
             contract,
-            parameters=step.parameters,
+            parameters=parameters,
             tenant_id=tenant_id,
             context={
                 **context,

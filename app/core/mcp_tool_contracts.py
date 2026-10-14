@@ -244,6 +244,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
       agrar (6), finance (5), workflow (4), compliance (3), process (3), inventory (2)
     """
     from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
+    from app.api.v1.schemas.data_quality_input import DataQualityCheckIn
     tools: list[MCPToolContract] = [
 
         # ---------------------------------------------------------------
@@ -579,6 +580,8 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_process_data_quality_validate",
+            schema_version=2,
+            input_schema=DataQualityCheckIn.model_json_schema(),
             domain="process",
             operation="data_quality_validate",
             beschreibung="Prueft Stammdaten-Datensatz gegen Qualitaetsregeln",
@@ -587,8 +590,9 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             request_payload_mode=MCPRequestPayloadMode.DATASET_VALIDATION,
             output_beschreibung="Validierungsergebnis: valid/invalid, Violations mit Code und Feld",
             parameter=[
-                _p_str("entity_typ", "Entitaetstyp (LIEFERANT/KONTRAKT/WIEGESCHEIN/ARTIKEL)", True),
-                _p_str("datensatz_json", "JSON-serialisierter Datensatz", True),
+                _p_str("entity_typ", "Kanonischer Name aus dem DQ-Regelsetregister", True),
+                MCPToolParameter("datensatz", MCPParameterTyp.OBJECT, "Zu pruefendes Fachobjekt", True),
+                MCPToolParameter("kontext_datensaetze", MCPParameterTyp.ARRAY, "Vergleichsobjekte", False),
             ],
         ),
 
