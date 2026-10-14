@@ -14,6 +14,14 @@ from app.core.uuid7 import uuid7
 logger = logging.getLogger(__name__)
 
 
+class BelegOhneMandant(ValueError):
+    """Ein Beleg ohne Mandant gehoert niemandem (TENANT-DOC-001): kein Lese- oder Schreibweg findet ihn wieder.
+
+    Bis 14.10.2026 nahm der Speicher solche Belege an; die sieben Testbelege der gewachsenen Datenbank sind nach
+    Sicherung und Freigabe geloescht. Dies ist der einzige Schreibweg der Anwendung in ``documents``.
+    """
+
+
 class DocumentRepository:
     """Repository für Dokument-Verwaltung"""
     
@@ -31,6 +39,8 @@ class DocumentRepository:
 
     def save_document(self, doc_type: str, doc_number: str, data: dict, *, commit: bool = True) -> dict:
         """Speichert ein Dokument; commit=False belässt die Transaktion beim Aufrufer."""
+        if not str((data or {}).get("tenantId") or "").strip():
+            raise BelegOhneMandant(f"{doc_type}/{doc_number}: Beleg ohne Mandant (tenantId) wird nicht gespeichert")
         try:
             # Prüfe ob Dokument existiert
             existing = self.db.execute(

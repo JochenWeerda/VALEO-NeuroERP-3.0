@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## ALTBELEG-QUARANTAENE-20261014 — in Arbeit, Claude Code
+## ALTBELEG-QUARANTAENE-20261014 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Nutzerentscheidung PORTAL-CONTEXT-001 / TENANT-DOC-001 Punkt 2: die sieben mandantenlosen Altbelege (6 `INV-Q-…`, 1 `AP-TEST-001`) inventarisieren und zugriffsbeschraenkt isolieren — kein DELETE, keine erfundene Zuordnung; neue Belege ohne Mandant technisch ausschliessen. Befund: beide Sorten sind Testartefakte (`tests/test_sales_invoice_einvoice_endpoints.py::_seed_invoice` bis 14.10. ohne `tenantId`; `tests/test_ap_invoices_api.py` feste Nummer bis `42f8fe6c3`), keine Bezuege in 780 weiteren Tabellen. Sicherung `C:/Users/Jochen/valeo-backups/*-20261014-altbelege.dump` (sha256 im QA), Rueckspielen geprueft. **Dateibesitz:** neue Migration `beleg_quarantaene_20261014` (nach portal_order_idempotency_20261014); app/documents/repository.py (nur Mandantenpflicht beim Speichern); neues scripts/beleg_quarantaene.py; tests/test_beleg_quarantaene.py; eigene QA. **Abnahme:** Quarantaeneregister nicht loeschbar; Quarantaenebelege weder aenderbar noch loeschbar (DB-seitig); Speichern ohne Mandant abgewiesen; Bestand unveraendert und wiederherstellbar.
+**Lieferung:** Inventar der sieben mandantenlosen Altbelege (6 `INV-Q-…`, `AP-TEST-001`): Testartefakte, keine Bezuege in 780 Tabellen. Vollsicherung + Wiederherstellbarkeit geprueft (`C:/Users/Jochen/valeo-backups/`, sha256 im QA). **Auf ausdrueckliche Freigabe des Nutzers (14.10.) geloescht statt Quarantaene** — Quarantaene-Register/Trigger/Skript damit gegenstandslos, nicht im Repo. `DocumentRepository.save_document` weist Belege ohne `tenantId` ab (`BelegOhneMandant`). 6 Tests (frisch); Beleg-Regression 1232 gruen, 60 rot vorbestehend (58 × 401 alter Dev-Token, 2 auch ohne Aenderung). QA: `docs/quality-assurance/altbelege-mandantenpflicht-20261014.md`. Keine Migration.
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-14. **Ziel:** PORTAL-CONTEXT-001 / TENANT-DOC-001 Punkt 2. **Dateibesitz:** app/documents/repository.py (nur Mandantenpflicht beim Speichern); tests/test_beleg_mandantenpflicht.py; eigene QA. **Abnahme:** keine mandantenlosen Belege mehr, neue werden abgewiesen, Sicherung wiederherstellbar.
 
 ## STUDIO-CLOSURE-20261014 — reserviert, Codex
 
