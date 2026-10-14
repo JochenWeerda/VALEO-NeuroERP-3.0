@@ -131,7 +131,8 @@ class DocumentRepository:
                     query += " AND data::jsonb->>'customerId' = :customerId"
                     params["customerId"] = filters["customerId"]
                 if "tenantId" in filters:
-                    query += " AND (data::jsonb->>'tenantId' = :tenantId OR data::jsonb->>'tenantId' IS NULL)"
+                    # Streng: ein Beleg ohne Mandant gehoert niemandem (bis 14.10.2026 „oder ohne Mandant“).
+                    query += " AND data::jsonb->>'tenantId' = :tenantId"
                     params["tenantId"] = filters["tenantId"]
                 if "supplierId" in filters:
                     query += " AND data::jsonb->>'supplierId' = :supplierId"
@@ -179,7 +180,8 @@ class DocumentRepository:
                     query += " AND data::jsonb->>'status' = :status"
                     params["status"] = filters["status"]
                 if "tenantId" in filters:
-                    query += " AND (data::jsonb->>'tenantId' = :tenantId OR data::jsonb->>'tenantId' IS NULL)"
+                    # Streng: ein Beleg ohne Mandant gehoert niemandem (bis 14.10.2026 „oder ohne Mandant“).
+                    query += " AND data::jsonb->>'tenantId' = :tenantId"
                     params["tenantId"] = filters["tenantId"]
                 if "supplierId" in filters:
                     query += " AND data::jsonb->>'supplierId' = :supplierId"

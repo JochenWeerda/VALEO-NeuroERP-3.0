@@ -162,10 +162,12 @@ def _doc_repo(db: Session):
 
 def _list_docs(db: Session, doc_type: str, limit: int = 1000, tenant_id: Optional[str] = None) -> list[dict[str, Any]]:
     """Belege nur aus dem DB-Dokumentspeicher. Bis 08.10.2026 fiel ein leerer Mandant auf den
-    Prozessspeicher zurueck (fluechtig, aus beliebigen Requests); leer ist die richtige Antwort."""
+    Prozessspeicher zurueck (fluechtig, aus beliebigen Requests); leer ist die richtige Antwort.
+    Ohne Mandant gibt es nichts — bis 14.10.2026 hiess das „alle Mandanten“."""
+    if not tenant_id:
+        return []
     repo = _doc_repo(db)
-    filters = {"tenantId": tenant_id} if tenant_id else None
-    payload = list_from_store(doc_type, skip=0, limit=limit, filters=filters, repo=repo)
+    payload = list_from_store(doc_type, skip=0, limit=limit, filters={"tenantId": tenant_id}, repo=repo)
     return payload.get("data", []) if isinstance(payload, dict) else []
 
 
@@ -625,7 +627,9 @@ async def po_changelog(po_id: str, tenant_id: str = Depends(get_tenant_id), db: 
 
 
 @router.get("/sales/{doc_type}", response_model=CompatBridgeOut, summary="Bridge sales")
-async def sales_bridge(doc_type: str, db: Session = Depends(get_db)) -> dict:
+async def sales_bridge(
+    doc_type: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+) -> dict:
     mapping = {
         "auftraege": "sales_order",
         "angebote": "sales_offer",
@@ -639,7 +643,7 @@ async def sales_bridge(doc_type: str, db: Session = Depends(get_db)) -> dict:
     target = mapping.get(doc_type)
     if not target:
         raise HTTPException(status_code=404, detail="Unknown sales document type")
-    return {"data": _list_docs(db, target, limit=1000)}
+    return {"data": _list_docs(db, target, limit=1000, tenant_id=tenant_id)}
 
 
 # Einkauf compatibility -----------------------------------------------------

@@ -35,8 +35,6 @@ class PurchaseOrderService:
 
     def _find_po(self, po_id: str) -> dict[str, Any]:
         docs = list_docs(self.db, "purchase_order", tenant_id=self.tenant_id)
-        if not docs:
-            docs = list_docs(self.db, "purchase_order")
         for d in docs:
             if str(d.get("id")) == po_id or str(d.get("purchaseOrderNumber")) == po_id:
                 return d
@@ -54,8 +52,6 @@ class PurchaseOrderService:
         page_size: int = 50,
     ) -> dict:
         docs = list_docs(self.db, "purchase_order", limit=5000, tenant_id=self.tenant_id)
-        if not docs:
-            docs = list_docs(self.db, "purchase_order", limit=5000)
 
         def _match(d: dict) -> bool:
             if status and str(d.get("status")) != status:

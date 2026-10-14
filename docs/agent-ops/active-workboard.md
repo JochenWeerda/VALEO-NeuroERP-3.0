@@ -11,9 +11,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## DOC-STORE-MANDANT-20261014 — in Arbeit, Claude Code
+## DOC-STORE-MANDANT-20261014 — abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Der alte Dokumentspeicher (`documents`) liefert
+**Lieferung:** Filter streng, Lesen ohne Mandant leer, kein Prozessspeicher-Rueckfall. Dabei gefunden und behoben:
+Kundenportal (Auftraege, Rechnungen, Anfragen, Lieferscheine, Dashboard) und `/sales/{doc_type}` lasen ohne
+Mandant, der Bestellweg fiel auf die Bestellungen aller Mandanten zurueck. 11 Tests (frisch), Regression 439 gruen
+(4 vorbestehend rot, auf HEAD gegengeprueft). QA: `docs/quality-assurance/doc-store-mandant-20261014.md`.
+**Offen, fuer alle:** `get_document` ohne Mandant (Aufrufer pruefen selbst); Kundentrennung im Portal
+(Identitaetsmodell); `ops_dokumente`/`ops_rahmenvertraege`/`ops_zertifikate` ohne Mandantenspalte (61 Zertifikate).
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Der alte Dokumentspeicher (`documents`) liefert
 Listen nur im Mandanten der Anmeldung: kein „oder ohne Mandant“, kein Lesen ohne Mandant, kein Rueckfall auf alle
 Mandanten oder den Prozessspeicher. **Dateibesitz:** app/documents/repository.py (list/count);
 app/documents/router_helpers.py (In-Memory-Filter); app/services/compat_helpers.py (`list_docs`);

@@ -20,14 +20,15 @@ def doc_repo(db: Session):
 
 
 def list_docs(db: Session, doc_type: str, limit: int = 1000, tenant_id: Optional[str] = None) -> list[dict[str, Any]]:
-    repo = doc_repo(db)
-    filters = {"tenantId": tenant_id} if tenant_id else None
-    payload = list_from_store(doc_type, skip=0, limit=limit, filters=filters, repo=repo)
-    docs = payload.get("data", []) if isinstance(payload, dict) else []
-    if docs:
-        return docs
-    payload_mem = list_from_store(doc_type, skip=0, limit=limit, filters=filters, repo=None)
-    return payload_mem.get("data", []) if isinstance(payload_mem, dict) else []
+    """Belege eines Mandanten aus dem Dokumentspeicher.
+
+    Ohne Mandant gibt es nichts: bis 14.10.2026 hiess das „alle Mandanten“. Eine leere Liste ist die
+    Antwort — der fruehere Rueckfall auf den Prozessspeicher lieferte, was zufaellig im Prozess lag.
+    """
+    if not tenant_id:
+        return []
+    payload = list_from_store(doc_type, skip=0, limit=limit, filters={"tenantId": tenant_id}, repo=doc_repo(db))
+    return payload.get("data", []) if isinstance(payload, dict) else []
 
 
 def cache_key(*parts: Any) -> str:
