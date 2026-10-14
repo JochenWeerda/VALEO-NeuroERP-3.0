@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## STUDIO-GRAIN-CHAIN-20261014 — reserviert, Codex
+## STUDIO-GRAIN-CHAIN-20261014 — in arbeit, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Durch reale Studio-Simulation gefundene Modellbrueche der Ernteannahme beheben. **Dateibesitz:** modules/agrar/services/partie_service.py; app/services/harvest_acceptance_service.py nur betroffene Teilpositionen und verbindliche Status-/Buchungsinvarianten; eigene Tests und QA. **Abnahme:** Mandant ueber Annahmekopf, keine unbekannten ORM-Felder; reale Kette auf gemeinsamem valeo_probe rollbackisoliert. Keine neue Datenbank/Container; keine fremden Aenderungen.
+**Owner:** Codex. **Stand:** in arbeit 2026-10-14. **Ziel:** Durch reale Studio-Simulation gefundene Modellbrueche der Ernteannahme beheben. **Dateibesitz:** modules/agrar/services/partie_service.py; app/services/harvest_acceptance_service.py nur betroffene Teilpositionen und verbindliche Status-/Buchungsinvarianten; eigene Tests und QA. **Abnahme:** Mandant ueber Annahmekopf, keine unbekannten ORM-Felder; reale Kette auf gemeinsamem valeo_probe rollbackisoliert. Keine neue Datenbank/Container; keine fremden Aenderungen.
+
+**Zwischenstand:** Modellbrueche und verbindliche Annahmezustaende korrigiert; bestehender Unit-Vertrag auf echtes remarks-Feld und expliziten Rechnungsverweis angepasst. 23 gezielte Backendfaelle, neun Studio-UI-Faelle bestanden. Reale Rollbackkette bleibt wegen Vorsteuer rot; keine erfolgreiche Release-Abnahme. QA: studio-grain-chain-20261014.md.
 
 ## ALTBELEG-QUARANTAENE-20261014 — abgeschlossen, Claude Code
 
