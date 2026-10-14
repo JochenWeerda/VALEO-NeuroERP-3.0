@@ -5,14 +5,14 @@ from __future__ import annotations
 from typing import Any
 from collections.abc import Callable
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from app.api.v1.endpoints.mask_screen_definition import _check_readiness
 from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS
 from app.core.tenant import get_tenant_id
 from app.auth.deps import get_current_user
-from app.services.studio_draft_store import StudioStorageUnavailable, get_draft, list_drafts, save_draft, set_status, studio_run_route
+from app.services.studio_draft_store import StudioStorageUnavailable, list_history, get_draft, list_drafts, save_draft, set_status, studio_run_route
 from app.services.studio_propose import propose_studio_draft
 from app.services.studio_validation import load_studio_catalog, validate_studio_draft
 
@@ -118,6 +118,19 @@ def studio_get_draft(
     if item is None:
         raise HTTPException(404, "draft_nicht_gefunden")
     return item
+
+
+@router.get("/drafts/{draft_id}/history", summary="Unveraenderliche Studio-Revisionshistorie lesen")
+def studio_history(
+    draft_id: str, skip: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=500),
+    tenant_id: str = Depends(get_tenant_id),
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    if _storage_call(get_draft, tenant_id, draft_id) is None:
+        raise HTTPException(404, "draft_nicht_gefunden")
+    entries = _storage_call(list_history, tenant_id, draft_id, skip=skip, limit=limit + 1)
+    return {"history": entries[:limit], "has_more": len(entries) > limit,
+            "next_skip": skip + limit if len(entries) > limit else None}
 
 
 @router.post("/drafts", summary="Studio-Entwurf anlegen")

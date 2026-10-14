@@ -155,8 +155,8 @@ class PortalCompatService:
     # ── Full-featured dashboard (with Dokument ORM) ───────────────────────────
 
     def get_portal_dashboard_full(self) -> dict:
-        orders = list_docs(self.db, "sales_order", limit=20)
-        invoices = list_docs(self.db, "sales_invoice", limit=20)
+        orders = list_docs(self.db, "sales_order", limit=20, tenant_id=self.tenant_id)
+        invoices = list_docs(self.db, "sales_invoice", limit=20, tenant_id=self.tenant_id)
         try:
             docs = self.db.query(Dokument).order_by(Dokument.hochgeladen_am.desc()).limit(5).all()
         except Exception:
@@ -190,7 +190,7 @@ class PortalCompatService:
         }
 
     def list_portal_anfragen(self) -> list:
-        docs = list_docs(self.db, "customer_inquiry", limit=500)
+        docs = list_docs(self.db, "customer_inquiry", limit=500, tenant_id=self.tenant_id)
         return [
             {
                 "id": d.get("id") or d.get("number"),
@@ -203,7 +203,7 @@ class PortalCompatService:
         ]
 
     def list_portal_bestellungen(self) -> list:
-        docs = list_docs(self.db, "sales_order", limit=500)
+        docs = list_docs(self.db, "sales_order", limit=500, tenant_id=self.tenant_id)
         return [
             {
                 "id": d.get("id") or d.get("number"),
@@ -248,7 +248,7 @@ class PortalCompatService:
                  "flaeche": s.flaeche, "letzteMassnahme": None, "naechsteMassnahme": None}
                 for s in schlaege
             ]
-        deliveries = list_docs(self.db, "sales_delivery", limit=1000)
+        deliveries = list_docs(self.db, "sales_delivery", limit=1000, tenant_id=self.tenant_id)
         return [
             {
                 "id": d.get("number") or d.get("id"),
@@ -262,7 +262,7 @@ class PortalCompatService:
         ]
 
     def list_portal_naehrstoffbilanzen(self) -> list:
-        deliveries = list_docs(self.db, "sales_delivery", limit=2000)
+        deliveries = list_docs(self.db, "sales_delivery", limit=2000, tenant_id=self.tenant_id)
         return [
             {
                 "id": d.get("number") or d.get("id"),
@@ -277,7 +277,7 @@ class PortalCompatService:
         ]
 
     def list_portal_rechnungen(self) -> list:
-        invoices = list_docs(self.db, "sales_invoice", limit=500)
+        invoices = list_docs(self.db, "sales_invoice", limit=500, tenant_id=self.tenant_id)
         return [
             {
                 "id": i.get("id") or i.get("number"),

@@ -16,6 +16,7 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError, OperationalError, S
 from sqlalchemy.orm import Session
 
 _DRAFTS: dict[str, dict[str, Any]] = {}
+_HISTORY: list[dict[str, Any]] = []
 _memory_lock = RLock()
 _prefer_memory = False
 _table_ok: bool | None = None
@@ -42,6 +43,7 @@ def reset_studio_drafts() -> None:
     global _prefer_memory
     _prefer_memory = True
     _DRAFTS.clear()
+    _HISTORY.clear()
 
 
 def use_sql_studio_drafts() -> None:
@@ -50,6 +52,7 @@ def use_sql_studio_drafts() -> None:
     _prefer_memory = False
     _table_ok = None
     _DRAFTS.clear()
+    _HISTORY.clear()
 
 
 def invalidate_studio_table_cache() -> None:
@@ -66,6 +69,35 @@ def _with_revision(item: dict[str, Any]) -> dict[str, Any]:
         bound, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False
     ).encode()).hexdigest()
     return record
+
+
+def _history_entry(record: dict[str, Any], actor: str, action: str, previous: str | None) -> dict[str, Any]:
+    snapshot = _with_revision(record)
+    return {"id": str(uuid4()), "tenant_id": record["tenant_id"], "draft_id": record["id"],
+            "actor": actor, "action": action, "previous_revision": previous,
+            "revision": snapshot["revision"], "snapshot": snapshot, "recorded_at": datetime.now(UTC)}
+
+
+def _append_sql_history(session: Session, record: dict[str, Any], actor: str, action: str, previous: str | None) -> None:
+    from app.infrastructure.models.studio_models import ScreenDefinitionHistory
+    session.add(ScreenDefinitionHistory(**_history_entry(record, actor, action, previous)))
+
+
+@_durable_operation
+def list_history(tenant_id: str, draft_id: str, *, skip: int = 0, limit: int = 100) -> list[dict[str, Any]]:
+    if _prefer_memory:
+        with _memory_lock:
+            return [deepcopy(entry) for entry in _HISTORY if entry["tenant_id"] == tenant_id and entry["draft_id"] == draft_id][skip:skip + limit]
+    from app.infrastructure.models.studio_models import ScreenDefinitionHistory
+    session = _sql_session()
+    try:
+        rows = session.query(ScreenDefinitionHistory).filter_by(tenant_id=tenant_id, draft_id=draft_id).order_by(
+            ScreenDefinitionHistory.recorded_at, ScreenDefinitionHistory.id).offset(skip).limit(limit).all()
+        return [{"id": row.id, "actor": row.actor, "action": row.action, "revision": row.revision,
+                 "previous_revision": row.previous_revision, "snapshot": deepcopy(row.snapshot),
+                 "recorded_at": row.recorded_at.isoformat()} for row in rows]
+    finally:
+        session.close()
 
 
 @_durable_operation
@@ -132,11 +164,13 @@ def set_status(
         _assert_snapshot(item, expected_snapshot)
         _assert_transition(item["status"], status)
         _assert_four_eyes(item["updated_by"], actor, status)
+        previous = _with_revision(item)["revision"]
         item = deepcopy(item)
         item["status"] = status
         if status != "review":
             item["updated_by"] = actor
         item["updated_at"] = datetime.now(UTC).isoformat()
+        _HISTORY.append(_history_entry(item, actor, status, previous))
         _DRAFTS[draft_id] = item
         return _with_revision(item)
 
@@ -226,6 +260,7 @@ def _memory_save(
         "updated_by": actor,
         "updated_at": _now(),
     }
+    _HISTORY.append(_history_entry(record, actor, "update" if existing else "create", _with_revision(existing)["revision"] if existing else None))
     _DRAFTS[record["id"]] = record
     return deepcopy(record)
 
@@ -342,6 +377,7 @@ def _sql_save(
             raise KeyError(draft_id or row.id)
         if row is not None and row.status not in _EDITABLE:
             raise ValueError(f"status_{row.status}_nicht_editierbar")
+        previous = _with_revision(_row_to_dict(row))["revision"] if row is not None else None
         now = datetime.now(UTC)
         if row is None:
             row = ScreenDefinitionDraft(
@@ -358,6 +394,8 @@ def _sql_save(
         row.readiness = deepcopy(readiness) if readiness is not None else row.readiness
         row.updated_by = actor
         row.updated_at = now
+        session.flush()
+        _append_sql_history(session, _row_to_dict(row), actor, "update" if previous else "create", previous)
         session.commit()
         session.refresh(row)
         return _row_to_dict(row)
@@ -386,10 +424,13 @@ def _sql_set_status(
         _assert_snapshot(_row_to_dict(row), expected_snapshot)
         _assert_transition(row.status, status)
         _assert_four_eyes(row.updated_by, actor, status)
+        previous = _with_revision(_row_to_dict(row))["revision"]
         row.status = status
         if status != "review":
             row.updated_by = actor
         row.updated_at = datetime.now(UTC)
+        session.flush()
+        _append_sql_history(session, _row_to_dict(row), actor, status, previous)
         session.commit()
         session.refresh(row)
         return _row_to_dict(row)

@@ -8,6 +8,7 @@ from uuid import uuid4
 from app.auth.deps import get_current_user
 from fastapi.testclient import TestClient
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal, engine
 from app.core.screen_definitions import get_screen_definition
@@ -38,7 +39,7 @@ _USER: dict = {}
 
 
 @pytest.fixture
-def studio_db(require_db):
+def studio_db(require_db, monkeypatch):
     assert engine.url.database == "valeo_probe" or "test" in (engine.url.database or "").lower()
     _USER.clear()
     _USER.update(sub="anna", roles=["admin"], raw={"identity_type": "human"})
@@ -52,7 +53,15 @@ def studio_db(require_db):
     with engine.begin() as conn:
         for tenant in (_TENANT_A, _TENANT_B):
             conn.execute(text("INSERT INTO domain_shared.tenants(id,name) VALUES (:id,'Studio Test') ON CONFLICT(id) DO NOTHING"), {"id": tenant})
+    connection = engine.connect()
+    transaction = connection.begin()
+    factory = lambda: Session(bind=connection, join_transaction_mode="create_savepoint")
+    from app.services import studio_draft_store
+    monkeypatch.setattr(studio_draft_store, "_sql_session", factory)
+    monkeypatch.setattr(__import__(__name__), "SessionLocal", factory)
     yield
+    transaction.rollback()
+    connection.close()
     if previous_user is None:
         app.dependency_overrides.pop(get_current_user, None)
     else:
