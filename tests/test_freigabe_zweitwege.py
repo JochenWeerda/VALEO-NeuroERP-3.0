@@ -151,6 +151,16 @@ def _buche_er(haus, wer: dict, nummer: str):
     return haus["als"](wer).post(f"/ap/invoices/{nummer}/post", params={"posted_by": "x"})
 
 
+def test_als_buchender_steht_wer_angemeldet_ist_nicht_wer_in_der_anfrage_steht(haus):
+    nummer = _eingangsrechnung(haus, ANNA)
+    assert haus["als"](ANNA).post(f"/ap/invoices/{nummer}/post", params={"posted_by": "jemand-anderes"}).status_code == 200
+    assert haus["als"](ANNA).post(f"/ap/invoices/{_eingangsrechnung(haus, ANNA, 70)}/post").status_code == 200  # ohne Angabe
+    with SessionLocal() as db:
+        wer = db.execute(text("SELECT CAST(data AS jsonb)->>'postedBy' FROM documents WHERE doc_number = :n"),
+                         {"n": nummer}).scalar()
+    assert wer == "anna"
+
+
 def test_die_wiederkehrende_finanzrechnung_bucht_die_buchhaltung_selbst(haus):
     for monat in ("2026-08-13", "2026-09-13", "2026-10-13"):
         assert _buche_er(haus, ANNA, _eingangsrechnung(haus, ANNA, 1000, monat)).status_code == 200

@@ -11,6 +11,51 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOC-STORE-MANDANT-20261014 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Der alte Dokumentspeicher (`documents`) liefert
+Listen nur im Mandanten der Anmeldung: kein „oder ohne Mandant“, kein Lesen ohne Mandant, kein Rueckfall auf alle
+Mandanten oder den Prozessspeicher. **Dateibesitz:** app/documents/repository.py (list/count);
+app/documents/router_helpers.py (In-Memory-Filter); app/services/compat_helpers.py (`list_docs`);
+app/api/v1/endpoints/compat.py nur `_list_docs` und `/sales/{doc_type}`; app/services/portal_compat_service.py nur
+`list_docs`-Aufrufe; app/services/purchase_order_service.py nur Rueckfaelle; tests/test_dokumentspeicher_mandant.py;
+docs/quality-assurance/doc-store-mandant-20261014.md. **Abnahme:** Liste/Zaehlung je Mandant, Altbeleg ohne Mandant
+fuer niemanden, Aufruf ohne Mandant liefert nichts, Portal und `/sales/{doc_type}` nur eigener Mandant, Bestellweg ohne
+Rueckfall. **Nicht im Umfang:** Einzelabruf `get_document` (Nummer systemweit), Kundentrennung im Portal,
+`ops_dokumente`/`ops_rahmenvertraege`/`ops_zertifikate` ohne Mandantenspalte — werden ausgewiesen. Keine Migration.
+
+## AGENT-PROPOSAL-SAVE-TENANT-20261014 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Elternclaim:** IDENTITY-INTEGRATION-REST-20261012 (eigener Codex-Claim). **Ziel:** Fremde persistente Agentenvorschlaege koennen nicht per Save-ID ueberschrieben werden; Proposal-Mandant und Aufrufmandant stimmen zwingend ueberein. **Dateibesitz:** app/repositories/agent_proposal_repository.py nur Save-Mandantengrenze; tests/test_agent_proposal_save_tenant.py; docs/quality-assurance/agent-proposal-save-tenant-20261014.md. **Abnahme:** fremder Save veraendert keinen Inhalt/Review, eigener Save bleibt moeglich, falscher Proposal-Mandant wird vor Writes abgewiesen. **Risiken:** Vorschlagshistorie/Idempotenz/Studioanbindung bleiben offen; keine neue DB oder Container.
+
+**Lieferung:** 23 Faelle bestanden, davon drei PostgreSQL-Savepointvertraege. Save prueft Proposal- und persistierten Mandanten vor jeder Aenderung; fremde IDs bleiben unveraendert. QA: agent-proposal-save-tenant-20261014.md. Historie/Idempotenz und Studioanbindung bleiben offen.
+
+## FIN-LESEWEGE-MANDANT-20261013 — abgeschlossen, Claude Code
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-13.
+**Lieferung:** Lieferantengutschriften/-belastungen (`credit_debit_memos.py`) und der alte Rechnungsweg
+(`finance_invoices.py`) lesen, aendern, loeschen und geben frei nur noch im Mandanten der Anmeldung; der
+Handelnde kommt aus der Anmeldung statt aus `X-User-ID`/ungeprueftem Token/`posted_by`. Altbelege ohne Mandant
+werden niemandem ausgeliefert; `scripts/belege_mandant_nachtragen.py` ordnet zu, was die Buchung eindeutig nennt.
+QA mit Befundtabelle: `docs/quality-assurance/fin-lesewege-mandant-20261013.md`.
+**Offen, fuer alle:** `DocumentRepository.list_documents/count_documents` filtern „dieser Mandant ODER kein
+Mandant“ — mandantenlose Belege des alten Dokumentspeichers gehen an jeden, der sich auf den Filter verlaesst.
+Nicht geaendert (trifft Belegarten anderer Bereiche); braucht Bestandsaufnahme und Entscheidung.
+
+## GIT-INDEX-SPERRE-20261013 — Nachtrag 22:20, Claude Code
+
+Sperre gefunden 22:18: `.git/index.lock`, erstellt 21:28:56, 0 Bytes, kein Git-Prozess, nicht geoeffnet — nach
+Pruefung entfernt (50 Minuten alt). **Beobachtung zur Herkunft (Indiz, kein Beweis):** Der Index selbst traegt
+den Stand 21:27:51 (meine Lieferung FIN-CONTROL-002). Vier Sekunden nach der Sperre, 21:29:00, entstand der
+Commit `d819e4166` (Workboard-Claim), danach bis 21:52 sieben weitere — alle mit leerem Reflog-Eintrag und ohne
+dass sich der Index aenderte. Die Commits sind also am Index vorbei entstanden (Plumbing: `commit-tree` +
+`update-ref`), waehrend die Sperre lag. Naheliegend: Ein indexschreibender Git-Aufruf zu Beginn dieses
+Commit-Wegs wurde abgebrochen und liess die Sperre zurueck; die folgenden Commits brauchten den Index nicht und
+bemerkten sie nicht. **Bitte an Codex:** den ersten Git-Aufruf deines Commit-Wegs pruefen (alles, was den Index
+oeffnet: `git add`, `git status` ohne `GIT_OPTIONAL_LOCKS=0`, `git commit`) und ob er bei Zeitueberschreitung
+beendet wird. Folge fuer den Arbeitsbaum: Der Index des Hauptbaums steht hinter HEAD; `git status` dort zeigt
+bereits committete Studio-Aenderungen als Abweichung.
+
 ## STUDIO-DRAFT-WRITE-CAS-20261013 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-13. **Ziel:** Inhaltsupdate verlangt angezeigte Revision unter SQL-/Speicherschreibsperre; Anlegen ersetzt keinen bestehenden Entwurf. **Dateibesitz:** app/services/studio_draft_store.py; app/api/v1/endpoints/studio_drafts.py; Studio-API/Page und Tests; Studio-Python-Tests; scripts/belegmasken_veroeffentlichen.py; docs/quality-assurance/studio-draft-write-cas-20261013.md. **Abnahme:** stale/missing Revision schreibt nichts, gleichzeitige Bearbeiter verlieren keine Aenderung still; POST-Dublette meldet Konflikt statt Upsert. **Risiken:** eigene transaktionale Freigabehistorie/Idempotenz folgen; zentrales Audit verlangt lokale Benutzer/E-Mail und darf keine erfundenen Identitaeten bekommen. Keine Migration/DB-Neuanlage.

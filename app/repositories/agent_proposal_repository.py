@@ -56,7 +56,11 @@ class AgentProposalRepository:
         self._db = db
 
     def save(self, tenant_id: str, proposal: AgentProposal) -> None:
+        if proposal.tenant_id != tenant_id:
+            raise ValueError("proposal_mandant_abweichend")
         existing = self._db.get(AgentProposalRecord, proposal.proposal_id)
+        if existing is not None and existing.tenant_id != tenant_id:
+            raise ValueError("proposal_nicht_gefunden")
         reviewed_at = proposal.approved_at
         reviewed_by = proposal.approved_by
         if proposal.approval_status == ApprovalStatus.REJECTED and proposal.audit_events:

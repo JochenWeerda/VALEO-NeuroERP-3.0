@@ -339,12 +339,16 @@ async def approve_ap_invoice(
 )
 async def post_ap_invoice(
     invoice_id: str,
-    posted_by: str = Query(...),
+    posted_by: Optional[str] = Query(None, description="Unbeachtet: Es bucht, wer angemeldet ist."),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     nutzer: dict = Depends(finance_admin),
 ) -> dict:
     """Bucht eine Eingangsrechnung (erzeugt GL-Buchung + OP)."""
+    # Bis 13.10.2026 kam der Buchende aus der Anfrage: Jeder konnte unter fremdem Namen buchen.
+    posted_by = str(nutzer.get("sub") or "").strip() if isinstance(nutzer, dict) else ""
+    if not posted_by:
+        raise HTTPException(status_code=403, detail="Gebucht wird nur mit einer angemeldeten Person.")
     logger.info(f"Posting AP invoice: {invoice_id} by {posted_by}")
     repo = get_repository(db)
     # Ab hier ist invoice["tenantId"] der gepruefte Mandant.
