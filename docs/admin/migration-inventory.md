@@ -376,6 +376,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `periode_statuswoerterbuch_20261001` | Eine Buchungsperiode hat einen Zustand, nicht drei Vokabulare. |
 | `personal_organisation_zeitkonto_20261006` | Organisationseinheiten und Zeitkontokorrekturen — zwei fehlende Tabellen. |
 | `portal_kundenzugaenge_20261014` | Portal: gepruefte Zuordnung einer Anmeldung zu Kundenkonten (TENANT-DOC-001). |
+| `portal_lohndienst_persistenz_20261014` | Portal: Lohndienst-Auftraege und Empfehlungen in PostgreSQL; Portalrollen (PORTAL-CONTEXT-001). |
 | `portal_order_idempotency_20261014` | Portal-Bestellungen: Spalte idempotency_key, eindeutig je Mandant und Kunde. |
 | `pos_fiscal_providers_20260609` | POS fiscal provider abstraction and evidence tables. |
 | `pos_tagesabschluss_lifecycle_20260623` | DOM-POS-004 — POS Tagesabschluss Lifecycle Tabellen |

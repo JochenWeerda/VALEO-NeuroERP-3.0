@@ -336,7 +336,8 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `portal_innendienst` | PORTAL-INNENDIENST-001 — Innendienst-Sicht auf Kundenschlaege und Potentialanalyse. |
 | `portal_intelligence` | — |
 | `portal_interessent` | — |
-| `portal_kundenzugaenge` | Kundenzugaenge des Portals: welche Anmeldung welche Kundenkonten sehen darf (TENANT-DOC-001). |
+| `portal_kundenwege` | Portalwege des Kundenportals: Uebersicht, Anfragen, Bestellungen, Rechnungen, Unterlagen, Feldbuchliste, |
+| `portal_kundenzugaenge` | Kundenzugaenge des Portals: welche Anmeldung welche Kundenkonten mit welcher Portalrolle sieht (TENANT-DOC-001, |
 | `portal_lohndienst` | — |
 | `portal_preisspiegel` | PORTAL-PREISSPIEGEL-001 — Getreidekurs-API fuer Kundenportal und Innendienst. |
 | `portal_shop` | Kundenportal Shop API Endpunkte |

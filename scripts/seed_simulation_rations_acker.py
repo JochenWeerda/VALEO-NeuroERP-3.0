@@ -12,10 +12,15 @@ Zwei Betriebsprofile eines norddeutschen Gemischtbetriebs (Milchvieh + Ackerbau)
      (organisch Guelle + mineralisch KAS), Pflanzenschutz und Ernte. Wird ueber die
      echte Portal-API angelegt (rechnet Reinnaehrstoffe/DueV-Bilanz serverseitig).
 
-Aufruf (Backend muss laufen):
-    python scripts/seed_simulation_rations_acker.py \
-        --base http://127.0.0.1:8000 --token dev-token \
-        --tenant 00000000-0000-0000-0000-000000000001
+Aufruf (Backend muss laufen; nur Entwicklungs- oder Testumgebung):
+    python scripts/seed_simulation_rations_acker.py --umgebung entwicklung \
+        --base http://127.0.0.1:8000 --token "$SEED_TOKEN" \
+        --tenant <Mandant> --kundenkonto <CRM-Kunden-ID>
+
+Mandant und Kundenkonto sind Pflicht und werden vor dem ersten Schreiben am Server geprueft (PORTAL-CONTEXT-001):
+die Anmeldung braucht eine Zuordnung zu diesem Konto (Inhaber/Betriebsleiter) oder als Innendienst eine
+Agrar-Bearbeiterrolle. Es gibt keinen Ersatzkunden und keinen Standardmandanten mehr; bis 14.10.2026 landeten die
+Schlaege ueber den Rueckfall ``dev-customer`` in einem Feldbuch, das niemandem gehoerte.
 
 Idempotent: vorhandene Schlaege (per Name) werden nicht doppelt angelegt.
 """
@@ -274,17 +279,22 @@ def export_rations_dataset(out_path: str) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--umgebung", required=True, choices=("entwicklung", "test"),
+                    help="Simulationsdaten nur in ausdruecklich gekennzeichneten Entwicklungs- oder Testumgebungen")
     ap.add_argument("--base", default=os.environ.get("SEED_BASE", "http://127.0.0.1:8000"))
-    ap.add_argument("--token", default=os.environ.get("SEED_TOKEN", "dev-token"))
-    ap.add_argument("--tenant", default=os.environ.get("SEED_TENANT", "00000000-0000-0000-0000-000000000001"))
+    ap.add_argument("--token", default=os.environ.get("SEED_TOKEN"), help="Bearer-Token der Anmeldung (Pflicht)")
+    ap.add_argument("--tenant", required=True, help="Mandant (Pflicht, kein Standard)")
+    ap.add_argument("--kundenkonto", required=True, help="CRM-Kunden-ID des Betriebs (Pflicht, kein Ersatzkunde)")
     ap.add_argument("--rations-out", default="data/seed/rations_hof_ostfriesland.json")
     ap.add_argument("--skip-feldbuch", action="store_true")
     args = ap.parse_args()
+    if not args.token:
+        ap.error("--token oder SEED_TOKEN ist Pflicht")
 
     headers = {
         "Authorization": f"Bearer {args.token}",
         "X-Tenant-ID": args.tenant,
-        "X-Tenant-Id": args.tenant,
+        "X-Kundenkonto": args.kundenkonto,
         "Content-Type": "application/json",
     }
 
@@ -294,6 +304,11 @@ def main() -> int:
     if not args.skip_feldbuch:
         print("== B) Ackerschlagkartei: Schläge + Maßnahmen (über Portal-API) ==")
         try:
+            pruefung = requests.get(f"{args.base}/api/v1/portal/feldbuch/stats", headers=headers, timeout=15)
+            if pruefung.status_code != 200:
+                print(f"  ! Kundenkonto {args.kundenkonto} im Mandanten {args.tenant} nicht freigegeben "
+                      f"({pruefung.status_code}): {pruefung.text[:200]}", file=sys.stderr)
+                return 1
             res = seed_feldbuch(args.base, headers)
             print(f"  Ergebnis: {res['schlaege']} Schläge, {res['massnahmen']} Maßnahmen neu angelegt.")
         except requests.RequestException as e:

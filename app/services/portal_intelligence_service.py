@@ -1,18 +1,28 @@
-﻿"""PORTAL-INTELLIGENCE-001 — Cross-Sell-Empfehlungsengine fuer das Kundenportal.
+﻿"""PORTAL-INTELLIGENCE-001 — Cross-Sell-Empfehlungen fuer das Kundenportal, persistent in PostgreSQL.
 
-Generiert kontextabhaengige Empfehlungen:
+Erzeugt kontextabhaengige Empfehlungen:
   1. Ration berechnet → Rohwarenkorb + Mahl-/Mischwagen-Service anbieten
-  2. Schlagkartei-Kulturen → Ankaufs-/Kontraktangebote fuer Ernte
-  3. Bestehende Vertraege → Liefertermin-Reminder, Mengen-Luecken
-  4. Neue Ernte in Sicht → Vorkaufsmöglichkeit Saatgut/Duenger naechstes Jahr
+  2. Schlagkartei-Kulturen → Ankaufs-/Kontraktangebote fuer Ernte, Lohnspritzen
+
+Bis 14.10.2026 lagen die Empfehlungen nur im Arbeitsspeicher eines Prozesses. Jetzt (PORTAL-CONTEXT-001):
+
+* **Herkunft** — jede Empfehlung ist gekennzeichnet: ``regel`` (diese festen Regeln) oder ``ki`` (mit Modell). Eine
+  Empfehlung ist ein Vorschlag, kein Auftrag; verbindlich wird erst ein Lohndienst-Auftrag oder Kontrakt.
+* **Keine Dubletten** — eine Empfehlung ist eindeutig je Kunde, Typ, Ausloeser, Artikel und Ziel. Dieselbe
+  Erzeugung ein zweites Mal (Wiederholung, zweiter Prozess) legt nichts an.
+* **Gesehen** — mit Person und Zeit; ein zweites Markieren aendert nichts.
 """
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass, field, asdict
-from datetime import date, datetime
+from dataclasses import dataclass
+from datetime import date
+from decimal import Decimal
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
+
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 
 class EmpfehlungTyp(str, Enum):
@@ -29,37 +39,6 @@ class EmpfehlungPrioritaet(str, Enum):
     MITTEL = "mittel"
     NIEDRIG = "niedrig"
 
-
-@dataclass
-class Empfehlung:
-    empfehlung_id: str
-    tenant_id: str
-    kunden_nr: str
-    typ: EmpfehlungTyp
-    prioritaet: EmpfehlungPrioritaet
-    titel: str
-    beschreibung: str
-    cta_label: str           # Call-to-action Button-Text
-    cta_ziel: str            # Route/URL-Pfad im Portal
-    kontext_schluessel: str  # Was hat diese Empfehlung ausgeloest
-    kontext_wert: str        # Wert des Auslösers (z.B. Kulturname, Dienstleistungstyp)
-    artikel_id: str | None
-    betrag_indikativ: float | None  # Indikatives Umsatzpotential in EUR
-    gueltig_bis: date | None
-    gesehen: bool = False
-    erstellt_am: datetime = field(default_factory=datetime.utcnow)
-
-    def to_dict(self) -> dict[str, Any]:
-        d = asdict(self)
-        d["typ"] = self.typ.value
-        d["prioritaet"] = self.prioritaet.value
-        d["gueltig_bis"] = self.gueltig_bis.isoformat() if self.gueltig_bis else None
-        d["erstellt_am"] = self.erstellt_am.isoformat()
-        return d
-
-
-# In-memory store per tenant
-_STORE: dict[str, list[Empfehlung]] = {}
 
 # Mapping: Kulturname → Ankaufs-Artikel
 _KULTUR_ARTIKEL: dict[str, dict[str, str]] = {
@@ -89,52 +68,113 @@ _RATION_ROHWAREN: list[dict[str, Any]] = [
 ]
 
 
+@dataclass(frozen=True)
+class _Vorschlag:
+    typ: EmpfehlungTyp
+    prioritaet: EmpfehlungPrioritaet
+    titel: str
+    beschreibung: str
+    cta_label: str
+    cta_ziel: str
+    kontext_schluessel: str
+    kontext_wert: str
+    artikel_id: Optional[str] = None
+
+
+_SPALTEN = (
+    "e.id, e.tenant_id, e.customer_id, c.customer_number, e.typ, e.prioritaet, e.titel, e.beschreibung, "
+    "e.cta_label, e.cta_ziel, e.kontext_schluessel, e.kontext_wert, e.artikel_id, e.betrag_indikativ, e.gueltig_bis, "
+    "e.herkunft, e.modell, e.gesehen_am, e.gesehen_von, e.erzeugt_von, e.erzeugt_am"
+)
+_FROM = "FROM domain_portal.empfehlungen e JOIN domain_crm.customers c ON c.id = e.customer_id"
+_RANG = "CASE e.prioritaet WHEN 'hoch' THEN 0 WHEN 'mittel' THEN 1 ELSE 2 END"
+
+
+def _zeile(z: Any) -> dict[str, Any]:
+    d = dict(z._mapping)
+    for k, v in d.items():
+        if isinstance(v, Decimal):
+            d[k] = float(v)
+        elif hasattr(v, "isoformat"):
+            d[k] = v.isoformat()
+    d["empfehlung_id"] = d["id"]
+    d["kunden_nr"] = d.pop("customer_number")
+    d["gesehen"] = d["gesehen_am"] is not None
+    d["erstellt_am"] = d["erzeugt_am"]
+    d["ki_generiert"] = d["herkunft"] == "ki"
+    return d
+
+
 class PortalIntelligenceService:
-    def __init__(self, tenant_id: str) -> None:
+    def __init__(self, db: Session, tenant_id: str) -> None:
+        if not tenant_id:
+            raise ValueError("Empfehlungen ohne Mandant")
+        self.db = db
         self.tenant_id = tenant_id
-        if tenant_id not in _STORE:
-            _STORE[tenant_id] = []
 
-    def _store(self) -> list[Empfehlung]:
-        return _STORE[self.tenant_id]
+    # ── Lesen ────────────────────────────────────────────────────────────────
 
-    def empfehlungen_fuer_kunden(
-        self, kunden_nr: str, *, nur_ungesehen: bool = False
-    ) -> list[dict[str, Any]]:
-        result = [e for e in self._store() if e.kunden_nr == kunden_nr]
+    def empfehlungen_fuer_kunden(self, customer_id: str, *, nur_ungesehen: bool = False) -> list[dict[str, Any]]:
+        sql = f"SELECT {_SPALTEN} {_FROM} WHERE e.tenant_id = :t AND e.customer_id = :c"
         if nur_ungesehen:
-            result = [e for e in result if not e.gesehen]
-        result.sort(key=lambda e: (
-            {"hoch": 0, "mittel": 1, "niedrig": 2}[e.prioritaet.value],
-            e.erstellt_am,
-        ))
-        return [e.to_dict() for e in result]
+            sql += " AND e.gesehen_am IS NULL"
+        zeilen = self.db.execute(text(sql + f" ORDER BY {_RANG}, e.erzeugt_am, e.id"),
+                                 {"t": self.tenant_id, "c": customer_id})
+        return [_zeile(z) for z in zeilen]
 
-    def als_gesehen_markieren(self, empfehlung_id: str, kunden_nr: str) -> bool:
-        for e in self._store():
-            if e.empfehlung_id == empfehlung_id and e.kunden_nr == kunden_nr:
-                e.gesehen = True
-                return True
-        return False
+    def zusammenfassung(self, customer_id: str, kunden_nr: str) -> dict[str, Any]:
+        alle = self.empfehlungen_fuer_kunden(customer_id)
+        return {
+            "kunden_nr": kunden_nr,
+            "gesamt": len(alle),
+            "ungesehen": sum(1 for e in alle if not e["gesehen"]),
+            "nach_typ": {t.value: sum(1 for e in alle if e["typ"] == t.value) for t in EmpfehlungTyp},
+        }
 
-    def generiere_aus_ration(
-        self,
-        kunden_nr: str,
-        tiere_anzahl: int,
-        tier_kategorie: str,
-        benoetigt_rohwaren: list[str],  # liste von artikel_ids aus Rationskalkulation
-    ) -> list[dict[str, Any]]:
+    # ── Schreiben ────────────────────────────────────────────────────────────
+
+    def als_gesehen_markieren(self, empfehlung_id: str, customer_id: str, akteur: str) -> bool:
+        """True, wenn die Empfehlung zum Konto gehoert (auch wenn sie schon gesehen war)."""
+        self.db.execute(text(
+            "UPDATE domain_portal.empfehlungen SET gesehen_am = now(), gesehen_von = :v "
+            "WHERE id = :id AND tenant_id = :t AND customer_id = :c AND gesehen_am IS NULL"),
+            {"v": akteur, "id": empfehlung_id, "t": self.tenant_id, "c": customer_id})
+        vorhanden = self.db.execute(text(
+            "SELECT 1 FROM domain_portal.empfehlungen WHERE id = :id AND tenant_id = :t AND customer_id = :c"),
+            {"id": empfehlung_id, "t": self.tenant_id, "c": customer_id}).first() is not None
+        self.db.commit()
+        return vorhanden
+
+    def _speichern(self, customer_id: str, akteur: str, vorschlaege: list[_Vorschlag]) -> list[dict[str, Any]]:
+        neue: list[str] = []
+        for v in vorschlaege:
+            z = self.db.execute(text("""
+                INSERT INTO domain_portal.empfehlungen (id, tenant_id, customer_id, typ, prioritaet, titel, beschreibung,
+                  cta_label, cta_ziel, kontext_schluessel, kontext_wert, artikel_id, herkunft, erzeugt_von)
+                VALUES (:id, :t, :c, :typ, :prio, :titel, :beschreibung, :cta_label, :cta_ziel, :ks, :kw, :artikel,
+                  'regel', :akteur)
+                ON CONFLICT DO NOTHING
+                RETURNING id
+            """), {"id": str(uuid.uuid4()), "t": self.tenant_id, "c": customer_id, "typ": v.typ.value,
+                   "prio": v.prioritaet.value, "titel": v.titel, "beschreibung": v.beschreibung,
+                   "cta_label": v.cta_label, "cta_ziel": v.cta_ziel, "ks": v.kontext_schluessel,
+                   "kw": v.kontext_wert, "artikel": v.artikel_id, "akteur": akteur}).first()
+            if z is not None:
+                neue.append(z[0])
+        self.db.commit()
+        if not neue:
+            return []
+        zeilen = self.db.execute(text(f"SELECT {_SPALTEN} {_FROM} WHERE e.tenant_id = :t AND e.id = ANY(:ids) "
+                                      f"ORDER BY {_RANG}, e.erzeugt_am, e.id"), {"t": self.tenant_id, "ids": neue})
+        return [_zeile(z) for z in zeilen]
+
+    def generiere_aus_ration(self, *, customer_id: str, akteur: str, tiere_anzahl: int, tier_kategorie: str,
+                             benoetigt_rohwaren: list[str]) -> list[dict[str, Any]]:
         """Nach Rationskalkulation: Rohwaren-Angebote + Mahl-/Mischwagen-Service."""
-        neue: list[Empfehlung] = []
-        heute = date.today()
-
-        # Rohwaren die in der Ration vorkommen
+        vorschlaege: list[_Vorschlag] = []
         for rw in _RATION_ROHWAREN:
             if rw["artikel_id"] in benoetigt_rohwaren or not benoetigt_rohwaren:
-                neue.append(Empfehlung(
-                    empfehlung_id=str(uuid.uuid4()),
-                    tenant_id=self.tenant_id,
-                    kunden_nr=kunden_nr,
+                vorschlaege.append(_Vorschlag(
                     typ=EmpfehlungTyp.ROHWARE_ANGEBOT,
                     prioritaet=EmpfehlungPrioritaet.HOCH,
                     titel=f"Angebot: {rw['name']}",
@@ -148,14 +188,8 @@ class PortalIntelligenceService:
                     kontext_schluessel="ration_kalkulation",
                     kontext_wert=tier_kategorie,
                     artikel_id=rw["artikel_id"],
-                    betrag_indikativ=None,
-                    gueltig_bis=None,
                 ))
-        # Mahl- und Mischwagen-Service
-        neue.append(Empfehlung(
-            empfehlung_id=str(uuid.uuid4()),
-            tenant_id=self.tenant_id,
-            kunden_nr=kunden_nr,
+        vorschlaege.append(_Vorschlag(
             typ=EmpfehlungTyp.LOHNDIENST,
             prioritaet=EmpfehlungPrioritaet.HOCH,
             titel="Mahl- und Mischwagen: TMR direkt auf Ihrem Hof",
@@ -168,15 +202,8 @@ class PortalIntelligenceService:
             cta_ziel="/portal/lohndienste/neu?typ=mahl_misch",
             kontext_schluessel="ration_kalkulation",
             kontext_wert=tier_kategorie,
-            artikel_id=None,
-            betrag_indikativ=None,
-            gueltig_bis=None,
         ))
-        # Hofeigenes Mahlen
-        neue.append(Empfehlung(
-            empfehlung_id=str(uuid.uuid4()),
-            tenant_id=self.tenant_id,
-            kunden_nr=kunden_nr,
+        vorschlaege.append(_Vorschlag(
             typ=EmpfehlungTyp.LOHNDIENST,
             prioritaet=EmpfehlungPrioritaet.MITTEL,
             titel="Lohnmahlen: Eigenes Getreide zu Schrot/Mehl",
@@ -188,31 +215,16 @@ class PortalIntelligenceService:
             cta_ziel="/portal/lohndienste/neu?typ=lohn_mahlen",
             kontext_schluessel="ration_kalkulation",
             kontext_wert=tier_kategorie,
-            artikel_id=None,
-            betrag_indikativ=None,
-            gueltig_bis=None,
         ))
-        _STORE[self.tenant_id].extend(neue)
-        return [e.to_dict() for e in neue]
+        return self._speichern(customer_id, akteur, vorschlaege)
 
-    def generiere_aus_schlagkartei(
-        self,
-        kunden_nr: str,
-        kulturen: list[str],        # Kulturbezeichnungen aus Schlagkartei
-        flaeche_ha: float,
-        ernte_jahr: int,
-    ) -> list[dict[str, Any]]:
+    def generiere_aus_schlagkartei(self, *, customer_id: str, akteur: str, kulturen: list[str], flaeche_ha: float,
+                                   ernte_jahr: int) -> list[dict[str, Any]]:
         """Aus angebauten Kulturen: Ankaufs-/Kontraktangebote für die Ernte."""
-        neue: list[Empfehlung] = []
+        vorschlaege: list[_Vorschlag] = []
         heute = date.today()
-        bereits_vorgeschlagen = {
-            e.kontext_wert for e in self._store()
-            if e.kunden_nr == kunden_nr and e.typ == EmpfehlungTyp.ANKAUF_KONTRAKT
-        }
         for kultur in kulturen:
             key = kultur.lower().strip()
-            if key in bereits_vorgeschlagen:
-                continue
             mapping = _KULTUR_ARTIKEL.get(key)
             if not mapping:
                 continue
@@ -224,10 +236,7 @@ class PortalIntelligenceService:
             elif "gerste" in key:
                 ertrag_dt_ha = 65.0
             menge_dt = round(flaeche_ha * ertrag_dt_ha, 0)
-            neue.append(Empfehlung(
-                empfehlung_id=str(uuid.uuid4()),
-                tenant_id=self.tenant_id,
-                kunden_nr=kunden_nr,
+            vorschlaege.append(_Vorschlag(
                 typ=EmpfehlungTyp.ANKAUF_KONTRAKT,
                 prioritaet=EmpfehlungPrioritaet.HOCH if ernte_jahr == heute.year else EmpfehlungPrioritaet.MITTEL,
                 titel=f"Ankaufsangebot: {kultur} Ernte {ernte_jahr}",
@@ -237,19 +246,14 @@ class PortalIntelligenceService:
                     f"damit Sie Planungssicherheit haben. Preisspiegel und Kontrakt direkt im Portal."
                 ),
                 cta_label="Kontraktangebot ansehen",
-                cta_ziel=f"/portal/vertraege/neu?artikel={mapping['artikel_id']}&menge={menge_dt}",
+                # Ein Ankaufsangebot je Kultur: das Ziel nennt die Kultur, nicht die schwankende Menge.
+                cta_ziel=f"/portal/vertraege/neu?artikel={mapping['artikel_id']}&kultur={key}",
                 kontext_schluessel="schlagkartei_kultur",
                 kontext_wert=key,
                 artikel_id=mapping["artikel_id"],
-                betrag_indikativ=None,
-                gueltig_bis=None,
             ))
-            # Lohnspritz-Empfehlung wenn Getreide oder Raps
             if any(g in key for g in ["weizen", "gerste", "raps", "roggen", "triticale"]):
-                neue.append(Empfehlung(
-                    empfehlung_id=str(uuid.uuid4()),
-                    tenant_id=self.tenant_id,
-                    kunden_nr=kunden_nr,
+                vorschlaege.append(_Vorschlag(
                     typ=EmpfehlungTyp.LOHNDIENST,
                     prioritaet=EmpfehlungPrioritaet.MITTEL,
                     titel=f"Lohnspritzen: {kultur}-Schläge jetzt planen",
@@ -262,31 +266,5 @@ class PortalIntelligenceService:
                     cta_ziel="/portal/lohndienste/neu?typ=lohn_spritz&kultur=" + key,
                     kontext_schluessel="schlagkartei_kultur",
                     kontext_wert=key,
-                    artikel_id=None,
-                    betrag_indikativ=None,
-                    gueltig_bis=None,
                 ))
-        _STORE[self.tenant_id].extend(neue)
-        return [e.to_dict() for e in neue]
-
-    def zusammenfassung(self, kunden_nr: str) -> dict[str, Any]:
-        alle = [e for e in self._store() if e.kunden_nr == kunden_nr]
-        ungesehen = [e for e in alle if not e.gesehen]
-        return {
-            "kunden_nr": kunden_nr,
-            "gesamt": len(alle),
-            "ungesehen": len(ungesehen),
-            "nach_typ": {
-                t.value: sum(1 for e in alle if e.typ == t)
-                for t in EmpfehlungTyp
-            },
-        }
-
-
-_SVC_CACHE: dict[str, PortalIntelligenceService] = {}
-
-
-def get_intelligence_service(tenant_id: str) -> PortalIntelligenceService:
-    if tenant_id not in _SVC_CACHE:
-        _SVC_CACHE[tenant_id] = PortalIntelligenceService(tenant_id)
-    return _SVC_CACHE[tenant_id]
+        return self._speichern(customer_id, akteur, vorschlaege)

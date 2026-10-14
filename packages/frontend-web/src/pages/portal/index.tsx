@@ -15,6 +15,7 @@ import { usePortalDashboard, type PortalDashboard as PortalDashboardApi } from '
 import { ErrorState } from '@/components/ErrorState'
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
+import { kontoDarf, usePortalKonto } from '@/lib/portal-konto'
 import {
   ShoppingCart,
   Package,
@@ -33,8 +34,6 @@ import {
   Tractor,
 } from 'lucide-react'
 
-// Demo-Kunden-Nr; produktiv aus Auth-Context
-const DEMO_KUNDEN_NR = 'K-10001'
 // Demo Artikel-IDs basierend auf Schlagkartei-Kulturen
 const DEMO_ARTIKEL_IDS = 'WEI-001,GER-001,RAP-001'
 
@@ -222,11 +221,15 @@ function PreisspiegalWidget() {
 type EmpfehlungZusammenfassung = { ungesehen: number; gesamt: number; nach_typ: Record<string, number> }
 
 function EmpfehlungsBanner() {
+  // Kundenkonto aus der Kontowahl (PORTAL-CONTEXT-001); nur fuer Rollen, die Empfehlungen sehen.
+  const konto = usePortalKonto((state) => state.aktiv)
+  const kundenNr = konto?.customer_number ?? ''
   const { data } = useQuery<EmpfehlungZusammenfassung>({
-    queryKey: ['portal-empfehlungen-badge', DEMO_KUNDEN_NR],
+    queryKey: ['portal-empfehlungen-badge', konto?.customer_id],
+    enabled: Boolean(kundenNr) && kontoDarf(konto, 'empfehlungen'),
     queryFn: async () => {
       const res = await apiClient.get<EmpfehlungZusammenfassung>(
-        `/api/v1/portal/empfehlungen/${DEMO_KUNDEN_NR}/zusammenfassung`,
+        `/api/v1/portal/empfehlungen/${encodeURIComponent(kundenNr)}/zusammenfassung`,
       )
       return res.data
     },

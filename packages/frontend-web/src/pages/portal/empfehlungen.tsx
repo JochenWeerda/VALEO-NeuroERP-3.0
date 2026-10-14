@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
+import { usePortalKonto } from '@/lib/portal-konto'
 import { useToast } from '@/hooks/use-toast'
 import {
   Sparkles,
@@ -33,14 +34,8 @@ import {
 } from 'lucide-react'
 
 // Demo-Kunden-Nr; produktiv aus Auth-Context
-// Das Kundenkonto bestimmt der Server aus der Anmeldung (TENANT-DOC-001). Bei mehreren Konten gilt bis zur Kontowahl
-// im Portal das erste; der Kopf X-Kundenkonto waehlt es aus der zugeordneten Menge.
-interface PortalKundenkonto {
-  customer_id: string
-  customer_number: string
-  name: string
-  rolle: string
-}
+// Das Kundenkonto bestimmt der Server aus der Anmeldung (PORTAL-CONTEXT-001); die Seite nutzt das im Portal gewaehlte
+// Konto (lib/portal-konto.ts), der API-Client schickt es als X-Kundenkonto mit.
 
 type Empfehlung = {
   empfehlung_id: string
@@ -122,35 +117,19 @@ export default function EmpfehlungenPage() {
   const qc = useQueryClient()
   const [filter, setFilter] = useState<string>('alle')
 
-  const konten = useQuery<PortalKundenkonto[]>({
-    queryKey: ['portal-kundenkonten'],
-    queryFn: async () => (await apiClient.get<PortalKundenkonto[]>('/api/v1/portal/kundenkonten')).data,
-  })
-  const konto = konten.data?.[0]
-  const kopf = konto ? { headers: { 'X-Kundenkonto': konto.customer_id } } : undefined
+  const konto = usePortalKonto((state) => state.aktiv)
 
-  const empfehlungen = useQuery<{ items: Empfehlung[]; count: number }>({
+  const { data, isLoading, isError } = useQuery<{ items: Empfehlung[]; count: number }>({
     queryKey: ['portal-empfehlungen', konto?.customer_id],
     enabled: Boolean(konto),
-    queryFn: async () => {
-      const res = await apiClient.get<{ items: Empfehlung[]; count: number }>(
-        `/api/v1/portal/empfehlungen/${encodeURIComponent(konto?.customer_number ?? '')}`,
-        kopf,
-      )
-      return res.data
-    },
+    queryFn: async () => (await apiClient.get<{ items: Empfehlung[]; count: number }>('/api/v1/portal/empfehlungen')).data,
   })
-  const data = empfehlungen.data
-  const isLoading = konten.isLoading || empfehlungen.isLoading
-  const isError = konten.isError || empfehlungen.isError
 
   const gesehenMutation = useMutation({
     mutationFn: async (empfehlung_id: string) => {
-      if (!konto) throw new Error('Kein Kundenkonto')
+      if (!konto?.customer_number) throw new Error('Kein Kundenkonto')
       await apiClient.post(
         `/api/v1/portal/empfehlungen/${encodeURIComponent(konto.customer_number)}/gesehen/${empfehlung_id}`,
-        undefined,
-        kopf,
       )
     },
     onSuccess: () => {
