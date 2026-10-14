@@ -11,9 +11,10 @@ import uuid
 
 import pytest
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from app.core.belegvertrag import BELEGARTEN
-from app.core.database import SessionLocal
+from app.core.database import SessionLocal, engine
 from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition
 from app.core.screen_definitions_beleg import build_beleg_screen_definition, screen_id
 from app.services import studio_draft_store
@@ -29,13 +30,18 @@ def _skript():
 
 
 @pytest.fixture
-def mandant():
+def mandant(monkeypatch):
     kennung = f"bm-{uuid.uuid4().hex[:8]}"
     studio_draft_store.use_sql_studio_drafts()
     with SessionLocal() as db:
         db.execute(text("INSERT INTO domain_shared.tenants (id, name, is_active) VALUES (:id, :id, true)"), {"id": kennung})
         db.commit()
+    connection = engine.connect()
+    transaction = connection.begin()
+    monkeypatch.setattr(studio_draft_store, "_sql_session", lambda: Session(bind=connection, join_transaction_mode="create_savepoint"))
     yield kennung
+    transaction.rollback()
+    connection.close()
     with SessionLocal() as db:
         db.execute(text("DELETE FROM domain_shared.screen_definition_drafts WHERE tenant_id = :t"), {"t": kennung})
         db.execute(text("DELETE FROM domain_shared.tenants WHERE id = :t"), {"t": kennung})

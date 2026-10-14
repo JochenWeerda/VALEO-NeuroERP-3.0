@@ -27,3 +27,18 @@ class ScreenDefinitionDraft(Base):
     created_by = Column(String(64), nullable=False)
     updated_by = Column(String(64), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class ScreenDefinitionHistory(Base):
+    """Append-only snapshots, independent of mutable draft/tenant lifecycle."""
+    __tablename__ = "screen_definition_history"
+    __table_args__ = {"schema": "domain_shared"}
+    id = Column(String(36), primary_key=True)
+    tenant_id = Column(String, nullable=False)
+    draft_id = Column(String, nullable=False)
+    actor = Column(String, nullable=False)
+    action = Column(String(24), nullable=False)
+    previous_revision = Column(String(64), nullable=True)
+    revision = Column(String(64), nullable=False)
+    snapshot = Column(JSONB, nullable=False)
+    recorded_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
