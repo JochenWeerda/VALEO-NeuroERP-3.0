@@ -138,6 +138,7 @@ class MCPToolContract:
         return {
             "name": self.tool_name,
             "description": self.beschreibung,
+            "_meta": {"valeo/schemaVersion": self.schema_version},
             "inputSchema": {
                 "type": "object",
                 "properties": props,

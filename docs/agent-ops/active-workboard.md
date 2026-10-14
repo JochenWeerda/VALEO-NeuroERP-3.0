@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## STUDIO-ARTIFACT-VERSION-20261014 — reserviert, Codex
+## STUDIO-ARTIFACT-VERSION-20261014 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Erster P0-Slice der API-Artefaktsynchronisierung: Quellversion im externen Agentenmanifest und MCP-Vertrag erhalten, Regression gegen abweichende Version. **Dateibesitz:** app/core/agent_tool_contract_manifest.py; app/core/mcp_tool_contracts.py nur MCP-Versionsmetadaten; tests/test_agent_tool_contracts.py; eigene QA. **Abnahme:** Quellversion wird unveraendert projiziert; unterschiedliche Vertragsschemaversionen fallen im Regressionstest auf. **Risiken:** Keine Behauptung einer freigegebenen Capability-Version: Freigaberegister, echter REST/CLI-Abgleich und CI-Gate folgen; Historienanzeige und Prozesssimulation bleiben im Gesamtauftrag. Keine Migration, keine neue DB/Container.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Erster P0-Slice der API-Artefaktsynchronisierung: Quellversion im externen Agentenmanifest und MCP-Vertrag erhalten, Regression gegen abweichende Version. **Dateibesitz:** app/core/agent_tool_contract_manifest.py; app/core/mcp_tool_contracts.py nur MCP-Versionsmetadaten; tests/test_agent_tool_contracts.py; eigene QA. **Abnahme:** Quellversion wird unveraendert projiziert; unterschiedliche Vertragsschemaversionen fallen im Regressionstest auf. **Risiken:** Keine Behauptung einer freigegebenen Capability-Version: Freigaberegister, echter REST/CLI-Abgleich und CI-Gate folgen; Historienanzeige und Prozesssimulation bleiben im Gesamtauftrag. Keine Migration, keine neue DB/Container.
+
+**Lieferung:** Quellversion im Manifest, MCP-Metadaten und REST-Vertragsansicht erhalten; zusaetzlich agent_tool_contracts.py nur Versionsprojektion. QA: studio-artifact-version-20261014.md. Vollstaendiges CI-Gate, Freigabeversion, CLI-Bindung, Historienanzeige und Simulation weiterhin offen.
 
 ## PORTAL-KUNDE-001 — in Arbeit, Claude Code
 

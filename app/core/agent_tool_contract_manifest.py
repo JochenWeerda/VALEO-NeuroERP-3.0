@@ -102,6 +102,7 @@ def _build_entry(contract: MCPToolContract) -> AgentToolContractEntry:
             operation_id=contract.tool_name,
         ),
         api_endpoint=contract.api_endpoint or f"{method} {path}",
+        schema_version=contract.schema_version,
     )
 
 
