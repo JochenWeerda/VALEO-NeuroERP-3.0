@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-EDITOR-CONTROLS-20261014 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Studio-Bedienung fuer modellierte lesende Agrar-Entwuerfe, ohne unmodellierte Fachaktionen als simuliert auszugeben. **Dateibesitz:** studio-reducer.ts, ScreenStudioPage.tsx und gezielte UI-/Reducer-Tests (innerhalb bestehendem Studio-Claim). **Abnahme:** Fachbereich und Agent-Vertrag konsistent; Fachaktionen lassen sich ausdruecklich entfernen, alle Ebenen; keine Berechtigungs- oder Fachregelvermutung, bestehende native Runtime bleibt fuehrend.
+
 ## SELF-BILLING-NUMBER-20261014 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Zeitstempelbasierte Self-Billing-Kollisionen schliessen; Annahme verwendet bestehenden transaktionalen NumberRangeService. **Dateibesitz:** modules/agrar/services/self_billing_service.py nur Nummern-/ID-Generierung; harvest_acceptance_service.py nur serverseitige Nummernkreisvergabe (eigener Claim); Studio-Profilfixdaten und gezielte Tests/QA. **Abnahme:** mehrere Vorgange je Mandant, volle UUID-Identitaet, Journal-Laengengrenze, Counter ohne Zwischencommit; kein neues Nummerierungsmodell, DB oder Container.
