@@ -27,7 +27,7 @@ from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.op_skonto_auszifferung_schemas import OpSkontoAuszifferungOut
-from app.documents.router_helpers import get_repository, get_from_store, save_to_store
+from app.documents.router_helpers import eigener_beleg, get_repository, save_to_store
 
 
 router = APIRouter(prefix="/fibu/op-auszifferung", tags=["FIBU - OP Skonto-Auszifferung"])
@@ -191,7 +191,7 @@ def create_auszifferung(
             rnr = payload.rechnungsnr or settled[0]
             if rnr:
                 repo = get_repository(db)
-                inv = get_from_store("sales_invoice", rnr, repo)
+                inv = eigener_beleg("sales_invoice", rnr, tenant_id, repo)
                 if inv and inv.get("status") not in ("BEZAHLT", "STORNIERT"):
                     inv["status"] = "BEZAHLT"
                     save_to_store("sales_invoice", rnr, inv, repo)

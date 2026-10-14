@@ -601,9 +601,9 @@ async def approve_invoice(
         
         # Keep the document status in sync with workflow semantics.
         if update_status in {"approved", "rejected"}:
-            from app.documents.router_helpers import get_repository, get_from_store, save_to_store
+            from app.documents.router_helpers import eigener_beleg, get_repository, save_to_store
             repo = get_repository(db)
-            invoice = get_from_store("ap_invoice", action.invoice_id, repo)
+            invoice = eigener_beleg("ap_invoice", action.invoice_id, tenant_id, repo)
             if invoice:
                 invoice["status"] = APPROVAL_STATUS_TO_DOCUMENT_STATUS.get(update_status, invoice.get("status", "ENTWURF"))
                 invoice["approvedBy"] = action.approved_by

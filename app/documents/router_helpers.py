@@ -59,6 +59,21 @@ def get_from_store(doc_type: str, doc_number: str, repo: Optional[DocumentReposi
     return _DB.get(doc_number)
 
 
+def eigener_beleg(
+    doc_type: str, doc_number: str, tenant_id: str, repo: Optional[DocumentRepository] = None
+) -> Optional[dict]:
+    """Der Beleg dieses Mandanten oder ``None`` — ein fremder oder mandantenloser gilt als nicht vorhanden.
+
+    Die Belegnummer ist im Speicher systemweit eindeutig: Wer nur per Nummer liest, trifft auch den Beleg eines
+    anderen Mandanten. Bis 14.10.2026 gaben so E-Rechnung, Gutschrift, Memo-Verrechnung und Statusnachtraege
+    fremde Belege aus oder veraenderten sie.
+    """
+    beleg = get_from_store(doc_type, doc_number, repo)
+    if not beleg or not tenant_id or str(beleg.get("tenantId") or beleg.get("tenant_id") or "") != str(tenant_id):
+        return None
+    return beleg
+
+
 def list_from_store(
     doc_type: str, 
     skip: int = 0, 

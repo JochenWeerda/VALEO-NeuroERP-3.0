@@ -17,7 +17,7 @@ from app.auth.deps import get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services import finance_freigabe
-from app.documents.router_helpers import get_repository, save_to_store, get_from_store, list_from_store
+from app.documents.router_helpers import eigener_beleg, get_repository, save_to_store, get_from_store, list_from_store
 
 logger = logging.getLogger(__name__)
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
@@ -144,11 +144,11 @@ def calculate_memo_totals(items: List[MemoItem]) -> tuple[float, float, float]:
     return round(net_amount, 2), round(tax_amount, 2), round(gross_amount, 2)
 
 
-def get_supplier_name(supplier_id: str, db: Session) -> str:
-    """Holt Lieferantennamen aus der Datenbank."""
+def get_supplier_name(supplier_id: str, db: Session, tenant_id: str) -> str:
+    """Holt Lieferantennamen aus der Datenbank (nur Partner des eigenen Mandanten)."""
     try:
         repo = get_repository(db)
-        supplier = get_from_store("partner", supplier_id, repo)
+        supplier = eigener_beleg("partner", supplier_id, tenant_id, repo)
         if supplier:
             return supplier.get("name", supplier_id)
     except Exception as e:
@@ -156,11 +156,11 @@ def get_supplier_name(supplier_id: str, db: Session) -> str:
     return supplier_id
 
 
-def get_invoice_number(invoice_id: str, db: Session) -> Optional[str]:
-    """Holt Rechnungsnummer aus der Datenbank."""
+def get_invoice_number(invoice_id: str, db: Session, tenant_id: str) -> Optional[str]:
+    """Holt Rechnungsnummer aus der Datenbank (nur Rechnungen des eigenen Mandanten)."""
     try:
         repo = get_repository(db)
-        invoice = get_from_store("ap_invoice", invoice_id, repo)
+        invoice = eigener_beleg("ap_invoice", invoice_id, tenant_id, repo)
         if invoice:
             return invoice.get("number", invoice_id)
     except Exception as e:
@@ -190,12 +190,12 @@ async def create_credit_memo(
         memo_number = f"CM-{datetime.now().strftime('%Y')}-{memo_id[:8].upper()}"
         
         # Hole Lieferantennamen
-        supplier_name = get_supplier_name(memo.supplierId, db)
+        supplier_name = get_supplier_name(memo.supplierId, db, tenant_id)
         
         # Hole Rechnungsnummer falls vorhanden
         invoice_number = None
         if memo.invoiceId:
-            invoice_number = get_invoice_number(memo.invoiceId, db)
+            invoice_number = get_invoice_number(memo.invoiceId, db, tenant_id)
         
         # Erstelle Credit Memo Objekt
         credit_memo = {
@@ -262,12 +262,12 @@ async def create_debit_memo(
         memo_number = f"DM-{datetime.now().strftime('%Y')}-{memo_id[:8].upper()}"
         
         # Hole Lieferantennamen
-        supplier_name = get_supplier_name(memo.supplierId, db)
+        supplier_name = get_supplier_name(memo.supplierId, db, tenant_id)
         
         # Hole Rechnungsnummer falls vorhanden
         invoice_number = None
         if memo.invoiceId:
-            invoice_number = get_invoice_number(memo.invoiceId, db)
+            invoice_number = get_invoice_number(memo.invoiceId, db, tenant_id)
         
         # Erstelle Debit Memo Objekt
         debit_memo = {
@@ -469,7 +469,8 @@ async def settle_credit_memo(
         
         # Validiere Rechnungen
         for invoice_id in settlement.invoiceIds:
-            invoice = get_from_store("ap_invoice", invoice_id, repo)
+            # Bis 14.10.2026 ohne Mandant: die Verrechnung minderte offene Betraege und Posten fremder Rechnungen.
+            invoice = eigener_beleg("ap_invoice", invoice_id, tenant_id, repo)
             if not invoice:
                 raise HTTPException(status_code=404, detail=f"Invoice {invoice_id} not found")
             if invoice.get("supplierId") != memo.get("supplierId"):
@@ -490,7 +491,7 @@ async def settle_credit_memo(
         memo_amount = memo.get("amount", 0)
         per_invoice = memo_amount / len(settlement.invoiceIds) if settlement.invoiceIds else 0
         for invoice_id in settlement.invoiceIds:
-            invoice = get_from_store("ap_invoice", invoice_id, repo)
+            invoice = eigener_beleg("ap_invoice", invoice_id, tenant_id, repo)
             if invoice:
                 invoice["openAmount"] = max(0, (invoice.get("openAmount") or invoice.get("totalGross") or 0) - per_invoice)
                 save_to_store("ap_invoice", invoice_id, invoice, repo)
@@ -505,7 +506,7 @@ async def settle_credit_memo(
                                     updated_at = NOW()
                                 WHERE rechnungsnr = :inv_nr AND tenant_id = :tid AND konto_typ = 'kreditoren'
                             """),
-                            {"amt": per_invoice, "inv_nr": invoice_id, "tid": invoice.get("tenantId", "system")},
+                            {"amt": per_invoice, "inv_nr": invoice_id, "tid": tenant_id},
                         )
                         db.commit()
                     except Exception:  # noqa: BLE001 — OP-Update nicht kritisch für Gutschrift-Verrechnung
@@ -555,7 +556,8 @@ async def settle_debit_memo(
         
         # Validiere Rechnungen
         for invoice_id in settlement.invoiceIds:
-            invoice = get_from_store("ap_invoice", invoice_id, repo)
+            # Bis 14.10.2026 ohne Mandant: die Verrechnung minderte offene Betraege und Posten fremder Rechnungen.
+            invoice = eigener_beleg("ap_invoice", invoice_id, tenant_id, repo)
             if not invoice:
                 raise HTTPException(status_code=404, detail=f"Invoice {invoice_id} not found")
             if invoice.get("supplierId") != memo.get("supplierId"):
@@ -576,7 +578,7 @@ async def settle_debit_memo(
         memo_amount = memo.get("amount", 0)
         per_invoice = memo_amount / len(settlement.invoiceIds) if settlement.invoiceIds else 0
         for invoice_id in settlement.invoiceIds:
-            invoice = get_from_store("ap_invoice", invoice_id, repo)
+            invoice = eigener_beleg("ap_invoice", invoice_id, tenant_id, repo)
             if invoice:
                 invoice["openAmount"] = (invoice.get("openAmount") or invoice.get("totalGross") or 0) + per_invoice
                 save_to_store("ap_invoice", invoice_id, invoice, repo)

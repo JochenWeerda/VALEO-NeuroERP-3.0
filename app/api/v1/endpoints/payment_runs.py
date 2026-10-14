@@ -839,7 +839,9 @@ async def execute_payment_run(
             if inv is None:
                 continue  # Imported OP may have no document in this document store.
             invoice_tenant = inv.get("tenantId") or inv.get("tenant_id")
-            if invoice_tenant and invoice_tenant != tenant_id:
+            if not invoice_tenant:
+                continue  # Ohne Mandant gehoert der Beleg niemandem nachweislich; bis 14.10.2026 wurde er BEZAHLT.
+            if invoice_tenant != tenant_id:
                 raise HTTPException(status_code=409, detail="Invoice belongs to another tenant")
             if inv.get("status") == "STORNIERT":
                 raise HTTPException(status_code=409, detail="Cancelled invoice cannot be settled")

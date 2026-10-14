@@ -16,7 +16,7 @@ from app.core.mask_screen_summary_common import (
     build_tab_page,
     format_optional_date,
 )
-from app.documents.router_helpers import get_from_store, get_repository
+from app.documents.router_helpers import eigener_beleg, get_repository
 from app.infrastructure.models import StockMovement as StockMovementModel
 
 
@@ -275,7 +275,7 @@ class MaskRolloutSummaryService:
 
     def _ap_invoice_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
         repo = get_repository(self.db)
-        invoice = get_from_store("ap_invoice", entity_id, repo)
+        invoice = eigener_beleg("ap_invoice", entity_id, self.tenant_id, repo)
         if not invoice:
             raise HTTPException(status_code=404, detail="AP Invoice not found")
         return build_screen_summary_payload(
@@ -313,7 +313,7 @@ class MaskRolloutSummaryService:
         filter_plan: dict | None = None,
     ) -> dict[str, Any]:
         repo = get_repository(self.db)
-        invoice = get_from_store("ap_invoice", entity_id, repo)
+        invoice = eigener_beleg("ap_invoice", entity_id, self.tenant_id, repo)
         if not invoice:
             raise HTTPException(status_code=404, detail="AP Invoice not found")
         if tab_key == "positionen":

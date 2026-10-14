@@ -44,7 +44,8 @@ def post_ap_invoice_kernel_sync(
         logger.debug("PostAPInvoice: keine Rechnung %s", invoice_id)
         return
 
-    inv_tenant = str(invoice.get("tenantId") or invoice.get("tenant_id") or "system")
+    # Ohne Mandant gehoert die Rechnung niemandem; bis 14.10.2026 galt sie als Rechnung des Mandanten "system".
+    inv_tenant = str(invoice.get("tenantId") or invoice.get("tenant_id") or "")
     if inv_tenant != tenant_id:
         logger.warning(
             "PostAPInvoice: Tenant-Mismatch invoice=%s request=%s", inv_tenant, tenant_id

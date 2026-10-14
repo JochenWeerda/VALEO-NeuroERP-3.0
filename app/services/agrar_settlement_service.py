@@ -744,8 +744,8 @@ class AgrarSettlementService:
 
         supplier_name = None
         try:
-            from app.documents.router_helpers import get_from_store, get_repository
-            partner = get_from_store("partner", settlement.supplier_id, get_repository(self.db))
+            from app.documents.router_helpers import eigener_beleg, get_repository
+            partner = eigener_beleg("partner", settlement.supplier_id, self.tenant_id, get_repository(self.db))
             if partner:
                 supplier_name = partner.get("name")
         except Exception:  # noqa: BLE001 — Lieferantenname nicht abrufbar; bleibt None

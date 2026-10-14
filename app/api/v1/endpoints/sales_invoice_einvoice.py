@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.gobd_artifact import GobdArtifactError, register_artifact, sha256_hex
 from app.core.tenant import get_tenant_id
-from app.documents.router_helpers import get_from_store, get_repository
+from app.documents.router_helpers import eigener_beleg, get_repository
 from app.services.einvoice_generator import (
     EInvoiceInput,
     InvoiceLineDict,
@@ -144,13 +144,15 @@ def _invoice_to_einvoice_input(
     }
 
 
-def _load_sales_invoice(db: Session, invoice_number: str) -> dict:
+def _load_sales_invoice(db: Session, invoice_number: str, tenant_id: str) -> dict:
+    """Die Rechnung dieses Mandanten. Bis 14.10.2026 gab es hier keinen Mandanten: Eine fremde Rechnung wurde mit
+    den eigenen Absenderdaten als E-Rechnung erzeugt und im eigenen Archiv festgeschrieben."""
     repo = get_repository(db)
     # Kanonischer Store-Key ist snake_case (siehe documents.router upsert_sales_invoice).
-    invoice_dict = get_from_store("sales_invoice", invoice_number, repo=repo)
+    invoice_dict = eigener_beleg("sales_invoice", invoice_number, tenant_id, repo)
     if not invoice_dict:
         # Legacy-Alias absichern (ältere Aufrufer/Testdaten).
-        invoice_dict = get_from_store("salesInvoice", invoice_number, repo=repo)
+        invoice_dict = eigener_beleg("salesInvoice", invoice_number, tenant_id, repo)
     if not invoice_dict:
         raise HTTPException(status_code=404, detail=f"SalesInvoice {invoice_number} not found")
     return invoice_dict
@@ -204,7 +206,7 @@ def generate_xrechnung(
     Erzeugt eine XRechnung-3.0 (EN 16931, UBL 2.1) für eine bestehende SalesInvoice
     und registriert das XML im GoBD-Artifact-Archiv.
     """
-    invoice_dict = _load_sales_invoice(db, invoice_number)
+    invoice_dict = _load_sales_invoice(db, invoice_number, tenant_id)
     supplier = _resolve_supplier_party(db, tenant_id)
     customer = _resolve_customer_party(db, tenant_id, invoice_dict.get("customerId", ""))
     einvoice_input = _invoice_to_einvoice_input(invoice_dict, supplier, customer, payload)
@@ -243,7 +245,7 @@ def generate_zugferd(
     Erzeugt ZUGFeRD-2.x PDF/A-3 mit eingebettetem CII-XML (Profil EN 16931) und
     registriert das XML zusätzlich im GoBD-Artifact-Archiv.
     """
-    invoice_dict = _load_sales_invoice(db, invoice_number)
+    invoice_dict = _load_sales_invoice(db, invoice_number, tenant_id)
     supplier = _resolve_supplier_party(db, tenant_id)
     customer = _resolve_customer_party(db, tenant_id, invoice_dict.get("customerId", ""))
     einvoice_input = _invoice_to_einvoice_input(invoice_dict, supplier, customer, payload)
@@ -292,7 +294,7 @@ def get_xrechnung(
     Liefert das XRechnung-XML einer bereits generierten Rechnung. Generiert es
     on-the-fly auf Basis der Stammdaten, wenn noch nichts archiviert ist.
     """
-    invoice_dict = _load_sales_invoice(db, invoice_number)
+    invoice_dict = _load_sales_invoice(db, invoice_number, tenant_id)
     supplier = _resolve_supplier_party(db, tenant_id)
     customer = _resolve_customer_party(db, tenant_id, invoice_dict.get("customerId", ""))
     einvoice_input = _invoice_to_einvoice_input(

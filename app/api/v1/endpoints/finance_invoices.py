@@ -25,6 +25,7 @@ from app.finance.steuerschluessel import Steuergruppe, Steuerklaerung, steuergru
 from app.documents.models import SalesInvoice
 from app.documents.router_helpers import (
     delete_from_store,
+    eigener_beleg,
     get_from_store,
     get_repository,
     list_from_store,
@@ -444,7 +445,7 @@ async def storno_invoice(
         # Belegbruch schließen: Rechnungsdokument im Store auf STORNIERT setzen
         try:
             repo = get_repository(db)
-            inv = get_from_store("sales_invoice", invoice_number, repo)
+            inv = eigener_beleg("sales_invoice", invoice_number, tenant_id, repo)
             if inv:
                 inv["status"] = "STORNIERT"
                 save_to_store("sales_invoice", invoice_number, inv, repo)
