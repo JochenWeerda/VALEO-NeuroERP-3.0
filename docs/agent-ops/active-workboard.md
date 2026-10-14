@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## MCP-REST-BINDING-20261014 — reserviert, Codex
+## MCP-REST-BINDING-20261014 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** P0-Vertragsabgleich lesender Process-Kernel-Tools gegen reale REST-Parameter, echte Operation-IDs und CI-Negativtests; schreibende Qualitaetsfreigabe richtig einstufen. **Dateibesitz:** app/core/mcp_tool_contracts.py; neuer app/core/mcp_rest_binding.py; scripts/check_mcp_rest_bindings.py; tests/test_mcp_rest_bindings.py; betroffene MCP-/Broker-Tests; .github/workflows/openapi-drift.yml nur Gate; eigene QA. **Abnahme:** produktive GET-Bindungen gegen erzeugte OpenAPI, unbekannte/fehlende/falsch typisierte Parameter scheitern; Qualitaetsfreigabe unter Write-Sperre. **Risiken:** Versionierte Capability-Freigabe, POST-Payload-Transformationen, ERP-Katalog, CLI, Historienanzeige und Simulation bleiben eigene Folgeschritte. Keine Migration, keine neue DB/Container.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** P0-Vertragsabgleich lesender Process-Kernel-Tools gegen reale REST-Parameter, echte Operation-IDs und CI-Negativtests; schreibende Qualitaetsfreigabe richtig einstufen. **Dateibesitz:** app/core/mcp_tool_contracts.py; neuer app/core/mcp_rest_binding.py; scripts/check_mcp_rest_bindings.py; tests/test_mcp_rest_bindings.py; betroffene MCP-/Broker-Tests; .github/workflows/openapi-drift.yml nur Gate; eigene QA. **Abnahme:** produktive GET-Bindungen gegen erzeugte OpenAPI, unbekannte/fehlende/falsch typisierte Parameter scheitern; Qualitaetsfreigabe unter Write-Sperre. **Risiken:** Versionierte Capability-Freigabe, POST-Payload-Transformationen, ERP-Katalog, CLI, Historienanzeige und Simulation bleiben eigene Folgeschritte. Keine Migration, keine neue DB/Container.
+
+**Lieferung:** Elf REST-Lesebindungen offline und frisch erzeugt geprueft; 127 bestehende und 14 neue Tests bestanden; neues CI-Gate. Qualitaetsfreigabe und Mahnlauf als SCHREIBEN gesperrt; neuro_tool_execution.py sperrt irrefuehrenden Workflow-Instanznachweis vor Transport; sieben geaenderte Toolvertraege Version 2. QA: mcp-rest-binding-20261014.md. POST-/Rechte-/CLI-Gleichwertigkeit und fachlicher Ersatz der drei Workflow-Definitionslisten im Broker bleiben offen.
 
 ## STUDIO-ARTIFACT-VERSION-20261014 — abgeschlossen, Codex
 

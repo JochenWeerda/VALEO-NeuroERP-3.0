@@ -101,6 +101,10 @@ class NeuroToolExecutionService:
             reason = "tenant_required"
         elif context.get("external_base_url"):
             reason = "external_target_not_approved"
+        elif contract.tool_name == "valeo_workflow_instance_status":
+            # Its REST target lists definitions, not instance/delivery/approval
+            # state. Do not let a successful list masquerade as verification.
+            reason = "workflow_instance_contract_not_implemented"
         elif contract.kategorie not in {
             MCPToolKategorie.LESEN, MCPToolKategorie.BERECHNEN, MCPToolKategorie.VALIDIEREN
         }:
