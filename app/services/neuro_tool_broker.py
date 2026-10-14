@@ -558,6 +558,11 @@ class NeuroToolBroker:
         parameters = step.parameters
         if contract.tool_name == "valeo_process_data_quality_validate":
             parameters = self._dq_parameters(step, context)
+        if contract.tool_name in {"valeo_compliance_policy_evaluate", "valeo_workflow_approval_evaluate"}:
+            envelope = "prozess_key" if contract.tool_name == "valeo_compliance_policy_evaluate" else "aktions_typ"
+            if "kontext" not in parameters:
+                parameters = {envelope: parameters.get(envelope) or (context.get("process_key") if envelope == "prozess_key" else step.action),
+                              "kontext": {**dict(context.get("policy_context", {})), **dict(step.parameters), "tenant_id": tenant_id}}
         payload = self._tool_execution_service.execute_contract(
             contract,
             parameters=parameters,

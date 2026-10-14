@@ -246,6 +246,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
     from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
     from app.api.v1.schemas.data_quality_input import DataQualityCheckIn
     from app.api.v1.schemas.slo_input import SloCheckIn
+    from app.api.v1.schemas.advisory_input import PolicyEvaluationIn, ApprovalEvaluationIn
     tools: list[MCPToolContract] = [
 
         # ---------------------------------------------------------------
@@ -466,6 +467,8 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_workflow_approval_evaluate",
+            schema_version=2,
+            input_schema=ApprovalEvaluationIn.model_json_schema(),
             domain="workflow",
             operation="approval_evaluate",
             beschreibung="Bewertet ob eine Agent-Aktion menschliche Freigabe erfordert",
@@ -474,9 +477,8 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             request_payload_mode=MCPRequestPayloadMode.APPROVAL_CONTEXT,
             output_beschreibung="Risikostufe, requires_human_approval, Freigabe-Rolle",
             parameter=[
-                _p_str("aktions_typ", "Typ der geplanten Aktion", True, "SETTLEMENT_FREIGABE"),
-                _p_num("betrag_eur", "Transaktionsbetrag fuer Schwellenwert-Bewertung",
-                        False, minimum=0),
+                _p_str("aktions_typ", "Auszuwertende Aktion", True),
+                MCPToolParameter("kontext", MCPParameterTyp.OBJECT, "Auswertungskontext", True),
             ],
         ),
 
@@ -519,6 +521,8 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_compliance_policy_evaluate",
+            schema_version=2,
+            input_schema=PolicyEvaluationIn.model_json_schema(),
             domain="compliance",
             operation="policy_evaluate",
             beschreibung="Wertet Policy-Regelset gegen einen Prozesskontext aus",
@@ -527,10 +531,9 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             request_payload_mode=MCPRequestPayloadMode.POLICY_CONTEXT,
             output_beschreibung="Wirksame Aktion (ERLAUBT/ABGELEHNT/WARNUNG/ESKALATION) + Treffer-Liste",
             parameter=[
-                _p_str("prozess_key", "Prozess-Key fuer Policy-Lookup", True, "agrar_settlement"),
-                _p_num("brutto_eur", "Transaktionsbetrag EUR", False, minimum=0),
-                _p_num("netto_tonnen", "Nettogewicht Tonnen", False, minimum=0),
-                _p_str("lieferant_typ", "Lieferantentyp (MITGLIED/FREMDBETRIEB)", False),
+                _p_str("prozess_key", "Prozessdefinition", True),
+                MCPToolParameter("kontext", MCPParameterTyp.OBJECT, "Auswertungskontext", True),
+                _p_str("policy_set_id", "Regelset-Auswahl", False),
             ],
         ),
 

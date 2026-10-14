@@ -17,7 +17,7 @@ from app.core.database import get_db
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.nuts2_utils import derive_nuts2_from_postal_code, validate_nuts2_code
 from app.core.tenant import get_tenant_id
-from app.core.security import get_user_id_from_request
+from app.auth.finance_roles import beleg_read, beleg_write
 from app.services.harvest_acceptance_service import (
     HarvestAcceptanceService,
     _quality_protocol_to_qualitaetsprotokoll,
@@ -40,7 +40,7 @@ from app.api.v1.schemas.agrar_schemas import (
 )
 
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(beleg_read)])
 
 ReleaseStatus = Literal["draft", "provisional", "final", "credit_note_created", "paid", "disputed", "cancelled"]
 PricingMode = Literal["fixed_contract", "spot_daily", "exchange_fix_later"]
@@ -305,18 +305,21 @@ def _harvest_acceptance_to_dict_with_positions(acceptance: HarvestAcceptance, db
         result_dict["article_name"] = article_name
     return result_dict
 
-def _get_user_id_from_request(request: Optional[Request]) -> Optional[str]:
-    """Hilfsfunktion zum Extrahieren der User-ID aus Request (für Audit)."""
-    if request is None:
-        return "system"
-    return get_user_id_from_request(request) or "system"
+def _get_user_id_from_request(request: Optional[Request]) -> str:
+    """Only the verified token subject is an audit author."""
+    if request is None or not getattr(request.state, "tenant_verified", False):
+        raise HTTPException(403, "Verified harvest actor required")
+    subject = (getattr(request.state, "token_claims", None) or {}).get("sub")
+    if not isinstance(subject, str) or not subject.strip():
+        raise HTTPException(403, "Verified harvest actor required")
+    return subject.strip()
 
 
 def _svc(db: Session, tenant_id: str) -> HarvestAcceptanceService:
     return HarvestAcceptanceService(db, tenant_id)
 
 
-@router.post("/", response_model=HarvestAcceptanceOut, status_code=201, summary="Harvest acceptance anlegen")
+@router.post("/", dependencies=[Depends(beleg_write)], response_model=HarvestAcceptanceOut, status_code=201, summary="Harvest acceptance anlegen")
 async def create_harvest_acceptance(
     payload: HarvestAcceptanceCreate,
     request: Request,
@@ -379,7 +382,7 @@ async def get_harvest_acceptance(
         raise HTTPException(status_code=404, detail=exc.detail)
 
 
-@router.put("/{acceptance_id}", response_model=HarvestAcceptanceOut, summary="Harvest acceptance aktualisieren")
+@router.put("/{acceptance_id}", dependencies=[Depends(beleg_write)], response_model=HarvestAcceptanceOut, summary="Harvest acceptance aktualisieren")
 async def update_harvest_acceptance(
     acceptance_id: str,
     payload: HarvestAcceptanceUpdate,
@@ -397,7 +400,7 @@ async def update_harvest_acceptance(
         raise HTTPException(status_code=422, detail=exc.detail)
 
 
-@router.delete("/{acceptance_id}", status_code=204, response_class=Response, response_model=None, summary="Harvest acceptance löschen")
+@router.delete("/{acceptance_id}", status_code=204, response_class=Response, dependencies=[Depends(beleg_write)], response_model=None, summary="Harvest acceptance löschen")
 async def delete_harvest_acceptance(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -413,7 +416,7 @@ async def delete_harvest_acceptance(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.post("/{acceptance_id}/calculate", response_model=HarvestSettlementOut, summary="Harvest settlement endpoint berechnen")
+@router.post("/{acceptance_id}/calculate", dependencies=[Depends(beleg_write)], response_model=HarvestSettlementOut, summary="Harvest settlement endpoint berechnen")
 async def calculate_harvest_settlement_endpoint(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -428,7 +431,7 @@ async def calculate_harvest_settlement_endpoint(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.post("/{acceptance_id}/derive-nuts2", response_model=Nuts2DeriveOut, summary="Nuts2 from postal code endpoint derive")
+@router.post("/{acceptance_id}/derive-nuts2", dependencies=[Depends(beleg_write)], response_model=Nuts2DeriveOut, summary="Nuts2 from postal code endpoint derive")
 async def derive_nuts2_from_postal_code_endpoint(
     acceptance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -443,7 +446,7 @@ async def derive_nuts2_from_postal_code_endpoint(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.post("/{acceptance_id}/release", response_model=HarvestAcceptanceOut, summary="Harvest acceptance freigeben")
+@router.post("/{acceptance_id}/release", dependencies=[Depends(beleg_write)], response_model=HarvestAcceptanceOut, summary="Harvest acceptance freigeben")
 async def release_harvest_acceptance(
     acceptance_id: str,
     release_status: ReleaseStatus = Query(..., description="Neuer Freigabe-Status: provisional oder final"),
@@ -454,7 +457,7 @@ async def release_harvest_acceptance(
     db: Session = Depends(get_db),
 ):
     """Ernte-Annahme freigeben (vorläufig oder endgültig)."""
-    user_id = _get_user_id_from_request(request) if request else "system"
+    user_id = _get_user_id_from_request(request)
     try:
         return _svc(db, tenant_id).release_acceptance(
             acceptance_id, release_status, create_stock_movement, create_credit_note, user_id
@@ -465,7 +468,7 @@ async def release_harvest_acceptance(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.post("/{acceptance_id}/cancel", response_model=HarvestAcceptanceOut, summary="Harvest acceptance stornieren")
+@router.post("/{acceptance_id}/cancel", dependencies=[Depends(beleg_write)], response_model=HarvestAcceptanceOut, summary="Harvest acceptance stornieren")
 async def cancel_harvest_acceptance(
     acceptance_id: str,
     reason: str = Query(..., min_length=1, description="Pflichtbegründung für Stornierung"),
@@ -487,7 +490,7 @@ async def cancel_harvest_acceptance(
 # QUALITÄTSPROTOKOLL-INTEGRATION
 # ============================================================================
 
-@router.post("/{acceptance_id}/qualitaetsprotokoll", response_model=QualityProtocolCreateOut, summary="Qualitaetsprotokoll anlegen")
+@router.post("/{acceptance_id}/qualitaetsprotokoll", dependencies=[Depends(beleg_write)], response_model=QualityProtocolCreateOut, summary="Qualitaetsprotokoll anlegen")
 async def create_qualitaetsprotokoll(
     acceptance_id: str,
     data: dict,
@@ -552,7 +555,7 @@ class QualityBatchOut(BaseModel):
     results: list[QualityBatchRowResult]
 
 
-@router.post("/quality-batch", response_model=QualityBatchOut, summary="Qualitätswerte als Batch nachtragen")
+@router.post("/quality-batch", dependencies=[Depends(beleg_write)], response_model=QualityBatchOut, summary="Qualitätswerte als Batch nachtragen")
 async def create_quality_batch(
     payload: QualityBatchIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -611,7 +614,7 @@ async def create_quality_batch(
 # FRACHTKOSTEN-BERECHNUNG
 # ============================================================================
 
-@router.post("/{acceptance_id}/frachtkosten", response_model=FrachtkostenCalculateOut, summary="Frachtkosten berechnen")
+@router.post("/{acceptance_id}/frachtkosten", dependencies=[Depends(beleg_write)], response_model=FrachtkostenCalculateOut, summary="Frachtkosten berechnen")
 async def calculate_frachtkosten(
     acceptance_id: str,
     data: dict,
@@ -665,7 +668,7 @@ async def get_qs_abschlag(
     )
 
 
-@router.post("/{acceptance_id}/qs-protokoll-link", response_model=TypedObjectOut, summary="QS-Protokoll mit Annahme verknüpfen")
+@router.post("/{acceptance_id}/qs-protokoll-link", dependencies=[Depends(beleg_write)], response_model=TypedObjectOut, summary="QS-Protokoll mit Annahme verknüpfen")
 async def link_qs_protokoll(
     acceptance_id: str,
     quality_protocol_id: str = Query(...),

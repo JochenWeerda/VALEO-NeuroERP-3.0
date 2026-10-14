@@ -808,3 +808,7 @@ Lane A (Kern-Lane) und alle abhaengigen Slices implementiert:
 | NC-H4 Channel Ingress | `app/channels/channel_ingress.py` | `/api/v1/channels/route` | `74378078f` |
 
 Alle 8 Neuro-Core Lanes (A-H) jetzt umgesetzt oder teilweise umgesetzt. Einzig NC-G3 (aktive NATS-Handler) steht noch aus (Codex-Aufgabe).
+
+## Studio-Abnahme 2026-10-15
+
+Revisionsgebundener serverseitiger Simulationsnachweis und zentrale Freigabesicherung, native Historie und zwei weitere advisory POST-Vertraege integriert. Das feste grain.v1-Profil prueft dreizehn Invarianten auf dem gemeinsamen Rollback-Pruefstand. Nicht modellierte Prozessvarianten bleiben gesperrt. Positive Browser-Vieraugenabnahme noch freigabeabhaengig; kein systemweiter CI-Abschluss. Nachweis: [Studio-Abschluss](../../quality-assurance/studio-closure-20261015.md).

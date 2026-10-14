@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-13
+last_reviewed: 2026-10-15
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (105 Masken).
+> Generiert aus `app/core/screen_definitions.py` (107 Masken).
 
 ## Übersicht
 
@@ -95,6 +95,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `personal/qualifikationen` | Qualifikationen | hr | niedrig | — | `GET /api/v1/masks/personal/qualifikationen/agent-contract` |
 | `personal/schulungen` | Schulungen | hr | niedrig | — | `GET /api/v1/masks/personal/schulungen/agent-contract` |
 | `planung/kalender` | Planungskalender | platform | mittel | — | `GET /api/v1/masks/planung/kalender/agent-contract` |
+| `platform/studio-history` | Studio-Historie | platform | niedrig | — | `GET /api/v1/masks/platform/studio-history/agent-contract` |
+| `platform/studio-history-diff` | Änderungsvergleich | platform | niedrig | — | `GET /api/v1/masks/platform/studio-history-diff/agent-contract` |
 | `produktion/chargen-bearbeiten` | Chargen-Nummern bearbeiten | inventory | niedrig | — | `GET /api/v1/masks/produktion/chargen-bearbeiten/agent-contract` |
 | `produktion/produktionsleitstand` | Produktionsleitstand | agrar | mittel | — | `GET /api/v1/masks/produktion/produktionsleitstand/agent-contract` |
 | `qualitaet/reklamation` | Reklamation | qualitaet | mittel | `complaint-to-resolution` | `GET /api/v1/masks/qualitaet/reklamation/agent-contract` |
@@ -3551,6 +3553,54 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `reproject` | Neu projizieren | moderate | nein | `/api/v1/planung/kalender/reproject` |
+
+---
+
+### `platform/studio-history` — Studio-Historie
+
+**Zweck:** Versionen, Urheber und Änderungen von Studio-Definitionen nachvollziehen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/platform/studio-history/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/platform/studio-history/agent-contract` |
+| Readiness | `GET /api/v1/masks/platform/studio-history/readiness` |
+| Rollout-Route | `/mask-rollout/platform__studio-history/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `versions` → `/api/v1/studio/drafts/{entity_id}/history-view`
+
+**MCP-Tools (Domäne):**
+
+- `admin.postfach.speichern` — scope `admin:write`, Risiko hoch
+
+**Sensible Felder:** `actor, before, after`
+
+---
+
+### `platform/studio-history-diff` — Änderungsvergleich
+
+**Zweck:** Versionen, Urheber und Änderungen von Studio-Definitionen nachvollziehen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/platform/studio-history-diff/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/platform/studio-history-diff/agent-contract` |
+| Readiness | `GET /api/v1/masks/platform/studio-history-diff/readiness` |
+| Rollout-Route | `/mask-rollout/platform__studio-history-diff/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `comparison` → `/api/v1/studio/history-events/{entity_id}/diff`
+
+**MCP-Tools (Domäne):**
+
+- `admin.postfach.speichern` — scope `admin:write`, Risiko hoch
+
+**Sensible Felder:** `actor, before, after`
 
 ---
 

@@ -1,5 +1,5 @@
 from uuid import uuid4
-from studio_review_helper import publish_reviewed
+from studio_review_helper import publish_reviewed, simulation_ready_definition, simulate_reviewed, record_lifecycle_proof
 """Publication rejects changes made after the server validates a snapshot."""
 from copy import deepcopy
 import pytest
@@ -46,7 +46,8 @@ def test_unchanged_snapshot_publishes(probe):
 @pytest.mark.integration
 def test_sql_rejects_stale_snapshot(studio_db):
     from test_meridian_screen_studio_persistence import _TENANT_A
-    from app.services.studio_propose import propose_studio_draft
+    from app.services.studio_propose import propose_studio_draft as original_proposal
+    propose_studio_draft = lambda intent: simulation_ready_definition(original_proposal(intent))
     record = store.save_draft(_TENANT_A, 'editor', propose_studio_draft('Artikel'))
     changed = deepcopy(record['definition'])
     changed['title'] = 'Neu bearbeitet'
@@ -57,6 +58,7 @@ def test_sql_rejects_stale_snapshot(studio_db):
     assert current['definition'] == changed
     assert current['status'] == 'draft'
     current = store.set_status(_TENANT_A, record['id'], 'new-editor', 'review', expected_snapshot=current)
+    record_lifecycle_proof(current, 'new-editor')
     published = store.set_status(_TENANT_A, record['id'], 'reviewer', 'published_temp', expected_snapshot=current)
     assert published['definition'] == changed
 
@@ -83,7 +85,7 @@ def test_display_revision_expires_after_edit(probe):
     assert rejected.status_code == 409
     fetched = client.post('/studio/drafts/'+record['id']+'/submit-review', json={'expected_revision': updated['revision'], 'idempotency_key': str(uuid4())}).json()
     assert fetched['definition'] == changed
-    assert client.post('/studio/drafts/'+record['id']+'/publish', json={'expected_revision': fetched['revision'], 'idempotency_key': str(uuid4())}).status_code == 200
+    assert publish_reviewed(client,'/studio/drafts/'+record['id']+'/publish').status_code == 200
 
 
 def test_review_is_required_and_edit_invalidates_it(probe):
@@ -102,7 +104,7 @@ def test_review_is_required_and_edit_invalidates_it(probe):
     assert client.post(path+'/submit-review', json={'expected_revision': reviewed.json()['revision'], 'idempotency_key': str(uuid4())}).status_code == 409
     latest = client.post(path+'/submit-review', json={'expected_revision': edited['revision'], 'idempotency_key': str(uuid4())}).json()
     user['sub'] = 'third-person'
-    published = client.post(path+'/publish', json={'expected_revision': latest['revision'], 'idempotency_key': str(uuid4())}).json()
+    published = publish_reviewed(client,path+'/publish').json()
     assert published['status'] == 'published_temp'
     assert client.post(path+'/submit-review', json={'expected_revision': published['revision'], 'idempotency_key': str(uuid4())}).status_code == 409
     assert client.put(path, json={'definition': changed, 'expected_revision': published['revision'], 'idempotency_key': str(uuid4())}).status_code == 409
@@ -118,7 +120,8 @@ def test_review_is_required_and_edit_invalidates_it(probe):
 @pytest.mark.integration
 def test_sql_edit_invalidates_review(studio_db):
     from test_meridian_screen_studio_persistence import _TENANT_A
-    from app.services.studio_propose import propose_studio_draft
+    from app.services.studio_propose import propose_studio_draft as original_proposal
+    propose_studio_draft = lambda intent: simulation_ready_definition(original_proposal(intent))
     record = store.save_draft(_TENANT_A, 'editor', propose_studio_draft('Kunden'))
     reviewed = store.set_status(_TENANT_A, record['id'], 'editor', 'review', expected_snapshot=record)
     changed = deepcopy(reviewed['definition'])
@@ -158,7 +161,8 @@ def test_create_does_not_overwrite_existing_screen(probe):
 @pytest.mark.integration
 def test_sql_revision_conflict_preserves_first_writer(studio_db):
     from test_meridian_screen_studio_persistence import _TENANT_A
-    from app.services.studio_propose import propose_studio_draft
+    from app.services.studio_propose import propose_studio_draft as original_proposal
+    propose_studio_draft = lambda intent: simulation_ready_definition(original_proposal(intent))
     record = store.save_draft(_TENANT_A, 'editor', propose_studio_draft('Artikel'))
     changed = deepcopy(record['definition'])
     changed['title'] = 'Erster Stand'
@@ -172,7 +176,8 @@ def test_sql_revision_conflict_preserves_first_writer(studio_db):
 
 def test_foreign_update_is_hidden_before_revision_comparison(probe):
     client, _ = probe
-    from app.services.studio_propose import propose_studio_draft
+    from app.services.studio_propose import propose_studio_draft as original_proposal
+    propose_studio_draft = lambda intent: simulation_ready_definition(original_proposal(intent))
     foreign = store.save_draft('foreign-tenant', 'foreign-editor', propose_studio_draft('Artikel'))
     response = client.put('/studio/drafts/'+foreign['id'], json={
         'definition': foreign['definition'], 'expected_revision': '0' * 64, 'idempotency_key': str(uuid4())})

@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from app.core.screen_definitions_studio_history import STUDIO_HISTORY_BUILDERS
 from app.core.screen_definitions_identity import IDENTITY_SCREEN_BUILDERS
 from app.core.screen_definitions_kontrolle import KONTROLLE_ROUTEN, KONTROLLE_SCREEN_BUILDERS, KONTROLLE_SYNONYME
 from app.core.mask_rollout_catalog import ROLLOUT_WAVES_42_51
@@ -4485,6 +4486,7 @@ def _build_sanctions_scope_screen_definition(
 
 _SCREEN_DEFINITIONS: dict[str, Any] = {
     **IDENTITY_SCREEN_BUILDERS,
+    **STUDIO_HISTORY_BUILDERS,
     **KONTROLLE_SCREEN_BUILDERS,
     "schnittstelle/legacy-adapter-monitor": lambda: {
         "schemaVersion": 1, "id": "schnittstelle/legacy-adapter-monitor", "domain": "integration", "mode": "list",

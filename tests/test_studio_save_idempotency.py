@@ -6,7 +6,6 @@ from test_studio_token_identity import probe, create
 from test_meridian_screen_studio_persistence import studio_db, _client, _HEADERS_A
 from app.services import studio_draft_store as store
 from app.services.studio_propose import propose_studio_draft
-from testgrenze import pruefstand_erlaubt
 
 
 @pytest.mark.parametrize('mode', ['create', 'update'])
@@ -79,7 +78,7 @@ def test_sql_save_unknown_ack_is_recoverable(studio_db, monkeypatch, mode):
 def test_sql_key_lock_serializes_independent_connections(require_db):
     from sqlalchemy import text
     from app.core.database import engine
-    assert pruefstand_erlaubt(engine.url), "Nur Pruefstand oder CI-Testdatenbank"
+    assert engine.url.database == 'valeo_probe' or 'test' in engine.url.database.lower()
     key = str(uuid4())
     with engine.connect() as first, engine.connect() as second:
         first.execute(text('SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))'), {'key': key})

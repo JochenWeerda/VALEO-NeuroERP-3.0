@@ -231,6 +231,14 @@ class NeuroToolExecutionService:
         context: dict[str, Any],
         tenant_id: str,
     ) -> dict[str, Any]:
+        if contract.tool_name in {"valeo_compliance_policy_evaluate", "valeo_workflow_approval_evaluate"}:
+            from app.api.v1.schemas.advisory_input import PolicyEvaluationIn, ApprovalEvaluationIn
+            from pydantic import ValidationError
+            model = PolicyEvaluationIn if contract.tool_name == "valeo_compliance_policy_evaluate" else ApprovalEvaluationIn
+            try:
+                return model.model_validate(parameters).model_dump(mode="json")
+            except ValidationError:
+                raise HTTPException(422, "Explicit advisory context required") from None
         if contract.tool_name in {"valeo_finance_sla_check", "valeo_process_slo_check"}:
             from app.api.v1.schemas.slo_input import SloCheckIn
             from pydantic import ValidationError

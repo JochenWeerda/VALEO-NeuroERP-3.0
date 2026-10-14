@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-13",
+  "generatedAt": "2026-10-15",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -4271,6 +4271,46 @@
         "title",
         "payload",
         "object_route"
+      ],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
+      "mask_id": "platform/studio-history",
+      "title": "Studio-Historie",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/platform__studio-history/:entityId",
+      "agent_contract_url": "/api/v1/masks/platform/studio-history/agent-contract",
+      "screen_definition_url": "/api/v1/masks/platform/studio-history/screen-definition",
+      "readiness_url": "/api/v1/masks/platform/studio-history/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "actor",
+        "before",
+        "after"
+      ],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
+      "mask_id": "platform/studio-history-diff",
+      "title": "Änderungsvergleich",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/platform__studio-history-diff/:entityId",
+      "agent_contract_url": "/api/v1/masks/platform/studio-history-diff/agent-contract",
+      "screen_definition_url": "/api/v1/masks/platform/studio-history-diff/screen-definition",
+      "readiness_url": "/api/v1/masks/platform/studio-history-diff/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [
+        "actor",
+        "before",
+        "after"
       ],
       "mcp_tool_ids": [
         "admin.postfach.speichern"

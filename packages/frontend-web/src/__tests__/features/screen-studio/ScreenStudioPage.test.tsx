@@ -41,6 +41,7 @@ describe('ScreenStudioPage', () => {
   beforeEach(() => {
     getMock.mockResolvedValue({
       data: {
+        permissions: { canDesign: true, canPublish: true },
         floorplans: ['worklist', 'objectPage'],
         fieldTypes: ['text'],
         columnNavigation: ['single', 'listDetail'],
@@ -53,7 +54,7 @@ describe('ScreenStudioPage', () => {
         return {
           data: {
             violations: [],
-            canPublish: true,
+            canPublish: true, definitionReady: true,
             readiness: { generatorReady: true, errors: [] },
             definition: {
               schemaVersion: 1,
@@ -67,7 +68,7 @@ describe('ScreenStudioPage', () => {
           },
         }
       }
-      return { data: { violations: [], canPublish: true, readiness: { generatorReady: true, errors: [] } } }
+      return { data: { violations: [], canPublish: true, definitionReady: true, readiness: { generatorReady: true, errors: [] } } }
     })
   })
 
@@ -78,7 +79,7 @@ describe('ScreenStudioPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Aus Absicht erzeugen' }))
     await waitFor(() => expect(screen.getByDisplayValue('Kunden-Arbeitsliste')).toBeInTheDocument())
     expect(screen.getByTestId('studio-preview')).toBeInTheDocument()
-    expect(screen.getByTestId('studio-gates')).toHaveTextContent('Publish möglich')
+    expect(screen.getByTestId('studio-gates')).toHaveTextContent('Freigabe gesperrt')
     expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
   })
 
@@ -86,7 +87,7 @@ describe('ScreenStudioPage', () => {
     postMock.mockImplementation(async () => ({
       data: {
         violations: ['action_confirmation_fehlt:stornieren'],
-        canPublish: false,
+        canPublish: false, definitionReady: false,
         readiness: { generatorReady: false, errors: [] },
       },
     }))
@@ -98,15 +99,20 @@ describe('ScreenStudioPage', () => {
   it('requires saving local changes before review or publication', async () => {
     const response = async (url: string, body: { definition?: unknown }) => ({ data: {
       id: 'draft-a', status: url.endsWith('/submit-review') ? 'review' : 'draft', revision: 'revision-a', definition: body.definition,
-      violations: [], canPublish: true, readiness: { errors: [] },
+      violations: [], canPublish: true, definitionReady: true, readiness: { errors: [] },
+      simulation: { passed: true, candidate_revision: 'revision-a', profile: 'grain.v1' },
     } })
     postMock.mockImplementation(response)
     putMock.mockImplementation(response)
     renderStudio()
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Speichern' })).toBeEnabled())
     fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
     await waitFor(() => expect(screen.getByRole('button', { name: 'Prüfung' })).toBeEnabled())
     expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Prüfung' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Prozess simulieren' })).toBeEnabled())
+    expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Prozess simulieren' }))
     await waitFor(() => expect(screen.getByRole('button', { name: 'Freigeben' })).toBeEnabled())
     fireEvent.change(screen.getByLabelText('Titel'), { target: { value: 'Ungespeicherter Entwurf' } })
     expect(screen.getByRole('button', { name: 'Prüfung' })).toBeDisabled()
@@ -127,16 +133,19 @@ describe('ScreenStudioPage', () => {
     const definition = { ...emptyStudioDraft(), title: 'Entwurf einer anderen Person' }
     const record = { id: 'draft-review', status: 'review', revision: 'loaded-revision', definition }
     getMock.mockImplementation(async (url: string) => ({ data:
-      url.endsWith('/drafts') ? { drafts: [record] } : url.endsWith('/draft-review') ? record : { floorplans: ['worklist'] },
+      url.endsWith('/drafts') ? { drafts: [record] } : url.endsWith('/draft-review') ? record : { floorplans: ['worklist'], permissions: { canDesign: true, canPublish: true } },
     }))
     postMock.mockImplementation(async (url: string, body: { definition?: unknown }) => ({ data:
-      url.endsWith('/publish') ? { ...record, status: 'published_temp', violations: [], canPublish: true, readiness: { errors: [] } }
-        : { definition: body.definition, violations: [], canPublish: true, readiness: { errors: [] } },
+      url.endsWith('/simulate') ? { ...record, simulation: { passed: true, candidate_revision: record.revision, profile: 'grain.v1' } } : url.endsWith('/publish') ? { ...record, status: 'published_temp', violations: [], canPublish: true, definitionReady: true, readiness: { errors: [] } }
+        : { definition: body.definition, violations: [], canPublish: true, definitionReady: true, readiness: { errors: [] } },
     }))
     renderStudio()
     await screen.findByRole('option', { name: 'Entwurf einer anderen Person (review)' })
     fireEvent.change(screen.getByLabelText('Gespeicherten Entwurf öffnen'), { target: { value: 'draft-review' } })
     await waitFor(() => expect(screen.getByDisplayValue('Entwurf einer anderen Person')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Prozess simulieren' })).toBeEnabled())
+    expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Prozess simulieren' }))
     await waitFor(() => expect(screen.getByRole('button', { name: 'Freigeben' })).toBeEnabled())
     fireEvent.click(screen.getByRole('button', { name: 'Freigeben' }))
     await waitFor(() => expect(postMock).toHaveBeenCalledWith('/api/v1/studio/drafts/draft-review/publish', { expected_revision: 'loaded-revision', idempotency_key: expect.any(String) }))

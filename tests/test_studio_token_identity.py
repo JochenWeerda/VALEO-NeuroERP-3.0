@@ -1,5 +1,5 @@
 from uuid import uuid4
-from studio_review_helper import publish_reviewed
+from studio_review_helper import publish_reviewed, simulation_ready_definition
 """Explicit HTTP identity doubles; no production authentication override."""
 import pytest
 from fastapi import FastAPI
@@ -26,7 +26,7 @@ def probe():
 
 def create(client):
     response = client.post('/studio/drafts', headers={'X-Actor-ID': 'forged-actor'},
-                           json={'definition': propose_studio_draft('Kunden'), 'idempotency_key': str(uuid4())})
+                           json={'definition': simulation_ready_definition(propose_studio_draft('Kunden')), 'idempotency_key': str(uuid4())})
     assert response.status_code == 200, response.text
     return response.json()
 
@@ -77,7 +77,7 @@ def test_review_submission_cannot_relabel_the_content_editor(probe):
 def test_missing_verified_subject_cannot_create_a_draft(probe):
     client, user = probe
     user['sub'] = ''
-    response = client.post('/studio/drafts', json={'definition': propose_studio_draft('Kunden'), 'idempotency_key': str(uuid4())})
+    response = client.post('/studio/drafts', json={'definition': simulation_ready_definition(propose_studio_draft('Kunden')), 'idempotency_key': str(uuid4())})
     assert response.status_code == 403
     assert store.list_drafts('studio-test-tenant') == []
 

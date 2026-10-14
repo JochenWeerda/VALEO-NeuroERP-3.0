@@ -5,6 +5,8 @@ export interface StudioReport {
   violations: string[]
   readiness: { generatorReady?: boolean; errors?: string[]; warnings?: string[] }
   canPublish: boolean
+  definitionReady: boolean
+  requiresSimulation?: boolean
   definition: ScreenDefinition
 }
 
@@ -28,6 +30,7 @@ export async function fetchStudioDraft(id: string): Promise<StudioDraftRecord> {
 export async function fetchStudioCatalog() {
   const response = await apiClient.get('/api/v1/studio/catalog')
   return response.data as {
+    permissions: { canDesign: boolean; canPublish: boolean }
     floorplans: string[]
     fieldTypes: string[]
     columnNavigation: string[]
@@ -88,4 +91,25 @@ export async function publishStudioDraft(draftId: string, expectedRevision: stri
 
 export function studioRunPath(screenId: string) {
   return `/studio/run/${screenId.replace(/\//g, '__')}`
+}
+
+
+export interface StudioSimulationResult {
+  passed: boolean
+  candidate_revision: string
+  profile: string | null
+  failed_checks?: string[]
+  error?: string
+}
+
+export async function simulateStudioDraft(draftId: string, expectedRevision: string) {
+  const response = await apiClient.post(`/api/v1/studio/drafts/${encodeURIComponent(draftId)}/simulate`, {
+    expected_revision: expectedRevision, idempotency_key: statusKey('simulation', draftId, expectedRevision),
+  })
+  // An acknowledged simulation is complete. A deliberate new attempt gets a new
+  // key, while a transport failure keeps the key for recovery of the same attempt.
+  const intent = `valeo.studio.status:simulation:${draftId}:${expectedRevision}`
+  statusKeys.delete(intent)
+  try { sessionStorage.removeItem(intent) } catch { /* client-memory key was cleared */ }
+  return response.data as StudioDraftRecord & { simulation: StudioSimulationResult }
 }

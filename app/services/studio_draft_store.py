@@ -62,6 +62,11 @@ def invalidate_studio_table_cache() -> None:
 
 def _with_revision(item: dict[str, Any]) -> dict[str, Any]:
     record = deepcopy(item)
+    if record.get("updated_at"):
+        stamp = datetime.fromisoformat(record["updated_at"])
+        if stamp.tzinfo is None:
+            stamp = stamp.replace(tzinfo=UTC)
+        record["updated_at"] = stamp.astimezone(UTC).isoformat()
     bound = {key: record.get(key) for key in (
         "id", "tenant_id", "definition", "updated_at", "updated_by", "status"
     )}
@@ -223,8 +228,13 @@ def set_status(
         _assert_snapshot(item, expected_snapshot)
         _assert_transition(item["status"], status)
         _assert_four_eyes(item["updated_by"], actor, status)
+        if status == "published_temp":
+            from app.core.studio_release import require_simulation
+            proof = require_simulation(_with_revision(item), _HISTORY)
         previous = _with_revision(item)["revision"]
         item = deepcopy(item)
+        if status == "published_temp":
+            item["readiness"] = {**(item.get("readiness") or {}), "release_evidence": deepcopy(proof)}
         item["status"] = status
         if status != "review":
             item["updated_by"] = actor
@@ -248,9 +258,11 @@ def get_published_definition(tenant_id: str, screen_id: str) -> dict[str, Any] |
 def list_published_definitions(tenant_id: str) -> list[dict[str, Any]]:
     if _prefer_memory:
         with _memory_lock:
-            return [deepcopy(item["definition"]) for item in _DRAFTS.values()
+            from app.core.studio_release import published_definition
+            return [definition for item in _DRAFTS.values()
                     if item["tenant_id"] == tenant_id and item["status"] == "published_temp"
-                    and item.get("screen_id") and not _is_native(item["screen_id"])]
+                    and item.get("screen_id") and not _is_native(item["screen_id"])
+                    if (definition := published_definition(item)) is not None]
     return [definition for definition in _sql_list_published(tenant_id)
             if definition.get("id") and not _is_native(str(definition["id"]))]
 
@@ -281,7 +293,8 @@ def _memory_published(tenant_id: str, screen_id: str) -> dict[str, Any] | None:
             and item["screen_id"] == screen_id
             and item["status"] == "published_temp"
         ):
-            return deepcopy(item["definition"])
+            from app.core.studio_release import published_definition
+            return published_definition(item)
     return None
 
 
@@ -371,6 +384,10 @@ def _sql_session() -> Session:
 
 def _row_to_dict(row: Any) -> dict[str, Any]:
     updated = row.updated_at
+    if isinstance(updated, datetime):
+        if updated.tzinfo is None:
+            updated = updated.replace(tzinfo=UTC)
+        updated = updated.astimezone(UTC)
     updated_s = updated.isoformat() if hasattr(updated, "isoformat") else str(updated)
     return {
         "id": row.id,
@@ -501,6 +518,12 @@ def _sql_set_status(
         _assert_snapshot(_row_to_dict(row), expected_snapshot)
         _assert_transition(row.status, status)
         _assert_four_eyes(row.updated_by, actor, status)
+        if status == "published_temp":
+            from app.core.studio_release import require_simulation
+            from app.infrastructure.models.studio_models import ScreenDefinitionHistory
+            entries = session.query(ScreenDefinitionHistory).filter_by(tenant_id=tenant_id, draft_id=draft_id, action="simulation").order_by(ScreenDefinitionHistory.recorded_at, ScreenDefinitionHistory.id).all()
+            proof = require_simulation(_with_revision(_row_to_dict(row)), [{"action": e.action, "snapshot": e.snapshot} for e in entries])
+            row.readiness = {**(row.readiness or {}), "release_evidence": deepcopy(proof)}
         previous = _with_revision(_row_to_dict(row))["revision"]
         row.status = status
         if status != "review":
@@ -535,7 +558,8 @@ def _sql_published(tenant_id: str, screen_id: str) -> dict[str, Any] | None:
         )
         if row is None or not isinstance(row.definition, dict):
             return None
-        return deepcopy(row.definition)
+        from app.core.studio_release import published_definition
+        return published_definition(_row_to_dict(row))
     finally:
         session.close()
 
@@ -550,7 +574,9 @@ def _sql_list_published(tenant_id: str) -> list[dict[str, Any]]:
             .filter_by(tenant_id=tenant_id, status="published_temp")
             .all()
         )
-        return [deepcopy(row.definition) for row in rows if isinstance(row.definition, dict)]
+        from app.core.studio_release import published_definition
+        return [definition for row in rows if isinstance(row.definition, dict)
+                if (definition := published_definition(_row_to_dict(row))) is not None]
     finally:
         session.close()
 
@@ -562,6 +588,88 @@ def clear_sql_studio_drafts() -> None:
     try:
         session.execute(text("DELETE FROM domain_shared.screen_definition_drafts"))
         session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+
+@_durable_operation
+def history_event(tenant_id: str, draft_id: str | None, *, event_id: str | None = None, revision: str | None = None):
+    if _prefer_memory:
+        with _memory_lock:
+            matches = [entry for entry in _HISTORY if entry["tenant_id"] == tenant_id and (draft_id is None or entry["draft_id"] == draft_id)
+                       and ((event_id is not None and entry["id"] == event_id) or
+                            (revision is not None and entry["revision"] == revision))]
+            return deepcopy(matches[-1]) if matches else None
+    from app.infrastructure.models.studio_models import ScreenDefinitionHistory
+    session = _sql_session()
+    try:
+        query = session.query(ScreenDefinitionHistory).filter_by(tenant_id=tenant_id)
+        if draft_id is not None: query = query.filter_by(draft_id=draft_id)
+        if event_id is not None: query = query.filter_by(id=event_id)
+        elif revision is not None: query = query.filter_by(revision=revision)
+        else: return None
+        row = query.order_by(ScreenDefinitionHistory.recorded_at.desc(), ScreenDefinitionHistory.id.desc()).first()
+        return {"id": row.id, "draft_id": row.draft_id, "actor": row.actor, "action": row.action, "revision": row.revision,
+                "previous_revision": row.previous_revision, "snapshot": deepcopy(row.snapshot),
+                "recorded_at": row.recorded_at.isoformat()} if row else None
+    finally:
+        session.close()
+
+
+@_durable_operation
+def count_history(tenant_id: str, draft_id: str) -> int:
+    if _prefer_memory:
+        with _memory_lock:
+            return sum(entry["tenant_id"] == tenant_id and entry["draft_id"] == draft_id for entry in _HISTORY)
+    from app.infrastructure.models.studio_models import ScreenDefinitionHistory
+    session = _sql_session()
+    try:
+        return session.query(ScreenDefinitionHistory).filter_by(tenant_id=tenant_id, draft_id=draft_id).count()
+    finally:
+        session.close()
+
+
+@_durable_operation
+def simulate_draft(tenant_id: str, draft_id: str, actor: str, revision: str, key: str):
+    """Only this trusted server execution may persist release evidence."""
+    from app.core.studio_release import simulate_candidate
+    if _prefer_memory:
+        with _memory_lock:
+            replay = get_status_replay(tenant_id, draft_id, actor, "simulation", revision, key)
+            if replay is not None:
+                return replay
+            item = get_draft(tenant_id, draft_id)
+            if item is None:
+                raise KeyError(draft_id)
+            if item["revision"] != revision:
+                raise ValueError("entwurf_seit_anzeige_geaendert")
+            if item["status"] != "review":
+                raise ValueError("simulation_erfordert_review")
+            snapshot = {**item, "simulation": simulate_candidate(item)}
+            _HISTORY.append(_history_entry(snapshot, actor, "simulation", revision, key))
+            return deepcopy(snapshot)
+    from app.infrastructure.models.studio_models import ScreenDefinitionDraft
+    session = _sql_session()
+    try:
+        session.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"), {"key": key})
+        replay = _sql_replay(session, key, tenant_id, draft_id, actor, "simulation", revision)
+        if replay is not None:
+            return replay
+        row = session.query(ScreenDefinitionDraft).filter_by(id=draft_id, tenant_id=tenant_id).with_for_update().one_or_none()
+        if row is None:
+            raise KeyError(draft_id)
+        item = _with_revision(_row_to_dict(row))
+        if item["revision"] != revision:
+            raise ValueError("entwurf_seit_anzeige_geaendert")
+        if item["status"] != "review":
+            raise ValueError("simulation_erfordert_review")
+        snapshot = {**item, "simulation": simulate_candidate(item)}
+        _append_sql_history(session, snapshot, actor, "simulation", revision, key)
+        session.commit()
+        return snapshot
     except Exception:
         session.rollback()
         raise
