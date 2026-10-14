@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints.personal import _calendar_event_from_row
 from app.core.database import get_db
-from main import app
+from app.main import app
 
 
 _HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "tenant-calendar"}

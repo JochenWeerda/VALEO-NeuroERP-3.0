@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints.personal import router
 from app.services.personal_service import PersonalService
+from testgrenze import ALLE_FACHROLLEN, ersetze_bearer, ersetze_mandant
 
 def build_hrm_operating_system_contract():
     return PersonalService.build_hrm_operating_system()
@@ -12,6 +13,8 @@ def build_hrm_operating_system_contract():
 
 _HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "tenant-hrm"}
 _APP = FastAPI()
+ersetze_mandant(_APP)
+ersetze_bearer(_APP, *ALLE_FACHROLLEN)
 _APP.include_router(router, prefix="/api/v1")
 
 

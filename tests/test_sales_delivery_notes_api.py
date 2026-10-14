@@ -7,7 +7,7 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from main import app
+from app.main import app
 from conftest import skip_if_db_unavailable
 from app.api.v1.endpoints.sales_delivery_notes import (
     _get_user_id_from_request,

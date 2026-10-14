@@ -41,9 +41,25 @@ def schema() -> str:
     return json.dumps(daten, ensure_ascii=False, indent=1, sort_keys=True) + "\n"
 
 
+# Zuletzt fachlich geprueft — von Hand nachziehen, wenn jemand die Uebersicht durchsieht (Doku-Staleness-Gate).
+# Kein Tagesdatum: sonst waere ``--check`` jeden Tag rot.
+GEPRUEFT_AM = "2026-10-15"
+
+
 def uebersicht() -> str:
     ja = lambda wert: "ja" if wert else "nein"  # noqa: E731
     z = [
+        "---",
+        "title: Belegvertrag",
+        "type: reference",
+        "audience: [entwickler, integrator, agent]",
+        "owner: Codex",
+        "status: aktiv",
+        f"last_reviewed: {GEPRUEFT_AM}",
+        f"version: {VERTRAGSVERSION}.0",
+        "description: Eine Form fuer alle Belegarten — Varianten, Bausteine und Abbildung der bisherigen Feldnamen.",
+        "---",
+        "",
         "# Belegvertrag",
         "",
         "Erzeugt von `scripts/generate_belegvertrag.py` aus `app/core/belegvertrag.py`. Nicht von Hand ändern.",

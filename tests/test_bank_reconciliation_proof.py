@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.api.v1.endpoints import bank_accounts, bank_reconciliation
 from app.auth.deps import get_current_user
 from app.core.database import get_db
+from testgrenze import ALLE_FACHROLLEN, ersetze_bearer, ersetze_mandant, pruefstand_erlaubt
 
 
 @pytest.fixture(scope="module")
@@ -21,7 +22,7 @@ def schema():
     if not raw:
         pytest.skip("Existing shared test PostgreSQL required")
     url = make_url(raw)
-    assert url.database == "valeo_probe" or "test" in url.database.lower()
+    assert pruefstand_erlaubt(url), "Nur Pruefstand oder CI-Testdatenbank"
     engine = create_engine(url)
     name = "bankproof_" + uuid4().hex
     tables = ("bank_accounts", "chart_of_accounts", "bank_statements", "bank_statement_lines",
@@ -88,6 +89,8 @@ def case(schema, request):
         {"id": line, "t": tenant, "s": statement})
     db.commit()
     app = FastAPI()
+    ersetze_mandant(app)
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(bank_accounts.router)
     app.include_router(bank_reconciliation.router)
     app.dependency_overrides[get_db] = lambda: db

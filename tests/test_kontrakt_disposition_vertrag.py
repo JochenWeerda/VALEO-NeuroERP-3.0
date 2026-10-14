@@ -140,16 +140,28 @@ def bestand(engine):
 def client(engine):
     from fastapi.testclient import TestClient
 
+    from app.main import app
+
+    mandant = TestClient(app, raise_server_exceptions=False)
+    yield mandant
+
+
+_PRUEFER = {"sub": "pruefer", "roles": ["KONTRAKT_BEARBEITEN", "KONTRAKT_LESEN", "KONTRAKT_ADMIN"]}
+
+
+@pytest.fixture(autouse=True)
+def _pruefer():
+    """Je Test nach der conftest-Identitaet (admin) setzen — sonst ueberschreibt diese die Kontraktrollen."""
     from app.auth.deps import get_current_user
     from app.main import app
 
-    app.dependency_overrides[get_current_user] = lambda: {
-        "sub": "pruefer",
-        "roles": ["KONTRAKT_BEARBEITEN", "KONTRAKT_LESEN", "KONTRAKT_ADMIN"],
-    }
-    mandant = TestClient(app, raise_server_exceptions=False)
-    yield mandant
-    app.dependency_overrides.pop(get_current_user, None)
+    vorher = app.dependency_overrides.get(get_current_user)
+    app.dependency_overrides[get_current_user] = lambda: dict(_PRUEFER)
+    yield
+    if vorher is None:
+        app.dependency_overrides.pop(get_current_user, None)
+    else:
+        app.dependency_overrides[get_current_user] = vorher
 
 
 def kopf(haus: str) -> dict[str, str]:
@@ -533,7 +545,7 @@ def _als_personalbuero():
     @contextmanager
     def angemeldet():
         app.dependency_overrides[deps.get_current_user] = lambda: {
-            "sub": "5f0c2a9e-0b7d-4e55-9d0e-1c2a3b4c5d6e", "name": "t.de-vries", "roles": list(deps._DEV_ROLES)}
+            "sub": "5f0c2a9e-0b7d-4e55-9d0e-1c2a3b4c5d6e", "name": "t.de-vries", "roles": ["KONTRAKT_BEARBEITEN", "KONTRAKT_LESEN", "KONTRAKT_ADMIN"]}
         try:
             yield
         finally:

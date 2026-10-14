@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints.personal import _work_plan_findings_for_assignment, PlanningPreferenceOut, WorkPlanAssignmentOut
 from app.core.database import get_db
-from main import app
+from app.main import app
 
 
 _HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "tenant-work-plan"}

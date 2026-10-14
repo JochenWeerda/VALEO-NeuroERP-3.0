@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from uuid import uuid4
-from studio_review_helper import publish_reviewed
+from studio_review_helper import publish_reviewed, simulation_ready_definition
 
 import pytest
 from fastapi.testclient import TestClient
@@ -11,7 +11,10 @@ from app.main import app
 from app.auth.deps import get_current_user
 from app.core.screen_definitions import get_screen_definition
 from app.services.studio_draft_store import reset_studio_drafts, save_draft, set_status
-from app.services.studio_propose import propose_studio_draft
+from app.services.studio_propose import propose_studio_draft as original_proposal
+
+def propose_studio_draft(intent):
+    return simulation_ready_definition(original_proposal(intent))
 from app.services.studio_validation import validate_studio_draft
 
 pytestmark = pytest.mark.unit
@@ -60,7 +63,9 @@ def test_propose_builds_tenant_worklist() -> None:
     assert body["definition"]["id"].startswith("tenant/")
     assert body["definition"]["layout"]["columnNavigation"] == "listDetail"
     assert body["violations"] == []
-    assert body["canPublish"] is True
+    assert body["definitionReady"] is True
+    assert body["canPublish"] is False
+    assert body["requiresSimulation"] is True
 
 
 def test_validate_rejects_foreign_endpoint() -> None:
@@ -167,7 +172,8 @@ def test_native_screen_is_never_shadowed_by_studio_draft() -> None:
         {**propose_studio_draft("Kunden"), "id": "crm/customer-360"},
     )
     set_status(tenant_id, poisoned["id"], "anna", "review")
-    set_status(tenant_id, poisoned["id"], "berta", "published_temp")
+    with pytest.raises(ValueError, match="studio_definition_nicht_freigabefaehig"):
+        set_status(tenant_id, poisoned["id"], "berta", "published_temp")
     still_native = get_screen_definition("crm/customer-360", tenant_id=tenant_id)
     assert still_native is not None
     assert still_native["adapter"]["temporary"] is False

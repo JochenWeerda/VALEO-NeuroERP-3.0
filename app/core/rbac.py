@@ -103,11 +103,9 @@ def get_user_roles(request: Request) -> List[str]:
         return []
     
     claims = request.state.token_claims
-    
-    # Dev token
-    if claims.get('token_type') == 'dev':
-        return [Role.ADMIN]  # Dev token has admin access
-    
+
+    # Bis 14.10.2026 gab ein Claim ``token_type == "dev"`` hier Admin-Rechte; Dev-Tokens gibt es seit 12.10.2026
+    # nicht mehr, Rollen kommen nur aus dem signierten Provider-Token.
     # OIDC token - extract roles from claims
     roles = claims.get('roles', [])
     if isinstance(roles, str):
@@ -190,11 +188,7 @@ def get_tenant_id(request: Request) -> Optional[str]:
         return None
     
     claims = request.state.token_claims
-    
-    # Dev token
-    if claims.get('token_type') == 'dev':
-        return 'system'
-    
+
     # OIDC token
     return claims.get('tenant_id') or claims.get('tid')
 

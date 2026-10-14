@@ -34,6 +34,8 @@ def _stub_get(db, return_val):
     # Use a flexible mock that returns the same thing for any filter chain
     q = MagicMock()
     q.filter.return_value = q
+    q.with_for_update.return_value = q
+    q.populate_existing.return_value = q
     q.first.return_value = return_val
     q.order_by.return_value = q
     q.limit.return_value = q

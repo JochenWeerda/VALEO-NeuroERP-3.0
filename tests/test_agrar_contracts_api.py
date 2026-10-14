@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 import pytest
 from fastapi.testclient import TestClient
 
-from main import app
+from app.main import app
 from conftest import skip_if_db_unavailable
 from app.services.agrar_contract_service import (
     _compute_status,

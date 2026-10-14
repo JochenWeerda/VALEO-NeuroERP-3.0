@@ -32,6 +32,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from main import app  # noqa: E402  (projektrelativ via sys.path)
+from app.main import app as test_app  # noqa: E402
 
 sys.path.insert(0, os.path.join(_PROJECT_ROOT, "tests"))
 from conftest import skip_if_db_unavailable  # noqa: E402
@@ -49,6 +50,9 @@ _NO_AUTH_HEADERS: dict = {}
 _TENANT_ONLY_HEADERS = {"X-Tenant-ID": "test-tenant"}
 
 _CLIENT = TestClient(app, raise_server_exceptions=False)
+# Angemeldete Fachpruefungen: Test-App app.main mit der Testidentitaet des conftest (seit 12.10.2026 gibt es
+# keinen Dev-Token an der Produktions-App). Pruefungen ohne Anmeldung laufen weiter gegen main:app.
+_AUTH_CLIENT = TestClient(test_app, raise_server_exceptions=False)
 
 
 # ---------------------------------------------------------------------------
@@ -150,7 +154,7 @@ class TestContentType:
     @pytest.mark.parametrize("path", _GET_ENDPOINTS_200)
     def test_content_type_is_json(self, path: str):
         """TC-API-002: {path} liefert Content-Type application/json."""
-        resp = _CLIENT.get(path, headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get(path, headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         # Nicht-200er überspringen (Routing/Stub-Endpoints liefern ggf. 404 wenn keine DB)
         if resp.status_code == 404:
@@ -175,8 +179,8 @@ class TestTenantIsolation:
         """TC-API-003a: GET /kontrakt-klassen — unterschiedliche Tenants liefern isolierte Daten."""
         headers_a = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "tenant-a"}
         headers_b = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "tenant-b"}
-        resp_a = _CLIENT.get("/api/v1/kontrakt-klassen", headers=headers_a)
-        resp_b = _CLIENT.get("/api/v1/kontrakt-klassen", headers=headers_b)
+        resp_a = _AUTH_CLIENT.get("/api/v1/kontrakt-klassen", headers=headers_a)
+        resp_b = _AUTH_CLIENT.get("/api/v1/kontrakt-klassen", headers=headers_b)
         skip_if_db_unavailable(resp_a)
         skip_if_db_unavailable(resp_b)
         assert resp_a.status_code in (200, 204)
@@ -186,13 +190,13 @@ class TestTenantIsolation:
 
     def test_gelangensbestaetigung_tenant_isolation(self):
         """TC-API-003b: GET /gelangensbestaetigung — X-Tenant-ID wird durchgereicht."""
-        resp = _CLIENT.get("/api/v1/gelangensbestaetigung", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/gelangensbestaetigung", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 204)
 
     def test_missing_tenant_header_on_tenant_scoped_endpoint(self):
         """TC-API-003c: Tenant-scoped Endpoints ohne X-Tenant-ID liefern 400 oder nutzen Default."""
-        resp = _CLIENT.get(
+        resp = _AUTH_CLIENT.get(
             "/api/v1/kontrakt-klassen",
             headers={"Authorization": "Bearer dev-token"},
         )
@@ -204,7 +208,7 @@ class TestTenantIsolation:
 
     def test_sanctions_tenant_isolation(self):
         """TC-API-003d: GET /compliance/sanctions/eintraege — Tenant-Kontext wird via Header gesetzt."""
-        resp = _CLIENT.get("/api/v1/compliance/sanctions/eintraege", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/compliance/sanctions/eintraege", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 204)
 
@@ -218,7 +222,7 @@ class TestResponseShape:
 
     def test_kontrakt_klassen_returns_list(self):
         """TC-API-004a: GET /kontrakt-klassen → JSON-Array."""
-        resp = _CLIENT.get("/api/v1/kontrakt-klassen", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/kontrakt-klassen", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code == 200
         data = resp.json()
@@ -227,7 +231,7 @@ class TestResponseShape:
     def test_kontrakt_hedging_returns_list(self):
         """TC-API-004b: GET /kontrakt-hedging/{id}/hedges — Hedging-Route erfordert kontrakt_id."""
         # Route: /api/v1/kontrakt-hedging/{kontrakt_id}/hedges — kein List-Endpoint ohne ID
-        resp = _CLIENT.get("/api/v1/kontrakt-hedging/1/hedges", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/kontrakt-hedging/1/hedges", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 404), (
             f"TC-API-004b: Erwarte 200 (mit Daten) oder 404 (kein Kontrakt), bekam {resp.status_code}"
@@ -235,7 +239,7 @@ class TestResponseShape:
 
     def test_gelangensbestaetigung_returns_list_or_paged(self):
         """TC-API-004c: GET /gelangensbestaetigung → Array oder paginiertes Objekt."""
-        resp = _CLIENT.get("/api/v1/gelangensbestaetigung", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/gelangensbestaetigung", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code == 200
         data = resp.json()
@@ -250,7 +254,7 @@ class TestResponseShape:
 
     def test_sanctions_list_returns_list_or_paged(self):
         """TC-API-004d: GET /compliance/sanctions/eintraege → Array oder paginiertes Objekt."""
-        resp = _CLIENT.get("/api/v1/compliance/sanctions/eintraege", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/compliance/sanctions/eintraege", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code == 200
         data = resp.json()
@@ -258,7 +262,7 @@ class TestResponseShape:
 
     def test_nve_list_returns_paginated(self):
         """TC-API-004e: GET /nve/ → PaginatedResponse mit 'items' und 'total'."""
-        resp = _CLIENT.get("/api/v1/nve/", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/nve/", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code == 200
         data = resp.json()
@@ -268,7 +272,7 @@ class TestResponseShape:
 
     def test_inventory_counts_returns_list_or_paged(self):
         """TC-API-004f: GET /inventory/counts → Liste oder paginiertes Objekt."""
-        resp = _CLIENT.get("/api/v1/inventory/counts", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/inventory/counts", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 204)
         if resp.status_code == 200:
@@ -277,7 +281,7 @@ class TestResponseShape:
 
     def test_weighing_tickets_returns_list_or_paged(self):
         """TC-API-004g: GET /weighing-tickets → Liste oder paginiertes Objekt."""
-        resp = _CLIENT.get("/api/v1/weighing-tickets", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/weighing-tickets", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 204)
         if resp.status_code == 200:
@@ -286,7 +290,7 @@ class TestResponseShape:
 
     def test_pick_lists_returns_list_or_paged(self):
         """TC-API-004h: GET /pick-lists → Liste oder paginiertes Objekt."""
-        resp = _CLIENT.get("/api/v1/pick-lists", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/pick-lists", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 204)
         if resp.status_code == 200:
@@ -304,7 +308,7 @@ class TestGS1SSCCEndpoints:
     def test_gs1_parse_returns_result(self):
         """TC-API-005a: POST /gs1/barcode/parse → GS1ParseResult mit 'raw' und 'ai_felder'."""
         payload = {"barcode_string": "(01)04012345678901(10)CHARGE01(17)261231"}
-        resp = _CLIENT.post("/api/v1/gs1/barcode/parse", json=payload, headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.post("/api/v1/gs1/barcode/parse", json=payload, headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code == 200, (
             f"TC-API-005a FEHLER: {resp.status_code}. Body: {resp.text[:300]}"
@@ -317,7 +321,7 @@ class TestGS1SSCCEndpoints:
     def test_gs1_sscc_generate_returns_sscc_field(self):
         """TC-API-005b: POST /gs1/barcode/sscc/generate → SSCCGenerateResult mit 'sscc' Feld."""
         payload = {"company_prefix": "4012345", "serial_ref": "000000001"}
-        resp = _CLIENT.post(
+        resp = _AUTH_CLIENT.post(
             "/api/v1/gs1/barcode/sscc/generate", json=payload, headers=_AUTH_HEADERS
         )
         skip_if_db_unavailable(resp)
@@ -334,7 +338,7 @@ class TestGS1SSCCEndpoints:
     def test_gs1_sscc_validate(self):
         """TC-API-005c: GET /gs1/barcode/sscc/{sscc}/validate → SSCCValidateResult mit 'valid' Feld."""
         sscc = "340123456789012340"  # 18-stellig
-        resp = _CLIENT.get(
+        resp = _AUTH_CLIENT.get(
             f"/api/v1/gs1/barcode/sscc/{sscc}/validate", headers=_AUTH_HEADERS
         )
         skip_if_db_unavailable(resp)
@@ -349,7 +353,7 @@ class TestGS1SSCCEndpoints:
         """TC-API-005d: POST /nve/ → NVEOut mit 'sscc' Feld."""
         import time
         payload = {"sscc": f"34012345{int(time.time() * 1000000) % 10000000000:010d}"}
-        resp = _CLIENT.post("/api/v1/nve/", json=payload, headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.post("/api/v1/nve/", json=payload, headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 201), (
             f"TC-API-005d FEHLER: {resp.status_code}. Body: {resp.text[:300]}"
@@ -367,7 +371,7 @@ class TestComplianceEndpoints:
 
     def test_eudr_status_returns_register_and_lot_counts(self):
         """TC-API-006a: EUDR meldet echte Register- und Chargenzaehler."""
-        resp = _CLIENT.get("/api/v1/compliance/eudr", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/compliance/eudr", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code == 200, (
             f"TC-API-006a FEHLER: {resp.status_code}. Body: {resp.text[:300]}"
@@ -386,7 +390,7 @@ class TestComplianceEndpoints:
     def test_sanctions_pruefen_returns_treffer_list(self):
         """TC-API-006b: POST /compliance/sanctions/pruefen → Objekt mit 'treffer' Liste."""
         payload = {"name": "Test Entity GmbH", "land_code": "DE"}
-        resp = _CLIENT.post(
+        resp = _AUTH_CLIENT.post(
             "/api/v1/compliance/sanctions/pruefen", json=payload, headers=_AUTH_HEADERS
         )
         skip_if_db_unavailable(resp)
@@ -408,7 +412,7 @@ class TestComplianceEndpoints:
             "verwendungskategorie": "professional",
             "pcnStatus": "entwurf",
         }
-        resp = _CLIENT.post("/api/v1/compliance/pcn-meldungen", json=payload, headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.post("/api/v1/compliance/pcn-meldungen", json=payload, headers=_AUTH_HEADERS)
         assert resp.status_code == 201, (
             f"TC-API-006c FEHLER: {resp.status_code}. Body: {resp.text[:400]}"
         )
@@ -420,7 +424,7 @@ class TestComplianceEndpoints:
 
     def test_pcn_meldung_invalid_ufi_rejected(self):
         """TC-API-006d: POST /compliance/pcn-meldungen mit ungueltigem UFI -> 422."""
-        resp = _CLIENT.post(
+        resp = _AUTH_CLIENT.post(
             "/api/v1/compliance/pcn-meldungen",
             json={"produktname": "UAT Mix", "ufi": "bad-ufi"},
             headers=_AUTH_HEADERS,
@@ -429,7 +433,7 @@ class TestComplianceEndpoints:
 
     def test_gelangensbestaetigung_create_validates_schema(self):
         """TC-API-006c: POST /gelangensbestaetigung — Pflichtfeldvalidierung (422 bei fehlenden Feldern)."""
-        resp = _CLIENT.post(
+        resp = _AUTH_CLIENT.post(
             "/api/v1/gelangensbestaetigung",
             json={"lieferschein_nr": "LS-001"},  # unvollständig
             headers=_AUTH_HEADERS,
@@ -458,7 +462,7 @@ class TestComplianceEndpoints:
             "empfaenger_name": "Agri France S.A.S.",
             "empfaenger_ust_id_nr": "FR12345678901",
         }
-        resp = _CLIENT.post("/api/v1/gelangensbestaetigung", json=payload, headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.post("/api/v1/gelangensbestaetigung", json=payload, headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 201), (
             f"TC-API-006d FEHLER: {resp.status_code}. Body: {resp.text[:400]}"
@@ -466,7 +470,7 @@ class TestComplianceEndpoints:
         data = resp.json()
         assert isinstance(data, dict), "TC-API-006d: Response muss ein Objekt sein"
         assert "id" in data, f"TC-API-006d: 'id' fehlt in Response. Keys: {list(data.keys())}"
-        dublette = _CLIENT.post("/api/v1/gelangensbestaetigung", json=payload, headers=_AUTH_HEADERS)
+        dublette = _AUTH_CLIENT.post("/api/v1/gelangensbestaetigung", json=payload, headers=_AUTH_HEADERS)
         assert dublette.status_code == 409, f"TC-API-006d: Dublette erwartet 409, bekam {dublette.status_code}"
 
 
@@ -479,7 +483,7 @@ class TestFinanceCloseReadiness:
 
     def test_close_readiness_returns_status_field(self):
         """TC-API-007a: GET /finance/close-readiness → Objekt mit 'status' Feld."""
-        resp = _CLIENT.get("/api/v1/finance/close-readiness", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/finance/close-readiness", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code == 200, (
             f"TC-API-007a FEHLER: {resp.status_code}. Body: {resp.text[:300]}"
@@ -490,7 +494,7 @@ class TestFinanceCloseReadiness:
 
     def test_close_readiness_has_required_fields(self):
         """TC-API-007b: GET /finance/close-readiness → Pflichtfelder current_period, blocking_items."""
-        resp = _CLIENT.get("/api/v1/finance/close-readiness", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/finance/close-readiness", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code == 200
         data = resp.json()
@@ -506,7 +510,7 @@ class TestFinanceCloseReadiness:
 
     def test_close_readiness_status_is_known_value(self):
         """TC-API-007c: GET /finance/close-readiness → 'status' ist ein bekannter Enum-Wert."""
-        resp = _CLIENT.get("/api/v1/finance/close-readiness", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/finance/close-readiness", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code == 200
         data = resp.json()
@@ -517,7 +521,7 @@ class TestFinanceCloseReadiness:
 
     def test_close_readiness_no_ready_field_alias(self):
         """TC-API-007d: Das Feld heisst 'status', nicht 'ready' (Boolean)."""
-        resp = _CLIENT.get("/api/v1/finance/close-readiness", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/finance/close-readiness", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code == 200
         data = resp.json()
@@ -543,7 +547,7 @@ class TestAMICEndpoints:
             "parität": "EXW",
             "incoterm_ort": "Musterstadt Lager 1",
         }
-        resp = _CLIENT.post("/api/v1/kontrakt-klassen", json=payload, headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.post("/api/v1/kontrakt-klassen", json=payload, headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 201), (
             f"TC-API-008a FEHLER: {resp.status_code}. Body: {resp.text[:400]}"
@@ -558,7 +562,7 @@ class TestAMICEndpoints:
             "variante": "UNGUELTIG",
             "parität": "EXW",
         }
-        resp = _CLIENT.post("/api/v1/kontrakt-klassen", json=payload, headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.post("/api/v1/kontrakt-klassen", json=payload, headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code == 422, (
             f"TC-API-008b: Erwarte 422 fuer ungueltige Variante, bekam {resp.status_code}"
@@ -566,7 +570,7 @@ class TestAMICEndpoints:
 
     def test_rohware_sammelabrechnung_list(self):
         """TC-API-008c: GET /agrar/sammelabrechnung → Liste oder paginiertes Objekt."""
-        resp = _CLIENT.get("/api/v1/agrar/sammelabrechnung", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/agrar/sammelabrechnung", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 204), (
             f"TC-API-008c FEHLER: {resp.status_code}. Body: {resp.text[:300]}"
@@ -577,7 +581,7 @@ class TestAMICEndpoints:
 
     def test_ebilanz_perioden_list(self):
         """TC-API-008d: GET /ebilanz/meldungen → Liste (perioden-Alias)."""
-        resp = _CLIENT.get("/api/v1/ebilanz/meldungen", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/ebilanz/meldungen", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 204), (
             f"TC-API-008d FEHLER: {resp.status_code}. Body: {resp.text[:300]}"
@@ -593,7 +597,7 @@ class TestL3ConnectEndpoints:
 
     def test_warehouse_transfers_list(self):
         """TC-API-009a: GET /warehouses/transfers/ → Liste oder paginiertes Objekt."""
-        resp = _CLIENT.get("/api/v1/warehouses/transfers/", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/warehouses/transfers/", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 204), (
             f"TC-API-009a FEHLER: {resp.status_code}. Body: {resp.text[:300]}"
@@ -601,7 +605,7 @@ class TestL3ConnectEndpoints:
 
     def test_preparation_lists_list(self):
         """TC-API-009b: GET /preparation-lists → Liste oder paginiertes Objekt."""
-        resp = _CLIENT.get("/api/v1/preparation-lists", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/preparation-lists", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 204), (
             f"TC-API-009b FEHLER: {resp.status_code}. Body: {resp.text[:300]}"
@@ -609,7 +613,7 @@ class TestL3ConnectEndpoints:
 
     def test_pick_lists_list(self):
         """TC-API-009c: GET /pick-lists → Liste oder paginiertes Objekt."""
-        resp = _CLIENT.get("/api/v1/pick-lists", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/pick-lists", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 204), (
             f"TC-API-009c FEHLER: {resp.status_code}. Body: {resp.text[:300]}"
@@ -617,7 +621,7 @@ class TestL3ConnectEndpoints:
 
     def test_inventory_counts_list(self):
         """TC-API-009d: GET /inventory/counts → Liste oder paginiertes Objekt."""
-        resp = _CLIENT.get("/api/v1/inventory/counts", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/inventory/counts", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 204), (
             f"TC-API-009d FEHLER: {resp.status_code}. Body: {resp.text[:300]}"
@@ -625,7 +629,7 @@ class TestL3ConnectEndpoints:
 
     def test_weighing_tickets_list(self):
         """TC-API-009e: GET /weighing-tickets → Liste oder paginiertes Objekt."""
-        resp = _CLIENT.get("/api/v1/weighing-tickets", headers=_AUTH_HEADERS)
+        resp = _AUTH_CLIENT.get("/api/v1/weighing-tickets", headers=_AUTH_HEADERS)
         skip_if_db_unavailable(resp)
         assert resp.status_code in (200, 204), (
             f"TC-API-009e FEHLER: {resp.status_code}. Body: {resp.text[:300]}"

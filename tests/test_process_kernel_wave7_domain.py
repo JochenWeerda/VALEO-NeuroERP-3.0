@@ -349,7 +349,7 @@ AUTH_HEADERS = {"Authorization": "Bearer dev-token"}
 
 @pytest.fixture(scope="module")
 def client():
-    from main import app
+    from app.main import app
     with TestClient(app, raise_server_exceptions=True) as c:
         yield c
 

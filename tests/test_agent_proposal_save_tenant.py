@@ -6,11 +6,12 @@ from app.core.database import engine
 from app.repositories.agent_proposal_repository import AgentProposalRepository
 from app.infrastructure.models.agent_proposal_model import AgentProposalRecord
 from app.services.operator_agent_service import AgentProposal, AgentActionType, AgentRiskLevel
+from testgrenze import pruefstand_erlaubt
 
 
 @pytest.fixture
 def repository(require_db):
-    assert engine.url.database == 'valeo_probe' or 'test' in engine.url.database.lower()
+    assert pruefstand_erlaubt(engine.url), "Nur Pruefstand oder CI-Testdatenbank"
     with engine.connect() as connection:
         transaction = connection.begin()
         with Session(bind=connection, join_transaction_mode='create_savepoint') as session:

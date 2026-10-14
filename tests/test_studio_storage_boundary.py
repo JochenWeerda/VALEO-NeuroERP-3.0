@@ -1,3 +1,4 @@
+from studio_review_helper import simulation_ready_definition, record_lifecycle_proof
 from uuid import uuid4
 """Durable studio operations never fall back to per-process drafts."""
 import pytest
@@ -11,8 +12,9 @@ from app.services.studio_propose import propose_studio_draft
 @pytest.mark.parametrize('operation', ['list', 'get', 'save', 'status', 'runtime', 'runtime_list'])
 def test_unavailable_sql_never_uses_existing_process_drafts(monkeypatch, error_type, operation):
     store.reset_studio_drafts()
-    record = store.save_draft('tenant', 'editor', propose_studio_draft('Kunden'))
-    store.set_status('tenant', record['id'], 'editor', 'review')
+    record = store.save_draft('tenant', 'editor', simulation_ready_definition(propose_studio_draft('Kunden')))
+    reviewed = store.set_status('tenant', record['id'], 'editor', 'review')
+    record_lifecycle_proof(reviewed)
     store.set_status('tenant', record['id'], 'reviewer', 'published_temp')
     monkeypatch.setattr(store, '_prefer_memory', False)
     def unavailable():
@@ -50,7 +52,7 @@ def test_studio_http_storage_failure_is_sanitized_503(probe, monkeypatch, method
     def unavailable():
         raise OperationalError('private-connection-detail', {}, RuntimeError('private-password'))
     monkeypatch.setattr(store, '_sql_session', unavailable)
-    payload = {'definition': propose_studio_draft('Kunden'), 'expected_revision': '0' * 64, 'idempotency_key': str(uuid4())} if body == 'definition' else {'expected_revision': '0' * 64, 'idempotency_key': str(uuid4())}
+    payload = {'definition': simulation_ready_definition(propose_studio_draft('Kunden')), 'expected_revision': '0' * 64, 'idempotency_key': str(uuid4())} if body == 'definition' else {'expected_revision': '0' * 64, 'idempotency_key': str(uuid4())}
     response = getattr(client, method)(path, **({'json': payload} if method != 'get' else {}))
     assert response.status_code == 503, response.text
     assert 'private-' not in response.text

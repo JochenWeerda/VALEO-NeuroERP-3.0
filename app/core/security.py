@@ -240,8 +240,6 @@ def get_user_id_from_request(request: Request) -> str:
     """
     if hasattr(request.state, "token_claims") and request.state.token_claims:
         claims = request.state.token_claims
-        if claims.get("token_type") == "dev":
-            return "dev-user"
         sub = claims.get("sub")
         if sub:
             return str(sub)
@@ -253,8 +251,6 @@ def get_user_email_from_request(request: Request) -> Optional[str]:
     """Extract email for audit. From token_claims (preferred_username/email) or X-User-Email."""
     if hasattr(request.state, "token_claims") and request.state.token_claims:
         claims = request.state.token_claims
-        if claims.get("token_type") == "dev":
-            return "dev@local"
         for key in ("email", "preferred_username"):
             val = claims.get(key)
             if val:

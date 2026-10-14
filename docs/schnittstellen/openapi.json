@@ -11679,6 +11679,27 @@
         "title": "ApprovalAction",
         "type": "object"
       },
+      "ApprovalEvaluationIn": {
+        "additionalProperties": false,
+        "properties": {
+          "aktions_typ": {
+            "minLength": 1,
+            "title": "Aktions Typ",
+            "type": "string"
+          },
+          "kontext": {
+            "additionalProperties": true,
+            "title": "Kontext",
+            "type": "object"
+          }
+        },
+        "required": [
+          "aktions_typ",
+          "kontext"
+        ],
+        "title": "ApprovalEvaluationIn",
+        "type": "object"
+      },
       "ApprovalRequest": {
         "description": "Schema for requesting approval",
         "properties": {
@@ -120489,6 +120510,38 @@
         "title": "PodIn",
         "type": "object"
       },
+      "PolicyEvaluationIn": {
+        "additionalProperties": false,
+        "properties": {
+          "kontext": {
+            "additionalProperties": true,
+            "title": "Kontext",
+            "type": "object"
+          },
+          "policy_set_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Set Id"
+          },
+          "prozess_key": {
+            "minLength": 1,
+            "title": "Prozess Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "prozess_key",
+          "kontext"
+        ],
+        "title": "PolicyEvaluationIn",
+        "type": "object"
+      },
       "PolicyListResponse": {
         "description": "Antwort von /policy/list — StatusResponse verliert die Nutzlast.",
         "properties": {
@@ -156185,6 +156238,187 @@
         "title": "StudioDefinitionIn",
         "type": "object"
       },
+      "StudioDiffRow": {
+        "properties": {
+          "after": {
+            "title": "After",
+            "type": "string"
+          },
+          "before": {
+            "title": "Before",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "path",
+          "before",
+          "after"
+        ],
+        "title": "StudioDiffRow",
+        "type": "object"
+      },
+      "StudioHistoryDiffOut": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/StudioDiffRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "previous_revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Revision"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "revision",
+          "previous_revision",
+          "actor",
+          "action"
+        ],
+        "title": "StudioHistoryDiffOut",
+        "type": "object"
+      },
+      "StudioHistoryRow": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "string"
+          },
+          "simulation_failures": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulation Failures"
+          },
+          "simulation_profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulation Profile"
+          },
+          "simulation_result": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulation Result"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "id",
+          "actor",
+          "recorded_at",
+          "action",
+          "revision",
+          "status",
+          "active"
+        ],
+        "title": "StudioHistoryRow",
+        "type": "object"
+      },
+      "StudioHistoryViewOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/StudioHistoryRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "StudioHistoryViewOut",
+        "type": "object"
+      },
       "StudioProposeIn": {
         "properties": {
           "intent": {
@@ -156205,12 +156439,222 @@
             "pattern": "^[0-9a-f]{64}$",
             "title": "Expected Revision",
             "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
           }
         },
         "required": [
+          "idempotency_key",
           "expected_revision"
         ],
         "title": "StudioRevisionIn",
+        "type": "object"
+      },
+      "StudioSaveIn": {
+        "properties": {
+          "definition": {
+            "additionalProperties": true,
+            "title": "Definition",
+            "type": "object"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "definition",
+          "idempotency_key"
+        ],
+        "title": "StudioSaveIn",
+        "type": "object"
+      },
+      "StudioSimulationEvidenceOut": {
+        "properties": {
+          "artifact_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact Hash"
+          },
+          "business_effect": {
+            "default": "not_verified",
+            "title": "Business Effect",
+            "type": "string"
+          },
+          "candidate_revision": {
+            "title": "Candidate Revision",
+            "type": "string"
+          },
+          "checks": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "title": "Checks",
+            "type": "object"
+          },
+          "definition_hash": {
+            "title": "Definition Hash",
+            "type": "string"
+          },
+          "draft_id": {
+            "title": "Draft Id",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "error_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Location"
+          },
+          "external_effect": {
+            "default": "not_verified",
+            "title": "External Effect",
+            "type": "string"
+          },
+          "failed_checks": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Failed Checks",
+            "type": "array"
+          },
+          "passed": {
+            "title": "Passed",
+            "type": "boolean"
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "checks",
+          "passed",
+          "tenant_id",
+          "draft_id",
+          "candidate_revision",
+          "definition_hash"
+        ],
+        "title": "StudioSimulationEvidenceOut",
+        "type": "object"
+      },
+      "StudioSimulationOut": {
+        "properties": {
+          "base_screen_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Screen Id"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "definition": {
+            "additionalProperties": true,
+            "title": "Definition",
+            "type": "object"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "readiness": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Readiness"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "string"
+          },
+          "screen_id": {
+            "title": "Screen Id",
+            "type": "string"
+          },
+          "simulation": {
+            "$ref": "#/components/schemas/StudioSimulationEvidenceOut"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "updated_by": {
+            "title": "Updated By",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "screen_id",
+          "definition",
+          "status",
+          "created_by",
+          "updated_by",
+          "updated_at",
+          "revision",
+          "simulation"
+        ],
+        "title": "StudioSimulationOut",
         "type": "object"
       },
       "StudioUpdateIn": {
@@ -156224,10 +156668,16 @@
             "pattern": "^[0-9a-f]{64}$",
             "title": "Expected Revision",
             "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
           }
         },
         "required": [
           "definition",
+          "idempotency_key",
           "expected_revision"
         ],
         "title": "StudioUpdateIn",
@@ -230955,8 +231405,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Freigaben Api V1 Approvals  Subject Type   Subject Id  Get",
                   "type": "array"
@@ -231024,9 +231473,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Freigabe Anfragen Api V1 Approvals  Subject Type   Subject Id  Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -231102,9 +231549,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Freigabe Entscheiden Api V1 Approvals  Subject Type   Subject Id   Approval Id  Decision Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -236740,9 +237185,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Beleg Kopf Api V1 Belege  Belegart   Beleg Id  Kopf Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -236880,9 +237323,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Beleg Reiter Api V1 Belege  Belegart   Beleg Id  Tabs  Reiter  Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -270892,8 +271333,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Approvals Api V1 Docflow  Doc Id  Approvals Get",
                   "type": "array"
@@ -270968,9 +271408,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Request Approval Api V1 Docflow  Doc Id  Approvals Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -271053,9 +271491,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Decide Approval Api V1 Docflow  Doc Id  Approvals  Approval Id  Decision Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -271621,8 +272057,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Get Status History Api V1 Docflow  Doc Id  Status History Get",
                   "type": "array"
@@ -326204,8 +326639,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response Befunde Api V1 Kontrolle Befunde Get",
                   "type": "array"
@@ -326265,9 +326699,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Befund Pruefen Api V1 Kontrolle Befunde  Befund Id  Pruefung Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -326303,9 +326735,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Lage Api V1 Kontrolle Lagebild Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -326426,9 +326856,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Arbeitsliste Api V1 Kontrolle Pruefkorb Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -366987,15 +367415,13 @@
     },
     "/api/v1/process/agent/approval-evaluate": {
       "post": {
-        "description": "Bewertet ob eine Agent-Aktion menschliche Freigabe erfordert.\n\nBody: { \"aktions_typ\": str, \"kontext\": dict }",
+        "description": "Evaluate explicit advisory context; never issue a command approval.",
         "operationId": "evaluate_agent_approval_api_v1_process_agent_approval_evaluate_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
+                "$ref": "#/components/schemas/ApprovalEvaluationIn"
               }
             }
           },
@@ -374506,15 +374932,13 @@
     },
     "/api/v1/process/policy-rules/evaluate": {
       "post": {
-        "description": "Wertet PolicySet gegen einen Kontext aus.\n\nBody: { \"prozess_key\": str, \"policy_set_id\": str (optional), \"kontext\": dict }\nGibt PolicyEvaluationResult zurueck.",
+        "description": "Evaluate explicit advisory context; never issue a command approval.",
         "operationId": "evaluate_policy_rules_api_v1_process_policy_rules_evaluate_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
+                "$ref": "#/components/schemas/PolicyEvaluationIn"
               }
             }
           },
@@ -398560,7 +398984,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/StudioDefinitionIn"
+                "$ref": "#/components/schemas/StudioSaveIn"
               }
             }
           },
@@ -398713,6 +399137,233 @@
         ]
       }
     },
+    "/api/v1/studio/drafts/{draft_id}/history": {
+      "get": {
+        "operationId": "studio_history_api_v1_studio_drafts__draft_id__history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "draft_id",
+            "required": true,
+            "schema": {
+              "title": "Draft Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Studio History Api V1 Studio Drafts  Draft Id  History Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unveraenderliche Studio-Revisionshistorie lesen",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/studio/drafts/{draft_id}/history-diff": {
+      "get": {
+        "operationId": "studio_history_diff_api_v1_studio_drafts__draft_id__history_diff_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "draft_id",
+            "required": true,
+            "schema": {
+              "title": "Draft Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entry_id",
+            "required": true,
+            "schema": {
+              "title": "Entry Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudioHistoryDiffOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unveraenderliche Studio-Aenderung vergleichen",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/studio/drafts/{draft_id}/history-view": {
+      "get": {
+        "operationId": "studio_history_view_api_v1_studio_drafts__draft_id__history_view_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "draft_id",
+            "required": true,
+            "schema": {
+              "title": "Draft Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudioHistoryViewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Studio-Fassungen fuer native Auditmaske",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
     "/api/v1/studio/drafts/{draft_id}/publish": {
       "post": {
         "operationId": "studio_publish_api_v1_studio_drafts__draft_id__publish_post",
@@ -398835,6 +399486,65 @@
         ]
       }
     },
+    "/api/v1/studio/drafts/{draft_id}/simulate": {
+      "post": {
+        "operationId": "studio_simulate_api_v1_studio_drafts__draft_id__simulate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "draft_id",
+            "required": true,
+            "schema": {
+              "title": "Draft Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudioRevisionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudioSimulationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reale Prozesskette fuer unveraenderliche Review-Fassung pruefen",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
     "/api/v1/studio/drafts/{draft_id}/submit-review": {
       "post": {
         "operationId": "studio_submit_review_api_v1_studio_drafts__draft_id__submit_review_post",
@@ -398889,6 +399599,78 @@
           }
         ],
         "summary": "Studio-Entwurf zur Vier-Augen-Prüfung geben",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/studio/history-events/{entry_id}/diff": {
+      "get": {
+        "operationId": "studio_event_diff_api_v1_studio_history_events__entry_id__diff_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entry_id",
+            "required": true,
+            "schema": {
+              "title": "Entry Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudioHistoryDiffOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Studio-Ereignis fuer native Vergleichsmaske",
         "tags": [
           "ui",
           "studio",

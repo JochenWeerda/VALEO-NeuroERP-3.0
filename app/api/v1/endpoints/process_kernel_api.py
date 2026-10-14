@@ -9,6 +9,7 @@ from __future__ import annotations
 from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
 from app.api.v1.schemas.data_quality_input import DataQualityCheckIn
 from app.api.v1.schemas.slo_input import SloCheckIn, reject_nonfinite_slo_json
+from app.api.v1.schemas.advisory_input import PolicyEvaluationIn, ApprovalEvaluationIn
 
 from datetime import datetime
 from typing import Any
@@ -1201,21 +1202,12 @@ def get_policy_rules(prozess_key: str) -> dict[str, Any]:
     }
 
 
-@router.post("/policy-rules/evaluate", response_model=ProcessKernelOut, summary="Policy rules evaluate")
-def evaluate_policy_rules(body: dict) -> dict[str, Any]:
-    """
-    Wertet PolicySet gegen einen Kontext aus.
-
-    Body: { "prozess_key": str, "policy_set_id": str (optional), "kontext": dict }
-    Gibt PolicyEvaluationResult zurueck.
-    """
-    prozess_key: str = body.get("prozess_key", "")
-    policy_set_id: str = body.get("policy_set_id", "")
-    kontext: dict = body.get("kontext", {})
-
-    if not prozess_key:
-        raise HTTPException(status_code=422, detail="prozess_key ist erforderlich")
-
+@router.post("/policy-rules/evaluate", response_model=ProcessKernelOut, summary="Policy rules evaluate", dependencies=[Depends(reject_nonfinite_slo_json)])
+def evaluate_policy_rules(body: PolicyEvaluationIn) -> dict[str, Any]:
+    """Evaluate explicit advisory context; never issue a command approval."""
+    prozess_key = body.prozess_key
+    policy_set_id = body.policy_set_id
+    kontext = body.kontext
     all_sets = get_default_agrar_policy_sets()
 
     if policy_set_id:
@@ -1229,7 +1221,7 @@ def evaluate_policy_rules(body: dict) -> dict[str, Any]:
     # Ersten passenden PolicySet auswerten
     policy_set = matched[0]
     result = evaluate_policy_set(policy_set, kontext)
-    return result.as_dict()
+    return {**result.as_dict(), "advisory_only": True}
 
 
 # ---------------------------------------------------------------------------
@@ -1270,20 +1262,14 @@ def get_agent_approval_rules() -> dict[str, Any]:
     }
 
 
-@router.post("/agent/approval-evaluate", response_model=ProcessKernelOut, summary="Agent approval evaluate")
-def evaluate_agent_approval(body: dict) -> dict[str, Any]:
-    """
-    Bewertet ob eine Agent-Aktion menschliche Freigabe erfordert.
-
-    Body: { "aktions_typ": str, "kontext": dict }
-    """
-    aktions_typ: str = body.get("aktions_typ", "")
-    kontext: dict = body.get("kontext", {})
-    if not aktions_typ:
-        raise HTTPException(status_code=422, detail="aktions_typ ist erforderlich")
+@router.post("/agent/approval-evaluate", response_model=ProcessKernelOut, summary="Agent approval evaluate", dependencies=[Depends(reject_nonfinite_slo_json)])
+def evaluate_agent_approval(body: ApprovalEvaluationIn) -> dict[str, Any]:
+    """Evaluate explicit advisory context; never issue a command approval."""
+    aktions_typ = body.aktions_typ
+    kontext = body.kontext
     regeln = get_default_approval_rules()
     result = evaluate_approval_requirement(aktions_typ, kontext, regeln)
-    return result.as_dict()
+    return {**result.as_dict(), "advisory_only": True}
 
 
 # ---------------------------------------------------------------------------

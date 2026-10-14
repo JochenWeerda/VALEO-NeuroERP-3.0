@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-10-13
+# Architecture Index — generiert 2026-10-15
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-13T20:27:16Z'
+generated_at: '2026-10-14T22:07:52Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -803,6 +803,8 @@ domains:
     - portal_innendienst
     - portal_intelligence
     - portal_interessent
+    - portal_kundenwege
+    - portal_kundenzugaenge
     - portal_lohndienst
     - portal_preisspiegel
     - portal_shop
@@ -1848,6 +1850,7 @@ domains:
     - studio_propose
     - studio_validation
     - sync_scheduler
+    - tenant_lifecycle_service
     - voice_adapter
     - webhook_service
     - wf_cockpit_nats_projector
@@ -2094,13 +2097,12 @@ mapping_stats:
   frontend_routes_total: 941
   frontend_routes_mapped: 941
   backend_services_total: 290
-  backend_services_mapped: 289
-  backend_endpoints_total: 458
-  backend_endpoints_mapped: 458
+  backend_services_mapped: 290
+  backend_endpoints_total: 460
+  backend_endpoints_mapped: 460
 unmapped:
   frontend_routes: []
-  backend_services:
-  - tenant_lifecycle_service
+  backend_services: []
   backend_endpoints: []
 status:
   architecture_os_mvp: active

@@ -31,3 +31,55 @@ def ersetze_mandant(app: FastAPI, mandant: str | None = None) -> None:
 def ersetze_nutzer(app: FastAPI, *rollen: str) -> None:
     app.dependency_overrides[get_current_user] = lambda: {
         "sub": "5f0c2a9e", "name": "t.de-vries", "roles": list(rollen)}
+
+
+def ersetze_bearer(app: FastAPI, *rollen: str) -> None:
+    """Fuer Mini-Apps, die ``require_bearer_token`` selbst an einen Router haengen: die Pruefung ausdruecklich
+    ersetzen und Mandant/Rolle so in den Request-Zustand legen, wie es die echte Pruefung taete."""
+    from app.core.security import require_bearer_token
+
+    def identitaet(request: Request) -> str:
+        tenant = mandant_aus_kopf(request)
+        request.state.tenant_id = tenant
+        request.state.tenant_verified = True
+        request.state.token_claims = {"sub": "5f0c2a9e", "tenant_id": tenant, "roles": list(rollen)}
+        return "testgrenze"
+
+    app.dependency_overrides[require_bearer_token] = identitaet
+
+
+def _alle_fachrollen() -> tuple[str, ...]:
+    """Alle Fachrollen, die der Code prueft (config/keycloak/fachrollen.json), plus admin/manager/user.
+
+    Ersatz fuer das mit dem Dev-Token entfernte ``app.auth.deps._DEV_ROLES``: ein Testnutzer, der jede Fachrolle hat.
+    """
+    import json
+    from pathlib import Path
+
+    datei = Path(__file__).resolve().parents[1] / "config" / "keycloak" / "fachrollen.json"
+    rollen = [r["name"] for r in json.loads(datei.read_text(encoding="utf-8"))["rollen"]]
+    return ("admin", "manager", "user", *rollen)
+
+
+ALLE_FACHROLLEN = _alle_fachrollen()
+
+
+def pruefstand_erlaubt(url) -> bool:
+    """Schreibende Datenbanktests nur gegen den Pruefstand ``valeo_probe``, eine Test-Datenbank oder — in CI — die
+    erklaerte Job-Datenbank (``TEST_DATABASE_URL``/``DATABASE_URL``). Nie gegen die Entwicklungsdatenbank.
+
+    Bis 14.10.2026 stand in elf Tests ein fester Name; in CI heisst die eigens angelegte Job-Datenbank anders, die
+    Tests brachen dort im Setup ab.
+    """
+    import os
+
+    from sqlalchemy.engine import make_url
+
+    ziel = url if hasattr(url, "database") else make_url(str(url))
+    name = (ziel.database or "").lower()
+    if name == "valeo_probe" or "test" in name:
+        return True
+    if os.environ.get("CI", "").lower() == "true":
+        erklaert = os.environ.get("TEST_DATABASE_URL") or os.environ.get("DATABASE_URL")
+        return bool(erklaert) and make_url(erklaert).database == ziel.database
+    return False

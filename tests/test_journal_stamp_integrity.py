@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import ValidationFailedError
 from app.infrastructure.models.journal import JournalEntry
 from app.services.finance_transaction_service import FinanceTransactionService
+from testgrenze import pruefstand_erlaubt
 
 
 @pytest.fixture(autouse=True)
@@ -37,7 +38,7 @@ def store():
     if not raw:
         pytest.skip("Existing shared PostgreSQL required")
     url = make_url(raw)
-    assert url.database == "valeo_probe" or "test" in url.database.lower()
+    assert pruefstand_erlaubt(url), "Nur Pruefstand oder CI-Testdatenbank"
     engine = create_engine(url)
     name = "journalstamp_" + uuid4().hex
     with engine.begin() as conn:

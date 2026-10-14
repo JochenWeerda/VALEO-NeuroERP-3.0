@@ -11,7 +11,7 @@ from app.api.v1.endpoints.personal import (
     _time_profiles_from_user_rows,
 )
 from app.core.database import get_db
-from main import app
+from app.main import app
 
 
 _HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "tenant-hr-time"}

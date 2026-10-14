@@ -777,6 +777,25 @@ def test_payment_run_approve_accepts_empty_body_with_authenticated_actor_and_dis
 
     monkeypatch.setattr(payment_runs, "get_payment_run", fake_get_payment_run)
 
+    class FakeFreigabe:
+        """Die zentrale Approval Engine (APPROVAL-001) hat eigene Vertragstests gegen die Datenbank
+        (tests/test_freigabe_hauptbuch_zahlung.py); hier wird nur ihr Aufruf geprueft."""
+
+        def __init__(self, db, tenant_id):
+            captured["engine_tenant"] = tenant_id
+
+        def vorgang(self, run_id, aktion):
+            return type("Vorgang", (), {"ersteller": "maker"})()
+
+        def beantrage(self, run_id, aktion, ersteller, art):
+            captured["beantragt_von"] = ersteller
+            return {"status": "requested", "id": "freigabe-1"}
+
+        def entscheide(self, run_id, anfrage_id, user, genehmigt):
+            captured["entschieden"] = (anfrage_id, user["sub"], genehmigt)
+
+    monkeypatch.setattr("app.services.finance_freigabe.ZahlungslaufFreigabe", FakeFreigabe)
+
     request = payment_runs.ApprovePaymentRunRequest.model_validate({})
     # Seit 07.10.2026 ist der Freigeber der angemeldete Nutzer, nicht ein Rumpf-Default.
     response = asyncio.run(payment_runs.approve_payment_run(
@@ -786,6 +805,7 @@ def test_payment_run_approve_accepts_empty_body_with_authenticated_actor_and_dis
     assert captured["approved_by"] == "api"
     assert captured["committed"] is True
     assert response.approved_by == "api"
+    assert captured["beantragt_von"] == "maker" and captured["entschieden"] == ("freigabe-1", "api", True)
 
 
 def test_return_payment_persists_outbox_event(monkeypatch):

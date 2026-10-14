@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from datetime import datetime
 from uuid import UUID
 from collections.abc import Callable
 
@@ -13,6 +14,7 @@ from app.api.v1.endpoints.mask_screen_definition import _check_readiness
 from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS
 from app.core.tenant import get_tenant_id
 from app.auth.deps import get_current_user
+from app.auth.finance_roles import beleg_write
 from app.services.studio_draft_store import StudioStorageUnavailable, list_history, get_status_replay, get_draft, list_drafts, save_draft, set_status, studio_run_route
 from app.services.studio_propose import propose_studio_draft
 from app.services.studio_validation import load_studio_catalog, validate_studio_draft
@@ -47,6 +49,71 @@ class StudioRevisionIn(BaseModel):
     expected_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
+class StudioHistoryRow(BaseModel):
+    id: str
+    actor: str
+    recorded_at: datetime
+    action: str
+    revision: str
+    status: str | None
+    active: bool
+    simulation_result: str | None = None
+    simulation_profile: str | None = None
+    simulation_failures: str | None = None
+
+
+class StudioHistoryViewOut(BaseModel):
+    items: list[StudioHistoryRow]
+    total: int
+
+
+class StudioDiffRow(BaseModel):
+    id: str
+    path: str
+    before: str
+    after: str
+
+
+class StudioHistoryDiffOut(BaseModel):
+    items: list[StudioDiffRow]
+    total: int
+    revision: str
+    previous_revision: str | None
+    actor: str
+    action: str
+
+
+class StudioSimulationEvidenceOut(BaseModel):
+    profile: str | None = None
+    artifact_hash: str | None = None
+    checks: dict[str, bool]
+    passed: bool
+    tenant_id: str
+    draft_id: str
+    candidate_revision: str
+    definition_hash: str
+    business_effect: str = "not_verified"
+    external_effect: str = "not_verified"
+    failed_checks: list[str] = Field(default_factory=list)
+    error: str | None = None
+    error_location: str | None = None
+
+
+class StudioSimulationOut(BaseModel):
+    id: str
+    tenant_id: str
+    screen_id: str
+    base_screen_id: str | None = None
+    definition: dict[str, Any]
+    status: str
+    readiness: dict[str, Any] | None = None
+    created_by: str
+    updated_by: str
+    updated_at: datetime
+    revision: str
+    simulation: StudioSimulationEvidenceOut
+
+
 def _storage_call(operation: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
     try:
         return operation(*args, **kwargs)
@@ -68,10 +135,26 @@ def _actor(user: dict[str, Any]) -> str:
     return subject.strip()
 
 
+def _may_design(user: dict[str, Any]) -> bool:
+    if not isinstance(user.get("sub"), str) or not user["sub"].strip():
+        return False
+    try:
+        beleg_write(user=user)
+        return True
+    except HTTPException as error:
+        if error.status_code != 403:
+            raise
+        return False
+
+
+def _may_publish(user: dict[str, Any]) -> bool:
+    claims = user.get("raw") or {}
+    return claims.get("identity_type") == "human" and "admin" in (user.get("roles") or [])
+
+
 def _publisher(user: dict[str, Any] = Depends(get_current_user)) -> dict[str, Any]:
     # Same verified identity_type/admin boundary as identity administration.
-    claims = user.get("raw") or {}
-    if claims.get("identity_type") != "human" or "admin" not in (user.get("roles") or []):
+    if not _may_publish(user):
         raise HTTPException(403, "Menschliche Administration fuer Studio-Publikation erforderlich")
     _actor(user)
     return user
@@ -88,7 +171,9 @@ def _report(definition: dict[str, Any]) -> dict[str, Any]:
     return {
         "violations": violations,
         "readiness": readiness,
-        "canPublish": not violations and not blocking,
+        "definitionReady": not violations and not blocking,
+        "canPublish": False,
+        "requiresSimulation": True,
         "definition": definition,
     }
 
@@ -103,6 +188,7 @@ def studio_catalog(user: dict = Depends(get_current_user)) -> dict[str, Any]:
         "columnNavigation": ["single", "listDetail", "listDetailDetail"],
         "dataSources": catalog["data_sources"],
         "actions": catalog["command_actions"],
+        "permissions": {"canDesign": _may_design(user), "canPublish": _may_publish(user)},
     }
 
 
@@ -150,7 +236,7 @@ def studio_history(
 def studio_create_draft(
     body: StudioSaveIn,
     tenant_id: str = Depends(get_tenant_id),
-    user: dict = Depends(get_current_user),
+    user: dict = Depends(beleg_write),
 ) -> dict[str, Any]:
     report = _report(body.definition)
     if report["violations"]:
@@ -167,7 +253,7 @@ def studio_update_draft(
     draft_id: str,
     body: StudioUpdateIn,
     tenant_id: str = Depends(get_tenant_id),
-    user: dict = Depends(get_current_user),
+    user: dict = Depends(beleg_write),
 ) -> dict[str, Any]:
     report = _report(body.definition)
     if report["violations"]:
@@ -194,7 +280,7 @@ def studio_submit_review(
     draft_id: str,
     body: StudioRevisionIn,
     tenant_id: str = Depends(get_tenant_id),
-    user: dict = Depends(get_current_user),
+    user: dict = Depends(beleg_write),
 ) -> dict[str, Any]:
     return _transition(draft_id, tenant_id, _actor(user), "review", body.expected_revision, str(body.idempotency_key))
 
@@ -217,7 +303,7 @@ def studio_publish(
             raise HTTPException(409, "entwurf_seit_anzeige_geaendert")
         item = cached
     report = _report(item["definition"])
-    if not report["canPublish"]:
+    if not report["definitionReady"]:
         raise HTTPException(status_code=400, detail={"violations": report["violations"], "readiness": report["readiness"]})
     try:
         record = cached or _storage_call(set_status, tenant_id, draft_id, actor, "published_temp", expected_snapshot=item, idempotency_key=key, request_revision=body.expected_revision)
@@ -228,7 +314,7 @@ def studio_publish(
     except KeyError as error:
         raise HTTPException(status_code=404, detail="draft_nicht_gefunden") from error
     screen_id = str(record.get("screen_id") or (record.get("definition") or {}).get("id") or "")
-    return {**record, **report, "route": studio_run_route(screen_id) if screen_id else None}
+    return {**record, **report, "canPublish": True, "route": studio_run_route(screen_id) if screen_id else None}
 
 
 @router.post("/drafts/{draft_id}/retire", summary="Freigegebene Studio-Maske zurückziehen")
@@ -261,3 +347,61 @@ def _transition(draft_id: str, tenant_id: str, actor: str, status: str, revision
         raise HTTPException(status_code=403, detail=str(error)) from error
     except ValueError as error:
         raise HTTPException(status_code=409, detail=str(error)) from error
+
+
+@router.get("/drafts/{draft_id}/history-view", response_model=StudioHistoryViewOut, summary="Studio-Fassungen fuer native Auditmaske")
+def studio_history_view(draft_id: str, skip: int = Query(0, ge=0), limit: int = Query(25, ge=1, le=100),
+                        tenant_id: str = Depends(get_tenant_id), user: dict = Depends(get_current_user)) -> dict[str, Any]:
+    from app.services.studio_draft_store import count_history
+    item = _storage_call(get_draft, tenant_id, draft_id)
+    if item is None: raise HTTPException(404, "draft_nicht_gefunden")
+    entries = _storage_call(list_history, tenant_id, draft_id, skip=skip, limit=limit)
+    rows = [{"id": entry["id"], "actor": entry["actor"], "recorded_at": entry["recorded_at"],
+             "action": entry["action"], "revision": entry["revision"],
+             "status": entry["snapshot"].get("status"),
+             "simulation_result": ("bestanden" if entry["snapshot"]["simulation"].get("passed") is True else "fehlgeschlagen") if "simulation" in entry["snapshot"] else None,
+             "simulation_profile": entry["snapshot"].get("simulation", {}).get("profile"),
+             "simulation_failures": ", ".join(entry["snapshot"].get("simulation", {}).get("failed_checks", [])) or None,
+             "active": item["status"] == "published_temp" and entry["revision"] == item["revision"]} for entry in entries]
+    return {"items": rows, "total": _storage_call(count_history, tenant_id, draft_id)}
+
+
+@router.get("/drafts/{draft_id}/history-diff", response_model=StudioHistoryDiffOut, summary="Unveraenderliche Studio-Aenderung vergleichen")
+def studio_history_diff(draft_id: str, entry_id: str, skip: int = Query(0, ge=0), limit: int = Query(25, ge=1, le=100),
+                        tenant_id: str = Depends(get_tenant_id), user: dict = Depends(get_current_user)) -> dict[str, Any]:
+    from app.services.studio_draft_store import history_event
+    from app.services.studio_history_view import definition_diff
+    item = _storage_call(get_draft, tenant_id, draft_id)
+    entry = _storage_call(history_event, tenant_id, draft_id, event_id=entry_id) if item else None
+    if entry is None: raise HTTPException(404, "historie_nicht_gefunden")
+    previous = _storage_call(history_event, tenant_id, draft_id, revision=entry["previous_revision"]) if entry["previous_revision"] else None
+    if entry["previous_revision"] and previous is None:
+        raise HTTPException(409, "historischer_ausgangsstand_nicht_verfuegbar")
+    rows = definition_diff(previous["snapshot"]["definition"] if previous else {}, entry["snapshot"]["definition"])
+    return {"items": rows[skip:skip+limit], "total": len(rows), "revision": entry["revision"],
+            "previous_revision": entry["previous_revision"], "actor": entry["actor"], "action": entry["action"]}
+
+
+@router.get("/history-events/{entry_id}/diff", response_model=StudioHistoryDiffOut, summary="Studio-Ereignis fuer native Vergleichsmaske")
+def studio_event_diff(entry_id: str, skip: int = Query(0, ge=0), limit: int = Query(25, ge=1, le=100),
+                      tenant_id: str = Depends(get_tenant_id), user: dict = Depends(get_current_user)) -> dict[str, Any]:
+    from app.services.studio_draft_store import history_event
+    entry = _storage_call(history_event, tenant_id, None, event_id=entry_id)
+    if entry is None: raise HTTPException(404, "historie_nicht_gefunden")
+    return studio_history_diff(entry["draft_id"], entry_id, skip, limit, tenant_id, user)
+
+
+@router.post("/drafts/{draft_id}/simulate", response_model=StudioSimulationOut, summary="Reale Prozesskette fuer unveraenderliche Review-Fassung pruefen")
+def studio_simulate(draft_id: str, body: StudioRevisionIn,
+                    tenant_id: str = Depends(get_tenant_id),
+                    user: dict = Depends(beleg_write)) -> dict[str, Any]:
+    from app.services.studio_draft_store import simulate_draft
+    from app.core.studio_release import SimulationBusy
+    try:
+        return _storage_call(simulate_draft, tenant_id, draft_id, _actor(user), body.expected_revision, str(body.idempotency_key))
+    except SimulationBusy as error:
+        raise HTTPException(429, "Gemeinsamer Simulationspruefstand belegt; spaeter erneut versuchen", headers={"Retry-After": "5"}) from error
+    except KeyError as error:
+        raise HTTPException(404, "draft_nicht_gefunden") from error
+    except ValueError as error:
+        raise HTTPException(409, str(error)) from error

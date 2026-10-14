@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useReducer, useState } from 'react'
-import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from '@tanstack/react-query'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { Button } from '@/components/ui/button'
@@ -14,9 +14,12 @@ import {
   publishStudioDraft,
   saveStudioDraft,
   submitStudioReview,
+  simulateStudioDraft,
+  type StudioSimulationResult,
   validateStudioDraft,
   type StudioReport,
 } from '@/lib/api/studio'
+import { StudioHistoryPanel } from './StudioHistoryPanel'
 import { emptyStudioDraft } from './studio-defaults'
 import { mockRowsFor, studioReducer } from './studio-reducer'
 
@@ -29,10 +32,13 @@ export function ScreenStudioPage(): JSX.Element {
   const [savedSignature, setSavedSignature] = useState<string>()
   const [savedRevision, setSavedRevision] = useState<string>()
   const [savedStatus, setSavedStatus] = useState<string>()
+  const [simulation, setSimulation] = useState<StudioSimulationResult>()
   const [publishedRoute, setPublishedRoute] = useState<string>()
   const [report, setReport] = useState<StudioReport>()
   const [pending, setPending] = useState<string>()
   const [feedback, setFeedback] = useState<string | null>(null)
+  const queryClient = useQueryClient()
+  const refreshHistory = (id: string) => { void queryClient.invalidateQueries({ queryKey: ['platform/studio-history', id] }) }
   const catalog = useQuery({ queryKey: ['studio-catalog'], queryFn: fetchStudioCatalog })
   const drafts = useQuery({ queryKey: ['studio-drafts'], queryFn: fetchStudioDrafts })
   const plan = useMemo(() => compileRenderPlanFromScreenDefinition(definition), [definition])
@@ -105,6 +111,12 @@ export function ScreenStudioPage(): JSX.Element {
         <div className="space-y-2">
           <Label htmlFor="studio-title">Titel</Label>
           <Input id="studio-title" value={definition.title} onChange={(event) => dispatch({ type: 'setTitle', title: event.target.value })} />
+          <Label htmlFor="studio-domain">Fachbereich</Label>
+          <select id="studio-domain" className="w-full rounded border bg-background px-2 py-1.5 text-sm" value={definition.domain}
+            onChange={(event) => dispatch({ type: 'setDomain', domain: event.target.value as typeof definition.domain })}>
+            {[...new Set([definition.domain, 'agrar', 'einkauf', 'crm', 'finance', 'lager'])].map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+          <Button type="button" variant="outline" disabled={Boolean(pending)} onClick={() => dispatch({ type: 'removeActions' })}>Fachaktionen entfernen</Button>
           <Label htmlFor="studio-floorplan">Floorplan</Label>
           <select id="studio-floorplan" className="w-full rounded border bg-background px-2 py-1.5 text-sm" value={definition.layout?.floorplan ?? 'worklist'}
             onChange={(event) => dispatch({ type: 'setFloorplan', floorplan: event.target.value as never })}>
@@ -127,12 +139,13 @@ export function ScreenStudioPage(): JSX.Element {
           {definition.tables?.[0]?.columns.length ?? 0} Felder
         </p>
         <div className="flex flex-wrap gap-2">
-          <Button type="button" disabled={Boolean(pending)} onClick={() => void run('save', async () => {
+          <Button type="button" disabled={Boolean(pending) || !catalog.data?.permissions?.canDesign} onClick={() => void run('save', async () => {
             const saved = await saveStudioDraft(definition, draftId, savedRevision)
             setDraftId(saved.id)
             setSavedSignature(JSON.stringify(saved.definition))
             setSavedRevision(saved.revision)
             setSavedStatus(saved.status)
+            refreshHistory(saved.id)
             void drafts.refetch()
             setPublishedRoute(undefined)
             setReport(saved)
@@ -140,22 +153,31 @@ export function ScreenStudioPage(): JSX.Element {
           })}>
             {pending === 'save' ? 'Speichern…' : 'Speichern'}
           </Button>
-          <Button type="button" variant="outline" disabled={!draftId || !savedRevision || savedStatus !== 'draft' || dirty || Boolean(pending)} onClick={() => void run('review', async () => {
+          <Button type="button" variant="outline" disabled={!draftId || !savedRevision || savedStatus !== 'draft' || dirty || Boolean(pending) || !catalog.data?.permissions?.canDesign} onClick={() => void run('review', async () => {
             if (dirty || !savedRevision || savedStatus !== 'draft') return
             const reviewed = await submitStudioReview(draftId ?? '', savedRevision)
             setSavedRevision(reviewed.revision)
             setSavedStatus(reviewed.status)
+            refreshHistory(draftId ?? '')
             void drafts.refetch()
             setFeedback('Zur Prüfung gegeben.')
           })}>
             Prüfung
           </Button>
-          <Button type="button" variant="outline" disabled={!draftId || !savedRevision || savedStatus !== 'review' || dirty || Boolean(pending) || !report?.canPublish} onClick={() => void run('publish', async () => {
+          <Button type="button" variant="outline" disabled={!draftId || !savedRevision || savedStatus !== 'review' || dirty || Boolean(pending) || !catalog.data?.permissions?.canDesign} onClick={() => void run('simulation', async () => {
+            if (!draftId || !savedRevision || dirty) return
+            const checked = await simulateStudioDraft(draftId, savedRevision)
+            setSimulation(checked.simulation)
+            refreshHistory(draftId)
+            setFeedback(checked.simulation.passed ? 'Prozesssimulation bestanden.' : 'Prozesssimulation fehlgeschlagen; Freigabe gesperrt.')
+          })}>Prozess simulieren</Button>
+          <Button type="button" variant="outline" disabled={!draftId || !savedRevision || savedStatus !== 'review' || dirty || Boolean(pending) || !report?.definitionReady || !catalog.data?.permissions?.canPublish || !simulation?.passed || simulation.candidate_revision !== savedRevision} onClick={() => void run('publish', async () => {
             if (dirty || !savedRevision || savedStatus !== 'review') return
             const published = await publishStudioDraft(draftId ?? '', savedRevision)
             setReport(published)
             setSavedRevision(published.revision)
             setSavedStatus(published.status)
+            refreshHistory(draftId ?? '')
             void drafts.refetch()
             setPublishedRoute(published.route)
             setFeedback(`Veröffentlicht als ${published.status}.`)
@@ -164,6 +186,7 @@ export function ScreenStudioPage(): JSX.Element {
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">Freigabe erfolgt durch eine andere angemeldete menschliche Administration.</p>
+        {catalog.data && !catalog.data.permissions?.canPublish && <p className="text-sm">Ihre Anmeldung besitzt kein Studio-Freigaberecht.</p>}
         {draftId && dirty ? <p role="status">Änderungen zuerst speichern, danach erneut prüfen.</p> : null}
         {feedback ? <p className="text-sm" role="status">{feedback}</p> : null}
         {publishedRoute && !dirty ? (
@@ -188,9 +211,11 @@ export function ScreenStudioPage(): JSX.Element {
         ) : (
           <p className="text-sm text-muted-foreground">Keine Studio-Verletzungen.</p>
         )}
-        <p className="text-sm">{report?.canPublish ? 'Publish möglich.' : 'Publish gesperrt, bis Gates grün sind.'}</p>
+        <p className="text-sm">{report?.definitionReady && catalog.data?.permissions?.canPublish && simulation?.passed && simulation.candidate_revision === savedRevision && !dirty ? 'Freigabe nach menschlicher Prüfung möglich.' : 'Freigabe gesperrt, bis Vertragsprüfung und Prozesssimulation bestanden sind.'}</p>
         {(report?.readiness.errors ?? []).map((item) => <p key={item} className="text-sm text-destructive">{item}</p>)}
       </aside>
+      {simulation && <p role="status">Simulation: {simulation.passed ? 'bestanden' : 'fehlgeschlagen'}{simulation.failed_checks?.length ? ` (${simulation.failed_checks.join(', ')})` : ''}</p>}
+      {draftId && <StudioHistoryPanel key={`${draftId}:${savedRevision ?? ""}`} draftId={draftId} />}
     </div>
   )
 }

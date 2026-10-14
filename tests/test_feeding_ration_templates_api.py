@@ -93,8 +93,19 @@ def test_template_rejects_cross_group_copy_and_stale_version() -> None:
 
 
 def test_template_endpoints_enforce_roles() -> None:
-    denied = client.get(
-        f"{BASE}/feeding/businesses/unknown/ration-templates",
-        headers={"Authorization": "Bearer dev-token-no-roles", "X-Tenant-Id": TENANT},
-    )
+    """Eine Anmeldung ohne Futtermittelrolle wird abgewiesen (ausdruecklicher Nutzer ohne Rollen)."""
+    from app.auth.deps import get_current_user
+
+    vorher = app.dependency_overrides.get(get_current_user)
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "ohne-rolle", "roles": []}
+    try:
+        denied = client.get(
+            f"{BASE}/feeding/businesses/unknown/ration-templates",
+            headers={"Authorization": "Bearer dev-token", "X-Tenant-Id": TENANT},
+        )
+    finally:
+        if vorher is None:
+            app.dependency_overrides.pop(get_current_user, None)
+        else:
+            app.dependency_overrides[get_current_user] = vorher
     assert denied.status_code in {401, 403}

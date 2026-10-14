@@ -25,12 +25,13 @@ from app.core.exceptions import ValidationFailedError
 from app.finance.steuerschluessel import Steuergruppe, Steuerklaerung, Vorsteuergruppe
 from app.services.finance_eingangsrechnung_buchung import kreditorenkonto
 from app.services.finance_transaction_service import FinanceTransactionService
+from app.core.business_time import business_today
 
 FORDERUNGEN = "1400"  # wie SalesPostingService.ACCOUNT_RECEIVABLES
 
 
 def _tag(wert: Any) -> date:
-    return date.fromisoformat(str(wert or date.today().isoformat())[:10])
+    return date.fromisoformat(str(wert or business_today().isoformat())[:10])
 
 
 def _mindere_op(db: Session, tenant_id: str, konto_typ: str, rechnungsnummer: Optional[str], brutto: Decimal) -> None:

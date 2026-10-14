@@ -20,7 +20,7 @@ from conftest import skip_if_db_unavailable
 
 @pytest.fixture
 def client():
-    from main import app
+    from app.main import app
     return TestClient(app, raise_server_exceptions=False)
 
 

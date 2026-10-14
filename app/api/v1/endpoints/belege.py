@@ -21,6 +21,7 @@ from app.services import docflow_belegaktionen
 from app.services.docflow_belegadapter import lies_beleg
 from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
 from app.services.docflow_service import DocflowService
+from app.api.v1.schemas.base import TypedObjectOut
 
 router = APIRouter()
 
@@ -29,7 +30,7 @@ def _lies(belegart: str, beleg_id: str, tenant_id: str, db: Session, nutzer: Any
     return beleg_lesen(belegart, beleg_id, tenant_id, db, nutzer)
 
 
-@router.get("/{belegart}/{beleg_id}/kopf", response_model=dict[str, Any], summary="Belegkopf fuer die Belegmaske")
+@router.get("/{belegart}/{beleg_id}/kopf", response_model=TypedObjectOut, summary="Belegkopf fuer die Belegmaske")
 def beleg_kopf(
     belegart: str,
     beleg_id: str,
@@ -63,7 +64,7 @@ def beleg_kopf(
     return kopf
 
 
-@router.get("/{belegart}/{beleg_id}/tabs/{reiter}", response_model=dict[str, Any], summary="Reiter der Belegmaske")
+@router.get("/{belegart}/{beleg_id}/tabs/{reiter}", response_model=TypedObjectOut, summary="Reiter der Belegmaske")
 def beleg_reiter(
     belegart: str,
     beleg_id: str,

@@ -10,6 +10,7 @@ from app.api.v1.endpoints import dunning
 from app.auth.deps import get_current_user
 from app.core.database import get_db
 from app.core.exceptions import register_domain_exception_handlers
+from testgrenze import ALLE_FACHROLLEN, ersetze_bearer, ersetze_mandant
 
 
 class _FakeResult:
@@ -232,6 +233,8 @@ class FakeDb:
 
 def _build_client(db: FakeDb) -> TestClient:
     app = FastAPI()
+    ersetze_mandant(app)
+    ersetze_bearer(app, *ALLE_FACHROLLEN)
     app.include_router(dunning.router, prefix="/finance")
     register_domain_exception_handlers(app)
     app.dependency_overrides[get_db] = lambda: db

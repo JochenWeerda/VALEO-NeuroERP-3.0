@@ -7,10 +7,12 @@ from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints.personal import router
 from app.core.database import get_db
+from testgrenze import ersetze_mandant
 
 
 _HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "tenant-hrm"}
 _APP = FastAPI()
+ersetze_mandant(_APP)
 _APP.include_router(router, prefix="/api/v1")
 
 

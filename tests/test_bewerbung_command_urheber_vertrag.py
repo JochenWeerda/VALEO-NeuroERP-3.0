@@ -303,13 +303,18 @@ class TestAnmeldekennung:
             ("5f0c2a9e-0b7d-4e55-9d0e-1c2a3b4c5d6e",)]
 
     def test_token_liefert_den_anmeldenamen(self, monkeypatch):
+        from types import SimpleNamespace
+
         from fastapi.security import HTTPAuthorizationCredentials
 
         from app.auth import deps
 
         def anmeldung(**claims):
-            monkeypatch.setattr(deps, "decode_token", lambda _t: {"sub": "uuid-1", "roles": ["x"], **claims})
-            return deps.get_current_user(HTTPAuthorizationCredentials(scheme="Bearer", credentials="jwt"))
+            # Die geprueften Claims liegen im Request-Zustand (seit 12.10.2026 ohne eigenes decode_token).
+            zustand = SimpleNamespace(tenant_verified=True, authenticated_token="jwt",
+                                      token_claims={"sub": "uuid-1", "roles": ["x"], **claims})
+            return deps.get_current_user(SimpleNamespace(state=zustand),
+                                         HTTPAuthorizationCredentials(scheme="Bearer", credentials="jwt"))
 
         assert anmeldung(preferred_username="h.janssen", name="Hilke Janssen")["name"] == "h.janssen"
         assert anmeldung(name="Hilke Janssen")["name"] == "Hilke Janssen"

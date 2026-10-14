@@ -89,10 +89,9 @@ def leer(engine, stamm):
 def echte_anmeldung(_enable_dev_token):
     """Der echte Dev-Token-Weg: Die Inventar-Rollenpruefung liest die Token-Claims,
     die der conftest-Ersatz fuer ``require_bearer_token`` nie setzt."""
-    from app.core import security
-    from app.main import app
 
-    app.dependency_overrides.pop(security.require_bearer_token, None)
+    # Bis 12.10.2026 wurde hier die conftest-Identitaet abgeschaltet, um den Dev-Token-Weg zu nehmen; den
+    # gibt es nicht mehr. Die conftest-Identitaet setzt die Token-Claims (Rolle) selbst.
     yield
 
 

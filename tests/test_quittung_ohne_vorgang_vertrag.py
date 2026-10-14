@@ -26,6 +26,7 @@ import uuid
 from datetime import date, timedelta
 
 import pytest
+from testgrenze import ALLE_FACHROLLEN
 
 pytestmark = pytest.mark.integration
 
@@ -623,7 +624,7 @@ def _als_personalbuero():
     @contextmanager
     def angemeldet():
         app.dependency_overrides[deps.get_current_user] = lambda: {
-            "sub": "5f0c2a9e-0b7d-4e55-9d0e-1c2a3b4c5d6e", "name": "t.de-vries", "roles": list(deps._DEV_ROLES)}
+            "sub": "5f0c2a9e-0b7d-4e55-9d0e-1c2a3b4c5d6e", "name": "t.de-vries", "roles": list(ALLE_FACHROLLEN)}
         try:
             yield
         finally:

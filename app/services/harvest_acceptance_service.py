@@ -102,14 +102,25 @@ class HarvestAcceptanceService:
         self.db = db
         self.tenant_id = tenant_id
 
-    def _get_or_raise(self, acceptance_id: str) -> HarvestAcceptance:
-        obj = self.db.query(HarvestAcceptance).filter(
+    def _get_or_raise(self, acceptance_id: str, *, locked: bool = False) -> HarvestAcceptance:
+        query = self.db.query(HarvestAcceptance).filter(
             HarvestAcceptance.id == acceptance_id,
             HarvestAcceptance.tenant_id == self.tenant_id,
-        ).first()
+        )
+        if locked:
+            query = query.with_for_update().populate_existing()
+        obj = query.first()
         if not obj:
             raise EntityNotFoundError("HarvestAcceptance", acceptance_id)
         return obj
+
+    def _validate_references(self, values: dict) -> None:
+        for field, model in (("customer_id", Customer), ("article_id", Article),
+                             ("warehouse_id", Warehouse), ("weighing_ticket_id", WeighingTicket),
+                             ("contract_id", AgrarContract)):
+            reference = values.get(field)
+            if reference and self.db.query(model).filter(model.id == reference, model.tenant_id == self.tenant_id).first() is None:
+                raise ValidationFailedError("Annahmereferenz nicht im autorisierten Mandanten vorhanden.")
 
     def list_acceptances(
         self,
@@ -320,12 +331,15 @@ class HarvestAcceptanceService:
         return _to_dict_with_positions(obj, self.db)
 
     def update_acceptance(self, acceptance_id: str, update_data: dict, user_id: Optional[str]) -> Any:
-        from app.api.v1.endpoints.harvest_acceptance import HarvestAcceptanceOut
-        obj = self._get_or_raise(acceptance_id)
+        from app.api.v1.endpoints.harvest_acceptance import HarvestAcceptanceOut, HarvestAcceptanceUpdate
+        obj = self._get_or_raise(acceptance_id, locked=True)
 
         if obj.release_status not in ("draft", "provisional"):
             raise ValidationFailedError(f"Cannot update harvest acceptance in status '{obj.release_status}'. Only 'draft' or 'provisional' can be updated.")
 
+        if set(update_data) - set(HarvestAcceptanceUpdate.model_fields):
+            raise ValidationFailedError("Nicht unterstuetzte oder unveraenderliche Annahmefelder.")
+        self._validate_references(update_data)
         effective_data = {
             "acceptance_number": obj.acceptance_number,
             "customer_id": obj.customer_id,
@@ -368,7 +382,7 @@ class HarvestAcceptanceService:
         return {"origin_nuts2_code": None, "message": "Could not derive NUTS-2 code from postal code. Please enter manually."}
 
     def cancel(self, acceptance_id: str, reason: str) -> Any:
-        obj = self._get_or_raise(acceptance_id)
+        obj = self._get_or_raise(acceptance_id, locked=True)
         if obj.release_status in {"final", "credit_note_created", "paid"} or obj.invoice_id:
             raise ValidationFailedError("Endgültig freigegebene Annahmen können nicht storniert werden")
         if obj.release_status == "cancelled":
@@ -498,7 +512,10 @@ class HarvestAcceptanceService:
         from modules.agrar.repositories.self_billing_repo import SelfBillingRepositoryImpl
         from modules.agrar.services.tax_profile_service import get_taxation_type_for_supplier
 
-        obj = self._get_or_raise(acceptance_id)
+        from sqlalchemy import text
+        self.db.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"),
+                        {"key": "valeo.harvest.release:" + self.tenant_id})
+        obj = self._get_or_raise(acceptance_id, locked=True)
         if obj.release_status in {"final", "credit_note_created", "paid"} or obj.invoice_id:
             raise ValidationFailedError("Harvest acceptance is already final")
         if obj.release_status == "cancelled":
@@ -506,6 +523,8 @@ class HarvestAcceptanceService:
         if release_status not in ("provisional", "final"):
             raise ValidationFailedError("release_status must be 'provisional' or 'final'")
 
+        self._validate_references({field: getattr(obj, field, None) for field in
+                                   ("customer_id", "article_id", "warehouse_id", "weighing_ticket_id", "contract_id")})
         # Hole Nettogewicht (für Stock Movement und Partie/Charge)
         net_weight_kg = Decimal("0")
         if obj.weighing_ticket_id:
@@ -519,6 +538,9 @@ class HarvestAcceptanceService:
             ).all()
             if positions:
                 net_weight_kg = sum(pos.quantity_kg or Decimal("0") for pos in positions)
+
+        if release_status == "final" and (not net_weight_kg.is_finite() or net_weight_kg <= 0):
+            raise ValidationFailedError("Endgueltige Annahme erfordert ein positives endliches Nettogewicht.")
 
         # Erstelle Wareneingang (Stock Movement), wenn gewünscht und noch nicht vorhanden
         if create_stock_movement and not obj.stock_movement_id:
@@ -574,23 +596,20 @@ class HarvestAcceptanceService:
 
         # Belegbruch schließen (AGRAR-KON-001): Kontrakt-Restmenge reduzieren bei final release
         if release_status == "final" and obj.contract_id and net_weight_kg > 0:
-            try:
-                contract = self.db.query(AgrarContract).filter(
-                    AgrarContract.id == obj.contract_id,
-                    AgrarContract.tenant_id == self.tenant_id,
-                ).first()
-                if contract:
-                    from decimal import Decimal as _Dec
-                    new_remaining = max(
-                        _Dec("0"),
-                        (contract.remaining_quantity_kg or _Dec("0")) - net_weight_kg,
-                    )
-                    contract.remaining_quantity_kg = new_remaining
-                    contract.status = (
-                        "fulfilled" if new_remaining == 0 else "partially_allocated"
-                    )
-            except Exception:  # noqa: BLE001 — Kontrakt-Update nicht kritisch für Freigabe
-                pass
+            contract = self.db.query(AgrarContract).filter(
+                AgrarContract.id == obj.contract_id,
+                AgrarContract.tenant_id == self.tenant_id,
+            ).first()
+            if contract:
+                from decimal import Decimal as _Dec
+                new_remaining = max(
+                    _Dec("0"),
+                    (contract.remaining_quantity_kg or _Dec("0")) - net_weight_kg,
+                )
+                contract.remaining_quantity_kg = new_remaining
+                contract.status = (
+                    "fulfilled" if new_remaining == 0 else "partially_allocated"
+                )
 
         # Erstelle Partie/Charge (wenn final und noch nicht vorhanden)
         if release_status == "final":
@@ -615,13 +634,21 @@ class HarvestAcceptanceService:
                 raise ValidationFailedError("Cannot create credit note: total_gross_amount_eur is not set. Please calculate settlement first.")
 
             vat_rate_percent = Decimal("0")
-            if obj.vat_rate_percent:
-                vat_rate_percent = obj.vat_rate_percent
-            else:
-                vat_rate_percent = Decimal("19.0")
+            if obj.vat_rate_percent is None:
+                raise ValidationFailedError("Expliziter Steuersatz fuer Self-Billing fehlt.")
+            vat_rate_percent = obj.vat_rate_percent
 
             billing_repo = SelfBillingRepositoryImpl(self.db, commit_on_success=False)
+            from app.services.number_range_service import NumberRangeService
+            try:
+                invoice_number = NumberRangeService(self.db).next_number("self_billing", self.tenant_id)
+            except ValueError as error:
+                raise ValidationFailedError("Aktiver Self-Billing-Nummernkreis fehlt.") from error
+            # Leave room for SB- and the canonical STORNO- prefix in the 20-char journal field.
+            if len(invoice_number) > 10:
+                raise ValidationFailedError("Self-Billing-Nummernkreis muss hoechstens 10 Zeichen liefern.")
             credit_note_input = CreditNoteCreate(
+                invoice_number=invoice_number,
                 tenant_id=self.tenant_id,
                 harvest_acceptance_id=acceptance_id,
                 total_net_amount_eur=obj.total_net_amount_eur or Decimal("0"),
@@ -697,7 +724,11 @@ class HarvestAcceptanceService:
         from modules.agrar.services.harvest_calculator import HarvestCalculationInput, calculate_harvest_settlement
         from app.core.uuid7 import uuid7 as _uuid7
 
-        obj = self._get_or_raise(acceptance_id)
+        obj = self._get_or_raise(acceptance_id, locked=True)
+        if obj.release_status not in {"draft", "provisional"} or obj.invoice_id:
+            raise ValidationFailedError("Festgeschriebene Annahme erfordert einen gesonderten Korrekturprozess.")
+        self._validate_references({field: getattr(obj, field, None) for field in
+                                   ("customer_id", "article_id", "warehouse_id", "weighing_ticket_id", "contract_id")})
 
         # Hole Nettogewicht aus Wiegeschein
         delivered_quantity_kg = Decimal("0")
@@ -832,7 +863,7 @@ class HarvestAcceptanceService:
         vat_rate_percent = None
         if obj.article_id:
             article = self.db.query(Article).filter(Article.id == obj.article_id).first()
-            if article and article.mehrwertsteuer_prozent:
+            if article and article.mehrwertsteuer_prozent is not None:
                 vat_rate_percent = article.mehrwertsteuer_prozent
 
         # Erstelle Drying Rule Repository (falls crop_code vorhanden)
@@ -872,7 +903,7 @@ class HarvestAcceptanceService:
             warnings.append("Kein Preis gefunden. Bitte manuell eingeben oder Vertrag/Artikel prüfen.")
 
         # Berechne
-        result = calculate_harvest_settlement(calc_input, vat_rate_percent=Decimal(str(vat_rate_percent)) if vat_rate_percent else None)
+        result = calculate_harvest_settlement(calc_input, vat_rate_percent=Decimal(str(vat_rate_percent)) if vat_rate_percent is not None else None)
 
         # Füge Warnungen hinzu
         if warnings:
@@ -935,7 +966,7 @@ class HarvestAcceptanceService:
             "total_net_amount_eur": float(result.total_net_amount_eur),
             "total_vat_amount_eur": float(result.total_vat_amount_eur),
             "total_gross_amount_eur": float(result.total_gross_amount_eur),
-            "vat_rate_percent": float(result.vat_rate_percent) if result.vat_rate_percent else None,
+            "vat_rate_percent": float(result.vat_rate_percent) if result.vat_rate_percent is not None else None,
             "warnings": result.warnings,
             "price_source": price_source,
         }

@@ -4,7 +4,7 @@ Validates that endpoints are reachable and not blocked by auth.
 """
 
 from fastapi.testclient import TestClient
-from main import app
+from app.main import app
 
 client = TestClient(app, raise_server_exceptions=False)
 AUTH_HEADERS = {"Authorization": "Bearer dev-token"}

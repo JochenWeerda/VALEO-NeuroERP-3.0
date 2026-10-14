@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import inspect
 from sqlalchemy.exc import SQLAlchemyError
 
-from main import app
+from app.main import app
 from app.core.database import get_db, SessionLocal
 from app.infrastructure.models import User, Customer, AuditLog, Tenant
 

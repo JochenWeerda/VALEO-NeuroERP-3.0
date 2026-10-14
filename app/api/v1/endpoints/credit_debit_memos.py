@@ -686,6 +686,8 @@ def _book_memo_to_store(
     journal_ref = f"JRN-{datetime.now().strftime('%Y%m%d')}-{memo_id[:8].upper()}"
     booking = {
         "id": uuid7(),
+        # Der Buchungsbeleg gehoert dem Mandanten des Memos (ohne Mandant nimmt der Belegspeicher nichts an).
+        "tenantId": memo.get("tenantId"),
         "memoId": memo_id,
         "memoType": memo_type,
         "journalRef": journal_ref,

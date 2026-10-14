@@ -1,15 +1,46 @@
 """
-Inventory-specific authentication and authorization middleware
+Inventory-specific authentication and authorization.
+
+Seit 14.10.2026 (CI-GRUEN): Rollen kommen aus der geprueften Anmeldung — den Fachrollen des Hauses
+(``LAGER_LESEN``/``LAGER_BEARBEITEN``/``LAGER_ADMIN``, ``admin``, ``manager``) — und nur ergaenzend aus der lokalen
+Benutzertabelle (Altbestand ``inventory_manager``/``inventory_user``). Bis dahin liess ein Token mit dem Claim
+``token_type == "dev"`` jede Pruefung aus; Dev-Tokens gibt es seit 12.10.2026 nicht mehr, ein solcher Claim haette nur
+noch ueber einen fehlkonfigurierten Provider kommen koennen und dann alles geoeffnet. Wer weder eine Fachrolle traegt
+noch als aktiver lokaler Benutzer mit Lagerrolle gefuehrt ist, bekommt 403.
 """
 
 import json
+
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
+from ....auth.oidc import extract_roles
 from ....core.config import settings
 from ....core.database import get_db
 from ....core.security import require_bearer_token
 from ....infrastructure.models import User as UserModel
+
+LESEN = frozenset({"admin", "manager", "LAGER_LESEN", "LAGER_BEARBEITEN", "LAGER_ADMIN",
+                   "inventory_manager", "inventory_user"})
+VERWALTEN = frozenset({"admin", "LAGER_ADMIN", "inventory_manager"})
+
+
+def _rollen(request: Request, db: Session) -> set[str]:
+    claims = getattr(request.state, "token_claims", None) or {}
+    rollen = set(extract_roles(claims))
+    user_id = claims.get("sub") or claims.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="User ID not found in token")
+    if rollen & LESEN:
+        return rollen
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user or not user.is_active:
+        raise HTTPException(status_code=403, detail="User not found or inactive")
+    try:
+        lokal = json.loads(user.roles or "[]") if isinstance(user.roles or "[]", str) else (user.roles or [])
+    except (json.JSONDecodeError, TypeError) as exc:
+        raise HTTPException(status_code=403, detail="Invalid user roles configuration") from exc
+    return rollen | {str(r) for r in lokal}
 
 
 def require_inventory_access(
@@ -17,42 +48,9 @@ def require_inventory_access(
     token: str = Depends(require_bearer_token),
     db: Session = Depends(get_db)
 ) -> str:
-    """
-    Require inventory access permissions.
-    Checks if user has inventory-related roles or permissions.
-    """
-    # Get user claims from request state
-    claims = getattr(request.state, 'token_claims', {})
-
-    # For development token, allow all access
-    if claims.get('token_type') == 'dev':
-        return token
-
-    # Extract user ID from JWT claims
-    user_id = claims.get('sub') or claims.get('user_id')
-    if not user_id:
-        raise HTTPException(status_code=401, detail="User ID not found in token")
-
-    # Check user permissions in database
-    user = db.query(UserModel).filter(UserModel.id == user_id).first()
-    if not user or not user.is_active:
-        raise HTTPException(status_code=403, detail="User not found or inactive")
-
-    # Check roles - allow if user has inventory, admin, or manager roles
-    user_roles = user.roles or "[]"
-    try:
-        roles = json.loads(user_roles) if isinstance(user_roles, str) else user_roles
-        allowed_roles = ['admin', 'inventory_manager', 'inventory_user', 'manager']
-
-        if not any(role in roles for role in allowed_roles):
-            raise HTTPException(
-                status_code=403,
-                detail="Insufficient permissions for inventory access"
-            )
-    except (json.JSONDecodeError, TypeError):
-        # If roles parsing fails, deny access for security
-        raise HTTPException(status_code=403, detail="Invalid user roles configuration")
-
+    """Lagerzugriff: eine Lese-, Bearbeitungs- oder Verwaltungsrolle."""
+    if not _rollen(request, db) & LESEN:
+        raise HTTPException(status_code=403, detail="Insufficient permissions for inventory access")
     return token
 
 
@@ -61,41 +59,9 @@ def require_inventory_admin(
     token: str = Depends(require_inventory_access),
     db: Session = Depends(get_db)
 ) -> str:
-    """
-    Require inventory admin permissions.
-    Only allows users with admin or inventory_manager roles.
-    """
-    # Get user claims from request state
-    claims = getattr(request.state, 'token_claims', {})
-
-    # For development token, allow all access
-    if claims.get('token_type') == 'dev':
-        return token
-
-    # Extract user ID from JWT claims
-    user_id = claims.get('sub') or claims.get('user_id')
-    if not user_id:
-        raise HTTPException(status_code=401, detail="User ID not found in token")
-
-    # Check user permissions in database
-    user = db.query(UserModel).filter(UserModel.id == user_id).first()
-    if not user or not user.is_active:
-        raise HTTPException(status_code=403, detail="User not found or inactive")
-
-    # Check for admin roles
-    user_roles = user.roles or "[]"
-    try:
-        roles = json.loads(user_roles) if isinstance(user_roles, str) else user_roles
-        admin_roles = ['admin', 'inventory_manager']
-
-        if not any(role in roles for role in admin_roles):
-            raise HTTPException(
-                status_code=403,
-                detail="Admin permissions required for this operation"
-            )
-    except (json.JSONDecodeError, TypeError):
-        raise HTTPException(status_code=403, detail="Invalid user roles configuration")
-
+    """Lagerverwaltung: ``LAGER_ADMIN``, ``admin`` oder lokal ``inventory_manager``."""
+    if not _rollen(request, db) & VERWALTEN:
+        raise HTTPException(status_code=403, detail="Admin permissions required for this operation")
     return token
 
 
@@ -110,7 +76,7 @@ def get_current_tenant_id(
     ``tenant_id``-Query-Parameter, der den Mandanten ueberschrieb. Wer eine fremde
     Kennung in die URL schrieb, las und buchte im fremden Lager.
 
-    Traegt ein echtes Token einen Mandanten, muss er mit dem Kontext uebereinstimmen.
+    Traegt das Token einen Mandanten, muss er mit dem Kontext uebereinstimmen.
     """
     tenant_id = (
         getattr(request.state, "tenant_id", None)
@@ -119,10 +85,9 @@ def get_current_tenant_id(
     ).strip() or settings.DEFAULT_TENANT_ID
 
     claims = getattr(request.state, 'token_claims', {}) or {}
-    if claims.get('token_type') != 'dev':
-        token_tenant = claims.get('tenant_id')
-        if token_tenant and token_tenant != tenant_id:
-            raise HTTPException(status_code=403, detail="Access denied: tenant mismatch")
+    token_tenant = claims.get('tenant_id')
+    if token_tenant and token_tenant != tenant_id:
+        raise HTTPException(status_code=403, detail="Access denied: tenant mismatch")
 
     return tenant_id
 
@@ -132,20 +97,8 @@ def require_tenant_access(
     request: Request,
     db: Session = Depends(get_db)
 ) -> str:
-    """
-    Ensure user has access to the specified tenant.
-    """
-    claims = getattr(request.state, 'token_claims', {})
-
-    # For development token, allow all tenant access
-    if claims.get('token_type') == 'dev':
-        return tenant_id
-
-    user_tenant_id = claims.get('tenant_id')
-    if user_tenant_id != tenant_id:
-        raise HTTPException(
-            status_code=403,
-            detail="Access denied: tenant mismatch"
-        )
-
+    """Der genannte Mandant muss der des Tokens sein."""
+    claims = getattr(request.state, 'token_claims', {}) or {}
+    if claims.get('tenant_id') != tenant_id:
+        raise HTTPException(status_code=403, detail="Access denied: tenant mismatch")
     return tenant_id

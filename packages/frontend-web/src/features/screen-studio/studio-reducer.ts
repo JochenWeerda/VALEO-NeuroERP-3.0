@@ -3,6 +3,8 @@ import type { ScreenDefinition, ScreenFieldDefinition, ScreenTableColumn, Screen
 export type StudioAction =
   | { type: 'replace'; definition: ScreenDefinition }
   | { type: 'setTitle'; title: string }
+  | { type: 'setDomain'; domain: ScreenDefinition['domain'] }
+  | { type: 'removeActions' }
   | { type: 'setFloorplan'; floorplan: NonNullable<ScreenDefinition['layout']>['floorplan'] }
   | { type: 'setColumnNavigation'; columnNavigation: NonNullable<ScreenDefinition['layout']>['columnNavigation'] }
   | { type: 'setDensity'; density: NonNullable<ScreenDefinition['layout']>['density'] }
@@ -16,6 +18,10 @@ export function studioReducer(state: ScreenDefinition, action: StudioAction): Sc
       return action.definition
     case 'setTitle':
       return { ...state, title: action.title }
+    case 'setDomain':
+      return { ...state, domain: action.domain, agentContract: state.agentContract ? { ...state.agentContract, domain: action.domain } : undefined }
+    case 'removeActions':
+      return removeStudioActions(state)
     case 'setFloorplan':
       return { ...state, layout: { ...state.layout, floorplan: action.floorplan } }
     case 'setColumnNavigation':
@@ -53,4 +59,17 @@ export function mockRowsFor(definition: ScreenDefinition): Record<string, Record
       return row
     }),
   ]))
+}
+
+
+export function removeStudioActions(definition: ScreenDefinition): ScreenDefinition {
+  const cleared = new Set(['actions', 'rowActions', 'availableActions', 'editableFields'])
+  function walk(value: unknown): unknown {
+    if (Array.isArray(value)) return value.map(walk)
+    if (value && typeof value === 'object') return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, cleared.has(key) ? [] : walk(item)]),
+    )
+    return value
+  }
+  return walk(definition) as ScreenDefinition
 }

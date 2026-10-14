@@ -9,7 +9,7 @@ import io
 import pytest
 from fastapi.testclient import TestClient
 
-from main import app
+from app.main import app
 
 _HEADERS = {
     "Authorization": "Bearer dev-token",

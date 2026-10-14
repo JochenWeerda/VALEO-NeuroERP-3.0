@@ -315,7 +315,7 @@ def test_silo_transfers_protokolliert():
 # ── API Tests ─────────────────────────────────────────────────────────────────
 
 from fastapi.testclient import TestClient
-from main import app
+from app.main import app
 from app.api.v1.endpoints import supplier_portal
 
 client = TestClient(app, raise_server_exceptions=False, base_url="http://localhost")
