@@ -156,7 +156,9 @@ class NeuroToolExecutionService:
 
     def _get_client(self) -> TestClient:
         if self._client is None:
-            from app.main import app as main_app
+            # Use the same guarded application as the backend container.
+            # app.main is the compatibility test surface, not production.
+            from main import app as main_app
             self._client = TestClient(main_app, raise_server_exceptions=False)
         return self._client
 

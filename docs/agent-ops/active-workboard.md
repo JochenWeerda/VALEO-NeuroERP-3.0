@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## MCP-PROD-TRANSPORT-20261014 — reserviert, Codex
+## MCP-PROD-TRANSPORT-20261014 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Default-Neurotransport verwendet produktive main-App mit denselben REST-Berechtigungen statt Test-Kompatibilitaets-App. **Dateibesitz:** app/services/neuro_tool_execution.py nur _get_client; neuer tests/test_neuro_production_transport.py; eigene QA. **Abnahme:** produktive App ausgewaehlt, 403 wird durchgereicht, Token redigiert, fehlende Produktions-App kein Testfallback. **Risiken:** POST-Schematransformationen, vollstaendiger Kanalabgleich, Historienanzeige und Prozesssimulation bleiben offen. Keine Migration/DB-Neuanlage.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Default-Neurotransport verwendet produktive main-App mit denselben REST-Berechtigungen statt Test-Kompatibilitaets-App. **Dateibesitz:** app/services/neuro_tool_execution.py nur _get_client; neuer tests/test_neuro_production_transport.py; eigene QA. **Abnahme:** produktive App ausgewaehlt, 403 wird durchgereicht, Token redigiert, fehlende Produktions-App kein Testfallback. **Risiken:** POST-Schematransformationen, vollstaendiger Kanalabgleich, Historienanzeige und Prozesssimulation bleiben offen. Keine Migration/DB-Neuanlage.
+
+**Lieferung:** Defaulttransport auf produktive main-App umgestellt, kein Kompatibilitaetsfallback. 16 Transport-/Gatefaelle bestanden, darunter unterschiedliche synthetische Apps mit Produktions-403 und Tokenredaktion. QA: mcp-prod-transport-20261014.md. Vollstaendige fachliche Rechteabnahme und POST-Vertraege weiterhin offen.
 
 ## MCP-REST-BINDING-20261014 — abgeschlossen, Codex
 
