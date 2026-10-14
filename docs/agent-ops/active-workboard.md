@@ -11,9 +11,27 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## DOC-ROUTER-MANDANT-20261014 — in Arbeit, Claude Code
+## STUDIO-STATUS-IDEMPOTENCY-20261014 — abgeschlossen, Codex
 
-**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Der generische Belegrouter
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Einreichung/Publikation/Retirement verwenden explizite UUID-Idempotenzschluessel und atomare Historienergebnisse. **Dateibesitz:** studio_draft_store.py; studio_drafts.py; Studio-Client und bestehende Vertrage/Testhelfer; neue tests/test_studio_status_idempotency.py; eigene QA. **Abnahme:** identische Wiederholung liefert gespeicherten Snapshot ohne zweiten Eintrag, Schluessel an Mandant/Actor/Aktion/Entwurf/Revision gebunden; Rechte vor Replay. **Risiken:** Create/Update-Idempotenz, vollstaendige Korrelationsattribute und Browserabnahme folgen. Historientabelle wiederverwenden, keine Migration/DB-Neuanlage.
+
+**Lieferung:** 119 Python/SQL- und zehn UI-Faelle, danach neun Replay/Historienfaelle mit Kollisions-Rollback bestanden. Statusauftraege speichern UUID-Ergebnis atomar in Historie; identischer Kontext replayt ohne Doppelwirkung, geaenderter Kontext/entzogene Rechte abgewiesen. QA: studio-status-idempotency-20261014.md. Create/Update-Idempotenz, Korrelationsattribute und Browserabnahme offen.
+
+## DOC-EINZELABRUF-MANDANT-20261014 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Einzelabrufe des Dokumentspeichers ausserhalb des Belegrouters treffen nur Belege des eigenen Mandanten: E-Rechnung (XRechnung/ZUGFeRD/CII), Gutschrift/Retoure (Rechnung auf GUTGESCHRIEBEN), Verrechnung von Lieferantengutschriften/-belastungen (offener Betrag und offene Posten), Kopfdaten der Eingangsrechnungsmaske, Statusnachtraege bei Zahlung/Auszifferung/Storno, Lieferantenname. **Dateibesitz:** app/documents/router_helpers.py (neuer Helfer); app/api/v1/endpoints/{sales_invoice_einvoice,sales_credit_notes,credit_debit_memos,finance_clearing,op_skonto_auszifferung,finance_invoices,payment_runs,ap_approval_workflow}.py (nur die Abrufstellen); app/services/{mask_rollout_summary_service,ap_invoice_kernel_posting,agrar_settlement_service}.py (nur die Abrufstellen); tests/test_einzelabruf_mandant.py; docs/quality-assurance/doc-einzelabruf-mandant-20261014.md. **Abnahme:** fremder/mandantenloser Beleg wird weder gelesen noch veraendert; eigene Faelle unveraendert gruen. Keine Migration.
+
+## DOC-ROUTER-MANDANT-20261014 — abgeschlossen, Claude Code
+
+**Lieferung:** `/api/mcp/documents/*` nur im Mandanten der Anmeldung: fremd/mandantenlos 404, Anlage unter fremder
+Nummer 409, Anlage setzt den Mandanten, Liste aus der Datenbank, Sammelloeschung nur eigene, Loeschen ohne stillen
+Rueckfall. Dabei gefunden: der Nachhaltigkeitsexport (CSV/PDF, Portal) rechnete ueber alle Mandanten — behoben.
+16 Tests (frisch); OpenAPI fuer die 15 Pfade nachgezogen. QA: `docs/quality-assurance/doc-router-mandant-20261014.md`.
+**Offen, fuer alle:** keine Rollenpruefung auf dem Router (Rechnungen/Gutschriften anlegen, aendern, loeschen fuer
+jede angemeldete Person); `/customers/search`, `/articles/search`, sechs `/analytics/…` verdeckt und tot; weitere
+Einzelabrufe des Dokumentspeichers (`ap_approval_workflow`, `sales_credit_notes`, … — Liste in der QA) ungeprueft.
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Der generische Belegrouter
 `/api/mcp/documents/*` liest, aendert, loescht und legt Belege nur im Mandanten der Anmeldung an. Bisher trafen
 GET/PUT/DELETE per Nummer jede Belegart jedes Mandanten (auch Gutschriften und Rechnungen, an den Finanzwegen
 vorbei); Anlegen ueberschrieb fremde Belege gleicher Nummer und setzte keinen Mandanten. **Dateibesitz:**

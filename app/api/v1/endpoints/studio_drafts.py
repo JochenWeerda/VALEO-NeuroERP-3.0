@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from uuid import UUID
 from collections.abc import Callable
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -12,7 +13,7 @@ from app.api.v1.endpoints.mask_screen_definition import _check_readiness
 from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS
 from app.core.tenant import get_tenant_id
 from app.auth.deps import get_current_user
-from app.services.studio_draft_store import StudioStorageUnavailable, list_history, get_draft, list_drafts, save_draft, set_status, studio_run_route
+from app.services.studio_draft_store import StudioStorageUnavailable, list_history, get_status_replay, get_draft, list_drafts, save_draft, set_status, studio_run_route
 from app.services.studio_propose import propose_studio_draft
 from app.services.studio_validation import load_studio_catalog, validate_studio_draft
 
@@ -38,6 +39,7 @@ class StudioUpdateIn(StudioDefinitionIn):
 
 
 class StudioRevisionIn(BaseModel):
+    idempotency_key: UUID
     expected_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
@@ -46,6 +48,13 @@ def _storage_call(operation: Callable[..., Any], *args: Any, **kwargs: Any) -> A
         return operation(*args, **kwargs)
     except StudioStorageUnavailable as error:
         raise HTTPException(503, "Studio-Persistenz derzeit nicht verfuegbar") from error
+
+
+def _replay(tenant: str, draft: str, actor: str, action: str, revision: str, key: str):
+    try:
+        return _storage_call(get_status_replay, tenant, draft, actor, action, revision, key)
+    except ValueError as error:
+        raise HTTPException(409, str(error)) from error
 
 
 def _actor(user: dict[str, Any]) -> str:
@@ -182,7 +191,7 @@ def studio_submit_review(
     tenant_id: str = Depends(get_tenant_id),
     user: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
-    return _transition(draft_id, tenant_id, _actor(user), "review", body.expected_revision)
+    return _transition(draft_id, tenant_id, _actor(user), "review", body.expected_revision, str(body.idempotency_key))
 
 
 @router.post("/drafts/{draft_id}/publish", summary="Studio-Entwurf als published_temp freigeben")
@@ -192,16 +201,21 @@ def studio_publish(
     tenant_id: str = Depends(get_tenant_id),
     user: dict = Depends(_publisher),
 ) -> dict[str, Any]:
-    item = _storage_call(get_draft, tenant_id, draft_id)
+    actor, key = _actor(user), str(body.idempotency_key)
+    cached = _replay(tenant_id, draft_id, actor, "published_temp", body.expected_revision, key)
+    item = cached or _storage_call(get_draft, tenant_id, draft_id)
     if item is None:
         raise HTTPException(status_code=404, detail="draft_nicht_gefunden")
-    if body.expected_revision != item["revision"]:
-        raise HTTPException(409, "entwurf_seit_anzeige_geaendert")
+    if not cached and body.expected_revision != item["revision"]:
+        cached = _replay(tenant_id, draft_id, actor, "published_temp", body.expected_revision, key)
+        if cached is None:
+            raise HTTPException(409, "entwurf_seit_anzeige_geaendert")
+        item = cached
     report = _report(item["definition"])
     if not report["canPublish"]:
         raise HTTPException(status_code=400, detail={"violations": report["violations"], "readiness": report["readiness"]})
     try:
-        record = _storage_call(set_status, tenant_id, draft_id, _actor(user), "published_temp", expected_snapshot=item)
+        record = cached or _storage_call(set_status, tenant_id, draft_id, actor, "published_temp", expected_snapshot=item, idempotency_key=key, request_revision=body.expected_revision)
     except PermissionError as error:
         raise HTTPException(status_code=403, detail=str(error)) from error
     except ValueError as error:
@@ -219,17 +233,23 @@ def studio_retire(
     tenant_id: str = Depends(get_tenant_id),
     user: dict = Depends(_publisher),
 ) -> dict[str, Any]:
-    return _transition(draft_id, tenant_id, _actor(user), "retired", body.expected_revision)
+    return _transition(draft_id, tenant_id, _actor(user), "retired", body.expected_revision, str(body.idempotency_key))
 
 
-def _transition(draft_id: str, tenant_id: str, actor: str, status: str, revision: str) -> dict[str, Any]:
+def _transition(draft_id: str, tenant_id: str, actor: str, status: str, revision: str, key: str) -> dict[str, Any]:
+    cached = _replay(tenant_id, draft_id, actor, status, revision, key)
+    if cached is not None:
+        return cached
     item = _storage_call(get_draft, tenant_id, draft_id)
     if item is None:
         raise HTTPException(404, "draft_nicht_gefunden")
     if item["revision"] != revision:
+        cached = _replay(tenant_id, draft_id, actor, status, revision, key)
+        if cached is not None:
+            return cached
         raise HTTPException(409, "entwurf_seit_anzeige_geaendert")
     try:
-        return _storage_call(set_status, tenant_id, draft_id, actor, status, expected_snapshot=item)
+        return _storage_call(set_status, tenant_id, draft_id, actor, status, expected_snapshot=item, idempotency_key=key, request_revision=revision)
     except KeyError as error:
         raise HTTPException(status_code=404, detail="draft_nicht_gefunden") from error
     except PermissionError as error:

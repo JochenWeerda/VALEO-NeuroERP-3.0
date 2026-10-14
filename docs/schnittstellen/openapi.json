@@ -187286,6 +187286,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Sales Delivery Sustainability",
         "tags": [
           "documents"
@@ -187349,6 +187354,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Export Sales Delivery Sustainability Csv",
         "tags": [
           "documents"
@@ -187412,6 +187422,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Export Sales Delivery Sustainability Pdf",
         "tags": [
           "documents"
@@ -187663,6 +187678,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Upsert Customer Inquiry",
         "tags": [
           "documents"
@@ -187848,6 +187868,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Upsert Payment Received",
         "tags": [
           "documents"
@@ -187892,6 +187917,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Upsert Purchase Offer",
         "tags": [
           "documents"
@@ -187936,6 +187966,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Upsert Purchase Order",
         "tags": [
           "documents"
@@ -187980,6 +188015,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Upsert Purchase Request",
         "tags": [
           "documents"
@@ -188024,6 +188064,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Upsert Sales Delivery",
         "tags": [
           "documents"
@@ -188068,6 +188113,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Upsert Sales Invoice",
         "tags": [
           "documents"
@@ -188112,6 +188162,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Upsert Sales Offer",
         "tags": [
           "documents"
@@ -188156,6 +188211,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Upsert Sales Order",
         "tags": [
           "documents"
@@ -188164,7 +188224,7 @@
     },
     "/api/mcp/documents/{doc_type}": {
       "delete": {
-        "description": "Löscht mehrere Belege gleichzeitig",
+        "description": "Löscht mehrere Belege gleichzeitig — nur eigene. Bis 14.10.2026 nur im Prozessspeicher und ohne Mandant.",
         "operationId": "bulk_delete_documents_api_mcp_documents__doc_type__delete",
         "parameters": [
           {
@@ -188213,13 +188273,18 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Bulk Delete Documents",
         "tags": [
           "documents"
         ]
       },
       "get": {
-        "description": "Holt Liste aller Belege eines Typs",
+        "description": "Belege eines Typs im Mandanten der Anmeldung.\n\nBis 14.10.2026 las dieser Weg nur den Prozessspeicher — bei konfigurierter Datenbank also nichts, sonst\ndie fluechtigen Belege aller Mandanten.",
         "operationId": "list_documents_api_mcp_documents__doc_type__get",
         "parameters": [
           {
@@ -188276,6 +188341,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Documents",
         "tags": [
           "documents"
@@ -188330,6 +188400,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Document",
         "tags": [
           "documents"
@@ -188382,6 +188457,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Document",
         "tags": [
           "documents"
@@ -188446,6 +188526,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Document",
         "tags": [
           "documents"
@@ -229915,7 +230000,7 @@
     },
     "/api/v1/api/mcp/documents/{doc_type}": {
       "delete": {
-        "description": "Löscht mehrere Belege gleichzeitig",
+        "description": "Löscht mehrere Belege gleichzeitig — nur eigene. Bis 14.10.2026 nur im Prozessspeicher und ohne Mandant.",
         "operationId": "bulk_delete_documents_api_v1_api_mcp_documents__doc_type__delete",
         "parameters": [
           {
@@ -229977,7 +230062,7 @@
         ]
       },
       "get": {
-        "description": "Holt Liste aller Belege eines Typs",
+        "description": "Belege eines Typs im Mandanten der Anmeldung.\n\nBis 14.10.2026 las dieser Weg nur den Prozessspeicher — bei konfigurierter Datenbank also nichts, sonst\ndie fluechtigen Belege aller Mandanten.",
         "operationId": "list_documents_api_v1_api_mcp_documents__doc_type__get",
         "parameters": [
           {

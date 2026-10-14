@@ -129,14 +129,15 @@ def list_from_store(
 
 
 def delete_from_store(doc_type: str, doc_number: str, repo: Optional[DocumentRepository] = None) -> bool:
-    """Löscht Dokument aus DB oder In-Memory Store"""
+    """Löscht Dokument aus DB oder In-Memory Store.
+
+    Wie beim Speichern und Lesen kein stiller Rueckfall bei konfigurierter Datenbank: ein gescheitertes Loeschen
+    meldete bis 14.10.2026 "nicht gefunden" bzw. loeschte nur eine fluechtige Kopie.
+    """
     if repo:
-        try:
-            return repo.delete_document(doc_type, doc_number)
-        except Exception as e:
-            logger.warning(f"DB delete failed, using in-memory: {e}")
-    
-    # Fallback zu In-Memory
+        return repo.delete_document(doc_type, doc_number)
+
+    # Ohne Datenbank: Prozessspeicher
     if doc_number in _DB:
         del _DB[doc_number]
         return True
