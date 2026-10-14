@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-PREVIEW-CACHE-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** In der Browserabnahme gefundenen veralteten Maskentitel nach Umbenennung zentral im RenderPlan-Cache korrigieren. **Dateibesitz:** schema-compiler.ts nur schemaVolatility; schema-compiler.test.ts eigener Titelvertrag; QA/Workboard. **Abnahme:** gleicher Screen mit neuem Titel liefert neuen Plan; bestehende Compiler- und Studio-Vertraege bleiben gruen, keine einzelne Maske umgestalten.
+
 ## HARVEST-RELEASE-SAFETY-20261015 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** Gefundene Ernteannahme-Folgerisiken: Release-Rennen, fremde Kernreferenzen, Payload-Identitaet und fehlende ERP-Rollen vor Fachzugriff. **Dateibesitz:** harvest_acceptance_service.py, partie_service.py (eigene laufende Claims); harvest_acceptance.py nur Rollen-/Actorgrenze und Bindung; eigene Tests/QA. **Abnahme:** vorhandene Belegrollen, kein Header-/System-Autor, serialisierte Freigabe, eigene Artikel/Lager/Wiegescheine/Kontrakte, keine Teilwirkung; gemeinsamer Pruefstand, keine Migration/DB/Container. Keine neue Rechtewelt.
