@@ -11,23 +11,29 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## HARVEST-RELEASE-SAFETY-20261015 — in arbeit, Codex
+## HARVEST-RELEASE-SAFETY-20261015 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** in arbeit 2026-10-15. **Ziel:** Gefundene Ernteannahme-Folgerisiken: Release-Rennen, fremde Kernreferenzen, Payload-Identitaet und fehlende ERP-Rollen vor Fachzugriff. **Dateibesitz:** harvest_acceptance_service.py, partie_service.py (eigene laufende Claims); harvest_acceptance.py nur Rollen-/Actorgrenze und Bindung; eigene Tests/QA. **Abnahme:** vorhandene Belegrollen, kein Header-/System-Autor, serialisierte Freigabe, eigene Artikel/Lager/Wiegescheine/Kontrakte, keine Teilwirkung; gemeinsamer Pruefstand, keine Migration/DB/Container. Keine neue Rechtewelt.
-
-**Abnahmestand 2026-10-15:** 38 Backendfaelle einschliesslich vier echter SQL-Nachweisvertraege und zwoelf Studio-UI-Faelle bestanden. Zentraler Release-Nachweis, Rollenprojektion, native Historie und transaktionale Nummernvergabe integriert. Positive Browser-Vieraugenabnahme wartet auf ausdrueckliche temporaere Prueferfreigabe; unmodellierte Prozessvarianten bleiben gesperrt. Details: docs/quality-assurance/studio-closure-20261015.md. Gesamt-CI weiter separater CI-GRUEN-Claim.
-
-## STUDIO-EDITOR-CONTROLS-20261014 — in arbeit, Codex
-
-**Owner:** Codex. **Stand:** in arbeit 2026-10-14. **Ziel:** Studio-Bedienung fuer modellierte lesende Agrar-Entwuerfe, ohne unmodellierte Fachaktionen als simuliert auszugeben. **Dateibesitz:** studio-reducer.ts, ScreenStudioPage.tsx und gezielte UI-/Reducer-Tests (innerhalb bestehendem Studio-Claim). **Abnahme:** Fachbereich und Agent-Vertrag konsistent; Fachaktionen lassen sich ausdruecklich entfernen, alle Ebenen; keine Berechtigungs- oder Fachregelvermutung, bestehende native Runtime bleibt fuehrend.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** Gefundene Ernteannahme-Folgerisiken: Release-Rennen, fremde Kernreferenzen, Payload-Identitaet und fehlende ERP-Rollen vor Fachzugriff. **Dateibesitz:** harvest_acceptance_service.py, partie_service.py (eigene laufende Claims); harvest_acceptance.py nur Rollen-/Actorgrenze und Bindung; eigene Tests/QA. **Abnahme:** vorhandene Belegrollen, kein Header-/System-Autor, serialisierte Freigabe, eigene Artikel/Lager/Wiegescheine/Kontrakte, keine Teilwirkung; gemeinsamer Pruefstand, keine Migration/DB/Container. Keine neue Rechtewelt.
 
 **Abnahmestand 2026-10-15:** 38 Backendfaelle einschliesslich vier echter SQL-Nachweisvertraege und zwoelf Studio-UI-Faelle bestanden. Zentraler Release-Nachweis, Rollenprojektion, native Historie und transaktionale Nummernvergabe integriert. Positive Browser-Vieraugenabnahme wartet auf ausdrueckliche temporaere Prueferfreigabe; unmodellierte Prozessvarianten bleiben gesperrt. Details: docs/quality-assurance/studio-closure-20261015.md. Gesamt-CI weiter separater CI-GRUEN-Claim.
 
-## SELF-BILLING-NUMBER-20261014 — in arbeit, Codex
+**Abschluss des abgegrenzten Slice:** fachlicher Nummernkreis, Bedienkontrollen beziehungsweise Annahme-Rollen-/Referenzgrenze positiv getestet. Positive Studio-Browserfreigabe ist weiterhin Teil des offenen STUDIO-CLOSURE-Claims.
 
-**Owner:** Codex. **Stand:** in arbeit 2026-10-14. **Ziel:** Zeitstempelbasierte Self-Billing-Kollisionen schliessen; Annahme verwendet bestehenden transaktionalen NumberRangeService. **Dateibesitz:** modules/agrar/services/self_billing_service.py nur Nummern-/ID-Generierung; harvest_acceptance_service.py nur serverseitige Nummernkreisvergabe (eigener Claim); Studio-Profilfixdaten und gezielte Tests/QA. **Abnahme:** mehrere Vorgange je Mandant, volle UUID-Identitaet, Journal-Laengengrenze, Counter ohne Zwischencommit; kein neues Nummerierungsmodell, DB oder Container.
+## STUDIO-EDITOR-CONTROLS-20261014 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Studio-Bedienung fuer modellierte lesende Agrar-Entwuerfe, ohne unmodellierte Fachaktionen als simuliert auszugeben. **Dateibesitz:** studio-reducer.ts, ScreenStudioPage.tsx und gezielte UI-/Reducer-Tests (innerhalb bestehendem Studio-Claim). **Abnahme:** Fachbereich und Agent-Vertrag konsistent; Fachaktionen lassen sich ausdruecklich entfernen, alle Ebenen; keine Berechtigungs- oder Fachregelvermutung, bestehende native Runtime bleibt fuehrend.
 
 **Abnahmestand 2026-10-15:** 38 Backendfaelle einschliesslich vier echter SQL-Nachweisvertraege und zwoelf Studio-UI-Faelle bestanden. Zentraler Release-Nachweis, Rollenprojektion, native Historie und transaktionale Nummernvergabe integriert. Positive Browser-Vieraugenabnahme wartet auf ausdrueckliche temporaere Prueferfreigabe; unmodellierte Prozessvarianten bleiben gesperrt. Details: docs/quality-assurance/studio-closure-20261015.md. Gesamt-CI weiter separater CI-GRUEN-Claim.
+
+**Abschluss des abgegrenzten Slice:** fachlicher Nummernkreis, Bedienkontrollen beziehungsweise Annahme-Rollen-/Referenzgrenze positiv getestet. Positive Studio-Browserfreigabe ist weiterhin Teil des offenen STUDIO-CLOSURE-Claims.
+
+## SELF-BILLING-NUMBER-20261014 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Zeitstempelbasierte Self-Billing-Kollisionen schliessen; Annahme verwendet bestehenden transaktionalen NumberRangeService. **Dateibesitz:** modules/agrar/services/self_billing_service.py nur Nummern-/ID-Generierung; harvest_acceptance_service.py nur serverseitige Nummernkreisvergabe (eigener Claim); Studio-Profilfixdaten und gezielte Tests/QA. **Abnahme:** mehrere Vorgange je Mandant, volle UUID-Identitaet, Journal-Laengengrenze, Counter ohne Zwischencommit; kein neues Nummerierungsmodell, DB oder Container.
+
+**Abnahmestand 2026-10-15:** 38 Backendfaelle einschliesslich vier echter SQL-Nachweisvertraege und zwoelf Studio-UI-Faelle bestanden. Zentraler Release-Nachweis, Rollenprojektion, native Historie und transaktionale Nummernvergabe integriert. Positive Browser-Vieraugenabnahme wartet auf ausdrueckliche temporaere Prueferfreigabe; unmodellierte Prozessvarianten bleiben gesperrt. Details: docs/quality-assurance/studio-closure-20261015.md. Gesamt-CI weiter separater CI-GRUEN-Claim.
+
+**Abschluss des abgegrenzten Slice:** fachlicher Nummernkreis, Bedienkontrollen beziehungsweise Annahme-Rollen-/Referenzgrenze positiv getestet. Positive Studio-Browserfreigabe ist weiterhin Teil des offenen STUDIO-CLOSURE-Claims.
 
 ## CI-GRUEN-20261014 — in Arbeit, Claude Code
 
