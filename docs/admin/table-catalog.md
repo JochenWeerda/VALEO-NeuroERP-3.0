@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 675 Tabellen, 8910 Spalten.**
+**31 Schemas, 676 Tabellen, 8920 Spalten.**
 
 ## Schemas
 
@@ -46,7 +46,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_mfg` | `inventory` | 3 | 15 |
 | `domain_nachweisraum` | `dms-compliance` | 3 | 31 |
 | `domain_ops` | `inventory` | 76 | 1062 |
-| `domain_portal` | `crm` | 5 | 80 |
+| `domain_portal` | `crm` | 6 | 90 |
 | `domain_pos` | `finance` | 4 | 41 |
 | `domain_pricing` | `finance` | 5 | 48 |
 | `domain_procurement` | `procurement` | 5 | 50 |
@@ -545,6 +545,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_portal.customer_order_items` | `app/infrastructure/models/portal_models.py`, `app/services/ist_aggregation_service.py` | — | — |
 | `domain_portal.customer_orders` | `app/core/sql_identifiers.py`, `app/infrastructure/models/portal_models.py`, `app/services/geo_pipeline.py`, `app/services/ist_aggregation_service.py` | — | — |
 | `domain_portal.customer_pre_purchases` | `app/infrastructure/models/portal_models.py` | — | — |
+| `domain_portal.kundenzugaenge` | `app/api/v1/endpoints/portal_kundenzugaenge.py`, `app/auth/portal_kunde.py` | `app/api/v1/endpoints/portal_kundenzugaenge.py` | — |
 | `domain_pos.payment_methods` | `app/api/v1/endpoints/pos_payments.py` | — | — |
 | `domain_pos.pos_tagesabschluesse` | `app/api/v1/endpoints/pos_payments.py`, `app/services/pos_tagesabschluss_service.py` | `app/services/pos_tagesabschluss_service.py` | — |
 | `domain_pos.pos_tagesabschluss_log` | — | `app/services/pos_tagesabschluss_service.py` | — |
@@ -1336,6 +1337,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `customer_order_items` | `crm` | native | `id` | id, order_id, article_id, article_number, article_name, quantity, unit, unit_price, total_price, price_source, contract_id, pre_purchase_id, quantity_from_credit, quantity_at_list_price |
 | `customer_orders` | `crm` | native | `id` | id, tenant_id, customer_id, customer_number, customer_name, order_number, order_date, status, total_net, total_gross, delivery_address, delivery_date_requested, customer_notes, internal_notes, created_at, updated_at |
 | `customer_pre_purchases` | `crm` | native | `id` | id, tenant_id, customer_id, article_id, article_number, article_name, pre_purchase_number, pre_purchase_price, current_list_price, unit, total_quantity, remaining_quantity, payment_date, payment_reference, valid_until, is_active, notes, created_at, updated_at |
+| `kundenzugaenge` | `crm` | native | `id` | id, tenant_id, subject, customer_id, rolle, gueltig_bis, angelegt_von, angelegt_am, widerrufen_von, widerrufen_am |
 
 ## `domain_pos`
 

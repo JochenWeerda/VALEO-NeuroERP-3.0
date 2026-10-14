@@ -189,7 +189,8 @@ export function usePortalLieferscheinCompliance() {
   return useQuery({
     queryKey: ['portal', 'lieferscheine', 'compliance'],
     queryFn: async () => {
-      const resp = await apiClient.get<{ ok: boolean; data: PortalLieferscheinCompliance[] }>('/api/mcp/documents/sales_delivery?skip=0&limit=100')
+      // Nur die Lieferscheine des Kundenkontos (TENANT-DOC-001); der interne Belegrouter kennt keinen Kunden.
+      const resp = await apiClient.get<{ ok: boolean; data: PortalLieferscheinCompliance[] }>('/api/v1/portal/lieferscheine')
       return resp.data?.data ?? []
     },
     initialData: [],
@@ -579,14 +580,12 @@ export function usePortalZertifikate() {
   })
 }
 
-export async function downloadSalesDeliverySustainabilityCsv(year: number, customerId?: string) {
+export async function downloadSalesDeliverySustainabilityCsv(year: number) {
+  // Der Kunde kommt aus der Anmeldung, nicht aus einem Parameter (TENANT-DOC-001).
   const params = new URLSearchParams({ year: String(year) })
-  if (customerId) {
-    params.set('customer_id', customerId)
-  }
 
   const response = await apiClient.get<Blob>(
-    `/api/mcp/documents/analytics/sales-delivery-sustainability/export.csv?${params.toString()}`,
+    `/api/v1/portal/nachhaltigkeit/export.csv?${params.toString()}`,
     { responseType: 'blob' },
   )
 
@@ -594,21 +593,19 @@ export async function downloadSalesDeliverySustainabilityCsv(year: number, custo
   const url = window.URL.createObjectURL(blob)
   const anchor = document.createElement('a')
   anchor.href = url
-  anchor.download = `sales-delivery-sustainability-${year}${customerId ? `-${customerId}` : ''}.csv`
+  anchor.download = `sales-delivery-sustainability-${year}.csv`
   document.body.appendChild(anchor)
   anchor.click()
   anchor.remove()
   window.URL.revokeObjectURL(url)
 }
 
-export async function downloadSalesDeliverySustainabilityPdf(year: number, customerId?: string) {
+export async function downloadSalesDeliverySustainabilityPdf(year: number) {
+  // Der Kunde kommt aus der Anmeldung, nicht aus einem Parameter (TENANT-DOC-001).
   const params = new URLSearchParams({ year: String(year) })
-  if (customerId) {
-    params.set('customer_id', customerId)
-  }
 
   const response = await apiClient.get<Blob>(
-    `/api/mcp/documents/analytics/sales-delivery-sustainability/export.pdf?${params.toString()}`,
+    `/api/v1/portal/nachhaltigkeit/export.pdf?${params.toString()}`,
     { responseType: 'blob' },
   )
 
@@ -616,7 +613,7 @@ export async function downloadSalesDeliverySustainabilityPdf(year: number, custo
   const url = window.URL.createObjectURL(blob)
   const anchor = document.createElement('a')
   anchor.href = url
-  anchor.download = `sales-delivery-sustainability-${year}${customerId ? `-${customerId}` : ''}.pdf`
+  anchor.download = `sales-delivery-sustainability-${year}.pdf`
   document.body.appendChild(anchor)
   anchor.click()
   anchor.remove()

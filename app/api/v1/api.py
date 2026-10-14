@@ -1350,6 +1350,10 @@ api_router.include_router(
     tags=["agrar", "nawaro", "raps"]
 )
 
+# Kundenportal: Zuordnung Anmeldung -> Kundenkonto (TENANT-DOC-001)
+from app.api.v1.endpoints import portal_kundenzugaenge  # noqa: E402
+api_router.include_router(portal_kundenzugaenge.router)
+
 # Kundenportal
 api_router.include_router(
     portal_shop.router,

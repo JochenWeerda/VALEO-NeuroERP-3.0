@@ -92974,6 +92974,166 @@
         "title": "KundenVersandResponse",
         "type": "object"
       },
+      "Kundenkonto": {
+        "properties": {
+          "customer_id": {
+            "title": "Customer Id",
+            "type": "string"
+          },
+          "customer_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Number"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "rolle": {
+            "title": "Rolle",
+            "type": "string"
+          }
+        },
+        "required": [
+          "customer_id",
+          "rolle"
+        ],
+        "title": "Kundenkonto",
+        "type": "object"
+      },
+      "Kundenzugang": {
+        "properties": {
+          "angelegt_am": {
+            "format": "date-time",
+            "title": "Angelegt Am",
+            "type": "string"
+          },
+          "angelegt_von": {
+            "title": "Angelegt Von",
+            "type": "string"
+          },
+          "customer_id": {
+            "title": "Customer Id",
+            "type": "string"
+          },
+          "gueltig_bis": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltig Bis"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "rolle": {
+            "title": "Rolle",
+            "type": "string"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "widerrufen_am": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Widerrufen Am"
+          },
+          "widerrufen_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Widerrufen Von"
+          }
+        },
+        "required": [
+          "id",
+          "subject",
+          "customer_id",
+          "rolle",
+          "angelegt_von",
+          "angelegt_am"
+        ],
+        "title": "Kundenzugang",
+        "type": "object"
+      },
+      "KundenzugangIn": {
+        "properties": {
+          "customer_id": {
+            "description": "CRM-Kunde dieses Mandanten",
+            "minLength": 1,
+            "title": "Customer Id",
+            "type": "string"
+          },
+          "gueltig_bis": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gueltig Bis"
+          },
+          "rolle": {
+            "description": "Rolle der Person im Betrieb",
+            "enum": [
+              "inhaber",
+              "mitarbeiter",
+              "buchhaltung",
+              "berater"
+            ],
+            "title": "Rolle",
+            "type": "string"
+          },
+          "subject": {
+            "description": "Kennung der Anmeldung (OIDC sub)",
+            "minLength": 1,
+            "title": "Subject",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject",
+          "customer_id",
+          "rolle"
+        ],
+        "title": "KundenzugangIn",
+        "type": "object"
+      },
       "L3BonusCorrectionOut": {
         "description": "``POST /l3-report-catalog/bonus-runs/{id}/corrections``",
         "properties": {
@@ -354621,6 +354781,24 @@
     "/api/v1/portal/anfragen": {
       "get": {
         "operationId": "portal_anfragen_api_v1_portal_anfragen_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -354635,6 +354813,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -354651,6 +354839,24 @@
     "/api/v1/portal/bestellungen": {
       "get": {
         "operationId": "portal_bestellungen_api_v1_portal_bestellungen_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -354665,6 +354871,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -354755,6 +354971,24 @@
     "/api/v1/portal/dashboard": {
       "get": {
         "operationId": "portal_dashboard_api_v1_portal_dashboard_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -354765,6 +354999,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -354781,6 +355025,24 @@
     "/api/v1/portal/dokumente": {
       "get": {
         "operationId": "portal_dokumente_api_v1_portal_dokumente_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -354795,6 +355057,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -355164,8 +355436,8 @@
         "operationId": "portal_feldbuch_api_v1_portal_feldbuch_get",
         "parameters": [
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -355176,7 +355448,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -357761,6 +358033,244 @@
         ]
       }
     },
+    "/api/v1/portal/kundenkonten": {
+      "get": {
+        "operationId": "meine_kundenkonten_api_v1_portal_kundenkonten_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Kundenkonto"
+                  },
+                  "title": "Response Meine Kundenkonten Api V1 Portal Kundenkonten Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eigene Kundenkonten der Anmeldung",
+        "tags": [
+          "portal",
+          "kundenzugang"
+        ]
+      }
+    },
+    "/api/v1/portal/kundenzugaenge": {
+      "get": {
+        "operationId": "kundenzugaenge_api_v1_portal_kundenzugaenge_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "customer_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Kundenzugang"
+                  },
+                  "title": "Response Kundenzugaenge Api V1 Portal Kundenzugaenge Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kundenzugaenge auflisten",
+        "tags": [
+          "portal",
+          "kundenzugang"
+        ]
+      },
+      "post": {
+        "operationId": "kundenzugang_anlegen_api_v1_portal_kundenzugaenge_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KundenzugangIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Kundenzugang"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kundenzugang anlegen",
+        "tags": [
+          "portal",
+          "kundenzugang"
+        ]
+      }
+    },
+    "/api/v1/portal/kundenzugaenge/{zugang_id}/widerrufen": {
+      "post": {
+        "operationId": "kundenzugang_widerrufen_api_v1_portal_kundenzugaenge__zugang_id__widerrufen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "zugang_id",
+            "required": true,
+            "schema": {
+              "title": "Zugang Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Kundenzugang"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kundenzugang widerrufen",
+        "tags": [
+          "portal",
+          "kundenzugang"
+        ]
+      }
+    },
+    "/api/v1/portal/lieferscheine": {
+      "get": {
+        "description": "Bis 14.10.2026 las das Portal die Lieferscheine ueber den internen Belegrouter — alle Kunden des Mandanten.",
+        "operationId": "portal_lieferscheine_api_v1_portal_lieferscheine_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompatBridgeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lieferscheine des Kundenkontos",
+        "tags": [
+          "compat"
+        ]
+      }
+    },
     "/api/v1/portal/lohndienste": {
       "get": {
         "operationId": "list_auftraege_api_v1_portal_lohndienste_get",
@@ -358073,9 +358583,143 @@
         ]
       }
     },
+    "/api/v1/portal/nachhaltigkeit/export.csv": {
+      "get": {
+        "operationId": "portal_nachhaltigkeit_csv_api_v1_portal_nachhaltigkeit_export_csv_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "year",
+            "required": true,
+            "schema": {
+              "maximum": 2100,
+              "minimum": 2000,
+              "title": "Year",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Naehrstoff- und CO2e-Auswertung des Kundenkontos als CSV",
+        "tags": [
+          "compat"
+        ]
+      }
+    },
+    "/api/v1/portal/nachhaltigkeit/export.pdf": {
+      "get": {
+        "operationId": "portal_nachhaltigkeit_pdf_api_v1_portal_nachhaltigkeit_export_pdf_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "year",
+            "required": true,
+            "schema": {
+              "maximum": 2100,
+              "minimum": 2000,
+              "title": "Year",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Naehrstoff- und CO2e-Auswertung des Kundenkontos als PDF",
+        "tags": [
+          "compat"
+        ]
+      }
+    },
     "/api/v1/portal/naehrstoffbilanzen": {
       "get": {
         "operationId": "portal_naehrstoffbilanzen_api_v1_portal_naehrstoffbilanzen_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -358090,6 +358734,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -359021,6 +359675,24 @@
     "/api/v1/portal/rechnungen": {
       "get": {
         "operationId": "portal_rechnungen_api_v1_portal_rechnungen_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -359035,6 +359707,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -359051,6 +359733,24 @@
     "/api/v1/portal/shop": {
       "get": {
         "operationId": "portal_shop_api_v1_portal_shop_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -359065,6 +359765,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -359081,6 +359791,24 @@
     "/api/v1/portal/vertraege": {
       "get": {
         "operationId": "portal_vertraege_api_v1_portal_vertraege_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -359095,6 +359823,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -359111,6 +359849,24 @@
     "/api/v1/portal/zertifikate": {
       "get": {
         "operationId": "portal_zertifikate_api_v1_portal_zertifikate_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Kundenkonto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Kundenkonto"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -359125,6 +359881,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [

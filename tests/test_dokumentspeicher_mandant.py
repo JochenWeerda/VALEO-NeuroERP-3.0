@@ -25,7 +25,11 @@ from app.documents import router_helpers
 from app.documents.repository import DocumentRepository
 from app.services.compat_helpers import list_docs
 from app.services.purchase_order_service import PurchaseOrderService
+from app.auth.portal_kunde import PortalKunde, portal_kunde
 from testgrenze import ersetze_mandant, ersetze_nutzer
+
+
+KUNDE = "K-DS"
 
 
 @pytest.fixture
@@ -35,7 +39,7 @@ def haus():
 
     def ablegen(art: str, wo: str | None, **daten) -> str:
         nummer = f"DS-{uuid.uuid4().hex[:10]}"
-        beleg = {**daten, "number": nummer, "id": nummer, "purchaseOrderNumber": nummer}
+        beleg = {"customerId": KUNDE, **daten, "number": nummer, "id": nummer, "purchaseOrderNumber": nummer}
         if wo is not None:
             beleg["tenantId"] = wo
         with SessionLocal() as db:
@@ -54,6 +58,8 @@ def haus():
 
     def als(wo: str) -> TestClient:
         ersetze_mandant(app, wo)
+        # Hier wird die Mandantengrenze geprueft; die Kundengrenze prueft tests/test_portal_kunde_trennung.py.
+        app.dependency_overrides[portal_kunde] = lambda: PortalKunde(wo, KUNDE, "5f0c2a9e", intern=True)
         return client
 
     yield {"mandant": mandant, "anderer": anderer, "ablegen": ablegen, "als": als}
