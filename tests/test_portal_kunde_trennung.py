@@ -21,6 +21,7 @@ from sqlalchemy.exc import DBAPIError
 
 from app.api.v1.endpoints.compat import router as compat_router
 from app.api.v1.endpoints.portal_kundenzugaenge import router as zugang_router
+from app.api.v1.endpoints.portal_shop import router as shop_router
 from app.auth.deps import get_current_user
 from app.core.database import SessionLocal
 from app.core.tenant import get_tenant_id
@@ -73,6 +74,7 @@ def welt():
     app = FastAPI()
     app.include_router(compat_router, prefix="/api/v1")
     app.include_router(zugang_router, prefix="/api/v1")
+    app.include_router(shop_router, prefix="/api/v1/portal")
     client = TestClient(app, raise_server_exceptions=False)
 
     def als(t: str, subject: str, *rollen: str) -> TestClient:
@@ -84,6 +86,8 @@ def welt():
            "zuordnen": zuordnen, "als": als}
     with SessionLocal() as db:
         db.execute(text("DELETE FROM documents WHERE doc_number = ANY(:n)"), {"n": belege})
+        db.execute(text("DELETE FROM domain_portal.customer_orders WHERE tenant_id IN (:a, :b)"), {"a": a, "b": b})
+        db.execute(text("DELETE FROM domain_portal.customer_contracts WHERE tenant_id IN (:a, :b)"), {"a": a, "b": b})
         db.execute(text("DELETE FROM domain_crm.customers WHERE tenant_id IN (:a, :b)"), {"a": a, "b": b})
         db.execute(text("DELETE FROM domain_shared.tenants WHERE id IN (:a, :b)"), {"a": a, "b": b})
         db.commit()
@@ -245,3 +249,79 @@ def test_lieferscheine_und_export_nur_des_eigenen_kontos(welt):
     assert zeilen["Anzahl Lieferscheine"] == "1"
     assert welt["als"](welt["a"], "irgendwer", "user").get(
         "/api/v1/portal/nachhaltigkeit/export.pdf", params={"year": 2031}).status_code == 403
+
+
+# ── Shop (portal_shop): Mandant und Kunde kamen aus der URL ───────────────────
+
+
+def _bestellung(t: str, kunde: str) -> str:
+    oid = str(uuid.uuid4())
+    with SessionLocal() as db:
+        db.execute(text(
+            "INSERT INTO domain_portal.customer_orders (id, tenant_id, customer_id, customer_number, customer_name, "
+            "order_number, status, order_date, created_at, updated_at, total_net, total_gross) "
+            "VALUES (:id, :t, :c, :c, :c, :n, 'SUBMITTED', now(), now(), now(), 0, 0)"),
+            {"id": oid, "t": t, "c": kunde, "n": _id("PO")})
+        db.commit()
+    return oid
+
+
+def _kontrakt(t: str, kunde: str) -> str:
+    nummer = _id("KT")
+    with SessionLocal() as db:
+        db.execute(text(
+            "INSERT INTO domain_portal.customer_contracts (id, tenant_id, customer_id, article_id, article_number, "
+            "article_name, contract_number, contract_price, list_price, unit, total_quantity, remaining_quantity, "
+            "status, valid_from, valid_until) VALUES (:id, :t, :c, 'A-1', 'A-1', 'Weizen', :n, 10, 12, 'dt', 5, 5, "
+            "'ACTIVE', now() - interval '1 day', now() + interval '30 days')"),
+            {"id": str(uuid.uuid4()), "t": t, "c": kunde, "n": nummer})
+        db.commit()
+    return nummer
+
+
+def test_shop_mandant_und_kunde_aus_der_url_zaehlen_nicht(welt):
+    eigen = _kontrakt(welt["a"], welt["k1"])
+    _kontrakt(welt["a"], welt["k2"])
+    _kontrakt(welt["b"], welt["k1b"])
+    welt["zuordnen"](welt["a"], "hof-1", welt["k1"])
+    antwort = welt["als"](welt["a"], "hof-1").get(
+        "/api/v1/portal/contracts", params={"tenant_id": welt["b"], "customer_id": welt["k2"]})
+    assert antwort.status_code == 200, antwort.text
+    assert {k["contract_number"] for k in antwort.json()} == {eigen}
+
+
+def test_shop_bestellungen_nur_des_eigenen_kontos(welt):
+    eigen = _bestellung(welt["a"], welt["k1"])
+    nachbar = _bestellung(welt["a"], welt["k2"])
+    welt["zuordnen"](welt["a"], "hof-1", welt["k1"])
+    c = welt["als"](welt["a"], "hof-1")
+    liste = c.get("/api/v1/portal/orders", params={"customer_id": welt["k2"]})
+    assert liste.status_code == 200, liste.text
+    assert {o["id"] for o in liste.json()["items"]} == {eigen}
+    assert c.get(f"/api/v1/portal/orders/{nachbar}").status_code == 404
+    assert c.get(f"/api/v1/portal/orders/{eigen}").status_code == 200
+
+
+def test_shop_ohne_zuordnung_kein_zugang(welt):
+    c = welt["als"](welt["a"], "irgendwer", "user")
+    for weg in ("products", "orders", "contracts", "pre-purchases"):
+        assert c.get(f"/api/v1/portal/{weg}", params={"tenant_id": welt["a"], "customer_id": welt["k1"]}).status_code == 403, weg
+
+
+def test_shop_interne_wege_brauchen_die_verkaufsrolle(welt):
+    bestellung = _bestellung(welt["a"], welt["k1"])
+    welt["zuordnen"](welt["a"], "hof-1", welt["k1"])
+    kunde = welt["als"](welt["a"], "hof-1")
+    assert kunde.get("/api/v1/portal/orders/reconciliation").status_code == 403
+    assert kunde.patch(f"/api/v1/portal/orders/{bestellung}/status",
+                       params={"new_status": "CONFIRMED"}).status_code == 403
+    lesen = welt["als"](welt["a"], "innendienst", "SALES_LESEN")
+    assert lesen.get("/api/v1/portal/orders/reconciliation").status_code == 200
+    assert lesen.patch(f"/api/v1/portal/orders/{bestellung}/status",
+                       params={"new_status": "CONFIRMED"}).status_code == 403
+    fremd = welt["als"](welt["b"], "innendienst-b", "SALES_BEARBEITEN")
+    assert fremd.patch(f"/api/v1/portal/orders/{bestellung}/status",
+                       params={"new_status": "CONFIRMED", "tenant_id": welt["a"]}).status_code == 404
+    eigen = welt["als"](welt["a"], "innendienst", "SALES_BEARBEITEN")
+    assert eigen.patch(f"/api/v1/portal/orders/{bestellung}/status",
+                       params={"new_status": "CONFIRMED"}).status_code == 200

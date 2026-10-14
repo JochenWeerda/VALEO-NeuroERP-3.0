@@ -245,6 +245,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
     """
     from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
     from app.api.v1.schemas.data_quality_input import DataQualityCheckIn
+    from app.api.v1.schemas.slo_input import SloCheckIn
     tools: list[MCPToolContract] = [
 
         # ---------------------------------------------------------------
@@ -415,6 +416,8 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_finance_sla_check",
+            schema_version=2,
+            input_schema=SloCheckIn.model_json_schema(),
             domain="finance",
             operation="sla_check",
             beschreibung="Prueft SLO-Compliance fuer einen Finance-Dienst",
@@ -566,6 +569,8 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_process_slo_check",
+            schema_version=2,
+            input_schema=SloCheckIn.model_json_schema(),
             domain="process",
             operation="slo_check",
             beschreibung="Prueft Einhaltung eines Service-Level-Objectives",

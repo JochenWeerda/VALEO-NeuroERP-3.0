@@ -43780,6 +43780,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "idempotency_key",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
