@@ -21,6 +21,7 @@ from sqlalchemy.exc import DBAPIError
 
 from app.api.v1.endpoints.compat import router as compat_router
 from app.api.v1.endpoints.portal_kundenzugaenge import router as zugang_router
+from app.api.v1.endpoints.portal_feldbuch import router as feldbuch_router
 from app.api.v1.endpoints.portal_shop import router as shop_router
 from app.auth.deps import get_current_user
 from app.core.database import SessionLocal
@@ -75,6 +76,7 @@ def welt():
     app.include_router(compat_router, prefix="/api/v1")
     app.include_router(zugang_router, prefix="/api/v1")
     app.include_router(shop_router, prefix="/api/v1/portal")
+    app.include_router(feldbuch_router, prefix="/api/v1/portal")
     client = TestClient(app, raise_server_exceptions=False)
 
     def als(t: str, subject: str, *rollen: str) -> TestClient:
@@ -86,6 +88,8 @@ def welt():
            "zuordnen": zuordnen, "als": als}
     with SessionLocal() as db:
         db.execute(text("DELETE FROM documents WHERE doc_number = ANY(:n)"), {"n": belege})
+        db.execute(text("DELETE FROM domain_agrar.feldbuch_massnahmen WHERE tenant_id IN (:a, :b)"), {"a": a, "b": b})
+        db.execute(text("DELETE FROM domain_agrar.feldbuch_schlaege WHERE tenant_id IN (:a, :b)"), {"a": a, "b": b})
         db.execute(text("DELETE FROM domain_portal.customer_orders WHERE tenant_id IN (:a, :b)"), {"a": a, "b": b})
         db.execute(text("DELETE FROM domain_portal.customer_contracts WHERE tenant_id IN (:a, :b)"), {"a": a, "b": b})
         db.execute(text("DELETE FROM domain_crm.customers WHERE tenant_id IN (:a, :b)"), {"a": a, "b": b})
@@ -325,3 +329,60 @@ def test_shop_interne_wege_brauchen_die_verkaufsrolle(welt):
     eigen = welt["als"](welt["a"], "innendienst", "SALES_BEARBEITEN")
     assert eigen.patch(f"/api/v1/portal/orders/{bestellung}/status",
                        params={"new_status": "CONFIRMED"}).status_code == 200
+
+
+# ── Feldbuch (portal_feldbuch): Kunde kam aus ``customer_id`` oder ``dev-customer`` ──
+
+
+def _schlag(c, name: str) -> str:
+    antwort = c.post("/api/v1/portal/feldbuch/schlaege", json={"name": name, "flaeche": 1.5})
+    assert antwort.status_code == 201, antwort.text
+    return antwort.json()["id"]
+
+
+def test_feldbuch_kunde_aus_der_url_zaehlt_nicht(welt):
+    welt["zuordnen"](welt["a"], "hof-1", welt["k1"])
+    welt["zuordnen"](welt["a"], "hof-2", welt["k2"])
+    eigen = _schlag(welt["als"](welt["a"], "hof-1"), "Eigenacker")
+    nachbar = _schlag(welt["als"](welt["a"], "hof-2"), "Nachbaracker")
+    c = welt["als"](welt["a"], "hof-1")
+    liste = c.get("/api/v1/portal/feldbuch/schlaege", params={"customer_id": welt["k2"]})
+    assert liste.status_code == 200, liste.text
+    assert {s["id"] for s in liste.json()} == {eigen}
+    assert c.get(f"/api/v1/portal/feldbuch/schlaege/{nachbar}").status_code == 404
+    assert c.put(f"/api/v1/portal/feldbuch/schlaege/{nachbar}", json={"name": "Uebernommen"}).status_code == 404
+    assert c.delete(f"/api/v1/portal/feldbuch/schlaege/{nachbar}").status_code == 404
+    angelegt = c.post("/api/v1/portal/feldbuch/schlaege", params={"customer_id": welt["k2"]},
+                      json={"name": "Untergeschoben", "flaeche": 1.0})
+    assert angelegt.status_code == 201
+    assert {s["name"] for s in welt["als"](welt["a"], "hof-2").get("/api/v1/portal/feldbuch/schlaege").json()} == {
+        "Nachbaracker"}
+
+
+def test_feldbuch_ohne_zuordnung_kein_zugang_und_kein_ersatzkunde(welt):
+    c = welt["als"](welt["a"], "irgendwer", "user")
+    assert c.get("/api/v1/portal/feldbuch/schlaege").status_code == 403
+    assert c.post("/api/v1/portal/feldbuch/schlaege", json={"name": "X", "flaeche": 1.0}).status_code == 403
+    assert c.get("/api/v1/portal/feldbuch/schlaege", params={"customer_id": welt["k1"]}).status_code == 403
+
+
+def test_feldbuch_zuordnung_gilt_nur_im_eigenen_mandanten(welt):
+    welt["zuordnen"](welt["b"], "hof-b", welt["k1b"])
+    _schlag(welt["als"](welt["b"], "hof-b"), "Acker in B")
+    assert welt["als"](welt["a"], "hof-b").get("/api/v1/portal/feldbuch/schlaege").status_code == 403
+
+
+def test_feldbuch_interne_betreuung_liest_und_schreibt_nur_mit_agrarrolle(welt):
+    welt["zuordnen"](welt["a"], "hof-1", welt["k1"])
+    eigen = _schlag(welt["als"](welt["a"], "hof-1"), "Eigenacker")
+    kopf = {"X-Kundenkonto": welt["k1"]}
+    lesen = welt["als"](welt["a"], "innendienst", "SALES_LESEN")
+    assert {s["id"] for s in lesen.get("/api/v1/portal/feldbuch/schlaege", headers=kopf).json()} == {eigen}
+    assert lesen.post("/api/v1/portal/feldbuch/schlaege", headers=kopf,
+                      json={"name": "X", "flaeche": 1.0}).status_code == 403
+    assert lesen.delete(f"/api/v1/portal/feldbuch/schlaege/{eigen}", headers=kopf).status_code == 403
+    berater = welt["als"](welt["a"], "berater", "SALES_LESEN", "AGRAR_BEARBEITEN")
+    assert berater.post("/api/v1/portal/feldbuch/schlaege", headers=kopf,
+                        json={"name": "Vom Berater", "flaeche": 2.0}).status_code == 201
+    fremd = welt["als"](welt["b"], "berater-b", "SALES_LESEN", "AGRAR_BEARBEITEN")
+    assert fremd.get("/api/v1/portal/feldbuch/schlaege", headers=kopf).status_code == 404

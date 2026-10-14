@@ -1,7 +1,7 @@
 """
 Portal Feldbuch — Endpoints für den Landwirt im Kundenportal
 
-Gefiltert nach customer_id aus JWT.
+Mandant und Kundenkonto nur aus Anmeldung und gepruefter Zuordnung (``app/auth/portal_kunde.py``).
 Export (CSV / Ackerschlagkartei-CSV) und Import.
 """
 from __future__ import annotations
@@ -25,7 +25,8 @@ from app.core.data_quality_enforcement import evaluate_feldbuch_massnahme_datens
 from app.core.database import get_db
 from app.core.data_quality_enforcement import DQValidationException
 from app.core.tenant import get_tenant_id
-from app.core.security import get_user_id_from_request
+from app.auth.deps import get_current_user
+from app.auth.portal_kunde import PortalKunde, portal_kunde
 from app.core.uuid7 import uuid7
 from app.infrastructure.models.agrar_models import FeldbuchMassnahme, FeldbuchSchlag
 
@@ -120,24 +121,26 @@ def _validate_portal_feldbuch_csv(content: bytes) -> None:
 
 
 # ────────────────────────────────────────────────────────────────────────────
-# Auth helper — customer_id aus JWT oder Query-Param (dev-mode)
+# Kundenkonto — nur aus Anmeldung und gepruefter Zuordnung (TENANT-DOC-001)
 # ────────────────────────────────────────────────────────────────────────────
+
+# Bis 14.10.2026 nahm dieses Feldbuch den Kunden aus dem Parameter ``customer_id``, der Anmeldekennung oder dem
+# Rueckfall ``dev-customer`` — wer eine fremde Kunden-ID in die URL schrieb, las und aenderte deren Schlaege.
+# Interne Betreuung (``app/auth/portal_kunde.py``) liest das Feldbuch des gewaehlten Kunden; aendern darf sie es nur
+# mit einer Agrar-Bearbeiterrolle.
+_AGRAR_WRITE_ROLES = frozenset({"AGRAR_BEARBEITEN", "AGRAR_ADMIN", "admin"})
+
 
 def _get_customer_id(
     request: Request,
-    customer_id: Optional[str] = Query(None),
+    kunde: PortalKunde = Depends(portal_kunde),
+    nutzer: dict = Depends(get_current_user),
 ) -> str:
-    """
-    Im Production-Betrieb kommt customer_id aus dem JWT-Sub-Claim (token_claims).
-    Im Dev-Mode kann sie als Query-Parameter übergeben werden.
-    Wenn weder JWT noch Query-Param vorhanden → Fallback 'dev-customer'.
-    """
-    if customer_id:
-        return customer_id
-    uid = get_user_id_from_request(request)
-    if uid and uid not in ("system", "dev-user"):
-        return uid
-    return "dev-customer"
+    if kunde.intern and request.method not in ("GET", "HEAD") and not (
+        set((nutzer or {}).get("roles") or []) & _AGRAR_WRITE_ROLES
+    ):
+        raise HTTPException(status_code=403, detail="Keine Berechtigung: Feldbuch des Kunden bearbeiten.")
+    return kunde.customer_id
 
 
 # ────────────────────────────────────────────────────────────────────────────

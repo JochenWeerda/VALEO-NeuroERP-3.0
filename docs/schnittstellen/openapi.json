@@ -355645,8 +355645,8 @@
         "operationId": "portal_anbauplan_uebersicht_api_v1_portal_feldbuch_anbauplan_uebersicht_get",
         "parameters": [
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -355657,7 +355657,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -355703,8 +355703,8 @@
         "operationId": "portal_andi_import_api_v1_portal_feldbuch_andi_import_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -355715,7 +355715,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -355822,8 +355822,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -355834,7 +355834,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -355877,8 +355877,8 @@
         "operationId": "portal_arbeitskontext_set_api_v1_portal_feldbuch_arbeitskontext_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -355889,7 +355889,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -355945,8 +355945,8 @@
         "operationId": "portal_betrieb_api_v1_portal_feldbuch_betrieb_get",
         "parameters": [
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -355957,7 +355957,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -356012,8 +356012,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -356024,7 +356024,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -356079,8 +356079,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -356091,7 +356091,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -356146,8 +356146,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -356158,7 +356158,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -356263,8 +356263,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -356275,7 +356275,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -356321,8 +356321,8 @@
         "operationId": "portal_import_api_v1_portal_feldbuch_import_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -356333,7 +356333,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -356389,8 +356389,8 @@
         "operationId": "portal_jahreswechsel_api_v1_portal_feldbuch_jahreswechsel_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -356401,7 +356401,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -356456,8 +356456,8 @@
         "operationId": "portal_lagerverbrauch_api_v1_portal_feldbuch_lagerverbrauch_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -356468,7 +356468,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -356610,8 +356610,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -356622,7 +356622,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -356669,8 +356669,8 @@
         "operationId": "portal_feldbuch_create_massnahme",
         "parameters": [
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -356681,7 +356681,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -356737,8 +356737,8 @@
         "operationId": "portal_sammel_duengung_api_v1_portal_feldbuch_massnahmen_sammel_duengung_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -356749,7 +356749,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -356813,8 +356813,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -356825,7 +356825,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -356870,8 +356870,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -356882,7 +356882,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -356934,8 +356934,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -356946,7 +356946,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -357002,8 +357002,8 @@
         "operationId": "portal_offline_sync_api_v1_portal_feldbuch_offline_sync_post",
         "parameters": [
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -357014,7 +357014,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -357079,8 +357079,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -357091,7 +357091,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -357208,8 +357208,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -357220,7 +357220,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -357267,8 +357267,8 @@
         "operationId": "portal_feldbuch_create_schlag",
         "parameters": [
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -357279,7 +357279,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -357343,8 +357343,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -357355,7 +357355,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -357400,8 +357400,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -357412,7 +357412,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -357464,8 +357464,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -357476,7 +357476,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -357557,8 +357557,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -357569,7 +357569,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -357639,8 +357639,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -357651,7 +357651,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -357695,8 +357695,8 @@
         "operationId": "portal_stammdaten_api_v1_portal_feldbuch_stammdaten_get",
         "parameters": [
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -357707,7 +357707,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -357752,8 +357752,8 @@
         "operationId": "portal_feldbuch_stats_api_v1_portal_feldbuch_stats_get",
         "parameters": [
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -357764,7 +357764,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],
@@ -357819,8 +357819,8 @@
             }
           },
           {
-            "in": "query",
-            "name": "customer_id",
+            "in": "header",
+            "name": "X-Kundenkonto",
             "required": false,
             "schema": {
               "anyOf": [
@@ -357831,7 +357831,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Customer Id"
+              "title": "X-Kundenkonto"
             }
           }
         ],

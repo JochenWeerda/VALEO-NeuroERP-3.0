@@ -11,6 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## PORTAL-FELDBUCH-KUNDE-20261014 — abgeschlossen, Claude Code
+
+**Lieferung:** `portal_feldbuch._get_customer_id` nur noch aus `portal_kunde` — alle 30 Feldbuchwege; Parameter `customer_id` und Rueckfall `dev-customer` entfernt. Interne Betreuung liest mit Belegleserolle, aendert nur mit `AGRAR_BEARBEITEN`/`AGRAR_ADMIN`/`admin`. 4 neue Negativtests (frisch), Regression Feldbuch 50 + Portal gruen; OpenAPI nur die Feldbuchpfade. QA: `docs/quality-assurance/portal-feldbuch-kunde-20261014.md`. **Offen, fuer alle:** `seed_simulation_rations_acker.py` braucht Zuordnung; Lohndienste, Empfehlungen; `created_by` nennt den Kunden statt der Anmeldung.
+
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-14. **Ziel:** TENANT-DOC-001 Punkt 1, Folgeslice von PORTAL-KUNDE-001. **Dateibesitz:** app/api/v1/endpoints/portal_feldbuch.py (nur Kundenabhaengigkeit); tests/test_portal_kunde_trennung.py; OpenAPI nur `/api/v1/portal/feldbuch/*`; eigene QA. **Abnahme:** fremde Kunden-ID in URL wirkungslos, fremder Schlag 404, ohne Zuordnung 403, interne Schreibwege nur mit Agrarrolle. Keine Migration.
+
 ## SLO-CANONICAL-INPUT-20261014 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Keine erfundenen SLO-Messwerte/IDs; ausdruecklicher gemeinsamer REST-/MCP-Vertrag mit endlichen Zahlen oder ausdruecklichem null. **Dateibesitz:** process_kernel_api.py nur check_slo/Schemaimport; neues schemas/slo_input.py; mcp_tool_contracts.py nur finance_sla_check/process_slo_check; neuro_tool_execution.py nur SLO-Vorvalidierung/Entfernung Ersatzwerte; neue tests/test_slo_canonical_input.py und QA; OpenAPI nur SLO-Eingabe/Beschreibung/Komponente auf HEAD-Basis. **Abnahme:** missing/string/bool/NaN/Inf 422 vor HTTP; explicit null bleibt UNBEKANNT, null und 0 unterscheidbar; zwei MCP-Version-2-Vertraege gleicher REST-Schemaabgleich. **Risiken:** Skontoberechnung im Broker ist fachlich falsch an SLO gebunden und braucht eigenen Ersatz; kein Fachfreigabenachweis. Andere POSTs/Historie/Simulation offen. Keine Migration/DB/Container.
