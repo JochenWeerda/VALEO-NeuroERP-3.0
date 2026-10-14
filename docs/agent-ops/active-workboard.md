@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MCP-REST-BINDING-20261014 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** P0-Vertragsabgleich lesender Process-Kernel-Tools gegen reale REST-Parameter, echte Operation-IDs und CI-Negativtests; schreibende Qualitaetsfreigabe richtig einstufen. **Dateibesitz:** app/core/mcp_tool_contracts.py; neuer app/core/mcp_rest_binding.py; scripts/check_mcp_rest_bindings.py; tests/test_mcp_rest_bindings.py; betroffene MCP-/Broker-Tests; .github/workflows/openapi-drift.yml nur Gate; eigene QA. **Abnahme:** produktive GET-Bindungen gegen erzeugte OpenAPI, unbekannte/fehlende/falsch typisierte Parameter scheitern; Qualitaetsfreigabe unter Write-Sperre. **Risiken:** Versionierte Capability-Freigabe, POST-Payload-Transformationen, ERP-Katalog, CLI, Historienanzeige und Simulation bleiben eigene Folgeschritte. Keine Migration, keine neue DB/Container.
+
 ## STUDIO-ARTIFACT-VERSION-20261014 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Erster P0-Slice der API-Artefaktsynchronisierung: Quellversion im externen Agentenmanifest und MCP-Vertrag erhalten, Regression gegen abweichende Version. **Dateibesitz:** app/core/agent_tool_contract_manifest.py; app/core/mcp_tool_contracts.py nur MCP-Versionsmetadaten; tests/test_agent_tool_contracts.py; eigene QA. **Abnahme:** Quellversion wird unveraendert projiziert; unterschiedliche Vertragsschemaversionen fallen im Regressionstest auf. **Risiken:** Keine Behauptung einer freigegebenen Capability-Version: Freigaberegister, echter REST/CLI-Abgleich und CI-Gate folgen; Historienanzeige und Prozesssimulation bleiben im Gesamtauftrag. Keine Migration, keine neue DB/Container.
