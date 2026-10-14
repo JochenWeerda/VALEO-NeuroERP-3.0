@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## SELF-BILLING-ATOMIC-20261014 — reserviert, Codex
+## SELF-BILLING-ATOMIC-20261014 — in arbeit, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Self-Billing-Eingangsjournal aus kanonischen mandantengebundenen Steuerschluesseln statt festen verkehrten Konten; keine Zwischencommits. **Dateibesitz:** harvest_acceptance_service.py Buchungsweg (eigener laufender Claim); modules/agrar/repositories/self_billing_repo.py nur optionale Commit-Grenze; eigene Tests, QA und Simulator-Fixdaten. **Abnahme:** Aufwand/Vorsteuer Soll, Verbindlichkeit Haben, expliziter Steuervertrag, Konflikt ohne Teilcommit; gemeinsamer Pruefstand mit Rollback. Keine neue DB/Container.
+**Owner:** Codex. **Stand:** in arbeit 2026-10-14. **Ziel:** Self-Billing-Eingangsjournal aus kanonischen mandantengebundenen Steuerschluesseln statt festen verkehrten Konten; keine Zwischencommits. **Dateibesitz:** harvest_acceptance_service.py Buchungsweg (eigener laufender Claim); modules/agrar/repositories/self_billing_repo.py nur optionale Commit-Grenze; eigene Tests, QA und Simulator-Fixdaten. **Abnahme:** Aufwand/Vorsteuer Soll, Verbindlichkeit Haben, expliziter Steuervertrag, Konflikt ohne Teilcommit; gemeinsamer Pruefstand mit Rollback. Keine neue DB/Container.
+
+**Zwischenstand:** Kanonischer expliziter Eingangssteuerschluessel, korrekte Soll/Haben-Kontierung, Self-Billing/Journal ohne Zwischencommit; drei neue Vertragsfaelle gruen. Reale Erntekette jetzt zwoelf/zwoelf mit Rollback positiv. Studio-SQL-Nachweis und Artefakte/Altvertraege weiter offen. QA: self-billing-atomic-20261014.md.
 
 ## PORTAL-CONTEXT-001-20261014 — abgeschlossen, Claude Code
 
