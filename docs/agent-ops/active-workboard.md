@@ -24,9 +24,11 @@ fuer niemanden, Aufruf ohne Mandant liefert nichts, Portal und `/sales/{doc_type
 Rueckfall. **Nicht im Umfang:** Einzelabruf `get_document` (Nummer systemweit), Kundentrennung im Portal,
 `ops_dokumente`/`ops_rahmenvertraege`/`ops_zertifikate` ohne Mandantenspalte — werden ausgewiesen. Keine Migration.
 
-## AGENT-PROPOSAL-SAVE-TENANT-20261014 — reserviert, Codex
+## AGENT-PROPOSAL-SAVE-TENANT-20261014 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Elternclaim:** IDENTITY-INTEGRATION-REST-20261012 (eigener Codex-Claim). **Ziel:** Fremde persistente Agentenvorschlaege koennen nicht per Save-ID ueberschrieben werden; Proposal-Mandant und Aufrufmandant stimmen zwingend ueberein. **Dateibesitz:** app/repositories/agent_proposal_repository.py nur Save-Mandantengrenze; tests/test_agent_proposal_save_tenant.py; docs/quality-assurance/agent-proposal-save-tenant-20261014.md. **Abnahme:** fremder Save veraendert keinen Inhalt/Review, eigener Save bleibt moeglich, falscher Proposal-Mandant wird vor Writes abgewiesen. **Risiken:** Vorschlagshistorie/Idempotenz/Studioanbindung bleiben offen; keine neue DB oder Container.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Elternclaim:** IDENTITY-INTEGRATION-REST-20261012 (eigener Codex-Claim). **Ziel:** Fremde persistente Agentenvorschlaege koennen nicht per Save-ID ueberschrieben werden; Proposal-Mandant und Aufrufmandant stimmen zwingend ueberein. **Dateibesitz:** app/repositories/agent_proposal_repository.py nur Save-Mandantengrenze; tests/test_agent_proposal_save_tenant.py; docs/quality-assurance/agent-proposal-save-tenant-20261014.md. **Abnahme:** fremder Save veraendert keinen Inhalt/Review, eigener Save bleibt moeglich, falscher Proposal-Mandant wird vor Writes abgewiesen. **Risiken:** Vorschlagshistorie/Idempotenz/Studioanbindung bleiben offen; keine neue DB oder Container.
+
+**Lieferung:** 23 Faelle bestanden, davon drei PostgreSQL-Savepointvertraege. Save prueft Proposal- und persistierten Mandanten vor jeder Aenderung; fremde IDs bleiben unveraendert. QA: agent-proposal-save-tenant-20261014.md. Historie/Idempotenz und Studioanbindung bleiben offen.
 
 ## FIN-LESEWEGE-MANDANT-20261013 — abgeschlossen, Claude Code
 
