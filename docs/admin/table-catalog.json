@@ -43904,6 +43904,74 @@
           "read_by": [
             "app/infrastructure/models/portal_models.py"
           ]
+        },
+        "kundenzugaenge": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "subject",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "customer_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "rolle",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "gueltig_bis",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "angelegt_von",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "angelegt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "widerrufen_von",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "widerrufen_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "crm",
+          "ownership_reason": "Custodian domain_portal / Domain crm.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/portal_kundenzugaenge.py",
+            "app/auth/portal_kunde.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/portal_kundenzugaenge.py"
+          ]
         }
       }
     },

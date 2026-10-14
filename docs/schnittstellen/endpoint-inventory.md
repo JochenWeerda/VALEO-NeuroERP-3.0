@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-13
+last_reviewed: 2026-10-14
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -336,6 +336,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `portal_innendienst` | PORTAL-INNENDIENST-001 — Innendienst-Sicht auf Kundenschlaege und Potentialanalyse. |
 | `portal_intelligence` | — |
 | `portal_interessent` | — |
+| `portal_kundenzugaenge` | Kundenzugaenge des Portals: welche Anmeldung welche Kundenkonten sehen darf (TENANT-DOC-001). |
 | `portal_lohndienst` | — |
 | `portal_preisspiegel` | PORTAL-PREISSPIEGEL-001 — Getreidekurs-API fuer Kundenportal und Innendienst. |
 | `portal_shop` | Kundenportal Shop API Endpunkte |

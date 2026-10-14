@@ -10,7 +10,7 @@ from typing import Any, List, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -55,6 +55,7 @@ from app.services.pos_compat_service import PosCompatService
 from app.services.inventory_compat_service import InventoryCompatService, FutterCompatService
 from app.services.annahme_service import AnnahmeService
 from app.services.portal_compat_service import PortalCompatService
+from app.auth.portal_kunde import PortalKunde, portal_kunde
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from pydantic import ConfigDict as _ConfigDict
@@ -2092,78 +2093,117 @@ async def create_lkw_warteschlange_alias(
 
 
 # Portal compatibility ------------------------------------------------------
+# Mandant und Kundenkonto kommen aus ``portal_kunde`` (Anmeldung + gepruefte Zuordnung, TENANT-DOC-001). Bis
+# 14.10.2026 sah jede angemeldete Person hier die Belege aller Kunden des Mandanten; ``/portal/feldbuch`` nahm den
+# Kunden aus dem Parameter ``customer_id``.
+
+
+def _portal(db: Session, kunde: PortalKunde) -> PortalCompatService:
+    return PortalCompatService(db, kunde.tenant_id, kunde.customer_id)
 
 
 @router.get("/portal/dashboard", response_model=PortalOut, summary="Dashboard portal")
 async def portal_dashboard(
-    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    kunde: PortalKunde = Depends(portal_kunde), db: Session = Depends(get_db)
 ) -> dict:
-    return PortalCompatService(db, tenant_id).get_portal_dashboard_full()
+    return _portal(db, kunde).get_portal_dashboard_full()
 
 
 @router.get("/portal/anfragen", response_model=list[CompatBridgeOut], summary="Anfragen portal")
 async def portal_anfragen(
-    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    kunde: PortalKunde = Depends(portal_kunde), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
-    return PortalCompatService(db, tenant_id).list_portal_anfragen()
+    return _portal(db, kunde).list_portal_anfragen()
 
 
 @router.get("/portal/bestellungen", response_model=list[CompatBridgeOut], summary="Bestellungen portal")
 async def portal_bestellungen(
-    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    kunde: PortalKunde = Depends(portal_kunde), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
-    return PortalCompatService(db, tenant_id).list_portal_bestellungen()
+    return _portal(db, kunde).list_portal_bestellungen()
 
 
 @router.get("/portal/dokumente", response_model=list[CompatBridgeOut], summary="Dokumente portal")
 async def portal_dokumente(
-    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    kunde: PortalKunde = Depends(portal_kunde), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
-    return PortalCompatService(db, tenant_id).list_portal_dokumente()
+    return _portal(db, kunde).list_portal_dokumente()
 
 
 @router.get("/portal/feldbuch", response_model=list[CompatBridgeOut], summary="Feldbuch portal")
 async def portal_feldbuch(
-    customer_id: Optional[str] = Query(None),
-    tenant_id: Optional[str] = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
+    kunde: PortalKunde = Depends(portal_kunde), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
-    return PortalCompatService(db, tenant_id or "").list_portal_feldbuch(customer_id=customer_id)
+    return _portal(db, kunde).list_portal_feldbuch()
 
 
 @router.get("/portal/naehrstoffbilanzen", response_model=list[CompatBridgeOut], summary="Naehrstoffbilanzen portal")
 async def portal_naehrstoffbilanzen(
-    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    kunde: PortalKunde = Depends(portal_kunde), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
-    return PortalCompatService(db, tenant_id).list_portal_naehrstoffbilanzen()
+    return _portal(db, kunde).list_portal_naehrstoffbilanzen()
 
 
 @router.get("/portal/rechnungen", response_model=list[CompatBridgeOut], summary="Rechnungen portal")
 async def portal_rechnungen(
-    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    kunde: PortalKunde = Depends(portal_kunde), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
-    return PortalCompatService(db, tenant_id).list_portal_rechnungen()
+    return _portal(db, kunde).list_portal_rechnungen()
 
 
 @router.get("/portal/shop", response_model=list[CompatBridgeOut], summary="Shop portal")
 async def portal_shop(
-    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    kunde: PortalKunde = Depends(portal_kunde), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
-    return PortalCompatService(db, tenant_id).list_portal_shop()
+    return _portal(db, kunde).list_portal_shop()
 
 
 @router.get("/portal/vertraege", response_model=list[CompatBridgeOut], summary="Vertraege portal")
 async def portal_vertraege(
-    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    kunde: PortalKunde = Depends(portal_kunde), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
-    return PortalCompatService(db, tenant_id).list_portal_vertraege()
+    return _portal(db, kunde).list_portal_vertraege()
 
 
 @router.get("/portal/zertifikate", response_model=list[CompatBridgeOut], summary="Zertifikate portal")
 async def portal_zertifikate(
-    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
+    kunde: PortalKunde = Depends(portal_kunde), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
-    return PortalCompatService(db, tenant_id).list_portal_zertifikate()
+    return _portal(db, kunde).list_portal_zertifikate()
+
+
+@router.get("/portal/lieferscheine", response_model=CompatBridgeOut, summary="Lieferscheine des Kundenkontos")
+async def portal_lieferscheine(
+    kunde: PortalKunde = Depends(portal_kunde), db: Session = Depends(get_db)
+) -> dict[str, Any]:
+    """Bis 14.10.2026 las das Portal die Lieferscheine ueber den internen Belegrouter — alle Kunden des Mandanten."""
+    return {"ok": True, "data": _portal(db, kunde)._kundenbelege("sales_delivery", 1000)}
+
+
+@router.get("/portal/nachhaltigkeit/export.csv", response_class=StreamingResponse,
+            summary="Naehrstoff- und CO2e-Auswertung des Kundenkontos als CSV")
+async def portal_nachhaltigkeit_csv(
+    year: int = Query(..., ge=2000, le=2100),
+    kunde: PortalKunde = Depends(portal_kunde),
+    db: Session = Depends(get_db),
+):
+    from app.documents.router import export_sales_delivery_sustainability_csv
+
+    return await export_sales_delivery_sustainability_csv(
+        year=year, customer_id=kunde.customer_id, db=db, tenant_id=kunde.tenant_id)
+
+
+@router.get("/portal/nachhaltigkeit/export.pdf", response_class=StreamingResponse,
+            summary="Naehrstoff- und CO2e-Auswertung des Kundenkontos als PDF")
+async def portal_nachhaltigkeit_pdf(
+    year: int = Query(..., ge=2000, le=2100),
+    kunde: PortalKunde = Depends(portal_kunde),
+    db: Session = Depends(get_db),
+):
+    from app.documents.router import export_sales_delivery_sustainability_pdf
+
+    return await export_sales_delivery_sustainability_pdf(
+        year=year, customer_id=kunde.customer_id, db=db, tenant_id=kunde.tenant_id)
 
 
 # Procurement Nice-to-Have --------------------------------------------------

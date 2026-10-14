@@ -19,15 +19,21 @@ def doc_repo(db: Session):
     return get_repository(db)
 
 
-def list_docs(db: Session, doc_type: str, limit: int = 1000, tenant_id: Optional[str] = None) -> list[dict[str, Any]]:
-    """Belege eines Mandanten aus dem Dokumentspeicher.
+def list_docs(
+    db: Session, doc_type: str, limit: int = 1000, tenant_id: Optional[str] = None,
+    customer_id: Optional[str] = None,
+) -> list[dict[str, Any]]:
+    """Belege eines Mandanten aus dem Dokumentspeicher, auf Wunsch nur die eines Kunden.
 
     Ohne Mandant gibt es nichts: bis 14.10.2026 hiess das „alle Mandanten“. Eine leere Liste ist die
     Antwort — der fruehere Rueckfall auf den Prozessspeicher lieferte, was zufaellig im Prozess lag.
     """
     if not tenant_id:
         return []
-    payload = list_from_store(doc_type, skip=0, limit=limit, filters={"tenantId": tenant_id}, repo=doc_repo(db))
+    filters = {"tenantId": tenant_id}
+    if customer_id is not None:
+        filters["customerId"] = customer_id
+    payload = list_from_store(doc_type, skip=0, limit=limit, filters=filters, repo=doc_repo(db))
     return payload.get("data", []) if isinstance(payload, dict) else []
 
 

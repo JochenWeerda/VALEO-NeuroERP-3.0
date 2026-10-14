@@ -9,16 +9,23 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import EntityNotFoundError, ValidationFailedError
 from app.core.uuid7 import uuid7
 from app.infrastructure.models import Article as ArticleModel
-from app.domains.operations.models import Dokument, Rahmenvertrag, ZertifikatEintrag
 from app.services.compat_helpers import enqueue_event, list_docs, now_iso, doc_repo
 
 logger = logging.getLogger(__name__)
 
 
 class PortalCompatService:
-    def __init__(self, db: Session, tenant_id: str) -> None:
+    def __init__(self, db: Session, tenant_id: str, customer_id: Optional[str] = None) -> None:
         self.db = db
         self.tenant_id = tenant_id
+        # Das Kundenkonto aus ``app.auth.portal_kunde`` (TENANT-DOC-001). Ohne Kunden liefern die Portal-Listen
+        # nichts: bis 14.10.2026 sah jede angemeldete Person die Belege aller Kunden des Mandanten.
+        self.customer_id = customer_id
+
+    def _kundenbelege(self, doc_type: str, limit: int) -> list:
+        if not self.customer_id:
+            return []
+        return list_docs(self.db, doc_type, limit=limit, tenant_id=self.tenant_id, customer_id=self.customer_id)
 
     # ── Dashboard ─────────────────────────────────────────────────────────────
 
@@ -155,12 +162,9 @@ class PortalCompatService:
     # ── Full-featured dashboard (with Dokument ORM) ───────────────────────────
 
     def get_portal_dashboard_full(self) -> dict:
-        orders = list_docs(self.db, "sales_order", limit=20, tenant_id=self.tenant_id)
-        invoices = list_docs(self.db, "sales_invoice", limit=20, tenant_id=self.tenant_id)
-        try:
-            docs = self.db.query(Dokument).order_by(Dokument.hochgeladen_am.desc()).limit(5).all()
-        except Exception:
-            docs = []
+        orders = self._kundenbelege("sales_order", 20)
+        invoices = self._kundenbelege("sales_invoice", 20)
+        docs = self._kundendokumente()
         offene_rechnungen = sum(1 for i in invoices if str(i.get("status", "")).lower() in {"offen", "ueberfaellig"})
         return {
             "kpis": [
@@ -190,7 +194,7 @@ class PortalCompatService:
         }
 
     def list_portal_anfragen(self) -> list:
-        docs = list_docs(self.db, "customer_inquiry", limit=500, tenant_id=self.tenant_id)
+        docs = self._kundenbelege("customer_inquiry", 500)
         return [
             {
                 "id": d.get("id") or d.get("number"),
@@ -203,7 +207,7 @@ class PortalCompatService:
         ]
 
     def list_portal_bestellungen(self) -> list:
-        docs = list_docs(self.db, "sales_order", limit=500, tenant_id=self.tenant_id)
+        docs = self._kundenbelege("sales_order", 500)
         return [
             {
                 "id": d.get("id") or d.get("number"),
@@ -217,11 +221,16 @@ class PortalCompatService:
             for d in docs
         ]
 
+    def _kundendokumente(self) -> list:
+        """Dokumente, Rahmenvertraege und Zertifikate (``domain_ops``) tragen weder Mandant noch Kunde.
+
+        Bis 14.10.2026 zeigte das Portal sie jedem — interne Betriebsunterlagen aller Haeuser. Solange keiner dieser
+        Eintraege einem Kunden zugeordnet ist, gehoert keiner ins Portal (TENANT-DOC-001).
+        """
+        return []
+
     def list_portal_dokumente(self) -> list:
-        try:
-            docs = self.db.query(Dokument).order_by(Dokument.hochgeladen_am.desc()).limit(500).all()
-        except Exception:
-            docs = []
+        docs = self._kundendokumente()
         return [
             {
                 "id": d.id,
@@ -234,21 +243,23 @@ class PortalCompatService:
             for d in docs
         ]
 
-    def list_portal_feldbuch(self, customer_id: Optional[str] = None) -> list:
+    def list_portal_feldbuch(self) -> list:
         from app.infrastructure.models.agrar_models import FeldbuchSchlag
-        q = self.db.query(FeldbuchSchlag)
-        if self.tenant_id:
-            q = q.filter(FeldbuchSchlag.tenant_id == self.tenant_id)
-        if customer_id:
-            q = q.filter(FeldbuchSchlag.customer_id == customer_id)
-        schlaege = q.order_by(FeldbuchSchlag.name).all()
+        if not self.tenant_id or not self.customer_id:
+            return []
+        schlaege = (
+            self.db.query(FeldbuchSchlag)
+            .filter(FeldbuchSchlag.tenant_id == self.tenant_id, FeldbuchSchlag.customer_id == self.customer_id)
+            .order_by(FeldbuchSchlag.name)
+            .all()
+        )
         if schlaege:
             return [
                 {"id": s.id, "schlag": s.name, "kultur": s.kultur or "",
                  "flaeche": s.flaeche, "letzteMassnahme": None, "naechsteMassnahme": None}
                 for s in schlaege
             ]
-        deliveries = list_docs(self.db, "sales_delivery", limit=1000, tenant_id=self.tenant_id)
+        deliveries = self._kundenbelege("sales_delivery", 1000)
         return [
             {
                 "id": d.get("number") or d.get("id"),
@@ -262,7 +273,7 @@ class PortalCompatService:
         ]
 
     def list_portal_naehrstoffbilanzen(self) -> list:
-        deliveries = list_docs(self.db, "sales_delivery", limit=2000, tenant_id=self.tenant_id)
+        deliveries = self._kundenbelege("sales_delivery", 2000)
         return [
             {
                 "id": d.get("number") or d.get("id"),
@@ -277,7 +288,7 @@ class PortalCompatService:
         ]
 
     def list_portal_rechnungen(self) -> list:
-        invoices = list_docs(self.db, "sales_invoice", limit=500, tenant_id=self.tenant_id)
+        invoices = self._kundenbelege("sales_invoice", 500)
         return [
             {
                 "id": i.get("id") or i.get("number"),
@@ -290,9 +301,10 @@ class PortalCompatService:
         ]
 
     def list_portal_shop(self) -> list:
+        # Der Katalog gehoert dem Mandanten; bis 14.10.2026 las diese Liste die Artikel aller Mandanten.
         articles = (
             self.db.query(ArticleModel)
-            .filter(ArticleModel.is_active == True)  # noqa: E712
+            .filter(ArticleModel.tenant_id == self.tenant_id, ArticleModel.is_active == True)  # noqa: E712
             .order_by(ArticleModel.name.asc())
             .limit(500)
             .all()
@@ -310,10 +322,7 @@ class PortalCompatService:
         ]
 
     def list_portal_vertraege(self) -> list:
-        try:
-            items = self.db.query(Rahmenvertrag).order_by(Rahmenvertrag.laufzeit_bis.desc()).limit(500).all()
-        except Exception:
-            items = []
+        items = self._kundendokumente()
         return [
             {
                 "id": i.id,
@@ -327,10 +336,7 @@ class PortalCompatService:
         ]
 
     def list_portal_zertifikate(self) -> list:
-        try:
-            items = self.db.query(ZertifikatEintrag).order_by(ZertifikatEintrag.gueltig_bis.desc()).limit(500).all()
-        except Exception:
-            items = []
+        items = self._kundendokumente()
         return [
             {
                 "id": i.id,

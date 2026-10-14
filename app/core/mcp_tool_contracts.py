@@ -248,6 +248,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
         # ---------------------------------------------------------------
         MCPToolContract(
             tool_name="valeo_agrar_settlement_list",
+            schema_version=2,
             domain="agrar",
             operation="settlement_list",
             beschreibung="Listet Agrar-Settlement-Instanzen mit optionalem Status-Filter",
@@ -256,10 +257,10 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             output_beschreibung="Liste von Settlement-Summaries (id, status, betrag, menge)",
             parameter=[
                 _p_enum("status", "Filter nach Prozessstatus",
-                        ["OFFEN", "IN_PRUEFUNG", "FREIGEGEBEN", "VERBUCHT", "STORNIERT"],
+                        ["draft", "posted", "cancelled"],
                         pflicht=False),
-                _p_str("kampagne", "Erntekampagne-Filter z.B. '2024'", pflicht=False),
-                _p_int("limit", "Max. Ergebnisse (default 50, max 500)", False, 50),
+                _p_str("campaign_id", "Erntekampagnen-ID", pflicht=False),
+                _p_str("supplier_id", "Lieferanten-ID", pflicht=False),
             ],
         ),
 
@@ -308,25 +309,24 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_agrar_kampagne_list",
+            schema_version=2,
             domain="agrar",
             operation="kampagne_list",
             beschreibung="Listet verfuegbare Kampagnen-Vorlagen und aktive Kampagnen",
             kategorie=MCPToolKategorie.LESEN,
             api_endpoint="GET /api/v1/process/kampagnen/vorlagen",
             output_beschreibung="Liste von KampagnenVorlagen (typ, cn8_code, meilensteine)",
-            parameter=[
-                _p_enum("typ", "Kampagnen-Typ Filter",
-                        ["WINTERWEIZEN", "SOMMERGERSTE", "RAPS", "KOERNERMAIS", "ZUCKERRUEBEN"],
-                        pflicht=False),
-            ],
+            parameter=[],
         ),
 
         MCPToolContract(
             tool_name="valeo_agrar_quality_protocol_approve",
+            schema_version=2,
             domain="agrar",
             operation="quality_protocol_approve",
             beschreibung="Finalisiert ein Qualitaetsprotokoll fuer den weiteren Prozesslauf",
-            kategorie=MCPToolKategorie.VALIDIEREN,
+            kategorie=MCPToolKategorie.SCHREIBEN,
+            requires_approval=True,
             api_endpoint="POST /api/v1/agrar/quality-protocols/{protocol_id}/approve",
             output_beschreibung="Finalisiertes Qualitaetsprotokoll mit Freigabedaten",
             parameter=[
@@ -340,6 +340,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
         # ---------------------------------------------------------------
         MCPToolContract(
             tool_name="valeo_finance_ap_invoice_list",
+            schema_version=2,
             domain="finance",
             operation="ap_invoice_list",
             beschreibung="Listet Kreditorenrechnungen mit Status-Filter fuer Genehmigungsworkflow",
@@ -350,8 +351,10 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
                 _p_enum("status", "Genehmigungsstatus-Filter",
                         ["EINGEGANGEN", "IN_PRUEFUNG", "FREIGEGEBEN", "ABGELEHNT", "BEZAHLT"],
                         pflicht=False),
-                _p_str("lieferant_id", "Filter nach Lieferant-ID", False),
-                _p_bool("faellig_heute", "Nur heute faellige Rechnungen"),
+                _p_str("supplier_id", "Filter nach Lieferanten-ID", False),
+                _p_str("query", "Suchbegriff", False),
+                _p_int("skip", "Listenoffset", False),
+                _p_int("limit", "Seitengroesse", False),
             ],
         ),
 
@@ -374,6 +377,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
 
         MCPToolContract(
             tool_name="valeo_finance_open_items_get",
+            schema_version=2,
             domain="finance",
             operation="open_items_get",
             beschreibung="Ruft offene Posten (Debitoren oder Kreditoren) ab",
@@ -381,18 +385,22 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             api_endpoint="GET /api/v1/finance/open-items",
             output_beschreibung="Liste offener Posten mit Betrag, Faelligkeit, Mahnstufe",
             parameter=[
-                _p_enum("typ", "Debitor oder Kreditor", ["debitor", "kreditor"], True),
-                _p_str("partner_id", "Geschaeftspartner-ID", False),
-                _p_bool("nur_ueberfaellig", "Nur ueberfaellige Posten"),
+                _p_str("konto_typ", "Kontotypfilter", False),
+                _p_str("konto_nr", "Kontonummerfilter", False),
+                _p_str("op_status", "Statusfilter", False),
+                _p_str("search", "Suchbegriff", False),
+                MCPToolParameter("limit", MCPParameterTyp.INTEGER, "Maximale Treffer", False, minimum=1, maximum=5000),
             ],
         ),
 
         MCPToolContract(
             tool_name="valeo_finance_dunning_run",
+            schema_version=2,
             domain="finance",
             operation="dunning_run",
             beschreibung="Startet einen Mahnlauf fuer ueberfaellige Posten",
-            kategorie=MCPToolKategorie.BERECHNEN,
+            kategorie=MCPToolKategorie.SCHREIBEN,
+            requires_approval=True,
             api_endpoint="POST /api/v1/finance/dunning/run",
             output_beschreibung="Run-ID und Anzahl erzeugter Mahnungen fuer den Stichtag",
             parameter=[
@@ -420,14 +428,16 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
         # ---------------------------------------------------------------
         MCPToolContract(
             tool_name="valeo_workflow_instance_status",
+            schema_version=2,
             domain="workflow",
             operation="instance_status",
-            beschreibung="Ruft aktuellen Status einer Workflow-Instanz ab",
+            beschreibung="Listet Workflow-Definitionen und deren Versionen; kein Instanzstatus",
             kategorie=MCPToolKategorie.LESEN,
             api_endpoint="GET /api/v1/process/workflows",
-            output_beschreibung="Instanz-Status, aktueller Schritt, SLA-Stufe, History",
+            output_beschreibung="Workflow-Definitionsversionen und Anzahl",
             parameter=[
-                _p_str("instance_id", "Workflow-Instanz-ID", True, "inst-20240901-0042"),
+                _p_str("process_definition_key", "Prozessdefinitionsfilter", False),
+                _p_bool("active_only", "Nur aktive Definitionsversionen"),
             ],
         ),
 

@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-13
+last_reviewed: 2026-10-14
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -375,6 +375,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `performance_indexes_20260526` | Performance indexes for high-frequency query patterns. |
 | `periode_statuswoerterbuch_20261001` | Eine Buchungsperiode hat einen Zustand, nicht drei Vokabulare. |
 | `personal_organisation_zeitkonto_20261006` | Organisationseinheiten und Zeitkontokorrekturen — zwei fehlende Tabellen. |
+| `portal_kundenzugaenge_20261014` | Portal: gepruefte Zuordnung einer Anmeldung zu Kundenkonten (TENANT-DOC-001). |
 | `pos_fiscal_providers_20260609` | POS fiscal provider abstraction and evidence tables. |
 | `pos_tagesabschluss_lifecycle_20260623` | DOM-POS-004 — POS Tagesabschluss Lifecycle Tabellen |
 | `pos_zahlarten_aktionen_20260930` | Zahlarten und Kassenaktionen bekommen eine Migration. |
@@ -421,6 +422,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `steuerschluessel_aufwandskonto_20261013` | Steuerschluessel tragen ein Aufwandskonto fuer Eingangsbelege. |
 | `steuerschluessel_einheit_20261012` | Steuerschluessel: eine Quelle. Erloeskonto und Paragraf-24-Kennzeichen an ``tax_keys``. |
 | `streckengeschaefte_table_merge_20260424` | Streckengeschaefte persistent (public.streckengeschaefte); merge mehrerer Alembic-Heads. |
+| `studio_history_20261014` | Transactional append-only Studio revision history. |
 | `supply_chain_events_20260610` | supply_chain_events — append-only Ketten-Ereignis-Log (DOM-SUPPLY-004.2) |
 | `tank_adapter_20260821` | Tank adapter inbox and delivery-note handover. |
 | `tapi_calls_20260603` | TAPI/Telefonie — eingehende Anrufe für Click-to-Customer-Popup. |
