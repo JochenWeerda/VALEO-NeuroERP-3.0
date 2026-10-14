@@ -7,6 +7,7 @@ Prozessreferenz-Kontext und Explainability.
 from __future__ import annotations
 
 from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
+from app.api.v1.schemas.data_quality_input import DataQualityCheckIn
 
 from datetime import datetime
 from typing import Any
@@ -1389,37 +1390,11 @@ def get_dq_rulesets() -> dict[str, Any]:
 
 
 @router.post("/data-quality/validate", response_model=ProcessKernelOut, summary="Dq validieren")
-def validate_dq(body: dict) -> dict[str, Any]:
-    """
-    Validiert einen Datensatz gegen ein DQ-Regelset.
-
-    Body: { "entity_typ": str, "datensatz": dict, "kontext_datensaetze": list[dict] | null }
-    Optional: "ruleset_id" zum expliziten Regelset-Lookup (wird ignoriert, wenn entity_typ passt).
-    """
-    entity_typ: str = body.get("entity_typ", "")
-    datensatz: dict = body.get("datensatz", {})
-    kontext: list[dict] | None = body.get("kontext_datensaetze")
-
-    if not entity_typ:
-        raise HTTPException(status_code=422, detail="entity_typ ist erforderlich")
-    if not isinstance(datensatz, dict):
-        raise HTTPException(status_code=422, detail="datensatz muss ein Objekt sein")
-
-    # Eingabegrenzen: DoS-Schutz
-    _MAX_FELDER = 50
-    _MAX_FELDWERT_LEN = 1000
-    _MAX_KONTEXT = 100
-    if len(datensatz) > _MAX_FELDER:
-        raise HTTPException(status_code=422, detail=f"datensatz darf maximal {_MAX_FELDER} Felder enthalten")
-    for k, v in datensatz.items():
-        if isinstance(v, str) and len(v) > _MAX_FELDWERT_LEN:
-            raise HTTPException(
-                status_code=422,
-                detail=f"Feldwert '{k}' ueberschreitet maximale Laenge ({_MAX_FELDWERT_LEN} Zeichen)",
-            )
-    if kontext is not None:
-        if not isinstance(kontext, list) or len(kontext) > _MAX_KONTEXT:
-            raise HTTPException(status_code=422, detail=f"kontext_datensaetze darf maximal {_MAX_KONTEXT} Eintraege enthalten")
+def validate_dq(body: DataQualityCheckIn) -> dict[str, Any]:
+    """Validate the explicit business dataset with bounded canonical input."""
+    entity_typ = body.entity_typ
+    datensatz = body.datensatz
+    kontext = body.kontext_datensaetze
 
     rulesets = get_default_dq_rulesets()
     ruleset = rulesets.get(entity_typ)

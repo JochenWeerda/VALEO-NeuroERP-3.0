@@ -45462,6 +45462,44 @@
         "title": "DashboardMeta",
         "type": "object"
       },
+      "DataQualityCheckIn": {
+        "additionalProperties": false,
+        "properties": {
+          "datensatz": {
+            "additionalProperties": true,
+            "maxProperties": 50,
+            "title": "Datensatz",
+            "type": "object"
+          },
+          "entity_typ": {
+            "minLength": 1,
+            "title": "Entity Typ",
+            "type": "string"
+          },
+          "kontext_datensaetze": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "maxItems": 100,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontext Datensaetze"
+          }
+        },
+        "required": [
+          "entity_typ",
+          "datensatz"
+        ],
+        "title": "DataQualityCheckIn",
+        "type": "object"
+      },
       "DataQualityOut": {
         "additionalProperties": true,
         "properties": {},
@@ -368728,15 +368766,13 @@
     },
     "/api/v1/process/data-quality/validate": {
       "post": {
-        "description": "Validiert einen Datensatz gegen ein DQ-Regelset.\n\nBody: { \"entity_typ\": str, \"datensatz\": dict, \"kontext_datensaetze\": list[dict] | null }\nOptional: \"ruleset_id\" zum expliziten Regelset-Lookup (wird ignoriert, wenn entity_typ passt).",
+        "description": "Validate the explicit business dataset with bounded canonical input.",
         "operationId": "validate_dq_api_v1_process_data_quality_validate_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
+                "$ref": "#/components/schemas/DataQualityCheckIn"
               }
             }
           },

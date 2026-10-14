@@ -231,6 +231,13 @@ class NeuroToolExecutionService:
         context: dict[str, Any],
         tenant_id: str,
     ) -> dict[str, Any]:
+        if contract.tool_name == "valeo_process_data_quality_validate":
+            from app.api.v1.schemas.data_quality_input import DataQualityCheckIn
+            from pydantic import ValidationError
+            try:
+                return DataQualityCheckIn.model_validate(parameters).model_dump(mode="json")
+            except ValidationError:
+                raise HTTPException(422, "Explicit bounded data-quality object required") from None
         if contract.tool_name == "valeo_workflow_migration_check":
             from app.api.v1.schemas.workflow_migration_input import WorkflowMigrationCheckIn
             from pydantic import ValidationError
