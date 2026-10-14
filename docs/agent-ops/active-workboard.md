@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-REVISION-HISTORY-20261014 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Studio-Speicher-/Statusaenderungen mit ihrem Revisionsinhalt atomar protokollieren; SQL-Historie append-only, lesend im angemeldeten Mandanten. **Dateibesitz:** studio_draft_store.py; studio_drafts.py; studio_models.py; neue Migration studio_history_20261014 (nach control_findings_20261013); tests/test_studio_revision_history.py; Studio-/Pilot-SQL-Fixtures nur rollbackbasierte Historienisolation; eigene QA/Platform-Impact-Doku. **Abnahme:** Historie und Zustand gemeinsame Transaktion, SQL sperrt UPDATE/DELETE, fremde Historie leer/404; bestehende Suites weiter gruen. **Migrationsclaim:** additive Tabelle/Trigger auf bestehendem valeo_probe und lokaler Entwicklungsdatenbank, kein Reset/keine neue DB; keine anderen offenen Migrationsclaims gefunden. **Risiken:** Idempotenz und getrennte Agenten-/Korrelationsidentitaet folgen; Historie ersetzt keine Produktionsfreigabe.
+
 ## DOC-STORE-MANDANT-20261014 — abgeschlossen, Claude Code
 
 **Lieferung:** Filter streng, Lesen ohne Mandant leer, kein Prozessspeicher-Rueckfall. Dabei gefunden und behoben:
