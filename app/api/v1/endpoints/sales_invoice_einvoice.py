@@ -18,6 +18,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.auth.finance_roles import beleg_read, beleg_write
 from app.core.database import get_db
 from app.core.gobd_artifact import GobdArtifactError, register_artifact, sha256_hex
 from app.core.tenant import get_tenant_id
@@ -193,6 +194,8 @@ def _register_xml_artifact(
 @router.post(
     "/{invoice_number}/einvoice/xrechnung",
     summary="XRechnung 3.0 (UBL 2.1) generieren",
+    # Erzeugen schreibt ins GoBD-Archiv. Bis 14.10.2026 genuegte eine Anmeldung.
+    dependencies=[Depends(beleg_write)],
     response_model=SalesInvoiceEinvoiceOut,
     response_class=Response,
 )
@@ -232,6 +235,7 @@ def generate_xrechnung(
 @router.post(
     "/{invoice_number}/einvoice/zugferd",
     summary="ZUGFeRD 2.x (PDF/A-3 + CII EN 16931) generieren",
+    dependencies=[Depends(beleg_write)],
     response_model=SalesInvoiceEinvoiceOut,
     response_class=Response,
 )
@@ -283,6 +287,7 @@ def generate_zugferd(
 @router.get(
     "/{invoice_number}/einvoice/xrechnung",
     summary="Letzte XRechnung als XML abrufen",
+    dependencies=[Depends(beleg_read)],
     response_class=Response,
 )
 def get_xrechnung(
