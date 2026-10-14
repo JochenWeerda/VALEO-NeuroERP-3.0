@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## DOC-EINZELABRUF-MANDANT-20261014 — in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Einzelabrufe des Dokumentspeichers ausserhalb des Belegrouters treffen nur Belege des eigenen Mandanten: E-Rechnung (XRechnung/ZUGFeRD/CII), Gutschrift/Retoure (Rechnung auf GUTGESCHRIEBEN), Verrechnung von Lieferantengutschriften/-belastungen (offener Betrag und offene Posten), Kopfdaten der Eingangsrechnungsmaske, Statusnachtraege bei Zahlung/Auszifferung/Storno, Lieferantenname. **Dateibesitz:** app/documents/router_helpers.py (neuer Helfer); app/api/v1/endpoints/{sales_invoice_einvoice,sales_credit_notes,credit_debit_memos,finance_clearing,op_skonto_auszifferung,finance_invoices,payment_runs,ap_approval_workflow}.py (nur die Abrufstellen); app/services/{mask_rollout_summary_service,ap_invoice_kernel_posting,agrar_settlement_service}.py (nur die Abrufstellen); tests/test_einzelabruf_mandant.py; docs/quality-assurance/doc-einzelabruf-mandant-20261014.md. **Abnahme:** fremder/mandantenloser Beleg wird weder gelesen noch veraendert; eigene Faelle unveraendert gruen. Keine Migration.
+
 ## DOC-ROUTER-MANDANT-20261014 — abgeschlossen, Claude Code
 
 **Lieferung:** `/api/mcp/documents/*` nur im Mandanten der Anmeldung: fremd/mandantenlos 404, Anlage unter fremder
