@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-GRAIN-CHAIN-20261014 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Durch reale Studio-Simulation gefundene Modellbrueche der Ernteannahme beheben. **Dateibesitz:** modules/agrar/services/partie_service.py; app/services/harvest_acceptance_service.py nur betroffene Teilpositionen und verbindliche Status-/Buchungsinvarianten; eigene Tests und QA. **Abnahme:** Mandant ueber Annahmekopf, keine unbekannten ORM-Felder; reale Kette auf gemeinsamem valeo_probe rollbackisoliert. Keine neue Datenbank/Container; keine fremden Aenderungen.
+
 ## ALTBELEG-QUARANTAENE-20261014 — abgeschlossen, Claude Code
 
 **Lieferung:** Inventar der sieben mandantenlosen Altbelege (6 `INV-Q-…`, `AP-TEST-001`): Testartefakte, keine Bezuege in 780 Tabellen. Vollsicherung + Wiederherstellbarkeit geprueft (`C:/Users/Jochen/valeo-backups/`, sha256 im QA). **Auf ausdrueckliche Freigabe des Nutzers (14.10.) geloescht statt Quarantaene** — Quarantaene-Register/Trigger/Skript damit gegenstandslos, nicht im Repo. `DocumentRepository.save_document` weist Belege ohne `tenantId` ab (`BelegOhneMandant`). 6 Tests (frisch); Beleg-Regression 1232 gruen, 60 rot vorbestehend (58 × 401 alter Dev-Token, 2 auch ohne Aenderung). QA: `docs/quality-assurance/altbelege-mandantenpflicht-20261014.md`. Keine Migration.
