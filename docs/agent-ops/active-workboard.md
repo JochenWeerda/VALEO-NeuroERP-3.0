@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## WORKFLOW-MIGRATION-INPUT-20261014 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Echter Workflow-Vergleich statt stiller identischer Demodaten: typisierte REST-Eingabe, explizite alte/neue Schritte, MCP-Transport, inhaltsgebundener Ergebnisfingerprint. **Dateibesitz:** process_kernel_api.py nur /workflow-migration/check und Schemaimport; neue schemas/workflow_migration_input.py; mcp_tool_contracts.py nur migration_check; neuro_tool_execution.py nur Migrationseingaben; Tests dieses Vertrags; docs/schnittstellen/openapi.json nur betroffener Pfad/Komponenten auf HEAD-Basis, fremde Arbeitskopie bleibt erhalten; eigene QA. **Abnahme:** fehlende/doppelte/falsch typisierte Schritte 422 ohne Demo; geloeschter Pflichtschritt BREAKING; Agentenpayload transportiert beide Staende unveraendert; Ergebnis an Inhalt gebunden. **Risiken:** Fingerprint ist keine Genehmigung; vollstaendige Simulation/Release-Sperre und andere POST-Vertraege bleiben offen. Keine Migration/DB/Container.
+
 ## MCP-PROD-TRANSPORT-20261014 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-14. **Ziel:** Default-Neurotransport verwendet produktive main-App mit denselben REST-Berechtigungen statt Test-Kompatibilitaets-App. **Dateibesitz:** app/services/neuro_tool_execution.py nur _get_client; neuer tests/test_neuro_production_transport.py; eigene QA. **Abnahme:** produktive App ausgewaehlt, 403 wird durchgereicht, Token redigiert, fehlende Produktions-App kein Testfallback. **Risiken:** POST-Schematransformationen, vollstaendiger Kanalabgleich, Historienanzeige und Prozesssimulation bleiben offen. Keine Migration/DB-Neuanlage.
