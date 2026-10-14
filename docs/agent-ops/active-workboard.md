@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SELF-BILLING-NUMBER-20261014 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-14. **Ziel:** Zeitstempelbasierte Self-Billing-Kollisionen schliessen; Annahme verwendet bestehenden transaktionalen NumberRangeService. **Dateibesitz:** modules/agrar/services/self_billing_service.py nur Nummern-/ID-Generierung; harvest_acceptance_service.py nur serverseitige Nummernkreisvergabe (eigener Claim); Studio-Profilfixdaten und gezielte Tests/QA. **Abnahme:** mehrere Vorgange je Mandant, volle UUID-Identitaet, Journal-Laengengrenze, Counter ohne Zwischencommit; kein neues Nummerierungsmodell, DB oder Container.
+
 ## CI-GRUEN-20261014 — in Arbeit, Claude Code
 
 **Owner:** Claude Code. **Stand:** in Arbeit 2026-10-14. **Ziel:** Nutzerauftrag „alles Offene und Risiken schliessen“: main-CI wieder gruen (Stand 35dc18532: 505 failed/28 errors in der Vollsuite, OpenAPI-Drift, Frontend-Typecheck, Doku-Staleness, business-time/godfile-Ratschen, axe, E2E, Service-Security) plus Restpunkte aus PORTAL-CONTEXT-001 (MCP-Lesewerkzeuge Lohndienst/Empfehlungen, Zugangspflege, Keycloak-Kennwort in docker-compose, Glocke). **Vorgehen:** Ursachen buendeln (63 Dateien testen main:app mit abgeschafftem Dev-Token → app.main-Testgrenze), je Ursache ein Commit. **Dateibesitz:** nur Testdateien der jeweiligen Ursache, Konfiguration der Gates, eigene Portal-Dateien; **nicht** angefasst werden Dateien aktiver Codex-Slices (SELF-BILLING-ATOMIC, STUDIO-GRAIN-CHAIN, STUDIO-CLOSURE) — Befunde dort gehen als Hinweis an Codex. Keine Migration ohne eigenen Claim.
