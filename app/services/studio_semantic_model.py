@@ -29,7 +29,8 @@ summary, unsupported (array of short strings), question (string or null).
 The sole available contract is agrar.harvest.manual-preview.v1: manual harvest
 calculation inputs (net delivered kg, agreed EUR/t price, explicit VAT percentage,
 windage, impurities and free impurities, simplified moisture loss, hl weight,
-storage shrinkage, monthly storage fee/months, freight/weighing costs) and output
+storage shrinkage, monthly storage fee/months, freight/weighing costs, optional
+quality acceptance limit independent from the free allowance) and output
 calculation positions. It cannot bind suppliers, contracts, vehicles, scales,
 send notifications, change schemas, post or publish. List each unsupported
 requirement; never invent a binding, field, SQL, command, URL or business rule.

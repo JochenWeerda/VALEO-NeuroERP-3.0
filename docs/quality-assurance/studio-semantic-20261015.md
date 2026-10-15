@@ -35,7 +35,7 @@ Echte Browserbilder und Pruefergebnisse werden erst nach Ausfuehrung ergaenzt. K
 
 ## Implementierungsstand 2026-10-15
 
-Der Studio-Katalog fuehrt agrar.harvest.manual-preview.v1 mit 13 fachlich benannten Parametern, Einheiten, Synonymen, Schema und Vertragsversion. Vier Eingaben sind verpflichtend, weitere optional. Unbekannte Felder, Quellen und Aktionen werden serverseitig abgewiesen. Fehlende optionale Messwerte bleiben unbekannt und werden nicht als gemessene Null erfunden. Die alte freie feld_N-Spaltenerzeugung wurde aus der Bedienung entfernt.
+Der Studio-Katalog fuehrt agrar.harvest.manual-preview.v1 mit 14 fachlich benannten Parametern, Einheiten, Synonymen, Schema und Vertragsversion. Vier Eingaben sind verpflichtend, weitere optional. Unbekannte Felder, Quellen und Aktionen werden serverseitig abgewiesen. Fehlende optionale Messwerte bleiben unbekannt und werden nicht als gemessene Null erfunden. Die alte freie feld_N-Spaltenerzeugung wurde aus der Bedienung entfernt.
 
 Der mehrstufige Katalogdialog klaert Prozess und manuelle Wiegeeingabe sowie den begrenzten Umfang. Gespraech und Entscheidungen werden mit der normalen ScreenDefinition gespeichert. Ein neuer Vorschlag ersetzt keinen ausgewaehlten gespeicherten Entwurf stillschweigend. Optionale Fachfelder lassen sich anschliessend aus-/einblenden, kompatible Testwerte bleiben erhalten; entfernte Werte werden aus der Kalkulationsanfrage entfernt. Der zentrale RenderPlan-Cache beruecksichtigt strukturelle Aenderungen unter gleicher Screen-ID/Version.
 
@@ -51,7 +51,7 @@ Im lokalen Sichtpruefungsmandanten ist ein Modell konfiguriert. Die unveraendert
 
 ## Pruefungen
 
-27 Frontend-/Compilerfaelle bestanden, darunter echte zentrale FormState-Eingabe, Datenerhalt bei Feldauswahl, verspätete Antworten, Rueckfragen und vorhandene Freigabesperren. Fokussierter Typecheck Status 0. 118 Backend-Vertragsfaelle bestanden; vier reale SQL-/Prozessnachweise separat bestanden, darunter echte grain.v1-Kette mit dreizehn Invarianten, Replay, gescheiterte Beweisspeicherung, fremder Mandant und belegter gemeinsamer Pruefstand. Keine Skips in diesen Abnahmen, keine neue Datenbank oder Container, keine Migration oder Ruecksetzung.
+28 Frontend-/Compilerfaelle bestanden, darunter echte zentrale FormState-Eingabe, Datenerhalt bei Feldauswahl, verspätete Antworten, Rueckfragen und vorhandene Freigabesperren. Fokussierter Typecheck Status 0. 121 Backend-Vertragsfaelle bestanden; vier reale SQL-/Prozessnachweise separat bestanden, darunter echte grain.v1-Kette mit dreizehn Invarianten, Replay, gescheiterte Beweisspeicherung, fremder Mandant und belegter gemeinsamer Pruefstand. Keine Skips in diesen Abnahmen, keine neue Datenbank oder Container, keine Migration oder Ruecksetzung.
 
 Der erste kombinierte Aufruf verweigerte vier Setups, weil sein Teststarter den Pruefstand zugleich als Entwicklungsdatenbank deklarierte. Das war eine korrekte Schutzentscheidung. Der nachfolgende Prozesslauf nutzte expliziten Pruefstand bei unveraenderter realer Entwicklungsdatenbank-Identitaet; alle vier Faelle bestanden. Keine Schutzpruefung wurde gelockert.
 
@@ -65,3 +65,21 @@ Positive Modell-Browserabnahme mit eigenem Kontingent und Abstimmungsbetrieb unb
 
 
 Positionsanzeige: Die Besatz-Bezeichnung verwendet jetzt dieselbe explizite Freigrenze wie die vorhandene Formel; bei 0/2/3 Prozent gesondert geprueft. Windabgang bleibt gemaess kanonischem Domain-Kommentar rein informativ und wird in Katalog/Warnung so benannt. Keine neue Abzugsformel eingefuehrt. Ein unpassender kombinierter Teststarter zeigte anschliessend auch die umgekehrte DB-Grenze; die beiden kanonischen getrennten Laeufe bleiben fuehrend, ihre Schutzregeln unveraendert.
+
+
+## Nutzerpraezisierung Windabgang und Besatz
+
+[HARVEST-DEDUCTION-001](../architecture/harvest-deduction-contract-standard.md) haelt Qualitaetsgrenze, echte Freigrenze, Fraktionsabgrenzung, gesonderte Reinigungskosten und versionierte Vertragsgrundlage getrennt. Die Vorschau wurde um eine eigene optionale Qualitaetsgrenze erweitert. Ihre Bewertung beeinflusst die vorhandene Abrechnungsformel nicht; settlement_authorized bleibt immer false. Das Beispiel 25.000 kg / 1,5 Prozent Besatz / 0,8 Prozent informativer Wind / Freigrenze null ergibt 24.625 kg, ohne Doppelabzug. Fehlende Freigrenzen werden auch bei bekannter Qualitaetsgrenze nicht geraten.
+
+Der operative Produktionspfad besitzt weiterhin noch keine solche versionierte Vertragsregelaufloesung und verwendet einen alten Kalkulatorstandard fuer die Freigrenze. Dieser Befund ist ausdruecklich offen. Die Bereitstellung des Recherchepapiers wird nicht als rechtliche Freigabe interpretiert; es wurde keine Abrechnungsbedingung fuer einen Kunden geaendert.
+
+
+## Finale Browserabnahme und Handbuch
+
+Eigener synthetischer Entwurf d052bc7c-ddd6-4838-9d75-34ea62a3eff1 auf dem Sichtpruefungsmandanten. Erste und ueberarbeitete Definition gespeichert; nach regulaerer Neuanmeldung wieder geoeffnet. Zusaetzliche optionale Qualitaetsgrenze gespeichert, Status korrekt von review nach draft zurueckgesetzt, erneut zur Pruefung gegeben. Gespeichertes Gespraech und manuelle Entscheidungen werden sichtbar wiederhergestellt. Die Unterhaltung ist weiterhin keine vertrauenswuerdige Freigabequelle; ungueltige gespeicherte Dialogstrukturen weist der Server ab und die Oberflaeche behandelt Altstaende defensiv.
+
+Sieben echte Historienereignisse create/update/review/simulation/update/review/simulation. Aktuelle Reviewrevision f49af219b184fb037b92a87406b29694ee61c9c64d9348d6babb7fb85136e5a5. Beide echten UI-Simulationsversuche korrekt mit semantic_preview_not_a_release_profile verweigert; keine Veroeffentlichung oder Geschaeftswirkung. Produktivfreigabe und Vertragsfreigabe wurden nicht behauptet. Klartextmeldungen ohne technische Feldkenntnis; sieben echte, visuell gepruefte JPG-Bilder im [Handbuch](../benutzerhandbuch/studio-fachdialog.md).
+
+Finale Nachweise: 121 Backend-Vertraege bestanden, vier reale SQL-/Prozessfaelle separat bestanden, 28 Frontend-/Compilerfaelle bestanden, fokussierter Typecheck Status 0. Vorhandener gemeinsamer Pruefstand, keine neue DB/Container/Migration/Reset. Die browserseitige Speicherung betraf ausschliesslich eigene Studio-Metadaten des synthetischen Sichtpruefungsmandanten, keine fachlichen Testbuchungen auf der Entwicklungsdatenbank.
+
+CI-Nachlauf fuer 109dcc71d: Docs Governance, Docs Build, OpenAPI Drift, Universal Mask Platform, PostgreSQL, beide E2E-Laufe, Erntepeak-Lasttest und Security Agent erfolgreich. Gesamt-Quality-Gate, CI/CD, Service Security und Security Scan weiterhin fehlgeschlagen; kein Gesamt-Gruen-Nachweis. Neue lokale Lieferaenderungen erhalten einen eigenen CI-Nachlauf.

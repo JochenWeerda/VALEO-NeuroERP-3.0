@@ -12,6 +12,7 @@ import { mockRowsFor } from './studio-reducer'
 const sample = {
   delivered_quantity_kg: 25000, unit_price_eur_per_ton: 220, vat_rate_percent: 0,
   impurities_free_pct: 2, windage_pct: 0, impurities_pct: 3, moisture_pct: 0,
+  quality_limit_pct: 2,
   hl_weight_kg_per_hl: 76, storage_shrinkage_pct: 0, storage_fee_per_month: 0,
   storage_months: 0, freight_costs: 100, weighing_fees: 15,
 }
@@ -29,7 +30,16 @@ function calculationError(failure: unknown, definition: ScreenDefinition): strin
       return `${label}: ungültiger Wert. Bitte Zahlenformat und Wertebereich prüfen.`
     }).join(' ')
   }
-  return getAxiosErrorMessage(failure)
+  const message = getAxiosErrorMessage(failure)
+  return message.split(';').map(part => {
+    const field = definition.fields?.find(item => part.includes(item.key))
+    if (!field) return part.trim()
+    const lower = /greater than (?:or equal to )?([\d.]+)/.exec(part)
+    const upper = /less than (?:or equal to )?([\d.]+)/.exec(part)
+    if (lower) return `${field.label}: muss ${part.includes('or equal to') ? 'mindestens' : 'größer als'} ${lower[1]} sein.`
+    if (upper) return `${field.label}: darf ${part.includes('or equal to') ? 'höchstens' : 'nur weniger als'} ${upper[1]} sein.`
+    return `${field.label}: ungültiger Wert. Bitte Zahlenformat und Wertebereich prüfen.`
+  }).join(' ')
 }
 
 export function StudioPreview({ definition }: { definition: ScreenDefinition }): JSX.Element {
@@ -77,6 +87,7 @@ export function StudioPreview({ definition }: { definition: ScreenDefinition }):
       {error && <p role="alert">Berechnung gesperrt: {error}</p>}
       {result && <div aria-live="polite" data-testid="studio-calculation-result">
         <p>Netto: {result.total_net_amount_eur} EUR · Steuer: {result.total_vat_amount_eur} EUR · Brutto: {result.total_gross_amount_eur} EUR</p>
+        <p>Qualitätsgrenze: {result.quality_limit_exceeded == null ? 'nicht bewertet' : result.quality_limit_exceeded ? 'überschritten' : 'eingehalten'} · Vertragsfreigabe: nicht erteilt</p>
         <ul className="list-disc pl-4 text-xs">{result.warnings.map(warning => <li key={warning}>{warning}</li>)}</ul>
       </div>}
     </div>}

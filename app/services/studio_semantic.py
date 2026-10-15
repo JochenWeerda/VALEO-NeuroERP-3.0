@@ -10,7 +10,7 @@ from decimal import Decimal
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from modules.agrar.services.harvest_calculator import (
     HarvestCalculationInput, calculate_harvest_settlement,
@@ -27,6 +27,7 @@ class HarvestPreviewIn(BaseModel):
     windage_pct: Decimal | None = Field(default=None, ge=0, le=100)
     impurities_pct: Decimal | None = Field(default=None, ge=0, le=100)
     impurities_free_pct: Decimal = Field(ge=0, le=100)
+    quality_limit_pct: Decimal | None = Field(default=None, ge=0, le=100)
     moisture_pct: Decimal | None = Field(default=None, ge=0, le=100)
     hl_weight_kg_per_hl: Decimal | None = Field(default=None, ge=0, le=150)
     storage_shrinkage_pct: Decimal | None = Field(default=None, ge=0, le=100)
@@ -44,6 +45,7 @@ _LABELS = {
     "windage_pct": ("Windabgang (Information, kein Abrechnungsabzug)", "%", "Bestands-/Prozesskennzahl"),
     "impurities_pct": ("Besatz", "%", "Fremdbestandteile"),
     "impurities_free_pct": ("Vereinbarter freier Besatz", "%", "Besatzfreigrenze"),
+    "quality_limit_pct": ("Maximaler Besatz als Qualitaetsanforderung", "%", "Qualitaetsgrenze, keine Freigrenze"),
     "moisture_pct": ("Feuchtigkeit (vereinfachtes Testmodell)", "%", "Feuchte"),
     "hl_weight_kg_per_hl": ("Hektolitergewicht", "kg/hl", "HL-Gewicht"),
     "storage_shrinkage_pct": ("Lagerschwund", "%", "Schwund"),
@@ -116,6 +118,8 @@ class HarvestPreviewOut(BaseModel):
     total_vat_amount_eur: Decimal
     total_gross_amount_eur: Decimal
     vat_rate_percent: Decimal
+    quality_limit_exceeded: bool | None
+    settlement_authorized: Literal[False] = False
     warnings: list[str]
 
 
@@ -162,11 +166,17 @@ def dialogue(body: StudioDialogueIn) -> StudioDialogueOut:
 def preview(body: HarvestPreviewIn) -> dict[str, Any]:
     values = body.model_dump()
     vat = values.pop("vat_rate_percent")
+    quality_limit = values.pop("quality_limit_pct")
+    quality_exceeded = body.impurities_pct > quality_limit if quality_limit is not None and body.impurities_pct is not None else None
     result = calculate_harvest_settlement(HarvestCalculationInput(**values), vat_rate_percent=vat)
     if result.total_net_amount_eur < 0:
         raise ValueError("Kosten uebersteigen den Warenwert; Kalkulationsprobe unzulaessig.")
+    quality_warnings = ["Qualitaetsgrenze ueberschritten; Annahmeentscheidung gesondert klaeren."] if quality_exceeded else []
     return {"contract": CONTRACT, "business_effect": "none", "external_effect": "none",
-            **asdict(result), "warnings": [*result.warnings, *semantic_catalog()["limitations"]]}
+            "quality_limit_exceeded": quality_exceeded, "settlement_authorized": False,
+            **asdict(result), "warnings": [*result.warnings, *quality_warnings,
+                                          "Eine Qualitaetsgrenze ist keine abzugsfreie Besatztoleranz. Vertragsfreigabe ist nicht erteilt.",
+                                          *semantic_catalog()["limitations"]]}
 
 
 def semantic_violations(definition: dict[str, Any]) -> list[str]:
@@ -178,6 +188,14 @@ def semantic_violations(definition: dict[str, Any]) -> list[str]:
     decisions = meta.get("decisions")
     if not isinstance(decisions, dict) or decisions.get("weighing") != "manual" or decisions.get("acceptPreviewLimits") is not True:
         return ["semantic_scope_not_confirmed"]
+    conversation = meta.get("dialogue", [])
+    if not isinstance(conversation, list) or len(conversation) > 20:
+        return ["semantic_dialogue_invalid"]
+    try:
+        for turn in conversation:
+            DialogueTurn.model_validate(turn)
+    except ValidationError:
+        return ["semantic_dialogue_invalid"]
     canonical = reference_definition([])
     # Labels/layout may be redesigned, but domain bindings and their safety
     # semantics cannot be changed by generated metadata or direct API callers.

@@ -7,6 +7,19 @@ const send = vi.hoisted(() => vi.fn())
 vi.mock('@/lib/api/studio', () => ({ sendStudioDialogue: send }))
 
 describe('catalog-guided Studio conversation', () => {
+  it('restores the saved conversation and explicit manual decisions without a model call', () => {
+    const previousCalls = send.mock.calls.length
+    render(<StudioDialogue disabled={false} onProposal={vi.fn()} initialTurns={[
+      { role: 'user', content: 'Gespeicherte fachliche Anforderung' },
+      { role: 'assistant', content: 'Gespeicherte Rueckfrage' },
+    ]} initialDecisions={{ weighing: 'manual', acceptPreviewLimits: true }} />)
+    expect(screen.getByText('Gespeicherte fachliche Anforderung')).toBeInTheDocument()
+    expect(screen.getByText('Gespeicherte Rueckfrage')).toBeInTheDocument()
+    expect(screen.getByLabelText('Wiegewerte übernehmen')).toHaveValue('manual')
+    expect(screen.getByRole('checkbox', { name: /Nur Kalkulationsprobe/ })).toBeChecked()
+    expect(send.mock.calls.length).toBe(previousCalls)
+  })
+
   it('clarifies requirements before applying a proposal, preserves turns, invalidates changed consent', async () => {
     const onProposal = vi.fn()
     send.mockResolvedValueOnce({ ready: false, message: 'Wiegewerte manuell oder automatisch?', limitations: [] })

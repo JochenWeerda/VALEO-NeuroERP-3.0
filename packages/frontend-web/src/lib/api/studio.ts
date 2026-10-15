@@ -49,6 +49,8 @@ export interface HarvestPreviewResult {
   total_net_amount_eur: string
   total_vat_amount_eur: string
   total_gross_amount_eur: string
+  quality_limit_exceeded?: boolean | null
+  settlement_authorized?: false
   warnings: string[]
 }
 

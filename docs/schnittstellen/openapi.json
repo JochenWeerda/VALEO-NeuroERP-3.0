@@ -79709,6 +79709,22 @@
             ],
             "title": "Moisture Pct"
           },
+          "quality_limit_pct": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Limit Pct"
+          },
           "storage_fee_per_month": {
             "anyOf": [
               {
@@ -79846,6 +79862,23 @@
             "title": "Positions",
             "type": "array"
           },
+          "quality_limit_exceeded": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Limit Exceeded"
+          },
+          "settlement_authorized": {
+            "const": false,
+            "default": false,
+            "title": "Settlement Authorized",
+            "type": "boolean"
+          },
           "total_gross_amount_eur": {
             "title": "Total Gross Amount Eur",
             "type": "string"
@@ -79879,6 +79912,7 @@
           "total_vat_amount_eur",
           "total_gross_amount_eur",
           "vat_rate_percent",
+          "quality_limit_exceeded",
           "warnings"
         ],
         "title": "HarvestPreviewOut",

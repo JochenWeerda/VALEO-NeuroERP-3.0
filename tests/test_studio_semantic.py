@@ -48,7 +48,7 @@ def test_every_catalog_field_is_an_actual_versioned_domain_input():
     fields = semantic_catalog()["fields"]
     assert {field["key"] for field in fields} == set(HarvestPreviewIn.model_fields)
     assert all(field["contract"].startswith(CONTRACT + "#") for field in fields)
-    assert set(HarvestPreviewIn.model_fields) - {"vat_rate_percent"} <= set(HarvestCalculationInput.__dataclass_fields__)
+    assert set(HarvestPreviewIn.model_fields) - {"vat_rate_percent", "quality_limit_pct"} <= set(HarvestCalculationInput.__dataclass_fields__)
 
 
 def test_real_domain_calculation_has_conditional_positions_and_exact_money():
@@ -93,7 +93,25 @@ def test_position_label_matches_the_explicit_impurities_allowance(free):
     assert f"- {free}%" in row["calculation_formula"]
 
 
-@pytest.mark.parametrize("mutation", ["field", "type", "required", "contract", "source", "action", "output", "decision"])
+def test_quality_limit_does_not_become_a_free_allowance_or_double_wind_deduction():
+    base = dict(impurities_pct=Decimal('1.5'), windage_pct=Decimal('0.8'), impurities_free_pct=0,
+                freight_costs=0, weighing_fees=0, quality_limit_pct=2)
+    result = preview(sample(**base))
+    assert next(row['quantity_kg'] for row in result['positions'] if row['position_number'] == 65) == Decimal('24625.000')
+    assert result['quality_limit_exceeded'] is False
+    assert result['settlement_authorized'] is False
+    assert preview(sample(**{**base, 'quality_limit_pct': 1}))['total_net_amount_eur'] == result['total_net_amount_eur']
+    assert preview(sample(**{**base, 'quality_limit_pct': 1}))['quality_limit_exceeded'] is True
+    assert preview(sample(**{**base, 'windage_pct': 0}))['total_net_amount_eur'] == result['total_net_amount_eur']
+
+
+def test_preview_does_not_guess_a_free_allowance_from_the_quality_limit():
+    with pytest.raises(ValidationError):
+        HarvestPreviewIn(delivered_quantity_kg=25000, unit_price_eur_per_ton=220,
+                         vat_rate_percent=0, impurities_pct=1.5, quality_limit_pct=2)
+
+
+@pytest.mark.parametrize("mutation", ["field", "type", "required", "contract", "source", "action", "output", "decision", "dialogue"])
 def test_semantic_contract_cannot_be_forged_by_direct_definition_edit(mutation):
     definition = deepcopy(reference_definition([]))
     if mutation == "field": definition["fields"].append({"key": "invented", "type": "text"})
@@ -104,6 +122,7 @@ def test_semantic_contract_cannot_be_forged_by_direct_definition_edit(mutation):
     elif mutation == "action": definition["actions"] = [{"key": "create_activity", "dangerLevel": "safe"}]
     elif mutation == "output": definition["tables"][0]["columns"][0]["key"] = "invented"
     elif mutation == "decision": definition["studioSemantic"]["decisions"]["weighing"] = "automatic"
+    elif mutation == "dialogue": definition["studioSemantic"]["dialogue"] = {"not": "a conversation"}
     assert any(error.startswith("semantic_") for error in validate_studio_draft(definition, native_screen_ids=set()))
 
 

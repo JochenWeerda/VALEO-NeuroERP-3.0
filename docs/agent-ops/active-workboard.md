@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## STUDIO-QUALITY-LIMIT-20261015 — reserviert, Codex
+## STUDIO-QUALITY-LIMIT-20261015 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Nutzerpraezisierung Windabgang/Besatz in der manuellen Referenzmaske sichtbar und testbar machen: Qualitaetsgrenze getrennt von echter Freigrenze, keine automatische Vertragsfreigabe oder doppelte Windbelastung. **Dateibesitz:** eigene studio_semantic.py/model, StudioPreview/API-Typen und Tests; neue harvest-deduction-contract-standard.md, QA/Handbuch/Workboard, eigene generierte Projektionen. **Abnahme:** 25.000 kg/1,5 Prozent Besatz/0,8 Prozent informativem Wind ergeben bei expliziter Freigrenze null nur 375 kg Mengenabzug; Qualitaetsgrenze veraendert den Abzug nicht. Qualitaetsueberschreitung sichtbar, Vertrags-/Produktivfreigabe immer false. Produktions-Kontraktbindung wird nicht erfunden.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** Nutzerpraezisierung Windabgang/Besatz in der manuellen Referenzmaske sichtbar und testbar machen: Qualitaetsgrenze getrennt von echter Freigrenze, keine automatische Vertragsfreigabe oder doppelte Windbelastung. **Dateibesitz:** eigene studio_semantic.py/model, StudioPreview/API-Typen und Tests; neue harvest-deduction-contract-standard.md, QA/Handbuch/Workboard, eigene generierte Projektionen. **Abnahme:** 25.000 kg/1,5 Prozent Besatz/0,8 Prozent informativem Wind ergeben bei expliziter Freigrenze null nur 375 kg Mengenabzug; Qualitaetsgrenze veraendert den Abzug nicht. Qualitaetsueberschreitung sichtbar, Vertrags-/Produktivfreigabe immer false. Produktions-Kontraktbindung wird nicht erfunden.
+
+**Meilenstein:** Qualitaetsgrenze und echte Besatzfreigrenze getrennt; Nutzerbeispiel im Browser geprueft: 375 kg Abzug, 24625 kg Abrechnungsgewicht, kein zusaetzlicher Windabzug. Qualitaetswarnung veraendert den Betrag nicht. Produktive versionierte Vertragsbindung bleibt gesondert offen. QA: docs/quality-assurance/studio-semantic-20261015.md. Keine neue Datenbank/Container oder Ruecksetzung.
 
 ## STUDIO-POSITION-LABEL-20261015 — abgeschlossen, Codex
 
@@ -39,11 +41,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Meilenstein:** Optionaler Modellweg mit zentralem Gateway, eigener Quote, tatsaechlichem Verbrauch und Wiederholungsschutz implementiert und gezielt getestet. Reale positive Browserabnahme mangels eigenem Kontingent der synthetischen Testkennung offen; keine automatische Rechte-/Kontingentvergabe. QA: docs/quality-assurance/studio-semantic-20261015.md. Keine neue Datenbank/Container oder Ruecksetzung.
 
-## STUDIO-SEMANTIC-CODE-20261015 — in Arbeit, Codex
+## STUDIO-SEMANTIC-CODE-20261015 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** in Arbeit 2026-10-15. **Ziel:** Fachsprachlicher Dialog, kataloggebundene Eingabemaske und echte Domain-Berechnung als isolierte Vorschau im bestehenden Studio. **Dateibesitz:** neue app/services/studio_semantic.py und API-Schemas; studio_drafts.py nur additive Semantic-Routen/Katalog; studio_validation.py nur Semantic-Vertrag; studio_release.py nur explizite Abgrenzung unmodellierter Vorschauen; studio_process_simulation.py nur Artefaktliste; ScreenStudioPage.tsx, neue StudioDialogue/StudioPreview-Komponenten, studio.ts und eigene Tests; eigene Architektur-/Meridian-/QA-/Handbuchdoku sowie generierte eigene Vertragsprojektionen auf HEAD. **Abnahme:** unbekannte Vertraege sperren, keine erfundenen Felder; gezielte Rueckfrage und dokumentierte Antwort; reale Kalkulation ohne DB-/Fachwirkung, Invalidwerte sperren; Speicher-/Revisionsgrenzen erhalten, Browsernachweis. **Risiken:** Modellverfuegbarkeit offen; deterministische Katalogfuehrung transparent ausweisen; Vorschau niemals als freigegebene produktive Prozessvariante darstellen. Kein Eingriff in Claudes CI-Claim, neue Datenbank/Container oder persoenliche Konten.
 
 **Meilenstein:** 118 Backend-Vertraege, vier echte SQL-/Prozessfaelle und 27 Frontend-/Compilerfaelle bestanden. Fachkatalog, Rueckfragen, optionale Feldauswahl und interaktive Domain-Vorschau implementiert; finaler Browser-/Handbuchabschluss laeuft. Vorschau bleibt vor produktiver Freigabe gesperrt. QA: docs/quality-assurance/studio-semantic-20261015.md. Keine neue Datenbank/Container oder Ruecksetzung.
+
+**Meilenstein:** Manuelle Referenzmaske einschliesslich gespeichertem Fachdialog, Historie mit sieben Ereignissen und expliziter Freigabesperre real im Browser abgenommen. Handbuch mit sieben echten Bildern. 121 Backend-Vertraege, vier echte SQL-/Prozessfaelle, 28 Frontend-/Compilerfaelle und Typpruefung bestanden. Positive Modellabnahme ohne zugewiesenes eigenes Kontingent weiter offen. QA: docs/quality-assurance/studio-semantic-20261015.md. Keine neue Datenbank/Container oder Ruecksetzung.
 
 ## STUDIO-SEMANTIC-20261015 — in Arbeit, Codex
 

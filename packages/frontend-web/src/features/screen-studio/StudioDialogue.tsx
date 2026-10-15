@@ -4,11 +4,17 @@ import { Button } from '@/components/ui/button'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { fetchStudioBudgets, sendStudioDialogue, type StudioDialogueTurn, type StudioDialogueResult } from '@/lib/api/studio'
 
-export function StudioDialogue({ onProposal, disabled }: { onProposal: (_definition: ScreenDefinition) => void; disabled: boolean }): JSX.Element {
-  const [turns, setTurns] = useState<StudioDialogueTurn[]>([])
+export function StudioDialogue({ onProposal, disabled, initialTurns = [], initialDecisions }: {
+  onProposal: (_definition: ScreenDefinition) => void
+  disabled: boolean
+  initialTurns?: StudioDialogueTurn[]
+  initialDecisions?: { weighing?: 'manual'; acceptPreviewLimits?: boolean }
+}): JSX.Element {
+  const [turns, setTurns] = useState<StudioDialogueTurn[]>(() => Array.isArray(initialTurns)
+    ? initialTurns.filter(turn => turn && (turn.role === 'user' || turn.role === 'assistant') && typeof turn.content === 'string') : [])
   const [message, setMessage] = useState('Ich brauche eine Getreideannahme mit Verwiegung, Feuchtigkeit, Besatz und Abrechnungspreis.')
-  const [weighing, setWeighing] = useState<'' | 'manual' | 'automatic'>('')
-  const [accepted, setAccepted] = useState(false)
+  const [weighing, setWeighing] = useState<'' | 'manual' | 'automatic'>(initialDecisions?.weighing ?? '')
+  const [accepted, setAccepted] = useState(initialDecisions?.acceptPreviewLimits === true)
   const [answer, setAnswer] = useState<StudioDialogueResult>()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()

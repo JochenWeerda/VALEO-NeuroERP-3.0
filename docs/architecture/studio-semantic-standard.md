@@ -159,3 +159,8 @@ Eine interaktive Berechnungsvorschau prueft die Eingaben mit bestehenden Domain-
 Der Dialog liefert pruefbare Vorschlaege. Ohne verfuegbares Sprachmodell muss eine kataloggestuetzte Bedienung als solche erkennbar sein; feste Vorlagen oder Schluesselworterkennung duerfen nicht als lernender Agent ausgegeben werden. Fachliche Entscheidungen, Rueckfragen und Antworten muessen der Entwurfsversion zuordenbar sein; Modellantworten sind unvertrauenswuerdige Eingaben und werden serverseitig gegen erlaubte Vertraege validiert.
 
 Lieferstand und CI-Nachlauf: [QA und Umsetzungsstand](../quality-assurance/studio-semantic-20261015.md).
+
+
+## Ergaenzung des Nutzers: Abrechnungsgrundlage
+
+[HARVEST-DEDUCTION-001](harvest-deduction-contract-standard.md) trennt Qualitaetsgrenze, echte Freigrenze, Messfraktionen und versionierte Vertragsgrundlage. Eine reine Qualitaetsbewertung oder technisch moegliche Berechnung erteilt keine Vertragsfreigabe. Die manuelle Studio-Probe bleibt vor produktiver Aktivierung gesperrt.

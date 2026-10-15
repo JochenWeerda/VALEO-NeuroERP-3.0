@@ -16,6 +16,7 @@ import {
   type StudioSimulationResult,
   validateStudioDraft,
   type StudioReport,
+  type StudioDialogueTurn,
 } from '@/lib/api/studio'
 import { StudioHistoryPanel } from './StudioHistoryPanel'
 import { emptyStudioDraft } from './studio-defaults'
@@ -44,6 +45,10 @@ export function ScreenStudioPage(): JSX.Element {
   const catalog = useQuery({ queryKey: ['studio-catalog'], queryFn: fetchStudioCatalog })
   const drafts = useQuery({ queryKey: ['studio-drafts'], queryFn: fetchStudioDrafts })
   const dirty = savedSignature !== JSON.stringify(definition)
+  const semanticPreview = Boolean((definition as ScreenDefinition & { studioSemantic?: unknown }).studioSemantic)
+  const semanticContext = (definition as ScreenDefinition & { studioSemantic?: {
+    dialogue?: StudioDialogueTurn[]; decisions?: { weighing?: 'manual'; acceptPreviewLimits?: boolean }
+  } }).studioSemantic
 
   useEffect(() => {
     let cancelled = false
@@ -140,7 +145,8 @@ export function ScreenStudioPage(): JSX.Element {
             {(catalog.data?.columnNavigation ?? ['single', 'listDetail']).map((item) => <option key={item} value={item}>{item}</option>)}
           </select>
         </div>
-        <StudioDialogue disabled={Boolean(pending) || !catalog.data?.permissions?.canDesign} onProposal={applyProposal} />
+        <StudioDialogue key={previewGeneration} initialTurns={semanticContext?.dialogue} initialDecisions={semanticContext?.decisions}
+          disabled={Boolean(pending) || !catalog.data?.permissions?.canDesign} onProposal={applyProposal} />
         {catalog.data?.semantic && <section aria-label="Freigegebene Fachfelder" className="space-y-1 text-sm">
           <h2 className="font-semibold">Freigegebene Fachfelder · Getreide-Kalkulationsprobe</h2>
           <p className="text-xs text-muted-foreground">Im Katalogvorschlag können Sie optionale Eingaben auswählen. Pflichtfelder sichern den Berechnungsvertrag.</p>
@@ -230,9 +236,10 @@ export function ScreenStudioPage(): JSX.Element {
           <p className="text-sm text-muted-foreground">Keine Studio-Verletzungen.</p>
         )}
         <p className="text-sm">{report?.definitionReady && catalog.data?.permissions?.canPublish && simulation?.passed && simulation.candidate_revision === savedRevision && !dirty ? 'Freigabe nach menschlicher Prüfung möglich.' : 'Freigabe gesperrt, bis Vertragsprüfung und Prozesssimulation bestanden sind.'}</p>
-        {(report?.readiness.errors ?? []).map((item) => <p key={item} className="text-sm text-destructive">{item}</p>)}
+        {semanticPreview ? <p className="text-sm text-destructive">Diese Kalkulationsprobe besitzt noch keine freigegebene produktive Datenbindung und Prozessvariante.</p>
+          : (report?.readiness.errors ?? []).map((item) => <p key={item} className="text-sm text-destructive">{item}</p>)}
       </aside>
-      {simulation && <p role="status">Simulation: {simulation.passed ? 'bestanden' : 'fehlgeschlagen'}{simulation.failed_checks?.length ? ` (${simulation.failed_checks.join(', ')})` : ''}</p>}
+      {simulation && <p role="status">Simulation: {simulation.passed ? 'bestanden' : 'fehlgeschlagen'}{simulation.failed_checks?.length ? ` (${simulation.failed_checks.map(check => check === 'semantic_preview_not_a_release_profile' ? 'Kalkulationsprobe ist noch kein abgenommener produktiver Prozess' : check).join(', ')})` : ''}</p>}
       {draftId && <StudioHistoryPanel key={`${draftId}:${savedRevision ?? ""}`} draftId={draftId} />}
     </div>
   )
