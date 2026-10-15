@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HARVEST-RULE-RESOLVER-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Expliziter typisierter Vertragsregel-Snapshot und interne Resolvergrenze fuer den Domain-Service. **Dateibesitz:** neuer modules/agrar/contracts/harvest_deductions_v1.py; HarvestAcceptanceService nur Resolver-Injektion/Bereichsvalidierung; studio_process_simulation.py nur deklarierte synthetische Regelversion und Artefakthash; eigene fokussierte Tests/QA/Workboard. **Abnahme:** fremder Mandant/Vertrag/Partner/Artikel/Gueltigkeit sperrt vor Mutation; feste versionierte Simulationsfixture benutzt denselben Domain-Weg, keine Test-Sonderfreigabe im Produktionsrouter; echte SQL-Kette bleibt pruefbar. Persistente produktive Regelverwaltung bleibt separat offen. Keine neue Datenbank/Migration/Container.
+
 ## HARVEST-EXPLICIT-ALLOWANCE-20261015 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Unbelegten 2-Prozent-Standard aus der Domain-Kalkulation entfernen; operative Berechnung ohne verifizierte Vertragsregel klar sperren, Nullmesswerte bewahren. **Dateibesitz:** modules/agrar/services/harvest_calculator.py nur explizite Freigrenze und Eingabevalidierung; harvest_acceptance_service.py nur Berechnungsgrenze/Nullwerte; neuer fokussierter Vertragstest; eigene QA/Architekturstandard/Workboard-Abschnitte. **Abnahme:** kein stiller Freigrenzenwert; fehlende Grundlage ergibt fachlichen Fehler vor Mutation, gemessene Null ueberschreibt Vorwert; explizite 0/2/3-Prozent-Modelle bleiben pruefbar. Versionierte produktive Regelverwaltung separat offen, keine Scheinfreigabe. Keine Migration/neue Datenbank/Container oder fremden CI-Dateien.
