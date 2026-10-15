@@ -121,17 +121,20 @@ def _validate_jwt(token: str) -> Dict[str, Any]:
             detail="Invalid bearer token",
         )
 
-    keys = _get_jwks(jwks_url)
     header = jwt.get_unverified_header(token)  # NOSONAR - only kid/alg are read before signed JWT validation.
     kid = header.get("kid")
     algorithm = header.get("alg", "RS256")
-    if algorithm not in {"RS256", "RS384", "RS512", "ES256", "ES384", "ES512"}:
-        logger.warning("Rejecting bearer token with unsupported algorithm: %s", algorithm)
+    if (not isinstance(algorithm, str)
+            or algorithm not in {"RS256", "RS384", "RS512", "ES256", "ES384", "ES512"}
+            or (kid is not None and not isinstance(kid, str))):
+        logger.warning("Rejecting bearer token with unsupported header")
         raise HTTPException(
             status.HTTP_401_UNAUTHORIZED,
             detail="Invalid bearer token",
         )
 
+    # Reject malformed/unsupported credentials before any external key discovery.
+    keys = _get_jwks(jwks_url)
     key_data = _find_jwk(keys, kid)
     if key_data is None:
         keys = _get_jwks(jwks_url, force_refresh=True)
