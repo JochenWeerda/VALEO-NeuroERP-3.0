@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-ARCH-MAPPING-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Complete-Generator meldet drei bereits committierte Dienste ohne exakte Zuordnung. **Dateibesitz:** config/architecture-domain-prefixes.yaml nur studio_history_view und studio_process_simulation -> platform sowie sepa_xml_generator -> finance; eigene QA und generierter Index. **Abnahme:** complete mapping aus HEAD-Inventaren plus eigenen neuen Diensten; keine fremden Dienste aendern oder generischen Prefixe aufweichen. Keine neue Domain/Container.
+
 ## STUDIO-STRUCTURE-CACHE-20261015 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Zentrale Vorschau nach Feld-/Tabellen-/Layoutaenderung ohne veralteten RenderPlan. **Dateibesitz:** schema-compiler.ts ausschliesslich schemaVolatility; eigener Strukturvertrag in schema-compiler.test.ts; eigene QA/Workboard. **Abnahme:** gleiche Screen-ID/Version und geaenderte freigegebene Felder, Tabellen oder Layout erzeugen aktuellen Plan; keine einzelne ERP-Maske umgestalten, bestehende Compilervertraege bleiben bestehen.
