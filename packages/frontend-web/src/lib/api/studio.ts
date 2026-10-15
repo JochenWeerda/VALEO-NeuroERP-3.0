@@ -18,7 +18,7 @@ export interface StudioDraftRecord {
 }
 
 export async function fetchStudioDrafts(): Promise<StudioDraftRecord[]> {
-  const response = await apiClient.get('/api/v1/studio/drafts')
+  const response = await apiClient.get<{ drafts?: StudioDraftRecord[] }>('/api/v1/studio/drafts')
   return response.data.drafts ?? []
 }
 

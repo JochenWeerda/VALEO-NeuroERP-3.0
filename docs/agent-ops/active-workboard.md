@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## STUDIO-CI-REST-20261015 — reserviert, Codex
+## STUDIO-CI-REST-20261015 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Die im CI-Handschlag gemeldete unbekannte Studio-Listenantwort typisieren und die SQL-Fixture an die kanonische Pruefstand-Grenze binden. **Dateibesitz:** src/lib/api/studio.ts nur fetchStudioDrafts; tests/test_meridian_screen_studio_persistence.py nur Pruefstand-Auswahl; QA/Workboard. **Abnahme:** gezielte Studio-Vertraege und vorhandene SQL-Fixture, kein neuer DB/Container, keine Lockerung der Schutzgrenze. CI-Startskript und private Push-Grenze bleiben im fremden Claim unangetastet.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** Die im CI-Handschlag gemeldete unbekannte Studio-Listenantwort typisieren und die SQL-Fixture an die kanonische Pruefstand-Grenze binden. **Dateibesitz:** src/lib/api/studio.ts nur fetchStudioDrafts; tests/test_meridian_screen_studio_persistence.py nur Pruefstand-Auswahl; QA/Workboard. **Abnahme:** gezielte Studio-Vertraege und vorhandene SQL-Fixture, kein neuer DB/Container, keine Lockerung der Schutzgrenze. CI-Startskript und private Push-Grenze bleiben im fremden Claim unangetastet.
+
+**Abschluss des abgegrenzten Slice:** Typisierte Listenhuelle und kanonischer Pruefstand-Waechter. Fuenf UI-/API-Faelle, zwei echte SQL-Persistenzfaelle, fokussierter Typecheck Status 0. Keine fremden Arbeitskopien angepasst; develop weiter am bekannten CI-Vorgaenger blockiert.
 
 ## STUDIO-FREIGABE-HANDBUCH-20261015 — abgeschlossen, Codex
 
