@@ -18338,6 +18338,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **Agent-Einstieg:** `config/architecture-index.yaml` + [architecture-protocol.md](../architecture/agents/architecture-protocol.md) + [Rollout-Prompt](../architecture/agents/architecture-os-rollout-prompt.md) (Copy-Paste für neue Sessions)
 
-## ACTION-NUMERIC-INPUT-20261015 — reserviert, Codex
+## ACTION-NUMERIC-INPUT-20261015 — abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Reale Kontingentmaske scheitert mit 422, weil deklarierte Zahlen als Zeichenketten versendet werden. **Dateibesitz:** zentraler ActionInputDialog.tsx ausschliesslich schemaabhaengige Zahluebergabe; action-input-dialog.test.tsx; eigene QA und Workboard. **Abnahme:** Zahlen inklusive Null sind JSON-Zahlen; Textkennungen bleiben Text; leere optionale Zahlen werden nicht als Null gesendet; bestehende Dialogtests bleiben gruen. Strikte serverseitige Kontingentvertraege unveraendert. Zusaetzlich nachgewiesen: generischer Renderer mischt Sitzungsdaten in den strikten Budget-Command. Dateibesitz ergaenzt um useActionRuntime.ts ausschliesslich Budget-Transportprojektion, neuen identity-budget-command-adapter.ts und dessen Tests. Nur deklarierte fachliche Eingaben senden; keine Identitaet aus dem Rumpf. Keine Datenbank oder Container.
+
+**ACTION-NUMERIC-INPUT Abnahme:** 18 Frontendtests und TypeScript bestanden. Reale Vorschau, Bestaetigung und Auditbegruendung fuer 10000 Token Mandantenbudget plus daraus genau ein Nutzerkontingent (keine zusaetzliche Kapazitaet, null Unterkontingente) bestanden. Serververtraege unveraendert. QA: docs/quality-assurance/action-numeric-input-20261015.md.

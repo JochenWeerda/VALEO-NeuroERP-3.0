@@ -1,3 +1,4 @@
+import { identityBudgetInput } from './identity-budget-command-adapter'
 import { useCallback, useRef, useState } from 'react'
 import { apiClient } from '@/lib/api-client'
 import type { ScreenActionDefinition } from '../schema'
@@ -107,7 +108,7 @@ export function useActionRuntime(
           .replace('{screen_id}', opts.screenId)
 
         const body: Record<string, unknown> = {
-          ...(req.payload ?? {}),
+          ...identityBudgetInput(endpoint, req.payload ?? {}),
           ...(req.mode !== 'execute' ? { _mode: req.mode } : {}),
           ...(req.auditReason ? { _auditReason: req.auditReason } : {}),
           ...(req.idempotencyKey ? { _idempotencyKey: req.idempotencyKey } : {}),

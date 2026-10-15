@@ -100,7 +100,9 @@ export function ActionInputDialog({
       return
     }
     const werte = Object.fromEntries(
-      Object.entries(form.values).filter(([, wert]) => !leer(wert)),
+      Object.entries(form.values)
+        .filter(([, wert]) => !leer(wert))
+        .map(([key, wert]) => [key, felder.find((feld) => feld.key === key)?.type === 'number' ? Number(wert) : wert]),
     )
     onSubmit(werte)
   }
