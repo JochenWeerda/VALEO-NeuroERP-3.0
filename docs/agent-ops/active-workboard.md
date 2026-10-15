@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-STRUCTURE-CACHE-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Zentrale Vorschau nach Feld-/Tabellen-/Layoutaenderung ohne veralteten RenderPlan. **Dateibesitz:** schema-compiler.ts ausschliesslich schemaVolatility; eigener Strukturvertrag in schema-compiler.test.ts; eigene QA/Workboard. **Abnahme:** gleiche Screen-ID/Version und geaenderte freigegebene Felder, Tabellen oder Layout erzeugen aktuellen Plan; keine einzelne ERP-Maske umgestalten, bestehende Compilervertraege bleiben bestehen.
+
 ## STUDIO-MODEL-20261015 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Optionales echtes Sprachmodell fuer kataloggebundene Anforderungsinterpretation, ohne unkontingentierte Agentenaufrufe. **Dateibesitz:** llm_gateway.py nur additive metered response; neue studio_semantic_model.py; Erweiterungen im eigenen Semantic-Dialog/API/UI-Claim und eigene Tests/Doku. config/architecture-domain-prefixes.yaml nur neue Studio-Servicezuordnung, generierte eigene Architektur-/Service-/OpenAPI-Projektionen. **Abnahme:** vorhandenes Modellgateway und Kontingentnebenbuch wiederverwenden; vor Aufruf reservieren; verifizierter Budgeteigentuemer/Mandant, begrenzte Eingabe/Ausgabe; kein Wiederholungs-Doppellauf; fehlende Nutzungsdaten/unklare Fehler behalten Reservierung, keine erfundenen Tokenwerte. Modellvorschlag serverseitig strikt auf Vertrag und erlaubte Felder beschraenken. **Risiko:** Positive Browser-Modellabnahme erfordert vorhandenes zugewiesenes Kontingent; keine automatische Rechte-/Kontingenterweiterung.
