@@ -18337,3 +18337,7 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 **CLI:** `pnpm arch:render` · `pnpm arch:validate` · `pnpm arch:drift`
 
 **Agent-Einstieg:** `config/architecture-index.yaml` + [architecture-protocol.md](../architecture/agents/architecture-protocol.md) + [Rollout-Prompt](../architecture/agents/architecture-os-rollout-prompt.md) (Copy-Paste für neue Sessions)
+
+## ACTION-NUMERIC-INPUT-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Ziel:** Reale Kontingentmaske scheitert mit 422, weil deklarierte Zahlen als Zeichenketten versendet werden. **Dateibesitz:** zentraler ActionInputDialog.tsx ausschliesslich schemaabhaengige Zahluebergabe; action-input-dialog.test.tsx; eigene QA und Workboard. **Abnahme:** Zahlen inklusive Null sind JSON-Zahlen; Textkennungen bleiben Text; leere optionale Zahlen werden nicht als Null gesendet; bestehende Dialogtests bleiben gruen. Strikte serverseitige Kontingentvertraege unveraendert. Keine Datenbank oder Container.
