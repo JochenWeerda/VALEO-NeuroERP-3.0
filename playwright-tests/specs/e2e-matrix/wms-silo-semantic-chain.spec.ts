@@ -8,10 +8,11 @@
  * Externe Gates: QS-Zertifizierung, ATLAS, ELSTER bleiben ausserhalb.
  */
 import { test, expect, request } from '@playwright/test'
+import { apiToken, E2E_MANDANT } from '../../helpers/anmeldung'
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
-const TENANT = 'e2e-wms-silo-001'
-const AUTH = process.env.API_DEV_TOKEN ?? 'dev-token'
+const TENANT = E2E_MANDANT
+const AUTH = apiToken()
 const HEADERS = {
   'X-Tenant-ID': TENANT,
   'Content-Type': 'application/json',
@@ -225,9 +226,9 @@ test.describe.serial('WMS/Silo — Ernte-Annahme bis Rückverfolgung @smoke @e2e
 test.describe('WMS @critical Kern-Pfad', () => {
   const BASE_CRIT = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:8000'
   const HEADERS_CRIT = {
-    'X-Tenant-ID': 'e2e-crit-wms',
+    'X-Tenant-ID': E2E_MANDANT,
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.API_DEV_TOKEN ?? 'dev-token'}`,
+    'Authorization': `Bearer ${apiToken()}`,
   }
 
   test('WMS @critical — Einlagerung-Endpunkt antwortet (Health)', async () => {

@@ -4,6 +4,7 @@
  */
 
 import { APIRequestContext, Page } from '@playwright/test';
+import { holeTokens } from './anmeldung';
 
 export interface AuthCredentials {
   email: string;
@@ -166,13 +167,9 @@ export class ApiHelper {
 /**
  * Session für Page-basierte Tests.
  *
- * Die Produkt-Login-Seite ist SSO-only (`Mit SSO anmelden`) — es gibt keine
- * E-Mail/Passwort-Felder. Gegen **Vite-Dev** oder **Preview ohne OIDC** setzen
- * wir den Dev-Token in `localStorage` (analog `AuthService` in der SPA).
- *
- * Gegen **reales OIDC** (Preview mit gesetzter `VITE_OIDC_DISCOVERY_URL`):
- * `VALEO_PLAYWRIGHT_USE_SSO=1` setzen und gültige `VALEO_USER_*` / `VALEO_PASS_*`
- * oder ein vorgefertigtes `storageState` verwenden (CI-Empfehlung).
+ * Seit 12.10.2026 gibt es keinen Dev-Token mehr. Standard: Tokens per Password Grant vom Test-Keycloak holen
+ * (`helpers/anmeldung.ts`) und so in `localStorage` legen, wie die SPA sie nach dem PKCE-Rueckruf ablegt.
+ * `VALEO_PLAYWRIGHT_USE_SSO=1` meldet stattdessen ueber die Anmeldeseite des Anbieters an.
  */
 export async function loginToPage(
   page: Page,
@@ -182,26 +179,20 @@ export async function loginToPage(
   const root = baseURL.replace(/\/$/, '');
 
   if (process.env.VALEO_PLAYWRIGHT_USE_SSO === '1') {
-    await page.goto(`${root}/auth/login`);
-    await page.fill('input[name="email"], input[type="email"]', credentials.email);
+    await page.goto(`${root}/login`);
+    await page.getByRole('button', { name: /SSO/i }).click();
+    await page.fill('input[name="username"], input[type="email"]', credentials.email);
     await page.fill('input[name="password"], input[type="password"]', credentials.password);
-    await page.click('button[type="submit"]');
-    await page.waitForURL(/dashboard|home/i, { timeout: 15000 });
+    await page.press('input[name="password"], input[type="password"]', 'Enter');
+    await page.waitForURL((url) => url.origin === new URL(root).origin && !url.pathname.startsWith('/login'), { timeout: 15000 });
     return;
   }
 
-  const token =
-    process.env.VALEO_API_DEV_TOKEN ||
-    process.env.VITE_API_DEV_TOKEN ||
-    'dev-token';
-
-  await page.addInitScript((tok: string) => {
-    try {
-      localStorage.setItem('access_token', tok);
-    } catch {
-      /* ignore */
-    }
-  }, token);
+  const tokens = await holeTokens(credentials.email, credentials.password);
+  await page.addInitScript((t: { access: string; refresh?: string }) => {
+    localStorage.setItem('access_token', t.access);
+    if (t.refresh) localStorage.setItem('refresh_token', t.refresh);
+  }, tokens);
 
   await page.goto(`${root}/`, { waitUntil: 'domcontentloaded' });
   // networkidle tritt bei offenen SSE-/Polling-Verbindungen der Universal-Masken nie
@@ -215,22 +206,22 @@ export async function loginToPage(
 }
 
 /**
- * Standard-Test-User
+ * Standard-Test-User — nur aus der Umgebung; feste Beispielkennwoerter gibt es nicht mehr.
  */
 export const TEST_USERS: Record<string, AuthCredentials> = {
   admin: {
-    email: process.env.VALEO_USER_ADMIN || 'admin@example.com',
-    password: process.env.VALEO_PASS_ADMIN || 'admin123',
+    email: process.env.VALEO_USER_ADMIN ?? '',
+    password: process.env.VALEO_PASS_ADMIN ?? '',
     role: 'admin',
   },
   powerUser: {
-    email: process.env.VALEO_USER_POWER || 'power@example.com',
-    password: process.env.VALEO_PASS_POWER || 'power123',
+    email: process.env.VALEO_USER_POWER ?? '',
+    password: process.env.VALEO_PASS_POWER ?? '',
     role: 'power-user',
   },
   readonly: {
-    email: process.env.VALEO_USER_READ || 'readonly@example.com',
-    password: process.env.VALEO_PASS_READ || 'readonly123',
+    email: process.env.VALEO_USER_READ ?? '',
+    password: process.env.VALEO_PASS_READ ?? '',
     role: 'readonly',
   },
 };

@@ -2,10 +2,11 @@ import { defineConfig } from '@playwright/test'
 
 /**
  * SEMANTIC-E2E-STRICT-001 — schlanke Playwright-Config fuer @critical API-Health-Tests.
- * Kein globalSetup (kein Frontend-Build/Preview), nur Backend-API via request-Context.
+ * Kein Frontend-Build/Preview, nur Backend-API via request-Context; globalSetup holt nur das Zugriffstoken.
  */
 export default defineConfig({
   testDir: './playwright-tests/specs/e2e-matrix',
+  globalSetup: './playwright.anmeldung.mjs',
   grep: /@critical/,
   timeout: 60_000,
   fullyParallel: true,

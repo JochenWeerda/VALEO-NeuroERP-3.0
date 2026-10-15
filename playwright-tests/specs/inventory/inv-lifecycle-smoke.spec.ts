@@ -4,10 +4,11 @@
  * Kritische Pfade: Lot anlegen → Lot auflisten → Lot verbrauchen.
  */
 import { test, expect, request } from '@playwright/test'
+import { apiToken, E2E_MANDANT } from '../../helpers/anmeldung'
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:8000'
-const TENANT = 'test-tenant-inv-001'
-const TOKEN = process.env.API_DEV_TOKEN ?? process.env.VALEO_API_DEV_TOKEN ?? process.env.VITE_API_DEV_TOKEN ?? 'dev-token'
+const TENANT = E2E_MANDANT
+const TOKEN = apiToken()
 const HEADERS = { Authorization: `Bearer ${TOKEN}`, 'X-Tenant-ID': TENANT, 'Content-Type': 'application/json' }
 
 let lotId: string
