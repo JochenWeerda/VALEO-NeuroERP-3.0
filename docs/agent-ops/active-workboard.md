@@ -17,6 +17,8 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Abschluss 2026-10-15:** Positive Vier-Augen-Browserfreigabe fuer die unveraenderte Review-Revision nach dreizehn erfolgreichen Realchecks; getrennter Freigeber, aktueller Artefakthash und gespeicherte Ausgangsrevision lesend bestaetigt. Freigegebene Lesemaske mit unveraenderter EINKAUF_BEARBEITEN-Kennung geoeffnet. Temporaere admin-Rolle entzogen, Sitzungen beendet, Kennung gesperrt; Neuanmeldung im Browser abgewiesen. Keine persoenlichen Konten, neuen Datenbanken oder Container. Eigene vorherige Tests und Nachlaeufe: QA studio-closure-20261015.md. Handbuch: docs/benutzerhandbuch/studio-freigabe.md samt echten Screenshots. Kein Gesamt-CI-/Alle-Prozesse-Nachweis.
 
+**Integrations-Handshake CI-GRUEN:** main-Abnahme 81cdb033f geliefert, drei LFS-Bilder vorhanden. develop-Abgleich verweigert wegen Benutzerkennungs-Fingerprint in bereits vorhandenem 645fb2e89 / scripts/ci/e2e_keycloak.sh:25 (VALEO_IDP_ADMIN_USERNAME). Keine Werte ausgegeben, keine Schutz-Ausnahme, kein Hook-Bypass oder Force-Push. Datei bleibt im aktiven Claude-CI-Claim. Details: QA studio-closure-20261015.md, Abschnitt Auslieferung.
+
 ## STUDIO-PREVIEW-CACHE-20261015 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** In der Browserabnahme gefundenen veralteten Maskentitel nach Umbenennung zentral im RenderPlan-Cache korrigieren. **Dateibesitz:** schema-compiler.ts nur schemaVolatility; schema-compiler.test.ts eigener Titelvertrag; QA/Workboard. **Abnahme:** gleicher Screen mit neuem Titel liefert neuen Plan; bestehende Compiler- und Studio-Vertraege bleiben gruen, keine einzelne Maske umgestalten.
