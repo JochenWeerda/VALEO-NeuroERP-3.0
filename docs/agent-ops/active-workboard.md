@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-SEMANTIC-CODE-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Fachsprachlicher Dialog, kataloggebundene Eingabemaske und echte Domain-Berechnung als isolierte Vorschau im bestehenden Studio. **Dateibesitz:** neue app/services/studio_semantic.py und API-Schemas; studio_drafts.py nur additive Semantic-Routen/Katalog; studio_validation.py nur Semantic-Vertrag; studio_release.py nur explizite Abgrenzung unmodellierter Vorschauen; studio_process_simulation.py nur Artefaktliste; ScreenStudioPage.tsx, neue StudioDialogue/StudioPreview-Komponenten, studio.ts und eigene Tests; eigene Architektur-/Meridian-/QA-/Handbuchdoku sowie generierte eigene Vertragsprojektionen auf HEAD. **Abnahme:** unbekannte Vertraege sperren, keine erfundenen Felder; gezielte Rueckfrage und dokumentierte Antwort; reale Kalkulation ohne DB-/Fachwirkung, Invalidwerte sperren; Speicher-/Revisionsgrenzen erhalten, Browsernachweis. **Risiken:** Modellverfuegbarkeit offen; deterministische Katalogfuehrung transparent ausweisen; Vorschau niemals als freigegebene produktive Prozessvariante darstellen. Kein Eingriff in Claudes CI-Claim, neue Datenbank/Container oder persoenliche Konten.
+
 ## STUDIO-SEMANTIC-20261015 — in Arbeit, Codex
 
 **Owner:** Codex. **Stand:** in Arbeit 2026-10-15. **Ziel:** Nutzerplan fuer dialogfaehiges Studio verbindlich integrieren; anschliessend fachsprachliche Getreideannahme ohne erfundene Datenbindungen ueber bestehende Meridian-Engine nachweisen. **Dateibesitz:** neue docs/architecture/studio-semantic-standard.md, eigener Governance-/QA-/Workboard-Abschnitt; spaetere Codeintegration nur nach erweitertem Dateiclaim. **Abnahme dieser ersten Etappe:** STUDIO-SEMANTIC-001, fuenf Phasen und pruefbare Referenzszenarien dokumentiert; CI-Nachlauf der Baselinesenkung exakt berichtet. **Risiken:** vier Vorlagen sind kein Agentendialog; Berechnungsvorschau ist kein Freigabenachweis. Gesamt-CI und develop-Identitaetssperre bleiben sichtbar. Keine neue DB/Container, kein fremder CI-Dateibesitz.
