@@ -13,4 +13,4 @@ ActionInputDialog uebergibt deklarierte Zahlen jetzt als JSON-Zahlen. Null bleib
 
 18 Frontendtests bestanden (Eingabedialog, Budgettransport, Laufzeit-Eingabefluss); TypeScript-Pruefung bestanden. Reale Browserabnahme: serverseitige Vorschau, Bestaetigung und Auditbegruendung fuehrten zu einem Mandantenbudget von exakt 10.000 Token und einem Nutzer-Unterkontingent derselben Hoehe mit null Unterkontingenten. Das ist dieselbe Kapazitaet, keine Verdoppelung. Lesender Redis-Nachweis: genau zwei Budgets, genau ein Testnutzerbudget mit Limit 10.000. Keine Datenbank und kein Container angelegt.
 
-Screenshot: artifacts/harvest-browser-20261015/token-budget-assigned.jpg. Die temporaere Rechtebereinigung folgt nach der laufenden finanziellen Abnahme. Der Kontingentempfaenger erhielt keine Verwaltungsrechte.
+Screenshot: artifacts/harvest-browser-20261015/token-budget-assigned.jpg. Die temporaeren Finanz- und Kontingentrechte wurden nach der finanziellen Abnahme entzogen, Sitzungen beendet und die synthetische Prueferkennung gesperrt. Der Kontingentempfaenger erhielt keine Verwaltungsrechte.
