@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-15
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-15T06:40:04Z'
+generated_at: '2026-10-15T07:53:11Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -484,6 +484,7 @@ domains:
     - docs/adr/adr-077-leading-weighing-ticket.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-079-ebilanz-xbrl-drafts.md
+    - docs/adr/adr-harvest-deduction-resolver.md
     - docs/adr/adr-studio-semantic-contracts.md
     status: active
   crm:

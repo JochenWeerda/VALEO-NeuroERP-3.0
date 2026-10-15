@@ -27,6 +27,7 @@ def simulation_artifact_hash():
     files = ["app/services/studio_process_simulation.py", "app/services/harvest_acceptance_service.py",
              "app/services/finance_transaction_service.py", "app/core/studio_release.py",
              "modules/agrar/services/harvest_calculator.py", "modules/agrar/services/self_billing_service.py",
+             "modules/agrar/contracts/harvest_deductions_v1.py",
              "app/auth/finance_roles.py", "config/studio_data_sources.yaml", "app/core/mcp_tool_contracts.py",
              "app/finance/steuerschluessel.py", "app/services/finance_eingangsrechnung_buchung.py",
              "modules/agrar/repositories/self_billing_repo.py", "modules/agrar/services/partie_service.py",
@@ -104,14 +105,33 @@ def _grain_chain(db, seed, checks):
     db.add(ticket); db.flush()
     db.refresh(ticket); db.refresh(article)
     checks["receipt"] = net == 10000
-    svc = HarvestAcceptanceService(db, seed)
+    from modules.agrar.contracts.harvest_deductions_v1 import HarvestDeductionRuleV1
+    # Explicit synthetic terms, hashed with this fixture. Never a production grant.
+    rule = HarvestDeductionRuleV1(
+        rule_id="grain.v1.synthetic-impurity-terms", rule_version=1, tenant_id=seed,
+        customer_id=customer.id, article_id=article.id,
+        valid_from=date(2026, 1, 1), valid_until=date(2026, 12, 31),
+        source_reference="Studio grain.v1 isolated synthetic fixture",
+        measurement_method="synthetic-laboratory", measurement_method_version="1",
+        impurities_free_pct=Decimal("2"), quality_limit_pct=Decimal("2"),
+    )
+
+    def fixture_rule(*, tenant_id, acceptance_id):
+        if tenant_id != seed:
+            raise ValidationFailedError("Simulation rule belongs to a different tenant.")
+        return rule
+
+    svc = HarvestAcceptanceService(db, seed, rule_resolver=fixture_rule)
     item = svc.create_acceptance(HarvestAcceptanceCreate(acceptance_number=f"SIM-{suffix}", delivery_date=date(2026, 1, 15),
              customer_id=customer.id, article_id=article.id, warehouse_id=warehouse.id, weighing_ticket_id=ticket.id), actor.id)
     acceptance_id = str(item["id"])
-    svc.calculate_settlement(acceptance_id)
+    calculation = svc.calculate_settlement(acceptance_id)
     from app.infrastructure.models import HarvestAcceptance
     acceptance = db.get(HarvestAcceptance, acceptance_id)
-    checks["quality"] = acceptance.total_net_amount_eur > 0
+    impurity = next(p for p in calculation["positions"] if p["position_number"] == 20)
+    checks["quality"] = (acceptance.total_net_amount_eur > 0 and impurity["quantity_kg"] == 100
+                         and rule.content_hash in impurity["calculation_formula"]
+                         and any("Qualitaetsgrenze" in warning for warning in calculation["warnings"]))
     svc.release_acceptance(acceptance_id, "final", True, True, actor.id)
     acceptance = db.get(HarvestAcceptance, acceptance_id)
     invoice = SelfBillingRepositoryImpl(db).get_invoice_by_id(acceptance.invoice_id)

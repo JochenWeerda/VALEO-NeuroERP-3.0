@@ -192,3 +192,7 @@ deduplizieren `event_id`. Entscheidung:
 Alle Ressourcen sind rollen-, tenant- und Business-Grant-gebunden. Transitionen
 sind optimistisch versioniert; Entwuerfe sind strukturiert und keine PDF-
 Behauptung. Entscheidung: [ADR-055](../../../adr/adr-055-feeding-measure-lifecycle.md).
+
+## Ernte-Abrechnungsregel 2026-10-15
+
+Der bestehende calculate- und finale Gutschriftweg verlangt eine serverseitige Vertragsregelquelle. Der Produktionsrouter stellt diese Quelle noch nicht bereit; deshalb fachliche Sperre vor Geschaeftsmutation, kein neuer Anfrageparameter fuer Freigaben oder Freigrenzen. Nichtfinanzielle Annahme bleibt getrennt. HarvestDeductionRuleV1 bindet den internen Snapshot an Mandant, Vertrag, Partner, Artikel und Lieferdatum. Die isolierte grain.v1-Probe benutzt eine deklarierte synthetische Version ueber denselben Service. [Standard](../../harvest-deduction-contract-standard.md), [ADR](../../../adr/adr-harvest-deduction-resolver.md), [QA](../../../quality-assurance/harvest-explicit-rule-20261015.md).
