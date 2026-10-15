@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-CI-LOCK-GUARD-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Den zweiten festen DB-Namen im eigenstaendigen Studio-Sperrtest durch dieselbe kanonische Pruefstand-Grenze ersetzen. **Dateibesitz:** tests/test_studio_save_idempotency.py nur Datenbankfreigabe; QA/Workboard. **Abnahme:** echte SQL-Wiederholungs-/Historienvertraege auf vorhandenem Pruefstand, keine neue Datenbank oder Lockerung von require_db.
+
 ## STUDIO-SERVICE-INVENTORY-20261015 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Aktuellen Docs-Build-Drift des Service-Inventars aus den committierten Quellen beheben. **Dateibesitz:** docs/entwickler/service-inventory.md nur HEAD-Projektion; QA/Workboard. **Abnahme:** kanonischer Generator liefert dasselbe Inventar; fremde Arbeitskopie und andere Inventare bleiben erhalten.
