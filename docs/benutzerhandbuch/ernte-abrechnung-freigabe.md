@@ -47,4 +47,18 @@ Der berechtigte Bearbeiter laedt den aktuellen Stand erneut und oeffnet **Gutsch
 
 ![Ausfuehrungsdialog vor einer ausdruecklichen Bestaetigung](img/ernte-freigabe-20261015/ausfuehrungspruefung.jpg)
 
-**Stand der dokumentierten Browserabnahme:** Anmeldung, Regelanlage und -genehmigung, Regelbindung, Messbestaetigung, Berechnung und finanzielle Gegenpruefung sind real erfolgt. Die abschliessende Geschaeftsausfuehrung ist noch gesondert abzunehmen; die letzte Abbildung zeigt deren Pruefdialog vor der Bestaetigung. Es wurde dabei keine Zahlung oder externe Meldung ausgefuehrt. Die temporaere Prueferrolle wurde anschliessend entzogen und die Kennung gesperrt. [Technischer Abnahmestand](../quality-assurance/harvest-rule-store-20261015.md).
+**Stand der dokumentierten Browserabnahme:** Die gesamte Kette wurde mit synthetischen Daten real ausgefuehrt. Genau eine Gutschrift ueber 5.417,50 EUR netto, 379,23 EUR Steuer und 5.796,73 EUR brutto, eine verknuepfte Lagerbewegung und ein ausgeglichener Finanzbuchungsentwurf im Status `draft` entstanden. Die Annahme steht auf `credit_note_created`. Es wurde keine Zahlung und keine externe Meldung ausgefuehrt.
+
+![Erfolgreicher Abschluss mit unveraenderlicher Berechnungsbindung und Betraegen](img/ernte-freigabe-20261015/release-completed.jpg)
+
+Ein erneuter Ausfuehrungsversuch wurde mit **Festgeschriebene Annahme ist nicht mehr bearbeitbar** abgewiesen. Die anschliessende Datenbankpruefung bestaetigte weiterhin genau eine Gutschrift, einen Buchungsentwurf und ein Abschlussereignis.
+
+![Abgewiesene erneute Ausfuehrung](img/ernte-freigabe-20261015/release-repeat-blocked.jpg)
+
+## Kontingent fuer das Fachgespraech
+
+Unter **Nutzer- und Agentenkontingente** stellt die berechtigte Plattformverwaltung ein begrenztes Mandantenbudget bereit und verteilt daraus Nutzerkontingente. Beide Schritte verlangen Vorschau, ausdrueckliche Bestaetigung und Auditbegruendung. Unterkontingente teilen die vorhandene Kapazitaet; sie schaffen keine zusaetzlichen Token. Mit maximal null Unterkontingenten kann ein Empfaenger keine Agentenbudgets weiterverteilen.
+
+![Bereitgestelltes Testbudget mit vollstaendiger begrenzter Nutzerzuweisung](img/ernte-freigabe-20261015/token-budget-assigned.jpg)
+
+In der Abnahme wurden insgesamt 10.000 Token bereitgestellt und daraus genau ein Nutzerkontingent derselben Hoehe vergeben. Die Modellpruefung blieb wegen fehlendem Anbieterschluessel gesperrt. Weder Tokenverbrauch noch offene Reservierungen entstanden. Ein Kontingent ersetzt keine Modellkonfiguration. Die temporaeren Finanz- und Kontingentrechte wurden anschliessend entfernt, Sitzungen beendet und die Prueferkennung gesperrt. [Technischer Abnahmestand](../quality-assurance/harvest-rule-store-20261015.md).
