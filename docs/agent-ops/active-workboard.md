@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HARVEST-EXPLICIT-ALLOWANCE-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Unbelegten 2-Prozent-Standard aus der Domain-Kalkulation entfernen; operative Berechnung ohne verifizierte Vertragsregel klar sperren, Nullmesswerte bewahren. **Dateibesitz:** modules/agrar/services/harvest_calculator.py nur explizite Freigrenze und Eingabevalidierung; harvest_acceptance_service.py nur Berechnungsgrenze/Nullwerte; neuer fokussierter Vertragstest; eigene QA/Architekturstandard/Workboard-Abschnitte. **Abnahme:** kein stiller Freigrenzenwert; fehlende Grundlage ergibt fachlichen Fehler vor Mutation, gemessene Null ueberschreibt Vorwert; explizite 0/2/3-Prozent-Modelle bleiben pruefbar. Versionierte produktive Regelverwaltung separat offen, keine Scheinfreigabe. Keine Migration/neue Datenbank/Container oder fremden CI-Dateien.
+
 ## STUDIO-QUALITY-LIMIT-20261015 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** Nutzerpraezisierung Windabgang/Besatz in der manuellen Referenzmaske sichtbar und testbar machen: Qualitaetsgrenze getrennt von echter Freigrenze, keine automatische Vertragsfreigabe oder doppelte Windbelastung. **Dateibesitz:** eigene studio_semantic.py/model, StudioPreview/API-Typen und Tests; neue harvest-deduction-contract-standard.md, QA/Handbuch/Workboard, eigene generierte Projektionen. **Abnahme:** 25.000 kg/1,5 Prozent Besatz/0,8 Prozent informativem Wind ergeben bei expliziter Freigrenze null nur 375 kg Mengenabzug; Qualitaetsgrenze veraendert den Abzug nicht. Qualitaetsueberschreitung sichtbar, Vertrags-/Produktivfreigabe immer false. Produktions-Kontraktbindung wird nicht erfunden.
