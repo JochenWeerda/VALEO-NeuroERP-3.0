@@ -1,7 +1,5 @@
-import { useEffect, useMemo, useReducer, useState } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from '@tanstack/react-query'
-import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
-import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -21,7 +19,10 @@ import {
 } from '@/lib/api/studio'
 import { StudioHistoryPanel } from './StudioHistoryPanel'
 import { emptyStudioDraft } from './studio-defaults'
-import { mockRowsFor, studioReducer } from './studio-reducer'
+import { studioReducer } from './studio-reducer'
+import { StudioDialogue } from './StudioDialogue'
+import { StudioPreview } from './StudioPreview'
+import type { ScreenDefinition } from '@/components/mask-builder/schema'
 
 const previewClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
 
@@ -37,13 +38,12 @@ export function ScreenStudioPage(): JSX.Element {
   const [report, setReport] = useState<StudioReport>()
   const [pending, setPending] = useState<string>()
   const [feedback, setFeedback] = useState<string | null>(null)
+  const [previewGeneration, setPreviewGeneration] = useState(0)
   const queryClient = useQueryClient()
   const refreshHistory = (id: string) => { void queryClient.invalidateQueries({ queryKey: ['platform/studio-history', id] }) }
   const catalog = useQuery({ queryKey: ['studio-catalog'], queryFn: fetchStudioCatalog })
   const drafts = useQuery({ queryKey: ['studio-drafts'], queryFn: fetchStudioDrafts })
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(definition), [definition])
   const dirty = savedSignature !== JSON.stringify(definition)
-  const tables = useMemo(() => mockRowsFor(definition), [definition])
 
   useEffect(() => {
     let cancelled = false
@@ -54,6 +54,17 @@ export function ScreenStudioPage(): JSX.Element {
     })
     return () => { cancelled = true }
   }, [definition])
+
+  function applyProposal(next: ScreenDefinition): void {
+    setPreviewGeneration(value => value + 1)
+    dispatch({ type: 'replace', definition: next })
+    setDraftId(undefined)
+    setSavedRevision(undefined)
+    setSavedSignature(undefined)
+    setSavedStatus(undefined)
+    setSimulation(undefined)
+    setPublishedRoute(undefined)
+  }
 
   async function run(key: string, work: () => Promise<void>): Promise<void> {
     if (pending) return
@@ -83,6 +94,7 @@ export function ScreenStudioPage(): JSX.Element {
               if (!id) return
               void run('load', async () => {
                 const item = await fetchStudioDraft(id)
+                setPreviewGeneration(value => value + 1)
                 dispatch({ type: 'replace', definition: item.definition })
                 setDraftId(item.id)
                 setSavedSignature(JSON.stringify(item.definition))
@@ -102,7 +114,7 @@ export function ScreenStudioPage(): JSX.Element {
           <Input id="studio-intent" value={intent} onChange={(event) => setIntent(event.target.value)} aria-label="Maskenabsicht" />
           <Button type="button" disabled={Boolean(pending)} onClick={() => void run('propose', async () => {
             const next = await proposeStudioDraft(intent)
-            dispatch({ type: 'replace', definition: next.definition })
+            applyProposal(next.definition)
             setReport(next)
           })}>
             {pending === 'propose' ? 'Vorschlag…' : 'Aus Absicht erzeugen'}
@@ -128,18 +140,24 @@ export function ScreenStudioPage(): JSX.Element {
             {(catalog.data?.columnNavigation ?? ['single', 'listDetail']).map((item) => <option key={item} value={item}>{item}</option>)}
           </select>
         </div>
-        <Button type="button" variant="outline" disabled={Boolean(pending)} data-testid="studio-add-column" onClick={() => dispatch({
-          type: 'addColumn',
-          tableKey: definition.tables?.[0]?.key ?? 'list',
-          column: { key: `feld_${(definition.tables?.[0]?.columns.length ?? 0) + 1}`, label: 'Neues Feld', sortable: true, filterable: true },
-        })}>
-          Spalte hinzufügen
-        </Button>
-        <p className="text-sm text-muted-foreground" data-testid="studio-column-count">
-          {definition.tables?.[0]?.columns.length ?? 0} Felder
-        </p>
+        <StudioDialogue disabled={Boolean(pending) || !catalog.data?.permissions?.canDesign} onProposal={applyProposal} />
+        {catalog.data?.semantic && <section aria-label="Freigegebene Fachfelder" className="space-y-1 text-sm">
+          <h2 className="font-semibold">Freigegebene Fachfelder · Getreide-Kalkulationsprobe</h2>
+          <p className="text-xs text-muted-foreground">Im Katalogvorschlag können Sie optionale Eingaben auswählen. Pflichtfelder sichern den Berechnungsvertrag.</p>
+          <ul>{catalog.data.semantic.fields.map(field => <li key={field.key} title={field.contract}>
+            <label className="flex gap-2"><input type="checkbox" checked={Boolean(definition.fields?.some(item => item.key === field.key))}
+              disabled={Boolean(pending) || field.required || !(definition as ScreenDefinition & { studioSemantic?: unknown }).studioSemantic}
+              onChange={event => {
+                const fields = definition.fields?.filter(item => item.key !== field.key) ?? []
+                dispatch({ type: 'replace', definition: { ...definition, fields: event.target.checked ? [...fields, {
+                  key: field.key, label: `${field.label} (${field.unit})`, type: 'number', required: field.required,
+                  helpText: 'Manuelle Testeingabe. Keine produktive Wirkung.',
+                }] : fields } })
+              }} />{field.label} ({field.unit}){field.required ? ' · Pflichtfeld' : ''}</label>
+          </li>)}</ul>
+        </section>}
         <div className="flex flex-wrap gap-2">
-          <Button type="button" disabled={Boolean(pending) || !catalog.data?.permissions?.canDesign} onClick={() => void run('save', async () => {
+          <Button type="button" disabled={Boolean(pending) || !catalog.data?.permissions?.canDesign || (Boolean(draftId) && !dirty)} onClick={() => void run('save', async () => {
             const saved = await saveStudioDraft(definition, draftId, savedRevision)
             setDraftId(saved.id)
             setSavedSignature(JSON.stringify(saved.definition))
@@ -198,7 +216,7 @@ export function ScreenStudioPage(): JSX.Element {
 
       <section className="min-w-0 overflow-auto rounded border" data-testid="studio-preview">
         <QueryClientProvider client={previewClient}>
-          <UniversalMaskRenderer plan={plan} tables={tables} />
+          <StudioPreview key={`${previewGeneration}:${definition.id}`} definition={definition} />
         </QueryClientProvider>
       </section>
 

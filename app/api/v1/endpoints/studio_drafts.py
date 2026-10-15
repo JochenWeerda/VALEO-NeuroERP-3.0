@@ -18,6 +18,9 @@ from app.auth.finance_roles import beleg_write
 from app.services.studio_draft_store import StudioStorageUnavailable, list_history, get_status_replay, get_draft, list_drafts, save_draft, set_status, studio_run_route
 from app.services.studio_propose import propose_studio_draft
 from app.services.studio_validation import load_studio_catalog, validate_studio_draft
+from app.services.studio_semantic import DialogueTurn, HarvestPreviewIn, HarvestPreviewOut, StudioDialogueIn, StudioDialogueOut, dialogue, preview, semantic_catalog
+from app.core.database import get_db
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/studio", tags=["ui", "studio", "screen-definition"])
 
@@ -188,6 +191,7 @@ def studio_catalog(user: dict = Depends(get_current_user)) -> dict[str, Any]:
         "columnNavigation": ["single", "listDetail", "listDetailDetail"],
         "dataSources": catalog["data_sources"],
         "actions": catalog["command_actions"],
+        "semantic": semantic_catalog(),
         "permissions": {"canDesign": _may_design(user), "canPublish": _may_publish(user)},
     }
 
@@ -201,6 +205,37 @@ def studio_validate(body: StudioDefinitionIn, user: dict = Depends(get_current_u
 def studio_propose(body: StudioProposeIn, user: dict = Depends(get_current_user)) -> dict[str, Any]:
     definition = propose_studio_draft(body.intent)
     return _report(definition)
+
+
+@router.post("/dialogue", response_model=StudioDialogueOut, summary="Fachsprachlichen Studio-Entwurf kataloggebunden klaeren")
+def studio_dialogue(body: StudioDialogueIn, user: dict = Depends(beleg_write),
+                    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> StudioDialogueOut:
+    _actor(user)
+    if not body.use_language_model:
+        return dialogue(body)
+    from app.services.studio_semantic_model import interpret
+    from app.services.llm_gateway import LLMGateway
+    interpreted = interpret(body, LLMGateway(db, tenant_id))
+    if interpreted.contract is None or interpreted.unsupported or interpreted.question:
+        return StudioDialogueOut(mode="llm_assisted", message=" ".join(filter(None, [
+            interpreted.summary, interpreted.question, *interpreted.unsupported])), limitations=semantic_catalog()["limitations"])
+    # The model chooses neither fields nor actions. A recognized process is
+    # resolved through the same deterministic catalog and human decisions.
+    recognized = body.model_copy(update={"turns": [*body.turns, DialogueTurn(role="user", content="Getreide-Kalkulationsprobe")]})
+    result = dialogue(recognized)
+    if result.definition:
+        result.definition["studioSemantic"]["dialogue"] = [turn.model_dump() for turn in body.turns]
+        result.definition["studioSemantic"]["interpretation"] = interpreted.model_dump()
+    return result.model_copy(update={"mode": "llm_assisted"})
+
+
+@router.post("/harvest-preview", response_model=HarvestPreviewOut, summary="Isolierte manuelle Getreidekalkulation ohne Fachwirkung")
+def studio_harvest_preview(body: HarvestPreviewIn, user: dict = Depends(beleg_write)) -> HarvestPreviewOut:
+    _actor(user)
+    try:
+        return HarvestPreviewOut(**preview(body))
+    except ValueError as error:
+        raise HTTPException(400, str(error)) from error
 
 
 @router.get("/drafts", summary="Studio-Entwürfe des Mandanten auflisten")

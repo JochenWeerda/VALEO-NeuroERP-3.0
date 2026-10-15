@@ -34,7 +34,9 @@ def simulation_artifact_hash():
              "app/api/v1/endpoints/studio_drafts.py", "app/services/studio_draft_store.py",
              "app/services/studio_validation.py", "app/services/number_range_service.py", "config/mcp_erp_tools.yaml",
              "app/core/agent_tool_contract_manifest.py", "app/core/mcp_rest_binding.py",
-             "app/api/v1/schemas/advisory_input.py", "app/core/screen_definitions_studio_history.py"]
+             "app/api/v1/schemas/advisory_input.py", "app/core/screen_definitions_studio_history.py",
+             "app/services/studio_semantic.py", "app/services/studio_semantic_model.py",
+             "app/services/llm_gateway.py"]
     digest = hashlib.sha256()
     for name in files:
         path = root / name

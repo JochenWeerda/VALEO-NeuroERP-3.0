@@ -2120,3 +2120,8 @@ Formale Projekt- und Lieferstaende liegen weiterhin in:
 
 - [Process Kernel Status](../architecture/process-kernel/STATUS.md)
 - `docs/project-context/operational-rollout-scope-2026-04-09.md`
+
+
+## STUDIO-SEMANTIC-001 — Restumfang nach manueller Referenzmaske (2026-10-15)
+
+Fachkatalog, kataloggefuehrter Dialog, optionale kontingentierte Modellinterpretation und isolierte Domain-Kalkulation sind implementiert und gezielt geprueft. Offen: reale Modellabnahme mit vorhandenem eigenem Kontingent; Betriebsabstimmung bei unbekanntem Providerabschluss/Overrun; fachliche Lieferanten-/Kontrakt-/Waagenbindung, Controllerbenachrichtigung und konfigurierte Trocknungsregeln mit eigenen Prozessvarianten. Die manuelle Vorschau bleibt im Release-Gate gesperrt, bis ihre vollstaendige Variante nachgewiesen ist. Bestehender grain.v1-Nachweis ersetzt diese Abnahme nicht. [QA und konkrete Grenzen](../quality-assurance/studio-semantic-20261015.md). Bekannte fremde CI-/Security- und develop-Identitaetsbefunde bleiben bestehen.

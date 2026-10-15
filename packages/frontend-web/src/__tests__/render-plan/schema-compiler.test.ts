@@ -448,3 +448,18 @@ describe('schema-compiler', () => {
     expect(compileSpy).toHaveBeenCalledTimes(1)
   })
 })
+
+
+it('recompiles Studio field, table and layout edits under the same screen revision', () => {
+  const schema = { ...crmSchema(), id: 'tenant/cache-structure', fields: [{ key: 'menge', label: 'Menge', type: 'number' as const }] }
+  const first = compileRenderPlanFromScreenDefinition(schema)
+  expect(first.fieldsByKey.menge).toBeDefined()
+  const changed = compileRenderPlanFromScreenDefinition({ ...schema, fields: [{ key: 'preis', label: 'Preis', type: 'currency' }] })
+  expect(changed).not.toBe(first)
+  expect(changed.fieldsByKey.menge).toBeUndefined()
+  expect(changed.fieldsByKey.preis).toBeDefined()
+  const layout = compileRenderPlanFromScreenDefinition({ ...schema, layout: { ...schema.layout, density: 'expertDense' } })
+  expect(layout.shell.density).toBe('expertDense')
+  const table = compileRenderPlanFromScreenDefinition({ ...schema, tables: [{ key: 'probe', label: 'Probe', columns: [{ key: 'summe', label: 'Summe', numeric: true }] }] })
+  expect(table.tablesByKey.probe).toBeDefined()
+})

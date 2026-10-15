@@ -205,4 +205,6 @@ def validate_studio_draft(
                 if screen_action.get(ui_flag) is True and action.get(agent_flag) is not True:
                     violations.append(f"agent_action_{agent_flag}_aufgehoben:{key}")
 
+    from app.services.studio_semantic import semantic_violations
+    violations.extend(semantic_violations(definition))
     return violations

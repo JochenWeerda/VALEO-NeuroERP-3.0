@@ -152,7 +152,7 @@ def calculate_harvest_settlement(inp: HarvestCalculationInput, vat_rate_percent:
             impurities_abzug_kg = round_qty(delivered_qty * (impurities_abzug_pct / Decimal("100")))
         positions.append(HarvestPositionResult(
             position_number=20,
-            description="Besatz 2% frei",
+            description=f"Besatz {inp.impurities_free_pct.normalize():f}% frei",
             quantity_kg=impurities_abzug_kg,
             quantity_pct=impurities_pct,
             unit="kg / %",

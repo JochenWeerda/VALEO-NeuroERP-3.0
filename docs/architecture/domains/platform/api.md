@@ -43,3 +43,10 @@ gegen dieselben Identitäts-/Kapazitätsregeln. Eine Vorschau schreibt keine
 Kontingente und kein Verbrauchsereignis. Jede Vergabe besitzt einen Urheber.
 
 [Abnahmestand und offene Verbrauchs-/Provider-/Handbuchintegration](../../../quality-assurance/identity-administration-20261012.md).
+
+
+## Studio-Fachdialog (2026-10-15)
+
+`GET /studio/catalog` erweitert den vorhandenen Katalog um versionierte fachliche Eingabevertraege. `POST /studio/dialogue` klaert Anforderungen und erzeugt ausschliesslich einen serverseitig kataloggebundenen Vorschlag. Der optionale Modellmodus nutzt den konfigurierten LLMGateway und das bestehende eigene Tokenkontingent; fehlende Mittel oder ungeklärte Anbieterabschluesse eroeffnen keinen Bypass. `POST /studio/harvest-preview` berechnet manuelle Testeingaben ueber den Agrar-Domain-Service ohne Datenbank-, Buchungs-, Bestands- oder externe Wirkung. Beide POST-Wege verlangen die vorhandene Beleg-Bearbeitungsrolle; der Dialog verwendet den verifizierten Mandantenkontext.
+
+Entwurfsspeicherung bleibt ausschliesslich im bestehenden versionierten, idempotenten Studio-Speicher. Der Vorschauvertrag wird nicht als durch grain.v1 abgenommene produktive Prozessvariante veroeffentlicht. Neue MCP-/CLI-Schreibwerkzeuge werden daraus nicht freigeschaltet. [Architekturentscheidung](../../../adr/adr-studio-semantic-contracts.md), [QA](../../../quality-assurance/studio-semantic-20261015.md).

@@ -287,6 +287,8 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `studio_history_view` | Read-only, type-preserving comparison of immutable Studio snapshots. |
 | `studio_process_simulation` | Real domain-service simulation on the shared probe, always rolled back. |
 | `studio_propose` | Deterministic ScreenDefinition proposals for humans and agents. |
+| `studio_semantic` | Versioned business vocabulary and side-effect-free Studio reference contract. |
+| `studio_semantic_model` | Budgeted intent interpretation; model output can only select a known contract. |
 | `studio_validation` | SD-Studio Draft-Validierung (UIX-090) — harte Sicherheitsregeln. |
 | `supply_chain_event_service` | Append-only Ketten-Ereignis-Log + kanonischer Übergabestatus (DOM-SUPPLY-004.2). |
 | `supply_chain_lot_service` | Lager-Lot-Folgeaktionen mit Abweichungsgrund (DOM-SUPPLY-004.3). |

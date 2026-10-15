@@ -318,3 +318,12 @@ Die zentrale Tailwind-Kompilation scannt explizit `src/` und `index.html`.
 So bleiben Klassen der Renderer und Seiten vollstaendig erfasst, waehrend
 Workspace-Artefakte und der Startordner den CSS-Build nicht ausweiten.
 Die acht WCAG-Kernrouten bestehen nach dieser Begrenzung (2026-10-05).
+
+
+## Studio-Fachdialog und interaktive Vorschau (2026-10-15)
+
+Das Studio erzeugt seine manuelle Getreide-Kalkulationsprobe als normale ScreenDefinition. Fachsprachlicher Katalog und optional kontingentiertes Modell liefern Vorschlaege; der Server bestimmt allein die zulaessigen Vertragsfelder. Optionale Felder lassen sich ueber Fachbezeichnungen auswaehlen, Pflichtfelder bleiben verbindlich. Freie technische feld_N-Spalten wurden aus der Bedienung entfernt.
+
+Die Vorschau verwendet weiterhin schema-compiler, UniversalFormState und UniversalMaskRenderer. Der Host bindet ausschliesslich den bestehenden Agrar-Kalkulator an; keine zweite Masken-Engine oder nachgebaute Fachformel. Eingabeaenderungen entwerten alte Ergebnisse; verspaetete Antworten duerfen sie nicht wieder sichtbar machen. Beispieldaten enthalten nur sichtbare Felder.
+
+RenderPlan-Caching beruecksichtigt auch Fields, Tables, Tabs, Layout und Datenquellen, weil Studio-Aenderungen vor dem Speichern dieselbe ID/Version behalten. Die Referenz ist eine isolierte Kalkulationsprobe und noch keine freigegebene produktive Getreideannahme. [Abnahme und Grenzen](../quality-assurance/studio-semantic-20261015.md).

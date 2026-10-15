@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-15
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-14T22:07:52Z'
+generated_at: '2026-10-15T05:47:45Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -484,6 +484,7 @@ domains:
     - docs/adr/adr-077-leading-weighing-ticket.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-079-ebilanz-xbrl-drafts.md
+    - docs/adr/adr-studio-semantic-contracts.md
     status: active
   crm:
     owner: domain/crm
@@ -1238,6 +1239,7 @@ domains:
     - pos_tagesabschluss_service
     - preisfindung_service
     - query_center_service
+    - sepa_xml_generator
     - tse_fiskaly_service
     - vies_service
     backend_endpoints:
@@ -1847,7 +1849,11 @@ domains:
     - security_observability
     - stt_client
     - studio_draft_store
+    - studio_history_view
+    - studio_process_simulation
     - studio_propose
+    - studio_semantic
+    - studio_semantic_model
     - studio_validation
     - sync_scheduler
     - tenant_lifecycle_service
@@ -2096,8 +2102,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 941
   frontend_routes_mapped: 941
-  backend_services_total: 290
-  backend_services_mapped: 290
+  backend_services_total: 295
+  backend_services_mapped: 295
   backend_endpoints_total: 460
   backend_endpoints_mapped: 460
 unmapped:

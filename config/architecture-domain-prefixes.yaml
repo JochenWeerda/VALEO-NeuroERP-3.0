@@ -606,6 +606,11 @@ exact_service_stems:
   document_allocation_service: platform
   studio_draft_store: platform
   studio_propose: platform
+  studio_semantic: platform
+  studio_semantic_model: platform
+  studio_history_view: platform
+  studio_process_simulation: platform
+  sepa_xml_generator: finance
   billing_batch_service: finance
   document_control_projection: dms-compliance
   document_control_service: dms-compliance

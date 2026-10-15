@@ -70,6 +70,8 @@ def profile_errors(definition):
     """grain.v1 proves the fixed domain chain; unmodeled commands/rules never pass."""
     from app.services.studio_validation import _iter_actions, _nodes
     errors=[]
+    if definition.get("studioSemantic") is not None:
+        errors.append("semantic_preview_not_a_release_profile")
     if definition.get("domain")!="agrar":
         errors.append("domain_not_covered")
     requested=definition.get("processSimulation") or {}

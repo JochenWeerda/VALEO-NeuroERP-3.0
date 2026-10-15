@@ -50008,6 +50008,31 @@
         "title": "DialIn",
         "type": "object"
       },
+      "DialogueTurn": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "user",
+              "assistant"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "DialogueTurn",
+        "type": "object"
+      },
       "DictRequest": {
         "properties": {
           "data": {
@@ -79516,6 +79541,347 @@
           }
         },
         "title": "HarvestAcceptanceUpdate",
+        "type": "object"
+      },
+      "HarvestPositionOut": {
+        "properties": {
+          "amount_eur": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount Eur"
+          },
+          "calculation_formula": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculation Formula"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "position_number": {
+            "title": "Position Number",
+            "type": "integer"
+          },
+          "quantity_kg": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity Kg"
+          },
+          "quantity_pct": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quantity Pct"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          }
+        },
+        "required": [
+          "position_number",
+          "description"
+        ],
+        "title": "HarvestPositionOut",
+        "type": "object"
+      },
+      "HarvestPreviewIn": {
+        "additionalProperties": false,
+        "properties": {
+          "delivered_quantity_kg": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "maximum": 100000.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Delivered Quantity Kg"
+          },
+          "freight_costs": {
+            "anyOf": [
+              {
+                "maximum": 100000.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Freight Costs"
+          },
+          "hl_weight_kg_per_hl": {
+            "anyOf": [
+              {
+                "maximum": 150.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hl Weight Kg Per Hl"
+          },
+          "impurities_free_pct": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Impurities Free Pct"
+          },
+          "impurities_pct": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Impurities Pct"
+          },
+          "moisture_pct": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Moisture Pct"
+          },
+          "storage_fee_per_month": {
+            "anyOf": [
+              {
+                "maximum": 10000.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Fee Per Month"
+          },
+          "storage_months": {
+            "anyOf": [
+              {
+                "maximum": 120.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Months"
+          },
+          "storage_shrinkage_pct": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storage Shrinkage Pct"
+          },
+          "unit_price_eur_per_ton": {
+            "anyOf": [
+              {
+                "maximum": 10000.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Unit Price Eur Per Ton"
+          },
+          "vat_rate_percent": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Vat Rate Percent"
+          },
+          "weighing_fees": {
+            "anyOf": [
+              {
+                "maximum": 10000.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighing Fees"
+          },
+          "windage_pct": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Windage Pct"
+          }
+        },
+        "required": [
+          "delivered_quantity_kg",
+          "unit_price_eur_per_ton",
+          "vat_rate_percent",
+          "impurities_free_pct"
+        ],
+        "title": "HarvestPreviewIn",
+        "type": "object"
+      },
+      "HarvestPreviewOut": {
+        "properties": {
+          "business_effect": {
+            "const": "none",
+            "title": "Business Effect",
+            "type": "string"
+          },
+          "contract": {
+            "const": "agrar.harvest.manual-preview.v1",
+            "title": "Contract",
+            "type": "string"
+          },
+          "external_effect": {
+            "const": "none",
+            "title": "External Effect",
+            "type": "string"
+          },
+          "positions": {
+            "items": {
+              "$ref": "#/components/schemas/HarvestPositionOut"
+            },
+            "title": "Positions",
+            "type": "array"
+          },
+          "total_gross_amount_eur": {
+            "title": "Total Gross Amount Eur",
+            "type": "string"
+          },
+          "total_net_amount_eur": {
+            "title": "Total Net Amount Eur",
+            "type": "string"
+          },
+          "total_vat_amount_eur": {
+            "title": "Total Vat Amount Eur",
+            "type": "string"
+          },
+          "vat_rate_percent": {
+            "title": "Vat Rate Percent",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "contract",
+          "business_effect",
+          "external_effect",
+          "positions",
+          "total_net_amount_eur",
+          "total_vat_amount_eur",
+          "total_gross_amount_eur",
+          "vat_rate_percent",
+          "warnings"
+        ],
+        "title": "HarvestPreviewOut",
         "type": "object"
       },
       "HarvestSettlementAbzugRowOut": {
@@ -156236,6 +156602,126 @@
           "definition"
         ],
         "title": "StudioDefinitionIn",
+        "type": "object"
+      },
+      "StudioDialogueIn": {
+        "additionalProperties": false,
+        "properties": {
+          "accept_preview_limits": {
+            "default": false,
+            "title": "Accept Preview Limits",
+            "type": "boolean"
+          },
+          "budget_id": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget Id"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "turns": {
+            "items": {
+              "$ref": "#/components/schemas/DialogueTurn"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Turns",
+            "type": "array"
+          },
+          "use_language_model": {
+            "default": false,
+            "title": "Use Language Model",
+            "type": "boolean"
+          },
+          "weighing": {
+            "anyOf": [
+              {
+                "enum": [
+                  "manual",
+                  "automatic"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weighing"
+          }
+        },
+        "required": [
+          "turns"
+        ],
+        "title": "StudioDialogueIn",
+        "type": "object"
+      },
+      "StudioDialogueOut": {
+        "properties": {
+          "contract": {
+            "default": "agrar.harvest.manual-preview.v1",
+            "title": "Contract",
+            "type": "string"
+          },
+          "definition": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Definition"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "mode": {
+            "default": "catalog_guided",
+            "enum": [
+              "catalog_guided",
+              "llm_assisted"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "ready": {
+            "default": false,
+            "title": "Ready",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "StudioDialogueOut",
         "type": "object"
       },
       "StudioDiffRow": {
@@ -398949,6 +399435,54 @@
         ]
       }
     },
+    "/api/v1/studio/dialogue": {
+      "post": {
+        "operationId": "studio_dialogue_api_v1_studio_dialogue_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudioDialogueIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudioDialogueOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fachsprachlichen Studio-Entwurf kataloggebunden klaeren",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
     "/api/v1/studio/drafts": {
       "get": {
         "operationId": "studio_list_drafts_api_v1_studio_drafts_get",
@@ -399599,6 +400133,54 @@
           }
         ],
         "summary": "Studio-Entwurf zur Vier-Augen-Prüfung geben",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/studio/harvest-preview": {
+      "post": {
+        "operationId": "studio_harvest_preview_api_v1_studio_harvest_preview_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HarvestPreviewIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HarvestPreviewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Isolierte manuelle Getreidekalkulation ohne Fachwirkung",
         "tags": [
           "ui",
           "studio",
