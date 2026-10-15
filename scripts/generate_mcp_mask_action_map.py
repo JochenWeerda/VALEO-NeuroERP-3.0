@@ -17,6 +17,8 @@ from typing import Any
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from app.core.screen_definitions_harvest_controls import COMMAND_PATHS as HARVEST_COMMANDS
 ACTIONS_PATH = ROOT / "services/ki-usability/app/data/screen_mask_actions.json"
 TOOLS_PATH = ROOT / "config/mcp_erp_tools.yaml"
 OUT_PATH = ROOT / "config/mcp_mask_action_map.yaml"
@@ -408,6 +410,10 @@ LOCAL_UI_RULES: dict[str, dict[str, str]] = {
 }
 
 BLOCKED_RULES: dict[str, dict[str, str]] = {
+    **{f"mask:agrar/harvest-controls:{key}": {
+        "coverage": "blocked_human_only",
+        "notes": "Native Erntekontrolle ist forbiddenForAgents; kein freigegebener MCP-Write. Domain-Commands bleiben menschlich autorisiert und nachweispflichtig.",
+    } for key in HARVEST_COMMANDS},
     "mask:finance/steuerschluessel:speichern": {
         "coverage": "open_high",
         "notes": (
@@ -564,7 +570,8 @@ def build_map() -> dict[str, Any]:
         "classification_notes": (
             "FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); "
             f"blocked_missing_tenant {by_cov.get('blocked_missing_tenant', 0)}. "
-            f"Rest: open_high nur Zahlauf; blocked_no_endpoint {by_cov.get('blocked_no_endpoint', 0)}; "
+            f"Rest: open_high {by_cov.get('open_high', 0)}; open_medium {by_cov.get('open_medium', 0)}; "
+            f"blocked_human_only {by_cov.get('blocked_human_only', 0)}; blocked_no_endpoint {by_cov.get('blocked_no_endpoint', 0)}; "
             f"local_ui {by_cov.get('local_ui', 0)}; FIN-CLOSE blocked_adr_076."
         ),
     }

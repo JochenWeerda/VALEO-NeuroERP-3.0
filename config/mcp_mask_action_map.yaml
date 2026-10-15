@@ -1,12 +1,12 @@
 schema_version: '1.0'
 slice_id: MCP-MASK-WRITE-PARITY-20261008
-generated_on: '2026-10-13'
+generated_on: '2026-10-15'
 sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 97
-    screens_with_actions: 49
+    actions: 106
+    screens_with_actions: 50
     domains: 14
 mcp_write_tools:
 - crm.contact.log
@@ -80,10 +80,11 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 66
-  mask_mutations_considered: 51
+  mask_actions_considered: 74
+  mask_mutations_considered: 59
   by_coverage:
     adjacent: 1
+    blocked_human_only: 8
     local_ui: 15
     mapped: 43
     mapped_propose_only: 1
@@ -143,6 +144,94 @@ mappings:
   mcp_tool_id: agrar.feeding.actual_measure
   coverage: mapped
   notes: MCP-MASK-WRITES-BATCH4-20261008; FeedingActualMeasureService.create_measure.
+- mask_action_id: mask:agrar/harvest-controls:approve_calculation
+  mask: agrar/harvest-controls
+  domain: agrar
+  action_key: approve_calculation
+  label: Berechnungsfassung genehmigen
+  command_endpoint: /api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/approve-calculation
+  command: harvest.control.approve_calculation
+  coverage: blocked_human_only
+  notes: Native Erntekontrolle ist forbiddenForAgents; kein freigegebener MCP-Write. Domain-Commands bleiben
+    menschlich autorisiert und nachweispflichtig.
+  mcp_tool_id: null
+- mask_action_id: mask:agrar/harvest-controls:approve_rule
+  mask: agrar/harvest-controls
+  domain: agrar
+  action_key: approve_rule
+  label: Regel genehmigen
+  command_endpoint: /api/v1/agrar/harvest-acceptance/settlement-controls/rules/{version_id}/approve
+  command: harvest.control.approve_rule
+  coverage: blocked_human_only
+  notes: Native Erntekontrolle ist forbiddenForAgents; kein freigegebener MCP-Write. Domain-Commands bleiben
+    menschlich autorisiert und nachweispflichtig.
+  mcp_tool_id: null
+- mask_action_id: mask:agrar/harvest-controls:attest
+  mask: agrar/harvest-controls
+  domain: agrar
+  action_key: attest
+  label: Messnachweis bestätigen
+  command_endpoint: /api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/attest-measurement
+  command: harvest.control.attest
+  coverage: blocked_human_only
+  notes: Native Erntekontrolle ist forbiddenForAgents; kein freigegebener MCP-Write. Domain-Commands bleiben
+    menschlich autorisiert und nachweispflichtig.
+  mcp_tool_id: null
+- mask_action_id: mask:agrar/harvest-controls:bind_rule
+  mask: agrar/harvest-controls
+  domain: agrar
+  action_key: bind_rule
+  label: Regel an Annahme binden
+  command_endpoint: /api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/bind-rule
+  command: harvest.control.bind_rule
+  coverage: blocked_human_only
+  notes: Native Erntekontrolle ist forbiddenForAgents; kein freigegebener MCP-Write. Domain-Commands bleiben
+    menschlich autorisiert und nachweispflichtig.
+  mcp_tool_id: null
+- mask_action_id: mask:agrar/harvest-controls:calculate
+  mask: agrar/harvest-controls
+  domain: agrar
+  action_key: calculate
+  label: Verbindlich berechnen
+  command_endpoint: /api/v1/agrar/harvest-acceptance/{acceptance_id}/calculate
+  command: harvest.control.calculate
+  coverage: blocked_human_only
+  notes: Native Erntekontrolle ist forbiddenForAgents; kein freigegebener MCP-Write. Domain-Commands bleiben
+    menschlich autorisiert und nachweispflichtig.
+  mcp_tool_id: null
+- mask_action_id: mask:agrar/harvest-controls:create_rule
+  mask: agrar/harvest-controls
+  domain: agrar
+  action_key: create_rule
+  label: Regelversion erstellen
+  command_endpoint: /api/v1/agrar/harvest-acceptance/settlement-controls/rules
+  command: harvest.control.create_rule
+  coverage: blocked_human_only
+  notes: Native Erntekontrolle ist forbiddenForAgents; kein freigegebener MCP-Write. Domain-Commands bleiben
+    menschlich autorisiert und nachweispflichtig.
+  mcp_tool_id: null
+- mask_action_id: mask:agrar/harvest-controls:release
+  mask: agrar/harvest-controls
+  domain: agrar
+  action_key: release
+  label: Gutschrift und Wareneingang erzeugen
+  command_endpoint: /api/v1/agrar/harvest-acceptance/{acceptance_id}/release?release_status=final&create_stock_movement=true&create_credit_note=true
+  command: harvest.control.release
+  coverage: blocked_human_only
+  notes: Native Erntekontrolle ist forbiddenForAgents; kein freigegebener MCP-Write. Domain-Commands bleiben
+    menschlich autorisiert und nachweispflichtig.
+  mcp_tool_id: null
+- mask_action_id: mask:agrar/harvest-controls:revoke_rule
+  mask: agrar/harvest-controls
+  domain: agrar
+  action_key: revoke_rule
+  label: Regelgenehmigung widerrufen
+  command_endpoint: /api/v1/agrar/harvest-acceptance/settlement-controls/rules/{version_id}/revoke
+  command: harvest.control.revoke_rule
+  coverage: blocked_human_only
+  notes: Native Erntekontrolle ist forbiddenForAgents; kein freigegebener MCP-Write. Domain-Commands bleiben
+    menschlich autorisiert und nachweispflichtig.
+  mcp_tool_id: null
 - mask_action_id: mask:agrar/ration:activate
   mask: agrar/ration
   domain: agrar
@@ -792,4 +881,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high nur Zahlauf; blocked_no_endpoint 0; local_ui 15; FIN-CLOSE blocked_adr_076.'
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 8; blocked_no_endpoint 0; local_ui 15; FIN-CLOSE
+  blocked_adr_076.'

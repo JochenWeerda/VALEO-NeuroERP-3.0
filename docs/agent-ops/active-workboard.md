@@ -18368,6 +18368,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **Abnahme:** Vorher 6 gezielte Negativfaelle rot, danach 188 neue/bestehende HTTP-/Recruiting-Vertraege plus 63 echte RSA-/JWKS-/HTTP-/WebSocket-Mandantenvertraege gruen. Ungueltige Token ohne Providerzugriff 401; regulare Providerstoerung weiterhin 503. Ausschliesslich _validate_jwt aus kanonischem HEAD geaendert, fremde andere Hunkstaende bewahrt. QA auth-jwt-preflight-20261015.md. Keine neue DB/Container oder Fachmutation.
 
-## HARVEST-MCP-PROJECTION-20261015 — reserviert, Codex
+## HARVEST-MCP-PROJECTION-20261015 — abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Folgeprojektionen des neuen Aktionskatalogs konsistent nachziehen; acht ausdruecklich menschliche Ernte-Schreibaktionen als blocked_human_only klassifizieren. **Dateibesitz:** scripts/generate_mcp_mask_action_map.py nur eigene acht BLOCKED_RULES und korrekte dynamische Restzusammenfassung; config/mcp_mask_action_map.yaml generiert; Action-Matrix-Report ausschliesslich kanonisch generiert; eigener neuer Test/QA/Workboard. **Abnahme:** alle acht Writes ohne MCP-Tool-ID gesperrt, keine neue Freischaltung/keine Gateausnahme; bestehende Abdeckungen/Rechte unveraendert, Generatorchecks und bestehende Kartenvertraege gruen. Generator selbst vor Claim identisch zu HEAD. Fremder CI-Claim behaelt Gatekonfigurationen und bestehende Tests. Keine DB/Container.
+
+**Abnahme:** Alle acht Ernte-Writes explizit blocked_human_only ohne Tool-ID; keine neue MCP-Freischaltung. Bestehende 4 open_high, 43 mapped und 15 local_ui unveraendert. Zusammenfassung nennt echte Zaehler. Vier Kartenvertraege, Generator --check, kanonischer Action-Matrix-Report und fuenf Agent-Handbuchartefakte gruen. QA harvest-mcp-projection-20261015.md. Security Scan 38794074410 vollstaendig erfolgreich; Service Security verbleibt wegen abgelaufener ChromaDB-Bewertungen separat offen.
