@@ -16,3 +16,7 @@ Freigabe setzt verifizierte menschliche Adminidentitaet, getrennten Editor, eing
 Die Historie bewahrt Snapshot und Subject ohne erfundene lokale Benutzer-/E-Mail-Zuordnung. PostgreSQL blockiert nachtraegliche Zeilenmutation sowie TRUNCATE. Keine Kaskade entfernt Historie mit dem Draft. Historienabfragen sind paginiert und mandantengebunden. Bestehende Stande vor der Migration werden nicht nachtraeglich zu einer Freigabehistorie umgedeutet.
 
 Migration und Nachweise: [Studio-Revisionshistorie](../../../quality-assurance/studio-revision-history-20261014.md). Idempotenz, Agenten-/Korrelationsattribute, maskenseitige Historie und fachliche Prozessvariantensimulation sind nachfolgende Integrationen. Die vollstaendige Engine-Abnahme ist dadurch noch nicht erreicht.
+
+## Fachsprachliche Weiterentwicklung 2026-10-15
+
+[STUDIO-SEMANTIC-001](../../studio-semantic-standard.md) ist der verbindliche Entwicklungsauftrag fuer den mehrstufigen Dialog und die kataloggebundene Maskenerstellung. Bestehende Meridian-Engine, Rechte und revisionsgebundene Freigabe bleiben fuehrend. Der Dialog und die komplexe Referenzmaske sind gesondert nachzuweisen; vier Vorlagen ersetzen diesen Nachweis nicht.

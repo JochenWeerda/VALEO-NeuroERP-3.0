@@ -11,9 +11,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## STUDIO-SEMANTIC-20261015 — reserviert, Codex
+## STUDIO-SEMANTIC-20261015 — in Arbeit, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Nutzerplan fuer dialogfaehiges Studio verbindlich integrieren; anschliessend fachsprachliche Getreideannahme ohne erfundene Datenbindungen ueber bestehende Meridian-Engine nachweisen. **Dateibesitz:** neue docs/architecture/studio-semantic-standard.md, eigener Governance-/QA-/Workboard-Abschnitt; spaetere Codeintegration nur nach erweitertem Dateiclaim. **Abnahme dieser ersten Etappe:** STUDIO-SEMANTIC-001, fuenf Phasen und pruefbare Referenzszenarien dokumentiert; CI-Nachlauf der Baselinesenkung exakt berichtet. **Risiken:** vier Vorlagen sind kein Agentendialog; Berechnungsvorschau ist kein Freigabenachweis. Gesamt-CI und develop-Identitaetssperre bleiben sichtbar. Keine neue DB/Container, kein fremder CI-Dateibesitz.
+**Owner:** Codex. **Stand:** in Arbeit 2026-10-15. **Ziel:** Nutzerplan fuer dialogfaehiges Studio verbindlich integrieren; anschliessend fachsprachliche Getreideannahme ohne erfundene Datenbindungen ueber bestehende Meridian-Engine nachweisen. **Dateibesitz:** neue docs/architecture/studio-semantic-standard.md, eigener Governance-/QA-/Workboard-Abschnitt; spaetere Codeintegration nur nach erweitertem Dateiclaim. **Abnahme dieser ersten Etappe:** STUDIO-SEMANTIC-001, fuenf Phasen und pruefbare Referenzszenarien dokumentiert; CI-Nachlauf der Baselinesenkung exakt berichtet. **Risiken:** vier Vorlagen sind kein Agentendialog; Berechnungsvorschau ist kein Freigabenachweis. Gesamt-CI und develop-Identitaetssperre bleiben sichtbar. Keine neue DB/Container, kein fremder CI-Dateibesitz.
+
+**Zwischenergebnis:** STUDIO-SEMANTIC-001 uebernommen und Governance verknuepft; CI-Nachlauf der Baselinesenkung dokumentiert. Integritaet/Godfile, Docs, PostgreSQL und beide E2E-Laufe bestanden. Gesamt-CI weiter mit Backend-/Sicherheitsbefunden. Dialog, Fachkatalog und komplexer Browsernachweis bleiben offen. QA: docs/quality-assurance/studio-semantic-20261015.md.
+
 
 ## STUDIO-GODFILE-LOWER-20261015 — abgeschlossen, Codex
 
