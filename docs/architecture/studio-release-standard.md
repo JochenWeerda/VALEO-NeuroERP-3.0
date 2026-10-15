@@ -28,4 +28,4 @@ Das Profil deckt den festen Agrar-Basispfad ab. Unmodellierte Fachaktionen, edit
 
 Studio-Entwurfsaktionen verwenden die vorhandene beleg_write-Rollenregel. Menschliche Admin-Freigabe und Vier Augen bleiben erforderlich. Die Oberflaeche erhaelt diese Rechteprojektion vom Server. Native Historienmasken zeigen Revision, Actor, Zeit, Status, Differenz und Simulationsergebnis. Nach Aenderungen wird ihr Cache gezielt invalidiert.
 
-Abnahmen und noch offene positive Browserfreigabe: [Studio-Abschluss](../quality-assurance/studio-closure-20261015.md). Weitere Profile bleiben deaktiviert, bis ihre eigene vollstaendige Kette nachgewiesen ist.
+Abnahmen einschliesslich positiver Vier-Augen-Browserfreigabe und nachgewiesenem Rechteentzug: [Studio-Abschluss](../quality-assurance/studio-closure-20261015.md). Bedienung mit echten Screenshots: [Studio-Freigabe](../benutzerhandbuch/studio-freigabe.md). Weitere Profile bleiben deaktiviert, bis ihre eigene vollstaendige Kette nachgewiesen ist.
