@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## SELF-BILLING-POSTING-TESTS-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Sechs ueberholte Self-Billing-Vertraege an den kanonischen Eingangssteuer- und Transaktionsvertrag anpassen. **Dateibesitz:** tests/test_posting_services.py nur Self-Billing-Abschnitt; eigene QA/Workboard. **Abnahme:** Aufwand und Vorsteuer Soll, Verbindlichkeit Haben, explizite Steuerkonfiguration; Fehler muessen propagieren und duerfen keinen Teilcommit verdecken. Kein Produktivcode, keine neue Datenbank oder Container.
+
 ## STUDIO-CI-REST-20261015 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** Die im CI-Handschlag gemeldete unbekannte Studio-Listenantwort typisieren und die SQL-Fixture an die kanonische Pruefstand-Grenze binden. **Dateibesitz:** src/lib/api/studio.ts nur fetchStudioDrafts; tests/test_meridian_screen_studio_persistence.py nur Pruefstand-Auswahl; QA/Workboard. **Abnahme:** gezielte Studio-Vertraege und vorhandene SQL-Fixture, kein neuer DB/Container, keine Lockerung der Schutzgrenze. CI-Startskript und private Push-Grenze bleiben im fremden Claim unangetastet.
