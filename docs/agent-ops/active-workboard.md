@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-SEMANTIC-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Nutzerplan fuer dialogfaehiges Studio verbindlich integrieren; anschliessend fachsprachliche Getreideannahme ohne erfundene Datenbindungen ueber bestehende Meridian-Engine nachweisen. **Dateibesitz:** neue docs/architecture/studio-semantic-standard.md, eigener Governance-/QA-/Workboard-Abschnitt; spaetere Codeintegration nur nach erweitertem Dateiclaim. **Abnahme dieser ersten Etappe:** STUDIO-SEMANTIC-001, fuenf Phasen und pruefbare Referenzszenarien dokumentiert; CI-Nachlauf der Baselinesenkung exakt berichtet. **Risiken:** vier Vorlagen sind kein Agentendialog; Berechnungsvorschau ist kein Freigabenachweis. Gesamt-CI und develop-Identitaetssperre bleiben sichtbar. Keine neue DB/Container, kein fremder CI-Dateibesitz.
+
 ## STUDIO-GODFILE-LOWER-20261015 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** Exakte Godfile-Ratsche nach der eigenen Verkuerzung von process_kernel_api.py nachziehen. **Dateibesitz:** config/godfile_baseline.json nur process_kernel_api.py-Eintrag; QA/Workboard. **Abnahme:** ausschliesslich Senkung auf committierte echte Zeilenzahl; keine Schwellen-/Erhoehungs-Ausnahme, fremde Baselinewerte bleiben unveraendert.
