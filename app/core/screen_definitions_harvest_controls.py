@@ -40,7 +40,7 @@ def build_harvest_controls():
             "auditReasonRequired": key in {"approve_rule", "revoke_rule", "approve_calculation"},
             "forbiddenForAgents": True, "humanApprovalRequired": critical, "inputFields": inputs})
     actions.insert(0, {"key": "refresh", "label": "Annahme und Nachweise laden", "kind": "secondary", "zone": "header",
-                       "dangerLevel": "safe", "localEffect": "navigation", "command": "harvest.control.refresh"})
+                       "dangerLevel": "safe", "permission": "refresh", "localEffect": "navigation", "command": "harvest.control.refresh"})
     return {"schemaVersion": 1, "id": "agrar/harvest-controls", "domain": "agrar", "mode": "workflow",
         "title": "Ernte-Abrechnung: Vertragsregeln und Freigaben",
         "subtitle": "Regelversion wählen, Messnachweis bestätigen, berechnen und durch eine zweite Person genehmigen lassen.",
@@ -63,13 +63,14 @@ def build_harvest_controls():
             field("quality_limit_pct", "Qualitätsgrenze Besatz (%) – keine Freigrenze", "percentage"),
         ], "tables": [{"key": "rules", "label": "Unveränderliche Regelversionen – Zeile zum Prüfen auswählen",
             "dataSourceKey": "rules", "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 44,
+            "rowActions": [{"key": "inspect_rule", "label": "Regelversion prüfen", "command": "harvest.control.inspect_rule"}],
             "columns": [{"key": key, "label": label, "width": width} for key, label, width in [
-                ("definition.rule_id", "Regel", 170), ("definition.rule_version", "Fassung", 80),
-                ("status", "Genehmigung", 110), ("definition.impurities_free_pct", "Abzugsfrei (%)", 110),
-                ("definition.quality_limit_pct", "Qualitätsgrenze (%)", 120),
-                ("definition.measurement_method", "Methode", 160), ("definition.measurement_method_version", "Methodenfassung", 110),
-                ("definition.valid_from", "Gültig ab", 110), ("definition.valid_until", "Gültig bis", 110),
-                ("definition.source_reference", "Grundlage", 200), ("created_by", "Urheber", 170)]]}]},
+                ("rule_id", "Regel", 170), ("rule_version", "Fassung", 80),
+                ("status", "Genehmigung", 110), ("impurities_free_pct", "Abzugsfrei (%)", 110),
+                ("quality_limit_pct", "Qualitätsgrenze (%)", 120),
+                ("measurement_method", "Methode", 160), ("measurement_method_version", "Methodenfassung", 110),
+                ("valid_from", "Gültig ab", 110), ("valid_until", "Gültig bis", 110),
+                ("source_reference", "Grundlage", 200), ("created_by", "Urheber", 170)]]}]},
             {"key": "calculation", "label": "Berechnungspositionen", "tables": [{"key": "positions",
                 "label": "Konkrete Berechnungsfassung – bei veraltetem Nachweis nicht freigabefähig", "pageSize": 25,
                 "virtualized": True, "rowHeight": 44, "columns": [{"key": key, "label": label, "width": width}

@@ -133259,7 +133259,7 @@
             "type": "string"
           },
           "qualitaetsprotokoll": {
-            "$ref": "#/components/schemas/QualityProtocolOut"
+            "$ref": "#/components/schemas/app__api__v1__schemas__agrar_schemas__QualityProtocolOut"
           },
           "quality_status": {
             "anyOf": [
@@ -133293,12 +133293,6 @@
           "approved_by"
         ],
         "title": "QualityProtocolFinalizeIn",
-        "type": "object"
-      },
-      "QualityProtocolOut": {
-        "additionalProperties": true,
-        "properties": {},
-        "title": "QualityProtocolOut",
         "type": "object"
       },
       "QualityProtocolUpdateIn": {
@@ -209643,7 +209637,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest acceptances auflisten"
+        "summary": "Harvest acceptances auflisten",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       },
       "post": {
         "description": "Ernte-Annahme anlegen.",
@@ -209685,7 +209685,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest acceptance anlegen"
+        "summary": "Harvest acceptance anlegen",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       }
     },
     "/api/v1/agrar/harvest-acceptance/last": {
@@ -209765,7 +209771,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Last harvest acceptance abrufen"
+        "summary": "Last harvest acceptance abrufen",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       }
     },
     "/api/v1/agrar/harvest-acceptance/quality-batch": {
@@ -209809,7 +209821,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Qualitätswerte als Batch nachtragen"
+        "summary": "Qualitätswerte als Batch nachtragen",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       }
     },
     "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/approve-calculation": {
@@ -209865,6 +209883,10 @@
         ],
         "summary": "Gepruefte Berechnungsfassung finanziell genehmigen",
         "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme",
           "agrar",
           "harvest-controls"
         ]
@@ -209924,6 +209946,10 @@
         "summary": "Messprovenienz fuer den konkreten Protokollstand bestaetigen",
         "tags": [
           "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme",
+          "agrar",
           "harvest-controls"
         ]
       }
@@ -209982,6 +210008,10 @@
         "summary": "Genehmigte Regelversion an Annahme binden",
         "tags": [
           "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme",
+          "agrar",
           "harvest-controls"
         ]
       }
@@ -210029,6 +210059,10 @@
         ],
         "summary": "Aktuellen Eingabe- und Nachweisstand der Abrechnung lesen",
         "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme",
           "agrar",
           "harvest-controls"
         ]
@@ -210118,6 +210152,10 @@
         "summary": "Unveraenderliche Abrechnungsnachweise lesen",
         "tags": [
           "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme",
+          "agrar",
           "harvest-controls"
         ]
       }
@@ -210195,6 +210233,10 @@
         "summary": "Mandantengebundene fachliche Auswahl suchen",
         "tags": [
           "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme",
+          "agrar",
           "harvest-controls"
         ]
       }
@@ -210221,6 +210263,10 @@
         ],
         "summary": "Wirksame Bedienaktionen aus vorhandenen Bereichsrollen ableiten",
         "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme",
           "agrar",
           "harvest-controls"
         ]
@@ -210301,6 +210347,10 @@
         "summary": "Versionierte Vertragsregeln lesen",
         "tags": [
           "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme",
+          "agrar",
           "harvest-controls"
         ]
       },
@@ -210345,6 +210395,10 @@
         ],
         "summary": "Neue unveraenderliche Vertragsregelversion erstellen",
         "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme",
           "agrar",
           "harvest-controls"
         ]
@@ -210404,6 +210458,10 @@
         "summary": "Konkrete Vertragsregel im Vier-Augen-Prinzip genehmigen",
         "tags": [
           "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme",
+          "agrar",
           "harvest-controls"
         ]
       }
@@ -210462,6 +210520,10 @@
         "summary": "Vertragsregelgenehmigung widerrufen",
         "tags": [
           "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme",
+          "agrar",
           "harvest-controls"
         ]
       }
@@ -210501,7 +210563,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest acceptance löschen"
+        "summary": "Harvest acceptance löschen",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       },
       "get": {
         "description": "Ernte-Annahme abrufen inkl. Quality Protocol und Self-Billing Invoice.",
@@ -210544,7 +210612,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest acceptance abrufen"
+        "summary": "Harvest acceptance abrufen",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       },
       "put": {
         "description": "Ernte-Annahme aktualisieren (nur im Status 'draft' oder 'provisional').",
@@ -210597,7 +210671,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest acceptance aktualisieren"
+        "summary": "Harvest acceptance aktualisieren",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/calculate": {
@@ -210652,7 +210732,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest settlement endpoint berechnen"
+        "summary": "Harvest settlement endpoint berechnen",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/cancel": {
@@ -210709,7 +210795,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest acceptance stornieren"
+        "summary": "Harvest acceptance stornieren",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/derive-nuts2": {
@@ -210754,7 +210846,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Nuts2 from postal code endpoint derive"
+        "summary": "Nuts2 from postal code endpoint derive",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/frachtkosten": {
@@ -210799,7 +210897,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Frachtkosten abrufen"
+        "summary": "Frachtkosten abrufen",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       },
       "post": {
         "description": "Berechne Frachtkosten für Lieferung.",
@@ -210854,7 +210958,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Frachtkosten berechnen"
+        "summary": "Frachtkosten berechnen",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/qs-abschlag": {
@@ -210921,7 +211031,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "QS-CHARGE-001: QS-Abschläge berechnen"
+        "summary": "QS-CHARGE-001: QS-Abschläge berechnen",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/qs-protokoll-link": {
@@ -210975,7 +211091,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "QS-Protokoll mit Annahme verknüpfen"
+        "summary": "QS-Protokoll mit Annahme verknüpfen",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/qualitaetsprotokoll": {
@@ -210998,7 +211120,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/QualityProtocolOut"
+                  "$ref": "#/components/schemas/app__api__v1__schemas__agrar_schemas__QualityProtocolOut"
                 }
               }
             },
@@ -211020,7 +211142,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Qualitaetsprotokoll abrufen"
+        "summary": "Qualitaetsprotokoll abrufen",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       },
       "post": {
         "description": "Erstelle Qualitätsprotokoll für Ernte-Annahme.",
@@ -211075,7 +211203,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Qualitaetsprotokoll anlegen"
+        "summary": "Qualitaetsprotokoll anlegen",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/release": {
@@ -211181,7 +211315,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest acceptance freigeben"
+        "summary": "Harvest acceptance freigeben",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
       }
     },
     "/api/v1/agrar/inventory/low-stock": {

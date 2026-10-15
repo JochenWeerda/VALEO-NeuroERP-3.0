@@ -94,8 +94,9 @@ function ControlMask(): JSX.Element {
     finally { setBusy(false) }
   }
 
-  async function onAction(key: string): Promise<void> {
+  async function onAction(key: string, payload: Record<string, unknown>): Promise<void> {
     if (busy) return
+    if (key === 'inspect_rule') { selectRule(payload); return }
     if (key === 'refresh') {
       setBusy(true)
       try { await reload(); setFeedback('Aktueller Stand geladen. Auswahl und Nachweise vor Ausführung prüfen.') }
@@ -105,19 +106,27 @@ function ControlMask(): JSX.Element {
     }
     const action = schema.data?.actions?.find(item => item.key === key)
     if (!action || !allowed.includes(key)) { setFeedback('Für diese Aktion fehlt die Berechtigung.'); return }
-    if (action.inputFields?.length) setPending({ action, payload: { ...form.values } })
+    if (action.inputFields?.length) {
+      const review = key === 'approve_rule' || key === 'revoke_rule'
+        ? `Regel ${String(selected?.definition.rule_id ?? 'nicht ausgewählt')}, Fassung ${String(selected?.definition.rule_version ?? 'unbekannt')}. SHA256: ${selected?.content_hash ?? 'fehlt'}.`
+        : `Annahme ${acceptanceId || 'nicht ausgewählt'}. Netto: ${context?.calculation_result?.total_net_amount_eur ?? 'unbekannt'} EUR; Brutto: ${context?.calculation_result?.total_gross_amount_eur ?? 'unbekannt'} EUR. Berechnungs-SHA256: ${context?.calculation_hash ?? 'fehlt'}.`
+      setPending({ action: { ...action, inputFields: action.inputFields.map(field => field.key === 'confirm_execution'
+        ? { ...field, helpText: review } : field) }, payload: { ...form.values } })
+    }
     else await execute(action, { ...form.values })
   }
 
   if (schema.isLoading) return <p>Abrechnungssteuerung wird geladen…</p>
   if (schema.error || permissions.error || !runtime.plan) return <p role="alert">Abrechnungsmaske oder Berechtigungen konnten nicht geladen werden.</p>
-  return <section data-testid="harvest-controls" aria-label="Vertragsregeln und Freigaben">
+  return <section className="min-w-0" data-testid="harvest-controls" aria-label="Vertragsregeln und Freigaben">
     <p role="status" className="p-3 text-sm">{feedback}</p>
     <p className="px-3 text-sm">Genehmigungen benötigen eine andere menschliche Einkaufs- beziehungsweise Finanzleitung. Die Regelqualität und finanzielle Fassung werden getrennt geprüft.</p>
     <UniversalMaskRenderer plan={runtime.plan} formState={form} hideFormSubmit allowedPermissions={allowed}
-      lookupBindings={runtime.lookupBindings} tables={{ ...runtime.tableRows, positions: context?.calculation_result?.positions ?? [] }} tableTotals={runtime.tableTotals}
+      lookupBindings={runtime.lookupBindings} tables={{ ...runtime.tableRows,
+        rules: (runtime.tableRows.rules ?? []).map(row => ({ ...row, ...(row.definition as Record<string, unknown>) })),
+        positions: context?.calculation_result?.positions ?? [] }} tableTotals={runtime.tableTotals}
       tableQueryStates={runtime.tableQueryStates} onTableQueryChange={runtime.setTableQuery}
-      messages={runtime.messages} onRowSelect={selectRule} onAction={key => onAction(key)} />
+      messages={runtime.messages} onRowSelect={selectRule} onAction={onAction} />
     {pending && <ActionInputDialog action={pending.action} open onCancel={() => setPending(undefined)}
       onSubmit={values => { void execute(pending.action, { ...pending.payload, ...values }) }} />}
   </section>

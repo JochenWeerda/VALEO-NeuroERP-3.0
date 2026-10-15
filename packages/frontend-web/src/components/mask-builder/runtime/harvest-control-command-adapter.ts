@@ -44,9 +44,11 @@ export function prepareHarvestControl(action: ScreenActionDefinition, req: Actio
     const name = required(payload.rule_id, 'Regelbezeichnung')
     body.rule_id = name
     body.expected_version = definition.rule_id === name ? definition.rule_version : 0
-    const keys = ['customer_id', 'article_id', 'valid_from', 'valid_until', 'source_reference',
-      'measurement_method', 'measurement_method_version', 'impurities_free_pct']
-    body.terms = Object.fromEntries(keys.map(key => [key, required(payload[key], 'Vertragsangabe')]))
+    const labels = { customer_id: 'Kunde / Lieferant', article_id: 'Artikel', valid_from: 'Vertraglich gültig ab',
+      valid_until: 'Vertraglich gültig bis', source_reference: 'Vertragsgrundlage / Fundstelle',
+      measurement_method: 'Untersuchungsmethode', measurement_method_version: 'Methodenfassung',
+      impurities_free_pct: 'Vereinbarter abzugsfreier Besatz (%)' }
+    body.terms = Object.fromEntries(Object.entries(labels).map(([key, label]) => [key, required(payload[key], label)]))
     Object.assign(body.terms as object, { contract_id: payload.contract_id || null,
       quality_limit_pct: payload.quality_limit_pct === '' || payload.quality_limit_pct == null ? null : payload.quality_limit_pct })
   } else if (command === 'approve_rule' || command === 'revoke_rule') {
