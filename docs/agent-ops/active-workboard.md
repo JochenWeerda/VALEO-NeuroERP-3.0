@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-QUALITY-LIMIT-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Nutzerpraezisierung Windabgang/Besatz in der manuellen Referenzmaske sichtbar und testbar machen: Qualitaetsgrenze getrennt von echter Freigrenze, keine automatische Vertragsfreigabe oder doppelte Windbelastung. **Dateibesitz:** eigene studio_semantic.py/model, StudioPreview/API-Typen und Tests; neue harvest-deduction-contract-standard.md, QA/Handbuch/Workboard, eigene generierte Projektionen. **Abnahme:** 25.000 kg/1,5 Prozent Besatz/0,8 Prozent informativem Wind ergeben bei expliziter Freigrenze null nur 375 kg Mengenabzug; Qualitaetsgrenze veraendert den Abzug nicht. Qualitaetsueberschreitung sichtbar, Vertrags-/Produktivfreigabe immer false. Produktions-Kontraktbindung wird nicht erfunden.
+
 ## STUDIO-POSITION-LABEL-20261015 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** In der interaktiven Abnahme entdeckte widerspruechliche Positionsbeschriftung bei abweichender Besatzfreigrenze schliessen. **Dateibesitz:** modules/agrar/services/harvest_calculator.py ausschliesslich Description Pos.20 dynamisch aus expliziter Freigrenze; eigene Semantic-Tests/QA. Windabgang bleibt gemaess kanonischem Domain-Vertrag rein informativ und wird in der eigenen Vorschau deutlich so benannt. **Abnahme:** keine Formel- oder Buchungsaenderung, Positionsbezeichnung stimmt bei 0/2/3 Prozent mit ihrer Formel ueberein; bestehende Berechnungen unveraendert.
