@@ -17,3 +17,13 @@ Der geteilte Arbeitsbaum besitzt eine fremde aeltere Fassung von tests/testgrenz
 Beide SQL-Persistenzfaelle bestanden mit explizit ausgewaehltem valeo_probe, strikter Datenbankanforderung und ohne Skips. Die vorhandene Fixture prueft Speicherung ueber Prozessspeichergrenzen sowie Mandantenisolation und Vier Augen. Pruefstandrevision: portal_lohndienst_persistenz_20261014. Die Typpruefung tsconfig.typecheck.json endete mit Status 0.
 
 Der develop-Abgleich bleibt durch den privaten Benutzerkennungsbefund im vorhandenen CI-Startskript blockiert. Keine Ausnahme, kein Hook-Bypass und kein Force-Push. Der bestehende Handshake zum aktiven CI-GRUEN-Claim bleibt fuehrend.
+
+## Weitere direkte CI-Befunde
+
+Der aktuelle PostgreSQL-Lauf auf 7c7e1791e hatte einen Fehler und zwoelf Setupfehler an festen Datenbanknamen. Auch der eigenstaendige Idempotenz-Sperrtest verwendet jetzt denselben kanonischen Waechter; require_db bleibt vorgeschaltet. Der gemeinsame Nachlauf fuer Persistenz, Historie, Speicherschluessel und Statuswiederholung bestand mit zehn SQL-Faellen, ohne Skips (sieben bewusst nicht ausgewaehlte Unitfaelle). Die acht vorangegangenen gezielten SQL-Nachweise werden dadurch nicht als zusaetzliche unabhaengige Faelle doppelt gezaehlt.
+
+Auch die drei weiteren SQL-Snapshotfaelle derselben korrigierten Fixture bestanden separat: Konflikt nach Anzeige, Bearbeitung invalidiert Review und Schutz des ersten Schreibers. Damit sind alle dreizehn im aktuellen CI-Lauf betroffenen Faelle lokal positiv nachgeprueft; keine Skips in diesen Abnahmen. Eine erfolgreiche Wiederholung des GitHub-Jobs wird damit nicht vorweggenommen.
+
+Der Docs-Build scheiterte am Service-Inventar. Die neue Inventarprojektion stammt vollstaendig aus den committierten HEAD-Diensten und dem kanonischen Generator: 293 Module, einschliesslich der zwei neuen Studio-Dienste und des bereits committierten SEPA-Generators. Andere Inventare und die fremde aeltere Arbeitskopie wurden nicht ueberschrieben. Der Vergleich ignoriert ausschliesslich die vom bestehenden Drift-Checker ausgeschlossenen Datums-/Generatorzeilen.
+
+Quellen: [PostgreSQL-Lauf](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/38681909839), [Docs-Build](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/38681909847). Der E2E-Smoke desselben Stands war erfolgreich; dies ist keine Aussage ueber alle anderen CI-Gates.

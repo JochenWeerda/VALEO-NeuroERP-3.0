@@ -11,17 +11,23 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## STUDIO-CI-LOCK-GUARD-20261015 — reserviert, Codex
+## STUDIO-CI-LOCK-GUARD-20261015 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Den zweiten festen DB-Namen im eigenstaendigen Studio-Sperrtest durch dieselbe kanonische Pruefstand-Grenze ersetzen. **Dateibesitz:** tests/test_studio_save_idempotency.py nur Datenbankfreigabe; QA/Workboard. **Abnahme:** echte SQL-Wiederholungs-/Historienvertraege auf vorhandenem Pruefstand, keine neue Datenbank oder Lockerung von require_db.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** Den zweiten festen DB-Namen im eigenstaendigen Studio-Sperrtest durch dieselbe kanonische Pruefstand-Grenze ersetzen. **Dateibesitz:** tests/test_studio_save_idempotency.py nur Datenbankfreigabe; QA/Workboard. **Abnahme:** echte SQL-Wiederholungs-/Historienvertraege auf vorhandenem Pruefstand, keine neue Datenbank oder Lockerung von require_db.
 
-## STUDIO-SERVICE-INVENTORY-20261015 — reserviert, Codex
+**Ergebnis:** Zweiter fester Datenbankname durch kanonischen Waechter ersetzt; zehn SQL-Persistenz-/Historien-/Idempotenzfaelle bestanden, keine Skips. Weitere Snapshotfaelle separat dokumentiert. QA: docs/quality-assurance/studio-ci-rest-20261015.md und self-billing-posting-tests-20261015.md. Keine neue Testdatenbank/Container, kein Reset. develop bleibt am dokumentierten Identitaetsbefund im fremden CI-Commit blockiert.
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Aktuellen Docs-Build-Drift des Service-Inventars aus den committierten Quellen beheben. **Dateibesitz:** docs/entwickler/service-inventory.md nur HEAD-Projektion; QA/Workboard. **Abnahme:** kanonischer Generator liefert dasselbe Inventar; fremde Arbeitskopie und andere Inventare bleiben erhalten.
+## STUDIO-SERVICE-INVENTORY-20261015 — abgeschlossen, Codex
 
-## SELF-BILLING-POSTING-TESTS-20261015 — reserviert, Codex
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** Aktuellen Docs-Build-Drift des Service-Inventars aus den committierten Quellen beheben. **Dateibesitz:** docs/entwickler/service-inventory.md nur HEAD-Projektion; QA/Workboard. **Abnahme:** kanonischer Generator liefert dasselbe Inventar; fremde Arbeitskopie und andere Inventare bleiben erhalten.
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Sechs ueberholte Self-Billing-Vertraege an den kanonischen Eingangssteuer- und Transaktionsvertrag anpassen. **Dateibesitz:** tests/test_posting_services.py nur Self-Billing-Abschnitt; eigene QA/Workboard. **Abnahme:** Aufwand und Vorsteuer Soll, Verbindlichkeit Haben, explizite Steuerkonfiguration; Fehler muessen propagieren und duerfen keinen Teilcommit verdecken. Kein Produktivcode, keine neue Datenbank oder Container.
+**Ergebnis:** 293 Dienste aus committierten HEAD-Quellen mit dem kanonischen Generator erfasst; nur Inventarprojektion integriert, fremde Arbeitskopie erhalten. QA: docs/quality-assurance/studio-ci-rest-20261015.md und self-billing-posting-tests-20261015.md. Keine neue Testdatenbank/Container, kein Reset. develop bleibt am dokumentierten Identitaetsbefund im fremden CI-Commit blockiert.
+
+## SELF-BILLING-POSTING-TESTS-20261015 — abgeschlossen, Codex
+
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** Sechs ueberholte Self-Billing-Vertraege an den kanonischen Eingangssteuer- und Transaktionsvertrag anpassen. **Dateibesitz:** tests/test_posting_services.py nur Self-Billing-Abschnitt; eigene QA/Workboard. **Abnahme:** Aufwand und Vorsteuer Soll, Verbindlichkeit Haben, explizite Steuerkonfiguration; Fehler muessen propagieren und duerfen keinen Teilcommit verdecken. Kein Produktivcode, keine neue Datenbank oder Container.
+
+**Ergebnis:** 36 Buchungs-/Self-Billing-Unitfaelle bestanden; explizite Steuerfixture, korrekte Soll-/Habenrichtung und Fehlerweitergabe ohne Zwischencommit; kein Fachcode geaendert. QA: docs/quality-assurance/studio-ci-rest-20261015.md und self-billing-posting-tests-20261015.md. Keine neue Testdatenbank/Container, kein Reset. develop bleibt am dokumentierten Identitaetsbefund im fremden CI-Commit blockiert.
 
 ## STUDIO-CI-REST-20261015 — abgeschlossen, Codex
 

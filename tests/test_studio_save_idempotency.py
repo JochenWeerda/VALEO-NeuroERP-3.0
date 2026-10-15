@@ -78,7 +78,8 @@ def test_sql_save_unknown_ack_is_recoverable(studio_db, monkeypatch, mode):
 def test_sql_key_lock_serializes_independent_connections(require_db):
     from sqlalchemy import text
     from app.core.database import engine
-    assert engine.url.database == 'valeo_probe' or 'test' in engine.url.database.lower()
+    from testgrenze import pruefstand_erlaubt
+    assert pruefstand_erlaubt(engine.url)
     key = str(uuid4())
     with engine.connect() as first, engine.connect() as second:
         first.execute(text('SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))'), {'key': key})
