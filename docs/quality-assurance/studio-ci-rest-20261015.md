@@ -27,3 +27,9 @@ Auch die drei weiteren SQL-Snapshotfaelle derselben korrigierten Fixture bestand
 Der Docs-Build scheiterte am Service-Inventar. Die neue Inventarprojektion stammt vollstaendig aus den committierten HEAD-Diensten und dem kanonischen Generator: 293 Module, einschliesslich der zwei neuen Studio-Dienste und des bereits committierten SEPA-Generators. Andere Inventare und die fremde aeltere Arbeitskopie wurden nicht ueberschrieben. Der Vergleich ignoriert ausschliesslich die vom bestehenden Drift-Checker ausgeschlossenen Datums-/Generatorzeilen.
 
 Quellen: [PostgreSQL-Lauf](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/38681909839), [Docs-Build](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/38681909847). Der E2E-Smoke desselben Stands war erfolgreich; dies ist keine Aussage ueber alle anderen CI-Gates.
+
+## GitHub-Bestaetigung und exakte Ratsche
+
+Der Meilenstein f9ad9934e bestaetigt die Korrekturen auch auf GitHub: [Docs-Build erfolgreich](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/38683206741) einschliesslich Inventar-/Handbuchabgleich und [PostgreSQL-Prueflauf erfolgreich](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/runs/38683206799).
+
+Die unabhaengige Integritaetspruefung meldete anschliessend eine nicht nachgezogene Senkung: process_kernel_api.py ist nach der eigenen Vertragsbereinigung 6170 statt 6184 Zeilen lang. Nur dieser Baselineeintrag wird auf die echte committierte Laenge gesenkt. Alle anderen Eintraege, die 1000-Zeilen-Grenze und das Verbot von Erhoehungen bleiben bestehen. Die Ratschenfunktion prueft die Projektion gegen alle committierten Endpunkte, ohne fremde Arbeitsdateien zu ersetzen. Der GitHub-Nachlauf dieser letzten Baselinesenkung steht bei Auslieferung noch aus; die gesamte Quality-Pipeline wird nicht als gruen ausgegeben.

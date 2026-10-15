@@ -11,9 +11,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## STUDIO-GODFILE-LOWER-20261015 — reserviert, Codex
+## STUDIO-GODFILE-LOWER-20261015 — abgeschlossen, Codex
 
-**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Exakte Godfile-Ratsche nach der eigenen Verkuerzung von process_kernel_api.py nachziehen. **Dateibesitz:** config/godfile_baseline.json nur process_kernel_api.py-Eintrag; QA/Workboard. **Abnahme:** ausschliesslich Senkung auf committierte echte Zeilenzahl; keine Schwellen-/Erhoehungs-Ausnahme, fremde Baselinewerte bleiben unveraendert.
+**Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** Exakte Godfile-Ratsche nach der eigenen Verkuerzung von process_kernel_api.py nachziehen. **Dateibesitz:** config/godfile_baseline.json nur process_kernel_api.py-Eintrag; QA/Workboard. **Abnahme:** ausschliesslich Senkung auf committierte echte Zeilenzahl; keine Schwellen-/Erhoehungs-Ausnahme, fremde Baselinewerte bleiben unveraendert.
+
+**Ergebnis:** Nur eigener Endpunkt von 6184 auf 6170 gesenkt. Exakte Ratsche gegen alle committierten Endpunkte gruen; keine anderen Baselinewerte veraendert. Docs-Build und PostgreSQL-Job des vorherigen Meilensteins auf GitHub erfolgreich. QA: studio-ci-rest-20261015.md.
 
 ## STUDIO-CI-LOCK-GUARD-20261015 — abgeschlossen, Codex
 
