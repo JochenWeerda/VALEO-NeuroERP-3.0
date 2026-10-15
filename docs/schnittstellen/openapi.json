@@ -142896,6 +142896,33 @@
             "title": "Id",
             "type": "string"
           },
+          "impurities_free_pct": {
+            "readOnly": true,
+            "title": "Impurities Free Pct",
+            "type": "string"
+          },
+          "measurement_method": {
+            "readOnly": true,
+            "title": "Measurement Method",
+            "type": "string"
+          },
+          "measurement_method_version": {
+            "readOnly": true,
+            "title": "Measurement Method Version",
+            "type": "string"
+          },
+          "quality_limit_pct": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "readOnly": true,
+            "title": "Quality Limit Pct"
+          },
           "recorded_at": {
             "anyOf": [
               {
@@ -142908,8 +142935,35 @@
             ],
             "title": "Recorded At"
           },
+          "rule_id": {
+            "readOnly": true,
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "rule_version": {
+            "readOnly": true,
+            "title": "Rule Version",
+            "type": "integer"
+          },
+          "source_reference": {
+            "readOnly": true,
+            "title": "Source Reference",
+            "type": "string"
+          },
           "status": {
             "title": "Status",
+            "type": "string"
+          },
+          "valid_from": {
+            "format": "date",
+            "readOnly": true,
+            "title": "Valid From",
+            "type": "string"
+          },
+          "valid_until": {
+            "format": "date",
+            "readOnly": true,
+            "title": "Valid Until",
             "type": "string"
           }
         },
@@ -142918,7 +142972,16 @@
           "definition",
           "content_hash",
           "created_by",
-          "status"
+          "status",
+          "rule_id",
+          "rule_version",
+          "impurities_free_pct",
+          "quality_limit_pct",
+          "measurement_method",
+          "measurement_method_version",
+          "valid_from",
+          "valid_until",
+          "source_reference"
         ],
         "title": "RuleVersionOut",
         "type": "object"

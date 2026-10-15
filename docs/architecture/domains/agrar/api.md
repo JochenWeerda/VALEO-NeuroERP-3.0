@@ -196,3 +196,8 @@ Behauptung. Entscheidung: [ADR-055](../../../adr/adr-055-feeding-measure-lifecyc
 ## Ernte-Abrechnungsregel 2026-10-15
 
 Calculate und finale Gutschrift verwenden den persistenten HarvestRuleStore. Versionierte Regelanlage, getrennte menschliche Genehmigung, Messbestaetigung, Bindung und finanzielle Gegenpruefung sind unter `/api/v1/agrar/harvest-acceptance/settlement-controls` registriert. Calculate verlangt einen idempotenten, kontextgebundenen Command; finale finanzielle Freigabe einen idempotenten Command mit exaktem Berechnungshash. Der Server prueft aktuelle Quellen und Genehmigungen vor Geschaeftswirkung. Nichtfinanzielle Annahme bleibt getrennt. Native Kontrollmaske und REST verwenden dieselben Commands und vorhandenen Bereichsrollen. Die isolierte grain.v1-Probe prueft denselben persistenten Domain-Weg. [Standard](../../harvest-deduction-contract-standard.md), [ADR](../../../adr/adr-harvest-deduction-resolver.md), [aktueller Abnahmestand](../../../quality-assurance/harvest-rule-store-20261015.md).
+
+
+## Ernte-Regelversionen
+
+GET `/api/v1/agrar/harvest-acceptance/settlement-controls/rules` liefert die unveraenderliche `definition` und daraus abgeleitete schreibgeschuetzte Anzeigefelder (Regelbezeichnung/-fassung, Besatz-/Qualitaetsgrenze, Methode/-fassung, Geltung und Vertragsquelle). Diese Ausgabefelder sind keine schreibbaren Regelparameter. [Vertragsnachweis](../../../quality-assurance/harvest-read-projection-20261015.md).

@@ -1,11 +1,12 @@
 """Transport adapter for versioned harvest domain commands, never direct CRUD."""
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Literal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
-from pydantic import BaseModel
+from decimal import Decimal
+from pydantic import BaseModel, computed_field
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -45,6 +46,52 @@ class RuleVersionOut(BaseModel):
     status: str
     actor: str | None = None
     recorded_at: datetime | None = None
+
+    # Display projection of the sole immutable definition; never stored or accepted as rule input.
+    @computed_field
+    @property
+    def rule_id(self) -> str:
+        return self.definition.rule_id
+
+    @computed_field
+    @property
+    def rule_version(self) -> int:
+        return self.definition.rule_version
+
+    @computed_field
+    @property
+    def impurities_free_pct(self) -> Decimal:
+        return self.definition.impurities_free_pct
+
+    @computed_field
+    @property
+    def quality_limit_pct(self) -> Decimal | None:
+        return self.definition.quality_limit_pct
+
+    @computed_field
+    @property
+    def measurement_method(self) -> str:
+        return self.definition.measurement_method
+
+    @computed_field
+    @property
+    def measurement_method_version(self) -> str:
+        return self.definition.measurement_method_version
+
+    @computed_field
+    @property
+    def valid_from(self) -> date:
+        return self.definition.valid_from
+
+    @computed_field
+    @property
+    def valid_until(self) -> date:
+        return self.definition.valid_until
+
+    @computed_field
+    @property
+    def source_reference(self) -> str:
+        return self.definition.source_reference
 
 
 class RuleListOut(BaseModel):
