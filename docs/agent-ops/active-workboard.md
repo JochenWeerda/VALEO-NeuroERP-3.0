@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-GODFILE-LOWER-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Exakte Godfile-Ratsche nach der eigenen Verkuerzung von process_kernel_api.py nachziehen. **Dateibesitz:** config/godfile_baseline.json nur process_kernel_api.py-Eintrag; QA/Workboard. **Abnahme:** ausschliesslich Senkung auf committierte echte Zeilenzahl; keine Schwellen-/Erhoehungs-Ausnahme, fremde Baselinewerte bleiben unveraendert.
+
 ## STUDIO-CI-LOCK-GUARD-20261015 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** Den zweiten festen DB-Namen im eigenstaendigen Studio-Sperrtest durch dieselbe kanonische Pruefstand-Grenze ersetzen. **Dateibesitz:** tests/test_studio_save_idempotency.py nur Datenbankfreigabe; QA/Workboard. **Abnahme:** echte SQL-Wiederholungs-/Historienvertraege auf vorhandenem Pruefstand, keine neue Datenbank oder Lockerung von require_db.
