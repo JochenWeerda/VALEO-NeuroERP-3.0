@@ -58,3 +58,10 @@ Die automatische Freigabepruefung hat die letzte Ausfuehrung von Gutschrift, Lag
 Die temporaere FINANCE_ADMIN-Rolle ist inzwischen entzogen, alle Sitzungen sind beendet und die synthetische Prueferkennung ist gesperrt. Die bestehende Bearbeiterrolle blieb unveraendert. Lokaler Bereinigungsnachweis: `artifacts/harvest-finance-reviewer-cleanup-proof.json`. Es wurden keine zusaetzlichen Kontingentrechte vergeben. Screenshots: `artifacts/harvest-browser-20261015/calculation-reviewed.png`, `financial-approval-confirmation.png` im selben Verzeichnis. Der Benutzer muss weder technische Tabellen- noch Spaltennamen eingeben; Auswahl erfolgt ueber fachliche Suchtreffer.
 
 Der vollstaendige lokale Anwendungsabgleich bestaetigt inzwischen gleiche Erntepfade und identische Komponentenmodelle der OpenAPI-Projektion. Gleichnamige Modelle werden mit der Namensaufloesung der vollstaendigen FastAPI-Anwendung abgeglichen. Elf alte Abweichungen fremder Arbeitskopien anderer Bereiche bleiben ausgeschlossen; kein blindes Ueberschreiben der gemeinsamen OpenAPI-Arbeitskopie.
+
+
+## Aktualisierter Nachlauf und Freigaben
+
+CI auf bba516114: OpenAPI Drift Check (38746165017), Universal Mask Platform CI (38746165083), PostgreSQL (38746165142), Smoke, kritische E2E, Erntepeak und Docs Build bestanden. Docs Governance (38746165015) beanstandet den fehlenden gemappten Workboard-Nachtrag zum app/-Nachlauf; dieser Dokumentationsmeilenstein zieht ihn nach. Die anderen roten Pipelines bleiben gesondert zu untersuchen; eine insgesamt gruene CI wird nicht behauptet.
+
+Der Nutzer hat inzwischen sowohl die genaue lokale synthetische Geschaeftsausfuehrung (eine Gutschrift 5.796,73 EUR brutto, Lagerbewegung, ausgeglichener Buchungsentwurf) als auch die zwei ausschliesslich zur begrenzten 10.000-Token-Vergabe benoetigten Rechte ausdruecklich genehmigt. Die vorherigen offenen Nutzerfragen sind damit beantwortet. Die alten Regel- und Finanzgenehmigungen endeten jedoch am 15.10.2026 um 17:00 Uhr Ortszeit. Vor der abschliessenden Browserausfuehrung sind regulaere neue Genehmigungen erforderlich; Fristen werden nicht umgangen. Die Prueferkennung bleibt bis dahin gesperrt.
