@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-POSITION-LABEL-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** In der interaktiven Abnahme entdeckte widerspruechliche Positionsbeschriftung bei abweichender Besatzfreigrenze schliessen. **Dateibesitz:** modules/agrar/services/harvest_calculator.py ausschliesslich Description Pos.20 dynamisch aus expliziter Freigrenze; eigene Semantic-Tests/QA. Windabgang bleibt gemaess kanonischem Domain-Vertrag rein informativ und wird in der eigenen Vorschau deutlich so benannt. **Abnahme:** keine Formel- oder Buchungsaenderung, Positionsbezeichnung stimmt bei 0/2/3 Prozent mit ihrer Formel ueberein; bestehende Berechnungen unveraendert.
+
 ## STUDIO-ARCH-MAPPING-20261015 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Complete-Generator meldet drei bereits committierte Dienste ohne exakte Zuordnung. **Dateibesitz:** config/architecture-domain-prefixes.yaml nur studio_history_view und studio_process_simulation -> platform sowie sepa_xml_generator -> finance; eigene QA und generierter Index. **Abnahme:** complete mapping aus HEAD-Inventaren plus eigenen neuen Diensten; keine fremden Dienste aendern oder generischen Prefixe aufweichen. Keine neue Domain/Container.
