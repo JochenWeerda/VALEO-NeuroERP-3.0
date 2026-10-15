@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-SERVICE-INVENTORY-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Aktuellen Docs-Build-Drift des Service-Inventars aus den committierten Quellen beheben. **Dateibesitz:** docs/entwickler/service-inventory.md nur HEAD-Projektion; QA/Workboard. **Abnahme:** kanonischer Generator liefert dasselbe Inventar; fremde Arbeitskopie und andere Inventare bleiben erhalten.
+
 ## SELF-BILLING-POSTING-TESTS-20261015 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Sechs ueberholte Self-Billing-Vertraege an den kanonischen Eingangssteuer- und Transaktionsvertrag anpassen. **Dateibesitz:** tests/test_posting_services.py nur Self-Billing-Abschnitt; eigene QA/Workboard. **Abnahme:** Aufwand und Vorsteuer Soll, Verbindlichkeit Haben, explizite Steuerkonfiguration; Fehler muessen propagieren und duerfen keinen Teilcommit verdecken. Kein Produktivcode, keine neue Datenbank oder Container.
