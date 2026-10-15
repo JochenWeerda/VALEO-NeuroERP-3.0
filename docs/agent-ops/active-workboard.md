@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-FREIGABE-HANDBUCH-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Die unter STUDIO-CLOSURE genehmigte und durchgefuehrte Vier-Augen-Browserabnahme samt Rechteentzug dauerhaft als Handbuch dokumentieren. **Dateibesitz:** neues docs/benutzerhandbuch/studio-freigabe.md und img/studio-freigabe-20261015; QA studio-closure-20261015, studio-release-standard, eigener Statusabschnitt und eigene Workboard-Claims. **Abnahme:** echte Screenshots, getrennte Identitaeten, exakte Revision und dreizehn Checks, gesperrte Prueferkennung ohne Adminrolle/Sitzung; keine Zugangsdaten oder persoenlichen Konten, keine neue Testdatenbank.
+
 ## STUDIO-PREVIEW-CACHE-20261015 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** In der Browserabnahme gefundenen veralteten Maskentitel nach Umbenennung zentral im RenderPlan-Cache korrigieren. **Dateibesitz:** schema-compiler.ts nur schemaVolatility; schema-compiler.test.ts eigener Titelvertrag; QA/Workboard. **Abnahme:** gleicher Screen mit neuem Titel liefert neuen Plan; bestehende Compiler- und Studio-Vertraege bleiben gruen, keine einzelne Maske umgestalten.
