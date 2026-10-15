@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HARVEST-FINANCIAL-RULE-GATE-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Keine finanzielle Freigabe alter oder manuell gelieferter Summen ohne serverseitige Vertragsregelquelle. **Dateibesitz:** harvest_acceptance_service.py nur gemeinsame Resolverpruefung und finanzielle Freigabe vor Stock-/Buchungsmutation; eigene Harvest-Regeltests, QA/Workboard/Standard. **Abnahme:** fehlender oder fremder Regelkontext verhindert neue Gutschrift vor jeder Geschaeftswirkung; nichtfinanzielle Annahme bleibt getrennt, SQL-Simulation nutzt explizite synthetische Regeln. Kein fingierter persistenter Freigabenachweis, keine neue DB/Container/Migration.
+
 ## HARVEST-RULE-RESOLVER-20261015 — reserviert, Codex
 
 **Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Expliziter typisierter Vertragsregel-Snapshot und interne Resolvergrenze fuer den Domain-Service. **Dateibesitz:** neuer modules/agrar/contracts/harvest_deductions_v1.py; HarvestAcceptanceService nur Resolver-Injektion/Bereichsvalidierung; studio_process_simulation.py nur deklarierte synthetische Regelversion und Artefakthash; eigene fokussierte Tests/QA/Workboard. **Abnahme:** fremder Mandant/Vertrag/Partner/Artikel/Gueltigkeit sperrt vor Mutation; feste versionierte Simulationsfixture benutzt denselben Domain-Weg, keine Test-Sonderfreigabe im Produktionsrouter; echte SQL-Kette bleibt pruefbar. Persistente produktive Regelverwaltung bleibt separat offen. Keine neue Datenbank/Migration/Container.
