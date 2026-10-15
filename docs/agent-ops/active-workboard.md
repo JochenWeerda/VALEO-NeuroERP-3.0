@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## STUDIO-CI-REST-20261015 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-15. **Ziel:** Die im CI-Handschlag gemeldete unbekannte Studio-Listenantwort typisieren und die SQL-Fixture an die kanonische Pruefstand-Grenze binden. **Dateibesitz:** src/lib/api/studio.ts nur fetchStudioDrafts; tests/test_meridian_screen_studio_persistence.py nur Pruefstand-Auswahl; QA/Workboard. **Abnahme:** gezielte Studio-Vertraege und vorhandene SQL-Fixture, kein neuer DB/Container, keine Lockerung der Schutzgrenze. CI-Startskript und private Push-Grenze bleiben im fremden Claim unangetastet.
+
 ## STUDIO-FREIGABE-HANDBUCH-20261015 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** Die unter STUDIO-CLOSURE genehmigte und durchgefuehrte Vier-Augen-Browserabnahme samt Rechteentzug dauerhaft als Handbuch dokumentieren. **Dateibesitz:** neues docs/benutzerhandbuch/studio-freigabe.md und img/studio-freigabe-20261015; QA studio-closure-20261015, studio-release-standard, eigener Statusabschnitt und eigene Workboard-Claims. **Abnahme:** echte Screenshots, getrennte Identitaeten, exakte Revision und dreizehn Checks, gesperrte Prueferkennung ohne Adminrolle/Sitzung; keine Zugangsdaten oder persoenlichen Konten, keine neue Testdatenbank.
