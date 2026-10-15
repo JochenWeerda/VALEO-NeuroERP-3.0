@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 97,
-    "screens_with_actions": 49,
+    "actions": 106,
+    "screens_with_actions": 50,
     "domains": 14
   },
   "actions": [
@@ -227,6 +227,186 @@
         "navigationRoute": null,
         "command": null,
         "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/harvest-controls:approve_calculation",
+      "label": "Berechnungsfassung genehmigen",
+      "description": "Berechnungsfassung genehmigen (agrar/harvest-controls)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/harvest-controls",
+      "intent_phrases": [
+        "Berechnungsfassung genehmigen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/harvest-controls",
+        "actionKey": "approve_calculation",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/approve-calculation",
+        "navigationRoute": null,
+        "command": "harvest.control.approve_calculation",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:agrar/harvest-controls:approve_rule",
+      "label": "Regel genehmigen",
+      "description": "Regel genehmigen (agrar/harvest-controls)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/harvest-controls",
+      "intent_phrases": [
+        "Regel genehmigen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/harvest-controls",
+        "actionKey": "approve_rule",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/settlement-controls/rules/{version_id}/approve",
+        "navigationRoute": null,
+        "command": "harvest.control.approve_rule",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:agrar/harvest-controls:attest",
+      "label": "Messnachweis bestätigen",
+      "description": "Messnachweis bestätigen (agrar/harvest-controls)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/harvest-controls",
+      "intent_phrases": [
+        "Messnachweis bestätigen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/harvest-controls",
+        "actionKey": "attest",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/attest-measurement",
+        "navigationRoute": null,
+        "command": "harvest.control.attest",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:agrar/harvest-controls:bind_rule",
+      "label": "Regel an Annahme binden",
+      "description": "Regel an Annahme binden (agrar/harvest-controls)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/harvest-controls",
+      "intent_phrases": [
+        "Regel an Annahme binden"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/harvest-controls",
+        "actionKey": "bind_rule",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/bind-rule",
+        "navigationRoute": null,
+        "command": "harvest.control.bind_rule",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:agrar/harvest-controls:calculate",
+      "label": "Verbindlich berechnen",
+      "description": "Verbindlich berechnen (agrar/harvest-controls)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/harvest-controls",
+      "intent_phrases": [
+        "Verbindlich berechnen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/harvest-controls",
+        "actionKey": "calculate",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/{acceptance_id}/calculate",
+        "navigationRoute": null,
+        "command": "harvest.control.calculate",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:agrar/harvest-controls:create_rule",
+      "label": "Regelversion erstellen",
+      "description": "Regelversion erstellen (agrar/harvest-controls)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/harvest-controls",
+      "intent_phrases": [
+        "Regelversion erstellen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/harvest-controls",
+        "actionKey": "create_rule",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/settlement-controls/rules",
+        "navigationRoute": null,
+        "command": "harvest.control.create_rule",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:agrar/harvest-controls:refresh",
+      "label": "Annahme und Nachweise laden",
+      "description": "Annahme und Nachweise laden (agrar/harvest-controls)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/harvest-controls",
+      "intent_phrases": [
+        "Annahme und Nachweise laden"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/harvest-controls",
+        "actionKey": "refresh",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "harvest.control.refresh",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/harvest-controls:release",
+      "label": "Gutschrift und Wareneingang erzeugen",
+      "description": "Gutschrift und Wareneingang erzeugen (agrar/harvest-controls)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/harvest-controls",
+      "intent_phrases": [
+        "Gutschrift und Wareneingang erzeugen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/harvest-controls",
+        "actionKey": "release",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/{acceptance_id}/release?release_status=final&create_stock_movement=true&create_credit_note=true",
+        "navigationRoute": null,
+        "command": "harvest.control.release",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:agrar/harvest-controls:revoke_rule",
+      "label": "Regelgenehmigung widerrufen",
+      "description": "Regelgenehmigung widerrufen (agrar/harvest-controls)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/harvest-controls",
+      "intent_phrases": [
+        "Regelgenehmigung widerrufen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/harvest-controls",
+        "actionKey": "revoke_rule",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/settlement-controls/rules/{version_id}/revoke",
+        "navigationRoute": null,
+        "command": "harvest.control.revoke_rule",
+        "method": "POST"
       }
     },
     {

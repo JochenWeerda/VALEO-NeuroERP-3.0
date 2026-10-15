@@ -18344,9 +18344,11 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **ACTION-NUMERIC-INPUT Abnahme:** 18 Frontendtests und TypeScript bestanden. Reale Vorschau, Bestaetigung und Auditbegruendung fuer 10000 Token Mandantenbudget plus daraus genau ein Nutzerkontingent (keine zusaetzliche Kapazitaet, null Unterkontingente) bestanden. Serververtraege unveraendert. QA: docs/quality-assurance/action-numeric-input-20261015.md.
 
-## HARVEST-CATALOG-FOLLOWUP-20261015 — reserviert, Codex
+## HARVEST-CATALOG-FOLLOWUP-20261015 — abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Fehlenden generierten Aktionskatalog der neun eigenen Erntekontrollaktionen nachziehen und aktuellen CI-Nachlauf nachweisen. **Dateibesitz:** services/ki-usability/app/data/screen_mask_actions.json ausschliesslich aus kanonischen HEAD-Buildern generiert; eigene QA/Workboard. **Abnahme:** Generator --check und bestehende Katalogtests gruen; kein Fremdquellenstand eingemischt. Fremder CI-GRUEN-Claim behaelt seine Tests/Gatekonfigurationen, bereits uncommittete Testkorrekturen werden nicht vereinnahmt. Keine DB/Container.
+
+**Ergebnis:** Kanonischer Generator nachgezogen: 97 auf 106 Aktionen/50 Masken; genau neun Ernteaktionen hinzugefuegt, keine anderen geaendert/entfernt. --check gruen; bestehende vier Katalogvertraege abgenommen. QA harvest-catalog-followup-20261015.md. Fremde Tests/Gates unveraendert.
 
 ## NODE-HIGH-REVIEW-20261015 — abgeschlossen, Codex
 
