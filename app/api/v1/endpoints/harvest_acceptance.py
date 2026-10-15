@@ -18,6 +18,11 @@ from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFa
 from app.core.nuts2_utils import derive_nuts2_from_postal_code, validate_nuts2_code
 from app.core.tenant import get_tenant_id
 from app.auth.finance_roles import beleg_read, beleg_write
+from app.auth.deps import get_current_user
+from app.api.v1.endpoints.harvest_rules import (
+    router as controls_router, ControlledSettlementOut, SafeHarvestRoute, controlled_service, execute, verified_principal,
+)
+from modules.agrar.contracts.harvest_control_v1 import ContextCommandIn, FinancialReleaseIn
 from app.services.harvest_acceptance_service import (
     HarvestAcceptanceService,
     _quality_protocol_to_qualitaetsprotokoll,
@@ -40,7 +45,8 @@ from app.api.v1.schemas.agrar_schemas import (
 )
 
 
-router = APIRouter(dependencies=[Depends(beleg_read)])
+router = APIRouter(dependencies=[Depends(beleg_read)], route_class=SafeHarvestRoute)
+router.include_router(controls_router, prefix="/settlement-controls")
 
 ReleaseStatus = Literal["draft", "provisional", "final", "credit_note_created", "paid", "disputed", "cancelled"]
 PricingMode = Literal["fixed_contract", "spot_daily", "exchange_fix_later"]
@@ -416,15 +422,19 @@ async def delete_harvest_acceptance(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.post("/{acceptance_id}/calculate", dependencies=[Depends(beleg_write)], response_model=HarvestSettlementOut, summary="Harvest settlement endpoint berechnen")
+@router.post("/{acceptance_id}/calculate", dependencies=[Depends(beleg_write)], response_model=ControlledSettlementOut, summary="Harvest settlement endpoint berechnen")
 async def calculate_harvest_settlement_endpoint(
     acceptance_id: str,
+    payload: ContextCommandIn,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),
 ):
     """Berechnet alle Abrechnungs-Positionen für Ernte-Annahme."""
     try:
-        return _svc(db, tenant_id).calculate_settlement(acceptance_id)
+        service, _ = controlled_service(db, tenant_id, verified_principal(request, user))
+        return execute(lambda: service.calculate_settlement(acceptance_id, command=payload))
     except EntityNotFoundError as exc:
         raise HTTPException(status_code=404, detail=exc.detail)
     except ValidationFailedError as exc:
@@ -455,10 +465,18 @@ async def release_harvest_acceptance(
     request: Request = None,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    payload: FinancialReleaseIn | None = None,
+    user: dict = Depends(get_current_user),
 ):
     """Ernte-Annahme freigeben (vorläufig oder endgültig)."""
     user_id = _get_user_id_from_request(request)
     try:
+        if create_credit_note and release_status == "final":
+            if payload is None:
+                raise HTTPException(422, "Idempotenter Auftrag mit konkreter Berechnungsfassung erforderlich.")
+            service, _ = controlled_service(db, tenant_id, verified_principal(request, user))
+            return execute(lambda: service.release_acceptance(acceptance_id, release_status,
+                create_stock_movement, create_credit_note, user_id, command=payload))
         return _svc(db, tenant_id).release_acceptance(
             acceptance_id, release_status, create_stock_movement, create_credit_note, user_id
         )

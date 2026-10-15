@@ -187,6 +187,12 @@ export interface ScreenActionDefinition {
     preview: boolean
     defaults?: Record<string, unknown>
     stateAction?: string
+  } | {
+    adapter: 'harvest.control.v1'
+    command: 'create_rule' | 'approve_rule' | 'revoke_rule' | 'bind_rule' | 'attest' | 'calculate' | 'approve_calculation' | 'release'
+    preview: false
+    defaults?: Record<string, unknown>
+    stateAction?: string
   }
   /** Navigates instead of mutating. Placeholders: {entity_id}, {business_partner_id}. */
   navigationRoute?: string

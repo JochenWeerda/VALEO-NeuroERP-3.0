@@ -16397,6 +16397,27 @@
         "title": "AuditEvidenceOut",
         "type": "object"
       },
+      "AuditListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AuditRowOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "AuditListOut",
+        "type": "object"
+      },
       "AuditLogCreate": {
         "description": "Create audit log entry.",
         "properties": {
@@ -16558,6 +16579,62 @@
         "description": "Response schema for audit endpoints.",
         "properties": {},
         "title": "AuditOut",
+        "type": "object"
+      },
+      "AuditRowOut": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "calculation_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculation Hash"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "issuer": {
+            "title": "Issuer",
+            "type": "string"
+          },
+          "recorded_at": {
+            "format": "date-time",
+            "title": "Recorded At",
+            "type": "string"
+          },
+          "rule_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Version Id"
+          }
+        },
+        "required": [
+          "id",
+          "action",
+          "actor",
+          "issuer",
+          "recorded_at"
+        ],
+        "title": "AuditRowOut",
         "type": "object"
       },
       "AufbewahrungIn": {
@@ -28448,6 +28525,45 @@
         "title": "ByOwnerOut",
         "type": "object"
       },
+      "CalculationApproveIn": {
+        "additionalProperties": false,
+        "properties": {
+          "acknowledge_quality_exception": {
+            "default": false,
+            "title": "Acknowledge Quality Exception",
+            "type": "boolean"
+          },
+          "expected_calculation_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Expected Calculation Hash",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "expected_calculation_hash",
+          "expires_at",
+          "reason"
+        ],
+        "title": "CalculationApproveIn",
+        "type": "object"
+      },
       "CalendarEventIn": {
         "properties": {
           "conflictLevel": {
@@ -32861,6 +32977,40 @@
         "title": "CheckpointRequest",
         "type": "object"
       },
+      "ChoiceOut": {
+        "properties": {
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "label"
+        ],
+        "title": "ChoiceOut",
+        "type": "object"
+      },
+      "ChoicesOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ChoiceOut"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ChoicesOut",
+        "type": "object"
+      },
       "CloseIn": {
         "properties": {
           "bediener": {
@@ -36419,6 +36569,27 @@
         "title": "ContactsOut",
         "type": "object"
       },
+      "ContextCommandIn": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_context_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Expected Context Hash",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "expected_context_hash"
+        ],
+        "title": "ContextCommandIn",
+        "type": "object"
+      },
       "ContextRequest": {
         "properties": {
           "action_type": {
@@ -37089,6 +37260,175 @@
         "title": "ControlCenterPlanItemRequest",
         "type": "object"
       },
+      "ControlEventOut": {
+        "properties": {
+          "acknowledge_quality_exception": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acknowledge Quality Exception"
+          },
+          "calculation_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculation Hash"
+          },
+          "content_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Hash"
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "measurement_method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Measurement Method"
+          },
+          "measurement_method_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Measurement Method Version"
+          },
+          "protocol_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Protocol Hash"
+          },
+          "protocol_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Protocol Id"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "rule_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Hash"
+          },
+          "rule_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Version Id"
+          },
+          "snapshot": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot"
+          },
+          "source_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Reference"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ControlEventOut",
+        "type": "object"
+      },
       "ControlExceptionOut": {
         "description": "Zeile aus ``domain_ops.document_control_exceptions``.",
         "properties": {
@@ -37507,6 +37847,75 @@
           }
         },
         "title": "ControlWorklistOut",
+        "type": "object"
+      },
+      "ControlledSettlementOut": {
+        "properties": {
+          "acceptance_id": {
+            "title": "Acceptance Id",
+            "type": "string"
+          },
+          "calculation_hash": {
+            "title": "Calculation Hash",
+            "type": "string"
+          },
+          "control_event_id": {
+            "title": "Control Event Id",
+            "type": "string"
+          },
+          "positions": {
+            "items": {
+              "$ref": "#/components/schemas/HarvestSettlementPositionOut"
+            },
+            "title": "Positions",
+            "type": "array"
+          },
+          "price_source": {
+            "title": "Price Source",
+            "type": "string"
+          },
+          "total_gross_amount_eur": {
+            "title": "Total Gross Amount Eur",
+            "type": "number"
+          },
+          "total_net_amount_eur": {
+            "title": "Total Net Amount Eur",
+            "type": "number"
+          },
+          "total_vat_amount_eur": {
+            "title": "Total Vat Amount Eur",
+            "type": "number"
+          },
+          "vat_rate_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vat Rate Percent"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "acceptance_id",
+          "positions",
+          "total_net_amount_eur",
+          "total_vat_amount_eur",
+          "total_gross_amount_eur",
+          "price_source",
+          "calculation_hash",
+          "control_event_id"
+        ],
+        "title": "ControlledSettlementOut",
         "type": "object"
       },
       "ControllingAbweichungOut": {
@@ -69268,6 +69677,27 @@
         "title": "FinanceReadModelsOut",
         "type": "object"
       },
+      "FinancialReleaseIn": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_calculation_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Expected Calculation Hash",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "expected_calculation_hash"
+        ],
+        "title": "FinancialReleaseIn",
+        "type": "object"
+      },
       "FinancialReportsOut": {
         "additionalProperties": true,
         "description": "Response schema for financial reports endpoints.",
@@ -79541,6 +79971,252 @@
           }
         },
         "title": "HarvestAcceptanceUpdate",
+        "type": "object"
+      },
+      "HarvestDeductionRuleV1": {
+        "additionalProperties": false,
+        "properties": {
+          "article_id": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Article Id",
+            "type": "string"
+          },
+          "contract_id": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Id"
+          },
+          "customer_id": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Customer Id",
+            "type": "string"
+          },
+          "deduction_basis": {
+            "const": "delivered_quantity_kg",
+            "default": "delivered_quantity_kg",
+            "title": "Deduction Basis",
+            "type": "string"
+          },
+          "impurities_free_pct": {
+            "title": "Impurities Free Pct",
+            "type": "string"
+          },
+          "measurement_method": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Measurement Method",
+            "type": "string"
+          },
+          "measurement_method_version": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Measurement Method Version",
+            "type": "string"
+          },
+          "quality_limit_pct": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Limit Pct"
+          },
+          "quantity_rounding": {
+            "const": "0.001_HALF_UP",
+            "default": "0.001_HALF_UP",
+            "title": "Quantity Rounding",
+            "type": "string"
+          },
+          "rule_id": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "rule_version": {
+            "minimum": 1.0,
+            "title": "Rule Version",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "harvest.deductions.v1",
+            "default": "harvest.deductions.v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "source_reference": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Source Reference",
+            "type": "string"
+          },
+          "tenant_id": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "valid_from": {
+            "format": "date",
+            "title": "Valid From",
+            "type": "string"
+          },
+          "valid_until": {
+            "format": "date",
+            "title": "Valid Until",
+            "type": "string"
+          },
+          "windage_mode": {
+            "const": "informative",
+            "default": "informative",
+            "title": "Windage Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "customer_id",
+          "article_id",
+          "valid_from",
+          "valid_until",
+          "source_reference",
+          "measurement_method",
+          "measurement_method_version",
+          "impurities_free_pct",
+          "rule_id",
+          "rule_version",
+          "tenant_id"
+        ],
+        "title": "HarvestDeductionRuleV1",
+        "type": "object"
+      },
+      "HarvestDeductionTermsV1": {
+        "additionalProperties": false,
+        "properties": {
+          "article_id": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Article Id",
+            "type": "string"
+          },
+          "contract_id": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Id"
+          },
+          "customer_id": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Customer Id",
+            "type": "string"
+          },
+          "deduction_basis": {
+            "const": "delivered_quantity_kg",
+            "default": "delivered_quantity_kg",
+            "title": "Deduction Basis",
+            "type": "string"
+          },
+          "impurities_free_pct": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Impurities Free Pct"
+          },
+          "measurement_method": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Measurement Method",
+            "type": "string"
+          },
+          "measurement_method_version": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Measurement Method Version",
+            "type": "string"
+          },
+          "quality_limit_pct": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Limit Pct"
+          },
+          "quantity_rounding": {
+            "const": "0.001_HALF_UP",
+            "default": "0.001_HALF_UP",
+            "title": "Quantity Rounding",
+            "type": "string"
+          },
+          "source_reference": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Source Reference",
+            "type": "string"
+          },
+          "valid_from": {
+            "format": "date",
+            "title": "Valid From",
+            "type": "string"
+          },
+          "valid_until": {
+            "format": "date",
+            "title": "Valid Until",
+            "type": "string"
+          },
+          "windage_mode": {
+            "const": "informative",
+            "default": "informative",
+            "title": "Windage Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "customer_id",
+          "article_id",
+          "valid_from",
+          "valid_until",
+          "source_reference",
+          "measurement_method",
+          "measurement_method_version",
+          "impurities_free_pct"
+        ],
+        "title": "HarvestDeductionTermsV1",
         "type": "object"
       },
       "HarvestPositionOut": {
@@ -105190,6 +105866,61 @@
         "title": "MeasureTransitionIn",
         "type": "object"
       },
+      "MeasurementAttestIn": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_context_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Expected Context Hash",
+            "type": "string"
+          },
+          "expected_protocol_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Expected Protocol Hash",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "measurement_method": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Measurement Method",
+            "type": "string"
+          },
+          "measurement_method_version": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Measurement Method Version",
+            "type": "string"
+          },
+          "protocol_id": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Protocol Id",
+            "type": "string"
+          },
+          "source_reference": {
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Source Reference",
+            "type": "string"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "expected_context_hash",
+          "protocol_id",
+          "expected_protocol_hash",
+          "measurement_method",
+          "measurement_method_version",
+          "source_reference"
+        ],
+        "title": "MeasurementAttestIn",
+        "type": "object"
+      },
       "MeldungCreateRequest": {
         "properties": {
           "betrag_eur": {
@@ -119626,6 +120357,22 @@
         "title": "PeriodUpdate",
         "type": "object"
       },
+      "PermissionsOut": {
+        "properties": {
+          "allowed_actions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Actions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "allowed_actions"
+        ],
+        "title": "PermissionsOut",
+        "type": "object"
+      },
       "PersonalOut": {
         "additionalProperties": true,
         "description": "Offenes Antwortmodell der Personalwege.\n\nLag bis zum 06.10.2026 in `endpoints/personal.py` und war damit von den beiden\nherausgenommenen Modulen nicht erreichbar. Hier steht es **einmal**.\n\n``extra=\"allow\"`` heisst: Das Modell beschreibt nichts. Es durch Modelle je Weg\nzu ersetzen ist ein eigener Slice und ausdruecklich **nicht** Teil der\nZerlegung — sonst waere nicht mehr zu unterscheiden, was der Umzug und was die\nKorrektur gebrochen hat.",
@@ -132512,7 +133259,7 @@
             "type": "string"
           },
           "qualitaetsprotokoll": {
-            "$ref": "#/components/schemas/app__api__v1__schemas__agrar_schemas__QualityProtocolOut"
+            "$ref": "#/components/schemas/QualityProtocolOut"
           },
           "quality_status": {
             "anyOf": [
@@ -132546,6 +133293,12 @@
           "approved_by"
         ],
         "title": "QualityProtocolFinalizeIn",
+        "type": "object"
+      },
+      "QualityProtocolOut": {
+        "additionalProperties": true,
+        "properties": {},
+        "title": "QualityProtocolOut",
         "type": "object"
       },
       "QualityProtocolUpdateIn": {
@@ -141972,6 +142725,127 @@
         "title": "Rule",
         "type": "object"
       },
+      "RuleBindIn": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_context_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Expected Context Hash",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "rule_version_id": {
+            "format": "uuid",
+            "title": "Rule Version Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "expected_context_hash",
+          "rule_version_id"
+        ],
+        "title": "RuleBindIn",
+        "type": "object"
+      },
+      "RuleCreateIn": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_version": {
+            "minimum": 0.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "rule_id": {
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "^[\\w.:-]+$",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "terms": {
+            "$ref": "#/components/schemas/HarvestDeductionTermsV1"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "rule_id",
+          "expected_version",
+          "terms"
+        ],
+        "title": "RuleCreateIn",
+        "type": "object"
+      },
+      "RuleDecisionIn": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_hash": {
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Expected Hash",
+            "type": "string"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "expected_hash",
+          "reason"
+        ],
+        "title": "RuleDecisionIn",
+        "type": "object"
+      },
+      "RuleListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RuleVersionOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "RuleListOut",
+        "type": "object"
+      },
       "RuleOut": {
         "properties": {
           "entity_type": {
@@ -141998,6 +142872,61 @@
           "rule_type"
         ],
         "title": "RuleOut",
+        "type": "object"
+      },
+      "RuleVersionOut": {
+        "properties": {
+          "actor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor"
+          },
+          "content_hash": {
+            "title": "Content Hash",
+            "type": "string"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "definition": {
+            "$ref": "#/components/schemas/HarvestDeductionRuleV1"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "recorded_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recorded At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "definition",
+          "content_hash",
+          "created_by",
+          "status"
+        ],
+        "title": "RuleVersionOut",
         "type": "object"
       },
       "RunReportRequest": {
@@ -149354,6 +150283,109 @@
           "completion_pct"
         ],
         "title": "SettlementCompletionStatusOut",
+        "type": "object"
+      },
+      "SettlementContextOut": {
+        "properties": {
+          "calculation_approval": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculation Approval"
+          },
+          "calculation_current": {
+            "title": "Calculation Current",
+            "type": "boolean"
+          },
+          "calculation_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculation Hash"
+          },
+          "calculation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calculation Id"
+          },
+          "calculation_result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HarvestSettlementOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "context_hash": {
+            "title": "Context Hash",
+            "type": "string"
+          },
+          "issues": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "protocol_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Protocol Hash"
+          },
+          "release_status": {
+            "title": "Release Status",
+            "type": "string"
+          },
+          "rule_version_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Version Id"
+          },
+          "state": {
+            "additionalProperties": true,
+            "title": "State",
+            "type": "object"
+          }
+        },
+        "required": [
+          "context_hash",
+          "state",
+          "release_status",
+          "issues",
+          "calculation_current"
+        ],
+        "title": "SettlementContextOut",
         "type": "object"
       },
       "SettlementCorrectionDraftOut": {
@@ -208611,13 +209643,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest acceptances auflisten",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "Harvest acceptances auflisten"
       },
       "post": {
         "description": "Ernte-Annahme anlegen.",
@@ -208659,13 +209685,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest acceptance anlegen",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "Harvest acceptance anlegen"
       }
     },
     "/api/v1/agrar/harvest-acceptance/last": {
@@ -208745,13 +209765,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Last harvest acceptance abrufen",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "Last harvest acceptance abrufen"
       }
     },
     "/api/v1/agrar/harvest-acceptance/quality-batch": {
@@ -208795,12 +209809,660 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Qualitätswerte als Batch nachtragen",
+        "summary": "Qualitätswerte als Batch nachtragen"
+      }
+    },
+    "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/approve-calculation": {
+      "post": {
+        "operationId": "approve_calculation_api_v1_agrar_harvest_acceptance_settlement_controls_acceptances__acceptance_id__approve_calculation_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "acceptance_id",
+            "required": true,
+            "schema": {
+              "title": "Acceptance Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalculationApproveIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ControlEventOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gepruefte Berechnungsfassung finanziell genehmigen",
         "tags": [
           "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
+          "harvest-controls"
+        ]
+      }
+    },
+    "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/attest-measurement": {
+      "post": {
+        "operationId": "attest_api_v1_agrar_harvest_acceptance_settlement_controls_acceptances__acceptance_id__attest_measurement_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "acceptance_id",
+            "required": true,
+            "schema": {
+              "title": "Acceptance Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeasurementAttestIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ControlEventOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Messprovenienz fuer den konkreten Protokollstand bestaetigen",
+        "tags": [
+          "agrar",
+          "harvest-controls"
+        ]
+      }
+    },
+    "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/bind-rule": {
+      "post": {
+        "operationId": "bind_rule_api_v1_agrar_harvest_acceptance_settlement_controls_acceptances__acceptance_id__bind_rule_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "acceptance_id",
+            "required": true,
+            "schema": {
+              "title": "Acceptance Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleBindIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ControlEventOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Genehmigte Regelversion an Annahme binden",
+        "tags": [
+          "agrar",
+          "harvest-controls"
+        ]
+      }
+    },
+    "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/context": {
+      "get": {
+        "operationId": "context_api_v1_agrar_harvest_acceptance_settlement_controls_acceptances__acceptance_id__context_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "acceptance_id",
+            "required": true,
+            "schema": {
+              "title": "Acceptance Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettlementContextOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Aktuellen Eingabe- und Nachweisstand der Abrechnung lesen",
+        "tags": [
+          "agrar",
+          "harvest-controls"
+        ]
+      }
+    },
+    "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/history": {
+      "get": {
+        "operationId": "history_api_v1_agrar_harvest_acceptance_settlement_controls_acceptances__acceptance_id__history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "acceptance_id",
+            "required": true,
+            "schema": {
+              "title": "Acceptance Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Offset"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditListOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unveraenderliche Abrechnungsnachweise lesen",
+        "tags": [
+          "agrar",
+          "harvest-controls"
+        ]
+      }
+    },
+    "/api/v1/agrar/harvest-acceptance/settlement-controls/choices/{kind}": {
+      "get": {
+        "operationId": "choices_api_v1_agrar_harvest_acceptance_settlement_controls_choices__kind__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "enum": [
+                "acceptance",
+                "customer",
+                "article",
+                "contract"
+              ],
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "maxLength": 100,
+              "minLength": 2,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 25,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChoicesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mandantengebundene fachliche Auswahl suchen",
+        "tags": [
+          "agrar",
+          "harvest-controls"
+        ]
+      }
+    },
+    "/api/v1/agrar/harvest-acceptance/settlement-controls/permissions": {
+      "get": {
+        "operationId": "permissions_api_v1_agrar_harvest_acceptance_settlement_controls_permissions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermissionsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Wirksame Bedienaktionen aus vorhandenen Bereichsrollen ableiten",
+        "tags": [
+          "agrar",
+          "harvest-controls"
+        ]
+      }
+    },
+    "/api/v1/agrar/harvest-acceptance/settlement-controls/rules": {
+      "get": {
+        "operationId": "list_rules_api_v1_agrar_harvest_acceptance_settlement_controls_rules_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Offset"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleListOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Versionierte Vertragsregeln lesen",
+        "tags": [
+          "agrar",
+          "harvest-controls"
+        ]
+      },
+      "post": {
+        "operationId": "create_rule_api_v1_agrar_harvest_acceptance_settlement_controls_rules_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleVersionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Neue unveraenderliche Vertragsregelversion erstellen",
+        "tags": [
+          "agrar",
+          "harvest-controls"
+        ]
+      }
+    },
+    "/api/v1/agrar/harvest-acceptance/settlement-controls/rules/{version_id}/approve": {
+      "post": {
+        "operationId": "approve_rule_api_v1_agrar_harvest_acceptance_settlement_controls_rules__version_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleDecisionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ControlEventOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Konkrete Vertragsregel im Vier-Augen-Prinzip genehmigen",
+        "tags": [
+          "agrar",
+          "harvest-controls"
+        ]
+      }
+    },
+    "/api/v1/agrar/harvest-acceptance/settlement-controls/rules/{version_id}/revoke": {
+      "post": {
+        "operationId": "revoke_rule_api_v1_agrar_harvest_acceptance_settlement_controls_rules__version_id__revoke_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "version_id",
+            "required": true,
+            "schema": {
+              "title": "Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleDecisionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ControlEventOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vertragsregelgenehmigung widerrufen",
+        "tags": [
+          "agrar",
+          "harvest-controls"
         ]
       }
     },
@@ -208839,13 +210501,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest acceptance löschen",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "Harvest acceptance löschen"
       },
       "get": {
         "description": "Ernte-Annahme abrufen inkl. Quality Protocol und Self-Billing Invoice.",
@@ -208888,13 +210544,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest acceptance abrufen",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "Harvest acceptance abrufen"
       },
       "put": {
         "description": "Ernte-Annahme aktualisieren (nur im Status 'draft' oder 'provisional').",
@@ -208947,13 +210597,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest acceptance aktualisieren",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "Harvest acceptance aktualisieren"
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/calculate": {
@@ -208971,12 +210615,22 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContextCommandIn"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HarvestSettlementOut"
+                  "$ref": "#/components/schemas/ControlledSettlementOut"
                 }
               }
             },
@@ -208998,13 +210652,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest settlement endpoint berechnen",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "Harvest settlement endpoint berechnen"
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/cancel": {
@@ -209061,13 +210709,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest acceptance stornieren",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "Harvest acceptance stornieren"
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/derive-nuts2": {
@@ -209112,13 +210754,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Nuts2 from postal code endpoint derive",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "Nuts2 from postal code endpoint derive"
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/frachtkosten": {
@@ -209163,13 +210799,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Frachtkosten abrufen",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "Frachtkosten abrufen"
       },
       "post": {
         "description": "Berechne Frachtkosten für Lieferung.",
@@ -209224,13 +210854,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Frachtkosten berechnen",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "Frachtkosten berechnen"
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/qs-abschlag": {
@@ -209297,13 +210921,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "QS-CHARGE-001: QS-Abschläge berechnen",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "QS-CHARGE-001: QS-Abschläge berechnen"
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/qs-protokoll-link": {
@@ -209357,13 +210975,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "QS-Protokoll mit Annahme verknüpfen",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "QS-Protokoll mit Annahme verknüpfen"
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/qualitaetsprotokoll": {
@@ -209386,7 +210998,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__api__v1__schemas__agrar_schemas__QualityProtocolOut"
+                  "$ref": "#/components/schemas/QualityProtocolOut"
                 }
               }
             },
@@ -209408,13 +211020,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Qualitaetsprotokoll abrufen",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "Qualitaetsprotokoll abrufen"
       },
       "post": {
         "description": "Erstelle Qualitätsprotokoll für Ernte-Annahme.",
@@ -209469,13 +211075,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Qualitaetsprotokoll anlegen",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "Qualitaetsprotokoll anlegen"
       }
     },
     "/api/v1/agrar/harvest-acceptance/{acceptance_id}/release": {
@@ -209537,6 +211137,23 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/FinancialReleaseIn"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Payload"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -209564,13 +211181,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Harvest acceptance freigeben",
-        "tags": [
-          "agrar",
-          "harvest",
-          "acceptance",
-          "ernte-annahme"
-        ]
+        "summary": "Harvest acceptance freigeben"
       }
     },
     "/api/v1/agrar/inventory/low-stock": {

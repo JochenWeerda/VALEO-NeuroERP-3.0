@@ -41,6 +41,8 @@ export interface ActionResult {
   /** Downstream entity IDs created/modified */
   affectedIds?: string[]
   error?: string
+  /** Typed adapters may expose their server receipt to the owning controller. */
+  data?: Record<string, unknown>
 }
 
 export interface ActionPolicy {

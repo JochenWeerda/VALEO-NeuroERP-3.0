@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react'
+import { lazy, Suspense, useEffect, useReducer, useState } from 'react'
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,8 +26,11 @@ import { StudioPreview } from './StudioPreview'
 import type { ScreenDefinition } from '@/components/mask-builder/schema'
 
 const previewClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+const HarvestControls = lazy(() => import('./HarvestControls').then(module => ({ default: module.HarvestControls })))
 
 export function ScreenStudioPage(): JSX.Element {
+  const controlsInitiallyOpen = new URLSearchParams(window.location.search).get('harvestControls') === '1'
+  const [controlsSeen, setControlsSeen] = useState(controlsInitiallyOpen)
   const [definition, dispatch] = useReducer(studioReducer, emptyStudioDraft())
   const [intent, setIntent] = useState('Lieferanten bewerten und auswählen')
   const [draftId, setDraftId] = useState<string>()
@@ -86,6 +89,11 @@ export function ScreenStudioPage(): JSX.Element {
 
   return (
     <div className="grid gap-4 p-4 lg:grid-cols-[minmax(18rem,22rem)_minmax(0,1fr)_minmax(16rem,20rem)]" data-testid="screen-studio">
+      <details className="col-span-full rounded border p-3" open={controlsInitiallyOpen || undefined}
+        onToggle={event => { if (event.currentTarget.open) setControlsSeen(true) }}>
+        <summary className="cursor-pointer font-medium">Ernte-Abrechnung: Vertragsregeln, Messnachweise und Freigaben</summary>
+        {controlsSeen && <Suspense fallback={<p>Abrechnungssteuerung wird geladen…</p>}><HarvestControls /></Suspense>}
+      </details>
       <section className="space-y-4">
         <div>
           <h1 className="text-lg font-semibold">Masken-Studio</h1>

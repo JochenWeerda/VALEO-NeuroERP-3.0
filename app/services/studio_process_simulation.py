@@ -8,7 +8,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from functools import lru_cache
 from pathlib import Path
@@ -28,6 +28,7 @@ def simulation_artifact_hash():
              "app/services/finance_transaction_service.py", "app/core/studio_release.py",
              "modules/agrar/services/harvest_calculator.py", "modules/agrar/services/self_billing_service.py",
              "modules/agrar/contracts/harvest_deductions_v1.py",
+             "modules/agrar/contracts/harvest_control_v1.py", "modules/agrar/services/harvest_rule_store.py",
              "app/auth/finance_roles.py", "config/studio_data_sources.yaml", "app/core/mcp_tool_contracts.py",
              "app/finance/steuerschluessel.py", "app/services/finance_eingangsrechnung_buchung.py",
              "modules/agrar/repositories/self_billing_repo.py", "modules/agrar/services/partie_service.py",
@@ -105,34 +106,61 @@ def _grain_chain(db, seed, checks):
     db.add(ticket); db.flush()
     db.refresh(ticket); db.refresh(article)
     checks["receipt"] = net == 10000
-    from modules.agrar.contracts.harvest_deductions_v1 import HarvestDeductionRuleV1
-    # Explicit synthetic terms, hashed with this fixture. Never a production grant.
-    rule = HarvestDeductionRuleV1(
-        rule_id="grain.v1.synthetic-impurity-terms", rule_version=1, tenant_id=seed,
-        customer_id=customer.id, article_id=article.id,
-        valid_from=date(2026, 1, 1), valid_until=date(2026, 12, 31),
-        source_reference="Studio grain.v1 isolated synthetic fixture",
-        measurement_method="synthetic-laboratory", measurement_method_version="1",
-        impurities_free_pct=Decimal("2"), quality_limit_pct=Decimal("2"),
-    )
+    from modules.agrar.contracts.harvest_deductions_v1 import HarvestDeductionTermsV1
+    from modules.agrar.contracts.harvest_control_v1 import (RuleCreateIn, RuleDecisionIn, RuleBindIn,
+        MeasurementAttestIn, ContextCommandIn, CalculationApproveIn, FinancialReleaseIn)
+    from app.api.v1.endpoints.harvest_rules import controlled_service
+    from app.infrastructure.models import QualityProtocol, HarvestAcceptance
+    reviewer = User(id=str(uuid4()), tenant_id=seed, username=f"review-{suffix}",
+                    email=f"review-{suffix}@example.invalid", first_name="Synthetic", last_name="Reviewer", roles=["FINANCE_ADMIN"])
+    db.add(reviewer); db.flush()
+    issuer = {"iss": "urn:valeo:synthetic-grain-simulation", "identity_type": "human"}
+    editor_principal = {"sub": actor.id, "roles": ["FINANCE_BEARBEITEN"], "raw": issuer}
+    review_principal = {"sub": reviewer.id, "roles": ["FINANCE_ADMIN"], "raw": issuer}
+    svc, control = controlled_service(db, seed, editor_principal)
+    review_svc, review_control = controlled_service(db, seed, review_principal)
+    rule_record = control.create_rule(RuleCreateIn(idempotency_key=uuid4(), rule_id="grain.v1.synthetic-terms",
+        expected_version=0, terms=HarvestDeductionTermsV1(customer_id=customer.id, article_id=article.id,
+            valid_from=date(2026, 1, 1), valid_until=date.max, source_reference="Studio isolated synthetic fixture",
+            measurement_method="synthetic-laboratory", measurement_method_version="1",
+            impurities_free_pct=Decimal("2"), quality_limit_pct=Decimal("2"))))
+    review_control.decide_rule(rule_record["id"], RuleDecisionIn(idempotency_key=uuid4(),
+        expected_hash=rule_record["content_hash"], reason="Synthetic four-eyes rule verification",
+        expires_at=datetime.now(UTC)+timedelta(days=1)))
 
-    def fixture_rule(*, tenant_id, acceptance_id):
-        if tenant_id != seed:
-            raise ValidationFailedError("Simulation rule belongs to a different tenant.")
-        return rule
+    def controlled_calculation(acceptance_id):
+        acceptance = db.get(HarvestAcceptance, acceptance_id)
+        protocol = QualityProtocol(id=str(uuid4()), tenant_id=seed, harvest_acceptance_id=acceptance_id,
+            protocol_number="SIM-"+acceptance_id[:12], version=1, impurities_pct=3, moisture_pct=14,
+            source_type="manual", source_file_content="Synthetic laboratory fixture", created_by=actor.id)
+        db.add(protocol); db.flush(); acceptance.quality_protocol_id=protocol.id; db.commit()
+        context = control.context(acceptance_id)
+        control.bind_rule(acceptance_id, RuleBindIn(idempotency_key=uuid4(),
+            expected_context_hash=context["context_hash"], rule_version_id=rule_record["id"]))
+        context = control.context(acceptance_id)
+        control.attest(acceptance_id, MeasurementAttestIn(idempotency_key=uuid4(),
+            expected_context_hash=context["context_hash"], protocol_id=protocol.id,
+            expected_protocol_hash=context["protocol_hash"], measurement_method="synthetic-laboratory",
+            measurement_method_version="1", source_reference="Synthetic laboratory fixture"))
+        result = svc.calculate_settlement(acceptance_id, command=ContextCommandIn(idempotency_key=uuid4(),
+            expected_context_hash=control.context(acceptance_id)["context_hash"]))
+        review_control.approve_calculation(review_svc, acceptance_id, CalculationApproveIn(idempotency_key=uuid4(),
+            expected_calculation_hash=result["calculation_hash"], expires_at=datetime.now(UTC)+timedelta(hours=1),
+            reason="Synthetic financial review including quality exception", acknowledge_quality_exception=True))
+        return result
 
-    svc = HarvestAcceptanceService(db, seed, rule_resolver=fixture_rule)
     item = svc.create_acceptance(HarvestAcceptanceCreate(acceptance_number=f"SIM-{suffix}", delivery_date=date(2026, 1, 15),
              customer_id=customer.id, article_id=article.id, warehouse_id=warehouse.id, weighing_ticket_id=ticket.id), actor.id)
     acceptance_id = str(item["id"])
-    calculation = svc.calculate_settlement(acceptance_id)
+    calculation = controlled_calculation(acceptance_id)
     from app.infrastructure.models import HarvestAcceptance
     acceptance = db.get(HarvestAcceptance, acceptance_id)
     impurity = next(p for p in calculation["positions"] if p["position_number"] == 20)
     checks["quality"] = (acceptance.total_net_amount_eur > 0 and impurity["quantity_kg"] == 100
-                         and rule.content_hash in impurity["calculation_formula"]
+                         and rule_record["content_hash"] in impurity["calculation_formula"]
                          and any("Qualitaetsgrenze" in warning for warning in calculation["warnings"]))
-    svc.release_acceptance(acceptance_id, "final", True, True, actor.id)
+    release_body = FinancialReleaseIn(idempotency_key=uuid4(), expected_calculation_hash=calculation["calculation_hash"])
+    svc.release_acceptance(acceptance_id, "final", True, True, actor.id, command=release_body)
     acceptance = db.get(HarvestAcceptance, acceptance_id)
     invoice = SelfBillingRepositoryImpl(db).get_invoice_by_id(acceptance.invoice_id)
     checks["self_billing"] = invoice is not None and invoice.harvest_acceptance_id == acceptance_id
@@ -178,7 +206,7 @@ def _grain_chain(db, seed, checks):
     before = db.query(StockMovement).filter_by(tenant_id=seed).count()
     nested = db.begin_nested()
     try:
-        svc.release_acceptance(acceptance_id, "final", True, True, actor.id)
+        svc.release_acceptance(acceptance_id, "final", True, True, actor.id, command=release_body)
         checks["idempotency"] = (db.query(StockMovement).filter_by(tenant_id=seed).count() == before
                                    and db.get(HarvestAcceptance, acceptance_id).invoice_id == invoice.id)
     except (ValidationFailedError, ConflictError):
@@ -194,8 +222,9 @@ def _grain_chain(db, seed, checks):
     second = svc.create_acceptance(HarvestAcceptanceCreate(acceptance_number=f"SB-{suffix}",
              delivery_date=date(2026, 1, 15), customer_id=customer.id, article_id=article.id,
              warehouse_id=warehouse.id, weighing_ticket_id=second_ticket.id), actor.id)
-    svc.calculate_settlement(second["id"])
-    svc.release_acceptance(second["id"], "final", True, True, actor.id)
+    second_calculation = controlled_calculation(second["id"])
+    svc.release_acceptance(second["id"], "final", True, True, actor.id, command=FinancialReleaseIn(
+        idempotency_key=uuid4(), expected_calculation_hash=second_calculation["calculation_hash"]))
     second_acceptance = db.get(HarvestAcceptance, second["id"])
     second_invoice = SelfBillingRepositoryImpl(db).get_invoice_by_id(second_acceptance.invoice_id)
     checks["numbering"] = (invoice.id != second_invoice.id and invoice.invoice_number != second_invoice.invoice_number

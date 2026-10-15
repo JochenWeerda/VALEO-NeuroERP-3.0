@@ -12,13 +12,9 @@ from typing import Literal, Protocol
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, field_validator, model_validator
 
 
-class HarvestDeductionRuleV1(BaseModel):
+class HarvestDeductionTermsV1(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    schema_version: Literal["harvest.deductions.v1"] = "harvest.deductions.v1"
-    rule_id: str = Field(min_length=1, max_length=100)
-    rule_version: StrictInt = Field(ge=1)
-    tenant_id: str = Field(min_length=1, max_length=100)
     contract_id: str | None = Field(default=None, min_length=1, max_length=100)
     customer_id: str = Field(min_length=1, max_length=100)
     article_id: str = Field(min_length=1, max_length=100)
@@ -50,6 +46,14 @@ class HarvestDeductionRuleV1(BaseModel):
         if self.valid_until < self.valid_from:
             raise ValueError("Vertragsregel hat einen ungueltigen Geltungszeitraum.")
         return self
+
+
+
+class HarvestDeductionRuleV1(HarvestDeductionTermsV1):
+    schema_version: Literal["harvest.deductions.v1"] = "harvest.deductions.v1"
+    rule_id: str = Field(min_length=1, max_length=100)
+    rule_version: StrictInt = Field(ge=1)
+    tenant_id: str = Field(min_length=1, max_length=100)
 
     @property
     def content_hash(self) -> str:

@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-15
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-15T07:53:11Z'
+generated_at: '2026-10-15T13:06:20Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -405,6 +405,7 @@ domains:
     - futtermittel_rohwaren
     - grundfutter_analysen
     - harvest_acceptance
+    - harvest_rules
     - hofliste
     - kontrakt_hedging
     - kontrakt_klassen
@@ -2105,8 +2106,8 @@ mapping_stats:
   frontend_routes_mapped: 941
   backend_services_total: 295
   backend_services_mapped: 295
-  backend_endpoints_total: 460
-  backend_endpoints_mapped: 460
+  backend_endpoints_total: 461
+  backend_endpoints_mapped: 461
 unmapped:
   frontend_routes: []
   backend_services: []

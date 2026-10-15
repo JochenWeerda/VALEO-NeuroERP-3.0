@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, architect, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-14
+last_reviewed: 2026-10-15
 version: 1.0.0
 description: Generierter Katalog der domain_*-Tabellen aus information_schema.
 ---
@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 679 Tabellen, 8980 Spalten.**
+**31 Schemas, 680 Tabellen, 8990 Spalten.**
 
 ## Schemas
 
@@ -39,7 +39,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_hr` | `hr` | 29 | 345 |
 | `domain_hrm` | `hr` | 3 | 32 |
 | `domain_integration` | `platform` | 4 | 46 |
-| `domain_inventory` | `inventory` | 77 | 1109 |
+| `domain_inventory` | `inventory` | 78 | 1119 |
 | `domain_log` | `platform` | 4 | 59 |
 | `domain_logistics` | `logistics` | 8 | 92 |
 | `domain_meldewesen` | `finance` | 2 | 21 |
@@ -1154,6 +1154,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `harvest_acceptance_lines` | `inventory` | native | `id` | id, harvest_acceptance_id, line_number, silo_id, lot_id, qty_kg_allocated, notes, created_at, updated_at |
 | `harvest_acceptance_positions` | `inventory` | native | `id` | id, harvest_acceptance_id, position_number, description, is_printable, is_calculable, lab_value_pct, quantity_kg, unit, price_per_unit_eur, amount_eur, calculation_formula, origin_nuts2_code, nuts_version, origin_postal_code, origin_city, origin_country_code, article_id, variety_id, created_at, updated_at |
 | `harvest_acceptances` | `inventory` | native | `id` | id, acceptance_number, tenant_id, branch_id, warehouse_id, delivery_date, delivery_time, sales_rep_id, operator_id, weighing_ticket_id, cost_center_id, customer_id, contract_id, forwarder_id, intermediate_dealer_id, deviating_vat_id, article_id, variety_id, vehicle_plate, origin_nuts2_code, nuts_version, origin_postal_code, origin_city, origin_country_code, is_sustainable_biomass, release_status, provisional_invoice_number, invoice_id, invoice_number, stock_movement_id, quality_protocol_id, remarks, print_remarks_on_acceptance_note, print_remarks_on_settlement, total_net_amount_eur, total_vat_amount_eur, total_gross_amount_eur, vat_rate_percent, created_at, created_by, updated_at, updated_by, pricing_mode, price_source_id, acceptance_mode, ownership_type, vat_event, advance_payment_amount_eur, advance_payment_date, advance_invoice_id |
+| `harvest_control_events` | `inventory` | native | `event_no` | event_no, id, tenant_id, aggregate_id, kind, actor, idempotency_key, request_hash, payload, recorded_at |
 | `inventory_auxiliary_audit` | `inventory` | native | `id` | id, tenant_id, batch_id, action, old_value, new_value, actor, reason, created_at |
 | `inventory_auxiliary_batches` | `inventory` | native | `id` | id, tenant_id, inventory_count_id, batch_type, status, source_hash, payload, line_count, difference_count, preliminary_value, maker, checker, source_route, notes, created_at, updated_at |
 | `inventory_count_lines` | `inventory` | native | `id` | id, inventory_count_id, article_id, expected_qty, counted_qty, difference, warehouse_id, bin_location_id, batch_number, tenant_id, created_at, updated_at |

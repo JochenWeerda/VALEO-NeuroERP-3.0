@@ -31028,6 +31028,72 @@
             "app/services/supply_chain_trace_service.py"
           ]
         },
+        "harvest_control_events": {
+          "columns": [
+            {
+              "name": "event_no",
+              "nullable": false,
+              "type": "bigint"
+            },
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "aggregate_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "kind",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "actor",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "idempotency_key",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "request_hash",
+              "nullable": false,
+              "type": "character"
+            },
+            {
+              "name": "payload",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "recorded_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.tenants.id"
+            }
+          ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "event_no"
+          ]
+        },
         "inventory_auxiliary_audit": {
           "columns": [
             {

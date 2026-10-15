@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (107 Masken).
+> Generiert aus `app/core/screen_definitions.py` (108 Masken).
 
 ## Übersicht
 
@@ -31,6 +31,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/feeding-group` | Tiergruppe | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-group/agent-contract` |
 | `agrar/feeding-plan` | Fuetterungsplan | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-plan/agent-contract` |
 | `agrar/feeding-reference-data` | Naehrstoffe und Einheiten | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-reference-data/agent-contract` |
+| `agrar/harvest-controls` | Ernte-Abrechnung: Vertragsregeln und Freigaben | agrar | hoch | — | `GET /api/v1/masks/agrar/harvest-controls/agent-contract` |
 | `agrar/harvest-settlement` | Ernte-Abrechnung | agrar | niedrig | `harvest-to-settlement`, `contract-to-settlement` | `GET /api/v1/masks/agrar/harvest-settlement/agent-contract` |
 | `agrar/kontrakte` | Kontrakt | agrar | niedrig | `contract-to-settlement`, `harvest-to-settlement` | `GET /api/v1/masks/agrar/kontrakte/agent-contract` |
 | `agrar/ration` | Rationsfreigabe | agrar | hoch | — | `GET /api/v1/masks/agrar/ration/agent-contract` |
@@ -538,6 +539,54 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - In welcher Einheit wird Rohprotein bewertet?
 - Welche Naehrstoffe sind auf TM bezogen?
+
+---
+
+### `agrar/harvest-controls` — Ernte-Abrechnung: Vertragsregeln und Freigaben
+
+**Zweck:** Vertragsregeln und konkrete Ernte-Abrechnungsfassungen nachvollziehbar prüfen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/harvest-controls/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/harvest-controls/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/harvest-controls/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__harvest-controls/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `rules` → `/api/v1/agrar/harvest-acceptance/settlement-controls/rules`
+- `acceptances` → `/api/v1/agrar/harvest-acceptance/settlement-controls/choices/acceptance`
+- `customers` → `/api/v1/agrar/harvest-acceptance/settlement-controls/choices/customer`
+- `articles` → `/api/v1/agrar/harvest-acceptance/settlement-controls/choices/article`
+- `contracts` → `/api/v1/agrar/harvest-acceptance/settlement-controls/choices/contract`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Sensible Felder:** `customer_id, source_reference`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Annahme und Nachweise laden | safe | nein | `—` |
+| `create_rule` | Regelversion erstellen | moderate | nein | `/api/v1/agrar/harvest-acceptance/settlement-controls/rules` |
+| `approve_rule` | Regel genehmigen | high | ja | `/api/v1/agrar/harvest-acceptance/settlement-controls/rules/{version_id}/approve` |
+| `revoke_rule` | Regelgenehmigung widerrufen | high | ja | `/api/v1/agrar/harvest-acceptance/settlement-controls/rules/{version_id}/revoke` |
+| `bind_rule` | Regel an Annahme binden | moderate | nein | `/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/bind-rule` |
+| `attest` | Messnachweis bestätigen | moderate | nein | `/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/attest-measurement` |
+| `calculate` | Verbindlich berechnen | moderate | nein | `/api/v1/agrar/harvest-acceptance/{acceptance_id}/calculate` |
+| `approve_calculation` | Berechnungsfassung genehmigen | high | ja | `/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/approve-calculation` |
+| `release` | Gutschrift und Wareneingang erzeugen | high | ja | `/api/v1/agrar/harvest-acceptance/{acceptance_id}/release?release_status=final&create_stock_movement=true&create_credit_note=true` |
 
 ---
 

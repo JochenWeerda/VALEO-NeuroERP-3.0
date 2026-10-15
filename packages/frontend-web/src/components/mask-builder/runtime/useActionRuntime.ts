@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 import { apiClient } from '@/lib/api-client'
 import type { ScreenActionDefinition } from '../schema'
 import { prepareDocflowCommand, docflowCommandResult, docflowErrorResult } from './docflow-command-adapter'
+import { prepareHarvestControl, harvestControlResult } from './harvest-control-command-adapter'
 import {
   buildActionPolicy,
   checkActionPolicy,
@@ -87,13 +88,16 @@ export function useActionRuntime(
       try {
         if (actionDef.commandBinding) {
           const signature = JSON.stringify([opts.screenId, opts.entityId, req.actionKey,
-            req.expectedVersion ?? opts.entityData?.version, req.payload ?? {}, req.auditReason ?? '', actionDef.commandBinding])
+            req.expectedVersion ?? opts.entityData?.version, req.payload ?? {}, req.auditReason ?? '', actionDef.commandBinding,
+            actionDef.commandBinding.adapter === 'harvest.control.v1' ? opts.entityData : undefined])
           if (intentRef.current?.signature !== signature) {
             intentRef.current = { signature, key: crypto.randomUUID() }
           }
-          const prepared = prepareDocflowCommand(actionDef, req, opts, req.idempotencyKey ?? intentRef.current.key)
+          const harvest = actionDef.commandBinding.adapter === 'harvest.control.v1'
+          const prepared = harvest ? prepareHarvestControl(actionDef, req, opts, req.idempotencyKey ?? intentRef.current.key)
+            : prepareDocflowCommand(actionDef, req, opts, req.idempotencyKey ?? intentRef.current.key)
           const response = await apiClient.request<unknown>({ method: 'POST', url: prepared.url, data: prepared.body })
-          const result = docflowCommandResult(actionDef, req, opts, response.data)
+          const result = harvest ? harvestControlResult(req, response.data) : docflowCommandResult(actionDef, req, opts, response.data)
           setLastResult(result)
           return result
         }

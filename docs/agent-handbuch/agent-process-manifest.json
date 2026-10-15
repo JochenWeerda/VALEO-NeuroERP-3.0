@@ -1266,6 +1266,131 @@
       ]
     },
     {
+      "mask_id": "agrar/harvest-controls",
+      "title": "Ernte-Abrechnung: Vertragsregeln und Freigaben",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__harvest-controls/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/harvest-controls/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/harvest-controls/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/harvest-controls/readiness",
+      "risk_summary": "high",
+      "actions": [
+        {
+          "key": "refresh",
+          "label": "Annahme und Nachweise laden",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "create_rule",
+          "label": "Regelversion erstellen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "create_rule",
+          "commandEndpoint": "/api/v1/agrar/harvest-acceptance/settlement-controls/rules",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "approve_rule",
+          "label": "Regel genehmigen",
+          "dangerLevel": "high",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "approve_rule",
+          "commandEndpoint": "/api/v1/agrar/harvest-acceptance/settlement-controls/rules/{version_id}/approve",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "revoke_rule",
+          "label": "Regelgenehmigung widerrufen",
+          "dangerLevel": "high",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "revoke_rule",
+          "commandEndpoint": "/api/v1/agrar/harvest-acceptance/settlement-controls/rules/{version_id}/revoke",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "bind_rule",
+          "label": "Regel an Annahme binden",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "bind_rule",
+          "commandEndpoint": "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/bind-rule",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "attest",
+          "label": "Messnachweis bestätigen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "attest",
+          "commandEndpoint": "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/attest-measurement",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "calculate",
+          "label": "Verbindlich berechnen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "calculate",
+          "commandEndpoint": "/api/v1/agrar/harvest-acceptance/{acceptance_id}/calculate",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "approve_calculation",
+          "label": "Berechnungsfassung genehmigen",
+          "dangerLevel": "high",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "approve_calculation",
+          "commandEndpoint": "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/approve-calculation",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "release",
+          "label": "Gutschrift und Wareneingang erzeugen",
+          "dangerLevel": "high",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "release",
+          "commandEndpoint": "/api/v1/agrar/harvest-acceptance/{acceptance_id}/release?release_status=final&create_stock_movement=true&create_credit_note=true",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "customer_id",
+        "source_reference"
+      ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "agrar/harvest-settlement",
       "title": "Ernte-Abrechnung",
       "domain": "agrar",

@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-14
+last_reviewed: 2026-10-15
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -239,6 +239,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `gs1_barcode` | GS1 Barcode Parse Service |
 | `gs1_parser` | GS1 barcode parser endpoint (l3c-gs1) |
 | `harvest_acceptance` | Harvest Acceptance (Ernte-Annahme) API endpoints. |
+| `harvest_rules` | Transport adapter for versioned harvest domain commands, never direct CRUD. |
 | `hausbankenstamm` | Hausbankenstamm — Eigene Bankverbindungen des Mandanten. |
 | `hofliste` | Hofliste — Fahrzeugvormeldungen und Status am Waagenterminal. |
 | `hrm_abwesenheit` | HRM-ABWESENHEIT-ANTRAG-001 — Abwesenheitsantrag API. |
