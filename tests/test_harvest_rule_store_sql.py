@@ -28,8 +28,11 @@ def _enable_dev_token():
 
 
 @pytest.fixture
-def case():
-    engine = simulation._configured_probe()
+def case(monkeypatch):
+    from app.core.database import engine
+    from testgrenze import pruefstand_erlaubt
+    assert pruefstand_erlaubt(engine.url), "Only the declared shared test database is allowed"
+    monkeypatch.setattr(simulation, "_configured_probe", lambda: engine)
     connection = engine.connect(); outer = connection.begin()
     db = Session(bind=connection, join_transaction_mode="create_savepoint", expire_on_commit=False)
     tenant = str(uuid4()); editor_id = str(uuid4()); reviewer_id = str(uuid4())

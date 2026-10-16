@@ -83,7 +83,7 @@ def build_harvest_controls():
                 field("quality_note", "Qualitätsbewertung", readOnly=True),
             ]}],
         "actions": actions,
-        "layout": {"floorplan": "objectPage", "density": "expertDense", "contextRail": "audit", "tableProfile": "audit"},
+        "layout": {"floorplan": "cockpit", "density": "expertDense", "contextRail": "audit", "tableProfile": "audit"},
         "performance": {"initialPayloadBudgetKb": 64, "requiresLazyTabs": True, "requiresVirtualTables": True,
                         "lookupMinChars": 2, "bundleGroup": "agrar"},
         "noWorkflowReason": "Verbindliche Zustands- und Vier-Augen-Prüfung erfolgt in den versionierten Domain-Commands.",

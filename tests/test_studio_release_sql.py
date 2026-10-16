@@ -1,6 +1,5 @@
 """Shared-probe SQL evidence tests; each test rolls back its own outer transaction."""
 from uuid import uuid4
-import os
 import pytest
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -17,12 +16,10 @@ def _enable_dev_token():
 
 @pytest.fixture
 def sql_candidate(monkeypatch):
-    try:
-        engine=simulation._configured_probe()
-    except RuntimeError:
-        if os.environ.get("PYTEST_REQUIRE_DB_STRICT")=="1":
-            raise
-        pytest.skip("Explicit shared probe configuration required")
+    from app.core.database import engine
+    from testgrenze import pruefstand_erlaubt
+    assert pruefstand_erlaubt(engine.url), "Only the declared shared test database is allowed"
+    monkeypatch.setattr(simulation, "_configured_probe", lambda: engine)
     connection=engine.connect();outer=connection.begin()
     own=str(uuid4())
     connection.execute(text("INSERT INTO domain_shared.tenants(id,name,domain) VALUES (:id,'Studio SQL evidence',:domain)"),
