@@ -14,6 +14,10 @@ from fastapi import FastAPI
 
 _app = FastAPI()
 _app.include_router(compliance_router, prefix="/api/v1")
+from testgrenze import ALLE_FACHROLLEN, ersetze_bearer, ersetze_mandant, ersetze_nutzer
+ersetze_bearer(_app, *ALLE_FACHROLLEN)
+ersetze_mandant(_app)
+ersetze_nutzer(_app, *ALLE_FACHROLLEN)
 
 def skip_if_db_unavailable(response):
     """Skipt den Test wenn PostgreSQL nicht erreichbar ist."""

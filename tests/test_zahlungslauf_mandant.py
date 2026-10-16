@@ -114,7 +114,8 @@ def engine():
     if not DB_URL:
         pytest.skip("Explicit shared PostgreSQL test database required")
     database = make_url(DB_URL).database or ""
-    if database != "valeo_probe" and "test" not in database.lower():
+    from testgrenze import pruefstand_erlaubt
+    if not pruefstand_erlaubt(make_url(DB_URL)):
         pytest.fail("Never write finance test data into a development database")
     try:
         motor = create_engine(DB_URL)

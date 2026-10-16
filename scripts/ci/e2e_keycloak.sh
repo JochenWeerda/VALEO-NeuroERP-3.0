@@ -17,12 +17,12 @@ ADMIN_PASS="$(geheim)"; PASS_ADMIN="$(geheim)"; PASS_POWER="$(geheim)"; PASS_REA
 for wert in "$ADMIN_PASS" "$PASS_ADMIN" "$PASS_POWER" "$PASS_READ"; do echo "::add-mask::$wert"; done
 
 docker run -d --name e2e-keycloak -p 8080:8080 \
-  -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD="$ADMIN_PASS" -e KC_FEATURES=declarative-user-profile \
+  -e KEYCLOAK_ADMIN=ci-identity-bootstrap -e KEYCLOAK_ADMIN_PASSWORD="$ADMIN_PASS" -e KC_FEATURES=declarative-user-profile \
   quay.io/keycloak/keycloak:22.0 start-dev >/dev/null
 timeout 180 bash -c 'until curl -fsS http://localhost:8080/realms/master >/dev/null 2>&1; do sleep 3; done' || {
   docker logs e2e-keycloak | tail -50; exit 1; }
 
-export VALEO_IDP_ADMIN_USERNAME=admin VALEO_IDP_ADMIN_PASSWORD="$ADMIN_PASS"
+export VALEO_IDP_ADMIN_USERNAME=ci-identity-bootstrap VALEO_IDP_ADMIN_PASSWORD="$ADMIN_PASS"
 python scripts/provision_identity_provider.py --url http://localhost:8080
 export VALEO_IDP_URL=http://localhost:8080
 export VALEO_USER_ADMIN=e2e-admin@valeo.invalid VALEO_PASS_ADMIN="$PASS_ADMIN"

@@ -446,7 +446,7 @@ class TestStatisch:
                 ziel = aktion.get("commandEndpoint")
                 if not ziel:
                     continue
-                konkret = re.sub(r"\{[^}]+\}", "X", ziel)
+                konkret = re.sub(r"\{[^}]+\}", "X", ziel.split("?", 1)[0])
                 if not any(m.match(konkret) for m in muster):
                     fehlend.append(f"{screen_id}/{aktion['key']}: {ziel}")
         assert fehlend == []

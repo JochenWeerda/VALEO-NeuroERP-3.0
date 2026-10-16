@@ -27,6 +27,14 @@ customers_endpoint = importlib.import_module("app.api.v1.endpoints.customers")
 customer_service_module = importlib.import_module("app.services.customer_service")
 
 
+def verified_harvest_request():
+    from starlette.requests import Request
+    request = Request({"type": "http", "headers": []})
+    request.state.tenant_verified = True
+    request.state.token_claims = {"sub": "synthetic-dq-actor", "tenant_id": "tenant-1"}
+    return request
+
+
 class FailQueryDB:
     def query(self, *args, **kwargs):
         raise AssertionError("DB query should not happen before DQ validation")
@@ -53,6 +61,12 @@ class ImportGuardDB:
 
 
 class _QueryStub:
+    def with_for_update(self):
+        return self
+
+    def populate_existing(self):
+        return self
+
     def __init__(self, result):
         self._result = result
 
@@ -178,7 +192,7 @@ def test_create_harvest_acceptance_rejects_invalid_country_before_db_query():
     )
 
     with pytest.raises(HTTPException) as exc:
-        asyncio.run(create_harvest_acceptance(payload, request=None, tenant_id="tenant-1", db=FailQueryDB()))
+        asyncio.run(create_harvest_acceptance(payload, request=verified_harvest_request(), tenant_id="tenant-1", db=FailQueryDB()))
 
     assert exc.value.status_code == 422
     assert exc.value.detail["entity_typ"] == "ErnteAnnahme"
@@ -190,7 +204,7 @@ def test_update_harvest_acceptance_rejects_invalid_country_before_commit():
             update_harvest_acceptance(
                 "ha-1",
                 HarvestAcceptanceUpdate(origin_country_code="XX"),
-                request=None,
+                request=verified_harvest_request(),
                 tenant_id="tenant-1",
                 db=HarvestAcceptanceUpdateDB(),
             )

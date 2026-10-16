@@ -154,6 +154,8 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Uebernahme 2026-10-16:** Nutzer hat den ruhenden Claim ausdruecklich zur Uebernahme freigegeben. Codex integriert vorhandene uncommittete Korrekturen nur nach Einzelvergleich mit HEAD und gezielter Abnahme, schliesst verbliebene CI-Vertraege/Maskenbefunde und bereinigt die CI-Bootstrapkennung fuer den Datenschutzguard. Dateibesitz dieses Claims geht damit an Codex; andere laufende Quellhunks bleiben geschuetzt. Keine neue Testdatenbank/Container, kein Reset. Ziel: gruener aktueller GitHub-Nachlauf und sicherer develop-Abgleich; externe Modellabnahme bleibt ohne konfigurierten Anbieterschluessel ehrlich offen.
 
+**Enger Test-/Bootstrap-Meilenstein 2026-10-16:** Sieben Testdateien korrigiert, 206 gezielte Vertraege gruen; produktive Auth-/Fachregeln unveraendert. Nur zwei CI-Bootstrapzuweisungen auf synthetische Kennung umgestellt; Datenschutz und Syntax geprueft. Kein Fuhrpark-/Finanz-Fachcode oder Gesamtartefakt in dieser Lieferung. Quellenintegration und Gesamt-CI folgen getrennt. QA inherited-ci-test-boundaries-20261016.md.
+
 ## SELF-BILLING-ATOMIC-20261014 — abgeschlossen, Codex
 
 **Owner:** Codex. **Stand:** abgeschlossen 2026-10-15. **Ziel:** Self-Billing-Eingangsjournal aus kanonischen mandantengebundenen Steuerschluesseln statt festen verkehrten Konten; keine Zwischencommits. **Dateibesitz:** harvest_acceptance_service.py Buchungsweg (eigener laufender Claim); modules/agrar/repositories/self_billing_repo.py nur optionale Commit-Grenze; eigene Tests, QA und Simulator-Fixdaten. **Abnahme:** Aufwand/Vorsteuer Soll, Verbindlichkeit Haben, expliziter Steuervertrag, Konflikt ohne Teilcommit; gemeinsamer Pruefstand mit Rollback. Keine neue DB/Container.
