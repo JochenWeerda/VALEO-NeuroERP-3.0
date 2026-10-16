@@ -18477,6 +18477,9 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 **Owner:** Codex. **Befund:** Reale Variantenabnahme: einzelne Feldbeschriftung erscheint im Aenderungsvergleich als gesamter Register-JSON-Block. **Dateibesitz:** app/services/studio_history_view.py ausschliesslich lesender Vergleich; tests/test_studio_history_view.py, eigene QA/Workboard. **Abnahme:** verschachtelte Register-/Feld-/Spaltenaenderungen einzeln, typgetreu und mit eindeutigen JSON-Pointern anzeigen; Hinzufuegen/Entfernen und Reihenfolge nicht verschweigen; bestehende API/Paginierung/Mandantengrenze und unveraenderbare Snapshots erhalten. Keine neue Maske, DB-/Container-/Rechteeingriffe oder Belegwirkung.
 
 
-## AUTH-LOCALHOST-DEPLOY-20261016 - reserviert, Codex
+## AUTH-LOCALHOST-DEPLOY-20261016 - abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Port 3000 liefert Containerbuild vom 17.09. mit alter Testidentitaet aus. Aktuellen bereits abgesicherten Frontendstand gezielt ausliefern und reale anonyme Anmeldung pruefen. **Dateibesitz:** eigene QA/Workboard und generierte lokale Frontendassets; keine fremden Quellen, Rollen, Datenbanken oder Container entfernen. **Abnahme:** keine automatische Testidentitaet, geschuetzter Einstieg fuehrt zur Anmeldung; anonymer API-Zugriff wird abgewiesen.
+
+
+**AUTH-LOCALHOST-DEPLOY Abnahme:** Alter Docker-Container vom 17.09. lieferte Test-Admin-UI aus. Kanonischen bestehenden Frontendstand produktiv gebaut und ausschliesslich dessen Assets in den vorhandenen lokalen Webcontainer eingespielt. 29 Anmelde-/Sicherheitsvertraege gruen. Reale Browseraufrufe / und /admin/screen-studio fuehren ohne Anmeldung nach /login. Zwei geschuetzte API-Endpunkte anonym 401. Keine Token geloescht, Rollen geaendert, Datenbank oder fremder Container ersetzt. QA auth-localhost-deploy-20261016.md.
