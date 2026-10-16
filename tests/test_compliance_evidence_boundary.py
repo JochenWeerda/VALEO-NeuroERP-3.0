@@ -78,3 +78,17 @@ def test_empty_check_configuration_is_unverified():
     result = monitor_with().run_compliance_checks("tenant-a")
     assert result["overall_status"] == "UNKNOWN"
     assert result["compliance_score"] is None
+
+
+def test_high_numeric_score_cannot_overrule_a_verified_failure():
+    monitor = monitor_with(failure={"status": "FAILED"})
+    result = monitor.run_compliance_checks("tenant-a")
+    assert result["compliance_score"] == 95
+    assert monitor._assess_certification_readiness(result)["readiness_level"] == "NOT_READY"
+
+
+def test_high_numeric_score_with_warning_is_not_certification_ready():
+    monitor = monitor_with(warning={"status": "WARNING"})
+    result = monitor.run_compliance_checks("tenant-a")
+    assert result["compliance_score"] == 98
+    assert monitor._assess_certification_readiness(result)["readiness_level"] == "NEAR_READY"

@@ -11,3 +11,7 @@ Der Monitor erfindet keine historischen Daten, Backups, Vorfaelle oder Zertifizi
 17 reine Funktionsvertraege bestanden (neue Nachweisgrenzen plus vorhandene Geschaeftszeitfaelle). Die gezielte Pruefung lief ohne fachfremdes globales FastAPI-Testsetup und ohne Coverage-Vollsuitenanspruch. Keine DB/Container, keine Rechte-/API-Aenderung. Vorhandene verfuegbare Checkresultate werden weiter ausgewertet; unbekannte Resultate erhalten keinen scheinbar gruennahen Score.
 
 Sonar-Ausgangsliste: 168 offene Bug-/Vulnerability-Fundstellen ueber zwei vollstaendig gelesene Seiten. Dieser Slice beseitigt die Konstanten-/Scheinerfolgsursache im Monitor; ein neuer Sonar-Rescan entscheidet ueber die aktualisierte Zahl. Coverage, Hotspotreviews, andere Laufzeitbefunde und Belegmigration sind nicht als abgeschlossen ausgewiesen. Keine Schwellenabsenkung oder Scanner-Ausnahme.
+
+## Gegenpruefung des Gesamtscores
+
+Auch 95 Punkte bei einer bekannten fehlgeschlagenen Kontrolle bedeuten NOT_READY. 98 Punkte mit Warnung koennen keine volle Bereitschaft ergeben. Vollstaendig bestandene automatische Kontrollen heissen CHECKS_PASSED, keine Zertifizierungszusage. Zwei zusaetzliche Regressionen, insgesamt 19 Funktionsvertraege gruen.

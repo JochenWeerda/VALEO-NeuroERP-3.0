@@ -268,8 +268,11 @@ class ISO27001ComplianceMonitor:
                 'critical_gaps': len(results['critical_issues']),
             }
 
-        if readiness_score >= 95:
-            readiness = 'READY'
+        if results['overall_status'] == 'NON_COMPLIANT':
+            readiness = 'NOT_READY'
+            notes = 'Verified controls failed; remediation and independent assessment are required.'
+        elif readiness_score >= 95 and results['overall_status'] == 'COMPLIANT':
+            readiness = 'CHECKS_PASSED'
             notes = 'Automated checks passed; certification requires an independent audit.'
         elif readiness_score >= 85:
             readiness = 'NEAR_READY'

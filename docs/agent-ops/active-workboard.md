@@ -18455,3 +18455,5 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 ## STUDIO-VARIANT-PRESENTATION-20261016 - reserviert, Codex
 
 **Owner:** Codex. **Ziel:** Importierte Belegvarianten ohne Tabellen-/Spaltenwissen im bestehenden Studio gezielt beschriften; gemeinsame Basis-/Variantenbindung, technische Felder, Rechte und Fachcommands unveraendert. **Dateibesitz:** neuer kleiner Darstellungseditor und reiner Metadatenhelfer, minimale Montage ScreenStudioPage, eigene UI-/Unveraenderlichkeitsvertraege, QA/Meridian/Workboard. **Abnahme:** Kopf-/Register-/Tabellen-/Spaltenbeschriftungen der geladenen Variante bearbeitbar; keine freie JSON-/URL-/Rechtebearbeitung; Entwurf/Historie und bestehende Freigabe bleiben fuehrend. Das ist Darstellung, keine behauptete vollstaendige Belegbearbeitung oder neue produktive Freigabe. Keine DB-/Container-/Rechteaenderung.
+
+**SONAR-COMPLIANCE-EVIDENCE Gegenpruefung:** Hoher Restsaldo darf bekannte Kontrollfehler nicht ueberstimmen: 95/FAILED bleibt NOT_READY, 98/WARNING nicht volle Bereitschaft, automatische Erfolge CHECKS_PASSED ohne Zertifizierungszusage. Insgesamt 19 reine Funktionsvertraege gruen.
