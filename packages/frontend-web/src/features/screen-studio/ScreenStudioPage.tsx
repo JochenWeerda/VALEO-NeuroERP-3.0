@@ -34,6 +34,7 @@ export function ScreenStudioPage(): JSX.Element {
   const controlsInitiallyOpen = new URLSearchParams(window.location.search).get('harvestControls') === '1'
   const [controlsSeen, setControlsSeen] = useState(controlsInitiallyOpen)
   const [nativeImportSeen, setNativeImportSeen] = useState(false)
+  const [dialogueRequested, setDialogueRequested] = useState(false)
   const [definition, dispatch] = useReducer(studioReducer, emptyStudioDraft())
   const [intent, setIntent] = useState('Lieferanten bewerten und auswählen')
   const [draftId, setDraftId] = useState<string>()
@@ -67,6 +68,7 @@ export function ScreenStudioPage(): JSX.Element {
   }, [definition])
 
   function applyProposal(next: ScreenDefinition): void {
+    setDialogueRequested(false)
     setPreviewGeneration(value => value + 1)
     dispatch({ type: 'replace', definition: next })
     setDraftId(undefined)
@@ -103,6 +105,7 @@ export function ScreenStudioPage(): JSX.Element {
         <summary className="cursor-pointer font-medium">Vorhandene Maske versionieren und ins Studio übernehmen</summary>
         {nativeImportSeen && <Suspense fallback={<p>Vorhandene Masken werden geladen…</p>}>
           <StudioNativeImport onImported={item => {
+            setIntent('')
             applyProposal(item.definition)
             setDraftId(item.id); setSavedRevision(item.revision); setSavedStatus(item.status)
             setSavedSignature(JSON.stringify(item.definition))
@@ -115,6 +118,9 @@ export function ScreenStudioPage(): JSX.Element {
       <section className="space-y-4">
         <div>
           <h1 className="text-lg font-semibold">Masken-Studio</h1>
+          {definition.documentVariant && <p aria-label="Belegmasken-Version" className="text-sm text-muted-foreground">
+            Ausgangsfassung: Belegbasis {definition.documentVariant.baseVersion} · Variante {definition.documentVariant.variantVersion}
+          </p>}
           <p className="text-sm text-muted-foreground">ScreenDefinition erzeugen, prüfen und als temporären Entwurf speichern.</p>
         </div>
         <div className="space-y-2">
@@ -127,11 +133,14 @@ export function ScreenStudioPage(): JSX.Element {
                 const item = await fetchStudioDraft(id)
                 setPreviewGeneration(value => value + 1)
                 dispatch({ type: 'replace', definition: item.definition })
+                setIntent('')
+                setDialogueRequested(false)
                 setDraftId(item.id)
                 setSavedSignature(JSON.stringify(item.definition))
                 setSavedRevision(item.revision)
             setSavedStatus(item.status)
                 setPublishedRoute(undefined)
+                setSimulation(undefined)
                 setReport(undefined)
                 setFeedback(`Entwurf geladen (${item.status}).`)
               })
@@ -142,8 +151,8 @@ export function ScreenStudioPage(): JSX.Element {
         </div>
         <div className="space-y-2">
           <Label htmlFor="studio-intent">Agent-Vorschlag</Label>
-          <Input id="studio-intent" value={intent} onChange={(event) => setIntent(event.target.value)} aria-label="Maskenabsicht" />
-          <Button type="button" disabled={Boolean(pending)} onClick={() => void run('propose', async () => {
+          <Input id="studio-intent" value={intent} onChange={(event) => setIntent(event.target.value)} aria-label="Maskenabsicht" placeholder="Neue Maske oder Änderung beschreiben…" />
+          <Button type="button" disabled={Boolean(pending) || !intent.trim()} onClick={() => void run('propose', async () => {
             const next = await proposeStudioDraft(intent)
             applyProposal(next.definition)
             setReport(next)
@@ -171,9 +180,14 @@ export function ScreenStudioPage(): JSX.Element {
             {(catalog.data?.columnNavigation ?? ['single', 'listDetail']).map((item) => <option key={item} value={item}>{item}</option>)}
           </NativeSelect>
         </div>
+        {!semanticPreview && !dialogueRequested && <Button type="button" variant="outline"
+          onClick={() => setDialogueRequested(true)}>Neuen Entwurf im Fachgespräch beginnen</Button>}
+        {(semanticPreview || dialogueRequested) && <>
+        {!semanticPreview && <p className="text-sm text-muted-foreground">Derzeit verfügbar: Getreide-Kalkulationsprobe. Eine Übernahme ersetzt den aktuellen Entwurf erst nach Ihrer Auswahl.</p>}
         <StudioDialogue key={previewGeneration} initialTurns={semanticContext?.dialogue} initialDecisions={semanticContext?.decisions}
           disabled={Boolean(pending) || !catalog.data?.permissions?.canDesign} onProposal={applyProposal} />
-        {catalog.data?.semantic && <section aria-label="Freigegebene Fachfelder" className="space-y-1 text-sm">
+        </>}
+        {semanticPreview && catalog.data?.semantic && <section aria-label="Freigegebene Fachfelder" className="space-y-1 text-sm">
           <h2 className="font-semibold">Freigegebene Fachfelder · Getreide-Kalkulationsprobe</h2>
           <p className="text-xs text-muted-foreground">Im Katalogvorschlag können Sie optionale Eingaben auswählen. Pflichtfelder sichern den Berechnungsvertrag.</p>
           <ul>{catalog.data.semantic.fields.map(field => <li key={field.key} title={field.contract}>

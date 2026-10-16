@@ -459,6 +459,10 @@ function RenderFromPlan({
       className={classes.root}
       onKeyDown={(event) => handleScreenKeyDown(event, plan, effectivePayload, dispatchAction)}
       data-screen-definition={plan.screenId}
+      data-document-base-version={plan.documentVariant?.baseVersion}
+      data-document-variant-id={plan.documentVariant?.variantId}
+      data-document-variant-version={plan.documentVariant?.variantVersion}
+      data-document-materialized-hash={plan.documentVariant?.materializedHash}
       data-testid={`screen-${plan.screenId}`}
       data-layout-mode={plan.shell.layoutMode}
       data-mobile-layout={plan.shell.mobileMode}
@@ -578,6 +582,10 @@ function RenderFromScreen({
     <div
       className={classes.root}
       data-screen-definition={screen.id}
+      data-document-base-version={screen.documentVariant?.baseVersion}
+      data-document-variant-id={screen.documentVariant?.variantId}
+      data-document-variant-version={screen.documentVariant?.variantVersion}
+      data-document-materialized-hash={screen.documentVariant?.materializedHash}
       data-testid={`screen-${screen.id}`}
       data-layout-mode={screen.layout?.preferredMode ?? 'desktopDense'}
       data-mobile-layout={screen.layout?.mobileMode ?? 'mobileStack'}

@@ -1,4 +1,5 @@
 import type {
+  DocumentScreenVariantRef,
   ScreenDomain,
   ScreenColumnNavigation,
   ScreenCalendarView,
@@ -269,6 +270,7 @@ export interface RenderPerformancePlan {
 }
 
 export interface RenderPlan {
+  documentVariant?: DocumentScreenVariantRef
   cacheKey: string
   screenId: string
   schemaVersion: number

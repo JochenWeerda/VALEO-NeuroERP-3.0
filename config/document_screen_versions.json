@@ -1,0 +1,5283 @@
+{
+  "bases": {
+    "1.0.0": {
+      "definition": {
+        "identityField": "beleg_nr",
+        "interaction": {
+          "enterMovesFocus": true
+        },
+        "layout": {
+          "floorplan": "transaction",
+          "mobileMode": "mobileStack",
+          "preferredMode": "desktopDense",
+          "sectionNavigation": "anchors",
+          "stickyFooter": true,
+          "stickyHeader": true,
+          "summaryPlacement": "footer",
+          "touchTargetPx": 44
+        },
+        "mode": "detail",
+        "noWorkflowReason": "Der Stand des Belegs und die naechste moegliche Aktion kommen je Beleg vom Server (aktionen des Belegvertrags); die Maske fuehrt keinen eigenen Ablauf.",
+        "schemaVersion": 1
+      },
+      "hash": "3a71fab023d4824c640a7d4171ee1720dfa6576089e18ed8c327c65ababc3b86"
+    }
+  },
+  "current": {
+    "goods_receipt": "1.0.0",
+    "purchase_credit_memo": "1.0.0",
+    "purchase_invoice": "1.0.0",
+    "purchase_order": "1.0.0",
+    "sales_credit_memo": "1.0.0",
+    "sales_delivery": "1.0.0",
+    "sales_invoice": "1.0.0",
+    "sales_offer": "1.0.0",
+    "sales_order": "1.0.0"
+  },
+  "family": "beleg",
+  "schemaVersion": 1,
+  "variants": {
+    "goods_receipt": {
+      "1.0.0": {
+        "baseHash": "3a71fab023d4824c640a7d4171ee1720dfa6576089e18ed8c327c65ababc3b86",
+        "baseVersion": "1.0.0",
+        "definitionHash": "e99aecbb04f64dda58accad3ac1c30ea9c1aba0e144bef5667ae7fcfb012238f",
+        "patch": {
+          "actions": [
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "release",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/release",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigeben",
+              "forbiddenForAgents": true,
+              "key": "freigeben",
+              "kind": "secondary",
+              "kommando": "docflow.release",
+              "label": "Freigeben",
+              "method": "POST",
+              "permission": "belege.ausstellen",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "convert",
+                "defaults": {
+                  "target_doc_type": "purchase_invoice"
+                },
+                "preview": true
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/convert",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_umwandeln_purchase_invoice",
+              "folgebelegart": "purchase_invoice",
+              "forbiddenForAgents": true,
+              "key": "umwandeln:purchase_invoice",
+              "kind": "primary",
+              "kommando": "docflow.convert",
+              "label": "Eingangsrechnung erstellen",
+              "method": "POST",
+              "permission": "belege.bearbeiten",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": true,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "reverse",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/reverse",
+              "dangerLevel": "critical",
+              "enabledWhen": "aktion_stornieren",
+              "forbiddenForAgents": true,
+              "key": "stornieren",
+              "kind": "secondary",
+              "kommando": "docflow.reverse",
+              "label": "Stornieren",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_request",
+                "defaults": {
+                  "action": "reverse"
+                },
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals",
+              "dangerLevel": "safe",
+              "enabledWhen": "aktion_freigabe_anfordern_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "reason",
+                  "label": "Grund der Anfrage",
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_anfordern:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_request",
+              "label": "Storno: Freigabe anfragen",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": true
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_erteilen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe erteilen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": false
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_ablehnen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe ablehnen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg/goods-receipt",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Wareneingang lesen: Kopf, Lieferant, Positionen (nur Mengen), Belegkette, Dokumente und Verlauf. Dieselben Daten liefert das MCP-Werkzeug beleg.lesen.",
+            "examplePrompts": [
+              "Zeige die Positionen von Wareneingang {entity_id}.",
+              "Aus welchem Beleg ist Wareneingang {entity_id} entstanden?",
+              "Was ist der Stand von Wareneingang {entity_id}, und was geht als Nächstes?"
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='beleg-goods-receipt']",
+              "summaryArea": "[data-testid='mask-summary']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/goods_receipt/{entity_id}/kopf",
+              "key": "entity"
+            },
+            {
+              "endpoint": "/api/v1/belege/goods_receipt/{entity_id}/tabs/positionen",
+              "key": "positionen",
+              "pageSize": 50
+            },
+            {
+              "endpoint": "/api/v1/belege/goods_receipt/{entity_id}/tabs/kette",
+              "key": "kette",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/goods_receipt/{entity_id}/tabs/dokumente",
+              "key": "dokumente",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/goods_receipt/{entity_id}/tabs/historie",
+              "key": "historie",
+              "pageSize": 25
+            }
+          ],
+          "domain": "einkauf",
+          "id": "beleg/goods-receipt",
+          "performance": {
+            "bundleGroup": "einkauf",
+            "initialPayloadBudgetKb": 48,
+            "lookupMinChars": 2,
+            "requiresLazyTabs": true,
+            "requiresVirtualTables": true
+          },
+          "subtitle": "Lieferant · nur Mengen",
+          "tabs": [
+            {
+              "dataSourceKey": "entity",
+              "fields": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Wareneingang Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Lieferant-Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Lieferant",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "aktionshinweis",
+                  "label": "Hinweise zu Aktionen",
+                  "readOnly": true,
+                  "type": "textarea"
+                }
+              ],
+              "keepAlive": true,
+              "key": "kopf",
+              "label": "Wareneingang – Kopf",
+              "lazy": false
+            },
+            {
+              "keepAlive": false,
+              "key": "positionen",
+              "label": "Positionen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "pos_nr",
+                      "label": "Pos.",
+                      "sortable": true,
+                      "width": 50
+                    },
+                    {
+                      "filterable": true,
+                      "key": "artikel_nr",
+                      "label": "Artikel-Nr.",
+                      "width": 120
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 220
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "key": "einheit",
+                      "label": "Einheit",
+                      "width": 70
+                    },
+                    {
+                      "key": "charge",
+                      "label": "Charge",
+                      "width": 120
+                    },
+                    {
+                      "key": "menge_offen",
+                      "label": "Offen",
+                      "numeric": true,
+                      "renderKind": "number"
+                    }
+                  ],
+                  "dataSourceKey": "positionen",
+                  "key": "positionen",
+                  "label": "Positionen",
+                  "pageSize": 50,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "kette",
+              "label": "Belegkette",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "filterable": true,
+                      "key": "richtung",
+                      "label": "Richtung",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Belegart",
+                      "width": 160
+                    },
+                    {
+                      "key": "beleg_nr",
+                      "label": "Beleg-Nr.",
+                      "width": 160
+                    },
+                    {
+                      "key": "status",
+                      "label": "Status",
+                      "width": 110
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number"
+                    }
+                  ],
+                  "dataSourceKey": "kette",
+                  "key": "kette",
+                  "label": "Belegkette",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "dokumente",
+              "label": "Dokumente",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "datum",
+                      "label": "Datum",
+                      "renderKind": "date",
+                      "sortable": true,
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "art",
+                      "label": "Art",
+                      "width": 90
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 240
+                    },
+                    {
+                      "key": "version",
+                      "label": "Version",
+                      "numeric": true,
+                      "width": 80
+                    },
+                    {
+                      "key": "stand",
+                      "label": "Stand",
+                      "width": 120
+                    }
+                  ],
+                  "dataSourceKey": "dokumente",
+                  "key": "dokumente",
+                  "label": "Dokumente",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "historie",
+              "label": "Verlauf",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "zeitpunkt",
+                      "label": "Zeitpunkt",
+                      "renderKind": "datetime",
+                      "sortable": true,
+                      "width": 160
+                    },
+                    {
+                      "key": "von_status",
+                      "label": "Von",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "nach_status",
+                      "label": "Nach",
+                      "width": 110
+                    },
+                    {
+                      "key": "kommando",
+                      "label": "Aktion",
+                      "width": 130
+                    },
+                    {
+                      "key": "akteur",
+                      "label": "Durch",
+                      "width": 160
+                    },
+                    {
+                      "key": "grund",
+                      "label": "Grund",
+                      "width": 260
+                    }
+                  ],
+                  "dataSourceKey": "historie",
+                  "key": "historie",
+                  "label": "Verlauf",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            }
+          ],
+          "title": "Wareneingang",
+          "variant": {
+            "belegart": "goods_receipt",
+            "bucht": false,
+            "folgebelege": [
+              "purchase_invoice"
+            ],
+            "mitPreisen": false,
+            "of": "beleg",
+            "partnerrolle": "lieferant"
+          }
+        },
+        "patchHash": "45430f8cb1b50307546284e90fab9747d27a061efdfae811e4114c9ad1af72ea"
+      }
+    },
+    "purchase_credit_memo": {
+      "1.0.0": {
+        "baseHash": "3a71fab023d4824c640a7d4171ee1720dfa6576089e18ed8c327c65ababc3b86",
+        "baseVersion": "1.0.0",
+        "definitionHash": "41055a8bb9bc0717002f1e93109846745084fb3831a5d63b37e03066c0d2cf06",
+        "patch": {
+          "actions": [
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "release",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/release",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigeben",
+              "forbiddenForAgents": true,
+              "key": "freigeben",
+              "kind": "secondary",
+              "kommando": "docflow.release",
+              "label": "Freigeben",
+              "method": "POST",
+              "permission": "belege.ausstellen",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "post",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/post",
+              "dangerLevel": "moderate",
+              "enabledWhen": "aktion_buchen",
+              "forbiddenForAgents": true,
+              "key": "buchen",
+              "kind": "primary",
+              "kommando": "docflow.post",
+              "label": "Buchen",
+              "method": "POST",
+              "permission": "belege.buchen",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": true,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "reverse",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/reverse",
+              "dangerLevel": "critical",
+              "enabledWhen": "aktion_stornieren",
+              "forbiddenForAgents": true,
+              "key": "stornieren",
+              "kind": "secondary",
+              "kommando": "docflow.reverse",
+              "label": "Stornieren",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_request",
+                "defaults": {
+                  "action": "post"
+                },
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals",
+              "dangerLevel": "safe",
+              "enabledWhen": "aktion_freigabe_anfordern_post",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "reason",
+                  "label": "Grund der Anfrage",
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_anfordern:post",
+              "kind": "secondary",
+              "kommando": "docflow.approval_request",
+              "label": "Buchung: Freigabe anfragen",
+              "method": "POST",
+              "permission": "belege.buchen",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "post",
+                  "granted": true
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:post"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_post",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_erteilen:post",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Buchung: Freigabe erteilen",
+              "method": "POST",
+              "permission": "belege.freigeben",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "post",
+                  "granted": false
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:post"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_post",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_ablehnen:post",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Buchung: Freigabe ablehnen",
+              "method": "POST",
+              "permission": "belege.freigeben",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_request",
+                "defaults": {
+                  "action": "reverse"
+                },
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals",
+              "dangerLevel": "safe",
+              "enabledWhen": "aktion_freigabe_anfordern_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "reason",
+                  "label": "Grund der Anfrage",
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_anfordern:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_request",
+              "label": "Storno: Freigabe anfragen",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": true
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_erteilen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe erteilen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": false
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_ablehnen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe ablehnen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg/purchase-credit-memo",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Einkaufsgutschrift lesen: Kopf, Lieferant, Positionen mit Preisen und Summen, Belegkette, Dokumente und Verlauf. Dieselben Daten liefert das MCP-Werkzeug beleg.lesen.",
+            "examplePrompts": [
+              "Zeige die Positionen von Einkaufsgutschrift {entity_id}.",
+              "Aus welchem Beleg ist Einkaufsgutschrift {entity_id} entstanden?",
+              "Was ist der Stand von Einkaufsgutschrift {entity_id}, und was geht als Nächstes?"
+            ],
+            "sensitiveFields": [
+              "netto",
+              "steuer",
+              "brutto",
+              "einzelpreis",
+              "rabatt_prozent"
+            ],
+            "testSelectors": {
+              "screenRoot": "[data-testid='beleg-purchase-credit-memo']",
+              "summaryArea": "[data-testid='mask-summary']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/purchase_credit_memo/{entity_id}/kopf",
+              "key": "entity"
+            },
+            {
+              "endpoint": "/api/v1/belege/purchase_credit_memo/{entity_id}/tabs/positionen",
+              "key": "positionen",
+              "pageSize": 50
+            },
+            {
+              "endpoint": "/api/v1/belege/purchase_credit_memo/{entity_id}/tabs/kette",
+              "key": "kette",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/purchase_credit_memo/{entity_id}/tabs/dokumente",
+              "key": "dokumente",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/purchase_credit_memo/{entity_id}/tabs/historie",
+              "key": "historie",
+              "pageSize": 25
+            }
+          ],
+          "domain": "einkauf",
+          "id": "beleg/purchase-credit-memo",
+          "performance": {
+            "bundleGroup": "einkauf",
+            "initialPayloadBudgetKb": 48,
+            "lookupMinChars": 2,
+            "requiresLazyTabs": true,
+            "requiresVirtualTables": true
+          },
+          "subtitle": "Lieferant · mit Preisen",
+          "tabs": [
+            {
+              "dataSourceKey": "entity",
+              "fields": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Einkaufsgutschrift Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Lieferant-Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Lieferant",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "waehrung",
+                  "label": "Währung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "steuer",
+                  "label": "Vorsteuer",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "brutto",
+                  "label": "Brutto",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "buchungsstand",
+                  "label": "Buchung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "buchungsgrund",
+                  "label": "Hinweis zur Buchung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "aktionshinweis",
+                  "label": "Hinweise zu Aktionen",
+                  "readOnly": true,
+                  "type": "textarea"
+                }
+              ],
+              "keepAlive": true,
+              "key": "kopf",
+              "label": "Einkaufsgutschrift – Kopf",
+              "lazy": false
+            },
+            {
+              "keepAlive": false,
+              "key": "positionen",
+              "label": "Positionen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "pos_nr",
+                      "label": "Pos.",
+                      "sortable": true,
+                      "width": 50
+                    },
+                    {
+                      "filterable": true,
+                      "key": "artikel_nr",
+                      "label": "Artikel-Nr.",
+                      "width": 120
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 220
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "key": "einheit",
+                      "label": "Einheit",
+                      "width": 70
+                    },
+                    {
+                      "key": "charge",
+                      "label": "Charge",
+                      "width": 120
+                    },
+                    {
+                      "key": "einzelpreis",
+                      "label": "Einzelpreis",
+                      "numeric": true,
+                      "renderKind": "currency"
+                    },
+                    {
+                      "key": "rabatt_prozent",
+                      "label": "Rabatt %",
+                      "numeric": true,
+                      "renderKind": "number"
+                    },
+                    {
+                      "key": "steuerschluessel",
+                      "label": "Steuerschlüssel",
+                      "width": 110
+                    },
+                    {
+                      "key": "netto",
+                      "label": "Netto",
+                      "numeric": true,
+                      "renderKind": "currency"
+                    },
+                    {
+                      "key": "aufwandskonto",
+                      "label": "Aufwandskonto",
+                      "width": 110
+                    }
+                  ],
+                  "dataSourceKey": "positionen",
+                  "key": "positionen",
+                  "label": "Positionen",
+                  "pageSize": 50,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "kette",
+              "label": "Belegkette",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "filterable": true,
+                      "key": "richtung",
+                      "label": "Richtung",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Belegart",
+                      "width": 160
+                    },
+                    {
+                      "key": "beleg_nr",
+                      "label": "Beleg-Nr.",
+                      "width": 160
+                    },
+                    {
+                      "key": "status",
+                      "label": "Status",
+                      "width": 110
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number"
+                    }
+                  ],
+                  "dataSourceKey": "kette",
+                  "key": "kette",
+                  "label": "Belegkette",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "dokumente",
+              "label": "Dokumente",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "datum",
+                      "label": "Datum",
+                      "renderKind": "date",
+                      "sortable": true,
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "art",
+                      "label": "Art",
+                      "width": 90
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 240
+                    },
+                    {
+                      "key": "version",
+                      "label": "Version",
+                      "numeric": true,
+                      "width": 80
+                    },
+                    {
+                      "key": "stand",
+                      "label": "Stand",
+                      "width": 120
+                    }
+                  ],
+                  "dataSourceKey": "dokumente",
+                  "key": "dokumente",
+                  "label": "Dokumente",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "historie",
+              "label": "Verlauf",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "zeitpunkt",
+                      "label": "Zeitpunkt",
+                      "renderKind": "datetime",
+                      "sortable": true,
+                      "width": 160
+                    },
+                    {
+                      "key": "von_status",
+                      "label": "Von",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "nach_status",
+                      "label": "Nach",
+                      "width": 110
+                    },
+                    {
+                      "key": "kommando",
+                      "label": "Aktion",
+                      "width": 130
+                    },
+                    {
+                      "key": "akteur",
+                      "label": "Durch",
+                      "width": 160
+                    },
+                    {
+                      "key": "grund",
+                      "label": "Grund",
+                      "width": 260
+                    }
+                  ],
+                  "dataSourceKey": "historie",
+                  "key": "historie",
+                  "label": "Verlauf",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            }
+          ],
+          "title": "Einkaufsgutschrift",
+          "variant": {
+            "belegart": "purchase_credit_memo",
+            "bucht": true,
+            "folgebelege": [],
+            "mitPreisen": true,
+            "of": "beleg",
+            "partnerrolle": "lieferant"
+          }
+        },
+        "patchHash": "b589ae97c221d8a1788a3eb103c4ce1090402b9872d43288e1c96f93ce1a8a4b"
+      }
+    },
+    "purchase_invoice": {
+      "1.0.0": {
+        "baseHash": "3a71fab023d4824c640a7d4171ee1720dfa6576089e18ed8c327c65ababc3b86",
+        "baseVersion": "1.0.0",
+        "definitionHash": "05e3070feeca39eeff24aac44eef06bd0e0815e59239cda158f5f0d200318698",
+        "patch": {
+          "actions": [
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "release",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/release",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigeben",
+              "forbiddenForAgents": true,
+              "key": "freigeben",
+              "kind": "secondary",
+              "kommando": "docflow.release",
+              "label": "Freigeben",
+              "method": "POST",
+              "permission": "belege.ausstellen",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "post",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/post",
+              "dangerLevel": "moderate",
+              "enabledWhen": "aktion_buchen",
+              "forbiddenForAgents": true,
+              "key": "buchen",
+              "kind": "primary",
+              "kommando": "docflow.post",
+              "label": "Buchen",
+              "method": "POST",
+              "permission": "belege.buchen",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "convert",
+                "defaults": {
+                  "target_doc_type": "purchase_credit_memo"
+                },
+                "preview": true
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/convert",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_umwandeln_purchase_credit_memo",
+              "folgebelegart": "purchase_credit_memo",
+              "forbiddenForAgents": true,
+              "key": "umwandeln:purchase_credit_memo",
+              "kind": "secondary",
+              "kommando": "docflow.convert",
+              "label": "Einkaufsgutschrift erstellen",
+              "method": "POST",
+              "permission": "belege.bearbeiten",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": true,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "reverse",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/reverse",
+              "dangerLevel": "critical",
+              "enabledWhen": "aktion_stornieren",
+              "forbiddenForAgents": true,
+              "key": "stornieren",
+              "kind": "secondary",
+              "kommando": "docflow.reverse",
+              "label": "Stornieren",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_request",
+                "defaults": {
+                  "action": "post"
+                },
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals",
+              "dangerLevel": "safe",
+              "enabledWhen": "aktion_freigabe_anfordern_post",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "reason",
+                  "label": "Grund der Anfrage",
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_anfordern:post",
+              "kind": "secondary",
+              "kommando": "docflow.approval_request",
+              "label": "Buchung: Freigabe anfragen",
+              "method": "POST",
+              "permission": "belege.buchen",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "post",
+                  "granted": true
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:post"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_post",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_erteilen:post",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Buchung: Freigabe erteilen",
+              "method": "POST",
+              "permission": "belege.freigeben",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "post",
+                  "granted": false
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:post"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_post",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_ablehnen:post",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Buchung: Freigabe ablehnen",
+              "method": "POST",
+              "permission": "belege.freigeben",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_request",
+                "defaults": {
+                  "action": "reverse"
+                },
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals",
+              "dangerLevel": "safe",
+              "enabledWhen": "aktion_freigabe_anfordern_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "reason",
+                  "label": "Grund der Anfrage",
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_anfordern:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_request",
+              "label": "Storno: Freigabe anfragen",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": true
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_erteilen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe erteilen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": false
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_ablehnen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe ablehnen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg/purchase-invoice",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Eingangsrechnung lesen: Kopf, Lieferant, Positionen mit Preisen und Summen, Belegkette, Dokumente und Verlauf. Dieselben Daten liefert das MCP-Werkzeug beleg.lesen.",
+            "examplePrompts": [
+              "Zeige die Positionen von Eingangsrechnung {entity_id}.",
+              "Aus welchem Beleg ist Eingangsrechnung {entity_id} entstanden?",
+              "Was ist der Stand von Eingangsrechnung {entity_id}, und was geht als Nächstes?"
+            ],
+            "sensitiveFields": [
+              "netto",
+              "steuer",
+              "brutto",
+              "einzelpreis",
+              "rabatt_prozent"
+            ],
+            "testSelectors": {
+              "screenRoot": "[data-testid='beleg-purchase-invoice']",
+              "summaryArea": "[data-testid='mask-summary']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/purchase_invoice/{entity_id}/kopf",
+              "key": "entity"
+            },
+            {
+              "endpoint": "/api/v1/belege/purchase_invoice/{entity_id}/tabs/positionen",
+              "key": "positionen",
+              "pageSize": 50
+            },
+            {
+              "endpoint": "/api/v1/belege/purchase_invoice/{entity_id}/tabs/kette",
+              "key": "kette",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/purchase_invoice/{entity_id}/tabs/dokumente",
+              "key": "dokumente",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/purchase_invoice/{entity_id}/tabs/historie",
+              "key": "historie",
+              "pageSize": 25
+            }
+          ],
+          "domain": "einkauf",
+          "id": "beleg/purchase-invoice",
+          "performance": {
+            "bundleGroup": "einkauf",
+            "initialPayloadBudgetKb": 48,
+            "lookupMinChars": 2,
+            "requiresLazyTabs": true,
+            "requiresVirtualTables": true
+          },
+          "subtitle": "Lieferant · mit Preisen",
+          "tabs": [
+            {
+              "dataSourceKey": "entity",
+              "fields": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Eingangsrechnung Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Lieferant-Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Lieferant",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "waehrung",
+                  "label": "Währung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "steuer",
+                  "label": "Vorsteuer",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "brutto",
+                  "label": "Brutto",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "buchungsstand",
+                  "label": "Buchung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "buchungsgrund",
+                  "label": "Hinweis zur Buchung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "aktionshinweis",
+                  "label": "Hinweise zu Aktionen",
+                  "readOnly": true,
+                  "type": "textarea"
+                }
+              ],
+              "keepAlive": true,
+              "key": "kopf",
+              "label": "Eingangsrechnung – Kopf",
+              "lazy": false
+            },
+            {
+              "keepAlive": false,
+              "key": "positionen",
+              "label": "Positionen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "pos_nr",
+                      "label": "Pos.",
+                      "sortable": true,
+                      "width": 50
+                    },
+                    {
+                      "filterable": true,
+                      "key": "artikel_nr",
+                      "label": "Artikel-Nr.",
+                      "width": 120
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 220
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "key": "einheit",
+                      "label": "Einheit",
+                      "width": 70
+                    },
+                    {
+                      "key": "charge",
+                      "label": "Charge",
+                      "width": 120
+                    },
+                    {
+                      "key": "menge_offen",
+                      "label": "Offen",
+                      "numeric": true,
+                      "renderKind": "number"
+                    },
+                    {
+                      "key": "einzelpreis",
+                      "label": "Einzelpreis",
+                      "numeric": true,
+                      "renderKind": "currency"
+                    },
+                    {
+                      "key": "rabatt_prozent",
+                      "label": "Rabatt %",
+                      "numeric": true,
+                      "renderKind": "number"
+                    },
+                    {
+                      "key": "steuerschluessel",
+                      "label": "Steuerschlüssel",
+                      "width": 110
+                    },
+                    {
+                      "key": "netto",
+                      "label": "Netto",
+                      "numeric": true,
+                      "renderKind": "currency"
+                    },
+                    {
+                      "key": "aufwandskonto",
+                      "label": "Aufwandskonto",
+                      "width": 110
+                    }
+                  ],
+                  "dataSourceKey": "positionen",
+                  "key": "positionen",
+                  "label": "Positionen",
+                  "pageSize": 50,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "kette",
+              "label": "Belegkette",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "filterable": true,
+                      "key": "richtung",
+                      "label": "Richtung",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Belegart",
+                      "width": 160
+                    },
+                    {
+                      "key": "beleg_nr",
+                      "label": "Beleg-Nr.",
+                      "width": 160
+                    },
+                    {
+                      "key": "status",
+                      "label": "Status",
+                      "width": 110
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number"
+                    }
+                  ],
+                  "dataSourceKey": "kette",
+                  "key": "kette",
+                  "label": "Belegkette",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "dokumente",
+              "label": "Dokumente",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "datum",
+                      "label": "Datum",
+                      "renderKind": "date",
+                      "sortable": true,
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "art",
+                      "label": "Art",
+                      "width": 90
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 240
+                    },
+                    {
+                      "key": "version",
+                      "label": "Version",
+                      "numeric": true,
+                      "width": 80
+                    },
+                    {
+                      "key": "stand",
+                      "label": "Stand",
+                      "width": 120
+                    }
+                  ],
+                  "dataSourceKey": "dokumente",
+                  "key": "dokumente",
+                  "label": "Dokumente",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "historie",
+              "label": "Verlauf",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "zeitpunkt",
+                      "label": "Zeitpunkt",
+                      "renderKind": "datetime",
+                      "sortable": true,
+                      "width": 160
+                    },
+                    {
+                      "key": "von_status",
+                      "label": "Von",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "nach_status",
+                      "label": "Nach",
+                      "width": 110
+                    },
+                    {
+                      "key": "kommando",
+                      "label": "Aktion",
+                      "width": 130
+                    },
+                    {
+                      "key": "akteur",
+                      "label": "Durch",
+                      "width": 160
+                    },
+                    {
+                      "key": "grund",
+                      "label": "Grund",
+                      "width": 260
+                    }
+                  ],
+                  "dataSourceKey": "historie",
+                  "key": "historie",
+                  "label": "Verlauf",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            }
+          ],
+          "title": "Eingangsrechnung",
+          "variant": {
+            "belegart": "purchase_invoice",
+            "bucht": true,
+            "folgebelege": [
+              "purchase_credit_memo"
+            ],
+            "mitPreisen": true,
+            "of": "beleg",
+            "partnerrolle": "lieferant"
+          }
+        },
+        "patchHash": "628c296c0187e7610d8b309e17dfa1ffe85bc3ac39185ba93345e50ed5e26f13"
+      }
+    },
+    "purchase_order": {
+      "1.0.0": {
+        "baseHash": "3a71fab023d4824c640a7d4171ee1720dfa6576089e18ed8c327c65ababc3b86",
+        "baseVersion": "1.0.0",
+        "definitionHash": "15401de65d8a5b49603fb76d67bfd88517db5929b327dc3021f543d60e3a4824",
+        "patch": {
+          "actions": [
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "release",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/release",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigeben",
+              "forbiddenForAgents": true,
+              "key": "freigeben",
+              "kind": "secondary",
+              "kommando": "docflow.release",
+              "label": "Freigeben",
+              "method": "POST",
+              "permission": "belege.ausstellen",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "convert",
+                "defaults": {
+                  "target_doc_type": "goods_receipt"
+                },
+                "preview": true
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/convert",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_umwandeln_goods_receipt",
+              "folgebelegart": "goods_receipt",
+              "forbiddenForAgents": true,
+              "key": "umwandeln:goods_receipt",
+              "kind": "primary",
+              "kommando": "docflow.convert",
+              "label": "Wareneingang erstellen",
+              "method": "POST",
+              "permission": "belege.bearbeiten",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "convert",
+                "defaults": {
+                  "target_doc_type": "purchase_invoice"
+                },
+                "preview": true
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/convert",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_umwandeln_purchase_invoice",
+              "folgebelegart": "purchase_invoice",
+              "forbiddenForAgents": true,
+              "key": "umwandeln:purchase_invoice",
+              "kind": "secondary",
+              "kommando": "docflow.convert",
+              "label": "Eingangsrechnung erstellen",
+              "method": "POST",
+              "permission": "belege.bearbeiten",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": true,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "reverse",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/reverse",
+              "dangerLevel": "critical",
+              "enabledWhen": "aktion_stornieren",
+              "forbiddenForAgents": true,
+              "key": "stornieren",
+              "kind": "secondary",
+              "kommando": "docflow.reverse",
+              "label": "Stornieren",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_request",
+                "defaults": {
+                  "action": "reverse"
+                },
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals",
+              "dangerLevel": "safe",
+              "enabledWhen": "aktion_freigabe_anfordern_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "reason",
+                  "label": "Grund der Anfrage",
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_anfordern:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_request",
+              "label": "Storno: Freigabe anfragen",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": true
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_erteilen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe erteilen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": false
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_ablehnen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe ablehnen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg/purchase-order",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Bestellung lesen: Kopf, Lieferant, Positionen mit Preisen und Summen, Belegkette, Dokumente und Verlauf. Dieselben Daten liefert das MCP-Werkzeug beleg.lesen.",
+            "examplePrompts": [
+              "Zeige die Positionen von Bestellung {entity_id}.",
+              "Aus welchem Beleg ist Bestellung {entity_id} entstanden?",
+              "Was ist der Stand von Bestellung {entity_id}, und was geht als Nächstes?"
+            ],
+            "sensitiveFields": [
+              "netto",
+              "steuer",
+              "brutto",
+              "einzelpreis",
+              "rabatt_prozent"
+            ],
+            "testSelectors": {
+              "screenRoot": "[data-testid='beleg-purchase-order']",
+              "summaryArea": "[data-testid='mask-summary']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/purchase_order/{entity_id}/kopf",
+              "key": "entity"
+            },
+            {
+              "endpoint": "/api/v1/belege/purchase_order/{entity_id}/tabs/positionen",
+              "key": "positionen",
+              "pageSize": 50
+            },
+            {
+              "endpoint": "/api/v1/belege/purchase_order/{entity_id}/tabs/kette",
+              "key": "kette",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/purchase_order/{entity_id}/tabs/dokumente",
+              "key": "dokumente",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/purchase_order/{entity_id}/tabs/historie",
+              "key": "historie",
+              "pageSize": 25
+            }
+          ],
+          "domain": "einkauf",
+          "id": "beleg/purchase-order",
+          "performance": {
+            "bundleGroup": "einkauf",
+            "initialPayloadBudgetKb": 48,
+            "lookupMinChars": 2,
+            "requiresLazyTabs": true,
+            "requiresVirtualTables": true
+          },
+          "subtitle": "Lieferant · mit Preisen",
+          "tabs": [
+            {
+              "dataSourceKey": "entity",
+              "fields": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Bestellung Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Lieferant-Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Lieferant",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "waehrung",
+                  "label": "Währung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "steuer",
+                  "label": "Vorsteuer",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "brutto",
+                  "label": "Brutto",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "aktionshinweis",
+                  "label": "Hinweise zu Aktionen",
+                  "readOnly": true,
+                  "type": "textarea"
+                }
+              ],
+              "keepAlive": true,
+              "key": "kopf",
+              "label": "Bestellung – Kopf",
+              "lazy": false
+            },
+            {
+              "keepAlive": false,
+              "key": "positionen",
+              "label": "Positionen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "pos_nr",
+                      "label": "Pos.",
+                      "sortable": true,
+                      "width": 50
+                    },
+                    {
+                      "filterable": true,
+                      "key": "artikel_nr",
+                      "label": "Artikel-Nr.",
+                      "width": 120
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 220
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "key": "einheit",
+                      "label": "Einheit",
+                      "width": 70
+                    },
+                    {
+                      "key": "charge",
+                      "label": "Charge",
+                      "width": 120
+                    },
+                    {
+                      "key": "menge_offen",
+                      "label": "Offen",
+                      "numeric": true,
+                      "renderKind": "number"
+                    },
+                    {
+                      "key": "einzelpreis",
+                      "label": "Einzelpreis",
+                      "numeric": true,
+                      "renderKind": "currency"
+                    },
+                    {
+                      "key": "rabatt_prozent",
+                      "label": "Rabatt %",
+                      "numeric": true,
+                      "renderKind": "number"
+                    },
+                    {
+                      "key": "steuerschluessel",
+                      "label": "Steuerschlüssel",
+                      "width": 110
+                    },
+                    {
+                      "key": "netto",
+                      "label": "Netto",
+                      "numeric": true,
+                      "renderKind": "currency"
+                    },
+                    {
+                      "key": "aufwandskonto",
+                      "label": "Aufwandskonto",
+                      "width": 110
+                    }
+                  ],
+                  "dataSourceKey": "positionen",
+                  "key": "positionen",
+                  "label": "Positionen",
+                  "pageSize": 50,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "kette",
+              "label": "Belegkette",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "filterable": true,
+                      "key": "richtung",
+                      "label": "Richtung",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Belegart",
+                      "width": 160
+                    },
+                    {
+                      "key": "beleg_nr",
+                      "label": "Beleg-Nr.",
+                      "width": 160
+                    },
+                    {
+                      "key": "status",
+                      "label": "Status",
+                      "width": 110
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number"
+                    }
+                  ],
+                  "dataSourceKey": "kette",
+                  "key": "kette",
+                  "label": "Belegkette",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "dokumente",
+              "label": "Dokumente",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "datum",
+                      "label": "Datum",
+                      "renderKind": "date",
+                      "sortable": true,
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "art",
+                      "label": "Art",
+                      "width": 90
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 240
+                    },
+                    {
+                      "key": "version",
+                      "label": "Version",
+                      "numeric": true,
+                      "width": 80
+                    },
+                    {
+                      "key": "stand",
+                      "label": "Stand",
+                      "width": 120
+                    }
+                  ],
+                  "dataSourceKey": "dokumente",
+                  "key": "dokumente",
+                  "label": "Dokumente",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "historie",
+              "label": "Verlauf",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "zeitpunkt",
+                      "label": "Zeitpunkt",
+                      "renderKind": "datetime",
+                      "sortable": true,
+                      "width": 160
+                    },
+                    {
+                      "key": "von_status",
+                      "label": "Von",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "nach_status",
+                      "label": "Nach",
+                      "width": 110
+                    },
+                    {
+                      "key": "kommando",
+                      "label": "Aktion",
+                      "width": 130
+                    },
+                    {
+                      "key": "akteur",
+                      "label": "Durch",
+                      "width": 160
+                    },
+                    {
+                      "key": "grund",
+                      "label": "Grund",
+                      "width": 260
+                    }
+                  ],
+                  "dataSourceKey": "historie",
+                  "key": "historie",
+                  "label": "Verlauf",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            }
+          ],
+          "title": "Bestellung",
+          "variant": {
+            "belegart": "purchase_order",
+            "bucht": false,
+            "folgebelege": [
+              "goods_receipt",
+              "purchase_invoice"
+            ],
+            "mitPreisen": true,
+            "of": "beleg",
+            "partnerrolle": "lieferant"
+          }
+        },
+        "patchHash": "f6a5f1beb328d17f70f2a0af363b154da8c7858b514fee96f52ebb8f7df87dd8"
+      }
+    },
+    "sales_credit_memo": {
+      "1.0.0": {
+        "baseHash": "3a71fab023d4824c640a7d4171ee1720dfa6576089e18ed8c327c65ababc3b86",
+        "baseVersion": "1.0.0",
+        "definitionHash": "5efbfbe82e1bfde9ec0766d1df24446709db08f9652992b6dc079e32c47ddabd",
+        "patch": {
+          "actions": [
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "release",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/release",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigeben",
+              "forbiddenForAgents": true,
+              "key": "freigeben",
+              "kind": "secondary",
+              "kommando": "docflow.release",
+              "label": "Freigeben",
+              "method": "POST",
+              "permission": "belege.ausstellen",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "post",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/post",
+              "dangerLevel": "moderate",
+              "enabledWhen": "aktion_buchen",
+              "forbiddenForAgents": true,
+              "key": "buchen",
+              "kind": "primary",
+              "kommando": "docflow.post",
+              "label": "Buchen",
+              "method": "POST",
+              "permission": "belege.buchen",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": true,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "reverse",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/reverse",
+              "dangerLevel": "critical",
+              "enabledWhen": "aktion_stornieren",
+              "forbiddenForAgents": true,
+              "key": "stornieren",
+              "kind": "secondary",
+              "kommando": "docflow.reverse",
+              "label": "Stornieren",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_request",
+                "defaults": {
+                  "action": "post"
+                },
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals",
+              "dangerLevel": "safe",
+              "enabledWhen": "aktion_freigabe_anfordern_post",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "reason",
+                  "label": "Grund der Anfrage",
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_anfordern:post",
+              "kind": "secondary",
+              "kommando": "docflow.approval_request",
+              "label": "Buchung: Freigabe anfragen",
+              "method": "POST",
+              "permission": "belege.buchen",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "post",
+                  "granted": true
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:post"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_post",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_erteilen:post",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Buchung: Freigabe erteilen",
+              "method": "POST",
+              "permission": "belege.freigeben",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "post",
+                  "granted": false
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:post"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_post",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_ablehnen:post",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Buchung: Freigabe ablehnen",
+              "method": "POST",
+              "permission": "belege.freigeben",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_request",
+                "defaults": {
+                  "action": "reverse"
+                },
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals",
+              "dangerLevel": "safe",
+              "enabledWhen": "aktion_freigabe_anfordern_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "reason",
+                  "label": "Grund der Anfrage",
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_anfordern:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_request",
+              "label": "Storno: Freigabe anfragen",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": true
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_erteilen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe erteilen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": false
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_ablehnen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe ablehnen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg/sales-credit-memo",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Gutschrift lesen: Kopf, Kunde, Positionen mit Preisen und Summen, Belegkette, Dokumente und Verlauf. Dieselben Daten liefert das MCP-Werkzeug beleg.lesen.",
+            "examplePrompts": [
+              "Zeige die Positionen von Gutschrift {entity_id}.",
+              "Aus welchem Beleg ist Gutschrift {entity_id} entstanden?",
+              "Was ist der Stand von Gutschrift {entity_id}, und was geht als Nächstes?"
+            ],
+            "sensitiveFields": [
+              "netto",
+              "steuer",
+              "brutto",
+              "einzelpreis",
+              "rabatt_prozent"
+            ],
+            "testSelectors": {
+              "screenRoot": "[data-testid='beleg-sales-credit-memo']",
+              "summaryArea": "[data-testid='mask-summary']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/sales_credit_memo/{entity_id}/kopf",
+              "key": "entity"
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_credit_memo/{entity_id}/tabs/positionen",
+              "key": "positionen",
+              "pageSize": 50
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_credit_memo/{entity_id}/tabs/kette",
+              "key": "kette",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_credit_memo/{entity_id}/tabs/dokumente",
+              "key": "dokumente",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_credit_memo/{entity_id}/tabs/historie",
+              "key": "historie",
+              "pageSize": 25
+            }
+          ],
+          "domain": "sales",
+          "id": "beleg/sales-credit-memo",
+          "performance": {
+            "bundleGroup": "sales",
+            "initialPayloadBudgetKb": 48,
+            "lookupMinChars": 2,
+            "requiresLazyTabs": true,
+            "requiresVirtualTables": true
+          },
+          "subtitle": "Kunde · mit Preisen",
+          "tabs": [
+            {
+              "dataSourceKey": "entity",
+              "fields": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Gutschrift Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Kunde",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "waehrung",
+                  "label": "Währung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "steuer",
+                  "label": "Umsatzsteuer",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "brutto",
+                  "label": "Brutto",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "buchungsstand",
+                  "label": "Buchung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "buchungsgrund",
+                  "label": "Hinweis zur Buchung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "aktionshinweis",
+                  "label": "Hinweise zu Aktionen",
+                  "readOnly": true,
+                  "type": "textarea"
+                }
+              ],
+              "keepAlive": true,
+              "key": "kopf",
+              "label": "Gutschrift – Kopf",
+              "lazy": false
+            },
+            {
+              "keepAlive": false,
+              "key": "positionen",
+              "label": "Positionen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "pos_nr",
+                      "label": "Pos.",
+                      "sortable": true,
+                      "width": 50
+                    },
+                    {
+                      "filterable": true,
+                      "key": "artikel_nr",
+                      "label": "Artikel-Nr.",
+                      "width": 120
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 220
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "key": "einheit",
+                      "label": "Einheit",
+                      "width": 70
+                    },
+                    {
+                      "key": "charge",
+                      "label": "Charge",
+                      "width": 120
+                    },
+                    {
+                      "key": "einzelpreis",
+                      "label": "Einzelpreis",
+                      "numeric": true,
+                      "renderKind": "currency"
+                    },
+                    {
+                      "key": "rabatt_prozent",
+                      "label": "Rabatt %",
+                      "numeric": true,
+                      "renderKind": "number"
+                    },
+                    {
+                      "key": "steuerschluessel",
+                      "label": "Steuerschlüssel",
+                      "width": 110
+                    },
+                    {
+                      "key": "netto",
+                      "label": "Netto",
+                      "numeric": true,
+                      "renderKind": "currency"
+                    }
+                  ],
+                  "dataSourceKey": "positionen",
+                  "key": "positionen",
+                  "label": "Positionen",
+                  "pageSize": 50,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "kette",
+              "label": "Belegkette",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "filterable": true,
+                      "key": "richtung",
+                      "label": "Richtung",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Belegart",
+                      "width": 160
+                    },
+                    {
+                      "key": "beleg_nr",
+                      "label": "Beleg-Nr.",
+                      "width": 160
+                    },
+                    {
+                      "key": "status",
+                      "label": "Status",
+                      "width": 110
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number"
+                    }
+                  ],
+                  "dataSourceKey": "kette",
+                  "key": "kette",
+                  "label": "Belegkette",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "dokumente",
+              "label": "Dokumente",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "datum",
+                      "label": "Datum",
+                      "renderKind": "date",
+                      "sortable": true,
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "art",
+                      "label": "Art",
+                      "width": 90
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 240
+                    },
+                    {
+                      "key": "version",
+                      "label": "Version",
+                      "numeric": true,
+                      "width": 80
+                    },
+                    {
+                      "key": "stand",
+                      "label": "Stand",
+                      "width": 120
+                    }
+                  ],
+                  "dataSourceKey": "dokumente",
+                  "key": "dokumente",
+                  "label": "Dokumente",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "historie",
+              "label": "Verlauf",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "zeitpunkt",
+                      "label": "Zeitpunkt",
+                      "renderKind": "datetime",
+                      "sortable": true,
+                      "width": 160
+                    },
+                    {
+                      "key": "von_status",
+                      "label": "Von",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "nach_status",
+                      "label": "Nach",
+                      "width": 110
+                    },
+                    {
+                      "key": "kommando",
+                      "label": "Aktion",
+                      "width": 130
+                    },
+                    {
+                      "key": "akteur",
+                      "label": "Durch",
+                      "width": 160
+                    },
+                    {
+                      "key": "grund",
+                      "label": "Grund",
+                      "width": 260
+                    }
+                  ],
+                  "dataSourceKey": "historie",
+                  "key": "historie",
+                  "label": "Verlauf",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            }
+          ],
+          "title": "Gutschrift",
+          "variant": {
+            "belegart": "sales_credit_memo",
+            "bucht": true,
+            "folgebelege": [],
+            "mitPreisen": true,
+            "of": "beleg",
+            "partnerrolle": "kunde"
+          }
+        },
+        "patchHash": "9e2a75a08a7182a9623d95649ce84cf50ad0993caf4ec5e852e980a001470c63"
+      }
+    },
+    "sales_delivery": {
+      "1.0.0": {
+        "baseHash": "3a71fab023d4824c640a7d4171ee1720dfa6576089e18ed8c327c65ababc3b86",
+        "baseVersion": "1.0.0",
+        "definitionHash": "5e18144fb7ba6218e472a7b40322eaf3cdd77f405944469795473394c7000425",
+        "patch": {
+          "actions": [
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "release",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/release",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigeben",
+              "forbiddenForAgents": true,
+              "key": "freigeben",
+              "kind": "secondary",
+              "kommando": "docflow.release",
+              "label": "Freigeben",
+              "method": "POST",
+              "permission": "belege.ausstellen",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "convert",
+                "defaults": {
+                  "target_doc_type": "sales_invoice"
+                },
+                "preview": true
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/convert",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_umwandeln_sales_invoice",
+              "folgebelegart": "sales_invoice",
+              "forbiddenForAgents": true,
+              "key": "umwandeln:sales_invoice",
+              "kind": "primary",
+              "kommando": "docflow.convert",
+              "label": "Rechnung erstellen",
+              "method": "POST",
+              "permission": "belege.bearbeiten",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": true,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "reverse",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/reverse",
+              "dangerLevel": "critical",
+              "enabledWhen": "aktion_stornieren",
+              "forbiddenForAgents": true,
+              "key": "stornieren",
+              "kind": "secondary",
+              "kommando": "docflow.reverse",
+              "label": "Stornieren",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_request",
+                "defaults": {
+                  "action": "reverse"
+                },
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals",
+              "dangerLevel": "safe",
+              "enabledWhen": "aktion_freigabe_anfordern_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "reason",
+                  "label": "Grund der Anfrage",
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_anfordern:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_request",
+              "label": "Storno: Freigabe anfragen",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": true
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_erteilen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe erteilen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": false
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_ablehnen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe ablehnen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg/sales-delivery",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Lieferschein lesen: Kopf, Kunde, Positionen (nur Mengen), Belegkette, Dokumente und Verlauf. Dieselben Daten liefert das MCP-Werkzeug beleg.lesen.",
+            "examplePrompts": [
+              "Zeige die Positionen von Lieferschein {entity_id}.",
+              "Aus welchem Beleg ist Lieferschein {entity_id} entstanden?",
+              "Was ist der Stand von Lieferschein {entity_id}, und was geht als Nächstes?"
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='beleg-sales-delivery']",
+              "summaryArea": "[data-testid='mask-summary']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/sales_delivery/{entity_id}/kopf",
+              "key": "entity"
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_delivery/{entity_id}/tabs/positionen",
+              "key": "positionen",
+              "pageSize": 50
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_delivery/{entity_id}/tabs/kette",
+              "key": "kette",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_delivery/{entity_id}/tabs/dokumente",
+              "key": "dokumente",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_delivery/{entity_id}/tabs/historie",
+              "key": "historie",
+              "pageSize": 25
+            }
+          ],
+          "domain": "sales",
+          "id": "beleg/sales-delivery",
+          "performance": {
+            "bundleGroup": "sales",
+            "initialPayloadBudgetKb": 48,
+            "lookupMinChars": 2,
+            "requiresLazyTabs": true,
+            "requiresVirtualTables": true
+          },
+          "subtitle": "Kunde · nur Mengen",
+          "tabs": [
+            {
+              "dataSourceKey": "entity",
+              "fields": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Lieferschein Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Kunde",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "aktionshinweis",
+                  "label": "Hinweise zu Aktionen",
+                  "readOnly": true,
+                  "type": "textarea"
+                }
+              ],
+              "keepAlive": true,
+              "key": "kopf",
+              "label": "Lieferschein – Kopf",
+              "lazy": false
+            },
+            {
+              "keepAlive": false,
+              "key": "positionen",
+              "label": "Positionen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "pos_nr",
+                      "label": "Pos.",
+                      "sortable": true,
+                      "width": 50
+                    },
+                    {
+                      "filterable": true,
+                      "key": "artikel_nr",
+                      "label": "Artikel-Nr.",
+                      "width": 120
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 220
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "key": "einheit",
+                      "label": "Einheit",
+                      "width": 70
+                    },
+                    {
+                      "key": "charge",
+                      "label": "Charge",
+                      "width": 120
+                    },
+                    {
+                      "key": "menge_offen",
+                      "label": "Offen",
+                      "numeric": true,
+                      "renderKind": "number"
+                    }
+                  ],
+                  "dataSourceKey": "positionen",
+                  "key": "positionen",
+                  "label": "Positionen",
+                  "pageSize": 50,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "kette",
+              "label": "Belegkette",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "filterable": true,
+                      "key": "richtung",
+                      "label": "Richtung",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Belegart",
+                      "width": 160
+                    },
+                    {
+                      "key": "beleg_nr",
+                      "label": "Beleg-Nr.",
+                      "width": 160
+                    },
+                    {
+                      "key": "status",
+                      "label": "Status",
+                      "width": 110
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number"
+                    }
+                  ],
+                  "dataSourceKey": "kette",
+                  "key": "kette",
+                  "label": "Belegkette",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "dokumente",
+              "label": "Dokumente",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "datum",
+                      "label": "Datum",
+                      "renderKind": "date",
+                      "sortable": true,
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "art",
+                      "label": "Art",
+                      "width": 90
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 240
+                    },
+                    {
+                      "key": "version",
+                      "label": "Version",
+                      "numeric": true,
+                      "width": 80
+                    },
+                    {
+                      "key": "stand",
+                      "label": "Stand",
+                      "width": 120
+                    }
+                  ],
+                  "dataSourceKey": "dokumente",
+                  "key": "dokumente",
+                  "label": "Dokumente",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "historie",
+              "label": "Verlauf",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "zeitpunkt",
+                      "label": "Zeitpunkt",
+                      "renderKind": "datetime",
+                      "sortable": true,
+                      "width": 160
+                    },
+                    {
+                      "key": "von_status",
+                      "label": "Von",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "nach_status",
+                      "label": "Nach",
+                      "width": 110
+                    },
+                    {
+                      "key": "kommando",
+                      "label": "Aktion",
+                      "width": 130
+                    },
+                    {
+                      "key": "akteur",
+                      "label": "Durch",
+                      "width": 160
+                    },
+                    {
+                      "key": "grund",
+                      "label": "Grund",
+                      "width": 260
+                    }
+                  ],
+                  "dataSourceKey": "historie",
+                  "key": "historie",
+                  "label": "Verlauf",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            }
+          ],
+          "title": "Lieferschein",
+          "variant": {
+            "belegart": "sales_delivery",
+            "bucht": false,
+            "folgebelege": [
+              "sales_invoice"
+            ],
+            "mitPreisen": false,
+            "of": "beleg",
+            "partnerrolle": "kunde"
+          }
+        },
+        "patchHash": "9d8c9cb468b93e4b72123577b485d9cd815028374e4a44d533438ab8d9dc759f"
+      }
+    },
+    "sales_invoice": {
+      "1.0.0": {
+        "baseHash": "3a71fab023d4824c640a7d4171ee1720dfa6576089e18ed8c327c65ababc3b86",
+        "baseVersion": "1.0.0",
+        "definitionHash": "d8b1faa09adfe4a6af5b25a888185723374b7ec2d88c28f1710ec1cd0ad0c2ed",
+        "patch": {
+          "actions": [
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "release",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/release",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigeben",
+              "forbiddenForAgents": true,
+              "key": "freigeben",
+              "kind": "secondary",
+              "kommando": "docflow.release",
+              "label": "Freigeben",
+              "method": "POST",
+              "permission": "belege.ausstellen",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "post",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/post",
+              "dangerLevel": "moderate",
+              "enabledWhen": "aktion_buchen",
+              "forbiddenForAgents": true,
+              "key": "buchen",
+              "kind": "primary",
+              "kommando": "docflow.post",
+              "label": "Buchen",
+              "method": "POST",
+              "permission": "belege.buchen",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "convert",
+                "defaults": {
+                  "target_doc_type": "sales_credit_memo"
+                },
+                "preview": true
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/convert",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_umwandeln_sales_credit_memo",
+              "folgebelegart": "sales_credit_memo",
+              "forbiddenForAgents": true,
+              "key": "umwandeln:sales_credit_memo",
+              "kind": "secondary",
+              "kommando": "docflow.convert",
+              "label": "Gutschrift erstellen",
+              "method": "POST",
+              "permission": "belege.bearbeiten",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": true,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "reverse",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/reverse",
+              "dangerLevel": "critical",
+              "enabledWhen": "aktion_stornieren",
+              "forbiddenForAgents": true,
+              "key": "stornieren",
+              "kind": "secondary",
+              "kommando": "docflow.reverse",
+              "label": "Stornieren",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_request",
+                "defaults": {
+                  "action": "post"
+                },
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals",
+              "dangerLevel": "safe",
+              "enabledWhen": "aktion_freigabe_anfordern_post",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "reason",
+                  "label": "Grund der Anfrage",
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_anfordern:post",
+              "kind": "secondary",
+              "kommando": "docflow.approval_request",
+              "label": "Buchung: Freigabe anfragen",
+              "method": "POST",
+              "permission": "belege.buchen",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "post",
+                  "granted": true
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:post"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_post",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_erteilen:post",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Buchung: Freigabe erteilen",
+              "method": "POST",
+              "permission": "belege.freigeben",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "post",
+                  "granted": false
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:post"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_post",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_ablehnen:post",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Buchung: Freigabe ablehnen",
+              "method": "POST",
+              "permission": "belege.freigeben",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_request",
+                "defaults": {
+                  "action": "reverse"
+                },
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals",
+              "dangerLevel": "safe",
+              "enabledWhen": "aktion_freigabe_anfordern_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "reason",
+                  "label": "Grund der Anfrage",
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_anfordern:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_request",
+              "label": "Storno: Freigabe anfragen",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": true
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_erteilen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe erteilen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": false
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_ablehnen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe ablehnen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg/sales-invoice",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Rechnung lesen: Kopf, Kunde, Positionen mit Preisen und Summen, Belegkette, Dokumente und Verlauf. Dieselben Daten liefert das MCP-Werkzeug beleg.lesen.",
+            "examplePrompts": [
+              "Zeige die Positionen von Rechnung {entity_id}.",
+              "Aus welchem Beleg ist Rechnung {entity_id} entstanden?",
+              "Was ist der Stand von Rechnung {entity_id}, und was geht als Nächstes?"
+            ],
+            "sensitiveFields": [
+              "netto",
+              "steuer",
+              "brutto",
+              "einzelpreis",
+              "rabatt_prozent"
+            ],
+            "testSelectors": {
+              "screenRoot": "[data-testid='beleg-sales-invoice']",
+              "summaryArea": "[data-testid='mask-summary']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/sales_invoice/{entity_id}/kopf",
+              "key": "entity"
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_invoice/{entity_id}/tabs/positionen",
+              "key": "positionen",
+              "pageSize": 50
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_invoice/{entity_id}/tabs/kette",
+              "key": "kette",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_invoice/{entity_id}/tabs/dokumente",
+              "key": "dokumente",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_invoice/{entity_id}/tabs/historie",
+              "key": "historie",
+              "pageSize": 25
+            }
+          ],
+          "domain": "sales",
+          "id": "beleg/sales-invoice",
+          "performance": {
+            "bundleGroup": "sales",
+            "initialPayloadBudgetKb": 48,
+            "lookupMinChars": 2,
+            "requiresLazyTabs": true,
+            "requiresVirtualTables": true
+          },
+          "subtitle": "Kunde · mit Preisen",
+          "tabs": [
+            {
+              "dataSourceKey": "entity",
+              "fields": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Rechnung Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Kunde",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "waehrung",
+                  "label": "Währung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "steuer",
+                  "label": "Umsatzsteuer",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "brutto",
+                  "label": "Brutto",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "buchungsstand",
+                  "label": "Buchung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "buchungsgrund",
+                  "label": "Hinweis zur Buchung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "aktionshinweis",
+                  "label": "Hinweise zu Aktionen",
+                  "readOnly": true,
+                  "type": "textarea"
+                }
+              ],
+              "keepAlive": true,
+              "key": "kopf",
+              "label": "Rechnung – Kopf",
+              "lazy": false
+            },
+            {
+              "keepAlive": false,
+              "key": "positionen",
+              "label": "Positionen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "pos_nr",
+                      "label": "Pos.",
+                      "sortable": true,
+                      "width": 50
+                    },
+                    {
+                      "filterable": true,
+                      "key": "artikel_nr",
+                      "label": "Artikel-Nr.",
+                      "width": 120
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 220
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "key": "einheit",
+                      "label": "Einheit",
+                      "width": 70
+                    },
+                    {
+                      "key": "charge",
+                      "label": "Charge",
+                      "width": 120
+                    },
+                    {
+                      "key": "menge_offen",
+                      "label": "Offen",
+                      "numeric": true,
+                      "renderKind": "number"
+                    },
+                    {
+                      "key": "einzelpreis",
+                      "label": "Einzelpreis",
+                      "numeric": true,
+                      "renderKind": "currency"
+                    },
+                    {
+                      "key": "rabatt_prozent",
+                      "label": "Rabatt %",
+                      "numeric": true,
+                      "renderKind": "number"
+                    },
+                    {
+                      "key": "steuerschluessel",
+                      "label": "Steuerschlüssel",
+                      "width": 110
+                    },
+                    {
+                      "key": "netto",
+                      "label": "Netto",
+                      "numeric": true,
+                      "renderKind": "currency"
+                    }
+                  ],
+                  "dataSourceKey": "positionen",
+                  "key": "positionen",
+                  "label": "Positionen",
+                  "pageSize": 50,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "kette",
+              "label": "Belegkette",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "filterable": true,
+                      "key": "richtung",
+                      "label": "Richtung",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Belegart",
+                      "width": 160
+                    },
+                    {
+                      "key": "beleg_nr",
+                      "label": "Beleg-Nr.",
+                      "width": 160
+                    },
+                    {
+                      "key": "status",
+                      "label": "Status",
+                      "width": 110
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number"
+                    }
+                  ],
+                  "dataSourceKey": "kette",
+                  "key": "kette",
+                  "label": "Belegkette",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "dokumente",
+              "label": "Dokumente",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "datum",
+                      "label": "Datum",
+                      "renderKind": "date",
+                      "sortable": true,
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "art",
+                      "label": "Art",
+                      "width": 90
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 240
+                    },
+                    {
+                      "key": "version",
+                      "label": "Version",
+                      "numeric": true,
+                      "width": 80
+                    },
+                    {
+                      "key": "stand",
+                      "label": "Stand",
+                      "width": 120
+                    }
+                  ],
+                  "dataSourceKey": "dokumente",
+                  "key": "dokumente",
+                  "label": "Dokumente",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "historie",
+              "label": "Verlauf",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "zeitpunkt",
+                      "label": "Zeitpunkt",
+                      "renderKind": "datetime",
+                      "sortable": true,
+                      "width": 160
+                    },
+                    {
+                      "key": "von_status",
+                      "label": "Von",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "nach_status",
+                      "label": "Nach",
+                      "width": 110
+                    },
+                    {
+                      "key": "kommando",
+                      "label": "Aktion",
+                      "width": 130
+                    },
+                    {
+                      "key": "akteur",
+                      "label": "Durch",
+                      "width": 160
+                    },
+                    {
+                      "key": "grund",
+                      "label": "Grund",
+                      "width": 260
+                    }
+                  ],
+                  "dataSourceKey": "historie",
+                  "key": "historie",
+                  "label": "Verlauf",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            }
+          ],
+          "title": "Rechnung",
+          "variant": {
+            "belegart": "sales_invoice",
+            "bucht": true,
+            "folgebelege": [
+              "sales_credit_memo"
+            ],
+            "mitPreisen": true,
+            "of": "beleg",
+            "partnerrolle": "kunde"
+          }
+        },
+        "patchHash": "5ec8d3f85b35247e36ac59b148b61d56e9ff23f4404c778b2f3aab9bbfa73884"
+      }
+    },
+    "sales_offer": {
+      "1.0.0": {
+        "baseHash": "3a71fab023d4824c640a7d4171ee1720dfa6576089e18ed8c327c65ababc3b86",
+        "baseVersion": "1.0.0",
+        "definitionHash": "84016b1d9402405c1168c8f2be0d77c86513b75da3d56a0c11ba45e9b615ed62",
+        "patch": {
+          "actions": [
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "release",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/release",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigeben",
+              "forbiddenForAgents": true,
+              "key": "freigeben",
+              "kind": "secondary",
+              "kommando": "docflow.release",
+              "label": "Freigeben",
+              "method": "POST",
+              "permission": "belege.ausstellen",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "convert",
+                "defaults": {
+                  "target_doc_type": "sales_order"
+                },
+                "preview": true
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/convert",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_umwandeln_sales_order",
+              "folgebelegart": "sales_order",
+              "forbiddenForAgents": true,
+              "key": "umwandeln:sales_order",
+              "kind": "primary",
+              "kommando": "docflow.convert",
+              "label": "Auftrag erstellen",
+              "method": "POST",
+              "permission": "belege.bearbeiten",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": true,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "reverse",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/reverse",
+              "dangerLevel": "critical",
+              "enabledWhen": "aktion_stornieren",
+              "forbiddenForAgents": true,
+              "key": "stornieren",
+              "kind": "secondary",
+              "kommando": "docflow.reverse",
+              "label": "Stornieren",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_request",
+                "defaults": {
+                  "action": "reverse"
+                },
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals",
+              "dangerLevel": "safe",
+              "enabledWhen": "aktion_freigabe_anfordern_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "reason",
+                  "label": "Grund der Anfrage",
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_anfordern:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_request",
+              "label": "Storno: Freigabe anfragen",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": true
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_erteilen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe erteilen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": false
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_ablehnen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe ablehnen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg/sales-offer",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Angebot lesen: Kopf, Kunde, Positionen mit Preisen und Summen, Belegkette, Dokumente und Verlauf. Dieselben Daten liefert das MCP-Werkzeug beleg.lesen.",
+            "examplePrompts": [
+              "Zeige die Positionen von Angebot {entity_id}.",
+              "Aus welchem Beleg ist Angebot {entity_id} entstanden?",
+              "Was ist der Stand von Angebot {entity_id}, und was geht als Nächstes?"
+            ],
+            "sensitiveFields": [
+              "netto",
+              "steuer",
+              "brutto",
+              "einzelpreis",
+              "rabatt_prozent"
+            ],
+            "testSelectors": {
+              "screenRoot": "[data-testid='beleg-sales-offer']",
+              "summaryArea": "[data-testid='mask-summary']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/sales_offer/{entity_id}/kopf",
+              "key": "entity"
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_offer/{entity_id}/tabs/positionen",
+              "key": "positionen",
+              "pageSize": 50
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_offer/{entity_id}/tabs/kette",
+              "key": "kette",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_offer/{entity_id}/tabs/dokumente",
+              "key": "dokumente",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_offer/{entity_id}/tabs/historie",
+              "key": "historie",
+              "pageSize": 25
+            }
+          ],
+          "domain": "sales",
+          "id": "beleg/sales-offer",
+          "performance": {
+            "bundleGroup": "sales",
+            "initialPayloadBudgetKb": 48,
+            "lookupMinChars": 2,
+            "requiresLazyTabs": true,
+            "requiresVirtualTables": true
+          },
+          "subtitle": "Kunde · mit Preisen",
+          "tabs": [
+            {
+              "dataSourceKey": "entity",
+              "fields": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Angebot Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Kunde",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "waehrung",
+                  "label": "Währung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "steuer",
+                  "label": "Umsatzsteuer",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "brutto",
+                  "label": "Brutto",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "aktionshinweis",
+                  "label": "Hinweise zu Aktionen",
+                  "readOnly": true,
+                  "type": "textarea"
+                }
+              ],
+              "keepAlive": true,
+              "key": "kopf",
+              "label": "Angebot – Kopf",
+              "lazy": false
+            },
+            {
+              "keepAlive": false,
+              "key": "positionen",
+              "label": "Positionen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "pos_nr",
+                      "label": "Pos.",
+                      "sortable": true,
+                      "width": 50
+                    },
+                    {
+                      "filterable": true,
+                      "key": "artikel_nr",
+                      "label": "Artikel-Nr.",
+                      "width": 120
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 220
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "key": "einheit",
+                      "label": "Einheit",
+                      "width": 70
+                    },
+                    {
+                      "key": "charge",
+                      "label": "Charge",
+                      "width": 120
+                    },
+                    {
+                      "key": "menge_offen",
+                      "label": "Offen",
+                      "numeric": true,
+                      "renderKind": "number"
+                    },
+                    {
+                      "key": "einzelpreis",
+                      "label": "Einzelpreis",
+                      "numeric": true,
+                      "renderKind": "currency"
+                    },
+                    {
+                      "key": "rabatt_prozent",
+                      "label": "Rabatt %",
+                      "numeric": true,
+                      "renderKind": "number"
+                    },
+                    {
+                      "key": "steuerschluessel",
+                      "label": "Steuerschlüssel",
+                      "width": 110
+                    },
+                    {
+                      "key": "netto",
+                      "label": "Netto",
+                      "numeric": true,
+                      "renderKind": "currency"
+                    }
+                  ],
+                  "dataSourceKey": "positionen",
+                  "key": "positionen",
+                  "label": "Positionen",
+                  "pageSize": 50,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "kette",
+              "label": "Belegkette",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "filterable": true,
+                      "key": "richtung",
+                      "label": "Richtung",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Belegart",
+                      "width": 160
+                    },
+                    {
+                      "key": "beleg_nr",
+                      "label": "Beleg-Nr.",
+                      "width": 160
+                    },
+                    {
+                      "key": "status",
+                      "label": "Status",
+                      "width": 110
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number"
+                    }
+                  ],
+                  "dataSourceKey": "kette",
+                  "key": "kette",
+                  "label": "Belegkette",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "dokumente",
+              "label": "Dokumente",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "datum",
+                      "label": "Datum",
+                      "renderKind": "date",
+                      "sortable": true,
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "art",
+                      "label": "Art",
+                      "width": 90
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 240
+                    },
+                    {
+                      "key": "version",
+                      "label": "Version",
+                      "numeric": true,
+                      "width": 80
+                    },
+                    {
+                      "key": "stand",
+                      "label": "Stand",
+                      "width": 120
+                    }
+                  ],
+                  "dataSourceKey": "dokumente",
+                  "key": "dokumente",
+                  "label": "Dokumente",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "historie",
+              "label": "Verlauf",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "zeitpunkt",
+                      "label": "Zeitpunkt",
+                      "renderKind": "datetime",
+                      "sortable": true,
+                      "width": 160
+                    },
+                    {
+                      "key": "von_status",
+                      "label": "Von",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "nach_status",
+                      "label": "Nach",
+                      "width": 110
+                    },
+                    {
+                      "key": "kommando",
+                      "label": "Aktion",
+                      "width": 130
+                    },
+                    {
+                      "key": "akteur",
+                      "label": "Durch",
+                      "width": 160
+                    },
+                    {
+                      "key": "grund",
+                      "label": "Grund",
+                      "width": 260
+                    }
+                  ],
+                  "dataSourceKey": "historie",
+                  "key": "historie",
+                  "label": "Verlauf",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            }
+          ],
+          "title": "Angebot",
+          "variant": {
+            "belegart": "sales_offer",
+            "bucht": false,
+            "folgebelege": [
+              "sales_order"
+            ],
+            "mitPreisen": true,
+            "of": "beleg",
+            "partnerrolle": "kunde"
+          }
+        },
+        "patchHash": "6a8972e46c14bbf2a060403a5b028386bbc5ad59c29f88e6de344be0a209d5f0"
+      }
+    },
+    "sales_order": {
+      "1.0.0": {
+        "baseHash": "3a71fab023d4824c640a7d4171ee1720dfa6576089e18ed8c327c65ababc3b86",
+        "baseVersion": "1.0.0",
+        "definitionHash": "a5cf74548e0f979d976fb5e08fe6faa6ec57bc8a962464a2efc2634d59d7fc40",
+        "patch": {
+          "actions": [
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "release",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/release",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigeben",
+              "forbiddenForAgents": true,
+              "key": "freigeben",
+              "kind": "secondary",
+              "kommando": "docflow.release",
+              "label": "Freigeben",
+              "method": "POST",
+              "permission": "belege.ausstellen",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "convert",
+                "defaults": {
+                  "target_doc_type": "sales_delivery"
+                },
+                "preview": true
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/convert",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_umwandeln_sales_delivery",
+              "folgebelegart": "sales_delivery",
+              "forbiddenForAgents": true,
+              "key": "umwandeln:sales_delivery",
+              "kind": "primary",
+              "kommando": "docflow.convert",
+              "label": "Lieferschein erstellen",
+              "method": "POST",
+              "permission": "belege.bearbeiten",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "convert",
+                "defaults": {
+                  "target_doc_type": "sales_invoice"
+                },
+                "preview": true
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/convert",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_umwandeln_sales_invoice",
+              "folgebelegart": "sales_invoice",
+              "forbiddenForAgents": true,
+              "key": "umwandeln:sales_invoice",
+              "kind": "secondary",
+              "kommando": "docflow.convert",
+              "label": "Rechnung erstellen",
+              "method": "POST",
+              "permission": "belege.bearbeiten",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": true,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "reverse",
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/reverse",
+              "dangerLevel": "critical",
+              "enabledWhen": "aktion_stornieren",
+              "forbiddenForAgents": true,
+              "key": "stornieren",
+              "kind": "secondary",
+              "kommando": "docflow.reverse",
+              "label": "Stornieren",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_request",
+                "defaults": {
+                  "action": "reverse"
+                },
+                "preview": false
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals",
+              "dangerLevel": "safe",
+              "enabledWhen": "aktion_freigabe_anfordern_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "reason",
+                  "label": "Grund der Anfrage",
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_anfordern:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_request",
+              "label": "Storno: Freigabe anfragen",
+              "method": "POST",
+              "permission": "belege.stornieren",
+              "requiresConfirmation": false
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": true
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_erteilen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe erteilen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            },
+            {
+              "auditReasonRequired": false,
+              "commandBinding": {
+                "adapter": "docflow.v1",
+                "command": "approval_decide",
+                "defaults": {
+                  "action": "reverse",
+                  "granted": false
+                },
+                "preview": false,
+                "stateAction": "freigabe_erteilen:reverse"
+              },
+              "commandEndpoint": "/api/v1/docflow/{entity_id}/approvals/{approval_id}/decision",
+              "dangerLevel": "low",
+              "enabledWhen": "aktion_freigabe_erteilen_reverse",
+              "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "key": "note",
+                  "label": "Pruefvermerk",
+                  "required": true,
+                  "type": "textarea"
+                }
+              ],
+              "key": "freigabe_ablehnen:reverse",
+              "kind": "secondary",
+              "kommando": "docflow.approval_decide",
+              "label": "Storno: Freigabe ablehnen",
+              "method": "POST",
+              "permission": "belege.freigeben_erhoeht",
+              "requiresConfirmation": true
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg/sales-order",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Auftrag lesen: Kopf, Kunde, Positionen mit Preisen und Summen, Belegkette, Dokumente und Verlauf. Dieselben Daten liefert das MCP-Werkzeug beleg.lesen.",
+            "examplePrompts": [
+              "Zeige die Positionen von Auftrag {entity_id}.",
+              "Aus welchem Beleg ist Auftrag {entity_id} entstanden?",
+              "Was ist der Stand von Auftrag {entity_id}, und was geht als Nächstes?"
+            ],
+            "sensitiveFields": [
+              "netto",
+              "steuer",
+              "brutto",
+              "einzelpreis",
+              "rabatt_prozent"
+            ],
+            "testSelectors": {
+              "screenRoot": "[data-testid='beleg-sales-order']",
+              "summaryArea": "[data-testid='mask-summary']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/sales_order/{entity_id}/kopf",
+              "key": "entity"
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_order/{entity_id}/tabs/positionen",
+              "key": "positionen",
+              "pageSize": 50
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_order/{entity_id}/tabs/kette",
+              "key": "kette",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_order/{entity_id}/tabs/dokumente",
+              "key": "dokumente",
+              "pageSize": 25
+            },
+            {
+              "endpoint": "/api/v1/belege/sales_order/{entity_id}/tabs/historie",
+              "key": "historie",
+              "pageSize": 25
+            }
+          ],
+          "domain": "sales",
+          "id": "beleg/sales-order",
+          "performance": {
+            "bundleGroup": "sales",
+            "initialPayloadBudgetKb": 48,
+            "lookupMinChars": 2,
+            "requiresLazyTabs": true,
+            "requiresVirtualTables": true
+          },
+          "subtitle": "Kunde · mit Preisen",
+          "tabs": [
+            {
+              "dataSourceKey": "entity",
+              "fields": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Auftrag Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr.",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Kunde",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "waehrung",
+                  "label": "Währung",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "steuer",
+                  "label": "Umsatzsteuer",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "brutto",
+                  "label": "Brutto",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "aktionshinweis",
+                  "label": "Hinweise zu Aktionen",
+                  "readOnly": true,
+                  "type": "textarea"
+                }
+              ],
+              "keepAlive": true,
+              "key": "kopf",
+              "label": "Auftrag – Kopf",
+              "lazy": false
+            },
+            {
+              "keepAlive": false,
+              "key": "positionen",
+              "label": "Positionen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "pos_nr",
+                      "label": "Pos.",
+                      "sortable": true,
+                      "width": 50
+                    },
+                    {
+                      "filterable": true,
+                      "key": "artikel_nr",
+                      "label": "Artikel-Nr.",
+                      "width": 120
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 220
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "key": "einheit",
+                      "label": "Einheit",
+                      "width": 70
+                    },
+                    {
+                      "key": "charge",
+                      "label": "Charge",
+                      "width": 120
+                    },
+                    {
+                      "key": "menge_offen",
+                      "label": "Offen",
+                      "numeric": true,
+                      "renderKind": "number"
+                    },
+                    {
+                      "key": "einzelpreis",
+                      "label": "Einzelpreis",
+                      "numeric": true,
+                      "renderKind": "currency"
+                    },
+                    {
+                      "key": "rabatt_prozent",
+                      "label": "Rabatt %",
+                      "numeric": true,
+                      "renderKind": "number"
+                    },
+                    {
+                      "key": "steuerschluessel",
+                      "label": "Steuerschlüssel",
+                      "width": 110
+                    },
+                    {
+                      "key": "netto",
+                      "label": "Netto",
+                      "numeric": true,
+                      "renderKind": "currency"
+                    }
+                  ],
+                  "dataSourceKey": "positionen",
+                  "key": "positionen",
+                  "label": "Positionen",
+                  "pageSize": 50,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "kette",
+              "label": "Belegkette",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "filterable": true,
+                      "key": "richtung",
+                      "label": "Richtung",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Belegart",
+                      "width": 160
+                    },
+                    {
+                      "key": "beleg_nr",
+                      "label": "Beleg-Nr.",
+                      "width": 160
+                    },
+                    {
+                      "key": "status",
+                      "label": "Status",
+                      "width": 110
+                    },
+                    {
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "renderKind": "number"
+                    }
+                  ],
+                  "dataSourceKey": "kette",
+                  "key": "kette",
+                  "label": "Belegkette",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "dokumente",
+              "label": "Dokumente",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "datum",
+                      "label": "Datum",
+                      "renderKind": "date",
+                      "sortable": true,
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "art",
+                      "label": "Art",
+                      "width": 90
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "width": 240
+                    },
+                    {
+                      "key": "version",
+                      "label": "Version",
+                      "numeric": true,
+                      "width": 80
+                    },
+                    {
+                      "key": "stand",
+                      "label": "Stand",
+                      "width": 120
+                    }
+                  ],
+                  "dataSourceKey": "dokumente",
+                  "key": "dokumente",
+                  "label": "Dokumente",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "historie",
+              "label": "Verlauf",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "zeitpunkt",
+                      "label": "Zeitpunkt",
+                      "renderKind": "datetime",
+                      "sortable": true,
+                      "width": 160
+                    },
+                    {
+                      "key": "von_status",
+                      "label": "Von",
+                      "width": 110
+                    },
+                    {
+                      "filterable": true,
+                      "key": "nach_status",
+                      "label": "Nach",
+                      "width": 110
+                    },
+                    {
+                      "key": "kommando",
+                      "label": "Aktion",
+                      "width": 130
+                    },
+                    {
+                      "key": "akteur",
+                      "label": "Durch",
+                      "width": 160
+                    },
+                    {
+                      "key": "grund",
+                      "label": "Grund",
+                      "width": 260
+                    }
+                  ],
+                  "dataSourceKey": "historie",
+                  "key": "historie",
+                  "label": "Verlauf",
+                  "pageSize": 25,
+                  "rowHeight": 52,
+                  "serverPagination": true,
+                  "virtualized": true
+                }
+              ]
+            }
+          ],
+          "title": "Auftrag",
+          "variant": {
+            "belegart": "sales_order",
+            "bucht": false,
+            "folgebelege": [
+              "sales_delivery",
+              "sales_invoice"
+            ],
+            "mitPreisen": true,
+            "of": "beleg",
+            "partnerrolle": "kunde"
+          }
+        },
+        "patchHash": "96200ebf1b24e0e3a487098fc6c8f9b3e49cca75e90c5bb671b4fe60e6a4172a"
+      }
+    }
+  }
+}

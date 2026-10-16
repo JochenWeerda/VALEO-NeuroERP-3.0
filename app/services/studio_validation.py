@@ -96,6 +96,18 @@ def validate_studio_draft(
         violations.append("screen_id_muss_text_sein")
         screen_id = ""
 
+    binding = definition.get("documentVariant")
+    if binding is not None:
+        try:
+            from app.core.document_screen_versions import document_definition
+            if not isinstance(binding, dict):
+                raise ValueError("binding_not_an_object")
+            document_definition(binding["variantId"], binding["variantVersion"], expected=binding)
+            if definition.get("variant", {}).get("belegart") != binding["variantId"]:
+                raise ValueError("variant_mismatch")
+        except (ValueError, KeyError, TypeError, AttributeError):
+            violations.append("belegvariantenbindung_ungueltig")
+
     # ── Namensraum ───────────────────────────────────────────────────────────
     if screen_id and not screen_id.startswith("tenant/"):
         violations.append(f"namensraum:screen_id_muss_tenant_prefix_haben:{screen_id}")

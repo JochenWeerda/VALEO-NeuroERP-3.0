@@ -35,6 +35,7 @@ def simulation_artifact_hash():
              "modules/agrar/services/tax_profile_service.py", "modules/agrar/services/weighing_domain.py",
              "app/api/v1/endpoints/studio_drafts.py", "app/services/studio_draft_store.py",
              "app/api/v1/endpoints/studio_native_import.py", "app/services/studio_native_import.py",
+             "app/core/document_screen_versions.py", "config/document_screen_versions.json",
              "app/services/studio_validation.py", "app/services/number_range_service.py", "config/mcp_erp_tools.yaml",
              "app/core/agent_tool_contract_manifest.py", "app/core/mcp_rest_binding.py",
              "app/api/v1/schemas/advisory_input.py", "app/core/screen_definitions_studio_history.py",

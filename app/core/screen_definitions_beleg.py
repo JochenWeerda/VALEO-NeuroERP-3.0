@@ -264,5 +264,6 @@ def native_beleg_definition(mask_id: str, tenant_id: str) -> dict[str, Any] | No
         return None
     for art in BELEGARTEN:
         if screen_id(art) == mask_id:
-            return build_beleg_screen_definition(art)
+            from app.core.document_screen_versions import document_definition
+            return document_definition(art)
     return None

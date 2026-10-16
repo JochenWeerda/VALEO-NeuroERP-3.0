@@ -72,6 +72,15 @@ describe('ScreenStudioPage', () => {
     })
   })
 
+  it('opens the currently available specialist dialogue only on explicit request', () => {
+    renderStudio()
+    expect(screen.queryByRole('region', { name: 'Fachgespraech' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Freigegebene Fachfelder' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Neuen Entwurf im Fachgespräch beginnen' }))
+    expect(screen.getByRole('region', { name: 'Fachgespraech' })).toBeInTheDocument()
+    expect(screen.getByText(/Derzeit verfügbar: Getreide-Kalkulationsprobe/)).toBeInTheDocument()
+  })
+
   it('lets an agent intent replace the draft and keeps the preview', async () => {
     renderStudio()
     expect(screen.getByTestId('screen-studio')).toBeInTheDocument()
@@ -144,6 +153,8 @@ describe('ScreenStudioPage', () => {
     await screen.findByRole('option', { name: 'Entwurf einer anderen Person (review)' })
     fireEvent.change(screen.getByLabelText('Gespeicherten Entwurf öffnen'), { target: { value: 'draft-review' } })
     await waitFor(() => expect(screen.getByDisplayValue('Entwurf einer anderen Person')).toBeInTheDocument())
+    expect(screen.getByLabelText('Maskenabsicht')).toHaveValue('')
+    expect(screen.queryByRole('region', { name: 'Fachgespraech' })).not.toBeInTheDocument()
     await waitFor(() => expect(screen.getByRole('button', { name: 'Prozess simulieren' })).toBeEnabled())
     expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Prozess simulieren' }))

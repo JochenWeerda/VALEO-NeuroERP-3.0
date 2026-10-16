@@ -331,3 +331,7 @@ RenderPlan-Caching beruecksichtigt auch Fields, Tables, Tabs, Layout und Datenqu
 ## Studio-Themes und funktionale Kontraste (16.10.2026)
 
 Studio-Definitionen erben das aktive globale Theme ueber denselben UniversalMaskRenderer. Keine feste Maskenfarbe zur Reparatur eines zentralen Themefehlers einfuehren. Der regulaere Frontendvertrag studio-theme-contrast.test.ts prueft Textpaare mit mindestens 4,5:1 und aktive Eingabe-/Fokuskontraste mit mindestens 3:1, einschliesslich spezifischer Meridian-/Terra-Dunkelregeln. Dekorative Trenner bleiben davon getrennt. Browserabnahmen bleiben fuer konkrete Zustaende, Transparenz, Zoom und Layout erforderlich; Palettentests sind keine vollstaendige WCAG-Zertifizierung. Nachweis: docs/quality-assurance/studio-theme-contrast-20261016.md.
+
+## Versionsgebundene Belegvarianten (16.10.2026)
+
+Die Belegfamilie liefert Basis-/Variantenreferenzen einschliesslich Inhaltsbindung ueber ScreenDefinition, Compiler und RenderPlan bis zur zentralen Rendererwurzel. Ein Wechsel allein der Versionsbindung darf keinen alten Plan aus dem Cache liefern. Die Version beschreibt die Definition; das globale Theme bleibt zentral geerbt. Fachfremde Profilfelder und alte Arbeitsanforderungen bleiben beim Wechsel auf eine andere Maske ausgeblendet beziehungsweise werden verworfen. Nachweis und verbleibende Integrationsschritte: docs/quality-assurance/document-screen-version-binding-20261016.md.

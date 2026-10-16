@@ -425,7 +425,19 @@ export interface ScreenProcessChainCatalogEntry {
   steps: ScreenProcessChainStep[]
 }
 
+/** Immutable origin template. The full edited candidate has its own Studio revision. */
+export interface DocumentScreenVariantRef {
+  family: 'beleg'
+  baseVersion: string
+  baseHash: string
+  variantId: string
+  variantVersion: string
+  variantHash: string
+  materializedHash: string
+}
+
 export interface ScreenDefinition {
+  documentVariant?: DocumentScreenVariantRef
   /** Declared native creation; new/neu are never fetched as entity IDs. */
   creation?: {
     endpoint: string
@@ -509,6 +521,16 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   if (!screen.id) errors.push('id is required')
   if (!screen.domain) errors.push('domain is required')
   if (!screen.mode) errors.push('mode is required')
+  if (screen.documentVariant !== undefined) {
+    const binding = screen.documentVariant
+    const version = /^[1-9][0-9]*\.[0-9]+\.[0-9]+$/
+    const hash = /^[0-9a-f]{64}$/
+    if (!binding || binding.family !== 'beleg' || typeof binding.variantId !== 'string' || !binding.variantId.trim()
+      || !version.test(binding.baseVersion) || !version.test(binding.variantVersion)
+      || ![binding.baseHash, binding.variantHash, binding.materializedHash].every(value => hash.test(value))) {
+      errors.push('documentVariant requires an exact valid base and variant binding')
+    }
+  }
   if (!screen.title) errors.push('title is required')
 
   if (screen.layout?.columnNavigation && screen.layout.columnNavigation !== 'single'

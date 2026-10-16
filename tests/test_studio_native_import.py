@@ -69,6 +69,25 @@ def test_stale_source_hash_does_not_create_a_baseline(boundary):
     assert store.list_drafts('own') == []
 
 
+def test_document_import_retains_exact_base_variant_and_materialization_in_history(boundary):
+    from app.core.screen_definitions_beleg import NATIVE_BELEG_TENANTS, screen_id
+    app, client = boundary
+    tenant = next(iter(NATIVE_BELEG_TENANTS))
+    app.dependency_overrides[get_tenant_id] = lambda: tenant
+    key = screen_id('sales_invoice')
+    source = service.source_definition(tenant, key)
+    response = client.post('/studio/native-imports', json={
+        'screen_id': key, 'expected_source_hash': service.definition_hash(source), 'idempotency_key': str(uuid4())})
+    assert response.status_code == 200, response.text
+    record = response.json()
+    binding = source['documentVariant']
+    assert record['definition']['documentVariant'] == binding
+    assert record['readiness']['migration']['source_definition'] == source
+    history = store.list_history(tenant, record['id'])
+    assert history[0]['snapshot']['definition']['documentVariant'] == binding
+    assert record['status'] == 'draft' and record['readiness']['eligible_for_release'] is False
+
+
 @pytest.mark.parametrize('source', ['tenant/foreign-draft', 'beleg/sales-invoice', 'missing/source'])
 def test_unregistered_or_foreign_source_is_not_importable(boundary, source):
     _, client = boundary
