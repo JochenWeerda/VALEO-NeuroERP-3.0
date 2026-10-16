@@ -18510,3 +18510,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 
 **DOCFLOW-SCREEN-PROVENANCE Abnahme:** 185 DocFlow-Vertraege gruen; serverseitig aktive Maske anhand geprueftem Mandanten/Belegart/Definitionshash aufgeloest. Versionierte Familie/Studiofreigabe ausschliesslich vom Server im unveraenderlichen Create-Pflichtprotokoll, HTTP-Antwort und Replaysnapshot. Historische/kontextlose Belege bleiben ohne erfundenen Nachweis. Alte Replayhashes bei fehlendem neuem Feld stabil. OpenAPI genau vier Schemas, kein Pfad; Architektur941/941,299/299,462/462, Groessen-/Handbuchgates gruen. QA docflow-screen-provenance-20261016.md. UI-Erfassung und vollstaendige Variantenmigration bleiben eigene Schritte.
+
+
+## DOCFLOW-SCHEMA-SOT-20261016 - reserviert, Codex
+
+**Owner:** Codex. **Befund:** Ungenutzte defekte docflow_schemas.py konkurriert mit produktiven Modellen im Router (alte optionale Updateversion, fehlende Typimporte). **Ziel:** Ein kanonischer Schemaort ohne Vertragsaenderung. **Dateibesitz:** docflow_schemas.py aus exakten aktuellen Routerklassen; Router ausschliesslich Import statt lokaler Definitionen, eigener Import-/Identitaetsvertrag, QA/Workboard. **Abnahme:** identische Modellobjekte fuer Router und Schemaverbraucher, exakt gleiche JSON-Schemas/OpenAPI, gesamte DocFlow-Familie gruen. Keine DB-/Rollen-/MCP-Aenderung.
