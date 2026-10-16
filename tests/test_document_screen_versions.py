@@ -123,11 +123,14 @@ def test_release_version_is_explicit_and_not_an_alias_or_path(value):
 
 def test_studio_rejects_a_forged_origin_reference_without_relaxing_other_gates():
     from app.services.studio_validation import validate_studio_draft
-    definition = document_definition("sales_invoice")
+    from app.core.screen_definitions import _with_meridian_action_contract
+    definition = _with_meridian_action_contract(document_definition("sales_invoice"))
     definition.update(id="tenant/version-check", adapter={"type": "native", "sourceId": "tenant/version-check", "temporary": True})
     valid = validate_studio_draft(definition, native_screen_ids=set())
     assert "belegvariantenbindung_ungueltig" not in valid
-    assert valid  # Document command/source release gates still apply.
+    assert valid == []
+    from app.core.studio_release import profile_errors
+    assert profile_errors(definition)  # Registered metadata is not process/release evidence.
     definition["documentVariant"]["baseHash"] = "0" * 64
     assert "belegvariantenbindung_ungueltig" in validate_studio_draft(definition, native_screen_ids=set())
 

@@ -27,6 +27,12 @@ import yaml
 _CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "studio_data_sources.yaml"
 
 _DANGER_RANK = {"safe": 0, "moderate": 1, "high": 2, "critical": 3}
+_DOCUMENT_TRANSPORT_FIELDS = ("commandEndpoint", "method", "commandBinding", "kommando", "permission",
+                              "enabledWhen", "inputFields", "folgebelegart")
+_DOCUMENT_POLICY_FIELDS = (*_DOCUMENT_TRANSPORT_FIELDS, "dangerLevel", "forbiddenForAgents",
+                           "requiresConfirmation", "auditReasonRequired", "humanApprovalRequired",
+                           "requiresHumanApproval", "disabled")
+
 
 
 class StudioConfigError(RuntimeError):
@@ -69,6 +75,34 @@ def _iter_actions(definition: dict[str, Any]):
                 yield from actions if isinstance(actions, list) else [None]
 
 
+def _bound_document_template(definition):
+    """A pinned origin never grants an unregistered or weakened current command."""
+    from app.core.document_screen_versions import document_definition
+    from app.core.screen_definitions_beleg import build_beleg_screen_definition
+    from app.core.screen_definitions import _with_meridian_action_contract
+    from app.core.studio_release import definition_hash
+    binding = definition["documentVariant"]
+    if not isinstance(binding, dict):
+        raise ValueError("document_binding_not_an_object")
+    original = _with_meridian_action_contract(document_definition(
+        binding["variantId"], binding["variantVersion"], expected=binding))
+    current = _with_meridian_action_contract(build_beleg_screen_definition(binding["variantId"]))
+    if (definition.get("domain") != original["domain"]
+            or definition_hash(definition.get("variant")) != definition_hash(original["variant"])
+            or definition_hash(original["variant"]) != definition_hash(current["variant"])):
+        raise ValueError("document_variant_changed")
+    old_actions = {action["key"]: action for action in _iter_actions(original)}
+    new_actions = {action["key"]: action for action in _iter_actions(current)}
+    if set(old_actions) != set(new_actions) or definition_hash(original["dataSources"]) != definition_hash(current["dataSources"]):
+        raise ValueError("document_policy_changed")
+    for key, action in old_actions.items():
+        previous = {field: action.get(field) for field in _DOCUMENT_POLICY_FIELDS}
+        registered = {field: new_actions[key].get(field) for field in _DOCUMENT_POLICY_FIELDS}
+        if definition_hash(previous) != definition_hash(registered):
+            raise ValueError("document_command_policy_changed")
+    return original
+
+
 def validate_studio_draft(
     definition: dict[str, Any],
     *,
@@ -96,17 +130,17 @@ def validate_studio_draft(
         violations.append("screen_id_muss_text_sein")
         screen_id = ""
 
+    document_template = None
     binding = definition.get("documentVariant")
     if binding is not None:
         try:
-            from app.core.document_screen_versions import document_definition
-            if not isinstance(binding, dict):
-                raise ValueError("binding_not_an_object")
-            document_definition(binding["variantId"], binding["variantVersion"], expected=binding)
-            if definition.get("variant", {}).get("belegart") != binding["variantId"]:
-                raise ValueError("variant_mismatch")
+            document_template = _bound_document_template(definition)
         except (ValueError, KeyError, TypeError, AttributeError):
             violations.append("belegvariantenbindung_ungueltig")
+    if document_template is not None:
+        # Scoped projection of the existing immutable template and live registry,
+        # not a second global command/permission allowlist.
+        catalog_actions = {action["key"]: action for action in _iter_actions(document_template)}
 
     # ── Namensraum ───────────────────────────────────────────────────────────
     if screen_id and not screen_id.startswith("tenant/"):
@@ -125,6 +159,9 @@ def validate_studio_draft(
         violations.append("adapter_muss_native_und_an_screen_id_gebunden_sein")
 
     allowed_endpoints: set[str] = cat.get("data_source_endpoints") or set()
+    if document_template is not None:
+        allowed_endpoints = {source["endpoint"] for source in document_template["dataSources"]}
+
     write_endpoints = {action.get("commandEndpoint") for action in catalog_actions.values()}
     write_endpoints.update((action.get("inputFlow") or {}).get("submitEndpoint")
                            for action in catalog_actions.values())
@@ -169,6 +206,15 @@ def validate_studio_draft(
         if base is None:
             violations.append(f"action_nicht_im_katalog:{key}")
             continue
+        if document_template is not None:
+            from app.core.studio_release import definition_hash
+            try:
+                given = {field: action.get(field) for field in _DOCUMENT_TRANSPORT_FIELDS}
+                required = {field: base.get(field) for field in _DOCUMENT_TRANSPORT_FIELDS}
+                if definition_hash(given) != definition_hash(required):
+                    violations.append(f"belegaktionsvertrag_geaendert:{key}")
+            except (ValueError, TypeError):
+                violations.append(f"belegaktionsvertrag_geaendert:{key}")
         # eigener/fremder commandEndpoint
         ep = action.get("commandEndpoint")
         if ep is not None and ep != base.get("commandEndpoint"):
