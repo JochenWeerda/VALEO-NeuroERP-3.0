@@ -386263,15 +386263,6 @@
               "title": "Model Name",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "requestBody": {
@@ -386331,15 +386322,6 @@
               "title": "Model Name",
               "type": "string"
             }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -386385,15 +386367,6 @@
             "required": true,
             "schema": {
               "title": "Model Name",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": true,
-            "schema": {
-              "title": "Tenant Id",
               "type": "string"
             }
           },

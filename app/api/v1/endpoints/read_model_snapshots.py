@@ -4,6 +4,8 @@ from typing import Optional
 from app.core.read_model_persistence import ReadModelSnapshotStore, ReadModelSnapshot, SnapshotCursor
 from app.core.event_consumer_wiring import build_default_wiring
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
+from app.auth.deps import require_roles
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.base import BaseSchema
@@ -18,24 +20,24 @@ _wiring = build_default_wiring()
 def _get_store(db: Session = Depends(get_db)) -> ReadModelSnapshotStore:
     return ReadModelSnapshotStore(db_session=db)
 
-@router.post("/snapshots", status_code=201, summary="Snapshot anlegen",
+@router.post("/snapshots", status_code=201, summary="Snapshot anlegen", dependencies=[Depends(require_roles("admin"))],
     response_model=ReadModelSnapshotsOut
 )
 def create_snapshot(
     model_name: str,
-    tenant_id: str,
     payload: dict,
+    tenant_id: str = Depends(get_tenant_id),
     store: ReadModelSnapshotStore = Depends(_get_store),
 ):
     snapshot = ReadModelSnapshot.build(model_name=model_name, tenant_id=tenant_id, payload=payload)
     return store.save(snapshot).model_dump()
 
-@router.get("/snapshots/latest", summary="Latest snapshot abrufen",
+@router.get("/snapshots/latest", dependencies=[Depends(require_roles("admin"))], summary="Latest snapshot abrufen",
     response_model=ReadModelSnapshotsOut
 )
 def get_latest_snapshot(
     model_name: str = Query(...),
-    tenant_id: str = Query(...),
+    tenant_id: str = Depends(get_tenant_id),
     store: ReadModelSnapshotStore = Depends(_get_store),
 ):
     snapshot = store.get_latest(model_name=model_name, tenant_id=tenant_id)
@@ -44,12 +46,12 @@ def get_latest_snapshot(
         raise HTTPException(status_code=404, detail="Kein Snapshot vorhanden")
     return snapshot.model_dump()
 
-@router.get("/snapshots/page", summary="Snapshot page abrufen",
+@router.get("/snapshots/page", dependencies=[Depends(require_roles("admin"))], summary="Snapshot page abrufen",
     response_model=ReadModelSnapshotsOut
 )
 def get_snapshot_page(
     model_name: str = Query(...),
-    tenant_id: str = Query(...),
+    tenant_id: str = Depends(get_tenant_id),
     last_snapshot_id: Optional[str] = Query(None),
     limit: int = Query(20, ge=1, le=100),
     store: ReadModelSnapshotStore = Depends(_get_store),

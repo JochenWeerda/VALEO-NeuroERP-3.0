@@ -1322,3 +1322,6 @@ from app.infrastructure.models.wms_models import (  # noqa: E402,F401
     MaterialFlowNode,
     MaterialFlowEdge,
 )
+
+# Register persisted read models during regular database initialization.
+from .read_model_snapshots import ReadModelSnapshotRecord  # noqa: F401

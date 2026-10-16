@@ -63,6 +63,9 @@ def test_keyset_matches_memory_and_bounds_actual_sql(engine, anchor, expected):
 def test_http_page_limit_is_validated_before_store_effects(limit, status):
     app = FastAPI()
     app.include_router(endpoint.router)
+    from testgrenze import ersetze_mandant, ersetze_nutzer
+    ersetze_mandant(app, "tenant-a")
+    ersetze_nutzer(app, "admin")
     app.dependency_overrides[endpoint._get_store] = lambda: ReadModelSnapshotStore()
     with TestClient(app) as client:
         response = client.get('/read-models/snapshots/page', params={
