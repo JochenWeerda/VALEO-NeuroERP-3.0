@@ -18460,6 +18460,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **Darstellungsabnahme:** Beschriftungen bestehender Belegfelder/Register/Tabellen/Spalten ohne technische Namen bearbeitbar; Ursprung, Commands, Rechte und Readonly unveraendert. 21 UI-Vertraege/Typpruefung gruen. Reales SSO, Speichern und Wiederaufruf sowie zwei Historienrevisionen, drei Desktopgroessen hell/dunkel geprueft. Nutzerhinweis: Button Maskenvorschlag erstellen. QA studio-variant-presentation-20261016.md. Vollstaendige Fachbearbeitung und Belegmigration bleiben offen.
 
-## SONAR-SSE-CANCELLATION-20261016 - reserviert, Codex
+## SONAR-SSE-CANCELLATION-20261016 - abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Drei konkrete Abbruchbefunde im SSE-Manager fachlich schliessen: Abbruchsignale fuer Heartbeat/Stream weiterreichen, erwartetes eigenes Stoppen vom Abbruch des Aufrufers unterscheiden, Verbindungs-/Taskreferenzen immer aufraeumen. **Dateibesitz:** app/core/sse_manager.py ausschliesslich Abbruch/Lebensdauer; eigene reale Asyncio-Vertraege, QA/Workboard. **Abnahme:** normaler Stop kehrt sauber zurueck; abgebrochener Aufrufer bleibt abgebrochen; Stream entfernt Verbindung auch bei CancelledError. Keine Transport-, Rechte-, DB-/Containeraenderung.
+
+**SSE-Abnahme:** Fuenf reale Asyncio-Vertraege gruen. Heartbeat-/Streamabbruch propagiert, eigene Stop-Cancellation vom Aufruferabbruch getrennt; Referenz und Verbindung auch bei Fehlern aufgeraeumt. QA sse-cancellation-20261016.md. Kein Netz-/DB-/Container-/Rechteeingriff. Sonar-Nachlauf offen.
