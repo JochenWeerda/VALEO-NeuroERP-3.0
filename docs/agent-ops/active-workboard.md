@@ -18398,6 +18398,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **Abnahme:** Vier neue UI-Vertraege vorher rot, danach zusammen mit drei bestehenden Auswahl-/Readonly-Vertraegen sieben gruen. Namen an Kennung und Suchquelle gebunden; alte Suchtexte bei Kontextwechsel verworfen. Ausschliesslich zentraler Renderer, keine parallele Maske/API/Rechteaenderung. QA lookup-label-binding-20261016.md.
 
-## CHROMA-CI-CONTRACT-20261016 - reserviert, Codex
+## CHROMA-CI-CONTRACT-20261016 - abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Neue Backend-Reachability-Regressionssuite auch ohne Aenderung fremder Workflowdateien in der normalen Pytest-CI ausfuehren. **Dateibesitz:** neuer tests/test_chroma_backend_review_ci.py; eigener QA-Nachtrag/Workboard. **Abnahme:** regulaere Pytest-Entdeckung fuehrt die vorhandenen zwoelf isolierten Policy-Faelle verbindlich aus; Fehler propagieren, keine Datenbank/Container/Server. Fremde Tests und Gatekonfigurationen bleiben unveraendert.
+
+**Abnahme:** Pytest-Anbindung gruen, zwoelf bestehende Backend-Policy-Faelle ausgefuehrt; Fehler und Null-Test-Lauf sperren. Keine fremden Workflowdateien, DB oder Container veraendert. QA chroma-review-20261016.md ergaenzt.

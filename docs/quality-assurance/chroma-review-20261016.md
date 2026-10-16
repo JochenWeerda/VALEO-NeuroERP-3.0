@@ -21,3 +21,7 @@ Zusaetzlich wurde eine Nachweisluecke geschlossen: app/infrastructure/rag/vector
 Neun vorhandene Gate-Tests und zwoelf Tests mit dem zweiten Verbraucher bestehen; darin drei neue Vertraege fuer Aenderung, Entfernung und serverseitige Betriebsarten (fuenf negative Varianten). Drei vorhandene Embedded-Only-Vertraege bestehen ebenfalls. Der originale Scannerbericht bleibt unveraendert mit Exitcode 1 und drei Findings; die separate Auswertung ergibt drei nicht erreichbare Findings und null unbewertete Findings. Die Bewertung gilt bis ausschliesslich 2026-10-23 und muss bei jeder Aenderung der Quellen oder Deployments frueher erneuert werden. Keine Datenbank oder Container erzeugt.
 
 Die lokale Pruefung ersetzt nicht den abschliessenden gruenen GitHub-Service-Security-Lauf. Tabellenkatalog-Drift und verbleibende Backend-Vertraege sind gesonderte CI-Befunde.
+
+## Automatische Regression in der Backend-CI
+
+Der bestehende Service-Security-Workflow ruft die bisherige Gate-Suite direkt auf und entdeckt neue Script-Testdateien nicht automatisch. Ein eigener Pytest-Vertrag fuehrt deshalb die zwoelf Backend-Policy-Faelle als isolierte Unittest-Suite aus, propagiert jeden Fehler und weist auch eine versehentliche Null-Test-Ausfuehrung zurueck. Der Pytest-Vertrag besteht; er verwendet weder Kompatibilitaets-App noch Datenbank. Fremde Workflowdateien und Tests wurden nicht geaendert.
