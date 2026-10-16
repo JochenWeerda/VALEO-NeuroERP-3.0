@@ -18472,7 +18472,7 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **DocFlow-Update-Abnahme:** Pflichtversion und Idempotenzschluessel, gepruefter Akteur, mandantenbezogene Sperre vor Replay/Version, unveraenderlicher Antwortsnapshot und transaktionales Pflichtprotokoll/Outbox. Allgemeine Statuswechsel einschliesslich Rueckstufung nach Entwurf gesperrt. Bestehender Rechnungseditor mit Version/Retry-Kennung und Entwurfserzeugung nachgezogen. 164 DocFlow-Familientests (inklusive 28 echter RSA-/Mandantentests), 62 Studio-/Versionsvertraege, 21 Katalog-/Lineage-Faelle sowie 1395 UI-Tests/276 Dateien und Typpruefung gruen; gezielter Steuer-/Command-/MCP-Verbund 89 gruen. OpenAPI genau ein Schema/kein Pfad, physisches Katalogschema unveraendert, nur zwei SQL-Codeverbrauchergruppen ergaenzt. Architektur-/Handbuch-/Varianten-/Groessen-/SQL-/API-Dokugates gruen. QA docflow-update-guard-20261016.md. Keine weitere DB/Container/Migration oder MCP-Freischaltung. Gesamt-Belegmigration und uebrige Sonar-Befunde bleiben offen.
 
-## STUDIO-HISTORY-GRANULAR-20261016 - reserviert, Codex
+## STUDIO-HISTORY-GRANULAR-20261016 - abgeschlossen, Codex
 
 **Owner:** Codex. **Befund:** Reale Variantenabnahme: einzelne Feldbeschriftung erscheint im Aenderungsvergleich als gesamter Register-JSON-Block. **Dateibesitz:** app/services/studio_history_view.py ausschliesslich lesender Vergleich; tests/test_studio_history_view.py, eigene QA/Workboard. **Abnahme:** verschachtelte Register-/Feld-/Spaltenaenderungen einzeln, typgetreu und mit eindeutigen JSON-Pointern anzeigen; Hinzufuegen/Entfernen und Reihenfolge nicht verschweigen; bestehende API/Paginierung/Mandantengrenze und unveraenderbare Snapshots erhalten. Keine neue Maske, DB-/Container-/Rechteeingriffe oder Belegwirkung.
 
@@ -18483,3 +18483,6 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 
 **AUTH-LOCALHOST-DEPLOY Abnahme:** Alter Docker-Container vom 17.09. lieferte Test-Admin-UI aus. Kanonischen bestehenden Frontendstand produktiv gebaut und ausschliesslich dessen Assets in den vorhandenen lokalen Webcontainer eingespielt. 29 Anmelde-/Sicherheitsvertraege gruen. Reale Browseraufrufe / und /admin/screen-studio fuehren ohne Anmeldung nach /login. Zwei geschuetzte API-Endpunkte anonym 401. Keine Token geloescht, Rollen geaendert, Datenbank oder fremder Container ersetzt. QA auth-localhost-deploy-20261016.md.
+
+
+**STUDIO-HISTORY-GRANULAR Abnahme:** 16 Vertraege gruen: einzelne Beschriftung in 201 Feldern liefert genau eine Aenderungszeile; Typwechsel, fehlende/leere Container, Reihenfolge, Pfadescaping und HTTP-Paginierung geprueft. Gespeicherte unveraenderliche Historie bleibt byteinhaltlich erhalten; nur lesende Vergleichsprojektion verbessert. QA studio-history-granular-20261016.md.
