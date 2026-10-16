@@ -18459,3 +18459,7 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 **SONAR-COMPLIANCE-EVIDENCE Gegenpruefung:** Hoher Restsaldo darf bekannte Kontrollfehler nicht ueberstimmen: 95/FAILED bleibt NOT_READY, 98/WARNING nicht volle Bereitschaft, automatische Erfolge CHECKS_PASSED ohne Zertifizierungszusage. Insgesamt 19 reine Funktionsvertraege gruen.
 
 **Darstellungsabnahme:** Beschriftungen bestehender Belegfelder/Register/Tabellen/Spalten ohne technische Namen bearbeitbar; Ursprung, Commands, Rechte und Readonly unveraendert. 21 UI-Vertraege/Typpruefung gruen. Reales SSO, Speichern und Wiederaufruf sowie zwei Historienrevisionen, drei Desktopgroessen hell/dunkel geprueft. Nutzerhinweis: Button Maskenvorschlag erstellen. QA studio-variant-presentation-20261016.md. Vollstaendige Fachbearbeitung und Belegmigration bleiben offen.
+
+## SONAR-SSE-CANCELLATION-20261016 - reserviert, Codex
+
+**Owner:** Codex. **Ziel:** Drei konkrete Abbruchbefunde im SSE-Manager fachlich schliessen: Abbruchsignale fuer Heartbeat/Stream weiterreichen, erwartetes eigenes Stoppen vom Abbruch des Aufrufers unterscheiden, Verbindungs-/Taskreferenzen immer aufraeumen. **Dateibesitz:** app/core/sse_manager.py ausschliesslich Abbruch/Lebensdauer; eigene reale Asyncio-Vertraege, QA/Workboard. **Abnahme:** normaler Stop kehrt sauber zurueck; abgebrochener Aufrufer bleibt abgebrochen; Stream entfernt Verbindung auch bei CancelledError. Keine Transport-, Rechte-, DB-/Containeraenderung.
