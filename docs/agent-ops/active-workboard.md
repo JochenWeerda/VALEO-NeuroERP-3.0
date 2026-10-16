@@ -18392,6 +18392,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **Abnahme:** Frisches bestehendes CI-Artefakt: 681 Tabellen, alle 680 bisherigen Definitionen erhalten; eine migrierte Studio-Historientabelle und sieben quellengestuetzte additive Lineagezuordnungen. JSON bytegenau/Markdown datumsnormalisiert zum kanonischen Generator. Fremde physische Kataloge bewahrt. Keine Schemaaenderung oder DB-Ressource. QA table-catalog-sync-20261016.md; GitHub-Nachlauf erforderlich.
 
-## LOOKUP-LABEL-BINDING-20261016 - reserviert, Codex
+## LOOKUP-LABEL-BINDING-20261016 - abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Zentrale Lookup-Anzeige gegen veraltete Namen bei Datensatz-/Quellenwechsel absichern. **Dateibesitz:** packages/frontend-web/src/components/mask-builder/renderers/LookupField.tsx (vorher identisch HEAD), neuer eigener Frontend-Vertrag, QA/Workboard. **Abnahme:** ausgewaehlter Name bleibt nur fuer zugehoerigen Wert/Quelle; externe Wertwechsel, Leeren und Quellenwechsel verwerfen alte Auswahl und Suchtext. Bestehende Auswahl-/Readonly-Vertraege erhalten; keine andere Maske oder API aendern. Keine DB/Container.
+
+**Abnahme:** Vier neue UI-Vertraege vorher rot, danach zusammen mit drei bestehenden Auswahl-/Readonly-Vertraegen sieben gruen. Namen an Kennung und Suchquelle gebunden; alte Suchtexte bei Kontextwechsel verworfen. Ausschliesslich zentraler Renderer, keine parallele Maske/API/Rechteaenderung. QA lookup-label-binding-20261016.md.
