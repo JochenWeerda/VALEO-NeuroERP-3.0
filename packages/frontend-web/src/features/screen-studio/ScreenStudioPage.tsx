@@ -19,6 +19,7 @@ import {
   type StudioReport,
   type StudioDialogueTurn,
 } from '@/lib/api/studio'
+import { StudioVariantPresentation } from './StudioVariantPresentation'
 import { StudioHistoryPanel } from './StudioHistoryPanel'
 import { emptyStudioDraft } from './studio-defaults'
 import { studioReducer } from './studio-reducer'
@@ -157,7 +158,7 @@ export function ScreenStudioPage(): JSX.Element {
             applyProposal(next.definition)
             setReport(next)
           })}>
-            {pending === 'propose' ? 'Vorschlag…' : 'Aus Absicht erzeugen'}
+            {pending === 'propose' ? 'Vorschlag…' : 'Maskenvorschlag erstellen'}
           </Button>
         </div>
         <div className="space-y-2">
@@ -180,6 +181,9 @@ export function ScreenStudioPage(): JSX.Element {
             {(catalog.data?.columnNavigation ?? ['single', 'listDetail']).map((item) => <option key={item} value={item}>{item}</option>)}
           </NativeSelect>
         </div>
+        <StudioVariantPresentation definition={definition}
+          disabled={Boolean(pending) || !catalog.data?.permissions?.canDesign}
+          onChange={next => dispatch({ type: 'replace', definition: next })} />
         {!semanticPreview && !dialogueRequested && <Button type="button" variant="outline"
           onClick={() => setDialogueRequested(true)}>Neuen Entwurf im Fachgespräch beginnen</Button>}
         {(semanticPreview || dialogueRequested) && <>

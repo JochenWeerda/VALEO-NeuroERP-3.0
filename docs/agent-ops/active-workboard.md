@@ -18452,8 +18452,10 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **Abnahme:** 17 reine Funktionsvertraege gruen. Acht unbelegte Kontrollen explizit UNKNOWN; Ausnahmen und ungueltige Ergebnisse sperren positive Bewertung, bekannte Fehler NON_COMPLIANT. Keine erfundenen Verlaufsdaten/Zertifizierungsfristen und keine Rohfehler im Bericht/Monitorlog. Evidenzadapter weiterhin fehlend/offen, nicht als Zertifizierungsnachweis ausgegeben. QA compliance-evidence-boundary-20261016.md. Kein DB-/Container-/Rechteeingriff.
 
-## STUDIO-VARIANT-PRESENTATION-20261016 - reserviert, Codex
+## STUDIO-VARIANT-PRESENTATION-20261016 - abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Importierte Belegvarianten ohne Tabellen-/Spaltenwissen im bestehenden Studio gezielt beschriften; gemeinsame Basis-/Variantenbindung, technische Felder, Rechte und Fachcommands unveraendert. **Dateibesitz:** neuer kleiner Darstellungseditor und reiner Metadatenhelfer, minimale Montage ScreenStudioPage, eigene UI-/Unveraenderlichkeitsvertraege, QA/Meridian/Workboard. **Abnahme:** Kopf-/Register-/Tabellen-/Spaltenbeschriftungen der geladenen Variante bearbeitbar; keine freie JSON-/URL-/Rechtebearbeitung; Entwurf/Historie und bestehende Freigabe bleiben fuehrend. Das ist Darstellung, keine behauptete vollstaendige Belegbearbeitung oder neue produktive Freigabe. Keine DB-/Container-/Rechteaenderung.
 
 **SONAR-COMPLIANCE-EVIDENCE Gegenpruefung:** Hoher Restsaldo darf bekannte Kontrollfehler nicht ueberstimmen: 95/FAILED bleibt NOT_READY, 98/WARNING nicht volle Bereitschaft, automatische Erfolge CHECKS_PASSED ohne Zertifizierungszusage. Insgesamt 19 reine Funktionsvertraege gruen.
+
+**Darstellungsabnahme:** Beschriftungen bestehender Belegfelder/Register/Tabellen/Spalten ohne technische Namen bearbeitbar; Ursprung, Commands, Rechte und Readonly unveraendert. 21 UI-Vertraege/Typpruefung gruen. Reales SSO, Speichern und Wiederaufruf sowie zwei Historienrevisionen, drei Desktopgroessen hell/dunkel geprueft. Nutzerhinweis: Button Maskenvorschlag erstellen. QA studio-variant-presentation-20261016.md. Vollstaendige Fachbearbeitung und Belegmigration bleiben offen.

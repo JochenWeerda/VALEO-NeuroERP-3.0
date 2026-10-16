@@ -86,7 +86,7 @@ describe('ScreenStudioPage', () => {
     expect(screen.getByTestId('screen-studio')).toBeInTheDocument()
     expect(screen.queryByText('Ernte-Abrechnung: Vertragsregeln, Messnachweise und Freigaben')).not.toBeInTheDocument()
     fireEvent.change(screen.getByLabelText('Maskenabsicht'), { target: { value: 'Kundenliste' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Aus Absicht erzeugen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Maskenvorschlag erstellen' }))
     await waitFor(() => expect(screen.getByDisplayValue('Kunden-Arbeitsliste')).toBeInTheDocument())
     expect(screen.getByTestId('studio-preview')).toBeInTheDocument()
     expect(screen.getByTestId('studio-gates')).toHaveTextContent('Freigabe gesperrt')

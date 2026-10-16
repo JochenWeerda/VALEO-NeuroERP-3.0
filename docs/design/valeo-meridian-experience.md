@@ -335,3 +335,7 @@ Studio-Definitionen erben das aktive globale Theme ueber denselben UniversalMask
 ## Versionsgebundene Belegvarianten (16.10.2026)
 
 Die Belegfamilie liefert Basis-/Variantenreferenzen einschliesslich Inhaltsbindung ueber ScreenDefinition, Compiler und RenderPlan bis zur zentralen Rendererwurzel. Ein Wechsel allein der Versionsbindung darf keinen alten Plan aus dem Cache liefern. Die Version beschreibt die Definition; das globale Theme bleibt zentral geerbt. Fachfremde Profilfelder und alte Arbeitsanforderungen bleiben beim Wechsel auf eine andere Maske ausgeblendet beziehungsweise werden verworfen. Nachweis und verbleibende Integrationsschritte: docs/quality-assurance/document-screen-version-binding-20261016.md.
+
+## Fachliche Beschriftung importierter Belegvarianten (16.10.2026)
+
+Der Studio-Darstellungseditor arbeitet ausschliesslich auf vorhandenen ScreenDefinition-Beschriftungen. Vorschau und Laufzeit bleiben in der zentralen Meridian-Kette; keine zweite Belegmaske. Technische Bindungen und Schutzvertraege sind nicht editierbar. 21 gezielte UI-Vertraege und Typpruefung gruen; reale SSO-/Speicher-/Wiederoeffnungspruefung und drei Desktopgroessen hell/dunkel dokumentiert. QA studio-variant-presentation-20261016.md.
