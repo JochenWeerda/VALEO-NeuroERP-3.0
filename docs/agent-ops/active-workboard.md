@@ -18475,3 +18475,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 ## STUDIO-HISTORY-GRANULAR-20261016 - reserviert, Codex
 
 **Owner:** Codex. **Befund:** Reale Variantenabnahme: einzelne Feldbeschriftung erscheint im Aenderungsvergleich als gesamter Register-JSON-Block. **Dateibesitz:** app/services/studio_history_view.py ausschliesslich lesender Vergleich; tests/test_studio_history_view.py, eigene QA/Workboard. **Abnahme:** verschachtelte Register-/Feld-/Spaltenaenderungen einzeln, typgetreu und mit eindeutigen JSON-Pointern anzeigen; Hinzufuegen/Entfernen und Reihenfolge nicht verschweigen; bestehende API/Paginierung/Mandantengrenze und unveraenderbare Snapshots erhalten. Keine neue Maske, DB-/Container-/Rechteeingriffe oder Belegwirkung.
+
+
+## AUTH-LOCALHOST-DEPLOY-20261016 - reserviert, Codex
+
+**Owner:** Codex. **Ziel:** Port 3000 liefert Containerbuild vom 17.09. mit alter Testidentitaet aus. Aktuellen bereits abgesicherten Frontendstand gezielt ausliefern und reale anonyme Anmeldung pruefen. **Dateibesitz:** eigene QA/Workboard und generierte lokale Frontendassets; keine fremden Quellen, Rollen, Datenbanken oder Container entfernen. **Abnahme:** keine automatische Testidentitaet, geschuetzter Einstieg fuehrt zur Anmeldung; anonymer API-Zugriff wird abgewiesen.
