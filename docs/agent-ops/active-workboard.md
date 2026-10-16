@@ -18445,3 +18445,7 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 **Transport-Abnahme:** 31 Backendvertraege einschliesslich echtem HTTP-400 vor Speicherung, 20 gezielte UI-Vertraege, 1373 Frontendtests/274 Dateien und Typpruefung gruen. Fremdziele vor Tokenbeschaffung gesperrt; eingebettete Live-Widgets in Studio-Vorschau unterdrueckt, grain.v1 deckt sie nicht ab. QA studio-transport-boundary-20261016.md. Keine Rechte oder Fachwirkungen freigeschaltet.
 
 **Belegkatalog-Abnahme:** Neun unveraenderte normalisierte Vorlagen valide; 28 neue Negativ-/Bindungsvertraege, insgesamt 128 Faelle gruen. Variantenbezogene Quellen und Command-/Schutzvertraege, keine globale Allowlist. Simulationshash an vier native Quellmodule gebunden. QA studio-document-catalog-20261016.md. Profilfreigabe unveraendert gesperrt, weitere Belegmigration offen.
+
+## SONAR-COMPLIANCE-EVIDENCE-20261016 - reserviert, Codex
+
+**Owner:** Codex. **Ziel:** Echte Sonar-Laufzeitbefunde im Compliance-Monitor schliessen: fehlende Nachweise oder Prueffehler duerfen kein COMPLIANT, erfundene Messwerte oder Zertifizierungsbereitschaft ergeben. **Dateibesitz:** app/security/compliance_monitor.py; neuer gezielter Test, betroffener Demo-Trend-Altvertrag; eigene QA und Workboard. **Abnahme:** unbekannte und fehlgeschlagene Checks sichtbar, keine erfundenen Trends/Fristen, keine Rohfehlermeldungen im Bericht; belegte Ergebnisse werden weiterhin ausgewertet. Keine API-, Rollen-, DB- oder Containeraenderung. Weitere Sonar-/Belegmigration bleiben Gesamtauftrag.
