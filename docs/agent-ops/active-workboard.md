@@ -18488,6 +18488,9 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 **STUDIO-HISTORY-GRANULAR Abnahme:** 16 Vertraege gruen: einzelne Beschriftung in 201 Feldern liefert genau eine Aenderungszeile; Typwechsel, fehlende/leere Container, Reihenfolge, Pfadescaping und HTTP-Paginierung geprueft. Gespeicherte unveraenderliche Historie bleibt byteinhaltlich erhalten; nur lesende Vergleichsprojektion verbessert. QA studio-history-granular-20261016.md.
 
 
-## DOCFLOW-SERVICE-INVENTORY-20261016 - reserviert, Codex
+## DOCFLOW-SERVICE-INVENTORY-20261016 - abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** CI Docs Build 38937984526: generierten Servicekatalog nach neuem DocFlow-Updatehelper synchronisieren. **Dateibesitz:** ausschliesslich docs/entwickler/service-inventory.md aus kanonischem HEAD, eigene QA/Workboard. Fremde physische Inventarkopien bleiben erhalten. **Abnahme:** vollstaendige Modulliste und Docstrings entsprechen exakt HEAD; keine Gateausnahme, kein Schema oder Runtimeeingriff.
+
+
+**DOCFLOW-SERVICE-INVENTORY Abnahme:** Servicepfade und Docstrings ausschliesslich aus Git HEAD gelesen und mit vorhandenem Generator gerendert; neuer DocFlow-Updatehelper nachgezogen. Fremde physische Inventarkopie bewahrt. QA docflow-service-inventory-20261016.md.

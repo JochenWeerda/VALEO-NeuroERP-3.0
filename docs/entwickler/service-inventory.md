@@ -101,6 +101,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `docflow_return_service` | Document-return worklist on top of canonical Docflow headers and artifacts. |
 | `docflow_service` | Service layer for the canonical Docflow command pipeline (DOCFLOW-P0-01..03). |
 | `docflow_source_proposals` | Read-only source proposals over existing contracts and customer-owned stock. |
+| `docflow_update_command` | Versioned, replay-safe DocFlow editing in the existing document transaction. |
 | `document_allocation_service` | FSX-MENGENMODELL — Zuordnen von Teilmengen zwischen Belegpositionen. |
 | `document_control_projection` | Project document-control exceptions from canonical source documents. |
 | `document_control_service` | Central document-control exception worklist (Beleg-Kontrolle). |
