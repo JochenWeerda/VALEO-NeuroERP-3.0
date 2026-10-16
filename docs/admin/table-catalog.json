@@ -13386,6 +13386,7 @@
             "id"
           ],
           "read_by": [
+            "app/agrar/feldbuch/portal_zugang.py",
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/compliance_dsgvo.py",
             "app/api/v1/endpoints/crm_360.py",
@@ -14889,7 +14890,8 @@
           ],
           "read_by": [
             "app/services/finance_freigabe.py",
-            "app/services/freigabe_engine.py"
+            "app/services/freigabe_engine.py",
+            "app/services/kontrollkorb.py"
           ],
           "written_by": [
             "app/services/freigabe_engine.py"
@@ -15380,6 +15382,7 @@
             "app/services/docflow_return_service.py",
             "app/services/docflow_service.py",
             "app/services/finance_freigabe.py",
+            "app/services/kontrollkorb.py",
             "app/services/mcp_beleg_tools.py",
             "app/services/settlement_document_archive_service.py"
           ],
@@ -21794,6 +21797,7 @@
             "app/services/finance_freigabe.py",
             "app/services/finance_read_model_service.py",
             "app/services/finance_transaction_service.py",
+            "app/services/kontrollkorb.py",
             "app/services/sales_posting_service.py",
             "app/workers/monthly_report_worker.py",
             "app/workers/weekly_report_worker.py"
@@ -57487,6 +57491,65 @@
             "app/services/studio_draft_store.py"
           ]
         },
+        "screen_definition_history": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "draft_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "actor",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "action",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "previous_revision",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "revision",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "snapshot",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "recorded_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/infrastructure/models/studio_models.py"
+          ]
+        },
         "sepa_mandates": {
           "columns": [
             {
@@ -57741,11 +57804,13 @@
             "app/finance/steuerschluessel.py",
             "app/infrastructure/models/l3c_models.py",
             "app/services/finance_freigabe.py",
-            "app/services/freigabe_engine.py"
+            "app/services/freigabe_engine.py",
+            "app/services/harvest_acceptance_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/compat.py",
-            "app/finance/steuerschluessel.py"
+            "app/finance/steuerschluessel.py",
+            "app/services/studio_process_simulation.py"
           ]
         },
         "tenants": {
@@ -57819,6 +57884,7 @@
             "app/services/connector_config.py",
             "app/services/finance_read_model_service.py",
             "app/services/llm_gateway.py",
+            "app/services/studio_process_simulation.py",
             "app/workers/mail_poll_worker.py",
             "app/workers/rag_indexer.py"
           ],

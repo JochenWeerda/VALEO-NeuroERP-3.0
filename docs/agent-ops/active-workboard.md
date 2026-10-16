@@ -18386,6 +18386,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **Abnahme:** Zwei direkte Registry-Vertraege bestanden: Historie und Vergleich erreichen den registrierten Studio-Arbeitsraum; alle nativen Masken haben ein Navigationsziel. Keine Entity-ID erfunden, keine Rechteaenderung oder DB-Nutzung. QA studio-history-navigation-20261016.md.
 
-## TABLE-CATALOG-SYNC-20261016 - reserviert, Codex
+## TABLE-CATALOG-SYNC-20261016 - abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Den frischen Katalog aus Quality Gate 38797044667 an bestehende Migration/Quellen binden und den Artefaktdrift schliessen. **Dateibesitz:** docs/admin/table-catalog.json/md ausschliesslich im isolierten Lieferindex; eigener Pruefvertrag/QA/Workboard. Physische fremde Katalogfassungen bleiben unveraendert. **Abnahme:** keine bisherigen Tabellen oder Spaltendefinitionen verloren; eine vorhandene Studio-Historienmigration, sieben nachvollziehbare Verbraucherzuordnungen; deterministische Generatorausgabe. Keine Schemaaenderung, keine neue DB/Container, kein Reset. Fremder CI-Claim behaelt Gatekonfigurationen und bestehende Tests.
+
+**Abnahme:** Frisches bestehendes CI-Artefakt: 681 Tabellen, alle 680 bisherigen Definitionen erhalten; eine migrierte Studio-Historientabelle und sieben quellengestuetzte additive Lineagezuordnungen. JSON bytegenau/Markdown datumsnormalisiert zum kanonischen Generator. Fremde physische Kataloge bewahrt. Keine Schemaaenderung oder DB-Ressource. QA table-catalog-sync-20261016.md; GitHub-Nachlauf erforderlich.
