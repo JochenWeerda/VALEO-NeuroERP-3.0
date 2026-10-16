@@ -18446,6 +18446,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **Belegkatalog-Abnahme:** Neun unveraenderte normalisierte Vorlagen valide; 28 neue Negativ-/Bindungsvertraege, insgesamt 128 Faelle gruen. Variantenbezogene Quellen und Command-/Schutzvertraege, keine globale Allowlist. Simulationshash an vier native Quellmodule gebunden. QA studio-document-catalog-20261016.md. Profilfreigabe unveraendert gesperrt, weitere Belegmigration offen.
 
-## SONAR-COMPLIANCE-EVIDENCE-20261016 - reserviert, Codex
+## SONAR-COMPLIANCE-EVIDENCE-20261016 - abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Echte Sonar-Laufzeitbefunde im Compliance-Monitor schliessen: fehlende Nachweise oder Prueffehler duerfen kein COMPLIANT, erfundene Messwerte oder Zertifizierungsbereitschaft ergeben. **Dateibesitz:** app/security/compliance_monitor.py; neuer gezielter Test, betroffener Demo-Trend-Altvertrag; eigene QA und Workboard. **Abnahme:** unbekannte und fehlgeschlagene Checks sichtbar, keine erfundenen Trends/Fristen, keine Rohfehlermeldungen im Bericht; belegte Ergebnisse werden weiterhin ausgewertet. Keine API-, Rollen-, DB- oder Containeraenderung. Weitere Sonar-/Belegmigration bleiben Gesamtauftrag.
+
+**Abnahme:** 17 reine Funktionsvertraege gruen. Acht unbelegte Kontrollen explizit UNKNOWN; Ausnahmen und ungueltige Ergebnisse sperren positive Bewertung, bekannte Fehler NON_COMPLIANT. Keine erfundenen Verlaufsdaten/Zertifizierungsfristen und keine Rohfehler im Bericht/Monitorlog. Evidenzadapter weiterhin fehlend/offen, nicht als Zertifizierungsnachweis ausgegeben. QA compliance-evidence-boundary-20261016.md. Kein DB-/Container-/Rechteeingriff.
