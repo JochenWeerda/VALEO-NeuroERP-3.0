@@ -18385,3 +18385,7 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 **Owner:** Codex. **Ziel:** Zwei native Studio-Historienmasken an den bestehenden Studio-Arbeitsraum binden. **Dateibesitz:** app/core/screen_definitions.py ausschliesslich zwei _SCREEN_LIST_ROUTE-Eintraege; neuer Navigationstest, eigene QA/Workboard. **Abnahme:** alle nativen Katalogmasken mit Route, Historie/Vergleich erreichen registrierten Arbeitsraum; keine kuenstlichen Entity-IDs, keine eigene Parallelmaske oder Rechteaenderung. Fremde Tests/Gates und Quellenhunks bleiben erhalten. Keine DB/Container.
 
 **Abnahme:** Zwei direkte Registry-Vertraege bestanden: Historie und Vergleich erreichen den registrierten Studio-Arbeitsraum; alle nativen Masken haben ein Navigationsziel. Keine Entity-ID erfunden, keine Rechteaenderung oder DB-Nutzung. QA studio-history-navigation-20261016.md.
+
+## TABLE-CATALOG-SYNC-20261016 - reserviert, Codex
+
+**Owner:** Codex. **Ziel:** Den frischen Katalog aus Quality Gate 38797044667 an bestehende Migration/Quellen binden und den Artefaktdrift schliessen. **Dateibesitz:** docs/admin/table-catalog.json/md ausschliesslich im isolierten Lieferindex; eigener Pruefvertrag/QA/Workboard. Physische fremde Katalogfassungen bleiben unveraendert. **Abnahme:** keine bisherigen Tabellen oder Spaltendefinitionen verloren; eine vorhandene Studio-Historienmigration, sieben nachvollziehbare Verbraucherzuordnungen; deterministische Generatorausgabe. Keine Schemaaenderung, keine neue DB/Container, kein Reset. Fremder CI-Claim behaelt Gatekonfigurationen und bestehende Tests.
