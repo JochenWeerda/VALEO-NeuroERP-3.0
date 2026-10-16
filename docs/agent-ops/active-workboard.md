@@ -18502,3 +18502,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 
 **DOCFLOW-CREATE-GUARD Abnahme:** 175 gesamte DocFlow-Familienvertraege und 21 Katalog-/Lineagevertraege gruen. Gleicher Tenant/Schluessel transaktional serialisiert, Inhalt und gepruefter Akteur gebunden, urspruenglicher HTTP-Antwortsnapshot auch nach Folgeaenderung; geaenderte Anfrage/Altkey ohne Nachweis 409, Rechte vor Replay. Outbox, Pflichtlog, Kopf, Positionen und Replay atomar, Fehlermeldung ohne Eingabewerte. Keine Schema-/Rechte-/MCP-Aenderung. Altaufrufe ohne Schluessel bleiben ausserhalb der Wiederholungsgarantie. QA docflow-create-guard-20261016.md.
+
+
+## DOCFLOW-SCREEN-PROVENANCE-20261016 - reserviert, Codex
+
+**Owner:** Codex. **Ziel:** Neue Belege optional an exakt verwendete aktive registrierte Maske binden; serverseitige Mandanten-/Belegart-/Hashpruefung, unveraenderlicher Nachweis im bestehenden Pflichtprotokoll. **Dateibesitz:** kleiner interner Provenienzhelfer, Createhelper nur Aufloesung/Protokoll/Snapshot, bestehende DocFlow-DTOs und Antwortprojektion, eigene Negativ-/SQL-/HTTPtests und API-/Inventar-/QA-Projektionen. Keine erfundene Bindung fuer Altbelege oder Erstellungen ohne Maskenkontext, keine Aktivierung editierter Entwuerfe, keine Schema-/Rollen-/MCP-Aenderung. Gemeinsamer Pruefstand nur eigene Daten.
