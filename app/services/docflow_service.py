@@ -765,54 +765,11 @@ class DocflowService:
     # ── commands ──────────────────────────────────────────────────────────────
 
     def create_document(self, payload: Any) -> str:
-        """Creates header + items + POS compliance. Returns doc_id."""
-        if payload.doc_type == "sales_invoice":
-            self._assert_invoice_customer_allowed(payload.customer_id)
-        if payload.idempotency_key:
-            existing = self.load_create_idempotency(payload.idempotency_key)
-            if existing:
-                return existing
-        if payload.status in {"posted", "reversed", "cancelled"}:
-            raise ValidationFailedError(
-                f"Ein Beleg wird nicht im Status {payload.status} angelegt; gebucht und storniert wird über die Kommandos."
-            )
-        now = datetime.now(timezone.utc)
-        doc_id = str(uuid4())
-        self._kommando("create")
-        total_net, total_tax, total_gross = Decimal("0"), Decimal("0"), Decimal("0")
-        self.db.execute(
-            text("""
-                INSERT INTO domain_docflow.document_headers
-                (id, tenant_id, doc_type, doc_number, status, source_system, source_ref, customer_id, supplier_id,
-                 currency, total_net, total_tax, total_gross, document_date, posting_date, version, created_by, updated_by, created_at, updated_at)
-                VALUES (:id, :tenant_id, :doc_type, :doc_number, :status, :source_system, :source_ref, :customer_id, :supplier_id,
-                 :currency, :total_net, :total_tax, :total_gross, :document_date, :posting_date, 1, :created_by, :updated_by, NOW(), NOW())
-            """),
-            {
-                "id": doc_id, "tenant_id": self.tenant_id, "doc_type": payload.doc_type,
-                "doc_number": payload.doc_number, "status": payload.status,
-                "source_system": payload.source_system or "docflow.ui",
-                "source_ref": payload.source_ref, "customer_id": payload.customer_id,
-                "supplier_id": payload.supplier_id, "currency": payload.currency,
-                "total_net": _money(total_net), "total_tax": _money(total_tax), "total_gross": _money(total_gross),
-                "document_date": payload.document_date or now,
-                "posting_date": payload.posting_date,
-                "created_by": self._wer(payload.created_by), "updated_by": self._wer(payload.created_by),
-            },
-        )
-        total_net, total_tax, total_gross = self._insert_items(doc_id, payload.items, steuerrichtung(payload.doc_type))
-        self.db.execute(
-            text("UPDATE domain_docflow.document_headers SET total_net=:n, total_tax=:t, total_gross=:g WHERE id=:id AND tenant_id=:tenant_id"),
-            {"id": doc_id, "tenant_id": self.tenant_id, "n": _money(total_net), "t": _money(total_tax), "g": _money(total_gross)},
-        )
-        self.upsert_pos_compliance(doc_id, payload.pos_compliance)
-        self._protokolliere("create", doc_id, {"doc_type": payload.doc_type, "doc_number": payload.doc_number, "status": payload.status})
-        self.best_effort_audit("docflow_create", "docflow_document", doc_id,
-                               {"doc_type": payload.doc_type, "doc_number": payload.doc_number, "status": payload.status})
-        if payload.idempotency_key:
-            self.store_create_idempotency(payload.idempotency_key, doc_id)
-        self.db.commit()
-        return doc_id
+        return str(self.create_document_snapshot(payload)['header']['id'])
+
+    def create_document_snapshot(self, payload: Any) -> dict[str, Any]:
+        from app.services.docflow_create_command import create_snapshot
+        return create_snapshot(self, payload)
 
     def update_document(self, doc_id: str, payload: Any) -> dict[str, Any]:
         from app.services.docflow_update_command import update_document

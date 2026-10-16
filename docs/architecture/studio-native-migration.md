@@ -57,3 +57,8 @@ Der vorhandene DocFlow-Update-Command verlangt jetzt die gelesene positive expec
 Der bestehende Rechnungseditor sendet die gelesene Version, fuehrt unveraenderte parallele Klicks zusammen und behaelt bei Transportfehlern denselben Auftragsschluessel. Neue Rechnungen werden als Entwurf gespeichert. Der REST-Vertrag ist bewusst verschaerft: Alte Update-Aufrufe ohne Version oder Schluessel werden abgewiesen. Das bestehende API-Artefakt fuehrt genau diese Schemaaenderung nach. Es entstehen kein zweites Commandregister, kein Endpunkt und kein neuer Datenspeicher. Keine MCP-Schreibfreigabe oder Studio-Profilfreigabe wird hierdurch erteilt.
 
 Nachweis: [DocFlow-Update-Abnahme](../quality-assurance/docflow-update-guard-20261016.md). Die fachliche Vollmigration der Masken bleibt ein getrennter Lieferstand.
+
+
+## Erstellungsauftrag absichern
+
+Der bestehende DocFlow-Createweg bindet vorhandene Idempotenzschluessel jetzt an Inhalt und verifizierten Akteur, serialisiert parallele Wiederholungen und liefert den originalen Antwortsnapshot. Fachwirkung, Pflichtlog, Outbox und Replay bilden eine Transaktion. Altauftraege ohne Inhaltsnachweis werden nicht ungeprueft wiederholt. Der unveraenderte API-Vertrag erlaubt weiterhin schluessellose Altaufrufe ausserhalb dieser Garantie. Nachweis: [Erstellungsabnahme](../quality-assurance/docflow-create-guard-20261016.md).

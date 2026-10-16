@@ -18496,6 +18496,9 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 **DOCFLOW-SERVICE-INVENTORY Abnahme:** Servicepfade und Docstrings ausschliesslich aus Git HEAD gelesen und mit vorhandenem Generator gerendert; neuer DocFlow-Updatehelper nachgezogen. Fremde physische Inventarkopie bewahrt. QA docflow-service-inventory-20261016.md.
 
 
-## DOCFLOW-CREATE-GUARD-20261016 - reserviert, Codex
+## DOCFLOW-CREATE-GUARD-20261016 - abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Gleiche Erstellung mit geaendertem Inhalt/Akteur ablehnen und parallele Wiederholungen serialisieren; unveraenderlicher Antwortsnapshot, Pflichtlog und Outbox in derselben Transaktion. **Dateibesitz:** DocflowService ausschliesslich Create-Delegation, neuer interner Createhelper, bestehender Create-HTTP-Handler, eigener SQL-/HTTP-/Negativvertrag und gezielte Projektionen/QA/Workboard. Kein neues API-/Datenbankschema, kein Rechte- oder MCP-Freischaltentscheid. Vorhandene gemeinsame valeo_probe nur eigene Daten; kein Reset/Migration/Container. Altaufrufe ohne Schluessel bleiben bewusst ausserhalb einer Wiederholungsgarantie und werden nicht als geschlossen behauptet.
+
+
+**DOCFLOW-CREATE-GUARD Abnahme:** 175 gesamte DocFlow-Familienvertraege und 21 Katalog-/Lineagevertraege gruen. Gleicher Tenant/Schluessel transaktional serialisiert, Inhalt und gepruefter Akteur gebunden, urspruenglicher HTTP-Antwortsnapshot auch nach Folgeaenderung; geaenderte Anfrage/Altkey ohne Nachweis 409, Rechte vor Replay. Outbox, Pflichtlog, Kopf, Positionen und Replay atomar, Fehlermeldung ohne Eingabewerte. Keine Schema-/Rechte-/MCP-Aenderung. Altaufrufe ohne Schluessel bleiben ausserhalb der Wiederholungsgarantie. QA docflow-create-guard-20261016.md.

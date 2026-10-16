@@ -15388,6 +15388,7 @@
           ],
           "written_by": [
             "app/core/gobd_artifact.py",
+            "app/services/docflow_create_command.py",
             "app/services/docflow_gobd_service.py",
             "app/services/docflow_service.py",
             "app/services/docflow_update_command.py",

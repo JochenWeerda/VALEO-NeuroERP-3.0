@@ -395,17 +395,21 @@ async def create_document(
     _validate_pos_compliance_requirements(payload.doc_type, payload.pos_compliance)
     svc = _svc(db, effective_tenant, _akteur(nutzer))
     try:
-        doc_id = svc.create_document(payload)
+        snapshot = svc.create_document_snapshot(payload)
+        doc_id = str(snapshot['header']['id'])
     except (EntityNotFoundError, ValidationFailedError) as exc:
         db.rollback()
         raise HTTPException(status_code=422, detail=exc.detail)
+    except ConflictError as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=exc.detail)
     except HTTPException:
         db.rollback()
         raise
     except Exception as exc:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"create failed: {exc}") from exc
-    return _row_to_header_out(svc, doc_id)
+        raise HTTPException(status_code=500, detail="Document create failed") from exc
+    return _row_to_header_out(svc, doc_id, snapshot)
 
 
 @router.put("/{doc_id}", response_model=DocflowHeaderOut, summary="Document aktualisieren")
