@@ -327,3 +327,7 @@ Das Studio erzeugt seine manuelle Getreide-Kalkulationsprobe als normale ScreenD
 Die Vorschau verwendet weiterhin schema-compiler, UniversalFormState und UniversalMaskRenderer. Der Host bindet ausschliesslich den bestehenden Agrar-Kalkulator an; keine zweite Masken-Engine oder nachgebaute Fachformel. Eingabeaenderungen entwerten alte Ergebnisse; verspaetete Antworten duerfen sie nicht wieder sichtbar machen. Beispieldaten enthalten nur sichtbare Felder.
 
 RenderPlan-Caching beruecksichtigt auch Fields, Tables, Tabs, Layout und Datenquellen, weil Studio-Aenderungen vor dem Speichern dieselbe ID/Version behalten. Die Referenz ist eine isolierte Kalkulationsprobe und noch keine freigegebene produktive Getreideannahme. [Abnahme und Grenzen](../quality-assurance/studio-semantic-20261015.md).
+
+## Studio-Themes und funktionale Kontraste (16.10.2026)
+
+Studio-Definitionen erben das aktive globale Theme ueber denselben UniversalMaskRenderer. Keine feste Maskenfarbe zur Reparatur eines zentralen Themefehlers einfuehren. Der regulaere Frontendvertrag studio-theme-contrast.test.ts prueft Textpaare mit mindestens 4,5:1 und aktive Eingabe-/Fokuskontraste mit mindestens 3:1, einschliesslich spezifischer Meridian-/Terra-Dunkelregeln. Dekorative Trenner bleiben davon getrennt. Browserabnahmen bleiben fuer konkrete Zustaende, Transparenz, Zoom und Layout erforderlich; Palettentests sind keine vollstaendige WCAG-Zertifizierung. Nachweis: docs/quality-assurance/studio-theme-contrast-20261016.md.
