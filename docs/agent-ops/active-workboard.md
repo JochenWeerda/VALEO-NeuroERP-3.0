@@ -18374,6 +18374,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **Abnahme:** Alle acht Ernte-Writes explizit blocked_human_only ohne Tool-ID; keine neue MCP-Freischaltung. Bestehende 4 open_high, 43 mapped und 15 local_ui unveraendert. Zusammenfassung nennt echte Zaehler. Vier Kartenvertraege, Generator --check, kanonischer Action-Matrix-Report und fuenf Agent-Handbuchartefakte gruen. QA harvest-mcp-projection-20261015.md. Security Scan 38794074410 vollstaendig erfolgreich; Service Security verbleibt wegen abgelaufener ChromaDB-Bewertungen separat offen.
 
-## CHROMA-REVIEW-20261016 — reserviert, Codex
+## CHROMA-REVIEW-20261016 — abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Drei faellige eigene ChromaDB-Bewertungen evidenzgebunden erneuern und den zweiten Backend-Verbraucher in die Reachability-/Hashpruefung aufnehmen. **Dateibesitz:** config/security/dependency-decisions.json ausschliesslich drei bestehende Chroma-Reviews; scripts/security_dependency_gate.py ausschliesslich Erweiterung EVIDENCE_GLOBS um app/infrastructure/rag/vector_store.py; neuer gezielter Regressionstest; eigene QA/Workboard. **Abnahme:** aktuelle Primaeradvisories/Herstellerstand, beide Verbraucher eingebettet, keine HTTP-Server-/Remote-Code-/RBAC-Serverpfade im Deployment; originale sichtbare Auditbefunde unveraendert; Hashdrift/Serverpfad/Ablauf sperren. Keine neue Risikoausnahme/keine Workflowaenderung. Fremder CI-Claim behaelt Gatekonfigurationen/Tests; eigener bestehender Bewertungsvertrag wird strenger. Keine DB/Container, keine Fachmutation.
+
+**Abnahme:** Beide Verbraucher und Deploymentpfade mit 98 Dateien gebunden; neun bisherige und zwoelf Backend-Kontrolltests sowie drei Embedded-Vertraege gruen. Originaler Linux-Audit unveraendert: drei Findings, Scannerexit 1; separate Entscheidung drei not_affected/0 blocked. Review 16.10. bis ausschliesslich 23.10.; keine neue Ausnahme. QA chroma-review-20261016.md; GitHub-Nachlauf bleibt erforderlich.
