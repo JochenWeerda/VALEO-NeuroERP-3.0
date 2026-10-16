@@ -1,10 +1,10 @@
-"""Pydantic schemas for the docflow domain."""
+"""Canonical DocFlow request/response models shared by every adapter."""
 from __future__ import annotations
-
-from typing import Any, Optional, List
-from pydantic import BaseModel, Field, ConfigDict
+from datetime import date, datetime
+from typing import Any, Optional
+from pydantic import BaseModel, Field, ConfigDict as _ConfigDict
 from app.api.v1.schemas.base import BaseSchema
-from pydantic import ConfigDict as _ConfigDict
+from app.api.v1.schemas.docflow_screen_context import DocflowScreenContextIn, DocflowScreenContextOut
 
 
 class DocflowOut(BaseSchema):
@@ -21,6 +21,8 @@ class DocflowItemOut(BaseModel):
     unit: Optional[str] = None
     unit_price: float
     discount_percent: float
+    tax_code: Optional[str] = None
+    expense_account: Optional[str] = None
     tax_rate: float
     line_total_net: float
     line_total_tax: float
@@ -28,6 +30,7 @@ class DocflowItemOut(BaseModel):
 
 
 class DocflowHeaderOut(BaseModel):
+    screen_context: Optional[DocflowScreenContextOut] = None
     id: str
     tenant_id: str
     doc_type: str
@@ -92,7 +95,51 @@ class DocflowRecordExportRequest(BaseModel):
     exported_by: Optional[str] = Field(default=None, max_length=100)
 
 
+class DocflowCommandResult(BaseModel):
+    command: str
+    idempotent_hit: bool = False
+    source_doc_id: Optional[str] = None
+    target_doc_id: Optional[str] = None
+    posting_id: Optional[str] = None
+    status: str
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class DocflowLineInput(BaseModel):
+    article_number: str = Field(..., min_length=1, max_length=80)
+    description: Optional[str] = None
+    quantity: float = Field(default=0, ge=0)
+    unit: Optional[str] = Field(default=None, max_length=20)
+    unit_price: float = Field(default=0, ge=0)
+    discount_percent: float = Field(default=0, ge=0, le=100)
+    # Steuerschluessel des Mandanten (tax_keys.code). Mit ihm kommt der Satz vom Server; ein abweichend
+    # mitgeschickter Satz wird abgelehnt. Ohne ihn gilt der Satz der Anfrage — gebucht wird so nicht.
+    tax_code: Optional[str] = Field(default=None, max_length=2)
+    tax_rate: Optional[float] = Field(default=None, ge=0, le=100)
+    # Nur Einkaufsbelege: Aufwandskonto der Position; leer = das des Steuerschluessels.
+    expense_account: Optional[str] = Field(default=None, max_length=20)
+    batch_id: Optional[str] = Field(default=None, max_length=64)
+    charge: Optional[str] = Field(default=None, max_length=64)
+
+
+class PosComplianceInput(BaseModel):
+    terminal_id: str = Field(..., min_length=1, max_length=60)
+    cash_register_id: Optional[str] = Field(default=None, max_length=60)
+    transaction_type: str = Field(default="sale", min_length=4, max_length=20)
+    payment_breakdown: Optional[dict[str, Any]] = None
+    tse_transaction_id: str = Field(..., min_length=1, max_length=120)
+    tse_signature: str = Field(..., min_length=1)
+    tse_signature_counter: Optional[int] = None
+    transaction_started_at: datetime
+    transaction_ended_at: datetime
+    receipt_issued_at: datetime
+    dsfinvk_export_batch_id: Optional[str] = Field(default=None, max_length=120)
+    correction_type: Optional[str] = Field(default=None, max_length=20)
+    original_header_id: Optional[str] = Field(default=None, max_length=36)
+
+
 class DocflowCreateRequest(BaseModel):
+    screen_context: Optional[DocflowScreenContextIn] = None
     doc_type: str = Field(..., min_length=3, max_length=40)
     doc_number: str = Field(..., min_length=1, max_length=80)
     status: str = Field(default="draft", min_length=3, max_length=20)
@@ -110,7 +157,8 @@ class DocflowCreateRequest(BaseModel):
 
 
 class DocflowUpdateRequest(BaseModel):
-    expected_version: Optional[int] = Field(default=None, ge=1)
+    expected_version: int = Field(..., ge=1, strict=True)
+    idempotency_key: str = Field(..., min_length=8, max_length=120)
     status: Optional[str] = Field(default=None, min_length=3, max_length=20)
     source_system: Optional[str] = Field(default=None, max_length=40)
     source_ref: Optional[str] = Field(default=None, max_length=80)
@@ -123,3 +171,12 @@ class DocflowUpdateRequest(BaseModel):
     items: Optional[list[DocflowLineInput]] = None
     pos_compliance: Optional[PosComplianceInput] = None
 
+
+class DocflowApprovalRequest(BaseModel):
+    action: str = Field(..., pattern="^(post|reverse)$")
+    reason: Optional[str] = Field(default=None, max_length=300)
+
+
+class DocflowApprovalDecision(BaseModel):
+    granted: bool
+    note: Optional[str] = Field(default=None, max_length=300)
