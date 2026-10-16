@@ -18518,3 +18518,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 
 **DOCFLOW-SCHEMA-SOT Abnahme:** Alle 16 produktiven Modelle an einem kanonischen Schemaort; Router importiert identische Modellobjekte statt lokaler Kopien. 203 gesamte DocFlow-Vertraege einschliesslich 18 neuer Identitaets-/Pflichtfeldvertraege gruen. Produktions-OpenAPI exakt unveraendert (3185 Pfade). Defekte ungenutzte Altdefinitionen ersetzt, keine API-/Rechte-/Schema-Migration. QA docflow-schema-sot-20261016.md.
+
+
+## MASK-TABLE-INPUT-20261016 - reserviert, Codex
+
+**Owner:** Codex. **Ziel:** Strukturiertes Tabellen-Eingabefeld im zentralen Builder als Grundlage der Belegpositionserfassung statt Objekttext. **Dateibesitz:** ScreenFieldDefinition/RenderFieldPlan/Compiler/FastFormRenderer nur deklarierte rowFields und tableEditing; FieldRenderer nur zentraler Tabellenzweig, neuer TableFieldRenderer und gezielte UI-/Compilervertraege, Meridian-/QA-/Workboard. **Abnahme:** zentrale Renderkette bewahrt Spaltenmetadaten; typgerechtes Editieren ohne Mutation/Verlust versteckter Zeilendaten; Hinzufuegen/Entfernen nur explizit erlaubt; Readonly, ungueltige Spalten/Werte und Mengenlimit fail-closed; keine Fachberechnung oder eigene API. Keine schreibende Freischaltung bestehender Masken/Studio-Entwuerfe, keine DB-/Rollen-/MCP-Aenderung.
