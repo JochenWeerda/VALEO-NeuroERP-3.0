@@ -18380,6 +18380,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **Abnahme:** Beide Verbraucher und Deploymentpfade mit 98 Dateien gebunden; neun bisherige und zwoelf Backend-Kontrolltests sowie drei Embedded-Vertraege gruen. Originaler Linux-Audit unveraendert: drei Findings, Scannerexit 1; separate Entscheidung drei not_affected/0 blocked. Review 16.10. bis ausschliesslich 23.10.; keine neue Ausnahme. QA chroma-review-20261016.md; GitHub-Nachlauf bleibt erforderlich.
 
-## STUDIO-HISTORY-NAV-20261016 - reserviert, Codex
+## STUDIO-HISTORY-NAV-20261016 - abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Zwei native Studio-Historienmasken an den bestehenden Studio-Arbeitsraum binden. **Dateibesitz:** app/core/screen_definitions.py ausschliesslich zwei _SCREEN_LIST_ROUTE-Eintraege; neuer Navigationstest, eigene QA/Workboard. **Abnahme:** alle nativen Katalogmasken mit Route, Historie/Vergleich erreichen registrierten Arbeitsraum; keine kuenstlichen Entity-IDs, keine eigene Parallelmaske oder Rechteaenderung. Fremde Tests/Gates und Quellenhunks bleiben erhalten. Keine DB/Container.
+
+**Abnahme:** Zwei direkte Registry-Vertraege bestanden: Historie und Vergleich erreichen den registrierten Studio-Arbeitsraum; alle nativen Masken haben ein Navigationsziel. Keine Entity-ID erfunden, keine Rechteaenderung oder DB-Nutzung. QA studio-history-navigation-20261016.md.

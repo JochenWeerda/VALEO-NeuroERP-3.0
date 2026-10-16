@@ -5527,6 +5527,8 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    "platform/studio-history": "/admin/screen-studio",
+    "platform/studio-history-diff": "/admin/screen-studio",
     "agrar/harvest-controls": "/admin/screen-studio?harvestControls=1",
     **KONTROLLE_ROUTEN,
     "admin/identity-budgets": "/admin/identity-budgets",
