@@ -18523,3 +18523,6 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 ## MASK-TABLE-INPUT-20261016 - reserviert, Codex
 
 **Owner:** Codex. **Ziel:** Strukturiertes Tabellen-Eingabefeld im zentralen Builder als Grundlage der Belegpositionserfassung statt Objekttext. **Dateibesitz:** ScreenFieldDefinition/RenderFieldPlan/Compiler/FastFormRenderer nur deklarierte rowFields und tableEditing; FieldRenderer nur zentraler Tabellenzweig, neuer TableFieldRenderer und gezielte UI-/Compilervertraege, Meridian-/QA-/Workboard. **Abnahme:** zentrale Renderkette bewahrt Spaltenmetadaten; typgerechtes Editieren ohne Mutation/Verlust versteckter Zeilendaten; Hinzufuegen/Entfernen nur explizit erlaubt; Readonly, ungueltige Spalten/Werte und Mengenlimit fail-closed; keine Fachberechnung oder eigene API. Keine schreibende Freischaltung bestehender Masken/Studio-Entwuerfe, keine DB-/Rollen-/MCP-Aenderung.
+
+
+**MASK-TABLE-INPUT Dateibesitz ergaenzt:** UniversalMaskRenderer ausschliesslich Tabellenmetadaten im vorhandenen Rohdefinitionspfad; useUniversalFormState ausschliesslich deklarative Tabellen-/Pflichtfeldvalidierung; kleiner gemeinsamer Tabellenstrukturvertrag und gezielte Tests. Grund: sichtbares Eingabefeld allein darf keinen ungueltigen Submit erlauben; Renderer und Formstate muessen dieselbe Strukturgrenze verwenden.
