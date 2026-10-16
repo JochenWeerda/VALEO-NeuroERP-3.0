@@ -18494,3 +18494,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 
 **DOCFLOW-SERVICE-INVENTORY Abnahme:** Servicepfade und Docstrings ausschliesslich aus Git HEAD gelesen und mit vorhandenem Generator gerendert; neuer DocFlow-Updatehelper nachgezogen. Fremde physische Inventarkopie bewahrt. QA docflow-service-inventory-20261016.md.
+
+
+## DOCFLOW-CREATE-GUARD-20261016 - reserviert, Codex
+
+**Owner:** Codex. **Ziel:** Gleiche Erstellung mit geaendertem Inhalt/Akteur ablehnen und parallele Wiederholungen serialisieren; unveraenderlicher Antwortsnapshot, Pflichtlog und Outbox in derselben Transaktion. **Dateibesitz:** DocflowService ausschliesslich Create-Delegation, neuer interner Createhelper, bestehender Create-HTTP-Handler, eigener SQL-/HTTP-/Negativvertrag und gezielte Projektionen/QA/Workboard. Kein neues API-/Datenbankschema, kein Rechte- oder MCP-Freischaltentscheid. Vorhandene gemeinsame valeo_probe nur eigene Daten; kein Reset/Migration/Container. Altaufrufe ohne Schluessel bleiben bewusst ausserhalb einer Wiederholungsgarantie und werden nicht als geschlossen behauptet.
