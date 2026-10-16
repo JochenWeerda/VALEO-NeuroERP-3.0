@@ -20,6 +20,7 @@ from app.services.docflow_service import DocflowService, POS_TYPES
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
 from app.api.v1.schemas.base import TypedObjectOut
+from app.api.v1.schemas.docflow_screen_context import DocflowScreenContextIn, DocflowScreenContextOut
 
 
 class DocflowOut(BaseSchema):
@@ -59,6 +60,7 @@ class DocflowItemOut(BaseModel):
 
 
 class DocflowHeaderOut(BaseModel):
+    screen_context: Optional[DocflowScreenContextOut] = None
     id: str
     tenant_id: str
     doc_type: str
@@ -167,6 +169,7 @@ class PosComplianceInput(BaseModel):
 
 
 class DocflowCreateRequest(BaseModel):
+    screen_context: Optional[DocflowScreenContextIn] = None
     doc_type: str = Field(..., min_length=3, max_length=40)
     doc_number: str = Field(..., min_length=1, max_length=80)
     status: str = Field(default="draft", min_length=3, max_length=20)
@@ -240,7 +243,10 @@ def _row_to_header_out(svc: DocflowService, header_id: str, snapshot: Optional[d
         raise HTTPException(status_code=404, detail="Document not found")
     items = snapshot["items"] if snapshot is not None else svc.fetch_items(header_id)
     pos_compliance = snapshot["pos_compliance"] if snapshot is not None else svc.fetch_pos_compliance(header_id)
+    from app.services.docflow_screen_provenance import read_screen_context
+    context = snapshot.get("screen_context") if snapshot is not None and "screen_context" in snapshot else read_screen_context(svc, header_id)
     return DocflowHeaderOut(
+        screen_context=context,
         id=str(header["id"]),
         tenant_id=str(header["tenant_id"]),
         doc_type=str(header["doc_type"]),

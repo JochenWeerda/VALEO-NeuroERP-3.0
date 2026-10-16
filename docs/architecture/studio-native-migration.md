@@ -62,3 +62,8 @@ Nachweis: [DocFlow-Update-Abnahme](../quality-assurance/docflow-update-guard-202
 ## Erstellungsauftrag absichern
 
 Der bestehende DocFlow-Createweg bindet vorhandene Idempotenzschluessel jetzt an Inhalt und verifizierten Akteur, serialisiert parallele Wiederholungen und liefert den originalen Antwortsnapshot. Fachwirkung, Pflichtlog, Outbox und Replay bilden eine Transaktion. Altauftraege ohne Inhaltsnachweis werden nicht ungeprueft wiederholt. Der unveraenderte API-Vertrag erlaubt weiterhin schluessellose Altaufrufe ausserhalb dieser Garantie. Nachweis: [Erstellungsabnahme](../quality-assurance/docflow-create-guard-20261016.md).
+
+
+## Maskenprovenienz beim Erzeugen
+
+Der neue optionale screen_context bindet Create an die im verifizierten Mandanten aktive Maske und deren exakten Definitionshash. Serveraufgeloeste Basis-/Varianten-/Studiofreigabereferenzen werden im bestehenden unveraenderlichen Createprotokoll und Antwortsnapshot festgehalten; Altbelege werden nicht nachtraeglich umgedeutet. Diese serverseitige Grundlage ist umgesetzt; die kuenftige zentrale Eingabemaske muss den Kontext aus ihrer geladenen Definition mitsenden. [Abnahme](../quality-assurance/docflow-screen-provenance-20261016.md).

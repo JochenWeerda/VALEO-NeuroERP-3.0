@@ -100,6 +100,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `docflow_freigabe` | DocFlow-Belege an der zentralen Approval Engine (APPROVAL-001). |
 | `docflow_gobd_service` | GoBD-Exportpaket & DMS-/Paperless-Liveprobe (DOM-DOC-004.4). |
 | `docflow_return_service` | Document-return worklist on top of canonical Docflow headers and artifacts. |
+| `docflow_screen_provenance` | Verified screen provenance stored in the existing immutable document command log. |
 | `docflow_service` | Service layer for the canonical Docflow command pipeline (DOCFLOW-P0-01..03). |
 | `docflow_source_proposals` | Read-only source proposals over existing contracts and customer-owned stock. |
 | `docflow_update_command` | Versioned, replay-safe DocFlow editing in the existing document transaction. |

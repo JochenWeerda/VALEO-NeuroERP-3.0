@@ -52551,6 +52551,16 @@
             ],
             "title": "Posting Date"
           },
+          "screen_context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DocflowScreenContextIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "source_ref": {
             "anyOf": [
               {
@@ -52721,6 +52731,16 @@
               }
             ],
             "title": "Printed By"
+          },
+          "screen_context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DocflowScreenContextOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "source_ref": {
             "anyOf": [
@@ -53204,6 +53224,78 @@
           "reason"
         ],
         "title": "DocflowReverseRequest",
+        "type": "object"
+      },
+      "DocflowScreenContextIn": {
+        "additionalProperties": false,
+        "properties": {
+          "definition_hash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Definition Hash",
+            "type": "string"
+          },
+          "screen_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Screen Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "screen_id",
+          "definition_hash"
+        ],
+        "title": "DocflowScreenContextIn",
+        "type": "object"
+      },
+      "DocflowScreenContextOut": {
+        "additionalProperties": false,
+        "properties": {
+          "definition_hash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Definition Hash",
+            "type": "string"
+          },
+          "document_variant": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Variant"
+          },
+          "screen_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Screen Id",
+            "type": "string"
+          },
+          "studio_release": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Studio Release"
+          }
+        },
+        "required": [
+          "screen_id",
+          "definition_hash"
+        ],
+        "title": "DocflowScreenContextOut",
         "type": "object"
       },
       "DocflowUpdateRequest": {

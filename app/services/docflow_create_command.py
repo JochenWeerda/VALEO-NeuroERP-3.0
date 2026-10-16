@@ -16,6 +16,8 @@ def create_snapshot(service: Any, payload: Any) -> dict[str, Any]:
     if key and not service.akteur:
         raise ValidationFailedError('Ein gepruefter Akteur ist erforderlich.')
     content = payload.model_dump(mode='json', exclude={'idempotency_key', 'created_by'})
+    if getattr(payload, 'screen_context', None) is None:
+        content.pop('screen_context', None)  # Keep hashes of pre-provenance requests stable.
     content['actor'] = service.akteur
     resource = str(uuid5(NAMESPACE_URL, json.dumps([service.tenant_id, key])))
     try:
@@ -31,9 +33,12 @@ def create_snapshot(service: Any, payload: Any) -> dict[str, Any]:
                 raise ConflictError('Alter Auftrag ohne Inhaltsnachweis; neuer Schluessel erforderlich.')
         if payload.doc_type == 'sales_invoice':
             service._assert_invoice_customer_allowed(payload.customer_id)
-        doc_id = _apply_create(service, payload)
+        from app.services.docflow_screen_provenance import resolve_screen_context
+        context = resolve_screen_context(getattr(payload, 'screen_context', None), payload.doc_type, service.tenant_id)
+        doc_id = _apply_create(service, payload, context)
         snapshot = json.loads(json.dumps({'header': service.fetch_header(doc_id),
-            'items': service.fetch_items(doc_id), 'pos_compliance': service.fetch_pos_compliance(doc_id)}, default=str))
+            'items': service.fetch_items(doc_id), 'pos_compliance': service.fetch_pos_compliance(doc_id),
+            'screen_context': context}, default=str))
         service.upsert_outbox_event('docflow.document.created', doc_id, {
             'tenant_id': service.tenant_id, 'doc_id': doc_id, 'actor': service.akteur,
             'version': snapshot['header']['version'], 'idempotency_key': key})
@@ -47,7 +52,7 @@ def create_snapshot(service: Any, payload: Any) -> dict[str, Any]:
         raise
 
 
-def _apply_create(self: Any, payload: Any) -> str:
+def _apply_create(self: Any, payload: Any, context=None) -> str:
     from app.services.docflow_service import _money, steuerrichtung
     if payload.status in {"posted", "reversed", "cancelled"}:
         raise ValidationFailedError(
@@ -83,7 +88,8 @@ def _apply_create(self: Any, payload: Any) -> str:
         {"id": doc_id, "tenant_id": self.tenant_id, "n": _money(total_net), "t": _money(total_tax), "g": _money(total_gross)},
     )
     self.upsert_pos_compliance(doc_id, payload.pos_compliance)
-    self._protokolliere("create", doc_id, {"doc_type": payload.doc_type, "doc_number": payload.doc_number, "status": payload.status})
+    self._protokolliere("create", doc_id, {"doc_type": payload.doc_type, "doc_number": payload.doc_number,
+                                           "status": payload.status, "screen_context": context})
     self.best_effort_audit("docflow_create", "docflow_document", doc_id,
                            {"doc_type": payload.doc_type, "doc_number": payload.doc_number, "status": payload.status})
     return doc_id
