@@ -15390,6 +15390,7 @@
             "app/core/gobd_artifact.py",
             "app/services/docflow_gobd_service.py",
             "app/services/docflow_service.py",
+            "app/services/docflow_update_command.py",
             "app/services/settlement_document_archive_service.py"
           ]
         },
@@ -15525,7 +15526,8 @@
             "app/services/docflow_service.py"
           ],
           "written_by": [
-            "app/services/docflow_service.py"
+            "app/services/docflow_service.py",
+            "app/services/docflow_update_command.py"
           ]
         },
         "document_links": {

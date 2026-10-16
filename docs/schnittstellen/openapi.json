@@ -53245,16 +53245,15 @@
             "title": "Document Date"
           },
           "expected_version": {
-            "anyOf": [
-              {
-                "minimum": 1.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Expected Version"
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "maxLength": 120,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
           },
           "items": {
             "anyOf": [
@@ -53353,6 +53352,10 @@
             "title": "Updated By"
           }
         },
+        "required": [
+          "expected_version",
+          "idempotency_key"
+        ],
         "title": "DocflowUpdateRequest",
         "type": "object"
       },

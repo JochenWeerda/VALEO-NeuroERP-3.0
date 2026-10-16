@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react"
+import { createDocflowSaveSession } from '@/lib/api/docflow-save-session'
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams, useSearchParams } from '@/app/routing/typed-router'
 import { Card } from "@/components/ui/card"
@@ -95,6 +96,8 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
   const entityType = 'invoice'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Rechnung')
   const [docId, setDocId] = useState<string | null>(editId ?? null)
+  const [docVersion, setDocVersion] = useState<number>()
+  const saveSession = useRef(createDocflowSaveSession())
   const [roleFocus, setRoleFocus] = useState<InvoiceRoleFocus>("all")
   const [invoice, setInvoice] = useState<SalesInvoice>({
     number: "",
@@ -133,12 +136,18 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
 
   useEffect(() => {
     if (!editId) {
+      setDocId(null)
+      setDocVersion(undefined)
       return
     }
+    let cancelled = false
+    setDocId(editId)
+    setDocVersion(undefined)
     void (async () => {
       try {
         type DocflowInvoiceDoc = {
           id?: string | number
+          version?: number
           doc_number?: string
           document_date?: string
           customer_id?: string
@@ -155,7 +164,9 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
           total_gross?: number
         }
         const doc = await apiClient.get<DocflowInvoiceDoc>(`/api/v1/docflow/${editId}`)
+        if (cancelled) return
         setDocId(String(doc.id ?? editId))
+        setDocVersion(doc.version)
         setInvoice((prev) => ({
           ...prev,
           number: doc.doc_number ?? prev.number,
@@ -175,9 +186,10 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
           totalGross: Number(doc.total_gross ?? prev.totalGross),
         }))
       } catch {
-        push(t('crud.messages.readError', { defaultValue: 'Rechnung konnte nicht geladen werden' }))
+        if (!cancelled) push(t('crud.messages.readError', { defaultValue: 'Rechnung konnte nicht geladen werden' }))
       }
     })()
+    return () => { cancelled = true }
   }, [editId, push, t])
 
   async function save(v: SalesInvoice): Promise<void> {
@@ -192,7 +204,7 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
       const docPayload = {
         doc_type: "sales_invoice",
         doc_number: v.number,
-        status: "open",
+        ...(docId ? {} : { status: "draft" }),
         customer_id: v.customerId || null,
         document_date: v.date ? new Date(v.date).toISOString() : null,
         posting_date: v.dueDate || null,
@@ -206,16 +218,9 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
           tax_code: line.taxCode || null,
         })),
       }
-      if (docId) {
-        await apiClient.put(`/api/v1/docflow/${docId}`, docPayload)
-      } else {
-        const idempotencyKey = crypto.randomUUID()
-        const { data: created } = await apiClient.post("/api/v1/docflow", {
-          ...docPayload,
-          idempotency_key: idempotencyKey,
-        })
-        setDocId(String((created as { id?: string }).id ?? ''))
-      }
+      const saved = await saveSession.current.save(docId, docVersion, docPayload)
+      setDocId(saved.id)
+      setDocVersion(saved.version)
 
       push(getSuccessMessage(t, 'update', entityType))
     } catch {

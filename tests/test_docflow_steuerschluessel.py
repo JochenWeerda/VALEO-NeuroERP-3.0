@@ -145,6 +145,7 @@ def test_ein_unpassender_schluessel_wird_schon_beim_speichern_abgelehnt(haus, po
 def test_aendern_ersetzt_die_positionen_mit_dem_neuen_schluessel(haus):
     doc_id = _anlegen(haus, [("3", None, 1, 100)]).json()["id"]
     antwort = haus["client"].put(f"/docflow/{doc_id}", params={"tenant_id": haus["mandant"]}, json={
+        "expected_version": 1, "idempotency_key": "replace-tax-key-items",
         "items": [{"article_number": "A-1", "quantity": 1, "unit_price": 100, "tax_code": "2"}]})
     assert antwort.status_code == 200, antwort.text
     assert [(z["tax_code"], z["tax_rate"]) for z in antwort.json()["items"]] == [("2", 7.0)]

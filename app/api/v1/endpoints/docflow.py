@@ -184,7 +184,8 @@ class DocflowCreateRequest(BaseModel):
 
 
 class DocflowUpdateRequest(BaseModel):
-    expected_version: Optional[int] = Field(default=None, ge=1)
+    expected_version: int = Field(..., ge=1, strict=True)
+    idempotency_key: str = Field(..., min_length=8, max_length=120)
     status: Optional[str] = Field(default=None, min_length=3, max_length=20)
     source_system: Optional[str] = Field(default=None, max_length=40)
     source_ref: Optional[str] = Field(default=None, max_length=80)
@@ -233,12 +234,12 @@ def _validate_pos_compliance_requirements(doc_type: str, pos: Optional[PosCompli
         raise HTTPException(status_code=400, detail="original_header_id required for correction_type")
 
 
-def _row_to_header_out(svc: DocflowService, header_id: str) -> DocflowHeaderOut:
-    header = svc.fetch_header(header_id)
+def _row_to_header_out(svc: DocflowService, header_id: str, snapshot: Optional[dict[str, Any]] = None) -> DocflowHeaderOut:
+    header = snapshot["header"] if snapshot is not None else svc.fetch_header(header_id)
     if not header:
         raise HTTPException(status_code=404, detail="Document not found")
-    items = svc.fetch_items(header_id)
-    pos_compliance = svc.fetch_pos_compliance(header_id)
+    items = snapshot["items"] if snapshot is not None else svc.fetch_items(header_id)
+    pos_compliance = snapshot["pos_compliance"] if snapshot is not None else svc.fetch_pos_compliance(header_id)
     return DocflowHeaderOut(
         id=str(header["id"]),
         tenant_id=str(header["tenant_id"]),
@@ -424,7 +425,7 @@ async def update_document(
     verlange(nutzer, "bearbeiten", effective_doc_type)
     _validate_pos_compliance_requirements(effective_doc_type, payload.pos_compliance)
     try:
-        svc.update_document(doc_id, payload)
+        snapshot = svc.update_document(doc_id, payload)
     except EntityNotFoundError as exc:
         db.rollback()
         raise HTTPException(status_code=404, detail=exc.detail)
@@ -439,8 +440,8 @@ async def update_document(
         raise
     except Exception as exc:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"update failed: {exc}") from exc
-    return _row_to_header_out(svc, doc_id)
+        raise HTTPException(status_code=500, detail="Document update failed") from exc
+    return _row_to_header_out(svc, doc_id, snapshot)
 
 
 # ── Freigaben (APPROVAL-001) ──────────────────────────────────────────────────
