@@ -440,3 +440,7 @@ def studio_simulate(draft_id: str, body: StudioRevisionIn,
         raise HTTPException(404, "draft_nicht_gefunden") from error
     except ValueError as error:
         raise HTTPException(409, str(error)) from error
+
+
+from app.api.v1.endpoints.studio_native_import import router as native_import_router
+router.include_router(native_import_router)

@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-10-15
+# Architecture Index — generiert 2026-10-16
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-15T13:36:04Z'
+generated_at: '2026-10-16T04:45:54Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1852,6 +1852,7 @@ domains:
     - stt_client
     - studio_draft_store
     - studio_history_view
+    - studio_native_import
     - studio_process_simulation
     - studio_propose
     - studio_semantic
@@ -1958,6 +1959,7 @@ domains:
     - service_anfragen
     - sla_escalation_api
     - studio_drafts
+    - studio_native_import
     - supply_chain_blockchain
     - system_metrics
     - tapi
@@ -2104,10 +2106,10 @@ domains:
 mapping_stats:
   frontend_routes_total: 941
   frontend_routes_mapped: 941
-  backend_services_total: 295
-  backend_services_mapped: 295
-  backend_endpoints_total: 461
-  backend_endpoints_mapped: 461
+  backend_services_total: 296
+  backend_services_mapped: 296
+  backend_endpoints_total: 462
+  backend_endpoints_mapped: 462
 unmapped:
   frontend_routes: []
   backend_services: []

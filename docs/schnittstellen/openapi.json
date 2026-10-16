@@ -109665,6 +109665,156 @@
         "title": "NaehrwertKomponente",
         "type": "object"
       },
+      "NativeDraftOut": {
+        "properties": {
+          "base_screen_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Screen Id"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "definition": {
+            "additionalProperties": true,
+            "title": "Definition",
+            "type": "object"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "readiness": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Readiness"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "string"
+          },
+          "screen_id": {
+            "title": "Screen Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "updated_by": {
+            "title": "Updated By",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "screen_id",
+          "definition",
+          "status",
+          "created_by",
+          "updated_by",
+          "updated_at",
+          "revision"
+        ],
+        "title": "NativeDraftOut",
+        "type": "object"
+      },
+      "NativeImportIn": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_source_hash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Expected Source Hash",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "screen_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Screen Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "screen_id",
+          "expected_source_hash",
+          "idempotency_key"
+        ],
+        "title": "NativeImportIn",
+        "type": "object"
+      },
+      "NativeSourceOut": {
+        "properties": {
+          "screen_id": {
+            "title": "Screen Id",
+            "type": "string"
+          },
+          "source_hash": {
+            "title": "Source Hash",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "screen_id",
+          "title",
+          "source_hash"
+        ],
+        "title": "NativeSourceOut",
+        "type": "object"
+      },
+      "NativeSourcesOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/NativeSourceOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "NativeSourcesOut",
+        "type": "object"
+      },
       "NawaroAreaRowIn": {
         "properties": {
           "area_2022": {
@@ -402074,6 +402224,128 @@
           }
         ],
         "summary": "Studio-Ereignis fuer native Vergleichsmaske",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/studio/native-imports": {
+      "post": {
+        "operationId": "native_import_api_v1_studio_native_imports_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NativeImportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NativeDraftOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Vorhandene Maske als versionierte Studio-Ausgangsfassung uebernehmen",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/studio/native-sources": {
+      "get": {
+        "operationId": "native_sources_api_v1_studio_native_sources_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 100,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NativeSourcesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Versionierte Ausgangsquellen vorhandener Masken auflisten",
         "tags": [
           "ui",
           "studio",

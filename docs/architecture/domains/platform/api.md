@@ -55,3 +55,9 @@ Entwurfsspeicherung bleibt ausschliesslich im bestehenden versionierten, idempot
 ## Getrennte Qualitaetsbewertung im Studio
 
 Der manuelle Vorschauvertrag ergaenzt quality_limit_pct unabhaengig von impurities_free_pct. Die Antwort kennzeichnet quality_limit_exceeded dreistufig (unbekannt/eingehalten/ueberschritten) und settlement_authorized immer false. Diese Angaben erteilen keine Vertragsfreigabe. [Fachlicher Kontrollvertrag](../../harvest-deduction-contract-standard.md).
+
+## Versionierte native Studio-Ausgangsfassungen (2026-10-16)
+
+GET /studio/native-sources liefert einen begrenzten, durchsuchbaren Katalog eigener verfuegbarer nativer Masken mit Quellhash. POST /studio/native-imports verlangt bestehende Beleg-Bearbeitungsrechte, angezeigten Quellhash und UUID-Idempotenzschluessel. Der Server sichert die Ausgangsfassung im bestehenden revisionsgebundenen Studio-Speicher; Mandant und Urheber stammen ausschliesslich aus der Anmeldung. Importierte Entwuerfe aktivieren keine Maske und erzeugen keinen Simulations- oder Freigabenachweis. [Schrittweise Migration](../../studio-native-migration.md).
+
+Snapshot-Lesewege unter /read-models/snapshots verwenden ebenfalls den geprueften Mandanten; ein Queryparameter waehlt keinen anderen Mandanten. Alle generischen technischen Snapshot-Lese- und Schreibwege verlangen die vorhandene admin-Rolle.

@@ -608,6 +608,7 @@ exact_service_stems:
   studio_propose: platform
   studio_semantic: platform
   studio_semantic_model: platform
+  studio_native_import: platform
   studio_history_view: platform
   studio_process_simulation: platform
   sepa_xml_generator: finance
@@ -651,6 +652,7 @@ exact_endpoint_stems:
   document_allocations: platform
   mailkonto: platform
   studio_drafts: platform
+  studio_native_import: platform
   billing_batch: finance
   document_control: dms-compliance
   foreign_goods_worklist: inventory

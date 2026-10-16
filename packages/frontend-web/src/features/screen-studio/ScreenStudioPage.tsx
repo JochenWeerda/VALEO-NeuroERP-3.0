@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from '@tan
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { NativeSelect } from '@/components/ui/native-select'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import {
   fetchStudioCatalog,
@@ -26,11 +27,13 @@ import { StudioPreview } from './StudioPreview'
 import type { ScreenDefinition } from '@/components/mask-builder/schema'
 
 const previewClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+const StudioNativeImport = lazy(() => import('./StudioNativeImport').then(module => ({ default: module.StudioNativeImport })))
 const HarvestControls = lazy(() => import('./HarvestControls').then(module => ({ default: module.HarvestControls })))
 
 export function ScreenStudioPage(): JSX.Element {
   const controlsInitiallyOpen = new URLSearchParams(window.location.search).get('harvestControls') === '1'
   const [controlsSeen, setControlsSeen] = useState(controlsInitiallyOpen)
+  const [nativeImportSeen, setNativeImportSeen] = useState(false)
   const [definition, dispatch] = useReducer(studioReducer, emptyStudioDraft())
   const [intent, setIntent] = useState('Lieferanten bewerten und auswählen')
   const [draftId, setDraftId] = useState<string>()
@@ -94,6 +97,21 @@ export function ScreenStudioPage(): JSX.Element {
         <summary className="cursor-pointer font-medium">Ernte-Abrechnung: Vertragsregeln, Messnachweise und Freigaben</summary>
         {controlsSeen && <Suspense fallback={<p>Abrechnungssteuerung wird geladen…</p>}><HarvestControls /></Suspense>}
       </details>}
+      <details className="col-span-full rounded border p-3" onToggle={event => {
+        if (event.currentTarget.open) setNativeImportSeen(true)
+      }}>
+        <summary className="cursor-pointer font-medium">Vorhandene Maske versionieren und ins Studio übernehmen</summary>
+        {nativeImportSeen && <Suspense fallback={<p>Vorhandene Masken werden geladen…</p>}>
+          <StudioNativeImport onImported={item => {
+            applyProposal(item.definition)
+            setDraftId(item.id); setSavedRevision(item.revision); setSavedStatus(item.status)
+            setSavedSignature(JSON.stringify(item.definition))
+            void queryClient.invalidateQueries({ queryKey: ['studio-drafts'] })
+            refreshHistory(item.id)
+            setFeedback('Versionierte Ausgangsfassung übernommen. Die bisherige Maske bleibt bis zur geprüften Umstellung aktiv.')
+          }} />
+        </Suspense>}
+      </details>
       <section className="space-y-4">
         <div>
           <h1 className="text-lg font-semibold">Masken-Studio</h1>
@@ -101,7 +119,7 @@ export function ScreenStudioPage(): JSX.Element {
         </div>
         <div className="space-y-2">
           <Label htmlFor="studio-existing">Gespeicherten Entwurf öffnen</Label>
-          <select id="studio-existing" value={draftId ?? ''} disabled={Boolean(pending)}
+          <NativeSelect id="studio-existing" value={draftId ?? ''} disabled={Boolean(pending)}
             onChange={(event) => {
               const id = event.target.value
               if (!id) return
@@ -120,7 +138,7 @@ export function ScreenStudioPage(): JSX.Element {
             }}>
             <option value="">Entwurf auswählen</option>
             {(drafts.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.definition.title} ({item.status})</option>)}
-          </select>
+          </NativeSelect>
         </div>
         <div className="space-y-2">
           <Label htmlFor="studio-intent">Agent-Vorschlag</Label>
@@ -137,21 +155,21 @@ export function ScreenStudioPage(): JSX.Element {
           <Label htmlFor="studio-title">Titel</Label>
           <Input id="studio-title" value={definition.title} onChange={(event) => dispatch({ type: 'setTitle', title: event.target.value })} />
           <Label htmlFor="studio-domain">Fachbereich</Label>
-          <select id="studio-domain" className="w-full rounded border bg-background px-2 py-1.5 text-sm" value={definition.domain}
+          <NativeSelect id="studio-domain" className="w-full rounded border bg-background px-2 py-1.5 text-sm" value={definition.domain}
             onChange={(event) => dispatch({ type: 'setDomain', domain: event.target.value as typeof definition.domain })}>
             {[...new Set([definition.domain, 'agrar', 'einkauf', 'crm', 'finance', 'lager'])].map((item) => <option key={item} value={item}>{item}</option>)}
-          </select>
+          </NativeSelect>
           <Button type="button" variant="outline" disabled={Boolean(pending)} onClick={() => dispatch({ type: 'removeActions' })}>Fachaktionen entfernen</Button>
           <Label htmlFor="studio-floorplan">Floorplan</Label>
-          <select id="studio-floorplan" className="w-full rounded border bg-background px-2 py-1.5 text-sm" value={definition.layout?.floorplan ?? 'worklist'}
+          <NativeSelect id="studio-floorplan" className="w-full rounded border bg-background px-2 py-1.5 text-sm" value={definition.layout?.floorplan ?? 'worklist'}
             onChange={(event) => dispatch({ type: 'setFloorplan', floorplan: event.target.value as never })}>
             {(catalog.data?.floorplans ?? ['worklist']).map((item) => <option key={item} value={item}>{item}</option>)}
-          </select>
+          </NativeSelect>
           <Label htmlFor="studio-columns">Spaltennavigation</Label>
-          <select id="studio-columns" className="w-full rounded border bg-background px-2 py-1.5 text-sm" value={definition.layout?.columnNavigation ?? 'single'}
+          <NativeSelect id="studio-columns" className="w-full rounded border bg-background px-2 py-1.5 text-sm" value={definition.layout?.columnNavigation ?? 'single'}
             onChange={(event) => dispatch({ type: 'setColumnNavigation', columnNavigation: event.target.value as never })}>
             {(catalog.data?.columnNavigation ?? ['single', 'listDetail']).map((item) => <option key={item} value={item}>{item}</option>)}
-          </select>
+          </NativeSelect>
         </div>
         <StudioDialogue key={previewGeneration} initialTurns={semanticContext?.dialogue} initialDecisions={semanticContext?.decisions}
           disabled={Boolean(pending) || !catalog.data?.permissions?.canDesign} onProposal={applyProposal} />

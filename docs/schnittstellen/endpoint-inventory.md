@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-15
+last_reviewed: 2026-10-16
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -423,6 +423,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `strecke` | Strecke – Streckengeschaefte CRUD |
 | `strecke_speditionen` | Strecke – Speditionen / Frachttarife nach PLZ |
 | `studio_drafts` | ScreenDefinition Studio API — catalog, validate, propose, drafts. |
+| `studio_native_import` | Authenticated native-mask baselines; no activation or release shortcut. |
 | `stuecklisten` | Stücklisten / Rezepturen [ARTSTLI] — Artikelkomponenten-Stammdaten. |
 | `subsidiary_ledger_reconciliation` | Subsidiary Ledger Reconciliation API |
 | `supplier_portal` | — |
