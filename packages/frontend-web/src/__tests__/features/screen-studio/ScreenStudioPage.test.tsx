@@ -75,6 +75,7 @@ describe('ScreenStudioPage', () => {
   it('lets an agent intent replace the draft and keeps the preview', async () => {
     renderStudio()
     expect(screen.getByTestId('screen-studio')).toBeInTheDocument()
+    expect(screen.queryByText('Ernte-Abrechnung: Vertragsregeln, Messnachweise und Freigaben')).not.toBeInTheDocument()
     fireEvent.change(screen.getByLabelText('Maskenabsicht'), { target: { value: 'Kundenliste' } })
     fireEvent.click(screen.getByRole('button', { name: 'Aus Absicht erzeugen' }))
     await waitFor(() => expect(screen.getByDisplayValue('Kunden-Arbeitsliste')).toBeInTheDocument())

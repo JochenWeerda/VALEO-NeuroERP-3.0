@@ -89,11 +89,11 @@ export function ScreenStudioPage(): JSX.Element {
 
   return (
     <div className="grid gap-4 p-4 lg:grid-cols-[minmax(18rem,22rem)_minmax(0,1fr)_minmax(16rem,20rem)]" data-testid="screen-studio">
-      <details className="col-span-full min-w-0 rounded border p-3" open={controlsInitiallyOpen || undefined}
+      {controlsInitiallyOpen && <details className="col-span-full min-w-0 rounded border p-3" open
         onToggle={event => { if (event.currentTarget.open) setControlsSeen(true) }}>
         <summary className="cursor-pointer font-medium">Ernte-Abrechnung: Vertragsregeln, Messnachweise und Freigaben</summary>
         {controlsSeen && <Suspense fallback={<p>Abrechnungssteuerung wird geladen…</p>}><HarvestControls /></Suspense>}
-      </details>
+      </details>}
       <section className="space-y-4">
         <div>
           <h1 className="text-lg font-semibold">Masken-Studio</h1>

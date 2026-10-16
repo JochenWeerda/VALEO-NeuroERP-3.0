@@ -18421,3 +18421,5 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 ## STUDIO-BELEG-THEME-20261016 - reserviert, Codex
 
 **Owner:** Codex. **Nutzerauftrag:** Gemeinsame Belegmasken mit versionierten Varianten vollstaendig Studio-faehig machen; Themeuebernahme und Lesbarkeit einschliesslich Dunkelansicht pruefen. **Dateibesitz:** additive Belegvarianten-Vertraege und deren Anbindung an bestehende Studio-Definitionen; gezielte zentrale Theme-Kontrastvertraege und E2E-Abnahme, eigene Doku. Bestehende Claims CI-SOURCE-REPAIR und STUDIO-NATIVE-BASELINES bleiben bei Codex. **Abnahme:** reproduzierbare Basis-/Variantenbindung, keine Freigabeumgehung; globale Themes statt Masken-Sonderfarben, nachgewiesene Text-/Bedienelementkontraste und reale Screenshots. Keine neuen DB/Container. Fremde Arbeitskopien bleiben geschuetzt.
+
+**STUDIO-BELEG-THEME Teilabnahme Kontext:** Nutzerhinweis umgesetzt: Ernte-Abrechnungssteuerung nur im ausdruecklichen Fachzugang harvestControls=1; keine permanente Zeile im allgemeinen Editor. Vier Bedientests bestanden, reale Browseransicht ohne Ernte-Zeile. QA studio-context-panel-20261016.md. Belegmigration und Themeabnahme laufen weiter.
