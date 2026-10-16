@@ -252,3 +252,17 @@ def build_beleg_screen_definition(belegart: str) -> dict[str, Any]:
 
 def alle_beleg_screen_definitions() -> dict[str, dict[str, Any]]:
     return {screen_id(art): build_beleg_screen_definition(art) for art in BELEGARTEN}
+
+
+# Native code release, restricted to the already approved visual-test tenant.
+# These definitions are not editable Studio drafts and never mint Studio proof.
+NATIVE_BELEG_TENANTS = frozenset({"00000000-0000-0000-0000-000000000051"})
+
+
+def native_beleg_definition(mask_id: str, tenant_id: str) -> dict[str, Any] | None:
+    if tenant_id not in NATIVE_BELEG_TENANTS:
+        return None
+    for art in BELEGARTEN:
+        if screen_id(art) == mask_id:
+            return build_beleg_screen_definition(art)
+    return None

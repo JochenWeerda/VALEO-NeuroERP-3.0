@@ -5710,6 +5710,10 @@ def get_screen_definition(
         return _hydrate_screen_definition(builder(), mask_id, today)
     if not tenant_id:
         return None
+    if mask_id.startswith("beleg/"):
+        from app.core.screen_definitions_beleg import native_beleg_definition
+        native = native_beleg_definition(mask_id, tenant_id)
+        return _hydrate_screen_definition(native, mask_id, today) if native else None
     from copy import deepcopy
 
     from app.services.studio_draft_store import get_published_definition
