@@ -18397,3 +18397,7 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 **Owner:** Codex. **Ziel:** Zentrale Lookup-Anzeige gegen veraltete Namen bei Datensatz-/Quellenwechsel absichern. **Dateibesitz:** packages/frontend-web/src/components/mask-builder/renderers/LookupField.tsx (vorher identisch HEAD), neuer eigener Frontend-Vertrag, QA/Workboard. **Abnahme:** ausgewaehlter Name bleibt nur fuer zugehoerigen Wert/Quelle; externe Wertwechsel, Leeren und Quellenwechsel verwerfen alte Auswahl und Suchtext. Bestehende Auswahl-/Readonly-Vertraege erhalten; keine andere Maske oder API aendern. Keine DB/Container.
 
 **Abnahme:** Vier neue UI-Vertraege vorher rot, danach zusammen mit drei bestehenden Auswahl-/Readonly-Vertraegen sieben gruen. Namen an Kennung und Suchquelle gebunden; alte Suchtexte bei Kontextwechsel verworfen. Ausschliesslich zentraler Renderer, keine parallele Maske/API/Rechteaenderung. QA lookup-label-binding-20261016.md.
+
+## CHROMA-CI-CONTRACT-20261016 - reserviert, Codex
+
+**Owner:** Codex. **Ziel:** Neue Backend-Reachability-Regressionssuite auch ohne Aenderung fremder Workflowdateien in der normalen Pytest-CI ausfuehren. **Dateibesitz:** neuer tests/test_chroma_backend_review_ci.py; eigener QA-Nachtrag/Workboard. **Abnahme:** regulaere Pytest-Entdeckung fuehrt die vorhandenen zwoelf isolierten Policy-Faelle verbindlich aus; Fehler propagieren, keine Datenbank/Container/Server. Fremde Tests und Gatekonfigurationen bleiben unveraendert.
