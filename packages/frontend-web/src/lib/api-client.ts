@@ -4,6 +4,7 @@
  */
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse, isAxiosError } from 'axios'
 import { auth } from './auth'
+import { assertTrustedApiDestination } from './api-destination'
 import { rollenHinweis } from './role-hint'
 import { tenantFromToken } from './tenant-from-token'
 import { toast } from 'sonner'
@@ -104,6 +105,8 @@ class APIClient {
     // Request Interceptor (Auth Token)
     this.client.interceptors.request.use(
       async (config) => {
+        assertTrustedApiDestination(config.url, config.baseURL, API_BASE_URL,
+          typeof window === 'undefined' ? undefined : window.location.href)
         const token = await auth.getFreshAccessToken()
         if (token) {
           config.headers.Authorization = `Bearer ${token}`

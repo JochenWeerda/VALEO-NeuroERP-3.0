@@ -81,6 +81,9 @@ def profile_errors(definition):
         errors.append("screen_commands_not_covered")
     if any(node.get("editableFields") not in (None, []) for node in _nodes(definition)):
         errors.append("editable_agent_fields_not_covered")
+    if any(node.get(key) not in (None, {}, []) for node in _nodes(definition)
+           for key in ("creation", "twin", "calendar", "sourceProposals")):
+        errors.append("embedded_transports_not_covered")
     keys={"workflowRules","processRules","qualityRules","accountingRules","businessRules"}
     if any(node[key] not in (None, [], {}) for node in _nodes(definition) for key in keys & node.keys()):
         errors.append("rules_not_covered")

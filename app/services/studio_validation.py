@@ -125,7 +125,26 @@ def validate_studio_draft(
         violations.append("adapter_muss_native_und_an_screen_id_gebunden_sein")
 
     allowed_endpoints: set[str] = cat.get("data_source_endpoints") or set()
+    write_endpoints = {action.get("commandEndpoint") for action in catalog_actions.values()}
+    write_endpoints.update((action.get("inputFlow") or {}).get("submitEndpoint")
+                           for action in catalog_actions.values())
     for node in _nodes(definition):
+        for field in ("endpoint", "summaryEndpoint", "countEndpoint"):
+            endpoint = node.get(field)
+            if endpoint is not None and (not isinstance(endpoint, str) or endpoint not in allowed_endpoints):
+                violations.append(f"datenquelle_nicht_im_katalog:{endpoint}")
+        for field in ("reprojectEndpoint", "icsTokenEndpoint", "submitEndpoint"):
+            endpoint = node.get(field)
+            if endpoint is not None and (not isinstance(endpoint, str) or endpoint not in write_endpoints):
+                violations.append("schreibender_transport_nicht_im_katalog")
+        if node.get("creation") not in (None, {}):
+            violations.append("erstellung_nicht_im_studio_katalog")
+        for field in ("rowRouteTemplate", "targetRoute", "activateRouteTemplate"):
+            route = node.get(field)
+            if route is not None and (not isinstance(route, str) or not route.startswith("/")
+                    or route.startswith("//") or "\\" in route
+                    or any(ord(char) < 32 or ord(char) == 127 for char in route)):
+                violations.append("navigation_muss_lokaler_maskenpfad_sein")
         sources = node.get("dataSources", [])
         if not isinstance(sources, list):
             violations.append("datenquellen_muss_liste_sein")
@@ -136,9 +155,6 @@ def validate_studio_draft(
             if not isinstance(source, dict):
                 violations.append("datenquelle_muss_objekt_sein")
                 continue
-            endpoint = source.get("endpoint")
-            if endpoint is not None and (not isinstance(endpoint, str) or endpoint not in allowed_endpoints):
-                violations.append(f"datenquelle_nicht_im_katalog:{endpoint}")
 
     # ── Actions ──────────────────────────────────────────────────────────────
     for action in _iter_actions(definition):

@@ -3,6 +3,7 @@ import { isAxiosError } from 'axios'
 import type { ScreenDefinition } from '@/components/mask-builder/schema'
 import { UniversalMaskRenderer } from '@/components/mask-builder/UniversalMaskRenderer'
 import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder/render-plan/schema-compiler'
+import { createStudioPreviewPlan } from '@/components/mask-builder/render-plan/studio-preview'
 import { useUniversalFormState } from '@/components/mask-builder/runtime/useUniversalFormState'
 import { Button } from '@/components/ui/button'
 import { calculateStudioHarvest, type HarvestPreviewResult } from '@/lib/api/studio'
@@ -45,7 +46,8 @@ function calculationError(failure: unknown, definition: ScreenDefinition): strin
 export function StudioPreview({ definition }: { definition: ScreenDefinition }): JSX.Element {
   const semantic = (definition as ScreenDefinition & { studioSemantic?: { contract: string } }).studioSemantic
   const supported = semantic?.contract === 'agrar.harvest.manual-preview.v1'
-  const plan = useMemo(() => compileRenderPlanFromScreenDefinition(definition), [definition])
+  const { plan, suppressedWidgets } = useMemo(() => createStudioPreviewPlan(
+    compileRenderPlanFromScreenDefinition(definition)), [definition])
   const form = useUniversalFormState({ screen: definition })
   const [result, setResult] = useState<HarvestPreviewResult>()
   const [error, setError] = useState<string>()
@@ -77,6 +79,9 @@ export function StudioPreview({ definition }: { definition: ScreenDefinition }):
   }, [previewValues, supported, form.validationPlan.hasBlockingErrors, definition])
   const tables = supported ? { calculation: result?.positions ?? [] } : mockRowsFor(definition)
   return <>
+    {suppressedWidgets.length > 0 && <p className="p-3 text-sm text-muted-foreground">
+      Ohne Live-Zugriff in dieser Vorschau: {suppressedWidgets.join(', ')}. Diese Ansichten benötigen eine eigene Abnahme.
+    </p>}
     {supported && <div className="space-y-2 border-b p-3">
       <p className="text-sm font-medium">Interaktive Kalkulationsprobe · keine Buchung · keine Freigabewirkung</p>
       <Button type="button" variant="outline" onClick={() => form.resetForm(Object.fromEntries(
