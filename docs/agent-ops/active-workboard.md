@@ -18526,3 +18526,6 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 
 **MASK-TABLE-INPUT Dateibesitz ergaenzt:** UniversalMaskRenderer ausschliesslich Tabellenmetadaten im vorhandenen Rohdefinitionspfad; useUniversalFormState ausschliesslich deklarative Tabellen-/Pflichtfeldvalidierung; kleiner gemeinsamer Tabellenstrukturvertrag und gezielte Tests. Grund: sichtbares Eingabefeld allein darf keinen ungueltigen Submit erlauben; Renderer und Formstate muessen dieselbe Strukturgrenze verwenden.
+
+
+**MASK-TABLE-INPUT Integrationsergaenzung:** ActionInputDialog ausschliesslich leeren Tabellenwert als Liste weitergeben und explizit geleerte Listen beim Absenden erhalten; eigene neue Dialogvertraege im eigenen Table-Input-Test. Bestehende fremde Testdateien bleiben unveraendert. Grund: Kommandodialog darf Positionen weder in Text umdeuten noch das Loeschen aller Zeilen stillschweigend weglassen.
