@@ -18529,3 +18529,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 
 **MASK-TABLE-INPUT Integrationsergaenzung:** ActionInputDialog ausschliesslich leeren Tabellenwert als Liste weitergeben und explizit geleerte Listen beim Absenden erhalten; eigene neue Dialogvertraege im eigenen Table-Input-Test. Bestehende fremde Testdateien bleiben unveraendert. Grund: Kommandodialog darf Positionen weder in Text umdeuten noch das Loeschen aller Zeilen stillschweigend weglassen.
+
+
+## DOCFLOW-CI-UPDATE-CONSUMERS-20261017 - reserviert, Codex
+
+**Owner:** Codex (pausierter fremder CI-Claim gemaess Nutzerfreigabe beerbt). **Befund:** CI/CD38941771526 und Quality Gate38941771683: genau zwei Altvertraege senden Update ohne Pflichtversion/-schluessel, 422 statt Erreichen der beabsichtigten Rechte-/Freigabepruefung. **Dateibesitz:** tests/test_beleg_rechte.py ausschliesslich gueltiger Updatekoerper im 403-Fall; tests/test_freigabe.py ausschliesslich gelesene Version/Key beim Aendern nach Freigabe; eigene QA/Workboard. **Abnahme:** beide fachlichen Aussagen bleiben unveraendert, gesamte Rechte-/Freigabe-/DocFlowfamilie gruen. Keine Lockerung produktiver Vertraege oder Gates, keine DB/Migration/Container.
