@@ -67,3 +67,7 @@ Der bestehende DocFlow-Createweg bindet vorhandene Idempotenzschluessel jetzt an
 ## Maskenprovenienz beim Erzeugen
 
 Der neue optionale screen_context bindet Create an die im verifizierten Mandanten aktive Maske und deren exakten Definitionshash. Serveraufgeloeste Basis-/Varianten-/Studiofreigabereferenzen werden im bestehenden unveraenderlichen Createprotokoll und Antwortsnapshot festgehalten; Altbelege werden nicht nachtraeglich umgedeutet. Diese serverseitige Grundlage ist umgesetzt; die kuenftige zentrale Eingabemaske muss den Kontext aus ihrer geladenen Definition mitsenden. [Abnahme](../quality-assurance/docflow-screen-provenance-20261016.md).
+
+## Gemeinsame Entwurfsbearbeitung (17.10.2026)
+
+Familienfassung 1.1.0 bindet in allen neun Varianten die bestehende DocFlow-Updateaktion an den zentralen Eingabedialog. Vollstaendige Positionen einschliesslich nicht sichtbarer Zusatzangaben werden geladen; Version/Identitaet und bestaetigtes Ergebnis werden geprueft. Verknuepfte Positionen sind gegen Vollersatz geschuetzt. Historische Fassungen bleiben unveraendert. Dies ersetzt keine Neuanlage, Fachsonderfelder, mengenbeschraenkte Lagerbearbeitung, Prozessfreigabe oder Alt-Einstieg-Abnahme. Zielmatrix: ../design/beleg-studio-variantenmatrix.md; Nachweis: ../quality-assurance/beleg-studio-edit-20261017.md.

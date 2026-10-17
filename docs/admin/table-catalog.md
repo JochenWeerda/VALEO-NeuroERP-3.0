@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, architect, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-16
+last_reviewed: 2026-10-17
 version: 1.0.0
 description: Generierter Katalog der domain_*-Tabellen aus information_schema.
 ---
@@ -236,8 +236,8 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_docflow.document_followups` | `app/services/docflow_followup_service.py` | `app/services/docflow_followup_service.py` | — |
 | `domain_docflow.document_header_links` | `app/services/docflow_belegadapter.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
 | `domain_docflow.document_headers` | `app/api/v1/endpoints/admin_pos.py`, `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py`, `app/core/gobd_artifact.py`, `app/services/docflow_artifact_service.py`, `app/services/docflow_belegadapter.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_followup_service.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_return_service.py`, `app/services/docflow_service.py`, `app/services/finance_freigabe.py`, `app/services/kontrollkorb.py`, `app/services/mcp_beleg_tools.py`, `app/services/settlement_document_archive_service.py` | `app/core/gobd_artifact.py`, `app/services/docflow_create_command.py`, `app/services/docflow_gobd_service.py`, `app/services/docflow_service.py`, `app/services/docflow_update_command.py`, `app/services/settlement_document_archive_service.py` | — |
-| `domain_docflow.document_items` | `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_service.py` | `app/services/docflow_service.py`, `app/services/docflow_update_command.py` | — |
-| `domain_docflow.document_links` | `app/services/docflow_belegadapter.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
+| `domain_docflow.document_items` | `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_service.py`, `app/services/docflow_update_command.py` | `app/services/docflow_service.py`, `app/services/docflow_update_command.py` | — |
+| `domain_docflow.document_links` | `app/services/docflow_belegadapter.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_service.py`, `app/services/docflow_update_command.py` | `app/services/docflow_service.py` | — |
 | `domain_docflow.document_postings` | `app/services/docflow_belegadapter.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
 | `domain_docflow.document_return_audit` | `app/services/docflow_return_service.py` | `app/services/docflow_return_service.py` | — |
 | `domain_docflow.document_return_cases` | `app/services/docflow_return_service.py` | `app/services/docflow_return_service.py` | — |

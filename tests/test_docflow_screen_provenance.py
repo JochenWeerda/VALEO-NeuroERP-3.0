@@ -88,7 +88,7 @@ def test_actual_native_definition_resolves_exact_version():
     definition=get_screen_definition('beleg/sales-offer',tenant_id=tenant)
     assert definition is not None
     result=resolve_screen_context(DocflowScreenContextIn(**binding(definition)),'sales_offer',tenant)
-    assert result['document_variant']['variantVersion']=='1.0.0'
+    assert result['document_variant'] == definition['documentVariant']
 
 
 def test_pre_provenance_request_hash_remains_replayable(context):

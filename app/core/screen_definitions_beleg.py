@@ -123,7 +123,34 @@ def _aktion(key: str, label: str, kommando: Belegkommando, *, kind: str = "secon
 
 def aktionen(variante: Belegvariante) -> list[dict[str, Any]]:
     """Was die Maske anbieten kann. Genau eine Hauptaktion: der naechste Schritt der Belegfolge."""
-    liste: list[dict[str, Any]] = [_aktion("freigeben", "Freigeben", BELEGKOMMANDOS["docflow.release"])]
+    zeilenfelder = [
+        {"key": "article_number", "label": "Artikel-Nr.", "type": "text", "required": True},
+        {"key": "description", "label": "Bezeichnung", "type": "text"},
+        {"key": "quantity", "label": "Menge", "type": "number", "required": True},
+        {"key": "unit", "label": "Einheit", "type": "text"},
+        {"key": "charge", "label": "Charge", "type": "text"},
+    ]
+    if variante.mit_preisen:
+        zeilenfelder += [
+            {"key": "unit_price", "label": "Einzelpreis", "type": "currency", "required": True},
+            {"key": "discount_percent", "label": "Rabatt %", "type": "number"},
+            {"key": "tax_code", "label": "Steuerschluessel", "type": "text"},
+            {"key": "tax_rate", "label": "Steuersatz %", "type": "number"},
+        ]
+        if variante.richtung == "einkauf":
+            zeilenfelder.append({"key": "expense_account", "label": "Aufwandskonto", "type": "text"})
+    liste: list[dict[str, Any]] = [
+        _aktion("bearbeiten", "Beleg bearbeiten", BELEGKOMMANDOS["docflow.update"],
+                inputFields=[
+                    {"key": "document_date", "label": "Belegdatum", "type": "date", "required": True},
+                    {"key": "currency", "label": "Waehrung", "type": "text", "required": True},
+                    {"key": "source_ref", "label": "Externe Referenz", "type": "text"},
+                    {"key": "items", "label": "Positionen", "type": "table", "required": True,
+                     "rowFields": zeilenfelder,
+                     "tableEditing": {"allowAdd": True, "allowDelete": True, "maxRows": 200}},
+                ]),
+        _aktion("freigeben", "Freigeben", BELEGKOMMANDOS["docflow.release"]),
+    ]
     if variante.bucht:
         liste.append(_aktion("buchen", "Buchen", BELEGKOMMANDOS["docflow.post"]))
     for folgeart in variante.folgebelege:

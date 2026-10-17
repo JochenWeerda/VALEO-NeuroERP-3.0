@@ -62,6 +62,18 @@ def _apply_update(self, doc_id: str, payload: Any) -> None:
     current_status = str(header.get("status") or "draft")
     if payload.items is not None and current_status != "draft":
         raise ValidationFailedError("Positionen kÃ¶nnen nur im Status Entwurf (draft) ersetzt werden")
+    if payload.items is not None:
+        linked = self.db.execute(text("""
+            SELECT EXISTS (
+                SELECT 1 FROM domain_docflow.document_links
+                WHERE tenant_id=:tenant AND (from_header_id=:id OR to_header_id=:id)
+            ) OR EXISTS (
+                SELECT 1 FROM domain_docflow.document_items
+                WHERE tenant_id=:tenant AND header_id=:id AND source_line_id IS NOT NULL
+            )
+        """), {"tenant": self.tenant_id, "id": doc_id}).scalar_one()
+        if linked:
+            raise ValidationFailedError("Verknuepfte Positionen erfordern eine positionsbezogene Fachkorrektur.")
     if payload.status in {"posted", "reversed"}:
         raise ValidationFailedError(
             f"Der Status {payload.status} wird nicht gesetzt, sondern entsteht durch Buchen bzw. Stornieren."

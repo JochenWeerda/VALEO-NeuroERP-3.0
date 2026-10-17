@@ -95,9 +95,9 @@ export function useActionRuntime(
             intentRef.current = { signature, key: crypto.randomUUID() }
           }
           const harvest = actionDef.commandBinding.adapter === 'harvest.control.v1'
-          const prepared = harvest ? prepareHarvestControl(actionDef, req, opts, req.idempotencyKey ?? intentRef.current.key)
+          const prepared = harvest ? { ...prepareHarvestControl(actionDef, req, opts, req.idempotencyKey ?? intentRef.current.key), method: 'POST' as const }
             : prepareDocflowCommand(actionDef, req, opts, req.idempotencyKey ?? intentRef.current.key)
-          const response = await apiClient.request<unknown>({ method: 'POST', url: prepared.url, data: prepared.body })
+          const response = await apiClient.request<unknown>({ method: prepared.method, url: prepared.url, data: prepared.body })
           const result = harvest ? harvestControlResult(req, response.data) : docflowCommandResult(actionDef, req, opts, response.data)
           setLastResult(result)
           return result

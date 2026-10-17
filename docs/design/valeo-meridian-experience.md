@@ -344,3 +344,7 @@ Der Studio-Darstellungseditor arbeitet ausschliesslich auf vorhandenen ScreenDef
 ## Strukturierte Formular-Tabellen (17.10.2026)
 
 Deklarierte rowFields und tableEditing werden ueber denselben Compiler und RenderPlan bis zu FastFormRenderer/FieldRenderer gefuehrt. Der Tabellenbaustein spannt eine volle Formularzeile auf, verwendet semantische globale Themefarben und prueft zentrale Struktur-/Pflichtfeldgrenzen. Keine eigene Belegseite oder Fachberechnung. Reale isolierte StudioPreview-Referenz bei1366/1440/1920 und Hell/Dunkel abgenommen. [Nachweis und Integrationsgrenze](../quality-assurance/mask-table-input-20261017.md).
+
+## Gemeinsame Belegbearbeitung (17.10.2026)
+
+Die Belegfamilie verwendet eine gemeinsame deklarierte Tabellen-Eingabeaktion ueber ScreenDefinition, RenderPlan, nativen Dialog und zentralen Formularzustand. PUT, Vollabruf, Versionsbindung und Ergebniskontrolle sind Transportaufgaben; Rechte, Steuer, Ketten und Transaktion bleiben beim Domain-Command. Neun Varianten teilen dieses Geruest und behalten ihre Spaltenpolitik. Matrix und Abnahme: beleg-studio-variantenmatrix.md und ../quality-assurance/beleg-studio-edit-20261017.md. Keine parallele Beleg-UI oder fachliche Berechnung im Renderer.

@@ -15525,7 +15525,8 @@
             "app/api/v1/endpoints/gobd_archiv.py",
             "app/core/dms_ocr_contracts.py",
             "app/services/docflow_freigabe.py",
-            "app/services/docflow_service.py"
+            "app/services/docflow_service.py",
+            "app/services/docflow_update_command.py"
           ],
           "written_by": [
             "app/services/docflow_service.py",
@@ -15608,7 +15609,8 @@
             "app/services/docflow_belegadapter.py",
             "app/services/docflow_evidence_service.py",
             "app/services/docflow_freigabe.py",
-            "app/services/docflow_service.py"
+            "app/services/docflow_service.py",
+            "app/services/docflow_update_command.py"
           ],
           "written_by": [
             "app/services/docflow_service.py"

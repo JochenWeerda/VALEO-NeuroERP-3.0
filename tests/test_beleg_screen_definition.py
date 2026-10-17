@@ -94,7 +94,7 @@ def test_beschriftung_folgt_der_variante():
 def test_aktionen_kommen_aus_dem_verzeichnis_und_der_variante(belegart):
     variante = bv.BELEGARTEN[belegart]
     aktionen = {a["key"]: a for a in sdb.build_beleg_screen_definition(belegart)["actions"]}
-    erwartet = {"freigeben", "stornieren"} | {f"umwandeln:{f}" for f in variante.folgebelege}
+    erwartet = {"bearbeiten", "freigeben", "stornieren"} | {f"umwandeln:{f}" for f in variante.folgebelege}
     for fachaktion in (("post", "reverse") if variante.bucht else ("reverse",)):
         erwartet |= {f"freigabe_{verb}:{fachaktion}" for verb in ("anfordern", "erteilen", "ablehnen")}
     assert set(aktionen) == erwartet | ({"buchen"} if variante.bucht else set())

@@ -45,6 +45,7 @@ import { useScreenDefinition } from '@/lib/api/masks'
 import { useToast } from '@/hooks/use-toast'
 import type { ActionResult } from '@/components/mask-builder/runtime/useActionRuntime'
 import { ActionInputDialog } from '@/components/mask-builder/renderers/ActionInputDialog'
+import { docflowEditInput, isDocflowEdit } from './runtime/docflow-edit-input'
 
 interface UniversalNativeDetailPageProps {
   screenId: string
@@ -120,6 +121,14 @@ function NativeExistingDetailPage({
   const [stage, setStage] = useState<'input' | 'confirm' | 'preview' | 'audit' | null>(null)
   const [dryRunResult, setDryRunResult] = useState<ActionResult | null>(null)
   const [auditReason, setAuditReason] = useState('')
+  const inputLoadRef = useRef(false)
+  const inputContextRef = useRef('')
+  inputContextRef.current = `${screenId}:${entityId}`
+  useEffect(() => {
+    setPendingAction(null)
+    setStage(null)
+  }, [screenId, entityId])
+  useEffect(() => () => { inputContextRef.current = '' }, [])
 
   const permissions = useScreenPermissions(schemaQuery.data)
   const runtime = useUniversalMaskRuntime({
@@ -175,6 +184,7 @@ function NativeExistingDetailPage({
 
   // --- Worker: final execute (no UI state ownership) ---
   async function doExecute(pending: PendingAction, reason?: string): Promise<void> {
+    const context = inputContextRef.current
     const { actionKey, payload, expectedVersion, approvalId, bindingSnapshot } = pending
     if (!actionIsAvailable(actionKey)) {
       reportUnavailableAction()
@@ -190,6 +200,7 @@ function NativeExistingDetailPage({
       approvalId,
       bindingSnapshot,
     })
+    if (inputContextRef.current !== context) return
     if (!result.success) {
       const errs = result.validationErrors ?? []
       if (errs.length > 0) {
@@ -198,6 +209,10 @@ function NativeExistingDetailPage({
       } else {
         setActionError(result.error ?? `Aktion "${actionKey}" fehlgeschlagen.`)
         setValidationErrors([])
+      }
+      if (isDocflowEdit(schemaQuery.data?.actions?.find(action => action.key === actionKey))) {
+        setPendingAction(pending)
+        setStage('input')
       }
       return
     }
@@ -210,6 +225,7 @@ function NativeExistingDetailPage({
 
   // --- Handler: called by UniversalMaskRenderer ---
   async function handleAction(actionKey: string, payload: Record<string, unknown>): Promise<void> {
+    if (inputLoadRef.current) return
     setActionError(null)
     setValidationErrors([])
     if (!actionIsAvailable(actionKey)) {
@@ -259,6 +275,25 @@ function NativeExistingDetailPage({
 
     // Deklarierte Eingaben zuerst (Screen Definition -> ActionInputDialog).
     if (actionDef?.inputFields?.length) {
+      if (isDocflowEdit(actionDef)) {
+        if (!entityId || !permissions.includes('belege.preise')) {
+          reportUnavailableAction()
+          return
+        }
+        const context = inputContextRef.current
+        inputLoadRef.current = true
+        try {
+          const response = await apiClient.get<unknown>(`/api/v1/docflow/${encodeURIComponent(entityId)}`)
+          if (inputContextRef.current !== context) return
+          pending.payload = docflowEditInput(actionDef, response.data, entityId,
+            pending.expectedVersion, schemaQuery.data?.documentVariant?.variantId ?? runtime.entityData.belegart)
+        } catch (error) {
+          if (inputContextRef.current === context) setActionError(getAxiosErrorMessage(error))
+          return
+        } finally {
+          inputLoadRef.current = false
+        }
+      }
       setPendingAction(pending)
       setStage('input')
       return
@@ -462,6 +497,9 @@ function NativeExistingDetailPage({
         return actionDef ? (
           <ActionInputDialog
             action={actionDef}
+            initialValues={pendingAction.payload}
+            error={actionError ?? undefined}
+            submitLabel={isDocflowEdit(actionDef) ? 'Entwurf speichern' : undefined}
             open
             onCancel={resetDialogs}
             onSubmit={(werte) => { void advanceFromInput({ ...pendingAction, payload: { ...pendingAction.payload, ...werte } }) }}
