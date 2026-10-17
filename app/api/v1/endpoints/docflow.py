@@ -135,6 +135,8 @@ def _row_to_header_out(svc: DocflowService, header_id: str, snapshot: Optional[d
                 discount_percent=float(i.get("discount_percent") or 0),
                 tax_code=i.get("tax_code"),
                 expense_account=i.get("expense_account"),
+                batch_id=i.get("batch_id"),
+                charge=i.get("charge"),
                 tax_rate=float(i.get("tax_rate") or 0),
                 line_total_net=float(i.get("line_total_net") or 0),
                 line_total_tax=float(i.get("line_total_tax") or 0),

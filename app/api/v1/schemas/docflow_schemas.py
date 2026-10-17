@@ -23,6 +23,8 @@ class DocflowItemOut(BaseModel):
     discount_percent: float
     tax_code: Optional[str] = None
     expense_account: Optional[str] = None
+    batch_id: Optional[str] = None
+    charge: Optional[str] = None
     tax_rate: float
     line_total_net: float
     line_total_tax: float

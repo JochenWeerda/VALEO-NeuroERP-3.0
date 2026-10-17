@@ -52823,6 +52823,28 @@
             "title": "Article Number",
             "type": "string"
           },
+          "batch_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Batch Id"
+          },
+          "charge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Charge"
+          },
           "description": {
             "anyOf": [
               {
