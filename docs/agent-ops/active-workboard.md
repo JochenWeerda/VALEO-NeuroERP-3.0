@@ -18520,7 +18520,7 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 **DOCFLOW-SCHEMA-SOT Abnahme:** Alle 16 produktiven Modelle an einem kanonischen Schemaort; Router importiert identische Modellobjekte statt lokaler Kopien. 203 gesamte DocFlow-Vertraege einschliesslich 18 neuer Identitaets-/Pflichtfeldvertraege gruen. Produktions-OpenAPI exakt unveraendert (3185 Pfade). Defekte ungenutzte Altdefinitionen ersetzt, keine API-/Rechte-/Schema-Migration. QA docflow-schema-sot-20261016.md.
 
 
-## MASK-TABLE-INPUT-20261016 - reserviert, Codex
+## MASK-TABLE-INPUT-20261016 - abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Strukturiertes Tabellen-Eingabefeld im zentralen Builder als Grundlage der Belegpositionserfassung statt Objekttext. **Dateibesitz:** ScreenFieldDefinition/RenderFieldPlan/Compiler/FastFormRenderer nur deklarierte rowFields und tableEditing; FieldRenderer nur zentraler Tabellenzweig, neuer TableFieldRenderer und gezielte UI-/Compilervertraege, Meridian-/QA-/Workboard. **Abnahme:** zentrale Renderkette bewahrt Spaltenmetadaten; typgerechtes Editieren ohne Mutation/Verlust versteckter Zeilendaten; Hinzufuegen/Entfernen nur explizit erlaubt; Readonly, ungueltige Spalten/Werte und Mengenlimit fail-closed; keine Fachberechnung oder eigene API. Keine schreibende Freischaltung bestehender Masken/Studio-Entwuerfe, keine DB-/Rollen-/MCP-Aenderung.
 
@@ -18534,3 +18534,6 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 ## DOCFLOW-CI-UPDATE-CONSUMERS-20261017 - reserviert, Codex
 
 **Owner:** Codex (pausierter fremder CI-Claim gemaess Nutzerfreigabe beerbt). **Befund:** CI/CD38941771526 und Quality Gate38941771683: genau zwei Altvertraege senden Update ohne Pflichtversion/-schluessel, 422 statt Erreichen der beabsichtigten Rechte-/Freigabepruefung. **Dateibesitz:** tests/test_beleg_rechte.py ausschliesslich gueltiger Updatekoerper im 403-Fall; tests/test_freigabe.py ausschliesslich gelesene Version/Key beim Aendern nach Freigabe; eigene QA/Workboard. **Abnahme:** beide fachlichen Aussagen bleiben unveraendert, gesamte Rechte-/Freigabe-/DocFlowfamilie gruen. Keine Lockerung produktiver Vertraege oder Gates, keine DB/Migration/Container.
+
+
+**MASK-TABLE-INPUT Abnahme 17.10.:** Zentral deklarierte strukturierte Tabellenfelder ueber ScreenDefinition, Compiler, RenderPlan, Formstate und beide Rendererwege. Pflichtfelder/Zahlen, readonly, sichere Spalten, maximal200 Zeilen/30 Spalten, Erhalten versteckter Daten und explizites Leeren im Kommandodialog geprueft. 1414 gesamte UI-Vertraege vor abschliessendem Dialog-/Layoutnachtrag; danach64 gezielte Vertraege und Typpruefung gruen. Reale isolierte StudioPreview-Bedienung mit synthetischen Zeilen bei1440hell/1366dunkel/1920dunkel; dabei gefundene Formularbreite zentral korrigiert. Kein Speichern/Buchen/Maskenfreigeben, keine neue API/DB. QA mask-table-input-20261017.md. Belegvarianten-Anbindung bleibt eigener Schritt.

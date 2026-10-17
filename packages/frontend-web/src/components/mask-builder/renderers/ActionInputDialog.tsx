@@ -34,6 +34,7 @@ function zeilen(daten: unknown): Zeile[] {
 }
 
 function leer(wert: unknown): boolean {
+  if (Array.isArray(wert)) return false // An explicitly empty list clears existing rows.
   return wert === undefined || wert === null || String(wert).trim() === ''
 }
 
@@ -123,7 +124,7 @@ export function ActionInputDialog({
             <div key={feld.key} className="space-y-1">
               <FieldRenderer
                 field={feld}
-                value={form.values[feld.key] ?? ''}
+                value={form.values[feld.key] ?? (feld.type === 'table' ? [] : '')}
                 onChange={(wert) => form.setValue(feld.key, wert)}
                 voiceEnabled={false}
               />

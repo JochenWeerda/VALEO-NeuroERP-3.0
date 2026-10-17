@@ -72,6 +72,9 @@ export interface ScreenFieldDefinition {
   options?: Array<{ value: string | number; label: string }>
   dataSourceKey?: string
   minSearchChars?: number
+  /** Structured table input; adds no persistence or business command. */
+  rowFields?: ScreenFieldDefinition[]
+  tableEditing?: { allowAdd?: boolean; allowDelete?: boolean; maxRows?: number }
   renderHint?: 'singleLine' | 'multiLine' | 'compact' | 'touch'
 }
 

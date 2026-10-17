@@ -339,3 +339,8 @@ Die Belegfamilie liefert Basis-/Variantenreferenzen einschliesslich Inhaltsbindu
 ## Fachliche Beschriftung importierter Belegvarianten (16.10.2026)
 
 Der Studio-Darstellungseditor arbeitet ausschliesslich auf vorhandenen ScreenDefinition-Beschriftungen. Vorschau und Laufzeit bleiben in der zentralen Meridian-Kette; keine zweite Belegmaske. Technische Bindungen und Schutzvertraege sind nicht editierbar. 21 gezielte UI-Vertraege und Typpruefung gruen; reale SSO-/Speicher-/Wiederoeffnungspruefung und drei Desktopgroessen hell/dunkel dokumentiert. QA studio-variant-presentation-20261016.md.
+
+
+## Strukturierte Formular-Tabellen (17.10.2026)
+
+Deklarierte rowFields und tableEditing werden ueber denselben Compiler und RenderPlan bis zu FastFormRenderer/FieldRenderer gefuehrt. Der Tabellenbaustein spannt eine volle Formularzeile auf, verwendet semantische globale Themefarben und prueft zentrale Struktur-/Pflichtfeldgrenzen. Keine eigene Belegseite oder Fachberechnung. Reale isolierte StudioPreview-Referenz bei1366/1440/1920 und Hell/Dunkel abgenommen. [Nachweis und Integrationsgrenze](../quality-assurance/mask-table-input-20261017.md).

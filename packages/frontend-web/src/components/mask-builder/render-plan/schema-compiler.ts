@@ -31,7 +31,7 @@ function compileField(
   return {
     key: field.key,
     label: field.label,
-    componentKind: fieldTypeToComponentKind(field.type),
+    componentKind: fieldTypeToComponentKind(field.type, field.rowFields !== undefined || field.tableEditing !== undefined),
     dataPath: field.key,
     tabKey,
     order,
@@ -44,6 +44,8 @@ function compileField(
     dataSourceKey: field.dataSourceKey,
     minSearchChars: field.minSearchChars ?? performanceLookupMinChars,
     renderHint: field.renderHint,
+    rowFields: field.rowFields,
+    tableEditing: field.tableEditing,
   }
 }
 
