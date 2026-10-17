@@ -18540,3 +18540,8 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 
 **DOCFLOW-CI-UPDATE-CONSUMERS Abnahme:**105 gesamte Rechte-/Freigabe-/neue DocFlowvertraege gruen. 403-Fall sendet formal gueltigen Updateauftrag; Freigabeentwertung verwendet zuvor per HTTP gelesene Version und Auftragsschluessel. Fachliche Behauptungen unveraendert, kein produktiver Gate-/Rechteeingriff. QA docflow-ci-update-consumers-20261017.md. Gesamter neuer GitHub-Nachlauf bleibt erforderlich.
+
+
+## DOCFLOW-ITEM-METADATA-20261017 — reserviert, Codex
+
+**Owner:** Codex. **Stand:** reserviert 2026-10-17. **Ziel:** Bereits gespeicherte batch_id und charge beim kanonischen vollstaendigen Belegabruf und unveraenderlichen Command-Snapshot erhalten, damit ein nachfolgender Editor sie verlustfrei uebernehmen kann. **Dateibesitz:** app/api/v1/schemas/docflow_schemas.py nur additive Positionsausgabe; app/api/v1/endpoints/docflow.py nur Positionsprojektion; neuer tests/test_docflow_item_metadata.py; eigene OpenAPI-Projektion, QA/Workboard. **Abnahme:** echte PostgreSQL-Lese-/Update-/Replay-Kette, Altpositionen ohne Metadaten bleiben lesbar; Rechte und Mandantengrenzen unveraendert. **Risiken:** dies aktiviert keine Bearbeitungsmaske und behebt noch keine Alteditor-Datenverluste; keine neue DB/Container/Migration oder fremde Arbeitskopien.
