@@ -238,7 +238,8 @@ def test_ohne_recht_wird_nichts_gebucht_storniert_angelegt_oder_umgewandelt(http
     assert http("FINANCE_BEARBEITEN").post(f"/docflow/{gebucht}/convert", json=wandeln).status_code == 403
     assert http("SALES_LESEN").post(f"/docflow/{offen}/release", json={"idempotency_key": "recht-freigeben"}).status_code == 403
     assert http("SALES_LESEN").delete(f"/docflow/{offen}").status_code == 403
-    assert http("SALES_LESEN").put(f"/docflow/{offen}", json={}).status_code == 403
+    assert http("SALES_LESEN").put(f"/docflow/{offen}", json={
+        "expected_version": 1, "idempotency_key": "readonly-edit-denied"}).status_code == 403
     assert (_status(satz, "vk-rechnung-2"), _status(satz, "vk-rechnung-1")) == ("open", "posted")
     assert _buchungen(satz) == vorher
 

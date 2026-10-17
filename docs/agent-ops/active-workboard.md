@@ -18531,9 +18531,12 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 **MASK-TABLE-INPUT Integrationsergaenzung:** ActionInputDialog ausschliesslich leeren Tabellenwert als Liste weitergeben und explizit geleerte Listen beim Absenden erhalten; eigene neue Dialogvertraege im eigenen Table-Input-Test. Bestehende fremde Testdateien bleiben unveraendert. Grund: Kommandodialog darf Positionen weder in Text umdeuten noch das Loeschen aller Zeilen stillschweigend weglassen.
 
 
-## DOCFLOW-CI-UPDATE-CONSUMERS-20261017 - reserviert, Codex
+## DOCFLOW-CI-UPDATE-CONSUMERS-20261017 - abgeschlossen, Codex
 
 **Owner:** Codex (pausierter fremder CI-Claim gemaess Nutzerfreigabe beerbt). **Befund:** CI/CD38941771526 und Quality Gate38941771683: genau zwei Altvertraege senden Update ohne Pflichtversion/-schluessel, 422 statt Erreichen der beabsichtigten Rechte-/Freigabepruefung. **Dateibesitz:** tests/test_beleg_rechte.py ausschliesslich gueltiger Updatekoerper im 403-Fall; tests/test_freigabe.py ausschliesslich gelesene Version/Key beim Aendern nach Freigabe; eigene QA/Workboard. **Abnahme:** beide fachlichen Aussagen bleiben unveraendert, gesamte Rechte-/Freigabe-/DocFlowfamilie gruen. Keine Lockerung produktiver Vertraege oder Gates, keine DB/Migration/Container.
 
 
 **MASK-TABLE-INPUT Abnahme 17.10.:** Zentral deklarierte strukturierte Tabellenfelder ueber ScreenDefinition, Compiler, RenderPlan, Formstate und beide Rendererwege. Pflichtfelder/Zahlen, readonly, sichere Spalten, maximal200 Zeilen/30 Spalten, Erhalten versteckter Daten und explizites Leeren im Kommandodialog geprueft. 1414 gesamte UI-Vertraege vor abschliessendem Dialog-/Layoutnachtrag; danach64 gezielte Vertraege und Typpruefung gruen. Reale isolierte StudioPreview-Bedienung mit synthetischen Zeilen bei1440hell/1366dunkel/1920dunkel; dabei gefundene Formularbreite zentral korrigiert. Kein Speichern/Buchen/Maskenfreigeben, keine neue API/DB. QA mask-table-input-20261017.md. Belegvarianten-Anbindung bleibt eigener Schritt.
+
+
+**DOCFLOW-CI-UPDATE-CONSUMERS Abnahme:**105 gesamte Rechte-/Freigabe-/neue DocFlowvertraege gruen. 403-Fall sendet formal gueltigen Updateauftrag; Freigabeentwertung verwendet zuvor per HTTP gelesene Version und Auftragsschluessel. Fachliche Behauptungen unveraendert, kein produktiver Gate-/Rechteeingriff. QA docflow-ci-update-consumers-20261017.md. Gesamter neuer GitHub-Nachlauf bleibt erforderlich.
