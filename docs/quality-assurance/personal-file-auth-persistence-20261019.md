@@ -18,7 +18,7 @@ Erster Personalakten-/Service-Lauf55 bestanden. Nach Datumsvalidierung59 bestand
 
 Die neuen SQL-Vertraege verwenden echte signierte RSA-Token, die produktive Bearer-/Mandantenmiddleware sowie kontrollierte JWKS-/Sitzungslease-Testgrenzen. Zwei eigene Mandanten liegen in einer aeusseren Rollbacktransaktion; Endpunktcommits loesen nur Savepoints. Geprueft sind: unberechtigte Rollen mit fuenf actorRole-Werten ohne SQL, readonly verweigertes Schreiben, erhaltener eigener und unveraenderter fremder Datenbestand, Header-Mandantenfaelschung, fehlende Anmeldung, ueberschriebener Rumpfurheber, leere Akte, reale SQL-Fehler ohne falschen Erfolg/private Fehlertexte sowie drei ungueltige Datumsfaelle vor SQL.
 
-Die zwei eigenen OpenAPI-Operationen, Migration und physische Tabelle sind projiziert. Vierzehn bereits committete Masken-/Audit-/Mail-/Mobil-Lineagebeziehungen wurden gleichzeitig nachgezogen, statt unrichtige Katalognachweise zu behalten. Tabellenkatalog673 Tabellen; Codeinventare und Agent-Handbuch gegen HEAD-Eingaben geprueft. personal.py bleibt bei3083 Zeilen; keine erhoehte Godfile-Grenze.
+Die zwei eigenen OpenAPI-Operationen, Migration und physische Tabelle sind projiziert. Vierzehn bereits committete Masken-/Audit-/Mail-/Mobil-Lineagebeziehungen wurden gleichzeitig nachgezogen, statt unrichtige Katalognachweise zu behalten. Tabellenkatalog682 dokumentierte Tabellen; davon673 im aktuellen Probe vorhanden; Codeinventare und Agent-Handbuch gegen HEAD-Eingaben geprueft. personal.py bleibt bei3083 Zeilen; keine erhoehte Godfile-Grenze.
 
 ## Grenzen
 
@@ -28,3 +28,6 @@ Keine Personalselbstbedienung oder globale Vorgesetztenberechtigung behauptet. H
 ## Integrierte Schlusspruefung
 
 Alle60 Faelle nochmals gegen eine ausschliesslich aus aktuellem Git-HEAD und den eigenen HR-Aenderungen aufgebaute Quellansicht bestanden. Importierte Anwendungsmodule wurden auf diese Herkunft geprueft. Vollstaendige OpenAPI-Projektion wiederholt erzeugt und stabil; keine nur auf alten Arbeitskopien beruhende API-Abnahme. Parallel gelieferte Steuerkategorienmigration per leerem Mergekopf zusammengefuehrt, beide Zweige unveraendert erhalten. Ein DAG-Vertrag prueft den einzigen Kopf und beide Eltern. Auf gemeinsamem Probe vor Upgrade null fremde aktive Transaktionen; nur ausstehender Steuerzweig und Merge ausgefuehrt. Entwicklung weiterhin unveraendert.
+
+
+Katalog-Schlussdiff: Neun bereits dokumentierte Tabellen fehlen physisch im gemeinsamen Probe (CRM contacts und acht Inventory-Untertabellen). Diese bestehenden Eintraege bleiben erhalten; ihre Entfernung war nicht Teil dieses Claims. Der vollstaendige physische Katalogabgleich bleibt daher offen, bis deren Migrationen/Schemaherkunft geklaert sind. Die neue HR-Tabelle und14 Lesepfadkorrekturen sind isoliert geprueft; kein pauschales Katalog-Gruen.

@@ -18779,3 +18779,6 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 
 **PERSONAL-FILE / COMMITTED-API / PARALLEL-MIGRATION Abschluss:** Integrierter Quellstand60 Personaltests gruen, alle Anwendungsmodule aus aktueller Git-Quellansicht, komplette API-Projektion wiederholbar stabil. Katalog673 Tabellen mit14 korrigierten Lesepfadnachweisen; andere Codeinventare unveraendert aktuell. Steuerzweig und HR-Zweig ueber merge_hr_tax_20261019 zusammengefuehrt, ein DAG-Vertrag bestanden; vor additivem Probe-Upgrade null fremde aktive Transaktionen. Keine Entwicklungs-DDL, keine weitere DB/Container, kein Reset. Laufender Backend-Rollout und Provider-Abnahme weiterhin getrennt offen.
+
+
+**Katalog-Korrektur vor Push:** Generator hatte neun bestehende Tabellen wegen physischer Probe-Abweichung entfernt. Eintraege wiederhergestellt; nur neue HR-Tabelle und14 Lesepfadkorrekturen liefern.682 dokumentierte Tabellen,673 im Probe. Vollstaendiger physischer Drift bleibt offen (CRM contacts; Inventory article_alternative_eans, article_analyses, article_print_settings, article_units sowie vier nawaro-Untertabellen). Keine behauptete Schema-Gesamtkonformitaet.
