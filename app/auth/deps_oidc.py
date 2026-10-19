@@ -8,6 +8,7 @@ from typing import List, TypedDict
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from .oidc import oidc, extract_roles, extract_scopes
+from .deps import effective_roles
 import logging
 
 logger = logging.getLogger(__name__)
@@ -67,7 +68,7 @@ def require_roles(*needed: str):
     Dependency Factory: Prüft ob User eine der benötigten Rollen hat
 
     Args:
-        *needed: Benötigte Rollen (z.B. "admin", "manager")
+        *needed: Benötigte Rollen (z.B. "admin", "FINANCE_BEARBEITEN")
 
     Returns:
         Dependency-Function die User validiert
@@ -81,7 +82,7 @@ def require_roles(*needed: str):
     """
 
     async def _dep(user: User = Depends(get_current_user)) -> User:
-        roles = set(user.get("roles") or [])
+        roles = effective_roles(user.get("roles"))
         if not roles.intersection(set(needed)):
             logger.warning(
                 f"User {user['sub']} lacks required roles. Has: {roles}, needs: {needed}"
@@ -148,7 +149,7 @@ def require_roles_and_scopes(roles: List[str], scopes: List[str]):
 
     async def _dep(user: User = Depends(get_current_user)) -> User:
         # Rollen-Check
-        user_roles = set(user.get("roles") or [])
+        user_roles = effective_roles(user.get("roles"))
         if not user_roles.intersection(set(roles)):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

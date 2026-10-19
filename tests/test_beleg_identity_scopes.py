@@ -102,3 +102,46 @@ def test_scope_projection_matches_all_existing_document_rights():
     assert set(DOCUMENT_SCOPE_ROLES["belege:write"]) == write
     assert "LAGER_LESEN" in read and "LAGER_LESEN" not in write
     assert "LAGER_BEARBEITEN" in read & write
+
+
+@pytest.mark.parametrize("failure", [None, "delete_failed", "not_removed", "foreign_mapping", "missing_id"])
+def test_retired_manager_scope_mapping_is_removed_and_verified_without_other_cleanup(failure):
+    mapping = {name: set(roles) | {"manager"} for name, roles in DOCUMENT_SCOPE_ROLES.items()}
+    if failure == "foreign_mapping":
+        mapping["belege:read"].add("unknown_role")
+    removals = []
+    def handler(request):
+        if "/roles/" in request.url.path:
+            name = request.url.path.rsplit("/", 1)[-1]
+            assert name != "manager"
+            return httpx.Response(200, json={"id": "id-"+name, "name": name})
+        scope = next(name for name in mapping if name in request.url.path)
+        if request.url.path.endswith("/scope-mappings/realm"):
+            if request.method == "GET":
+                return httpx.Response(200, json=[
+                    {"name": name, **({} if name == "manager" and failure == "missing_id" else {"id": "id-"+name})}
+                    for name in sorted(mapping[scope])])
+            if request.method == "DELETE":
+                records = json.loads(request.content)
+                assert records == [{"name": "manager", "id": "id-manager"}]
+                removals.append(scope)
+                if failure == "delete_failed":
+                    return httpx.Response(403)
+                if failure != "not_removed":
+                    mapping[scope].remove("manager")
+                return httpx.Response(204)
+            pytest.fail("No active role assignment should change during retirement")
+        return httpx.Response(200, json={"name": scope, "protocol": "openid-connect",
+            "attributes": {"include.in.token.scope": "true"}})
+    with httpx.Client(base_url="https://idp.invalid", transport=httpx.MockTransport(handler)) as client:
+        if failure:
+            with pytest.raises(RuntimeError):
+                reconcile_document_scope_roles(client, {}, "fixture", {s: s for s in mapping})
+            assert "manager" in mapping["belege:read"]
+            if failure in {"foreign_mapping", "missing_id"}:
+                assert removals == []
+        else:
+            reconcile_document_scope_roles(client, {}, "fixture", {s: s for s in mapping})
+            reconcile_document_scope_roles(client, {}, "fixture", {s: s for s in mapping})
+            assert removals == ["belege:read", "belege:write"]
+            assert mapping == {s: set(roles) for s, roles in DOCUMENT_SCOPE_ROLES.items()}

@@ -50,11 +50,11 @@ WEGE = {'bank_accounts': [('GET', '/bank-accounts/new', 'read'),
                      ('GET', '/mahnstufe/{rechnungsnr}/trail', 'read')]}
 FAELLE = [(modul, methode, weg, zugang) for modul, wege in WEGE.items() for methode, weg, zugang in wege]
 
-FINANZ_LESEN = {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"}
+FINANZ_LESEN = {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"}
 ERLAUBT = {
     "read": FINANZ_LESEN,
     "kontenplan": FINANZ_LESEN | {"EINKAUF_LESEN", "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN"},
-    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"},
+    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"},
     "admin": {"FINANCE_ADMIN", "admin"},
 }
 ERLAUBT['broad'] = FINANZ_LESEN | {d + '_' + r for d in ['SALES','CRM','EINKAUF'] for r in ['LESEN','BEARBEITEN','ADMIN']}

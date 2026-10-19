@@ -68,12 +68,21 @@ def anmeldename(user: Optional[dict]) -> str:
     return str(daten.get("name") or daten.get("sub") or "").strip()[:120]
 
 
+def effective_roles(roles: List[str] | None) -> set[str]:
+    """Historical manager never grants authorization (role-description-contract.md).
+
+    Preserve verified identity and claims for audit; only authorization ignores
+    the retired role. Explicit domain roles remain effective unchanged.
+    """
+    return set(roles or ()) - {"manager"}
+
+
 def require_roles(*needed: str):
     """
     Dependency Factory: Prüft ob User eine der benötigten Rollen hat
 
     Args:
-        *needed: Benötigte Rollen (z.B. "admin", "manager")
+        *needed: Benötigte Rollen (z.B. "admin", "FINANCE_BEARBEITEN")
 
     Returns:
         Dependency-Function die User validiert
@@ -87,7 +96,7 @@ def require_roles(*needed: str):
     """
 
     def _dep(user: User = Depends(get_current_user)) -> User:
-        roles = set(user.get("roles") or [])
+        roles = effective_roles(user.get("roles"))
         if not roles.intersection(set(needed)):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
