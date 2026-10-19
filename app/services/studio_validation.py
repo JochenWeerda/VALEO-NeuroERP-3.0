@@ -95,6 +95,10 @@ def _bound_document_template(definition):
     new_actions = {action["key"]: action for action in _iter_actions(current)}
     if set(old_actions) != set(new_actions) or definition_hash(original["dataSources"]) != definition_hash(current["dataSources"]):
         raise ValueError("document_policy_changed")
+    if definition_hash(original.get('creation')) != definition_hash(current.get('creation')):
+        raise ValueError('document_creation_policy_changed')
+    if definition_hash(definition.get('creation')) != definition_hash(original.get('creation')):
+        raise ValueError('document_creation_changed')
     for key, action in old_actions.items():
         previous = {field: action.get(field) for field in _DOCUMENT_POLICY_FIELDS}
         registered = {field: new_actions[key].get(field) for field in _DOCUMENT_POLICY_FIELDS}
@@ -161,6 +165,7 @@ def validate_studio_draft(
     allowed_endpoints: set[str] = cat.get("data_source_endpoints") or set()
     if document_template is not None:
         allowed_endpoints = {source["endpoint"] for source in document_template["dataSources"]}
+        allowed_endpoints.update(source['endpoint'] for source in (document_template.get('creation') or {}).get('dataSources', []))
 
     write_endpoints = {action.get("commandEndpoint") for action in catalog_actions.values()}
     write_endpoints.update((action.get("inputFlow") or {}).get("submitEndpoint")
@@ -168,13 +173,15 @@ def validate_studio_draft(
     for node in _nodes(definition):
         for field in ("endpoint", "summaryEndpoint", "countEndpoint"):
             endpoint = node.get(field)
-            if endpoint is not None and (not isinstance(endpoint, str) or endpoint not in allowed_endpoints):
+            bound_creation_endpoint = (document_template is not None and node is definition.get('creation')
+                                       and field == 'endpoint' and endpoint == document_template.get('creation', {}).get('endpoint'))
+            if endpoint is not None and not bound_creation_endpoint and (not isinstance(endpoint, str) or endpoint not in allowed_endpoints):
                 violations.append(f"datenquelle_nicht_im_katalog:{endpoint}")
         for field in ("reprojectEndpoint", "icsTokenEndpoint", "submitEndpoint"):
             endpoint = node.get(field)
             if endpoint is not None and (not isinstance(endpoint, str) or endpoint not in write_endpoints):
                 violations.append("schreibender_transport_nicht_im_katalog")
-        if node.get("creation") not in (None, {}):
+        if node.get("creation") not in (None, {}) and (document_template is None or node is not definition):
             violations.append("erstellung_nicht_im_studio_katalog")
         for field in ("rowRouteTemplate", "targetRoute", "activateRouteTemplate"):
             route = node.get(field)

@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-16
+last_reviewed: 2026-10-19
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -95,6 +95,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `docflow_belegadapter` | DocFlow-Belege in der Form des Belegvertrags (BELEG-011). |
 | `docflow_belegaktionen` | Aktionen der Belegmaske auf den Kommandos von DocFlow und der Approval Engine (BELEG-021). |
 | `docflow_create_command` | Atomic, actor/content-bound DocFlow creation using existing replay storage. |
+| `docflow_creation_context` | Tenant-bound partner references for registered document creation screens. |
 | `docflow_evidence_service` | Dokument-Nachweisraum (DOM-DOC-004) — GoBD-Artefakt-/Vorgangs-Sicht. |
 | `docflow_followup_service` | Bescheid/Rückmeldung & Wiedervorlage am Vorgang (DOM-DOC-004.3). |
 | `docflow_freigabe` | DocFlow-Belege an der zentralen Approval Engine (APPROVAL-001). |

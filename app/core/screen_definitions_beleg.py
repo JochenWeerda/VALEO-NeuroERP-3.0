@@ -212,6 +212,18 @@ def build_beleg_screen_definition(belegart: str) -> dict[str, Any]:
             "of": "beleg", "belegart": belegart, "partnerrolle": variante.partnerrolle,
             "mitPreisen": variante.mit_preisen, "bucht": variante.bucht, "folgebelege": list(variante.folgebelege),
         },
+        "creation": {
+            "adapter": "docflow.create.v1", "endpoint": "/api/v1/docflow/",
+            "permission": "belege.bearbeiten", "detailRoute": f"/belege/{belegart}/{{entity_id}}",
+            "defaults": {"currency": "EUR", "items": []},
+            "dataSources": [{"key": "partner", "endpoint": f"/api/v1/belege/{belegart}/partner-auswahl"}],
+            "fields": [
+                {"key": "doc_number", "label": "Entwurfsbezeichnung", "type": "text", "required": True},
+                {"key": "supplier_id" if variante.partnerrolle == "lieferant" else "customer_id",
+                 "label": partner, "type": "lookup", "dataSourceKey": "partner", "required": True},
+                *next(action["inputFields"] for action in aktionen(variante) if action["key"] == "bearbeiten"),
+            ],
+        },
         "dataSources": [
             {"key": "entity", "endpoint": _pfad(belegart, "/kopf")},
             {"key": "positionen", "endpoint": _pfad(belegart, "/tabs/positionen"), "pageSize": 50},

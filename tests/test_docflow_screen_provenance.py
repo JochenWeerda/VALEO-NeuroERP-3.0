@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.core.database import engine
 from test_docflow_create_guard import context, create, request
 from test_docflow_update_guard import sql_doc, client
+from test_beleg_studio_creation import partners  # noqa: F401 -- own tenant-owned partner fixture
 
 pytestmark=[pytest.mark.integration,pytest.mark.needs_live_db]
 
@@ -53,8 +54,8 @@ def test_real_registry_does_not_grant_native_test_mask_to_other_tenant():
     with pytest.raises(ValidationFailedError):resolve_screen_context(context,'sales_offer','synthetic-unapproved-tenant')
 
 
-def test_provenance_persists_and_replays_after_registry_changes(context,screen,client):
-    definition,_=screen;body=request(screen_context=binding(definition)).model_dump(mode='json')
+def test_provenance_persists_and_replays_after_registry_changes(context,screen,client,partners):
+    definition,_=screen;body=request(screen_context=binding(definition),customer_id=partners[0]).model_dump(mode='json')
     first=client.post('/docflow/',json=body)
     assert first.status_code==200,first.text
     expected=first.json()['screen_context']

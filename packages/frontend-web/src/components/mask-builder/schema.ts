@@ -443,11 +443,15 @@ export interface ScreenDefinition {
   documentVariant?: DocumentScreenVariantRef
   /** Declared native creation; new/neu are never fetched as entity IDs. */
   creation?: {
+    adapter?: 'docflow.create.v1'
+    fields?: ScreenFieldDefinition[]
+    dataSources?: ScreenDataSource[]
     endpoint: string
     permission: string
     detailRoute: string
     defaults?: Record<string, unknown>
   }
+  creationContext?: { screen_id: string; definition_hash: string }
   schemaVersion: 1
   id: string
   domain: ScreenDomain

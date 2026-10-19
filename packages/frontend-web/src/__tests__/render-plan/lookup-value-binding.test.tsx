@@ -1,5 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, fireEvent } from '@testing-library/react'
+import { useState } from 'react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { LookupField } from '@/components/mask-builder/renderers/LookupField'
@@ -42,5 +43,21 @@ it('discards unfinished search when the loaded record changes', async () => {
   await user.type(screen.getByLabelText('Kunde'), 'x')
   rendered.rerender(view('B'))
   expect(screen.getByLabelText('Kunde')).toHaveValue('B')
+  client.clear()
+})
+
+it('clears the selected identifier when its visible name is overwritten and preserves the new query', () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  function Controlled() {
+    const [value, setValue] = useState('selected-partner')
+    return <QueryClientProvider client={client}>
+      <LookupField field={field} value={value} lookupEndpoint="/customers" onSelect={setValue} />
+      <output data-testid="selected-id">{value}</output>
+    </QueryClientProvider>
+  }
+  render(<Controlled />)
+  fireEvent.change(screen.getByLabelText('Kunde'), { target: { value: 'another partner' } })
+  expect(screen.getByTestId('selected-id')).toHaveTextContent('')
+  expect(screen.getByLabelText('Kunde')).toHaveValue('another partner')
   client.clear()
 })

@@ -348,3 +348,7 @@ Deklarierte rowFields und tableEditing werden ueber denselben Compiler und Rende
 ## Gemeinsame Belegbearbeitung (17.10.2026)
 
 Die Belegfamilie verwendet eine gemeinsame deklarierte Tabellen-Eingabeaktion ueber ScreenDefinition, RenderPlan, nativen Dialog und zentralen Formularzustand. PUT, Vollabruf, Versionsbindung und Ergebniskontrolle sind Transportaufgaben; Rechte, Steuer, Ketten und Transaktion bleiben beim Domain-Command. Neun Varianten teilen dieses Geruest und behalten ihre Spaltenpolitik. Matrix und Abnahme: beleg-studio-variantenmatrix.md und ../quality-assurance/beleg-studio-edit-20261017.md. Keine parallele Beleg-UI oder fachliche Berechnung im Renderer.
+
+## Gemeinsame Belegneuanlage (19.10.2026)
+
+Deklarierte creation-Felder und Partnerquellen laufen durch denselben Compiler, RenderPlan, Formularzustand und Renderer. Auswahl nach Namen statt technischer Kennung, alte Auswahl beim Uebertippen invalidiert. Detailnavigation erst nach erfolgreichem Formularabschluss, damit der zentrale Ungespeichertschutz keine erfolgreiche Anlage festhaelt. Echte Buchungsabnahme hell/dunkel bei1440 dokumentiert: ../quality-assurance/beleg-studio-create-20261019.md.

@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { useLookupSearch } from '../hooks/useLookupSearch'
@@ -25,8 +25,10 @@ export const LookupField = memo(function LookupField({
   const [query, setQuery] = useState('')
   const [picked, setPicked] = useState<{ value: string; label: string; endpoint?: string } | null>(null)
   const displayValue = value == null || value === '' ? '' : String(value)
+  const localClear = useRef<{ endpoint?: string } | null>(null)
   useEffect(() => {
-    setQuery('')
+    if (!(localClear.current && localClear.current.endpoint === lookupEndpoint && displayValue === '')) setQuery('')
+    localClear.current = null
     setPicked(current => current?.value === displayValue && current.endpoint === lookupEndpoint ? current : null)
   }, [displayValue, lookupEndpoint])
   const minChars = field.minSearchChars ?? performance?.lookupMinChars ?? 2
@@ -61,6 +63,10 @@ export const LookupField = memo(function LookupField({
           if (field.readOnly) return
           setPicked(null)
           setQuery(event.target.value)
+          if (displayValue && onSelect) {
+            localClear.current = { endpoint: lookupEndpoint }
+            onSelect('', { value: '', label: '' })
+          }
         }}
       />
       {!field.readOnly && query.length > 0 && query.length < minChars ? (

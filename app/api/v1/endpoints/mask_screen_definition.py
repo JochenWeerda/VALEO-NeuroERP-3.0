@@ -123,6 +123,9 @@ async def get_mask_screen_definition(
     definition = get_screen_definition(normalized, tenant_id=tenant_id)
     if definition is None:
         raise HTTPException(status_code=404, detail=f"Keine ScreenDefinition fuer Maske {mask_id}")
+    if (definition.get('creation') or {}).get('adapter') == 'docflow.create.v1':
+        from app.core.studio_release import definition_hash
+        return {**definition, 'creationContext': {'screen_id': definition['id'], 'definition_hash': definition_hash(definition)}}
     return definition
 
 

@@ -239623,6 +239623,76 @@
         ]
       }
     },
+    "/api/v1/belege/{belegart}/partner-auswahl": {
+      "get": {
+        "operationId": "beleg_partner_auswahl_api_v1_belege__belegart__partner_auswahl_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "belegart",
+            "required": true,
+            "schema": {
+              "title": "Belegart",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 120,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mandantengebundene Partnerauswahl fuer Belegentwuerfe",
+        "tags": [
+          "belege"
+        ]
+      }
+    },
     "/api/v1/belege/{belegart}/{beleg_id}": {
       "get": {
         "description": "Kopf, Partner, Positionen, Summen, Buchungsstand, Belegkette, Historie und Aktionen.\n\nOhne Preisrecht kommen weder Preisfelder noch Summen; Aktionen ohne Recht sind gesperrt.",

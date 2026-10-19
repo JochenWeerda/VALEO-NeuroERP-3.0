@@ -35,6 +35,9 @@ def create_snapshot(service: Any, payload: Any) -> dict[str, Any]:
             service._assert_invoice_customer_allowed(payload.customer_id)
         from app.services.docflow_screen_provenance import resolve_screen_context
         context = resolve_screen_context(getattr(payload, 'screen_context', None), payload.doc_type, service.tenant_id)
+        if context is not None:
+            from app.services.docflow_creation_context import validate_partner
+            validate_partner(service.db, service.tenant_id, payload)
         doc_id = _apply_create(service, payload, context)
         snapshot = json.loads(json.dumps({'header': service.fetch_header(doc_id),
             'items': service.fetch_items(doc_id), 'pos_compliance': service.fetch_pos_compliance(doc_id),

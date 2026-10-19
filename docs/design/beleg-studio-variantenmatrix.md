@@ -48,3 +48,7 @@ Bearbeitung laedt den vollstaendigen kanonischen DocFlow-Beleg, nicht die erste 
 ## Noch erforderliche Paritaet
 
 Die neue Entwurfsbearbeitung ist kein Nachweis vollstaendiger Kopf-/Sonderfeldparitaet. Partnerauswahl, Neuanlage, Liefer-/Zahlungs-/Kontraktbausteine, gezielte Aenderung verknuepfter Positionen, Mengenbearbeitung ohne Preisleserecht, unabhaengige Variantenfreigaben, reale Fachkettenprofile und Browserabnahme jedes abgeloesten Einstiegs bleiben gesonderte Abnahmen. Insbesondere darf ein Vollersatz keine vorhandenen Positionsverknuepfungen beseitigen. Bis zur jeweiligen Abnahme bleiben die bisherigen Fachwege erhalten.
+
+## Gemeinsame Neuanlage (19.10.2026)
+
+Familienfassung 1.2.0 ergaenzt fuer alle neun Varianten die zentrale Neuanlage mit mandantengebundener Partnerauswahl, versionierter Provenienz und idempotentem Domain-Create. Echte Eingangsrechnung im Browser gespeichert, freigegeben und mit ausgeglichenem Journal sowie offenem Posten gebucht; Wiederholung erzeugt keine zweite Buchung. Dies ist keine komplette Sonderfeld-/Altmaskenparitaet. Die zuvor offene Basis-Neuanlage und Partnerauswahl sind damit umgesetzt; weitere Liefer-/Zahlungs-/Kontraktbausteine bleiben offen. [Nachweis](../quality-assurance/beleg-studio-create-20261019.md).

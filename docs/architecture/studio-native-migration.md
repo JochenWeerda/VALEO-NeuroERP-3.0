@@ -71,3 +71,7 @@ Der neue optionale screen_context bindet Create an die im verifizierten Mandante
 ## Gemeinsame Entwurfsbearbeitung (17.10.2026)
 
 Familienfassung 1.1.0 bindet in allen neun Varianten die bestehende DocFlow-Updateaktion an den zentralen Eingabedialog. Vollstaendige Positionen einschliesslich nicht sichtbarer Zusatzangaben werden geladen; Version/Identitaet und bestaetigtes Ergebnis werden geprueft. Verknuepfte Positionen sind gegen Vollersatz geschuetzt. Historische Fassungen bleiben unveraendert. Dies ersetzt keine Neuanlage, Fachsonderfelder, mengenbeschraenkte Lagerbearbeitung, Prozessfreigabe oder Alt-Einstieg-Abnahme. Zielmatrix: ../design/beleg-studio-variantenmatrix.md; Nachweis: ../quality-assurance/beleg-studio-edit-20261017.md.
+
+## Gemeinsame Belegneuanlage (19.10.2026)
+
+Version 1.2.0 bindet alle neun Varianten an denselben zentralen Erstellungstransport und echte mandantengebundene Partnerauswahl. Der servergelieferte Definitionshash bindet die Neuanlage an die aktive Fassung. Historische Fassungen bleiben erhalten. Echte Browserkette bis zur gebuchten Eingangsrechnung und SQL-Nachweis einschliesslich Journal/OP/Replay abgenommen; keine globale Aktivierung oder Umleitung alter Einstiege. [Nachweis und Grenzen](../quality-assurance/beleg-studio-create-20261019.md).

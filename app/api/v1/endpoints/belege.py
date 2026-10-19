@@ -26,6 +26,19 @@ from app.api.v1.schemas.base import TypedObjectOut
 router = APIRouter()
 
 
+@router.get("/{belegart}/partner-auswahl", response_model=TypedObjectOut, summary="Mandantengebundene Partnerauswahl fuer Belegentwuerfe")
+def beleg_partner_auswahl(
+    belegart: str, q: str = Query('', max_length=120), limit: int = Query(25, ge=1, le=50),
+    tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
+) -> dict[str, Any]:
+    if belegart not in BELEGARTEN:
+        raise HTTPException(404, 'Belegvariante nicht gefunden')
+    verlange(nutzer, 'bearbeiten', belegart)
+    from app.services.docflow_creation_context import search_partners
+    return {'items': search_partners(db, tenant_id, belegart, q.strip(), limit)}
+
+
 def _lies(belegart: str, beleg_id: str, tenant_id: str, db: Session, nutzer: Any) -> Beleg:
     return beleg_lesen(belegart, beleg_id, tenant_id, db, nutzer)
 
