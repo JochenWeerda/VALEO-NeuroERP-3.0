@@ -13,6 +13,7 @@ from ..schemas.crm import ContactCreate, ContactUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.contacts_schemas import ContactsOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -126,8 +127,7 @@ async def get_contact(contact_id: str):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, summary="Contact anlegen",
-    response_model=ContactsOut
-)
+    response_model=ContactsOut, dependencies=SCHREIBEN["CRM"])
 async def create_contact(contact_data: ContactCreate):
     try:
         payload = _map_create_payload(contact_data)
@@ -138,8 +138,7 @@ async def create_contact(contact_data: ContactCreate):
 
 
 @router.put("/{contact_id}", summary="Contact aktualisieren",
-    response_model=ContactsOut
-)
+    response_model=ContactsOut, dependencies=SCHREIBEN["CRM"])
 async def update_contact(contact_id: str, contact_data: ContactUpdate):
     try:
         payload = _map_update_payload(contact_data)
@@ -154,8 +153,7 @@ async def update_contact(contact_id: str, contact_data: ContactUpdate):
 
 
 @router.delete("/{contact_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Contact löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 async def delete_contact(contact_id: str):
     try:
         await crm_core_client.delete_contact(contact_id)

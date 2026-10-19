@@ -25,6 +25,7 @@ from ..schemas.crm import Case, CaseCreate, CaseUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.cases_schemas import CasesOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -87,7 +88,7 @@ def _compute_sla(
     }
 
 
-@router.post("/", response_model=Case, status_code=status.HTTP_201_CREATED, summary="Case anlegen")
+@router.post("/", response_model=Case, status_code=status.HTTP_201_CREATED, summary="Case anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_case(case_data: CaseCreate):
     """Create a new support case via crm-service."""
     try:
@@ -219,7 +220,7 @@ async def get_case(case_id: str):
     return Case.model_validate(case)
 
 
-@router.put("/{case_id}", response_model=Case, summary="Case aktualisieren")
+@router.put("/{case_id}", response_model=Case, summary="Case aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_case(case_id: str, case_data: CaseUpdate):
     """Update a support case via crm-service."""
     try:
@@ -234,8 +235,7 @@ async def update_case(case_id: str, case_data: CaseUpdate):
 
 
 @router.delete("/{case_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Case löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 async def delete_case(case_id: str):
     """Delete a support case via crm-service."""
     try:
@@ -248,7 +248,7 @@ async def delete_case(case_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to delete case: {exc}") from exc
 
 
-@router.post("/{case_id}/escalate", response_model=CasesOut, summary="Case escalate")
+@router.post("/{case_id}/escalate", response_model=CasesOut, summary="Case escalate", dependencies=SCHREIBEN["CRM"])
 async def escalate_case(
     case_id: str,
     reason: str = Query(..., description="Reason for escalation"),

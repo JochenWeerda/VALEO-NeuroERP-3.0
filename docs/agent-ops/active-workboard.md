@@ -13,7 +13,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 ## WRITE-ROLES-AREAS-20261019 - in Arbeit, Claude Code
 
-**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-19. **Nutzerentscheid 19.10.** (wie ADMIN-WRITE-ROLES): Schreibwege der Pruefliste `config/write_routes_without_roles.json` je Bereich mit `SCHREIBEN[...]` aus `app/auth/bereich_roles.py` absichern, eine Gruppe je Commit. **Dateibesitz:** nur Decorator-Abhaengigkeit und Import der betroffenen Router, `app/auth/bereich_roles.py`, Baseline, Testidentitaeten betroffener Mini-App-Tests, QA `docs/quality-assurance/write-roles-bereiche-20261019.md`. **Erledigt:** VERKAUF.
+**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-19. **Nutzerentscheid 19.10.** (wie ADMIN-WRITE-ROLES): Schreibwege der Pruefliste `config/write_routes_without_roles.json` je Bereich mit `SCHREIBEN[...]` aus `app/auth/bereich_roles.py` absichern, eine Gruppe je Commit. **Dateibesitz:** nur Decorator-Abhaengigkeit und Import der betroffenen Router, `app/auth/bereich_roles.py`, Baseline, Testidentitaeten betroffener Mini-App-Tests, QA `docs/quality-assurance/write-roles-bereiche-20261019.md`. **Erledigt:** VERKAUF, CRM, EINKAUF, STAMMDATEN.
 
 ## ADMIN-WRITE-ROLES-20261019 - abgeschlossen, Claude Code
 

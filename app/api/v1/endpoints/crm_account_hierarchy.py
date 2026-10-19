@@ -15,6 +15,7 @@ from ....core.database import get_db
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.crm_account_hierarchy_schemas import CrmAccountHierarchyOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -129,7 +130,7 @@ async def get_account_hierarchy(
 # POST /{id}/set-parent
 # ---------------------------------------------------------------------------
 
-@router.post("/{account_id}/set-parent", response_model=CrmAccountHierarchyOut, tags=["crm", "accounts"], summary="Account parent setzen")
+@router.post("/{account_id}/set-parent", response_model=CrmAccountHierarchyOut, tags=["crm", "accounts"], summary="Account parent setzen", dependencies=SCHREIBEN["CRM"])
 async def set_account_parent(
     account_id: str,
     parent_id: Optional[str] = Query(None, description="Parent-Account-ID (null = root)"),

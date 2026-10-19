@@ -41,3 +41,8 @@ ordnet ueber die Kennung zu. Beide sind ausdrueckliche Abhaengigkeiten und als s
 - Gruppe VERKAUF: 99 Decorators in 30 Routern (u. a. alle Auftragswege `sales_orders`). Inventar 1521 -> 1417.
   Nachweis: 334 Suiten des Verkaufs 9212 gruen; 7 Mini-App-Tests mit Testidentitaet nachgezogen; ein Fehlschlag
   (`test_einkauf_bestellliste_beide_speicher`, Kategorie `tax`) ist vorbestehend und unabhaengig.
+- Gruppen CRM, EINKAUF, STAMMDATEN: 339 Decorators. Inventar 1417 -> 1073. Nachweis: 583 Suiten 16706 gruen.
+  Nachgezogen: `testgrenze.ersetze_bearer` liefert jetzt auch den Nutzer aus denselben Claims (Rollen-Abhaengigkeiten
+  lesen ihn); Testidentitaeten fuer Bestellvorschlag (Einkauf) und Interessenten (Vertrieb); die Bestellmail
+  versendet im Test der Einkauf statt des Lagers. Nebenbefund aus Rollout-Schritt 6: Mahnen fehlte in
+  `agentContract.dangerousActions` der Maske `finance/ar-open-item` (Vertragstest war rot) — ergaenzt.

@@ -48,6 +48,9 @@ def _app_customers():
     from app.core.tenant import get_tenant_id
     app = FastAPI()
     app.include_router(router, prefix="/customers")
+    from testgrenze import ersetze_nutzer
+
+    ersetze_nutzer(app, "CRM_BEARBEITEN")  # Interessenten pflegt der Vertrieb
     db = _mock_db()
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_tenant_id] = lambda: TENANT_ID

@@ -11,7 +11,7 @@ from app.api.v1.endpoints.mcp_tool_registry import get_current_user, get_db as m
 from app.core.database import get_db
 from app.core.dependencies import get_tenant_id as get_tenant_dep
 from app.core.tenant import get_tenant_id
-from testgrenze import setze_identitaet
+from testgrenze import ersetze_nutzer, setze_identitaet
 
 
 
@@ -30,6 +30,7 @@ def _client_tours():
 def _client_po():
     app = FastAPI()
     app.include_router(einkauf_bestellvorschlag.router, prefix="/api/v1")
+    ersetze_nutzer(app, "EINKAUF_BEARBEITEN")  # Bestellvorschlag ist Einkaufsarbeit
     db = Mock()
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"

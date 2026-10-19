@@ -46,6 +46,8 @@ def ersetze_bearer(app: FastAPI, *rollen: str) -> None:
         return "testgrenze"
 
     app.dependency_overrides[require_bearer_token] = identitaet
+    # Rollen-Abhaengigkeiten (require_roles) lesen den Nutzer; er traegt dieselbe Identitaet und dieselben Rollen.
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": list(rollen)}
 
 
 def _alle_fachrollen() -> tuple[str, ...]:

@@ -29,6 +29,7 @@ from app.services.articles_service import (
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.articles_schemas import ArticlesOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -145,7 +146,7 @@ def _steuerschluessel_pruefen(db: Session, tenant_id: str, werte: dict) -> None:
             werte["mehrwertsteuer_prozent"] = satz
 
 
-@router.post("/", response_model=Article, status_code=status.HTTP_201_CREATED, summary="Article anlegen")
+@router.post("/", response_model=Article, status_code=status.HTTP_201_CREATED, summary="Article anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def create_article(
     article_data: ArticleCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -268,7 +269,7 @@ async def create_article(
     return _to_article_schema(article)
 
 
-@router.put("/{article_id}", response_model=Article, summary="Article aktualisieren")
+@router.put("/{article_id}", response_model=Article, summary="Article aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
 async def update_article(
     article_id: str,
     article_data: ArticleUpdate,
@@ -325,8 +326,7 @@ async def update_article(
     "/{article_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
-    summary="Article löschen",
-)
+    summary="Article löschen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def delete_article(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -934,7 +934,7 @@ async def _do_enrich(article_ids: list[str], db: Session, tenant_id: str) -> Enr
     return EnrichImagesResponse(enriched=enriched, skipped=skipped, failed=failed, results=results)
 
 
-@router.post("/{article_id}/fetch-image", response_model=ImageEnrichResult, summary="Article image abrufen")
+@router.post("/{article_id}/fetch-image", response_model=ImageEnrichResult, summary="Article image abrufen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def fetch_article_image(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -954,7 +954,7 @@ async def fetch_article_image(
     return ImageEnrichResult(article_id=article_id, image_url=url, source=source)
 
 
-@router.post("/enrich-images", response_model=EnrichImagesResponse, summary="Article images anreichern")
+@router.post("/enrich-images", response_model=EnrichImagesResponse, summary="Article images anreichern", dependencies=SCHREIBEN["STAMMDATEN"])
 async def enrich_article_images(
     article_ids: Optional[list[str]] = None,
     tenant_id: str = Depends(get_tenant_id),

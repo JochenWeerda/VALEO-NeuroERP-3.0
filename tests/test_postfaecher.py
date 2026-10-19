@@ -138,6 +138,7 @@ def smtp(monkeypatch):
 ADMIN = {"sub": "chefin", "roles": ["admin"]}
 FIBU = {"sub": "buchhalter", "roles": ["FINANCE_ADMIN"]}
 LAGER = {"sub": "lagerist", "roles": ["LAGER_BEARBEITEN"]}
+EINKAUF = {"sub": "einkaeufer", "roles": ["EINKAUF_BEARBEITEN"]}
 
 
 def anlegen(db, haus=HAUS_A, **daten):
@@ -530,7 +531,7 @@ class TestHttp:
             v.execute(text("INSERT INTO domain_einkauf.bestellungen (id, tenant_id, bestellnummer, lieferant_id, "
                            " bestelldatum, status) VALUES (:i, :h, :n, :l, CURRENT_DATE, 'versendet')"),
                       {"i": str(uuid.uuid4()), "h": HAUS_A, "n": nummer, "l": LIEFERANT})
-        als(LAGER)
+        als(EINKAUF)  # die Bestellung versendet der Einkauf (Bereichsrolle seit 19.10.2026)
         antwort = client.post(f"/api/v1/purchase-orders/{nummer}/communications/email", headers=kopf(), json={})
         assert antwort.status_code == 201, antwort.text
         assert smtp.gesendet == [{"host": "smtp.ionos.de", "from": "Einkauf <einkauf@genossenschaft.example>",

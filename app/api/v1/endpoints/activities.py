@@ -15,6 +15,7 @@ from ..schemas.crm import Activity, ActivityCreate, ActivityUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.activities_schemas import ActivitiesOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -142,7 +143,7 @@ async def get_activity(activity_id: str):
     return Activity.model_validate(_adapt_activity(activity))
 
 
-@router.post("/", response_model=Activity, status_code=status.HTTP_201_CREATED, summary="Activity anlegen")
+@router.post("/", response_model=Activity, status_code=status.HTTP_201_CREATED, summary="Activity anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_activity(payload: ActivityCreate):
     try:
         body = _map_activity_payload(payload)
@@ -152,7 +153,7 @@ async def create_activity(payload: ActivityCreate):
     return Activity.model_validate(_adapt_activity(created))
 
 
-@router.put("/{activity_id}", response_model=Activity, summary="Activity aktualisieren")
+@router.put("/{activity_id}", response_model=Activity, summary="Activity aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_activity(activity_id: str, payload: ActivityUpdate):
     try:
         body = _map_activity_payload(payload)
@@ -167,8 +168,7 @@ async def update_activity(activity_id: str, payload: ActivityUpdate):
 
 
 @router.delete("/{activity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity lÃ¶schen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 async def delete_activity(activity_id: str):
     try:
         await crm_core_client.delete_activity(activity_id)
@@ -190,8 +190,7 @@ async def list_activity_main_topics(activity_id: str):
     "/{activity_id}/main-topics",
     response_model=str,
     status_code=status.HTTP_201_CREATED,
-    summary="Activity main topic anlegen",
-)
+    summary="Activity main topic anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_activity_main_topic(activity_id: str, payload: _StringListItem):
     items = [str(item) for item in await _load_list_field(activity_id, "main_topics")]
     items.append(payload.value)
@@ -199,7 +198,7 @@ async def create_activity_main_topic(activity_id: str, payload: _StringListItem)
     return str(updated[-1])
 
 
-@router.put("/{activity_id}/main-topics/{item_index}", response_model=str, summary="Activity main topic replace")
+@router.put("/{activity_id}/main-topics/{item_index}", response_model=str, summary="Activity main topic replace", dependencies=SCHREIBEN["CRM"])
 async def replace_activity_main_topic(
     activity_id: str,
     payload: _StringListItem,
@@ -213,8 +212,7 @@ async def replace_activity_main_topic(
 
 
 @router.delete("/{activity_id}/main-topics/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity main topic lÃ¶schen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 async def delete_activity_main_topic(activity_id: str, item_index: int = Path(..., ge=0)):
     items = [str(item) for item in await _load_list_field(activity_id, "main_topics")]
     _validate_item_index(items, item_index, "Main topic")
@@ -232,8 +230,7 @@ async def list_activity_orders_placed(activity_id: str):
     "/{activity_id}/orders-placed",
     response_model=str,
     status_code=status.HTTP_201_CREATED,
-    summary="Activity order placed anlegen",
-)
+    summary="Activity order placed anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_activity_order_placed(activity_id: str, payload: _StringListItem):
     items = [str(item) for item in await _load_list_field(activity_id, "orders_placed")]
     items.append(payload.value)
@@ -241,7 +238,7 @@ async def create_activity_order_placed(activity_id: str, payload: _StringListIte
     return str(updated[-1])
 
 
-@router.put("/{activity_id}/orders-placed/{item_index}", response_model=str, summary="Activity order placed replace")
+@router.put("/{activity_id}/orders-placed/{item_index}", response_model=str, summary="Activity order placed replace", dependencies=SCHREIBEN["CRM"])
 async def replace_activity_order_placed(
     activity_id: str,
     payload: _StringListItem,
@@ -255,8 +252,7 @@ async def replace_activity_order_placed(
 
 
 @router.delete("/{activity_id}/orders-placed/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity order placed lÃ¶schen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 async def delete_activity_order_placed(activity_id: str, item_index: int = Path(..., ge=0)):
     items = [str(item) for item in await _load_list_field(activity_id, "orders_placed")]
     _validate_item_index(items, item_index, "Order")
@@ -273,8 +269,7 @@ async def list_activity_follow_up_actions(activity_id: str):
     "/{activity_id}/follow-up-actions",
     response_model=ActivitiesOut | str,
     status_code=status.HTTP_201_CREATED,
-    summary="Activity follow up action anlegen",
-)
+    summary="Activity follow up action anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_activity_follow_up_action(activity_id: str, payload: _FollowUpActionItem):
     items = await _load_list_field(activity_id, "follow_up_actions")
     items.append(payload.value)
@@ -282,7 +277,7 @@ async def create_activity_follow_up_action(activity_id: str, payload: _FollowUpA
     return updated[-1]
 
 
-@router.put("/{activity_id}/follow-up-actions/{item_index}", response_model=ActivitiesOut | str, summary="Activity follow up action replace")
+@router.put("/{activity_id}/follow-up-actions/{item_index}", response_model=ActivitiesOut | str, summary="Activity follow up action replace", dependencies=SCHREIBEN["CRM"])
 async def replace_activity_follow_up_action(
     activity_id: str,
     payload: _FollowUpActionItem,
@@ -296,8 +291,7 @@ async def replace_activity_follow_up_action(
 
 
 @router.delete("/{activity_id}/follow-up-actions/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity follow up action lÃ¶schen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 async def delete_activity_follow_up_action(activity_id: str, item_index: int = Path(..., ge=0)):
     items = await _load_list_field(activity_id, "follow_up_actions")
     _validate_item_index(items, item_index, "Follow-up action")

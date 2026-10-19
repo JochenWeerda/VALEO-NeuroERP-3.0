@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.customers_schemas import CustomersOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -96,7 +97,7 @@ def _to_http_exception(error: httpx.HTTPStatusError) -> HTTPException:
 
 
 
-@router.post("/", response_model=Customer, status_code=status.HTTP_201_CREATED, summary="Customer anlegen")
+@router.post("/", response_model=Customer, status_code=status.HTTP_201_CREATED, summary="Customer anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_customer(
     customer_data: CustomerCreate,
     db: Session = Depends(get_db),
@@ -345,7 +346,7 @@ async def get_customer(
     return Customer.model_validate(d)
 
 
-@router.put("/{customer_id}", response_model=Customer, summary="Customer aktualisieren")
+@router.put("/{customer_id}", response_model=Customer, summary="Customer aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_customer(
     customer_id: str,
     customer_data: CustomerUpdate,
@@ -367,8 +368,7 @@ async def update_customer(
     "/{customer_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
-    summary="Customer löschen",
-)
+    summary="Customer löschen", dependencies=SCHREIBEN["CRM"])
 async def delete_customer(
     customer_id: str,
     db: Session = Depends(get_db),
@@ -425,8 +425,7 @@ class UmkreissucheErgebnis(_BaseModel):
 
 
 @router.post("/umkreissuche", summary="Umkreissuche",
-    response_model=CustomersOut
-)
+    response_model=CustomersOut, dependencies=SCHREIBEN["CRM"])
 def umkreissuche(
     payload: UmkreissucheInput,
     db: Session = Depends(get_db),
@@ -472,8 +471,7 @@ class KonvertierungResult(_BaseModel):
 
 
 @router.post("/interessenten", status_code=201, summary="Interessent anlegen",
-    response_model=InteressentOut
-)
+    response_model=InteressentOut, dependencies=SCHREIBEN["CRM"])
 def create_interessent(
     payload: InteressentCreate,
     db: Session = Depends(get_db),
@@ -505,7 +503,7 @@ def create_interessent(
     return ergebnis
 
 
-@router.post("/interessenten/{interessent_id}/konvertieren", response_model=KonvertierungResult, summary="Konvertieren")
+@router.post("/interessenten/{interessent_id}/konvertieren", response_model=KonvertierungResult, summary="Konvertieren", dependencies=SCHREIBEN["CRM"])
 def konvertieren(
     interessent_id: str,
     db: Session = Depends(get_db),

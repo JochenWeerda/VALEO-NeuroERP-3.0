@@ -21,6 +21,7 @@ from app.core.tenant import get_tenant_id
 from app.services.mail_workspace_service import MailWorkspaceError, MailWorkspaceService
 from app.services.mask_action_runtime_service import MaskActionResult as MaskActionResultOut
 from app.services.mask_commands import begruendung, statusaktion
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/mail-workspace", tags=["crm", "mail", "dms"])
 
@@ -106,7 +107,7 @@ def list_attachments(
     )
 
 
-@router.post("/drafts", response_model=MailDraftCreatedOut, status_code=201, summary="Entwurf anlegen")
+@router.post("/drafts", response_model=MailDraftCreatedOut, status_code=201, summary="Entwurf anlegen", dependencies=SCHREIBEN["CRM"])
 def create_draft(
     body: DraftIn,
     user: dict = Depends(get_current_user),
@@ -124,7 +125,7 @@ def create_draft(
     )
 
 
-@router.post("/{message_id}/assign", response_model=MailAssignOut, summary="Nachricht zuweisen")
+@router.post("/{message_id}/assign", response_model=MailAssignOut, summary="Nachricht zuweisen", dependencies=SCHREIBEN["CRM"])
 def assign(
     message_id: str,
     body: AssignmentIn,
@@ -143,7 +144,7 @@ def assign(
     )
 
 
-@router.post("/{message_id}/queue", response_model=MailQueueOut, summary="Nachricht zum Versand einreihen")
+@router.post("/{message_id}/queue", response_model=MailQueueOut, summary="Nachricht zum Versand einreihen", dependencies=SCHREIBEN["CRM"])
 def queue(
     message_id: str,
     body: ReasonIn,
@@ -161,7 +162,7 @@ def queue(
     )
 
 
-@router.post("/attachments/{attachment_id}/transfer", response_model=MailTransferOut, summary="Anhang uebernehmen")
+@router.post("/attachments/{attachment_id}/transfer", response_model=MailTransferOut, summary="Anhang uebernehmen", dependencies=SCHREIBEN["CRM"])
 def transfer_attachment(
     attachment_id: str,
     body: ReasonIn,
@@ -183,8 +184,7 @@ def transfer_attachment(
 @router.post(
     "/{entity_id}/actions/queue",
     response_model=MaskActionResultOut,
-    summary="Mailarbeitsplatz: Nachricht zum Versand einreihen (Maskenaktion)",
-)
+    summary="Mailarbeitsplatz: Nachricht zum Versand einreihen (Maskenaktion)", dependencies=SCHREIBEN["CRM"])
 async def queue_action(
     entity_id: str,
     body: dict[str, Any] = Body(default_factory=dict),
@@ -216,8 +216,7 @@ async def queue_action(
 @router.post(
     "/attachments/{entity_id}/actions/transfer",
     response_model=MaskActionResultOut,
-    summary="Mailarbeitsplatz: Anhang ins DMS uebernehmen (Maskenaktion)",
-)
+    summary="Mailarbeitsplatz: Anhang ins DMS uebernehmen (Maskenaktion)", dependencies=SCHREIBEN["CRM"])
 async def transfer_action(
     entity_id: str,
     body: dict[str, Any] = Body(default_factory=dict),

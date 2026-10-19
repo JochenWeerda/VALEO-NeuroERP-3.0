@@ -27,6 +27,7 @@ from ..schemas.crm import Opportunity, OpportunityCreate, OpportunityUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.opportunities_schemas import OpportunitiesOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -38,7 +39,7 @@ router = APIRouter()
 OPPORTUNITY_STAGES = ["LEAD", "QUALIFIZIERT", "ANGEBOT", "VERHANDLUNG", "GEWONNEN", "VERLOREN"]
 
 
-@router.post("/", response_model=Opportunity, status_code=status.HTTP_201_CREATED, summary="Opportunity anlegen")
+@router.post("/", response_model=Opportunity, status_code=status.HTTP_201_CREATED, summary="Opportunity anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_opportunity(opportunity_data: OpportunityCreate, tenant_id: str = Depends(get_tenant_id)):
     """Create a new sales opportunity via crm-sales.
 
@@ -396,7 +397,7 @@ async def get_forecast(
 # PATCH /{id}/stage — Stage-Wechsel mit History-Log
 # ---------------------------------------------------------------------------
 
-@router.patch("/{opportunity_id}/stage", response_model=OpportunitiesOut, tags=["crm", "opportunities"], summary="Opportunity stage aktualisieren")
+@router.patch("/{opportunity_id}/stage", response_model=OpportunitiesOut, tags=["crm", "opportunities"], summary="Opportunity stage aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def patch_opportunity_stage(
     opportunity_id: str,
     new_stage: str = Query(..., description="Target stage (LEAD/QUALIFIZIERT/ANGEBOT/VERHANDLUNG/GEWONNEN/VERLOREN)"),
@@ -462,7 +463,7 @@ async def patch_opportunity_stage(
 # ---------------------------------------------------------------------------
 
 @router.post("/{opportunity_id}/activities", response_model=OpportunitiesOut, status_code=status.HTTP_201_CREATED,
-             tags=["crm", "opportunities"], summary="Opportunity activity hinzufügen")
+             tags=["crm", "opportunities"], summary="Opportunity activity hinzufügen", dependencies=SCHREIBEN["CRM"])
 async def add_opportunity_activity(
     opportunity_id: str,
     activity_type: str = Query("NOTE", description="Aktivitätstyp (NOTE/CALL/EMAIL/MEETING)"),
@@ -530,7 +531,7 @@ async def get_opportunity(
     return result.model_copy(update={"customer_name": kunde.name, "customer_number": number})
 
 
-@router.put("/{opportunity_id}", response_model=Opportunity, summary="Opportunity aktualisieren")
+@router.put("/{opportunity_id}", response_model=Opportunity, summary="Opportunity aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_opportunity(
     opportunity_id: str,
     opportunity_data: OpportunityUpdate,
@@ -551,8 +552,7 @@ async def update_opportunity(
 
 
 @router.delete("/{opportunity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Opportunity löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 async def delete_opportunity(
     opportunity_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ):

@@ -30,6 +30,7 @@ from app.api.v1.schemas.procurement_match_schemas import (
 )
 from app.services.procurement_match_service import ProcurementMatchService
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/procurement", tags=["procurement", "einkauf"])
 
@@ -86,7 +87,7 @@ def list_follow_ups(
     }
 
 
-@router.post("/match/follow-up", response_model=FollowUpOut, summary="Folgeaktion erfassen (append-only)", status_code=201)
+@router.post("/match/follow-up", response_model=FollowUpOut, summary="Folgeaktion erfassen (append-only)", status_code=201, dependencies=SCHREIBEN["EINKAUF"])
 def create_follow_up(
     body: FollowUpIn,
     db: Session = Depends(get_db),
@@ -153,7 +154,7 @@ def _max_abs_position_delta_pct(positionen: list[dict[str, Any]]) -> Decimal:
     return max(deltas, default=Decimal("0"))
 
 
-@router.post("/match/auto", response_model=AutoMatchOut, summary="PROC-3WM-001: 3-Wege-Match ausführen und Ergebnis persistieren", status_code=201)
+@router.post("/match/auto", response_model=AutoMatchOut, summary="PROC-3WM-001: 3-Wege-Match ausführen und Ergebnis persistieren", status_code=201, dependencies=SCHREIBEN["EINKAUF"])
 def auto_match_and_persist(
     body: AutoMatchIn,
     db: Session = Depends(get_db),
@@ -280,7 +281,7 @@ def list_match_results(
     return {"items": [dict(r) for r in rows]}
 
 
-@router.post("/match/ers", response_model=ErsCreditOut, summary="ERS-Gutschrift aus Match-Abweichung erzeugen", status_code=201)
+@router.post("/match/ers", response_model=ErsCreditOut, summary="ERS-Gutschrift aus Match-Abweichung erzeugen", status_code=201, dependencies=SCHREIBEN["EINKAUF"])
 def create_ers_credit(
     body: ErsCreditIn,
     db: Session = Depends(get_db),
@@ -349,7 +350,7 @@ class RechnungsFreigabeIn(_BM):
 # extra="allow" aber jedes zusaetzliche Feld unveraendert durch. Ein
 # domaenenspezifisches Schema kann folgen, sobald die Tabelle ein verbindliches
 # Schema hat.
-@router.post("/bestellungen/{bestellung_id}/transition", response_model=TypedObjectOut, summary="Bestellungs-Status wechseln")
+@router.post("/bestellungen/{bestellung_id}/transition", response_model=TypedObjectOut, summary="Bestellungs-Status wechseln", dependencies=SCHREIBEN["EINKAUF"])
 def bestellung_transition_endpoint(
     bestellung_id: str,
     body: BestellungTransitionIn,
@@ -365,7 +366,7 @@ def bestellung_transition_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/bestellungen/{bestellung_id}/wareneingang", response_model=WareneingangOut, status_code=201, summary="Wareneingang buchen")
+@router.post("/bestellungen/{bestellung_id}/wareneingang", response_model=WareneingangOut, status_code=201, summary="Wareneingang buchen", dependencies=SCHREIBEN["EINKAUF"])
 def buche_wareneingang_endpoint(
     bestellung_id: str,
     body: WareneingangIn,
@@ -382,7 +383,7 @@ def buche_wareneingang_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/wareneingaenge/{we_id}/qs", response_model=WareneingangOut, summary="QS-Status eines Wareneingangs aktualisieren")
+@router.post("/wareneingaenge/{we_id}/qs", response_model=WareneingangOut, summary="QS-Status eines Wareneingangs aktualisieren", dependencies=SCHREIBEN["EINKAUF"])
 def update_we_qs_endpoint(
     we_id: str,
     body: QSUpdateIn,
@@ -397,7 +398,7 @@ def update_we_qs_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/bestellungen/{bestellung_id}/rechnungspruefung", response_model=RechnungspruefungOut, status_code=201, summary="Rechnungsprüfung (3-Wege-Match)")
+@router.post("/bestellungen/{bestellung_id}/rechnungspruefung", response_model=RechnungspruefungOut, status_code=201, summary="Rechnungsprüfung (3-Wege-Match)", dependencies=SCHREIBEN["EINKAUF"])
 def rechnungspruefung_endpoint(
     bestellung_id: str,
     body: RechnungspruefungIn,
@@ -414,7 +415,7 @@ def rechnungspruefung_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/rechnungspruefungen/{pruefung_id}/freigabe", response_model=RechnungspruefungOut, summary="Rechnungsprüfung manuell freigeben")
+@router.post("/rechnungspruefungen/{pruefung_id}/freigabe", response_model=RechnungspruefungOut, summary="Rechnungsprüfung manuell freigeben", dependencies=SCHREIBEN["EINKAUF"])
 def rechnungsfreigabe_endpoint(
     pruefung_id: str,
     body: RechnungsFreigabeIn,

@@ -14,6 +14,7 @@ from ..schemas.crm import FarmProfile, FarmProfileCreate, FarmProfileUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.farm_profiles_schemas import FarmProfilesOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -142,7 +143,7 @@ async def get_farm_profile(profile_id: str):
     return FarmProfile.model_validate(_adapt_farm_profile(profile))
 
 
-@router.post("/", response_model=FarmProfile, status_code=status.HTTP_201_CREATED, summary="Farm profile anlegen")
+@router.post("/", response_model=FarmProfile, status_code=status.HTTP_201_CREATED, summary="Farm profile anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_farm_profile(payload: FarmProfileCreate):
     try:
         body = _map_create_payload(payload)
@@ -152,7 +153,7 @@ async def create_farm_profile(payload: FarmProfileCreate):
     return FarmProfile.model_validate(_adapt_farm_profile(created))
 
 
-@router.put("/{profile_id}", response_model=FarmProfile, summary="Farm profile aktualisieren")
+@router.put("/{profile_id}", response_model=FarmProfile, summary="Farm profile aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_farm_profile(profile_id: str, payload: FarmProfileUpdate):
     try:
         body = _map_update_payload(payload)
@@ -167,8 +168,7 @@ async def update_farm_profile(profile_id: str, payload: FarmProfileUpdate):
 
 
 @router.delete("/{profile_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 async def delete_farm_profile(profile_id: str):
     try:
         await crm_core_client.delete_farm_profile(profile_id)
@@ -185,7 +185,7 @@ async def list_farm_profile_crops(profile_id: str):
     return await _load_list_field(profile_id, "crops")
 
 
-@router.post("/{profile_id}/crops", response_model=FarmProfilesOut, status_code=status.HTTP_201_CREATED, summary="Farm profile crop anlegen")
+@router.post("/{profile_id}/crops", response_model=FarmProfilesOut, status_code=status.HTTP_201_CREATED, summary="Farm profile crop anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_farm_profile_crop(profile_id: str, payload: dict[str, Any]):
     items = await _load_list_field(profile_id, "crops")
     items.append(payload)
@@ -193,7 +193,7 @@ async def create_farm_profile_crop(profile_id: str, payload: dict[str, Any]):
     return dict(updated[-1])
 
 
-@router.put("/{profile_id}/crops/{item_index}", response_model=FarmProfilesOut, summary="Farm profile crop replace")
+@router.put("/{profile_id}/crops/{item_index}", response_model=FarmProfilesOut, summary="Farm profile crop replace", dependencies=SCHREIBEN["CRM"])
 async def replace_farm_profile_crop(
     profile_id: str,
     item_index: int = Path(..., ge=0),
@@ -207,8 +207,7 @@ async def replace_farm_profile_crop(
 
 
 @router.delete("/{profile_id}/crops/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile crop löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 async def delete_farm_profile_crop(profile_id: str, item_index: int = Path(..., ge=0)):
     items = await _load_list_field(profile_id, "crops")
     _validate_item_index(items, item_index, "Crop")
@@ -221,7 +220,7 @@ async def list_farm_profile_livestock(profile_id: str):
     return await _load_list_field(profile_id, "livestock")
 
 
-@router.post("/{profile_id}/livestock", response_model=FarmProfilesOut, status_code=status.HTTP_201_CREATED, summary="Farm profile livestock anlegen")
+@router.post("/{profile_id}/livestock", response_model=FarmProfilesOut, status_code=status.HTTP_201_CREATED, summary="Farm profile livestock anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_farm_profile_livestock(profile_id: str, payload: dict[str, Any]):
     items = await _load_list_field(profile_id, "livestock")
     items.append(payload)
@@ -229,7 +228,7 @@ async def create_farm_profile_livestock(profile_id: str, payload: dict[str, Any]
     return dict(updated[-1])
 
 
-@router.put("/{profile_id}/livestock/{item_index}", response_model=FarmProfilesOut, summary="Farm profile livestock replace")
+@router.put("/{profile_id}/livestock/{item_index}", response_model=FarmProfilesOut, summary="Farm profile livestock replace", dependencies=SCHREIBEN["CRM"])
 async def replace_farm_profile_livestock(
     profile_id: str,
     item_index: int = Path(..., ge=0),
@@ -243,8 +242,7 @@ async def replace_farm_profile_livestock(
 
 
 @router.delete("/{profile_id}/livestock/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile livestock löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 async def delete_farm_profile_livestock(profile_id: str, item_index: int = Path(..., ge=0)):
     items = await _load_list_field(profile_id, "livestock")
     _validate_item_index(items, item_index, "Livestock")
@@ -262,8 +260,7 @@ async def list_farm_profile_certifications(profile_id: str):
     "/{profile_id}/certifications",
     response_model=str,
     status_code=status.HTTP_201_CREATED,
-    summary="Farm profile certification anlegen",
-)
+    summary="Farm profile certification anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_farm_profile_certification(profile_id: str, payload: _CertificationItem):
     items = [str(item) for item in await _load_list_field(profile_id, "certifications")]
     items.append(payload.value)
@@ -271,7 +268,7 @@ async def create_farm_profile_certification(profile_id: str, payload: _Certifica
     return str(updated[-1])
 
 
-@router.put("/{profile_id}/certifications/{item_index}", response_model=str, summary="Farm profile certification replace")
+@router.put("/{profile_id}/certifications/{item_index}", response_model=str, summary="Farm profile certification replace", dependencies=SCHREIBEN["CRM"])
 async def replace_farm_profile_certification(
     profile_id: str,
     payload: _CertificationItem,
@@ -285,8 +282,7 @@ async def replace_farm_profile_certification(
 
 
 @router.delete("/{profile_id}/certifications/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile certification löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 async def delete_farm_profile_certification(profile_id: str, item_index: int = Path(..., ge=0)):
     items = [str(item) for item in await _load_list_field(profile_id, "certifications")]
     _validate_item_index(items, item_index, "Certification")

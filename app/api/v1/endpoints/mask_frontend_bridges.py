@@ -331,7 +331,7 @@ def get_segment_performance(
     }
 
 
-@router.post("/crm/segments/{segment_id}/calculate", response_model=BridgeOut, summary="Segment neu berechnen")
+@router.post("/crm/segments/{segment_id}/calculate", response_model=BridgeOut, summary="Segment neu berechnen", dependencies=SCHREIBEN["CRM"])
 def calculate_segment(
     segment_id: str,
     body: SegmentCalculateIn,
@@ -353,7 +353,7 @@ def calculate_segment(
 # ---------------------------------------------------------------------------
 
 
-@router.post("/einkauf/anfragen/{anfrage_id}/send", response_model=BridgeOut, summary="Anfrage an Lieferanten senden")
+@router.post("/einkauf/anfragen/{anfrage_id}/send", response_model=BridgeOut, summary="Anfrage an Lieferanten senden", dependencies=SCHREIBEN["EINKAUF"])
 def send_anfrage(
     anfrage_id: str,
     body: AnfrageSendIn,
@@ -366,7 +366,7 @@ def send_anfrage(
     return versende_einkauf_anfrage(db, tenant_id, anfrage_id, body.supplierIds, body.method, nutzer)
 
 
-@router.post("/einkauf/lieferscheine/{ls_id}/print", response_model=BridgeOut, summary="Einkauf-Lieferschein drucken")
+@router.post("/einkauf/lieferscheine/{ls_id}/print", response_model=BridgeOut, summary="Einkauf-Lieferschein drucken", dependencies=SCHREIBEN["EINKAUF"])
 def print_einkauf_lieferschein(
     ls_id: str,
     template: Optional[str] = Query(default=None, max_length=60),

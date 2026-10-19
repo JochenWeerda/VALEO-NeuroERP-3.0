@@ -24,6 +24,7 @@ from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class CrmCampaignOut(BaseSchema):
@@ -222,7 +223,7 @@ async def list_templates(
     return [_row_to_template(r) for r in rows]
 
 
-@router.post("/templates", response_model=CrmCampaignOut, status_code=201, summary="Template anlegen")
+@router.post("/templates", response_model=CrmCampaignOut, status_code=201, summary="Template anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_template(
     payload: TemplateCreate,
     tenant_id: str = Query("system"),
@@ -270,7 +271,7 @@ async def get_template(
     return _row_to_template(row)
 
 
-@router.put("/templates/{template_id}", response_model=CrmCampaignOut, summary="Template aktualisieren")
+@router.put("/templates/{template_id}", response_model=CrmCampaignOut, summary="Template aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_template(
     template_id: str,
     payload: TemplateUpdate,
@@ -304,7 +305,7 @@ async def update_template(
     return _row_to_template(updated)
 
 
-@router.post("/templates/{template_id}/duplicate", response_model=CrmCampaignOut, status_code=201, summary="Template duplicate")
+@router.post("/templates/{template_id}/duplicate", response_model=CrmCampaignOut, status_code=201, summary="Template duplicate", dependencies=SCHREIBEN["CRM"])
 async def duplicate_template(
     template_id: str,
     tenant_id: str = Query("system"),
@@ -345,7 +346,7 @@ async def duplicate_template(
     return _row_to_template(copy)
 
 
-@router.post("/templates/{template_id}/activate", response_model=CrmCampaignOut, summary="Template aktivieren")
+@router.post("/templates/{template_id}/activate", response_model=CrmCampaignOut, summary="Template aktivieren", dependencies=SCHREIBEN["CRM"])
 async def activate_template(
     template_id: str,
     tenant_id: str = Query("system"),
@@ -365,7 +366,7 @@ async def activate_template(
     return _row_to_template(row)
 
 
-@router.post("/templates/{template_id}/deactivate", response_model=CrmCampaignOut, summary="Template deaktivieren")
+@router.post("/templates/{template_id}/deactivate", response_model=CrmCampaignOut, summary="Template deaktivieren", dependencies=SCHREIBEN["CRM"])
 async def deactivate_template(
     template_id: str,
     tenant_id: str = Query("system"),
@@ -385,7 +386,7 @@ async def deactivate_template(
     return _row_to_template(row)
 
 
-@router.delete("/templates/{template_id}", status_code=204, response_class=Response, summary="Template lÃ¶schen")
+@router.delete("/templates/{template_id}", status_code=204, response_class=Response, summary="Template lÃ¶schen", dependencies=SCHREIBEN["CRM"])
 async def delete_template(
     template_id: str,
     tenant_id: str = Query("system"),
@@ -426,7 +427,7 @@ async def list_campaigns(
     return [_row_to_campaign(r) for r in rows]
 
 
-@router.post("", response_model=CrmCampaignOut, status_code=201, summary="Campaign anlegen")
+@router.post("", response_model=CrmCampaignOut, status_code=201, summary="Campaign anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_campaign(
     payload: CampaignCreate,
     tenant_id: str = Query("system"),
@@ -490,7 +491,7 @@ async def get_campaign(
     return _row_to_campaign(row)
 
 
-@router.put("/{campaign_id}", response_model=CrmCampaignOut, summary="Campaign aktualisieren")
+@router.put("/{campaign_id}", response_model=CrmCampaignOut, summary="Campaign aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_campaign(
     campaign_id: str,
     payload: CampaignUpdate,
@@ -526,7 +527,7 @@ async def update_campaign(
     return _row_to_campaign(updated)
 
 
-@router.delete("/{campaign_id}", status_code=204, response_class=Response, summary="Campaign lÃ¶schen")
+@router.delete("/{campaign_id}", status_code=204, response_class=Response, summary="Campaign lÃ¶schen", dependencies=SCHREIBEN["CRM"])
 async def delete_campaign(
     campaign_id: str,
     tenant_id: str = Query("system"),
@@ -582,7 +583,7 @@ def _transition(campaign_id: str, tenant_id: str, target: str, db: Session) -> d
     return _row_to_campaign(updated)
 
 
-@router.post("/{campaign_id}/activate", response_model=CrmCampaignOut, summary="Campaign aktivieren")
+@router.post("/{campaign_id}/activate", response_model=CrmCampaignOut, summary="Campaign aktivieren", dependencies=SCHREIBEN["CRM"])
 async def activate_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
@@ -590,7 +591,7 @@ async def activate_campaign(
     return _transition(campaign_id, tenant_id, "active", db)
 
 
-@router.post("/{campaign_id}/pause", response_model=CrmCampaignOut, summary="Campaign pausieren")
+@router.post("/{campaign_id}/pause", response_model=CrmCampaignOut, summary="Campaign pausieren", dependencies=SCHREIBEN["CRM"])
 async def pause_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
@@ -598,7 +599,7 @@ async def pause_campaign(
     return _transition(campaign_id, tenant_id, "paused", db)
 
 
-@router.post("/{campaign_id}/resume", response_model=CrmCampaignOut, summary="Campaign fortsetzen")
+@router.post("/{campaign_id}/resume", response_model=CrmCampaignOut, summary="Campaign fortsetzen", dependencies=SCHREIBEN["CRM"])
 async def resume_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
@@ -606,7 +607,7 @@ async def resume_campaign(
     return _transition(campaign_id, tenant_id, "active", db)
 
 
-@router.post("/{campaign_id}/complete", response_model=CrmCampaignOut, summary="Campaign complete")
+@router.post("/{campaign_id}/complete", response_model=CrmCampaignOut, summary="Campaign complete", dependencies=SCHREIBEN["CRM"])
 async def complete_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
@@ -614,7 +615,7 @@ async def complete_campaign(
     return _transition(campaign_id, tenant_id, "completed", db)
 
 
-@router.post("/{campaign_id}/archive", response_model=CrmCampaignOut, summary="Campaign archivieren")
+@router.post("/{campaign_id}/archive", response_model=CrmCampaignOut, summary="Campaign archivieren", dependencies=SCHREIBEN["CRM"])
 async def archive_campaign(
     campaign_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)
 ) -> dict:
@@ -651,7 +652,7 @@ async def list_recipients(
     ]
 
 
-@router.post("/{campaign_id}/recipients", response_model=CrmCampaignOut, status_code=201, summary="Recipient hinzufÃ¼gen")
+@router.post("/{campaign_id}/recipients", response_model=CrmCampaignOut, status_code=201, summary="Recipient hinzufÃ¼gen", dependencies=SCHREIBEN["CRM"])
 async def add_recipient(
     campaign_id: str,
     payload: RecipientAdd,
@@ -683,7 +684,7 @@ async def add_recipient(
     return {"id": nid, "campaign_id": campaign_id, "recipient_id": payload.recipient_id, "status": "queued"}
 
 
-@router.patch("/{campaign_id}/recipients/{recipient_id}", response_model=CrmCampaignOut, summary="Recipient status aktualisieren")
+@router.patch("/{campaign_id}/recipients/{recipient_id}", response_model=CrmCampaignOut, summary="Recipient status aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_recipient_status(
     campaign_id: str,
     recipient_id: str,

@@ -1727,6 +1727,10 @@ def build_finance_ar_open_item_screen_definition() -> dict[str, Any]:
                 "Zeige alle bisherigen Zahlungseingaenge fuer OP {entity_id}.",
             ],
             "sensitiveFields": ["brutto", "offen", "skonto", "faellig_am"],
+            "dangerousActions": [
+                {"key": "mahnen", "reason": "Mahnung geht an den Kunden; Mahnlauf-Write bewusst nur fuer Menschen "
+                                            "(MCP-Karte: Status lesen)."},
+            ],
             "testSelectors": {"screenRoot": "[data-testid='finance-ar-open-item']", "primaryAction": "[data-testid='action-mahnen']", "summaryArea": "[data-testid='mask-summary']"},
         },
         "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},

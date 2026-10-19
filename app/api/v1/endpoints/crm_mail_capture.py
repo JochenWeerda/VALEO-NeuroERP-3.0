@@ -25,6 +25,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_auto_capture_service import CrmAutoCaptureService
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/crm/kim", tags=["crm", "kim", "360"])
 
@@ -81,7 +82,7 @@ def _resolve_direction(declared: Optional[str], from_addr: str, own: list[str]) 
     return direction, from_addr
 
 
-@router.post("/mail-capture", response_model=TypedObjectOut, summary="E-Mail als Kontakt erfassen (geparst oder roh)")
+@router.post("/mail-capture", response_model=TypedObjectOut, summary="E-Mail als Kontakt erfassen (geparst oder roh)", dependencies=SCHREIBEN["CRM"])
 def mail_capture(
     body: MailCaptureIn,
     db: Session = Depends(get_db),

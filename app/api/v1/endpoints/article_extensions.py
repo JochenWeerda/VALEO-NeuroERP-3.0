@@ -13,6 +13,7 @@ from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import ArticleBatch, ArticleSelection
 from ..schemas.base import PaginatedResponse, BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -75,7 +76,7 @@ async def list_article_batches(
     )
 
 
-@router.post("/file-upload", response_model=FileUploadResponse, summary="Article file hochladen")
+@router.post("/file-upload", response_model=FileUploadResponse, summary="Article file hochladen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def upload_article_file(
     article_id: str = Query(...),
     file: UploadFile = File(...),
@@ -90,8 +91,7 @@ async def upload_article_file(
 
 
 @router.post("/recipe-import", status_code=201, summary="Recipe importieren",
-    response_model=BatchOut
-)
+    response_model=BatchOut, dependencies=SCHREIBEN["STAMMDATEN"])
 async def import_recipe(payload: RecipeImportRequest):
     """POST Rezeptur Import"""
     return {
@@ -114,7 +114,7 @@ async def list_article_selections(
     return [SelectionOut.model_validate(i) for i in items]
 
 
-@router.post("/selections", response_model=SelectionOut, status_code=201, summary="Article selection anlegen")
+@router.post("/selections", response_model=SelectionOut, status_code=201, summary="Article selection anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def create_article_selection(
     payload: SelectionCreate,
     tenant_id: Optional[str] = Query(None),
@@ -136,7 +136,7 @@ async def create_article_selection(
     return SelectionOut.model_validate(obj)
 
 
-@router.delete("/selections/{sel_id}", status_code=204, response_class=Response, response_model=None, summary="Article selection löschen")
+@router.delete("/selections/{sel_id}", status_code=204, response_class=Response, response_model=None, summary="Article selection löschen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def delete_article_selection(sel_id: str, db: Session = Depends(get_db)):
     """DEL Artikel Selektionen löschen"""
     obj = db.query(ArticleSelection).filter(ArticleSelection.id == sel_id).first()

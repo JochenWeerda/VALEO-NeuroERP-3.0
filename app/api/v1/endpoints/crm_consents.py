@@ -18,6 +18,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.infrastructure.models.crm_consent import CrmConsent, CrmConsentHistory
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/crm/consents", tags=["crm", "dsgvo"])
 
@@ -159,7 +160,7 @@ async def list_contact_consents(
 
 
 @router.post("", response_model=TypedObjectOut, status_code=201, summary="Einwilligung anlegen")
-@router.post("/", response_model=TypedObjectOut, status_code=201, summary="Einwilligung anlegen")
+@router.post("/", response_model=TypedObjectOut, status_code=201, summary="Einwilligung anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_consent(
     payload: ConsentCreate,
     request: Request,
@@ -209,7 +210,7 @@ async def get_consent(
     return _to_dict(_load(db, consent_id, tenant_id))
 
 
-@router.put("/{consent_id}", response_model=TypedObjectOut, summary="Einwilligung aktualisieren")
+@router.put("/{consent_id}", response_model=TypedObjectOut, summary="Einwilligung aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_consent(
     consent_id: str,
     payload: ConsentUpdate,
@@ -241,7 +242,7 @@ async def update_consent(
     return _to_dict(row)
 
 
-@router.delete("/{consent_id}", status_code=204, response_class=Response, response_model=None, summary="Einwilligung loeschen")
+@router.delete("/{consent_id}", status_code=204, response_class=Response, response_model=None, summary="Einwilligung loeschen", dependencies=SCHREIBEN["CRM"])
 async def delete_consent(
     consent_id: str,
     db: Session = Depends(get_db),
@@ -273,7 +274,7 @@ async def get_consent_history(
     return [_history_dict(row) for row in rows]
 
 
-@router.post("/{consent_id}/confirm", response_model=TypedObjectOut, summary="Double-Opt-In bestaetigen")
+@router.post("/{consent_id}/confirm", response_model=TypedObjectOut, summary="Double-Opt-In bestaetigen", dependencies=SCHREIBEN["CRM"])
 async def confirm_consent(
     consent_id: str,
     request: Request,
@@ -299,7 +300,7 @@ async def confirm_consent(
     return _to_dict(row)
 
 
-@router.post("/{consent_id}/revoke", response_model=TypedObjectOut, summary="Einwilligung widerrufen")
+@router.post("/{consent_id}/revoke", response_model=TypedObjectOut, summary="Einwilligung widerrufen", dependencies=SCHREIBEN["CRM"])
 async def revoke_consent(
     consent_id: str,
     request: Request,
@@ -324,8 +325,7 @@ async def revoke_consent(
 @router.post(
     "/{consent_id}/resend-confirmation",
     response_model=TypedObjectOut,
-    summary="Double-Opt-In erneut senden",
-)
+    summary="Double-Opt-In erneut senden", dependencies=SCHREIBEN["CRM"])
 async def resend_confirmation(
     consent_id: str,
     db: Session = Depends(get_db),

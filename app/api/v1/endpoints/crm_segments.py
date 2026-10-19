@@ -15,6 +15,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel, ConfigDict
 
 from app.core.tenant import get_tenant_id
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/crm/segments", tags=["crm", "segments"])
 
@@ -58,7 +59,7 @@ async def list_segments(
 
 
 @router.post("", status_code=201, response_model=SegmentOut, summary="Kundensegment anlegen")
-@router.post("/", status_code=201, response_model=SegmentOut, summary="Kundensegment anlegen", include_in_schema=False)
+@router.post("/", status_code=201, response_model=SegmentOut, summary="Kundensegment anlegen", include_in_schema=False, dependencies=SCHREIBEN["CRM"])
 async def create_segment(
     body: dict[str, Any] = Body(default={}),
     tenant_id: str = Depends(get_tenant_id),
@@ -80,7 +81,7 @@ async def get_segment(
     return seg
 
 
-@router.put("/{segment_id}", response_model=SegmentOut, summary="Kundensegment aktualisieren")
+@router.put("/{segment_id}", response_model=SegmentOut, summary="Kundensegment aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_segment(
     segment_id: str = Path(...),
     body: dict[str, Any] = Body(default={}),
@@ -92,7 +93,7 @@ async def update_segment(
     return _SEGMENTS[segment_id]
 
 
-@router.delete("/{segment_id}", status_code=204, summary="Kundensegment löschen", response_class=Response)
+@router.delete("/{segment_id}", status_code=204, summary="Kundensegment löschen", response_class=Response, dependencies=SCHREIBEN["CRM"])
 async def delete_segment(
     segment_id: str = Path(...),
     tenant_id: str = Depends(get_tenant_id),

@@ -230,8 +230,7 @@ async def action_reklamation_abschliessen(
 @router.post(
     "/einkauf/angebote/{entity_id}/actions/bestellen",
     response_model=MaskActionResult,
-    summary="Bestellung aus Angebot erstellen (SPEC-P1-04)",
-)
+    summary="Bestellung aus Angebot erstellen (SPEC-P1-04)", dependencies=SCHREIBEN["EINKAUF"])
 async def action_angebot_bestellen(
     entity_id: str,
     body: dict[str, Any] = Body(default_factory=dict),
@@ -349,8 +348,7 @@ _AKTIVITAETSARTEN = {"CALL", "EMAIL", "MEETING", "NOTE"}
 @router.post(
     "/crm/opportunities/{entity_id}/actions/create_activity",
     response_model=MaskActionResult,
-    summary="CRM-Aktivitaet fuer Opportunity anlegen (SPEC-P1-04)",
-)
+    summary="CRM-Aktivitaet fuer Opportunity anlegen (SPEC-P1-04)", dependencies=SCHREIBEN["CRM"])
 async def action_opportunity_create_activity(
     entity_id: str,
     body: dict[str, Any] = Body(default_factory=dict),
@@ -410,8 +408,7 @@ async def action_opportunity_create_activity(
 @router.post(
     "/einkauf/anlieferavis/{entity_id}/actions/wareneingang",
     response_model=MaskActionResult,
-    summary="Wareneingang aus dem Anlieferavis buchen (SPEC-P1-04)",
-)
+    summary="Wareneingang aus dem Anlieferavis buchen (SPEC-P1-04)", dependencies=SCHREIBEN["EINKAUF"])
 async def action_avis_wareneingang(
     entity_id: str,
     body: dict[str, Any] = Body(default_factory=dict),
