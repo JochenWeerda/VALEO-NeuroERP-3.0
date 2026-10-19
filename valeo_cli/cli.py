@@ -8,7 +8,7 @@
     ausfuehren <maske> <aktion>   Aktion ueber denselben Kommandoweg wie die Maske
     studio <befehl>               Masken im Screen Studio erzeugen, pruefen, freigeben (siehe valeo_cli.studio)
 
-Exit-Codes: 0 erfolgreich, 1 fachlich abgelehnt (auch 409) oder nicht ausfuehrbar, 2 Bedienfehler, 3 Anmeldung,
+Exit-Codes: 0 erfolgreich, 1 fachlich abgelehnt (auch 409) oder nicht ausfuehrbar, 2 Bedienfehler, 3 Anmeldung oder Berechtigung,
 4 Server oder Netz.
 """
 from __future__ import annotations
@@ -35,6 +35,10 @@ class ServerError(RuntimeError):
     pass
 
 
+class Forbidden(RuntimeError):
+    """403: angemeldet, aber nicht berechtigt (Rolle, Mandant, Vier-Augen-Prinzip)."""
+
+
 class Conflict(RuntimeError):
     """409: Der Server lehnt fachlich ab (veraltete Revision, schon vorhanden, falscher Zustand)."""
 
@@ -55,8 +59,10 @@ def _detail(response: httpx.Response) -> str:
 def _request(http: httpx.Client, token: str, method: str, path: str, body: dict | None = None) -> Any:
     response = http.request(method, _api_base() + path, json=body,
                             headers={"Authorization": f"Bearer {token}", "Accept": "application/json"})
-    if response.status_code in (401, 403):
-        raise auth.AuthError(f"Server verweigert ({response.status_code}): {_detail(response)}")
+    if response.status_code == 401:
+        raise auth.AuthError(f"Anmeldung ungueltig oder abgelaufen: {_detail(response)}")
+    if response.status_code == 403:
+        raise Forbidden(_detail(response))
     if response.status_code == 409:
         raise Conflict(_detail(response))
     if response.status_code == 404:
@@ -250,6 +256,9 @@ def main(argv: list[str] | None = None, *, http: httpx.Client | None = None, out
     except (UsageError, ValueError) as exc:
         out(f"Fehler: {exc}")
         return 2
+    except Forbidden as exc:
+        out(f"Verweigert: {exc}")
+        return 3
     except auth.AuthError as exc:
         out(f"Anmeldung: {exc}")
         return 3

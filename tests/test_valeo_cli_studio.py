@@ -155,7 +155,7 @@ def test_lebenslauf_pruefung_simulation_freigabe(monkeypatch):
     code, out = run(["freigeben", "d1"], studio, monkeypatch)
     assert code == 2 and "--revision" in out, "freigegeben wird nur, was man gesehen hat"
     code, out = run(["freigeben", "d1", "--revision", reviewed], studio, monkeypatch)
-    assert code == 3 and "Administration" in out
+    assert code == 3 and "Verweigert: Menschliche Administration" in out
     studio.can_publish = True
     code, out = run(["freigeben", "d1", "--revision", reviewed], studio, monkeypatch)
     assert code == 0 and "published_temp" in out and "/studio/run/x" in out

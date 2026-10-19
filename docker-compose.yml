@@ -235,6 +235,8 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp
+      # Pruefstand fuer die Studio-Prozesssimulation (frische DB, nie die Entwicklungs-DB); siehe CLAUDE.md.
+      TEST_DATABASE_URL: postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_probe
       REDIS_URL: redis://redis:6379/0
       EVENT_BUS_ENABLED: "true"
       EVENT_BUS_PROVIDER: nats
