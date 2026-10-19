@@ -6,11 +6,12 @@ import csv
 import io
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import Response, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.akteur import gepruefter_akteur_aus_request
 from app.core.tenant import get_tenant_id
 from app.domains.operations.models import (
     ComplianceEintrag,
@@ -35,6 +36,7 @@ from app.services.compliance_service import (
 
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class ComplianceOut(BaseSchema):
@@ -422,7 +424,7 @@ async def list_intrastat_meldungen(
     }
 
 
-@router.post("/intrastat/meldungen", response_model=ComplianceOut, status_code=201, summary="Intrastat meldung anlegen")
+@router.post("/intrastat/meldungen", response_model=ComplianceOut, status_code=201, summary="Intrastat meldung anlegen", dependencies=SCHREIBEN["QUALITAET"])
 async def create_intrastat_meldung(
     body: dict,
 ) -> dict:
@@ -511,7 +513,7 @@ def _pcn_store_payload(meldung_id: str, body: dict, tenant_id: str) -> dict:
     }
 
 
-@router.post("/pcn-meldungen", response_model=ComplianceOut, status_code=201, summary="Pcn meldung anlegen")
+@router.post("/pcn-meldungen", response_model=ComplianceOut, status_code=201, summary="Pcn meldung anlegen", dependencies=SCHREIBEN["QUALITAET"])
 async def create_pcn_meldung(
     body: dict,
     db: Session = Depends(get_db),
@@ -775,7 +777,7 @@ _VALID_SPERRGRUENDE = {
 }
 
 
-@router.post("/artikel-sperre", response_model=TypedObjectOut, status_code=201, summary="Artikel sperren (COMP-SPERR-001)")
+@router.post("/artikel-sperre", response_model=TypedObjectOut, status_code=201, summary="Artikel sperren (COMP-SPERR-001)", dependencies=SCHREIBEN["QUALITAET"])
 async def sperre_artikel(
     body: ArtikelSperreIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -866,7 +868,7 @@ async def get_artikel_sperre(
     }
 
 
-@router.delete("/artikel-sperre/{artikel_id}", response_model=TypedObjectOut, summary="Artikel freigeben")
+@router.delete("/artikel-sperre/{artikel_id}", response_model=TypedObjectOut, summary="Artikel freigeben", dependencies=SCHREIBEN["QUALITAET"])
 async def freigabe_artikel(
     artikel_id: str,
     body: ArtikelFreigabeIn,
@@ -937,94 +939,68 @@ async def list_artikel_sperren(
 
 # ---------------------------------------------------------------------------
 # DOM-COMPLIANCE-004: PCN-Lifecycle / VVVO-Sachkunde / Sperre-Audit
+# Mandant aus der geprueften Anmeldung (get_tenant_id), Bearbeiter aus dem Token. Bis 19.10.2026 kamen sie aus
+# dem Kopf X-Tenant-ID (Rueckfall "default") und aus dem Feld "operator" im Body.
 # ---------------------------------------------------------------------------
 
 from pydantic import BaseModel as _BaseModel
 from typing import Optional as _Optional
 
 
-class PCNCreateIn(_BaseModel):
-    artikel_id: str
-    meldungstyp: str
-    operator: _Optional[str] = "system"
-    bemerkung: _Optional[str] = None
-
-
 class PCNTransitionIn(_BaseModel):
     new_status: str
-    operator: _Optional[str] = "system"
     reason: _Optional[str] = None
 
 
 class PCNWithdrawIn(_BaseModel):
     grund: str
-    operator: _Optional[str] = "system"
 
 
 class VVVOPruefungIn(_BaseModel):
     pruefung_am: str
-    operator: _Optional[str] = "system"
 
 
 class SperreIn(_BaseModel):
     grund: str
-    operator: _Optional[str] = "system"
     nachweis_ref: _Optional[str] = None
 
 
 class FreigabeIn(_BaseModel):
-    operator: _Optional[str] = "system"
     nachweis_ref: _Optional[str] = None
     bemerkung: _Optional[str] = None
 
 
 class SperreStornoIn(_BaseModel):
     grund: str
-    operator: _Optional[str] = "system"
 
 
-@router.post("/pcn-meldungen", status_code=201, response_model=ComplianceOut, summary="PCN-Meldung anlegen")
-def create_pcn_meldung_v2(
-    body: PCNCreateIn,
-    x_tenant_id: _Optional[str] = Header(None),
-    db: Session = Depends(get_db),
-) -> dict:
-    from app.services.compliance_pcn_lifecycle_service import create_pcn_meldung, PCNError
-    tenant_id = x_tenant_id or "default"
-    try:
-        return create_pcn_meldung(db, tenant_id, body.artikel_id, body.meldungstyp,
-                                   body.operator or "system", body.bemerkung)
-    except PCNError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
-
-
-@router.post("/pcn-meldungen/{meldung_id}/transition", response_model=ComplianceOut, summary="PCN-Status wechseln")
+@router.post("/pcn-meldungen/{meldung_id}/transition", response_model=ComplianceOut, summary="PCN-Status wechseln", dependencies=SCHREIBEN["QUALITAET"])
 def transition_pcn_meldung(
     meldung_id: str,
     body: PCNTransitionIn,
-    x_tenant_id: _Optional[str] = Header(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_pcn_lifecycle_service import transition_pcn_status, PCNError
-    tenant_id = x_tenant_id or "default"
     try:
         return transition_pcn_status(db, meldung_id, tenant_id, body.new_status,
-                                      body.operator or "system", body.reason)
+                                      gepruefter_akteur_aus_request(request), body.reason)
     except PCNError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/pcn-meldungen/{meldung_id}/withdraw", response_model=ComplianceOut, summary="PCN-Meldung zurückziehen")
+@router.post("/pcn-meldungen/{meldung_id}/withdraw", response_model=ComplianceOut, summary="PCN-Meldung zurückziehen", dependencies=SCHREIBEN["QUALITAET"])
 def withdraw_pcn(
     meldung_id: str,
     body: PCNWithdrawIn,
-    x_tenant_id: _Optional[str] = Header(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_pcn_lifecycle_service import withdraw_pcn_meldung, PCNError
-    tenant_id = x_tenant_id or "default"
     try:
-        return withdraw_pcn_meldung(db, meldung_id, tenant_id, body.grund, body.operator or "system")
+        return withdraw_pcn_meldung(db, meldung_id, tenant_id, body.grund, gepruefter_akteur_aus_request(request))
     except PCNError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -1032,26 +1008,25 @@ def withdraw_pcn(
 @router.get("/vvvo/faellige-pruefungen", response_model=ComplianceOut, summary="Fällige VVVO-Prüfungen listen")
 def list_vvvo_faellig(
     within_days: int = Query(30),
-    x_tenant_id: _Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_vvvo_sachkunde_service import list_faellige_vvvo_pruefungen
-    tenant_id = x_tenant_id or "default"
     items = list_faellige_vvvo_pruefungen(db, tenant_id, within_days)
     return {"items": items, "count": len(items)}
 
 
-@router.post("/vvvo/{vvvo_id}/pruefung", response_model=ComplianceOut, summary="VVVO-Prüfung aktualisieren")
+@router.post("/vvvo/{vvvo_id}/pruefung", response_model=ComplianceOut, summary="VVVO-Prüfung aktualisieren", dependencies=SCHREIBEN["QUALITAET"])
 def update_vvvo_pruefung(
     vvvo_id: str,
     body: VVVOPruefungIn,
-    x_tenant_id: _Optional[str] = Header(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_vvvo_sachkunde_service import berechne_naechste_vvvo_pruefung, VVVOError
-    tenant_id = x_tenant_id or "default"
     try:
-        return berechne_naechste_vvvo_pruefung(db, vvvo_id, tenant_id, body.pruefung_am, body.operator or "system")
+        return berechne_naechste_vvvo_pruefung(db, vvvo_id, tenant_id, body.pruefung_am, gepruefter_akteur_aus_request(request))
     except VVVOError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -1059,58 +1034,57 @@ def update_vvvo_pruefung(
 @router.get("/sachkunde/ablaufend", response_model=ComplianceOut, summary="Ablaufende Sachkunde-Zertifikate")
 def list_sachkunde_ablaufend(
     within_days: int = Query(30),
-    x_tenant_id: _Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_vvvo_sachkunde_service import list_ablaufende_sachkunde
-    tenant_id = x_tenant_id or "default"
     items = list_ablaufende_sachkunde(db, tenant_id, within_days)
     return {"items": items, "count": len(items)}
 
 
-@router.post("/artikel/{artikel_id}/sperre", response_model=ComplianceOut, summary="Artikel sperren (Audit-Trail)")
+@router.post("/artikel/{artikel_id}/sperre", response_model=ComplianceOut, summary="Artikel sperren (Audit-Trail)", dependencies=SCHREIBEN["QUALITAET"])
 def sperre_artikel_audit(
     artikel_id: str,
     body: SperreIn,
-    x_tenant_id: _Optional[str] = Header(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_sperre_audit_service import sperre_artikel, SperreAuditError
-    tenant_id = x_tenant_id or "default"
     try:
         return sperre_artikel(db, artikel_id, tenant_id, body.grund,
-                               body.operator or "system", body.nachweis_ref)
+                               gepruefter_akteur_aus_request(request), body.nachweis_ref)
     except SperreAuditError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/artikel/{artikel_id}/freigabe", response_model=ComplianceOut, summary="Artikel freigeben (Audit-Trail)")
+@router.post("/artikel/{artikel_id}/freigabe", response_model=ComplianceOut, summary="Artikel freigeben (Audit-Trail)", dependencies=SCHREIBEN["QUALITAET"])
 def freigabe_artikel_audit(
     artikel_id: str,
     body: FreigabeIn,
-    x_tenant_id: _Optional[str] = Header(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_sperre_audit_service import freigabe_artikel, SperreAuditError
-    tenant_id = x_tenant_id or "default"
     try:
-        return freigabe_artikel(db, artikel_id, tenant_id, body.operator or "system",
+        return freigabe_artikel(db, artikel_id, tenant_id, gepruefter_akteur_aus_request(request),
                                  body.nachweis_ref, body.bemerkung)
     except SperreAuditError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/artikel/{artikel_id}/sperre-storno", response_model=ComplianceOut, summary="Artikelsperre stornieren")
+@router.post("/artikel/{artikel_id}/sperre-storno", response_model=ComplianceOut, summary="Artikelsperre stornieren", dependencies=SCHREIBEN["QUALITAET"])
 def storno_artikel_sperre(
     artikel_id: str,
     body: SperreStornoIn,
-    x_tenant_id: _Optional[str] = Header(None),
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_sperre_audit_service import storno_sperre, SperreAuditError
-    tenant_id = x_tenant_id or "default"
     try:
-        return storno_sperre(db, artikel_id, tenant_id, body.grund, body.operator or "system")
+        return storno_sperre(db, artikel_id, tenant_id, body.grund, gepruefter_akteur_aus_request(request))
     except SperreAuditError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -1118,10 +1092,9 @@ def storno_artikel_sperre(
 @router.get("/artikel/{artikel_id}/sperre-audit", response_model=ComplianceOut, summary="Sperre-Audit-Trail abrufen")
 def get_artikel_sperre_audit(
     artikel_id: str,
-    x_tenant_id: _Optional[str] = Header(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.compliance_sperre_audit_service import get_sperre_audit_trail
-    tenant_id = x_tenant_id or "default"
     trail = get_sperre_audit_trail(db, artikel_id, tenant_id)
     return {"artikel_id": artikel_id, "trail": trail, "count": len(trail)}

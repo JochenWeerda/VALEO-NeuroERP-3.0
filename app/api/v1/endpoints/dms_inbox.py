@@ -20,6 +20,7 @@ from ....core.uuid7 import uuid7
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -115,7 +116,7 @@ async def get_inbox(db: Session = Depends(get_db)):
         return InboxListResponse(ok=True, items=[], count=0, message="DMS-Inbox nicht verfügbar")
 
 
-@router.post("/inbox/{inbox_id}/create", response_model=CreateFromInboxResponse, tags=["dms"], summary="From inbox anlegen")
+@router.post("/inbox/{inbox_id}/create", response_model=CreateFromInboxResponse, tags=["dms"], summary="From inbox anlegen", dependencies=SCHREIBEN["BELEGE"])
 async def create_from_inbox(
     inbox_id: str,
     overrides: Dict[str, Any] = Body(default={}),
@@ -141,7 +142,7 @@ async def create_from_inbox(
     return CreateFromInboxResponse(ok=True, number=beleg_number, message="Beleg erstellt")
 
 
-@router.delete("/inbox/{inbox_id}", status_code=204, response_class=Response, response_model=None, tags=["dms"], summary="Inbox document löschen")
+@router.delete("/inbox/{inbox_id}", status_code=204, response_class=Response, response_model=None, tags=["dms"], summary="Inbox document löschen", dependencies=SCHREIBEN["BELEGE"])
 async def delete_inbox_document(
     inbox_id: str,
     db: Session = Depends(get_db),

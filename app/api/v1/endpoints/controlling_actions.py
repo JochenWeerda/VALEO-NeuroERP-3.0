@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel
 
 from app.api.v1.schemas.finance_controlling_bundle_schemas import (
@@ -16,6 +16,7 @@ from app.api.v1.schemas.finance_controlling_bundle_schemas import (
 )
 from app.core.database import get_db
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 router = APIRouter(prefix="/controlling", tags=["controlling"])
 logger = logging.getLogger(__name__)
@@ -59,13 +60,14 @@ class KSTAbschlussRequest(BaseModel):
 @router.post("/budgets", response_model=ControllingBudgetCreatedOut, status_code=201, summary="Controlling-Budget anlegen", dependencies=SCHREIBEN["CONTROLLING"])
 def create_budget(
     body: BudgetCreateRequest,
+    request: Request,
     x_tenant_id: Optional[str] = Header(None),
     db=Depends(get_db),
 ) -> Dict[str, Any]:
     from app.services.controlling_budget_lifecycle_service import create_budget as svc, BudgetLifecycleError
     tenant_id = x_tenant_id or "default"
     try:
-        return svc(db, tenant_id, body.kostenstelle_id, body.periode, body.plan_eur, body.bezeichnung, body.operator)
+        return svc(db, tenant_id, body.kostenstelle_id, body.periode, body.plan_eur, body.bezeichnung, gepruefter_akteur_aus_request(request))
     except BudgetLifecycleError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
@@ -77,13 +79,14 @@ def create_budget(
 def transition_budget(
     budget_id: str,
     body: BudgetTransitionRequest,
+    request: Request,
     x_tenant_id: Optional[str] = Header(None),
     db=Depends(get_db),
 ) -> Dict[str, Any]:
     from app.services.controlling_budget_lifecycle_service import transition_budget_status, BudgetLifecycleError
     tenant_id = x_tenant_id or "default"
     try:
-        return transition_budget_status(db, budget_id, tenant_id, body.new_status, body.operator)
+        return transition_budget_status(db, budget_id, tenant_id, body.new_status, gepruefter_akteur_aus_request(request))
     except BudgetLifecycleError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
@@ -103,13 +106,14 @@ def get_abweichung(
 @router.post("/ist-werte", response_model=ControllingIstWertOut, status_code=201, summary="Ist-Wert buchen", dependencies=SCHREIBEN["CONTROLLING"])
 def buche_ist_wert(
     body: IstWertRequest,
+    request: Request,
     x_tenant_id: Optional[str] = Header(None),
     db=Depends(get_db),
 ) -> Dict[str, Any]:
     from app.services.controlling_abweichung_service import buche_ist_wert as svc
     tenant_id = x_tenant_id or "default"
     try:
-        return svc(db, tenant_id, body.kostenstelle_id, body.periode, body.ist_eur, body.buchungsref, body.operator)
+        return svc(db, tenant_id, body.kostenstelle_id, body.periode, body.ist_eur, body.buchungsref, gepruefter_akteur_aus_request(request))
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
@@ -136,12 +140,13 @@ def drill_down(
 def advance_abschluss(
     kostenstelle_id: str,
     body: KSTAbschlussRequest,
+    request: Request,
     x_tenant_id: Optional[str] = Header(None),
     db=Depends(get_db),
 ) -> Dict[str, Any]:
     from app.services.controlling_kostenstellen_abschluss_service import advance_kst_abschluss, KSTAbschlussError
     tenant_id = x_tenant_id or "default"
     try:
-        return advance_kst_abschluss(db, kostenstelle_id, body.periode, tenant_id, body.new_status, body.operator)
+        return advance_kst_abschluss(db, kostenstelle_id, body.periode, tenant_id, body.new_status, gepruefter_akteur_aus_request(request))
     except KSTAbschlussError as e:
         raise HTTPException(status_code=422, detail=str(e))

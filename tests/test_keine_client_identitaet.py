@@ -55,3 +55,17 @@ def test_kein_weg_liest_identitaet_aus_kopfzeilen():
 def test_suchmuster_erkennt_die_alten_formen():
     for beispiel in ('request.headers.get("X-User-ID")', "headers['X-Roles']", 'Header(None, alias="X-User-ID")'):
         assert any(t.group("name") in KOPFZEILEN for t in LESEN.finditer(beispiel)), beispiel
+
+
+#: Bearbeiter aus Feldern des Anfragekoerpers (19.10.2026: ``operator``/``actor``/``created_by`` in sieben Routern
+#: und im Compliance-Lebenszyklus — derselbe Fehler wie ``X-User-ID``, nur im Body).
+BODY_URHEBER = re.compile(r"(?:body|payload)\.(?:operator|actor|created_by)")
+
+
+def test_kein_weg_nimmt_den_bearbeiter_aus_dem_body():
+    funde = []
+    for datei in sorted((APP / "api").rglob("*.py")):
+        for nummer, code in _code_zeilen(datei.read_text(encoding="utf-8")):
+            if BODY_URHEBER.search(code):
+                funde.append(f"{datei.relative_to(APP.parent)}:{nummer}")
+    assert funde == []

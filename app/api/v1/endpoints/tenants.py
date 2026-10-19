@@ -7,6 +7,7 @@ from app.core.tenant import get_tenant_id
 from app.services.tenant_lifecycle_service import TenantLifecycleService
 from app.api.v1.schemas.shared import TenantCreate, TenantUpdate, Tenant
 from app.api.v1.schemas.base import PaginatedResponse
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router=APIRouter(tags=['tenants'],dependencies=[Depends(get_tenant_id)])
 
@@ -16,7 +17,7 @@ class LifecycleReason(BaseModel):
     reason: str=Field(min_length=3,max_length=500)
 
 
-@router.post('/',response_model=Tenant,status_code=201,summary='Mandanten mit Plattformberechtigung anlegen')
+@router.post('/',response_model=Tenant,status_code=201,summary='Mandanten mit Plattformberechtigung anlegen', dependencies=SCHREIBEN["PLATTFORM"])
 def create_tenant(payload: TenantCreate,db: Session=Depends(get_db)) -> Tenant:
     return Tenant.model_validate(TenantLifecycleService(db).create(payload.model_dump()))
 
@@ -35,18 +36,18 @@ def get_tenant(target_id: str,db: Session=Depends(get_db)) -> Tenant:
     return Tenant.model_validate(TenantLifecycleService(db).get(target_id))
 
 
-@router.put('/{target_id}',response_model=Tenant,summary='Mandantenstammdaten administrieren')
+@router.put('/{target_id}',response_model=Tenant,summary='Mandantenstammdaten administrieren', dependencies=SCHREIBEN["PLATTFORM"])
 def update_tenant(target_id: str,payload: TenantUpdate,db: Session=Depends(get_db)) -> Tenant:
     return Tenant.model_validate(TenantLifecycleService(db).update(target_id,payload.model_dump(exclude_unset=True)))
 
 
-@router.post('/{target_id}/block',response_model=Tenant,summary='Mandanten unter Erhalt sämtlicher Buchungen sperren')
+@router.post('/{target_id}/block',response_model=Tenant,summary='Mandanten unter Erhalt sämtlicher Buchungen sperren', dependencies=SCHREIBEN["PLATTFORM"])
 def block_tenant(target_id: str,payload: LifecycleReason,db: Session=Depends(get_db)) -> Tenant:
     return Tenant.model_validate(TenantLifecycleService(db).block(target_id,payload.reason))
 
 
 @router.delete('/{target_id}',status_code=204,response_class=Response,response_model=None,
-               summary='Mandanten ausschließlich ohne Buchungen und geschützte Referenzen löschen')
+               summary='Mandanten ausschließlich ohne Buchungen und geschützte Referenzen löschen', dependencies=SCHREIBEN["PLATTFORM"])
 def delete_tenant(target_id: str,payload: LifecycleReason,db: Session=Depends(get_db)) -> Response:
     TenantLifecycleService(db).delete(target_id,payload.reason)
     return Response(status_code=204)

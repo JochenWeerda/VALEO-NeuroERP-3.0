@@ -22,6 +22,7 @@ from app.services.docflow_belegadapter import lies_beleg
 from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
 from app.services.docflow_service import DocflowService
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -105,7 +106,7 @@ def beleg_reiter(
 
 
 @router.post("/{belegart}/{beleg_id}/actions/{aktion}", response_model=MaskActionResult,
-             summary="Aktion der Belegmaske ausfuehren (Masken-CommandEndpoint)")
+             summary="Aktion der Belegmaske ausfuehren (Masken-CommandEndpoint)", dependencies=SCHREIBEN["BELEGE"])
 async def beleg_aktion(
     belegart: str,
     beleg_id: str,

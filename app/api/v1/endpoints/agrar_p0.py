@@ -1,5 +1,5 @@
 from __future__ import annotations
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel
 from typing import Optional
 from datetime import date
@@ -8,6 +8,7 @@ import uuid
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.agrar_p0_schemas import AgrarP0Out
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 
 router = APIRouter(prefix="/agrar/p0", tags=["agrar-p0"])
@@ -222,6 +223,7 @@ def issue_selbstabrechnung(
 def set_selbstabrechnung_status(
     rechnung_id: str,
     body: StatusTransitionIn,
+    request: Request,
     x_tenant_id: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -231,7 +233,7 @@ def set_selbstabrechnung_status(
     from app.services.agrar_selbstabrechnung_lifecycle_service import transition_status, SelbstabrechnungError
     try:
         return transition_status(db=db, rechnung_id=rechnung_id, tenant_id=x_tenant_id,
-                                 new_status=body.new_status, operator=body.operator or "system",
+                                 new_status=body.new_status, operator=gepruefter_akteur_aus_request(request),
                                  reason=body.reason)
     except SelbstabrechnungError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -247,6 +249,7 @@ def set_selbstabrechnung_status(
 def storno_selbstabrechnung(
     rechnung_id: str,
     body: StornoIn,
+    request: Request,
     x_tenant_id: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -256,7 +259,7 @@ def storno_selbstabrechnung(
     from app.services.agrar_selbstabrechnung_lifecycle_service import storno_selbstabrechnung as svc, SelbstabrechnungError
     try:
         return svc(db=db, rechnung_id=rechnung_id, tenant_id=x_tenant_id,
-                   grund=body.grund, operator=body.operator or "system")
+                   grund=body.grund, operator=gepruefter_akteur_aus_request(request))
     except SelbstabrechnungError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:

@@ -63,3 +63,21 @@ ordnet ueber die Kennung zu. Beide sind ausdrueckliche Abhaengigkeiten und als s
   geprueften Claims in den Request (seit AUDIT-IDENTITY-INTEGRITY liest das FiBu-Audit sie dort). Hinweis:
   `test_process_kernel_wave74_rations_optimization` verdeckt per `sys.path` das `app`-Paket fuer spaetere Tests
   derselben Sitzung (vorbestehend, nur bei abweichender Reihenfolge sichtbar).
+- Gruppen BELEGE, QUALITAET, PLATTFORM (+ Agrar-/CRM-Reste): 125 Decorators. Inventar 441 -> 318. Neue Gruppe
+  FREIGABE (Belegbereiche, Buchhaltung, Controlling) fuer `approvals` und die Beleg-Freigabeentscheidung, wie
+  `beleg_roles.rollen_fuer("freigeben")`; vorher haette die Bereichsliste den Controller ausgesperrt.
+- **Bearbeiter aus dem Body (Sicherheitsbefund):** Compliance-Lebenszyklus (PCN, VVVO, Artikelsperre) sowie sieben
+  Router (u. a. Mahnstufen-Eskalation, Wareneingangs-QS, Budgetstatus, AB-/Lieferscheinstatus, Preisabweichung)
+  nahmen den Urheber aus `operator`/`actor`/`created_by` im Anfragekoerper. Jetzt aus dem Token; der
+  Identitaetsvertrag verbietet das Muster. Eine nie erreichbare doppelte Route `POST /compliance/pcn-meldungen`
+  entfernt. Mandanten-Kopfzeilen sind dagegen kein Befund: `bind_headers` setzt `X-Tenant-ID` nach der
+  Tokenpruefung auf den Tokenmandanten und weist Abweichungen ab.
+- **Nachdruck ueber Maske/CLI/MCP:** Die Maskenaktion „Lieferschein drucken“ rief den Druckweg mit `request=None`
+  auf; seit AUDIT-IDENTITY-INTEGRITY scheiterte jeder Nachdruck an der fehlenden Nutzerzuordnung. Request wird
+  durchgereicht. Bewusst offen gelassen (Claim AUDIT-IDENTITY-INTEGRITY): FiBu-Audit mit `request=None` in
+  Connector-, Journal- und Lagergeldwegen.
+- Godfiles: AB-/Lieferschein-/Preisabweichungsblock nach `sales_order_commands.py`; `compliance.py` schrumpft.
+- Testgrenze: `ersetze_nutzer` legt dieselbe Identitaet als gepruefte Claims in den Request.
+- Nachweis: gezielte Suiten gruen (Compliance 159, Finanz/Freigabe/Mahnstufe/Vertraege 103, Maskenaktionen 23,
+  Identitaetsvertrag, Rollen-Ratsche). Der Gesamtlauf der Block-Suiten wurde vom System wegen Speichermangels
+  abgebrochen und steht aus.

@@ -8,7 +8,7 @@ from datetime import date, datetime, timezone
 from typing import Any, List, Optional
 from app.auth.finance_roles import finance_admin, finance_read, finance_write, open_items_read
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -41,6 +41,7 @@ from app.api.v1.schemas.finance_schemas import (
     BuchungsuebergabeExportOut,
     CloseReadinessOut,
 )
+from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 
 router = APIRouter(tags=["finance", "actions"])
@@ -332,6 +333,7 @@ async def run_closing(
 @router.post("/closing/approve", response_model=ClosingApproveOut, summary="Closing genehmigen", dependencies=[Depends(finance_admin)])
 async def approve_closing(
     body: ClosingActionRequest,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -348,7 +350,7 @@ async def approve_closing(
         tenant_id=tenant_id,
         period=body.period,
         closing_type=body.closing_type,
-        actor=body.actor,
+        actor=gepruefter_akteur_aus_request(request),
     )
     return await gateway.approve(request, db)
 
@@ -723,13 +725,14 @@ def buche_rate_endpoint(
 def eskaliere_mahnstufe_endpoint(
     rechnungsnr: str,
     body: MahnstufeIn,
+    request: Request,
     x_tenant_id: _Opt[str] = Header(None),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.finance_mahnstufe_service import eskaliere_mahnstufe, MahnstufeError
     tenant_id = x_tenant_id or "default"
     try:
-        return eskaliere_mahnstufe(db, rechnungsnr, tenant_id, body.operator or "system")
+        return eskaliere_mahnstufe(db, rechnungsnr, tenant_id, gepruefter_akteur_aus_request(request))
     except MahnstufeError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

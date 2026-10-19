@@ -7,18 +7,6 @@
             "title": "New Status",
             "type": "string"
           },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
-          },
           "reason": {
             "anyOf": [
               {
@@ -95369,18 +95357,6 @@
             "title": "New Status",
             "type": "string"
           },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
-          },
           "quittiert_von": {
             "anyOf": [
               {
@@ -115508,64 +115484,11 @@
         "title": "OwnershipOut",
         "type": "object"
       },
-      "PCNCreateIn": {
-        "properties": {
-          "artikel_id": {
-            "title": "Artikel Id",
-            "type": "string"
-          },
-          "bemerkung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bemerkung"
-          },
-          "meldungstyp": {
-            "title": "Meldungstyp",
-            "type": "string"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
-          }
-        },
-        "required": [
-          "artikel_id",
-          "meldungstyp"
-        ],
-        "title": "PCNCreateIn",
-        "type": "object"
-      },
       "PCNTransitionIn": {
         "properties": {
           "new_status": {
             "title": "New Status",
             "type": "string"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
           },
           "reason": {
             "anyOf": [
@@ -115590,18 +115513,6 @@
           "grund": {
             "title": "Grund",
             "type": "string"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
           }
         },
         "required": [
@@ -126485,15 +126396,10 @@
               }
             ],
             "title": "Grund"
-          },
-          "operator": {
-            "title": "Operator",
-            "type": "string"
           }
         },
         "required": [
-          "entscheidung",
-          "operator"
+          "entscheidung"
         ],
         "title": "PreisabweichungFreigabeIn",
         "type": "object"
@@ -154474,18 +154380,6 @@
               }
             ],
             "title": "Nachweis Ref"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
           }
         },
         "required": [
@@ -154499,18 +154393,6 @@
           "grund": {
             "title": "Grund",
             "type": "string"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
           }
         },
         "required": [
@@ -166778,18 +166660,6 @@
       },
       "VVVOPruefungIn": {
         "properties": {
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
-          },
           "pruefung_am": {
             "title": "Pruefung Am",
             "type": "string"
@@ -180542,18 +180412,6 @@
               }
             ],
             "title": "Nachweis Ref"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
           }
         },
         "title": "FreigabeIn",
@@ -243514,22 +243372,6 @@
               "title": "Artikel Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -243586,22 +243428,6 @@
             "schema": {
               "title": "Artikel Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -243660,22 +243486,6 @@
               "title": "Artikel Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -243722,22 +243532,6 @@
             "schema": {
               "title": "Artikel Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -245019,30 +244813,15 @@
         ]
       },
       "post": {
-        "operationId": "create_pcn_meldung_v2_api_v1_compliance_pcn_meldungen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
+        "description": "Anlage einer neuen PCN-Meldung (Product Classification Notification) mit UFI.\n\nValidiert das UFI-Format (XXXX-XXXX-XXXX-XXXX) und legt die Meldung persistent an.\nEntspricht den Anforderungen der EU-Verordnung 2017/542 (CLP-Anhang VIII).",
+        "operationId": "create_pcn_meldung_api_v1_compliance_pcn_meldungen_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PCNCreateIn"
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
               }
             }
           },
@@ -245075,7 +244854,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "PCN-Meldung anlegen",
+        "summary": "Pcn meldung anlegen",
         "tags": [
           "Compliance"
         ]
@@ -245092,22 +244871,6 @@
             "schema": {
               "title": "Meldung Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -245165,22 +244928,6 @@
             "schema": {
               "title": "Meldung Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -245396,22 +245143,6 @@
               "default": 30,
               "title": "Within Days",
               "type": "integer"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -245840,22 +245571,6 @@
               "title": "Within Days",
               "type": "integer"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -245902,22 +245617,6 @@
             "schema": {
               "title": "Vvvo Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -396230,22 +395929,6 @@
               "title": "Ls Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -396303,22 +395986,6 @@
             "schema": {
               "title": "Auftrag Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -396378,22 +396045,6 @@
               "title": "Auftrag Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -396451,22 +396102,6 @@
             "schema": {
               "title": "Abweichung Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],

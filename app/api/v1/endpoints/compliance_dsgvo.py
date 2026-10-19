@@ -21,6 +21,7 @@ from app.services.audit_hardening import append_audit_entry
 from app.api.v1.schemas.base import BaseSchema, IDResponse
 from app.api.v1.schemas.compliance_dsgvo_schemas import ComplianceDsgvoOut
 from app.core.akteur import akteur_aus_request
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 def _benutzer_aus_anfrage(request: Request | None) -> str | None:
@@ -258,8 +259,7 @@ def _loeschung_ist_vollstaendig(log: list[dict]) -> bool:
 
 
 @router.post("/erasure-requests", status_code=201, summary="Erasure request anlegen",
-    response_model=IDResponse
-)
+    response_model=IDResponse, dependencies=SCHREIBEN["QUALITAET"])
 async def create_erasure_request(
     payload: ErasureRequestIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -343,8 +343,7 @@ async def get_erasure_request(
 
 
 @router.post("/erasure-requests/{request_id}/process", summary="Erasure request verarbeiten",
-    response_model=ErasureProcessOut
-)
+    response_model=ErasureProcessOut, dependencies=SCHREIBEN["QUALITAET"])
 async def process_erasure_request(
     request_id: str,
     payload: ErasureProcessIn,
@@ -455,8 +454,7 @@ async def process_erasure_request(
 
 
 @router.post("/erasure-requests/{request_id}/reject", summary="Erasure request ablehnen",
-    response_model=IDResponse
-)
+    response_model=IDResponse, dependencies=SCHREIBEN["QUALITAET"])
 async def reject_erasure_request(
     request_id: str,
     payload: ErasureRejectIn,

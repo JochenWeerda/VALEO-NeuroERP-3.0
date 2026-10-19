@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -122,6 +122,7 @@ async def action_payment_run_freigeben(
     summary="Lieferschein drucken (SPEC-P1-04)", dependencies=SCHREIBEN["VERKAUF"])
 async def action_delivery_note_drucken(
     entity_id: str,
+    request: Request,
     body: dict[str, Any] = Body(default_factory=dict),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -146,7 +147,8 @@ async def action_delivery_note_drucken(
 
         await print_delivery_note(
             eid, attestation=str(payload.get("attestation") or "").strip() or None,
-            tenant_id=tid, db=db_, request=None,
+            # Die gepruefte Identitaet reist mit: Die Attestierung des Nachdrucks ordnet sie einem lokalen Nutzer zu.
+            tenant_id=tid, db=db_, request=request,
         )
         return "Lieferschein gedruckt."
 
@@ -170,8 +172,7 @@ async def action_delivery_note_drucken(
 @router.post(
     "/reklamationen/{entity_id}/actions/abschliessen",
     response_model=MaskActionResult,
-    summary="Reklamation abschliessen (SPEC-P1-04)",
-)
+    summary="Reklamation abschliessen (SPEC-P1-04)", dependencies=SCHREIBEN["QUALITAET"])
 async def action_reklamation_abschliessen(
     entity_id: str,
     body: dict[str, Any] = Body(default_factory=dict),

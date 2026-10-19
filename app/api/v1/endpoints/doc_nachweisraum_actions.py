@@ -12,6 +12,7 @@ from app.api.v1.schemas.docflow_bundle_schemas import (
     NachweisDokumentOut,
 )
 from app.core.database import get_db
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/nachweisraum", tags=["nachweisraum"])
 logger = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ class GoBDExportTransitionRequest(BaseModel):
     fehler: Optional[str] = None
 
 
-@router.post("/dokumente", response_model=NachweisDokumentOut, summary="Nachweisraum-Dokument anlegen")
+@router.post("/dokumente", response_model=NachweisDokumentOut, summary="Nachweisraum-Dokument anlegen", dependencies=SCHREIBEN["QUALITAET"])
 def create_dokument(
     req: DokumentCreateRequest,
     x_tenant_id: str = Header(...),
@@ -74,8 +75,7 @@ def create_dokument(
 @router.post(
     "/dokumente/{dokument_id}/transition",
     response_model=NachweisDokumentOut,
-    summary="Nachweisraum-Dokumentstatus wechseln",
-)
+    summary="Nachweisraum-Dokumentstatus wechseln", dependencies=SCHREIBEN["QUALITAET"])
 def transition_dokument(
     dokument_id: str,
     req: DokumentTransitionRequest,
@@ -100,7 +100,7 @@ def transition_dokument(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/gobd-exporte", response_model=GobdExportOut, summary="GoBD-Export anlegen")
+@router.post("/gobd-exporte", response_model=GobdExportOut, summary="GoBD-Export anlegen", dependencies=SCHREIBEN["QUALITAET"])
 def create_gobd_export(
     req: GoBDExportCreateRequest,
     x_tenant_id: str = Header(...),
@@ -125,8 +125,7 @@ def create_gobd_export(
 @router.post(
     "/gobd-exporte/{export_id}/transition",
     response_model=GobdExportOut,
-    summary="GoBD-Exportstatus wechseln",
-)
+    summary="GoBD-Exportstatus wechseln", dependencies=SCHREIBEN["QUALITAET"])
 def transition_gobd_export(
     export_id: str,
     req: GoBDExportTransitionRequest,

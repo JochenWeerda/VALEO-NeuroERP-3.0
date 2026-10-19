@@ -13,6 +13,7 @@ from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 from ....core.uuid7 import uuid7
 from ....integrations.dms_client import get_document_url, is_configured, upload_document
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -186,7 +187,7 @@ async def list_dms_images(
     ) for row in rows]
 
 
-@router.post("/documents", response_model=DMSDocumentOut, status_code=201, summary="DMS document hochladen")
+@router.post("/documents", response_model=DMSDocumentOut, status_code=201, summary="DMS document hochladen", dependencies=SCHREIBEN["BELEGE"])
 async def upload_dms_document(
     file: UploadFile = File(...),
     entity_type: str = Form("article"),
@@ -234,7 +235,7 @@ async def upload_dms_document(
                           size=len(content), url=str(result.get("url") or get_document_url(external_id)))
 
 
-@router.delete("/documents/{doc_id}", status_code=204, response_class=Response, response_model=None, summary="DMS document loeschen")
+@router.delete("/documents/{doc_id}", status_code=204, response_class=Response, response_model=None, summary="DMS document loeschen", dependencies=SCHREIBEN["BELEGE"])
 async def delete_dms_document(
     doc_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -20,6 +20,7 @@ from app.services.customer_reference import resolve_reference
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class ReklamationOut(BaseSchema):
@@ -270,8 +271,7 @@ def _add_audit(
 
 
 @router.post("", status_code=201, summary="Reklamation anlegen",
-    response_model=ReklamationOut
-)
+    response_model=ReklamationOut, dependencies=SCHREIBEN["QUALITAET"])
 def create_reklamation(
     req: ReklamationCreateRequest,
     db: Session = Depends(get_db),
@@ -362,8 +362,7 @@ def get_e2e_overview(reklamation_id: str, db: Session = Depends(get_db), tenant_
 
 
 @router.post("/{reklamation_id}/transition", summary="Status transition",
-    response_model=ReklamationOut
-)
+    response_model=ReklamationOut, dependencies=SCHREIBEN["QUALITAET"])
 def transition_status(
     reklamation_id: str,
     req: ReklamationTransitionRequest,
@@ -391,8 +390,7 @@ def transition_status(
 
 
 @router.post("/{reklamation_id}/crm-reference", summary="Crm reference aktualisieren",
-    response_model=ReklamationOut
-)
+    response_model=ReklamationOut, dependencies=SCHREIBEN["QUALITAET"])
 def update_crm_reference(
     reklamation_id: str,
     req: ReklamationReferenzUpdateRequest,
@@ -410,8 +408,7 @@ def update_crm_reference(
 
 
 @router.post("/{reklamation_id}/dms-referenzen", summary="Dms referenzen hinzufügen",
-    response_model=ReklamationOut
-)
+    response_model=ReklamationOut, dependencies=SCHREIBEN["QUALITAET"])
 def add_dms_referenzen(
     reklamation_id: str,
     req: ReklamationReferenzUpdateRequest,
@@ -437,8 +434,7 @@ def add_dms_referenzen(
 
 
 @router.post("/{reklamation_id}/labor-befund", summary="Laborbefund uebernehmen",
-    response_model=ReklamationOut
-)
+    response_model=ReklamationOut, dependencies=SCHREIBEN["QUALITAET"])
 def uebernehme_labor_befund(
     reklamation_id: str,
     req: ReklamationLaborBefundRequest,

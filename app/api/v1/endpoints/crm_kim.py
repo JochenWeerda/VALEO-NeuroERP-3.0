@@ -16,7 +16,7 @@ from __future__ import annotations
 import time
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -28,6 +28,7 @@ from app.services.crm_notification_service import CrmNotificationService
 from app.services.llm_gateway import LLMGateway, parse_json_object
 from app.api.v1.schemas.base import TypedObjectOut
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 router = APIRouter(prefix="/crm/kim", tags=["crm", "kim", "360"])
 
@@ -427,6 +428,7 @@ class LogCreateIn(BaseModel):
 def create_log(
     kunden_nr: str,
     body: LogCreateIn,
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> StatusOut:
@@ -440,7 +442,7 @@ def create_log(
         "art": art,
         "kurzinfo": body.betreff or body.artKurzinfo,
         "notiz": body.kommentar,
-        "bediener": body.operator,
+        "bediener": gepruefter_akteur_aus_request(request),
         "wiedervorlage": body.reSubmissionDate or None,
         "weiterleitung_an": body.ccIntern,
         "verweis": body.referenceNo,
@@ -452,7 +454,7 @@ def create_log(
                 cc=body.ccIntern,
                 betreff=body.betreff or body.artKurzinfo,
                 kommentar=body.kommentar,
-                sender=body.operator,
+                sender=gepruefter_akteur_aus_request(request),
                 kunden_nr=kunden_nr,
                 kontakt_id=created.get("id"),
             )

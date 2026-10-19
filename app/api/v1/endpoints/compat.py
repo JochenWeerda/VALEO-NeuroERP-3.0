@@ -2976,7 +2976,7 @@ async def get_firma(
     return {}
 
 
-@router.put("/setup/firma", response_model=SetupFirmaOut, tags=["setup"], summary="Firma save")
+@router.put("/setup/firma", response_model=SetupFirmaOut, tags=["setup"], summary="Firma save", dependencies=SCHREIBEN["PLATTFORM"])
 async def save_firma(
     payload: dict = Body(...),
     tenant_id: str = Depends(get_tenant_id),
