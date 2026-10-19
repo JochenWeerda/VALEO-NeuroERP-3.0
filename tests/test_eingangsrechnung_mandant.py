@@ -34,8 +34,9 @@ WORKFLOW = "/api/v1/finance/ap/approval-workflow"
 
 ROLES = [None, "user", "PERSONAL_ADMIN", "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"]
 ALLOWED = {
-    "read": {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"},
-    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"},
+    # ``manager`` bleibt Negativfall: abgeloest seit MANAGER-ROLE-ENFORCEMENT-20261019, gewaehrt nichts.
+    "read": {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"},
+    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"},
     "admin": {"FINANCE_ADMIN", "admin"},
 }
 CASES = [

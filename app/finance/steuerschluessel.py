@@ -353,10 +353,11 @@ SKR03_AUFWANDSKONTEN = {"8": "3300", "9": "3400"}
 # Sammelkonto der Verbindlichkeiten aus Lieferungen und Leistungen je Kontenrahmen.
 KREDITORENKONTO = {"SKR03": "1600", "SKR04": "3300"}
 SKR03_KONTEN = (
-    ("1571", "Abziehbare Vorsteuer 7 %", "asset", "tax"),
-    ("1576", "Abziehbare Vorsteuer 19 %", "asset", "tax"),
-    ("1771", "Umsatzsteuer 7 %", "liability", "tax"),
-    ("1776", "Umsatzsteuer 19 %", "liability", "tax"),
+    # Kategorien des Kontenplan-Schemas (``tax`` kennt es nicht; bis 19.10.2026 scheiterte daran das Lesen).
+    ("1571", "Abziehbare Vorsteuer 7 %", "asset", "current_assets"),
+    ("1576", "Abziehbare Vorsteuer 19 %", "asset", "current_assets"),
+    ("1771", "Umsatzsteuer 7 %", "liability", "current_liabilities"),
+    ("1776", "Umsatzsteuer 19 %", "liability", "current_liabilities"),
     ("8300", "Erlöse 7 % USt", "revenue", "revenue"),
     ("8400", "Erlöse 19 % USt", "revenue", "revenue"),
     ("3300", "Wareneingang 7 % Vorsteuer", "expense", "cost_of_goods_sold"),
