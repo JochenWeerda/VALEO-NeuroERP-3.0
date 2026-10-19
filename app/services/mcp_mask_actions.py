@@ -105,12 +105,17 @@ HUMAN_ONLY = {"fuer_agenten_gesperrt", "menschliche_genehmigung"}
 
 @lru_cache(maxsize=1)
 def _tool_mask_actions() -> dict[str, tuple[tuple[str, str], ...]]:
-    """MCP-Werkzeug -> zugeordnete Maskenaktionen (screen_id, action_key) laut config/mcp_mask_action_map.yaml."""
+    """MCP-Werkzeug -> Maskenaktionen (screen_id, action_key), die es ausloest, laut config/mcp_mask_action_map.yaml.
+
+    Reine Statusleser (``mapped_read``) zaehlen nicht: Eine gesperrte Aktion (z. B. Mahnen) bleibt lesbar.
+    """
     path = Path(__file__).resolve().parents[2] / "config/mcp_mask_action_map.yaml"
     mappings = (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("mappings", [])
     out: dict[str, list[tuple[str, str]]] = {}
     for m in mappings:
         tool, mask_action = m.get("mcp_tool_id"), m.get("mask_action_id") or ""
+        if m.get("coverage") == "mapped_read":
+            continue  # Das Werkzeug liest nur den Status; es loest die Maskenaktion nicht aus.
         if tool and mask_action.startswith("mask:") and mask_action.count(":") >= 2:
             _, screen, key = mask_action.split(":", 2)
             out.setdefault(tool, []).append((screen, key))

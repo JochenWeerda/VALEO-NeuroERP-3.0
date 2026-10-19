@@ -11,6 +11,7 @@ from typing import Any, Optional
 from uuid import uuid4
 
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
+from app.auth.deps import require_roles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import text
@@ -24,6 +25,10 @@ from app.api.v1.schemas.admin_pos_schemas import AdminPosOut
 
 
 router = APIRouter()
+
+_ADMIN_FINANZ = [Depends(require_roles("admin", "FINANCE_ADMIN"))]  # Massenimport/Steuerexport
+_KASSE = [Depends(require_roles("SALES_BEARBEITEN", "SALES_ADMIN", "admin", "manager"))]  # Kassiervorgang
+_NUR_ADMIN = [Depends(require_roles("admin"))]  # Konfiguration: wie admin_core
 
 
 class PosTerminalIn(BaseModel):
@@ -128,7 +133,7 @@ async def list_pos_terminals(
     return [_map_row_to_model(row, PosTerminalOut) for row in rows]
 
 
-@router.post("/pos/terminals", response_model=PosTerminalOut, status_code=201, summary="Pos terminal anlegen")
+@router.post("/pos/terminals", response_model=PosTerminalOut, status_code=201, summary="Pos terminal anlegen", dependencies=_NUR_ADMIN)
 async def create_pos_terminal(
     payload: PosTerminalIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -163,7 +168,7 @@ async def create_pos_terminal(
     return _map_row_to_model(row, PosTerminalOut)
 
 
-@router.put("/pos/terminals/{terminal_id}", response_model=PosTerminalOut, summary="Pos terminal aktualisieren")
+@router.put("/pos/terminals/{terminal_id}", response_model=PosTerminalOut, summary="Pos terminal aktualisieren", dependencies=_NUR_ADMIN)
 async def update_pos_terminal(
     terminal_id: str,
     payload: PosTerminalIn,
@@ -211,7 +216,7 @@ async def update_pos_terminal(
     return _map_row_to_model(row, PosTerminalOut)
 
 
-@router.delete("/pos/terminals/{terminal_id}", status_code=204, response_class=Response, response_model=None, summary="Pos terminal löschen")
+@router.delete("/pos/terminals/{terminal_id}", status_code=204, response_class=Response, response_model=None, summary="Pos terminal löschen", dependencies=_NUR_ADMIN)
 async def delete_pos_terminal(
     terminal_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -252,7 +257,7 @@ async def list_tse_devices(
     return [_map_row_to_model(row, PosTseDeviceOut) for row in rows]
 
 
-@router.post("/pos/tse-devices", response_model=PosTseDeviceOut, status_code=201, summary="Tse device anlegen")
+@router.post("/pos/tse-devices", response_model=PosTseDeviceOut, status_code=201, summary="Tse device anlegen", dependencies=_NUR_ADMIN)
 async def create_tse_device(
     payload: PosTseDeviceIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -299,7 +304,7 @@ async def create_tse_device(
     return _map_row_to_model(row, PosTseDeviceOut)
 
 
-@router.put("/pos/tse-devices/{device_id}", response_model=PosTseDeviceOut, summary="Tse device aktualisieren")
+@router.put("/pos/tse-devices/{device_id}", response_model=PosTseDeviceOut, summary="Tse device aktualisieren", dependencies=_NUR_ADMIN)
 async def update_tse_device(
     device_id: str,
     payload: PosTseDeviceIn,
@@ -368,7 +373,7 @@ async def list_pos_notices(
     return [_map_row_to_model(row, PosNoticeOut) for row in rows]
 
 
-@router.post("/pos/notices", response_model=PosNoticeOut, status_code=201, summary="Pos notice anlegen")
+@router.post("/pos/notices", response_model=PosNoticeOut, status_code=201, summary="Pos notice anlegen", dependencies=_NUR_ADMIN)
 async def create_pos_notice(
     payload: PosNoticeIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -405,7 +410,7 @@ async def create_pos_notice(
     return _map_row_to_model(row, PosNoticeOut)
 
 
-@router.post("/pos/dsfinvk-exports", response_model=DsfinvkExportOut, status_code=201, summary="Dsfinvk export ausführen")
+@router.post("/pos/dsfinvk-exports", response_model=DsfinvkExportOut, status_code=201, summary="Dsfinvk export ausführen", dependencies=_ADMIN_FINANZ)
 async def run_dsfinvk_export(
     payload: DsfinvkExportRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -624,7 +629,7 @@ class KasseUebernahmeResult(BaseModel):
     errors: list[str]
 
 
-@router.post("/pos/uebernahme-kasse", response_model=KasseUebernahmeResult, summary="Kasse uebernahme")
+@router.post("/pos/uebernahme-kasse", response_model=KasseUebernahmeResult, summary="Kasse uebernahme", dependencies=_ADMIN_FINANZ)
 async def uebernahme_kasse(
     body: KasseUebernahmeRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -717,8 +722,7 @@ async def get_tse_status(tenant_id: str = Depends(get_tenant_id)):
 
 
 @router.post("/pos/tse/create", status_code=201, summary="Neue TSS bei Fiskaly anlegen",
-    response_model=AdminPosOut
-)
+    response_model=AdminPosOut, dependencies=_NUR_ADMIN)
 async def create_tss(tss_id: Optional[str] = None, tenant_id: str = Depends(get_tenant_id)):
     """Legt eine neue Technical Security System (TSS) bei Fiskaly an."""
     from app.services.tse_fiskaly_service import create_tse
@@ -731,8 +735,7 @@ async def create_tss(tss_id: Optional[str] = None, tenant_id: str = Depends(get_
 @router.post(
     "/pos/tse/transaction/start",
     response_model=AdminPosOut,
-    summary="Kassentransaktion starten (StartTransaction)",
-)
+    summary="Kassentransaktion starten (StartTransaction)", dependencies=_KASSE)
 async def tse_start_transaction(body: TseTransactionRequest, tenant_id: str = Depends(get_tenant_id)):
     """Startet eine signaturpflichtige Kassentransaktion und gibt Fiskaly-Signatur zurück."""
     from app.services.tse_fiskaly_service import start_transaction
@@ -745,8 +748,7 @@ async def tse_start_transaction(body: TseTransactionRequest, tenant_id: str = De
 @router.post(
     "/pos/tse/transaction/finish",
     response_model=AdminPosOut,
-    summary="Kassentransaktion abschließen (FinishTransaction)",
-)
+    summary="Kassentransaktion abschließen (FinishTransaction)", dependencies=_KASSE)
 async def tse_finish_transaction(body: TseFinishRequest, tenant_id: str = Depends(get_tenant_id)):
     """Schließt eine TSE-Transaktion ab und liefert die finale Signatur für den Bon."""
     from app.services.tse_fiskaly_service import finish_transaction
@@ -757,8 +759,7 @@ async def tse_finish_transaction(body: TseFinishRequest, tenant_id: str = Depend
 
 
 @router.post("/pos/tse/export", summary="TSE-Export bei fiskaly anfordern",
-    response_model=AdminPosOut
-)
+    response_model=AdminPosOut, dependencies=_ADMIN_FINANZ)
 async def tse_export(
     tss_id: str,
     start_date: str = Query(..., description="ISO-Datum YYYY-MM-DD"),

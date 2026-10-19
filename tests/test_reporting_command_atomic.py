@@ -20,6 +20,7 @@ from app.services import mask_action_runtime_service as runtime
 from app.services.l3_report_catalog_service import L3ReportCatalogService
 from app.services.query_center_service import QueryCenterService
 from app.services import mcp_execution_service as mcp
+from testgrenze import setze_identitaet
 
 KEY = "reporting-regression-test-key"
 VALID = {"name": "Offene Rechnungen", "data_product_id": "finance-ap-invoice-cockpit",
@@ -76,6 +77,7 @@ def client(db):
     app = FastAPI()
     app.include_router(l3_report_catalog.router, prefix="/api/v1")
     app.include_router(query_center.router, prefix="/api/v1")
+    setze_identitaet(app, "berichts-sub")  # gepruefte Claims statt Kopf X-User-ID
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
     return TestClient(app)

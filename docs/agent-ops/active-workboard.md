@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## ADMIN-WRITE-ROLES-20261019 - in Arbeit, Claude Code
+## ADMIN-WRITE-ROLES-20261019 - abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-19. **Nutzerentscheid 19.10.:** Schreibwege brauchen eine ausdrueckliche serverseitige Berechtigung aus dem bestehenden Rollenmodell; administrative Aenderungen zuerst; Fachaktionen behalten Bereichsrollen und Freigaben; die Rollen-Ratsche (1603) ist Pruefliste, nicht Befundzahl. **Ziel:** die 82 offenen Schreibwege unter `/api/v1/admin*` (Inventar `config/write_routes_without_roles.json`) mit `require_roles` absichern: Konfiguration `admin` (wie `admin_core`), Massenimport/Steuerexport `admin`/`FINANCE_ADMIN`, TSE-Kassiervorgang Verkaufsrollen. **Dateibesitz:** nur die Admin-Router (`admin_mobile`, `admin_pos`, `admin_devices`, `admin_monitoring`, `admin_suite`, `beleg_vordrucke`, `admin_reporting`, `branches`, `number_ranges`, `admin_dms`, `admin_core`, `data_quality`), Ratschen-Baseline, eigene Tests, QA. Kein Fachbereichsrouter; parallele Audit-Arbeit des Nutzers bleibt unberuehrt.
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-19 (82 Admin-Schreibwege mit Rolle, Ratsche 1603 -> 1521; QA `docs/quality-assurance/admin-write-roles-20261019.md`; Gesamtlauf der Suite steht aus, Speichermangel). **Nutzerentscheid 19.10.:** Schreibwege brauchen eine ausdrueckliche serverseitige Berechtigung aus dem bestehenden Rollenmodell; administrative Aenderungen zuerst; Fachaktionen behalten Bereichsrollen und Freigaben; die Rollen-Ratsche (1603) ist Pruefliste, nicht Befundzahl. **Ziel:** die 82 offenen Schreibwege unter `/api/v1/admin*` (Inventar `config/write_routes_without_roles.json`) mit `require_roles` absichern: Konfiguration `admin` (wie `admin_core`), Massenimport/Steuerexport `admin`/`FINANCE_ADMIN`, TSE-Kassiervorgang Verkaufsrollen. **Dateibesitz:** nur die Admin-Router (`admin_mobile`, `admin_pos`, `admin_devices`, `admin_monitoring`, `admin_suite`, `beleg_vordrucke`, `admin_reporting`, `branches`, `number_ranges`, `admin_dms`, `admin_core`, `data_quality`), Ratschen-Baseline, eigene Tests, QA. Kein Fachbereichsrouter; parallele Audit-Arbeit des Nutzers bleibt unberuehrt.
 
 ## MASK-COMMANDS-ROLLOUT-20261019 - abgeschlossen, Claude Code
 

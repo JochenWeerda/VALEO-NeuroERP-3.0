@@ -251,3 +251,8 @@ def test_kartenentscheidung_ohne_agenten_write_gilt_auch_generisch():
         if action and action.get("commandEndpoint") and mm.agent_block(action) is None:
             offen.append(eintrag["mask_action_id"])
     assert offen == []
+
+
+def test_statusleser_einer_gesperrten_aktion_bleibt_fuer_agenten_offen():
+    """Mahnen ist Menschen vorbehalten; das Lesewerkzeug fibu.dunning.status loest es nicht aus."""
+    assert mm.human_only_tool_call("fibu.dunning.status", {}) is None

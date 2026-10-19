@@ -8,6 +8,7 @@ from typing import Any, Literal
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
+from app.auth.deps import require_roles
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -19,6 +20,8 @@ from app.services.integration_bootstrap import build_integration_bootstrap_summa
 
 
 router = APIRouter(prefix="/admin-suite", tags=["admin-suite", "readiness"])
+
+_NUR_ADMIN = [Depends(require_roles("admin"))]  # Konfiguration: wie admin_core
 
 ReadinessStatus = Literal["ready", "warning", "blocked", "unchecked"]
 SetupStepStatus = Literal["unchecked", "in_progress", "warning", "blocked", "completed"]
@@ -617,7 +620,7 @@ async def get_setup_session(
     return _build_setup_session(tenant_id, settings.get("admin_suite_setup"))
 
 
-@router.patch("/setup/steps/{step_key}", response_model=SetupSessionOut, summary="Admin Suite setup step aktualisieren")
+@router.patch("/setup/steps/{step_key}", response_model=SetupSessionOut, summary="Admin Suite setup step aktualisieren", dependencies=_NUR_ADMIN)
 async def update_setup_step(
     step_key: str,
     payload: SetupStepUpdate,
@@ -658,7 +661,7 @@ async def get_migration_cockpit(
     return _migration_cockpit(tenant_id, _migration_store(settings))
 
 
-@router.post("/migration/batches", response_model=MigrationBatchOut, status_code=201, summary="Migration Dry Run Batch anlegen")
+@router.post("/migration/batches", response_model=MigrationBatchOut, status_code=201, summary="Migration Dry Run Batch anlegen", dependencies=_NUR_ADMIN)
 async def create_migration_batch(
     payload: MigrationBatchCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -692,7 +695,7 @@ async def create_migration_batch(
     return MigrationBatchOut(**batch)
 
 
-@router.patch("/migration/batches/{batch_id}/reconciliation", response_model=MigrationBatchOut, summary="Migration Reconciliation aktualisieren")
+@router.patch("/migration/batches/{batch_id}/reconciliation", response_model=MigrationBatchOut, summary="Migration Reconciliation aktualisieren", dependencies=_NUR_ADMIN)
 async def update_migration_reconciliation(
     batch_id: str,
     payload: MigrationReconciliationUpdate,
@@ -715,7 +718,7 @@ async def update_migration_reconciliation(
     return MigrationBatchOut(**batch)
 
 
-@router.post("/migration/batches/{batch_id}/approve", response_model=MigrationBatchOut, summary="Migration Batch freigeben")
+@router.post("/migration/batches/{batch_id}/approve", response_model=MigrationBatchOut, summary="Migration Batch freigeben", dependencies=_NUR_ADMIN)
 async def approve_migration_batch(
     batch_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -742,7 +745,7 @@ async def get_security_cockpit() -> SecurityCockpitOut:
     return SecurityCockpitOut(roles=_security_roles(), agent_roles=_agent_roles())
 
 
-@router.post("/security/simulate", response_model=SecuritySimulationOut, summary="Effektive Rechte simulieren")
+@router.post("/security/simulate", response_model=SecuritySimulationOut, summary="Effektive Rechte simulieren", dependencies=_NUR_ADMIN)
 async def simulate_security(payload: SecuritySimulationIn) -> SecuritySimulationOut:
     """Simuliert effektive Rechte ohne Rollen oder Tenant-Daten zu veraendern."""
     return _simulate_security(payload.roles)
@@ -840,7 +843,7 @@ async def get_llm_gateway(
     return _llm_config_out(load_llm_config(db, tenant_id))
 
 
-@router.put("/llm-gateway", response_model=LlmGatewayConfigOut, summary="LLM-Anbieter-Konfiguration speichern")
+@router.put("/llm-gateway", response_model=LlmGatewayConfigOut, summary="LLM-Anbieter-Konfiguration speichern", dependencies=_NUR_ADMIN)
 async def update_llm_gateway(
     payload: LlmGatewayUpdateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -865,7 +868,7 @@ async def update_llm_gateway(
     return _llm_config_out(load_llm_config(db, tenant_id))
 
 
-@router.post("/llm-gateway/test", response_model=LlmTestOut, summary="LLM-Anbieter testen")
+@router.post("/llm-gateway/test", response_model=LlmTestOut, summary="LLM-Anbieter testen", dependencies=_NUR_ADMIN)
 async def test_llm_gateway(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
