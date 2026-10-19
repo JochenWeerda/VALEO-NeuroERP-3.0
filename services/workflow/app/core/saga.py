@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, List, Optional
 from uuid import uuid4, UUID
 import asyncio
 import logging
+import inspect
 
 
 logger = logging.getLogger(__name__)
@@ -52,6 +53,7 @@ class SagaCoordinator:
         self._definitions: Dict[str, SagaDefinition] = {}
         self._instances: Dict[UUID, SagaInstance] = {}
         self._lock = asyncio.Lock()
+        self._tasks: set[asyncio.Task[None]] = set()
 
     async def register(self, definition: SagaDefinition) -> None:
         async with self._lock:
@@ -65,15 +67,29 @@ class SagaCoordinator:
                 raise KeyError(f"Saga {saga_name} nicht registriert.")
             instance = SagaInstance(definition, context)
             self._instances[instance.id] = instance
-        asyncio.create_task(self._execute(instance))
+        task = asyncio.create_task(self._execute(instance))
+        self._tasks.add(task)
+        task.add_done_callback(lambda finished: self._task_finished(instance, finished))
         return instance
+
+    def _task_finished(self, instance: SagaInstance, task: asyncio.Task[None]) -> None:
+        self._tasks.discard(task)
+        if task.cancelled():
+            instance.status = "cancelled"
+            instance.error = "Saga execution cancelled"
+            return
+        error = task.exception()
+        if error is not None:
+            instance.status = "failed"
+            instance.error = str(error)
+            logger.error("Saga execution failed", exc_info=(type(error), error, error.__traceback__))
 
     async def _execute(self, instance: SagaInstance) -> None:
         logger.info("Starte Saga %s (%s)", instance.definition.name, instance.id)
         for step in instance.definition.steps:
             try:
                 result = step.action(instance.context)
-                if asyncio.iscoroutine(result):
+                if inspect.isawaitable(result):
                     await result
                 instance.completed_steps.append(step.name)
             except Exception as exc:
@@ -86,17 +102,19 @@ class SagaCoordinator:
         logger.info("Saga %s (%s) abgeschlossen", instance.definition.name, instance.id)
 
     async def _compensate(self, instance: SagaInstance) -> None:
+        failed = False
         for step_name in reversed(instance.completed_steps):
             step = next(step for step in instance.definition.steps if step.name == step_name)
             if step.compensation:
                 try:
                     result = step.compensation(instance.context)
-                    if asyncio.iscoroutine(result):
+                    if inspect.isawaitable(result):
                         await result
                 except Exception as exc:
+                    failed = True
                     logger.error("Kompensation für Schritt %s fehlgeschlagen: %s", step.name, exc, exc_info=True)
-        instance.status = "compensated" if instance.error else "rolled_back"
-        logger.info("Saga %s (%s) kompensiert", instance.definition.name, instance.id)
+        instance.status = "compensation_failed" if failed else ("compensated" if instance.error else "rolled_back")
+        logger.info("Saga %s (%s): Kompensationsstatus %s", instance.definition.name, instance.id, instance.status)
 
     async def status(self, instance_id: UUID) -> SagaInstance:
         async with self._lock:
