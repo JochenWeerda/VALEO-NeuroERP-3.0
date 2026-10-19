@@ -6,8 +6,9 @@
     aktionen <maske>              Aktionen einer Maske und ob die CLI sie ausfuehren kann
     zeigen <maske> <aktion>       Vertrag einer Aktion (Felder, Bestaetigung, Begruendung)
     ausfuehren <maske> <aktion>   Aktion ueber denselben Kommandoweg wie die Maske
+    studio <befehl>               Masken im Screen Studio erzeugen, pruefen, freigeben (siehe valeo_cli.studio)
 
-Exit-Codes: 0 erfolgreich, 1 fachlich abgelehnt oder nicht ausfuehrbar, 2 Bedienfehler, 3 Anmeldung,
+Exit-Codes: 0 erfolgreich, 1 fachlich abgelehnt (auch 409) oder nicht ausfuehrbar, 2 Bedienfehler, 3 Anmeldung,
 4 Server oder Netz.
 """
 from __future__ import annotations
@@ -21,7 +22,7 @@ from typing import Any, Callable
 
 import httpx
 
-from valeo_cli import auth, support
+from valeo_cli import auth, studio, support
 
 DEFAULT_API = "http://localhost:8000"
 
@@ -32,6 +33,10 @@ class UsageError(RuntimeError):
 
 class ServerError(RuntimeError):
     pass
+
+
+class Conflict(RuntimeError):
+    """409: Der Server lehnt fachlich ab (veraltete Revision, schon vorhanden, falscher Zustand)."""
 
 
 def _api_base() -> str:
@@ -52,6 +57,8 @@ def _request(http: httpx.Client, token: str, method: str, path: str, body: dict 
                             headers={"Authorization": f"Bearer {token}", "Accept": "application/json"})
     if response.status_code in (401, 403):
         raise auth.AuthError(f"Server verweigert ({response.status_code}): {_detail(response)}")
+    if response.status_code == 409:
+        raise Conflict(_detail(response))
     if response.status_code == 404:
         raise UsageError(f"Nicht gefunden: {_detail(response)}")
     if response.status_code >= 400:
@@ -200,6 +207,7 @@ def parser() -> argparse.ArgumentParser:
     x.add_argument("--ja", action="store_true", help="Bestaetigung ohne Rueckfrage")
     x.add_argument("--idempotenz", metavar="SCHLUESSEL", help="Wiederholung mit demselben Schluessel")
     x.add_argument("--json", action="store_true", help="Antwort vollstaendig als JSON")
+    studio.add_parser(sub)
     return p
 
 
@@ -229,11 +237,16 @@ def main(argv: list[str] | None = None, *, http: httpx.Client | None = None, out
         if args.befehl == "status":
             return cmd_status(args, http, settings, out)
         token = auth.access_token(http, settings)
+        if args.befehl == "studio":
+            return studio.run(args, lambda method, path, body=None: _request(http, token, method, path, body), out, stdin)
         if args.befehl == "aktionen":
             return cmd_aktionen(args, http, token, out)
         if args.befehl == "zeigen":
             return cmd_zeigen(args, http, token, out)
         return cmd_ausfuehren(args, http, token, out, ask, stdin)
+    except Conflict as exc:
+        out(f"Abgelehnt: {exc}")
+        return 1
     except (UsageError, ValueError) as exc:
         out(f"Fehler: {exc}")
         return 2

@@ -66,6 +66,44 @@ python -m valeo_cli ausfuehren admin/identity-budgets allocate --daten eingabe.j
 Exit-Codes: 0 erfolgreich, 1 fachlich abgelehnt oder nicht per CLI ausfuehrbar, 2 Bedienfehler, 3 Anmeldung oder
 Rechte, 4 Server oder Netz.
 
+## Masken im Studio erzeugen
+
+`python -m valeo_cli studio …` bedient dieselbe Studio-API (`/api/v1/studio`) wie die Studio-App. Vorschlag,
+Pruefung, Entwurf, Uebernahme, Vier-Augen-Pruefung, Simulation und Freigabe entscheidet der Server, mit seinen
+Rechten: Gestalten braucht das Belegschreibrecht; Freigeben und Zurueckziehen braucht menschliche Administration.
+
+```bash
+python -m valeo_cli studio katalog                       # Datenquellen, Kommandoaktionen, eigene Studio-Rechte
+python -m valeo_cli studio vorschlag "Lieferanten mit Ort und Status" --maske tenant/lieferanten --speichern
+python -m valeo_cli studio quellen duenger               # vorhandene Masken als Ausgangsfassung
+python -m valeo_cli studio uebernehmen agrar/duenger     # bindet den angezeigten Quellhash
+python -m valeo_cli studio entwuerfe
+python -m valeo_cli studio zeigen <entwurf> --ausgabe maske.json     # Revision merken, Datei bearbeiten
+python -m valeo_cli studio pruefen maske.json            # ohne zu speichern
+python -m valeo_cli studio speichern maske.json --entwurf <entwurf> --revision <revision>
+python -m valeo_cli studio pruefung <entwurf>            # Vier-Augen-Pruefung
+python -m valeo_cli studio simulieren <entwurf>
+python -m valeo_cli studio freigeben <entwurf> --revision <gepruefte revision>
+python -m valeo_cli studio historie <entwurf>
+```
+
+- **Verlorene Aenderungen:** Aendern und Freigeben verlangen die gesehene Revision. Eine veraltete Revision
+  lehnt der Server mit 409 ab (Exit-Code 1). Pruefung, Simulation und Rueckzug nehmen ohne `--revision` die
+  aktuelle Revision.
+- **Wiederholung:** Jeder schreibende Aufruf traegt einen neuen Wiederholungsschluessel. `--idempotenz`
+  wiederholt einen Aufruf mit demselben Schluessel.
+- **Kennung:** `--maske tenant/<kennung>` setzt die Maskenkennung und zieht die eigene Adapterbindung mit. Ob die
+  Kennung zulaessig und frei ist, entscheidet der Server.
+- **Dateien:** `speichern` und `pruefen` nehmen eine reine Definition oder die Ausgabe von `zeigen` bzw.
+  `vorschlag`; `-` liest von stdin.
+
+Eine freigegebene Studio-Maske liefert `GET /api/v1/masks/{kennung}/screen-definition` mandantengenau aus. Ihre
+Aktionen sind damit sofort ueber `aktionen`, `zeigen` und `ausfuehren` bedienbar.
+
+Grenze des Servers: Die Freigabe verlangt eine bestandene Simulation. Das einzige Simulationsprofil
+`grain.v1` deckt nur die Getreidekette (Domaene `agrar`) ab. Andere Masken lassen sich anlegen, pruefen und
+zur Pruefung geben, aber noch nicht freigeben.
+
 ## Was die CLI (noch) nicht ausfuehrt
 
 Was nicht so ausgefuehrt werden kann wie in der Maske, weist die CLI mit Grund ab:
