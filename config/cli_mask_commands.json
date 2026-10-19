@@ -122,6 +122,9 @@
   "mask:crm/customer-360:create_activity",
   "mask:crm/lead:qualifizieren",
   "mask:crm/opportunity:create_activity",
+  "mask:docflow/dokumenten-ruecklauf:mark_received",
+  "mask:docflow/dokumenten-ruecklauf:mark_sent",
+  "mask:docflow/dokumenten-ruecklauf:verify_return",
   "mask:einkauf/angebot:bestellen",
   "mask:einkauf/anlieferavis:wareneingang",
   "mask:einkauf/purchase-order:speichern",
@@ -129,6 +132,7 @@
   "mask:finance/ap-invoice:freigeben",
   "mask:finance/ar-open-item:mahnen",
   "mask:finance/payment-run:freigeben",
+  "mask:finance/pruefkorb:pruefen",
   "mask:finance/rechnungstapel:execute",
   "mask:finance/rechnungstapel:release",
   "mask:finance/rechnungstapel:retry",
@@ -169,10 +173,17 @@
   "mask:sales/gutschrift:speichern",
   "mask:sales/gutschrift:vorschlag_ablehnen",
   "mask:sales/gutschrift:vorschlag_freigeben",
-  "mask:schnittstelle/mde-inbox:process_pending"
+  "mask:schnittstelle/legacy-adapter-monitor:approve",
+  "mask:schnittstelle/legacy-adapter-monitor:reconcile",
+  "mask:schnittstelle/legacy-adapter-monitor:stage",
+  "mask:schnittstelle/mde-inbox:process_pending",
+  "mask:schnittstelle/mde-inbox:retry_event",
+  "mask:tankstelle/adapter-inbox:process",
+  "mask:tankstelle/adapter-inbox:retry",
+  "mask:tankstelle/adapter-inbox:validate"
  ],
  "nicht_unterstuetzt": {
   "eingabe_in_maske": 4,
-  "kein_endpunkt": 150
+  "kein_endpunkt": 139
  }
 }

@@ -1075,6 +1075,7 @@ api_router.include_router(
 from app.api.v1.endpoints import docflow_return  # noqa: E402
 
 api_router.include_router(docflow_return.router)
+api_router.include_router(docflow_return.command_router)  # Maskenaktionen (MASK-COMMANDS-ROLLOUT)
 
 from app.api.v1.endpoints import document_control  # noqa: E402
 

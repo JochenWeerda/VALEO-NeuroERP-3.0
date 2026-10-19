@@ -275350,6 +275350,79 @@
         ]
       }
     },
+    "/api/v1/document-returns/{entity_id}/actions/{action_key}": {
+      "post": {
+        "operationId": "run_return_action_api_v1_document_returns__entity_id__actions__action_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "action_key",
+            "required": true,
+            "schema": {
+              "enum": [
+                "mark_sent",
+                "mark_received",
+                "verify_return"
+              ],
+              "title": "Action Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dokumentenruecklauf: Maskenaktion (versendet, eingegangen, geprueft)",
+        "tags": [
+          "docflow",
+          "dms"
+        ]
+      }
+    },
     "/api/v1/dokumente": {
       "get": {
         "description": "List all documents with filtering and pagination",
@@ -329819,6 +329892,65 @@
         ]
       }
     },
+    "/api/v1/kontrolle/befunde/{entity_id}/actions/pruefen": {
+      "post": {
+        "description": "Derselbe Fachweg wie ``/pruefung``; die Bewertung (``note``) ist zugleich die Audit-Begruendung.\n\nRolle, Funktionstrennung (wer gebucht hat, prueft nicht) und Person statt Dienstkonto prueft\n``pruefe_befund`` — im Trockenlauf vorab dieselben Bedingungen.",
+        "operationId": "befund_pruefen_aktion_api_v1_kontrolle_befunde__entity_id__actions_pruefen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pruefkorb: Befund bewerten (Maskenaktion)",
+        "tags": [
+          "kontrolle"
+        ]
+      }
+    },
     "/api/v1/kontrolle/lagebild": {
       "get": {
         "operationId": "lage_api_v1_kontrolle_lagebild_get",
@@ -337081,6 +337213,80 @@
           }
         ],
         "summary": "Lieferstapel in die Staging-Stufe uebernehmen",
+        "tags": [
+          "integration",
+          "l3-parity"
+        ]
+      }
+    },
+    "/api/v1/legacy-interface-adapters/batches/{entity_id}/actions/{action_key}": {
+      "post": {
+        "description": "Dieselben Fachwege wie die Einzelwege; Rolle prueft der Router (Leitung Finanzen/Lager).",
+        "operationId": "run_batch_action_api_v1_legacy_interface_adapters_batches__entity_id__actions__action_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "action_key",
+            "required": true,
+            "schema": {
+              "enum": [
+                "stage",
+                "reconcile",
+                "approve"
+              ],
+              "title": "Action Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Altsystem-Adapter: Maskenaktion (Staging, Abstimmung, Freigabe)",
         "tags": [
           "integration",
           "l3-parity"
@@ -348115,6 +348321,65 @@
           }
         ],
         "summary": "Queue-Status abrufen",
+        "tags": [
+          "mobile",
+          "sync"
+        ]
+      }
+    },
+    "/api/v1/mobile/sync-queue/{entity_id}/actions/retry_event": {
+      "post": {
+        "operationId": "run_retry_event_api_v1_mobile_sync_queue__entity_id__actions_retry_event_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "MDE-Inbox: fehlgeschlagenes Ereignis wiederholen (Maskenaktion)",
         "tags": [
           "mobile",
           "sync"
@@ -405107,6 +405372,80 @@
           }
         ],
         "summary": "Tankdaten entgegennehmen",
+        "tags": [
+          "tankstelle",
+          "integration"
+        ]
+      }
+    },
+    "/api/v1/tank-adapter/intake/{entity_id}/actions/{action_key}": {
+      "post": {
+        "description": "Dieselben Fachwege wie die Einzelwege; ``retry`` nimmt optional ``corrected_payload``.",
+        "operationId": "run_intake_action_api_v1_tank_adapter_intake__entity_id__actions__action_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "action_key",
+            "required": true,
+            "schema": {
+              "enum": [
+                "validate",
+                "process",
+                "retry"
+              ],
+              "title": "Action Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Tankanlagen-Eingang: Maskenaktion (pruefen, verarbeiten, wiederholen)",
         "tags": [
           "tankstelle",
           "integration"

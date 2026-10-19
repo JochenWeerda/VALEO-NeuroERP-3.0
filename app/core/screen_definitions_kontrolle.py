@@ -58,8 +58,8 @@ def build_pruefkorb_screen_definition() -> dict[str, Any]:
             ],
             "rowRouteTemplate": "{source_route}",
             "rowActions": [
-                {"key": "pruefen", "label": "Bewerten", "visibleWhen": nur_offen},
-                {"key": "open_source", "label": "Zum Beleg"},
+                {"key": "pruefen", "label": "Bewerten", "visibleWhen": nur_offen, "commandEndpoint": "/api/v1/kontrolle/befunde/{entity_id}/actions/pruefen", "method": "POST", "humanApprovalRequired": True},
+                {"key": "open_source", "label": "Zum Beleg", "localEffect": "navigation"},
             ],
         }],
         "noWorkflowReason": "Ein Befund hat nur zwei Stände (offen, geprüft); die Bewertung wird am Befund festgehalten.",

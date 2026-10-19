@@ -71,3 +71,28 @@ Identitaet). Der MCP-Kartengenerator kennt `mask.action.execute` (`mapped_generi
   zusammen 1997 gruen.
 - Vitest der fuenf Seiten 15 gruen; volle `tsc` und ESLint ohne Befund in den Dateien.
 - Inventar: `aktionen_nicht_deklariert` 99 -> 75, CLI-Register 169 Aktionen.
+
+## Schritt 3: Tankanlagen-Eingang, Altsystem-Adapter, MDE-Inbox, Dokumentenruecklauf, Pruefkorb
+
+- `POST /tank-adapter/intake/{id}/actions/{validate|process|retry}` (retry optional `corrected_payload`)
+- `POST /legacy-interface-adapters/batches/{id}/actions/{stage|reconcile|approve}` (approve menschlich)
+- `POST /mobile/sync-queue/{id}/actions/retry_event`
+- `POST /document-returns/{id}/actions/{mark_sent|mark_received|verify_return}` — bewusst nicht unter
+  `/docflow`, dort gelten die versionierten Beleg-Adapter (MCP und CLI sperren `/docflow`-Wege ohne Adapter)
+- `POST /kontrolle/befunde/{id}/actions/pruefen` (`note` = Bewertung und Begruendung; menschlich)
+
+Vorschau des Ruecklaufnachweises ist `localEffect: view` (lesend).
+
+### Sicherheitsbefunde und Korrektur
+
+Tankanlagen-Eingang (pruefen, verarbeiten, wiederholen), MDE (wiederholen, Queue verarbeiten) und
+Dokumentenruecklauf (anlegen, Statuswechsel) hatten keine Rollenpruefung. Jetzt: Tankanlage Lager oder Verkauf
+(`tank_write`), MDE Lager, Ruecklauf Belegbearbeitung (`beleg_write`). Alle fuenf Router nahmen den Urheber aus
+`X-User-ID`; die Annahme der Tankdaten nimmt jetzt die Kennung des angemeldeten (technischen) Zugangs.
+
+### Nachweis
+
+- `tests/test_inbox_mask_commands.py` (5, `valeo_probe`): Rolle, Urheber, Zustand, Trockenlauf, fremder
+  Mandant, Funktionstrennung im Pruefkorb. Mit Bestands-, MCP-, CLI-, Inventar- und Rollensuiten 2751 gruen.
+- Vitest der Seiten (finance, schnittstelle, tankstelle, docflow) gruen; `tsc` und ESLint ohne Befund.
+- Inventar: `aktionen_nicht_deklariert` 75 -> 60; CLI-Register 180 Aktionen.

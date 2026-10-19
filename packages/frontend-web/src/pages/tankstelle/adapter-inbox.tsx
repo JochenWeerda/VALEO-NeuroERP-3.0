@@ -1,22 +1,30 @@
-import { useQueryClient } from '@tanstack/react-query'
 import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
-import { apiClient } from '@/lib/api-client'
+import { seg, useMaskRowCommands } from '@/components/mask-builder/runtime/useMaskRowCommands'
 import { useToast } from '@/hooks/use-toast'
 
 const SCREEN_ID = 'tankstelle/adapter-inbox'
+const intake = (key: string) => (row: Record<string, unknown>) => `/api/v1/tank-adapter/intake/${seg(row.id)}/actions/${key}`
 
+/** Tankanlagen-Eingang: Pruefen, Uebernehmen und Wiederholen ueber dieselben Kommando-Wege wie CLI und MCP. */
 export default function TankAdapterInboxPage(): JSX.Element {
-  const queryClient = useQueryClient(); const { toast } = useToast()
-  async function handleAction(actionKey: string, row: Record<string, unknown>): Promise<void> {
-    if (actionKey === 'open_source') { window.location.assign(`/tankstelle/adapter-inbox?focus=${encodeURIComponent(String(row.id ?? ''))}`); return }
-    if (!['validate', 'process', 'retry'].includes(actionKey)) return
-    const reason = window.prompt('Grund (Audit):')?.trim(); if (!reason || reason.length < 5) return
-    let body: Record<string, unknown> = { reason }
-    if (actionKey === 'retry') { const corrected = window.prompt('Korrigiertes Payload als JSON (leer = unveraendert):')?.trim(); if (corrected) body = { reason, corrected_payload: JSON.parse(corrected) } }
-    try {
-      await apiClient.post(`/api/v1/tank-adapter/intake/${encodeURIComponent(String(row.id ?? ''))}/${actionKey}`, body)
-      await queryClient.invalidateQueries({ queryKey: [SCREEN_ID] }); toast({ title: 'Tankanlagen-Eingang aktualisiert' })
-    } catch (error) { toast({ title: 'Aktion fehlgeschlagen', description: error instanceof Error ? error.message : 'Unbekannter Fehler', variant: 'destructive' }) }
-  }
+  const { toast } = useToast()
+  const handleAction = useMaskRowCommands({
+    screenId: SCREEN_ID,
+    commands: { validate: intake('validate'), process: intake('process'), retry: intake('retry') },
+    navigation: { open_source: row => `/tankstelle/adapter-inbox?focus=${seg(row.id)}` },
+    payload: (actionKey) => {
+      if (actionKey !== 'retry') return undefined
+      const corrected = window.prompt('Korrigiertes Payload als JSON (leer = unveraendert):')?.trim()
+      if (!corrected) return {}
+      try {
+        return { corrected_payload: JSON.parse(corrected) as unknown }
+      } catch {
+        toast({ title: 'Kein gueltiges JSON', description: 'Das korrigierte Payload wurde nicht gesendet.', variant: 'destructive' })
+        return null
+      }
+    },
+    reasonPrompt: 'Grund (Audit):',
+    successTitle: 'Tankanlagen-Eingang aktualisiert',
+  })
   return <UniversalNativeCockpitPage screenId={SCREEN_ID} testId="tank-adapter-inbox" permissions={['tank.adapter.write']} onAction={handleAction} />
 }

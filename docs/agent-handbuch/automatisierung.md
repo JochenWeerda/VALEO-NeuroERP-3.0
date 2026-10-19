@@ -204,6 +204,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `finance.ap_invoice.approved` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
 | `finance.ar_open_item.dunning_created` | outbox | `app/api/v1/endpoints/open_items.py` |
 | `finance.billing_batch_line.retry` | outbox | `app/api/v1/endpoints/billing_batch.py` |
+| `finance.control_finding.reviewed` | outbox | `app/api/v1/endpoints/kontrolle.py` |
 | `finance.payment_run.approved` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `finance.tax_key.saved` | outbox | `app/api/v1/endpoints/tax_keys.py` |
 | `fuhrpark.dokument.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
@@ -215,6 +216,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `inventur.abgeschlossen` | outbox | `app/services/inventory_compat_service.py` |
 | `logistik.frachttabelle.created` | outbox | `app/api/v1/endpoints/logistik_frachttabellen.py` |
 | `logistik.tour.created` | outbox | `app/api/v1/command_handlers/logistics.py` |
+| `mobile.event.retry` | outbox | `app/api/v1/endpoints/mobile_sync.py` |
 | `personal.bewerbung.created` | outbox | `app/api/v1/endpoints/personal_bewerbungen.py` |
 | `personal.einwilligungserklaerung.created` | outbox | `app/api/v1/endpoints/personal_bewerbungen.py` |
 | `personal.onboarding.created` | outbox | `app/api/v1/command_handlers/training.py` |

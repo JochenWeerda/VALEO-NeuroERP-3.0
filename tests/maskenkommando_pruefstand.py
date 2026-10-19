@@ -74,6 +74,8 @@ class Pruefstand:
         from sqlalchemy import text
 
         with engine.begin() as v:
+            # Gepruefte Befunde und Freigaben sind unloeschbar; die Wartungsweiche gilt nur in dieser Transaktion.
+            v.execute(text("SET LOCAL valeo.docflow_wartung = 'loeschen'"))
             for tabelle in self.tabellen:
                 v.execute(text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"),  # nosec B608
                           {"h": [self.haus_a, self.haus_b]})
@@ -99,6 +101,13 @@ class Pruefstand:
         from sqlalchemy import text
 
         with engine.connect() as v:
+            return v.execute(text(sql), parameter).scalar()
+
+    def einfuegen(self, engine, sql: str, **parameter):
+        """Schreibend mit Commit; liefert den ersten Wert (``RETURNING``)."""
+        from sqlalchemy import text
+
+        with engine.begin() as v:
             return v.execute(text(sql), parameter).scalar()
 
     def ausfuehren(self, engine, sql: str, **parameter) -> None:

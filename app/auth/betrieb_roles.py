@@ -20,3 +20,7 @@ LAGER_LEITUNG = ("LAGER_ADMIN", *_LEITUNG)
 lager_write = require_roles(*LAGER_SCHREIBEN)
 lager_admin = require_roles(*LAGER_LEITUNG)
 produktion_write = require_roles(*PRODUKTION_SCHREIBEN)
+
+#: Tankanlage: Lieferungen der Zapfsaeulen pruefen und verarbeiten (Lager bzw. Verkauf an der Tankstelle).
+TANK_SCHREIBEN = (*LAGER_SCHREIBEN, "SALES_BEARBEITEN", "SALES_ADMIN")
+tank_write = require_roles(*TANK_SCHREIBEN)

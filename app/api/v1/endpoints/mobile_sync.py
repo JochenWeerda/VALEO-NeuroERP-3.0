@@ -9,12 +9,16 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.auth.betrieb_roles import lager_write
+from app.core.akteur import gepruefter_akteur
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.services.mask_action_runtime_service import MaskActionResult as MaskActionResultOut
+from app.services.mask_commands import begruendung, statusaktion
 from app.services.mobile_sync_service import MobileSyncService
 from app.api.v1.schemas.base import TypedObjectOut
 
@@ -66,7 +70,7 @@ def sync_events(
 
 @router.post("/sync-process", response_model=TypedObjectOut, summary="Pending Events verarbeiten")
 def process_queue(
-    request: Request,
+    user: dict = Depends(lager_write),
     body: ProcessQueueIn | None = None,
     limit: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
@@ -76,7 +80,7 @@ def process_queue(
     Kann manuell oder per Cron aufgerufen werden.
     """
     svc = MobileSyncService(db, tenant_id)
-    actor = (request.headers.get("X-User-ID") or "mde-operator")[:120]
+    actor = gepruefter_akteur(user)  # bis 19.10.2026: Client-Header X-User-ID
     return svc.process_pending(limit=limit, actor=actor, reason=(body.reason if body else "Manuelle MDE-Verarbeitung"))
 
 
@@ -121,11 +125,11 @@ def get_queue_summary(
 def retry_event(
     event_id: str,
     body: RetryEventIn,
-    request: Request,
+    user: dict = Depends(lager_write),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    actor = (request.headers.get("X-User-ID") or "mde-operator")[:120]
+    actor = gepruefter_akteur(user)  # bis 19.10.2026: Client-Header X-User-ID
     try:
         return MobileSyncService(db, tenant_id).retry_event(event_id, actor=actor, reason=body.reason)
     except LookupError as exc:
@@ -144,3 +148,31 @@ def get_event_audit(
         return MobileSyncService(db, tenant_id).event_audit(event_id)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+
+@router.post(
+    "/sync-queue/{entity_id}/actions/retry_event",
+    response_model=MaskActionResultOut,
+    summary="MDE-Inbox: fehlgeschlagenes Ereignis wiederholen (Maskenaktion)",
+)
+async def run_retry_event(
+    entity_id: str,
+    body: dict[str, Any] = Body(default_factory=dict),
+    user: dict = Depends(lager_write),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    bearbeiter = gepruefter_akteur(user)
+
+    def ausfuehren(db_: Session, _payload: dict[str, Any]) -> str:
+        MobileSyncService(db_, tenant_id).retry_event(entity_id, actor=bearbeiter, reason=begruendung(body))
+        return "MDE-Ereignis erneut eingereiht."
+
+    result = await statusaktion(
+        db, action_key="retry_event", entity_type="mobile_event", entity_id=entity_id, tenant_id=tenant_id,
+        body=body, erlaubt={"failed", "quarantined"}, ausfuehren=ausfuehren,
+        status_sql="SELECT sync_status AS status FROM domain_ops.mobile_event_queue WHERE id=:id AND tenant_id=:tid",
+        event_type="mobile.event.retry",
+    )
+    return result.model_dump()

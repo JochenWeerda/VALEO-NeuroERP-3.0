@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -21,6 +21,8 @@ from app.core.tenant import get_tenant_id
 from app.services import kontrollkorb
 from app.services.freigabe_engine import KONTROLLROLLEN, pruefe_befund, pruefkorb
 from app.api.v1.schemas.base import TypedObjectOut
+from app.services.mask_action_runtime_service import MaskActionResult as MaskActionResultOut
+from app.services.mask_commands import statusaktion
 
 router = APIRouter()
 
@@ -104,3 +106,47 @@ def befund_pruefen(
     except ValidationFailedError as exc:
         db.rollback()
         raise HTTPException(status_code=403, detail=exc.detail) from exc
+
+
+@router.post(
+    "/befunde/{entity_id}/actions/pruefen",
+    response_model=MaskActionResultOut,
+    summary="Pruefkorb: Befund bewerten (Maskenaktion)",
+)
+async def befund_pruefen_aktion(
+    entity_id: str,
+    body: dict[str, Any] = Body(default_factory=dict),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Derselbe Fachweg wie ``/pruefung``; die Bewertung (``note``) ist zugleich die Audit-Begruendung.
+
+    Rolle, Funktionstrennung (wer gebucht hat, prueft nicht) und Person statt Dienstkonto prueft
+    ``pruefe_befund`` — im Trockenlauf vorab dieselben Bedingungen.
+    """
+    _nur_leser(nutzer)
+    note = str(body.get("note") or body.get("_auditReason") or "").strip()
+    body = {**body, "_auditReason": body.get("_auditReason") or note}
+    wer = str((nutzer or {}).get("sub") or "") if isinstance(nutzer, dict) else ""
+
+    def vorpruefung(row: dict[str, Any]) -> str | None:
+        if len(note) < 3:
+            return "Die Pruefung braucht eine Bewertung."
+        if not rollen_von(nutzer) & KONTROLLROLLEN:
+            return "Keine Berechtigung fuer den Pruefkorb."
+        if row.get("actor") and str(row["actor"]) == wer:
+            return "Wer gebucht hat, prueft den Befund nicht selbst."
+        return None
+
+    def ausfuehren(db_: Session, _payload: dict[str, Any]) -> str:
+        pruefe_befund(db_, tenant_id, entity_id, nutzer, note)
+        return "Befund bewertet."
+
+    result = await statusaktion(
+        db, action_key="pruefen", entity_type="control_finding", entity_id=entity_id, tenant_id=tenant_id,
+        body=body, erlaubt={"offen"}, ausfuehren=ausfuehren, zusatzpruefung=vorpruefung, begruendung_pflicht=False,
+        status_sql="SELECT status, actor FROM domain_docflow.control_findings WHERE id=:id AND tenant_id=:tid",
+        event_type="finance.control_finding.reviewed",
+    )
+    return result.model_dump()

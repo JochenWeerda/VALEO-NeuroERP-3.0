@@ -5481,5 +5481,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 99
+  "event_count": 101
 }
