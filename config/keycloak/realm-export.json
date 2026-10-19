@@ -150,6 +150,10 @@
         "description": "Lager: leiten: freigeben, loeschen, abschliessen"
       },
       {
+        "name": "LAGER_BEARBEITEN",
+        "description": "Lager: anlegen und aendern"
+      },
+      {
         "name": "LAGER_LESEN",
         "description": "Lager: ansehen"
       },

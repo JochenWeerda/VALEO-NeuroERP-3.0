@@ -1,0 +1,23 @@
+name: Role description contracts
+on:
+  pull_request:
+    paths: ['app/**', 'config/keycloak/**', 'scripts/check_fachrollen.py', 'tests/test_role_description_contracts.py', '.github/workflows/role-description-contracts.yml']
+  push:
+    branches: [main, develop]
+    paths: ['app/**', 'config/keycloak/**', 'scripts/check_fachrollen.py', 'tests/test_role_description_contracts.py', '.github/workflows/role-description-contracts.yml']
+permissions:
+  contents: read
+jobs:
+  role-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check role catalogue and required descriptions
+        run: python scripts/check_fachrollen.py --check
+      - name: Check realm coverage
+        run: python scripts/check_fachrollen.py --realm
+      - name: Reject missing or lost contracts
+        run: python -m unittest discover -s tests -p test_role_description_contracts.py -v

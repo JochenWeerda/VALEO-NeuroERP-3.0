@@ -3,143 +3,551 @@
   "rollen": [
     {
       "name": "AGRAR_ADMIN",
-      "beschreibung": "Agrar: leiten: freigeben, loeschen, abschliessen"
+      "beschreibung": "Agrar: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration",
+      "vertrag": {
+        "zweck": "Agrar: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Agrar; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachliche Leitung im benannten Bereich; Freigaben, Abschluesse und Loeschungen nur soweit der jeweilige Aktionsvertrag sie zulaesst.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "AGRAR_BEARBEITEN",
-      "beschreibung": "Agrar: anlegen und aendern"
+      "beschreibung": "Agrar: anlegen und aendern",
+      "vertrag": {
+        "zweck": "Agrar: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Agrar; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Im benannten Bereich anlegen und aendern; Buchen und Stornieren nur bei ausdruecklichem bestehendem Aktionsvertrag.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "AGRAR_LESEN",
-      "beschreibung": "Agrar: ansehen"
+      "beschreibung": "Agrar: ansehen",
+      "vertrag": {
+        "zweck": "Agrar: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Agrar; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachlich freigegebene Datensaetze ansehen und erlaubte Auswertungen abrufen.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "CRM_ADMIN",
-      "beschreibung": "Vertrieb und Kundenpflege: leiten: freigeben, loeschen, abschliessen"
+      "beschreibung": "Vertrieb und Kundenpflege: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration",
+      "vertrag": {
+        "zweck": "Vertrieb und Kundenpflege: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Vertrieb und Kundenpflege; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachliche Leitung im benannten Bereich; Freigaben, Abschluesse und Loeschungen nur soweit der jeweilige Aktionsvertrag sie zulaesst.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "CRM_BEARBEITEN",
-      "beschreibung": "Vertrieb und Kundenpflege: anlegen und aendern"
+      "beschreibung": "Vertrieb und Kundenpflege: anlegen und aendern",
+      "vertrag": {
+        "zweck": "Vertrieb und Kundenpflege: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Vertrieb und Kundenpflege; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Im benannten Bereich anlegen und aendern; Buchen und Stornieren nur bei ausdruecklichem bestehendem Aktionsvertrag.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "CRM_LESEN",
-      "beschreibung": "Vertrieb und Kundenpflege: ansehen"
+      "beschreibung": "Vertrieb und Kundenpflege: ansehen",
+      "vertrag": {
+        "zweck": "Vertrieb und Kundenpflege: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Vertrieb und Kundenpflege; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachlich freigegebene Datensaetze ansehen und erlaubte Auswertungen abrufen.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "EINKAUF_ADMIN",
-      "beschreibung": "Einkauf: leiten: freigeben, loeschen, abschliessen"
+      "beschreibung": "Einkauf: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration",
+      "vertrag": {
+        "zweck": "Einkauf: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Einkauf; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachliche Leitung im benannten Bereich; Freigaben, Abschluesse und Loeschungen nur soweit der jeweilige Aktionsvertrag sie zulaesst.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "EINKAUF_BEARBEITEN",
-      "beschreibung": "Einkauf: anlegen und aendern"
+      "beschreibung": "Einkauf: anlegen und aendern",
+      "vertrag": {
+        "zweck": "Einkauf: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Einkauf; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Im benannten Bereich anlegen und aendern; Buchen und Stornieren nur bei ausdruecklichem bestehendem Aktionsvertrag.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "EINKAUF_LESEN",
-      "beschreibung": "Einkauf: ansehen"
+      "beschreibung": "Einkauf: ansehen",
+      "vertrag": {
+        "zweck": "Einkauf: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Einkauf; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachlich freigegebene Datensaetze ansehen und erlaubte Auswertungen abrufen.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "FINANCE_ADMIN",
-      "beschreibung": "Finanzbuchhaltung: leiten: freigeben, loeschen, abschliessen"
+      "beschreibung": "Finanzbuchhaltung: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration",
+      "vertrag": {
+        "zweck": "Finanzbuchhaltung: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Finanzbuchhaltung; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachliche Leitung im benannten Bereich; Freigaben, Abschluesse und Loeschungen nur soweit der jeweilige Aktionsvertrag sie zulaesst.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "FINANCE_BEARBEITEN",
-      "beschreibung": "Finanzbuchhaltung: anlegen und aendern"
+      "beschreibung": "Finanzbuchhaltung: anlegen und aendern",
+      "vertrag": {
+        "zweck": "Finanzbuchhaltung: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Finanzbuchhaltung; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Im benannten Bereich anlegen und aendern; Buchen und Stornieren nur bei ausdruecklichem bestehendem Aktionsvertrag.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "FINANCE_LESEN",
-      "beschreibung": "Finanzbuchhaltung: ansehen"
+      "beschreibung": "Finanzbuchhaltung: ansehen",
+      "vertrag": {
+        "zweck": "Finanzbuchhaltung: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Finanzbuchhaltung; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachlich freigegebene Datensaetze ansehen und erlaubte Auswertungen abrufen.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "FUTTERMITTEL_ADMIN",
-      "beschreibung": "Futtermittel: leiten: freigeben, loeschen, abschliessen"
+      "beschreibung": "Futtermittel: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration",
+      "vertrag": {
+        "zweck": "Futtermittel: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Futtermittel; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachliche Leitung im benannten Bereich; Freigaben, Abschluesse und Loeschungen nur soweit der jeweilige Aktionsvertrag sie zulaesst.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "FUTTERMITTEL_BEARBEITEN",
-      "beschreibung": "Futtermittel: anlegen und aendern"
+      "beschreibung": "Futtermittel: anlegen und aendern",
+      "vertrag": {
+        "zweck": "Futtermittel: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Futtermittel; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Im benannten Bereich anlegen und aendern; Buchen und Stornieren nur bei ausdruecklichem bestehendem Aktionsvertrag.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "FUTTERMITTEL_LESEN",
-      "beschreibung": "Futtermittel: ansehen"
+      "beschreibung": "Futtermittel: ansehen",
+      "vertrag": {
+        "zweck": "Futtermittel: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Futtermittel; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachlich freigegebene Datensaetze ansehen und erlaubte Auswertungen abrufen.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "HARVEST_ADMIN",
-      "beschreibung": "Ernteannahme: leiten: freigeben, loeschen, abschliessen"
+      "beschreibung": "Ernteannahme: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration",
+      "vertrag": {
+        "zweck": "Ernteannahme: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Ernteannahme; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachliche Leitung im benannten Bereich; Freigaben, Abschluesse und Loeschungen nur soweit der jeweilige Aktionsvertrag sie zulaesst.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "HARVEST_BEARBEITEN",
-      "beschreibung": "Ernteannahme: anlegen und aendern"
+      "beschreibung": "Ernteannahme: anlegen und aendern",
+      "vertrag": {
+        "zweck": "Ernteannahme: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Ernteannahme; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Im benannten Bereich anlegen und aendern; Buchen und Stornieren nur bei ausdruecklichem bestehendem Aktionsvertrag.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "HARVEST_LESEN",
-      "beschreibung": "Ernteannahme: ansehen"
+      "beschreibung": "Ernteannahme: ansehen",
+      "vertrag": {
+        "zweck": "Ernteannahme: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Ernteannahme; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachlich freigegebene Datensaetze ansehen und erlaubte Auswertungen abrufen.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "KONTENPLAN_PFLEGE",
-      "beschreibung": "Kontenplan: pflegen (delegierbar, unabhaengig von der Leitungsrolle)"
+      "beschreibung": "Kontenplan: pflegen (delegierbar, unabhaengig von der Leitungsrolle)",
+      "vertrag": {
+        "zweck": "Kontenplan: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Kontenplan; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Stammdaten im benannten Kontenplan oder Kontenrahmen pflegen; keine Buchungen oder Zahlungsfreigaben.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "KONTENRAHMEN_PFLEGE",
-      "beschreibung": "Gemeinsamer Kontenrahmen: pflegen (delegierbar, unabhaengig von der Leitungsrolle)"
+      "beschreibung": "Gemeinsamer Kontenrahmen: pflegen (delegierbar, unabhaengig von der Leitungsrolle)",
+      "vertrag": {
+        "zweck": "Gemeinsamer Kontenrahmen: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Gemeinsamer Kontenrahmen; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Stammdaten im benannten Kontenplan oder Kontenrahmen pflegen; keine Buchungen oder Zahlungsfreigaben.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "KONTRAKT_ADMIN",
-      "beschreibung": "Kontrakte: leiten: freigeben, loeschen, abschliessen"
+      "beschreibung": "Kontrakte: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration",
+      "vertrag": {
+        "zweck": "Kontrakte: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Kontrakte; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachliche Leitung im benannten Bereich; Freigaben, Abschluesse und Loeschungen nur soweit der jeweilige Aktionsvertrag sie zulaesst.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "KONTRAKT_BEARBEITEN",
-      "beschreibung": "Kontrakte: anlegen und aendern"
+      "beschreibung": "Kontrakte: anlegen und aendern",
+      "vertrag": {
+        "zweck": "Kontrakte: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Kontrakte; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Im benannten Bereich anlegen und aendern; Buchen und Stornieren nur bei ausdruecklichem bestehendem Aktionsvertrag.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "KONTRAKT_LESEN",
-      "beschreibung": "Kontrakte: ansehen"
+      "beschreibung": "Kontrakte: ansehen",
+      "vertrag": {
+        "zweck": "Kontrakte: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Kontrakte; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachlich freigegebene Datensaetze ansehen und erlaubte Auswertungen abrufen.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "KONTRAKT_LOESCHEN",
-      "beschreibung": "Kontrakte: loeschen"
+      "beschreibung": "Kontrakte: loeschen",
+      "vertrag": {
+        "zweck": "Kontrakte: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Kontrakte; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Ausschliesslich fachlich loeschbare, nicht festgeschriebene Datensaetze im benannten Bereich loeschen.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "LAGER_ADMIN",
-      "beschreibung": "Lager: leiten: freigeben, loeschen, abschliessen"
+      "beschreibung": "Lager: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration",
+      "vertrag": {
+        "zweck": "Lager: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Lager; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachliche Leitung im benannten Bereich; Freigaben, Abschluesse und Loeschungen nur soweit der jeweilige Aktionsvertrag sie zulaesst.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "LAGER_BEARBEITEN",
-      "beschreibung": "Lager: anlegen und aendern"
+      "beschreibung": "Lager: anlegen und aendern",
+      "vertrag": {
+        "zweck": "Lager: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Lager; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Im benannten Bereich anlegen und aendern; Buchen und Stornieren nur bei ausdruecklichem bestehendem Aktionsvertrag.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "LAGER_LESEN",
-      "beschreibung": "Lager: ansehen"
+      "beschreibung": "Lager: ansehen",
+      "vertrag": {
+        "zweck": "Lager: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Lager; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachlich freigegebene Datensaetze ansehen und erlaubte Auswertungen abrufen.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "PERSONAL_ADMIN",
-      "beschreibung": "Personal: leiten: freigeben, loeschen, abschliessen"
+      "beschreibung": "Personal: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration",
+      "vertrag": {
+        "zweck": "Personal: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Personal; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachliche Leitung im benannten Bereich; Freigaben, Abschluesse und Loeschungen nur soweit der jeweilige Aktionsvertrag sie zulaesst.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "PERSONAL_BEARBEITEN",
-      "beschreibung": "Personal: anlegen und aendern"
+      "beschreibung": "Personal: anlegen und aendern",
+      "vertrag": {
+        "zweck": "Personal: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Personal; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Im benannten Bereich anlegen und aendern; Buchen und Stornieren nur bei ausdruecklichem bestehendem Aktionsvertrag.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "PERSONAL_LESEN",
-      "beschreibung": "Personal: ansehen"
+      "beschreibung": "Personal: ansehen",
+      "vertrag": {
+        "zweck": "Personal: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Personal; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachlich freigegebene Datensaetze ansehen und erlaubte Auswertungen abrufen.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "QUALITAET_LESEN",
-      "beschreibung": "Qualitaetssicherung: ansehen"
+      "beschreibung": "Qualitaetssicherung: ansehen",
+      "vertrag": {
+        "zweck": "Qualitaetssicherung: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Qualitaetssicherung; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachlich freigegebene Datensaetze ansehen und erlaubte Auswertungen abrufen.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "SALES_ADMIN",
-      "beschreibung": "Verkauf: leiten: freigeben, loeschen, abschliessen"
+      "beschreibung": "Verkauf: fachliche Leitung; Freigaben und Abschluesse nur gemaess Aktionsvertrag, keine technische Administration",
+      "vertrag": {
+        "zweck": "Verkauf: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Verkauf; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachliche Leitung im benannten Bereich; Freigaben, Abschluesse und Loeschungen nur soweit der jeweilige Aktionsvertrag sie zulaesst.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "SALES_BEARBEITEN",
-      "beschreibung": "Verkauf: anlegen und aendern"
+      "beschreibung": "Verkauf: anlegen und aendern",
+      "vertrag": {
+        "zweck": "Verkauf: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Verkauf; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Im benannten Bereich anlegen und aendern; Buchen und Stornieren nur bei ausdruecklichem bestehendem Aktionsvertrag.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "SALES_LESEN",
-      "beschreibung": "Verkauf: ansehen"
+      "beschreibung": "Verkauf: ansehen",
+      "vertrag": {
+        "zweck": "Verkauf: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Verkauf; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachlich freigegebene Datensaetze ansehen und erlaubte Auswertungen abrufen.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
     },
     {
       "name": "SETTLEMENT_LESEN",
-      "beschreibung": "Abrechnung: ansehen"
+      "beschreibung": "Abrechnung: ansehen",
+      "vertrag": {
+        "zweck": "Abrechnung: fachliche Aufgaben gemaess benannter Berechtigungsstufe.",
+        "personenkreis": "Ausdruecklich beauftragte Mitarbeitende fuer Abrechnung; keine automatische Ableitung aus Stellenbezeichnung oder Fuehrungsverantwortung.",
+        "geltungsbereich": "Nur autorisierter aktiver Mandant und zulaessige Datensaetze; Betrieb und Niederlassung gemaess zusaetzlicher Objektberechtigung. Gemeinsamer Kontenrahmen nur mit seinem gesonderten Pflegerecht.",
+        "erlaubt": "Fachlich freigegebene Datensaetze ansehen und erlaubte Auswertungen abrufen.",
+        "ausgeschlossen": "Keine fremden Mandanten, keine sachfremden Bereiche, keine Rechtevergabe oder technische Administration. Festgeschriebene Belege nicht direkt aendern oder loeschen.",
+        "freigaben": "Aktionsgebundene Freigaben, Vier-Augen-Regeln und Wertgrenzen bleiben zusaetzlich erforderlich; die Rolle ersetzt keine Genehmigung.",
+        "vergabe": "Durch autorisierte Identitaetsverwaltung nach fachlicher Beauftragung; minimal erforderlicher Umfang, bei Aufgabenwechsel pruefen und entziehen."
+      }
+    }
+  ],
+  "grundrollen": [
+    {
+      "name": "admin",
+      "beschreibung": "Technische Administration",
+      "vertrag": {
+        "zweck": "Autorisierte technische Administration der Installation und zugewiesener Mandanten.",
+        "personenkreis": "Nur ausdruecklich beauftragte Personen; fuer Altrollen keine neue Vergabe.",
+        "geltungsbereich": "Autorisierter Mandant und Objektumfang; keine implizite Ausdehnung auf Konzern, Betrieb oder Niederlassung.",
+        "erlaubt": "Explizit abgesicherte Verwaltungsaktionen; bestehende Fachaktionen nur nach deren gesondertem Vertrag.",
+        "ausgeschlossen": "Kein Freibrief fuer fremde Mandanten, Zahlungen, Buchungen oder Umgehung von Vier-Augen-Regeln.",
+        "freigaben": "Aktionsgebundene Genehmigung und Vier-Augen-Pruefung gelten unveraendert.",
+        "vergabe": "Autorisierte Identitaetsverwaltung mit nachvollziehbarer Begruendung und regelmaessiger Entzugspruefung; Altrollen nicht neu vergeben."
+      }
+    },
+    {
+      "name": "user",
+      "beschreibung": "Angemeldeter Standardnutzer",
+      "vertrag": {
+        "zweck": "Persoenlicher Zugang ohne automatische Fachbearbeitung.",
+        "personenkreis": "Nur ausdruecklich beauftragte Personen; fuer Altrollen keine neue Vergabe.",
+        "geltungsbereich": "Autorisierter Mandant und Objektumfang; keine implizite Ausdehnung auf Konzern, Betrieb oder Niederlassung.",
+        "erlaubt": "Eigene Einstellungen und explizit freigegebene persoenliche Funktionen.",
+        "ausgeschlossen": "Keine pauschalen Fachlese-, Schreib-, Administrations- oder Freigaberechte.",
+        "freigaben": "Aktionsgebundene Genehmigung und Vier-Augen-Pruefung gelten unveraendert.",
+        "vergabe": "Autorisierte Identitaetsverwaltung mit nachvollziehbarer Begruendung und regelmaessiger Entzugspruefung; Altrollen nicht neu vergeben."
+      }
+    },
+    {
+      "name": "manager",
+      "beschreibung": "Historische allgemeine Managementrolle",
+      "vertrag": {
+        "zweck": "Altrolle in Abloesung; keine fachlich definierte Agrarhandelsleitung und keine Shop-spezifische Rolle.",
+        "personenkreis": "Nur ausdruecklich beauftragte Personen; fuer Altrollen keine neue Vergabe.",
+        "geltungsbereich": "Autorisierter Mandant und Objektumfang; keine implizite Ausdehnung auf Konzern, Betrieb oder Niederlassung.",
+        "erlaubt": "Keine neuen Rechte oder Neuvergabe; vorhandene Codezuordnungen einzeln auf begrenzte Fachrollen ueberfuehren.",
+        "ausgeschlossen": "Keine pauschale Leitung aller Bereiche; insbesondere keine automatische Finanz-, Personal-, Zahlungs- oder Systemverwaltung.",
+        "freigaben": "Aktionsgebundene Genehmigung und Vier-Augen-Pruefung gelten unveraendert.",
+        "vergabe": "Autorisierte Identitaetsverwaltung mit nachvollziehbarer Begruendung und regelmaessiger Entzugspruefung; Altrollen nicht neu vergeben."
+      }
+    },
+    {
+      "name": "auditor",
+      "beschreibung": "Pruefender Zugang",
+      "vertrag": {
+        "zweck": "Beauftragte Revision im genehmigten Pruefungsumfang.",
+        "personenkreis": "Nur ausdruecklich beauftragte Personen; fuer Altrollen keine neue Vergabe.",
+        "geltungsbereich": "Autorisierter Mandant und Objektumfang; keine implizite Ausdehnung auf Konzern, Betrieb oder Niederlassung.",
+        "erlaubt": "Explizit autorisierte lesende Fach- und Auditansichten.",
+        "ausgeschlossen": "Keine Geschaeftsmutation, Rechtevergabe oder Mandantenumgehung.",
+        "freigaben": "Aktionsgebundene Genehmigung und Vier-Augen-Pruefung gelten unveraendert.",
+        "vergabe": "Autorisierte Identitaetsverwaltung mit nachvollziehbarer Begruendung und regelmaessiger Entzugspruefung; Altrollen nicht neu vergeben."
+      }
+    },
+    {
+      "name": "finance_manager",
+      "beschreibung": "Historische Finanzrolle",
+      "vertrag": {
+        "zweck": "Altbezeichnung; nach Pruefung auf vorhandene FINANCE-Fachrollen umstellen.",
+        "personenkreis": "Nur ausdruecklich beauftragte Personen; fuer Altrollen keine neue Vergabe.",
+        "geltungsbereich": "Autorisierter Mandant und Objektumfang; keine implizite Ausdehnung auf Konzern, Betrieb oder Niederlassung.",
+        "erlaubt": "Keine neuen Rechte; ausschliesslich einzeln nachgewiesene bestehende Bereichsvertraege.",
+        "ausgeschlossen": "Kein automatisches FINANCE_ADMIN und keine automatische Zahlungsfreigabe.",
+        "freigaben": "Aktionsgebundene Genehmigung und Vier-Augen-Pruefung gelten unveraendert.",
+        "vergabe": "Autorisierte Identitaetsverwaltung mit nachvollziehbarer Begruendung und regelmaessiger Entzugspruefung; Altrollen nicht neu vergeben."
+      }
+    },
+    {
+      "name": "inventory_manager",
+      "beschreibung": "Historische Lagerrolle",
+      "vertrag": {
+        "zweck": "Altbezeichnung; nach Pruefung auf vorhandene LAGER-Fachrollen umstellen.",
+        "personenkreis": "Nur ausdruecklich beauftragte Personen; fuer Altrollen keine neue Vergabe.",
+        "geltungsbereich": "Autorisierter Mandant und Objektumfang; keine implizite Ausdehnung auf Konzern, Betrieb oder Niederlassung.",
+        "erlaubt": "Keine neuen Rechte; ausschliesslich einzeln nachgewiesene bestehende Bereichsvertraege.",
+        "ausgeschlossen": "Keine automatische Inventurkorrektur, Fremdmandanten- oder Finanzberechtigung.",
+        "freigaben": "Aktionsgebundene Genehmigung und Vier-Augen-Pruefung gelten unveraendert.",
+        "vergabe": "Autorisierte Identitaetsverwaltung mit nachvollziehbarer Begruendung und regelmaessiger Entzugspruefung; Altrollen nicht neu vergeben."
+      }
+    },
+    {
+      "name": "crm_manager",
+      "beschreibung": "Historische CRM-Rolle",
+      "vertrag": {
+        "zweck": "Altbezeichnung; nach Pruefung auf vorhandene CRM-Fachrollen umstellen.",
+        "personenkreis": "Nur ausdruecklich beauftragte Personen; fuer Altrollen keine neue Vergabe.",
+        "geltungsbereich": "Autorisierter Mandant und Objektumfang; keine implizite Ausdehnung auf Konzern, Betrieb oder Niederlassung.",
+        "erlaubt": "Keine neuen Rechte; ausschliesslich einzeln nachgewiesene bestehende Bereichsvertraege.",
+        "ausgeschlossen": "Keine automatische Personal-, Finanz- oder Systemberechtigung.",
+        "freigaben": "Aktionsgebundene Genehmigung und Vier-Augen-Pruefung gelten unveraendert.",
+        "vergabe": "Autorisierte Identitaetsverwaltung mit nachvollziehbarer Begruendung und regelmaessiger Entzugspruefung; Altrollen nicht neu vergeben."
+      }
     }
   ]
 }
