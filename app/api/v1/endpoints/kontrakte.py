@@ -41,7 +41,6 @@ from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 # Backwards-compatible alias for tests
 _line_to_out = line_to_dict
 from app.services.position_guard_service import PositionGuardService
-
 from app.api.v1.schemas.kontrakte_schemas import (
     AmendmentCreate,
     AmendmentResponse,
@@ -61,6 +60,7 @@ from app.api.v1.schemas.kontrakt_disposition_schemas import (
 )
 from app.services import kontrakt_disposition_service as dispo
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.akteur import gepruefter_akteur  # Bearbeiter aus dem Token
 
 router = APIRouter(prefix="/kontrakte", tags=["kontrakte"])
 
@@ -888,7 +888,7 @@ async def create_amendment(
     amendment = ContractAmendment(
         id=uuid7(), contract_id=contract_id, type=payload.type, reason=payload.reason,
         status="pending", changes=payload.changes, tenant_id=tenant_id,
-        created_by=user.get("sub") or payload.created_by,
+        created_by=gepruefter_akteur(user),
     )
     db.add(amendment)
     db.flush()

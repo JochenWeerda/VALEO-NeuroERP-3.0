@@ -44,12 +44,14 @@ def test_create_request_valid():
         zustaendiger="max",
         frist_datum="2026-06-01",
     )
-    assert req.aktor_id == "system"
+    # Der Bearbeiter kommt aus dem Token, nie aus dem Anfragekoerper (19.10.2026).
+    assert "aktor_id" not in ReklamationCreateRequest.model_fields
+    assert req.lieferant_id == "LF-001"
 
 
 def test_transition_request_defaults():
     req = ReklamationTransitionRequest(neuer_status="in_pruefung")
-    assert req.aktor_id == "system"
+    assert "aktor_id" not in ReklamationTransitionRequest.model_fields
     assert req.kommentar is None
 
 

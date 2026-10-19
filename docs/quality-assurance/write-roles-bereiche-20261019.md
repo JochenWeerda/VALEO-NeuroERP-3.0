@@ -107,3 +107,11 @@ ordnet ueber die Kennung zu. Beide sind ausdrueckliche Abhaengigkeiten und als s
   Kommando-Inventar, MCP-Bindungen, Architektur-Drift, Godfile, Baseline-Integritaet) gruen.
 - **Offen:** Gesamtlauf der Backend-Suite (zweimal wegen Speichermangels vom System abgebrochen; CI ist
   Schiedsrichter). Zur Entscheidung: GERAET/EIGENE_DATEN (siehe oben).
+- **Nachtrag (STAMMDATEN-BEARBEITEN, Sicherheitsbefund):** Der Body-Vertrag in `tests/test_keine_client_identitaet.py`
+  war wirkungslos — sein Suchmuster enthielt zwei Backspace-Zeichen (`\x08`) statt `\b` und traf nie. Repariert und
+  um `req.` sowie `aktor_id` und `.get("...")` erweitert; ein Mustertest haelt die Formen fest. Er fand 23 weitere
+  Stellen, alle behoben: Nachweisraum, Futtermittelproduktion, Personal-Lebenszyklus, Meldewesen und
+  POS-Tagesabschluss (`operator`), GoBD-Artefakte/E-Rechnungs-XML und Kommissionierlisten (`created_by`),
+  Kontraktnachtrag (Rueckfall auf `payload.created_by`), Wareneingang aus dem Avis (`payload.get("operator")`), dazu
+  die fuenf Reklamationswege und „Reklamation abschliessen“ (`aktor_id`). Der Statuswechsel der Reklamation ist eine
+  Arbeitsfunktion `wechsle_status(..., aktor=...)`, die REST, Maske und MCP mit dem Token-Akteur aufrufen.

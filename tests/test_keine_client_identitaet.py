@@ -58,8 +58,12 @@ def test_suchmuster_erkennt_die_alten_formen():
 
 
 #: Bearbeiter aus Feldern des Anfragekoerpers (19.10.2026: ``operator``/``actor``/``created_by`` in sieben Routern
-#: und im Compliance-Lebenszyklus — derselbe Fehler wie ``X-User-ID``, nur im Body).
-BODY_URHEBER = re.compile(r"(?:body|payload)\.(?:operator|actor|created_by)")
+#: und im Compliance-Lebenszyklus, ``aktor_id`` in fuenf Reklamationswegen und deren Maskenaktion — derselbe Fehler
+#: wie ``X-User-ID``, nur im Body).
+BODY_URHEBER = re.compile(
+    r"\b(?:body|payload|req)\.(?:operator|actor|created_by|aktor_id)\b"
+    r"|\b(?:body|payload|req)\.get\(\s*[\"'](?:operator|actor|created_by|aktor_id)[\"']"
+)
 
 
 def test_kein_weg_nimmt_den_bearbeiter_aus_dem_body():
@@ -69,3 +73,8 @@ def test_kein_weg_nimmt_den_bearbeiter_aus_dem_body():
             if BODY_URHEBER.search(code):
                 funde.append(f"{datei.relative_to(APP.parent)}:{nummer}")
     assert funde == []
+
+
+def test_suchmuster_erkennt_bearbeiter_im_body():
+    for beispiel in ("req.aktor_id", 'payload.get("aktor_id")', "body.operator", "payload.get('actor')"):
+        assert BODY_URHEBER.search(beispiel), beispiel

@@ -812,11 +812,6 @@
             "title": "Mitarbeiter Id",
             "type": "string"
           },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
           "von_datum": {
             "title": "Von Datum",
             "type": "string"
@@ -841,11 +836,6 @@
           },
           "new_status": {
             "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           }
         },
@@ -53474,18 +53464,6 @@
             "title": "Content Hash Sha256",
             "type": "string"
           },
-          "created_by": {
-            "anyOf": [
-              {
-                "maxLength": 100,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created By"
-          },
           "file_name": {
             "anyOf": [
               {
@@ -53602,11 +53580,6 @@
             "title": "Dokument Typ",
             "type": "string"
           },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
           "referenz_id": {
             "title": "Referenz Id",
             "type": "string"
@@ -53710,11 +53683,6 @@
           },
           "new_status": {
             "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           },
           "wiedervorlage_datum": {
@@ -76962,11 +76930,6 @@
       },
       "GoBDExportCreateRequest": {
         "properties": {
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
           "periode": {
             "title": "Periode",
             "type": "string"
@@ -77012,11 +76975,6 @@
           },
           "new_status": {
             "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           }
         },
@@ -87717,18 +87675,6 @@
             "minLength": 64,
             "title": "Content Hash Sha256",
             "type": "string"
-          },
-          "created_by": {
-            "anyOf": [
-              {
-                "maxLength": 100,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created By"
           },
           "format_type": {
             "default": "XRechnung",
@@ -106024,11 +105970,6 @@
             "title": "Meldung Typ",
             "type": "string"
           },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
           "periode": {
             "title": "Periode",
             "type": "string"
@@ -106158,11 +106099,6 @@
           },
           "new_status": {
             "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           }
         },
@@ -120763,17 +120699,6 @@
       },
       "PickListFromDeliveryNoteIn": {
         "properties": {
-          "created_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created By"
-          },
           "strategy": {
             "default": "FEFO",
             "title": "Strategy",
@@ -120796,17 +120721,6 @@
       },
       "PickListIn": {
         "properties": {
-          "created_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created By"
-          },
           "items": {
             "items": {
               "$ref": "#/components/schemas/PickListItem"
@@ -129664,11 +129578,6 @@
             "title": "New Status",
             "type": "string"
           },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
           "qs_befund": {
             "default": "",
             "title": "Qs Befund",
@@ -129689,11 +129598,6 @@
           },
           "geplant_datum": {
             "title": "Geplant Datum",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           },
           "rezeptur_id": {
@@ -138595,11 +138499,6 @@
       },
       "ReklamationCreateRequest": {
         "properties": {
-          "aktor_id": {
-            "default": "system",
-            "title": "Aktor Id",
-            "type": "string"
-          },
           "crm_referenz": {
             "anyOf": [
               {
@@ -138765,11 +138664,6 @@
       },
       "ReklamationLaborBefundRequest": {
         "properties": {
-          "aktor_id": {
-            "default": "system",
-            "title": "Aktor Id",
-            "type": "string"
-          },
           "analysewerte": {
             "additionalProperties": true,
             "title": "Analysewerte",
@@ -139066,11 +138960,6 @@
       },
       "ReklamationReferenzUpdateRequest": {
         "properties": {
-          "aktor_id": {
-            "default": "system",
-            "title": "Aktor Id",
-            "type": "string"
-          },
           "crm_referenz": {
             "anyOf": [
               {
@@ -139094,11 +138983,6 @@
       },
       "ReklamationTransitionRequest": {
         "properties": {
-          "aktor_id": {
-            "default": "system",
-            "title": "Aktor Id",
-            "type": "string"
-          },
           "kommentar": {
             "anyOf": [
               {
@@ -141584,11 +141468,6 @@
             "title": "Bezeichnung",
             "type": "string"
           },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
           "positionen": {
             "items": {
               "$ref": "#/components/schemas/RezepturPosition"
@@ -141731,11 +141610,6 @@
         "properties": {
           "new_status": {
             "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           }
         },
@@ -160119,11 +159993,6 @@
           "kasse_id": {
             "title": "Kasse Id",
             "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
           }
         },
         "required": [
@@ -160348,11 +160217,6 @@
           },
           "new_status": {
             "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           },
           "tse_signatur": {
@@ -176277,11 +176141,6 @@
             "title": "Mitarbeiter Id",
             "type": "string"
           },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
           "taetigkeit": {
             "title": "Taetigkeit",
             "type": "string"
@@ -176311,11 +176170,6 @@
           },
           "new_status": {
             "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           }
         },
@@ -186046,11 +185900,6 @@
             "default": {},
             "title": "Changes",
             "type": "object"
-          },
-          "created_by": {
-            "default": "system",
-            "title": "Created By",
-            "type": "string"
           },
           "reason": {
             "title": "Reason",

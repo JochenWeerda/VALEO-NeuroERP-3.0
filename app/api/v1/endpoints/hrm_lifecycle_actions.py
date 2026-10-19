@@ -4,12 +4,13 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.api.v1.schemas.base import TypedObjectOut
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 router = APIRouter(prefix="/hrm/lifecycle", tags=["hrm-lifecycle"])
 logger = logging.getLogger(__name__)
@@ -22,12 +23,10 @@ class ZeitbuchungCreateRequest(BaseModel):
     bis_zeit: str
     taetigkeit: str
     kostenstelle_id: str
-    operator: str = "system"
 
 
 class ZeitbuchungTransitionRequest(BaseModel):
     new_status: str
-    operator: str = "system"
     korrektur_grund: str = ""
 
 
@@ -38,18 +37,17 @@ class AbwesenheitCreateRequest(BaseModel):
     bis_datum: str
     arbeitstage: int
     kommentar: str = ""
-    operator: str = "system"
 
 
 class AbwesenheitTransitionRequest(BaseModel):
     new_status: str
-    operator: str = "system"
     ablehnungs_grund: str = ""
 
 
 @router.post("/zeitbuchungen", response_model=TypedObjectOut, summary="Zeitbuchung anlegen", dependencies=SCHREIBEN["PERSONAL"])
 def create_zeitbuchung(
     req: ZeitbuchungCreateRequest,
+    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -67,7 +65,7 @@ def create_zeitbuchung(
             bis_zeit=req.bis_zeit,
             taetigkeit=req.taetigkeit,
             kostenstelle_id=req.kostenstelle_id,
-            operator=req.operator,
+            operator=gepruefter_akteur_aus_request(request),
         )
     except ZeiterfassungError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -80,6 +78,7 @@ def create_zeitbuchung(
 def transition_zeitbuchung(
     buchung_id: str,
     req: ZeitbuchungTransitionRequest,
+    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -93,7 +92,7 @@ def transition_zeitbuchung(
             buchung_id=buchung_id,
             new_status=req.new_status,
             tenant_id=x_tenant_id,
-            operator=req.operator,
+            operator=gepruefter_akteur_aus_request(request),
             korrektur_grund=req.korrektur_grund,
         )
     except ZeiterfassungError as e:
@@ -118,6 +117,7 @@ def get_arbeitszeitkonto(
 @router.post("/abwesenheiten", response_model=TypedObjectOut, summary="Abwesenheitsantrag anlegen", dependencies=SCHREIBEN["PERSONAL"])
 def create_abwesenheit(
     req: AbwesenheitCreateRequest,
+    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -135,7 +135,7 @@ def create_abwesenheit(
             bis_datum=req.bis_datum,
             arbeitstage=req.arbeitstage,
             kommentar=req.kommentar,
-            operator=req.operator,
+            operator=gepruefter_akteur_aus_request(request),
         )
     except AbwesenheitError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -148,6 +148,7 @@ def create_abwesenheit(
 def transition_abwesenheit(
     abwesenheit_id: str,
     req: AbwesenheitTransitionRequest,
+    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -161,7 +162,7 @@ def transition_abwesenheit(
             abwesenheit_id=abwesenheit_id,
             new_status=req.new_status,
             tenant_id=x_tenant_id,
-            operator=req.operator,
+            operator=gepruefter_akteur_aus_request(request),
             ablehnungs_grund=req.ablehnungs_grund,
         )
     except AbwesenheitError as e:
