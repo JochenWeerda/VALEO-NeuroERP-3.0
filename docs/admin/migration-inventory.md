@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-15
+last_reviewed: 2026-10-19
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -279,6 +279,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `gutschrift_ust_20261012` | Gutschrift: Umsatzsteuer je Position, Netto/Steuer/Brutto getrennt, Erloeskonto je Steuerschluessel. |
 | `harvest_rule_store_20261015` | Append-only harvest rule, measurement, calculation and approval journal. |
 | `hr_applications_table_20260702` | hr: applications-Tabelle für Bewerbungs-Pipeline |
+| `hr_employee_files_20261019` | Canonical tenant-bound personal file metadata; no pilot persistence. |
 | `hr_personal_time_tracking_20260215` | hr personal time tracking tables |
 | `hr_planning_tables_20260625` | HR planning tables — employee_time_profiles, calendar_events, payroll_exports, |
 | `hr_training_onboarding_module_20260215` | hr training/qualification/onboarding module |
@@ -351,6 +352,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `merge_heads_20260522` | Merge: agrar_ernte_planung_20260520 + fachliche_vertiefung_wave13_20260522 |
 | `merge_heads_docflow_agrar_einkauf_20260301` | Merge heads: Agrar, Einkauf RE-Workflow, Docflow GoBD Schritt 3 |
 | `merge_heads_ops_and_erp_20260304` | merge heads: domain_ops (missing_ops) and domain_erp (finance tables) |
+| `merge_hr_tax_20261019` | Join the independently delivered HR and tax-account migration branches. |
 | `merge_l3c_and_procurement_indexes_20260213` | Merge Alembic heads l3c_gap_001 and optimize_procurement_indexes_20260213. |
 | `merge_log_agent_20260626` | Merge Alembic heads: log_frachtbriefe + merge_agent_job_runner. |
 | `merge_log_agri_heads_20260623` | Merge log_disposition and agri_silo_lot_link heads (DOM-INV-004 pre-step). |
@@ -429,6 +431,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `supply_chain_events_20260610` | supply_chain_events — append-only Ketten-Ereignis-Log (DOM-SUPPLY-004.2) |
 | `tank_adapter_20260821` | Tank adapter inbox and delivery-note handover. |
 | `tapi_calls_20260603` | TAPI/Telefonie — eingehende Anrufe für Click-to-Customer-Popup. |
+| `tax_account_category_20261019` | Steuerkonten: Kategorie ``tax`` auf die Kategorien des Kontenplan-Schemas umstellen. |
 | `team_calendar_20260821` | Team calendar ownership and privacy model. |
 | `user_screen_overlays_uix071` | UIX-071 user screen overlays. |
 | `ustva_voranmeldungen_20260527` | UStVA Voranmeldungen Tabelle (§ 18 UStG ELSTER-Übertragung). |

@@ -18773,3 +18773,9 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 
 **GIT-MAIN-HISTORY-GUARD Abnahme:** Drei echte Git-Vertraege bestanden. Null-old-OID durch Lesen des tatsaechlichen aktuellen Ref abgesichert; Ruecksprung/Divergenz/Loeschung verweigert, Integration/andere Branches/fremde Hooks erhalten. Installation nach Commit aus versionierter Vorlage.
+
+
+**COMMITTED-API-INTEGRATION Katalognebenbefund:** Vollstaendige aktuelle Quellansicht bestaetigt sechs weitere ausschliessliche read_by-Luecken: document_return_cases, fremdwaren_einlagerung, legacy_adapter_batches, inventory_auxiliary_batches, production_operations, tank_adapter_intake. Katalogbesitz um diese sechs bereits committeten Lesepfade erweitert; keine Tabellen-/Fachcodeaenderung.
+
+
+**PERSONAL-FILE / COMMITTED-API / PARALLEL-MIGRATION Abschluss:** Integrierter Quellstand60 Personaltests gruen, alle Anwendungsmodule aus aktueller Git-Quellansicht, komplette API-Projektion wiederholbar stabil. Katalog673 Tabellen mit14 korrigierten Lesepfadnachweisen; andere Codeinventare unveraendert aktuell. Steuerzweig und HR-Zweig ueber merge_hr_tax_20261019 zusammengefuehrt, ein DAG-Vertrag bestanden; vor additivem Probe-Upgrade null fremde aktive Transaktionen. Keine Entwicklungs-DDL, keine weitere DB/Container, kein Reset. Laufender Backend-Rollout und Provider-Abnahme weiterhin getrennt offen.

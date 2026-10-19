@@ -61558,6 +61558,8 @@
         "properties": {
           "createdBy": {
             "default": "system",
+            "deprecated": true,
+            "description": "Kompatibilitaetsfeld; Urheber kommt ausschliesslich aus der geprueften Anmeldung",
             "maxLength": 120,
             "title": "Createdby",
             "type": "string"
@@ -356161,6 +356163,7 @@
             }
           },
           {
+            "description": "Ansichtsfilter nach Personal-Berechtigung; vergibt keine Rolle",
             "in": "query",
             "name": "actorRole",
             "required": false,
@@ -356174,6 +356177,7 @@
                 }
               ],
               "default": "hr",
+              "description": "Ansichtsfilter nach Personal-Berechtigung; vergibt keine Rolle",
               "title": "Actorrole"
             }
           }
@@ -356225,23 +356229,6 @@
             "schema": {
               "title": "Employee Ref",
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "actorRole",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": "hr",
-              "title": "Actorrole"
             }
           }
         ],

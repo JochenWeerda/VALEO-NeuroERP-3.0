@@ -61,3 +61,10 @@ Der manuelle Vorschauvertrag ergaenzt quality_limit_pct unabhaengig von impuriti
 GET /studio/native-sources liefert einen begrenzten, durchsuchbaren Katalog eigener verfuegbarer nativer Masken mit Quellhash. POST /studio/native-imports verlangt bestehende Beleg-Bearbeitungsrechte, angezeigten Quellhash und UUID-Idempotenzschluessel. Der Server sichert die Ausgangsfassung im bestehenden revisionsgebundenen Studio-Speicher; Mandant und Urheber stammen ausschliesslich aus der Anmeldung. Importierte Entwuerfe aktivieren keine Maske und erzeugen keinen Simulations- oder Freigabenachweis. [Schrittweise Migration](../../studio-native-migration.md).
 
 Snapshot-Lesewege unter /read-models/snapshots verwenden ebenfalls den geprueften Mandanten; ein Queryparameter waehlt keinen anderen Mandanten. Alle generischen technischen Snapshot-Lese- und Schreibwege verlangen die vorhandene admin-Rolle.
+
+
+## Personalakten: Identitaetsgrenze
+
+GET /api/v1/personal/employee-files/{employee_ref} verlangt PERSONAL_LESEN, PERSONAL_BEARBEITEN, PERSONAL_ADMIN oder admin. actorRole ist ausschliesslich ein Ansichtsfilter nach dieser Berechtigung, keine Rollenvergabe. POST desselben Weges mit /documents verlangt PERSONAL_BEARBEITEN, PERSONAL_ADMIN oder admin; sein Urheber wird aus dem geprueften Token uebernommen. Der alte POST-Queryparameter actorRole ist entfernt und uebermittelt keine Rechte.
+
+Die kanonische Metadatentabelle domain_hr.employee_file_documents wird durch hr_employee_files_20261019 angelegt. Fehlende oder fehlerhafte Persistenz antwortet generisch503, niemals mit einem erzeugten Demo-Dokument oder falschem201. Ungueltige Kalenderdaten und umgekehrte Gueltigkeitszeiträume werden vor SQL abgewiesen. Die Personalakten-Sichtbarkeitsklasse manager ist keine allgemeine Realm-Berechtigung. Selbstservice und zugelassene Vorgesetztenbeziehungen benoetigen eigene gepruefte Objektbeziehungen; dieser Vertrag erteilt sie nicht.

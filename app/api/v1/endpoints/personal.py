@@ -14,7 +14,8 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.auth.deps import anmeldename, get_current_user
+from app.auth.deps import anmeldename, get_current_user, require_roles
+from app.core.akteur import gepruefter_akteur
 from app.core.database import get_db
 from app.core.business_time import business_today
 from app.core.exceptions import ConflictError, EntityNotFoundError
@@ -1872,37 +1873,36 @@ async def record_hrm_operations_gate_probe(
 @router.get("/employee-files/{employee_ref}", response_model=EmployeeFileOut, summary="Employee file abrufen")
 async def get_employee_file(
     employee_ref: str,
-    actor_role: str | None = Query(default="hr", alias="actorRole"),
+    actor_role: str | None = Query(default="hr", alias="actorRole", description="Ansichtsfilter nach Personal-Berechtigung; vergibt keine Rolle"),
+    user: dict = Depends(require_roles("PERSONAL_LESEN", "PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin")),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     role = PersonalService.normalize_actor_role(actor_role)
-    return PersonalService(db, tenant_id).get_employee_file(employee_ref, role)
+    try:
+        return PersonalService(db, tenant_id).get_employee_file(employee_ref, role)
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(503, "Personalakten sind derzeit nicht verfuegbar") from None
 
 
 @router.post("/employee-files/{employee_ref}/documents", response_model=EmployeeFileDocumentOut, status_code=201, summary="Employee file document anlegen")
 async def create_employee_file_document(
     employee_ref: str,
     payload: EmployeeFileDocumentCreateIn,
-    actor_role: str | None = Query(default="hr", alias="actorRole"),
+    user: dict = Depends(require_roles("PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin")),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    role = PersonalService.normalize_actor_role(actor_role)
-    if role not in {"admin", "hr", "payroll"}:
-        raise HTTPException(status_code=403, detail="Personalakten-Dokumente duerfen nur HR, Payroll oder Admin anlegen.")
     try:
-        doc_class = PersonalService.get_document_class(payload.documentType)
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
-    visibility = payload.visibility or str(doc_class["default_visibility"])
-    if visibility == "payroll" and role not in {"admin", "payroll", "hr"}:
-        raise HTTPException(status_code=403, detail="Payroll-Dokumente duerfen nur HR/Payroll/Admin anlegen.")
-    return PersonalService(db, tenant_id).create_employee_file_document(
-        employee_ref,
-        payload.model_dump(),
-        role,
-    )
+        PersonalService.get_document_class(payload.documentType)
+        return PersonalService(db, tenant_id).create_employee_file_document(
+            employee_ref, {**payload.model_dump(), "createdBy": gepruefter_akteur(user)}, "hr")
+    except ValueError:
+        raise HTTPException(422, "Unbekannte Personalakten-Dokumentklasse") from None
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(503, "Personalakten-Dokument wurde nicht gespeichert") from None
 
 
 @router.get("/time-profiles", response_model=EmployeeTimeProfileCatalogOut, summary="Time profiles auflisten")
