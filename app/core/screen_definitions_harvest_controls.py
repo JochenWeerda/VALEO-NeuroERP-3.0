@@ -63,7 +63,7 @@ def build_harvest_controls():
             field("quality_limit_pct", "Qualitätsgrenze Besatz (%) – keine Freigrenze", "percentage"),
         ], "tables": [{"key": "rules", "label": "Unveränderliche Regelversionen – Zeile zum Prüfen auswählen",
             "dataSourceKey": "rules", "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 44,
-            "rowActions": [{"key": "inspect_rule", "label": "Regelversion prüfen", "command": "harvest.control.inspect_rule"}],
+            "rowActions": [{"key": "inspect_rule", "label": "Regelversion prüfen", "command": "harvest.control.inspect_rule", "localEffect": "view"}],
             "columns": [{"key": key, "label": label, "width": width} for key, label, width in [
                 ("rule_id", "Regel", 170), ("rule_version", "Fassung", 80),
                 ("status", "Genehmigung", 110), ("impurities_free_pct", "Abzugsfrei (%)", 110),

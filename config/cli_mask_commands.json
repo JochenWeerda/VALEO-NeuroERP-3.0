@@ -7,6 +7,7 @@
   "mask:abrechnung/eb-lieferschein-kontrolle:waive",
   "mask:admin/identity-budgets:allocate",
   "mask:admin/identity-budgets:root",
+  "mask:admin/postfaecher:entfernen",
   "mask:admin/postfaecher:speichern",
   "mask:admin/postfaecher:testen",
   "mask:agrar/feed-controlling:record_observation",
@@ -153,10 +154,15 @@
   "mask:finance/rechnungstapel:retry",
   "mask:finance/rechnungstapel:validate",
   "mask:finance/steuerschluessel:speichern",
+  "mask:fuhrpark/ausgehende-dokumente:loeschen",
   "mask:fuhrpark/ausgehende-dokumente:speichern",
+  "mask:fuhrpark/fahrzeug-stamm:drucker",
   "mask:fuhrpark/fahrzeug-stamm:loeschen",
   "mask:fuhrpark/fahrzeug-stamm:speichern",
+  "mask:fuhrpark/fahrzeug-stamm:unfall",
+  "mask:fuhrpark/rechnungen:loeschen",
   "mask:fuhrpark/rechnungen:speichern",
+  "mask:fuhrpark/terminarten:loeschen",
   "mask:fuhrpark/terminarten:speichern",
   "mask:futtermittel/analyse:reject",
   "mask:futtermittel/analyse:release",
@@ -176,10 +182,20 @@
   "mask:logistik/frachttabellen:loeschen",
   "mask:logistik/tour-fracht-arbeitsraum:storno",
   "mask:logistik/tourenplanung:anlegen",
+  "mask:logistik/tourenplanung:storno",
+  "mask:logistik/versandprofile:avis",
+  "mask:logistik/versandprofile:loeschen",
+  "mask:logistik/versandprofile:profil",
+  "mask:personal/bewerbung-einwilligung:erteilen",
+  "mask:personal/bewerbung-einwilligung:widerrufen",
+  "mask:personal/bewerbungen:loeschen",
   "mask:personal/bewerbungen:speichern",
   "mask:personal/einwilligungserklaerungen:anlegen",
+  "mask:personal/onboarding:loeschen",
   "mask:personal/onboarding:speichern",
+  "mask:personal/qualifikationen:loeschen",
   "mask:personal/qualifikationen:speichern",
+  "mask:personal/schulungen:loeschen",
   "mask:personal/schulungen:speichern",
   "mask:planung/kalender:reproject",
   "mask:produktion/chargen-bearbeiten:edit_metadata",
@@ -207,6 +223,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 108
+  "kein_endpunkt": 92
  }
 }

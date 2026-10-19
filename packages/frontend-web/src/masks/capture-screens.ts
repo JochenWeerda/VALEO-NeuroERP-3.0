@@ -514,7 +514,7 @@ export const tourenplanungScreen = {
     {
       key: 'dispo',
       label: 'Dispo-Arbeitsraum',
-      command: 'tour.openWorkspace',
+      command: 'tour.openWorkspace', localEffect: 'navigation',
       kind: 'secondary',
       dangerLevel: 'safe',
       zone: 'header',
@@ -523,7 +523,7 @@ export const tourenplanungScreen = {
     {
       key: 'aufloesen',
       label: 'Auflösen',
-      command: 'tour.resolveDeliveryNote',
+      command: 'tour.resolveDeliveryNote', localEffect: 'view',
       kind: 'secondary',
       dangerLevel: 'safe',
       zone: 'footer',
@@ -550,9 +550,9 @@ export const tourenplanungScreen = {
     rowHeight: 44,
     rowDetail: false,
     rowActions: [
-      { key: 'beladung', label: 'Beladung', command: 'tour.openLoading', dangerLevel: 'safe' },
-      { key: 'hinweise', label: 'Hinweise', command: 'tour.showHints', dangerLevel: 'safe' },
-      { key: 'storno', label: 'Stornieren', command: 'tour.cancel', dangerLevel: 'moderate', requiresConfirmation: true, visibleWhen: { field: 'status', values: ['geplant'] } },
+      { key: 'beladung', label: 'Beladung', command: 'tour.openLoading', localEffect: 'navigation', dangerLevel: 'safe' },
+      { key: 'hinweise', label: 'Hinweise', command: 'tour.showHints', localEffect: 'view', dangerLevel: 'safe' },
+      { key: 'storno', label: 'Stornieren', command: 'tour.cancel', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/logistik/tours/{entity_id}/cancel', method: 'POST' }, forbiddenForAgents: true, dangerLevel: 'moderate', requiresConfirmation: true, visibleWhen: { field: 'status', values: ['geplant'] } },
     ],
     columns: [
       { key: 'ziel', label: 'Ziel', priority: 'primary' },
@@ -609,7 +609,7 @@ export const transporteFahrerScreen = {
     {
       key: 'verfuegbar',
       label: 'Verfügbaren Fahrer öffnen',
-      command: 'driver.openAvailable',
+      command: 'driver.openAvailable', localEffect: 'navigation',
       enabledWhen: 'driver.hasAvailable',
       kind: 'secondary',
       dangerLevel: 'safe',
@@ -619,7 +619,7 @@ export const transporteFahrerScreen = {
     {
       key: 'touren',
       label: 'Tourenplanung',
-      command: 'driver.openTours',
+      command: 'driver.openTours', localEffect: 'navigation',
       kind: 'secondary',
       dangerLevel: 'safe',
       zone: 'footer',
@@ -628,7 +628,7 @@ export const transporteFahrerScreen = {
     {
       key: 'dokumente',
       label: 'Dokumente',
-      command: 'driver.openDocuments',
+      command: 'driver.openDocuments', localEffect: 'navigation',
       kind: 'secondary',
       dangerLevel: 'safe',
       zone: 'footer',
@@ -637,7 +637,7 @@ export const transporteFahrerScreen = {
     {
       key: 'export',
       label: 'Export',
-      command: 'driver.export',
+      command: 'driver.export', localEffect: 'download',
       kind: 'secondary',
       dangerLevel: 'safe',
       zone: 'footer',
@@ -690,7 +690,7 @@ export const tourFrachtArbeitsraumScreen = {
     { key: 'touren', label: 'Zur Tourenplanung', kind: 'secondary', dangerLevel: 'safe', zone: 'header', permission: 'logistics:read', navigationRoute: '/logistik/tourenplanung' },
     { key: 'fracht', label: 'Zu Frachtbriefen', kind: 'secondary', dangerLevel: 'safe', zone: 'header', permission: 'logistics:read', navigationRoute: '/logistik/frachtbriefe' },
     { key: 'tabellen', label: 'Frachttabellen', kind: 'secondary', dangerLevel: 'safe', zone: 'header', permission: 'logistics:read', navigationRoute: '/logistik/frachttabellen' },
-    { key: 'probe', label: 'Probe berechnen', kind: 'primary', dangerLevel: 'safe', zone: 'footer', permission: 'logistics:read', command: 'fracht.calculateProbe', forbiddenForAgents: true },
+    { key: 'probe', label: 'Probe berechnen', kind: 'primary', dangerLevel: 'safe', zone: 'footer', permission: 'logistics:read', command: 'fracht.calculateProbe', localEffect: 'view', forbiddenForAgents: true },
   ],
   tables: [
     {
@@ -786,7 +786,7 @@ export const frachttabellenScreen = {
   ],
   actions: [
     { key: 'anlegen', label: 'Tabelle speichern', kind: 'primary', dangerLevel: 'safe', zone: 'header', permission: 'logistics:write', command: 'fracht.createTable', forbiddenForAgents: true },
-    { key: 'position', label: 'Position anlegen', kind: 'secondary', dangerLevel: 'safe', zone: 'footer', permission: 'logistics:write', command: 'fracht.addPosition', forbiddenForAgents: true },
+    { key: 'position', label: 'Position anlegen', kind: 'secondary', dangerLevel: 'safe', zone: 'footer', permission: 'logistics:write', command: 'fracht.addPosition', localEffect: 'edit_mode', forbiddenForAgents: true },
   ],
   tables: [
     {
@@ -870,7 +870,7 @@ export const versandprofileScreen = {
     {
       key: 'profil',
       label: 'Profil speichern',
-      command: 'versand.saveProfile',
+      command: 'versand.saveProfile', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/logistik/versand/profile', method: 'POST' }, forbiddenForAgents: true,
       kind: 'primary',
       dangerLevel: 'safe',
       zone: 'header',
@@ -879,7 +879,7 @@ export const versandprofileScreen = {
     {
       key: 'avis',
       label: 'Avis speichern',
-      command: 'versand.saveAvis',
+      command: 'versand.saveAvis', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/logistik/versand/avise', method: 'POST' }, forbiddenForAgents: true,
       kind: 'secondary',
       dangerLevel: 'safe',
       zone: 'footer',
@@ -912,7 +912,7 @@ export const versandprofileScreen = {
             {
               key: 'loeschen',
               label: 'Löschen',
-              command: 'versand.deleteProfile',
+              command: 'versand.deleteProfile', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/logistik/versand/profile/{entity_id}', method: 'DELETE' }, forbiddenForAgents: true,
               dangerLevel: 'moderate',
               disabledWhen: { field: 'gesperrt', values: [true] },
             },
@@ -1029,7 +1029,7 @@ export const fuhrparkTerminartenScreen = {
         {
           key: 'loeschen',
           label: 'Löschen',
-          command: 'fuhrpark.deleteTerminart',
+          command: 'fuhrpark.deleteTerminart', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/fuhrpark/terminarten/{entity_id}', method: 'DELETE' }, forbiddenForAgents: true,
           dangerLevel: 'moderate',
           disabledWhen: { field: 'gesperrt', values: [true] },
         },
@@ -1115,7 +1115,7 @@ export const fuhrparkRechnungenScreen = {
         {
           key: 'loeschen',
           label: 'Löschen',
-          command: 'fuhrpark.deleteRechnung',
+          command: 'fuhrpark.deleteRechnung', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/fuhrpark/rechnungen/{entity_id}', method: 'DELETE' }, forbiddenForAgents: true,
           dangerLevel: 'moderate',
           disabledWhen: { field: 'gesperrt', values: [true] },
         },
@@ -1203,7 +1203,7 @@ export const fuhrparkAusgehendeDokumenteScreen = {
         {
           key: 'loeschen',
           label: 'Löschen',
-          command: 'fuhrpark.deleteDokument',
+          command: 'fuhrpark.deleteDokument', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/fuhrpark/ausgehende-dokumente/{entity_id}', method: 'DELETE' }, forbiddenForAgents: true,
           dangerLevel: 'moderate',
           disabledWhen: { field: 'gesperrt', values: [true] },
         },
@@ -1270,7 +1270,7 @@ export const fuhrparkFahrzeugStammScreen = {
     {
       key: 'liste',
       label: 'Zur Liste',
-      command: 'fuhrpark.openFahrzeugListe',
+      command: 'fuhrpark.openFahrzeugListe', localEffect: 'navigation',
       kind: 'secondary',
       dangerLevel: 'safe',
       zone: 'footer',
@@ -1279,7 +1279,7 @@ export const fuhrparkFahrzeugStammScreen = {
     {
       key: 'drucker',
       label: 'Drucker einrichten',
-      command: 'fuhrpark.setupDrucker',
+      command: 'fuhrpark.setupDrucker', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/fuhrpark/fahrzeuge/{entity_id}/drucker-einrichten', method: 'POST' }, forbiddenForAgents: true,
       kind: 'secondary',
       dangerLevel: 'safe',
       zone: 'footer',
@@ -1288,7 +1288,7 @@ export const fuhrparkFahrzeugStammScreen = {
     {
       key: 'drucken',
       label: 'Drucken',
-      command: 'fuhrpark.printAkte',
+      command: 'fuhrpark.printAkte', localEffect: 'print',
       kind: 'secondary',
       dangerLevel: 'safe',
       zone: 'footer',
@@ -1297,7 +1297,7 @@ export const fuhrparkFahrzeugStammScreen = {
     {
       key: 'unfall',
       label: 'Unfall-Anzeige',
-      command: 'fuhrpark.reportUnfall',
+      command: 'fuhrpark.reportUnfall', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/fuhrpark/fahrzeuge/{entity_id}/unfall-anzeige', method: 'POST' }, forbiddenForAgents: true,
       kind: 'secondary',
       dangerLevel: 'moderate',
       zone: 'footer',
@@ -1489,7 +1489,7 @@ export const personalQualifikationenScreen = {
         {
           key: 'loeschen',
           label: 'Löschen',
-          command: 'personal.deleteQualifikation',
+          command: 'personal.deleteQualifikation', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/training/qualifications/{entity_id}', method: 'DELETE' }, forbiddenForAgents: true,
           dangerLevel: 'moderate',
           disabledWhen: { field: 'gesperrt', values: [true] },
         },
@@ -1574,7 +1574,7 @@ export const personalOnboardingScreen = {
         {
           key: 'loeschen',
           label: 'Löschen',
-          command: 'personal.deleteOnboarding',
+          command: 'personal.deleteOnboarding', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/training/onboarding/runs/{entity_id}', method: 'DELETE' }, forbiddenForAgents: true,
           dangerLevel: 'moderate',
           disabledWhen: { field: 'gesperrt', values: [true] },
         },
@@ -1660,7 +1660,7 @@ export const personalSchulungenScreen = {
         {
           key: 'loeschen',
           label: 'Löschen',
-          command: 'personal.deleteSchulung',
+          command: 'personal.deleteSchulung', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/training/assignments/{entity_id}', method: 'DELETE' }, forbiddenForAgents: true,
           dangerLevel: 'moderate',
           disabledWhen: { field: 'gesperrt', values: [true] },
         },
@@ -1733,7 +1733,7 @@ export const personalBewerbungenScreen = {
     {
       key: 'erklaerungen',
       label: 'Einwilligungserklärungen',
-      command: 'personal.openErklaerungen',
+      command: 'personal.openErklaerungen', localEffect: 'navigation',
       kind: 'secondary',
       dangerLevel: 'safe',
       zone: 'footer',
@@ -1754,13 +1754,13 @@ export const personalBewerbungenScreen = {
         {
           key: 'einwilligung',
           label: 'Einwilligung',
-          command: 'personal.openEinwilligung',
+          command: 'personal.openEinwilligung', localEffect: 'navigation',
           dangerLevel: 'safe',
         },
         {
           key: 'loeschen',
           label: 'Löschen',
-          command: 'personal.deleteBewerbung',
+          command: 'personal.deleteBewerbung', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/personal/applications/{entity_id}', method: 'DELETE' }, forbiddenForAgents: true,
           dangerLevel: 'moderate',
           disabledWhen: { field: 'gesperrt', values: [true] },
         },
@@ -1819,7 +1819,7 @@ export const personalBewerbungEinwilligungScreen = {
     {
       key: 'erteilen',
       label: 'Einwilligung erteilen',
-      command: 'personal.erteileEinwilligung',
+      command: 'personal.erteileEinwilligung', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/personal/applications/{entity_id}/einwilligung', method: 'POST' }, forbiddenForAgents: true,
       kind: 'primary',
       dangerLevel: 'safe',
       zone: 'header',
@@ -1828,7 +1828,7 @@ export const personalBewerbungEinwilligungScreen = {
     {
       key: 'widerrufen',
       label: 'Einwilligung widerrufen',
-      command: 'personal.widerrufeEinwilligung',
+      command: 'personal.widerrufeEinwilligung', inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/personal/applications/{entity_id}/einwilligung', method: 'DELETE' }, forbiddenForAgents: true,
       kind: 'secondary',
       dangerLevel: 'moderate',
       zone: 'header',
@@ -1838,7 +1838,7 @@ export const personalBewerbungEinwilligungScreen = {
     {
       key: 'zurueck',
       label: 'Zu den Bewerbungen',
-      command: 'personal.openBewerbungen',
+      command: 'personal.openBewerbungen', localEffect: 'navigation',
       kind: 'secondary',
       dangerLevel: 'safe',
       zone: 'footer',
@@ -1847,7 +1847,7 @@ export const personalBewerbungEinwilligungScreen = {
     {
       key: 'erklaerungen',
       label: 'Einwilligungserklärungen',
-      command: 'personal.openErklaerungen',
+      command: 'personal.openErklaerungen', localEffect: 'navigation',
       kind: 'secondary',
       dangerLevel: 'safe',
       zone: 'footer',
@@ -2263,7 +2263,7 @@ export const adminPostfaecherScreen = {
     {
       "key": "anmelden",
       "label": "Beim Anbieter anmelden",
-      "command": "admin.postfachAnmelden",
+      "command": "admin.postfachAnmelden", "localEffect": "navigation",
       "kind": "secondary",
       "dangerLevel": "safe",
       "zone": "header",
@@ -2328,13 +2328,13 @@ export const adminPostfaecherScreen = {
         {
           "key": "bearbeiten",
           "label": "Bearbeiten",
-          "command": "admin.postfachBearbeiten",
+          "command": "admin.postfachBearbeiten", "localEffect": "edit_mode",
           "dangerLevel": "safe"
         },
         {
           "key": "entfernen",
           "label": "Entfernen",
-          "command": "admin.postfachEntfernen",
+          "command": "admin.postfachEntfernen", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/admin/postfaecher/{entity_id}", "method": "DELETE"}, "forbiddenForAgents": true,
           "dangerLevel": "high",
           "requiresConfirmation": true
         }
@@ -2538,7 +2538,7 @@ export const salesGutschriftScreen = {
     {
       "key": "position",
       "label": "Position übernehmen",
-      "command": "sales.gutschriftPosition",
+      "command": "sales.gutschriftPosition", "localEffect": "edit_mode",
       "kind": "secondary",
       "dangerLevel": "safe",
       "zone": "header",
@@ -2706,7 +2706,7 @@ export const salesGutschriftScreen = {
         {
           "key": "entfernen",
           "label": "Entfernen",
-          "command": "sales.gutschriftPositionEntfernen",
+          "command": "sales.gutschriftPositionEntfernen", "localEffect": "edit_mode",
           "dangerLevel": "safe"
         }
       ]
@@ -2811,7 +2811,7 @@ export const salesGutschriftScreen = {
         {
           "key": "laden",
           "label": "Öffnen",
-          "command": "sales.gutschriftLaden",
+          "command": "sales.gutschriftLaden", "localEffect": "view",
           "dangerLevel": "safe"
         }
       ]
@@ -2871,7 +2871,7 @@ export const salesGutschriftScreen = {
         {
           "key": "pruefen",
           "label": "Prüfen",
-          "command": "sales.gutschriftVorschlagPruefen",
+          "command": "sales.gutschriftVorschlagPruefen", "localEffect": "view",
           "dangerLevel": "safe"
         }
       ]
@@ -3192,7 +3192,7 @@ export const financeSteuerschluesselScreen = {
         {
           "key": "bearbeiten",
           "label": "Bearbeiten",
-          "command": "finance.steuerschluesselBearbeiten",
+          "command": "finance.steuerschluesselBearbeiten", "localEffect": "edit_mode",
           "dangerLevel": "safe"
         }
       ]

@@ -774,7 +774,7 @@ def build_logistik_tourenplanung_screen_definition() -> dict[str, Any]:
             {
                 "key": "dispo",
                 "label": "Dispo-Arbeitsraum",
-                "command": "tour.openWorkspace",
+                "command": "tour.openWorkspace", "localEffect": "navigation",
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "header",
@@ -783,7 +783,7 @@ def build_logistik_tourenplanung_screen_definition() -> dict[str, Any]:
             {
                 "key": "aufloesen",
                 "label": "Auflösen",
-                "command": "tour.resolveDeliveryNote",
+                "command": "tour.resolveDeliveryNote", "localEffect": "view",
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "footer",
@@ -819,12 +819,12 @@ def build_logistik_tourenplanung_screen_definition() -> dict[str, Any]:
                 "rowHeight": 44,
                 "rowDetail": False,
                 "rowActions": [
-                    {"key": "beladung", "label": "Beladung", "command": "tour.openLoading", "dangerLevel": "safe"},
-                    {"key": "hinweise", "label": "Hinweise", "command": "tour.showHints", "dangerLevel": "safe"},
+                    {"key": "beladung", "label": "Beladung", "command": "tour.openLoading", "localEffect": "navigation", "dangerLevel": "safe"},
+                    {"key": "hinweise", "label": "Hinweise", "command": "tour.showHints", "localEffect": "view", "dangerLevel": "safe"},
                     {
                         "key": "storno",
                         "label": "Stornieren",
-                        "command": "tour.cancel",
+                        "command": "tour.cancel", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/logistik/tours/{entity_id}/cancel", "method": "POST"}, "forbiddenForAgents": True,
                         "dangerLevel": "moderate",
                         "requiresConfirmation": True,
                         "visibleWhen": {"field": "status", "values": ["geplant"]},
@@ -905,7 +905,7 @@ def build_transporte_fahrer_screen_definition() -> dict[str, Any]:
             {
                 "key": "verfuegbar",
                 "label": "Verfügbaren Fahrer öffnen",
-                "command": "driver.openAvailable",
+                "command": "driver.openAvailable", "localEffect": "navigation",
                 "enabledWhen": "driver.hasAvailable",
                 "kind": "secondary",
                 "dangerLevel": "safe",
@@ -915,7 +915,7 @@ def build_transporte_fahrer_screen_definition() -> dict[str, Any]:
             {
                 "key": "touren",
                 "label": "Tourenplanung",
-                "command": "driver.openTours",
+                "command": "driver.openTours", "localEffect": "navigation",
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "footer",
@@ -924,7 +924,7 @@ def build_transporte_fahrer_screen_definition() -> dict[str, Any]:
             {
                 "key": "dokumente",
                 "label": "Dokumente",
-                "command": "driver.openDocuments",
+                "command": "driver.openDocuments", "localEffect": "navigation",
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "footer",
@@ -933,7 +933,7 @@ def build_transporte_fahrer_screen_definition() -> dict[str, Any]:
             {
                 "key": "export",
                 "label": "Export",
-                "command": "driver.export",
+                "command": "driver.export", "localEffect": "download",
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "footer",
@@ -1037,7 +1037,7 @@ def build_logistik_tour_fracht_arbeitsraum_screen_definition() -> dict[str, Any]
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "footer",
-                "command": "fracht.calculateProbe",
+                "command": "fracht.calculateProbe", "localEffect": "view",
                 "permission": "logistics:read",
                 "forbiddenForAgents": True,
             },
@@ -1185,7 +1185,7 @@ def build_logistik_frachttabellen_screen_definition() -> dict[str, Any]:
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "footer",
-                "command": "fracht.addPosition",
+                "command": "fracht.addPosition", "localEffect": "edit_mode",
                 "permission": "logistics:write",
                 "forbiddenForAgents": True,
             },
@@ -1297,7 +1297,7 @@ def build_logistik_versandprofile_screen_definition() -> dict[str, Any]:
             {
                 "key": "profil",
                 "label": "Profil speichern",
-                "command": "versand.saveProfile",
+                "command": "versand.saveProfile", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/logistik/versand/profile", "method": "POST"}, "forbiddenForAgents": True,
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
@@ -1306,7 +1306,7 @@ def build_logistik_versandprofile_screen_definition() -> dict[str, Any]:
             {
                 "key": "avis",
                 "label": "Avis speichern",
-                "command": "versand.saveAvis",
+                "command": "versand.saveAvis", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/logistik/versand/avise", "method": "POST"}, "forbiddenForAgents": True,
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "footer",
@@ -1339,7 +1339,7 @@ def build_logistik_versandprofile_screen_definition() -> dict[str, Any]:
                             {
                                 "key": "loeschen",
                                 "label": "Löschen",
-                                "command": "versand.deleteProfile",
+                                "command": "versand.deleteProfile", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/logistik/versand/profile/{entity_id}", "method": "DELETE"}, "forbiddenForAgents": True,
                                 "dangerLevel": "moderate",
                                 "disabledWhen": {"field": "gesperrt", "values": [True]},
                             },
@@ -1477,7 +1477,7 @@ def build_fuhrpark_terminarten_screen_definition() -> dict[str, Any]:
                     {
                         "key": "loeschen",
                         "label": "Löschen",
-                        "command": "fuhrpark.deleteTerminart",
+                        "command": "fuhrpark.deleteTerminart", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/fuhrpark/terminarten/{entity_id}", "method": "DELETE"}, "forbiddenForAgents": True,
                         "dangerLevel": "moderate",
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
                     },
@@ -1584,7 +1584,7 @@ def build_fuhrpark_rechnungen_screen_definition() -> dict[str, Any]:
                     {
                         "key": "loeschen",
                         "label": "Löschen",
-                        "command": "fuhrpark.deleteRechnung",
+                        "command": "fuhrpark.deleteRechnung", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/fuhrpark/rechnungen/{entity_id}", "method": "DELETE"}, "forbiddenForAgents": True,
                         "dangerLevel": "moderate",
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
                     },
@@ -1693,7 +1693,7 @@ def build_fuhrpark_ausgehende_dokumente_screen_definition() -> dict[str, Any]:
                     {
                         "key": "loeschen",
                         "label": "Löschen",
-                        "command": "fuhrpark.deleteDokument",
+                        "command": "fuhrpark.deleteDokument", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/fuhrpark/ausgehende-dokumente/{entity_id}", "method": "DELETE"}, "forbiddenForAgents": True,
                         "dangerLevel": "moderate",
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
                     },
@@ -1781,7 +1781,7 @@ def build_fuhrpark_fahrzeug_stamm_screen_definition() -> dict[str, Any]:
             {
                 "key": "liste",
                 "label": "Zur Liste",
-                "command": "fuhrpark.openFahrzeugListe",
+                "command": "fuhrpark.openFahrzeugListe", "localEffect": "navigation",
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "footer",
@@ -1790,7 +1790,7 @@ def build_fuhrpark_fahrzeug_stamm_screen_definition() -> dict[str, Any]:
             {
                 "key": "drucker",
                 "label": "Drucker einrichten",
-                "command": "fuhrpark.setupDrucker",
+                "command": "fuhrpark.setupDrucker", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/fuhrpark/fahrzeuge/{entity_id}/drucker-einrichten", "method": "POST"}, "forbiddenForAgents": True,
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "footer",
@@ -1799,7 +1799,7 @@ def build_fuhrpark_fahrzeug_stamm_screen_definition() -> dict[str, Any]:
             {
                 "key": "drucken",
                 "label": "Drucken",
-                "command": "fuhrpark.printAkte",
+                "command": "fuhrpark.printAkte", "localEffect": "print",
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "footer",
@@ -1808,7 +1808,7 @@ def build_fuhrpark_fahrzeug_stamm_screen_definition() -> dict[str, Any]:
             {
                 "key": "unfall",
                 "label": "Unfall-Anzeige",
-                "command": "fuhrpark.reportUnfall",
+                "command": "fuhrpark.reportUnfall", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/fuhrpark/fahrzeuge/{entity_id}/unfall-anzeige", "method": "POST"}, "forbiddenForAgents": True,
                 "kind": "secondary",
                 "dangerLevel": "moderate",
                 "zone": "footer",
@@ -2022,7 +2022,7 @@ def build_personal_qualifikationen_screen_definition() -> dict[str, Any]:
                     {
                         "key": "loeschen",
                         "label": "Löschen",
-                        "command": "personal.deleteQualifikation",
+                        "command": "personal.deleteQualifikation", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/training/qualifications/{entity_id}", "method": "DELETE"}, "forbiddenForAgents": True,
                         "dangerLevel": "moderate",
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
                     },
@@ -2127,7 +2127,7 @@ def build_personal_onboarding_screen_definition() -> dict[str, Any]:
                     {
                         "key": "loeschen",
                         "label": "Löschen",
-                        "command": "personal.deleteOnboarding",
+                        "command": "personal.deleteOnboarding", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/training/onboarding/runs/{entity_id}", "method": "DELETE"}, "forbiddenForAgents": True,
                         "dangerLevel": "moderate",
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
                     },
@@ -2233,7 +2233,7 @@ def build_personal_schulungen_screen_definition() -> dict[str, Any]:
                     {
                         "key": "loeschen",
                         "label": "Löschen",
-                        "command": "personal.deleteSchulung",
+                        "command": "personal.deleteSchulung", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/training/assignments/{entity_id}", "method": "DELETE"}, "forbiddenForAgents": True,
                         "dangerLevel": "moderate",
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
                     },
@@ -2333,7 +2333,7 @@ def build_personal_bewerbungen_screen_definition() -> dict[str, Any]:
             {
                 "key": "erklaerungen",
                 "label": "Einwilligungserklärungen",
-                "command": "personal.openErklaerungen",
+                "command": "personal.openErklaerungen", "localEffect": "navigation",
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "footer",
@@ -2354,13 +2354,13 @@ def build_personal_bewerbungen_screen_definition() -> dict[str, Any]:
                     {
                         "key": "einwilligung",
                         "label": "Einwilligung",
-                        "command": "personal.openEinwilligung",
+                        "command": "personal.openEinwilligung", "localEffect": "navigation",
                         "dangerLevel": "safe",
                     },
                     {
                         "key": "loeschen",
                         "label": "Löschen",
-                        "command": "personal.deleteBewerbung",
+                        "command": "personal.deleteBewerbung", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/personal/applications/{entity_id}", "method": "DELETE"}, "forbiddenForAgents": True,
                         "dangerLevel": "moderate",
                         "disabledWhen": {"field": "gesperrt", "values": [True]},
                     },
@@ -2445,7 +2445,7 @@ def build_personal_bewerbung_einwilligung_screen_definition() -> dict[str, Any]:
             {
                 "key": "erteilen",
                 "label": "Einwilligung erteilen",
-                "command": "personal.erteileEinwilligung",
+                "command": "personal.erteileEinwilligung", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/personal/applications/{entity_id}/einwilligung", "method": "POST"}, "forbiddenForAgents": True,
                 "kind": "primary",
                 "dangerLevel": "safe",
                 "zone": "header",
@@ -2457,7 +2457,7 @@ def build_personal_bewerbung_einwilligung_screen_definition() -> dict[str, Any]:
                 # ein Grund oder eine Freigabe waere schwerer als die Erteilung.
                 "key": "widerrufen",
                 "label": "Einwilligung widerrufen",
-                "command": "personal.widerrufeEinwilligung",
+                "command": "personal.widerrufeEinwilligung", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/personal/applications/{entity_id}/einwilligung", "method": "DELETE"}, "forbiddenForAgents": True,
                 "kind": "secondary",
                 "dangerLevel": "moderate",
                 "zone": "header",
@@ -2467,7 +2467,7 @@ def build_personal_bewerbung_einwilligung_screen_definition() -> dict[str, Any]:
             {
                 "key": "zurueck",
                 "label": "Zu den Bewerbungen",
-                "command": "personal.openBewerbungen",
+                "command": "personal.openBewerbungen", "localEffect": "navigation",
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "footer",
@@ -2476,7 +2476,7 @@ def build_personal_bewerbung_einwilligung_screen_definition() -> dict[str, Any]:
             {
                 "key": "erklaerungen",
                 "label": "Einwilligungserklärungen",
-                "command": "personal.openErklaerungen",
+                "command": "personal.openErklaerungen", "localEffect": "navigation",
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "footer",
@@ -2761,7 +2761,7 @@ def build_admin_postfaecher_screen_definition() -> dict[str, Any]:
              "permission": "admin.postfach.testen",
              "inputFields": [{"key": "empfaenger", "label": "Empfänger", "type": "text",
                               "helpText": "Leer = an die Absender-Adresse selbst."}]},
-            {"key": "anmelden", "label": "Beim Anbieter anmelden", "command": "admin.postfachAnmelden",
+            {"key": "anmelden", "label": "Beim Anbieter anmelden", "command": "admin.postfachAnmelden", "localEffect": "navigation",
              "kind": "secondary", "dangerLevel": "safe", "zone": "header",
              "stubReason": "Fuehrt zur Anmeldung bei Google bzw. Microsoft fuer das geladene Postfach."},
             {"key": "neu", "label": "Neues Postfach", "command": "admin.postfachNeu",
@@ -2788,9 +2788,9 @@ def build_admin_postfaecher_screen_definition() -> dict[str, Any]:
                     {"key": "status_text", "label": "Status", "priority": "primary"},
                 ],
                 "rowActions": [
-                    {"key": "bearbeiten", "label": "Bearbeiten", "command": "admin.postfachBearbeiten",
+                    {"key": "bearbeiten", "label": "Bearbeiten", "command": "admin.postfachBearbeiten", "localEffect": "edit_mode",
                      "dangerLevel": "safe"},
-                    {"key": "entfernen", "label": "Entfernen", "command": "admin.postfachEntfernen",
+                    {"key": "entfernen", "label": "Entfernen", "command": "admin.postfachEntfernen", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/admin/postfaecher/{entity_id}", "method": "DELETE"}, "forbiddenForAgents": True,
                      "dangerLevel": "high", "requiresConfirmation": True},
                 ],
             },
@@ -2902,7 +2902,7 @@ def build_sales_gutschrift_screen_definition() -> dict[str, Any]:
             ],
         },
         "actions": [
-            {"key": "position", "label": "Position übernehmen", "command": "sales.gutschriftPosition",
+            {"key": "position", "label": "Position übernehmen", "command": "sales.gutschriftPosition", "localEffect": "edit_mode",
              "kind": "secondary", "dangerLevel": "safe", "zone": "header",
              "stubReason": "Stellt die Positionseingabe in die Positionsliste der Maske; gespeichert wird erst mit Speichern."},
             {"key": "speichern", "label": "Als Entwurf speichern", "command": "sales.gutschriftSpeichern",
@@ -2968,7 +2968,7 @@ def build_sales_gutschrift_screen_definition() -> dict[str, Any]:
                     {"key": "netto", "label": "Netto", "numeric": True, "renderKind": "currency", "priority": "primary"},
                 ],
                 "rowActions": [
-                    {"key": "entfernen", "label": "Entfernen", "command": "sales.gutschriftPositionEntfernen",
+                    {"key": "entfernen", "label": "Entfernen", "command": "sales.gutschriftPositionEntfernen", "localEffect": "edit_mode",
                      "dangerLevel": "safe"},
                 ],
             },
@@ -3009,7 +3009,7 @@ def build_sales_gutschrift_screen_definition() -> dict[str, Any]:
                     {"key": "status_text", "label": "Status", "renderKind": "status", "priority": "primary"},
                 ],
                 "rowActions": [
-                    {"key": "laden", "label": "Öffnen", "command": "sales.gutschriftLaden", "dangerLevel": "safe"},
+                    {"key": "laden", "label": "Öffnen", "command": "sales.gutschriftLaden", "localEffect": "view", "dangerLevel": "safe"},
                 ],
             },
             {
@@ -3034,7 +3034,7 @@ def build_sales_gutschrift_screen_definition() -> dict[str, Any]:
                     {"key": "status_text", "label": "Stand", "renderKind": "status", "priority": "primary"},
                 ],
                 "rowActions": [
-                    {"key": "pruefen", "label": "Prüfen", "command": "sales.gutschriftVorschlagPruefen",
+                    {"key": "pruefen", "label": "Prüfen", "command": "sales.gutschriftVorschlagPruefen", "localEffect": "view",
                      "dangerLevel": "safe"},
                 ],
             },
@@ -3207,7 +3207,7 @@ def build_finance_steuerschluessel_screen_definition() -> dict[str, Any]:
                     {"key": "status_text", "label": "Status", "renderKind": "status", "priority": "primary"},
                 ],
                 "rowActions": [
-                    {"key": "bearbeiten", "label": "Bearbeiten", "command": "finance.steuerschluesselBearbeiten",
+                    {"key": "bearbeiten", "label": "Bearbeiten", "command": "finance.steuerschluesselBearbeiten", "localEffect": "edit_mode",
                      "dangerLevel": "safe"},
                 ],
             },

@@ -134,3 +134,19 @@ Eingabefluesse als `blocked_human_only`.
   ohne `test_mcp_client_lifecycle` (bekannter Windows-Fall).
 - Vitest 93 + 61 Dateien gruen (u. a. Sync der Frontend-Kopie `capture-screens.ts`); volle `tsc` ohne Fehler.
 - Gates: Ratsche (nicht deklariert 0), Kommando-Inventar (0 bekannte Luecken), Architektur-Drift gruen.
+
+## Schritt 5: Frontend-Kommandos der Erfassungsmasken (40 ohne MCP/CLI -> 0)
+
+Die Capture-Masken verdrahten ihre Aktionen in der Seite (`command`). 40 davon waren fuer MCP unklassifiziert und
+ohne CLI. Jetzt, in Backend-SD und Frontend-Kopie `capture-screens.ts` gleich:
+
+- **18 Mutationen** mit `inputFlow` auf den Sendeweg, den die Seite tatsaechlich ruft (`forbiddenForAgents`):
+  Postfach entfernen, Fuhrpark-Dokument/-Rechnung/-Terminart loeschen, Drucker einrichten, Unfallanzeige,
+  Tour stornieren, Versandprofil/Lieferavis anlegen und Profil loeschen, Einwilligung erteilen/widerrufen,
+  Bewerbung/Onboarding/Qualifikation/Schulung loeschen.
+- **22 Oberflaechenaktionen** mit `localEffect`: Navigation, Formular laden/Position (`edit_mode`), Druck,
+  Fracht-Probe, Lieferschein aufloesen, Hinweise, Gutschrift laden/pruefen (`view`), Fahrerliste exportieren.
+
+Inventar: `aktionen_nicht_deklariert`, `aktionen_ohne_mcp_klassifikation`, `aktionen_ohne_cli` alle 0;
+CLI-Register 220 Aktionen. 137 betroffene Suiten 2232 gruen; Vitest 23 Dateien und Spiegeltest der Postfaecher
+gruen; `tsc` ohne Fehler.
