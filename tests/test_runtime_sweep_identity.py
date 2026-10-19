@@ -13,7 +13,7 @@ def test_session_probe_rejects_missing_or_foreign_identity(status, payload):
             sweep.verify_session(client, 'own')
 
 
-@pytest.mark.parametrize('code,expected', [(200, 0), (401, 1), (500, 1)])
+@pytest.mark.parametrize('code,expected', [(200, 0), (401, 1), (500, 1), (503, 1)])
 def test_sweep_cannot_hide_authentication_failure(monkeypatch, tmp_path, code, expected):
     original = httpx.Client
     def respond(request):
@@ -31,6 +31,7 @@ def test_sweep_cannot_hide_authentication_failure(monkeypatch, tmp_path, code, e
     report = json.loads(target.read_text())
     assert report['verified_session'] is True
     assert report['summary']['authentication_error'] == (1 if code == 401 else 0)
+    assert report['summary']['unexpected_503'] == (1 if code == 503 else 0)
     assert 'synthetic-token-only' not in target.read_text()
 
 

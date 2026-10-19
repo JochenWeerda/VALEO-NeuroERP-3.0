@@ -96,14 +96,14 @@ jobs:
           echo "Backend nicht erreichbar"; tail -50 uvicorn.log; exit 1
 
       - name: Run runtime sweep (0x5xx-Gate)
-        run: python scripts/ci/runtime_sweep_authenticated.py --base-url http://127.0.0.1:8000
+        run: python scripts/ci/runtime_sweep_authenticated.py --base-url http://127.0.0.1:8000 --output artifacts/runtime-sweep-current.json
 
       - name: Upload sweep report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: runtime-sweep-report
-          path: artifacts/runtime-sweep-*.json
+          path: artifacts/runtime-sweep-current.json
           retention-days: 30
           if-no-files-found: error
 
