@@ -232,3 +232,22 @@ def test_werkzeug_mit_eigenem_freigabeschritt_bleibt_fuer_agenten(monkeypatch):
     user = {"sub": "agent", "scopes": ["sales:write"], "raw": {"tenant_id": TENANT, "identity_type": "service"}}
     execute_mcp_tool(None, request, user, None)
     assert calls == [1]
+
+
+def test_kartenentscheidung_ohne_agenten_write_gilt_auch_generisch():
+    """Wo die MCP-Karte bewusst keinen Agenten-Write vorsieht, sperrt die Maske Agenten — sonst fuehrte
+    mask.action.execute die Aktion trotzdem aus (19.10.2026: Mahnen war so fuer Agenten offen)."""
+    import yaml
+
+    from app.core.screen_definitions import get_screen_definition
+
+    karte = yaml.safe_load(open("config/mcp_mask_action_map.yaml", encoding="utf-8"))
+    offen = []
+    for eintrag in karte["mappings"]:
+        if eintrag["coverage"] not in {"mapped_read", "open_high", "open_medium", "blocked_human_only"}:
+            continue
+        _, sid, key = (eintrag.get("mask_action_id") or "::").split(":")
+        action = next((a for a in mm.iter_actions(get_screen_definition(sid) or {}) if a.get("key") == key), None)
+        if action and action.get("commandEndpoint") and mm.agent_block(action) is None:
+            offen.append(eintrag["mask_action_id"])
+    assert offen == []

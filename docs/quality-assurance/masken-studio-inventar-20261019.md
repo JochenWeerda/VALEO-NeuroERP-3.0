@@ -42,9 +42,9 @@ Studio-Masken tragen nur Katalogaktionen. Was hier bedienbar ist, ist es in jede
 | Katalogaktion | Route | CLI | MCP |
 |---|---|---|---|
 | `create_activity` | ja | ja | mapped |
-| `mahnen` | ja | ja | mapped_read — **nicht ausfuehrbar** |
+| `mahnen` | ja | ja | blocked_human_only, mapped_read |
 | `freigeben` | ja | ja | mapped |
-| `stornieren` | **fehlt** | ja | keine Abbildung — **nicht ausfuehrbar** |
+| `stornieren` | ja | ja | blocked_human_only |
 
 Datenquellen: 15, ohne Route: keine.
 

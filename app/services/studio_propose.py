@@ -101,6 +101,8 @@ def propose_studio_draft(intent: str) -> dict[str, Any]:
                 "dangerLevel": action["dangerLevel"],
                 "requiresHumanApproval": False,
                 "requiresConfirmation": False,
+                # Die Agentensperre der Katalogaktion gilt auch im Agentenvertrag (sonst hebt der Vorschlag sie auf).
+                "forbiddenForAgents": action.get("forbiddenForAgents", False),
                 "permission": "studio.draft.execute",
             }],
             "validationRules": [],

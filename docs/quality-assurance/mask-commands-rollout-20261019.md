@@ -150,3 +150,23 @@ ohne CLI. Jetzt, in Backend-SD und Frontend-Kopie `capture-screens.ts` gleich:
 Inventar: `aktionen_nicht_deklariert`, `aktionen_ohne_mcp_klassifikation`, `aktionen_ohne_cli` alle 0;
 CLI-Register 220 Aktionen. 137 betroffene Suiten 2232 gruen; Vitest 23 Dateien und Spiegeltest der Postfaecher
 gruen; `tsc` ohne Fehler.
+
+## Schritt 6: Studio-Katalog vollstaendig bedienbar (3 -> 0)
+
+- `stornieren` versprach `/sales/orders/{id}/actions/stornieren`, den Weg gab es nicht. Jetzt derselbe
+  Zustandswechsel wie `/cancel` mit Verkaufsrolle, Begruendung, Trockenlauf, Wiederholungsschutz (Agenten gesperrt).
+- Das Inventar wertet eine Katalogaktion ohne eigene MCP-Zuordnung nach derselben Regel wie
+  `mask.action.execute` (generisch ausfuehrbar oder bewusst menschlich).
+
+### Sicherheitsbefund und Korrektur
+
+**Mahnen war fuer Agenten offen.** Die MCP-Karte entschied "Mahnlauf-Write bewusst nicht" (nur Status lesen),
+die Maskenaktion `finance/ar-open-item:mahnen` sperrte Agenten aber nicht; das generische `mask.action.execute`
+haette Mahnungen erzeugt. Jetzt `forbiddenForAgents` an Maske und Studio-Katalog; der Studio-Vorschlag traegt die
+Sperre in den Agentenvertrag. Neuer Vertrag `test_kartenentscheidung_ohne_agenten_write_gilt_auch_generisch`:
+Jede Kartenentscheidung ohne Agenten-Write muss die Maske sperren.
+
+### Nachweis
+
+`tests/test_sales_order_storno_command.py` (2) gegen `valeo_probe`; Auftrags-, Studio-, MCP-, Offene-Posten-,
+Katalog- und SD-Suiten 882 gruen; Vitest Mahnlauf/Katalog 52 gruen. Ratsche: alle Aktions- und Kataloglisten 0.

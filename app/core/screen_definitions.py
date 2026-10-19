@@ -1715,7 +1715,9 @@ def build_finance_ar_open_item_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "mahnen", "label": "Mahnung erstellen", "kind": "primary", "dangerLevel": "moderate", "permission": "finance.ar.mahnung", "requiresConfirmation": True, "commandEndpoint": "/api/v1/finance/open-items/{entity_id}/actions/mahnen", "method": "POST"},
+            {"key": "mahnen", "label": "Mahnung erstellen", "kind": "primary", "dangerLevel": "moderate", "permission": "finance.ar.mahnung", "requiresConfirmation": True, "commandEndpoint": "/api/v1/finance/open-items/{entity_id}/actions/mahnen", "method": "POST",
+             # Mahnlauf-Write bewusst nicht fuer Agenten (MCP-Karte: nur Status lesen); auch nicht ueber mask.action.execute.
+             "forbiddenForAgents": True},
         ],
         "noWorkflowReason": "OP-Status wird durch Zahlungseingaenge automatisch gesetzt — kein separater Workflow noetig.",
         "agentContract": {

@@ -258,6 +258,15 @@ def catalog() -> dict:
     for action in data.get("command_actions") or []:
         endpoint = action.get("commandEndpoint") or ""
         coverages = sorted({m["coverage"] for m in mappings if m.get("command_endpoint") == endpoint})
+        if not set(coverages) & MCP_BEDIENBAR:
+            # Ohne ausfuehrbare Zuordnung fuehrt mask.action.execute die Katalogaktion einer Studio-Maske aus —
+            # oder die Maske sperrt Agenten bewusst. Dieselbe Regel wie das Werkzeug (agent_block).
+            from app.services.mcp_mask_actions import agent_block
+            block = agent_block(action)
+            if block is None:
+                coverages = sorted({*coverages, "mapped_generic"})
+            elif block in AGENT_GESPERRT:
+                coverages = sorted({*coverages, "blocked_human_only"})
         rows.append({"aktion": action["key"], "endpunkt": endpoint, "route": _route_key(endpoint) in routes,
                      "cli": support(action).supported, "mcp": coverages,
                      "mcp_bedienbar": bool(set(coverages) & MCP_BEDIENBAR)})

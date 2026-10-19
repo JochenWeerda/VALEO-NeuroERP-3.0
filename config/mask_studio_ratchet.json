@@ -596,9 +596,5 @@
  "aktionen_nicht_verfuegbar": [],
  "aktionen_ohne_mcp_klassifikation": [],
  "aktionen_ohne_cli": [],
- "studio_katalog_nicht_bedienbar": [
-  "aktion:mahnen:mcp_nicht_ausfuehrbar",
-  "aktion:stornieren:mcp_nicht_ausfuehrbar",
-  "aktion:stornieren:ohne_route"
- ]
+ "studio_katalog_nicht_bedienbar": []
 }

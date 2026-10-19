@@ -396514,6 +396514,66 @@
         ]
       }
     },
+    "/api/v1/sales/orders/{entity_id}/actions/stornieren": {
+      "post": {
+        "description": "Derselbe Zustandswechsel wie ``/cancel`` (offen/bestaetigt -> storniert), fuer Maske, Studio, CLI und MCP.\n\nDie Begruendung ist Pflicht und steht mit dem Bearbeiter aus dem Token im Audit der Laufzeit.\nAgenten sperrt die Maske (``forbiddenForAgents`` im Studio-Katalog).",
+        "operationId": "stornieren_action_api_v1_sales_orders__entity_id__actions_stornieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Auftrag stornieren (Maskenaktion: Begruendung, Trockenlauf, Wiederholungsschutz)",
+        "tags": [
+          "sales",
+          "orders"
+        ]
+      }
+    },
     "/api/v1/sales/orders/{order_id}": {
       "delete": {
         "operationId": "delete_sales_order_api_v1_sales_orders__order_id__delete",
