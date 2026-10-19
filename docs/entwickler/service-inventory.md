@@ -210,6 +210,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `mask_rollout_summary_service` | Data service for batch mask rollout screen-summary endpoints (Waves 42–51). |
 | `mcp_beleg_tools` | Lesende MCP-Werkzeuge fuer Belege (BELEG-013). |
 | `mcp_execution_service` | Authenticated ERP adapters; a catalog entry alone never enables execution. |
+| `mcp_mask_actions` | Generische MCP-Werkzeuge fuer Maskenaktionen — eine Fachaktion, derselbe Kommandoweg wie die Maske. |
 | `mcp_tool_registry_service` | MCP-ERP-TOOLS-001 — Rollenbasierter ERP-Tool-Katalog fuer Agent-Zugriff. |
 | `meldewesen_lifecycle_service` | DOM-MEL-004.2 — Meldewesen Lifecycle (Intrastat/ELSTER/ATLAS — extern gegated). |
 | `milchvieh_crosssell_service` | Cross-Sell-Auswertung Milchvieh: Hygiene-Bedarf + Kraftfutter-Potenzial. |

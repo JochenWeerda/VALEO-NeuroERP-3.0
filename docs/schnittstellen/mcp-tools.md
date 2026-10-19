@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 62 Tools in 19 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 64 Tools in 20 Domaenen.
 
 ## Uebersicht
 
@@ -66,6 +66,8 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 62 Tools in 19 Domaenen.
 | `logistik.rechnung.speichern` | logistics | `logistics:write` | ja | mittel | nein |
 | `logistik.terminart.speichern` | logistics | `logistics:write` | ja | mittel | nein |
 | `logistik.tour.anlegen` | logistics | `logistics:write` | ja | mittel | nein |
+| `mask.action.execute` | masks | `masks:write` | ja | mittel | nein |
+| `mask.actions.list` | masks | `masks:read` | ja | niedrig | nein |
 | `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein |
 | `planung.calendar.reproject` | planung | `planung:write` | ja | mittel | nein |
 | `produktion.control.sync` | produktion | `ops:write` | ja | mittel | nein |
@@ -2983,6 +2985,120 @@ Legt eine Tour im Authentifizierungs-Mandanten an (Maske logistik/tourenplanung:
     },
     "auditEntryId": {
       "type": "string"
+    }
+  }
+}
+```
+
+## Domaene: masks
+
+### `mask.action.execute` — Maskenaktion ausfuehren
+
+Fuehrt eine Maskenaktion ueber ihren deklarierten Kommando-Endpunkt aus (gleicher Umschlag wie die Maske). Gesperrt sind forbiddenForAgents, humanApprovalRequired, Command-Adapter und Eingabefluesse. Default dryRun; execute erfordert idempotency_key.
+
+- **Scope:** `masks:write`
+- **Idempotent:** ja
+- **Risikoklasse:** mittel
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "input": {
+      "type": "object",
+      "nullable": true
+    },
+    "audit_reason": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "required": [
+    "screen_id",
+    "action"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "result": {
+      "type": "object"
+    }
+  }
+}
+```
+
+### `mask.actions.list` — Maskenaktionen auflisten
+
+Liest die Aktionen einer Maske aus der mandantengenauen ScreenDefinition, mit Eingabefeldern und Befund, ob ein Agent sie ausfuehren darf. Nur Lesen.
+
+- **Scope:** `masks:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "screen_id"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "nullable": true
+    },
+    "actions": {
+      "type": "array"
     }
   }
 }

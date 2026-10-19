@@ -185,7 +185,8 @@ def test_repository_cannot_change_primary_key_or_tenant(db,seeded,case):
 @pytest.mark.parametrize("mode", ["validate","dryRun","propose","execute"])
 def test_mcp_delete_rejects_actual_foreign_vehicle(db,seeded,mode):
     tenant,foreign,ids=seeded
-    user={"sub":"test", "scopes":["logistics:write"],"raw":{"tenant_id":tenant}}
+    # Mensch: Loeschen verlangt laut Maske menschliche Genehmigung; geprueft wird hier die Mandantentrennung.
+    user={"sub":"test", "scopes":["logistics:write"],"raw":{"tenant_id":tenant,"identity_type":"human"}}
     with pytest.raises(HTTPException) as error:
         mcp.execute_mcp_tool(db,mcp.ToolExecutionRequest(tool_name="logistik.fahrzeug.loeschen",parameters={"fahrzeug_id":ids["fahrzeuge"],"reason":"isolation"},mode=mode,idempotency_key="delete-test"),user,None)
     assert error.value.status_code==404

@@ -24,7 +24,7 @@ from app.api.v1.endpoints.reklamation_api import (
 )
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.reklamation import ReklamationsStatus, ReklamationZustandsmaschine
-from app.services import crm_lead_service, mcp_beleg_tools
+from app.services import crm_lead_service, mcp_beleg_tools, mcp_mask_actions
 from app.services.crm_kontakt_service import CrmKontaktService
 from app.services.document_allocation_service import LineToRegister
 from app.services.einkauf_compat_service import EinkaufCompatService, _NICHT_BESTELLBAR
@@ -656,7 +656,8 @@ _BELEG_TOOLS = {
 }
 
 
-def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, tenant_header: str | None) -> dict:
+def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, tenant_header: str | None,
+                     authorization: str | None = None) -> dict:
     """Use the verified identity, never a tenant or actor from tool arguments."""
     actor = user.get("sub")
     tenant = _tenant_from_claims(user.get("raw"))
@@ -674,6 +675,18 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
     if tool["scope"] not in user.get("scopes", []):
         raise HTTPException(403, "Required tool scope is missing")
     # A catalog flag or a client boolean never posts. Only an explicit adapter may write.
+    if request.mode == "execute" and not tool.get("human_approval_required"):
+        # Die Agentengrenze der Maske gilt fuer jeden Zugang: humanApprovalRequired/forbiddenForAgents
+        # verlangen eine menschliche Identitaet, auch ueber ein Spezialwerkzeug (MCP-MASK-GENERIC).
+        # Ausgenommen sind Werkzeuge mit eigenem deklariertem Freigabeschritt (Mensch gibt frei, Agent fuehrt aus).
+        locked = mcp_mask_actions.human_only_tool_call(request.tool_name, request.parameters)
+        if locked and (user.get("raw") or {}).get("identity_type") != "human":
+            raise HTTPException(403, f"Nur menschliche Bedienung: {locked}")
+    if request.tool_name in mcp_mask_actions.TOOLS:
+        # Generisch: derselbe Kommando-Endpunkt wie die Maske, mit dem Token des Aufrufers (MCP-MASK-GENERIC).
+        if request.tool_name == "mask.actions.list":
+            return mcp_mask_actions.list_actions(request.parameters, tenant)
+        return mcp_mask_actions.execute(request, tenant, authorization)
     if request.tool_name == "crm.customer.search":
         return _search_customers(db, request, actor, tenant)
     if request.tool_name == "crm.customer.summary360":

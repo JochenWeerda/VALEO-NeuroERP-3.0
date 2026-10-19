@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-16",
+  "generatedAt": "2026-10-19",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -5459,6 +5459,24 @@
       "scope": "agent:read",
       "idempotent": true,
       "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "mask.actions.list",
+      "domain": "masks",
+      "scope": "masks:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "mask.action.execute",
+      "domain": "masks",
+      "scope": "masks:write",
+      "idempotent": true,
+      "risk_class": "medium",
       "human_approval_required": false,
       "endpoint": "POST /api/v1/mcp/tools/call"
     }

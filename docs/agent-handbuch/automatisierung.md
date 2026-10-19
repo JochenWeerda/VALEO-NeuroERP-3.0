@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-16
+last_reviewed: 2026-10-19
 version: 3.0.0
 description: MCP-Tools, Domain-Events und Automatisierungsregeln für Agenten.
 ---
@@ -77,6 +77,8 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `logistik.rechnung.speichern` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `logistik.terminart.speichern` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `logistik.tour.anlegen` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `mask.action.execute` | masks | `masks:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
+| `mask.actions.list` | masks | `masks:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `planung.calendar.reproject` | planung | `planung:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `produktion.control.sync` | produktion | `ops:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |

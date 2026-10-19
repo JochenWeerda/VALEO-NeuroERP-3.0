@@ -51,6 +51,8 @@ COPY --from=builder /usr/local/lib/python3.13/poplib.py /usr/local/lib/python3.1
 
 COPY --chown=appuser:appuser app/ ./app/
 COPY --chown=appuser:appuser modules/ ./modules/
+# Laufzeitkonfiguration: Belegvarianten, Studio-Katalog, MCP-Werkzeuge und -Aktionskarte (MASK-CLI/MCP-MASK-GENERIC).
+COPY --chown=appuser:appuser config/ ./config/
 COPY --chown=appuser:appuser scripts/ ./scripts/
 COPY --chown=appuser:appuser main.py ./
 COPY --chown=appuser:appuser alembic/ ./alembic/

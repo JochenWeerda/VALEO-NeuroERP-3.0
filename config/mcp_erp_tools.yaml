@@ -1666,3 +1666,57 @@ tools:
     audit: read
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false
+
+  # ── Generische Maskenaktionen (MCP-MASK-GENERIC-20261019) ───
+  # Derselbe Kommando-Endpunkt wie die Maske, mit dem Token des Aufrufers. Agentensperren der
+  # ScreenDefinition gelten unveraendert; Rechte und Mandant prueft der Ziel-Endpunkt.
+  - tool_id: mask.actions.list
+    domain: masks
+    name: "Maskenaktionen auflisten"
+    description: "Liest die Aktionen einer Maske aus der mandantengenauen ScreenDefinition, mit Eingabefeldern und Befund, ob ein Agent sie ausfuehren darf. Nur Lesen."
+    scope: masks:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+      required: [screen_id]
+    output_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+        title: { type: string, nullable: true }
+        actions: { type: array }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
+  - tool_id: mask.action.execute
+    domain: masks
+    name: "Maskenaktion ausfuehren"
+    description: "Fuehrt eine Maskenaktion ueber ihren deklarierten Kommando-Endpunkt aus (gleicher Umschlag wie die Maske). Gesperrt sind forbiddenForAgents, humanApprovalRequired, Command-Adapter und Eingabefluesse. Default dryRun; execute erfordert idempotency_key."
+    scope: masks:write
+    idempotent: true
+    risk_class: medium
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+        action: { type: string }
+        entity_id: { type: string, nullable: true }
+        input: { type: object, nullable: true }
+        audit_reason: { type: string, nullable: true }
+      required: [screen_id, action]
+    output_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+        action: { type: string }
+        mode: { type: string }
+        result: { type: object }
+    audit: write
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false

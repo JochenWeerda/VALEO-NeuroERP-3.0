@@ -1633,6 +1633,13 @@ def test_stock_movement_stornieren_dry_run_and_guards(client):
 
 def test_stock_movement_stornieren_execute(client):
     http, db = _as_scopes(client, ["lager:write"])
+    # Die Maske verlangt eine menschliche Genehmigung (humanApprovalRequired) — das gilt auch per MCP.
+    agent = http.post("/mcp/tools/call", json={"tool_name": "lager.stock_movement.stornieren", "parameters": STORNO_MOV,
+                                               "mode": "execute", "idempotency_key": "storno-agent"})
+    assert agent.status_code == 403 and "mask:lager/stock-movement:stornieren" in agent.json()["detail"]
+    _, app, _ = client
+    app.dependency_overrides[get_current_user] = lambda: {
+        **USER, "scopes": ["lager:write"], "raw": {**USER.get("raw", {}), "identity_type": "human"}}
     db.execute.return_value.mappings.return_value.first.return_value = {
         "id": "mov-1", "movement_type": "einlagerung", "quantity": 10,
         "source_document_type": "WARENEINGANG", "article_id": "art-1", "warehouse_id": "wh-1",

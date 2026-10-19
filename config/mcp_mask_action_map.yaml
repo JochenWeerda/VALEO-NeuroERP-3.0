@@ -1,6 +1,6 @@
 schema_version: '1.0'
 slice_id: MCP-MASK-WRITE-PARITY-20261008
-generated_on: '2026-10-15'
+generated_on: '2026-10-19'
 sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
@@ -50,7 +50,8 @@ mcp_write_tools:
 - produktion.control.sync
 - planung.calendar.reproject
 - mobile.sync.process_pending
-mcp_read_tools_count: 21
+- mask.action.execute
+mcp_read_tools_count: 22
 mcp_native_writes:
 - mcp_tool_id: crm.contact.log
   mask_action_id: null

@@ -184,7 +184,13 @@ def _cli_commands() -> set[str]:
     return set(json.loads(registry.read_text(encoding="utf-8")).get("mask_action_ids", []))
 
 
+#: Bewusst Menschen vorbehalten: so deklariert die ScreenDefinition (oder ein Adapter/Eingabefluss der Maske).
+AGENT_GESPERRT = {"fuer_agenten_gesperrt", "menschliche_genehmigung", "adapter_nur_mensch", "eingabe_in_maske"}
+
+
 def actions() -> list[dict]:
+    from app.services.mcp_mask_actions import agent_block
+
     mcp = _mcp_coverage()
     cli = _cli_commands()
     rows = []
@@ -206,11 +212,18 @@ def actions() -> list[dict]:
                 art = "serverwirksam"
             else:
                 art = "nicht_deklariert"
+            block = agent_block(action)
+            if coverage in MCP_ZUGANG:
+                mcp_state = "zugang"
+            elif block is None:
+                mcp_state = "generisch"  # mask.action.execute: derselbe Kommando-Endpunkt mit dem Token des Agenten
+            elif coverage in MCP_GESPERRT or block in AGENT_GESPERRT:
+                mcp_state = "gesperrt"
+            else:
+                mcp_state = coverage or "unklassifiziert"
             rows.append({
                 "id": action_id, "maske": sid, "aktion": key, "label": action.get("label"), "art": art,
-                "rest": rest, "mcp": ("zugang" if coverage in MCP_ZUGANG else "gesperrt" if coverage in MCP_GESPERRT
-                                      else coverage or "unklassifiziert"),
-                "cli": action_id in cli,
+                "rest": rest, "mcp": mcp_state, "mcp_grund": block, "cli": action_id in cli,
             })
     return rows
 
@@ -330,9 +343,10 @@ def markdown(inv: dict) -> str:
               f"| Aktionen gesamt (ohne Doppel je Maske) | {len(inv['aktionen'])} |",
               f"| davon serverwirksam | {len(wirksam)} |",
               f"| … mit REST-Kommandoweg | {sum(1 for a in wirksam if a['rest'])} |",
-              f"| … mit MCP-Zugang | {sum(1 for a in wirksam if a['mcp'] == 'zugang')} |",
+              f"| … mit eigenem MCP-Werkzeug | {sum(1 for a in wirksam if a['mcp'] == 'zugang')} |",
+              f"| … per generischem MCP-Werkzeug (`mask.action.execute`) | {sum(1 for a in wirksam if a['mcp'] == 'generisch')} |",
               f"| … MCP bewusst gesperrt | {sum(1 for a in wirksam if a['mcp'] == 'gesperrt')} |",
-              f"| … MCP offen (`open_high` u. a.) | {sum(1 for a in wirksam if a['mcp'] not in ('zugang', 'gesperrt', 'unklassifiziert'))} |",
+              f"| … MCP offen (`open_high` u. a.) | {sum(1 for a in wirksam if a['mcp'] not in ('zugang', 'generisch', 'gesperrt', 'unklassifiziert'))} |",
               f"| … MCP unklassifiziert | {sum(1 for a in wirksam if a['mcp'] == 'unklassifiziert')} |",
               f"| … mit CLI-Zugang | {sum(1 for a in wirksam if a['cli'])} |",
               f"| nicht deklariert (kein Kommando, Endpunkt, Navigation) | "
