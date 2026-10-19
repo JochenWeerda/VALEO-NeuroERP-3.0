@@ -86,9 +86,10 @@ def test_belegvarianten_liefern_ihre_aktionen(inventar):
     assert len(beleg) == len(inventar["familien"]["beleg"])
 
 
-def test_cli_wird_nicht_geschoent(modul, inventar):
-    """Ohne CLI-Register hat keine Aktion einen CLI-Zugang — die Luecke steht vollstaendig in der Ratsche."""
-    if (ROOT / "config/cli_mask_commands.json").is_file():
-        pytest.skip("CLI-Register vorhanden")
+def test_cli_befund_kommt_allein_aus_dem_register(modul, inventar):
+    """CLI-Zugang hat genau, was das aus valeo_cli.support erzeugte Register fuehrt — nichts wird geschoent."""
+    import json
+    register = set(json.loads((ROOT / "config/cli_mask_commands.json").read_text(encoding="utf-8"))["mask_action_ids"])
+    assert {a["id"] for a in inventar["aktionen"] if a["cli"]} == register
     wirksam = {a["id"] for a in inventar["aktionen"] if a["art"] == "serverwirksam"}
-    assert set(modul.gaps(inventar)["aktionen_ohne_cli"]) == wirksam
+    assert set(modul.gaps(inventar)["aktionen_ohne_cli"]) == wirksam - register

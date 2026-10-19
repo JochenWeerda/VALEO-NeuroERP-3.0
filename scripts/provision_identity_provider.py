@@ -131,6 +131,24 @@ def assign_declared_scopes(client: httpx.Client, headers: dict, realm: str, iden
             raise RuntimeError('OIDC client scope assignment not persisted')
 
 
+#: Clients, die nach einem bestehenden Realm-Import hinzukamen und deshalb angelegt werden duerfen.
+#: Jeder andere fehlende Client bleibt ein Fehler: Ein ERP-Client wird nicht stillschweigend neu erfunden.
+ADDITIVE_CLIENT_IDS = frozenset({'valeo-neuro-erp-cli'})
+
+
+def create_declared_client(client: httpx.Client, headers: dict, realm: str, desired: dict) -> None:
+    """Oeffentlicher CLI-Client nur mit Device-Grant; kein Geheimnis, kein Browser-, Passwort- oder Dienstfluss."""
+    attributes = desired.get('attributes', {})
+    if (not desired.get('publicClient') or desired.get('standardFlowEnabled') or desired.get('serviceAccountsEnabled')
+            or desired.get('directAccessGrantsEnabled') or desired.get('implicitFlowEnabled')
+            or attributes.get('oauth2.device.authorization.grant.enabled') != 'true' or desired.get('redirectUris')):
+        raise RuntimeError('Additive client must be a public device-grant-only client')
+    representation = {k: v for k, v in desired.items() if k not in ('secret', 'defaultClientScopes', 'optionalClientScopes')}
+    response = client.post(f'/admin/realms/{realm}/clients', headers=headers, json=representation)
+    if response.status_code != 201:
+        raise RuntimeError(f'Declared client creation failed ({response.status_code})')
+
+
 def reconcile_callback_origins(current: dict, desired: dict) -> None:
     """Only declared callback origins, with existing deployment addresses retained."""
     for field in ('redirectUris','webOrigins'):
@@ -160,6 +178,10 @@ def provision(client: httpx.Client, username: str, password: str, source: dict, 
     for desired in realm.get('clients',[]):
         found=client.get(f'/admin/realms/{name}/clients',headers=headers,params={'clientId':desired['clientId']})
         found.raise_for_status()
+        if not found.json() and desired['clientId'] in ADDITIVE_CLIENT_IDS:
+            create_declared_client(client, headers, name, desired)
+            found=client.get(f'/admin/realms/{name}/clients',headers=headers,params={'clientId':desired['clientId']})
+            found.raise_for_status()
         if len(found.json()) != 1:
             raise RuntimeError('Configured ERP client missing or ambiguous')
         client_id=found.json()[0]['id']

@@ -6,7 +6,8 @@ import httpx
 from app.auth.beleg_roles import rollen_fuer
 from app.core.belegvertrag import BELEGARTEN
 
-ERP_CLIENT_IDS = frozenset({"valeo-neuro-erp-frontend", "valeo-neuro-erp-backend", "valeo-erp-staging"})
+ERP_CLIENT_IDS = frozenset({"valeo-neuro-erp-frontend", "valeo-neuro-erp-backend", "valeo-erp-staging",
+                            "valeo-neuro-erp-cli"})
 
 # Project the existing domain decisions; never maintain a parallel role list.
 DOCUMENT_SCOPE_ROLES = {
