@@ -125,7 +125,7 @@ jobs:
         run: pnpm --filter @valero-neuroerp/frontend-web build-storybook
       
       - name: Upload Storybook artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: storybook-static
           path: packages/frontend-web/storybook-static
@@ -140,7 +140,7 @@ jobs:
           CI: true
       
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report

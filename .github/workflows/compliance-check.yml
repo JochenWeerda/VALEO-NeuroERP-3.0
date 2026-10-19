@@ -58,7 +58,7 @@ jobs:
       
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: gdpr-test-results
           path: pytest-report.xml
@@ -109,7 +109,7 @@ jobs:
       
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: gobd-test-results
           path: pytest-report.xml
@@ -140,7 +140,7 @@ jobs:
           cat test-results/gobd-test-results/pytest-report.xml || echo "No GoBD results"
       
       - name: Upload Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: compliance-report
           path: compliance-report.md
