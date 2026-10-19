@@ -30,6 +30,7 @@ from modules.agrar.services.daily_price_service import (
 from modules.agrar.repositories.daily_price_repo import DailyPriceRepositoryImpl
 
 from app.api.v1.schemas.base import BaseSchema
+from app.core.akteur import akteur_aus_request
 
 
 router = APIRouter()
@@ -104,27 +105,8 @@ def _validate_daily_price_dq_datensatz(payload: dict) -> None:
 # ── Helper Functions ────────────────────────────────────────────────────────────
 
 def _get_user_id_from_request(request) -> Optional[str]:
-    """Holt User-ID aus Request-Header oder Bearer-Token."""
-    if request is None:
-        return None
-    # 1. Expliziter X-User-ID Header (API-Gateway/Proxy)
-    user_id = request.headers.get("X-User-ID")
-    if user_id:
-        return user_id
-    # 2. Bearer-Token: sub-Claim ohne Validierung auslesen (Validierung erfolgt in get_current_user)
-    auth = request.headers.get("Authorization", "")
-    if auth.startswith("Bearer "):
-        token = auth[7:]
-        try:
-            import base64
-            import json as _json
-            payload_b64 = token.split(".")[1]
-            payload_b64 += "=" * (4 - len(payload_b64) % 4)
-            claims = _json.loads(base64.urlsafe_b64decode(payload_b64))
-            return claims.get("sub")
-        except Exception:  # noqa: BLE001 — JWT decode failed; caller handles None return
-            pass
-    return None
+    """Urheber aus dem geprueften Token (bis 19.10.2026 zuerst aus dem Client-Header ``X-User-ID``)."""
+    return akteur_aus_request(request)
 
 
 def _to_out(price) -> DailyPriceOut:

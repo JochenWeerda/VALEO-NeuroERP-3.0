@@ -89,7 +89,7 @@ class AuditMiddleware:
         request = Request(scope)
         headers = request.headers
         claims = getattr(request.state, "token_claims", {}) or {}
-        user_id = claims.get("sub") or headers.get("X-User-ID", "anonymous")
+        user_id = claims.get("sub") or "anonymous"  # nie aus dem Client-Kopf X-User-ID
         tenant_id = getattr(request.state, "tenant_id", "unknown")
         correlation_id = (
             getattr(request.state, "correlation_id", None)

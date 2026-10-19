@@ -11,12 +11,14 @@ from app.api.v1.endpoints.mcp_tool_registry import get_current_user, get_db as m
 from app.core.database import get_db
 from app.core.dependencies import get_tenant_id as get_tenant_dep
 from app.core.tenant import get_tenant_id
+from testgrenze import setze_identitaet
 
 
 
 def _client_tours():
     app = FastAPI()
     app.include_router(logistics_tours.router, prefix="/api/v1")
+    setze_identitaet(app, "disp")
     db = Mock()
     db.execute.return_value.fetchone.return_value = None
     db.execute.return_value.mappings.return_value.first.return_value = None

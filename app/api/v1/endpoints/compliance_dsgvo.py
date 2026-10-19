@@ -20,29 +20,12 @@ from app.services.audit_hardening import append_audit_entry
 
 from app.api.v1.schemas.base import BaseSchema, IDResponse
 from app.api.v1.schemas.compliance_dsgvo_schemas import ComplianceDsgvoOut
+from app.core.akteur import akteur_aus_request
 
 
 def _benutzer_aus_anfrage(request: Request | None) -> str | None:
-    """Wer handelt hier? Ohne Namen ist eine Attestierung nur eine Huerde.
-
-    Dieselbe Form wie im Druckpfad des Lieferscheins: erst der Kopf
-    ``X-User-ID``, dann das ``sub`` des Bearer-Tokens.
-    """
-    if request is None:
-        return None
-    kopf = request.headers.get("X-User-ID")
-    if kopf:
-        return kopf
-    auth = request.headers.get("Authorization", "")
-    if auth.startswith("Bearer "):
-        try:
-            import base64
-            nutzlast = auth[7:].split(".")[1]
-            nutzlast += "=" * (4 - len(nutzlast) % 4)
-            return json.loads(base64.urlsafe_b64decode(nutzlast)).get("sub")
-        except Exception:  # noqa: BLE001 — kein lesbares Token, dann kein Name
-            pass
-    return None
+    """Urheber aus dem geprueften Token (bis 19.10.2026 zuerst aus dem Client-Header ``X-User-ID``)."""
+    return akteur_aus_request(request)
 
 
 router = APIRouter(prefix="/compliance/dsgvo", tags=["compliance", "dsgvo"])

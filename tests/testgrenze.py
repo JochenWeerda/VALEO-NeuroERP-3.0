@@ -83,3 +83,13 @@ def pruefstand_erlaubt(url) -> bool:
         erklaert = os.environ.get("TEST_DATABASE_URL") or os.environ.get("DATABASE_URL")
         return bool(erklaert) and make_url(erklaert).database == ziel.database
     return False
+
+
+def setze_identitaet(app: FastAPI, sub: str = "5f0c2a9e", *rollen: str) -> None:
+    """Fuer Mini-Apps ohne Bearer-Pruefung: die geprueften Claims so in den Request legen, wie es
+    ``require_bearer_token`` taete. Ersetzt den frueheren Kopf ``X-User-ID`` (kein Weg liest ihn mehr)."""
+
+    @app.middleware("http")
+    async def _identitaet(request: Request, call_next):  # noqa: ANN001, ANN202
+        request.state.token_claims = {"sub": sub, "roles": list(rollen)}
+        return await call_next(request)

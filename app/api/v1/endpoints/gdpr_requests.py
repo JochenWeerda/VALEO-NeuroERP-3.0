@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.gdpr_requests_schemas import GdprRequestsOut
+from app.core.akteur import akteur_aus_request
 
 
 router = APIRouter(prefix="/gdpr/requests", tags=["gdpr"])
@@ -150,7 +151,8 @@ def _record_history(
 
 
 def _current_user(request: Request) -> Optional[str]:
-    return request.headers.get("X-User-ID")
+    """Urheber aus dem geprueften Token (bis 19.10.2026 zuerst aus dem Client-Header ``X-User-ID``)."""
+    return akteur_aus_request(request)
 
 
 # ---------------------------------------------------------------------------

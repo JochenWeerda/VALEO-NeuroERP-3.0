@@ -30,6 +30,7 @@ from modules.agrar.services.quality_protocol_service import (
 from modules.agrar.repositories.quality_protocol_repo import QualityProtocolRepositoryImpl
 
 from app.api.v1.schemas.base import BaseSchema
+from app.core.akteur import akteur_aus_request
 
 
 router = APIRouter()
@@ -106,22 +107,8 @@ class QualityProtocolFinalizeIn(BaseModel):
 # ── Helper Functions ────────────────────────────────────────────────────────────
 
 def _get_user_id_from_request(request) -> Optional[str]:
-    """Holt User-ID aus Request-Header oder Bearer-Token."""
-    if request is None:
-        return None
-    user_id = request.headers.get("X-User-ID")
-    if user_id:
-        return user_id
-    auth = request.headers.get("Authorization", "")
-    if auth.startswith("Bearer "):
-        try:
-            import json as _json
-            payload_b64 = auth[7:].split(".")[1]
-            payload_b64 += "=" * (4 - len(payload_b64) % 4)
-            return _json.loads(base64.urlsafe_b64decode(payload_b64)).get("sub")
-        except Exception:  # noqa: BLE001 — JWT decode failed; caller handles None return
-            pass
-    return None
+    """Urheber aus dem geprueften Token (bis 19.10.2026 zuerst aus dem Client-Header ``X-User-ID``)."""
+    return akteur_aus_request(request)
 
 
 def _to_out(protocol) -> QualityProtocolOut:

@@ -21,6 +21,7 @@ from sqlalchemy import text
 
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from pydantic import ConfigDict as _ConfigDict
+from app.core.akteur import gepruefter_akteur_aus_request
 
 
 class ChargeOut(BaseSchema):
@@ -366,7 +367,7 @@ async def bulk_release_charges(
             status_code=409,
             detail={"message": "Qualitaetsfreigabe fehlt", "charge_ids": blocked},
         )
-    actor = request.headers.get("X-User-ID") or "charge-operator"
+    actor = gepruefter_akteur_aus_request(request)
     released_at = datetime.utcnow()
     for row in rows:
         old_status = row.status

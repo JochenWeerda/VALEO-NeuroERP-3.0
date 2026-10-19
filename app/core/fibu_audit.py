@@ -24,24 +24,19 @@ SYSTEM_USER_EMAIL = "system@internal"
 
 
 def _user_from_request(request: Optional[Any]) -> tuple[str, str]:
-    """user_id, user_email aus Request-Headern (X-User-ID, X-User-Email) oder Bearer-Token sub/preferred_username."""
-    if not request:
+    """user_id, user_email aus der geprueften Anmeldung (``request.state.token_claims``), nie aus Client-Kopfzeilen.
+
+    Bis zum 19.10.2026 kamen beide zuerst aus ``X-User-ID``/``X-User-Email``: Ein Client schrieb FiBu-Audit unter
+    fremdem Namen. Ohne gepruefte Anmeldung (System, Import) steht der Systemnutzer im Eintrag.
+    """
+    state = getattr(request, "state", None) if request is not None else None
+    claims = getattr(state, "token_claims", None) if state is not None else None
+    sub = str(claims.get("sub") or "").strip() if isinstance(claims, dict) else ""
+    if not sub:
         return SYSTEM_USER_ID, SYSTEM_USER_EMAIL
-    user_id = (request.headers.get("X-User-ID") or "").strip()
-    user_email = (request.headers.get("X-User-Email") or "").strip()
-    if user_id and user_email:
-        return user_id, user_email
-    if user_id:
-        return user_id, user_email or f"{user_id}@internal"
-    # Optional: aus Bearer-Token sub/preferred_username auslesen (ohne Validierung)
-    try:
-        auth = request.headers.get("Authorization") or ""
-        if auth.startswith("Bearer ") and hasattr(request.app.state, "decode_token"):
-            # App könnte decode_token bereitstellen
-            pass
-    except Exception:  # noqa: BLE001 — Token-Dekodierung fehlgeschlagen; System-User-ID wird verwendet
-        pass
-    return SYSTEM_USER_ID, SYSTEM_USER_EMAIL
+    email = next((str(claims[k]).strip() for k in ("email", "preferred_username") if str(claims.get(k) or "").strip()),
+                 f"{sub}@token")
+    return sub, email
 
 
 def log_fibu_audit(

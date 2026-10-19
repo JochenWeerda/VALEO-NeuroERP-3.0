@@ -18,6 +18,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
 from app.services.query_center_service import QueryCenterError, QueryCenterService
+from app.core.akteur import gepruefter_akteur_aus_request
 
 router = APIRouter(prefix="/query-center", tags=["reporting", "query-center"])
 
@@ -50,7 +51,8 @@ class ImportIn(BaseModel):
 
 
 def actor(request: Request) -> str:
-    return request.headers.get("X-User-ID") or "query-center-user"
+    """Urheber aus dem geprueften Token (bis 19.10.2026 zuerst aus dem Client-Header ``X-User-ID``)."""
+    return gepruefter_akteur_aus_request(request)
 
 
 def service(db: Session, tenant_id: str) -> QueryCenterService:

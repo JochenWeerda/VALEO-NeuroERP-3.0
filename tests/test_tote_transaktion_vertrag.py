@@ -228,7 +228,8 @@ def test_die_loeschung_ist_auditiert(client, kopf, mandant) -> None:
     assert eintrag is not None, "Die Loeschung hat keine Auditspur hinterlassen"
     assert eintrag["action"] == "ERASURE_PROCESSED"
     assert eintrag["entity_type"] == "data_erasure_request"
-    assert eintrag["user_id"] == "pruefer-artikel-17", "Der Handelnde ist nicht vermerkt"
+    # Vermerkt ist die gepruefte Anmeldung (Testidentitaet ``dev``), nicht der Kopf X-User-ID des Clients.
+    assert eintrag["user_id"] == "dev", "Der Handelnde ist nicht vermerkt"
     assert eintrag["hash"] == daten["audit_hash"]
     assert eintrag["prev_hash"], "Die Hashkette ist nicht geschlossen"
     # Der Betroffene und das Protokoll gehoeren in die Spur, nicht nur die

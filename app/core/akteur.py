@@ -34,3 +34,42 @@ def verlange_rolle(user: Any, *rollen: str) -> None:
     vorhanden = set(user.get("roles") or []) if isinstance(user, dict) else set()
     if not vorhanden.intersection(rollen):
         raise HTTPException(status_code=403, detail=f"Insufficient role. Required: {rollen}")
+
+
+def akteur_aus_request(request: Any, fallback: str | None = None) -> str | None:
+    """Urheber aus den Claims, die ``require_bearer_token`` geprueft im Request ablegt — nie aus einem Kopf.
+
+    Fuer Wege, die keinen Nutzer per Abhaengigkeit bekommen. Ohne gepruefte Claims: ``fallback``.
+    """
+    state = getattr(request, "state", None)
+    claims = getattr(state, "token_claims", None) if state is not None else None
+    subject = claims.get("sub") if isinstance(claims, dict) else None
+    if isinstance(subject, str) and subject.strip():
+        return subject.strip()[:120]
+    return fallback
+
+
+def gepruefter_akteur_aus_request(request: Any) -> str:
+    """Wie ``akteur_aus_request``, aber ohne gepruefte Identitaet ist die Anfrage nicht zurechenbar: 403."""
+    akteur = akteur_aus_request(request)
+    if akteur is None:
+        raise HTTPException(status_code=403, detail="Gepruefter Bearbeiter fehlt")
+    return akteur
+
+
+def bekannter_nutzer(db: Any, akteur: str | None, fallback: str = "system") -> str:
+    """Kennung fuer Spalten mit Fremdschluessel auf ``domain_shared.users``.
+
+    Die gepruefte Kennung, wenn es den Nutzer im Verzeichnis gibt; sonst ``fallback`` (wie vor dem 19.10.2026,
+    als dort ohne Kopfzeile immer ``system`` stand). So scheitert kein Vorgang an einem Nutzer, den das
+    Verzeichnis noch nicht kennt, und kein Client bestimmt den Namen.
+    """
+    if not akteur:
+        return fallback
+    try:
+        from sqlalchemy import text
+
+        known = db.execute(text("SELECT 1 FROM domain_shared.users WHERE id = :id"), {"id": akteur}).first()
+    except Exception:  # noqa: BLE001 — ohne lesbares Verzeichnis bleibt die FK-sichere Kennung
+        return fallback
+    return akteur if known is not None else fallback

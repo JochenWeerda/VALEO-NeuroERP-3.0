@@ -16,6 +16,7 @@ from app.services.calendar_projection_service import (
     CALENDAR_LAYERS,
     CalendarProjectionService,
 )
+from app.core.akteur import akteur_aus_request
 
 router = APIRouter(prefix="/planung/kalender", tags=["planung", "kalender"])
 
@@ -138,7 +139,7 @@ async def list_calendar_items(
     if to_ts <= from_ts:
         raise HTTPException(status_code=422, detail="to must be after from")
     try:
-        user_ref = request.headers.get("X-User-ID") or "default"
+        user_ref = akteur_aus_request(request, "default")
         permissions = {
             item.strip()
             for item in request.headers.get("X-Permissions", "").split(",")

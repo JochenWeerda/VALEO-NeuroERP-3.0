@@ -170,3 +170,30 @@ Jede Kartenentscheidung ohne Agenten-Write muss die Maske sperren.
 
 `tests/test_sales_order_storno_command.py` (2) gegen `valeo_probe`; Auftrags-, Studio-, MCP-, Offene-Posten-,
 Katalog- und SD-Suiten 882 gruen; Vitest Mahnlauf/Katalog 52 gruen. Ratsche: alle Aktions- und Kataloglisten 0.
+
+## Schritt 7: keine Identitaet aus Client-Kopfzeilen (systemweit)
+
+Nach den Masken des Rollouts lasen noch 21 Stellen `X-User-ID`, `X-User-Email` oder Rollen aus Kopfzeilen:
+Urheber-Helfer in elf Routern (Chargen-Freigabe, DSGVO, Tagespreise, FiBu-Konnektoren, Auskunftsersuchen,
+Berichtskatalog, Kalender, Qualitaetsprotokolle, Abfrage-Center, Lieferschein, Sanktionspruefung, Gutschrift,
+Tourenanlage, Mailkonto) sowie die zentralen `get_user_id_from_request`/`get_user_email_from_request`,
+`fibu_audit._user_from_request` (Kopf vor Token!) und die Audit-Middleware. Bei den UX-Overlays waehlte der Kopf,
+wessen Ansichtseinstellungen gelesen und ueberschrieben wurden.
+
+- `app/core/akteur.py`: `akteur_aus_request` / `gepruefter_akteur_aus_request` lesen die Claims, die
+  `require_bearer_token` geprueft ablegt; `bekannter_nutzer` fuer Spalten mit Fremdschluessel auf
+  `domain_shared.users` im frischen Schema (Attestierung des Lieferschein-Nachdrucks): gepruefte Kennung, wenn
+  bekannt, sonst `system` wie bisher.
+- FiBu- und DSGVO-Audit schreiben die gepruefte Kennung (im frischen Schema ohne Fremdschluessel; die
+  Entwicklungsdatenbank hat dort Drift).
+- Vertrag `tests/test_keine_client_identitaet.py`: Kein Code unter `app/` liest diese Kopfzeilen.
+- Testgrenze `testgrenze.setze_identitaet` fuer Mini-Apps statt `X-User-ID`; betroffene Tests pruefen jetzt,
+  dass ein gefaelschter Kopf nichts bewirkt.
+
+Nachweis: 98 + 43 Suiten der beruehrten Wege, FiBu und Audit 2076 gruen gegen `valeo_probe`.
+
+### Offen (eigene Slices)
+
+- **STAMMDATEN-BEARBEITEN:** elf native Objektmasken ohne Aenderungsbefehl (Schritt 4).
+- **Rollen der Auftragswege:** `sales_orders` (anlegen, bestaetigen, abschliessen, `/cancel`) prueft keine Rolle;
+  der neue Storno-Kommandoweg schon. Ein Rollen-Inventar aller Schreibwege ohne Rollenpruefung steht aus.

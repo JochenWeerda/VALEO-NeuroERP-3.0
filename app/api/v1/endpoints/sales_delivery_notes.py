@@ -39,28 +39,16 @@ from app.documents.router_helpers import get_repository, save_to_store
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.sales_delivery_notes_schemas import SalesDeliveryNotesOut
+from app.core.akteur import akteur_aus_request, bekannter_nutzer
 
 
 router = APIRouter(prefix="/sales/delivery-notes", tags=["sales", "delivery-notes"])
 
 
 def _get_user_id_from_request(request: Request | None) -> str | None:
-    if request is None:
-        return None
-    uid = request.headers.get("X-User-ID")
-    if uid:
-        return uid
-    auth = request.headers.get("Authorization", "")
-    if auth.startswith("Bearer "):
-        try:
-            import base64 as _b64
-            import json as _json
-            payload = auth[7:].split(".")[1]
-            payload += "=" * (4 - len(payload) % 4)
-            return _json.loads(_b64.urlsafe_b64decode(payload)).get("sub")
-        except Exception:  # noqa: BLE001 — JWT decode failed; caller handles None return
-            pass
-    return None
+    """Urheber aus dem geprueften Token (bis 19.10.2026 zuerst aus dem Client-Header ``X-User-ID``)."""
+    return akteur_aus_request(request)
+
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
@@ -641,7 +629,7 @@ async def print_delivery_note(
                 "tenant_id": tenant_id,
                 "entity_id": ls_id,
                 "reason": attestation,
-                "created_by": _get_user_id_from_request(request) or "system",
+                "created_by": bekannter_nutzer(db, _get_user_id_from_request(request)),  # FK auf domain_shared.users
             }
         )
     

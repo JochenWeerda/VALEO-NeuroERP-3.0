@@ -42,9 +42,8 @@ class OverlayOut(BaseModel):
 
 
 def _overlay_user_id(request: Request) -> str:
-    header_user = (request.headers.get("X-User-ID") or "").strip()
-    if header_user:
-        return header_user[:64]
+    """Wessen Ansicht: die der angemeldeten Person. Bis 19.10.2026 entschied der Kopf ``X-User-ID`` —
+    jede Person konnte die Ansichtseinstellungen einer anderen lesen und ueberschreiben."""
     return get_user_id_from_request(request)[:64]
 
 

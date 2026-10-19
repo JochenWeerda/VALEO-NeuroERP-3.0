@@ -24,6 +24,7 @@ from app.services.l3_report_catalog_service import (
     ReportCatalogError,
 )
 from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
+from app.core.akteur import gepruefter_akteur_aus_request
 
 router = APIRouter(prefix="/l3-report-catalog", tags=["reporting", "l3-parity"])
 
@@ -76,7 +77,8 @@ def guarded(call):  # noqa: ANN001, ANN201
 
 
 def actor(request: Request) -> str:
-    return request.headers.get("X-User-ID") or "report-user"
+    """Urheber aus dem geprueften Token (bis 19.10.2026 zuerst aus dem Client-Header ``X-User-ID``)."""
+    return gepruefter_akteur_aus_request(request)
 
 
 @router.get("", response_model=L3ReportCatalogOut, summary="Berichtskatalog abrufen")

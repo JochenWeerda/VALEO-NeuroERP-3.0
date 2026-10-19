@@ -11,11 +11,13 @@ from fastapi.testclient import TestClient
 from app.api.v1.endpoints import l3_report_catalog, query_center
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from testgrenze import setze_identitaet
 
 
 def _client_bonus():
     app = FastAPI()
     app.include_router(l3_report_catalog.router, prefix="/api/v1")
+    setze_identitaet(app, "agent-1")
     db = Mock()
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
@@ -25,6 +27,7 @@ def _client_bonus():
 def _client_query():
     app = FastAPI()
     app.include_router(query_center.router, prefix="/api/v1")
+    setze_identitaet(app, "agent-1")
     db = Mock()
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
