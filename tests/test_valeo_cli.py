@@ -35,7 +35,7 @@ ACTIONS = [
                      {"key": "kind", "type": "select", "required": True,
                       "options": [{"value": "user"}, {"value": "agent"}]}]},
     {"key": "regel", "label": "Regelversion", "commandEndpoint": "/api/v1/agrar/harvest/rules",
-     "commandBinding": {"adapter": "harvest.control.v1", "command": "create_rule"}},
+     "commandBinding": {"adapter": "unbekannt.v9", "command": "create_rule"}},
     {"key": "neu", "label": "Neu", "command": "admin.neu"},
 ]
 DEFINITION = {"id": "admin/fixture", "title": "Fixture", "actions": ACTIONS[:2],
@@ -79,7 +79,7 @@ def run(argv, server, token=HUMAN, monkeypatch=None, answer=""):
 def test_nur_der_generische_weg_der_maske_ist_unterstuetzt():
     by_key = {a["key"]: support.support(a) for a in ACTIONS}
     assert by_key["testen"].supported and by_key["allocate"].supported
-    assert by_key["regel"].reason == "adapter:harvest.control.v1"
+    assert by_key["regel"].reason == "adapter:unbekannt.v9"
     assert support.support({"key": "b", "commandEndpoint": "/api/v1/docflow/{entity_id}/post",
                             "commandBinding": {"adapter": "docflow.v1", "command": "post"}}).supported
     assert by_key["neu"].reason == "kein_endpunkt"
@@ -186,7 +186,7 @@ def test_agent_und_unbekannte_identitaet_sind_gesperrt(monkeypatch, token):
 def test_adapteraktion_wird_mit_grund_abgewiesen(monkeypatch):
     server = Server()
     code, out = run(["ausfuehren", "admin/fixture", "regel", "--ja"], server, monkeypatch=monkeypatch)
-    assert code == 1 and "harvest.control.v1" in out and not server.calls
+    assert code == 1 and "unbekannt.v9" in out and not server.calls
 
 
 def test_fachliche_ablehnung_und_serververweigerung(monkeypatch):
@@ -200,7 +200,7 @@ def test_fachliche_ablehnung_und_serververweigerung(monkeypatch):
 def test_aktionen_listet_zugang_und_grund(monkeypatch):
     code, out = run(["aktionen", "admin/fixture"], Server(), monkeypatch=monkeypatch)
     assert code == 0
-    assert "testen" in out and "CLI" in out and "harvest.control.v1" in out and "keinen Kommando-Endpunkt" in out
+    assert "testen" in out and "CLI" in out and "unbekannt.v9" in out and "keinen Kommando-Endpunkt" in out
 
 
 # --------------------------------------------------------------------------------------------- Anmeldung

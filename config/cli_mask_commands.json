@@ -5,6 +5,14 @@
   "mask:admin/identity-budgets:root",
   "mask:admin/postfaecher:speichern",
   "mask:admin/postfaecher:testen",
+  "mask:agrar/harvest-controls:approve_calculation",
+  "mask:agrar/harvest-controls:approve_rule",
+  "mask:agrar/harvest-controls:attest",
+  "mask:agrar/harvest-controls:bind_rule",
+  "mask:agrar/harvest-controls:calculate",
+  "mask:agrar/harvest-controls:create_rule",
+  "mask:agrar/harvest-controls:release",
+  "mask:agrar/harvest-controls:revoke_rule",
   "mask:agrar/harvest-settlement:drucken",
   "mask:agrar/ration:activate",
   "mask:agrar/ration:approve",
@@ -132,7 +140,6 @@
   "mask:schnittstelle/mde-inbox:process_pending"
  ],
  "nicht_unterstuetzt": {
-  "adapter:harvest.control.v1": 8,
   "eingabe_in_maske": 4,
   "kein_endpunkt": 182
  }

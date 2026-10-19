@@ -138,12 +138,28 @@ python -m valeo_cli ausfuehren beleg/sales-order bearbeiten --id <beleg> --daten
 
 Gesperrter Zustand, veraltete Version oder fehlende Bindung: Exit-Code 1, nichts gesendet.
 
+## Ernte-Abrechnungssteuerung
+
+`agrar/harvest-controls` laeuft ueber `harvest.control.v1` (`valeo_cli.harvest`, Spiegel von
+`harvest-control-command-adapter.ts`). Wie in der Maske waehlt man eine Regelfassung und laedt den Kontrollstand
+der Annahme, hier ausdruecklich: `--regel <Versionskennung>` sucht die Fassung in der Regelliste, `--id <Annahme>`
+laedt `…/acceptances/{id}/context`. Ausgefuehrt wird nur, was `…/permissions` erlaubt; Hashes binden an den
+geladenen Stand. Bestaetigung (`--ja` oder Rueckfrage) wird als `confirm_execution` uebergeben. Nur `execute`, nie
+fuer Agenten.
+
+```bash
+python -m valeo_cli ausfuehren agrar/harvest-controls calculate --id <annahme>
+python -m valeo_cli ausfuehren agrar/harvest-controls approve_rule --regel <fassung> --grund "Vertrag geprueft"     --feld expires_at=2026-12-31T12:00:00Z --ja
+```
+
+Unsicherer Ausgang (Netz- oder Serverfehler nach dem Absenden): Die CLI nennt den Wiederholungsschluessel. Mit
+`--idempotenz <schluessel>` wiederholt bleibt es derselbe Auftrag (Belege und Ernte-Steuerung).
+
 ## Was die CLI (noch) nicht ausfuehrt
 
 Was nicht so ausgefuehrt werden kann wie in der Maske, weist die CLI mit Grund ab:
 
-- **Ernte-Regelsteuerung** (`harvest.control.v1`): Ihr Adapter braucht die ausgewaehlte Regelversion aus der
-  Maske und ist noch nicht nachgebaut.
+
 - **Eingabeflüsse** (`inputFlow`, Formular nur fuer Menschen in der Maske).
 - **Aktionen ohne Kommando-Endpunkt**, die die Seite selbst verdrahtet.
 

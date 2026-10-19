@@ -19,11 +19,12 @@ import os
 import sys
 import time
 import uuid
+from urllib.parse import quote
 from typing import Any, Callable
 
 import httpx
 
-from valeo_cli import auth, docflow, studio, support
+from valeo_cli import auth, docflow, harvest, studio, support
 
 DEFAULT_API = "http://localhost:8000"
 
@@ -165,6 +166,9 @@ def cmd_ausfuehren(args, http, token, out, ask: Callable[[str], str], stdin) -> 
             if answer.strip().lower() not in {"ja", "j", "yes", "y"}:
                 out("Abgebrochen; nichts ausgefuehrt.")
                 return 1
+            args.ja = True  # bestaetigt; der Ernte-Adapter verlangt die Bestaetigung als confirm_execution
+    if (action.get("commandBinding") or {}).get("adapter") == "harvest.control.v1":
+        return _run_harvest(action, args, http, token, out, payload)
     if action.get("commandBinding"):
         # Belegfamilie: Zustand und Version aus derselben Belegquelle wie die Maske, dann der versionierte Adapter.
         if not args.id:
@@ -180,7 +184,8 @@ def cmd_ausfuehren(args, http, token, out, ask: Callable[[str], str], stdin) -> 
             # Belegzustand, Version oder Bindung passen nicht: fachlich abgelehnt, nichts gesendet.
             out(f"Abgelehnt: {exc}")
             return 1
-        response = _request(http, token, method, path, body)
+        response = (_send_retryable(http, token, method, path, body, key, out) if "idempotency_key" in body
+                    else _request(http, token, method, path, body))
         result = docflow.result(action, entity_id=args.id, data=data, mode=args.modus, response=response,
                                 expected_version=args.version)
         if "idempotency_key" in body:
@@ -197,6 +202,58 @@ def cmd_ausfuehren(args, http, token, out, ask: Callable[[str], str], stdin) -> 
         out(("OK" if success is not False else "ABGELEHNT") + (f": {result.get('summary') or result.get('error') or ''}"
                                                               if isinstance(result, dict) else ""))
     return 1 if isinstance(result, dict) and result.get("success") is False else 0
+
+
+def _send_retryable(http, token, method, path, body, key, out):
+    """Unsicherer Ausgang (Netz oder 5xx nach dem Absenden): Schluessel nennen, damit die Wiederholung derselbe
+    Auftrag bleibt - wie die Maske, die nach einem unsicheren Ergebnis denselben Schluessel wiederverwendet."""
+    try:
+        return _request(http, token, method, path, body)
+    except (ServerError, httpx.HTTPError):
+        out(f"Ausgang unsicher. Wiederholen mit: --idempotenz {key}")
+        raise
+
+
+def _run_harvest(action, args, http, token, out, payload) -> int:
+    """Ernte-Steuerung: Regelfassung (--regel) und Kontrollstand der Annahme (--id) wie in der Maske laden."""
+    allowed = _request(http, token, "GET", f"{harvest.CONTROL}/permissions").get("allowed_actions", [])
+    if action["key"] not in allowed:
+        out("Verweigert: Fuer diese Aktion fehlt die Berechtigung.")
+        return 3
+    selected = None
+    if harvest.needs_rule(action):
+        if not args.regel:
+            raise UsageError("Diese Aktion braucht eine Regelfassung (--regel <Versionskennung>).")
+        page = 1
+        while selected is None:
+            rows = _request(http, token, "GET", f"{harvest.CONTROL}/rules?limit=100&page={page}")
+            items = rows.get("items", rows) if isinstance(rows, dict) else rows
+            try:
+                selected = harvest.find_rule(items, args.regel)
+            except ValueError:
+                if not items or len(items) < 100:
+                    raise
+                page += 1
+    context = None
+    if harvest.needs_acceptance(action):
+        if not args.id:
+            raise UsageError("Diese Aktion braucht eine Annahme (--id).")
+        context = _request(http, token, "GET", f"{harvest.CONTROL}/acceptances/{quote(args.id, safe='')}/context")
+        payload = {**payload, "acceptance_id": args.id}
+    if args.ja:
+        payload = {**payload, "confirm_execution": "confirm"}
+    try:
+        url, body = harvest.prepare(action, selected_rule=selected, context=context, entity_id=args.id, payload=payload,
+                                    mode=args.modus, audit_reason=args.grund,
+                                    idempotency_key=args.idempotenz or str(uuid.uuid4()), is_agent=_is_agent(token))
+    except ValueError as exc:
+        out(f"Abgelehnt: {exc}")
+        return 1
+    result = harvest.result(_send_retryable(http, token, "POST", url, body, body["idempotency_key"], out))
+    result["idempotenz"] = body["idempotency_key"]
+    out(json.dumps(result, ensure_ascii=False, indent=2) if args.json else
+        ("OK" if result["success"] else "ABGELEHNT") + f": {result.get('summary') or result.get('error')}")
+    return 0 if result["success"] else 1
 
 
 def cmd_status(args, http, settings, out) -> int:
@@ -234,6 +291,7 @@ def parser() -> argparse.ArgumentParser:
     x.add_argument("--grund", help="Begruendung fuer den Nachweis")
     x.add_argument("--ja", action="store_true", help="Bestaetigung ohne Rueckfrage")
     x.add_argument("--idempotenz", metavar="SCHLUESSEL", help="Wiederholung mit demselben Schluessel")
+    x.add_argument("--regel", metavar="VERSIONSKENNUNG", help="Regelfassung (Ernte-Steuerung)")
     x.add_argument("--version", type=int, help="Gesehene Belegversion (Belege); sonst die aktuelle")
     x.add_argument("--json", action="store_true", help="Antwort vollstaendig als JSON")
     studio.add_parser(sub)

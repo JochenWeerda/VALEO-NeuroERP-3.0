@@ -14,8 +14,8 @@ from urllib.parse import quote
 
 MODES = ("execute", "dryRun", "validate", "propose")
 
-#: Command-Adapter, die die CLI wie die Maske nachbaut (``valeo_cli.docflow``).
-SUPPORTED_ADAPTERS = {"docflow.v1"}
+#: Command-Adapter, die die CLI wie die Maske nachbaut (``valeo_cli.docflow``, ``valeo_cli.harvest``).
+SUPPORTED_ADAPTERS = {"docflow.v1", "harvest.control.v1"}
 
 #: Pfadparameter, die der generische Weg der Maske selbst einsetzt (useActionRuntime). Alle anderen gehoeren
 #: einem Command-Adapter (DocFlow-Freigabe, Ernte-Regelversion) und sind hier nicht nachgebaut.
