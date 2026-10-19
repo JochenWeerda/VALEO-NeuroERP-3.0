@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from fastapi import Request
+from app.auth.deps import get_current_user, User as AuthenticatedUser
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,13 @@ from app.api.v1.schemas.gdpr_schemas import GdprOut
 router = APIRouter()
 
 
+def _authorize_subject(user_id: str, actor: AuthenticatedUser, *, keycloak_id: str | None = None, erase: bool = False) -> None:
+    """Profile access follows the verified identity; erasure is administrative."""
+    if not actor.get('sub') or ('admin' not in actor.get('roles', []) and
+                                (erase or actor['sub'] not in {user_id, keycloak_id})):
+        raise HTTPException(status_code=403, detail="Not authorized for this data subject")
+
+
 @router.get("/data-export/{user_id}", summary="User data exportieren",
     response_model=GdprOut
 )
@@ -30,13 +38,14 @@ async def export_user_data(
     request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    actor: AuthenticatedUser = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """
     GDPR Article 15: Right to Access
     Export all data for a user.
     """
     
-    logger.info(f"GDPR data-export requested for user: {user_id}")
+    logger.info("GDPR data-export requested")
     
     try:
         from app.infrastructure.models import (
@@ -54,6 +63,7 @@ async def export_user_data(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
+        _authorize_subject(user_id, actor, keycloak_id=user.keycloak_id)
         
         # Collect all user data
         data = {
@@ -80,7 +90,8 @@ async def export_user_data(
         
         # Get audit logs
         audit_logs = db.query(AuditLog).filter(
-            AuditLog.user_id == user_id
+            AuditLog.user_id == user_id,
+            AuditLog.tenant_id == tenant_id,
         ).limit(1000).all()
         
         data["audit_logs"] = [
@@ -93,24 +104,21 @@ async def export_user_data(
             for log in audit_logs
         ]
         
-        logger.info(
-            f"GDPR data-export completed for {user_id}: "
-            f"{len(audit_logs)} audit logs"
-        )
+        logger.info("GDPR data-export completed; audit rows=%d", len(audit_logs))
         
         return data
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("GDPR data-export failed: %s", e, exc_info=True)
+        logger.error("GDPR data-export failed (%s)", type(e).__name__)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
+            detail="User data export failed"
         )
 
 
-@router.delete("/delete-user/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="User data löschen",
+@router.delete("/delete-user/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Lokales Benutzerprofil anonymisieren",
     response_model=None
 )
 async def delete_user_data(
@@ -118,16 +126,19 @@ async def delete_user_data(
     request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    actor: AuthenticatedUser = Depends(get_current_user),
 ):
     """
-    GDPR Article 17: Right to Erasure
-    Delete all user data (with anonymization for audit-trail).
+    Administratively anonymize the tenant-local profile.
+    Retained evidence stays intact. Provider-account deletion and the complete
+    data-subject erasure workflow require their separate identity/retention paths.
     """
     
-    logger.warning(f"GDPR deletion requested for user: {user_id}")
+    _authorize_subject(user_id, actor, erase=True)
+    logger.warning("GDPR local profile anonymization requested")
     
     try:
-        from app.infrastructure.models import User, AuditLog
+        from app.infrastructure.models import User
         
         # Get user
         user = db.query(User).filter(
@@ -151,26 +162,21 @@ async def delete_user_data(
         user.deleted_at = datetime.utcnow()
         user.is_active = False
         
-        # 2. Anonymize in audit logs (nur PII)
-        db.query(AuditLog).filter(
-            AuditLog.user_id == user_id
-        ).update({
-            "user_email": f"deleted-{user_id}@anonymized.local",
-            "ip_address": "0.0.0.0"
-        })
+        # Retained audit evidence is immutable. Any policy-driven erasure of
+        # evidence requires the separate retention process, never this profile update.
         
         db.commit()
         
-        logger.info(f"GDPR deletion completed for {user_id} (anonymized)")
+        logger.info("GDPR local profile anonymization completed")
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"GDPR deletion failed: {e}", exc_info=True)
+        logger.error("GDPR profile anonymization failed (%s)", type(e).__name__)
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
+            detail="User profile anonymization failed"
         )
 
 
@@ -182,16 +188,17 @@ async def export_portable_data(
     request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    actor: AuthenticatedUser = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """
     GDPR Article 20: Right to Data Portability
     Export data in structured, machine-readable format.
     """
     
-    logger.info(f"GDPR portable-export requested for user: {user_id}")
+    logger.info("GDPR portable-export requested")
     
     # Same as data-export but in standardized format
-    data = await export_user_data(user_id, request, db, tenant_id)
+    data = await export_user_data(user_id, request, db, tenant_id, actor)
     
     # Add portability-specific metadata
     data["portability_metadata"] = {

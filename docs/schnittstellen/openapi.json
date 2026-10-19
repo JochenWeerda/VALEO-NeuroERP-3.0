@@ -317102,7 +317102,7 @@
     },
     "/api/v1/gdpr/delete-user/{user_id}": {
       "delete": {
-        "description": "GDPR Article 17: Right to Erasure\nDelete all user data (with anonymization for audit-trail).",
+        "description": "Administratively anonymize the tenant-local profile.\nRetained evidence stays intact. Provider-account deletion and the complete\ndata-subject erasure workflow require their separate identity/retention paths.",
         "operationId": "delete_user_data_api_v1_gdpr_delete_user__user_id__delete",
         "parameters": [
           {
@@ -317135,7 +317135,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "User data löschen",
+        "summary": "Lokales Benutzerprofil anonymisieren",
         "tags": [
           "gdpr",
           "compliance"
