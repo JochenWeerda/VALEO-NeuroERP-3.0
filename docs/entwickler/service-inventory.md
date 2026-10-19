@@ -207,6 +207,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `mail_workspace_service` | Role-scoped ERP mail workspace on top of the canonical IMAP ingest. |
 | `mailkonto_service` | Postfaecher des Mandanten: ausgehende E-Mails ueber seinen eigenen Dienst. |
 | `mask_action_runtime_service` | SPEC-P1-04 — gemeinsame ActionRuntime für Mask-CommandEndpoints. |
+| `mask_commands` | Statusaktionen einer Maske als Kommando-Weg (MASK-COMMANDS-ROLLOUT-20261019). |
 | `mask_rollout_summary_service` | Data service for batch mask rollout screen-summary endpoints (Waves 42–51). |
 | `mcp_beleg_tools` | Lesende MCP-Werkzeuge fuer Belege (BELEG-013). |
 | `mcp_execution_service` | Authenticated ERP adapters; a catalog entry alone never enables execution. |

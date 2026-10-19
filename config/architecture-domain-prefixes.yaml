@@ -587,6 +587,7 @@ domains:
 
 # Explizite Stem-Overrides (exakter Match, hoechste Prioritaet)
 exact_service_stems:
+  mask_commands: platform
   tenant_lifecycle_service: platform
   ebilanz_xbrl_service: finance
   bewerbung_service: hr

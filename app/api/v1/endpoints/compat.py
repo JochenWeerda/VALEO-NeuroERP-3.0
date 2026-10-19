@@ -950,13 +950,15 @@ async def einkauf_reports(tenant_id: str = Depends(get_tenant_id), db: Session =
     cached = cache_get_json(cache_key)
     if cached is not None:
         return cached
-    try:
-        rows = db.execute(
-            text("SELECT category, SUM(total_net) AS betrag FROM einkauf_bestellungen GROUP BY category")
-        ).fetchall()
-        spend = [{"kategorie": r._mapping.get("category") or "Sonstige", "anteil": 0, "betrag": float(r._mapping.get("betrag") or 0)} for r in rows]
-    except Exception:
-        spend = []
+    from decimal import Decimal
+    totals: dict[str, Decimal] = {}
+    for order in _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id):
+        category = str(order.get("category") or "Sonstige")
+        amount = Decimal(str(order.get("subtotal") or 0))
+        if not amount.is_finite():
+            raise ValueError("Invalid purchase-order subtotal")
+        totals[category] = totals.get(category, Decimal(0)) + amount
+    spend = [{"kategorie": category, "anteil": 0, "betrag": float(amount)} for category, amount in sorted(totals.items())]
     total = sum(float(i.get("betrag") or 0) for i in spend) or 1
     for i in spend:
         i["anteil"] = round(float(i["betrag"]) / total * 100, 2)

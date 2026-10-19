@@ -7,10 +7,12 @@ Multi-Tenant & Jahreswechsel-Support
 from __future__ import annotations
 import os
 import logging
+import inspect
 from typing import Annotated
 from fastapi import Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 from app.core.database import get_db
 
 logger = logging.getLogger(__name__)
@@ -19,8 +21,18 @@ logger = logging.getLogger(__name__)
 class NumberingServicePG:
     """PostgreSQL-basierter Nummernkreis-Service"""
 
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: Session | AsyncSession):
         self.db = db
+
+    async def execute(self, *args, **kwargs):
+        """The configured dependency is synchronous; also accept AsyncSession."""
+        result = self.db.execute(*args, **kwargs)
+        return await result if inspect.isawaitable(result) else result
+
+    async def commit(self):
+        result = self.db.commit()
+        if inspect.isawaitable(result):
+            await result
 
     async def next_number(
         self,
@@ -44,7 +56,7 @@ class NumberingServicePG:
         width = int(os.environ.get(f"NUMBER_WIDTH_{domain.upper()}", "5"))
         
         # Hole oder erstelle Nummernkreis (mit Row-Level-Lock)
-        result = await self.db.execute(
+        result = await self.execute(
             text("""
                 SELECT counter FROM number_series
                 WHERE domain = :domain
@@ -60,7 +72,7 @@ class NumberingServicePG:
         if row is None:
             # Erstelle neuen Nummernkreis
             counter = 1
-            await self.db.execute(
+            await self.execute(
                 text("""
                     INSERT INTO number_series (domain, tenant_id, year, prefix, counter, width)
                     VALUES (:domain, :tenant_id, :year, :prefix, :counter, :width)
@@ -77,7 +89,7 @@ class NumberingServicePG:
         else:
             # Incrementiere Counter
             counter = row[0] + 1
-            await self.db.execute(
+            await self.execute(
                 text("""
                     UPDATE number_series
                     SET counter = :counter
@@ -88,7 +100,7 @@ class NumberingServicePG:
                 {"domain": domain, "tenant_id": tenant_id, "year": year, "counter": counter}
             )
         
-        await self.db.commit()
+        await self.commit()
         
         # Formatiere Nummer
         number = f"{prefix}{counter:0{width}d}"
@@ -108,7 +120,7 @@ class NumberingServicePG:
         prefix = self._get_prefix(domain, tenant_id, year)
         width = int(os.environ.get(f"NUMBER_WIDTH_{domain.upper()}", "5"))
         
-        result = await self.db.execute(
+        result = await self.execute(
             text("""
                 SELECT counter FROM number_series
                 WHERE domain = :domain
@@ -132,7 +144,7 @@ class NumberingServicePG:
         """
         Setzt Nummernkreis zurück (nur für Admin/Testing)
         """
-        await self.db.execute(
+        await self.execute(
             text("""
                 UPDATE number_series
                 SET counter = 0
@@ -142,7 +154,7 @@ class NumberingServicePG:
             """),
             {"domain": domain, "tenant_id": tenant_id, "year": year}
         )
-        await self.db.commit()
+        await self.commit()
         logger.warning(f"Reset number series: {domain}/{tenant_id}/{year}")
 
     def _get_prefix(self, domain: str, tenant_id: str, year: int | None) -> str:
@@ -177,7 +189,7 @@ class NumberingServicePG:
 
 
 # Dependency für FastAPI
-async def get_numbering_pg(db: Annotated[AsyncSession, Depends(get_db)]) -> NumberingServicePG:
+async def get_numbering_pg(db: Annotated[Session, Depends(get_db)]) -> NumberingServicePG:
     """FastAPI Dependency für NumberingServicePG"""
     return NumberingServicePG(db)
 

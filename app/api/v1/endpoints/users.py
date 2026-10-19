@@ -10,7 +10,12 @@ from sqlalchemy.orm import Session
 from ....core.database import get_db
 from ....infrastructure.repositories import UserRepository
 from ....core.dependency_container import container
-from ....auth.deps_oidc import get_current_user, User as OIDCUser
+from ....auth.deps_oidc import get_current_user as authenticated_user, User as OIDCUser
+from app.auth.deps import require_roles
+from app.core.tenant import get_tenant_id
+from app.infrastructure.models import User as Profile
+from sqlalchemy import or_
+import json
 from ..schemas.shared import (
     UserCreate, UserUpdate, User,
     UserLogin, ChangePasswordRequest
@@ -22,6 +27,14 @@ from app.api.v1.schemas.users_schemas import UsersOut
 
 
 router = APIRouter(tags=["users"])
+
+
+def _profile_output(profile: Profile) -> User:
+    values = {name: getattr(profile, name) for name in User.model_fields}
+    if not isinstance(values['roles'], (str, type(None))):
+        values['roles'] = json.dumps(values['roles'])
+    return User.model_validate(values)
+
 
 
 @router.post("/", response_model=User, status_code=status.HTTP_201_CREATED, summary="User anlegen")
@@ -57,7 +70,8 @@ async def create_user(
 
 @router.get("/me", response_model=User, summary="Current user abrufen")
 async def get_current_user(
-    oidc_user: OIDCUser = Depends(get_current_user),
+    oidc_user: OIDCUser = Depends(authenticated_user),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -66,25 +80,24 @@ async def get_current_user(
     Returns the profile information of the currently authenticated user.
     """
     try:
-        user_repo = container.resolve(UserRepository)
-
-        # Get user by ID (sub from OIDC token)
-        token_tenant = oidc_user.get("tenant_id") or oidc_user.get("tid") or oidc_user.get("x-tenant-id") or "system"
-        user = await user_repo.get_by_id(oidc_user["sub"], token_tenant)
+        user = db.query(Profile).filter(
+            Profile.tenant_id == tenant_id, Profile.is_active.is_(True),
+            or_(Profile.id == oidc_user['sub'], Profile.keycloak_id == oidc_user['sub']),
+        ).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-
-        return User.model_validate(user)
+        return _profile_output(user)
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve current user: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve current user")
 
 
 @router.get("/{user_id}", response_model=User, summary="User abrufen")
 async def get_user(
     user_id: str,
-    oidc_user: OIDCUser = Depends(get_current_user),
+    oidc_user: OIDCUser = Depends(authenticated_user),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -93,19 +106,18 @@ async def get_user(
     Retrieve detailed information about a specific user.
     """
     try:
-        user_repo = container.resolve(UserRepository)
-
-        # Extract tenant from OIDC claims (assuming tenant is in custom claims)
-        tenant_id = oidc_user.get("raw", {}).get("tenant_id", "system")
-
-        user = await user_repo.get_by_id(user_id, tenant_id)
+        user = db.query(Profile).filter(Profile.id == user_id,
+                                       Profile.tenant_id == tenant_id,
+                                       Profile.is_active.is_(True)).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        return User.model_validate(user)
+        if 'admin' not in oidc_user.get('roles', []) and oidc_user['sub'] not in {user.id, user.keycloak_id}:
+            raise HTTPException(status_code=403, detail="Not authorized for this profile")
+        return _profile_output(user)
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve user: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve user")
 
 
 @router.get("/", response_model=PaginatedResponse[User], summary="Users auflisten")
@@ -113,7 +125,9 @@ async def list_users(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
     skip: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of items to return"),
-    oidc_user: OIDCUser = Depends(get_current_user),
+    oidc_user: OIDCUser = Depends(authenticated_user),
+    effective_tenant_id: str = Depends(get_tenant_id),
+    directory_admin: dict = Depends(require_roles("admin")),
     db: Session = Depends(get_db)
 ):
     """
@@ -122,16 +136,12 @@ async def list_users(
     Retrieve a paginated list of users, optionally filtered by tenant.
     """
     try:
-        user_repo = container.resolve(UserRepository)
-
-        # Use provided tenant_id or extract from authenticated user
-        effective_tenant_id = tenant_id or oidc_user.get("raw", {}).get("tenant_id", "system")
-
-        users = await user_repo.get_all(effective_tenant_id, skip, limit)
-        total = await user_repo.count(effective_tenant_id)
+        query = db.query(Profile).filter(Profile.tenant_id == effective_tenant_id, Profile.is_active.is_(True))
+        total = query.count()
+        users = query.order_by(Profile.id).offset(skip).limit(limit).all()
 
         return PaginatedResponse[User](
-            items=[User.model_validate(user) for user in users],
+            items=[_profile_output(user) for user in users],
             total=total,
             page=(skip // limit) + 1,
             size=limit,
@@ -140,14 +150,14 @@ async def list_users(
             has_prev=skip > 0
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to list users: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to list users")
 
 
 @router.put("/{user_id}", response_model=User, summary="User aktualisieren")
 async def update_user(
     user_id: str,
     user_data: UserUpdate,
-    oidc_user: OIDCUser = Depends(get_current_user),
+    oidc_user: OIDCUser = Depends(authenticated_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -182,7 +192,7 @@ async def update_user(
 )
 async def delete_user(
     user_id: str,
-    oidc_user: OIDCUser = Depends(get_current_user),
+    oidc_user: OIDCUser = Depends(authenticated_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -230,7 +240,7 @@ async def login(
 )
 async def change_password(
     password_data: ChangePasswordRequest,
-    oidc_user: OIDCUser = Depends(get_current_user),
+    oidc_user: OIDCUser = Depends(authenticated_user),
     db: Session = Depends(get_db)
 ):
     """

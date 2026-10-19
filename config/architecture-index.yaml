@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-19
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-19T14:52:51Z'
+generated_at: '2026-10-19T15:01:33Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1831,6 +1831,7 @@ domains:
     - mail_versand
     - mailkonto_service
     - mask_action_runtime_service
+    - mask_commands
     - mask_rollout_summary_service
     - mcp_beleg_tools
     - mcp_execution_service
@@ -2111,8 +2112,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 941
   frontend_routes_mapped: 941
-  backend_services_total: 301
-  backend_services_mapped: 301
+  backend_services_total: 302
+  backend_services_mapped: 302
   backend_endpoints_total: 462
   backend_endpoints_mapped: 462
 unmapped:
