@@ -7,7 +7,8 @@ Admin-Wegen (ADMIN-WRITE-ROLES) folgen die Fachbereiche, je Gruppe ein Commit.
 ## Modell (`app/auth/bereich_roles.py`)
 
 Je Weg haengt `dependencies=SCHREIBEN["<GRUPPE>"]` am Decorator. Rollen aus `config/keycloak/fachrollen.json`
-(`*_BEARBEITEN`/`*_ADMIN`) plus Leitung `admin`/`manager` wie in `beleg_roles`. Strengere eigene Pruefungen
+(`*_BEARBEITEN`/`*_ADMIN`) plus `admin` wie in `beleg_roles`; die historische Rolle `manager` erteilt seit
+MANAGER-ROLE-ENFORCEMENT-20261019 keine Rechte und ist aus den Bereichslisten entfernt. Strengere eigene Pruefungen
 (Finanzleitung, Vier-Augen, Freigaben) bleiben zusaetzlich bestehen.
 
 | Gruppe | Rollen (Bereiche) | Wege unter `/api/v1/...` |
@@ -46,3 +47,9 @@ ordnet ueber die Kennung zu. Beide sind ausdrueckliche Abhaengigkeiten und als s
   lesen ihn); Testidentitaeten fuer Bestellvorschlag (Einkauf) und Interessenten (Vertrieb); die Bestellmail
   versendet im Test der Einkauf statt des Lagers. Nebenbefund aus Rollout-Schritt 6: Mahnen fehlte in
   `agentContract.dangerousActions` der Maske `finance/ar-open-item` (Vertragstest war rot) — ergaenzt.
+- Gruppen LAGER, LOGISTIK, ERNTE, PRODUKTION: 284 Decorators. Inventar 1073 -> 790. Nachweis: Suiten des Blocks
+  10717 gruen; 69 Mini-App-Tests ohne Testidentitaet nachgezogen (`ersetze_nutzer`; beim Fuhrpark in der Fixture,
+  die nach jedem Test alle Overrides leert). Der Fuhrpark prueft keine Scopes selbst; die Tests ersetzten nur den
+  Nutzer des Mandantenwegs.
+- `manager` aus `bereich_roles`/`betrieb_roles`, der Kassenrolle und dem Auftragsstorno entfernt: abgeloest seit
+  MANAGER-ROLE-ENFORCEMENT-20261019 (die zentrale Pruefung wertet sie schon nicht mehr aus).

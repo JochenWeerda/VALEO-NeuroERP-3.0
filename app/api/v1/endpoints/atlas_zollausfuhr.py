@@ -16,6 +16,7 @@ from app.services.atlas_customs_service import ATLASCustomsService
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.atlas_zollausfuhr_schemas import AtlasZollausfuhrOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/zoll", tags=["zoll", "atlas", "customs"])
@@ -119,7 +120,7 @@ def list_anmeldungen(
         return list(_store.values())
 
 
-@router.post("/ausfuhranmeldungen", response_model=ZollausfuhrAnmeldungOut, status_code=201, summary="Anmeldung anlegen")
+@router.post("/ausfuhranmeldungen", response_model=ZollausfuhrAnmeldungOut, status_code=201, summary="Anmeldung anlegen", dependencies=SCHREIBEN["LOGISTIK"])
 def create_anmeldung(
     payload: ZollausfuhrAnmeldungCreate,
     db: Session = Depends(get_db),
@@ -191,7 +192,7 @@ def get_anmeldung(
     raise HTTPException(status_code=404, detail="Anmeldung nicht gefunden")
 
 
-@router.put("/ausfuhranmeldungen/{id}", response_model=ZollausfuhrAnmeldungOut, summary="Anmeldung aktualisieren")
+@router.put("/ausfuhranmeldungen/{id}", response_model=ZollausfuhrAnmeldungOut, summary="Anmeldung aktualisieren", dependencies=SCHREIBEN["LOGISTIK"])
 def update_anmeldung(
     id: str,
     payload: ZollausfuhrAnmeldungCreate,
@@ -230,7 +231,7 @@ def update_anmeldung(
     return get_anmeldung(id, db, tenant_id)
 
 
-@router.delete("/ausfuhranmeldungen/{id}", status_code=204, response_class=Response, response_model=None, summary="Anmeldung löschen")
+@router.delete("/ausfuhranmeldungen/{id}", status_code=204, response_class=Response, response_model=None, summary="Anmeldung löschen", dependencies=SCHREIBEN["LOGISTIK"])
 def delete_anmeldung(
     id: str,
     db: Session = Depends(get_db),
@@ -254,8 +255,7 @@ def delete_anmeldung(
 
 
 @router.post("/ausfuhranmeldungen/{id}/uebermitteln", summary="Uebermitteln",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["LOGISTIK"])
 def uebermitteln(
     id: str,
     db: Session = Depends(get_db),
@@ -277,8 +277,7 @@ def uebermitteln(
 
 
 @router.post("/ausfuhranmeldungen/{id}/vorab-validieren", summary="Validieren vorab",
-    response_model=AtlasZollausfuhrOut
-)
+    response_model=AtlasZollausfuhrOut, dependencies=SCHREIBEN["LOGISTIK"])
 def vorab_validieren(
     id: str,
     db: Session = Depends(get_db),

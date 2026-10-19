@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 # ---------------------------------------------------------------------------
 # Helpers — create minimal test apps per router to avoid full app startup
@@ -36,6 +37,7 @@ def _app_sammelabrechnung():
     from app.core.tenant import get_tenant_id
     app = FastAPI()
     app.include_router(router)
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     db = _mock_db()
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_tenant_id] = lambda: TENANT_ID
@@ -77,6 +79,7 @@ def _app_waagen():
     from app.core.tenant import get_tenant_id
     app = FastAPI()
     app.include_router(router)
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     db = _mock_db()
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_tenant_id] = lambda: TENANT_ID

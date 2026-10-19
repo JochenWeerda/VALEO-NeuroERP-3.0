@@ -22,6 +22,7 @@ from app.api.v1.schemas.inventory_bundle_schemas import (
 )
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -218,8 +219,7 @@ def plc_ingest(payload: PlcIngestIn, svc: AgriPlcService = Depends(_svc)) -> Any
     "/plc/silo-level",
     status_code=200,
     response_model=PlcSiloLevelOut,
-    summary="POST /plc/silo-level — Fuellstand-Update von PLC/Sensor (WM-AGRI-PLC-005)",
-)
+    summary="POST /plc/silo-level — Fuellstand-Update von PLC/Sensor (WM-AGRI-PLC-005)", dependencies=SCHREIBEN["LAGER"])
 def plc_silo_level(payload: PlcSiloLevelIn, svc: AgriPlcService = Depends(_svc)) -> Any:
     """Direkt-Update: Sensor meldet Fuellstand einer Silozelle (Gewicht in %, ggf. kg)."""
     try:
@@ -232,8 +232,7 @@ def plc_silo_level(payload: PlcSiloLevelIn, svc: AgriPlcService = Depends(_svc))
     "/plc/device-status",
     status_code=200,
     response_model=PlcDeviceStatusOut,
-    summary="POST /plc/device-status — Heartbeat/Statusmeldung vom PLC-Feldgeraet",
-)
+    summary="POST /plc/device-status — Heartbeat/Statusmeldung vom PLC-Feldgeraet", dependencies=SCHREIBEN["LAGER"])
 def plc_device_status(payload: PlcDeviceStatusIn, svc: AgriPlcService = Depends(_svc)) -> Any:
     """Heartbeat vom SCADA/PLC-System: Online-Status und Firmware-Version."""
     return svc.update_device_status(payload)

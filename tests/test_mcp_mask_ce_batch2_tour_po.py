@@ -11,13 +11,14 @@ from app.api.v1.endpoints.mcp_tool_registry import get_current_user, get_db as m
 from app.core.database import get_db
 from app.core.dependencies import get_tenant_id as get_tenant_dep
 from app.core.tenant import get_tenant_id
-from testgrenze import ersetze_nutzer, setze_identitaet
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer, setze_identitaet
 
 
 
 def _client_tours():
     app = FastAPI()
     app.include_router(logistics_tours.router, prefix="/api/v1")
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     setze_identitaet(app, "disp")
     db = Mock()
     db.execute.return_value.fetchone.return_value = None

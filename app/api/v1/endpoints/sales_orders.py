@@ -969,7 +969,7 @@ async def cancel_sales_order(
 
 
 #: Storno eines Auftrags ist Verkaufsarbeit: Sachbearbeitung oder Leitung des Verkaufs.
-_sales_write = require_roles("SALES_BEARBEITEN", "SALES_ADMIN", "admin", "manager")
+_sales_write = require_roles("SALES_BEARBEITEN", "SALES_ADMIN", "admin")
 
 
 @router.post(

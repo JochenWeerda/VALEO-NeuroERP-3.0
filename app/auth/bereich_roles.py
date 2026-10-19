@@ -2,8 +2,8 @@
 
 Nutzerentscheid 19.10.2026: Schreibwege brauchen eine ausdrueckliche serverseitige Berechtigung aus dem bestehenden
 Rollenmodell; Fachaktionen behalten ihre Bereichsrollen und Freigaben. Die Rollen sind die Fachrollen aus
-``config/keycloak/fachrollen.json`` (``*_BEARBEITEN``/``*_ADMIN``) und Leitung (``admin``, ``manager``) wie in
-``app/auth/beleg_roles.py`` und ``app/auth/finance_roles.py``. Es gibt kein zweites Rechtesystem.
+``config/keycloak/fachrollen.json`` (``*_BEARBEITEN``/``*_ADMIN``) und ``admin`` wie in ``app/auth/beleg_roles.py``
+und ``app/auth/finance_roles.py``. Es gibt kein zweites Rechtesystem.
 
 Je Weg haengt eine dieser Listen als ``dependencies=`` am Decorator. Wege mit eigener, strengerer Pruefung
 (z. B. Finanzleitung, Vier-Augen) behalten sie zusaetzlich; die Liste hier ist die Untergrenze.
@@ -16,7 +16,9 @@ from fastapi import Depends
 
 from app.auth.deps import get_current_user, require_roles
 
-_LEITUNG = ("admin", "manager")
+#: Technische Leitung. Die historische Rolle ``manager`` ist abgeloest (MANAGER-ROLE-ENFORCEMENT-20261019,
+#: docs/architecture/security/role-description-contract.md) und erteilt keine Bereichsrechte.
+_LEITUNG = ("admin",)
 
 
 def _bearbeiten(*bereiche: str) -> tuple[str, ...]:

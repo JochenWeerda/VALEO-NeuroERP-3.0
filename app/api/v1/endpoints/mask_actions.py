@@ -278,8 +278,7 @@ async def action_angebot_bestellen(
 @router.post(
     "/lager/stock-movements/{entity_id}/actions/stornieren",
     response_model=MaskActionResult,
-    summary="Lagerbewegung stornieren (SPEC-P1-04)",
-)
+    summary="Lagerbewegung stornieren (SPEC-P1-04)", dependencies=SCHREIBEN["LAGER"])
 async def action_lager_stornieren(
     entity_id: str,
     body: dict[str, Any] = Body(default_factory=dict),

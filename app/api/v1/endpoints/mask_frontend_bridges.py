@@ -1128,7 +1128,7 @@ def list_waage_vorlagen(
     ]
 
 
-@router.post("/waage/vorlagen", response_model=BridgeOut, status_code=201, summary="Waagenvorlage anlegen")
+@router.post("/waage/vorlagen", response_model=BridgeOut, status_code=201, summary="Waagenvorlage anlegen", dependencies=SCHREIBEN["LAGER"])
 def create_waage_vorlage(
     body: WaageVorlageIn,
     tenant_id: str = Depends(get_tenant_id),

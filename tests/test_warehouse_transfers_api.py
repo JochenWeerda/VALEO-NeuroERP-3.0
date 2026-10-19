@@ -19,6 +19,7 @@ from app.main import app
 from conftest import skip_if_db_unavailable
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 client = TestClient(app, raise_server_exceptions=False)
 AUTH = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "test-tenant"}
@@ -390,6 +391,7 @@ def _bin_mock(bid: str = "BIN-1") -> MagicMock:
 def _transfer_client(db: _FakeTransferDb):
     _app = FastAPI()
     _app.include_router(transfer_router)
+    ersetze_nutzer(_app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     _app.dependency_overrides[get_db] = lambda: db
     _app.dependency_overrides[get_tenant_id] = lambda: "unit"
     return TestClient(_app)

@@ -13,6 +13,7 @@ from app.api.v1.schemas.base import BaseSchema
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.agri_lot_link_booking_service import AgriLotLinkBookingService
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class AgriLotLinkOut(BaseSchema):
@@ -45,8 +46,7 @@ def _svc(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id))
     "/material-flow/lot-link",
     response_model=AgriLotLinkOut,
     status_code=status.HTTP_200_OK,
-    summary="POST /material-flow/lot-link",
-)
+    summary="POST /material-flow/lot-link", dependencies=SCHREIBEN["LAGER"])
 def book_lot_to_cell(
     payload: LotCellLinkIn,
     svc: AgriLotLinkBookingService = Depends(_svc),
@@ -69,8 +69,7 @@ def book_lot_to_cell(
     "/material-flow/lot-link/auto-book",
     response_model=AgriLotLinkOut,
     status_code=status.HTTP_200_OK,
-    summary="POST /material-flow/lot-link/auto-book",
-)
+    summary="POST /material-flow/lot-link/auto-book", dependencies=SCHREIBEN["LAGER"])
 def auto_book_lot_link(
     payload: AutoBookIn,
     svc: AgriLotLinkBookingService = Depends(_svc),

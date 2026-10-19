@@ -13,6 +13,7 @@ from app.domains.operations.models import Fahrer, FahrerStatus
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.transporte_schemas import TransporteOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/transporte", tags=["Transporte"])
@@ -93,8 +94,7 @@ def get_fahrer(fahrer_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/fahrer", status_code=201, summary="Fahrer anlegen",
-    response_model=TransporteOut
-)
+    response_model=TransporteOut, dependencies=SCHREIBEN["LOGISTIK"])
 def create_fahrer(payload: FahrerPayload, db: Session = Depends(get_db)):
     obj = Fahrer(**payload.model_dump())
     db.add(obj)
@@ -104,8 +104,7 @@ def create_fahrer(payload: FahrerPayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/fahrer/{fahrer_id}", summary="Fahrer aktualisieren",
-    response_model=TransporteOut
-)
+    response_model=TransporteOut, dependencies=SCHREIBEN["LOGISTIK"])
 def update_fahrer(fahrer_id: str, payload: FahrerPatch, db: Session = Depends(get_db)):
     obj = db.query(Fahrer).filter(Fahrer.id == fahrer_id).first()
     if not obj:
@@ -118,7 +117,7 @@ def update_fahrer(fahrer_id: str, payload: FahrerPatch, db: Session = Depends(ge
     return _to_dict(obj)
 
 
-@router.delete("/fahrer/{fahrer_id}", status_code=204, response_class=Response, response_model=None, summary="Fahrer löschen")
+@router.delete("/fahrer/{fahrer_id}", status_code=204, response_class=Response, response_model=None, summary="Fahrer löschen", dependencies=SCHREIBEN["LOGISTIK"])
 def delete_fahrer(fahrer_id: str, db: Session = Depends(get_db)):
     obj = db.query(Fahrer).filter(Fahrer.id == fahrer_id).first()
     if not obj:

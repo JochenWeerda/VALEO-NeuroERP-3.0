@@ -17,6 +17,7 @@ from ....core.database import get_db
 from ....core.module_registry import registry
 from modules.bootstrap import initialize_module_registry
 from .inventory_auth import get_current_tenant_id, require_inventory_access
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -124,7 +125,7 @@ async def list_charge_lineage(
     return [_to_out(dict(r)) for r in rows]
 
 
-@router.post("/", response_model=ChargeLineageOut, status_code=201)
+@router.post("/", response_model=ChargeLineageOut, status_code=201, dependencies=SCHREIBEN["LAGER"])
 async def create_charge_lineage(
     payload: ChargeLineageCreate,
     db: Session = Depends(get_db),

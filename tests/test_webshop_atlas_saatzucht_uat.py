@@ -13,7 +13,7 @@ from app.api.v1.endpoints import (
     o2c_uat_scaffold,
 )
 from app.services.webshop_integration_service import _ORDER_STORE
-from testgrenze import ersetze_nutzer
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 
 # ── Client factories ──────────────────────────────────────────────────────────
@@ -43,6 +43,7 @@ def _atlas_client() -> TestClient:
     app.dependency_overrides[atlas_zollausfuhr.get_db] = lambda: db
     app.dependency_overrides[atlas_zollausfuhr.get_tenant_id] = lambda: "test-tenant"
     app.include_router(atlas_zollausfuhr.router)
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     return TestClient(app)
 
 
@@ -52,6 +53,7 @@ def _saatzucht_client() -> TestClient:
     app.dependency_overrides[saatzucht.get_db] = lambda: db
     app.dependency_overrides[saatzucht.get_tenant_id] = lambda: "test-tenant"
     app.include_router(saatzucht.router)
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     return TestClient(app)
 
 
@@ -61,6 +63,7 @@ def _uat_client() -> TestClient:
     app.dependency_overrides[o2c_uat_scaffold.get_db] = lambda: db
     app.dependency_overrides[o2c_uat_scaffold.get_tenant_id] = lambda: "test-tenant"
     app.include_router(o2c_uat_scaffold.router)
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     return TestClient(app)
 
 

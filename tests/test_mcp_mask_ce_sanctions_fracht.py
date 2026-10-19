@@ -10,12 +10,13 @@ from app.api.v1.endpoints import logistik_frachttabellen, sanctions_compliance
 from app.core.database import get_db
 from app.core.dependencies import get_tenant_id as get_tenant_id_deps
 from app.core.tenant import get_tenant_id as get_tenant_id_core
-from testgrenze import setze_identitaet
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer, setze_identitaet
 
 
 def _client_sanctions():
     app = FastAPI()
     app.include_router(sanctions_compliance.router, prefix="/api/v1")
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     setze_identitaet(app, "agent-1")
     db = Mock()
     app.dependency_overrides[get_db] = lambda: db
@@ -26,6 +27,7 @@ def _client_sanctions():
 def _client_fracht():
     app = FastAPI()
     app.include_router(logistik_frachttabellen.router, prefix="/api/v1")
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     db = Mock()
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_tenant_id_deps] = lambda: "tenant-a"

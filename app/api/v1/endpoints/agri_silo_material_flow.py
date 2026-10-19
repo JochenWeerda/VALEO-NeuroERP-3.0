@@ -19,6 +19,7 @@ from app.api.v1.schemas.silo_material_flow_schemas import (
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.agri_silo_material_flow_service import AgriSiloMaterialFlowService
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class AgriJsonOut(BaseSchema):
@@ -127,7 +128,7 @@ def list_silo_systems(
     return svc.list_silo_systems(warehouse_id)
 
 
-@router.post("/silo-systems", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut, summary="POST /silo-systems")
+@router.post("/silo-systems", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut, summary="POST /silo-systems", dependencies=SCHREIBEN["LAGER"])
 def create_silo_system(
     warehouse_id: str = Query(...),
     payload: SiloSystemIn = ...,
@@ -151,7 +152,7 @@ def list_silo_cells(
     return svc.list_silo_cells(warehouse_id, silo_system_id)
 
 
-@router.post("/silo-cells", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut, summary="POST /silo-cells")
+@router.post("/silo-cells", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut, summary="POST /silo-cells", dependencies=SCHREIBEN["LAGER"])
 def create_silo_cell(
     silo_system_id: str = Query(...),
     warehouse_id: str = Query(...),
@@ -164,7 +165,7 @@ def create_silo_cell(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.patch("/silo-cells/{cell_id}", response_model=AgriJsonOut, summary="PATCH /silo-cells/{cell_id}")
+@router.patch("/silo-cells/{cell_id}", response_model=AgriJsonOut, summary="PATCH /silo-cells/{cell_id}", dependencies=SCHREIBEN["LAGER"])
 def patch_silo_cell(
     cell_id: str,
     warehouse_id: str = Query(...),
@@ -189,7 +190,7 @@ def list_flow_nodes(
     return svc.list_material_flow_nodes(warehouse_id)
 
 
-@router.post("/material-flow/nodes", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut, summary="POST /material-flow/nodes")
+@router.post("/material-flow/nodes", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut, summary="POST /material-flow/nodes", dependencies=SCHREIBEN["LAGER"])
 def create_flow_node(
     warehouse_id: str = Query(...),
     payload: MaterialFlowNodeIn = ...,
@@ -201,7 +202,7 @@ def create_flow_node(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.patch("/material-flow/nodes/{node_id}", response_model=AgriJsonOut, summary="PATCH /material-flow/nodes/{node_id}")
+@router.patch("/material-flow/nodes/{node_id}", response_model=AgriJsonOut, summary="PATCH /material-flow/nodes/{node_id}", dependencies=SCHREIBEN["LAGER"])
 def patch_flow_node(
     node_id: str,
     warehouse_id: str = Query(...),
@@ -223,7 +224,7 @@ def list_flow_edges(
     return svc.list_material_flow_edges(warehouse_id)
 
 
-@router.post("/material-flow/edges", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut, summary="POST /material-flow/edges")
+@router.post("/material-flow/edges", status_code=status.HTTP_201_CREATED, response_model=AgriJsonOut, summary="POST /material-flow/edges", dependencies=SCHREIBEN["LAGER"])
 def create_flow_edge(
     warehouse_id: str = Query(...),
     payload: MaterialFlowEdgeIn = ...,
@@ -235,7 +236,7 @@ def create_flow_edge(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.patch("/material-flow/edges/{edge_id}", response_model=AgriJsonOut, summary="PATCH /material-flow/edges/{edge_id}")
+@router.patch("/material-flow/edges/{edge_id}", response_model=AgriJsonOut, summary="PATCH /material-flow/edges/{edge_id}", dependencies=SCHREIBEN["LAGER"])
 def patch_flow_edge(
     edge_id: str,
     warehouse_id: str = Query(...),
@@ -253,8 +254,7 @@ def patch_flow_edge(
     "/material-flow/nodes/{node_id}",
     response_class=Response,
     status_code=204,
-    summary="DELETE /material-flow/nodes/{node_id}",
-)
+    summary="DELETE /material-flow/nodes/{node_id}", dependencies=SCHREIBEN["LAGER"])
 def delete_flow_node(
     node_id: str,
     warehouse_id: str = Query(...),
@@ -271,8 +271,7 @@ def delete_flow_node(
     "/material-flow/edges/{edge_id}",
     response_class=Response,
     status_code=204,
-    summary="DELETE /material-flow/edges/{edge_id}",
-)
+    summary="DELETE /material-flow/edges/{edge_id}", dependencies=SCHREIBEN["LAGER"])
 def delete_flow_edge(
     edge_id: str,
     warehouse_id: str = Query(...),
@@ -285,7 +284,7 @@ def delete_flow_edge(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.post("/material-flow/validate-route", response_model=AgriJsonOut, summary="POST /material-flow/validate-route")
+@router.post("/material-flow/validate-route", response_model=AgriJsonOut, summary="POST /material-flow/validate-route", dependencies=SCHREIBEN["LAGER"])
 def validate_route(
     payload: ValidateRouteIn = ...,
     svc: AgriSiloMaterialFlowService = Depends(_svc),
@@ -324,8 +323,7 @@ class FlushChargeIn(BaseModel):
     "/material-flow/flush-charge",
     response_model=AgriJsonOut,
     status_code=200,
-    summary="POST /material-flow/flush-charge",
-)
+    summary="POST /material-flow/flush-charge", dependencies=SCHREIBEN["LAGER"])
 def book_flush_charge(
     payload: FlushChargeIn,
     svc: AgriSiloMaterialFlowService = Depends(_svc),
@@ -345,7 +343,7 @@ def book_flush_charge(
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.post("/material-flow/transfer", response_model=AgriJsonOut, status_code=200, summary="POST /material-flow/transfer")
+@router.post("/material-flow/transfer", response_model=AgriJsonOut, status_code=200, summary="POST /material-flow/transfer", dependencies=SCHREIBEN["LAGER"])
 def book_material_transfer(
     payload: MaterialTransferIn,
     svc: AgriSiloMaterialFlowService = Depends(_svc),
@@ -370,8 +368,7 @@ def book_material_transfer(
     "/silo-cells/{cell_id}/sync-from-lots",
     response_model=AgriJsonOut,
     status_code=200,
-    summary="POST /silo-cells/{cell_id}/sync-from-lots",
-)
+    summary="POST /silo-cells/{cell_id}/sync-from-lots", dependencies=SCHREIBEN["LAGER"])
 def sync_silo_cell_from_lots(
     cell_id: str,
     warehouse_id: str = Query(...),

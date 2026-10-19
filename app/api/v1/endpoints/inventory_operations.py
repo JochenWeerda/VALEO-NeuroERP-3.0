@@ -32,6 +32,7 @@ from app.api.v1.schemas.inventory_lot_bundle_schemas import (
     LotConsumeOut,
     StornoKorrekturOut,
 )
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -262,7 +263,7 @@ async def list_reason_codes():
     return [{"code": k, "label": v} for k, v in REASON_CODES.items()]
 
 
-@router.post("/bestandskorrektur", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Bestandskorrektur anlegen")
+@router.post("/bestandskorrektur", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Bestandskorrektur anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_bestandskorrektur(
     payload: BestandskorrekturIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -403,7 +404,7 @@ async def create_bestandskorrektur(
     )
 
 
-@router.post("/schwund", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Schwund anlegen")
+@router.post("/schwund", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Schwund anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_schwund(
     payload: SchwundBuchungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -425,7 +426,7 @@ async def create_schwund(
     return await create_bestandskorrektur(korrektur, tenant_id, db)
 
 
-@router.post("/mhd-abschreibung", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Mhd abschreibung anlegen")
+@router.post("/mhd-abschreibung", response_model=BestandskorrekturOut, status_code=201, tags=["lager"], summary="Mhd abschreibung anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_mhd_abschreibung(
     payload: MhdAbschreibungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -588,8 +589,7 @@ class LotConsumeIn(BaseModel):
     status_code=201,
     response_model=InventoryLotOut,
     tags=["lager", "inventory", "lots"],
-    summary="Inventory-Lot anlegen (DOM-INV-004.2)",
-)
+    summary="Inventory-Lot anlegen (DOM-INV-004.2)", dependencies=SCHREIBEN["LAGER"])
 async def create_inventory_lot(
     body: LotCreateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -645,8 +645,7 @@ async def list_inventory_lots(
     "/lots/{lot_id}/consume",
     response_model=LotConsumeOut,
     tags=["lager", "inventory", "lots"],
-    summary="Lot-Verbrauch (FEFO, fail-closed) (DOM-INV-004.2)",
-)
+    summary="Lot-Verbrauch (FEFO, fail-closed) (DOM-INV-004.2)", dependencies=SCHREIBEN["LAGER"])
 async def consume_inventory_lot(
     lot_id: str,
     body: LotConsumeIn,
@@ -679,8 +678,7 @@ async def consume_inventory_lot(
     response_model=InventurDifferenzOut,
     status_code=201,
     tags=["lager", "inventory", "inventur"],
-    summary="Inventur-Differenzbeleg automatisch erzeugen (DOM-INV-004.3)",
-)
+    summary="Inventur-Differenzbeleg automatisch erzeugen (DOM-INV-004.3)", dependencies=SCHREIBEN["LAGER"])
 async def inventur_differenz_buchen(
     count_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -712,8 +710,7 @@ class StornoIn(BaseModel):
     response_model=StornoKorrekturOut,
     status_code=201,
     tags=["lager", "inventory", "korrekturen"],
-    summary="Bestandskorrektur stornieren (idempotent) (DOM-INV-004.4)",
-)
+    summary="Bestandskorrektur stornieren (idempotent) (DOM-INV-004.4)", dependencies=SCHREIBEN["LAGER"])
 async def storno_bestandskorrektur(
     korrektur_id: str,
     body: StornoIn,
@@ -877,8 +874,7 @@ class LagerbewegungOut(BaseModel):
     response_model=LagerbewegungOut,
     status_code=201,
     tags=["lager"],
-    summary="Lagerbewegung buchen",
-)
+    summary="Lagerbewegung buchen", dependencies=SCHREIBEN["LAGER"])
 async def create_lagerbewegung(
     payload: LagerbewegungIn,
     tenant_id: str = Depends(get_tenant_id),

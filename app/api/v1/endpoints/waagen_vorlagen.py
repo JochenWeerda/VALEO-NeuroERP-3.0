@@ -15,6 +15,7 @@ from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.waagen_vorlagen_schemas import WaagenVorlagenOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/waagen/vorlagen", tags=["agrar", "waage", "vorlagen"])
@@ -81,7 +82,7 @@ def list_vorlagen(
         return []
 
 
-@router.post("", response_model=WaagenVorlageOut, status_code=status.HTTP_201_CREATED, summary="Vorlage anlegen")
+@router.post("", response_model=WaagenVorlageOut, status_code=status.HTTP_201_CREATED, summary="Vorlage anlegen", dependencies=SCHREIBEN["LAGER"])
 def create_vorlage(
     payload: WaagenVorlageCreate,
     db: Session = Depends(get_db),
@@ -112,7 +113,7 @@ def create_vorlage(
     return {"id": new_id, **payload.model_dump(), "verwendungen_count": 0}
 
 
-@router.put("/{vorlage_id}", response_model=WaagenVorlageOut, summary="Vorlage aktualisieren")
+@router.put("/{vorlage_id}", response_model=WaagenVorlageOut, summary="Vorlage aktualisieren", dependencies=SCHREIBEN["LAGER"])
 def update_vorlage(
     vorlage_id: str,
     payload: WaagenVorlageCreate,
@@ -143,7 +144,7 @@ def update_vorlage(
     return {"id": vorlage_id, **payload.model_dump(), "verwendungen_count": 0}
 
 
-@router.delete("/{vorlage_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response, summary="Vorlage löschen")
+@router.delete("/{vorlage_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response, summary="Vorlage löschen", dependencies=SCHREIBEN["LAGER"])
 def delete_vorlage(
     vorlage_id: str,
     db: Session = Depends(get_db),
@@ -169,8 +170,7 @@ def delete_vorlage(
 
 
 @router.post("/{vorlage_id}/anwenden", summary="Anwenden",
-    response_model=WaagenVorlagenOut
-)
+    response_model=WaagenVorlagenOut, dependencies=SCHREIBEN["LAGER"])
 def anwenden(
     vorlage_id: str,
     db: Session = Depends(get_db),

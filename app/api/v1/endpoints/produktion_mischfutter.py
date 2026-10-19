@@ -32,6 +32,7 @@ from app.services.feed_production_chain_service import (
     fehlende_komponenten,
 )
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 
@@ -188,7 +189,7 @@ async def get_rezepte(
     ]
 
 
-@router.post("/auftrag", response_model=ProduktionsauftragOut, status_code=201, summary="Produktionsauftrag anlegen")
+@router.post("/auftrag", response_model=ProduktionsauftragOut, status_code=201, summary="Produktionsauftrag anlegen", dependencies=SCHREIBEN["PRODUKTION"])
 async def create_produktionsauftrag(
     payload: ProduktionsauftragIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -244,7 +245,7 @@ async def create_produktionsauftrag(
     return _to_out(auftrag)
 
 
-@router.patch("/auftrag/{auftrag_id}/status", response_model=ProduktionsauftragOut, summary="Auftrag status aktualisieren")
+@router.patch("/auftrag/{auftrag_id}/status", response_model=ProduktionsauftragOut, summary="Auftrag status aktualisieren", dependencies=SCHREIBEN["PRODUKTION"])
 async def update_auftrag_status(
     auftrag_id: str,
     payload: ProduktionsauftragStatusIn,
@@ -388,8 +389,7 @@ async def list_inventory_links(
 
 @router.post(
     "/inventory-links/{einzelfutter_id}/ensure", response_model=TypedObjectOut,
-    summary="Lagerartikel für Einzelfuttermittel anlegen oder verknüpfen",
-)
+    summary="Lagerartikel für Einzelfuttermittel anlegen oder verknüpfen", dependencies=SCHREIBEN["PRODUKTION"])
 async def ensure_inventory_link(
     einzelfutter_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from app.auth.deps import require_roles
 
-_LEITUNG = ("admin", "manager")
+_LEITUNG = ("admin",)  # ``manager`` ist abgeloest (MANAGER-ROLE-ENFORCEMENT-20261019)
 
 LAGER_SCHREIBEN = ("LAGER_BEARBEITEN", "LAGER_ADMIN", *_LEITUNG)
 #: Produktion (Mischen, Mahlen, Umbuchen) fuehrt das Lager mit der Agrar- bzw. Futtermittelsparte.

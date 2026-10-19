@@ -27,7 +27,7 @@ from app.api.v1.schemas.admin_pos_schemas import AdminPosOut
 router = APIRouter()
 
 _ADMIN_FINANZ = [Depends(require_roles("admin", "FINANCE_ADMIN"))]  # Massenimport/Steuerexport
-_KASSE = [Depends(require_roles("SALES_BEARBEITEN", "SALES_ADMIN", "admin", "manager"))]  # Kassiervorgang
+_KASSE = [Depends(require_roles("SALES_BEARBEITEN", "SALES_ADMIN", "admin"))]  # Kassiervorgang
 _NUR_ADMIN = [Depends(require_roles("admin"))]  # Konfiguration: wie admin_core
 
 

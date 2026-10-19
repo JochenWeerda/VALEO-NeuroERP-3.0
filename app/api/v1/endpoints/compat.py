@@ -1815,14 +1815,14 @@ async def inventory_inventur(
     return InventoryCompatService(db, tenant_id).list_inventur_counts()
 
 
-@router.post("/inventory/inventur/complete", response_model=InventoryOut, summary="Inventur complete inventory")
+@router.post("/inventory/inventur/complete", response_model=InventoryOut, summary="Inventur complete inventory", dependencies=SCHREIBEN["LAGER"])
 async def inventory_inventur_complete(
     payload: dict[str, list[str]], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     return InventoryCompatService(db, tenant_id).complete_inventur_counts(payload.get("ids", []))
 
 
-@router.delete("/inventory/inventur/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Inventur stornieren inventory")
+@router.delete("/inventory/inventur/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Inventur stornieren inventory", dependencies=SCHREIBEN["LAGER"])
 async def inventory_inventur_stornieren(
     item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -1993,7 +1993,7 @@ class AnnahmeStatusUpdate(BaseModel):
     klaerung: Optional[dict[str, Any]] = Field(default=None, description="Klaerungsdaten fuer gesperrte Ware")
 
 
-@router.patch("/annahme/warteschlange/{reg_id}", response_model=AnnahmeEntryOut, summary="Warteschlange patch annahme")
+@router.patch("/annahme/warteschlange/{reg_id}", response_model=AnnahmeEntryOut, summary="Warteschlange patch annahme", dependencies=SCHREIBEN["ERNTE"])
 async def annahme_warteschlange_patch(
     reg_id: str,
     body: AnnahmeStatusUpdate,
@@ -2008,7 +2008,7 @@ async def annahme_warteschlange_patch(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.post("/annahme/warteschlange/{reg_id}/repair-article", response_model=AnnahmeEntryOut, summary="Warteschlange repair article annahme")
+@router.post("/annahme/warteschlange/{reg_id}/repair-article", response_model=AnnahmeEntryOut, summary="Warteschlange repair article annahme", dependencies=SCHREIBEN["ERNTE"])
 async def annahme_warteschlange_repair_article(
     reg_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -2042,7 +2042,7 @@ class AnnahmeUploadOut(BaseModel):
     filename: str
 
 
-@router.post("/annahme/upload", response_model=AnnahmeUploadOut, status_code=201, tags=["annahme"], summary="Upload annahme")
+@router.post("/annahme/upload", response_model=AnnahmeUploadOut, status_code=201, tags=["annahme"], summary="Upload annahme", dependencies=SCHREIBEN["ERNTE"])
 async def annahme_upload(
     file: UploadFile = File(..., description="Foto/Scan Kennzeichen oder Lieferschein/Barcode"),
     tenant_id: str = Depends(get_tenant_id),
@@ -2070,7 +2070,7 @@ async def annahme_upload(
     return AnnahmeUploadOut(id=upload_id, filename=file.filename or safe_name)
 
 
-@router.post("/annahme/lkw-registrierung", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"], summary="Lkw registrierung anlegen")
+@router.post("/annahme/lkw-registrierung", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"], summary="Lkw registrierung anlegen", dependencies=SCHREIBEN["ERNTE"])
 async def create_lkw_registrierung(
     payload: LKWRegistrierungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2080,7 +2080,7 @@ async def create_lkw_registrierung(
     return LKWRegistrierungOut(**result)
 
 
-@router.post("/annahme/warteschlange", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"], summary="Lkw warteschlange alias anlegen")
+@router.post("/annahme/warteschlange", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"], summary="Lkw warteschlange alias anlegen", dependencies=SCHREIBEN["ERNTE"])
 async def create_lkw_warteschlange_alias(
     payload: LKWRegistrierungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2477,7 +2477,7 @@ class EinlagerungOut(BaseModel):
     status: str
 
 
-@router.post("/lager/einlagerung", response_model=EinlagerungOut, status_code=201, tags=["lager"], summary="Einlagerung anlegen")
+@router.post("/lager/einlagerung", response_model=EinlagerungOut, status_code=201, tags=["lager"], summary="Einlagerung anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_einlagerung(
     payload: EinlagerungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2565,7 +2565,7 @@ class AuslagerungOut(BaseModel):
     status: str
 
 
-@router.post("/lager/auslagerung", response_model=AuslagerungOut, status_code=201, tags=["lager"], summary="Auslagerung anlegen")
+@router.post("/lager/auslagerung", response_model=AuslagerungOut, status_code=201, tags=["lager"], summary="Auslagerung anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_auslagerung(
     payload: AuslagerungIn,
     tenant_id: str = Depends(get_tenant_id),
