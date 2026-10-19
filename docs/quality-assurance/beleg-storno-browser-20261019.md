@@ -44,3 +44,5 @@ Der Browser wurde nach Rechteentzug neu geladen und auf die Anmeldeseite zurueck
 ![Beendete Sitzung nach Rechteentzug](screenshots/beleg-storno-session-ended.png)
 
 Diese Abnahme belegt eine regulaere, unbeglichene Eingangsrechnung ohne weitere Korrekturen. Sie ersetzt nicht die gesonderte Pruefung teilweise bezahlter oder durch Gutschriften veraenderter Posten und ist kein Nachweis fuer den weiterhin offenen Storno gebuchter Gutschriften. Globaler Rollout, schreibende MCP-Freigabe und weitere CI-Restbefunde bleiben getrennt.
+
+Testnachlauf: Die drei neuen Dialogfaelle nach Bereinigung des Setups erneut gruen; das Setup gibt keinen Mock als impliziten Cleanup-Callback zurueck.

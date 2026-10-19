@@ -20,7 +20,7 @@ vi.mock('@/lib/api/masks', () => ({ useScreenDefinition: () => ({ data: {
     commandEndpoint: '/api/v1/docflow/{entity_id}/reverse', requiresConfirmation: true, auditReasonRequired: true,
     commandBinding: { adapter: 'docflow.v1', command: 'reverse', preview: false } }],
 }, isFetching: false }) }))
-beforeEach(() => execute.mockReset().mockResolvedValue({ success: true }))
+beforeEach(() => { execute.mockReset().mockResolvedValue({ success: true }) })
 function mount() { render(<UniversalNativeDetailPage screenId="beleg/purchase-invoice" entityId="synthetic-invoice" />) }
 
 it('preserves the required audit stage after the real Radix confirmation and executes only with the entered reason', async () => {
