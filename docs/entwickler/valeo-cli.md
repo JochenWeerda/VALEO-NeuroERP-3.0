@@ -115,13 +115,35 @@ zur Pruefung geben, aber noch nicht freigeben. Freigabefaehig sind im Profil nur
 Aktionen, bearbeitbare Felder, Regeln, eingebettete Transporte). Die Simulation braucht den Pruefstand
 `valeo_probe` ueber `TEST_DATABASE_URL`; ohne ihn scheitert sie mit `simulation_probe_not_configured`.
 
+## Belege (DocFlow)
+
+Die Aktionen der Belegfamilie (`beleg/*`) laufen ueber den versionierten Adapter `docflow.v1`, den
+`valeo_cli.docflow` Regel fuer Regel wie `docflow-command-adapter.ts` nachbaut. Die CLI laedt den Belegzustand
+aus derselben Quelle wie die Maske (`/api/v1/belege/{art}/{id}/kopf`):
+
+- Ausgefuehrt wird nur, was der Server dort erlaubt (`aktionen[].erlaubt`) und was `enabledWhen` freigibt.
+- Die Belegversion schuetzt vor verlorenen Aenderungen; `--version` bindet an die gesehene Version.
+- Nur die zulaessigen Felder je Kommando werden gesendet. Stornieren verlangt `--grund` (3 bis 300 Zeichen).
+- Freigaben binden an die Freigabekennung des Servers.
+- Eine schreibfreie Vorschau gibt es nur beim Umwandeln (`--modus dryRun`).
+- Agenten schreiben hier nie. Die Antwort wird gegen den Aufrufvertrag geprueft.
+
+```bash
+python -m valeo_cli aktionen beleg/purchase-invoice
+python -m valeo_cli ausfuehren beleg/purchase-invoice umwandeln:purchase_credit_memo --id <beleg> --modus dryRun
+python -m valeo_cli ausfuehren beleg/purchase-invoice buchen --id <beleg> --version 3
+python -m valeo_cli ausfuehren beleg/sales-invoice stornieren --id <beleg> --grund "Doppelt erfasst" --ja
+python -m valeo_cli ausfuehren beleg/sales-order bearbeiten --id <beleg> --daten entwurf.json
+```
+
+Gesperrter Zustand, veraltete Version oder fehlende Bindung: Exit-Code 1, nichts gesendet.
+
 ## Was die CLI (noch) nicht ausfuehrt
 
 Was nicht so ausgefuehrt werden kann wie in der Maske, weist die CLI mit Grund ab:
 
-- **Command-Adapter** (`commandBinding`), d. h. die Belegfamilie (`docflow.v1`) und die Ernte-Regelsteuerung
-  (`harvest.control.v1`). Die Maske baut deren Aufruf mit Version, Freigabekennung und Entwurfskontext. Das folgt
-  als eigener Meilenstein.
+- **Ernte-Regelsteuerung** (`harvest.control.v1`): Ihr Adapter braucht die ausgewaehlte Regelversion aus der
+  Maske und ist noch nicht nachgebaut.
 - **Eingabeflüsse** (`inputFlow`, Formular nur fuer Menschen in der Maske).
 - **Aktionen ohne Kommando-Endpunkt**, die die Seite selbst verdrahtet.
 

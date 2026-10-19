@@ -18,11 +18,12 @@ import json
 import os
 import sys
 import time
+import uuid
 from typing import Any, Callable
 
 import httpx
 
-from valeo_cli import auth, studio, support
+from valeo_cli import auth, docflow, studio, support
 
 DEFAULT_API = "http://localhost:8000"
 
@@ -164,10 +165,31 @@ def cmd_ausfuehren(args, http, token, out, ask: Callable[[str], str], stdin) -> 
             if answer.strip().lower() not in {"ja", "j", "yes", "y"}:
                 out("Abgebrochen; nichts ausgefuehrt.")
                 return 1
-    method, path, body = support.build_request(
-        action, screen_id=args.maske, entity_id=args.id, payload=payload, mode=args.modus,
-        audit_reason=args.grund, idempotency_key=args.idempotenz)
-    result = _request(http, token, method, path, body)
+    if action.get("commandBinding"):
+        # Belegfamilie: Zustand und Version aus derselben Belegquelle wie die Maske, dann der versionierte Adapter.
+        if not args.id:
+            raise UsageError("Diese Aktion braucht eine Belegkennung (--id).")
+        definition = _definition(http, token, args.maske)
+        data = _request(http, token, "GET", docflow.entity_endpoint(definition, args.id))
+        key = args.idempotenz or str(uuid.uuid4())
+        try:
+            method, path, body = docflow.prepare(
+                action, entity_id=args.id, data=data, payload=payload, mode=args.modus, audit_reason=args.grund,
+                idempotency_key=key, expected_version=args.version, is_agent=_is_agent(token))
+        except ValueError as exc:
+            # Belegzustand, Version oder Bindung passen nicht: fachlich abgelehnt, nichts gesendet.
+            out(f"Abgelehnt: {exc}")
+            return 1
+        response = _request(http, token, method, path, body)
+        result = docflow.result(action, entity_id=args.id, data=data, mode=args.modus, response=response,
+                                expected_version=args.version)
+        if "idempotency_key" in body:
+            result["idempotenz"] = key
+    else:
+        method, path, body = support.build_request(
+            action, screen_id=args.maske, entity_id=args.id, payload=payload, mode=args.modus,
+            audit_reason=args.grund, idempotency_key=args.idempotenz)
+        result = _request(http, token, method, path, body)
     if args.json:
         out(json.dumps(result, ensure_ascii=False, indent=2))
     else:
@@ -212,6 +234,7 @@ def parser() -> argparse.ArgumentParser:
     x.add_argument("--grund", help="Begruendung fuer den Nachweis")
     x.add_argument("--ja", action="store_true", help="Bestaetigung ohne Rueckfrage")
     x.add_argument("--idempotenz", metavar="SCHLUESSEL", help="Wiederholung mit demselben Schluessel")
+    x.add_argument("--version", type=int, help="Gesehene Belegversion (Belege); sonst die aktuelle")
     x.add_argument("--json", action="store_true", help="Antwort vollstaendig als JSON")
     studio.add_parser(sub)
     return p

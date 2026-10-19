@@ -14,6 +14,9 @@ from urllib.parse import quote
 
 MODES = ("execute", "dryRun", "validate", "propose")
 
+#: Command-Adapter, die die CLI wie die Maske nachbaut (``valeo_cli.docflow``).
+SUPPORTED_ADAPTERS = {"docflow.v1"}
+
 #: Pfadparameter, die der generische Weg der Maske selbst einsetzt (useActionRuntime). Alle anderen gehoeren
 #: einem Command-Adapter (DocFlow-Freigabe, Ernte-Regelversion) und sind hier nicht nachgebaut.
 GENERIC_PATH_PARAMETERS = {"{entity_id}", "{screen_id}"}
@@ -38,7 +41,8 @@ def support(action: dict[str, Any]) -> Support:
         return Support(False, "kein_endpunkt")
     binding = action.get("commandBinding")
     if binding:
-        return Support(False, f"adapter:{binding.get('adapter', 'unbekannt') if isinstance(binding, dict) else 'unbekannt'}")
+        adapter = binding.get("adapter", "unbekannt") if isinstance(binding, dict) else "unbekannt"
+        return Support(True) if adapter in SUPPORTED_ADAPTERS else Support(False, f"adapter:{adapter}")
     if _DOCFLOW.match(endpoint):
         return Support(False, "docflow_ohne_adapter")
     unknown = set(_PLACEHOLDER.findall(endpoint)) - GENERIC_PATH_PARAMETERS
@@ -83,6 +87,8 @@ def build_request(action: dict[str, Any], *, screen_id: str, entity_id: str | No
     checked = support(action)
     if not checked.supported:
         raise ValueError(reason_text(checked.reason))
+    if action.get("commandBinding"):
+        raise ValueError("Adapteraktionen baut valeo_cli.docflow, nicht der generische Weg.")
     endpoint = action["commandEndpoint"]
     if requires_entity(action) and not entity_id:
         raise ValueError("Diese Aktion braucht eine Objektkennung (--id).")
@@ -134,7 +140,7 @@ def coerce_fields(action: dict[str, Any], raw: dict[str, str]) -> dict[str, Any]
     for key, value in raw.items():
         field = fields.get(key, {})
         kind = field.get("type")
-        if kind == "number":
+        if kind in {"number", "currency", "percentage"}:
             try:
                 out[key] = int(value) if re.fullmatch(r"-?\d+", value) else float(value)
             except ValueError as exc:

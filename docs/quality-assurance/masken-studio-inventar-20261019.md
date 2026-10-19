@@ -26,7 +26,7 @@ Gesamt 671 Routen, davon 669 Masken.
 | … MCP bewusst gesperrt | 8 |
 | … MCP offen (`open_high` u. a.) | 4 |
 | … MCP unklassifiziert | 124 |
-| … mit CLI-Zugang | 50 |
+| … mit CLI-Zugang | 129 |
 | nicht deklariert (kein Kommando, Endpunkt, Navigation) | 119 |
 
 ## Versionierte Familien
