@@ -14,7 +14,7 @@ Eine Niederlassungsleitung erhaelt eine begruendete Kombination bestehender Fach
 
 Die allgemeine Rolle manager besitzt keine ausreichende Agrarhandelsdefinition. Sie ist eine historische Rolle in Abloesung, darf nicht neu vergeben und nicht pauschal auf weitere Bereiche ausgedehnt werden. finance_manager, inventory_manager und crm_manager sind ebenfalls historische Bezeichnungen; eine automatische Gleichsetzung mit heutigen Fachrollen findet nicht statt. Bestehende Zuweisungen und Verbraucher vor Entzug einzeln pruefen, auf minimal erforderliche Fachrollen umstellen und danach Altrechte entfernen. Es wird kein Live-Konto in diesem Dokumentationsslice veraendert.
 
-## Nachgewiesene offene Codeabweichungen
+## Ausgangsbefund und Durchsetzungsstand
 
 Am Ausgangsstand 3a63b9661 fuehrt app/auth/bereich_roles.py manager ueber _LEITUNG pauschal in Bereichsschreibrechte ein. app/auth/finance_roles.py erlaubt damit unter anderem finance_write und beleg_write. Diese Verwendungen sind Ist-Befunde, keine Genehmigung durch den neuen Vertrag. Der aktive WRITE-ROLES-AREAS-Slice liegt bei Claude; dessen Dateien werden nicht konkurrierend editiert. Die Ueberfuehrung mit Berechtigungs-/Negativtests bleibt zwingende Integrationsarbeit. Auch vorhandene admin-Sonderbehandlungen muessen an den Aktionsvertraegen gemessen werden.
 
@@ -27,3 +27,10 @@ python scripts/check_fachrollen.py --check prueft Katalogdrift und Pflichtvertra
 Das Gate prueft Vollstaendigkeit und Erhalt der Beschreibungen. Es beweist noch keine semantische Gleichheit zwischen allen Endpunkten und den beschriebenen Rechten. Neue oder geaenderte Rollen brauchen weiterhin fachliches Review, konkrete Mandanten-/Objekt-/Aktionspruefungen und serverseitige Negativtests. Die statische Realm-Importdatei erhaelt nur die bereits bestehende, bisher dort fehlende Definition LAGER_BEARBEITEN. Bestehende Realm-Beschreibungen und der laufende Keycloak wurden hier nicht umgeschrieben; deren Beschreibungssynchronisierung ist ein gesonderter Identitaetsintegrationsschritt.
 
 Lokale Abnahme: 12 Tests und 30 Unterfaelle bestanden; Katalogdrift gruen, Realm kennt alle 35 Fachrollen. Keine Datenbank-/Dockerressourcen benoetigt. GitHub-Nachlauf des neuen Workflows ist gesondert zu pruefen.
+
+
+## Durchsetzung nach dem Ausgangsbefund
+
+MANAGER-ROLE-ENFORCEMENT-20261019 setzt den Ausschluss der historischen allgemeinen Rolle in beiden zentralen Rollen-Guards, Rollen-plus-Scopes und dem internen Aktionsguard durch. Beleg-/Finanzrechte, Scopeprojektionen und generierte Belegmaskenrechte enthalten manager nicht mehr. Sieben direkt pruefende Fachwege wurden zusaetzlich korrigiert. Bestehende Fachrollen und die unveraenderten geprueften Auditclaims bleiben erhalten. Nachweis und Grenzen: docs/quality-assurance/manager-role-retirement-20261019.md.
+
+Die noch vorhandene Nennung in Claudes Bereichslisten gewaehrt ueber die zentrale require_roles-Auswertung keine Berechtigung; die redundante Quelle soll im laufenden Bereichsslice bereinigt werden. Eine Role-Description allein ersetzt weiterhin keinen Domain- oder Objektvertrag. Providerrollout, Sitzungsneuausstellung und unabhaengige fachliche Sichtbarkeitsmodelle werden durch diesen Code-Nachweis nicht als abgenommen dargestellt.

@@ -36,13 +36,13 @@ WEGE = [
     ("POST", "/posten/actions/mahnen", "write"),
     ("DELETE", "/posten", "admin"),
 ]
-FINANZ_LESEN = {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"}
+FINANZ_LESEN = {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"}
 ERLAUBT = {
     "read": FINANZ_LESEN | {
         "SALES_LESEN", "SALES_BEARBEITEN", "SALES_ADMIN", "CRM_LESEN", "CRM_BEARBEITEN", "CRM_ADMIN",
         "EINKAUF_LESEN", "EINKAUF_BEARBEITEN", "EINKAUF_ADMIN",
     },
-    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"},
+    "write": {"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"},
     "admin": {"FINANCE_ADMIN", "admin"},
 }
 ROLLEN = [None, "user", "LAGER_ADMIN", "PERSONAL_ADMIN", "QUALITAET_ADMIN", "HARVEST_ADMIN",

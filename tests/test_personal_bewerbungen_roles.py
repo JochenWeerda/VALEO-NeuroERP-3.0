@@ -33,8 +33,8 @@ CASES = [
 ]
 ROLES = [None, "user", "FUTTERMITTEL_ADMIN", "PERSONAL_LESEN", "PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin", "manager"]
 ALLOWED = {
-    "read": {"PERSONAL_LESEN", "PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin", "manager"},
-    "write": {"PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin", "manager"},
+    "read": {"PERSONAL_LESEN", "PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin"},
+    "write": {"PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin"},
     "admin": {"PERSONAL_ADMIN", "admin"},
 }
 

@@ -27,7 +27,7 @@ from app.services.mask_commands import statusaktion
 router = APIRouter()
 
 # Lesen darf auch die Buchhaltung: Sie soll sehen, was an ihren Vorgaengen aufgefallen ist.
-_LESEN = KONTROLLROLLEN | frozenset({"FINANCE_LESEN", "FINANCE_BEARBEITEN", "manager"})
+_LESEN = KONTROLLROLLEN | frozenset({"FINANCE_LESEN", "FINANCE_BEARBEITEN"})
 
 
 class Befundpruefung(BaseModel):

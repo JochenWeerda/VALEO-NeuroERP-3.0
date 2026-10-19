@@ -66,11 +66,11 @@ def test_schreiben_nur_fuer_admin(client, als, methode, weg, rumpf):
 
 
 @pytest.mark.parametrize("weg", LESEN)
-def test_lesen_nur_fuer_leitung(client, als, weg):
+def test_lesen_nicht_fuer_historischen_manager(client, als, weg):
     als(SACHBEARBEITER)
     assert client.get(weg, headers=KOPF).status_code == 403
     als(MANAGER)
-    assert client.get(weg, headers=KOPF).status_code != 403
+    assert client.get(weg, headers=KOPF).status_code == 403
 
 
 def test_jeder_schreibweg_traegt_eine_rolle():

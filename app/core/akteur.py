@@ -31,7 +31,8 @@ def anzeigename(user: Any) -> str:
 
 def verlange_rolle(user: Any, *rollen: str) -> None:
     """Fuer Kommando-Wege mit mehreren Aktionen: die strengere Rolle einer einzelnen Aktion."""
-    vorhanden = set(user.get("roles") or []) if isinstance(user, dict) else set()
+    from app.auth.deps import effective_roles
+    vorhanden = effective_roles(user.get("roles")) if isinstance(user, dict) else set()
     if not vorhanden.intersection(rollen):
         raise HTTPException(status_code=403, detail=f"Insufficient role. Required: {rollen}")
 

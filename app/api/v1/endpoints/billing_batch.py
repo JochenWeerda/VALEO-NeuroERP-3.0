@@ -178,7 +178,7 @@ def retry(
 
 #: Maskenaktion -> erlaubte Status und Rolle (Freigeben und Ausfuehren bewegen Geld: nur Finanzleitung).
 _BATCH_ACTIONS: dict[str, tuple[set[str], tuple[str, ...]]] = {
-    "validate": ({"draft"}, ("FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager")),
+    "validate": ({"draft"}, ("FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin")),
     "release": ({"validated"}, ("FINANCE_ADMIN", "admin")),
     "execute": ({"released"}, ("FINANCE_ADMIN", "admin")),
 }

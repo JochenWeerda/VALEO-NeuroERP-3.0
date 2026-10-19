@@ -220,8 +220,8 @@ def verlange_storno_ausgangsrechnung(db: Session, tenant_id: str, nummer: str, a
     verlange_oder_409(engine, engine.vorgang(nummer, "reverse"), "reverse", akteur)
 
 
-_FINANZ_LESEN = frozenset({"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"})
-_FINANZ_SCHREIBEN = frozenset({"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"})
+_FINANZ_LESEN = frozenset({"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"})
+_FINANZ_SCHREIBEN = frozenset({"FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"})
 _FINANZ_LEITUNG = frozenset({"FINANCE_ADMIN", "admin"})
 # Der Controller ueberwacht die Ausnahmen: Er gibt kritische Befunde frei, bucht aber nicht (FIN-CONTROL-001).
 _CONTROLLING = frozenset({"controller", "CONTROLLING"})
