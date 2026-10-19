@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/pos/tagesabschluss", tags=["pos-tagesabschluss"])
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ class TagesabschlussTransitionRequest(BaseModel):
     fehler_grund: Optional[str] = None
 
 
-@router.post("", response_model=TypedObjectOut, summary="POS-Tagesabschluss anlegen")
+@router.post("", response_model=TypedObjectOut, summary="POS-Tagesabschluss anlegen", dependencies=SCHREIBEN["VERKAUF"])
 def create_tagesabschluss(
     req: TagesabschlussCreateRequest,
     x_tenant_id: str = Header(...),
@@ -55,8 +56,7 @@ def create_tagesabschluss(
 @router.post(
     "/{abschluss_id}/transition",
     response_model=TypedObjectOut,
-    summary="POS-Tagesabschlussstatus wechseln",
-)
+    summary="POS-Tagesabschlussstatus wechseln", dependencies=SCHREIBEN["VERKAUF"])
 def transition_tagesabschluss(
     abschluss_id: str,
     req: TagesabschlussTransitionRequest,
@@ -91,7 +91,7 @@ def transition_tagesabschluss(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/tse/simulate", response_model=TypedObjectOut, summary="POS-TSE-Signatur simulieren")
+@router.post("/tse/simulate", response_model=TypedObjectOut, summary="POS-TSE-Signatur simulieren", dependencies=SCHREIBEN["VERKAUF"])
 def simulate_tse(
     kasse_id: str,
     z_bon_nr: str,

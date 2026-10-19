@@ -28,6 +28,7 @@ from app.core.akteur import gepruefter_akteur
 from app.services.mask_action_runtime_service import MaskActionResult as MaskActionResultOut
 from app.services.mask_commands import statusaktion
 from app.api.v1.schemas.agrar_schemas import DeliveryNoteCreatedOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -583,7 +584,7 @@ async def get_sales_order_tab_data(
     return {"tab_key": tab_key, "table_key": tab_key, "items": [], "page": page, "limit": limit, "total": 0}
 
 
-@router.post("/", response_model=SalesOrder, status_code=status.HTTP_201_CREATED, summary="Sales order anlegen")
+@router.post("/", response_model=SalesOrder, status_code=status.HTTP_201_CREATED, summary="Sales order anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_sales_order(
     payload: SalesOrderCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -692,7 +693,7 @@ async def create_sales_order(
     return _row_to_order(row, _fetch_items(db, order_id, effective_tenant))
 
 
-@router.put("/{order_id}", response_model=SalesOrder, summary="Sales order aktualisieren")
+@router.put("/{order_id}", response_model=SalesOrder, summary="Sales order aktualisieren", dependencies=SCHREIBEN["VERKAUF"])
 async def update_sales_order(
     order_id: str,
     payload: SalesOrderUpdate,
@@ -803,7 +804,7 @@ async def update_sales_order(
     return _row_to_order(row, _fetch_items(db, order_id, effective_tenant))
 
 
-@router.post("/{order_id}/create-delivery-note", response_model=DeliveryNoteCreatedOut, status_code=201, summary="Delivery from order anlegen")
+@router.post("/{order_id}/create-delivery-note", response_model=DeliveryNoteCreatedOut, status_code=201, summary="Delivery from order anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_delivery_from_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -881,7 +882,7 @@ async def create_delivery_from_order(
     return {"ok": True, "delivery_note_id": dn_id, "delivery_note_number": dn_nr, "order_id": order_id}
 
 
-@router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response, summary="Sales order löschen")
+@router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response, summary="Sales order löschen", dependencies=SCHREIBEN["VERKAUF"])
 async def delete_sales_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -913,7 +914,7 @@ async def delete_sales_order(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.post("/{order_id}/confirm", response_model=SalesOrder, summary="Sales order bestätigen")
+@router.post("/{order_id}/confirm", response_model=SalesOrder, summary="Sales order bestätigen", dependencies=SCHREIBEN["VERKAUF"])
 async def confirm_sales_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -931,7 +932,7 @@ async def confirm_sales_order(
     return _row_to_order(_get_sales_order_row(db, order_id, tenant_id))
 
 
-@router.post("/{order_id}/complete", response_model=SalesOrder, summary="Sales order complete")
+@router.post("/{order_id}/complete", response_model=SalesOrder, summary="Sales order complete", dependencies=SCHREIBEN["VERKAUF"])
 async def complete_sales_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -949,7 +950,7 @@ async def complete_sales_order(
     return _row_to_order(_get_sales_order_row(db, order_id, tenant_id))
 
 
-@router.post("/{order_id}/cancel", response_model=SalesOrder, summary="Sales order stornieren")
+@router.post("/{order_id}/cancel", response_model=SalesOrder, summary="Sales order stornieren", dependencies=SCHREIBEN["VERKAUF"])
 async def cancel_sales_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -1027,8 +1028,7 @@ class SalesOrderPrintOut(BaseSchema):
 @router.post(
     "/{order_id}/print",
     response_model=SalesOrderPrintOut,
-    summary="Sales order drucken",
-)
+    summary="Sales order drucken", dependencies=SCHREIBEN["VERKAUF"])
 async def print_sales_order(
     order_id: str,
     template: Optional[str] = Query(default=None, max_length=60, description="Formatvorlage"),
@@ -1089,8 +1089,7 @@ async def print_sales_order(
 @router.post(
     "/{order_id}/post",
     response_model=SalesOrder,
-    summary="Sales order buchen",
-)
+    summary="Sales order buchen", dependencies=SCHREIBEN["VERKAUF"])
 async def post_sales_order(
     order_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -1164,7 +1163,7 @@ class PreisabweichungFreigabeIn(_BM):
     grund: _Opt[str] = None
 
 
-@router.post("/orders/{auftrag_id}/ab-transition", response_model=TypedObjectOut, summary="Auftragsbestätigung Status wechseln")
+@router.post("/orders/{auftrag_id}/ab-transition", response_model=TypedObjectOut, summary="Auftragsbestätigung Status wechseln", dependencies=SCHREIBEN["VERKAUF"])
 def ab_transition_endpoint(
     auftrag_id: str,
     body: ABTransitionIn,
@@ -1180,7 +1179,7 @@ def ab_transition_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/delivery-notes/{ls_id}/advance", response_model=TypedObjectOut, summary="Lieferschein-Status vorwärts")
+@router.post("/delivery-notes/{ls_id}/advance", response_model=TypedObjectOut, summary="Lieferschein-Status vorwärts", dependencies=SCHREIBEN["VERKAUF"])
 def ls_advance_endpoint(
     ls_id: str,
     body: LSAdvanceIn,
@@ -1196,7 +1195,7 @@ def ls_advance_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/orders/{auftrag_id}/preisabweichung", response_model=TypedObjectOut, status_code=201, summary="Preisabweichung prüfen")
+@router.post("/orders/{auftrag_id}/preisabweichung", response_model=TypedObjectOut, status_code=201, summary="Preisabweichung prüfen", dependencies=SCHREIBEN["VERKAUF"])
 def pruefe_preisabweichung_endpoint(
     auftrag_id: str,
     body: PreisabweichungIn,
@@ -1213,7 +1212,7 @@ def pruefe_preisabweichung_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/preisabweichungen/{abweichung_id}/freigabe", response_model=TypedObjectOut, summary="Preisabweichung freigeben/ablehnen")
+@router.post("/preisabweichungen/{abweichung_id}/freigabe", response_model=TypedObjectOut, summary="Preisabweichung freigeben/ablehnen", dependencies=SCHREIBEN["VERKAUF"])
 def freigabe_preisabweichung_endpoint(
     abweichung_id: str,
     body: PreisabweichungFreigabeIn,

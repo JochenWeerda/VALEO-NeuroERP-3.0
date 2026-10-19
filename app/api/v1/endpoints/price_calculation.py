@@ -17,6 +17,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/preis-kalkulation", tags=["preis-kalkulation"])
@@ -67,7 +68,7 @@ MWST = 19.0
 # Endpoint
 # ---------------------------------------------------------------------------
 
-@router.post("/berechne", response_model=PreisKalkulationResult, summary="Preis berechne")
+@router.post("/berechne", response_model=PreisKalkulationResult, summary="Preis berechne", dependencies=SCHREIBEN["VERKAUF"])
 def berechne_preis(
     payload: PreisKalkulationInput,
     db: Session = Depends(get_db),

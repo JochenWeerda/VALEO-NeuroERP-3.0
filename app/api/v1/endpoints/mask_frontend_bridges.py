@@ -31,6 +31,7 @@ from app.services.customer_reference import resolve_reference
 from app.services.finance_datev_service import FinanceDatevService
 from app.services.finance_period_service import FinancePeriodService, PeriodError
 from app.services.vies_service import vies_service
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(tags=["mask-frontend-bridges"])
 
@@ -927,7 +928,7 @@ def list_tse_journal(
     ]
 
 
-@router.post("/preise/berechnen", response_model=BridgeOut, summary="Preis kalkulieren")
+@router.post("/preise/berechnen", response_model=BridgeOut, summary="Preis kalkulieren", dependencies=SCHREIBEN["VERKAUF"])
 def preise_berechnen(body: PreisBerechnenIn) -> dict[str, Any]:
     menge = float(body.menge_kg or 1)
     basis = 100.0

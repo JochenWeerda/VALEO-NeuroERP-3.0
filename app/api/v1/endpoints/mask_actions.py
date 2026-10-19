@@ -26,6 +26,7 @@ from app.auth.finance_roles import finance_admin
 from app.core.tenant import get_tenant_id
 from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
 from app.auth.deps import require_roles
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(tags=["mask-actions"])
 
@@ -118,8 +119,7 @@ async def action_payment_run_freigeben(
 @router.post(
     "/sales/delivery-notes/{entity_id}/actions/drucken",
     response_model=MaskActionResult,
-    summary="Lieferschein drucken (SPEC-P1-04)",
-)
+    summary="Lieferschein drucken (SPEC-P1-04)", dependencies=SCHREIBEN["VERKAUF"])
 async def action_delivery_note_drucken(
     entity_id: str,
     body: dict[str, Any] = Body(default_factory=dict),

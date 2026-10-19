@@ -15,6 +15,7 @@ from app.services.webshop_integration_service import WebshopIntegrationService
 
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.api.v1.schemas.webshop_integration_schemas import WebshopIntegrationOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/webshop", tags=["webshop", "integration"])
@@ -102,7 +103,7 @@ def list_connectors(
     ]
 
 
-@router.post("/orders/import", response_model=TypedObjectOut, summary="Orders importieren (Frontend-Alias)")
+@router.post("/orders/import", response_model=TypedObjectOut, summary="Orders importieren (Frontend-Alias)", dependencies=SCHREIBEN["VERKAUF"])
 def import_orders_alias(
     body: dict = None,  # type: ignore[assignment]
     db: Session = Depends(get_db),
@@ -121,7 +122,7 @@ def list_konfigurationen(
     return _svc(db, tenant_id).list_configurations()
 
 
-@router.post("/konfigurationen", response_model=WebshopKonfigurationOut, status_code=201, summary="Konfiguration anlegen")
+@router.post("/konfigurationen", response_model=WebshopKonfigurationOut, status_code=201, summary="Konfiguration anlegen", dependencies=SCHREIBEN["VERKAUF"])
 def create_konfiguration(
     payload: WebshopKonfiguration,
     db: Session = Depends(get_db),
@@ -131,7 +132,7 @@ def create_konfiguration(
     return _svc(db, tenant_id).create_configuration(payload.model_dump())
 
 
-@router.delete("/konfigurationen/{id}", status_code=204, response_class=Response, response_model=None, summary="Konfiguration löschen")
+@router.delete("/konfigurationen/{id}", status_code=204, response_class=Response, response_model=None, summary="Konfiguration löschen", dependencies=SCHREIBEN["VERKAUF"])
 def delete_konfiguration(
     id: str,
     db: Session = Depends(get_db),
@@ -164,7 +165,7 @@ def get_bestellung(
     return order
 
 
-@router.post("/bestellungen/import", response_model=WebshopSyncResult, summary="Bestellungen importieren")
+@router.post("/bestellungen/import", response_model=WebshopSyncResult, summary="Bestellungen importieren", dependencies=SCHREIBEN["VERKAUF"])
 def import_bestellungen(
     bestellungen: list[WebshopBestellung],
     db: Session = Depends(get_db),
@@ -175,8 +176,7 @@ def import_bestellungen(
 
 
 @router.post("/bestellungen/{id}/verarbeiten", summary="Verarbeiten",
-    response_model=WebshopIntegrationOut
-)
+    response_model=WebshopIntegrationOut, dependencies=SCHREIBEN["VERKAUF"])
 def verarbeiten(
     id: str,
     db: Session = Depends(get_db),
@@ -214,7 +214,7 @@ class ConvertOrderResult(BaseModel):
     positionen_count: int
 
 
-@router.post("/orders/{order_id}/convert", response_model=ConvertOrderResult, summary="Order umwandeln")
+@router.post("/orders/{order_id}/convert", response_model=ConvertOrderResult, summary="Order umwandeln", dependencies=SCHREIBEN["VERKAUF"])
 def convert_order(
     order_id: str,
     db: Session = Depends(get_db),

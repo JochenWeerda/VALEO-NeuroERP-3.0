@@ -64,6 +64,7 @@ from app.api.v1.schemas.mask_entity_contracts import (
     EinkaufAnlieferavisOut,
     EinkaufAuftragsbestaetigungOut,
 )
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 # ---------------------------------------------------------------------------
@@ -2680,7 +2681,7 @@ async def list_suspended_sales(
         return []
 
 
-@router.delete("/pos/suspended-sales/{sale_id}", status_code=204, tags=["pos"], response_class=Response, response_model=None, summary="Suspended sale lÃ¶schen")
+@router.delete("/pos/suspended-sales/{sale_id}", status_code=204, tags=["pos"], response_class=Response, response_model=None, summary="Suspended sale lÃ¶schen", dependencies=SCHREIBEN["VERKAUF"])
 async def delete_suspended_sale(
     sale_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -2763,7 +2764,7 @@ def _ensure_chart_account(
     return acc_id
 
 
-@router.post("/pos/tagesabschluss", response_model=TagesabschlussOut, status_code=201, tags=["pos"], summary="Tagesabschluss anlegen")
+@router.post("/pos/tagesabschluss", response_model=TagesabschlussOut, status_code=201, tags=["pos"], summary="Tagesabschluss anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_tagesabschluss(
     payload: TagesabschlussIn,
     tenant_id: str = Depends(get_tenant_id),

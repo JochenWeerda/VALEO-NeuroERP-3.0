@@ -13,6 +13,7 @@ from app.api.v1.endpoints import (
     o2c_uat_scaffold,
 )
 from app.services.webshop_integration_service import _ORDER_STORE
+from testgrenze import ersetze_nutzer
 
 
 # ── Client factories ──────────────────────────────────────────────────────────
@@ -32,6 +33,7 @@ def _webshop_client() -> TestClient:
     app.dependency_overrides[webshop_integration.get_db] = lambda: db
     app.dependency_overrides[webshop_integration.get_tenant_id] = lambda: "test-tenant"
     app.include_router(webshop_integration.router)
+    ersetze_nutzer(app, "SALES_BEARBEITEN")  # Schreibwege pruefen die Bereichsrolle
     return TestClient(app)
 
 
