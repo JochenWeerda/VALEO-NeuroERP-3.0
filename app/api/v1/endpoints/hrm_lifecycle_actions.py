@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/hrm/lifecycle", tags=["hrm-lifecycle"])
 logger = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ class AbwesenheitTransitionRequest(BaseModel):
     ablehnungs_grund: str = ""
 
 
-@router.post("/zeitbuchungen", response_model=TypedObjectOut, summary="Zeitbuchung anlegen")
+@router.post("/zeitbuchungen", response_model=TypedObjectOut, summary="Zeitbuchung anlegen", dependencies=SCHREIBEN["PERSONAL"])
 def create_zeitbuchung(
     req: ZeitbuchungCreateRequest,
     x_tenant_id: str = Header(...),
@@ -75,8 +76,7 @@ def create_zeitbuchung(
 @router.post(
     "/zeitbuchungen/{buchung_id}/transition",
     response_model=TypedObjectOut,
-    summary="Zeitbuchungsstatus wechseln",
-)
+    summary="Zeitbuchungsstatus wechseln", dependencies=SCHREIBEN["PERSONAL"])
 def transition_zeitbuchung(
     buchung_id: str,
     req: ZeitbuchungTransitionRequest,
@@ -115,7 +115,7 @@ def get_arbeitszeitkonto(
     return svc(db=db, mitarbeiter_id=mitarbeiter_id, tenant_id=x_tenant_id, monat=monat)
 
 
-@router.post("/abwesenheiten", response_model=TypedObjectOut, summary="Abwesenheitsantrag anlegen")
+@router.post("/abwesenheiten", response_model=TypedObjectOut, summary="Abwesenheitsantrag anlegen", dependencies=SCHREIBEN["PERSONAL"])
 def create_abwesenheit(
     req: AbwesenheitCreateRequest,
     x_tenant_id: str = Header(...),
@@ -144,8 +144,7 @@ def create_abwesenheit(
 @router.post(
     "/abwesenheiten/{abwesenheit_id}/transition",
     response_model=TypedObjectOut,
-    summary="Abwesenheitsstatus wechseln",
-)
+    summary="Abwesenheitsstatus wechseln", dependencies=SCHREIBEN["PERSONAL"])
 def transition_abwesenheit(
     abwesenheit_id: str,
     req: AbwesenheitTransitionRequest,

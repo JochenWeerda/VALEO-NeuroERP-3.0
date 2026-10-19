@@ -32,6 +32,7 @@ from modules.agrar.repositories.self_billing_repo import SelfBillingRepositoryIm
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.self_billing_schemas import SelfBillingOut
 from app.core.akteur import akteur_aus_request
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -147,7 +148,7 @@ def _to_out(invoice) -> SelfBillingInvoiceOut:
 
 # ── API Endpoints ───────────────────────────────────────────────────────────────
 
-@router.post("/harvest-acceptance/{harvest_acceptance_id}/create-credit-note", response_model=SelfBillingInvoiceOut, status_code=201, summary="Credit note endpoint anlegen")
+@router.post("/harvest-acceptance/{harvest_acceptance_id}/create-credit-note", response_model=SelfBillingInvoiceOut, status_code=201, summary="Credit note endpoint anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_credit_note_endpoint(
     harvest_acceptance_id: str,
     payload: CreditNoteCreateIn,
@@ -240,7 +241,7 @@ async def get_invoice_by_harvest_acceptance(
     return _to_out(invoice)
 
 
-@router.post("/{invoice_id}/issue", response_model=SelfBillingInvoiceOut, summary="Invoice endpoint issue")
+@router.post("/{invoice_id}/issue", response_model=SelfBillingInvoiceOut, summary="Invoice endpoint issue", dependencies=SCHREIBEN["AGRAR"])
 async def issue_invoice_endpoint(
     invoice_id: str,
     db: Session = Depends(get_db),
@@ -263,7 +264,7 @@ async def issue_invoice_endpoint(
     return _to_out(invoice)
 
 
-@router.post("/{invoice_id}/generate-einvoice", response_model=SelfBillingInvoiceOut, summary="Einvoice endpoint generieren")
+@router.post("/{invoice_id}/generate-einvoice", response_model=SelfBillingInvoiceOut, summary="Einvoice endpoint generieren", dependencies=SCHREIBEN["AGRAR"])
 async def generate_einvoice_endpoint(
     invoice_id: str,
     payload: EinvoiceGenerateIn,
@@ -292,7 +293,7 @@ async def generate_einvoice_endpoint(
     return _to_out(invoice)
 
 
-@router.post("/{invoice_id}/send", response_model=SelfBillingInvoiceOut, summary="Einvoice endpoint senden")
+@router.post("/{invoice_id}/send", response_model=SelfBillingInvoiceOut, summary="Einvoice endpoint senden", dependencies=SCHREIBEN["AGRAR"])
 async def send_einvoice_endpoint(
     invoice_id: str,
     recipient_email: Optional[str] = None,
@@ -313,7 +314,7 @@ async def send_einvoice_endpoint(
     return _to_out(invoice)
 
 
-@router.post("/{invoice_id}/dispute", response_model=SelfBillingOut, summary="Dispute endpoint anlegen")
+@router.post("/{invoice_id}/dispute", response_model=SelfBillingOut, summary="Dispute endpoint anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_dispute_endpoint(
     invoice_id: str,
     payload: DisputeCreateIn,
@@ -364,7 +365,7 @@ class PreviewIn(BaseModel):
     taxation_type: str = "regular"
 
 
-@router.post("/preview", response_model=SelfBillingOut, summary="Self billing vorschauen")
+@router.post("/preview", response_model=SelfBillingOut, summary="Self billing vorschauen", dependencies=SCHREIBEN["AGRAR"])
 async def preview_self_billing(
     payload: PreviewIn,
     db: Session = Depends(get_db),
@@ -428,7 +429,7 @@ async def preview_self_billing(
     }
 
 
-@router.post("/{invoice_id}/storno", response_model=SelfBillingOut, summary="Invoice storno")
+@router.post("/{invoice_id}/storno", response_model=SelfBillingOut, summary="Invoice storno", dependencies=SCHREIBEN["AGRAR"])
 async def storno_invoice(
     invoice_id: str,
     db: Session = Depends(get_db),
@@ -546,7 +547,7 @@ async def get_disputes(
 # BUCHUNGSKREISLAUF INTEGRATION
 # ============================================================================
 
-@router.post("/{invoice_id}/buchung", response_model=SelfBillingOut, summary="Gutschrift buche")
+@router.post("/{invoice_id}/buchung", response_model=SelfBillingOut, summary="Gutschrift buche", dependencies=SCHREIBEN["AGRAR"])
 async def buche_gutschrift(
     invoice_id: str,
     db: Session = Depends(get_db),

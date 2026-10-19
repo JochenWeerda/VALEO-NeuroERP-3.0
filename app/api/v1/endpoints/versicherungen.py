@@ -13,6 +13,7 @@ from app.domains.operations.models import Versicherung, VersicherungStatus
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.versicherungen_schemas import VersicherungenOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/versicherungen", tags=["Versicherungen"])
@@ -89,8 +90,7 @@ def get_versicherung(versicherung_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("", status_code=201, summary="Versicherung anlegen",
-    response_model=VersicherungenOut
-)
+    response_model=VersicherungenOut, dependencies=SCHREIBEN["FINANZ"])
 def create_versicherung(payload: VersicherungPayload, db: Session = Depends(get_db)):
     obj = Versicherung(**payload.model_dump())
     db.add(obj)
@@ -100,8 +100,7 @@ def create_versicherung(payload: VersicherungPayload, db: Session = Depends(get_
 
 
 @router.patch("/{versicherung_id}", summary="Versicherung aktualisieren",
-    response_model=VersicherungenOut
-)
+    response_model=VersicherungenOut, dependencies=SCHREIBEN["FINANZ"])
 def update_versicherung(versicherung_id: str, payload: VersicherungPatch, db: Session = Depends(get_db)):
     obj = db.query(Versicherung).filter(Versicherung.id == versicherung_id).first()
     if not obj:
@@ -114,7 +113,7 @@ def update_versicherung(versicherung_id: str, payload: VersicherungPatch, db: Se
     return _to_dict(obj)
 
 
-@router.delete("/{versicherung_id}", status_code=204, response_class=Response, response_model=None, summary="Versicherung löschen")
+@router.delete("/{versicherung_id}", status_code=204, response_class=Response, response_model=None, summary="Versicherung löschen", dependencies=SCHREIBEN["FINANZ"])
 def delete_versicherung(versicherung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Versicherung).filter(Versicherung.id == versicherung_id).first()
     if not obj:

@@ -14,6 +14,7 @@ from ....core.database import get_db
 from ....infrastructure.models import Saatgut as SaatgutModel
 from ....api.v1.schemas.base import PaginatedResponse
 from ....api.v1.schemas.agrar import Saatgut, SaatgutCreate, SaatgutUpdate
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -134,7 +135,7 @@ async def get_saatgut(
     return Saatgut.model_validate(saatgut)
 
 
-@router.post("/", response_model=Saatgut, status_code=201, summary="Saatgut anlegen")
+@router.post("/", response_model=Saatgut, status_code=201, summary="Saatgut anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_saatgut(
     saatgut_data: SaatgutCreate,
     tenant_id: Optional[str] = Query(None),
@@ -179,7 +180,7 @@ async def create_saatgut(
 
 
 @router.put("/{saatgut_id}", response_model=Saatgut, summary="Saatgut aktualisieren")
-@router.patch("/{saatgut_id}", response_model=Saatgut, summary="Saatgut aktualisieren")
+@router.patch("/{saatgut_id}", response_model=Saatgut, summary="Saatgut aktualisieren", dependencies=SCHREIBEN["AGRAR"])
 async def update_saatgut(
     saatgut_id: str,
     saatgut_data: SaatgutUpdate,
@@ -237,7 +238,7 @@ async def update_saatgut(
     return Saatgut.model_validate(saatgut)
 
 
-@router.delete("/{saatgut_id}", status_code=204, summary="Saatgut deaktivieren")
+@router.delete("/{saatgut_id}", status_code=204, summary="Saatgut deaktivieren", dependencies=SCHREIBEN["AGRAR"])
 async def delete_saatgut(
     saatgut_id: str,
     tenant_id: Optional[str] = Query(None),

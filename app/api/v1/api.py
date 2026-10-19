@@ -478,6 +478,9 @@ api_router.include_router(
     prefix="/sales/orders",
     tags=["sales", "orders"]
 )
+from app.api.v1.endpoints import sales_order_commands  # noqa: E402
+
+api_router.include_router(sales_order_commands.router, prefix="/sales/orders", tags=["sales", "orders"])
 
 api_router.include_router(
     sales_blanket_orders.router,
@@ -1945,6 +1948,9 @@ api_router.include_router(studio_drafts.router)
 api_router.include_router(finance_stammdaten.router)
 api_router.include_router(crm_consents.router)
 api_router.include_router(mask_frontend_bridges.router)
+from app.api.v1.endpoints import preis_kalkulation_bridge  # noqa: E402
+
+api_router.include_router(preis_kalkulation_bridge.router)  # aus mask_frontend_bridges herausgeloest
 api_router.include_router(operational_governance.router)
 api_router.include_router(planung_kalender.router)
 api_router.include_router(pricing_governance.router)

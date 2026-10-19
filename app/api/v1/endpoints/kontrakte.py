@@ -47,7 +47,6 @@ from app.api.v1.schemas.kontrakte_schemas import (
     AmendmentResponse,
     AmendmentStatusUpdate,
     AmendmentTemplateResponse,
-    DispositionCreate,
     KonContractIn,
     KonContractMovementIn,
     KonContractMovementOut,
@@ -61,6 +60,7 @@ from app.api.v1.schemas.kontrakt_disposition_schemas import (
     DispositionOut,
 )
 from app.services import kontrakt_disposition_service as dispo
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/kontrakte", tags=["kontrakte"])
 
@@ -631,7 +631,7 @@ async def update_kontrakt(
     return await get_kontrakt(contract_id, db, tenant_id, user)
 
 
-@router.put("/{contract_id}", response_model=KontraktOut, summary="Kontrakt replace")
+@router.put("/{contract_id}", response_model=KontraktOut, summary="Kontrakt replace", dependencies=SCHREIBEN["KONTRAKT"])
 async def replace_kontrakt(
     contract_id: str,
     payload: KonContractIn,

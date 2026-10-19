@@ -23,6 +23,7 @@ from app.core.business_time import business_date_after, business_today
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/zinsabrechnung", tags=["Zinsabrechnung"])
@@ -110,7 +111,7 @@ def list_zinsabrechnungen(
     return [ZinsabrechnungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/berechnen", response_model=ZinsabrechnungOut, status_code=201, summary="Zinsabrechnung berechne")
+@router.post("/berechnen", response_model=ZinsabrechnungOut, status_code=201, summary="Zinsabrechnung berechne", dependencies=SCHREIBEN["FINANZ"])
 def berechne_zinsabrechnung(
     payload: ZinsabrechnungCreate,
     db=Depends(get_db),
@@ -154,8 +155,7 @@ def berechne_zinsabrechnung(
 
 
 @router.post("/{zins_id}/drucken", summary="Zinsabrechnung drucke",
-    response_model=ZinsabrechnungOut
-)
+    response_model=ZinsabrechnungOut, dependencies=SCHREIBEN["FINANZ"])
 def drucke_zinsabrechnung(
     zins_id: str,
     db=Depends(get_db),
@@ -198,7 +198,7 @@ def drucke_zinsabrechnung(
     }
 
 
-@router.post("/{zins_id}/buchen", response_model=ZinsabrechnungOut, summary="Zinsabrechnung buche")
+@router.post("/{zins_id}/buchen", response_model=ZinsabrechnungOut, summary="Zinsabrechnung buche", dependencies=SCHREIBEN["FINANZ"])
 def buche_zinsabrechnung(
     zins_id: str,
     beleg_nr: Optional[str] = None,
@@ -256,7 +256,7 @@ def buche_zinsabrechnung(
     return ZinsabrechnungOut(**dict(row._mapping))
 
 
-@router.post("/{zins_id}/stornieren", response_model=ZinsabrechnungOut, summary="Zinsabrechnung storniere")
+@router.post("/{zins_id}/stornieren", response_model=ZinsabrechnungOut, summary="Zinsabrechnung storniere", dependencies=SCHREIBEN["FINANZ"])
 def storniere_zinsabrechnung(
     zins_id: str,
     db=Depends(get_db),

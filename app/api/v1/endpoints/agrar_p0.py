@@ -7,6 +7,7 @@ import uuid
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.agrar_p0_schemas import AgrarP0Out
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/agrar/p0", tags=["agrar-p0"])
@@ -34,8 +35,7 @@ class PsmProtokolleintragRequest(BaseModel):
     zulassungsnummer: Optional[str] = None
 
 @router.post("/duenge-bilanz", summary="Duenge bilanz berechne",
-    response_model=AgrarP0Out
-)
+    response_model=AgrarP0Out, dependencies=SCHREIBEN["AGRAR"])
 def berechne_duenge_bilanz(req: DuengeBilanzRequest):
     from app.core.duenge_bilanz import DuengeBilanz, DuengemittelEintrag, NaehrstoffTyp
     from datetime import date as _date
@@ -60,8 +60,7 @@ def berechne_duenge_bilanz(req: DuengeBilanzRequest):
     return bilanz.model_dump()
 
 @router.post("/psm-protokoll", status_code=201, summary="Psm protokoll erstelle",
-    response_model=AgrarP0Out
-)
+    response_model=AgrarP0Out, dependencies=SCHREIBEN["AGRAR"])
 def erstelle_psm_protokoll(req: PsmProtokolleintragRequest):
     from app.core.psm_protokoll import PsmAnwendungProtokoll
     protokoll = PsmAnwendungProtokoll(
@@ -122,9 +121,7 @@ class StornoIn(BaseModel):
     "/partien",
     response_model=AgrarP0Out,
     status_code=201,
-    summary="Partie aus Ernteannahmen aggregieren (DOM-AGRAR-004.2)",
-
-)
+    summary="Partie aus Ernteannahmen aggregieren (DOM-AGRAR-004.2)", dependencies=SCHREIBEN["AGRAR"])
 def create_partie(
     body: PartieCreateIn,
     x_tenant_id: Optional[str] = Header(None),
@@ -172,9 +169,7 @@ def get_partie(
     "/partien/{partie_id}/trocknung",
     response_model=AgrarP0Out,
     status_code=201,
-    summary="Trocknungsabrechnung berechnen (DOM-AGRAR-004.3)",
-
-)
+    summary="Trocknungsabrechnung berechnen (DOM-AGRAR-004.3)", dependencies=SCHREIBEN["AGRAR"])
 def berechne_trocknung(
     partie_id: str,
     body: TrocknungIn,
@@ -202,9 +197,7 @@ def berechne_trocknung(
 @router.post(
     "/selbstabrechnung/{rechnung_id}/issue",
     response_model=AgrarP0Out,
-    summary="Selbstabrechnung auf ISSUED setzen (DOM-AGRAR-004.4)",
-
-)
+    summary="Selbstabrechnung auf ISSUED setzen (DOM-AGRAR-004.4)", dependencies=SCHREIBEN["AGRAR"])
 def issue_selbstabrechnung(
     rechnung_id: str,
     x_tenant_id: Optional[str] = Header(None),
@@ -225,9 +218,7 @@ def issue_selbstabrechnung(
 @router.post(
     "/selbstabrechnung/{rechnung_id}/status",
     response_model=AgrarP0Out,
-    summary="Selbstabrechnung-Status wechseln (DOM-AGRAR-004.4)",
-
-)
+    summary="Selbstabrechnung-Status wechseln (DOM-AGRAR-004.4)", dependencies=SCHREIBEN["AGRAR"])
 def set_selbstabrechnung_status(
     rechnung_id: str,
     body: StatusTransitionIn,
@@ -252,9 +243,7 @@ def set_selbstabrechnung_status(
     "/selbstabrechnung/{rechnung_id}/storno",
     response_model=AgrarP0Out,
     status_code=201,
-    summary="Selbstabrechnung stornieren (idempotent) (DOM-AGRAR-004.4)",
-
-)
+    summary="Selbstabrechnung stornieren (idempotent) (DOM-AGRAR-004.4)", dependencies=SCHREIBEN["AGRAR"])
 def storno_selbstabrechnung(
     rechnung_id: str,
     body: StornoIn,

@@ -31,6 +31,7 @@ from modules.agrar.repositories.quality_protocol_repo import QualityProtocolRepo
 
 from app.api.v1.schemas.base import BaseSchema
 from app.core.akteur import akteur_aus_request
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -140,7 +141,7 @@ def _to_out(protocol) -> QualityProtocolOut:
 
 # ── API Endpoints ───────────────────────────────────────────────────────────────
 
-@router.post("", response_model=QualityProtocolOut, status_code=201, summary="Protocol anlegen")
+@router.post("", response_model=QualityProtocolOut, status_code=201, summary="Protocol anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_protocol(
     payload: QualityProtocolCreateIn,
     db: Session = Depends(get_db),
@@ -230,7 +231,7 @@ async def get_latest_protocol_for_harvest_acceptance(
     return _to_out(protocol)
 
 
-@router.put("/{protocol_id}", response_model=QualityProtocolOut, summary="Protocol aktualisieren")
+@router.put("/{protocol_id}", response_model=QualityProtocolOut, summary="Protocol aktualisieren", dependencies=SCHREIBEN["AGRAR"])
 async def update_protocol(
     protocol_id: str,
     payload: QualityProtocolUpdateIn,
@@ -265,7 +266,7 @@ async def update_protocol(
 
 
 @router.post("/{protocol_id}/approve", response_model=QualityProtocolOut, summary="Protocol finalize")
-@router.post("/{protocol_id}/finalize", response_model=QualityProtocolOut, summary="Protocol finalize")
+@router.post("/{protocol_id}/finalize", response_model=QualityProtocolOut, summary="Protocol finalize", dependencies=SCHREIBEN["AGRAR"])
 async def finalize_protocol(
     protocol_id: str,
     payload: QualityProtocolFinalizeIn,
@@ -286,7 +287,7 @@ async def finalize_protocol(
     return _to_out(protocol)
 
 
-@router.post("/import/csv", response_model=QualityProtocolOut, status_code=201, summary="Protocol from csv importieren")
+@router.post("/import/csv", response_model=QualityProtocolOut, status_code=201, summary="Protocol from csv importieren", dependencies=SCHREIBEN["AGRAR"])
 async def import_protocol_from_csv(
     harvest_acceptance_id: Optional[str] = Form(None),
     file: UploadFile = File(...),
@@ -339,7 +340,7 @@ async def import_protocol_from_csv(
     return _to_out(protocol)
 
 
-@router.post("/import/json", response_model=QualityProtocolOut, status_code=201, summary="Protocol from json importieren")
+@router.post("/import/json", response_model=QualityProtocolOut, status_code=201, summary="Protocol from json importieren", dependencies=SCHREIBEN["AGRAR"])
 async def import_protocol_from_json(
     harvest_acceptance_id: Optional[str] = Form(None),
     file: UploadFile = File(...),

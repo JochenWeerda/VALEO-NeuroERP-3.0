@@ -38,7 +38,6 @@ from app.infrastructure.models import (
     BusinessPartnerPriceAgreement,
 )
 
-from app.api.v1.schemas.base import BaseSchema
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 

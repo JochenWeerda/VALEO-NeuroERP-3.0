@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/meldewesen/lifecycle", tags=["meldewesen-lifecycle"])
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ class MeldungTransitionRequest(BaseModel):
     externe_referenz: str = ""
 
 
-@router.post("", response_model=TypedObjectOut, summary="Meldewesen-Meldung anlegen")
+@router.post("", response_model=TypedObjectOut, summary="Meldewesen-Meldung anlegen", dependencies=SCHREIBEN["FINANZ"])
 def create_meldung(
     req: MeldungCreateRequest,
     x_tenant_id: str = Header(...),
@@ -55,8 +56,7 @@ def create_meldung(
 @router.post(
     "/{meldung_id}/transition",
     response_model=TypedObjectOut,
-    summary="Meldewesen-Meldungsstatus wechseln",
-)
+    summary="Meldewesen-Meldungsstatus wechseln", dependencies=SCHREIBEN["FINANZ"])
 def transition_meldung(
     meldung_id: str,
     req: MeldungTransitionRequest,
@@ -84,8 +84,7 @@ def transition_meldung(
 @router.post(
     "/simulate-uebermittlung",
     response_model=TypedObjectOut,
-    summary="Meldewesen-Uebermittlung simulieren",
-)
+    summary="Meldewesen-Uebermittlung simulieren", dependencies=SCHREIBEN["FINANZ"])
 def simulate_uebermittlung(
     meldung_typ: str,
     periode: str,

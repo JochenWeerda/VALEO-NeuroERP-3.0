@@ -53,3 +53,13 @@ ordnet ueber die Kennung zu. Beide sind ausdrueckliche Abhaengigkeiten und als s
   Nutzer des Mandantenwegs.
 - `manager` aus `bereich_roles`/`betrieb_roles`, der Kassenrolle und dem Auftragsstorno entfernt: abgeloest seit
   MANAGER-ROLE-ENFORCEMENT-20261019 (die zentrale Pruefung wertet sie schon nicht mehr aus).
+- Gruppen AGRAR, KONTRAKT, FUTTERMITTEL, FINANZ, CONTROLLING, PERSONAL: 347 Decorators. Inventar 790 -> 441.
+  Nachweis: Suiten des Blocks 6309 gruen; Mini-App-Tests mit Testidentitaet nachgezogen.
+- **Godfile-Ratsche:** Die bisherigen Commits liessen fuenf Godfiles wachsen (u. a. `sales_orders.py` +43 durch den
+  Storno-Kommandoweg). Behoben durch echte Verkleinerung: Storno nach `sales_order_commands.py`, Preiskalkulation
+  nach `preis_kalkulation_bridge.py` (Pfade unveraendert), doppelter `require_roles`-Import in `admin_suite.py`,
+  ungenutzte Importe entfernt. Baseline gesenkt, Integritaet OK.
+- Nebenbefunde (nicht aus diesem Slice, belegt und behoben): Testgrenze von `test_freigabe_zweitwege` legt die
+  geprueften Claims in den Request (seit AUDIT-IDENTITY-INTEGRITY liest das FiBu-Audit sie dort). Hinweis:
+  `test_process_kernel_wave74_rations_optimization` verdeckt per `sys.path` das `app`-Paket fuer spaetere Tests
+  derselben Sitzung (vorbestehend, nur bei abweichender Reihenfolge sichtbar).

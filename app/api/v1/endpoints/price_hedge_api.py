@@ -15,6 +15,7 @@ from app.domains.operations.models import HedgeReferenceDB
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.price_hedge_api_schemas import PriceHedgeApiOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/price-hedge", tags=["price-hedge"])
@@ -32,8 +33,7 @@ class HedgeCreateRequest(BaseModel):
 
 
 @router.post("/hedges", status_code=201, summary="Hedge anlegen",
-    response_model=PriceHedgeApiOut
-)
+    response_model=PriceHedgeApiOut, dependencies=SCHREIBEN["KONTRAKT"])
 def create_hedge(req: HedgeCreateRequest, db: Session = Depends(get_db)):
     hid = str(uuid.uuid4())
     row = HedgeReferenceDB(
@@ -95,8 +95,7 @@ def list_hedges(
 
 
 @router.patch("/hedges/{hedge_id}/close", summary="Hedge abschließen",
-    response_model=PriceHedgeApiOut
-)
+    response_model=PriceHedgeApiOut, dependencies=SCHREIBEN["KONTRAKT"])
 def close_hedge(hedge_id: str, aktueller_preis: float, db: Session = Depends(get_db)):
     row = db.query(HedgeReferenceDB).filter(HedgeReferenceDB.hedge_id == hedge_id).first()
     if not row:

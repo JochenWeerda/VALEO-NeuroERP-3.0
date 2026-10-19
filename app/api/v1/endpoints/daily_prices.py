@@ -31,6 +31,7 @@ from modules.agrar.repositories.daily_price_repo import DailyPriceRepositoryImpl
 
 from app.api.v1.schemas.base import BaseSchema
 from app.core.akteur import akteur_aus_request
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -180,7 +181,7 @@ async def get_price(
     return _to_out(price)
 
 
-@router.post("", response_model=DailyPriceOut, status_code=201, summary="Price anlegen")
+@router.post("", response_model=DailyPriceOut, status_code=201, summary="Price anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_price(
     payload: DailyPriceCreateIn,
     db: Session = Depends(get_db),
@@ -213,7 +214,7 @@ async def create_price(
     return _to_out(price)
 
 
-@router.post("/bulk-import", response_model=list[DailyPriceOut], status_code=201, summary="Import prices endpoint Bulk")
+@router.post("/bulk-import", response_model=list[DailyPriceOut], status_code=201, summary="Import prices endpoint Bulk", dependencies=SCHREIBEN["AGRAR"])
 async def bulk_import_prices_endpoint(
     payload: DailyPriceBulkCreateIn,
     db: Session = Depends(get_db),
@@ -249,7 +250,7 @@ async def bulk_import_prices_endpoint(
     return [_to_out(p) for p in prices]
 
 
-@router.post("/import", response_model=list[DailyPriceOut], status_code=201, summary="Prices file importieren")
+@router.post("/import", response_model=list[DailyPriceOut], status_code=201, summary="Prices file importieren", dependencies=SCHREIBEN["AGRAR"])
 async def import_prices_file(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -321,7 +322,7 @@ class PriceRuleEvaluateOut(BaseModel):
     final_price_eur_per_ton: float
 
 
-@router.post("/price-rules/evaluate", response_model=PriceRuleEvaluateOut, summary="Price rules evaluate")
+@router.post("/price-rules/evaluate", response_model=PriceRuleEvaluateOut, summary="Price rules evaluate", dependencies=SCHREIBEN["AGRAR"])
 async def evaluate_price_rules(
     payload: PriceRuleEvaluateIn,
     db: Session = Depends(get_db),

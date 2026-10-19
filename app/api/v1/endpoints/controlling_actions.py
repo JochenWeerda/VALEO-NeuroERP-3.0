@@ -15,6 +15,7 @@ from app.api.v1.schemas.finance_controlling_bundle_schemas import (
     ControllingKstAbschlussOut,
 )
 from app.core.database import get_db
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/controlling", tags=["controlling"])
 logger = logging.getLogger(__name__)
@@ -55,7 +56,7 @@ class KSTAbschlussRequest(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("/budgets", response_model=ControllingBudgetCreatedOut, status_code=201, summary="Controlling-Budget anlegen")
+@router.post("/budgets", response_model=ControllingBudgetCreatedOut, status_code=201, summary="Controlling-Budget anlegen", dependencies=SCHREIBEN["CONTROLLING"])
 def create_budget(
     body: BudgetCreateRequest,
     x_tenant_id: Optional[str] = Header(None),
@@ -72,8 +73,7 @@ def create_budget(
 @router.post(
     "/budgets/{budget_id}/transition",
     response_model=ControllingBudgetTransitionOut,
-    summary="Controlling-Budgetstatus wechseln",
-)
+    summary="Controlling-Budgetstatus wechseln", dependencies=SCHREIBEN["CONTROLLING"])
 def transition_budget(
     budget_id: str,
     body: BudgetTransitionRequest,
@@ -100,7 +100,7 @@ def get_abweichung(
     return svc(db, tenant_id, kostenstelle_id, periode)
 
 
-@router.post("/ist-werte", response_model=ControllingIstWertOut, status_code=201, summary="Ist-Wert buchen")
+@router.post("/ist-werte", response_model=ControllingIstWertOut, status_code=201, summary="Ist-Wert buchen", dependencies=SCHREIBEN["CONTROLLING"])
 def buche_ist_wert(
     body: IstWertRequest,
     x_tenant_id: Optional[str] = Header(None),
@@ -132,8 +132,7 @@ def drill_down(
 @router.post(
     "/kostenstellen/{kostenstelle_id}/abschluss",
     response_model=ControllingKstAbschlussOut,
-    summary="Kostenstellenabschluss fortschreiben",
-)
+    summary="Kostenstellenabschluss fortschreiben", dependencies=SCHREIBEN["CONTROLLING"])
 def advance_abschluss(
     kostenstelle_id: str,
     body: KSTAbschlussRequest,

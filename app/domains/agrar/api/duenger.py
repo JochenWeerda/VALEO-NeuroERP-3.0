@@ -14,6 +14,7 @@ from ....core.database import get_db
 from ....infrastructure.models import Duenger as DuengerModel
 from ....api.v1.schemas.base import PaginatedResponse
 from ....api.v1.schemas.agrar import Duenger, DuengerCreate, DuengerUpdate
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -183,7 +184,7 @@ async def get_duenger(
     return Duenger.model_validate(duenger)
 
 
-@router.post("/", response_model=Duenger, status_code=201, summary="Duenger anlegen")
+@router.post("/", response_model=Duenger, status_code=201, summary="Duenger anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_duenger(
     duenger_data: DuengerCreate,
     tenant_id: Optional[str] = Query(None),
@@ -241,7 +242,7 @@ async def create_duenger(
 
 
 @router.put("/{duenger_id}", response_model=Duenger, summary="Duenger aktualisieren")
-@router.patch("/{duenger_id}", response_model=Duenger, summary="Duenger aktualisieren")
+@router.patch("/{duenger_id}", response_model=Duenger, summary="Duenger aktualisieren", dependencies=SCHREIBEN["AGRAR"])
 async def update_duenger(
     duenger_id: str,
     duenger_data: DuengerUpdate,
@@ -308,7 +309,7 @@ async def update_duenger(
     return Duenger.model_validate(duenger)
 
 
-@router.delete("/{duenger_id}", status_code=204, summary="Duenger deaktivieren")
+@router.delete("/{duenger_id}", status_code=204, summary="Duenger deaktivieren", dependencies=SCHREIBEN["AGRAR"])
 async def delete_duenger(
     duenger_id: str,
     tenant_id: Optional[str] = Query(None),

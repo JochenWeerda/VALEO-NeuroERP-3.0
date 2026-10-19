@@ -3,19 +3,19 @@
   "loc_limit": 1000,
   "files": {
     "app/api/v1/endpoints/admin_suite.py": 1035,
-    "app/api/v1/endpoints/agrar_feldbuch.py": 1103,
+    "app/api/v1/endpoints/agrar_feldbuch.py": 1096,
     "app/api/v1/endpoints/business_partners.py": 2719,
-    "app/api/v1/endpoints/compat.py": 3403,
+    "app/api/v1/endpoints/compat.py": 3399,
     "app/api/v1/endpoints/compliance.py": 1127,
-    "app/api/v1/endpoints/einkauf_bestellvorschlag.py": 1036,
+    "app/api/v1/endpoints/einkauf_bestellvorschlag.py": 1013,
     "app/api/v1/endpoints/flow_spines.py": 1499,
     "app/api/v1/endpoints/kontrakte.py": 1088,
-    "app/api/v1/endpoints/logistics_tours.py": 1020,
-    "app/api/v1/endpoints/mask_frontend_bridges.py": 1467,
-    "app/api/v1/endpoints/personal.py": 3083,
+    "app/api/v1/endpoints/logistics_tours.py": 1011,
+    "app/api/v1/endpoints/mask_frontend_bridges.py": 1437,
+    "app/api/v1/endpoints/personal.py": 3082,
     "app/api/v1/endpoints/portal_feldbuch.py": 1945,
     "app/api/v1/endpoints/process_kernel_api.py": 6170,
-    "app/api/v1/endpoints/rations_optimization.py": 8866,
-    "app/api/v1/endpoints/sales_orders.py": 1185
+    "app/api/v1/endpoints/rations_optimization.py": 8855,
+    "app/api/v1/endpoints/sales_orders.py": 1183
   }
 }

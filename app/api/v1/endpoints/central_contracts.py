@@ -30,6 +30,7 @@ from ....core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.central_contracts_schemas import CentralContractsOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -228,7 +229,7 @@ async def list_contracts(
     return [_row_to_contract(dict(r)) for r in rows]
 
 
-@router.post("", response_model=ContractOut, status_code=status.HTTP_201_CREATED, summary="Vertrag anlegen")
+@router.post("", response_model=ContractOut, status_code=status.HTTP_201_CREATED, summary="Vertrag anlegen", dependencies=SCHREIBEN["KONTRAKT"])
 async def create_contract(
     payload: ContractCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -388,7 +389,7 @@ async def get_contract(
     }
 
 
-@router.patch("/{contract_id}", response_model=ContractOut, summary="Vertrag aktualisieren")
+@router.patch("/{contract_id}", response_model=ContractOut, summary="Vertrag aktualisieren", dependencies=SCHREIBEN["KONTRAKT"])
 async def update_contract(
     contract_id: str,
     payload: ContractUpdate,
@@ -423,7 +424,7 @@ async def update_contract(
     return _row_to_contract(_get_contract(db, contract_id, tenant_id))
 
 
-@router.post("/{contract_id}/obligations", response_model=ObligationOut, status_code=status.HTTP_201_CREATED, summary="Pflicht hinzufügen")
+@router.post("/{contract_id}/obligations", response_model=ObligationOut, status_code=status.HTTP_201_CREATED, summary="Pflicht hinzufügen", dependencies=SCHREIBEN["KONTRAKT"])
 async def add_obligation(
     contract_id: str,
     payload: ObligationCreate,
@@ -498,7 +499,7 @@ async def list_obligations(
     ]
 
 
-@router.patch("/{contract_id}/obligations/{obligation_id}", response_model=ObligationOut, summary="Pflicht-Status aktualisieren")
+@router.patch("/{contract_id}/obligations/{obligation_id}", response_model=ObligationOut, summary="Pflicht-Status aktualisieren", dependencies=SCHREIBEN["KONTRAKT"])
 async def update_obligation_status(
     contract_id: str,
     obligation_id: str,
@@ -536,7 +537,7 @@ async def update_obligation_status(
     )
 
 
-@router.post("/{contract_id}/renew", response_model=ContractOut, summary="Vertrag verlaengern")
+@router.post("/{contract_id}/renew", response_model=ContractOut, summary="Vertrag verlaengern", dependencies=SCHREIBEN["KONTRAKT"])
 async def renew_contract(
     contract_id: str,
     payload: RenewBody,

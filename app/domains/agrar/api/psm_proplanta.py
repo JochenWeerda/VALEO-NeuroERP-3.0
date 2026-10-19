@@ -16,6 +16,7 @@ from ....integrations.proplanta_psm_client import (
     ProplantaPSMContractError,
     is_configured
 )
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -35,7 +36,7 @@ async def get_proplanta_psm_status():
     }
 
 
-@router.post("/sync", response_model=Dict[str, Any])
+@router.post("/sync", response_model=Dict[str, Any], dependencies=SCHREIBEN["AGRAR"])
 async def sync_proplanta_psm_data(
     background_tasks: BackgroundTasks,
     force: bool = Query(False, description="Force full sync even if recently synced")
@@ -246,7 +247,7 @@ async def get_proplanta_psm_stats():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/import-to-local")
+@router.post("/import-to-local", dependencies=SCHREIBEN["AGRAR"])
 async def import_proplanta_psm_to_local(
     background_tasks: BackgroundTasks,
     tenant_id: Optional[str] = Query("system", description="Tenant ID for imported data"),

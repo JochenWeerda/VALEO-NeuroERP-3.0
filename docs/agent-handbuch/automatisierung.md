@@ -232,7 +232,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `sales.credit_note.posting_rejected` | outbox | `app/api/v1/endpoints/sales_credit_notes.py` |
 | `sales.credit_note.saved` | outbox | `app/api/v1/endpoints/sales_credit_notes.py` |
 | `sales.delivery_note.print_requested` | outbox | `app/api/v1/endpoints/mask_actions.py` |
-| `sales.order.cancelled` | outbox | `app/api/v1/endpoints/sales_orders.py` |
+| `sales.order.cancelled` | outbox | `app/api/v1/endpoints/sales_order_commands.py` |
 | … | | 1 weitere |
 
 ### System

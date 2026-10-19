@@ -24,6 +24,7 @@ from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.kontrakt_mengenzeitraum_schemas import KontraktMengenzeitraumOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/kontrakte", tags=["Kontrakt - Mengenzeitraum & Zu-/Abschläge"])
@@ -113,7 +114,7 @@ def list_mengenzeitraeume(
 
 
 @router.post("/{kontrakt_nr}/mengenzeitraeume",
-             response_model=MengenzeitraumOut, status_code=201, summary="Mengenzeitraum anlegen")
+             response_model=MengenzeitraumOut, status_code=201, summary="Mengenzeitraum anlegen", dependencies=SCHREIBEN["KONTRAKT"])
 def create_mengenzeitraum(
     kontrakt_nr: str,
     payload: MengenzeitraumCreate,
@@ -146,7 +147,7 @@ def create_mengenzeitraum(
 
 
 @router.patch("/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}",
-              response_model=MengenzeitraumOut, summary="Mengenzeitraum aktualisieren")
+              response_model=MengenzeitraumOut, summary="Mengenzeitraum aktualisieren", dependencies=SCHREIBEN["KONTRAKT"])
 def update_mengenzeitraum(
     kontrakt_nr: str,
     zeitraum_id: str,
@@ -192,8 +193,7 @@ def update_mengenzeitraum(
 
 
 @router.delete("/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}", summary="Mengenzeitraum löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["KONTRAKT"])
 def delete_mengenzeitraum(
     kontrakt_nr: str,
     zeitraum_id: str,
@@ -216,8 +216,7 @@ def delete_mengenzeitraum(
 
 
 @router.post("/{kontrakt_nr}/mengenzeitraeume/generieren", summary="Mengenzeitraeume generiere",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["KONTRAKT"])
 def generiere_mengenzeitraeume(
     kontrakt_nr: str,
     von_datum: date,
@@ -308,8 +307,7 @@ def list_zuabschlagsgruppen(
 
 
 @router.post("/zuabschlagsgruppen", status_code=201, summary="Zuabschlagsgruppe anlegen",
-    response_model=KontraktMengenzeitraumOut
-)
+    response_model=KontraktMengenzeitraumOut, dependencies=SCHREIBEN["KONTRAKT"])
 def create_zuabschlagsgruppe(
     payload: ZuAbschlagsGruppeCreate,
     db=Depends(get_db),
@@ -360,7 +358,7 @@ def list_zuabschlaege(
 
 
 @router.post("/zuabschlagsgruppen/{gruppe_id}/positionen",
-             response_model=ZuAbschlagOut, status_code=201, summary="Zuabschlag anlegen")
+             response_model=ZuAbschlagOut, status_code=201, summary="Zuabschlag anlegen", dependencies=SCHREIBEN["KONTRAKT"])
 def create_zuabschlag(
     gruppe_id: str,
     payload: ZuAbschlagCreate,

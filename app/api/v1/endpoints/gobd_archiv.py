@@ -22,6 +22,7 @@ from app.core.database import get_db
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.gobd_archiv_schemas import GobdArchivOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/gobd", tags=["GoBD", "Archiv"])
@@ -52,7 +53,7 @@ class DocumentArtifactOut(BaseModel):
     created_by: Optional[str]
 
 
-@router.post("/artifacts", response_model=DocumentArtifactOut, summary="Document artifact registrieren")
+@router.post("/artifacts", response_model=DocumentArtifactOut, summary="Document artifact registrieren", dependencies=SCHREIBEN["FINANZ"])
 async def register_document_artifact(
     payload: DocumentArtifactCreate,
     tenant_id: Optional[str] = Query(None),
@@ -222,7 +223,7 @@ class InvoiceXmlOut(BaseModel):
     created_by: Optional[str]
 
 
-@router.post("/e-invoice-xml", response_model=InvoiceXmlOut, summary="Invoice xml store")
+@router.post("/e-invoice-xml", response_model=InvoiceXmlOut, summary="Invoice xml store", dependencies=SCHREIBEN["FINANZ"])
 async def store_invoice_xml(
     payload: InvoiceXmlCreate,
     tenant_id: Optional[str] = Query(None),
@@ -691,7 +692,7 @@ class InvoiceXmlValidateIn(BaseModel):
     validation_errors: Optional[dict[str, Any]] = None
 
 
-@router.patch("/e-invoice-xml/{header_id}/validate", response_model=InvoiceXmlOut, summary="Invoice xml validation setzen")
+@router.patch("/e-invoice-xml/{header_id}/validate", response_model=InvoiceXmlOut, summary="Invoice xml validation setzen", dependencies=SCHREIBEN["FINANZ"])
 async def set_invoice_xml_validation(
     header_id: str,
     payload: InvoiceXmlValidateIn,

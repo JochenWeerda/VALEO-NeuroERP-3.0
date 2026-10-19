@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/futtermittel/produktion", tags=["feed-produktion"])
 logger = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ class RezepturTransitionRequest(BaseModel):
     operator: str = "system"
 
 
-@router.post("/auftraege", response_model=TypedObjectOut, summary="Futtermittel-Produktionsauftrag anlegen")
+@router.post("/auftraege", response_model=TypedObjectOut, summary="Futtermittel-Produktionsauftrag anlegen", dependencies=SCHREIBEN["FUTTERMITTEL"])
 def create_produktionsauftrag(
     req: ProduktionsauftragCreateRequest,
     x_tenant_id: str = Header(...),
@@ -74,8 +75,7 @@ def create_produktionsauftrag(
 @router.post(
     "/auftraege/{auftrag_id}/transition",
     response_model=TypedObjectOut,
-    summary="Futtermittel-Produktionsauftragstatus wechseln",
-)
+    summary="Futtermittel-Produktionsauftragstatus wechseln", dependencies=SCHREIBEN["FUTTERMITTEL"])
 def transition_auftrag(
     auftrag_id: str,
     req: ProduktionsTransitionRequest,
@@ -100,7 +100,7 @@ def transition_auftrag(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/rezepturen", response_model=TypedObjectOut, summary="Futtermittel-Rezeptur anlegen")
+@router.post("/rezepturen", response_model=TypedObjectOut, summary="Futtermittel-Rezeptur anlegen", dependencies=SCHREIBEN["FUTTERMITTEL"])
 def create_rezeptur(
     req: RezepturCreateRequest,
     x_tenant_id: str = Header(...),
@@ -124,8 +124,7 @@ def create_rezeptur(
 @router.post(
     "/rezepturen/{rezeptur_id}/transition",
     response_model=TypedObjectOut,
-    summary="Futtermittel-Rezepturstatus wechseln",
-)
+    summary="Futtermittel-Rezepturstatus wechseln", dependencies=SCHREIBEN["FUTTERMITTEL"])
 def transition_rezeptur(
     rezeptur_id: str,
     req: RezepturTransitionRequest,
