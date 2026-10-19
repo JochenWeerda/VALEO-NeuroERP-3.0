@@ -120,6 +120,8 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | Event-ID | Kanal | Quelle |
 |---|---|---|
 | `crm.lead.qualified` | outbox | `app/api/v1/endpoints/leads.py` |
+| `crm.mail_workspace.attachment_transfer` | outbox | `app/api/v1/endpoints/mail_workspace.py` |
+| `crm.mail_workspace.queue` | outbox | `app/api/v1/endpoints/mail_workspace.py` |
 | `crm.opportunity.activity_created` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `crm_case.created` | outbox | `app/services/crm_compat_service.py` |
 

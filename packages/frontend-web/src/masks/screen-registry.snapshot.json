@@ -2158,8 +2158,15 @@
          true
         ]
        },
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "DELETE",
+        "submitEndpoint": "/api/v1/logistik/frachttabellen/{entity_id}"
+       },
        "key": "loeschen",
-       "label": "Löschen"
+       "label": "Löschen",
+       "requiresConfirmation": true
       }
      ],
      "rowDetail": false,
@@ -2415,8 +2422,15 @@
      "rowActions": [
       {
        "dangerLevel": "moderate",
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "POST",
+        "submitEndpoint": "/api/v1/logistik/freight-tariffs/{entity_id}/cancel"
+       },
        "key": "storno",
        "label": "Stornieren",
+       "requiresConfirmation": true,
        "visibleWhen": {
         "field": "stornierbar",
         "values": [
@@ -4687,6 +4701,12 @@
    "actions": [
     {
      "dangerLevel": "safe",
+     "forbiddenForAgents": true,
+     "inputFlow": {
+      "kind": "humanForm",
+      "method": "POST",
+      "submitEndpoint": "/api/v1/tours"
+     },
      "key": "neu",
      "kind": "primary",
      "label": "Neue Strecke",
@@ -4770,8 +4790,15 @@
      "rowActions": [
       {
        "dangerLevel": "moderate",
+       "forbiddenForAgents": true,
+       "inputFlow": {
+        "kind": "humanForm",
+        "method": "DELETE",
+        "submitEndpoint": "/api/v1/tours/{entity_id}"
+       },
        "key": "loeschen",
-       "label": "Löschen"
+       "label": "Löschen",
+       "requiresConfirmation": true
       }
      ],
      "rowHeight": 36,

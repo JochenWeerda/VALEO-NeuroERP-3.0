@@ -34,8 +34,16 @@ class Support:
 
 def support(action: dict[str, Any]) -> Support:
     """Kann die CLI diese Aktion so ausfuehren wie die Maske? Sonst: warum nicht."""
-    if action.get("inputFlow"):
-        return Support(False, "eingabe_in_maske")
+    flow = action.get("inputFlow")
+    if flow:
+        # Eingabefluss der Maske: Ein Mensch sendet die Formularfelder an denselben Fachweg (nur ``execute``).
+        endpoint = flow.get("submitEndpoint") if isinstance(flow, dict) else None
+        if not endpoint:
+            return Support(False, "eingabe_in_maske")
+        unknown = set(_PLACEHOLDER.findall(endpoint)) - GENERIC_PATH_PARAMETERS
+        if unknown:
+            return Support(False, "pfadparameter:" + ",".join(sorted(unknown)))
+        return Support(True)
     endpoint = action.get("commandEndpoint")
     if not endpoint:
         return Support(False, "kein_endpunkt")
@@ -52,7 +60,7 @@ def support(action: dict[str, Any]) -> Support:
 
 
 REASON_TEXT = {
-    "eingabe_in_maske": "Diese Aktion erfordert die Eingabe und Bestaetigung in der Maske.",
+    "eingabe_in_maske": "Diese Aktion erfordert die Eingabe und Bestaetigung in der Maske (kein Sendeweg deklariert).",
     "kein_endpunkt": "Die Aktion hat keinen Kommando-Endpunkt; die Maske verdrahtet sie selbst.",
     "docflow_ohne_adapter": "DocFlow-Aktionen brauchen den versionierten Command-Adapter.",
 }
@@ -66,8 +74,13 @@ def reason_text(reason: str | None) -> str:
     return REASON_TEXT.get(reason or "", reason or "")
 
 
+def input_flow_endpoint(action: dict[str, Any]) -> str | None:
+    flow = action.get("inputFlow")
+    return flow.get("submitEndpoint") if isinstance(flow, dict) else None
+
+
 def requires_entity(action: dict[str, Any]) -> bool:
-    return "{entity_id}" in (action.get("commandEndpoint") or "")
+    return "{entity_id}" in (action.get("commandEndpoint") or input_flow_endpoint(action) or "")
 
 
 def identity_budget_input(endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -89,6 +102,18 @@ def build_request(action: dict[str, Any], *, screen_id: str, entity_id: str | No
         raise ValueError(reason_text(checked.reason))
     if action.get("commandBinding"):
         raise ValueError("Adapteraktionen baut valeo_cli.docflow, nicht der generische Weg.")
+    flow_endpoint = input_flow_endpoint(action)
+    if flow_endpoint:
+        # Das Formular der Maske sendet seine Felder ohne Aktionsumschlag; einen Trockenlauf gibt es dort nicht.
+        if mode != "execute":
+            raise ValueError("Eingabefluesse kennen keinen Trockenlauf; nur ausfuehren (--modus execute).")
+        if requires_entity(action) and not entity_id:
+            raise ValueError("Diese Aktion braucht eine Objektkennung (--id).")
+        path = flow_endpoint.replace("{entity_id}", quote(entity_id or "", safe="")).replace("{screen_id}", screen_id)
+        body = dict(payload)
+        if audit_reason and "reason" not in body:
+            body["reason"] = audit_reason
+        return (action["inputFlow"].get("method") or "POST").upper(), path, body
     endpoint = action["commandEndpoint"]
     if requires_entity(action) and not entity_id:
         raise ValueError("Diese Aktion braucht eine Objektkennung (--id).")
@@ -109,6 +134,8 @@ def policy_block(action: dict[str, Any], *, is_agent: bool) -> str | None:
         return f"Aktion \"{action['key']}\" ist fuer Agent-Aufrufe gesperrt."
     if is_agent and action.get("humanApprovalRequired"):
         return f"Aktion \"{action['key']}\" erfordert menschliche Genehmigung."
+    if is_agent and action.get("inputFlow"):
+        return f"Aktion \"{action['key']}\" ist ein Eingabefluss der Maske und Menschen vorbehalten."
     return None
 
 

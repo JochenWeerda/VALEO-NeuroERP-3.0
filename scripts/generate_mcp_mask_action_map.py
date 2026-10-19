@@ -505,7 +505,13 @@ def _generic_coverage(action: dict[str, Any]) -> dict[str, Any] | None:
     key = (action.get("source") or {}).get("actionKey")
     definition = get_screen_definition(screen_id) if isinstance(screen_id, str) else None
     sd_action = next((a for a in iter_actions(definition or {}) if a.get("key") == key), None)
-    if not sd_action or not sd_action.get("commandEndpoint"):
+    if not sd_action:
+        return None
+    if sd_action.get("inputFlow") and not sd_action.get("commandEndpoint"):
+        # Eingabefluss der Maske: Ein Mensch fuellt das Formular (auch per CLI); Agenten bleiben gesperrt.
+        return {"mcp_tool_id": None, "coverage": "blocked_human_only",
+                "notes": "Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt."}
+    if not sd_action.get("commandEndpoint"):
         return None
     block = agent_block(sd_action)
     if block is None:

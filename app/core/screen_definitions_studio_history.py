@@ -20,7 +20,7 @@ def build_studio_history(diff=False):
              "virtualized": True, "rowHeight": 44}
     table["dataSourceKey"] = key
     if not diff:
-        table["rowActions"] = [{"key": "compare", "label": "Änderungen ansehen"}]
+        table["rowActions"] = [{"key": "compare", "label": "Änderungen ansehen", "localEffect": "view"}]
     return {"schemaVersion": 1, "id": screen_id, "domain": "platform", "mode": "list",
             "title": "Änderungsvergleich" if diff else "Studio-Historie",
             "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},

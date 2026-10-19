@@ -96,3 +96,41 @@ Dokumentenruecklauf (anlegen, Statuswechsel) hatten keine Rollenpruefung. Jetzt:
   Mandant, Funktionstrennung im Pruefkorb. Mit Bestands-, MCP-, CLI-, Inventar- und Rollensuiten 2751 gruen.
 - Vitest der Seiten (finance, schnittstelle, tankstelle, docflow) gruen; `tsc` und ESLint ohne Befund.
 - Inventar: `aktionen_nicht_deklariert` 75 -> 60; CLI-Register 180 Aktionen.
+
+## Schritt 4: alle uebrigen Maskenaktionen deklariert (`aktionen_nicht_deklariert` 60 -> 0)
+
+- **Reine Oberflaechenwirkung** (`localEffect`): Navigation, Druck, lesender Export (`download`), Ansicht/Vorschau
+  und Lesepruefung (`view`: Berichtslauf, Drilldown, Hash-Kettenpruefung, Versionsvergleich), Neu laden.
+- **Eingabefluesse** (`inputFlow` mit echtem Sendeweg, `forbiddenForAgents`): Futter-/Rationsformulare (Betrieb,
+  Vorlage anlegen/anwenden, Tiergruppe anlegen/bearbeiten, Tageswerte, Analyse erfassen), Abfrage anlegen,
+  Bonus-Korrektur, Chargenkennzeichen, Mailentwurf/-zuordnung, Strecke anlegen/loeschen, Frachttarif stornieren,
+  Frachttabelle loeschen, letzte Dokumente entfernen. Vorlage anwenden hat dafuer einen Sendeweg ohne fremden
+  Pfadparameter (`/ration-templates/actions/apply_template`, derselbe Fachweg).
+- **Kommandos**: Futteranalyse plausibilisieren (`.../actions/validate`), Mail senden (`.../actions/queue`,
+  menschlich) und Anhang uebernehmen (`.../attachments/{id}/actions/transfer`).
+- **Bearbeiten**: Duenger, Saatgut, Lieferant, Bestellung und Lagerartikel fuehren zur bestehenden Pflegemaske mit
+  derselben Kennung; Einzelfuttermittel bearbeitet in der Seite (`edit_mode`). In elf nativen Objektmasken
+  (Auftrag, Kontrakt, Chance, Lead, Anfrage, AB, Bankkonto, Debitor, Kreditor, Mischfuttermittel, Reklamation) tat
+  der Knopf nichts: kein Aenderungsbefehl, keine eindeutige Pflegemaske (teils doppelt vergebene Routen). Er ist
+  entfernt; ein echter Bearbeitungsweg ist Folge-Slice (siehe Workboard).
+
+### CLI: Eingabefluesse
+
+Die CLI fuehrt einen Eingabefluss mit Sendeweg fuer Menschen aus: Formularfelder ohne Aktionsumschlag (`--grund`
+wird `reason`), nur `execute`, fuer Agenten gesperrt. Die Paritaetsregel zu MCP bleibt (MCP sperrt Eingabefluesse).
+CLI-Register 204 Aktionen; Grund `eingabe_in_maske` kommt nur noch ohne Sendeweg vor. MCP-Karte fuehrt
+Eingabefluesse als `blocked_human_only`.
+
+### Sicherheitsbefund und Korrektur
+
+**Mail-Arbeitsplatz:** Welche Rollenpostfaecher jemand las, beschrieb und versandte, entschied der Client-Header
+`X-Roles`. Wer ihn setzte, hatte jedes Rollenpostfach des Mandanten. Jetzt Rollen aus dem Token (Test:
+`X-Roles: FINANCE_ADMIN` oeffnet nichts), Urheber aus dem Token.
+
+### Nachweis
+
+- `tests/test_mail_workspace_mask_commands.py` (3) gegen `valeo_probe`; CLI-Vertrag fuer Eingabefluesse.
+- 152 betroffene Suiten (ScreenDefinitions, Masken, MCP, CLI, Futter, Studio, Katalog, Registry): 1792 gruen,
+  ohne `test_mcp_client_lifecycle` (bekannter Windows-Fall).
+- Vitest 93 + 61 Dateien gruen (u. a. Sync der Frontend-Kopie `capture-screens.ts`); volle `tsc` ohne Fehler.
+- Gates: Ratsche (nicht deklariert 0), Kommando-Inventar (0 bekannte Luecken), Architektur-Drift gruen.

@@ -673,12 +673,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Sensible Felder:** `preis`
 
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
-
 ---
 
 ### `agrar/ration` — Rationsfreigabe
@@ -1187,7 +1181,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
 | `qualifizieren` | Als Opportunity qualifizieren | safe | nein | `/api/v1/crm/leads/{entity_id}/actions/qualifizieren` |
 
 ---
@@ -1274,7 +1267,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
 | `create_activity` | Aktivitaet anlegen | safe | nein | `/api/v1/crm/opportunities/{entity_id}/actions/create_activity` |
 
 ---
@@ -1367,12 +1359,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Was ist der Status von Anfrage {entity_id}?
 - Zeige alle Positionen von Anfrage {entity_id}.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
 
 ---
 
@@ -1488,12 +1474,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Zeige alle Positionen von AB {entity_id}.
 
 **Sensible Felder:** `einzelpreis`
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
 
 ---
 
@@ -1871,12 +1851,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Sensible Felder:** `iban, bic, saldo`
 
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
-
 ---
 
 ### `finance/debitor` — Debitor
@@ -1911,12 +1885,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Sensible Felder:** `kreditlimit, steuernummer, ust_id`
 
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
-
 ---
 
 ### `finance/kreditor` — Kreditor
@@ -1950,12 +1918,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Zeige alle Bestellungen bei Kreditor {entity_id}.
 
 **Sensible Felder:** `steuernummer, ust_id`
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
 
 ---
 
@@ -2164,7 +2126,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `validate` | Plausibilitaet pruefen | safe | nein | `—` |
+| `validate` | Plausibilitaet pruefen | safe | nein | `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/validate` |
 | `release` | Analyse freigeben | high | ja | `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/release` |
 | `reject` | Zurueckweisen | moderate | nein | `/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/reject` |
 
@@ -2255,12 +2217,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Welche Komponenten hat Mischfutter {entity_id}?
 - Zeige die berechneten Naehrstoffgehalte von Mischfutter {entity_id}.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
 
 ---
 
@@ -3723,7 +3679,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
 | `abschliessen` | Abschliessen | moderate | nein | `/api/v1/reklamationen/{entity_id}/actions/abschliessen` |
 
 ---
@@ -4068,12 +4023,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Zeige alle Dokumente von Auftrag {entity_id}.
 
 **Sensible Felder:** `einzelpreis, betrag`
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
 
 ---
 

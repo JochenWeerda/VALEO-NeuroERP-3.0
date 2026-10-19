@@ -161940,6 +161940,41 @@
         "title": "TelemetryReading",
         "type": "object"
       },
+      "TemplateApplyFormIn": {
+        "properties": {
+          "expected_latest_version_no": {
+            "minimum": 1.0,
+            "title": "Expected Latest Version No",
+            "type": "integer"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 10,
+            "title": "Reason",
+            "type": "string"
+          },
+          "target_ration_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Target Ration Id",
+            "type": "string"
+          },
+          "template_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Template Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_ration_id",
+          "expected_latest_version_no",
+          "reason",
+          "template_id"
+        ],
+        "title": "TemplateApplyFormIn",
+        "type": "object"
+      },
       "TemplateApplyIn": {
         "properties": {
           "expected_latest_version_no": {
@@ -217637,6 +217672,69 @@
         ]
       }
     },
+    "/api/v1/agrar/rations-optimization/feed-analyses/{analysis_id}/actions/validate": {
+      "post": {
+        "description": "Derselbe Fachweg wie ``/validate`` auf dem aktuellen Stand der Analyse (Maske, CLI, MCP).",
+        "operationId": "validate_action_api_v1_agrar_rations_optimization_feed_analyses__analysis_id__actions_validate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "analysis_id",
+            "required": true,
+            "schema": {
+              "title": "Analysis Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalysisActionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Analyse via ActionRuntime plausibilisieren",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-feed-analyses"
+        ]
+      }
+    },
     "/api/v1/agrar/rations-optimization/feed-analyses/{analysis_id}/document-reference": {
       "post": {
         "operationId": "reference_document_api_v1_agrar_rations_optimization_feed_analyses__analysis_id__document_reference_post",
@@ -222399,6 +222497,58 @@
           }
         ],
         "summary": "Rationsvorlage anlegen",
+        "tags": [
+          "agrar",
+          "futtermittel",
+          "rations-optimization",
+          "agrar",
+          "rations-optimization",
+          "feeding-ration-templates"
+        ]
+      }
+    },
+    "/api/v1/agrar/rations-optimization/feeding/ration-templates/actions/apply_template": {
+      "post": {
+        "description": "Derselbe Fachweg wie ``/ration-templates/{template_id}/apply``; die Vorlage waehlt das Formular.\n\nSo hat der Eingabefluss einen Sendeweg ohne fremden Pfadparameter, den auch die CLI bedienen kann.",
+        "operationId": "apply_template_form_api_v1_agrar_rations_optimization_feeding_ration_templates_actions_apply_template_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TemplateApplyFormIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionCopyOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rationsvorlage anwenden (Eingabefluss der Maske; Vorlage im Formular)",
         "tags": [
           "agrar",
           "futtermittel",
@@ -340906,6 +341056,66 @@
         ]
       }
     },
+    "/api/v1/mail-workspace/attachments/{entity_id}/actions/transfer": {
+      "post": {
+        "operationId": "transfer_action_api_v1_mail_workspace_attachments__entity_id__actions_transfer_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mailarbeitsplatz: Anhang ins DMS uebernehmen (Maskenaktion)",
+        "tags": [
+          "crm",
+          "mail",
+          "dms"
+        ]
+      }
+    },
     "/api/v1/mail-workspace/drafts": {
       "post": {
         "operationId": "create_draft_api_v1_mail_workspace_drafts_post",
@@ -340947,6 +341157,67 @@
           }
         ],
         "summary": "Entwurf anlegen",
+        "tags": [
+          "crm",
+          "mail",
+          "dms"
+        ]
+      }
+    },
+    "/api/v1/mail-workspace/{entity_id}/actions/queue": {
+      "post": {
+        "description": "Derselbe Fachweg wie ``/queue``; nur Entwuerfe und Fehlversuche, nur aus eigenen Rollenpostfaechern.",
+        "operationId": "queue_action_api_v1_mail_workspace__entity_id__actions_queue_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mailarbeitsplatz: Nachricht zum Versand einreihen (Maskenaktion)",
         "tags": [
           "crm",
           "mail",

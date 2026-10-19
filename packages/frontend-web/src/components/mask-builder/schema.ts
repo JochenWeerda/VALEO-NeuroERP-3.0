@@ -124,6 +124,15 @@ export interface ScreenTableDefinition {
     enabledWhen?: ScreenCondition
     visibleWhen?: { field: string; values: Array<string | number | boolean> }
     disabledWhen?: { field: string; values: Array<string | number | boolean> }
+    /** Kommando-Weg der Zeile ({entity_id} = Zeilenkennung); dieselben Wege rufen CLI und MCP. */
+    commandEndpoint?: string
+    method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+    auditReasonRequired?: boolean
+    humanApprovalRequired?: boolean
+    forbiddenForAgents?: boolean
+    /** Formular der Seite mit Sendeweg; nie automatisch abgeschickt (wie bei Kopfaktionen). */
+    inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
+    localEffect?: ScreenActionDefinition['localEffect']
   }>
   /** Selection-based actions; payload contains selectedRows and selectedIds. */
   bulkActions?: Array<{

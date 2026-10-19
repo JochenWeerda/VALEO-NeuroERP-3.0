@@ -32,7 +32,9 @@ Die Stufe wird statisch aus dem Quelltext bestimmt: Die Routendatei und die von 
 Zugang einen Befund: REST (``commandEndpoint``/``inputFlow``), MCP (Klassifikation in
 ``config/mcp_mask_action_map.yaml``) und CLI. Reine Navigation ist ausgenommen. Eine Aktion ohne jeden
 deklarierten Weg (typisch Zeilenaktionen wie ``edit``, ``print``, ``open_source``, die erst Renderer oder Seite
-verdrahten) heisst ``nicht_deklariert``: Ohne Vertrag kann es fuer sie weder MCP noch CLI geben.
+verdrahten) heisst ``nicht_deklariert``: Ohne Vertrag kann es fuer sie weder MCP noch CLI geben. Eine Aktion
+mit ``stubReason`` und ohne Weg heisst ``nicht_verfuegbar``: Die Maske sagt mit Grund, dass es sie (noch) nicht
+gibt; auch diese Liste darf nur schrumpfen.
 
 **Ratsche** (``config/mask_studio_ratchet.json``): Eine neue Route darf weder handgebaut noch Altmuster sein,
 eine neue Aktion nicht undeklariert, eine neue serverwirksame Aktion nicht ohne MCP-Klassifikation und nicht ohne
@@ -210,6 +212,8 @@ def actions() -> list[dict]:
                 art = "ohne_serverwirkung"
             elif rest or action.get("command"):
                 art = "serverwirksam"
+            elif action.get("stubReason"):
+                art = "nicht_verfuegbar"  # ehrlich deklariert: kein Weg, die Maske sagt es mit Grund
             else:
                 art = "nicht_deklariert"
             block = agent_block(action)
@@ -288,6 +292,7 @@ def gaps(inv: dict) -> dict[str, list[str]]:
         "handgebaut_routen": sorted(r["route"] for r in inv["seiten"] if r["stufe"] == "handgebaut"),
         "altmuster_routen": sorted(r["route"] for r in inv["seiten"] if r["stufe"] == "builder_altmuster"),
         "aktionen_nicht_deklariert": sorted(a["id"] for a in inv["aktionen"] if a["art"] == "nicht_deklariert"),
+        "aktionen_nicht_verfuegbar": sorted(a["id"] for a in inv["aktionen"] if a["art"] == "nicht_verfuegbar"),
         "aktionen_ohne_mcp_klassifikation": sorted(a["id"] for a in wirksam if a["mcp"] == "unklassifiziert"),
         "aktionen_ohne_cli": sorted(a["id"] for a in wirksam if not a["cli"]),
         "studio_katalog_nicht_bedienbar": sorted(
@@ -351,6 +356,8 @@ def markdown(inv: dict) -> str:
               f"| … mit CLI-Zugang | {sum(1 for a in wirksam if a['cli'])} |",
               f"| nicht deklariert (kein Kommando, Endpunkt, Navigation) | "
               f"{sum(1 for a in inv['aktionen'] if a['art'] == 'nicht_deklariert')} |",
+              f"| nicht verfuegbar (`stubReason`, die Maske nennt den Grund) | "
+              f"{sum(1 for a in inv['aktionen'] if a['art'] == 'nicht_verfuegbar')} |",
               "", "## Versionierte Familien", ""]
     for family, variants in inv["familien"].items():
         lines.append(f"- `{family}`: {len(variants)} Varianten — " + ", ".join(

@@ -179,7 +179,8 @@ export const streckeDispositionScreen = {
       { key: 'status', label: 'Status', renderKind: 'status', filterable: true, width: 120 },
       { key: 'notes', label: 'Notiz' },
     ],
-    rowActions: [{ key: 'loeschen', label: 'Löschen', dangerLevel: 'moderate' }],
+    rowActions: [{ key: 'loeschen', label: 'Löschen', dangerLevel: 'moderate', requiresConfirmation: true,
+      inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/tours/{entity_id}', method: 'DELETE' }, forbiddenForAgents: true }],
   }],
   actions: [{
     key: 'neu',
@@ -188,6 +189,8 @@ export const streckeDispositionScreen = {
     dangerLevel: 'safe',
     permission: 'logistics.strecke.schreiben',
     zone: 'header',
+    inputFlow: { kind: 'humanForm', submitEndpoint: '/api/v1/tours', method: 'POST' },
+    forbiddenForAgents: true,
   }],
   noWorkflowReason: 'Die Disposition plant Touren. Eine Belegkette haengt nicht an dieser Liste.',
   layout: worklistLayout,
@@ -732,7 +735,8 @@ export const tourFrachtArbeitsraumScreen = {
       rowHeight: 44,
       rowDetail: false,
       rowActions: [
-        { key: 'storno', label: 'Stornieren', dangerLevel: 'moderate', visibleWhen: { field: 'stornierbar', values: [true] } },
+        { key: 'storno', label: 'Stornieren', dangerLevel: 'moderate', visibleWhen: { field: 'stornierbar', values: [true] }, requiresConfirmation: true,
+          inputFlow: { kind: 'humanForm', method: 'POST', submitEndpoint: '/api/v1/logistik/freight-tariffs/{entity_id}/cancel' }, forbiddenForAgents: true },
       ],
       columns: [
         { key: 'carrier', label: 'Spediteur', filterable: true, priority: 'primary' },
@@ -795,7 +799,8 @@ export const frachttabellenScreen = {
       rowHeight: 44,
       rowDetail: false,
       rowActions: [
-        { key: 'loeschen', label: 'Löschen', dangerLevel: 'destructive', disabledWhen: { field: 'gesperrt', values: [true] } },
+        { key: 'loeschen', label: 'Löschen', dangerLevel: 'destructive', disabledWhen: { field: 'gesperrt', values: [true] }, requiresConfirmation: true,
+          inputFlow: { kind: 'humanForm', method: 'DELETE', submitEndpoint: '/api/v1/logistik/frachttabellen/{entity_id}' }, forbiddenForAgents: true },
       ],
       columns: [
         { key: 'tabelle_nr', label: 'Nummer', sortable: true, filterable: true, priority: 'primary' },

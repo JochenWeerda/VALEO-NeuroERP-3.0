@@ -86,6 +86,8 @@ def test_nur_der_generische_weg_der_maske_ist_unterstuetzt():
     assert support.support({"key": "x", "commandEndpoint": "/api/v1/docflow/{entity_id}/x"}).reason == "docflow_ohne_adapter"
     assert support.support({"key": "x", "commandEndpoint": "/api/v1/a", "inputFlow": {"kind": "humanForm"}}).reason \
         == "eingabe_in_maske"
+    # Ein Eingabefluss mit Sendeweg: Ein Mensch sendet die Formularfelder (MASK-COMMANDS-ROLLOUT).
+    assert support.support({"key": "x", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/a"}}).supported
     assert support.support({"key": "x", "commandEndpoint": "/api/v1/a/{approval_id}"}).reason \
         == "pfadparameter:{approval_id}"
 
@@ -338,3 +340,16 @@ def test_provisionierung_legt_nur_den_fehlenden_cli_client_an():
                 "clientId": "valeo-neuro-erp-cli", "publicClient": True, "standardFlowEnabled": True,
                 "attributes": {"oauth2.device.authorization.grant.enabled": "true"}})
     assert len(created) == 1 and "defaultClientScopes" not in created[0]
+
+
+def test_eingabefluss_sendet_die_formularfelder_ohne_umschlag():
+    action = {"key": "messen", "inputFlow": {"kind": "humanForm", "submitEndpoint": "/api/v1/x/{entity_id}/massnahmen",
+                                             "method": "POST"}, "forbiddenForAgents": True}
+    method, path, body = support.build_request(action, screen_id="s", entity_id="g 1", payload={"art": "kontrolle"},
+                                               mode="execute", audit_reason="Abweichung geprueft", idempotency_key="k")
+    assert (method, path, body) == ("POST", "/api/v1/x/g%201/massnahmen", {"art": "kontrolle", "reason": "Abweichung geprueft"})
+    with pytest.raises(ValueError, match="Trockenlauf"):
+        support.build_request(action, screen_id="s", entity_id="1", payload={}, mode="dryRun", audit_reason=None,
+                              idempotency_key=None)
+    assert support.policy_block({"key": "messen", "inputFlow": {"kind": "humanForm"}}, is_agent=True)
+    assert support.policy_block({"key": "messen", "inputFlow": {"kind": "humanForm"}}, is_agent=False) is None

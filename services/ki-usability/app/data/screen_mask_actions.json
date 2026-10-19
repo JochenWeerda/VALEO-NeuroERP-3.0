@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 109,
-    "screens_with_actions": 50,
+    "actions": 128,
+    "screens_with_actions": 62,
     "domains": 14
   },
   "actions": [
@@ -170,6 +170,46 @@
       }
     },
     {
+      "id": "mask:agrar/duenger:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (agrar/duenger)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/duenger",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/duenger",
+        "actionKey": "edit",
+        "commandEndpoint": null,
+        "navigationRoute": "/agrar/duenger-stamm/{entity_id}",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/feed-controlling:record_observation",
+      "label": "Tageswerte erfassen",
+      "description": "Tageswerte erfassen (agrar/feed-controlling)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/feed-controlling",
+      "intent_phrases": [
+        "Tageswerte erfassen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/feed-controlling",
+        "actionKey": "record_observation",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
       "id": "mask:agrar/feed-readiness:create_handoff",
       "label": "An Einkauf uebergeben",
       "description": "An Einkauf uebergeben (agrar/feed-readiness)",
@@ -225,6 +265,126 @@
         "actionKey": "create_measure",
         "commandEndpoint": null,
         "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/feeding-actuals:open_mobile",
+      "label": "Ist-Fuetterung erfassen",
+      "description": "Ist-Fuetterung erfassen (agrar/feeding-actuals)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/feeding-actuals",
+      "intent_phrases": [
+        "Ist-Fuetterung erfassen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/feeding-actuals",
+        "actionKey": "open_mobile",
+        "commandEndpoint": null,
+        "navigationRoute": "/futtermittel/fuetterungsdokumentation-mobil",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/feeding-business:apply_template",
+      "label": "Vorlage anwenden",
+      "description": "Vorlage anwenden (agrar/feeding-business)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/feeding-business",
+      "intent_phrases": [
+        "Vorlage anwenden"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/feeding-business",
+        "actionKey": "apply_template",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/feeding-business:create_template",
+      "label": "Vorlage anlegen",
+      "description": "Vorlage anlegen (agrar/feeding-business)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/feeding-business",
+      "intent_phrases": [
+        "Vorlage anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/feeding-business",
+        "actionKey": "create_template",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/feeding-businesses:create_business",
+      "label": "Betrieb anlegen",
+      "description": "Betrieb anlegen (agrar/feeding-businesses)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/feeding-businesses",
+      "intent_phrases": [
+        "Betrieb anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/feeding-businesses",
+        "actionKey": "create_business",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/feeding-group:edit_group",
+      "label": "Tiergruppe bearbeiten",
+      "description": "Tiergruppe bearbeiten (agrar/feeding-group)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/feeding-group",
+      "intent_phrases": [
+        "Tiergruppe bearbeiten"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/feeding-group",
+        "actionKey": "edit_group",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/feeding-plan:open_mobile",
+      "label": "Mobile Stallansicht",
+      "description": "Mobile Stallansicht (agrar/feeding-plan)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/feeding-plan",
+      "intent_phrases": [
+        "Mobile Stallansicht"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/feeding-plan",
+        "actionKey": "open_mobile",
+        "commandEndpoint": null,
+        "navigationRoute": "/futtermittel/fuetterungsdokumentation-mobil",
         "command": null,
         "method": null
       }
@@ -564,6 +724,86 @@
       }
     },
     {
+      "id": "mask:agrar/rations-lifecycle:create_group",
+      "label": "Tiergruppe anlegen",
+      "description": "Tiergruppe anlegen (agrar/rations-lifecycle)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/rations-lifecycle",
+      "intent_phrases": [
+        "Tiergruppe anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/rations-lifecycle",
+        "actionKey": "create_group",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/rations-lifecycle:plan_ration",
+      "label": "Neue Ration planen",
+      "description": "Neue Ration planen (agrar/rations-lifecycle)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/rations-lifecycle",
+      "intent_phrases": [
+        "Neue Ration planen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/rations-lifecycle",
+        "actionKey": "plan_ration",
+        "commandEndpoint": null,
+        "navigationRoute": "/portal/rationsoptimierung?mode=expert",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/saatgut:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (agrar/saatgut)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/saatgut",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/saatgut",
+        "actionKey": "edit",
+        "commandEndpoint": null,
+        "navigationRoute": "/agrar/saatgut-stamm/{entity_id}",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:auswertungen/abfrage-center:create",
+      "label": "Neue Abfrage",
+      "description": "Neue Abfrage (auswertungen/abfrage-center)",
+      "category": "mask-action",
+      "domain": "reporting",
+      "mask": "auswertungen/abfrage-center",
+      "intent_phrases": [
+        "Neue Abfrage"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "auswertungen/abfrage-center",
+        "actionKey": "create",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
       "id": "mask:auswertungen/abfrage-center:import",
       "label": "Signiert importieren",
       "description": "Signiert importieren (auswertungen/abfrage-center)",
@@ -708,6 +948,26 @@
       }
     },
     {
+      "id": "mask:crm/mail-arbeitsplatz:draft",
+      "label": "Neue Mail",
+      "description": "Neue Mail (crm/mail-arbeitsplatz)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/mail-arbeitsplatz",
+      "intent_phrases": [
+        "Neue Mail"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/mail-arbeitsplatz",
+        "actionKey": "draft",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
       "id": "mask:crm/opportunity:create_activity",
       "label": "Aktivitaet anlegen",
       "description": "Aktivitaet anlegen (crm/opportunity)",
@@ -774,6 +1034,26 @@
       }
     },
     {
+      "id": "mask:einkauf/purchase-order:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (einkauf/purchase-order)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/purchase-order",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/purchase-order",
+        "actionKey": "edit",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellungen/{entity_id}",
+        "command": null,
+        "method": null
+      }
+    },
+    {
       "id": "mask:einkauf/purchase-order:speichern",
       "label": "Speichern",
       "description": "Speichern (einkauf/purchase-order)",
@@ -815,6 +1095,26 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/supplier:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (einkauf/supplier)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/supplier",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/supplier",
+        "actionKey": "edit",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/lieferant/{entity_id}",
+        "command": null,
+        "method": null
       }
     },
     {
@@ -1247,6 +1547,68 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:futtermittel/analyse:validate",
+      "label": "Plausibilitaet pruefen",
+      "description": "Plausibilitaet pruefen (futtermittel/analyse)",
+      "category": "mask-action",
+      "domain": "futtermittel",
+      "mask": "futtermittel/analyse",
+      "intent_phrases": [
+        "Plausibilitaet pruefen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "futtermittel/analyse",
+        "actionKey": "validate",
+        "commandEndpoint": "/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/validate",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:futtermittel/analysen:import_analysis",
+      "label": "Analyse erfassen",
+      "description": "Analyse erfassen (futtermittel/analysen)",
+      "category": "mask-action",
+      "domain": "futtermittel",
+      "mask": "futtermittel/analysen",
+      "intent_phrases": [
+        "Analyse erfassen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "futtermittel/analysen",
+        "actionKey": "import_analysis",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:lager/article-stock:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (lager/article-stock)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "lager/article-stock",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "lager/article-stock",
+        "actionKey": "edit",
+        "commandEndpoint": null,
+        "navigationRoute": "/artikel/{entity_id}",
+        "command": null,
+        "method": null
       }
     },
     {
@@ -2139,6 +2501,26 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:strecke/disposition:neu",
+      "label": "Neue Strecke",
+      "description": "Neue Strecke (strecke/disposition)",
+      "category": "mask-action",
+      "domain": "logistics",
+      "mask": "strecke/disposition",
+      "intent_phrases": [
+        "Neue Strecke"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "strecke/disposition",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null
       }
     },
     {
