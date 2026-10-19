@@ -187,7 +187,7 @@ async def create_account(
     # 12.10.2026 scheiterte jedes Anlegen daran mit 500.
     db_account = AccountModel(**{**_spalten(account.model_dump()), "tenant_id": tenant_id})
     db.add(db_account)
-    db.commit()
+    db.flush()
     db.refresh(db_account)
     log_fibu_audit(
         db, tenant_id, "create", "finance_account", db_account.id,
@@ -226,7 +226,7 @@ async def update_account(
     for field, value in _spalten(account_update.model_dump(exclude_unset=True)).items():
         setattr(account, field, value)
 
-    db.commit()
+    db.flush()
     db.refresh(account)
     log_fibu_audit(
         db, tenant_id, "update", "finance_account", account_id,
@@ -261,7 +261,7 @@ async def delete_account(
         )
 
     account.is_active = False
-    db.commit()
+    db.flush()
     log_fibu_audit(
         db, tenant_id, "delete", "finance_account", account_id,
         {"is_active": False, "account_number": account.account_number},

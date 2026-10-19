@@ -619,9 +619,9 @@ async def print_delivery_note(
         db.execute(
             text("""
                 INSERT INTO domain_audit.attestations (
-                    id, tenant_id, entity_type, entity_id, action, reason, created_by, created_at
+                    id, tenant_id, entity_type, entity_id, action, reason, changes, created_by, created_at
                 ) VALUES (
-                    :id, :tenant_id, 'delivery_note', :entity_id, 'print', :reason, :created_by, NOW()
+                    :id, :tenant_id, 'delivery_note', :entity_id, 'print', :reason, CAST(:changes AS jsonb), :created_by, NOW()
                 )
             """),
             {
@@ -629,7 +629,12 @@ async def print_delivery_note(
                 "tenant_id": tenant_id,
                 "entity_id": ls_id,
                 "reason": attestation,
-                "created_by": bekannter_nutzer(db, _get_user_id_from_request(request)),  # FK auf domain_shared.users
+                "created_by": bekannter_nutzer(db, _get_user_id_from_request(request), tenant_id=tenant_id),
+                "changes": json.dumps({"actor": {
+                    "subject": _get_user_id_from_request(request),
+                    "issuer": request.state.token_claims["iss"],
+                    "tenant_id": tenant_id,
+                }}),
             }
         )
     

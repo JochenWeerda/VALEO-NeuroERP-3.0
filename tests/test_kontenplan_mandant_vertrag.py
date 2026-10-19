@@ -20,7 +20,7 @@ from sqlalchemy import text
 from app.api.v1.endpoints import chart_of_accounts
 from app.auth.deps import get_current_user
 from app.core.database import SessionLocal, get_db
-from testgrenze import ersetze_mandant
+from testgrenze import ersetze_mandant, setze_identitaet
 
 HAUS_A = "kp-mandant-a"
 HAUS_B = "kp-mandant-b"
@@ -58,6 +58,7 @@ def haus():
     # Der Mandant kommt im Betrieb aus dem geprueften Token. Hier nennt ihn der Kopf der Testanfrage:
     # Geprueft wird, dass der Weg nur diesen Mandanten nimmt — nicht Query und nicht Rumpf.
     ersetze_mandant(app)
+    setze_identitaet(app, "5f0c2a9e", "FINANCE_ADMIN")
     app.dependency_overrides[get_current_user] = lambda: {
         "sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_ADMIN"]}
     with TestClient(app) as client:
@@ -346,6 +347,7 @@ def test_manuelle_buchung_auf_gesperrtes_konto_nennt_den_grund(gesperrt, monkeyp
     app = FastAPI()
     app.include_router(journal_entries.router, prefix="/journal-entries")
     ersetze_mandant(app)
+    setze_identitaet(app, "5f0c2a9e", "FINANCE_ADMIN")
     app.dependency_overrides[get_current_user] = lambda: {
         "sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_BEARBEITEN"]}
     rumpf = {

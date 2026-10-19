@@ -19,7 +19,7 @@ def gepruefter_akteur(user: Any) -> str:
     subject = user.get("sub") if isinstance(user, dict) else None
     if not isinstance(subject, str) or not subject.strip():
         raise HTTPException(status_code=403, detail="Gepruefter Bearbeiter fehlt")
-    return subject.strip()[:120]
+    return subject
 
 
 def anzeigename(user: Any) -> str:
@@ -45,7 +45,7 @@ def akteur_aus_request(request: Any, fallback: str | None = None) -> str | None:
     claims = getattr(state, "token_claims", None) if state is not None else None
     subject = claims.get("sub") if isinstance(claims, dict) else None
     if isinstance(subject, str) and subject.strip():
-        return subject.strip()[:120]
+        return subject
     return fallback
 
 
@@ -57,19 +57,22 @@ def gepruefter_akteur_aus_request(request: Any) -> str:
     return akteur
 
 
-def bekannter_nutzer(db: Any, akteur: str | None, fallback: str = "system") -> str:
-    """Kennung fuer Spalten mit Fremdschluessel auf ``domain_shared.users``.
+def bekannter_nutzer(db: Any, akteur: str | None, *, tenant_id: str) -> str:
+    """Resolve a verified subject to exactly one active tenant-local profile.
 
-    Die gepruefte Kennung, wenn es den Nutzer im Verzeichnis gibt; sonst ``fallback`` (wie vor dem 19.10.2026,
-    als dort ohne Kopfzeile immer ``system`` stand). So scheitert kein Vorgang an einem Nutzer, den das
-    Verzeichnis noch nicht kennt, und kein Client bestimmt den Namen.
+    Missing/ambiguous mappings deny the action. Database failures propagate;
+    neither a fabricated system actor nor an aborted transaction is concealed.
     """
-    if not akteur:
-        return fallback
-    try:
-        from sqlalchemy import text
+    if not isinstance(akteur, str) or not akteur.strip() or not tenant_id:
+        raise HTTPException(status_code=403, detail="Gepruefte lokale Nutzerzuordnung fehlt")
+    from sqlalchemy import text
 
-        known = db.execute(text("SELECT 1 FROM domain_shared.users WHERE id = :id"), {"id": akteur}).first()
-    except Exception:  # noqa: BLE001 — ohne lesbares Verzeichnis bleibt die FK-sichere Kennung
-        return fallback
-    return akteur if known is not None else fallback
+    matches = db.execute(text("""
+        SELECT id FROM domain_shared.users
+        WHERE tenant_id = :tenant_id AND is_active IS TRUE
+          AND (id = :actor OR keycloak_id = :actor)
+        FOR SHARE
+    """), {"actor": akteur, "tenant_id": tenant_id}).all()
+    if len(matches) != 1:
+        raise HTTPException(status_code=403, detail="Keine eindeutige lokale Nutzerzuordnung")
+    return matches[0][0]
