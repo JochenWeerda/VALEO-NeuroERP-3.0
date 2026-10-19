@@ -18637,7 +18637,7 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **POS-WS-CLEANUP Ergebnis:** Deterministisch vor Reparatur vier rote und ein gruener Cleanupfall; final26 Faelle gruen einschliesslich unveraenderter signierter HTTP-/WebSocket-Transporttests. finally entfernt nur die beendete Verbindung und leere Terminalgruppen bei regulären/fehlerhaften/abgebrochenen Verbindungen. CancelledError propagiert unveraendert, andere Teilnehmer und Mandanten bleiben erhalten. Keine schwächeren Testassertionen, Token-/Rechte-/API-Schema-/DB-/Containeraenderungen. QA: docs/quality-assurance/pos-websocket-cleanup-20261019.md. Neuer GitHub-Gesamtnachlauf erforderlich; kein pauschales CI-Gruen behauptet.
 
-## CI-COMPLIANCE-REAL-20261019 - in arbeit, Codex
+## CI-COMPLIANCE-REAL-20261019 - abgeschlossen, Codex
 
 **Befund:** Compliance-Run39255445959 hat acht gruene GDPR-Teiltests, scheitert aber an globaler App-Coverage42,21 unter60. Zusaetzlich sind tests/compliance/test_gdpr.py und test_gobd.py teilweise alte Test-App-/Dev-Token-Vertraege, akzeptieren 500/501/503 oder enthalten Platzhalter statt echter Nachweise. **Naechste Abnahme:** vorhandene echte GDPR-/GoBD-Vertraege und produktive Auth-/Mandanten-/Revisionsgrenzen zusammenfuehren, belastbare Teil- und Gesamtmessung sowie Ergebnisartefakte. Keine Abdeckungsschwelle senken oder Fehler als Erfolg zulassen. Urspruenglicher Befund; Umsetzung und Nachlauf siehe Ergebnis unten. Betrifft weder die positive echte Beleg-/Stornopruefung noch Claudes Maskenrollout.
 
@@ -18657,6 +18657,10 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **CHROMA-DEPLOY-REVIEW Ergebnis:** Alle98 kanonischen Nachweisdateien mit vorheriger Bewertung verglichen; ausschliesslich docker-compose.yml geaendert (Probe-URL und schreibgeschuetzter Konfigurationsmount). Beide eingebetteten Verbraucher und Deployments erneut kontrolliert. Aktuelle drei Primaer-Advisories weiterhin ohne Fixversion; kein Server-/Remote-/RBAC-Providerpfad. Neun Gate-, zwoelf Backend-Negativ- und drei Embedded-Vertraege gruen. Originaler Linux-Scannerbericht unveraendert mit drei Findings; Bewertung zuvor drei gesperrt, nach Kontrolle drei nicht erreichbar. Bestehender Ablauf23.10. unveraendert; keine neue Ausnahme/Unterdrueckung. QA: docs/quality-assurance/chroma-deploy-review-20261019.md. GitHub-Service-Security-Nachlauf separat abzuwarten.
 
-## RUNTIME-AUTH-PROOF-20261019 - reserviert, Codex
+## RUNTIME-AUTH-PROOF-20261019 - in arbeit, Codex
 
 **Owner:** Codex. **Dateibesitz:** scripts/api_runtime_sweep.py, .github/workflows/runtime-sweep.yml, neuer CI-Anmeldestarter und eigene Tests/QA/Workboard. **Ziel:** Kein gruener Sweep aus tausend401-Antworten. Vor GET-Lauf verifizierte Sitzung/Mandant pruefen;401 im Lauf sperrt. Vorhandenen CI-Keycloak-Bootstrap und Redis verwenden, Token nur im Speicher, keine Dev-Token oder Authumgehung. **Abnahme:** fehlende/ungueltige Authentifizierung und fremder Mandant sperren, echte CI-Anmeldung und aussagekraeftiger Runtimebericht.19 abgelaufene Ausnahmen bleiben sperrend, keine Fristverlaengerung oder behauptete Fachabnahme. Keine neuen lokalen Datenbanken/Container/Reset/Migration; CI nutzt Jobressourcen. Claudes Claims geschuetzt.
+
+**CI-COMPLIANCE-REAL GitHub-Abnahme:** Run39270727503 auf4e20017f4 abgeschlossen mit success; beide Compliance-Teiljobs und verpflichtender Ergebnisbericht gruen. Slice geschlossen. Keine Behauptung eines gruenen Sonar-/Runtime-/Gesamtgates.
+
+**RUNTIME-AUTH-PROOF Umsetzung:** Vor jedem Sweep produktiven /api/v1/identity/session-Nachweis mit nichtleerem Subject und exaktem Mandanten verlangen; fehlender/alter Dev-Token sperrt.401 im anschliessenden Lauf eigene Fehlerklasse statt erwarteter Fachantwort. Workflow verwendet vorhandenen isolierten CI-Keycloak-Bootstrap und Redis-Jobservice; neuer Starter holt synthetisches Provider-Token nur in Prozessumgebung und entfernt es im finally.20 gezielte Positiv-/Negativtests gruen. Keine Allowlist-Aenderung;19 abgelaufene Ausnahmen bleiben rot. QA: docs/quality-assurance/runtime-auth-proof-20261019.md. Echter GitHub-Runtime-Nachlauf und dadurch sichtbar werdende Fachfehler noch offen.

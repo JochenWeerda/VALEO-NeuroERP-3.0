@@ -2,10 +2,11 @@
 """API-Runtime-Sweep — Dauergate gegen 5xx auf GET-Routen (SPEC-P0-02 / RUNTIME-API-SWEEP-001).
 
 Liest die OpenAPI-Spec einer laufenden Instanz, ruft alle parameterlosen
-GET-Routen mit Dev-Token + Tenant-Header auf und klassifiziert:
+GET-Routen mit geprueftem Provider-Token + Tenant-Header auf und klassifiziert:
 
   ok_2xx           — Erfolg
-  expected_4xx     — 400/401/403/404/405/409/422: fachlich erwartbar ohne Testdaten
+  expected_4xx     — 400/403/404/405/409/422: fachlich erwartbar ohne Testdaten
+  authentication_error — 401 sperrt; kein fachlicher Ausfuehrungsnachweis
   allowed_503      — 503-by-design laut config/runtime_sweep_allowlist.yaml
   server_error_5xx — jeder nicht allowgelistete 5xx  => Exit 1
 
@@ -30,7 +31,16 @@ import httpx
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ALLOWLIST_PATH = REPO_ROOT / "config" / "runtime_sweep_allowlist.yaml"
 
-EXPECTED_4XX = {400, 401, 403, 404, 405, 409, 422, 428, 429}
+EXPECTED_4XX = {400, 403, 404, 405, 409, 422, 428, 429}
+
+
+def verify_session(client: httpx.Client, tenant: str) -> None:
+    """Use the production session endpoint, never unverified JWT decoding."""
+    response = client.get('/api/v1/identity/session')
+    response.raise_for_status()
+    data = response.json()
+    if not isinstance(data, dict) or not data.get('subject') or data.get('tenant_id') != tenant:
+        raise ValueError('Keine verifizierte Sitzung fuer den angeforderten Mandanten')
 
 
 def load_allowlist() -> tuple[dict[str, dict], set[str]]:
@@ -83,13 +93,16 @@ def load_targets(client: httpx.Client, spec_path: str, skip_paths: set[str]) -> 
 def main() -> int:
     parser = argparse.ArgumentParser(description="API runtime sweep (GET, 5xx-Gate)")
     parser.add_argument("--base-url", default=os.environ.get("SWEEP_BASE_URL", "http://127.0.0.1:8000"))
-    parser.add_argument("--token", default=os.environ.get("API_DEV_TOKEN", "dev-token"))
+    parser.add_argument("--token", default=os.environ.get("SWEEP_ACCESS_TOKEN"))
     parser.add_argument("--openapi-path", default="/api/v1/openapi.json")
     parser.add_argument("--tenant", default=os.environ.get("SWEEP_TENANT_ID", "00000000-0000-0000-0000-000000000001"))
     parser.add_argument("--timeout", type=float, default=30.0)
     parser.add_argument("--output", default=None, help="Report-Pfad (Default: artifacts/runtime-sweep-<datum>.json)")
     parser.add_argument("--max-failures-shown", type=int, default=50)
     args = parser.parse_args()
+    if not args.token or args.token == 'dev-token':
+        print('FEHLER: Ein echtes Provider-Zugriffstoken ist erforderlich.', file=sys.stderr)
+        return 1
 
     today = dt.date.today()
     allowlist, skip_paths = load_allowlist()
@@ -105,15 +118,17 @@ def main() -> int:
     limits = httpx.Limits(max_connections=8, max_keepalive_connections=8)
     with httpx.Client(base_url=args.base_url, headers=headers, timeout=args.timeout, limits=limits) as client:
         try:
+            verify_session(client, args.tenant)
             targets = load_targets(client, args.openapi_path, skip_paths)
         except (httpx.HTTPError, ValueError) as exc:
-            print(f"FEHLER: OpenAPI konnte nicht fuer den Sweep geladen werden: {exc}", file=sys.stderr)
+            print(f"FEHLER: Sitzungs-/Schema-Vorpruefung fehlgeschlagen ({type(exc).__name__}).", file=sys.stderr)
             return 1
         print(f"Sweep: {len(targets)} parameterlose GET-Routen gegen {args.base_url} ({len(skip_paths)} geskippt)")
 
         results: dict[str, list[dict]] = {
             "ok_2xx": [], "expected_4xx": [], "allowed_503": [],
             "unexpected_503": [], "server_error_5xx": [], "transport_error": [],
+            "authentication_error": [],
         }
         for i, path in enumerate(targets, 1):
             try:
@@ -125,6 +140,8 @@ def main() -> int:
             entry = {"path": path, "status": code}
             if 200 <= code < 300:
                 results["ok_2xx"].append(entry)
+            elif code == 401:
+                results['authentication_error'].append(entry)
             elif code in EXPECTED_4XX:
                 results["expected_4xx"].append(entry)
             elif code == 503:
@@ -151,6 +168,7 @@ def main() -> int:
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "base_url": args.base_url,
         "targets": len(targets),
+        "verified_session": True,
         "summary": summary,
         "expired_allowlist_entries": [
             {"path": p, "expires": str(e.get("expires")), "reason": e.get("reason")} for p, e in expired
@@ -168,6 +186,9 @@ def main() -> int:
     print(f"Report: {out_path}")
 
     failed = False
+    if results['authentication_error']:
+        failed = True
+        print(f"FEHLER: {len(results['authentication_error'])} Route(n) ohne gueltige Authentifizierung.", file=sys.stderr)
     if results["server_error_5xx"]:
         failed = True
         print(f"\nFEHLER: {len(results['server_error_5xx'])} Route(n) mit 5xx:", file=sys.stderr)

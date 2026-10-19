@@ -1,6 +1,6 @@
 name: Runtime API Sweep
 
-# SPEC-P0-02 / RUNTIME-API-SWEEP-001: Nightly-Gate — alle parameterlosen
+# SPEC-P0-02 / RUNTIME-API-SWEEP-001: Nightly-Gate â€” alle parameterlosen
 # GET-Routen gegen frisch migrierte DB; 5xx oder nicht allowgelistete 503 => rot.
 
 on:
@@ -25,7 +25,11 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_sweep
-      API_DEV_TOKEN: dev-token
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_sweep
+      REDIS_URL: redis://localhost:6379/0
+      IDENTITY_SESSION_IDLE_SECONDS: "3600"
+      EVENT_BUS_ENABLED: "false"
+      OUTBOX_WORKER_ENABLED: "false"
       # CRM-Sidecar-Services existieren im Sweep-Job nicht. Default-URLs zeigen
       # auf Port 8000 (= Backend selbst) => 404 statt sauberem Connection-Error.
       # Geschlossener Port erzwingt den definierten Degrade-Pfad (leere Liste).
@@ -33,6 +37,15 @@ jobs:
       CRM_SALES_BASE_URL: http://127.0.0.1:59991
       CRM_SERVICE_BASE_URL: http://127.0.0.1:59992
     services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
       postgres:
         image: postgres:15
         env:
@@ -61,6 +74,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Start isolated CI identity provider
+        run: bash scripts/ci/e2e_keycloak.sh
+
       - name: Migrate empty database (Alembic + ORM create_all)
         run: python scripts/init_db.py
 
@@ -68,7 +84,7 @@ jobs:
         run: |
           # Bewusst die Wurzel-``main``: app.main ist die auth-freie
           # Test-Schicht, der 251 Produktionsrouten fehlen. Die Bereitschafts-
-          # probe muss deshalb /api/v1/openapi.json abfragen — die Produktions-
+          # probe muss deshalb /api/v1/openapi.json abfragen â€” die Produktions-
           # App liefert auf /openapi.json 404 (SPEC-SOURCE-REALAPP-20260910).
           nohup python -m uvicorn main:app --host 127.0.0.1 --port 8000 --log-level warning > uvicorn.log 2>&1 &
           for i in $(seq 1 120); do
@@ -80,7 +96,7 @@ jobs:
           echo "Backend nicht erreichbar"; tail -50 uvicorn.log; exit 1
 
       - name: Run runtime sweep (0x5xx-Gate)
-        run: python scripts/api_runtime_sweep.py --base-url http://127.0.0.1:8000
+        run: python scripts/ci/runtime_sweep_authenticated.py --base-url http://127.0.0.1:8000
 
       - name: Upload sweep report
         if: always()
@@ -89,6 +105,7 @@ jobs:
           name: runtime-sweep-report
           path: artifacts/runtime-sweep-*.json
           retention-days: 30
+          if-no-files-found: error
 
       - name: Show backend log on failure
         if: failure()
