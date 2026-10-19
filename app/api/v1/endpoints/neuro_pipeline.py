@@ -16,6 +16,7 @@ from app.agents.neuro_pipeline import run_pipeline
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.neuro_pipeline_schemas import NeuroPipelineOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/neuro", tags=["neuro-core", "pipeline"])
@@ -33,8 +34,7 @@ class PipelineRequest(BaseModel):
 
 
 @router.post("/classify", summary="Classify do",
-    response_model=NeuroPipelineOut
-)
+    response_model=NeuroPipelineOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
 async def do_classify(request: ClassifyRequest):
     """Intent aus User-Input klassifizieren."""
     result = classify(request.user_input, request.context)
@@ -50,8 +50,7 @@ async def list_intents():
 
 
 @router.post("/plan", summary="Plan do",
-    response_model=NeuroPipelineOut
-)
+    response_model=NeuroPipelineOut, dependencies=SCHREIBEN["FACHLICH"])
 async def do_plan(
     request: ClassifyRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -68,8 +67,7 @@ async def do_plan(
 
 
 @router.post("/execute", summary="Execute do",
-    response_model=NeuroPipelineOut
-)
+    response_model=NeuroPipelineOut, dependencies=SCHREIBEN["FACHLICH"])
 async def do_execute(
     request: PipelineRequest,
     tenant_id: str = Depends(get_tenant_id),

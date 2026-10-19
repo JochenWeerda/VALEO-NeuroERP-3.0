@@ -265,7 +265,7 @@ async def update_protocol(
     return _to_out(protocol)
 
 
-@router.post("/{protocol_id}/approve", response_model=QualityProtocolOut, summary="Protocol finalize")
+@router.post("/{protocol_id}/approve", response_model=QualityProtocolOut, summary="Protocol finalize", dependencies=SCHREIBEN["QUALITAET"])
 @router.post("/{protocol_id}/finalize", response_model=QualityProtocolOut, summary="Protocol finalize", dependencies=SCHREIBEN["AGRAR"])
 async def finalize_protocol(
     protocol_id: str,

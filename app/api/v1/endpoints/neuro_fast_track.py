@@ -9,6 +9,7 @@ from app.services.fast_track import classify_request, is_fast_track, FAST_TRACK_
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.neuro_fast_track_schemas import NeuroFastTrackOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/neuro/fast-track", tags=["neuro-core", "fast-track"])
@@ -21,8 +22,7 @@ class ClassifyRequest(BaseModel):
 
 
 @router.post("/classify", summary="Classify",
-    response_model=NeuroFastTrackOut
-)
+    response_model=NeuroFastTrackOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
 async def classify(request: ClassifyRequest):
     return classify_request(request.method, request.path, request.has_ai_context)
 

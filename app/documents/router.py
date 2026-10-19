@@ -26,6 +26,7 @@ from .router_helpers import (
 )
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
@@ -231,7 +232,7 @@ def _compute_sales_delivery_sustainability(
 # --- CRUD Endpoints ---
 
 
-@router.post("/customer_inquiry")
+@router.post("/customer_inquiry", dependencies=SCHREIBEN["FACHLICH"])
 async def upsert_customer_inquiry(
     doc: CustomerInquiry, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict:
@@ -268,7 +269,7 @@ async def upsert_customer_inquiry(
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.post("/sales_offer")
+@router.post("/sales_offer", dependencies=SCHREIBEN["FACHLICH"])
 async def upsert_sales_offer(
     doc: SalesOffer, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict:
@@ -316,7 +317,7 @@ async def upsert_sales_offer(
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.post("/sales_order")
+@router.post("/sales_order", dependencies=SCHREIBEN["FACHLICH"])
 async def upsert_sales_order(
     doc: SalesOrder, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict:
@@ -332,7 +333,7 @@ async def upsert_sales_order(
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.post("/sales_delivery")
+@router.post("/sales_delivery", dependencies=SCHREIBEN["FACHLICH"])
 async def upsert_sales_delivery(
     doc: SalesDelivery, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict:
@@ -351,7 +352,7 @@ async def upsert_sales_delivery(
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.post("/sales_invoice")
+@router.post("/sales_invoice", dependencies=SCHREIBEN["FACHLICH"])
 async def upsert_sales_invoice(
     doc: SalesInvoice, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict:
@@ -400,7 +401,7 @@ async def upsert_sales_invoice(
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.post("/payment_received")
+@router.post("/payment_received", dependencies=SCHREIBEN["FACHLICH"])
 async def upsert_payment_received(
     doc: PaymentReceived, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict:
@@ -440,7 +441,7 @@ async def upsert_payment_received(
 # --- Purchase Endpoints ---
 
 
-@router.post("/purchase_request")
+@router.post("/purchase_request", dependencies=SCHREIBEN["FACHLICH"])
 async def upsert_purchase_request(
     doc: PurchaseRequest, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict:
@@ -477,7 +478,7 @@ async def upsert_purchase_request(
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.post("/purchase_offer")
+@router.post("/purchase_offer", dependencies=SCHREIBEN["FACHLICH"])
 async def upsert_purchase_offer(
     doc: PurchaseOffer, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict:
@@ -525,7 +526,7 @@ async def upsert_purchase_offer(
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.post("/purchase_order")
+@router.post("/purchase_order", dependencies=SCHREIBEN["FACHLICH"])
 async def upsert_purchase_order(
     doc: PurchaseOrder, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict:
@@ -615,7 +616,7 @@ async def get_document(
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.put("/{doc_type}/{doc_number}")
+@router.put("/{doc_type}/{doc_number}", dependencies=SCHREIBEN["FACHLICH"])
 async def update_document(
     doc_type: str,
     doc_number: str,
@@ -652,7 +653,7 @@ async def update_document(
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.delete("/{doc_type}/{doc_number}")
+@router.delete("/{doc_type}/{doc_number}", dependencies=SCHREIBEN["FACHLICH"])
 async def delete_document(
     doc_type: str, doc_number: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -688,7 +689,7 @@ async def delete_document(
         raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
-@router.delete("/{doc_type}")
+@router.delete("/{doc_type}", dependencies=SCHREIBEN["FACHLICH"])
 async def bulk_delete_documents(
     doc_type: str,
     numbers: List[str] = Query(...),
@@ -881,7 +882,7 @@ FLOW: Dict[tuple[str, str], Callable[[dict], dict]] = {
 }
 
 
-@router.post("/follow")
+@router.post("/follow", dependencies=SCHREIBEN["FACHLICH"])
 async def create_follow_up(req: FollowRequest) -> dict:
     """
     Erstellt Folgebeleg aus Quell-Beleg
@@ -997,7 +998,7 @@ async def search_articles(
 # --- Due-Date Berechnung ---
 
 
-@router.post("/due-date/calculate")
+@router.post("/due-date/calculate", dependencies=SCHREIBEN["FACHLICH_LESEN"])
 async def calculate_due_date(
     data: dict,
     db: Session = Depends(get_db)

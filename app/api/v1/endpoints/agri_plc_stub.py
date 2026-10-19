@@ -205,8 +205,7 @@ def _svc(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id))
     "/plc/ingest",
     status_code=200,
     response_model=PlcIngestOut,
-    summary="POST /plc/ingest — PLC/OPC-UA Batch-Datenpunkte einlesen (WM-AGRI-PLC-005)",
-)
+    summary="POST /plc/ingest — PLC/OPC-UA Batch-Datenpunkte einlesen (WM-AGRI-PLC-005)", dependencies=SCHREIBEN["GERAET"])
 def plc_ingest(payload: PlcIngestIn, svc: AgriPlcService = Depends(_svc)) -> Any:
     """Batch-Endpoint: IoT-Gateway sendet mehrere Messwerte in einem Aufruf."""
     try:

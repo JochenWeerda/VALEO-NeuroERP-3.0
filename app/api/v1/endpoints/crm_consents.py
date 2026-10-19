@@ -159,7 +159,7 @@ async def list_contact_consents(
     return [_to_dict(row) for row in rows]
 
 
-@router.post("", response_model=TypedObjectOut, status_code=201, summary="Einwilligung anlegen")
+@router.post("", response_model=TypedObjectOut, status_code=201, summary="Einwilligung anlegen", dependencies=SCHREIBEN["CRM"])
 @router.post("/", response_model=TypedObjectOut, status_code=201, summary="Einwilligung anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_consent(
     payload: ConsentCreate,

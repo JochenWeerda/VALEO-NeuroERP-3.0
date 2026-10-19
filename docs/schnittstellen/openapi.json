@@ -188864,6 +188864,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Inbox Document",
         "tags": [
           "dms"
@@ -188956,6 +188961,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create From Inbox",
         "tags": [
           "dms"
@@ -188996,6 +189006,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Handle Webhook",
         "tags": [
           "dms"
@@ -189796,6 +189811,11 @@
             "description": "Successful Response"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Mcp Kpis Stub"
       }
     },
@@ -189812,6 +189832,11 @@
             "description": "Successful Response"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Mcp Trends Stub"
       }
     },
@@ -189828,6 +189853,11 @@
             "description": "Successful Response"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Mcp Copilot Forecast Stub"
       }
     },
@@ -190602,6 +190632,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Calculate Due Date",
         "tags": [
           "documents"
@@ -190646,6 +190681,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Follow Up",
         "tags": [
           "documents"
@@ -191509,6 +191549,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Follow Up",
         "tags": [
           "forms"
@@ -191999,6 +192044,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Policy testen",
         "tags": [
           "policy"
@@ -192500,6 +192550,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create New Translation",
         "tags": [
           "translations"
@@ -192544,6 +192599,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Bulk Seed Translations",
         "tags": [
           "translations"
@@ -192782,6 +192842,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Translation",
         "tags": [
           "translations"
@@ -202443,15 +202508,6 @@
           },
           {
             "in": "query",
-            "name": "resolved_by",
-            "required": true,
-            "schema": {
-              "title": "Resolved By",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "note",
             "required": false,
             "schema": {
@@ -202513,15 +202569,6 @@
             "required": true,
             "schema": {
               "title": "Entry Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "retried_by",
-            "required": true,
-            "schema": {
-              "title": "Retried By",
               "type": "string"
             }
           },
@@ -249081,6 +249128,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Activity",
         "tags": [
           "CRM",
@@ -250667,6 +250719,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Betriebsprofil",
         "tags": [
           "CRM",
@@ -250720,6 +250777,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Betriebsprofil",
         "tags": [
           "CRM",
@@ -250846,6 +250908,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Betriebsprofil",
         "tags": [
           "CRM",
@@ -257721,6 +257788,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Consent",
         "tags": [
           "CRM",
@@ -258487,6 +258559,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Contact",
         "tags": [
           "CRM",
@@ -263559,6 +263636,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Gdpr Anonymize",
         "tags": [
           "CRM",
@@ -266792,6 +266874,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Route Unassigned Leads",
         "tags": [
           "CRM",
@@ -267064,6 +267151,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Assign Lead",
         "tags": [
           "CRM",
@@ -267270,6 +267362,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Opportunity",
         "tags": [
           "CRM",
@@ -267699,6 +267796,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Opportunity",
         "tags": [
           "CRM",
@@ -267825,6 +267927,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Opportunity",
         "tags": [
           "CRM",
@@ -267957,6 +268064,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Link Opportunity To Documents",
         "tags": [
           "CRM",
@@ -268851,6 +268963,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Segment",
         "tags": [
           "CRM",
@@ -268904,6 +269021,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Segment",
         "tags": [
           "CRM",
@@ -269030,6 +269152,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Segment",
         "tags": [
           "CRM",
@@ -269166,6 +269293,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Add Segment Member",
         "tags": [
           "CRM",
@@ -269228,6 +269360,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Recalculate Segment",
         "tags": [
           "CRM",
@@ -287027,6 +287164,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Anlage",
         "tags": [
           "fibu"
@@ -287298,6 +287440,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Buchung",
         "tags": [
           "fibu"
@@ -287497,6 +287644,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Mahnen",
         "tags": [
           "fibu"
@@ -289122,6 +289274,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Zahlungslauf",
         "tags": [
           "fibu"
@@ -412462,6 +412619,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Resolve Voice",
         "tags": [
           "ki-usability",
@@ -421103,6 +421265,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Validate Vat",
         "tags": [
           "vies"
@@ -421368,6 +421535,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Migrate Workflow",
         "tags": [
           "workflow"
@@ -421455,6 +421627,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Do Transition",
         "tags": [
           "workflow"

@@ -19,6 +19,7 @@ from ....core.import_pipeline import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/import-pipeline", tags=["import", "pipeline"])
@@ -50,7 +51,7 @@ async def list_jobs(tenant_id: str = Depends(get_tenant_id)):
     return list(store.values())
 
 
-@router.post("/jobs", response_model=ImportPipelineJob, status_code=201, summary="Job anlegen")
+@router.post("/jobs", response_model=ImportPipelineJob, status_code=201, summary="Job anlegen", dependencies=SCHREIBEN["FACHLICH"])
 async def create_job(
     job: ImportPipelineJob,
     tenant_id: str = Depends(get_tenant_id),
@@ -79,7 +80,7 @@ async def get_job(
     return store[job_id]
 
 
-@router.post("/jobs/{job_id}/validate", response_model=ImportValidationResult, summary="Job validieren")
+@router.post("/jobs/{job_id}/validate", response_model=ImportValidationResult, summary="Job validieren", dependencies=SCHREIBEN["FACHLICH"])
 async def validate_job(
     job_id: str,
     tenant_id: str = Depends(get_tenant_id),

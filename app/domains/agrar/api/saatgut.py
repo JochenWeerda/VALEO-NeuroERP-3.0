@@ -179,7 +179,7 @@ async def create_saatgut(
     return Saatgut.model_validate(saatgut)
 
 
-@router.put("/{saatgut_id}", response_model=Saatgut, summary="Saatgut aktualisieren")
+@router.put("/{saatgut_id}", response_model=Saatgut, summary="Saatgut aktualisieren", dependencies=SCHREIBEN["AGRAR"])
 @router.patch("/{saatgut_id}", response_model=Saatgut, summary="Saatgut aktualisieren", dependencies=SCHREIBEN["AGRAR"])
 async def update_saatgut(
     saatgut_id: str,

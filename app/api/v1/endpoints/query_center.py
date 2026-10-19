@@ -19,6 +19,7 @@ from app.core.tenant import get_tenant_id
 from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
 from app.services.query_center_service import QueryCenterError, QueryCenterService
 from app.core.akteur import gepruefter_akteur_aus_request
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/query-center", tags=["reporting", "query-center"])
 
@@ -90,7 +91,7 @@ def list_definitions(
     )
 
 
-@router.post("/preview", response_model=QueryPreviewOut, summary="Abfrage als Vorschau ausfuehren")
+@router.post("/preview", response_model=QueryPreviewOut, summary="Abfrage als Vorschau ausfuehren", dependencies=SCHREIBEN["FACHLICH_LESEN"])
 def preview(
     body: PreviewIn,
     db: Session = Depends(get_db),
@@ -103,7 +104,7 @@ def preview(
     )
 
 
-@router.post("", response_model=QueryDefinitionSavedOut, status_code=201, summary="Abfragedefinition speichern")
+@router.post("", response_model=QueryDefinitionSavedOut, status_code=201, summary="Abfragedefinition speichern", dependencies=SCHREIBEN["FACHLICH"])
 def save(
     body: SaveIn,
     request: Request,
@@ -119,7 +120,7 @@ def save(
     )
 
 
-@router.post("/{definition_id}/export", response_model=QueryExportBundleOut, summary="Abfragedefinition signiert exportieren")
+@router.post("/{definition_id}/export", response_model=QueryExportBundleOut, summary="Abfragedefinition signiert exportieren", dependencies=SCHREIBEN["FACHLICH"])
 def export_definition(
     definition_id: str,
     body: ReasonIn,
@@ -134,7 +135,7 @@ def export_definition(
     )
 
 
-@router.post("/import", response_model=QueryDefinitionSavedOut, status_code=201, summary="Signierte Abfragedefinition importieren")
+@router.post("/import", response_model=QueryDefinitionSavedOut, status_code=201, summary="Signierte Abfragedefinition importieren", dependencies=SCHREIBEN["FACHLICH"])
 def import_definition(
     body: ImportIn,
     request: Request,
@@ -151,8 +152,7 @@ def import_definition(
 @router.post(
     "/actions/import",
     response_model=MaskActionResult,
-    summary="Signierten Abfrage-Import als Masken-CommandEndpoint",
-)
+    summary="Signierten Abfrage-Import als Masken-CommandEndpoint", dependencies=SCHREIBEN["FACHLICH"])
 def action_import(
     request: Request,
     body: dict[str, Any] = Body(default_factory=dict),

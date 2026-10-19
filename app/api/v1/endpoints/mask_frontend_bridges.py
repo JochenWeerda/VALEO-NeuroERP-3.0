@@ -1199,7 +1199,7 @@ def list_epcis_events(
     return {"items": items, "total": len(items)}
 
 
-@router.post("/inventory/epcis/events", response_model=BridgeOut, status_code=201, summary="EPCIS-Ereignis anlegen")
+@router.post("/inventory/epcis/events", response_model=BridgeOut, status_code=201, summary="EPCIS-Ereignis anlegen", dependencies=SCHREIBEN["GERAET"])
 def create_epcis_event(
     body: EpcisEventIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -1278,7 +1278,7 @@ def analytics_contract_positions(
     return {"data": data}
 
 
-@router.post("/ai/ask", response_model=BridgeOut, summary="Fachfrage beantworten")
+@router.post("/ai/ask", response_model=BridgeOut, summary="Fachfrage beantworten", dependencies=SCHREIBEN["FACHLICH_LESEN"])
 def ai_ask(body: AskIn) -> dict[str, Any]:
     prompt = body.prompt.strip()
     domain = ""

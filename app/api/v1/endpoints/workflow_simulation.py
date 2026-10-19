@@ -13,6 +13,7 @@ from app.core.workflow_simulation import (
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.workflow_simulation_schemas import WorkflowSimulationOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/workflow/simulation", tags=["workflow", "simulation"])
@@ -65,7 +66,7 @@ def list_sandbox_scenarios() -> list[dict]:
     ]
 
 
-@router.post("/run", response_model=SimulationResult, summary="Workflow-Simulation ausfuehren")
+@router.post("/run", response_model=SimulationResult, summary="Workflow-Simulation ausfuehren", dependencies=SCHREIBEN["FACHLICH"])
 def run_simulation(body: SimulationInput) -> SimulationResult:
     """Fuehrt eine modellbasierte Workflow-Simulation fuer das angegebene Szenario durch."""
     return simulate_workflow(body)
@@ -74,8 +75,7 @@ def run_simulation(body: SimulationInput) -> SimulationResult:
 @router.post(
     "/preview",
     response_model=WorkflowSandboxPreviewResult,
-    summary="Workflow-Sandbox-Preview ausfuehren",
-)
+    summary="Workflow-Sandbox-Preview ausfuehren", dependencies=SCHREIBEN["FACHLICH_LESEN"])
 def preview_simulation(body: WorkflowSandboxPreviewInput) -> WorkflowSandboxPreviewResult:
     """Fuehrt eine Sandbox-Vorschau fuer neue oder geaenderte Workflows aus."""
     return preview_workflow_sandbox(body)
@@ -84,8 +84,7 @@ def preview_simulation(body: WorkflowSandboxPreviewInput) -> WorkflowSandboxPrev
 @router.post(
     "/sandbox/preview",
     response_model=WorkflowSandboxPreviewResult,
-    summary="Workflow-Sandbox-Preview ausfuehren",
-)
+    summary="Workflow-Sandbox-Preview ausfuehren", dependencies=SCHREIBEN["FACHLICH_LESEN"])
 def preview_workflow_sandbox_endpoint(body: WorkflowSandboxPreviewInput) -> WorkflowSandboxPreviewResult:
     """Alias fuer den Sandbox-Preview-Contract mit explizitem Sandbox-Pfad."""
     return preview_workflow_sandbox(body)

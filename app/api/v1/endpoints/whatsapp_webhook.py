@@ -52,8 +52,7 @@ class WebhookReceiveResponse(BaseModel):
     response_model=WebhookReceiveResponse,
     status_code=200,
     tags=["WhatsApp"],
-    summary="WhatsApp Webhook-Nachricht empfangen",
-)
+    summary="WhatsApp Webhook-Nachricht empfangen", dependencies=SCHREIBEN["GERAET"])
 async def webhook_receive(
     request: Request,
     x_hub_signature_256: str = Header(None),

@@ -17,6 +17,7 @@ from app.core.database import Base, get_db
 from app.core.uuid7 import uuid7
 from app.integrations.dms_client import get_client, is_configured
 from app.integrations.dms_parser import parser
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,7 @@ class WebhookPayload(BaseModel):
     user: Optional[str] = None
 
 
-@router.post("/webhook")
+@router.post("/webhook", dependencies=SCHREIBEN["BELEGE"])
 async def handle_webhook(payload: WebhookPayload, db: Session = Depends(get_db)):
     """Webhook-Handler für Mayan-DMS-Events."""
     try:
@@ -142,7 +143,7 @@ async def get_inbox_document(inbox_id: str, db: Session = Depends(get_db)):
     }}
 
 
-@router.post("/inbox/{inbox_id}/create")
+@router.post("/inbox/{inbox_id}/create", dependencies=SCHREIBEN["BELEGE"])
 async def create_from_inbox(
     inbox_id: str,
     overrides: Dict[str, Any] = Body(...),
@@ -163,7 +164,7 @@ async def create_from_inbox(
     return {"ok": True, "number": beleg_number, "fields": fields}
 
 
-@router.delete("/inbox/{inbox_id}")
+@router.delete("/inbox/{inbox_id}", dependencies=SCHREIBEN["BELEGE"])
 async def delete_inbox_document(inbox_id: str, db: Session = Depends(get_db)):
     """Löscht Inbox-Dokument (ablehnen/verwerfen)."""
     entry = db.query(DmsInboxEntry).filter(DmsInboxEntry.id == inbox_id).first()

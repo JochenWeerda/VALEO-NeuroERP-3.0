@@ -560,8 +560,7 @@ def cancel_stop(
     "/tours/{tour_id}/events",
     status_code=201,
     summary="Tour-Ereignis erfassen",
-    response_model=LogisticsTourOut,
-)
+    response_model=LogisticsTourOut, dependencies=SCHREIBEN["GERAET"])
 def add_event(
     tour_id: str,
     body: TourEventIn,

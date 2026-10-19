@@ -75,7 +75,7 @@ def sync_events(
     return SupplyChainEventService(db, tenant_id).sync_from_state(ticket)
 
 
-@router.post("/events", response_model=ChainEventAckOut, summary="Ketten-Ereignis erfassen (Korrektur/Abweichung/Notiz/Storno)")
+@router.post("/events", response_model=ChainEventAckOut, summary="Ketten-Ereignis erfassen (Korrektur/Abweichung/Notiz/Storno)", dependencies=SCHREIBEN["GERAET"])
 def add_event(
     body: ChainEventIn,
     db: Session = Depends(get_db),

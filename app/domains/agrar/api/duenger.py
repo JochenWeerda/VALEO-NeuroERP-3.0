@@ -241,7 +241,7 @@ async def create_duenger(
     return Duenger.model_validate(duenger)
 
 
-@router.put("/{duenger_id}", response_model=Duenger, summary="Duenger aktualisieren")
+@router.put("/{duenger_id}", response_model=Duenger, summary="Duenger aktualisieren", dependencies=SCHREIBEN["AGRAR"])
 @router.patch("/{duenger_id}", response_model=Duenger, summary="Duenger aktualisieren", dependencies=SCHREIBEN["AGRAR"])
 async def update_duenger(
     duenger_id: str,

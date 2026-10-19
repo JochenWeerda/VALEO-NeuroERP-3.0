@@ -52,6 +52,12 @@ QUALITAET = _bearbeiten("LAGER", "EINKAUF", "SALES", "AGRAR", "FUTTERMITTEL")
 #: Bereichs. Reine Leser und Konten ohne Fachrolle schreiben nicht.
 FACHLICH = _bearbeiten("SALES", "CRM", "EINKAUF", "LAGER", "AGRAR", "HARVEST", "KONTRAKT", "FUTTERMITTEL",
                        "FINANCE", "PERSONAL")
+#: Bereichsuebergreifende Berechnungen ohne Schreibwirkung (Prozesskern: Policy aufloesen, pruefen, erklaeren):
+#: eine Lese- oder Bearbeitungsrolle irgendeines Bereichs. Konten ohne Fachrolle rechnen nicht.
+FACHLICH_LESEN = (*FACHLICH, *(f"{b}_LESEN" for b in ("SALES", "CRM", "EINKAUF", "LAGER", "AGRAR", "HARVEST",
+                                                        "KONTRAKT", "FUTTERMITTEL", "FINANCE", "PERSONAL",
+                                                        "QUALITAET", "SETTLEMENT")),
+                  "controller", "CONTROLLING")
 #: Plattformverwaltung (Mandanten, Nutzer, Identitaet, Konfiguration, Governance, Entwicklung/Abnahme).
 PLATTFORM = ("admin",)
 
@@ -64,7 +70,8 @@ SCHREIBEN = {name: _liste(rollen) for name, rollen in {
     "VERKAUF": VERKAUF, "CRM": CRM, "EINKAUF": EINKAUF, "LAGER": LAGER, "STAMMDATEN": STAMMDATEN,
     "LOGISTIK": LOGISTIK, "AGRAR": AGRAR, "ERNTE": ERNTE, "KONTRAKT": KONTRAKT, "FUTTERMITTEL": FUTTERMITTEL,
     "PRODUKTION": PRODUKTION, "FINANZ": FINANZ, "CONTROLLING": CONTROLLING, "PERSONAL": PERSONAL,
-    "BELEGE": BELEGE, "FREIGABE": FREIGABE, "QUALITAET": QUALITAET, "FACHLICH": FACHLICH, "PLATTFORM": PLATTFORM,
+    "BELEGE": BELEGE, "FREIGABE": FREIGABE, "QUALITAET": QUALITAET, "FACHLICH": FACHLICH,
+    "FACHLICH_LESEN": FACHLICH_LESEN, "PLATTFORM": PLATTFORM,
 }.items()}
 
 

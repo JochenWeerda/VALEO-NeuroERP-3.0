@@ -25,6 +25,7 @@ from app.services.l3_report_catalog_service import (
 )
 from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
 from app.core.akteur import gepruefter_akteur_aus_request
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/l3-report-catalog", tags=["reporting", "l3-parity"])
 
@@ -96,7 +97,7 @@ def list_bonus_runs(
     return L3ReportCatalogService(db, tenant_id).list_bonus_runs()
 
 
-@router.post("/bonus-runs", response_model=L3BonusRunCreatedOut, status_code=201, summary="Bonuslauf anlegen")
+@router.post("/bonus-runs", response_model=L3BonusRunCreatedOut, status_code=201, summary="Bonuslauf anlegen", dependencies=SCHREIBEN["FACHLICH"])
 def create_bonus_run(
     body: BonusRunIn,
     request: Request,
@@ -119,8 +120,7 @@ def create_bonus_run(
 @router.post(
     "/bonus-runs/actions/calculate",
     response_model=MaskActionResult,
-    summary="Bonuslauf berechnen als Masken-CommandEndpoint",
-)
+    summary="Bonuslauf berechnen als Masken-CommandEndpoint", dependencies=SCHREIBEN["FACHLICH"])
 def action_bonus_calculate(
     request: Request,
     body: dict[str, Any] = Body(default_factory=dict),
@@ -258,7 +258,7 @@ def action_bonus_calculate(
     )
 
 
-@router.post("/bonus-runs/{run_id}/corrections", response_model=L3BonusCorrectionOut, status_code=201, summary="Bonuslauf korrigieren")
+@router.post("/bonus-runs/{run_id}/corrections", response_model=L3BonusCorrectionOut, status_code=201, summary="Bonuslauf korrigieren", dependencies=SCHREIBEN["FACHLICH"])
 def correct_bonus_run(
     run_id: str,
     body: BonusCorrectionIn,
@@ -298,7 +298,7 @@ def export_bonus_run(
     )
 
 
-@router.post("/facts", response_model=L3FactProjectedOut, status_code=202, summary="Berichtsfakt projizieren")
+@router.post("/facts", response_model=L3FactProjectedOut, status_code=202, summary="Berichtsfakt projizieren", dependencies=SCHREIBEN["FACHLICH"])
 def project_fact(
     body: FactIn, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
 ) -> dict[str, Any]:

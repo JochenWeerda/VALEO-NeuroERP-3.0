@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.auth.deps import require_roles
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(tags=["policy"])
@@ -218,7 +219,7 @@ async def delete_policy(request: DeleteRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/policy/test", response_model=TestResponse, summary="Policy testen")
+@router.post("/policy/test", response_model=TestResponse, summary="Policy testen", dependencies=SCHREIBEN["FACHLICH_LESEN"])
 async def test_policy(
     request: TestRequest,
     tenant_id: str = Query("system", description="Tenant ID"),

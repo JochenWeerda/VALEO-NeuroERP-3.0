@@ -764,8 +764,11 @@ def test_rp003_workflow_instanz():
 from fastapi.testclient import TestClient
 from app.api.v1.endpoints.process_kernel_api import router
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 _app = FastAPI()
+
+ersetze_nutzer(_app, *ALLE_FACHROLLEN)
 _app.include_router(router)
 _client = TestClient(_app)
 

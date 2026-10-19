@@ -21,6 +21,7 @@ from ....core.ki_action_registry import (
     resolve_actions_for_context,
 )
 from ....core.ki_voice_deep_link_params import extract_deep_link_params
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class ActionOut(BaseModel):
@@ -133,7 +134,7 @@ def get_action(action_id: str, domain: str | None = None, mask: str | None = Non
     )
 
 
-@voice_router.post("/resolve", response_model=VoiceResolveOut | None)
+@voice_router.post("/resolve", response_model=VoiceResolveOut | None, dependencies=SCHREIBEN["EIGENE_DATEN"])
 def resolve_voice(body: VoiceResolveIn) -> VoiceResolveOut | None:
     return _resolve_intent(body.text)
 

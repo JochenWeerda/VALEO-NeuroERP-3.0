@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from app.core.dependency_container import container
 from app.finance.repositories import OffenerPostenRepository, BuchungRepository, KontoRepository, AnlageRepository
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/fibu", tags=["fibu"])
 
@@ -95,7 +96,7 @@ async def get_debitoren(
     op_repo = container.resolve(OffenerPostenRepository)
     return op_repo.get_debitoren(tenant_id, ueberfaellig, mahn_stufe)
 
-@router.post("/debitoren/{id}/mahnen")
+@router.post("/debitoren/{id}/mahnen", dependencies=SCHREIBEN["FINANZ"])
 async def mahnen(id: str, tenant_id: str = Query("system", description="Tenant ID")):
     """Mahnung für offenen Posten erstellen"""
     op_repo = container.resolve(OffenerPostenRepository)
@@ -111,7 +112,7 @@ async def get_kreditoren(zahlbar: Optional[bool] = Query(None), tenant_id: str =
     op_repo = container.resolve(OffenerPostenRepository)
     return op_repo.get_kreditoren(tenant_id, zahlbar)
 
-@router.post("/kreditoren/zahlungslauf")
+@router.post("/kreditoren/zahlungslauf", dependencies=SCHREIBEN["FINANZ"])
 async def zahlungslauf(ids: List[str], tenant_id: str = Query("system", description="Tenant ID")):
     """Zahlungslauf für ausgewählte Kreditoren durchführen"""
     op_repo = container.resolve(OffenerPostenRepository)
@@ -135,7 +136,7 @@ async def get_buchungen(
     buchung_repo = container.resolve(BuchungRepository)
     return buchung_repo.get_by_filters(tenant_id, datum_von, datum_bis, belegart)
 
-@router.post("/buchungen", response_model=Buchung)
+@router.post("/buchungen", response_model=Buchung, dependencies=SCHREIBEN["FINANZ"])
 async def create_buchung(buchung: Buchung, tenant_id: str = Query("system", description="Tenant ID")):
     """Neue Buchung erstellen"""
     buchung_repo = container.resolve(BuchungRepository)
@@ -167,7 +168,7 @@ async def get_anlagen(tenant_id: str = Query("system", description="Tenant ID"))
     anlage_repo = container.resolve(AnlageRepository)
     return anlage_repo.get_all(tenant_id)
 
-@router.post("/anlagen", response_model=Anlage)
+@router.post("/anlagen", response_model=Anlage, dependencies=SCHREIBEN["FINANZ"])
 async def create_anlage(anlage: Anlage, tenant_id: str = Query("system", description="Tenant ID")):
     """Neue Anlage erfassen"""
     anlage_repo = container.resolve(AnlageRepository)

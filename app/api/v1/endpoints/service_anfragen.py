@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.service_anfragen_schemas import ServiceAnfragenOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/service", tags=["Service"])
@@ -131,7 +132,7 @@ async def get_anfrage(
     return item
 
 
-@router.post("/anfragen", response_model=ServiceAnfragenOut, status_code=201, summary="Anfrage anlegen")
+@router.post("/anfragen", response_model=ServiceAnfragenOut, status_code=201, summary="Anfrage anlegen", dependencies=SCHREIBEN["FACHLICH"])
 async def create_anfrage(
     body: ServiceAnfrageCreate,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),
@@ -158,7 +159,7 @@ async def create_anfrage(
     return item
 
 
-@router.put("/anfragen/{anfrage_id}", response_model=ServiceAnfragenOut, summary="Anfrage aktualisieren")
+@router.put("/anfragen/{anfrage_id}", response_model=ServiceAnfragenOut, summary="Anfrage aktualisieren", dependencies=SCHREIBEN["FACHLICH"])
 async def update_anfrage(
     anfrage_id: str,
     body: ServiceAnfrageUpdate,
@@ -175,7 +176,7 @@ async def update_anfrage(
     return item
 
 
-@router.delete("/anfragen/{anfrage_id}", response_class=Response, status_code=204, response_model=None, summary="Anfrage löschen")
+@router.delete("/anfragen/{anfrage_id}", response_class=Response, status_code=204, response_model=None, summary="Anfrage löschen", dependencies=SCHREIBEN["FACHLICH"])
 async def delete_anfrage(
     anfrage_id: str,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),
@@ -189,7 +190,7 @@ async def delete_anfrage(
     return Response(status_code=204)
 
 
-@router.post("/rueckmeldungen", response_model=ServiceAnfragenOut, status_code=201, summary="Rueckmeldung anlegen")
+@router.post("/rueckmeldungen", response_model=ServiceAnfragenOut, status_code=201, summary="Rueckmeldung anlegen", dependencies=SCHREIBEN["FACHLICH"])
 async def create_rueckmeldung(
     body: RueckmeldungCreate,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),
@@ -211,7 +212,7 @@ async def create_rueckmeldung(
     return rm
 
 
-@router.post("/abschluss", response_model=ServiceAnfragenOut, summary="Service case abschließen")
+@router.post("/abschluss", response_model=ServiceAnfragenOut, summary="Service case abschließen", dependencies=SCHREIBEN["FACHLICH"])
 async def close_service_case(
     body: AbschlussCreate,
     x_tenant_id: str = Header("default", alias="X-Tenant-ID"),

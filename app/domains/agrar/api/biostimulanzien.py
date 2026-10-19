@@ -140,7 +140,7 @@ async def get_biostimulanz(
     return _item_dict(row)
 
 
-@router.post("", response_model=Biostimulanz, status_code=201, summary="Biostimulanz anlegen")
+@router.post("", response_model=Biostimulanz, status_code=201, summary="Biostimulanz anlegen", dependencies=SCHREIBEN["AGRAR"])
 @router.post("/", response_model=Biostimulanz, status_code=201, summary="Biostimulanz anlegen", include_in_schema=False, dependencies=SCHREIBEN["AGRAR"])
 async def create_biostimulanz(
     body: BiostimulanzCreate,

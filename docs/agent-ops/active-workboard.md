@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## WRITE-ROLES-AREAS-20261019 - in Arbeit, Claude Code
+## WRITE-ROLES-AREAS-20261019 - abgeschlossen, Claude Code
 
-**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-19. **Nutzerentscheid 19.10.** (wie ADMIN-WRITE-ROLES): Schreibwege der Pruefliste `config/write_routes_without_roles.json` je Bereich mit `SCHREIBEN[...]` aus `app/auth/bereich_roles.py` absichern, eine Gruppe je Commit. **Dateibesitz:** nur Decorator-Abhaengigkeit und Import der betroffenen Router, `app/auth/bereich_roles.py`, Baseline, Testidentitaeten betroffener Mini-App-Tests, QA `docs/quality-assurance/write-roles-bereiche-20261019.md`. **Erledigt:** VERKAUF, CRM, EINKAUF, STAMMDATEN, LAGER, LOGISTIK, ERNTE, PRODUKTION, AGRAR, KONTRAKT, FUTTERMITTEL, FINANZ, CONTROLLING, PERSONAL, BELEGE, FREIGABE, QUALITAET, PLATTFORM; `manager` aus den Bereichslisten entfernt; Godfile-Ratsche wieder gruen; Bearbeiter aus dem Body entfernt. Hinweis an PERSONAL-FILE-AUTH: `personal.py` employee-files tragen schon `SCHREIBEN["PERSONAL"]` (verträglich). **Offen:** FACHLICH, EIGENE_DATEN, GERAET (Inventar 318).
+**Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-19. **Nutzerentscheid 19.10.** (wie ADMIN-WRITE-ROLES): Schreibwege der Pruefliste `config/write_routes_without_roles.json` je Bereich mit `SCHREIBEN[...]` aus `app/auth/bereich_roles.py` absichern. **Ergebnis:** Pruefliste 1521 -> **0** ueber `app.main` und `main:app` (Ratsche prueft jetzt beide); alle Bereichsgruppen inkl. FREIGABE, FACHLICH, FACHLICH_LESEN, EIGENE_DATEN, GERAET; `manager` aus den Bereichslisten entfernt; ein delegierter Weg (`/api/v1/mcp/tools/call`, Scope-Pruefung im Executor) ausdruecklich als `DELEGIERT` gefuehrt; Bearbeiter aus Body und Query entfernt; Demo-Anmelderouter nur in Entwicklung. QA `docs/quality-assurance/write-roles-bereiche-20261019.md`. **Zur Entscheidung des Nutzers:** GERAET (Geraete-/Eingangswege ohne Fachrolle) und EIGENE_DATEN (persoenliche Daten je Kennung). **Offen:** Gesamtlauf der Backend-Suite (Speichermangel; CI ist Schiedsrichter). Hinweis an AUDIT-IDENTITY-INTEGRITY: FiBu-Audit mit `request=None` in Connector-, Journal- und Lagergeldwegen.
 
 ## ADMIN-WRITE-ROLES-20261019 - abgeschlossen, Claude Code
 

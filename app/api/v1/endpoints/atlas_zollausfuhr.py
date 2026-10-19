@@ -307,8 +307,7 @@ def ausfuhrnachricht(
 
 
 @router.post("/atlas-callback", summary="Callback atlas",
-    response_model=AtlasZollausfuhrOut
-)
+    response_model=AtlasZollausfuhrOut, dependencies=SCHREIBEN["GERAET"])
 def atlas_callback(
     body: ZollausfuhrStatusUpdate,
     db: Session = Depends(get_db),

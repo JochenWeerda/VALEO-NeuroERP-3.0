@@ -22,6 +22,7 @@ from app.core.tenant import get_tenant_id
 from app.services.mask_action_runtime_service import MaskActionResult as MaskActionResultOut
 from app.services.mask_commands import begruendung, statusaktion
 from app.services.tank_adapter_service import TankAdapterError, TankAdapterService
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/tank-adapter", tags=["tankstelle", "integration"])
 
@@ -54,7 +55,7 @@ def guarded(call):  # noqa: ANN001, ANN201
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@router.post("/intake", response_model=TankIngestOut, status_code=202, summary="Tankdaten entgegennehmen")
+@router.post("/intake", response_model=TankIngestOut, status_code=202, summary="Tankdaten entgegennehmen", dependencies=SCHREIBEN["GERAET"])
 def intake(
     body: IntakeIn,
     user: dict = Depends(get_current_user),

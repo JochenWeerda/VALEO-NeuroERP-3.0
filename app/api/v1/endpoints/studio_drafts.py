@@ -21,6 +21,7 @@ from app.services.studio_validation import load_studio_catalog, validate_studio_
 from app.services.studio_semantic import DialogueTurn, HarvestPreviewIn, HarvestPreviewOut, StudioDialogueIn, StudioDialogueOut, dialogue, preview, semantic_catalog
 from app.core.database import get_db
 from sqlalchemy.orm import Session
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/studio", tags=["ui", "studio", "screen-definition"])
 
@@ -196,12 +197,12 @@ def studio_catalog(user: dict = Depends(get_current_user)) -> dict[str, Any]:
     }
 
 
-@router.post("/validate", summary="Studio-ScreenDefinition gegen Katalog und Gates prüfen")
+@router.post("/validate", summary="Studio-ScreenDefinition gegen Katalog und Gates prüfen", dependencies=SCHREIBEN["FACHLICH_LESEN"])
 def studio_validate(body: StudioDefinitionIn, user: dict = Depends(get_current_user)) -> dict[str, Any]:
     return _report(body.definition)
 
 
-@router.post("/propose", summary="Studio-ScreenDefinition aus einer Absicht vorschlagen")
+@router.post("/propose", summary="Studio-ScreenDefinition aus einer Absicht vorschlagen", dependencies=SCHREIBEN["FACHLICH"])
 def studio_propose(body: StudioProposeIn, user: dict = Depends(get_current_user)) -> dict[str, Any]:
     definition = propose_studio_draft(body.intent)
     return _report(definition)
@@ -320,7 +321,7 @@ def studio_submit_review(
     return _transition(draft_id, tenant_id, _actor(user), "review", body.expected_revision, str(body.idempotency_key))
 
 
-@router.post("/drafts/{draft_id}/publish", summary="Studio-Entwurf als published_temp freigeben")
+@router.post("/drafts/{draft_id}/publish", summary="Studio-Entwurf als published_temp freigeben", dependencies=SCHREIBEN["FACHLICH"])
 def studio_publish(
     draft_id: str,
     body: StudioRevisionIn,
@@ -352,7 +353,7 @@ def studio_publish(
     return {**record, **report, "canPublish": True, "route": studio_run_route(screen_id) if screen_id else None}
 
 
-@router.post("/drafts/{draft_id}/retire", summary="Freigegebene Studio-Maske zurückziehen")
+@router.post("/drafts/{draft_id}/retire", summary="Freigegebene Studio-Maske zurückziehen", dependencies=SCHREIBEN["FACHLICH"])
 def studio_retire(
     draft_id: str,
     body: StudioRevisionIn,

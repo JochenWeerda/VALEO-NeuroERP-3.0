@@ -13,6 +13,7 @@ from app.core.uuid7 import uuid7
 
 from app.core.database import get_db
 from . import models, schemas
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ def get_tenant_id(x_tenant: Optional[str] = Header(None)) -> str:
 
 # --- CONTACTS ---
 
-@router.post("/contacts", response_model=schemas.Contact, status_code=201)
+@router.post("/contacts", response_model=schemas.Contact, status_code=201, dependencies=SCHREIBEN["CRM"])
 async def create_contact(
     contact: schemas.ContactCreate,
     db: Session = Depends(get_db),
@@ -166,7 +167,7 @@ async def get_contact_timeline(
 
 
 
-@router.post("/leads/route", response_model=dict)
+@router.post("/leads/route", response_model=dict, dependencies=SCHREIBEN["CRM"])
 async def route_unassigned_leads(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
@@ -192,7 +193,7 @@ async def route_unassigned_leads(
 
 
 
-@router.post("/leads/{lead_id}/assign", response_model=schemas.Lead)
+@router.post("/leads/{lead_id}/assign", response_model=schemas.Lead, dependencies=SCHREIBEN["CRM"])
 async def assign_lead(
     lead_id: str,
     body: schemas.LeadAssignBody,
@@ -215,7 +216,7 @@ async def assign_lead(
 
 # --- ACTIVITIES ---
 
-@router.post("/activities", response_model=schemas.Activity, status_code=201)
+@router.post("/activities", response_model=schemas.Activity, status_code=201, dependencies=SCHREIBEN["CRM"])
 async def create_activity(
     activity: schemas.ActivityCreate,
     db: Session = Depends(get_db),
@@ -320,7 +321,7 @@ async def delete_activity(
 
 # --- BETRIEBSPROFILE ---
 
-@router.post("/betriebsprofile", response_model=schemas.BetriebsProfil, status_code=201)
+@router.post("/betriebsprofile", response_model=schemas.BetriebsProfil, status_code=201, dependencies=SCHREIBEN["CRM"])
 async def create_betriebsprofil(
     profil: schemas.BetriebsProfilCreate,
     db: Session = Depends(get_db),
@@ -367,7 +368,7 @@ async def get_betriebsprofil(
     return profil
 
 
-@router.put("/betriebsprofile/{profil_id}", response_model=schemas.BetriebsProfil)
+@router.put("/betriebsprofile/{profil_id}", response_model=schemas.BetriebsProfil, dependencies=SCHREIBEN["CRM"])
 async def update_betriebsprofil(
     profil_id: str,
     profil_update: schemas.BetriebsProfilUpdate,
@@ -391,7 +392,7 @@ async def update_betriebsprofil(
     return db_profil
 
 
-@router.delete("/betriebsprofile/{profil_id}", status_code=204)
+@router.delete("/betriebsprofile/{profil_id}", status_code=204, dependencies=SCHREIBEN["CRM"])
 async def delete_betriebsprofil(
     profil_id: str,
     db: Session = Depends(get_db),
@@ -436,7 +437,7 @@ async def get_opportunity_stages():
     return PIPELINE_STAGES
 
 
-@router.post("/opportunities", response_model=schemas.Opportunity, status_code=201)
+@router.post("/opportunities", response_model=schemas.Opportunity, status_code=201, dependencies=SCHREIBEN["CRM"])
 async def create_opportunity(
     opp: schemas.OpportunityCreate,
     db: Session = Depends(get_db),
@@ -504,7 +505,7 @@ async def get_opportunity(
     return opp
 
 
-@router.put("/opportunities/{opp_id}", response_model=schemas.Opportunity)
+@router.put("/opportunities/{opp_id}", response_model=schemas.Opportunity, dependencies=SCHREIBEN["CRM"])
 async def update_opportunity(
     opp_id: str,
     update: schemas.OpportunityUpdate,
@@ -530,7 +531,7 @@ async def update_opportunity(
     return opp
 
 
-@router.patch("/opportunities/{opp_id}/link", response_model=schemas.Opportunity)
+@router.patch("/opportunities/{opp_id}/link", response_model=schemas.Opportunity, dependencies=SCHREIBEN["CRM"])
 async def link_opportunity_to_documents(
     opp_id: str,
     body: schemas.OpportunityLinkBody,
@@ -574,7 +575,7 @@ async def get_opportunity_belegkette(
     return chain
 
 
-@router.delete("/opportunities/{opp_id}", status_code=204)
+@router.delete("/opportunities/{opp_id}", status_code=204, dependencies=SCHREIBEN["CRM"])
 async def delete_opportunity(
     opp_id: str,
     db: Session = Depends(get_db),
@@ -628,7 +629,7 @@ async def get_pipeline_summary(
 # CONSENT MANAGEMENT (CRM-CNS-01)
 # ---------------------------------------------------------------------------
 
-@router.post("/consents", response_model=schemas.ConsentResponse, status_code=201)
+@router.post("/consents", response_model=schemas.ConsentResponse, status_code=201, dependencies=SCHREIBEN["CRM"])
 async def create_consent(
     consent: schemas.ConsentCreate,
     db: Session = Depends(get_db),
@@ -771,7 +772,7 @@ async def gdpr_data_export(
     return result
 
 
-@router.post("/gdpr/anonymize/{partner_id}", response_model=dict)
+@router.post("/gdpr/anonymize/{partner_id}", response_model=dict, dependencies=SCHREIBEN["CRM"])
 async def gdpr_anonymize(
     partner_id: str,
     reason: str = Query(..., min_length=10, description="Reason for anonymization"),
@@ -809,7 +810,7 @@ async def gdpr_anonymize(
 # SEGMENTS / ZIELGRUPPEN (MKT-SEG-01)
 # ---------------------------------------------------------------------------
 
-@router.post("/segments", response_model=schemas.Segment, status_code=201)
+@router.post("/segments", response_model=schemas.Segment, status_code=201, dependencies=SCHREIBEN["CRM"])
 async def create_segment(
     seg: schemas.SegmentCreate,
     db: Session = Depends(get_db),
@@ -889,7 +890,7 @@ async def get_segment(
     )
 
 
-@router.post("/segments/{seg_id}/recalculate", response_model=dict)
+@router.post("/segments/{seg_id}/recalculate", response_model=dict, dependencies=SCHREIBEN["CRM"])
 async def recalculate_segment(
     seg_id: str,
     db: Session = Depends(get_db),
@@ -914,7 +915,7 @@ async def recalculate_segment(
     return {"ok": True, "segment_id": seg_id, "member_count": cnt}
 
 
-@router.put("/segments/{seg_id}", response_model=schemas.Segment)
+@router.put("/segments/{seg_id}", response_model=schemas.Segment, dependencies=SCHREIBEN["CRM"])
 async def update_segment(
     seg_id: str,
     update: schemas.SegmentUpdate,
@@ -952,7 +953,7 @@ async def update_segment(
     return await get_segment(seg_id, db, tenant_id)
 
 
-@router.delete("/segments/{seg_id}", status_code=204)
+@router.delete("/segments/{seg_id}", status_code=204, dependencies=SCHREIBEN["CRM"])
 async def delete_segment(
     seg_id: str,
     db: Session = Depends(get_db),
@@ -970,7 +971,7 @@ async def delete_segment(
     return None
 
 
-@router.post("/segments/{seg_id}/members", response_model=dict)
+@router.post("/segments/{seg_id}/members", response_model=dict, dependencies=SCHREIBEN["CRM"])
 async def add_segment_member(
     seg_id: str,
     partner_id: str = Query(..., description="Partner ID to add"),

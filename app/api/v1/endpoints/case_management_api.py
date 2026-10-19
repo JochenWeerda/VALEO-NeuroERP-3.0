@@ -23,6 +23,7 @@ from app.services.case_management import (
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class CaseManagementOut(BaseSchema):
@@ -93,8 +94,7 @@ async def get_single(case_id: str):
 
 
 @router.post("/{case_id}/assign", summary="Zuweisen",
-    response_model=CaseManagementOut
-)
+    response_model=CaseManagementOut, dependencies=SCHREIBEN["FACHLICH"])
 async def assign(case_id: str, request: AssignRequest):
     """Case einem Benutzer zuweisen."""
     case = assign_case(case_id, request.user_id)
@@ -104,8 +104,7 @@ async def assign(case_id: str, request: AssignRequest):
 
 
 @router.post("/{case_id}/decide", summary="Decide",
-    response_model=CaseManagementOut
-)
+    response_model=CaseManagementOut, dependencies=SCHREIBEN["FACHLICH"])
 async def decide(case_id: str, request: DecideRequest):
     """Case entscheiden (genehmigen/ablehnen)."""
     decision = ApprovalDecision(request.decision)
@@ -116,8 +115,7 @@ async def decide(case_id: str, request: DecideRequest):
 
 
 @router.post("/{case_id}/escalate", summary="Escalate",
-    response_model=CaseManagementOut
-)
+    response_model=CaseManagementOut, dependencies=SCHREIBEN["FACHLICH"])
 async def escalate(case_id: str, request: EscalateRequest):
     """Case eskalieren."""
     case = escalate_case(case_id, request.escalate_to, request.reason)
@@ -127,8 +125,7 @@ async def escalate(case_id: str, request: EscalateRequest):
 
 
 @router.post("/{case_id}/close", summary="Abschließen",
-    response_model=CaseManagementOut
-)
+    response_model=CaseManagementOut, dependencies=SCHREIBEN["FACHLICH"])
 async def close(case_id: str):
     """Case schliessen."""
     case = close_case(case_id)
@@ -138,8 +135,7 @@ async def close(case_id: str):
 
 
 @router.post("/escalate-overdue", summary="Overdue escalate",
-    response_model=CaseManagementOut
-)
+    response_model=CaseManagementOut, dependencies=SCHREIBEN["FACHLICH"])
 async def escalate_overdue():
     """Alle ueberfaelligen Cases automatisch eskalieren."""
     escalated = check_and_escalate_overdue()

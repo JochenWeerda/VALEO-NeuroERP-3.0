@@ -2671,8 +2671,7 @@ async def delete_shift(
 
 
 @router.post("/driver-time/events", status_code=201, summary="Driver time event anlegen",
-    response_model=IDResponse
-)
+    response_model=IDResponse, dependencies=SCHREIBEN["GERAET"])
 async def create_driver_time_event(
     payload: DriverTimeEventIn,
     tenant_id: str = Depends(get_tenant_id),
