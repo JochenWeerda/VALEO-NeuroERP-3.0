@@ -65,6 +65,7 @@ WEGE = {
         ("POST", "/document-control/project", "beleg_write"),
         ("POST", "/document-control/exceptions/{case_id}/assign", "beleg_write"),
         ("POST", "/document-control/exceptions/{case_id}/transition", "beleg_write"),
+        ("POST", "/document-control/exceptions/{entity_id}/actions/{action_key}", "beleg_write"),
     ],
     "mask_frontend_bridges": [
         ("GET", "/einkauf/rechnungen", "beleg_read"),

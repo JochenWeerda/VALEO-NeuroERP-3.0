@@ -5,6 +5,7 @@ import BelegKontrollePage from '@/pages/auswertungen/beleg-kontrolle'
 
 const post = vi.fn()
 const invalidateQueries = vi.fn()
+const toast = vi.fn()
 
 vi.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries }),
@@ -15,7 +16,7 @@ vi.mock('@/lib/api-client', () => ({
 }))
 
 vi.mock('@/hooks/use-toast', () => ({
-  useToast: () => ({ toast: vi.fn() }),
+  useToast: () => ({ toast }),
 }))
 
 vi.mock('@/components/mask-builder/UniversalNativeCockpitPage', () => ({
@@ -32,7 +33,7 @@ vi.mock('@/components/mask-builder/UniversalNativeCockpitPage', () => ({
       <button
         type="button"
         data-testid={testId}
-        onClick={() => onAction('resolve', { id: 'case-1', source_route: '/verkauf/lieferschein/1' })}
+        onClick={() => { void onAction('resolve', { id: 'case-1', source_route: '/verkauf/lieferschein/1' }) }}
       >
         resolve
       </button>
@@ -44,20 +45,40 @@ describe('BelegKontrollePage', () => {
   beforeEach(() => {
     post.mockReset()
     invalidateQueries.mockReset()
+    toast.mockReset()
     vi.stubGlobal('prompt', vi.fn(() => 'Fachlich geprueft und erledigt'))
   })
 
-  it('renders native worklist and posts audited resolve', async () => {
-    post.mockResolvedValue({ data: { id: 'case-1', status: 'resolved' } })
+  it('ruft den Kommando-Weg der Maske mit Begruendung und Wiederholungsschluessel', async () => {
+    post.mockResolvedValue({ data: { success: true, summary: 'Status resolved.' } })
     render(<BelegKontrollePage />)
     expect(screen.getByTestId('native-worklist')).toHaveAttribute('data-screen-id', 'auswertungen/beleg-kontrolle')
     await userEvent.click(screen.getByTestId('beleg-kontrolle'))
     await waitFor(() =>
-      expect(post).toHaveBeenCalledWith('/api/v1/document-control/exceptions/case-1/transition', {
-        target: 'resolved',
-        reason: 'Fachlich geprueft und erledigt',
+      expect(post).toHaveBeenCalledWith('/api/v1/document-control/exceptions/case-1/actions/resolve', {
+        _auditReason: 'Fachlich geprueft und erledigt',
+        _idempotencyKey: expect.any(String),
       }),
     )
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['auswertungen/beleg-kontrolle'] })
+  })
+
+  it('meldet eine fachliche Ablehnung nicht als Erfolg', async () => {
+    post.mockResolvedValue({ data: { success: false, error: 'Uebergang resolved -> resolved nicht erlaubt.' } })
+    render(<BelegKontrollePage />)
+    await userEvent.click(screen.getByTestId('beleg-kontrolle'))
+    await waitFor(() => expect(toast).toHaveBeenCalledWith(expect.objectContaining({ variant: 'destructive' })))
+    expect(invalidateQueries).not.toHaveBeenCalled()
+  })
+
+  it('fuehrt denselben Fall nicht doppelt aus, solange er laeuft', async () => {
+    let resolve: (value: unknown) => void = () => {}
+    post.mockReturnValue(new Promise(r => { resolve = r }))
+    render(<BelegKontrollePage />)
+    await userEvent.click(screen.getByTestId('beleg-kontrolle'))
+    await userEvent.click(screen.getByTestId('beleg-kontrolle'))
+    expect(post).toHaveBeenCalledTimes(1)
+    resolve({ data: { success: true } })
+    await waitFor(() => expect(invalidateQueries).toHaveBeenCalledTimes(1))
   })
 })

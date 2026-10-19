@@ -275086,6 +275086,81 @@
         ]
       }
     },
+    "/api/v1/document-control/exceptions/{entity_id}/actions/{action_key}": {
+      "post": {
+        "description": "Derselbe Fachweg wie Zuweisen/Statuswechsel, mit Begruendung, Trockenlauf und Wiederholungsschutz.\n\nBearbeiter und Zustaendiger kommen aus dem Token; die Begruendung (``_auditReason``) ist Pflicht.",
+        "operationId": "run_control_action_api_v1_document_control_exceptions__entity_id__actions__action_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "action_key",
+            "required": true,
+            "schema": {
+              "enum": [
+                "assign_me",
+                "start_work",
+                "resolve",
+                "waive"
+              ],
+              "title": "Action Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Belegkontrolle: Maskenaktion (zuweisen, in Arbeit, erledigt, verwerfen)",
+        "tags": [
+          "document-control",
+          "finance"
+        ]
+      }
+    },
     "/api/v1/document-control/project": {
       "post": {
         "operationId": "project_exceptions_api_v1_document_control_project_post",

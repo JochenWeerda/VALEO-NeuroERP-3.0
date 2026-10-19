@@ -1,6 +1,10 @@
 {
  "_hinweis": "Erzeugt von scripts/generate_cli_mask_commands.py; nicht von Hand pflegen.",
  "mask_action_ids": [
+  "mask:abrechnung/eb-lieferschein-kontrolle:assign_me",
+  "mask:abrechnung/eb-lieferschein-kontrolle:resolve",
+  "mask:abrechnung/eb-lieferschein-kontrolle:start_work",
+  "mask:abrechnung/eb-lieferschein-kontrolle:waive",
   "mask:admin/identity-budgets:allocate",
   "mask:admin/identity-budgets:root",
   "mask:admin/postfaecher:speichern",
@@ -21,7 +25,19 @@
   "mask:agrar/ration:schedule",
   "mask:agrar/ration:submit_review",
   "mask:auswertungen/abfrage-center:import",
+  "mask:auswertungen/auftrags-kontrolle:assign_me",
+  "mask:auswertungen/auftrags-kontrolle:resolve",
+  "mask:auswertungen/auftrags-kontrolle:start_work",
+  "mask:auswertungen/auftrags-kontrolle:waive",
+  "mask:auswertungen/beleg-kontrolle:assign_me",
+  "mask:auswertungen/beleg-kontrolle:resolve",
+  "mask:auswertungen/beleg-kontrolle:start_work",
+  "mask:auswertungen/beleg-kontrolle:waive",
   "mask:auswertungen/bonus-berechnung:calculate",
+  "mask:auswertungen/lieferschein-kontrolle:assign_me",
+  "mask:auswertungen/lieferschein-kontrolle:resolve",
+  "mask:auswertungen/lieferschein-kontrolle:start_work",
+  "mask:auswertungen/lieferschein-kontrolle:waive",
   "mask:auswertungen/sanktionspruefung-kunden:check",
   "mask:auswertungen/sanktionspruefung-personal:check",
   "mask:beleg/goods-receipt:bearbeiten",
@@ -141,6 +157,6 @@
  ],
  "nicht_unterstuetzt": {
   "eingabe_in_maske": 4,
-  "kein_endpunkt": 182
+  "kein_endpunkt": 166
  }
 }

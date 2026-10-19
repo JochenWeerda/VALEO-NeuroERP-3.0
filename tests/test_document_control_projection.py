@@ -87,9 +87,11 @@ def test_project_endpoint_registered(monkeypatch: pytest.MonkeyPatch) -> None:
             assert tenant_id == "00000000-0000-0000-0000-000000000001"
 
         def refresh(self, *, actor: str):
-            assert actor == "beleg-test-user"
+            # Der Bearbeiter kommt aus der geprueften Identitaet, nie aus dem Client-Header X-User-ID.
+            seen.append(actor)
             return {"tenant_id": "00000000-0000-0000-0000-000000000001", "collected": 2, "created": 1, "refreshed": 1, "skipped": 0}
 
+    seen: list[str] = []
     monkeypatch.setattr(endpoint, "DocumentControlProjectionService", FakeProjection)
     client = TestClient(app, raise_server_exceptions=False)
     response = client.post(
@@ -97,8 +99,9 @@ def test_project_endpoint_registered(monkeypatch: pytest.MonkeyPatch) -> None:
         headers={
             "Authorization": "Bearer dev-token",
             "X-Tenant-ID": "00000000-0000-0000-0000-000000000001",
-            "X-User-ID": "beleg-test-user",
+            "X-User-ID": "gefaelschter-bearbeiter",
         },
     )
     assert response.status_code == 200
     assert response.json()["created"] == 1
+    assert seen and seen[0] and seen[0] != "gefaelschter-bearbeiter"

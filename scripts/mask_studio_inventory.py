@@ -203,7 +203,7 @@ def actions() -> list[dict]:
             seen.add(key)
             flow = action.get("inputFlow") if isinstance(action.get("inputFlow"), dict) else {}
             rest = action.get("commandEndpoint") or flow.get("submitEndpoint")
-            navigation = bool(action.get("navigationRoute")) and not rest
+            navigation = (bool(action.get("navigationRoute")) or bool(action.get("localEffect"))) and not rest
             action_id = f"mask:{sid}:{key}"
             coverage = mcp.get(action_id)
             if navigation or coverage in MCP_OHNE_SERVERWIRKUNG:
