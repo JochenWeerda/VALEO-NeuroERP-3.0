@@ -83,6 +83,9 @@ WEGE = {
         ("POST", "/billing-batches/{batch_id}/release", "admin"),
         ("POST", "/billing-batches/{batch_id}/execute", "admin"),
         ("POST", "/billing-batches/lines/{line_id}/retry", "write"),
+        # Maskenaktionen: Grundrolle am Weg, Freigeben/Ausfuehren verlangen im Weg die Finanzleitung.
+        ("POST", "/billing-batches/{entity_id}/actions/{action_key}", "write"),
+        ("POST", "/billing-batches/lines/{entity_id}/actions/retry", "write"),
     ],
     "fibu_connectors": [
         ("GET", "/connectors/profiles", "read"),

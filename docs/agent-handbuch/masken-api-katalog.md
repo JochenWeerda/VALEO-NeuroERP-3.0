@@ -2591,9 +2591,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `create_count_sheet` | Zaehlliste | low | nein | `—` |
-| `create_control` | Kontrolllauf | low | nein | `—` |
-| `create_valuation` | Vorlaeufig bewerten | low | nein | `—` |
+| `create_count_sheet` | Zaehlliste | low | nein | `/api/v1/inventory/auxiliary/actions/create_count_sheet` |
+| `create_control` | Kontrolllauf | low | nein | `/api/v1/inventory/auxiliary/actions/create_control` |
+| `create_valuation` | Vorlaeufig bewerten | low | nein | `/api/v1/inventory/auxiliary/actions/create_valuation` |
 | `create_opening` | Bestandsvortrag | high | nein | `—` |
 
 ---

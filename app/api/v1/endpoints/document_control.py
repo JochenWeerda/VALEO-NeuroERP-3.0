@@ -16,6 +16,7 @@ from app.api.v1.schemas.docflow_bundle_schemas import (
     ControlTransitionOut,
     ControlWorklistOut,
 )
+from app.core.akteur import anzeigename, gepruefter_akteur
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.document_control_service import (
@@ -29,18 +30,8 @@ from app.services.document_control_projection import DocumentControlProjectionSe
 router = APIRouter(prefix="/document-control", tags=["document-control", "finance"])
 
 
-def _actor(user: dict[str, Any]) -> str:
-    """Audit-Urheber aus dem geprueften Token; ein Client-Header ist kein Nachweis."""
-    subject = user.get("sub") if isinstance(user, dict) else None
-    if not isinstance(subject, str) or not subject.strip():
-        raise HTTPException(status_code=403, detail="Gepruefter Bearbeiter fehlt")
-    return subject.strip()[:120]
-
-
-def _display_name(user: dict[str, Any]) -> str:
-    raw = user.get("raw") if isinstance(user.get("raw"), dict) else {}
-    name = raw.get("preferred_username") or user.get("preferred_username") or user.get("sub")
-    return str(name).strip()[:120]
+_actor = gepruefter_akteur
+_display_name = anzeigename
 
 
 class ExceptionIn(BaseModel):

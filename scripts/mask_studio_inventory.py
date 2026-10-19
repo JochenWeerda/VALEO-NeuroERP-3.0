@@ -233,7 +233,7 @@ def actions() -> list[dict]:
 STUDIO_CATALOG = ROOT / "config/studio_data_sources.yaml"
 OPENAPI = ROOT / "docs/schnittstellen/openapi.json"
 #: MCP kann die Aktion ausfuehren (oder sie ist bewusst Menschen vorbehalten). ``mapped_read`` liest nur Status.
-MCP_BEDIENBAR = {"mapped", "mapped_propose_only", "blocked_human_only"}
+MCP_BEDIENBAR = {"mapped", "mapped_generic", "mapped_propose_only", "blocked_human_only"}
 
 
 def _route_key(path: str) -> str:

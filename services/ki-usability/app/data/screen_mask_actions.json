@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 106,
+    "actions": 109,
     "screens_with_actions": 50,
     "domains": 14
   },
@@ -1250,6 +1250,46 @@
       }
     },
     {
+      "id": "mask:lager/inventur-nebenlaeufe:create_control",
+      "label": "Kontrolllauf",
+      "description": "Kontrolllauf (lager/inventur-nebenlaeufe)",
+      "category": "mask-action",
+      "domain": "inventory",
+      "mask": "lager/inventur-nebenlaeufe",
+      "intent_phrases": [
+        "Kontrolllauf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "lager/inventur-nebenlaeufe",
+        "actionKey": "create_control",
+        "commandEndpoint": "/api/v1/inventory/auxiliary/actions/create_control",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:lager/inventur-nebenlaeufe:create_count_sheet",
+      "label": "Zaehlliste",
+      "description": "Zaehlliste (lager/inventur-nebenlaeufe)",
+      "category": "mask-action",
+      "domain": "inventory",
+      "mask": "lager/inventur-nebenlaeufe",
+      "intent_phrases": [
+        "Zaehlliste"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "lager/inventur-nebenlaeufe",
+        "actionKey": "create_count_sheet",
+        "commandEndpoint": "/api/v1/inventory/auxiliary/actions/create_count_sheet",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
       "id": "mask:lager/inventur-nebenlaeufe:create_opening",
       "label": "Bestandsvortrag",
       "description": "Bestandsvortrag (lager/inventur-nebenlaeufe)",
@@ -1267,6 +1307,26 @@
         "navigationRoute": null,
         "command": null,
         "method": null
+      }
+    },
+    {
+      "id": "mask:lager/inventur-nebenlaeufe:create_valuation",
+      "label": "Vorlaeufig bewerten",
+      "description": "Vorlaeufig bewerten (lager/inventur-nebenlaeufe)",
+      "category": "mask-action",
+      "domain": "inventory",
+      "mask": "lager/inventur-nebenlaeufe",
+      "intent_phrases": [
+        "Vorlaeufig bewerten"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "lager/inventur-nebenlaeufe",
+        "actionKey": "create_valuation",
+        "commandEndpoint": "/api/v1/inventory/auxiliary/actions/create_valuation",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
       }
     },
     {

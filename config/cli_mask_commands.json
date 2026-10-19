@@ -129,6 +129,10 @@
   "mask:finance/ap-invoice:freigeben",
   "mask:finance/ar-open-item:mahnen",
   "mask:finance/payment-run:freigeben",
+  "mask:finance/rechnungstapel:execute",
+  "mask:finance/rechnungstapel:release",
+  "mask:finance/rechnungstapel:retry",
+  "mask:finance/rechnungstapel:validate",
   "mask:finance/steuerschluessel:speichern",
   "mask:fuhrpark/ausgehende-dokumente:speichern",
   "mask:fuhrpark/fahrzeug-stamm:loeschen",
@@ -137,6 +141,14 @@
   "mask:fuhrpark/terminarten:speichern",
   "mask:futtermittel/analyse:reject",
   "mask:futtermittel/analyse:release",
+  "mask:lager/fremdware:complete",
+  "mask:lager/fremdware:transfer",
+  "mask:lager/inventur-nebenlaeufe:apply",
+  "mask:lager/inventur-nebenlaeufe:approve",
+  "mask:lager/inventur-nebenlaeufe:create_control",
+  "mask:lager/inventur-nebenlaeufe:create_count_sheet",
+  "mask:lager/inventur-nebenlaeufe:create_valuation",
+  "mask:lager/inventur-nebenlaeufe:review",
   "mask:lager/stock-movement:stornieren",
   "mask:logistik/frachttabellen:anlegen",
   "mask:logistik/tourenplanung:anlegen",
@@ -146,6 +158,10 @@
   "mask:personal/qualifikationen:speichern",
   "mask:personal/schulungen:speichern",
   "mask:planung/kalender:reproject",
+  "mask:produktion/produktionsleitstand:complete",
+  "mask:produktion/produktionsleitstand:mark_rework",
+  "mask:produktion/produktionsleitstand:release",
+  "mask:produktion/produktionsleitstand:start",
   "mask:produktion/produktionsleitstand:sync",
   "mask:qualitaet/reklamation:abschliessen",
   "mask:sales/delivery-note:drucken",
@@ -157,6 +173,6 @@
  ],
  "nicht_unterstuetzt": {
   "eingabe_in_maske": 4,
-  "kein_endpunkt": 166
+  "kein_endpunkt": 150
  }
 }

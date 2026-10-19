@@ -204,8 +204,12 @@ export interface ScreenActionDefinition {
   /** Opens an existing human input flow; submitEndpoint is documentation, never auto-dispatched. */
   inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
   stubReason?: string
-  /** Wirkt nur in der Maske (kein Fachbefehl): Eingabe leeren oder woandershin fuehren. */
-  localEffect?: 'form_reset' | 'navigation'
+  /**
+   * Wirkt nur in der Maske (kein Fachbefehl, keine Serveraenderung): Eingabe leeren, woandershin fuehren,
+   * drucken, herunterladen (lesend), in den Bearbeitungsmodus wechseln, neu laden oder eine Ansicht oeffnen.
+   * CLI und MCP lesen dieselben Daten ueber die Datenquellen der Maske.
+   */
+  localEffect?: 'form_reset' | 'navigation' | 'print' | 'download' | 'edit_mode' | 'refresh' | 'view'
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   requiresConfirmation?: boolean
   dangerLevel?: ActionDangerLevel

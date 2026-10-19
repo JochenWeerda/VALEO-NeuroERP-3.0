@@ -240594,6 +240594,66 @@
         ]
       }
     },
+    "/api/v1/billing-batches/lines/{entity_id}/actions/retry": {
+      "post": {
+        "operationId": "run_line_retry_api_v1_billing_batches_lines__entity_id__actions_retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rechnungsstapel: Fehlerzeile erneut verarbeiten (Maskenaktion)",
+        "tags": [
+          "finance",
+          "billing-batches",
+          "self-billing"
+        ]
+      }
+    },
     "/api/v1/billing-batches/lines/{line_id}/retry": {
       "post": {
         "operationId": "retry_api_v1_billing_batches_lines__line_id__retry_post",
@@ -240851,6 +240911,81 @@
           }
         ],
         "summary": "Rechnungsstapel pruefen",
+        "tags": [
+          "finance",
+          "billing-batches",
+          "self-billing"
+        ]
+      }
+    },
+    "/api/v1/billing-batches/{entity_id}/actions/{action_key}": {
+      "post": {
+        "description": "Derselbe Fachweg wie die Einzelwege, mit Begruendung, Trockenlauf und Wiederholungsschutz.",
+        "operationId": "run_batch_action_api_v1_billing_batches__entity_id__actions__action_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "action_key",
+            "required": true,
+            "schema": {
+              "enum": [
+                "validate",
+                "release",
+                "execute"
+              ],
+              "title": "Action Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rechnungsstapel: Maskenaktion (pruefen, freigeben, ausfuehren)",
         "tags": [
           "finance",
           "billing-batches",
@@ -309865,6 +310000,79 @@
         ]
       }
     },
+    "/api/v1/foreign-goods/{entity_id}/actions/{action_key}": {
+      "post": {
+        "description": "Dieselben Fachwege wie ``/transfer`` und ``/complete``; Ziellager bzw. Restmenge im Auftrag.",
+        "operationId": "run_foreign_goods_action_api_v1_foreign_goods__entity_id__actions__action_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "action_key",
+            "required": true,
+            "schema": {
+              "enum": [
+                "transfer",
+                "complete"
+              ],
+              "title": "Action Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fremdware: Maskenaktion (umlagern, abschliessen)",
+        "tags": [
+          "inventory",
+          "foreign-goods"
+        ]
+      }
+    },
     "/api/v1/foreign-goods/{foreign_goods_id}/complete": {
       "post": {
         "operationId": "complete_api_v1_foreign_goods__foreign_goods_id__complete_post",
@@ -321945,6 +322153,71 @@
         ]
       }
     },
+    "/api/v1/inventory/auxiliary/actions/{action_key}": {
+      "post": {
+        "description": "Derselbe Fachweg wie ``POST /batches``; die Inventur (``inventory_count_id``) steht im Auftrag.",
+        "operationId": "run_create_action_api_v1_inventory_auxiliary_actions__action_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_key",
+            "required": true,
+            "schema": {
+              "enum": [
+                "create_count_sheet",
+                "create_control",
+                "create_valuation"
+              ],
+              "title": "Action Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Inventur-Nebenlauf erzeugen (Maskenaktion: Zaehlliste, Kontrolllauf, vorlaeufige Bewertung)",
+        "tags": [
+          "inventory",
+          "inventory-auxiliary"
+        ]
+      }
+    },
     "/api/v1/inventory/auxiliary/batches": {
       "get": {
         "operationId": "list_batches_api_v1_inventory_auxiliary_batches_get",
@@ -322152,6 +322425,79 @@
           }
         ],
         "summary": "Nebenbuch-Stapel weiterschalten",
+        "tags": [
+          "inventory",
+          "inventory-auxiliary"
+        ]
+      }
+    },
+    "/api/v1/inventory/auxiliary/batches/{entity_id}/actions/{action_key}": {
+      "post": {
+        "operationId": "run_batch_action_api_v1_inventory_auxiliary_batches__entity_id__actions__action_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "action_key",
+            "required": true,
+            "schema": {
+              "enum": [
+                "review",
+                "approve",
+                "apply"
+              ],
+              "title": "Action Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Inventur-Nebenlauf: Maskenaktion (pruefen, freigeben, anwenden)",
         "tags": [
           "inventory",
           "inventory-auxiliary"
@@ -383034,6 +383380,82 @@
           }
         ],
         "summary": "Produktionsvorgang registrieren",
+        "tags": [
+          "production-control",
+          "agrar",
+          "inventory"
+        ]
+      }
+    },
+    "/api/v1/production-control/operations/{entity_id}/actions/{action_key}": {
+      "post": {
+        "description": "Derselbe Statuswechsel wie ``/transition``, mit Begruendung, Trockenlauf und Wiederholungsschutz.",
+        "operationId": "run_operation_action_api_v1_production_control_operations__entity_id__actions__action_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "action_key",
+            "required": true,
+            "schema": {
+              "enum": [
+                "release",
+                "start",
+                "complete",
+                "mark_rework"
+              ],
+              "title": "Action Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Produktionsleitstand: Maskenaktion (freigeben, starten, abschliessen, Nacharbeit)",
         "tags": [
           "production-control",
           "agrar",

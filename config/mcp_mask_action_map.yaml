@@ -5,7 +5,7 @@ sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 106
+    actions: 109
     screens_with_actions: 50
     domains: 14
 mcp_write_tools:
@@ -81,13 +81,14 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 74
-  mask_mutations_considered: 59
+  mask_actions_considered: 77
+  mask_mutations_considered: 62
   by_coverage:
     adjacent: 1
     blocked_human_only: 8
     local_ui: 15
     mapped: 43
+    mapped_generic: 3
     mapped_propose_only: 1
     mapped_read: 2
     open_high: 4
@@ -599,6 +600,26 @@ mappings:
   mcp_tool_id: agrar.feed_analysis.transition
   coverage: mapped
   notes: MCP-MASK-WRITES-BATCH5-20261008; action_key=release.
+- mask_action_id: mask:lager/inventur-nebenlaeufe:create_control
+  mask: lager/inventur-nebenlaeufe
+  domain: inventory
+  action_key: create_control
+  label: Kontrolllauf
+  command_endpoint: /api/v1/inventory/auxiliary/actions/create_control
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:lager/inventur-nebenlaeufe:create_count_sheet
+  mask: lager/inventur-nebenlaeufe
+  domain: inventory
+  action_key: create_count_sheet
+  label: Zaehlliste
+  command_endpoint: /api/v1/inventory/auxiliary/actions/create_count_sheet
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
 - mask_action_id: mask:lager/inventur-nebenlaeufe:create_opening
   mask: lager/inventur-nebenlaeufe
   domain: inventory
@@ -610,6 +631,16 @@ mappings:
   coverage: mapped_propose_only
   notes: MCP-INVENTUR-OPENING-PROPOSE-20261008; propose-only (pending, execute 501); kein CommandEndpoint,
     kein Booking/Journal — Uebernahme nur UI Vier-Augen.
+- mask_action_id: mask:lager/inventur-nebenlaeufe:create_valuation
+  mask: lager/inventur-nebenlaeufe
+  domain: inventory
+  action_key: create_valuation
+  label: Vorlaeufig bewerten
+  command_endpoint: /api/v1/inventory/auxiliary/actions/create_valuation
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
 - mask_action_id: mask:lager/stock-movement:stornieren
   mask: lager/stock-movement
   domain: lager

@@ -492,6 +492,31 @@ def _is_mutation(action: dict[str, Any]) -> bool:
     return bool(MUT_KEY.search(key))
 
 
+def _generic_coverage(action: dict[str, Any]) -> dict[str, Any] | None:
+    """Kommando-Endpunkt im Maskenformat: ``mask.action.execute`` fuehrt ihn aus — oder die Maske sperrt Agenten.
+
+    Dieselbe Regel wie das Werkzeug selbst (``app.services.mcp_mask_actions.agent_block``), gelesen aus der
+    mandantenunabhaengigen ScreenDefinition. ``None``: kein Kommando-Endpunkt, alte Einstufung gilt.
+    """
+    from app.core.screen_definitions import get_screen_definition
+    from app.services.mcp_mask_actions import agent_block, iter_actions
+
+    screen_id = action.get("mask")
+    key = (action.get("source") or {}).get("actionKey")
+    definition = get_screen_definition(screen_id) if isinstance(screen_id, str) else None
+    sd_action = next((a for a in iter_actions(definition or {}) if a.get("key") == key), None)
+    if not sd_action or not sd_action.get("commandEndpoint"):
+        return None
+    block = agent_block(sd_action)
+    if block is None:
+        return {"mcp_tool_id": "mask.action.execute", "coverage": "mapped_generic",
+                "notes": "Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske."}
+    if block in {"fuer_agenten_gesperrt", "menschliche_genehmigung"}:
+        return {"mcp_tool_id": None, "coverage": "blocked_human_only",
+                "notes": f"Maske behaelt die Aktion Menschen vor ({block}); CLI und Maske nutzen denselben Endpunkt."}
+    return None
+
+
 def build_map() -> dict[str, Any]:
     catalog = _load_json(ACTIONS_PATH)
     actions = catalog["actions"]
@@ -533,6 +558,8 @@ def build_map() -> dict[str, Any]:
         elif mid in BLOCKED_RULES:
             entry.update(BLOCKED_RULES[mid])
             entry["mcp_tool_id"] = None
+        elif (generic := _generic_coverage(action)) is not None:
+            entry.update(generic)
         elif domain in HIGH_DOMAINS:
             entry["mcp_tool_id"] = None
             entry["coverage"] = "open_high"

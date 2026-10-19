@@ -3255,8 +3255,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "inventory.aux.write",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/inventory/auxiliary/actions/create_count_sheet",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -3266,8 +3266,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "inventory.aux.write",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/inventory/auxiliary/actions/create_control",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -3277,8 +3277,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "inventory.aux.write",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/inventory/auxiliary/actions/create_valuation",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -5481,5 +5481,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 98
+  "event_count": 99
 }

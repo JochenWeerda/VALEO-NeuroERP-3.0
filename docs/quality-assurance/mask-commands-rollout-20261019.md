@@ -34,3 +34,40 @@ Zustaendiger kommen jetzt aus dem geprueften Token; ohne `sub` antwortet der Weg
   ESLint und volle `tsc` ohne Befund in den Dateien.
 - Neu erzeugt: OpenAPI, Architekturindex, CLI-Register (153 Aktionen, vorher 137), Inventar und Ratsche
   (`aktionen_nicht_deklariert` 119 -> 99). Gates Kommando-Inventar, MCP-REST-Bindungen, Architektur-Drift gruen.
+
+## Schritt 2: Rechnungsstapel, Produktionsleitstand, Fremdware, Inventur-Nebenlaeufe
+
+Kommando-Endpunkte (alle ueber `app/services/mask_commands.statusaktion` bzw. `run_delegated_mask_action`):
+
+- `POST /billing-batches/{id}/actions/{validate|release|execute}`, `POST /billing-batches/lines/{id}/actions/retry`
+- `POST /production-control/operations/{id}/actions/{release|start|complete|mark_rework}`
+- `POST /foreign-goods/{id}/actions/{transfer|complete}` (Ziellager bzw. Restmenge im Auftrag)
+- `POST /inventory/auxiliary/batches/{id}/actions/{review|approve|apply}`,
+  `POST /inventory/auxiliary/actions/{create_count_sheet|create_control|create_valuation}` (Inventur im Auftrag)
+
+Freigeben/Ausfuehren eines Rechnungsstapels und Freigeben/Anwenden eines Inventur-Nebenlaufs sind
+`humanApprovalRequired` (MCP sperrt Agenten). Reine Oberflaechenaktionen tragen `localEffect` (`navigation`,
+`print`); der Typ kennt jetzt zusaetzlich `download`, `edit_mode`, `refresh`, `view`.
+
+Gemeinsame Bausteine: `app/core/akteur.py` (Urheber aus dem Token, Rolle je Aktion),
+`app/auth/betrieb_roles.py` (Lager/Produktion), `useMaskRowCommands` (Seite: Umschlag, `success=false` ist
+Fehler, Schutz je Zeile und Aktion), `tests/maskenkommando_pruefstand.py` (Pruefstand mit umschaltbarer
+Identitaet). Der MCP-Kartengenerator kennt `mask.action.execute` (`mapped_generic`).
+
+### Sicherheitsbefunde und Korrektur
+
+1. **Vier-Augen-Prinzip umgehbar.** Rechnungsstapel (Freigeber != Ersteller) und Inventurfreigabe
+   (Pruefer != Ersteller) verglichen Werte aus `X-User-ID`. Mit zwei Kopfzeilen gab man den eigenen Stapel
+   bzw. die eigene Bewertung selbst frei. Jetzt Kennungen aus dem Token (Test mit zwei Personen).
+2. **Schreibwege ohne Rolle.** Produktionsleitstand (registrieren, synchronisieren, weiterschalten), Fremdware
+   (umlagern, abschliessen) und Inventur-Nebenlaeufe (anlegen, weiterschalten) prueften keine Rolle; jede
+   angemeldete Person des Mandanten konnte schreiben. Jetzt Bearbeitungsrolle des Bereichs, Freigeben/Anwenden
+   der Inventur Lagerleitung.
+
+### Nachweis
+
+- Gegen `valeo_probe`: `test_billing_batch_mask_commands` (6), `test_production_control_mask_commands` (3),
+  `test_lager_mask_commands` (4); mit Bestands-, MCP-, CLI-, Katalog-, Inventar- und Rollenvertragssuiten
+  zusammen 1997 gruen.
+- Vitest der fuenf Seiten 15 gruen; volle `tsc` und ESLint ohne Befund in den Dateien.
+- Inventar: `aktionen_nicht_deklariert` 99 -> 75, CLI-Register 169 Aktionen.
