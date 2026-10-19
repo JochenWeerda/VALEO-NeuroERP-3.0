@@ -972,5 +972,10 @@
   "mask:transporte/fahrer:export",
   "mask:transporte/fahrer:touren",
   "mask:transporte/fahrer:verfuegbar"
+ ],
+ "studio_katalog_nicht_bedienbar": [
+  "aktion:mahnen:mcp_nicht_ausfuehrbar",
+  "aktion:stornieren:mcp_nicht_ausfuehrbar",
+  "aktion:stornieren:ohne_route"
  ]
 }

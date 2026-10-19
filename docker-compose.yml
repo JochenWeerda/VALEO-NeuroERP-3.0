@@ -288,7 +288,8 @@ services:
       - ./alembic:/app/alembic
       - ./alembic.ini:/app/alembic.ini
       - ./main.py:/app/main.py
-      - ./config/mcp_erp_tools.yaml:/app/config/mcp_erp_tools.yaml:ro
+      # Laufzeitkonfiguration (Belegvarianten, Studio-Katalog); ohne sie 500 auf beleg/* und Studio-Simulation.
+      - ./config:/app/config:ro
     command: sh -c "python scripts/init_db.py && uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4 --timeout-keep-alive 5"
 
   inventory-service:

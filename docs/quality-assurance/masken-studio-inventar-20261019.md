@@ -33,6 +33,19 @@ Gesamt 671 Routen, davon 669 Masken.
 
 - `beleg`: 9 Varianten — goods_receipt 1.2.0, purchase_credit_memo 1.2.0, purchase_invoice 1.2.0, purchase_order 1.2.0, sales_credit_memo 1.2.0, sales_delivery 1.2.0, sales_invoice 1.2.0, sales_offer 1.2.0, sales_order 1.2.0
 
+## Studio-Katalog
+
+Studio-Masken tragen nur Katalogaktionen. Was hier bedienbar ist, ist es in jeder Studio-Maske.
+
+| Katalogaktion | Route | CLI | MCP |
+|---|---|---|---|
+| `create_activity` | ja | ja | mapped |
+| `mahnen` | ja | ja | mapped_read — **nicht ausfuehrbar** |
+| `freigeben` | ja | ja | mapped |
+| `stornieren` | **fehlt** | ja | keine Abbildung — **nicht ausfuehrbar** |
+
+Datenquellen: 15, ohne Route: keine.
+
 ## Beleg-Einstiege ausserhalb der Belegfamilie
 
 Stichwortsuche im Routenpfad (Angebot, Auftrag, Bestellung, Lieferschein, Wareneingang, Rechnung,

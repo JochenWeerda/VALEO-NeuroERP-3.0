@@ -191,3 +191,58 @@ def test_lesende_befehle_schreiben_nichts(monkeypatch, cmd):
 
     code, _ = run(cmd, handler, monkeypatch)
     assert code == 0 and all(method == "GET" for method, _, _ in studio.calls)
+
+
+CATALOG = {"version": "v", "permissions": {"canDesign": True},
+           "dataSources": [{"key": "duenger", "label": "Duenger", "endpoint": "/api/v1/agrar/duenger"}],
+           "actions": [{"key": "freigeben", "label": "Freigeben", "dangerLevel": "moderate",
+                        "commandEndpoint": "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben",
+                        "forbiddenForAgents": False},
+                       {"key": "stornieren", "label": "Stornieren", "dangerLevel": "high",
+                        "commandEndpoint": "/api/v1/x/{entity_id}/stornieren", "forbiddenForAgents": True}]}
+
+
+def test_neu_setzt_nur_katalogquellen_und_katalogaktionen_zusammen():
+    from valeo_cli.studio import compose
+    d = compose(CATALOG, screen_id="tenant/d", title="D", domain="agrar", source_key="duenger",
+                columns=[("name", "Name")], action_keys=["stornieren"])
+    assert d["dataSources"] == [{"key": "duenger", "endpoint": "/api/v1/agrar/duenger", "pageSize": 50}]
+    [action] = d["actions"]
+    assert action["dangerLevel"] == "high" and action["forbiddenForAgents"] is True and action["requiresConfirmation"]
+    assert d["agentContract"]["editableFields"] == [] and d["adapter"]["sourceId"] == "tenant/d"
+    assert d["agentContract"]["availableActions"][0]["requiresHumanApproval"] is True
+    with pytest.raises(ValueError, match="nicht im Studio-Katalog"):
+        compose(CATALOG, screen_id="tenant/d", title="D", domain="agrar", source_key="frei",
+                columns=[("a", "A")], action_keys=[])
+    with pytest.raises(ValueError, match="nicht im Studio-Katalog"):
+        compose(CATALOG, screen_id="tenant/d", title="D", domain="agrar", source_key="duenger",
+                columns=[("a", "A")], action_keys=["eigene"])
+    with pytest.raises(ValueError, match="--spalte"):
+        compose(CATALOG, screen_id="tenant/d", title="D", domain="agrar", source_key="duenger",
+                columns=[], action_keys=[])
+
+
+def test_lesende_agrarliste_aus_neu_passt_ins_freigabeprofil():
+    from app.core.studio_release import profile_errors
+    from valeo_cli.studio import compose
+    d = compose(CATALOG, screen_id="tenant/d", title="D", domain="agrar", source_key="duenger",
+                columns=[("name", "Name")], action_keys=[])
+    assert profile_errors(d) == []
+
+
+def test_neu_prueft_beim_server_und_speichert_nur_ohne_verstoss(monkeypatch):
+    studio = Studio()
+    original = studio.__call__
+
+    def handler(request):
+        if request.url.path.endswith("/catalog"):
+            return httpx.Response(200, json=CATALOG)
+        return original(request)
+
+    code, out = run(["neu", "--maske", "tenant/d", "--titel", "D", "--domaene", "agrar", "--quelle", "duenger",
+                     "--spalte", "name=Name", "--speichern"], handler, monkeypatch)
+    assert code == 0 and "Entwurf angelegt" in out
+    assert [p for m, p, _ in studio.calls] == ["/validate", "/drafts"]
+    code, out = run(["neu", "--maske", "tenant/e", "--titel", "E", "--domaene", "agrar", "--quelle", "frei",
+                     "--spalte", "x"], handler, monkeypatch)
+    assert code == 2 and "nicht im Studio-Katalog" in out

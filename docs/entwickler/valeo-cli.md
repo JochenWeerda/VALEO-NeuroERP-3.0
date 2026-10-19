@@ -75,6 +75,7 @@ Rechten: Gestalten braucht das Belegschreibrecht; Freigeben und Zurueckziehen br
 ```bash
 python -m valeo_cli studio katalog                       # Datenquellen, Kommandoaktionen, eigene Studio-Rechte
 python -m valeo_cli studio vorschlag "Lieferanten mit Ort und Status" --maske tenant/lieferanten --speichern
+python -m valeo_cli studio neu --maske tenant/duenger-liste --titel "Duenger" --domaene agrar     --quelle duenger --spalte artikelnummer=Nr --spalte name=Bezeichnung --aktion freigeben --speichern
 python -m valeo_cli studio quellen duenger               # vorhandene Masken als Ausgangsfassung
 python -m valeo_cli studio uebernehmen agrar/duenger     # bindet den angezeigten Quellhash
 python -m valeo_cli studio entwuerfe
@@ -94,15 +95,25 @@ python -m valeo_cli studio historie <entwurf>
   wiederholt einen Aufruf mit demselben Schluessel.
 - **Kennung:** `--maske tenant/<kennung>` setzt die Maskenkennung und zieht die eigene Adapterbindung mit. Ob die
   Kennung zulaessig und frei ist, entscheidet der Server.
+- **Gezielt zusammensetzen:** `neu` baut eine Arbeitsliste nur aus Datenquelle und Kommandoaktionen des
+  Server-Katalogs (`studio katalog --json`); Gefahrenstufe und Agentensperre kommen unveraendert aus dem Katalog,
+  Spalten sind nur lesbar. Freie Adressen oder eigene Aktionen gibt es nicht. `vorschlag` dagegen kennt heute nur
+  vier feste Vorlagen (Kunden, Offene Posten, Artikel, sonst Lieferanten) und beachtet die Absicht kaum.
 - **Dateien:** `speichern` und `pruefen` nehmen eine reine Definition oder die Ausgabe von `zeigen` bzw.
   `vorschlag`; `-` liest von stdin.
 
 Eine freigegebene Studio-Maske liefert `GET /api/v1/masks/{kennung}/screen-definition` mandantengenau aus. Ihre
 Aktionen sind damit sofort ueber `aktionen`, `zeigen` und `ausfuehren` bedienbar.
 
+Jede Studio-Maske ist per CLI und MCP bedienbar, soweit es ihre Katalogaktionen sind. Das
+Masken-Studio-Inventar prueft jede Katalogaktion auf echte Route, CLI-Zugang und ausfuehrbare MCP-Abbildung
+und jede Katalogquelle auf eine echte Route (Ratsche `studio_katalog_nicht_bedienbar`).
+
 Grenze des Servers: Die Freigabe verlangt eine bestandene Simulation. Das einzige Simulationsprofil
 `grain.v1` deckt nur die Getreidekette (Domaene `agrar`) ab. Andere Masken lassen sich anlegen, pruefen und
-zur Pruefung geben, aber noch nicht freigeben.
+zur Pruefung geben, aber noch nicht freigeben. Freigabefaehig sind im Profil nur lesende Agrar-Masken (ohne
+Aktionen, bearbeitbare Felder, Regeln, eingebettete Transporte). Die Simulation braucht den Pruefstand
+`valeo_probe` ueber `TEST_DATABASE_URL`; ohne ihn scheitert sie mit `simulation_probe_not_configured`.
 
 ## Was die CLI (noch) nicht ausfuehrt
 

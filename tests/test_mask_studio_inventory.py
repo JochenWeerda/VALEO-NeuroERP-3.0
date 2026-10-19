@@ -93,3 +93,21 @@ def test_cli_befund_kommt_allein_aus_dem_register(modul, inventar):
     assert {a["id"] for a in inventar["aktionen"] if a["cli"]} == register
     wirksam = {a["id"] for a in inventar["aktionen"] if a["art"] == "serverwirksam"}
     assert set(modul.gaps(inventar)["aktionen_ohne_cli"]) == wirksam - register
+
+
+def test_katalogaktion_ohne_route_oder_mcp_macht_die_ratsche_rot(modul, inventar, capsys):
+    """Studio-Masken tragen nur Katalogaktionen — eine unbedienbare Katalogaktion waere in jeder Studio-Maske kaputt."""
+    inv = copy.deepcopy(inventar)
+    inv["studio_katalog"]["aktionen"].append({"aktion": "neu_kaputt", "endpunkt": "/api/v1/gibt/es/nicht",
+                                              "route": False, "cli": True, "mcp": [], "mcp_bedienbar": False})
+    assert modul.check(inv) == 1
+    out = capsys.readouterr().out
+    assert "aktion:neu_kaputt:ohne_route" in out and "aktion:neu_kaputt:mcp_nicht_ausfuehrbar" in out
+
+
+def test_katalog_wird_gegen_openapi_und_mcp_karte_geprueft(modul, inventar):
+    rows = {a["aktion"]: a for a in inventar["studio_katalog"]["aktionen"]}
+    assert rows["freigeben"]["route"] and rows["freigeben"]["cli"] and rows["freigeben"]["mcp_bedienbar"]
+    assert "mapped_read" not in modul.MCP_BEDIENBAR, "nur Status lesen ist kein Bedienen"
+    for row in rows.values():
+        assert row["mcp_bedienbar"] == bool(set(row["mcp"]) & modul.MCP_BEDIENBAR)

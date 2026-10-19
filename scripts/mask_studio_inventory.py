@@ -215,6 +215,40 @@ def actions() -> list[dict]:
     return rows
 
 
+# --------------------------------------------------------------------------------------------- Studio-Katalog
+
+STUDIO_CATALOG = ROOT / "config/studio_data_sources.yaml"
+OPENAPI = ROOT / "docs/schnittstellen/openapi.json"
+#: MCP kann die Aktion ausfuehren (oder sie ist bewusst Menschen vorbehalten). ``mapped_read`` liest nur Status.
+MCP_BEDIENBAR = {"mapped", "mapped_propose_only", "blocked_human_only"}
+
+
+def _route_key(path: str) -> str:
+    return re.sub(r"\{[^}]+\}", "{}", path).rstrip("/")
+
+
+def catalog() -> dict:
+    """Eine Studio-Maske kann nur Quellen und Aktionen aus dem Katalog tragen. Ist jede Katalogaktion per CLI
+    und MCP bedienbar und zeigt jede Quelle auf eine echte Route, gilt das fuer jede Studio-Maske."""
+    import yaml
+
+    from valeo_cli.support import support
+
+    data = yaml.safe_load(STUDIO_CATALOG.read_text(encoding="utf-8")) or {}
+    routes = {_route_key(path) for path in json.loads(OPENAPI.read_text(encoding="utf-8"))["paths"]}
+    mappings = (yaml.safe_load(MCP_MAP.read_text(encoding="utf-8")) or {}).get("mappings", [])
+    rows = []
+    for action in data.get("command_actions") or []:
+        endpoint = action.get("commandEndpoint") or ""
+        coverages = sorted({m["coverage"] for m in mappings if m.get("command_endpoint") == endpoint})
+        rows.append({"aktion": action["key"], "endpunkt": endpoint, "route": _route_key(endpoint) in routes,
+                     "cli": support(action).supported, "mcp": coverages,
+                     "mcp_bedienbar": bool(set(coverages) & MCP_BEDIENBAR)})
+    sources = [{"quelle": ds["key"], "endpunkt": ds["endpoint"], "route": _route_key(ds["endpoint"]) in routes}
+               for ds in data.get("data_sources") or []]
+    return {"aktionen": rows, "quellen": sources}
+
+
 # --------------------------------------------------------------------------------------------- Auswertung
 
 def inventory() -> dict:
@@ -229,6 +263,7 @@ def inventory() -> dict:
         "familien": {families["family"]: families["current"]},
         "seiten": page_rows,
         "aktionen": action_rows,
+        "studio_katalog": catalog(),
         "masken_ohne_route": [sid for sid in registered
                               if sid not in routed and not any(r.startswith(sid.split("/")[0] + "/${") for r in routed)],
     }
@@ -242,6 +277,12 @@ def gaps(inv: dict) -> dict[str, list[str]]:
         "aktionen_nicht_deklariert": sorted(a["id"] for a in inv["aktionen"] if a["art"] == "nicht_deklariert"),
         "aktionen_ohne_mcp_klassifikation": sorted(a["id"] for a in wirksam if a["mcp"] == "unklassifiziert"),
         "aktionen_ohne_cli": sorted(a["id"] for a in wirksam if not a["cli"]),
+        "studio_katalog_nicht_bedienbar": sorted(
+            [f"aktion:{a['aktion']}:ohne_route" for a in inv["studio_katalog"]["aktionen"] if not a["route"]]
+            + [f"aktion:{a['aktion']}:ohne_cli" for a in inv["studio_katalog"]["aktionen"] if not a["cli"]]
+            + [f"aktion:{a['aktion']}:mcp_nicht_ausfuehrbar" for a in inv["studio_katalog"]["aktionen"]
+               if not a["mcp_bedienbar"]]
+            + [f"quelle:{q['quelle']}:ohne_route" for q in inv["studio_katalog"]["quellen"] if not q["route"]]),
     }
 
 
@@ -300,6 +341,15 @@ def markdown(inv: dict) -> str:
     for family, variants in inv["familien"].items():
         lines.append(f"- `{family}`: {len(variants)} Varianten — " + ", ".join(
             f"{k} {v}" for k, v in sorted(variants.items())))
+    lines += ["", "## Studio-Katalog", "",
+              "Studio-Masken tragen nur Katalogaktionen. Was hier bedienbar ist, ist es in jeder Studio-Maske.", "",
+              "| Katalogaktion | Route | CLI | MCP |", "|---|---|---|---|"]
+    for a in inv["studio_katalog"]["aktionen"]:
+        mcp = ", ".join(a["mcp"]) or "keine Abbildung"
+        lines.append(f"| `{a['aktion']}` | {'ja' if a['route'] else '**fehlt**'} | {'ja' if a['cli'] else 'nein'} | "
+                     f"{mcp}{'' if a['mcp_bedienbar'] else ' — **nicht ausfuehrbar**'} |")
+    missing = [q["quelle"] for q in inv["studio_katalog"]["quellen"] if not q["route"]]
+    lines += ["", f"Datenquellen: {len(inv['studio_katalog']['quellen'])}, ohne Route: {', '.join(missing) or 'keine'}."]
     beleg = [r for r in seiten if r["stufe"] in ("screen_definition", "builder_altmuster", "handgebaut")
              and _BELEG_ROUTE.search(r["route"])]
     lines += ["", "## Beleg-Einstiege ausserhalb der Belegfamilie", "",

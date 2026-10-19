@@ -86,6 +86,68 @@ def _current_revision(call, draft_id: str) -> str:
     return call("GET", f"{STUDIO}/drafts/{draft_id}")["revision"]
 
 
+def _parse_columns(specs: list[str]) -> list[tuple[str, str]]:
+    columns = []
+    for spec in specs:
+        key, _, label = spec.partition("=")
+        if not key.strip():
+            raise ValueError(f"--spalte erwartet feld oder feld=Bezeichnung, nicht {spec!r}")
+        columns.append((key.strip(), (label or key).strip()))
+    return columns
+
+
+def compose(catalog: dict[str, Any], *, screen_id: str, title: str, domain: str, source_key: str,
+            columns: list[tuple[str, str]], action_keys: list[str], density: str = "compact") -> dict[str, Any]:
+    """Arbeitsliste ausschliesslich aus dem Server-Katalog — dieselbe Form wie der Studio-Vorschlag.
+
+    Keine freie Adresse und keine eigene Aktion: Quelle und Aktionen muessen im Katalog stehen, Gefahrenstufe und
+    Agentensperre kommen unveraendert aus ihm. Spalten sind nur lesbar; was gilt, entscheidet die Servervalidierung.
+    """
+    sources = {ds["key"]: ds for ds in catalog.get("dataSources") or []}
+    actions = {a["key"]: a for a in catalog.get("actions") or []}
+    if source_key not in sources:
+        raise ValueError(f"Datenquelle {source_key!r} steht nicht im Studio-Katalog ({', '.join(sorted(sources))}).")
+    unknown = [key for key in action_keys if key not in actions]
+    if unknown:
+        raise ValueError(f"Aktion {', '.join(unknown)} steht nicht im Studio-Katalog ({', '.join(sorted(actions))}).")
+    if not columns:
+        raise ValueError("Mindestens eine --spalte angeben.")
+    source = sources[source_key]
+    chosen = [actions[key] for key in action_keys]
+    screen_actions = [{"key": a["key"], "label": a.get("label", a["key"]), "dangerLevel": a["dangerLevel"],
+                       "commandEndpoint": a.get("commandEndpoint"), "forbiddenForAgents": a.get("forbiddenForAgents", False),
+                       "requiresConfirmation": a["dangerLevel"] != "safe", "permission": "studio.draft.execute"}
+                      for a in chosen]
+    slug = screen_id.split("/", 1)[-1]
+    return {
+        "schemaVersion": 1, "id": screen_id, "domain": domain, "mode": "list", "title": title, "subtitle": title,
+        "adapter": {"type": "native", "sourceId": screen_id, "temporary": True},
+        "dataSources": [{"key": source["key"], "endpoint": source["endpoint"], "pageSize": 50}],
+        "layout": {"floorplan": "worklist", "columnNavigation": "listDetail", "density": density,
+                   "contextRail": "none", "tableProfile": "financial" if domain == "finance" else "standard"},
+        "tables": [{"key": "list", "label": title, "dataSourceKey": source["key"], "serverPagination": True,
+                    "pageSize": 25, "virtualized": True, "rowHeight": 44,
+                    "columns": [{"key": key, "label": label, "sortable": True, "filterable": True} for key, label in columns]}],
+        "actions": screen_actions,
+        "noWorkflowReason": "Studio-Worklist priorisiert Auswahl; Statuswechsel bleiben auf der ObjectPage.",
+        "agentContract": {
+            "screenId": screen_id, "domain": domain, "schemaVersion": 1, "contractVersion": 1,
+            "businessPurpose": title, "primaryEntity": slug,
+            "readableFields": [key for key, _ in columns], "editableFields": [], "sensitiveFields": [],
+            "availableActions": [{"key": a["key"], "label": a["label"], "dangerLevel": a["dangerLevel"],
+                                  "requiresHumanApproval": a["forbiddenForAgents"],
+                                  "requiresConfirmation": a["requiresConfirmation"], "permission": a["permission"]}
+                                 for a in screen_actions],
+            "validationRules": [], "workflowRules": [], "auditRequirements": [],
+            "recommendedAgentTasks": [f"{title} filtern und auswerten"], "forbiddenAgentTasks": [],
+            "testSelectors": {"screenRoot": f"[data-testid='screen-{screen_id}']",
+                              "submitButton": "[data-testid='form-submit-btn']",
+                              "workflowPanel": "[data-testid='workflow-panel']"},
+            "examplePrompts": [title],
+        },
+    }
+
+
 def run(args, call, out, stdin) -> int:
     """``call(method, path, body=None)`` liefert JSON oder wirft (Anmeldung, 404, Serverfehler)."""
     cmd = args.studio_befehl
@@ -126,6 +188,22 @@ def run(args, call, out, stdin) -> int:
             out("Entwurf angelegt: " + _summary(record))
         if args.ausgabe or not args.speichern:
             _write(args.ausgabe, report["definition"], out)
+        return 0
+    if cmd == "neu":
+        definition = compose(call("GET", f"{STUDIO}/catalog"), screen_id=args.maske, title=args.titel,
+                             domain=args.domaene, source_key=args.quelle, columns=_parse_columns(args.spalte),
+                             action_keys=args.aktion, density=args.dichte)
+        report = call("POST", f"{STUDIO}/validate", {"definition": definition})
+        ready = _report_lines(report, out)
+        if args.ausgabe:
+            _write(args.ausgabe, report["definition"], out)
+        if not args.speichern:
+            return 0 if ready else 1
+        if report.get("violations"):
+            out("Nicht gespeichert: Die Definition hat Verstoesse.")
+            return 1
+        record = call("POST", f"{STUDIO}/drafts", {"definition": report["definition"], "idempotency_key": _key(args)})
+        out("Entwurf angelegt: " + _summary(record))
         return 0
     if cmd == "pruefen":
         report = call("POST", f"{STUDIO}/validate", {"definition": _read_definition(args.datei, stdin)})
@@ -196,6 +274,16 @@ def add_parser(sub) -> None:
     v.add_argument("--speichern", action="store_true", help="Vorschlag sofort als Entwurf anlegen")
     v.add_argument("--maske", metavar="tenant/KENNUNG", help="Eigene Maskenkennung statt der vorgeschlagenen")
     v.add_argument("--ausgabe", metavar="DATEI", help="Definition in Datei schreiben")
+    n = with_key(s.add_parser("neu", help="Arbeitsliste gezielt aus Katalogquelle, Spalten und Katalogaktionen"))
+    n.add_argument("--maske", required=True, metavar="tenant/KENNUNG")
+    n.add_argument("--titel", required=True)
+    n.add_argument("--domaene", required=True, help="Fachdomaene, z. B. agrar, einkauf, finance, crm")
+    n.add_argument("--quelle", required=True, help="Datenquelle aus 'studio katalog --json'")
+    n.add_argument("--spalte", action="append", default=[], metavar="FELD[=Bezeichnung]")
+    n.add_argument("--aktion", action="append", default=[], metavar="KATALOGAKTION")
+    n.add_argument("--dichte", choices=("comfortable", "compact", "expertDense"), default="compact")
+    n.add_argument("--speichern", action="store_true", help="Als Entwurf anlegen, wenn ohne Verstoss")
+    n.add_argument("--ausgabe", metavar="DATEI")
     p = s.add_parser("pruefen", help="Definition gegen Katalog und Gates pruefen, ohne zu speichern")
     p.add_argument("datei", help="JSON-Datei oder - fuer stdin")
     s.add_parser("entwuerfe", help="Studio-Entwuerfe des Mandanten")
