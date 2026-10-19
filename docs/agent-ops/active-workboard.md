@@ -18770,3 +18770,6 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 ## PARALLEL-MIGRATION-MERGE-20261019 - reserviert, Codex
 
 **Owner:** Codex. Neue committete Steuermigration tax_account_category_20261019 und eigene bereits gepruefte HR-Migration teilen harvest_rule_store_20261015 als Eltern. Dateibesitz neuer alembic/versions/merge_hr_tax_20261019.py, zugehoeriger DAG-Vertrag und Migrationsinventar. Bestehende Migrationen nicht umschreiben; additiver Mergekopf ohne eigenes Schema-DML, beide Zweige ausfuehren. Vor Anwendung auf bestehendem valeo_probe Nutzung pruefen; nur ausstehende Steuermigration plus Merge, kein Reset/neue DB. Claudes Steuerkategorienreparatur und alle anderen aktuellen Lieferungen bleiben erhalten.
+
+
+**GIT-MAIN-HISTORY-GUARD Abnahme:** Drei echte Git-Vertraege bestanden. Null-old-OID durch Lesen des tatsaechlichen aktuellen Ref abgesichert; Ruecksprung/Divergenz/Loeschung verweigert, Integration/andere Branches/fremde Hooks erhalten. Installation nach Commit aus versionierter Vorlage.
