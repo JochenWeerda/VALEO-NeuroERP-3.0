@@ -6,14 +6,6 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "deckungsbeitrag"
   },
   {
-    "module": "@/pages/reports/lagerbestand",
-    "path": "lagerbestand"
-  },
-  {
-    "module": "@/pages/reports/umsatz",
-    "path": "umsatz"
-  },
-  {
     "module": "@/pages/reports",
     "path": ""
   }

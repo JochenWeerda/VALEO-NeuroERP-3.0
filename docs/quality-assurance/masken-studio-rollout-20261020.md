@@ -1,0 +1,168 @@
+# Masken-Studio-Rollout (MASK-STUDIO-ROLLOUT-20261020)
+
+Nutzerentscheid 19.10.2026: nur Studio-generierte Masken. „Studio-kompatibel“ heisst hier: Die Maske ist eine
+ScreenDefinition und wird vom universellen Renderer gezeichnet; damit ist sie ueber den Studio-Import uebernehmbar.
+
+## Befund zur Laufzeit-Aktivierung
+
+- Veroeffentlichte Studio-Fassungen gelten nur fuer neue Masken-IDs. Native Masken werden bewusst nie aus Entwuerfen
+  geliefert (`studio_draft_store.get_published_definition`).
+- Eine Freigabe verlangt einen Simulationsnachweis. Den gibt es bisher nur fuer das Profil Getreideannahme
+  (`grain.v1`).
+- Das ist eine Sicherheitsentscheidung der Studio-Slices. Sie wird hier nicht geaendert; eine Aktivierung nativer
+  Masken aus dem Studio waere eine eigene Nutzerentscheidung.
+
+## Wellen
+
+0. **Altlasten:** verwaiste Scheinseiten entfernen (nicht erreichbar, keine Daten).
+1. **Familien:** Belege (eine Maske mit Varianten), Stammdaten (ObjectPage), Listen (ListReport), Cockpits und
+   Worklists. Reihenfolge Landhandel-Kern -> Finanzen/FiBu -> CRM, Personal, Admin.
+2. **Altmuster:** `MaskConfig`/`ObjectPage`/`ListReport`-Konfigurationen in ScreenDefinitions ueberfuehren.
+
+Jede Welle senkt die Ratsche `config/mask_studio_ratchet.json`.
+
+## Welle 0 (20.10.2026): sechs Scheinseiten, acht Routen entfernt
+
+- `energie/verbrauch` (auch `energie`): fest eingetragene Strom- und Gaswerte samt „Einsparung“.
+- `reports/lagerbestand`, `reports/umsatz`, `statistik/bewegungen`: statische Zahlen ohne Datenquelle.
+- `termine/kalender`: statische Nachbildung einer Altsystem-Oberflaeche.
+- `kasse/tagesabschluss` (auch `kasse/historie`): Abschluss-Assistent, der beim Fertigstellen nur weiterleitete. Der
+  echte Kassenabschluss ist `pos/tagesabschluss-enhanced`.
+
+Keine dieser Seiten war ueber Navigation, Links, Importe, Backend-Verweise oder externe Einstiege erreichbar.
+Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
+
+## Sichtung der uebrigen Routen
+
+| Bereich | handgebaut | Altmuster |
+|---|---|---|
+| agrar | 48 | 6 |
+| crm | 21 | 26 |
+| finance | 28 | 18 |
+| fibu | 42 | 1 |
+| einkauf | 27 | 15 |
+| admin | 27 | 0 |
+| futtermittel | 9 | 16 |
+| sales | 22 | 0 |
+| lager | 16 | 3 |
+| compliance | 14 | 2 |
+| portal | 16 | 0 |
+| workflow | 14 | 0 |
+| personal | 12 | 0 |
+| strecke | 12 | 0 |
+| pos | 9 | 2 |
+| verkauf | 11 | 0 |
+| kontrakte | 9 | 0 |
+| annahme | 5 | 3 |
+| controlling | 7 | 0 |
+| docflow | 6 | 0 |
+| qualitaet | 5 | 1 |
+| charge | 4 | 1 |
+| produktion | 3 | 2 |
+| service | 5 | 0 |
+| waage | 5 | 0 |
+| agribusiness | 4 | 0 |
+| disposition | 4 | 0 |
+| futter | 4 | 0 |
+| nachhaltigkeit | 4 | 0 |
+| nawaro | 4 | 0 |
+| preise | 4 | 0 |
+| versand | 4 | 0 |
+| workflows | 4 | 0 |
+| artikel | 3 | 0 |
+| dashboard | 3 | 0 |
+| schaeden | 1 | 2 |
+| vertrag | 3 | 0 |
+| auth | 2 | 0 |
+| foerderung | 1 | 1 |
+| fuhrpark | 2 | 0 |
+| genossenschaft | 2 | 0 |
+| inventory | 2 | 0 |
+| monitoring | 2 | 0 |
+| reports | 2 | 0 |
+| silo | 2 | 0 |
+| tankstelle | 2 | 0 |
+| wartung | 2 | 0 |
+| zertifikate | 2 | 0 |
+| start | 1 | 0 |
+| alerts | 1 | 0 |
+| banken | 1 | 0 |
+| benachrichtigungen | 1 | 0 |
+| contracts | 1 | 0 |
+| copilot | 1 | 0 |
+| dashboards | 1 | 0 |
+| document | 1 | 0 |
+| dokumente | 1 | 0 |
+| einstellungen | 1 | 0 |
+| errors | 1 | 0 |
+| etiketten | 0 | 1 |
+| export | 0 | 1 |
+| finanzplanung | 1 | 0 |
+| hilfe | 1 | 0 |
+| inbox | 1 | 0 |
+| inventory-dashboard | 1 | 0 |
+| inventory-reports | 1 | 0 |
+| labor | 1 | 0 |
+| mahnwesen | 1 | 0 |
+| management | 1 | 0 |
+| marketing | 1 | 0 |
+| mobile | 1 | 0 |
+| policies | 1 | 0 |
+| pricing | 1 | 0 |
+| projekte | 1 | 0 |
+| prospecting | 1 | 0 |
+| public | 1 | 0 |
+| rezepte | 1 | 0 |
+| schichtplan | 1 | 0 |
+| setup | 1 | 0 |
+| stammdaten | 1 | 0 |
+| stock-management | 1 | 0 |
+| subventionen | 1 | 0 |
+| system | 1 | 0 |
+| verladung | 0 | 1 |
+| versicherungen | 1 | 0 |
+| vertrieb | 1 | 0 |
+| weighing | 1 | 0 |
+| wissen | 1 | 0 |
+
+### Noch verwaiste Routen (39) — vor dem Umbau einzeln entscheiden (loeschen, umleiten oder umbauen)
+
+- `admin/setup/dms-integration` (handgebaut, @/pages/admin/setup/dms-integration)
+- `agrar/saatgut/stamm/:id` (handgebaut, @/pages/agrar/saatgut/stamm)
+- `agrar/schlaege/karte` (handgebaut, @/pages/agrar/schlaege/karte)
+- `agrar/wetterwarnung` (handgebaut, @/pages/agrar/wetterwarnung)
+- `agribusiness/farmers` (handgebaut, @/pages/agribusiness/farmers)
+- `crm/campaign-builder` (handgebaut, @/pages/crm/campaign-builder)
+- `crm/kontakt-management` (builder_altmuster, @/pages/crm/kontakt-management)
+- `crm/opportunities-forecast` (handgebaut, @/pages/crm/opportunities-forecast)
+- `dashboard/customizable` (handgebaut, @/pages/dashboard/customizable)
+- `dashboards/geschaeftsfuehrung` (handgebaut, @/pages/dashboards/geschaeftsfuehrung)
+- `etiketten/drucken` (builder_altmuster, @/pages/etiketten/drucken)
+- `fibu/debitoren-api` (handgebaut, @/pages/fibu/debitoren-api)
+- `finance/buchungen` (builder_altmuster, @/pages/finance/buchungserfassung)
+- `finance/dunning-editor` (builder_altmuster, @/pages/finance/dunning-editor)
+- `finance/kasse` (builder_altmuster, @/pages/finance/kasse)
+- `finance/kontenplan` (handgebaut, @/pages/finance/chart-of-accounts)
+- `futter/einzel` (handgebaut, @/pages/futter/einzel/liste)
+- `futtermittel/bestellungen` (builder_altmuster, @/pages/futtermittel/futtermittel-bestellung)
+- `futtermittel/charge-verfolgung` (builder_altmuster, @/pages/futtermittel/charge-verfolgung)
+- `futtermittel/futtermittel-bestellung` (builder_altmuster, @/pages/futtermittel/futtermittel-bestellung)
+- `inventory-dashboard` (handgebaut, @/pages/inventory-dashboard)
+- `inventory-reports` (handgebaut, @/pages/inventory-reports)
+- `inventory/epcis` (handgebaut, @/pages/inventory/epcis/index)
+- `labor/proben` (handgebaut, @/pages/labor/proben-liste)
+- `marketing/kampagnen` (handgebaut, @/pages/marketing/kampagnen)
+- `mobile/scanner` (handgebaut, @/pages/mobile/scanner)
+- `personal/schulung-neu` (handgebaut, @/pages/personal/schulung-neu)
+- `portal/feldbuch-auswertungen` (handgebaut, @/pages/portal/feldbuch-auswertungen)
+- `portal/whatsapp-simulator` (handgebaut, @/pages/portal/whatsapp-simulator)
+- `rezepte/editor` (handgebaut, @/pages/rezepte/editor)
+- `schaeden/liste` (builder_altmuster, @/pages/schaeden/meldung)
+- `stock-management` (handgebaut, @/pages/stock-management)
+- `subventionen/dashboard` (handgebaut, @/pages/subventionen/dashboard)
+- `system/live-monitor` (handgebaut, @/pages/system/live-monitor)
+- `tankstelle/zapfungen` (handgebaut, @/pages/tankstelle/zapfungen)
+- `vertrag/rahmenvertraege` (handgebaut, @/pages/vertrag/rahmenvertraege)
+- `vertrieb/kundenumsatz` (handgebaut, @/pages/vertrieb/kundenumsatz)
+- `wartung/anlage/neu` (handgebaut, @/pages/wartung/anlagen-liste)
+- `wartung/anlagen` (handgebaut, @/pages/wartung/anlagen-liste)

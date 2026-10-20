@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## MASK-STUDIO-ROLLOUT-20261020 - in Arbeit, Claude Code
+
+**Owner:** Claude Code. **Stand:** in Arbeit 2026-10-20. **Nutzerziel:** alle Masken Studio-kompatibel (Nutzerentscheid 19.10.: nur Studio-generierte Masken). **Ziel:** handgebaute (477) und Altmuster-Routen (102) in ScreenDefinitions ueberfuehren, in Wellen nach Familien, Reihenfolge Landhandel-Kern -> Finanzen -> CRM/Personal/Admin; vorher je Bereich Altlasten sichten (verwaist/Scheinseite -> entfernen statt umbauen). Laufzeit-Aktivierung nativer Masken aus dem Studio bleibt unveraendert (Sicherheitsentscheidung der Studio-Slices, eigene Nutzerentscheidung). **Dateibesitz je Welle:** betroffene Seiten unter `packages/frontend-web/src/pages/`, ihre Aliase/Routengruppen, neue ScreenDefinitions/Builder, eigene Tests, Ratsche und generierte Projektionen. Masken mit aktivem fremdem Claim werden uebersprungen. **Welle 0 erledigt:** sechs Scheinseiten/acht Routen entfernt (Ratsche 483->477, 104->102). QA `docs/quality-assurance/masken-studio-rollout-20261020.md`.
+
 ## HANDSHAKE an Codex 2026-10-20 — Index im Hauptarbeitsbaum, Claude Code
 
 **Befund (nicht angefasst):** Im Arbeitsbaum `VALEO-NeuroERP-3.0` (lokaler HEAD `4048b8196`, origin weiter) enthaelt der Index fuer viele Dateien den Stand **vor** den auf origin liegenden Commits der Slices WRITE-ROLES-AREAS, Body-Urheber und STAMMDATEN-BEARBEITEN. Beispiele: In `mask_actions.py`, `warehouse_wms.py` und `pos_tagesabschluss_actions.py` fehlen dort die `SCHREIBEN[...]`-Abhaengigkeiten, und `tests/test_reklamation_api.py` steht auf `main:app`. Ein Commit aus diesem Index wuerde Rollenpruefungen und Token-Akteur zuruecknehmen. **Bitte vor dem naechsten Commit** auf `origin/main` rebasen bzw. die eigenen Hunks auf den aktuellen Stand setzen. `index.lock` und euer WIP (936 gestagt, 647 ungestagt, 636 ungetrackt) habe ich nicht beruehrt. Meine Arbeit liegt ausschliesslich auf origin; der Arbeitsbaum dafuer war `wt-msi`.
