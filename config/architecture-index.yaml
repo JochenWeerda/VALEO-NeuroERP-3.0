@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-20
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-20T01:16:10Z'
+generated_at: '2026-10-20T01:40:32Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -2088,6 +2088,7 @@ domains:
     - bestell_kommunikation_service
     - command_handlers_procurement
     - einkauf_compat_service
+    - ordrsp_service
     - proc_bestellung_lifecycle_service
     - proc_rechnungspruefung_service
     - proc_wareneingang_service
@@ -2115,8 +2116,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 940
   frontend_routes_mapped: 940
-  backend_services_total: 302
-  backend_services_mapped: 302
+  backend_services_total: 303
+  backend_services_mapped: 303
   backend_endpoints_total: 466
   backend_endpoints_mapped: 466
 unmapped:

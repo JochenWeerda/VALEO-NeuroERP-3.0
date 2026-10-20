@@ -33,7 +33,8 @@ BEARBEITER = f"bearb-{uuid.uuid4().hex[:8]}"
 
 TABELLEN = ("domain_crm.crm_action_audit_log", "public.outbox_events", "domain_ops.ops_bankkonten",
             "domain_shared.futtermittel_mischfutter", "public.crm_leads", "public.einkauf_auftragsbestaetigungen",
-            "domain_ops.reklamationen", "domain_einkauf.bestellungen", "domain_einkauf.lieferanten")
+            "domain_ops.reklamationen", "domain_einkauf.bestellungen",
+            "domain_einkauf.lieferanten")
 
 
 @pytest.fixture(scope="module")
@@ -53,6 +54,9 @@ def aufraeumen(engine):
     from sqlalchemy import text
 
     with engine.begin() as v:
+        # Positionen tragen keinen Mandanten; sie haengen an der Bestellung.
+        v.execute(text("DELETE FROM domain_einkauf.bestellung_positionen WHERE bestellung_id IN "
+                       "(SELECT id FROM domain_einkauf.bestellungen WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
         for tabelle in TABELLEN:
             v.execute(text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
 
@@ -371,4 +375,37 @@ def test_auftragsbestaetigung_deklariert_die_anlage():
     anlage = get_screen_definition("einkauf/auftragsbestaetigung")["creation"]
     assert anlage["endpoint"] == "/api/v1/einkauf/auftragsbestaetigungen"
     assert {f["key"] for f in anlage["fields"]} >= {"bestellung", "ab_nummer"}
+
+
+def test_ordrsp_legt_ab_an_und_gleicht_positionen_ab(client, engine):
+    lieferant, bestellung = str(uuid.uuid4()), str(uuid.uuid4())
+    nummer = f"B-{bestellung[:6]}"
+    ausfuehren(engine, "INSERT INTO domain_einkauf.lieferanten (id, tenant_id, lieferantennummer, firmenname) "
+                       "VALUES (:id, :h, :nr, 'Saatzucht Sued')", id=lieferant, h=HAUS_A, nr=f"L-{lieferant[:6]}")
+    ausfuehren(engine, "INSERT INTO domain_einkauf.bestellungen (id, tenant_id, bestellnummer, lieferant_id, "
+                       "bestelldatum, waehrung) VALUES (:id, :h, :nr, :l, CURRENT_DATE, 'EUR')",
+               id=bestellung, h=HAUS_A, nr=nummer, l=lieferant)
+    for pos, artikel, menge, preis in ((1, "WEIZEN", 100, 24.5), (2, "RAPS", 50, 51.0)):
+        ausfuehren(engine, "INSERT INTO domain_einkauf.bestellung_positionen (id, bestellung_id, pos_nr, "
+                           "artikel_nr, artikel_bezeichnung, menge, einheit, einzelpreis) "
+                           "VALUES (:id, :b, :p, :a, :a, :m, 'dt', :e)",
+                   id=str(uuid.uuid4()), b=bestellung, p=pos, a=artikel, m=menge, e=preis)
+    nachricht = (f"UNH+1+ORDRSP:D:96A:UN'BGM+231+AB-EDI-1+4'DTM+137:20261020:102'RFF+ON:{nummer}'"
+                 "LIN+1+5+WEIZEN:BP'QTY+21:100'PRI+AAA:24.50'LIN+2+3+RAPS:BP'QTY+21:40'PRI+AAA:51.00'UNT+11+1'")
+    antwort = client.post("/api/v1/einkauf/auftragsbestaetigungen/edi-ordrsp", json={"nachricht": nachricht},
+                          headers=kopf())
+    assert antwort.status_code == 201, antwort.text
+    ergebnis = antwort.json()
+    assert ergebnis["positionsabgleich"] is True
+    assert [(a["art"], a["position"]) for a in ergebnis["abweichungen"]] == [("menge", "RAPS")]
+    ab = zeile(engine, "SELECT lieferant_name, bestell_nr, abweichungen, notizen FROM public.einkauf_auftragsbestaetigungen "
+                       "WHERE id = :id", id=ergebnis["id"])
+    assert ab["lieferant_name"] == "Saatzucht Sued" and ab["bestell_nr"] == nummer
+    assert "RAPS: Menge" in ab["abweichungen"] and "EDI" in ab["notizen"]
+    # Erneute Zustellung derselben Nachricht legt nichts doppelt an.
+    assert client.post("/api/v1/einkauf/auftragsbestaetigungen/edi-ordrsp", json={"nachricht": nachricht},
+                       headers=kopf()).status_code == 409
+    kaputt = client.post("/api/v1/einkauf/auftragsbestaetigungen/edi-ordrsp",
+                         json={"nachricht": "UNH+1+ORDERS:D:96A:UN'"}, headers=kopf())
+    assert kaputt.status_code == 422
 

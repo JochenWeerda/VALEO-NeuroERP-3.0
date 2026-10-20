@@ -34,8 +34,18 @@ MANAGER-ROLE-ENFORCEMENT-20261019 keine Rechte und ist aus den Bereichslisten en
 | EIGENE_DATEN | gepruefte Person (eigene Daten) | ux, ux-telemetry, recent-documents, voice |
 | GERAET | geprueft, auch technischer Zugang | Eingaenge/Webhooks/Rueckmeldungen (SPS, MDE, EPCIS, Kanalbruecken, Tour-/Fahrerereignisse, Tank-Eingang, Zoll-Callback) |
 
-**Zur Entscheidung vorgelegt:** GERAET verlangt bewusst keine Fachrolle (technische Zugaenge haben keine); EIGENE_DATEN
-ordnet ueber die Kennung zu. Beide sind ausdrueckliche Abhaengigkeiten und als solche im Inventar sichtbar.
+**Entschieden (20.10.2026, Regel „Was nicht einfach laeuft, laeuft einfach nicht“ — einfachste tragfaehige
+Variante, begruendet):**
+
+- **GERAET:** Ein geprueftes Token des Mandanten genuegt, eine Fachrolle wird nicht verlangt.
+  - Technische Zugaenge (SPS, MDE, EPCIS, Kanal-Webhooks, Zoll-Rueckmeldung) haben keine Fachrolle. Eine Rollenpflicht
+    wuerde sie aussperren oder Geraeten Menschenrollen geben; beides ist schlechter.
+  - Schutz entsteht durch Mandantenbindung aus dem Token und fachliche Pruefung des Inhalts.
+  - Eigene Agenten- und Geraeteidentitaeten mit Scopes sind das Zielbild (Zielarchitektur Identitaet/Agenten) und
+    loesen diese Gruppe spaeter ab.
+- **EIGENE_DATEN:** Jede gepruefte Person schreibt nur ihre eigenen Daten (Ansicht, Telemetrie, zuletzt geoeffnet).
+  - Die Zuordnung laeuft ueber die Kennung aus dem Token.
+  - Eine Fachrolle fuer die eigene Arbeitsflaeche ergaebe keinen Schutz und nur Bedienhuerden.
 
 ## Fortschritt
 

@@ -789,6 +789,46 @@
         "title": "AbsenderOut",
         "type": "object"
       },
+      "Abweichung": {
+        "properties": {
+          "art": {
+            "title": "Art",
+            "type": "string"
+          },
+          "bestaetigt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestaetigt"
+          },
+          "bestellt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestellt"
+          },
+          "position": {
+            "title": "Position",
+            "type": "string"
+          }
+        },
+        "required": [
+          "art",
+          "position"
+        ],
+        "title": "Abweichung",
+        "type": "object"
+      },
       "AbwesenheitCreateRequest": {
         "properties": {
           "abwesenheit_typ": {
@@ -114732,6 +114772,79 @@
           "orders"
         ],
         "title": "OrdersResponse",
+        "type": "object"
+      },
+      "OrdrspEingang": {
+        "properties": {
+          "nachricht": {
+            "description": "EDIFACT ORDRSP (D.96A)",
+            "maxLength": 2000000,
+            "minLength": 10,
+            "title": "Nachricht",
+            "type": "string"
+          }
+        },
+        "required": [
+          "nachricht"
+        ],
+        "title": "OrdrspEingang",
+        "type": "object"
+      },
+      "OrdrspErgebnis": {
+        "properties": {
+          "abweichungen": {
+            "items": {
+              "$ref": "#/components/schemas/Abweichung"
+            },
+            "title": "Abweichungen",
+            "type": "array"
+          },
+          "bestaetigungsNummer": {
+            "title": "Bestaetigungsnummer",
+            "type": "string"
+          },
+          "bestellung": {
+            "title": "Bestellung",
+            "type": "string"
+          },
+          "createdAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdat"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lieferant": {
+            "title": "Lieferant",
+            "type": "string"
+          },
+          "positionsabgleich": {
+            "title": "Positionsabgleich",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "bestaetigungsNummer",
+          "bestellung",
+          "lieferant",
+          "status",
+          "abweichungen",
+          "positionsabgleich"
+        ],
+        "title": "OrdrspErgebnis",
         "type": "object"
       },
       "OrgUnitIn": {
@@ -278255,6 +278368,52 @@
           }
         ],
         "summary": "Auftragsbestaetigung zu einer Bestellung erfassen",
+        "tags": [
+          "einkauf"
+        ]
+      }
+    },
+    "/api/v1/einkauf/auftragsbestaetigungen/edi-ordrsp": {
+      "post": {
+        "operationId": "ab_aus_ordrsp_api_v1_einkauf_auftragsbestaetigungen_edi_ordrsp_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrdrspEingang"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdrspErgebnis"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellantwort (EDIFACT ORDRSP) einlesen und mit der Bestellung abgleichen",
         "tags": [
           "einkauf"
         ]

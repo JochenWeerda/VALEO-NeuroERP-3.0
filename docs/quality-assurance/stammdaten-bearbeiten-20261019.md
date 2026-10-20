@@ -64,7 +64,6 @@ Wirkung; er war entfernt. Jetzt hat jede einen echten Bearbeitungsweg, der fuer 
 
 ## Offen
 
-- EDI-Eingang (ORDRSP) und automatischer Positionsabgleich mit der Bestellung bleiben ein eigener Fachslice.
 - Gesamtlauf der Backend-Suite: lokal wegen Speichermangels nicht moeglich, CI ist Schiedsrichter.
 
 ## CI-Nachlauf (20.10.2026)
@@ -100,3 +99,20 @@ Wirkung; er war entfernt. Jetzt hat jede einen echten Bearbeitungsweg, der fuer 
 - Security Scan: `aiohttp` 3.14.4 behebt drei CVEs.
 - Service Security: die chromadb-Ausnahmen sind neu geprueft (siehe `security-dependency-policy-2026-09-15.md`).
 - Docs Build: die Inventare waren nicht aktuell (Drift). Alle Docs-Schritte laufen lokal gruen.
+
+## EDI-Eingang ORDRSP mit Positionsabgleich (20.10.2026)
+
+- `app/services/ordrsp_service.py`: Reiner Dienst ohne Datenbank.
+  - Liest EDIFACT ORDRSP D.96A: UNA-Trennzeichen, Freigabezeichen, BGM-Funktion, DTM, RFF+ON, CUX, LIN-Aktion, PIA,
+    QTY, PRI, MOA.
+  - Gleicht die Positionen gegen die Bestellung ab: Menge, Preis, Termin, abgelehnt, zusaetzlich, nicht bestaetigt.
+    Die Zuordnung laeuft ueber die Artikel- oder Lieferanten-Artikelnummer, sonst ueber die Positionsnummer.
+- `POST /api/v1/einkauf/auftragsbestaetigungen/edi-ordrsp` (Rolle EINKAUF):
+  - Die Bestellung wird ueber RFF+ON im Mandanten gesucht (404, wenn nicht gefunden).
+  - Die AB wird ueber dieselbe Anlagefunktion wie bei der Erfassung angelegt. Die Abweichungen stehen als Text an der
+    AB und als Liste in der Antwort.
+  - Eine erneute Zustellung derselben Nachricht ergibt 409, eine unlesbare Nachricht 422.
+  - Bestellungen aus dem Dokumentspeicher ohne Positionstabelle werden ehrlich als „Positionsabgleich nicht moeglich“
+    vermerkt.
+- Nachweis: `tests/test_ordrsp_service.py` (9 gruen) und die Wirkung im Pruefstand
+  (`test_ordrsp_legt_ab_an_und_gleicht_positionen_ab`).
