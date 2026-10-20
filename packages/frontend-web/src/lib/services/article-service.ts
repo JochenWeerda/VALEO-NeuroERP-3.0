@@ -101,7 +101,8 @@ export interface Article {
 }
 
 export interface ArticleCreate {
-  tenant_id: string
+  /** Mandant kommt serverseitig aus dem Token; nicht mitschicken. */
+  tenant_id?: string
   article_number: string
   name: string
   description?: string

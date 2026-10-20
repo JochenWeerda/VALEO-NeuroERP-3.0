@@ -306,7 +306,7 @@
       "date.today": 1
     },
     "app/services/portal_preisspiegel_service.py": {
-      "date.today": 4
+      "date.today": 2
     },
     "app/services/procurement_service.py": {
       "datetime.now.date": 1

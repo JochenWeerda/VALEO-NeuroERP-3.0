@@ -54,6 +54,15 @@ def test_resolve_article_tenant_rejects_mismatch():
     assert exc.value.detail == "Article payload belongs to a different tenant"
 
 
+def test_article_create_without_tenant_takes_the_context_tenant():
+    # Bis 20.10.2026 Pflichtfeld: die Maske schickte einen eingebauten Mandanten mit und scheiterte mit 403.
+    from app.api.v1.schemas.inventory import ArticleCreate
+
+    payload = ArticleCreate(article_number="A-1", name="Weizen", unit="KG", category="getreide", sales_price="25.00")
+    assert payload.tenant_id is None
+    assert articles._resolve_article_tenant(payload.tenant_id, "tenant-a") == "tenant-a"
+
+
 @pytest.mark.asyncio
 async def test_get_article_documents_filters_documents_by_context_tenant(monkeypatch):
     fake_model = _FakeArticleDocumentModel

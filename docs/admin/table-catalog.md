@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 686 Tabellen, 9052 Spalten.**
+**31 Schemas, 688 Tabellen, 9094 Spalten.**
 
 ## Schemas
 
@@ -52,7 +52,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_procurement` | `procurement` | 5 | 50 |
 | `domain_reporting` | `finance` | 6 | 80 |
 | `domain_sales` | `crm` | 11 | 156 |
-| `domain_shared` | `platform` | 157 | 1860 |
+| `domain_shared` | `platform` | 159 | 1902 |
 | `domain_workflow` | `platform` | 3 | 37 |
 
 ## Geschwister-Modelle
@@ -690,6 +690,8 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.partiestamm` | `app/api/v1/endpoints/partiestamm.py` | `app/api/v1/endpoints/partiestamm.py` | — |
 | `domain_shared.periodische_buchungen` | `app/api/v1/endpoints/periodische_buchungen.py` | `app/api/v1/endpoints/periodische_buchungen.py` | — |
 | `domain_shared.policy_rules` | `app/infrastructure/models/__init__.py` | — | — |
+| `domain_shared.portal_interessenten` | `app/services/portal_interessent_service.py` | `app/services/portal_interessent_service.py` | — |
+| `domain_shared.portal_preise` | `app/services/portal_preisspiegel_service.py` | `app/services/portal_preisspiegel_service.py` | — |
 | `domain_shared.preis_rabattgruppen` | `app/api/v1/endpoints/preis_rabattgruppen.py` | `app/api/v1/endpoints/preis_rabattgruppen.py` | — |
 | `domain_shared.preis_rabattklassen` | `app/api/v1/endpoints/preis_rabattgruppen.py` | `app/api/v1/endpoints/preis_rabattgruppen.py` | — |
 | `domain_shared.preis_rabattsaetze` | `app/api/v1/endpoints/preis_rabattgruppen.py` | `app/api/v1/endpoints/preis_rabattgruppen.py` | — |
@@ -1524,6 +1526,8 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `partiestamm` | `platform` | native | `id` | id, tenant_id, partie_nr, bezeichnung, artikel_nr, lager_nr, partie_typ, gruppe_id, erntejahr, herkunftsland, status, aktiv, created_at |
 | `periodische_buchungen` | `platform` | native | `id` | id, tenant_id, bezeichnung, vorgangsklasse, konto, gegenkonto, buchungstext, betrag, turnus, gueltig_ab, gueltig_bis, gesperrt, kostenstelle, aktiv, created_at |
 | `policy_rules` | `platform` | native | `id` | id, tenant_id, when_kpi_id, when_severity, action, params, limits, window, approval, auto_execute, auto_suggest, created_at, updated_at |
+| `portal_interessenten` | `platform` | native | `interessent_id` | interessent_id, tenant_id, status, vorname, nachname, email, telefon, betrieb_name, betrieb_typ, flaeche_ha, hauptkulturen, tiere_anzahl, tierart, plz, ort, interesse_themen, anmerkung, zugewiesen_an, kunden_nr, qualifiziert_am, konvertiert_am, erstellt_am, aktualisiert_am |
+| `portal_preise` | `platform` | native | `preis_id` | preis_id, tenant_id, artikel_id, artikel_name, frucht_gruppe, variante, preis_eur_dt, basis_qualitaet, ernte_jahr, liefermonat, aufschlag_eur_dt, quelle, gueltig_ab, gueltig_bis, hinweis, gepflegt_von, abgeloest_am, erstellt_am, aktualisiert_am |
 | `preis_rabattgruppen` | `platform` | native | `id` | id, tenant_id, gruppe_nr, bezeichnung, richtung, aktiv, created_at |
 | `preis_rabattklassen` | `platform` | native | `id` | id, tenant_id, klasse_nr, bezeichnung, richtung, aktiv, created_at |
 | `preis_rabattsaetze` | `platform` | native | `id` | id, tenant_id, rabattgruppe_nr, rabattklasse_nr, richtung, rabatt_prozent, ab_menge, gueltig_ab, gueltig_bis, created_at |

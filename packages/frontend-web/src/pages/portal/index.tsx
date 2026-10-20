@@ -34,9 +34,6 @@ import {
   Tractor,
 } from 'lucide-react'
 
-// Demo Artikel-IDs basierend auf Schlagkartei-Kulturen
-const DEMO_ARTIKEL_IDS = 'WEI-001,GER-001,RAP-001'
-
 
 type PortalDashboardView = {
   kunde: {
@@ -130,10 +127,10 @@ type PreisspiegalData = { preisspiegel: ArtikelPreis[]; stand: string }
 
 function PreisspiegalWidget() {
   const { data, isLoading } = useQuery<PreisspiegalData>({
-    queryKey: ['portal-preisspiegel-widget', DEMO_ARTIKEL_IDS],
+    queryKey: ['portal-preisspiegel-widget'],
     queryFn: async () => {
       const res = await apiClient.get<PreisspiegalData>(
-        `/api/v1/portal/preisspiegel/kunde?artikel_ids=${DEMO_ARTIKEL_IDS}`,
+        '/api/v1/portal/preisspiegel/kunde',
       )
       return res.data
     },
@@ -209,7 +206,7 @@ function PreisspiegalWidget() {
             ))}
             {(data.preisspiegel ?? []).length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-4">
-                Keine Preise für Ihre Früchte hinterlegt.
+                Aktuell sind keine Ankaufspreise hinterlegt.
               </p>
             )}
           </div>

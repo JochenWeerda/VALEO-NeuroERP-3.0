@@ -222,7 +222,6 @@ const DEFAULT_ARTIKEL: ArtikelData = {
   preise: [],
 }
 
-const DEFAULT_TENANT_ID = import.meta.env.VITE_TENANT_ID ?? '00000000-0000-0000-0000-000000000001'
 
 const statusOptions = [
   { value: 'aktiv', label: 'Aktiv' },
@@ -545,10 +544,8 @@ export default function ArtikelStammPage(): JSX.Element {
       }
 
       if (isNew) {
-        const payload: ArticleCreate = {
-          tenant_id: DEFAULT_TENANT_ID,
-          ...basePayload,
-        }
+        // Kein Mandant im Body: der Server nimmt ihn aus dem Token (ein eingebauter Wert scheiterte mit 403).
+        const payload: ArticleCreate = basePayload
         return articleService.createArticle(payload)
       }
       const payload: ArticleUpdate = basePayload

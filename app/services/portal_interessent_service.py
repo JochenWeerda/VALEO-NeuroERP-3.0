@@ -3,18 +3,26 @@
 Statusmaschine:
   INTERESSENT -> QUALIFIZIERT -> KUNDE | ABGELEHNT | INAKTIV
 
-Interessent = Selbstregistrierung im Portal (public, kein JWT noetig)
+Interessent = Selbstregistrierung im Portal
 Qualifiziert = Innendienst hat Erstgespraech bestaetigt
 Kunde = Umwandlung in echten Kunden (Kunden-Nr vergeben)
+
+Bis 20.10.2026 lagen Registrierungen (Name, E-Mail, Telefon, Betrieb) nur im Arbeitsspeicher; ein Neustart verlor
+jeden Interessenten. Jetzt ``domain_shared.portal_interessenten`` (Migration ``portal_interessenten_preise_20261020``).
 """
 from __future__ import annotations
 
+import json
 import re
 import uuid
-from dataclasses import dataclass, field, asdict
-from datetime import date, datetime
+from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
+
+from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 
 class InteressentStatus(str, Enum):
@@ -79,8 +87,8 @@ class Interessent:
     kunden_nr: str | None           # Nach Konvertierung
     qualifiziert_am: datetime | None
     konvertiert_am: datetime | None
-    erstellt_am: datetime = field(default_factory=datetime.utcnow)
-    aktualisiert_am: datetime = field(default_factory=datetime.utcnow)
+    erstellt_am: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    aktualisiert_am: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
@@ -101,25 +109,41 @@ class InteressentNichtGefundenFehler(Exception):
     pass
 
 
-_STORE: dict[str, list[Interessent]] = {}
-
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+_SPALTEN = (
+    "interessent_id, tenant_id, status, vorname, nachname, email, telefon, betrieb_name, betrieb_typ, flaeche_ha, "
+    "hauptkulturen, tiere_anzahl, tierart, plz, ort, interesse_themen, anmerkung, zugewiesen_an, kunden_nr, "
+    "qualifiziert_am, konvertiert_am, erstellt_am, aktualisiert_am"
+)
+
+
+def _aus_zeile(row: Any) -> Interessent:
+    d = dict(row)
+    return Interessent(
+        interessent_id=d["interessent_id"], tenant_id=d["tenant_id"], status=InteressentStatus(d["status"]),
+        vorname=d["vorname"], nachname=d["nachname"], email=d["email"], telefon=d["telefon"],
+        betrieb_name=d["betrieb_name"], betrieb_typ=BetriebsTyp(d["betrieb_typ"]) if d["betrieb_typ"] else None,
+        flaeche_ha=float(d["flaeche_ha"]) if d["flaeche_ha"] is not None else None,
+        hauptkulturen=list(d["hauptkulturen"] or []), tiere_anzahl=d["tiere_anzahl"], tierart=d["tierart"],
+        plz=d["plz"], ort=d["ort"], interesse_themen=list(d["interesse_themen"] or []), anmerkung=d["anmerkung"],
+        zugewiesen_an=d["zugewiesen_an"], kunden_nr=d["kunden_nr"], qualifiziert_am=d["qualifiziert_am"],
+        konvertiert_am=d["konvertiert_am"], erstellt_am=d["erstellt_am"], aktualisiert_am=d["aktualisiert_am"],
+    )
 
 
 class PortalInteressentService:
-    def __init__(self, tenant_id: str) -> None:
+    def __init__(self, db: Session, tenant_id: str) -> None:
+        self.db = db
         self.tenant_id = tenant_id
-        if tenant_id not in _STORE:
-            _STORE[tenant_id] = []
 
-    def _store(self) -> list[Interessent]:
-        return _STORE[self.tenant_id]
-
-    def _get(self, interessent_id: str) -> Interessent:
-        for i in self._store():
-            if i.interessent_id == interessent_id:
-                return i
-        raise InteressentNichtGefundenFehler(f"Interessent {interessent_id!r} nicht gefunden")
+    def _get(self, interessent_id: str, *, sperren: bool = False) -> Interessent:
+        sql = (f"SELECT {_SPALTEN} FROM domain_shared.portal_interessenten "  # nosec B608 - feste Spaltenliste
+               "WHERE tenant_id = :tid AND interessent_id = :id" + (" FOR UPDATE" if sperren else ""))
+        row = self.db.execute(text(sql), {"tid": self.tenant_id, "id": interessent_id}).mappings().first()
+        if not row:
+            raise InteressentNichtGefundenFehler(f"Interessent {interessent_id!r} nicht gefunden")
+        return _aus_zeile(row)
 
     def registrieren(
         self,
@@ -142,35 +166,28 @@ class PortalInteressentService:
             raise ValueError("Vor- und Nachname sind Pflicht")
         if not _EMAIL_RE.match(email):
             raise ValueError(f"Ungültige E-Mail-Adresse: {email!r}")
-        # Doppelregistrierung verhindern
-        for existing in self._store():
-            if existing.email.lower() == email.lower() and existing.status != InteressentStatus.INAKTIV:
-                raise ValueError(f"E-Mail {email!r} ist bereits registriert")
-        i = Interessent(
-            interessent_id=str(uuid.uuid4()),
-            tenant_id=self.tenant_id,
-            status=InteressentStatus.INTERESSENT,
-            vorname=vorname.strip(),
-            nachname=nachname.strip(),
-            email=email.lower().strip(),
-            telefon=telefon,
-            betrieb_name=betrieb_name,
-            betrieb_typ=betrieb_typ,
-            flaeche_ha=flaeche_ha,
-            hauptkulturen=hauptkulturen or [],
-            tiere_anzahl=tiere_anzahl,
-            tierart=tierart,
-            plz=plz,
-            ort=ort,
-            interesse_themen=interesse_themen or [],
-            anmerkung=anmerkung,
-            zugewiesen_an=None,
-            kunden_nr=None,
-            qualifiziert_am=None,
-            konvertiert_am=None,
-        )
-        self._store().append(i)
-        return i
+        neu = uuid.uuid4().hex
+        try:
+            self.db.execute(text("""
+                INSERT INTO domain_shared.portal_interessenten
+                    (interessent_id, tenant_id, status, vorname, nachname, email, telefon, betrieb_name, betrieb_typ,
+                     flaeche_ha, hauptkulturen, tiere_anzahl, tierart, plz, ort, interesse_themen, anmerkung)
+                VALUES (:id, :tid, 'interessent', :vorname, :nachname, :email, :telefon, :betrieb_name, :betrieb_typ,
+                        :flaeche_ha, CAST(:kulturen AS jsonb), :tiere, :tierart, :plz, :ort,
+                        CAST(:themen AS jsonb), :anmerkung)
+            """), {
+                "id": neu, "tid": self.tenant_id, "vorname": vorname.strip(), "nachname": nachname.strip(),
+                "email": email.lower().strip(), "telefon": telefon, "betrieb_name": betrieb_name,
+                "betrieb_typ": betrieb_typ.value if betrieb_typ else None, "flaeche_ha": flaeche_ha,
+                "kulturen": json.dumps(hauptkulturen or []), "tiere": tiere_anzahl, "tierart": tierart,
+                "plz": plz, "ort": ort, "themen": json.dumps(interesse_themen or []), "anmerkung": anmerkung,
+            })
+            self.db.commit()
+        except IntegrityError:
+            # Eindeutigkeit (Mandant, E-Mail) fuer aktive Registrierungen haelt die Datenbank, auch bei Gleichzeitigkeit.
+            self.db.rollback()
+            raise ValueError(f"E-Mail {email!r} ist bereits registriert") from None
+        return self._get(neu)
 
     def status_wechsel(
         self,
@@ -179,23 +196,32 @@ class PortalInteressentService:
         zugewiesen_an: str | None = None,
         kunden_nr: str | None = None,
     ) -> Interessent:
-        i = self._get(interessent_id)
-        if neuer_status not in ERLAUBTE_UEBERGAENGE[i.status]:
-            raise UngueltigerUebergangFehler(
-                f"Übergang {i.status.value}→{neuer_status.value} nicht erlaubt"
-            )
-        if neuer_status == InteressentStatus.KUNDE and not kunden_nr:
-            raise ValueError("Kunden-Nr ist bei Konvertierung zu Kunde Pflicht")
-        i.status = neuer_status
-        i.aktualisiert_am = datetime.utcnow()
-        if zugewiesen_an:
-            i.zugewiesen_an = zugewiesen_an
-        if neuer_status == InteressentStatus.QUALIFIZIERT:
-            i.qualifiziert_am = datetime.utcnow()
-        if neuer_status == InteressentStatus.KUNDE:
-            i.kunden_nr = kunden_nr
-            i.konvertiert_am = datetime.utcnow()
-        return i
+        try:
+            i = self._get(interessent_id, sperren=True)
+            if neuer_status not in ERLAUBTE_UEBERGAENGE[i.status]:
+                raise UngueltigerUebergangFehler(
+                    f"Übergang {i.status.value}→{neuer_status.value} nicht erlaubt"
+                )
+            if neuer_status == InteressentStatus.KUNDE and not kunden_nr:
+                raise ValueError("Kunden-Nr ist bei Konvertierung zu Kunde Pflicht")
+            self.db.execute(text("""
+                UPDATE domain_shared.portal_interessenten SET status = :status, aktualisiert_am = NOW(),
+                    zugewiesen_an = COALESCE(:zugewiesen, zugewiesen_an),
+                    qualifiziert_am = CASE WHEN :status = 'qualifiziert' THEN NOW() ELSE qualifiziert_am END,
+                    kunden_nr = CASE WHEN :status = 'kunde' THEN :kunden_nr ELSE kunden_nr END,
+                    konvertiert_am = CASE WHEN :status = 'kunde' THEN NOW() ELSE konvertiert_am END
+                WHERE tenant_id = :tid AND interessent_id = :id
+            """), {"status": neuer_status.value, "zugewiesen": zugewiesen_an or None, "kunden_nr": kunden_nr,
+                   "tid": self.tenant_id, "id": interessent_id})
+            self.db.commit()
+        except IntegrityError:
+            # Reaktivierung, waehrend dieselbe E-Mail schon wieder aktiv registriert ist.
+            self.db.rollback()
+            raise UngueltigerUebergangFehler("E-Mail ist bereits erneut registriert") from None
+        except Exception:
+            self.db.rollback()
+            raise
+        return self._get(interessent_id)
 
     def list_interessenten(
         self,
@@ -203,23 +229,19 @@ class PortalInteressentService:
         betrieb_typ: BetriebsTyp | None = None,
         zugewiesen_an: str | None = None,
     ) -> list[dict[str, Any]]:
-        result = self._store()
-        if status:
-            result = [i for i in result if i.status == status]
-        if betrieb_typ:
-            result = [i for i in result if i.betrieb_typ == betrieb_typ]
-        if zugewiesen_an:
-            result = [i for i in result if i.zugewiesen_an == zugewiesen_an]
-        return [i.to_dict() for i in sorted(result, key=lambda x: x.erstellt_am, reverse=True)]
+        rows = self.db.execute(text(
+            f"SELECT {_SPALTEN} FROM domain_shared.portal_interessenten WHERE tenant_id = :tid "  # nosec B608
+            "AND (CAST(:status AS text) IS NULL OR status = :status) "
+            "AND (CAST(:typ AS text) IS NULL OR betrieb_typ = :typ) "
+            "AND (CAST(:zug AS text) IS NULL OR zugewiesen_an = :zug) "
+            "ORDER BY erstellt_am DESC LIMIT 1000"
+        ), {"tid": self.tenant_id, "status": status.value if status else None,
+            "typ": betrieb_typ.value if betrieb_typ else None, "zug": zugewiesen_an}).mappings().all()
+        return [_aus_zeile(r).to_dict() for r in rows]
 
     def get(self, interessent_id: str) -> dict[str, Any]:
         return self._get(interessent_id).to_dict()
 
 
-_SVC_CACHE: dict[str, PortalInteressentService] = {}
-
-
-def get_interessent_service(tenant_id: str) -> PortalInteressentService:
-    if tenant_id not in _SVC_CACHE:
-        _SVC_CACHE[tenant_id] = PortalInteressentService(tenant_id)
-    return _SVC_CACHE[tenant_id]
+def get_interessent_service(db: Session, tenant_id: str) -> PortalInteressentService:
+    return PortalInteressentService(db, tenant_id)
