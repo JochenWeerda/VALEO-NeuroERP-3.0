@@ -4,8 +4,8 @@ type: explanation
 audience: [architect, entwickler, qa]
 owner: Codex
 status: active
-last_reviewed: 2026-10-16
-version: 1.0.0
+last_reviewed: 2026-10-20
+version: 1.1.0
 ---
 
 # Schrittweise Studio-Uebernahme
@@ -75,3 +75,37 @@ Familienfassung 1.1.0 bindet in allen neun Varianten die bestehende DocFlow-Upda
 ## Gemeinsame Belegneuanlage (19.10.2026)
 
 Version 1.2.0 bindet alle neun Varianten an denselben zentralen Erstellungstransport und echte mandantengebundene Partnerauswahl. Der servergelieferte Definitionshash bindet die Neuanlage an die aktive Fassung. Historische Fassungen bleiben erhalten. Echte Browserkette bis zur gebuchten Eingangsrechnung und SQL-Nachweis einschliesslich Journal/OP/Replay abgenommen; keine globale Aktivierung oder Umleitung alter Einstiege. [Nachweis und Grenzen](../quality-assurance/beleg-studio-create-20261019.md).
+
+
+## Vollstaendige CLI-Stapelplanung (20.10.2026)
+
+Die CLI liest nun alle Seiten des registrierten Quellenkatalogs statt nur der ersten
+100 Treffer. Ein leerer, doppelter oder waehrend des Abrufs wechselnder Teilbestand
+wird nicht als vollstaendige Planung ausgegeben.
+
+```shell
+python -m valeo_cli studio migrationsplan --ausgabe migration.json
+python -m valeo_cli studio stapel-uebernehmen migration.json --protokoll fortschritt.json
+```
+
+Optional grenzt `migrationsplan --suche agrar` die Quellen nach Kennung/Bezeichnung
+ein. Der Plan enthaelt Quellenkennungen, SHA-256-Quellstaende und eine Batchkennung,
+keine Zugangsdaten. Vor dem ersten Import wird die gesamte geplante Quellenmenge
+nochmals verglichen. Jeder Import verwendet den bestehenden authentifizierten
+native-imports-Weg mit Quellhash und einem stabil aus Batch/Quelle/Hash abgeleiteten
+UUID-Idempotenzschluessel. Nach einem Fehler denselben Plan erneut verwenden;
+bereits erfolgreiche Aufrufe werden vom Server wiederholt. Die lokale Protokolldatei
+ist kein Ersatz fuer die serverseitige Historie. Ein vorhandener Plan wird weder
+bei erneuter Planung noch durch ein gleichnamiges Protokoll ueberschrieben.
+
+Anderweitig angelegte Ausgangsfassungen werden durch diesen Stapel nicht ersetzt:
+Der vorhandene Serverkonflikt bleibt verbindlich. Bestehende bearbeitete Fassungen
+muessen vor einer neuen Welle einzeln abgeglichen werden. Der Import aktiviert
+keine Route und gilt nicht als Ersatznachweis fuer Fach-/Sicherheits-/Darstellungstests.
+Handgebaute Seiten ohne registrierte Definition erscheinen bewusst nicht als
+angeblich migrierte Masken. Ihr Umbau bleibt im Maskeninventar sichtbar.
+
+Fuer die lokale Windows-CLI verwendet ausschliesslich der HTTP-Transport zu
+localhost eine IPv4-Quellbindung. Dies umgeht eine nachgewiesene haengende
+Docker-Desktop-Weiterleitung ueber ::1; URLs und OIDC-Issuer bleiben unveraendert.
+Externe Hosts, TLS-Pruefung und Serverautorisierung werden nicht abgeschwaecht.

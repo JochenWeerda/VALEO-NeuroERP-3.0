@@ -246,3 +246,156 @@ def test_neu_prueft_beim_server_und_speichert_nur_ohne_verstoss(monkeypatch):
     code, out = run(["neu", "--maske", "tenant/e", "--titel", "E", "--domaene", "agrar", "--quelle", "frei",
                      "--spalte", "x"], handler, monkeypatch)
     assert code == 2 and "nicht im Studio-Katalog" in out
+
+
+class BulkStudio(Studio):
+    def __init__(self, count=205):
+        super().__init__()
+        self.sources = [{"screen_id": f"crm/list-{i:03}", "title": f"Liste {i}", "source_hash": f"{i:064x}"}
+                        for i in range(count)]
+        self.imports = {}
+        self.fail_once = None
+
+    def __call__(self, request):
+        if request.url.path.endswith("/native-sources"):
+            skip = int(request.url.params.get("skip", 0))
+            limit = int(request.url.params.get("limit", 100))
+            return httpx.Response(200, json={"items": self.sources[skip:skip+limit], "total": len(self.sources)})
+        if request.url.path.endswith("/native-imports"):
+            body = json.loads(request.content)
+            self.calls.append((request.method, "/native-imports", body))
+            if self.fail_once == body["screen_id"]:
+                self.fail_once = None
+                return httpx.Response(503, json={"detail": "storage unavailable"})
+            assert next(s for s in self.sources if s["screen_id"] == body["screen_id"])["source_hash"] == body["expected_source_hash"]
+            key = body["idempotency_key"]
+            if key not in self.imports:
+                self.imports[key] = {"id": f"d{len(self.imports)}", "status": "draft", "revision": "b"*64,
+                                     "screen_id": body["screen_id"]}
+            return httpx.Response(200, json=self.imports[key])
+        return super().__call__(request)
+
+
+def test_vollstaendiger_stapel_ueber_mehr_als_hundert_quellen(monkeypatch, tmp_path):
+    studio = BulkStudio()
+    plan = tmp_path / "plan.json"
+    code, out = run(["quellen"], studio, monkeypatch)
+    assert code == 0 and "205 vorhandene" in out and "crm/list-204" in out
+    assert run(["migrationsplan", "--ausgabe", str(plan)], studio, monkeypatch)[0] == 0
+    assert not studio.imports
+    data = json.loads(plan.read_text())
+    assert len(data["sources"]) == 205
+    code, out = run(["stapel-uebernehmen", str(plan)], studio, monkeypatch)
+    assert code == 0 and "205 Ausgangsfassungen" in out
+    assert len(studio.imports) == 205
+    assert all(c[1] == "/native-imports" for c in studio.calls)
+    assert all(r["status"] == "draft" for r in studio.imports.values())
+
+
+def test_stapel_wiederaufnahme_nach_serverfehler_ohne_doppelfassung(monkeypatch, tmp_path):
+    studio = BulkStudio(3)
+    plan, log = tmp_path / "plan.json", tmp_path / "log.json"
+    run(["migrationsplan", "--ausgabe", str(plan)], studio, monkeypatch)
+    studio.fail_once = "crm/list-001"
+    assert run(["stapel-uebernehmen", str(plan), "--protokoll", str(log)], studio, monkeypatch)[0] == 4
+    assert len(studio.imports) == 1
+    assert len(json.loads(log.read_text())["results"]) == 1
+    assert run(["stapel-uebernehmen", str(plan), "--protokoll", str(log)], studio, monkeypatch)[0] == 0
+    assert len(studio.imports) == 3
+    keys = [c[2]["idempotency_key"] for c in studio.calls]
+    assert keys[0] == keys[2] and keys[1] == keys[3]
+    assert len(json.loads(log.read_text())["results"]) == 3
+
+
+@pytest.mark.parametrize("change", ["hash", "missing", "added", "duplicate", "format"])
+def test_stapel_drift_oder_manipulierter_plan_sperrt_vor_erster_mutation(monkeypatch, tmp_path, change):
+    studio = BulkStudio(3)
+    plan = tmp_path / "plan.json"
+    run(["migrationsplan", "--ausgabe", str(plan)], studio, monkeypatch)
+    if change == "hash":
+        studio.sources[0]["source_hash"] = "f"*64
+    elif change == "missing":
+        studio.sources.pop()
+    elif change == "added":
+        studio.sources.append({"screen_id": "x/y", "title": "Y", "source_hash": "f"*64})
+    elif change == "duplicate":
+        studio.sources[1] = studio.sources[0]
+    else:
+        data = json.loads(plan.read_text()); data["sources"] = [{"screen_id": "crm/list-000"}]
+        plan.write_text(json.dumps(data))
+    assert run(["stapel-uebernehmen", str(plan)], studio, monkeypatch)[0] == 2
+    assert not studio.calls and not studio.imports
+
+
+def test_plan_wird_nicht_durch_neuplanung_oder_protokoll_zerstoert(monkeypatch, tmp_path):
+    studio = BulkStudio(1)
+    plan = tmp_path / "plan.json"
+    run(["migrationsplan", "--ausgabe", str(plan)], studio, monkeypatch)
+    original = plan.read_bytes()
+    assert run(["migrationsplan", "--ausgabe", str(plan)], studio, monkeypatch)[0] == 2
+    assert run(["stapel-uebernehmen", str(plan), "--protokoll", str(plan)], studio, monkeypatch)[0] == 2
+    assert plan.read_bytes() == original and not studio.imports
+
+
+def test_stapel_berechtigungsfehler_bleibt_serverentscheidung(monkeypatch, tmp_path):
+    studio = BulkStudio(1)
+    plan = tmp_path / "plan.json"
+    run(["migrationsplan", "--ausgabe", str(plan)], studio, monkeypatch)
+    def forbidden(request):
+        if request.method == "POST":
+            return httpx.Response(403, json={"detail": "denied"})
+        return studio(request)
+    assert run(["stapel-uebernehmen", str(plan)], forbidden, monkeypatch)[0] == 3
+    assert not studio.imports
+
+
+
+def test_gesamter_registrierter_bestand_per_cli_in_echtem_studio_speicher(require_db, monkeypatch, tmp_path):
+    """Real sources/router/store, shared SQL probe and outer rollback; not a live-login acceptance."""
+    from uuid import uuid4
+    from sqlalchemy import text
+    from sqlalchemy.orm import Session
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from app.api.v1.endpoints.studio_native_import import router
+    from app.auth.deps import get_current_user
+    from app.core.tenant import get_tenant_id
+    from app.core.database import engine
+    from app.services import studio_draft_store as store, studio_native_import as native
+    from testgrenze import pruefstand_erlaubt
+    assert pruefstand_erlaubt(engine.url)
+    tenant = str(uuid4())
+    application = FastAPI()
+    application.include_router(router, prefix="/api/v1/studio")
+    application.dependency_overrides[get_tenant_id] = lambda: tenant
+    application.dependency_overrides[get_current_user] = lambda: {
+        "sub": "synthetic-cli-migration-designer", "roles": ["EINKAUF_BEARBEITEN"]}
+    monkeypatch.setattr(store, "_prefer_memory", False)
+    monkeypatch.setenv("VALEO_ACCESS_TOKEN", HUMAN)
+    plan = tmp_path / "migration.json"
+    with engine.connect() as connection:
+        transaction = connection.begin()
+        try:
+            connection.execute(text("INSERT INTO domain_shared.tenants (id,name,is_active) VALUES (:id,:id,true)"),
+                               {"id": tenant})
+            monkeypatch.setattr(store, "_sql_session", lambda: Session(bind=connection, join_transaction_mode="create_savepoint"))
+            with TestClient(application) as http:
+                output = []
+                assert cli.main(["studio", "migrationsplan", "--ausgabe", str(plan)], http=http, out=output.append) == 0
+                sources = json.loads(plan.read_text())["sources"]
+                assert {r["screen_id"] for r in sources} == set(native.source_ids(tenant))
+                assert len(sources) > 100
+                assert cli.main(["studio", "stapel-uebernehmen", str(plan)], http=http, out=output.append) == 0
+                first = store.list_drafts(tenant)
+                assert len(first) == len(sources)
+                assert cli.main(["studio", "stapel-uebernehmen", str(plan)], http=http, out=output.append) == 0
+                assert store.list_drafts(tenant) == first
+                assert store.list_drafts(str(uuid4())) == []
+                for record in first:
+                    assert record["status"] == "draft"
+                    assert record["created_by"] == "synthetic-cli-migration-designer"
+                    assert record["readiness"]["eligible_for_release"] is False
+                    assert len(store.list_history(tenant, record["id"])) == 1
+                    assert store.get_published_definition(tenant, record["screen_id"]) is None
+        finally:
+            transaction.rollback()

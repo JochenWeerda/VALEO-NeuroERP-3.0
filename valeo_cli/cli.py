@@ -311,7 +311,11 @@ def main(argv: list[str] | None = None, *, http: httpx.Client | None = None, out
             except EOFError:
                 return ""
     own = http is None
-    http = http or httpx.Client(timeout=30.0)
+    # Docker Desktop can accept ::1 connections without forwarding their responses.
+    # Bind only the local HTTP transport to IPv4; preserve issuer URLs and remote TLS/proxy policy.
+    http = http or httpx.Client(timeout=30.0, mounts={
+        "http://localhost": httpx.HTTPTransport(local_address="0.0.0.0"),
+    })
     try:
         if args.befehl == "anmelden":
             session = auth.login(http, settings, announce=out, open_browser=not args.kein_browser)

@@ -18888,7 +18888,7 @@ sowie Handbuchdrift gruen. Keine Datenbank-/Container-/Geschaeftscodeaenderung.
 
 **Abnahme AP-MASK-CONTRACT-CI:** Fehlende dangerousActions-Deklaration nur fuer finance/ap-invoice.freigeben ergaenzt. Gesamte UIX-046/048-Sicherheitssuite und MCP-Map:797 bestanden auf unveraendertem Quellstand. Agent-Handbuch regeneriert und Driftpruefung gruen. Menschliche Freigabe/Agentensperre unveraendert; keine Layout-/Buchungs-/Rechteaenderung und keine zusaetzliche Datenbankressource.
 
-## STUDIO-CLI-BULK-20261020 - reserviert, Codex
+## STUDIO-CLI-BULK-20261020 - abgeschlossen, Codex
 
 Owner Codex. Nutzerauftrag: fehlende/handgebaute Masken ueber CLI in Studio
 ueberfuehren und abgeloeste Einzelmaskentests erst nach gleichwertigem Nachweis
@@ -18911,3 +18911,18 @@ antwortet aber nicht. Keycloak-Discovery ebenfalls200 ueber IPv4. Zusatzbesitz
 valeo_cli/cli.py ausschliesslich localhost-Transport mit IPv4-Quellbindung;
 externe Hosts/Issuer/TLS/Tokenpruefung unveraendert. Keine Docker-/OS-weite
 Netzwerkaenderung oder Dienstneustarts. Lokale CLI-Sitzung fehlt weiterhin.
+
+
+**STUDIO-CLI-BULK Abnahme:** 63 CLI-/native Studio-Vertraege bestanden, darunter
+vollstaendiger registrierter Bestand (>100) ueber CLI/echt HTTP-Router/echt SQL,
+Idempotenz/History/Isolation/keine Publikation. Gemeinsamer valeo_probe, aeusserer
+Rollback; keine neue DB/Container/Reset. Reale PKCE-Anmeldung der vorher
+freigegebenen synthetischen Testkennung erfolgreich. Lokale117 Quellen abrufbar;
+115 neue Baselines per CLI importiert, zwei bestehende erhalten (eine
+abweichende bewusst nicht ersetzt). Alle117 laufenden Quellen haben nun eine
+Ausgangsfassung; neue Fassungen bleiben nicht freigabefaehige Entwuerfe.
+Lokaler Mountbestand ist aelter als aktueller Git-Stand. Vollstaendige
+Handmade-Abloesung, Aktivierung und Ersatz alter Einzelmaskentests sind weiter
+offen; keine Baseline als Produktionsabnahme ausgegeben. QA:
+docs/quality-assurance/studio-cli-bulk-20261020.md. localhost-Transport repariert,
+keine OS-/Docker-Netzwerkaenderung oder neuen Rollen.

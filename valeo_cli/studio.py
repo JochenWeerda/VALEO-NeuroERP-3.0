@@ -12,6 +12,7 @@ Jeder schreibende Aufruf traegt einen Wiederholungsschluessel; ``--idempotenz`` 
 from __future__ import annotations
 
 import json
+import re
 import uuid
 from pathlib import Path
 from typing import Any, Callable
@@ -148,6 +149,68 @@ def compose(catalog: dict[str, Any], *, screen_id: str, title: str, domain: str,
     }
 
 
+def _all_sources(call, query: str = "") -> list[dict[str, str]]:
+    """Read all pages; an incomplete or changing inventory is never a migration plan."""
+    rows = []
+    seen = set()
+    total = None
+    while total is None or len(rows) < total:
+        page = call("GET", f"{STUDIO}/native-sources?" + urlencode({"q": query, "skip": len(rows), "limit": 100}))
+        count = page.get("total")
+        items = page.get("items")
+        if type(count) is not int or count < 0 or not isinstance(items, list):
+            raise ValueError("Ungueltiges Quelleninventar.")
+        if total is not None and count != total:
+            raise ValueError("Quelleninventar waehrend der Planung geaendert; erneut planen.")
+        total = count
+        if len(rows) + len(items) > total or (not items and len(rows) < total):
+            raise ValueError("Unvollstaendiges Quelleninventar.")
+        for row in items:
+            if not isinstance(row, dict):
+                raise ValueError("Ungueltige Maskenquelle.")
+            source_id, stamp = row.get("screen_id"), row.get("source_hash")
+            if (not isinstance(source_id, str) or not source_id or len(source_id) > 200
+                    or not isinstance(stamp, str) or not re.fullmatch(r"[0-9a-f]{64}", stamp)
+                    or source_id in seen):
+                raise ValueError("Ungueltige oder doppelte Maskenquelle.")
+            seen.add(source_id)
+            rows.append({"screen_id": source_id, "source_hash": stamp, "title": str(row.get("title") or source_id)})
+    return sorted(rows, key=lambda row: row["screen_id"])
+
+
+def _bulk_import(args, call, out) -> int:
+    if args.protokoll and Path(args.protokoll).resolve() == Path(args.datei).resolve():
+        raise ValueError("Protokoll darf den Migrationsplan nicht ueberschreiben.")
+    plan = json.loads(Path(args.datei).read_text(encoding="utf-8"))
+    if not isinstance(plan, dict) or plan.get("schemaVersion") != 1:
+        raise ValueError("Unbekanntes Migrationsplanformat.")
+    try:
+        batch = uuid.UUID(plan["batch_id"])
+    except (KeyError, ValueError, TypeError, AttributeError) as exc:
+        raise ValueError("Migrationsplan braucht eine gueltige batch_id.") from exc
+    query, sources = plan.get("query"), plan.get("sources")
+    if not isinstance(query, str) or len(query) > 100 or not isinstance(sources, list):
+        raise ValueError("Ungueltiger Migrationsplan.")
+    # Compare complete source snapshots before the first write. Server repeats the hash check per import.
+    current = _all_sources(call, query)
+    expected = [{"screen_id": row["screen_id"], "source_hash": row["source_hash"]} for row in current]
+    if sources != expected:
+        raise ValueError("Quellenbestand oder Quellhash seit Planung geaendert; keine Uebernahme ausgefuehrt.")
+    results = []
+    for source in sources:
+        key = str(uuid.uuid5(batch, source["screen_id"] + ":" + source["source_hash"]))
+        record = call("POST", f"{STUDIO}/native-imports", {"screen_id": source["screen_id"],
+                       "expected_source_hash": source["source_hash"], "idempotency_key": key})
+        results.append({"source_id": source["screen_id"], "draft_id": record["id"],
+                        "revision": record["revision"], "status": record["status"]})
+        if args.protokoll:
+            # Replays return the original record; the server, not this local journal, owns progress.
+            _write(args.protokoll, {"batch_id": str(batch), "results": results}, lambda _: None)
+        out("Ausgangsfassung uebernommen: " + _summary(record))
+    out(f"{len(results)} Ausgangsfassungen versioniert; Aktivierung und Freigabe unveraendert.")
+    return 0
+
+
 def run(args, call, out, stdin) -> int:
     """``call(method, path, body=None)`` liefert JSON oder wirft (Anmeldung, 404, Serverfehler)."""
     cmd = args.studio_befehl
@@ -161,11 +224,28 @@ def run(args, call, out, stdin) -> int:
             out(json.dumps(catalog, ensure_ascii=False, indent=2))
         return 0
     if cmd == "quellen":
-        rows = call("GET", f"{STUDIO}/native-sources?" + urlencode({"q": args.suche or "", "limit": 100}))
-        for row in rows.get("items", []):
+        rows = _all_sources(call, args.suche or "")
+        for row in rows:
             out(f"  {row['screen_id']:<48} {row['title']}")
-        out(f"{rows.get('total', 0)} vorhandene Masken uebernehmbar.")
+        out(f"{len(rows)} vorhandene Masken uebernehmbar.")
         return 0
+    if cmd == "migrationsplan":
+        target = Path(args.ausgabe)
+        if target.exists():
+            raise ValueError("Migrationsplan existiert bereits; fuer Wiederaufnahme denselben Plan verwenden.")
+        rows = _all_sources(call, args.suche or "")
+        plan = {"schemaVersion": 1, "batch_id": str(uuid.uuid4()), "query": args.suche or "",
+                "sources": [{"screen_id": row["screen_id"], "source_hash": row["source_hash"]} for row in rows]}
+        try:
+            with target.open("x", encoding="utf-8") as handle:
+                handle.write(json.dumps(plan, ensure_ascii=False, indent=2) + "\n")
+        except FileExistsError as exc:
+            raise ValueError("Migrationsplan wurde zwischenzeitlich angelegt; vorhandenen Plan verwenden.") from exc
+        out(f"Definition geschrieben: {target}")
+        out(f"{len(rows)} Quellen geplant; noch keine Maske importiert oder aktiviert.")
+        return 0
+    if cmd == "stapel-uebernehmen":
+        return _bulk_import(args, call, out)
     if cmd == "uebernehmen":
         rows = call("GET", f"{STUDIO}/native-sources?" + urlencode({"q": args.maske, "limit": 100})).get("items", [])
         source = next((row for row in rows if row["screen_id"] == args.maske), None)
@@ -267,6 +347,12 @@ def add_parser(sub) -> None:
     k.add_argument("--json", action="store_true")
     q = s.add_parser("quellen", help="Vorhandene Masken, die als Ausgangsfassung uebernehmbar sind")
     q.add_argument("suche", nargs="?")
+    mp = s.add_parser("migrationsplan", help="Alle registrierten Quellen hashgebunden fuer Stapeluebernahme planen")
+    mp.add_argument("--suche", default="", help="Quellen nach Kennung/Bezeichnung einschraenken")
+    mp.add_argument("--ausgabe", required=True, metavar="DATEI")
+    bulk = s.add_parser("stapel-uebernehmen", help="Geplante Quellen als Studio-Ausgangsfassungen versionieren")
+    bulk.add_argument("datei", help="Unveraenderter Migrationsplan; fuer Wiederaufnahme erneut verwenden")
+    bulk.add_argument("--protokoll", metavar="DATEI", help="Fortschritt ohne Zugangsdaten protokollieren")
     u = with_key(s.add_parser("uebernehmen", help="Vorhandene Maske als versionierten Studio-Entwurf uebernehmen"))
     u.add_argument("maske")
     v = with_key(s.add_parser("vorschlag", help="Maskenvorschlag aus einer fachlichen Absicht"))
