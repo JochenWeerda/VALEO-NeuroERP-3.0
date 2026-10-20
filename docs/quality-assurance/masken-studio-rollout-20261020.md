@@ -301,7 +301,7 @@ Studio-konform ist. Dafuer fehlten Objektmasken mit Anlage und Bearbeiten.
 | Gegenstand | Befund | Umsetzung |
 |---|---|---|
 | Artikelstamm `/artikel/:id`, `/artikel/neu` | handgebaute Seite (1.736 Zeilen); die Anlage schickte einen eingebauten Mandanten mit (VITE_TENANT_ID bzw. Null-UUID) und scheiterte in jedem echten Mandanten mit 403 | ScreenDefinition `artikel/stamm` (`app/core/screen_definitions_stamm.py`): Register Stammdaten, Preise und Steuer, Lager, Qualitaet und Gefahrgut, Lieferanten, Preisvereinbarungen, Dokumente; Anlage ueber `creation` (`POST /api/v1/articles/`), Bearbeiten ueber `/api/v1/articles/{id}/actions/bearbeiten` (delegiert an `update_article`, nur deklarierte Felder) |
-| Kundenanlage `POST /api/v1/crm/customers/` | Mandant aus dem Body, Standard Dev-Mandant: jede CRM-Rolle konnte Kunden in fremden Mandanten anlegen, ohne Angabe landeten sie im Dev-Mandanten | Mandant aus dem Kontext, abweichender Body-Mandant 403 |
+| Kundenanlage `POST /api/v1/crm/customers/` | Mandant aus dem Body, Standard Dev-Mandant. **Korrektur 20.10.:** produktiv (`main:app`) bindet `install_tenant_bindings` Body-Mandanten an den geprueften Kontext (fremd 403, fehlend aufgefuellt) — die Luecke bestand nur in `app.main` (Tests/Dev), nicht im Betrieb | Mandant aus dem Kontext, abweichender Body-Mandant 403 (Verteidigung in der Tiefe, gleiches Verhalten in beiden Apps) |
 | Kunden aus crm-core (Liste, Abruf, Aendern, Loeschen) | crm-core fuehrt keinen Mandanten — alle Wege reichten Kunden **aller** Mandanten durch (gleiches Muster wie die Kontakte) | ein crm-core-Kunde gilt nur ueber seinen Eintrag in `domain_crm.customers` als eigener; die Anlage traegt ihn immer ein (vorher nur mit Geschaeftspartner, Fehler verschluckt); `upsert_monolith_stub` aktualisiert keine fremden Zeilen mehr (`tests/test_kunden_crm_core_mandant.py`) |
 
 **Kundenakte, 20.10. (zweiter Schritt):** `crm/customer-360` hat jetzt eine Anlage (`creation`, `/crm/kunden/neu`;
@@ -320,6 +320,17 @@ nicht vorhandene Tabelle `einkauf_lieferanten` und ist tot (offen).
 
 Offen: Unterobjekte (Anschriften, CpD, Rabatte, Chefanweisungen, Bankverbindung) pflegt weiter die handgebaute
 Kundenmaske `/verkauf/kunden-stamm` ("Erweiterte Pflege"); naechster Schritt sind Register mit Zeilenaktionen.
+
+## Einordnung: Mandant aus Query/Body (20.10.2026)
+
+208 Wege deklarieren `tenant_id` als Query-Parameter (Standard oft `"system"`), weitere tragen ihn im Body. Das ist
+**produktiv keine Luecke**: `main:app` (Dockerfile, Compose) installiert `app.core.tenant_binding.install_tenant_bindings`
+— jeder deklarierte Mandanten-Selektor in Pfad, Query und Body wird gegen den geprueften Kontext geprueft (fremd 403)
+und fehlend aufgefuellt. `app.main` (Tests, Mini-Apps) installiert die Bindung **nicht**; dort sind diese Wege
+mandantenoffen. Echte Luecken bleiben, wo die Daten selbst keinen Mandanten tragen (crm-core-Kunden und -Kontakte —
+behoben) oder ein eingebauter Mandant mitgeschickt wird (Artikelanlage — scheiterte produktiv mit 403, behoben).
+Offen: `app.main` auf dieselbe Bindung bringen, damit Tests den Betrieb abbilden (eigener Slice: aendert das Verhalten
+vieler Bestandstests).
 
 ## Persistenzluecken: Fachdaten nur im Arbeitsspeicher (offen, je eigener Slice)
 
