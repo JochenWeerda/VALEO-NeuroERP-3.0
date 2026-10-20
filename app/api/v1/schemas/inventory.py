@@ -108,8 +108,11 @@ class ArticleBase(BaseSchema):
 
 
 class ArticleCreate(ArticleBase):
-    """Schema for creating an article"""
-    tenant_id: str = Field(..., description="Tenant ID")
+    """Schema for creating an article.
+
+    Der Mandant kommt aus dem geprueften Kontext; ein abweichender Wert wird mit 403 abgewiesen. Bis 20.10.2026 war das
+    Feld Pflicht, und die Artikelmaske schickte einen eingebauten Mandanten mit — Anlage scheiterte in jedem anderen."""
+    tenant_id: Optional[str] = Field(None, description="Optional; Mandant aus dem Kontext")
 
 
 class ArticleUpdate(BaseSchema):

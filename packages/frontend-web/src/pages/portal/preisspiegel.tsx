@@ -7,11 +7,10 @@
  *  - Neue Ernte frei Lager Handel
  *  - Neue Ernte ab Hof (Monat nach Ernte)
  *
- * API: GET /portal/preisspiegel/kunde?artikel_ids=...
+ * API: GET /portal/preisspiegel/kunde (ohne artikel_ids: alle aktuellen Kurse)
  *      GET /portal/preisspiegel?frucht_gruppe=...
  */
 
-import { useState } from 'react'
 import { Callout, type CalloutVariant } from '@/components/ui/callout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -60,7 +59,6 @@ type PreisspigelResponse = {
 
 // Für Demo: Artikel-IDs die der eingeloggte Bauer anbaut
 // Produktiv: aus JWT + Schlagkartei-Kulturen ableiten
-const DEMO_ARTIKEL = 'WEI-001,GER-001,RAP-001'
 
 const VARIANTE_CONFIG: Record<string, { label: string; icon: React.ReactNode; variant: CalloutVariant; beschreibung: string }> = {
   altware_ab_hof: {
@@ -146,13 +144,11 @@ function ArtikelPreiskarte({ artikel }: { artikel: ArtikelPreisspiegel }) {
 }
 
 export default function PreisspiedelPage() {
-  const [artikelFilter, setArtikelFilter] = useState<string>(DEMO_ARTIKEL)
-
   const { data, isLoading, isError, refetch, isFetching } = useQuery<PreisspigelResponse>({
-    queryKey: ['portal-preisspiegel', artikelFilter],
+    queryKey: ['portal-preisspiegel'],
     queryFn: async () => {
       const res = await apiClient.get<PreisspigelResponse>(
-        `/api/v1/portal/preisspiegel/kunde?artikel_ids=${artikelFilter}`,
+        '/api/v1/portal/preisspiegel/kunde',
       )
       return res.data
     },
@@ -216,7 +212,7 @@ export default function PreisspiedelPage() {
           {(data.preisspiegel ?? []).length === 0 ? (
             <Alert>
               <AlertDescription>
-                Für Ihre Früchte liegen aktuell keine Ankaufspreise vor. Wenden Sie sich an Ihren Innendienst.
+                Aktuell liegen keine Ankaufspreise vor. Wenden Sie sich an Ihren Innendienst.
               </AlertDescription>
             </Alert>
           ) : (

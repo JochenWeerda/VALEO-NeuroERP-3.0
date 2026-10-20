@@ -56230,6 +56230,250 @@
             "app/infrastructure/models/__init__.py"
           ]
         },
+        "portal_interessenten": {
+          "columns": [
+            {
+              "name": "interessent_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "vorname",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "nachname",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "email",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "telefon",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "betrieb_name",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "betrieb_typ",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "flaeche_ha",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "hauptkulturen",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "tiere_anzahl",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "tierart",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "plz",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "ort",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "interesse_themen",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "anmerkung",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "zugewiesen_an",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "kunden_nr",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "qualifiziert_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "konvertiert_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "erstellt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "aktualisiert_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "interessent_id"
+          ],
+          "read_by": [
+            "app/services/portal_interessent_service.py"
+          ],
+          "written_by": [
+            "app/services/portal_interessent_service.py"
+          ]
+        },
+        "portal_preise": {
+          "columns": [
+            {
+              "name": "preis_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "artikel_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "artikel_name",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "frucht_gruppe",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "variante",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "preis_eur_dt",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "basis_qualitaet",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "ernte_jahr",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "liefermonat",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "aufschlag_eur_dt",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "quelle",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "gueltig_ab",
+              "nullable": false,
+              "type": "date"
+            },
+            {
+              "name": "gueltig_bis",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "hinweis",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "gepflegt_von",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "abgeloest_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "erstellt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "aktualisiert_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "preis_id"
+          ],
+          "read_by": [
+            "app/services/portal_preisspiegel_service.py"
+          ],
+          "written_by": [
+            "app/services/portal_preisspiegel_service.py"
+          ]
+        },
         "preis_rabattgruppen": {
           "columns": [
             {

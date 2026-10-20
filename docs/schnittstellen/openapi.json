@@ -13131,7 +13131,7 @@
         "type": "object"
       },
       "ArticleCreate": {
-        "description": "Schema for creating an article",
+        "description": "Schema for creating an article.\n\nDer Mandant kommt aus dem geprueften Kontext; ein abweichender Wert wird mit 403 abgewiesen. Bis 20.10.2026 war das\nFeld Pflicht, und die Artikelmaske schickte einen eingebauten Mandanten mit — Anlage scheiterte in jedem anderen.",
         "properties": {
           "alt_ean_code": {
             "anyOf": [
@@ -13959,9 +13959,16 @@
             "title": "Supplier Number"
           },
           "tenant_id": {
-            "description": "Tenant ID",
-            "title": "Tenant Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional; Mandant aus dem Kontext",
+            "title": "Tenant Id"
           },
           "unit": {
             "description": "Unit of measure (e.g., kg, pcs, l)",
@@ -14096,8 +14103,7 @@
           "name",
           "unit",
           "category",
-          "sales_price",
-          "tenant_id"
+          "sales_price"
         ],
         "title": "ArticleCreate",
         "type": "object"
@@ -363666,22 +363672,6 @@
               ],
               "title": "Zugewiesen An"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -363721,24 +363711,6 @@
       },
       "post": {
         "operationId": "registrieren_api_v1_portal_interessenten_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -363776,7 +363748,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Interessent selbst registrieren (public)",
+        "summary": "Interessent selbst registrieren (Portal)",
         "tags": [
           "portal",
           "interessent",
@@ -363796,22 +363768,6 @@
             "schema": {
               "title": "Interessent Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -363862,22 +363818,6 @@
             "schema": {
               "title": "Interessent Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -365303,22 +365243,6 @@
               ],
               "title": "Ernte Jahr"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -365358,24 +365282,6 @@
       },
       "post": {
         "operationId": "preis_setzen_api_v1_portal_preisspiegel_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -365427,19 +365333,9 @@
         "operationId": "preisspiegel_kunde_api_v1_portal_preisspiegel_kunde_get",
         "parameters": [
           {
-            "description": "Kommagetrennte Artikel-IDs",
+            "description": "Kommagetrennte Artikel-IDs; ohne Angabe alle aktuellen",
             "in": "query",
             "name": "artikel_ids",
-            "required": true,
-            "schema": {
-              "description": "Kommagetrennte Artikel-IDs",
-              "title": "Artikel Ids",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
             "required": false,
             "schema": {
               "anyOf": [
@@ -365450,7 +365346,8 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Tenant-Id"
+              "description": "Kommagetrennte Artikel-IDs; ohne Angabe alle aktuellen",
+              "title": "Artikel Ids"
             }
           }
         ],
