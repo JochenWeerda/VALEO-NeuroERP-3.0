@@ -264,9 +264,12 @@ def get_dashboard_stats(tenant_id: Optional[str] = None) -> dict[str, Any]:
     }
 
 
-def check_and_escalate_overdue() -> list[ApprovalCase]:
+def check_and_escalate_overdue(tenant_id: str | None = None) -> list[ApprovalCase]:
+    """Eskaliert ueberfaellige Faelle; mit ``tenant_id`` nur die dieses Mandanten (Aufruf ueber die API)."""
     escalated = []
     for case in _CASE_STORE.values():
+        if tenant_id is not None and case.tenant_id != tenant_id:
+            continue
         if case.is_overdue and case.status in (CaseStatus.OPEN, CaseStatus.ASSIGNED):
             case.status = CaseStatus.ESCALATED
             case.priority = CasePriority.CRITICAL
