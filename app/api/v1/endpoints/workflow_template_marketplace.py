@@ -76,7 +76,7 @@ def get_workflow_template(
 
 
 @router.post("/{template_id}/preview", summary="Workflow-Template vor Installation previewen",
-    response_model=WorkflowTemplateOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    response_model=WorkflowTemplateOut, dependencies=SCHREIBEN["BERECHNEN"])
 def preview_workflow_template(
     template_id: str,
     payload: dict,
@@ -100,7 +100,7 @@ def preview_workflow_template(
 
 
 @router.post("/{template_id}/publish-preview", summary="Workflow-Template fuer Publikation previewen",
-    response_model=WorkflowTemplateOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    response_model=WorkflowTemplateOut, dependencies=SCHREIBEN["BERECHNEN"])
 def publish_preview_workflow_template(
     template_id: str,
     payload: dict,

@@ -91,7 +91,7 @@ def list_definitions(
     )
 
 
-@router.post("/preview", response_model=QueryPreviewOut, summary="Abfrage als Vorschau ausfuehren", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/preview", response_model=QueryPreviewOut, summary="Abfrage als Vorschau ausfuehren", dependencies=SCHREIBEN["BERECHNEN"])
 def preview(
     body: PreviewIn,
     db: Session = Depends(get_db),

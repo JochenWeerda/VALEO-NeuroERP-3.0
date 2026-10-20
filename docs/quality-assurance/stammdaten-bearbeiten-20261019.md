@@ -67,3 +67,13 @@ Wirkung; er war entfernt. Jetzt hat jede einen echten Bearbeitungsweg, der fuer 
 - Eingehende Auftragsbestaetigungen haben keinen Erfassungsweg; die Tabelle fuellt niemand. Das ist ein eigener
   Fachslice: EDI-ORDRSP oder Erfassung, Abgleich mit der Bestellung.
 - Gesamtlauf der Backend-Suite: lokal wegen Speichermangels nicht moeglich, CI ist Schiedsrichter.
+
+## CI-Nachlauf (20.10.2026)
+
+- Pytest (PostgreSQL, `needs_live_db`) war rot: 25 Faelle. Es waren Mini-App-Tests des Prozesskerns ohne
+  Testidentitaet nach dem Rollenblock; die lokale Auswahl nach Modulimport hatte sie nicht erfasst.
+- Systematisch nachgesucht: alle Testdateien mit `FastAPI()` ohne Testgrenze, 62 Dateien. Davon waren 22 rot (113
+  Faelle), alle 401. Nach dem Nachziehen von `ersetze_nutzer` sind 322 gruen.
+- „Role description contracts“ war seit `6070f8e68` rot. `check_fachrollen.py` hielt den Gruppenschluessel
+  `FACHLICH_LESEN` fuer eine Rolle (Muster `*_LESEN`). Die Gruppe heisst jetzt `BERECHNEN`, der Katalog ist gruen.
+- Docs Build, Service Security und Security Scan waren schon vor diesen Commits rot und sind nicht Teil dieses Slices.

@@ -25,7 +25,7 @@ class DictRequest(BaseModel):
 
 
 @router.post("/check-input", summary="Check input do",
-    response_model=NeuroGuardrailsOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    response_model=NeuroGuardrailsOut, dependencies=SCHREIBEN["BERECHNEN"])
 async def do_check_input(request: TextRequest):
     result = check_input(request.text)
     return result.to_dict()
@@ -51,13 +51,13 @@ async def do_detect_pii(request: TextRequest):
 
 
 @router.post("/mask", summary="Mask do",
-    response_model=NeuroGuardrailsOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    response_model=NeuroGuardrailsOut, dependencies=SCHREIBEN["BERECHNEN"])
 async def do_mask(request: TextRequest):
     return {"masked": mask_irreversible(request.text)}
 
 
 @router.post("/mask-reversible", summary="Mask reversible do",
-    response_model=NeuroGuardrailsOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    response_model=NeuroGuardrailsOut, dependencies=SCHREIBEN["BERECHNEN"])
 async def do_mask_reversible(request: TextRequest):
     masked, token_map = mask_reversible(request.text)
     return {"masked": masked, "tokens": len(token_map)}

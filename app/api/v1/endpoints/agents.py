@@ -625,7 +625,7 @@ async def get_low_stock_agent_status():
     }
 
 
-@router.post("/low-stock/simulate", response_model=AgentOut, summary="Low-Stock-Event simulieren", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/low-stock/simulate", response_model=AgentOut, summary="Low-Stock-Event simulieren", dependencies=SCHREIBEN["BERECHNEN"])
 async def simulate_low_stock_event(request: LowStockSimulateRequest):
     from ....workers.low_stock_agent import LowStockEvent, handle_low_stock_event
 

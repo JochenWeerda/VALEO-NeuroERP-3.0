@@ -9,6 +9,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import process_kernel_api
@@ -23,6 +24,7 @@ from app.core.action_idempotency import get_action_idempotency_store
 
 def _make_client() -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     mock_session = MagicMock()
 

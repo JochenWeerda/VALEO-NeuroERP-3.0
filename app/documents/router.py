@@ -998,7 +998,7 @@ async def search_articles(
 # --- Due-Date Berechnung ---
 
 
-@router.post("/due-date/calculate", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/due-date/calculate", dependencies=SCHREIBEN["BERECHNEN"])
 async def calculate_due_date(
     data: dict,
     db: Session = Depends(get_db)

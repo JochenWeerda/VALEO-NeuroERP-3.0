@@ -197,7 +197,7 @@ def studio_catalog(user: dict = Depends(get_current_user)) -> dict[str, Any]:
     }
 
 
-@router.post("/validate", summary="Studio-ScreenDefinition gegen Katalog und Gates prüfen", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/validate", summary="Studio-ScreenDefinition gegen Katalog und Gates prüfen", dependencies=SCHREIBEN["BERECHNEN"])
 def studio_validate(body: StudioDefinitionIn, user: dict = Depends(get_current_user)) -> dict[str, Any]:
     return _report(body.definition)
 

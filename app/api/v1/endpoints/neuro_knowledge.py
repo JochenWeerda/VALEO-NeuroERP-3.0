@@ -80,7 +80,7 @@ async def get_entry(
 
 
 @router.post("/search", summary="Suchen",
-    response_model=NeuroKnowledgeOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    response_model=NeuroKnowledgeOut, dependencies=SCHREIBEN["BERECHNEN"])
 async def search(
     request: SearchRequest,
     tenant_id: str = Depends(get_tenant_id),

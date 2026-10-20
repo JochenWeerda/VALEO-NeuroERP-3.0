@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import background_jobs, tenant_limits
@@ -9,6 +10,7 @@ from app.core.background_jobs import get_background_job_registry
 
 def _client() -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(background_jobs.router)
     app.include_router(tenant_limits.router)
     return TestClient(app)

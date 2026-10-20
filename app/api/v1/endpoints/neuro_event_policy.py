@@ -49,7 +49,7 @@ class ValidateEventRequest(BaseModel):
 
 
 @router.post("/neuro/events/validate", summary="Validate event do",
-    response_model=NeuroEventPolicyOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    response_model=NeuroEventPolicyOut, dependencies=SCHREIBEN["BERECHNEN"])
 async def do_validate_event(request: ValidateEventRequest):
     return validate_event(request.event_type, request.payload)
 

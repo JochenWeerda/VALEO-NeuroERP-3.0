@@ -395,7 +395,7 @@ def get_commands() -> dict[str, Any]:
 # AP2: Policy-Override-Resolution
 # ---------------------------------------------------------------------------
 
-@router.post("/policy/resolve", response_model=ProcessKernelOut, summary="Policy resolve", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/policy/resolve", response_model=ProcessKernelOut, summary="Policy resolve", dependencies=SCHREIBEN["BERECHNEN"])
 def resolve_policy(body: dict) -> dict[str, Any]:
     """LÃ¶st Policy-Override-Schichten auf und gibt die wirksame Entscheidung zurÃ¼ck."""
     rule_id: str = body.get("rule_id", "")
@@ -480,7 +480,7 @@ def build_agrar_settlement_ref(body: dict) -> dict[str, Any]:
 # AP6: Explainability aus Policy-Resolution
 # ---------------------------------------------------------------------------
 
-@router.post("/explainability", response_model=ProcessKernelOut, summary="Explainability build", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/explainability", response_model=ProcessKernelOut, summary="Explainability build", dependencies=SCHREIBEN["BERECHNEN"])
 def build_explainability(body: dict) -> dict[str, Any]:
     """Erzeugt eine Explainability-Sicht aus einer Policy-Override-Resolution."""
     rule_id: str = body.get("rule_id", "")
@@ -686,7 +686,7 @@ def get_settlement_approval_status(settlement_id: str) -> dict[str, Any]:
     }
 
 
-@router.post("/settlement/completion/evaluate", response_model=ProcessKernelOut, summary="Settlement completion contract evaluate", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/settlement/completion/evaluate", response_model=ProcessKernelOut, summary="Settlement completion contract evaluate", dependencies=SCHREIBEN["BERECHNEN"])
 def evaluate_settlement_completion_contract(
     payload: SettlementCompletionEvaluateRequest,
 ) -> dict[str, Any]:
@@ -1080,7 +1080,7 @@ def get_trocknungs_regelsets() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-@router.post("/workflow-migration/check", response_model=ProcessKernelOut, summary="Workflow migration prüfen", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/workflow-migration/check", response_model=ProcessKernelOut, summary="Workflow migration prüfen", dependencies=SCHREIBEN["BERECHNEN"])
 def check_workflow_migration(body: WorkflowMigrationCheckIn) -> dict[str, Any]:
     """Compare the explicitly supplied versions; never substitute demo steps."""
     alt_snap = WorkflowDefinitionSnapshot(
@@ -1203,7 +1203,7 @@ def get_policy_rules(prozess_key: str) -> dict[str, Any]:
     }
 
 
-@router.post("/policy-rules/evaluate", response_model=ProcessKernelOut, summary="Policy rules evaluate", dependencies=[*SCHREIBEN["FACHLICH_LESEN"], Depends(reject_nonfinite_slo_json)])
+@router.post("/policy-rules/evaluate", response_model=ProcessKernelOut, summary="Policy rules evaluate", dependencies=[*SCHREIBEN["BERECHNEN"], Depends(reject_nonfinite_slo_json)])
 def evaluate_policy_rules(body: PolicyEvaluationIn) -> dict[str, Any]:
     """Evaluate explicit advisory context; never issue a command approval."""
     prozess_key = body.prozess_key
@@ -1263,7 +1263,7 @@ def get_agent_approval_rules() -> dict[str, Any]:
     }
 
 
-@router.post("/agent/approval-evaluate", response_model=ProcessKernelOut, summary="Agent approval evaluate", dependencies=[*SCHREIBEN["FACHLICH_LESEN"], Depends(reject_nonfinite_slo_json)])
+@router.post("/agent/approval-evaluate", response_model=ProcessKernelOut, summary="Agent approval evaluate", dependencies=[*SCHREIBEN["BERECHNEN"], Depends(reject_nonfinite_slo_json)])
 def evaluate_agent_approval(body: ApprovalEvaluationIn) -> dict[str, Any]:
     """Evaluate explicit advisory context; never issue a command approval."""
     aktions_typ = body.aktions_typ
@@ -1297,7 +1297,7 @@ def get_slo_registry(dienst: str = "") -> dict[str, Any]:
 
 
 @router.post("/slo/check", response_model=ProcessKernelOut, summary="Slo prÃ¼fen",
-             dependencies=[*SCHREIBEN["FACHLICH_LESEN"], Depends(reject_nonfinite_slo_json)])
+             dependencies=[*SCHREIBEN["BERECHNEN"], Depends(reject_nonfinite_slo_json)])
 def check_slo(body: SloCheckIn) -> dict[str, Any]:
     """Check the explicit measurement; null is unknown and never synthetic zero."""
     slo_id = body.slo_id
@@ -1372,7 +1372,7 @@ def get_dq_rulesets() -> dict[str, Any]:
     }
 
 
-@router.post("/data-quality/validate", response_model=ProcessKernelOut, summary="Dq validieren", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/data-quality/validate", response_model=ProcessKernelOut, summary="Dq validieren", dependencies=SCHREIBEN["BERECHNEN"])
 def validate_dq(body: DataQualityCheckIn) -> dict[str, Any]:
     """Validate the explicit business dataset with bounded canonical input."""
     entity_typ = body.entity_typ
@@ -1476,7 +1476,7 @@ def get_query_fallbacks(domain: str = "") -> dict[str, Any]:
     }
 
 
-@router.post("/query-fallbacks/evaluate", response_model=ProcessKernelOut, summary="Query fallback evaluate", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/query-fallbacks/evaluate", response_model=ProcessKernelOut, summary="Query fallback evaluate", dependencies=SCHREIBEN["BERECHNEN"])
 def evaluate_query_fallback(body: dict) -> dict[str, Any]:
     """
     Bestimmt den Fallback fuer einen fehlgeschlagenen Query.
@@ -1535,7 +1535,7 @@ def get_bulk_limits(domain: str = "") -> dict[str, Any]:
     }
 
 
-@router.post("/bulk-operations/validate", response_model=ProcessKernelOut, summary="Bulk operation validieren", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/bulk-operations/validate", response_model=ProcessKernelOut, summary="Bulk operation validieren", dependencies=SCHREIBEN["BERECHNEN"])
 def validate_bulk_operation(body: dict = None) -> dict[str, Any]:
     """
     Validiert eine Bulk-Request strukturell gegen Domain-Limits.
@@ -1594,7 +1594,7 @@ def validate_bulk_operation(body: dict = None) -> dict[str, Any]:
     return result.as_dict()
 
 
-@router.post("/bulk-operations/evaluate", response_model=ProcessKernelOut, summary="Bulk operation with dq evaluate", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/bulk-operations/evaluate", response_model=ProcessKernelOut, summary="Bulk operation with dq evaluate", dependencies=SCHREIBEN["BERECHNEN"])
 def evaluate_bulk_operation_with_dq(body: dict | None = None) -> dict[str, Any]:
     """
     Evaluates a bulk request together with the active DQ rule set.
@@ -1872,7 +1872,7 @@ def get_rate_limit_policies(domain: str = "") -> dict[str, Any]:
     }
 
 
-@router.post("/rate-limits/check", response_model=ProcessKernelOut, summary="Rate limit prÃ¼fen", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/rate-limits/check", response_model=ProcessKernelOut, summary="Rate limit prÃ¼fen", dependencies=SCHREIBEN["BERECHNEN"])
 def check_rate_limit(body: dict = None) -> dict[str, Any]:
     """
     Prueft ob ein Request das Rate-Limit ueberschreitet.
@@ -1956,7 +1956,7 @@ def get_security_controls(kategorie: str = "") -> dict[str, Any]:
     }
 
 
-@router.post("/security/rbac-check", response_model=ProcessKernelOut, summary="Rbac permission prÃ¼fen", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/security/rbac-check", response_model=ProcessKernelOut, summary="Rbac permission prÃ¼fen", dependencies=SCHREIBEN["BERECHNEN"])
 def check_rbac_permission(body: dict = None) -> dict[str, Any]:
     """
     Prueft eine RBAC-Permission fuer eine Rolle.
@@ -2035,7 +2035,7 @@ def get_inline_validations(domain: str = "") -> dict[str, Any]:
     }
 
 
-@router.post("/inline-validations/validate", response_model=ProcessKernelOut, summary="Inline validation ausfÃ¼hren", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/inline-validations/validate", response_model=ProcessKernelOut, summary="Inline validation ausfÃ¼hren", dependencies=SCHREIBEN["BERECHNEN"])
 def run_inline_validation(body: dict = None) -> dict[str, Any]:
     """
     Validiert einen Eingabewert gegen die Regeln eines Feldes.
@@ -2098,7 +2098,7 @@ def get_error_guidance_rules(http_status: int = 0) -> dict[str, Any]:
     }
 
 
-@router.post("/error-guidance/evaluate", response_model=ProcessKernelOut, summary="Error guidance endpoint evaluate", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/error-guidance/evaluate", response_model=ProcessKernelOut, summary="Error guidance endpoint evaluate", dependencies=SCHREIBEN["BERECHNEN"])
 def evaluate_error_guidance_endpoint(body: dict = None) -> dict[str, Any]:
     """
     Wertet Error-Guidance fuer einen aufgetretenen Fehler aus.
@@ -2403,7 +2403,7 @@ def get_dms_erkennungsregeln(dokument_typ: str = "") -> dict[str, Any]:
 # Wave 37 â€” AP2: POST /process/dms/classify
 # ---------------------------------------------------------------------------
 
-@router.post("/dms/classify", response_model=ProcessKernelOut, summary="Dokument classify", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/dms/classify", response_model=ProcessKernelOut, summary="Dokument classify", dependencies=SCHREIBEN["BERECHNEN"])
 def classify_dokument(body: dict = None) -> dict[str, Any]:
     """
     Klassifiziert ein Dokument automatisch anhand seines Volltexts.
@@ -3301,7 +3301,7 @@ def get_checkpoint_regeln(workflow_typ: str = ""):
 
 
 @router.post("/checkpoints/erstelle", summary="Workflow checkpoint erstelle",
-    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["BERECHNEN"])
 def erstelle_workflow_checkpoint(body: dict | None = None):
     """
     Erstellt einen Checkpoint fÃ¼r eine Workflow-Instanz.
@@ -4437,7 +4437,7 @@ def get_checkpoint_sequenzen():
     ]
 
 @router.post("/checkpoint/wiederherstellungspunkt", tags=["process-kernel"], summary="Wiederherstellungspunkt abrufen",
-    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["BERECHNEN"])
 def get_wiederherstellungspunkt(payload: dict):
     """
     Payload: {"instanz_id": str, "ab_schritt": int}
@@ -4750,7 +4750,7 @@ def get_audit_trail():
 
 
 @router.post("/audit-trail/pruefe-integritaet", tags=["process-kernel"], summary="Audit integritaet pruefe",
-    response_model=ProcessKernelOut, dependencies=SCHREIBEN["FACHLICH_LESEN"]
+    response_model=ProcessKernelOut, dependencies=SCHREIBEN["BERECHNEN"]
 )
 def pruefe_audit_integritaet(payload: dict):  # noqa: F401,F811
     """

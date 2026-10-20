@@ -32,7 +32,7 @@ class VatValidationResponse(BaseModel):
     error: str = None
 
 
-@router.post("/validate", response_model=VatValidationResponse, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/validate", response_model=VatValidationResponse, dependencies=SCHREIBEN["BERECHNEN"])
 async def validate_vat(request: VatValidationRequest):
     """
     Validate VAT number using VIES

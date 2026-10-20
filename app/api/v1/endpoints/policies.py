@@ -219,7 +219,7 @@ async def delete_policy(request: DeleteRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/policy/test", response_model=TestResponse, summary="Policy testen", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/policy/test", response_model=TestResponse, summary="Policy testen", dependencies=SCHREIBEN["BERECHNEN"])
 async def test_policy(
     request: TestRequest,
     tenant_id: str = Query("system", description="Tenant ID"),

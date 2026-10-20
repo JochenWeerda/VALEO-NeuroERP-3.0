@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import pytest
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import channel_work_surfaces
@@ -43,6 +44,7 @@ def clear_channel_state():
 @pytest.fixture
 def client(require_db) -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(channel_work_surfaces.router)
     return TestClient(app)
 

@@ -54,7 +54,7 @@ FACHLICH = _bearbeiten("SALES", "CRM", "EINKAUF", "LAGER", "AGRAR", "HARVEST", "
                        "FINANCE", "PERSONAL")
 #: Bereichsuebergreifende Berechnungen ohne Schreibwirkung (Prozesskern: Policy aufloesen, pruefen, erklaeren):
 #: eine Lese- oder Bearbeitungsrolle irgendeines Bereichs. Konten ohne Fachrolle rechnen nicht.
-FACHLICH_LESEN = (*FACHLICH, *(f"{b}_LESEN" for b in ("SALES", "CRM", "EINKAUF", "LAGER", "AGRAR", "HARVEST",
+BERECHNEN = (*FACHLICH, *(f"{b}_LESEN" for b in ("SALES", "CRM", "EINKAUF", "LAGER", "AGRAR", "HARVEST",
                                                         "KONTRAKT", "FUTTERMITTEL", "FINANCE", "PERSONAL",
                                                         "QUALITAET", "SETTLEMENT")),
                   "controller", "CONTROLLING")
@@ -71,7 +71,7 @@ SCHREIBEN = {name: _liste(rollen) for name, rollen in {
     "LOGISTIK": LOGISTIK, "AGRAR": AGRAR, "ERNTE": ERNTE, "KONTRAKT": KONTRAKT, "FUTTERMITTEL": FUTTERMITTEL,
     "PRODUKTION": PRODUKTION, "FINANZ": FINANZ, "CONTROLLING": CONTROLLING, "PERSONAL": PERSONAL,
     "BELEGE": BELEGE, "FREIGABE": FREIGABE, "QUALITAET": QUALITAET, "FACHLICH": FACHLICH,
-    "FACHLICH_LESEN": FACHLICH_LESEN, "PLATTFORM": PLATTFORM,
+    "BERECHNEN": BERECHNEN, "PLATTFORM": PLATTFORM,
 }.items()}
 
 

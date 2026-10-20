@@ -35,7 +35,7 @@ class ConsentRevokeRequest(BaseModel):
 
 
 @router.post("/check", summary="Check do",
-    response_model=NeuroConsentOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    response_model=NeuroConsentOut, dependencies=SCHREIBEN["BERECHNEN"])
 async def do_check(req: ConsentCheckRequest, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return check_consent(req.entity_id, req.consent_type, tenant_id, db)
 

@@ -1278,7 +1278,7 @@ def analytics_contract_positions(
     return {"data": data}
 
 
-@router.post("/ai/ask", response_model=BridgeOut, summary="Fachfrage beantworten", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/ai/ask", response_model=BridgeOut, summary="Fachfrage beantworten", dependencies=SCHREIBEN["BERECHNEN"])
 def ai_ask(body: AskIn) -> dict[str, Any]:
     prompt = body.prompt.strip()
     domain = ""

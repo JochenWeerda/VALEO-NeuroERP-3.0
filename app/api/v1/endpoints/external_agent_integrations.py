@@ -327,7 +327,7 @@ def get_superglue_domain_rollouts(tenant_id: str = Query(default="default")) -> 
 
 
 @router.post("/providers/superglue/domain-rollouts/{domain_key}/preview", summary="Superglue domain rollout preview",
-    response_model=AgentIntegrationOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    response_model=AgentIntegrationOut, dependencies=SCHREIBEN["BERECHNEN"])
 def run_superglue_domain_rollout_preview(
     domain_key: str,
     tenant_id: str = Query(default="default"),

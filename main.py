@@ -575,17 +575,17 @@ if purchase_workflow_router:
 
 # Lightweight stubs for missing MCP/stream endpoints to avoid frontend 404s during development
 from app.auth.bereich_roles import SCHREIBEN  # Lesende Stubs: Fach- oder Leserolle (WRITE-ROLES)
-@app.post("/api/mcp/analytics/kpis", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@app.post("/api/mcp/analytics/kpis", dependencies=SCHREIBEN["BERECHNEN"])
 async def mcp_kpis_stub():
     return {"ok": True, "data": []}
 
 
-@app.post("/api/mcp/analytics/trends", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@app.post("/api/mcp/analytics/trends", dependencies=SCHREIBEN["BERECHNEN"])
 async def mcp_trends_stub():
     return {"ok": True, "data": []}
 
 
-@app.post("/api/mcp/copilot/forecast", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@app.post("/api/mcp/copilot/forecast", dependencies=SCHREIBEN["BERECHNEN"])
 async def mcp_copilot_forecast_stub():
     return {"ok": True, "data": {"forecast": None}}
 

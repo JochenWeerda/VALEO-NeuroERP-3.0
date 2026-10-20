@@ -81,12 +81,12 @@ ordnet ueber die Kennung zu. Beide sind ausdrueckliche Abhaengigkeiten und als s
 - Nachweis: gezielte Suiten gruen (Compliance 159, Finanz/Freigabe/Mahnstufe/Vertraege 103, Maskenaktionen 23,
   Identitaetsvertrag, Rollen-Ratsche). Der Gesamtlauf der Block-Suiten wurde vom System wegen Speichermangels
   abgebrochen und steht aus.
-- **Abschluss FACHLICH, FACHLICH_LESEN, EIGENE_DATEN, GERAET und Produktions-App:** 392 Decorators in 88 Dateien
-  (FACHLICH 241, FACHLICH_LESEN 46, GERAET 23, EIGENE_DATEN 7; dazu FINANZ 29, CRM 20, EINKAUF 13 u. a. in den
+- **Abschluss FACHLICH, BERECHNEN, EIGENE_DATEN, GERAET und Produktions-App:** 392 Decorators in 88 Dateien
+  (FACHLICH 241, BERECHNEN 46, GERAET 23, EIGENE_DATEN 7; dazu FINANZ 29, CRM 20, EINKAUF 13 u. a. in den
   Routern, die nur `main:app` montiert: `app/finance`, `app/crm`, `app/einkauf`, FiBu, Vertraege, Workflow, DMS,
   GoBD, Uebersetzungen, VIES). **Inventar 318 -> 0**, jetzt ueber `app.main` **und** `main:app` (die Anwendung des
   Containers haengt weitere Router an; vorher sah die Ratsche sie nicht).
-- FACHLICH_LESEN (neu): Berechnungen ohne Schreibwirkung (Policy aufloesen/testen, pruefen, erklaeren, simulieren,
+- BERECHNEN (neu): Berechnungen ohne Schreibwirkung (Policy aufloesen/testen, pruefen, erklaeren, simulieren,
   validieren) verlangen eine Lese- oder Bearbeitungsrolle irgendeines Bereichs. Die Zuordnung ist eine Heuristik
   (Pfad nach Pruefen/Berechnen **und** kein Commit/DML im Handler) und wurde nachgesehen: Abfrage-Import und
   signierter Export sowie die Superglue-Quarantaene (Aufloesen/Wiederholen) schreiben und tragen FACHLICH.
@@ -97,7 +97,7 @@ ordnet ueber die Kennung zu. Beide sind ausdrueckliche Abhaengigkeiten und als s
 - **Sicherheitsbefunde (behoben):** Superglue-Quarantaene nahm den Bearbeiter aus den Query-Parametern `resolved_by`
   und `retried_by` — jetzt aus dem Token. Der Demo-Anmelderouter (`/auth/...`, feste Demo-Konten) war in `main:app`
   in jeder Umgebung montiert — jetzt nur bei `APP_ENV == "development"`.
-- `POST /api/mcp/policy/test` verlangt jetzt FACHLICH_LESEN; der Vertragstest, der „ohne Rollenpruefung“ festhielt,
+- `POST /api/mcp/policy/test` verlangt jetzt BERECHNEN; der Vertragstest, der „ohne Rollenpruefung“ festhielt,
   haelt die neue Entscheidung fest. Die drei leeren MCP-Stubs in `main.py` (KPIs, Trends, Prognose) ebenso; das
   Frontend behandelt eine Ablehnung der Prognose als „keine Prognose“.
 - Nachweis: alle Testdateien, die einen geaenderten Router importieren (76 Dateien, 1600 Tests), gruen gegen die

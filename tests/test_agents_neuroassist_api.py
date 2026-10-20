@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 import pytest
 
@@ -12,6 +13,7 @@ from app.integrations.services.superglue_quarantine import append_quarantine_ent
 
 def _client() -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(agents.router, prefix="/api/v1/agents")
     return TestClient(app)
 

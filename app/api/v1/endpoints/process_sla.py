@@ -68,7 +68,7 @@ async def list_sla_policies(
 
 
 @router.post("/evaluate", summary="Sla endpoint evaluate",
-    response_model=ProcessSlaOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    response_model=ProcessSlaOut, dependencies=SCHREIBEN["BERECHNEN"])
 async def evaluate_sla_endpoint(
     request: EvaluateSLARequest,
     tenant_id: str = Depends(get_tenant_id),

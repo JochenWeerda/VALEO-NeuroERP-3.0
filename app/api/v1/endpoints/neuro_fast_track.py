@@ -22,7 +22,7 @@ class ClassifyRequest(BaseModel):
 
 
 @router.post("/classify", summary="Classify",
-    response_model=NeuroFastTrackOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    response_model=NeuroFastTrackOut, dependencies=SCHREIBEN["BERECHNEN"])
 async def classify(request: ClassifyRequest):
     return classify_request(request.method, request.path, request.has_ai_context)
 

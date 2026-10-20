@@ -8,6 +8,7 @@ import os
 
 import pytest
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import agent_context_api, process_kernel_api
@@ -17,6 +18,7 @@ from app.core.knowledge_core_contracts import KnowledgeChannel, build_context_pa
 @pytest.fixture
 def client(require_db) -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     app.include_router(agent_context_api.router)
     return TestClient(app)

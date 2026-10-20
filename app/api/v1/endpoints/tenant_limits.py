@@ -68,7 +68,7 @@ def list_rate_limits(domain: str = "") -> dict[str, Any]:
     }
 
 
-@router.post("/rate-limits/check", response_model=TenantLimitsOut, summary="Rate limit prüfen", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+@router.post("/rate-limits/check", response_model=TenantLimitsOut, summary="Rate limit prüfen", dependencies=SCHREIBEN["BERECHNEN"])
 def check_rate_limit(body: TenantRateLimitCheckIn) -> dict[str, Any]:
     registry = get_tenant_isolation_registry()
     request = RateLimitRequest(

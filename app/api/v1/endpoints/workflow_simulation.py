@@ -75,7 +75,7 @@ def run_simulation(body: SimulationInput) -> SimulationResult:
 @router.post(
     "/preview",
     response_model=WorkflowSandboxPreviewResult,
-    summary="Workflow-Sandbox-Preview ausfuehren", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    summary="Workflow-Sandbox-Preview ausfuehren", dependencies=SCHREIBEN["BERECHNEN"])
 def preview_simulation(body: WorkflowSandboxPreviewInput) -> WorkflowSandboxPreviewResult:
     """Fuehrt eine Sandbox-Vorschau fuer neue oder geaenderte Workflows aus."""
     return preview_workflow_sandbox(body)
@@ -84,7 +84,7 @@ def preview_simulation(body: WorkflowSandboxPreviewInput) -> WorkflowSandboxPrev
 @router.post(
     "/sandbox/preview",
     response_model=WorkflowSandboxPreviewResult,
-    summary="Workflow-Sandbox-Preview ausfuehren", dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    summary="Workflow-Sandbox-Preview ausfuehren", dependencies=SCHREIBEN["BERECHNEN"])
 def preview_workflow_sandbox_endpoint(body: WorkflowSandboxPreviewInput) -> WorkflowSandboxPreviewResult:
     """Alias fuer den Sandbox-Preview-Contract mit explizitem Sandbox-Pfad."""
     return preview_workflow_sandbox(body)

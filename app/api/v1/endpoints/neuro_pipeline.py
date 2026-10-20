@@ -34,7 +34,7 @@ class PipelineRequest(BaseModel):
 
 
 @router.post("/classify", summary="Classify do",
-    response_model=NeuroPipelineOut, dependencies=SCHREIBEN["FACHLICH_LESEN"])
+    response_model=NeuroPipelineOut, dependencies=SCHREIBEN["BERECHNEN"])
 async def do_classify(request: ClassifyRequest):
     """Intent aus User-Input klassifizieren."""
     result = classify(request.user_input, request.context)
