@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (109 Masken).
+> Generiert aus `app/core/screen_definitions.py` (110 Masken).
 
 ## Übersicht
 
@@ -56,6 +56,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/anfrage` | Einkaufsanfrage | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfrage/agent-contract` |
 | `einkauf/anfragen` | Anfragen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfragen/agent-contract` |
 | `einkauf/angebot` | Lieferantenangebot | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/angebot/agent-contract` |
+| `einkauf/angebote` | Angebote | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/angebote/agent-contract` |
 | `einkauf/anlieferavis` | Anlieferavis | einkauf | mittel | — | `GET /api/v1/masks/einkauf/anlieferavis/agent-contract` |
 | `einkauf/auftragsbestaetigung` | Auftragsbestaetigung | einkauf | mittel | — | `GET /api/v1/masks/einkauf/auftragsbestaetigung/agent-contract` |
 | `einkauf/purchase-order` | Bestellung | einkauf | mittel | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
@@ -1454,6 +1455,45 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bestellen` | Bestellung erstellen | safe | nein | `/api/v1/einkauf/angebote/{entity_id}/actions/bestellen` |
+
+---
+
+### `einkauf/angebote` — Angebote
+
+**Zweck:** Lieferantenangebote vergleichen, pruefen, genehmigen und in Bestellungen ueberfuehren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/einkauf/angebote/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/einkauf/angebote/agent-contract` |
+| Readiness | `GET /api/v1/masks/einkauf/angebote/readiness` |
+| Rollout-Route | `/mask-rollout/einkauf__angebote/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/einkauf/angebote`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Angebote warten auf Pruefung?
+- Welche Angebote laufen diese Woche ab?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neues Angebot | safe | nein | `—` |
+| `export` | CSV-Export | safe | nein | `—` |
 
 ---
 

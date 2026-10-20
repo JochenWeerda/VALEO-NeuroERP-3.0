@@ -95,8 +95,58 @@ def build_einkauf_anfragen_liste() -> dict[str, Any]:
     )
 
 
+
+def _status(*werte: str) -> dict[str, Any]:
+    """Sichtbarkeit nach Status; die Altdaten fuehren Status teils klein geschrieben."""
+    return {"field": "status", "values": [*werte, *(w.lower() for w in werte)]}
+
+
+def build_einkauf_angebote_liste() -> dict[str, Any]:
+    """Lieferantenangebote: pruefen, genehmigen, ablehnen, in Bestellung ueberfuehren."""
+    pfad = "/api/v1/einkauf/angebote/{entity_id}/actions/"
+    return _liste(
+        screen_id="einkauf/angebote", domain="einkauf", title="Angebote", subtitle="Lieferantenangebote zu Anfragen",
+        endpoint="/api/v1/einkauf/angebote", row_route="/einkauf/angebot/{id}", bundle="einkauf",
+        columns=[
+            {"key": "angebotNummer", "label": "Angebot-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "lieferant", "label": "Lieferant", "filterable": True, "sortable": True, "priority": "primary"},
+            {"key": "artikel", "label": "Artikel", "filterable": True, "priority": "secondary"},
+            {"key": "preis", "label": "Betrag", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "secondary"},
+            {"key": "gueltigBis", "label": "Gueltig bis", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "lieferzeit", "label": "Lieferzeit (Tage)", "numeric": True, "priority": "tertiary"},
+            {"key": "createdAt", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[{"key": "neu", "label": "Neues Angebot", "kind": "primary", "dangerLevel": "safe", "zone": "header",
+                  "navigationRoute": "/einkauf/angebot", "localEffect": "navigation"},
+                 _EXPORT],
+        row_actions=[
+            {"key": "pruefen", "label": "Pruefen", "dangerLevel": "safe", "permission": "einkauf.angebot.review",
+             "commandEndpoint": pfad + "pruefen", "method": "POST", "requiresConfirmation": True,
+             "visibleWhen": _status("ERFASST", "OFFEN", "ENTWURF")},
+            {"key": "genehmigen", "label": "Genehmigen", "dangerLevel": "moderate",
+             "permission": "einkauf.angebot.approve", "commandEndpoint": pfad + "genehmigen", "method": "POST",
+             "requiresConfirmation": True, "humanApprovalRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": _status("GEPRUEFT")},
+            {"key": "bestellen", "label": "In Bestellung", "dangerLevel": "moderate",
+             "permission": "einkauf.angebot.order", "commandEndpoint": pfad + "bestellen", "method": "POST",
+             "requiresConfirmation": True, "visibleWhen": _status("GEPRUEFT", "GENEHMIGT")},
+            {"key": "ablehnen", "label": "Ablehnen", "dangerLevel": "high", "permission": "einkauf.angebot.reject",
+             "commandEndpoint": pfad + "ablehnen", "method": "POST", "requiresConfirmation": True,
+             "auditReasonRequired": True, "visibleWhen": _status("ERFASST", "OFFEN", "ENTWURF", "GEPRUEFT", "GENEHMIGT")},
+        ],
+        dangerous=[{"key": "genehmigen", "reason": "Gibt ein Angebot zur Bestellung frei; nur Mensch."}],
+        purpose="Lieferantenangebote vergleichen, pruefen, genehmigen und in Bestellungen ueberfuehren.",
+        prompts=["Welche Angebote warten auf Pruefung?", "Welche Angebote laufen diese Woche ab?"],
+        no_workflow="Der Status steht am Angebot; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
+    "einkauf/angebote": build_einkauf_angebote_liste,
 }
-LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen"}
-LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"]}
+LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote"}
+LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
+                   "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"]}

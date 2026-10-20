@@ -8,12 +8,10 @@ const src = readFileSync(
 )
 
 describe('Einkauf-Angebotsliste UIX', () => {
-  it('stellt ListReport vor dem DS-Theater und blendet Theater auf Touch aus', () => {
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('<ListReport')
-    expect(src.indexOf('<ListReport')).toBeLessThan(src.indexOf('<OperationalCaseHeader'))
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('min-h-11')
-    expect(src).toContain('text-primary')
+  it('ist eine Studio-Liste aus der ScreenDefinition ohne eigenen Seitencode', () => {
+    // MASK-STUDIO-ROLLOUT: Spalten, Aktionen, Export und Zeilenroute stehen in einkauf/angebote.
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="einkauf/angebote"')
+    expect(src).not.toContain('apiClient')
   })
 })

@@ -1948,6 +1948,8 @@ from app.api.v1.endpoints import einkauf_ab_erfassung  # noqa: E402  # Erfassung
 api_router.include_router(einkauf_ab_erfassung.router)
 from app.api.v1.endpoints import einkauf_anfrage_kommandos  # noqa: E402  # Zeilenaktionen der Anfragen-Liste
 api_router.include_router(einkauf_anfrage_kommandos.router)
+from app.api.v1.endpoints import einkauf_angebot_kommandos  # noqa: E402  # Zeilenaktionen der Angebots-Liste
+api_router.include_router(einkauf_angebot_kommandos.router)
 api_router.include_router(mask_rollout_summaries.router)
 api_router.include_router(mask_screen_definition.router)
 api_router.include_router(studio_drafts.router)

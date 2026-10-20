@@ -46,10 +46,22 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
   Zeilenlink auf eine nicht vorhandene Route `/einkauf/anfragen/{id}`.
 - Zeilenaktionen werden wie Kopfaktionen nur mit Recht gezeigt: Plan-Compiler filtert `rowActions` nach Recht, die
   Rollen-Projektion (`generate_action_permission_projection.py`) liest auch Zeilenaktionen (Tabellen und Tabs).
-- Tests: `tests/test_einkauf_anfrage_kommandos.py` (7, Pruefstand), `native-list-page.test.tsx` (3).
+- Tests: `tests/test_einkauf_listen_kommandos.py` (Pruefstand), `native-list-page.test.tsx` (3).
   Ratsche: Altmuster 102 -> 101.
 - Offen aus der Sichtung: Die Erfassung `anfrage-erfassung.tsx` sendet PATCH, der Server kennt nur PUT;
   `EinkaufCompatService.list_anfragen` verschluckt Fehler (leere Liste).
+
+## Welle 1, Schritt 2 (20.10.2026): Einkauf Angebote
+
+- ScreenDefinition `einkauf/angebote` auf `NativeListPage`; Zeilenaktionen `pruefen`, `genehmigen` (nur Mensch),
+  `bestellen` (bestehender Weg der Objektmaske), `ablehnen` (Begruendung).
+- Kommando-Wege `einkauf_angebot_kommandos.py` mit Statusgrenzen auf dem Server. Befund: Die Statuswege
+  `/review`, `/approve`, `/reject` setzen jeden Status, auch ein bestelltes Angebot zurueck auf GEPRUEFT; die
+  Grenze stand nur im Browser. Die alten Wege bleiben fuer bestehende Aufrufer, die Maske nutzt die neuen.
+- Befunde der alten Seite: Loeschen rief `DELETE /einkauf/angebote/{id}`, den es nicht gibt (immer 405);
+  „Import“ sprang in die Bestellliste; Zeilenlink auf die nicht vorhandene Route `/einkauf/angebote/{id}`.
+  Loeschen entfaellt in der Liste (Ablehnen mit Begruendung ist der Fachweg).
+- Ratsche: Altmuster 101 -> 100.
 
 ## Sichtung der uebrigen Routen
 

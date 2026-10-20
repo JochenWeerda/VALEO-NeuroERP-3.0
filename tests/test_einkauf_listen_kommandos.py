@@ -1,4 +1,4 @@
-"""Zeilenaktionen der Anfragen-Liste wirken nur im erlaubten Zustand (MASK-STUDIO-ROLLOUT-20261020, Welle 1).
+"""Zeilenaktionen der Einkaufslisten wirken nur im erlaubten Zustand (MASK-STUDIO-ROLLOUT-20261020, Welle 1).
 
 Die handgebaute Liste rief ``/send`` ohne Lieferanten auf und loeschte Anfragen in jedem Status. Diese Vertraege
 halten fest:
@@ -7,7 +7,9 @@ halten fest:
 * eine freigegebene Anfrage oder eine Anfrage eines anderen Mandanten wird nicht geloescht;
 * ``senden`` ohne Lieferanten wird abgewiesen, ohne den Status zu aendern;
 * ``in_bestellung`` gilt nur fuer freigegebene Anfragen bzw. in der Angebotsphase;
-* die Liste deklariert jede Aktion mit diesem Kommandoweg und den Export.
+* Angebote: pruefen/genehmigen/ablehnen nur aus den erlaubten Status, ablehnen mit Begruendung; ein bestelltes
+  Angebot wird nicht zurueckgesetzt (der alte Statusweg setzte jeden Status);
+* die Listen deklarieren jede Aktion mit diesem Kommandoweg und den Export.
 
 Geprueft gegen eine frische Pruefstand-Datenbank (``TEST_DATABASE_URL``/``DATABASE_URL``).
 """
@@ -52,7 +54,9 @@ def aufraeumen(engine):
     with engine.begin() as v:
         v.execute(text("DELETE FROM einkauf_anfragen_positionen WHERE anfrage_id IN "
                        "(SELECT id FROM einkauf_anfragen WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
-        for tabelle in ("einkauf_anfragen", "domain_crm.crm_action_audit_log", "public.outbox_events"):
+        v.execute(text("DELETE FROM einkauf_angebote_positionen WHERE angebot_id IN "
+                       "(SELECT id FROM einkauf_angebote WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
+        for tabelle in ("einkauf_anfragen", "einkauf_angebote", "domain_crm.crm_action_audit_log", "public.outbox_events"):
             v.execute(text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
 
 
@@ -180,3 +184,56 @@ def test_liste_deklariert_kommandowege_und_export():
         assert zeilen[aktion]["commandEndpoint"] == PFAD.format(id="{entity_id}", aktion=aktion)
     assert zeilen["loeschen"]["auditReasonRequired"] is True
     assert {a["key"] for a in definition["actions"]} >= {"neu", "export"}
+
+
+def angebot(engine, status: str) -> str:
+    from sqlalchemy import text
+
+    kennung = str(uuid.uuid4())
+    with engine.begin() as v:
+        v.execute(text("INSERT INTO einkauf_angebote (id, tenant_id, angebotsnummer, lieferant_name, status, created_at, "
+                       "updated_at) VALUES (:id, :h, :nr, 'Muehle Nord', :s, now(), now())"),
+                  {"id": kennung, "h": HAUS_A, "nr": f"ANG-{kennung[:8]}", "s": status})
+    return kennung
+
+
+def angebot_status(engine, kennung: str) -> str:
+    return zeile(engine, "SELECT status FROM einkauf_angebote WHERE id = :id", id=kennung)["status"]
+
+
+def angebot_aktion(client, kennung: str, aktion: str, body: dict) -> dict:
+    antwort = client.post(f"/api/v1/einkauf/angebote/{kennung}/actions/{aktion}", json=body,
+                          headers={"X-Tenant-ID": HAUS_A})
+    assert antwort.status_code == 200, antwort.text
+    return antwort.json()
+
+
+def test_angebot_pruefen_und_genehmigen_der_reihe_nach(engine, client):
+    kennung = angebot(engine, "ERFASST")
+    assert angebot_aktion(client, kennung, "genehmigen", {})["success"] is False
+    assert angebot_status(engine, kennung) == "ERFASST"
+    assert angebot_aktion(client, kennung, "pruefen", {})["success"] is True
+    assert angebot_aktion(client, kennung, "genehmigen", {})["success"] is True
+    assert angebot_status(engine, kennung) == "GENEHMIGT"
+
+
+def test_angebot_ablehnen_braucht_grund_und_trifft_kein_bestelltes(engine, client):
+    offen = angebot(engine, "GEPRUEFT")
+    assert angebot_aktion(client, offen, "ablehnen", {})["success"] is False
+    assert angebot_aktion(client, offen, "ablehnen", {"_auditReason": "Preis ueber Marktniveau"})["success"] is True
+    assert angebot_status(engine, offen) == "ABGELEHNT"
+    bestellt = angebot(engine, "IN_BESTELLUNG")
+    for aktion in ("pruefen", "ablehnen"):
+        assert angebot_aktion(client, bestellt, aktion, {"_auditReason": "Versehentlich"})["success"] is False
+    assert angebot_status(engine, bestellt) == "IN_BESTELLUNG"
+
+
+def test_angebotsliste_deklariert_kommandowege():
+    from app.core.screen_definitions import get_screen_definition
+
+    definition = get_screen_definition("einkauf/angebote")
+    zeilen = {a["key"]: a for a in definition["tables"][0]["rowActions"]}
+    for aktion in ("pruefen", "genehmigen", "bestellen", "ablehnen"):
+        assert zeilen[aktion]["commandEndpoint"] == f"/api/v1/einkauf/angebote/{{entity_id}}/actions/{aktion}"
+    assert zeilen["ablehnen"]["auditReasonRequired"] is True
+    assert definition["tables"][0]["rowRouteTemplate"] == "/einkauf/angebot/{id}"

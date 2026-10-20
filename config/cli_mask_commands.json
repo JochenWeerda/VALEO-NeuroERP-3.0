@@ -149,6 +149,10 @@
   "mask:einkauf/anfragen:loeschen",
   "mask:einkauf/anfragen:senden",
   "mask:einkauf/angebot:bestellen",
+  "mask:einkauf/angebote:ablehnen",
+  "mask:einkauf/angebote:bestellen",
+  "mask:einkauf/angebote:genehmigen",
+  "mask:einkauf/angebote:pruefen",
   "mask:einkauf/anlieferavis:wareneingang",
   "mask:einkauf/auftragsbestaetigung:bestaetigen",
   "mask:einkauf/auftragsbestaetigung:pruefen",
@@ -238,6 +242,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 94
+  "kein_endpunkt": 96
  }
 }

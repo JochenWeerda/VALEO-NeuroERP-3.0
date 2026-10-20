@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 141,
-    "screens_with_actions": 71,
+    "actions": 142,
+    "screens_with_actions": 72,
     "domains": 14
   },
   "actions": [
@@ -1117,6 +1117,26 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/angebote:neu",
+      "label": "Neues Angebot",
+      "description": "Neues Angebot (einkauf/angebote)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/angebote",
+      "intent_phrases": [
+        "Neues Angebot"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/angebote",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/angebot",
+        "command": null,
+        "method": null
       }
     },
     {
