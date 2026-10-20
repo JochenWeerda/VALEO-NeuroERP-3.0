@@ -258399,7 +258399,7 @@
     },
     "/api/v1/crm/cases/{case_id}/escalate": {
       "post": {
-        "description": "Eskalation eines Service-Cases mit Priorität auf CRITICAL.",
+        "description": "Eskalation eines Service-Cases mit Priorität auf CRITICAL.\n\nDer Eskalierende kommt aus dem geprueften Token (bis 21.10.2026 aus einem frei setzbaren Anfrageparameter).",
         "operationId": "escalate_case_api_v1_crm_cases__case_id__escalate_post",
         "parameters": [
           {
@@ -258419,17 +258419,6 @@
             "schema": {
               "description": "Reason for escalation",
               "title": "Reason",
-              "type": "string"
-            }
-          },
-          {
-            "description": "User performing escalation",
-            "in": "query",
-            "name": "escalated_by",
-            "required": true,
-            "schema": {
-              "description": "User performing escalation",
-              "title": "Escalated By",
               "type": "string"
             }
           }

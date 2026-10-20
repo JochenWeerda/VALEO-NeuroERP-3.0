@@ -365,6 +365,8 @@ Aktivitaet nicht aus. Produktiv beschattet er fuer `/api/v1/crm/activities/{id}`
 `app.crm.router`: Abruf, Aendern, Loeschen und Unterlisten fremder Aktivitaeten waren moeglich, die Anlage trug den
 Standardmandanten ein. Jetzt Kontextmandant an jedem Weg (`tests/test_aktivitaeten_crm_core_mandant.py`).
 
+**Gleiches Muster, behoben (21.10.):** Betriebsprofile (`farm_profiles.py`, crm-core fuehrt den Mandanten, der Proxy nicht — Kulturen, Tierbestand, Zertifikate fremder Betriebe lesbar und aenderbar) und Service-Faelle (`cases.py`: Abruf/Aendern/Loeschen/Eskalieren/SLA-Status ohne Mandant, lokale Tabelle ebenso; Eskalierender aus einem frei setzbaren Parameter -> jetzt aus dem Token; Liste und Dashboard filtern jetzt immer). Tests `test_betriebsprofile_crm_core_mandant.py`, `test_faelle_crm_mandant.py`. Opportunities waren schon gebunden.
+
 **Offen (CRM-Konsolidierung):** zwei Speicher am selben Pfad — `GET/POST /api/v1/crm/activities` (ohne Schraegstrich)
 treffen `app.crm.router` (lokale Tabelle, Liste als Array), `/{id}` den crm-core-Proxy. Die handgebaute Seite las
 `items` aus dem Array und zeigte deshalb nie Aktivitaeten; eine angelegte Aktivitaet war ueber die Detailansicht
