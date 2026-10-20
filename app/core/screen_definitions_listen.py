@@ -1180,6 +1180,35 @@ def build_einkauf_zahlungsbedingungen_liste() -> dict[str, Any]:
     )
 
 
+def build_crm_wiedervorlagen_liste() -> dict[str, Any]:
+    """Offene Wiedervorlagen ueber alle Kunden; erledigen mit optionalem Ergebnis (haengt an die Kontaktnotiz)."""
+    return _liste(
+        screen_id="crm/wiedervorlagen", domain="crm", title="Wiedervorlagen",
+        subtitle="Offene Wiedervorlagen und Aufgaben ueber alle Kunden",
+        endpoint="/api/v1/crm/kunden-kontakte/wiedervorlagen?tage=365", row_route="/crm/kunden/{kunden_nr}",
+        bundle="crm",
+        columns=[
+            {"key": "wiedervorlage", "label": "Faellig", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "ueberfaellig", "label": "Ueberfaellig", "renderKind": "boolean", "filterable": True,
+             "priority": "primary"},
+            {"key": "kunde", "label": "Kunde", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "kunden_nr", "label": "Kunden-Nr.", "filterable": True, "priority": "secondary"},
+            {"key": "art", "label": "Art", "filterable": True, "priority": "secondary"},
+            {"key": "kurzinfo", "label": "Kurzinfo", "filterable": True, "priority": "primary"},
+            {"key": "bediener", "label": "Bediener", "filterable": True, "priority": "tertiary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[
+            {"key": "erledigen", "label": "Erledigen", "dangerLevel": "safe", "permission": "crm.kontakt.erledigen",
+             "commandEndpoint": "/api/v1/crm/kunden-kontakte/{entity_id}/erledigt", "method": "POST",
+             "inputFields": [{"key": "ergebnis", "label": "Ergebnis (optional)", "type": "textarea"}]},
+        ],
+        purpose="Faellige Rueckrufe und Aufgaben abarbeiten; das Ergebnis wird an die Kontaktnotiz angehaengt.",
+        prompts=["Welche Wiedervorlagen sind ueberfaellig?", "Was steht diese Woche fuer Kunde X an?"],
+        no_workflow="Erledigen schliesst die Wiedervorlage am Kontakt; kein eigener Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -1205,6 +1234,7 @@ LISTEN_SCREEN_BUILDERS = {
     "finance/buchungsvorlagen": build_finance_buchungsvorlagen_liste,
     "einkauf/warengruppen": build_einkauf_warengruppen_liste,
     "einkauf/zahlungsbedingungen": build_einkauf_zahlungsbedingungen_liste,
+    "crm/wiedervorlagen": build_crm_wiedervorlagen_liste,
     "charge/liste": build_chargen_liste,
     "personal/mitarbeiter-liste": build_personal_mitarbeiter_liste,
     "versicherungen/liste": build_versicherungen_liste,
@@ -1240,6 +1270,7 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "finance/buchungsvorlagen": "/finance/buchungsvorlagen",
                 "einkauf/warengruppen": "/einkauf/warengruppen",
                 "einkauf/zahlungsbedingungen": "/einkauf/zahlungsbedingungen",
+                "crm/wiedervorlagen": "/crm/wiedervorlagen",
                 "charge/liste": "/charge/liste",
                 "personal/mitarbeiter-liste": "/personal/mitarbeiter",
                 "versicherungen/liste": "/versicherungen",

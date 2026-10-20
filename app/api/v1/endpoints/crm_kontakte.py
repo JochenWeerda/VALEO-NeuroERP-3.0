@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -70,6 +70,9 @@ def erledigt(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    return CrmKontaktService(db, tenant_id).set_erledigt(
+    kontakt = CrmKontaktService(db, tenant_id).set_erledigt(
         kontakt_id, True, ergebnis=(body.ergebnis if body else None)
     )
+    if not kontakt:
+        raise HTTPException(status_code=404, detail="Kontakt nicht gefunden")
+    return kontakt

@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 208,
-    "screens_with_actions": 106,
+    "actions": 209,
+    "screens_with_actions": 107,
     "domains": 17
   },
   "actions": [
@@ -1596,6 +1596,26 @@
         "commandEndpoint": null,
         "navigationRoute": "/crm/segment/new",
         "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/wiedervorlagen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (crm/wiedervorlagen)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/wiedervorlagen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/wiedervorlagen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
         "method": null
       }
     },

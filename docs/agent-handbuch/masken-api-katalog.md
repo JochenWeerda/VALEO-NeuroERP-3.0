@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (144 Masken).
+> Generiert aus `app/core/screen_definitions.py` (145 Masken).
 
 ## Übersicht
 
@@ -66,6 +66,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `crm/opportunities-liste` | Verkaufschancen | crm | niedrig | — | `GET /api/v1/masks/crm/opportunities-liste/agent-contract` |
 | `crm/opportunity` | Opportunity | crm | niedrig | `order-to-cash` | `GET /api/v1/masks/crm/opportunity/agent-contract` |
 | `crm/segmente-liste` | Segmente | crm | niedrig | — | `GET /api/v1/masks/crm/segmente-liste/agent-contract` |
+| `crm/wiedervorlagen` | Wiedervorlagen | crm | niedrig | — | `GET /api/v1/masks/crm/wiedervorlagen/agent-contract` |
 | `docflow/dokumenten-ruecklauf` | Dokumentenruecklauf | dms-compliance | niedrig | — | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/agent-contract` |
 | `einkauf/anfrage` | Einkaufsanfrage | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfrage/agent-contract` |
 | `einkauf/anfragen` | Anfragen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfragen/agent-contract` |
@@ -1803,6 +1804,44 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `neu` | Neues Segment | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `crm/wiedervorlagen` — Wiedervorlagen
+
+**Zweck:** Faellige Rueckrufe und Aufgaben abarbeiten; das Ergebnis wird an die Kontaktnotiz angehaengt.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/crm/wiedervorlagen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/crm/wiedervorlagen/agent-contract` |
+| Readiness | `GET /api/v1/masks/crm/wiedervorlagen/readiness` |
+| Rollout-Route | `/mask-rollout/crm__wiedervorlagen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/crm/kunden-kontakte/wiedervorlagen?tage=365`
+
+**MCP-Tools (Domäne):**
+
+- `crm.customer.search` — scope `crm:read`, Risiko niedrig
+- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
+- `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Wiedervorlagen sind ueberfaellig?
+- Was steht diese Woche fuer Kunde X an?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---

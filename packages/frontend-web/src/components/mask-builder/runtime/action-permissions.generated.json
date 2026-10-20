@@ -639,6 +639,17 @@
         ]
       ]
     },
+    "crm/wiedervorlagen": {
+      "crm.kontakt.erledigen": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "docflow/dokumenten-ruecklauf": {
       "docflow.returns.write": [
         [

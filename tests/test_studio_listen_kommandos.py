@@ -74,6 +74,7 @@ def aufraeumen(engine):
                        "(SELECT id FROM einkauf_angebote WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_erp.exchange_rates WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_shared.zahlungsbedingungen WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM public.kunden_kontakte WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         for wg in ("warengruppen", "oberwarengruppen", "hauptwarengruppen"):
             v.execute(text(f"DELETE FROM domain_shared.{wg} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
         v.execute(text("DELETE FROM domain_erp.journal_entry_lines WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
@@ -615,6 +616,39 @@ def test_zahlungsbedingungen_anlegen_bearbeiten_ohne_leeren_und_deaktivieren(cli
                        json={"_auditReason": "ersetzt durch Z2"}).json()["success"] is True
     assert client.delete(f"/api/v1/fibu/zahlungsbedingungen/{nummer}",
                          headers={"X-Tenant-ID": HAUS_A}).status_code == 404
+
+
+def test_wiedervorlagen_mandantengenau_mit_namen_und_erledigen(engine, client):
+    """Liste mandantengenau; Erledigen einer fremden Wiedervorlage ist 404 statt Rueckgabe des fremden Kontakts
+    (vorher las der Weg nach dem wirkungslosen UPDATE den Kontakt ohne Mandant)."""
+    from sqlalchemy import text
+
+    from app.core.screen_definitions import get_screen_definition
+
+    nummer = f"K-{uuid.uuid4().hex[:6]}"
+    with engine.begin() as v:
+        # Kontakte verweisen auf den Kundenstamm public.kunden (systemweit eindeutige Kundennummer).
+        v.execute(text("INSERT INTO public.kunden (kunden_nr, name1) VALUES (:n, 'Hof Janssen')"), {"n": nummer})
+        kontakt = v.execute(text("INSERT INTO public.kunden_kontakte (kunden_nr, kurzinfo, wiedervorlage, tenant_id) "
+                                 "VALUES (:n, 'Rueckruf Saatgut', current_date - 1, :h) RETURNING id::text"),
+                            {"n": nummer, "h": HAUS_A}).scalar()
+    definition = get_screen_definition("crm/wiedervorlagen")
+    zeilen = {z["id"]: z for z in client.get(definition["dataSources"][0]["endpoint"],
+                                             headers={"X-Tenant-ID": HAUS_A}).json()["items"]}
+    assert zeilen[kontakt]["kunde"] == "Hof Janssen" and zeilen[kontakt]["ueberfaellig"] is True
+    assert kontakt not in {z["id"] for z in client.get(definition["dataSources"][0]["endpoint"],
+                                                       headers={"X-Tenant-ID": HAUS_B}).json()["items"]}
+    pfad = definition["tables"][0]["rowActions"][0]["commandEndpoint"].replace("{entity_id}", kontakt)
+    assert client.post(pfad, headers={"X-Tenant-ID": HAUS_B}, json={"ergebnis": "fremd"}).status_code == 404
+    erledigt = client.post(pfad, headers={"X-Tenant-ID": HAUS_A}, json={"ergebnis": "Angebot geschickt"})
+    assert erledigt.status_code == 200, erledigt.text
+    with engine.connect() as v:
+        zeile = v.execute(text("SELECT erledigt, notiz FROM public.kunden_kontakte WHERE id::text = :i"),
+                          {"i": kontakt}).mappings().one()
+    assert zeile["erledigt"] is True and "Angebot geschickt" in zeile["notiz"]
+    with engine.begin() as v:
+        v.execute(text("DELETE FROM public.kunden_kontakte WHERE kunden_nr = :n"), {"n": nummer})
+        v.execute(text("DELETE FROM public.kunden WHERE kunden_nr = :n"), {"n": nummer})
 
 
 def test_kreditorenliste_ist_eine_liste_und_oeffnet_die_objektmaske():

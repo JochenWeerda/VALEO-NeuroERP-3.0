@@ -351,6 +351,13 @@ korrigiert; die eigenen Wellen-Commits haben sie nie erweitert (geprueft).
 nicht gesendete Skontostufen bleiben erhalten) und Deaktivieren mit Begruendung (Rolle wie der bisherige Loeschweg,
 `finance_admin`). Befund: Loeschen meldete 204 auch fuer unbekannte Bedingungen (jetzt 404).
 
+## Wiedervorlagen als Studio-Liste (21.10.2026)
+
+`crm/wiedervorlagen`: offene Wiedervorlagen, Zeile oeffnet die Kundenakte (`/crm/kunden/{kunden_nr}`), Erledigen mit
+optionalem Ergebnis. Befund: Erledigen einer **fremden** Wiedervorlage aenderte nichts, gab den fremden Kontakt aber
+zurueck (Lesen ohne Mandant) — jetzt 404. Kein Befund: der Kundenname aus `public.kunden` (Kontakte verweisen per
+Fremdschluessel dorthin, Kundennummer systemweit eindeutig).
+
 ## Einordnung: Mandant aus Query/Body (20.10.2026)
 
 208 Wege deklarieren `tenant_id` als Query-Parameter (Standard oft `"system"`), weitere tragen ihn im Body. Das ist

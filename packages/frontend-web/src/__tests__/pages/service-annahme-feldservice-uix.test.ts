@@ -348,13 +348,11 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  it('stellt Wiedervorlagen mit Tokens und 44-px-Erledigen', () => {
+  it('stellt Wiedervorlagen als Studio-Liste dar', () => {
+    // Seit 21.10.2026 ScreenDefinition crm/wiedervorlagen (Erledigen mit Ergebnis, Zeile oeffnet die Kundenakte).
     const src = read('../../pages/crm/wiedervorlagen.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('Erledigen')
-    expect(src).toContain('bg-status-error/10')
-    expect(src).not.toContain('bg-red-50')
-    expect(src).not.toContain('size="sm"')
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="crm/wiedervorlagen"')
   })
 
   it('stellt Saatgut-Stamm mit 44-px-Zurueck', () => {

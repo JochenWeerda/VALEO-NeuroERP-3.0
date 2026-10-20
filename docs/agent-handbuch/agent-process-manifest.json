@@ -2593,6 +2593,39 @@
       ]
     },
     {
+      "mask_id": "crm/wiedervorlagen",
+      "title": "Wiedervorlagen",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__wiedervorlagen/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/wiedervorlagen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/wiedervorlagen/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/wiedervorlagen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.lead.qualify"
+      ]
+    },
+    {
       "mask_id": "docflow/dokumenten-ruecklauf",
       "title": "Dokumentenruecklauf",
       "domain": "dms-compliance",
