@@ -28,7 +28,12 @@ from app.services.articles_service import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.articles_schemas import ArticlesOut
+from app.api.v1.schemas.articles_schemas import (
+    ArticlesOut,
+    ArtikelDokumenteOut,
+    ArtikelLieferantenOut,
+    ArtikelPreiseOut,
+)
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
@@ -348,18 +353,19 @@ async def delete_article(
 from ....infrastructure.models import BusinessPartnerDiscountItem, BusinessPartnerPriceAgreement  # noqa: F811
 
 
-@router.get("/{article_id}/suppliers", response_model=ArticlesOut, summary="Article suppliers abrufen")
+@router.get("/{article_id}/suppliers", response_model=ArtikelLieferantenOut, summary="Article suppliers abrufen")
 async def get_article_suppliers(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get suppliers for an article."""
-    _get_article_or_404(db, article_id, tenant_id)
+    # Ueber die aufgeloeste ID: der Pfad darf auch die Artikelnummer tragen (vorher blieb das Register leer).
+    article = _get_article_or_404(db, article_id, tenant_id)
     
     # Query article suppliers
     suppliers = db.query(ArticleSupplier).filter(
-        ArticleSupplier.article_id == article_id,
+        ArticleSupplier.article_id == article.id,
         ArticleSupplier.tenant_id == tenant_id,
     ).all()
     
@@ -420,7 +426,7 @@ async def get_article_discounts(
     }
 
 
-@router.get("/{article_id}/prices", response_model=ArticlesOut, summary="Article prices abrufen")
+@router.get("/{article_id}/prices", response_model=ArtikelPreiseOut, summary="Article prices abrufen")
 async def get_article_prices(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -455,18 +461,18 @@ async def get_article_prices(
     }
 
 
-@router.get("/{article_id}/documents", response_model=ArticlesOut, summary="Article documents abrufen")
+@router.get("/{article_id}/documents", response_model=ArtikelDokumenteOut, summary="Article documents abrufen")
 async def get_article_documents(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get documents for an article."""
-    _get_article_or_404(db, article_id, tenant_id)
+    article = _get_article_or_404(db, article_id, tenant_id)
     
     # Query article documents
     documents = db.query(ArticleDocument).filter(
-        ArticleDocument.article_id == article_id,
+        ArticleDocument.article_id == article.id,
         ArticleDocument.tenant_id == tenant_id,
     ).all()
     

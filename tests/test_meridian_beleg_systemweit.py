@@ -115,6 +115,7 @@ def test_aenderbarer_bezug_hat_lesbares_gegenstueck(mask_id: str, definition: di
 _IDENTITAET = {
     "fuhrpark/fahrzeug-stamm": "kennzeichen",
     "agrar/duenger": "artikelnummer",
+    "artikel/stamm": "article_number",
     "agrar/feeding-business": "name",
     "agrar/feeding-group": "name",
     "agrar/feeding-plan": "name",
