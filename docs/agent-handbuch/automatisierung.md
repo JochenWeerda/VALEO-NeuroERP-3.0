@@ -229,14 +229,14 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `fuhrpark.fahrzeug.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.rechnung.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.terminart.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
+| `futtermittel.einzelfutter.stillgelegt` | outbox | `app/api/v1/endpoints/agrar_stammdaten_kommandos.py` |
+| `futtermittel.mischfutter.deaktiviert` | outbox | `app/api/v1/endpoints/agrar_stammdaten_kommandos.py` |
 | `futtermittel.mischfutter.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `identity.tenant.` | outbox | `app/services/tenant_lifecycle_service.py` |
 | `inventur.abgeschlossen` | outbox | `app/services/inventory_compat_service.py` |
 | `kontrakt.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `logistik.frachttabelle.created` | outbox | `app/api/v1/endpoints/logistik_frachttabellen.py` |
-| `logistik.tour.created` | outbox | `app/api/v1/command_handlers/logistics.py` |
-| `mobile.event.retry` | outbox | `app/api/v1/endpoints/mobile_sync.py` |
-| … | | 17 weitere |
+| … | | 19 weitere |
 
 ### System
 

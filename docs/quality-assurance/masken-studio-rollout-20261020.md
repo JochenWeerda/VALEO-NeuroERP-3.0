@@ -127,6 +127,30 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 - Abschluss-Reihenfolge: Code-Inventare vor dem Architekturindex erzeugen (der Index liest sie; sonst DRIFT im
   Quality Gate wie auf `bce21e65f`).
 
+## Welle 1, Schritt 8 (20.10.2026): Futtermittel — eine Quelle fuer Liste, Einzelansicht und Loeschen
+
+- **Befund, behoben:** Fuer `GET /futter/einzelfuttermittel`, `GET /futter/mischfuttermittel` und das Loeschen
+  verdeckten Compat-Wege die Stammdatenwege von `futter_stamm`: Sie projizierten *alle* aktiven Artikel des
+  Mandanten (auch Duenger und Saatgut), ihre Kennungen oeffneten keine Einzelansicht (die liest Futterkatalog bzw.
+  `futtermittel_mischfutter`), und „Loeschen“ deaktivierte beliebige Artikel. Die verdeckenden Wege
+  (`futter_read.py`, vier Compat-Loeschwege) sind entfernt; Liste, Einzelansicht und Loeschen arbeiten jetzt auf
+  derselben Quelle. Die Zuordnungsvertraege (`test_futter_canonical_*_dispatch.py`, Codex 06.10.) pruefen jetzt
+  diese Quelle; ihre Rollen- und Mandantenpruefungen bleiben.
+- **Befund, behoben:** `POST /futter/{kategorie}/bulk-delete` loeschte hart aus `domain_shared.einzelfuttermittel`
+  bzw. `domain_shared.mischfuttermittel` — Tabellen, die es nicht gibt. Entfernt.
+- `futter_stamm` verschluckte Fehler der Listen (`except Exception: return []`); jetzt nicht mehr.
+- ScreenDefinitions `futtermittel/einzelfuttermittel-liste` (Futterkatalog wie die Objektmaske, Stilllegen als neue
+  Katalogrevision mit Begruendung) und `futtermittel/mischfuttermittel-liste` (Deaktivieren mit Begruendung).
+  Vier Routen (`/futter/einzel`, `/futter/misch`, `/futtermittel/…-liste`) zeigen dieselben zwei Listen.
+- Ratsche: handgebaut 473 -> 471, Altmuster 94 -> 89.
+- Abschluss: Der Tabellenkatalog verzeichnet auch lesende/schreibende Codedateien; neue SQL-Wege brauchen einen
+  neu erzeugten Katalog gegen einen frischen `init_db`-Pruefstand (DRIFT im Quality Gate auf `fb3e69ff1`).
+
+## Zurueckgestellt: Kontraktuebersicht
+
+`/kontrakte` (LstKontraktUebersicht) ist ein Arbeitsvorrat mit zehn Serverfiltern und Engagement-/Steuerungskennzahlen.
+Ohne deklarative Filterleiste in der ScreenDefinition wuerde ein Umbau Funktion wegnehmen; zuerst das Framework.
+
 ## Laufzeit: Tabellen ohne Serverblaetterung (20.10.2026)
 
 - **Befund, behoben (zentral):** Fuer Tabellen mit `serverPagination: false` schickte die Laufzeit trotzdem

@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 155,
-    "screens_with_actions": 78,
+    "actions": 159,
+    "screens_with_actions": 80,
     "domains": 14
   },
   "actions": [
@@ -2085,6 +2085,86 @@
         "actionKey": "import_analysis",
         "commandEndpoint": null,
         "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:futtermittel/einzelfuttermittel-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (futtermittel/einzelfuttermittel-liste)",
+      "category": "mask-action",
+      "domain": "futtermittel",
+      "mask": "futtermittel/einzelfuttermittel-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "futtermittel/einzelfuttermittel-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:futtermittel/einzelfuttermittel-liste:neu",
+      "label": "Neues Einzelfuttermittel",
+      "description": "Neues Einzelfuttermittel (futtermittel/einzelfuttermittel-liste)",
+      "category": "mask-action",
+      "domain": "futtermittel",
+      "mask": "futtermittel/einzelfuttermittel-liste",
+      "intent_phrases": [
+        "Neues Einzelfuttermittel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "futtermittel/einzelfuttermittel-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/futtermittel/einzelfuttermittel/stamm/new",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:futtermittel/mischfuttermittel-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (futtermittel/mischfuttermittel-liste)",
+      "category": "mask-action",
+      "domain": "futtermittel",
+      "mask": "futtermittel/mischfuttermittel-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "futtermittel/mischfuttermittel-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:futtermittel/mischfuttermittel-liste:neu",
+      "label": "Neues Mischfuttermittel",
+      "description": "Neues Mischfuttermittel (futtermittel/mischfuttermittel-liste)",
+      "category": "mask-action",
+      "domain": "futtermittel",
+      "mask": "futtermittel/mischfuttermittel-liste",
+      "intent_phrases": [
+        "Neues Mischfuttermittel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "futtermittel/mischfuttermittel-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/futtermittel/mischfuttermittel/stamm/new",
         "command": null,
         "method": null
       }

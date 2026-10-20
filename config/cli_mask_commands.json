@@ -194,6 +194,8 @@
   "mask:futtermittel/analyse:release",
   "mask:futtermittel/analyse:validate",
   "mask:futtermittel/analysen:import_analysis",
+  "mask:futtermittel/einzelfuttermittel-liste:stilllegen",
+  "mask:futtermittel/mischfuttermittel-liste:deaktivieren",
   "mask:futtermittel/mischfuttermittel:bearbeiten",
   "mask:lager/fremdware:complete",
   "mask:lager/fremdware:transfer",
@@ -252,6 +254,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 107
+  "kein_endpunkt": 111
  }
 }

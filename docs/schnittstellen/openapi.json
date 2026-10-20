@@ -75213,71 +75213,6 @@
         "title": "FuhrparkTerminartPayload",
         "type": "object"
       },
-      "FutterBulkDeleteErrorOut": {
-        "properties": {
-          "detail": {
-            "title": "Detail",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "detail"
-        ],
-        "title": "FutterBulkDeleteErrorOut",
-        "type": "object"
-      },
-      "FutterBulkDeleteIn": {
-        "properties": {
-          "ids": {
-            "items": {
-              "type": "string"
-            },
-            "maxItems": 100,
-            "minItems": 1,
-            "title": "Ids",
-            "type": "array"
-          }
-        },
-        "title": "FutterBulkDeleteIn",
-        "type": "object"
-      },
-      "FutterBulkDeleteOut": {
-        "properties": {
-          "deleted": {
-            "title": "Deleted",
-            "type": "integer"
-          },
-          "errors": {
-            "items": {
-              "$ref": "#/components/schemas/FutterBulkDeleteErrorOut"
-            },
-            "title": "Errors",
-            "type": "array"
-          },
-          "missing_ids": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Missing Ids",
-            "type": "array"
-          },
-          "requested": {
-            "title": "Requested",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "requested",
-          "deleted"
-        ],
-        "title": "FutterBulkDeleteOut",
-        "type": "object"
-      },
       "FuttermittelRezeptOut": {
         "additionalProperties": true,
         "description": "Typed response schema for FuttermittelRezeptOut endpoints (extra fields forwarded).",
@@ -314213,25 +314148,37 @@
         ]
       }
     },
-    "/api/v1/futter/einzelfuttermittel/bulk-delete": {
+    "/api/v1/futter/einzelfuttermittel/{entity_id}/actions/stilllegen": {
       "post": {
-        "operationId": "bulk_delete_futter_einzel_api_v1_futter_einzelfuttermittel_bulk_delete_post",
+        "operationId": "einzelfutter_stilllegen_api_v1_futter_einzelfuttermittel__entity_id__actions_stilllegen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FutterBulkDeleteIn"
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FutterBulkDeleteOut"
+                  "$ref": "#/components/schemas/MaskActionResult"
                 }
               }
             },
@@ -314253,9 +314200,9 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Delete futter einzel Bulk",
+        "summary": "Einzelfuttermittel im Futterkatalog stilllegen",
         "tags": [
-          "compat"
+          "mask-actions"
         ]
       }
     },
@@ -314405,46 +314352,6 @@
           "stammdaten",
           "futter",
           "stammdaten"
-        ]
-      }
-    },
-    "/api/v1/futter/einzelfuttermittel/{item_id}": {
-      "delete": {
-        "operationId": "delete_futter_einzel_item_api_v1_futter_einzelfuttermittel__item_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "item_id",
-            "required": true,
-            "schema": {
-              "title": "Item Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Futter einzel item lÃ¶schen",
-        "tags": [
-          "compat"
         ]
       }
     },
@@ -314704,52 +314611,6 @@
         ]
       }
     },
-    "/api/v1/futter/mischfuttermittel/bulk-delete": {
-      "post": {
-        "operationId": "bulk_delete_futter_misch_api_v1_futter_mischfuttermittel_bulk_delete_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FutterBulkDeleteIn"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FutterBulkDeleteOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Delete futter misch Bulk",
-        "tags": [
-          "compat"
-        ]
-      }
-    },
     "/api/v1/futter/mischfuttermittel/naehrwerte/berechnen": {
       "post": {
         "description": "Berechnet NÃ¤hrwerte einer Mischfuttermittel-Rezeptur nach DLG 503/504 (10/2025).\n\nEnergie (DLG 503 / GfE 2023): OMD â†’ ED â†’ DE â†’ UE + CH4E â†’ ME_FAN1/FANi.\nProtein (DLG 504 / GfE 2023): CP â†’ RDP/UDP â†’ siDUDP + MCP â†’ sidP.\nErgebnis enthÃ¤lt Formel-Versionierung fÃ¼r vollstÃ¤ndige RÃ¼ckverfolgbarkeit.",
@@ -314855,22 +314716,40 @@
         ]
       }
     },
-    "/api/v1/futter/mischfuttermittel/{item_id}": {
-      "delete": {
-        "operationId": "delete_futter_misch_item_api_v1_futter_mischfuttermittel__item_id__delete",
+    "/api/v1/futter/mischfuttermittel/{entity_id}/actions/deaktivieren": {
+      "post": {
+        "operationId": "mischfutter_deaktivieren_api_v1_futter_mischfuttermittel__entity_id__actions_deaktivieren_post",
         "parameters": [
           {
             "in": "path",
-            "name": "item_id",
+            "name": "entity_id",
             "required": true,
             "schema": {
-              "title": "Item Id",
+              "title": "Entity Id",
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
-          "204": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
             "description": "Successful Response"
           },
           "422": {
@@ -314889,9 +314768,9 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Futter misch item lÃ¶schen",
+        "summary": "Mischfuttermittel mit Begruendung deaktivieren",
         "tags": [
-          "compat"
+          "mask-actions"
         ]
       }
     },
@@ -315364,65 +315243,6 @@
         "summary": "Stats futter",
         "tags": [
           "compat"
-        ]
-      }
-    },
-    "/api/v1/futter/{kategorie}/bulk-delete": {
-      "post": {
-        "operationId": "futter_bulk_delete_api_v1_futter__kategorie__bulk_delete_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "kategorie",
-            "required": true,
-            "schema": {
-              "title": "Kategorie",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "default": {},
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BridgeOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Futtermittel sammeln löschen",
-        "tags": [
-          "mask-frontend-bridges"
         ]
       }
     },

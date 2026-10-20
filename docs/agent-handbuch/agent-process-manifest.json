@@ -3229,6 +3229,43 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "futtermittel/einzelfuttermittel-liste",
+      "title": "Einzelfuttermittel",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/futtermittel__einzelfuttermittel-liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/futtermittel/einzelfuttermittel-liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/futtermittel/einzelfuttermittel-liste/screen-definition",
+      "readiness_url": "/api/v1/masks/futtermittel/einzelfuttermittel-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neues Einzelfuttermittel",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "futtermittel/mischfuttermittel",
       "title": "Mischfuttermittel",
       "domain": "futtermittel",
@@ -3249,6 +3286,43 @@
           "commandEndpoint": "/api/v1/futter/mischfuttermittel/{entity_id}/actions/bearbeiten",
           "method": "POST",
           "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "futtermittel/mischfuttermittel-liste",
+      "title": "Mischfuttermittel",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/futtermittel__mischfuttermittel-liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/futtermittel/mischfuttermittel-liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/futtermittel/mischfuttermittel-liste/screen-definition",
+      "readiness_url": "/api/v1/masks/futtermittel/mischfuttermittel-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neues Mischfuttermittel",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -5835,5 +5909,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 123
+  "event_count": 125
 }

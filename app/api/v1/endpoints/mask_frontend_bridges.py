@@ -1413,25 +1413,4 @@ def audit_trail(
     return {"data": data}
 
 
-@router.post("/futter/{kategorie}/bulk-delete", response_model=BridgeOut, summary="Futtermittel sammeln löschen", dependencies=SCHREIBEN["FUTTERMITTEL"])
-def futter_bulk_delete(
-    kategorie: str,
-    body: dict[str, Any] = Body(default={}),
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    ids = [str(x) for x in (body.get("ids") or []) if x]
-    if not ids:
-        return {"deleted": 0, "kategorie": kategorie, "ids": []}
-    table = {
-        "einzelfuttermittel": "domain_shared.einzelfuttermittel",
-        "mischfuttermittel": "domain_shared.mischfuttermittel",
-    }.get(kategorie, "domain_shared.einzelfuttermittel")
-    deleted = 0
-    for item_id in ids:
-        deleted += _safe_execute(
-            db,
-            f"DELETE FROM {table} WHERE id = :id AND tenant_id = :t",  # nosec B608
-            {"id": item_id, "t": tenant_id},
-        )
-    return {"deleted": deleted, "kategorie": kategorie, "ids": ids}
+# /futter/{kategorie}/bulk-delete entfernt (20.10.2026): loeschte hart aus Tabellen, die es nicht gibt.

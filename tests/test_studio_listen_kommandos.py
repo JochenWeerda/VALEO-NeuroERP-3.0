@@ -35,6 +35,8 @@ os.environ.setdefault("DATABASE_URL", DB_URL)
 
 HAUS_A = f"anf-a-{uuid.uuid4().hex[:6]}"
 HAUS_B = f"anf-b-{uuid.uuid4().hex[:6]}"
+#: Futterkatalog: Revisionen sind unveraenderlich (Trigger), deshalb ein eigener Mandant je Lauf ohne Aufraeumen.
+HAUS_KATALOG = f"anf-k-{uuid.uuid4().hex[:6]}"
 BEARBEITER = f"einkauf-{uuid.uuid4().hex[:8]}"
 PFAD = "/api/v1/einkauf/anfragen/{id}/actions/{aktion}"
 
@@ -58,6 +60,7 @@ def aufraeumen(engine):
     with engine.begin() as v:
         v.execute(text("DELETE FROM einkauf_anfragen_positionen WHERE anfrage_id IN "
                        "(SELECT id FROM einkauf_anfragen WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_shared.futtermittel_mischfutter WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_agrar.agrar_duenger WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_einkauf.lieferanten WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
@@ -72,7 +75,7 @@ def haeuser(engine):
     from sqlalchemy import text
 
     with engine.begin() as v:
-        for haus in (HAUS_A, HAUS_B):
+        for haus in (HAUS_A, HAUS_B, HAUS_KATALOG):
             v.execute(text("INSERT INTO domain_shared.tenants (id, name) VALUES (:id, :n) ON CONFLICT (id) DO NOTHING"),
                       {"id": haus, "n": f"Pruefbetrieb {haus}"})
     yield
@@ -398,3 +401,50 @@ def test_duenger_deaktivieren_mit_grund_und_nur_einmal(engine, client):
     assert aktion({"_auditReason": "Nicht mehr im Sortiment"}) is True
     assert zeile(engine, "SELECT ist_aktiv FROM domain_agrar.agrar_duenger WHERE id = :i", i=kennung)["ist_aktiv"] is False
     assert aktion({"_auditReason": "Noch einmal"}) is False
+
+
+def test_mischfutter_liste_und_deaktivieren_auf_den_futterstammdaten(engine, client):
+    """Liste und Deaktivieren arbeiten auf futtermittel_mischfutter, nicht auf allen Artikeln (bis 20.10.2026)."""
+    from sqlalchemy import text
+
+    kennung = str(uuid.uuid4())
+    with engine.begin() as v:
+        v.execute(text("INSERT INTO domain_shared.futtermittel_mischfutter (id, tenant_id, produkt_code, name, tierart, "
+                       "aktiv) VALUES (:i, :h, :c, 'MLF 18', 'rind', true)"),
+                  {"i": kennung, "h": HAUS_A, "c": f"MF-{kennung[:6]}"})
+    liste = client.get("/api/v1/futter/mischfuttermittel", headers={"X-Tenant-ID": HAUS_A})
+    assert liste.status_code == 200, liste.text
+    assert [e["id"] for e in liste.json()] == [kennung]
+    assert client.get(f"/api/v1/futter/mischfuttermittel/{kennung}", headers={"X-Tenant-ID": HAUS_A}).status_code == 200
+
+    def aktion(body: dict) -> bool:
+        antwort = client.post(f"/api/v1/futter/mischfuttermittel/{kennung}/actions/deaktivieren", json=body,
+                              headers={"X-Tenant-ID": HAUS_A})
+        assert antwort.status_code == 200, antwort.text
+        return antwort.json()["success"]
+
+    assert aktion({}) is False
+    assert aktion({"_auditReason": "Rezeptur ausgelaufen"}) is True
+    assert aktion({"_auditReason": "Noch einmal"}) is False
+    assert client.get("/api/v1/futter/mischfuttermittel", headers={"X-Tenant-ID": HAUS_A}).json() == []
+
+
+def test_einzelfutter_liste_oeffnet_die_einzelansicht_und_stilllegen_braucht_grund(engine, client):
+    """Listen-Kennung oeffnet die Einzelansicht (vorher Artikel-Kennungen ohne Einzelansicht)."""
+    kopf = {"X-Tenant-ID": HAUS_KATALOG}
+    angelegt = client.post("/api/v1/futter/einzelfuttermittel", headers=kopf,
+                           json={"artikel_nummer": f"EF-{uuid.uuid4().hex[:6]}", "name": "Rapsextraktionsschrot",
+                                 "art": "Eiweissfutter"})
+    assert angelegt.status_code == 201, angelegt.text
+    kennung = angelegt.json()["id"]
+    assert [e["id"] for e in client.get("/api/v1/futter/einzelfuttermittel", headers=kopf).json()] == [kennung]
+    katalog = client.get("/api/v1/agrar/rations-optimization/feed-catalog/feeds", headers=kopf)
+    assert katalog.status_code == 200, katalog.text
+    assert kennung in [e["id"] for e in katalog.json()]
+    assert client.get(f"/api/v1/agrar/rations-optimization/feed-catalog/feeds/{kennung}", headers=kopf).status_code == 200
+
+    weg = f"/api/v1/futter/einzelfuttermittel/{kennung}/actions/stilllegen"
+    assert client.post(weg, json={}, headers=kopf).json()["success"] is False
+    ergebnis = client.post(weg, json={"_auditReason": "Nicht mehr bezogen"}, headers=kopf).json()
+    assert ergebnis["success"] is True, ergebnis
+    assert client.get("/api/v1/futter/einzelfuttermittel", headers=kopf).json() == []

@@ -40,7 +40,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `agrar_maschinen` | Agrar Maschinen — CRUD für Maschinenpark (Landhandel + Lohnunternehmer) |
 | `agrar_p0` | — |
 | `agrar_settlements` | Agrar self-billing settlements with deduction and posting workflow (AGRAR-SET-01). |
-| `agrar_stammdaten_kommandos` | Zeilenaktionen der Agrar-Stammdatenlisten als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
+| `agrar_stammdaten_kommandos` | Zeilenaktionen der Agrar- und Futtermittel-Stammdatenlisten als Fachaktion fuer Maske, CLI und MCP. |
 | `agrar_varieties` | Agrar Sorten/Varieties API fuer Ernte-Annahme. |
 | `agrar_wetter` | Agrar Wetter — Wetter-Proxy für BrightSky (DWD) + Open-Meteo (ICON-D2) |
 | `agri_lot_link_booking` | WM-AGRI-LOT-LINK-001 endpoint: Annahme/Waage-Lot in Silozelle buchen. |
@@ -227,7 +227,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `forderungsgruppen` | Forderungsgruppen [FORG] — Kundensegmentierung für Bestandskontenzuordnung. |
 | `foreign_goods_worklist` | Foreign-goods operator worklist API. |
 | `fuhrpark` | Fuhrpark API Endpoints - zvoove style master data mask. |
-| `futter_read` | Guarded feed list projections preserving the existing frontend read contract. |
 | `futter_stamm` | Futtermittel-Stammdaten & Rezepte API |
 | `futtermittel_qs` | FEED-QS-001 — Futtermittel QS: HACCP-Plaene, VLOG-Meldungen, QS-Leitfaden. |
 | `futtermittel_rezepte` | Futtermittel Rezepturverwaltung |

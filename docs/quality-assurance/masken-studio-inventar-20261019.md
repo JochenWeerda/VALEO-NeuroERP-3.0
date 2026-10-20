@@ -8,9 +8,9 @@ Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentschei
 | Stufe | Routen | Anteil an Masken |
 |---|---:|---:|
 | studio_versioniert | 1 | 0.2 % |
-| screen_definition | 92 | 13.9 % |
-| builder_altmuster | 94 | 14.2 % |
-| handgebaut | 473 | 71.7 % |
+| screen_definition | 99 | 15.0 % |
+| builder_altmuster | 89 | 13.5 % |
+| handgebaut | 471 | 71.4 % |
 | weiterleitung | 2 |  |
 
 Gesamt 662 Routen, davon 660 Masken.
@@ -19,15 +19,15 @@ Gesamt 662 Routen, davon 660 Masken.
 
 | Befund | Anzahl |
 |---|---:|
-| Aktionen gesamt (ohne Doppel je Maske) | 356 |
-| davon serverwirksam | 249 |
-| … mit REST-Kommandoweg | 249 |
+| Aktionen gesamt (ohne Doppel je Maske) | 362 |
+| davon serverwirksam | 251 |
+| … mit REST-Kommandoweg | 251 |
 | … mit eigenem MCP-Werkzeug | 46 |
-| … per generischem MCP-Werkzeug (`mask.action.execute`) | 56 |
+| … per generischem MCP-Werkzeug (`mask.action.execute`) | 58 |
 | … MCP bewusst gesperrt | 147 |
 | … MCP offen (`open_high` u. a.) | 0 |
 | … MCP unklassifiziert | 0 |
-| … mit CLI-Zugang | 249 |
+| … mit CLI-Zugang | 251 |
 | nicht deklariert (kein Kommando, Endpunkt, Navigation) | 0 |
 | nicht verfuegbar (`stubReason`, die Maske nennt den Grund) | 0 |
 
@@ -121,7 +121,7 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | personal | 0 | 5 | 0 | 12 | 0 |
 | strecke | 0 | 0 | 0 | 12 | 0 |
 | verkauf | 0 | 3 | 0 | 11 | 2 |
-| futtermittel | 0 | 6 | 16 | 9 | 0 |
+| futtermittel | 0 | 11 | 11 | 9 | 0 |
 | kontrakte | 0 | 1 | 0 | 9 | 0 |
 | pos | 0 | 0 | 2 | 9 | 0 |
 | controlling | 0 | 0 | 0 | 7 | 0 |
@@ -133,7 +133,6 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | agribusiness | 0 | 0 | 0 | 4 | 0 |
 | charge | 0 | 0 | 1 | 4 | 0 |
 | disposition | 0 | 0 | 0 | 4 | 0 |
-| futter | 0 | 0 | 0 | 4 | 0 |
 | nachhaltigkeit | 0 | 0 | 0 | 4 | 0 |
 | nawaro | 0 | 0 | 0 | 4 | 0 |
 | preise | 0 | 0 | 0 | 4 | 0 |
@@ -145,6 +144,7 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | vertrag | 0 | 0 | 0 | 3 | 0 |
 | auth | 0 | 0 | 0 | 2 | 0 |
 | fuhrpark | 0 | 6 | 0 | 2 | 0 |
+| futter | 0 | 2 | 0 | 2 | 0 |
 | genossenschaft | 0 | 0 | 0 | 2 | 0 |
 | inventory | 0 | 0 | 0 | 2 | 0 |
 | monitoring | 0 | 0 | 0 | 2 | 0 |

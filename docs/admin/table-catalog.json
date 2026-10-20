@@ -326,7 +326,11 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/agrar_stammdaten_kommandos.py",
             "app/infrastructure/models/agrar_models.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/agrar_stammdaten_kommandos.py"
           ]
         },
         "agrar_duenger_mischungen": {
@@ -17845,6 +17849,7 @@
             "app/api/v1/endpoints/articles.py",
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/einkauf_ab_erfassung.py",
+            "app/api/v1/endpoints/einkauf_bestellung_kommandos.py",
             "app/api/v1/endpoints/einkauf_kpis.py",
             "app/api/v1/endpoints/einkauf_lieferschein.py",
             "app/api/v1/endpoints/purchase_invoice_verification.py",
@@ -51829,6 +51834,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/agrar_stammdaten_kommandos.py",
             "app/infrastructure/models/futtermittel_models.py",
             "app/services/feed_inventory_link_service.py",
             "app/services/feeding_actual_measure_service.py",
@@ -51998,8 +52004,13 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/agrar_stammdaten_kommandos.py",
+            "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/infrastructure/models/futtermittel_models.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/agrar_stammdaten_kommandos.py"
           ]
         },
         "futtermittel_produktionsauftraege": {

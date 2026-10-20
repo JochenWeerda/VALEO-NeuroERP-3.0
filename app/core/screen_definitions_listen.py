@@ -358,6 +358,70 @@ def build_agrar_duenger_liste() -> dict[str, Any]:
     )
 
 
+
+def build_futtermittel_einzelfuttermittel_liste() -> dict[str, Any]:
+    """Einzelfuttermittel aus dem Futterkatalog, derselben Quelle wie die Objektmaske."""
+    return _liste(
+        screen_id="futtermittel/einzelfuttermittel-liste", domain="futtermittel", title="Einzelfuttermittel",
+        subtitle="Futterkatalog mit Freigabe und Revision",
+        endpoint="/api/v1/agrar/rations-optimization/feed-catalog/feeds",
+        row_route="/futtermittel/einzelfuttermittel/{id}", bundle="futtermittel",
+        columns=[
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "artikel_nummer", "label": "Artikel-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "art", "label": "Art", "filterable": True, "priority": "primary"},
+            {"key": "approval_status", "label": "Freigabe", "renderKind": "status", "filterable": True,
+             "priority": "secondary"},
+            {"key": "trockensubstanz", "label": "TS g/kg", "numeric": True, "priority": "secondary"},
+            {"key": "preis_pro_t", "label": "Preis/t", "numeric": True, "renderKind": "currency",
+             "priority": "secondary"},
+            {"key": "revision", "label": "Revision", "numeric": True, "priority": "tertiary"},
+            {"key": "updated_at", "label": "Geaendert", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neues Einzelfuttermittel", "/futtermittel/einzelfuttermittel/stamm/new"), _EXPORT],
+        row_actions=[
+            {"key": "stilllegen", "label": "Stilllegen", "dangerLevel": "high",
+             "permission": "futtermittel.einzelfutter.retire",
+             "commandEndpoint": "/api/v1/futter/einzelfuttermittel/{entity_id}/actions/stilllegen", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True,
+             "visibleWhen": {"field": "aktiv", "values": [True]}},
+        ],
+        purpose="Einzelfuttermittel des Futterkatalogs finden, oeffnen und nicht mehr gefuehrte stilllegen.",
+        prompts=["Welche Einzelfuttermittel sind freigegeben?", "Welche Futtermittel haben keinen Preis?"],
+        no_workflow="Freigabe und Revision stehen am Katalogeintrag; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_futtermittel_mischfuttermittel_liste() -> dict[str, Any]:
+    """Mischfuttermittel; dieselbe Quelle wie die Objektmaske ``futtermittel/mischfuttermittel``."""
+    return _liste(
+        screen_id="futtermittel/mischfuttermittel-liste", domain="futtermittel", title="Mischfuttermittel",
+        subtitle="Mischfutter je Tierart und Leistungsstufe", endpoint="/api/v1/futter/mischfuttermittel",
+        row_route="/futtermittel/mischfuttermittel/{id}", bundle="futtermittel",
+        columns=[
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "produkt_code", "label": "Produkt-Code", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "tierart", "label": "Tierart", "filterable": True, "priority": "primary"},
+            {"key": "leistungsstufe", "label": "Leistungsstufe", "filterable": True, "priority": "secondary"},
+            {"key": "protein", "label": "Protein %", "numeric": True, "priority": "secondary"},
+            {"key": "energie", "label": "Energie MJ", "numeric": True, "priority": "secondary"},
+        ],
+        actions=[_neu("Neues Mischfuttermittel", "/futtermittel/mischfuttermittel/stamm/new"), _EXPORT],
+        row_actions=[
+            {"key": "deaktivieren", "label": "Deaktivieren", "dangerLevel": "high",
+             "permission": "futtermittel.mischfutter.deactivate",
+             "commandEndpoint": "/api/v1/futter/mischfuttermittel/{entity_id}/actions/deaktivieren", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True,
+             "visibleWhen": {"field": "aktiv", "values": [True]}},
+        ],
+        purpose="Mischfuttermittel je Tierart finden, oeffnen und nicht mehr gefuehrte deaktivieren.",
+        prompts=["Welche Mischfutter fuehren wir fuer Milchkuehe?", "Zeige Mischfutter mit ueber 18 % Protein."],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -367,6 +431,8 @@ LISTEN_SCREEN_BUILDERS = {
     "einkauf/bestellungen": build_einkauf_bestellungen_liste,
     "agrar/saatgut-liste": build_agrar_saatgut_liste,
     "agrar/duenger-liste": build_agrar_duenger_liste,
+    "futtermittel/einzelfuttermittel-liste": build_futtermittel_einzelfuttermittel_liste,
+    "futtermittel/mischfuttermittel-liste": build_futtermittel_mischfuttermittel_liste,
 }
 LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
                 "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
@@ -374,7 +440,9 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "einkauf/lieferanten": "/einkauf/lieferanten",
                 "einkauf/bestellungen": "/einkauf/bestellungen",
                 "agrar/saatgut-liste": "/agrar/saatgut",
-                "agrar/duenger-liste": "/agrar/duenger"}
+                "agrar/duenger-liste": "/agrar/duenger",
+                "futtermittel/einzelfuttermittel-liste": "/futtermittel/einzelfuttermittel-liste",
+                "futtermittel/mischfuttermittel-liste": "/futtermittel/mischfuttermittel-liste"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
@@ -382,4 +450,6 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "einkauf/lieferanten": ["lieferanten", "lieferantenliste", "kreditoren einkauf"],
                    "einkauf/bestellungen": ["bestellungen", "einkaufsbestellungen", "po"],
                    "agrar/saatgut-liste": ["saatgut", "sorten", "saatgutliste"],
-                   "agrar/duenger-liste": ["duenger", "duengemittel", "duengerliste"]}
+                   "agrar/duenger-liste": ["duenger", "duengemittel", "duengerliste"],
+                   "futtermittel/einzelfuttermittel-liste": ["einzelfuttermittel", "futterkatalog", "futtermittel"],
+                   "futtermittel/mischfuttermittel-liste": ["mischfuttermittel", "mischfutter", "kraftfutter"]}

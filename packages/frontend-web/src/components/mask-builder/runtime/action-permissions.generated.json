@@ -758,8 +758,30 @@
         ]
       ]
     },
+    "futtermittel/einzelfuttermittel-liste": {
+      "futtermittel.einzelfutter.retire": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "futtermittel/mischfuttermittel": {
       "futtermittel.mischfutter.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "futtermittel/mischfuttermittel-liste": {
+      "futtermittel.mischfutter.deactivate": [
         [
           "AGRAR_ADMIN",
           "AGRAR_BEARBEITEN",

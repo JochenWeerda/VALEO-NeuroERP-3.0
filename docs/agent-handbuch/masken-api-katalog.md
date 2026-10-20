@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (116 Masken).
+> Generiert aus `app/core/screen_definitions.py` (118 Masken).
 
 ## Übersicht
 
@@ -85,7 +85,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `futtermittel/analyse` | Futteranalyse | futtermittel | hoch | — | `GET /api/v1/masks/futtermittel/analyse/agent-contract` |
 | `futtermittel/analysen` | Futteranalysen | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/analysen/agent-contract` |
 | `futtermittel/einzelfuttermittel` | Einzelfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/einzelfuttermittel/agent-contract` |
+| `futtermittel/einzelfuttermittel-liste` | Einzelfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/einzelfuttermittel-liste/agent-contract` |
 | `futtermittel/mischfuttermittel` | Mischfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/mischfuttermittel/agent-contract` |
+| `futtermittel/mischfuttermittel-liste` | Mischfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/mischfuttermittel-liste/agent-contract` |
 | `lager/article-stock` | Artikelbestand | lager | niedrig | `inventory-to-settlement` | `GET /api/v1/masks/lager/article-stock/agent-contract` |
 | `lager/fremdware` | Fremdware und Fremdbestand | inventory | niedrig | — | `GET /api/v1/masks/lager/fremdware/agent-contract` |
 | `lager/inventur-nebenlaeufe` | Inventur-Nebenlaeufe | inventory | hoch | — | `GET /api/v1/masks/lager/inventur-nebenlaeufe/agent-contract` |
@@ -2555,6 +2557,36 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `futtermittel/einzelfuttermittel-liste` — Einzelfuttermittel
+
+**Zweck:** Einzelfuttermittel des Futterkatalogs finden, oeffnen und nicht mehr gefuehrte stilllegen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/futtermittel/einzelfuttermittel-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/futtermittel/einzelfuttermittel-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/futtermittel/einzelfuttermittel-liste/readiness` |
+| Rollout-Route | `/mask-rollout/futtermittel__einzelfuttermittel-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/agrar/rations-optimization/feed-catalog/feeds`
+
+**Beispiel-Prompts:**
+
+- Welche Einzelfuttermittel sind freigegeben?
+- Welche Futtermittel haben keinen Preis?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neues Einzelfuttermittel | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
 ### `futtermittel/mischfuttermittel` — Mischfuttermittel
 
 **Zweck:** Mischfuttermittel: Rezeptur-Komponenten und berechnete Naehrstoffgehalte fuer Rationsoptimierung.
@@ -2583,6 +2615,36 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/futter/mischfuttermittel/{entity_id}/actions/bearbeiten` |
+
+---
+
+### `futtermittel/mischfuttermittel-liste` — Mischfuttermittel
+
+**Zweck:** Mischfuttermittel je Tierart finden, oeffnen und nicht mehr gefuehrte deaktivieren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/futtermittel/mischfuttermittel-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/futtermittel/mischfuttermittel-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/futtermittel/mischfuttermittel-liste/readiness` |
+| Rollout-Route | `/mask-rollout/futtermittel__mischfuttermittel-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/futter/mischfuttermittel`
+
+**Beispiel-Prompts:**
+
+- Welche Mischfutter fuehren wir fuer Milchkuehe?
+- Zeige Mischfutter mit ueber 18 % Protein.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neues Mischfuttermittel | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

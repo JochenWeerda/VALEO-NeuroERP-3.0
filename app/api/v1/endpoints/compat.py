@@ -25,9 +25,7 @@ from app.core.data_quality_enforcement import (
 from app.core.database import get_db
 from app.core.uuid7 import uuid7
 from app.core.logging import get_correlation_id
-from app.api.v1.endpoints.futter_read import router as futter_read_router
-from app.agrar.rations.authz import WRITE_ROLES, require_roles
-from app.auth.deps import User, get_current_user
+from app.auth.deps import get_current_user
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import AuditLog, LkwAnnahmeQueue
 from app.documents.router_helpers import get_repository, list_from_store, get_from_store
@@ -1026,69 +1024,10 @@ async def einkauf_retouren_create(
 
 
 # Futter -------------------------------------------------------------------
-
-
-class FutterBulkDeleteIn(BaseModel):
-    ids: list[str] = Field(default_factory=list, min_length=1, max_length=100)
-
-
-class FutterBulkDeleteErrorOut(BaseModel):
-    id: str
-    detail: str
-
-
-class FutterBulkDeleteOut(BaseModel):
-    requested: int
-    deleted: int
-    missing_ids: list[str] = Field(default_factory=list)
-    errors: list[FutterBulkDeleteErrorOut] = Field(default_factory=list)
-
-
-router.include_router(futter_read_router)
-
-
-@router.delete("/futter/einzelfuttermittel/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Futter einzel item lÃ¶schen")
-async def delete_futter_einzel_item(
-    item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-) -> Response:
-    require_roles(user, WRITE_ROLES)
-    result = FutterCompatService(db, tenant_id).soft_delete_artikel([item_id])
-    if result["deleted"] == 0:
-        raise HTTPException(status_code=404, detail="Einzelfuttermittel nicht gefunden")
-    return Response(status_code=204)
-
-
-@router.post("/futter/einzelfuttermittel/bulk-delete", response_model=FutterBulkDeleteOut, summary="Delete futter einzel Bulk")
-async def bulk_delete_futter_einzel(
-    payload: FutterBulkDeleteIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-) -> FutterBulkDeleteOut:
-    require_roles(user, WRITE_ROLES)
-    result = FutterCompatService(db, tenant_id).soft_delete_artikel(payload.ids)
-    return FutterBulkDeleteOut(**result)
-
-
-@router.delete("/futter/mischfuttermittel/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Futter misch item lÃ¶schen")
-async def delete_futter_misch_item(
-    item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-) -> Response:
-    require_roles(user, WRITE_ROLES)
-    result = FutterCompatService(db, tenant_id).soft_delete_artikel([item_id])
-    if result["deleted"] == 0:
-        raise HTTPException(status_code=404, detail="Mischfuttermittel nicht gefunden")
-    return Response(status_code=204)
-
-
-@router.post("/futter/mischfuttermittel/bulk-delete", response_model=FutterBulkDeleteOut, summary="Delete futter misch Bulk")
-async def bulk_delete_futter_misch(
-    payload: FutterBulkDeleteIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-) -> FutterBulkDeleteOut:
-    require_roles(user, WRITE_ROLES)
-    result = FutterCompatService(db, tenant_id).soft_delete_artikel(payload.ids)
-    return FutterBulkDeleteOut(**result)
+# Liste und Loeschen der Einzel-/Mischfuttermittel stehen in futter_stamm (Futterkatalog bzw.
+# domain_shared.futtermittel_mischfutter). Bis 20.10.2026 verdeckten Wege hier beide mit einer Projektion
+# aller aktiven Artikel: Die Liste zeigte auch Duenger und Saatgut, ihre Kennungen oeffneten keine Einzelansicht,
+# und "Loeschen" deaktivierte beliebige Artikel.
 
 
 @router.get("/futter/chargen", response_model=list[CompatBridgeOut], summary="Chargen futter")

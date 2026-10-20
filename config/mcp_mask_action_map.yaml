@@ -5,8 +5,8 @@ sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 155
-    screens_with_actions: 78
+    actions: 159
+    screens_with_actions: 80
     domains: 14
 mcp_write_tools:
 - crm.contact.log
@@ -81,12 +81,12 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 90
+  mask_actions_considered: 92
   mask_mutations_considered: 68
   by_coverage:
     adjacent: 1
     blocked_human_only: 14
-    local_ui: 22
+    local_ui: 24
     mapped: 43
     mapped_generic: 3
     mapped_propose_only: 1
@@ -720,6 +720,26 @@ mappings:
   mcp_tool_id: null
   coverage: blocked_human_only
   notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
+- mask_action_id: mask:futtermittel/einzelfuttermittel-liste:neu
+  mask: futtermittel/einzelfuttermittel-liste
+  domain: futtermittel
+  action_key: neu
+  label: Neues Einzelfuttermittel
+  command_endpoint: null
+  command: null
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:futtermittel/mischfuttermittel-liste:neu
+  mask: futtermittel/mischfuttermittel-liste
+  domain: futtermittel
+  action_key: neu
+  label: Neues Mischfuttermittel
+  command_endpoint: null
+  command: null
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
 - mask_action_id: mask:lager/inventur-nebenlaeufe:create_control
   mask: lager/inventur-nebenlaeufe
   domain: inventory
@@ -1043,5 +1063,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 0; blocked_human_only 14; blocked_no_endpoint 0; local_ui 22; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 14; blocked_no_endpoint 0; local_ui 24; FIN-CLOSE
   blocked_adr_076.'

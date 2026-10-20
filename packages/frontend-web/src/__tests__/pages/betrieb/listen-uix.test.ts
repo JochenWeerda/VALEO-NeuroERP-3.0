@@ -5,20 +5,14 @@ import { describe, expect, it } from 'vitest'
 const read = (rel: string) => readFileSync(resolve(__dirname, rel), 'utf8')
 
 describe('Betriebs-Listen UIX', () => {
-  it('stellt Einzelfutter 44 px und filtert die Suche', () => {
+  it('stellt Einzelfutter als Studio-Liste (Suche und 44-px-Zeilen aus dem Renderer)', () => {
     const src = read('../../../pages/futter/einzel/liste.tsx')
-    expect(src).toContain('filteredFutter')
-    expect(src).toContain('min-h-11 font-medium text-primary')
-    expect(src).toContain('Suche Einzelfutter')
-    expect(src).not.toContain('text-blue-600')
+    expect(src).toContain("export { default } from '@/pages/futtermittel/einzelfuttermittel-liste'")
   })
 
-  it('stellt Mischfutter 44 px und filtert die Suche', () => {
+  it('stellt Mischfutter als Studio-Liste (Suche und 44-px-Zeilen aus dem Renderer)', () => {
     const src = read('../../../pages/futter/misch/liste.tsx')
-    expect(src).toContain('filteredMischfutter')
-    expect(src).toContain('min-h-11 font-medium text-primary')
-    expect(src).toContain('Suche Mischfutter')
-    expect(src).not.toContain('text-blue-600')
+    expect(src).toContain("export { default } from '@/pages/futtermittel/mischfuttermittel-liste'")
   })
 
   it('stellt Zertifikate 44 px und blendet KPI auf Touch aus', () => {
