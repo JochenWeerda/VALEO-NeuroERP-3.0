@@ -261,11 +261,14 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 - Ratsche: handgebaut 471 -> 465.
 - Zurueckgestellt: `zertifikate/liste` (Detail- und Anlage-Route zeigen die Liste selbst; Objektmaske fehlt).
 
-## Barrierefreiheit: virtuelle Tabelle ohne Tabellenrolle (offen)
+## Barrierefreiheit: virtuelle Tabelle ohne Tabellenrolle (behoben 20.10.2026)
 
 - `components/ui/VirtualDataTable.tsx` zeichnet Kopf und Zeilen als `div`; Zeilen tragen `role="row"` (oder
   `button`, wenn klickbar) ohne Behaelter `role="table"`/`grid`, Kopfzellen ohne `columnheader`. Screenreader
-  erkennen keine Tabelle. Umbau aendert Zeilenrollen, an denen Tests und Bedienung haengen — eigener Schritt.
+  erkennen keine Tabelle.
+- Behoben (Desktop; Kartenansicht auf Touch unveraendert): Behaelter `table` bzw. `grid` bei klickbaren Zeilen mit
+  `aria-rowcount`/`aria-colcount`, Kopfzeile `row` mit `columnheader` und `aria-sort`, Rumpf `rowgroup`, Zeilen
+  `row` mit `aria-rowindex` (klickbar: fokussierbar, `aria-selected`), Zellen `cell`/`gridcell`.
 - Aufgefallen im E2E-Smoke der PSM-Liste (suchte `table`/`grid`); der Smoke prueft jetzt die Wurzel der
   ScreenDefinition wie beim Saatgut.
 
