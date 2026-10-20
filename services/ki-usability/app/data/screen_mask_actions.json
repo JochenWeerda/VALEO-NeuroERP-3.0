@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 162,
-    "screens_with_actions": 81,
+    "actions": 164,
+    "screens_with_actions": 82,
     "domains": 14
   },
   "actions": [
@@ -1737,6 +1737,46 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:finance/kreditoren-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (finance/kreditoren-liste)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/kreditoren-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/kreditoren-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:finance/kreditoren-liste:neu",
+      "label": "Neuer Kreditor",
+      "description": "Neuer Kreditor (finance/kreditoren-liste)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/kreditoren-liste",
+      "intent_phrases": [
+        "Neuer Kreditor"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/kreditoren-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/finance/kreditoren-stamm",
+        "command": null,
+        "method": null
       }
     },
     {

@@ -8,8 +8,8 @@ Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentschei
 | Stufe | Routen | Anteil an Masken |
 |---|---:|---:|
 | studio_versioniert | 1 | 0.2 % |
-| screen_definition | 100 | 15.2 % |
-| builder_altmuster | 88 | 13.3 % |
+| screen_definition | 101 | 15.3 % |
+| builder_altmuster | 87 | 13.2 % |
 | handgebaut | 471 | 71.4 % |
 | weiterleitung | 2 |  |
 
@@ -19,7 +19,7 @@ Gesamt 662 Routen, davon 660 Masken.
 
 | Befund | Anzahl |
 |---|---:|
-| Aktionen gesamt (ohne Doppel je Maske) | 367 |
+| Aktionen gesamt (ohne Doppel je Maske) | 369 |
 | davon serverwirksam | 253 |
 | … mit REST-Kommandoweg | 253 |
 | … mit eigenem MCP-Werkzeug | 46 |
@@ -109,7 +109,7 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 |---|---:|---:|---:|---:|---:|
 | agrar | 0 | 10 | 4 | 45 | 0 |
 | fibu | 0 | 0 | 1 | 42 | 0 |
-| finance | 0 | 8 | 17 | 28 | 0 |
+| finance | 0 | 9 | 16 | 28 | 0 |
 | admin | 0 | 4 | 0 | 27 | 0 |
 | einkauf | 0 | 14 | 9 | 26 | 0 |
 | sales | 0 | 8 | 0 | 22 | 0 |

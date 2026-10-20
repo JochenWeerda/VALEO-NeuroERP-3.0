@@ -167,6 +167,15 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
   nicht gibt. Alle drei entfallen; Mahnungen laufen im Mahnwesen mit Vorschau.
 - Ratsche: Altmuster 89 -> 88.
 
+## Welle 1, Schritt 10 (20.10.2026): Finance Kreditoren
+
+- **Befund, behoben:** `/finance/kreditoren` („Kreditoren-Liste“ in der Finance-Uebersicht) zeigte ein leeres
+  Anlageformular statt der Kreditoren; nach dem Speichern landete man wieder dort. Die Route zeigt jetzt die
+  Studio-Liste `finance/kreditoren-liste` (Quelle `/api/v1/finance/kreditoren` wie die Objektmaske
+  `finance/kreditor`); die Anlage liegt unter `/finance/kreditoren-stamm`.
+- Kreditoren sind die Lieferanten des Einkaufs (`ProcurementService.list_lieferanten`); ein Beleg, ein Besitzer.
+- Ratsche: Altmuster 88 -> 87.
+
 ## Sichtung 20.10.2026: zurueckgestellt bzw. Entscheidung noetig
 
 | Seite | Befund | Weiter |

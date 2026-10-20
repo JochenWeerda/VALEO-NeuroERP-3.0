@@ -471,3 +471,15 @@ def test_debitor_sperren_und_entsperren_mit_grund(engine, client):
     liste = client.get("/api/v1/finance/debitoren", headers={"X-Tenant-ID": HAUS_A}).json()
     assert [(d["id"], d["is_active"]) for d in liste] == [(kennung, False)]
     assert aktion("entsperren", {"_auditReason": "Zahlung eingegangen"}) is True
+
+
+def test_kreditorenliste_ist_eine_liste_und_oeffnet_die_objektmaske():
+    """/finance/kreditoren zeigte ein leeres Anlageformular statt der Kreditoren (bis 20.10.2026)."""
+    from app.core.screen_definitions import get_screen_definition
+
+    liste = get_screen_definition("finance/kreditoren-liste")
+    objekt = get_screen_definition("finance/kreditor")
+    quelle = next(d["endpoint"] for d in objekt["dataSources"] if d["key"] == "entity")
+    assert quelle == liste["dataSources"][0]["endpoint"] + "/{entity_id}"
+    assert liste["tables"][0]["rowRouteTemplate"] == "/finance/kreditor/{id}"
+    assert next(a for a in liste["actions"] if a["key"] == "neu")["navigationRoute"] == "/finance/kreditoren-stamm"

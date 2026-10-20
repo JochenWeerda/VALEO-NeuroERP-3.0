@@ -464,6 +464,31 @@ def build_finance_debitoren_liste() -> dict[str, Any]:
     )
 
 
+
+def build_finance_kreditoren_liste() -> dict[str, Any]:
+    """Kreditoren (die Lieferanten des Einkaufs); dieselbe Quelle wie die Objektmaske ``finance/kreditor``."""
+    return _liste(
+        screen_id="finance/kreditoren-liste", domain="finance", title="Kreditoren",
+        subtitle="Lieferanten als Kreditoren mit Steuer- und Zahlungsdaten", endpoint="/api/v1/finance/kreditoren",
+        row_route="/finance/kreditor/{id}", bundle="finance",
+        columns=[
+            {"key": "name", "label": "Kreditor", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "kreditoren_nr", "label": "Kreditoren-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "city", "label": "Ort", "filterable": True, "priority": "secondary"},
+            {"key": "ust_id", "label": "USt-IdNr.", "filterable": True, "priority": "secondary"},
+            {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "priority": "tertiary"},
+            {"key": "email", "label": "E-Mail", "priority": "tertiary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[_neu("Neuer Kreditor", "/finance/kreditoren-stamm"), _EXPORT],
+        row_actions=[],
+        purpose="Kreditoren finden und ihre Stamm-, Steuer- und Bankdaten oeffnen.",
+        prompts=["Welche Kreditoren haben keine USt-IdNr.?", "Finde den Kreditor Muehle Nord."],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf; Kreditoren sind die Lieferanten des Einkaufs.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -476,6 +501,7 @@ LISTEN_SCREEN_BUILDERS = {
     "futtermittel/einzelfuttermittel-liste": build_futtermittel_einzelfuttermittel_liste,
     "futtermittel/mischfuttermittel-liste": build_futtermittel_mischfuttermittel_liste,
     "finance/debitoren-liste": build_finance_debitoren_liste,
+    "finance/kreditoren-liste": build_finance_kreditoren_liste,
 }
 LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
                 "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
@@ -486,7 +512,8 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "agrar/duenger-liste": "/agrar/duenger",
                 "futtermittel/einzelfuttermittel-liste": "/futtermittel/einzelfuttermittel-liste",
                 "futtermittel/mischfuttermittel-liste": "/futtermittel/mischfuttermittel-liste",
-                "finance/debitoren-liste": "/finance/debitoren-liste"}
+                "finance/debitoren-liste": "/finance/debitoren-liste",
+                "finance/kreditoren-liste": "/finance/kreditoren"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
@@ -497,4 +524,5 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "agrar/duenger-liste": ["duenger", "duengemittel", "duengerliste"],
                    "futtermittel/einzelfuttermittel-liste": ["einzelfuttermittel", "futterkatalog", "futtermittel"],
                    "futtermittel/mischfuttermittel-liste": ["mischfuttermittel", "mischfutter", "kraftfutter"],
-                   "finance/debitoren-liste": ["debitoren", "debitorenliste", "forderungen"]}
+                   "finance/debitoren-liste": ["debitoren", "debitorenliste", "forderungen"],
+                   "finance/kreditoren-liste": ["kreditoren", "kreditorenliste", "verbindlichkeiten stamm"]}

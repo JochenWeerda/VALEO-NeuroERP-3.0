@@ -3029,6 +3029,48 @@
       ]
     },
     {
+      "mask_id": "finance/kreditoren-liste",
+      "title": "Kreditoren",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/finance__kreditoren-liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/kreditoren-liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/kreditoren-liste/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/kreditoren-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neuer Kreditor",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
       "mask_id": "finance/payment-run",
       "title": "Zahlungslauf",
       "domain": "finance",

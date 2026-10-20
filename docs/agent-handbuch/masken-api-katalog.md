@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (119 Masken).
+> Generiert aus `app/core/screen_definitions.py` (120 Masken).
 
 ## Übersicht
 
@@ -73,6 +73,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/debitor` | Debitor | finance | mittel | — | `GET /api/v1/masks/finance/debitor/agent-contract` |
 | `finance/debitoren-liste` | Debitoren | finance | niedrig | — | `GET /api/v1/masks/finance/debitoren-liste/agent-contract` |
 | `finance/kreditor` | Kreditor | finance | mittel | — | `GET /api/v1/masks/finance/kreditor/agent-contract` |
+| `finance/kreditoren-liste` | Kreditoren | finance | niedrig | — | `GET /api/v1/masks/finance/kreditoren-liste/agent-contract` |
 | `finance/payment-run` | Zahlungslauf | finance | niedrig | `procure-to-pay`, `order-to-cash`, `finance-to-close` | `GET /api/v1/masks/finance/payment-run/agent-contract` |
 | `finance/pruefkorb` | Prüfkorb | finance | niedrig | — | `GET /api/v1/masks/finance/pruefkorb/agent-contract` |
 | `finance/rechnungstapel` | Rechnungstapel | finance | niedrig | — | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
@@ -2319,6 +2320,43 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | moderate | nein | `/api/v1/finance/kreditoren/{entity_id}/actions/bearbeiten` |
+
+---
+
+### `finance/kreditoren-liste` — Kreditoren
+
+**Zweck:** Kreditoren finden und ihre Stamm-, Steuer- und Bankdaten oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/finance/kreditoren-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/finance/kreditoren-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/finance/kreditoren-liste/readiness` |
+| Rollout-Route | `/mask-rollout/finance__kreditoren-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/finance/kreditoren`
+
+**MCP-Tools (Domäne):**
+
+- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
+- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Kreditoren haben keine USt-IdNr.?
+- Finde den Kreditor Muehle Nord.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neuer Kreditor | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
