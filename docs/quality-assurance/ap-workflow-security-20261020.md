@@ -122,3 +122,17 @@ nachgepruefte Teilmenge der716, keine zusaetzlich aufaddierte Pruefzahl.
 Auf7ee86fc80 waren OpenAPI-Drift, Rollenvertraege, PostgreSQL-Gate, Docs-Build/-Governance,
 kritische semantische E2E-Pfade und Compliance auf GitHub bereits erfolgreich;
 Gesamtpipeline/Quality Gate liefen beim Abruf noch.
+
+## Masken-CI-Nachlauf
+
+GitHub39461895750 fand eine konkrete Deklarationsluecke: Die AP-Freigabeaktion war
+korrekt forbiddenForAgents/humanApprovalRequired, stand aber nicht zusaetzlich in
+agentContract.dangerousActions. Diese fehlende Sicherheitsdeklaration ist nun im
+kanonischen AP-ScreenBuilder ergaenzt. Keine Aufweichung des Tests oder der Rechte.
+Das Agent-Handbuch wurde aus dem korrigierten Quellstand neu abgeleitet und geprueft.
+
+Vollstaendige test_uix046_048_command_endpoints_safety.py-Suite plus MCP-Map:
+797 bestanden, Anwendungscode waehrend der Pruefung unveraendert. Die zwei
+MCP-Map-Faelle ueberschneiden sich mit dem frueheren716er-Lauf; die Zahlen werden
+nicht als disjunkte Gesamtzahl addiert. Lokaler Browser-/Deploymentnachweis bleibt
+getrennt; der korrigierte GitHub-Lauf muss den neuen Commit pruefen.

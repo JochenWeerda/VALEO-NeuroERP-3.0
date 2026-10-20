@@ -1693,6 +1693,7 @@ def build_finance_ap_invoice_screen_definition() -> dict[str, Any]:
                 "Wann ist Eingangsrechnung {entity_id} faellig und wie hoch ist der Bruttobetrag?",
             ],
             "sensitiveFields": ["brutto", "mwst", "faellig_am"],
+            "dangerousActions": [{"key": "freigeben", "reason": "Menschliche Entscheidung zur konkreten unveraenderten Freigabeanfrage; fuer Agenten gesperrt."}],
             "testSelectors": {"screenRoot": "[data-testid='finance-ap-invoice']", "primaryAction": "[data-testid='action-freigeben']", "summaryArea": "[data-testid='mask-summary']"},
         },
         "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
