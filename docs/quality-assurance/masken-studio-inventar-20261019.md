@@ -22,9 +22,9 @@ Gesamt 662 Routen, davon 660 Masken.
 | Aktionen gesamt (ohne Doppel je Maske) | 417 |
 | davon serverwirksam | 267 |
 | … mit REST-Kommandoweg | 267 |
-| … mit eigenem MCP-Werkzeug | 46 |
+| … mit eigenem MCP-Werkzeug | 45 |
 | … per generischem MCP-Werkzeug (`mask.action.execute`) | 62 |
-| … MCP bewusst gesperrt | 159 |
+| … MCP bewusst gesperrt | 160 |
 | … MCP offen (`open_high` u. a.) | 0 |
 | … MCP unklassifiziert | 0 |
 | … mit CLI-Zugang | 267 |
@@ -43,7 +43,7 @@ Studio-Masken tragen nur Katalogaktionen. Was hier bedienbar ist, ist es in jede
 |---|---|---|---|
 | `create_activity` | ja | ja | mapped |
 | `mahnen` | ja | ja | blocked_human_only, mapped_read |
-| `freigeben` | ja | ja | mapped |
+| `freigeben` | ja | ja | blocked_human_only |
 | `stornieren` | ja | ja | blocked_human_only |
 
 Datenquellen: 15, ohne Route: keine.

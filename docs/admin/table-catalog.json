@@ -49126,6 +49126,64 @@
             "app/api/v1/endpoints/artikel_verpackung.py"
           ]
         },
+        "audit_evidence": {
+          "columns": [
+            {
+              "name": "audit_entry_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "aggregate_type",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "aggregate_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "action",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "evidence_refs",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "schema_version",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "tenant_id",
+            "audit_entry_id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/audit_evidence.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/audit_evidence.py"
+          ]
+        },
         "audit_logs": {
           "columns": [
             {

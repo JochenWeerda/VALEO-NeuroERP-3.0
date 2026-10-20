@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 682 Tabellen, 9015 Spalten.**
+**31 Schemas, 683 Tabellen, 9023 Spalten.**
 
 ## Schemas
 
@@ -52,7 +52,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_procurement` | `procurement` | 5 | 50 |
 | `domain_reporting` | `finance` | 6 | 80 |
 | `domain_sales` | `crm` | 11 | 156 |
-| `domain_shared` | `platform` | 153 | 1823 |
+| `domain_shared` | `platform` | 154 | 1831 |
 | `domain_workflow` | `platform` | 3 | 37 |
 
 ## Geschwister-Modelle
@@ -606,6 +606,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.artikel_sperren` | `app/api/v1/endpoints/compliance.py` | `app/api/v1/endpoints/compliance.py` | — |
 | `domain_shared.artikel_stoffstrom` | `app/api/v1/endpoints/artikel_stoffstrom.py` | `app/api/v1/endpoints/artikel_stoffstrom.py` | — |
 | `domain_shared.artikel_verpackungen` | `app/api/v1/endpoints/artikel_verpackung.py` | `app/api/v1/endpoints/artikel_verpackung.py` | — |
+| `domain_shared.audit_evidence` | `app/api/v1/endpoints/audit_evidence.py` | `app/api/v1/endpoints/audit_evidence.py` | — |
 | `domain_shared.audit_logs` | `app/api/v1/endpoints/compliance_dsgvo.py`, `app/api/v1/endpoints/gobd_archiv.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/neuro_verification.py`, `app/core/fibu_audit.py`, `app/finance/gobd.py`, `app/infrastructure/models/__init__.py`, `app/security/dashboard.py`, `app/services/audit_hardening.py`, `app/services/finance_freigabe.py` | `app/api/v1/endpoints/payment_matching.py`, `app/finance/gobd.py`, `app/services/audit_hardening.py`, `app/services/consent_engine.py`, `app/services/neuro_verification_engine.py` | — |
 | `domain_shared.beleg_vordrucke` | `app/api/v1/endpoints/beleg_vordrucke.py` | `app/api/v1/endpoints/beleg_vordrucke.py` | — |
 | `domain_shared.betriebsstaetten` | `app/api/v1/endpoints/betriebsstaetten.py` | `app/api/v1/endpoints/betriebsstaetten.py` | — |
@@ -1435,6 +1436,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `artikel_sperren` | `platform` | native | `id` | id, tenant_id, artikel_id, sperrgrund, gesperrt_bis, bemerkung, gesperrt_am, status |
 | `artikel_stoffstrom` | `platform` | native | `id` | id, tenant_id, artikel_nr, anbauland, rohstoff_kategorie, co2_aequivalent_kg_per_t, thg_wert, nachhaltig, iscc_zertifiziert, red_konform, gueltig_ab, gueltig_bis, bemerkung, created_at, updated_at |
 | `artikel_verpackungen` | `platform` | native | `id` | id, tenant_id, verpackungs_nr, bezeichnung, stufen, stufe1_bezeichnung, stufe1_menge, stufe1_einheit, stufe1_gewicht_kg, stufe2_bezeichnung, stufe2_einheiten_pro_stufe2, stufe2_gewicht_kg, stufe3_bezeichnung, stufe3_einheiten_pro_stufe3, stufe3_gewicht_kg, aktiv, created_at |
+| `audit_evidence` | `platform` | native | `tenant_id`, `audit_entry_id` | audit_entry_id, tenant_id, aggregate_type, aggregate_id, action, evidence_refs, schema_version, created_at |
 | `audit_logs` | `platform` | native | `id` | id, timestamp, user_id, user_email, tenant_id, action, entity_type, entity_id, changes, ip_address, user_agent, correlation_id, prev_hash, hash |
 | `beleg_vordrucke` | `platform` | native | `id` | id, tenant_id, name, kategorie, beschreibung, papierformat, ausrichtung, layout, beispieldaten, aktiv, created_at, updated_at |
 | `betriebsstaetten` | `platform` | native | `id` | id, tenant_id, filial_nr, bezeichnung, ist_zentrale, zentrale_filial_nr, ident_untergrenze, ident_obergrenze, strasse, plz, ort, land, telefon, email, aktiv, created_at |
