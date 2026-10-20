@@ -18875,3 +18875,13 @@ Geschaeftscode bleibt unveraendert. Vollsuite deckte sie bereits ab; der schnell
 PostgreSQL-Pflichtlauf muss denselben Schutz explizit enthalten.
 
 **Abnahme AP-CI-SELECTION:** Exakter CI-Selektor needs_live_db mit PYTEST_REQUIRE_DB_STRICT=1:71 AP-/Kernel-/native-/Parallelitaetsfaelle bestanden,39 reine sonstige Faelle planmaessig abgewaehlt. Gemeinsame case-Fixture und beide Parallelitaetstests fordern require_db an; conftest markiert auch transitive Verbraucher. Keine Geschaeftscodeaenderung, DB/Container/Reset oder Migrationsaenderung.
+
+## AP-MASK-CONTRACT-CI-20261020 - reserviert, Codex
+
+Bestaetigter CI-Befund39461895750: finance/ap-invoice.freigeben ist fuer Agenten
+gesperrt, fehlt aber in agentContract.dangerousActions. Besitz ausschliesslich
+build_finance_ap_invoice_screen_definition in app/core/screen_definitions.py:
+fehlende dangerousActions-Deklaration nachtragen, keine Rechte/Endpunkte/Layouts
+lockern. Agent-Handbuch aus Quelle erneuern; QA/Workboard aktualisieren.
+Abnahme: komplette test_uix046_048_command_endpoints_safety.py-Suite und MCP-Map
+sowie Handbuchdrift gruen. Keine Datenbank-/Container-/Geschaeftscodeaenderung.
