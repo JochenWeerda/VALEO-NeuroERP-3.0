@@ -126212,7 +126212,7 @@
             ],
             "title": "Kontrakt Id"
           },
-          "kundengruppe": {
+          "kunde_id": {
             "anyOf": [
               {
                 "type": "string"
@@ -126221,7 +126221,7 @@
                 "type": "null"
               }
             ],
-            "title": "Kundengruppe"
+            "title": "Kunde Id"
           },
           "menge_kg": {
             "anyOf": [
@@ -126233,17 +126233,6 @@
               }
             ],
             "title": "Menge Kg"
-          },
-          "sorte_klasse": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sorte Klasse"
           }
         },
         "title": "PreisBerechnenIn",

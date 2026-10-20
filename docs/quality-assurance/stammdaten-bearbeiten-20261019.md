@@ -116,3 +116,27 @@ Wirkung; er war entfernt. Jetzt hat jede einen echten Bearbeitungsweg, der fuer 
     vermerkt.
 - Nachweis: `tests/test_ordrsp_service.py` (9 gruen) und die Wirkung im Pruefstand
   (`test_ordrsp_legt_ab_an_und_gleicht_positionen_ab`).
+
+## CI-Nachlauf 3 (20.10.2026): Quality Gate und CI/CD Pipeline
+
+Beide Workflows waren dauerhaft rot: die CI/CD Pipeline in allen 24 der letzten Laeufe, das Quality Gate in 13 von 25
+(die uebrigen 11 abgebrochen). Damit ging auch das Signal der Rollen-Ratsche unter, deren Tests im vollen Lauf
+mitlaufen.
+
+- **Mandantenklassifikation:** `preis_kalkulation_bridge.py` war nicht klassifiziert.
+  - Dabei fiel auf: Der Weg war ein Platzhalter mit Basispreis 100, erfundenem Gruppenrabatt und festen 19 % MwSt.
+  - Jetzt delegiert er an die Preisfindung (`pricing.calculate_price`, mandantengebunden) und nimmt den Steuersatz
+    aus dem Verkaufs-Steuerschluessel des Artikels.
+  - Ohne gueltigen Schluessel nennt er keine Steuer.
+  - Die Seite `preise/kalkulation` zeigt Fehler und fehlende Steuer an. Die Schein-Eingaben Kundengruppe und
+    Sortenklasse sind durch die Kunden-ID ersetzt.
+- **Paginierungs-Ratsche:** Die Positionsabfrage der ORDRSP-Verarbeitung ist jetzt auf 5000 Zeilen begrenzt.
+- **Tabellenkatalog:** Neu erzeugt aus einer DB, die wie in der CI aufgebaut ist (`scripts/init_db.py`).
+  - Er stimmt mit dem Beleg-Artefakt der CI ueberein (681 Tabellen).
+  - Dazu kommen nur die neuen Lesestellen dieses Slices.
+- **Volle Suite** (38 Fehlschlaege in der CI):
+  - `test_reporting_command_atomic`: Testidentitaet fehlte.
+  - `test_slice_yaml_contracts`: 21 Slice-YAMLs ohne `slice_id`, ergaenzt aus `id`; 6 Dateien mit leerem
+    Folgedokument nach dem schliessenden `---`.
+  - `test_beleg_aktionen`: Eine reine Leserolle wird seit dem Rollenblock schon am Schreibweg abgewiesen (403). Es
+    wird weiterhin nichts gebucht; der Vertrag haelt das fest.

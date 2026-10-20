@@ -109,9 +109,9 @@ def _bestellpositionen(db: Session, tenant_id: str, bestellung: dict[str, Any]) 
     zeilen = db.execute(
         text("SELECT p.pos_nr, p.artikel_nr, p.lieferanten_artnr, p.menge, p.einzelpreis, p.lieferdatum "
              "FROM domain_einkauf.bestellung_positionen p JOIN domain_einkauf.bestellungen b ON b.id = p.bestellung_id "
-             "WHERE b.id::text = :id AND b.tenant_id = :tid ORDER BY p.pos_nr"),
+             "WHERE b.id::text = :id AND b.tenant_id = :tid ORDER BY p.pos_nr LIMIT 5000"),
         {"id": str(bestellung["id"]), "tid": tenant_id},
-    ).mappings().all()
+    ).mappings().fetchmany(5000)  # eine Bestellung, harte Obergrenze
     return [dict(z) for z in zeilen]
 
 

@@ -44,17 +44,38 @@ def test_ai_ask_returns_summary(monkeypatch):
     assert payload["sources"]
 
 
-def test_preise_berechnen_returns_kalkulationsweg(monkeypatch):
-    response = client.post(
-        "/api/v1/preise/berechnen",
-        headers=_headers(monkeypatch),
-        json={"artikel_id": "A-1", "menge_kg": 10, "kundengruppe": "GROSSHANDEL"},
-    )
-    assert response.status_code == 200
-    payload = response.json()
-    assert payload["netto_preis"] > 0
-    assert payload["brutto_preis"] >= payload["netto_preis"]
-    assert payload["kalkulationsweg"]
+def _preis_berechnen(schluessel, satz):
+    """Die Bruecke direkt, mit ersetzter Preisfindung und ersetztem Steuerschluessel (kein Platzhalterpreis mehr)."""
+    import asyncio
+    from decimal import Decimal
+    from unittest.mock import AsyncMock, MagicMock, patch
+
+    from app.api.v1.endpoints import preis_kalkulation_bridge as bruecke
+    from app.api.v1.endpoints.pricing import PriceCalculationResponse
+    from app.finance.steuerschluessel import Steuerklaerung
+
+    preis = PriceCalculationResponse(list_price=Decimal("20"), discount=Decimal("10"), net_price=Decimal("18"),
+                                     source="price_list")
+    db = MagicMock()
+    db.execute.return_value.scalar.return_value = schluessel
+    satz_fn = (lambda *a, **k: satz) if satz is not None else MagicMock(side_effect=Steuerklaerung("unbekannt"))
+    with patch("app.api.v1.endpoints.pricing.calculate_price", AsyncMock(return_value=preis)),          patch("app.finance.steuerschluessel.satz_des_schluessels", satz_fn):
+        return asyncio.run(bruecke.preise_berechnen(bruecke.PreisBerechnenIn(artikel_id="A-1", menge_kg=10),
+                                                    db=db, tenant_id="t"))
+
+
+def test_preise_berechnen_rechnet_aus_preisfindung_und_steuerschluessel():
+    ergebnis = _preis_berechnen("U7", __import__("decimal").Decimal("7"))
+    assert ergebnis["netto_preis"] == 180.0  # 10 x Nettopreis 18 aus der Preisliste, kein Basispreis 100
+    assert ergebnis["mwst_betrag"] == 12.6 and ergebnis["brutto_preis"] == 192.6
+    assert [s["schritt"].split(" ")[0] for s in ergebnis["kalkulationsweg"]] == ["Listenpreis", "Rabatt", "Umsatzsteuer"]
+
+
+def test_preise_berechnen_nennt_ohne_gueltigen_schluessel_keine_steuer():
+    ergebnis = _preis_berechnen(None, None)
+    assert ergebnis["netto_preis"] == 180.0
+    assert ergebnis["brutto_preis"] is None and ergebnis["mwst_betrag"] is None
+    assert ergebnis["steuerhinweis"]
 
 
 def test_preise_konditionen_ist_ein_objekt(monkeypatch, require_db):
