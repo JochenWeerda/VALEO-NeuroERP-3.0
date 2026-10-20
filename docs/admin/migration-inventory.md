@@ -443,6 +443,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `warehouse_wms_structure_20260517` | WMS warehouse zones, bins, bin_stock, pick_lists and pick_list_lines |
 | `wave3_wf_trigger_log_20260618` | wave3: wf_trigger_log + bank_statements + bank_statement_lines + waagen_quittungen |
 | `webhook_zustellprotokoll_20261001` | Ein Zustellversuch braucht einen Nachweis. |
+| `webshop_tabellen_20261020` | Webshop-Anbindung: Konfigurationen, Bestellungen und Synchronisationsprotokoll als Tabellen. |
 | `wf_cockpit_persist_20260625` | WF-COCKPIT-PERSIST-001: Persistente Workflow-Cockpit-Tabellen. |
 | `whatsapp_bestell_inbox_20260603` | WhatsApp Bestell-Inbox — eingehende Freitext-Bestellungen + AI-Extraktion. |
 | `whistleblower_eine_tabelle_20260930` | Hinweisgebermeldungen bekommen eine Migration, eine Form und einen Mandanten. |

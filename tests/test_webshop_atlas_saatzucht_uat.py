@@ -7,12 +7,10 @@ from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
 
 from app.api.v1.endpoints import (
-    webshop_integration,
     atlas_zollausfuhr,
     saatzucht,
     o2c_uat_scaffold,
 )
-from app.services.webshop_integration_service import _ORDER_STORE
 from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 
@@ -25,16 +23,6 @@ def _mock_db():
     db.commit.return_value = None
     db.rollback.return_value = None
     return db
-
-
-def _webshop_client() -> TestClient:
-    app = FastAPI()
-    db = _mock_db()
-    app.dependency_overrides[webshop_integration.get_db] = lambda: db
-    app.dependency_overrides[webshop_integration.get_tenant_id] = lambda: "test-tenant"
-    app.include_router(webshop_integration.router)
-    ersetze_nutzer(app, "SALES_BEARBEITEN")  # Schreibwege pruefen die Bereichsrolle
-    return TestClient(app)
 
 
 def _atlas_client() -> TestClient:
@@ -67,139 +55,7 @@ def _uat_client() -> TestClient:
     return TestClient(app)
 
 
-# ── Webshop tests ─────────────────────────────────────────────────────────────
-
-@pytest.mark.unit
-def test_webshop_sync_status_bereit():
-    client = _webshop_client()
-    resp = client.get("/webshop/sync-status")
-    assert resp.status_code == 200
-    body = resp.json()
-    assert body["status"] == "BEREIT"
-
-
-@pytest.mark.unit
-def test_webshop_bestellung_import_counts():
-    _ORDER_STORE.clear()
-    client = _webshop_client()
-    bestellungen = [
-        {
-            "externe_bestellnr": "ORD-001",
-            "shop_system": "SHOPWARE6",
-            "kunde_email": "a@example.com",
-            "kunde_name": "Anna Müller",
-            "artikel_positionen": [{"artikel_nr": "ART-1", "menge": 2, "preis_brutto": 10.0}],
-            "gesamtbetrag_brutto": 20.0,
-            "bestelldatum": "2026-05-01",
-            "status": "NEU",
-        },
-        {
-            "externe_bestellnr": "ORD-002",
-            "shop_system": "SHOPWARE6",
-            "kunde_email": "b@example.com",
-            "kunde_name": "Bob Schmidt",
-            "artikel_positionen": [{"artikel_nr": "ART-2", "menge": 1, "preis_brutto": 50.0}],
-            "gesamtbetrag_brutto": 50.0,
-            "bestelldatum": "2026-05-02",
-            "status": "NEU",
-        },
-    ]
-    resp = client.post("/webshop/bestellungen/import", json=bestellungen)
-    assert resp.status_code == 200
-    body = resp.json()
-    assert body["neue_bestellungen"] == 2
-    assert body["fehler"] == 0
-    assert body["duplikate"] == []
-
-
-@pytest.mark.unit
-def test_webshop_bestellung_import_is_idempotent_by_external_order_number():
-    _ORDER_STORE.clear()
-    client = _webshop_client()
-    bestellung = {
-        "externe_bestellnr": "ORD-IDEMP-001",
-        "shop_system": "SHOPWARE6",
-        "kunde_email": "kunde@example.com",
-        "kunde_name": "Kunde GmbH",
-        "artikel_positionen": [{"artikel_nr": "ART-1", "menge": 2, "preis_brutto": 10.0}],
-        "gesamtbetrag_brutto": 20.0,
-        "bestelldatum": "2026-05-01",
-        "status": "NEU",
-    }
-
-    first = client.post("/webshop/bestellungen/import", json=[bestellung])
-    second = client.post("/webshop/bestellungen/import", json=[bestellung])
-
-    assert first.status_code == 200
-    assert second.status_code == 200
-    assert first.json()["neue_bestellungen"] == 1
-    assert second.json()["neue_bestellungen"] == 0
-    assert second.json()["duplikate"] == ["ORD-IDEMP-001"]
-
-
-@pytest.mark.unit
-def test_webshop_bestellung_import_reports_business_blockers():
-    _ORDER_STORE.clear()
-    client = _webshop_client()
-    bestellung = {
-        "externe_bestellnr": "ORD-BLOCK-001",
-        "shop_system": "WOOCOMMERCE",
-        "kunde_email": "",
-        "kunde_name": "",
-        "artikel_positionen": [{"artikel_nr": "ART-1", "menge": 2, "preis_brutto": 10.0}],
-        "gesamtbetrag_brutto": 99.0,
-        "bestelldatum": "2026-05-01",
-        "status": "NEU",
-    }
-
-    resp = client.post("/webshop/bestellungen/import", json=[bestellung])
-
-    assert resp.status_code == 200
-    body = resp.json()
-    assert body["neue_bestellungen"] == 1
-    assert body["fehler"] == 1
-    blockers = body["blockierte_bestellungen"][0]["blockers"]
-    assert "CUSTOMER_CONTEXT_MISSING" in blockers
-    assert "ORDER_TOTAL_MISMATCH" in blockers
-
-
-@pytest.mark.unit
-def test_webshop_bestellung_verarbeiten_blocks_invalid_import():
-    _ORDER_STORE.clear()
-    client = _webshop_client()
-    bestellung = {
-        "externe_bestellnr": "ORD-BLOCK-002",
-        "shop_system": "SHOPIFY",
-        "kunde_email": "",
-        "kunde_name": "",
-        "artikel_positionen": [{"artikel_nr": "ART-1", "menge": 1, "preis_brutto": 10.0}],
-        "gesamtbetrag_brutto": 10.0,
-        "bestelldatum": "2026-05-01",
-        "status": "NEU",
-    }
-    client.post("/webshop/bestellungen/import", json=[bestellung])
-
-    resp = client.post("/webshop/bestellungen/ORD-BLOCK-002/verarbeiten")
-
-    assert resp.status_code == 200
-    body = resp.json()
-    assert body["verarbeitet"] is False
-    assert body["auftrag_nr"] is None
-    assert "CUSTOMER_CONTEXT_MISSING" in body["blockers"]
-
-
-@pytest.mark.unit
-def test_webshop_bestellung_verarbeiten():
-    _ORDER_STORE.clear()
-    client = _webshop_client()
-    resp = client.post("/webshop/bestellungen/some-id/verarbeiten")
-    assert resp.status_code == 200
-    body = resp.json()
-    assert body["verarbeitet"] is True
-    assert body["auftrag_nr"].startswith("WS-")
-
-
-# ── ATLAS tests ───────────────────────────────────────────────────────────────
+# Webshop-Tests: tests/test_webshop_persistenz.py (Pruefstand-Datenbank statt Speicher-Ersatz, 20.10.2026).
 
 @pytest.mark.unit
 def test_atlas_anmeldung_create_entwurf():

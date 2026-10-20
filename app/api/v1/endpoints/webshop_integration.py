@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-from app.services.webshop_integration_service import WebshopIntegrationService
+from app.services.webshop_integration_service import WebshopBestellungUnbekannt, WebshopIntegrationService
 
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from app.api.v1.schemas.webshop_integration_schemas import WebshopIntegrationOut
@@ -183,7 +183,10 @@ def verarbeiten(
     tenant_id: str = Depends(get_tenant_id),
 ):
     """Convert a clean shop order to an ERP-visible order reference."""
-    return _svc(db, tenant_id).process_order(id)
+    try:
+        return _svc(db, tenant_id).process_order(id)
+    except WebshopBestellungUnbekannt as exc:
+        raise HTTPException(status_code=404, detail="Webshop-Bestellung nicht gefunden") from exc
 
 
 @router.get("/sync-status", summary="Status synchronisieren",
@@ -236,6 +239,11 @@ def convert_order(
             detail={"message": "Bestellung hat fachliche Blocker", "blockers": blockers},
         )
     result = svc.process_order(order_id)
+    if not result.get("verarbeitet"):
+        raise HTTPException(
+            status_code=422,
+            detail={"message": result.get("hinweis"), "blockers": result.get("blockers") or []},
+        )
     auftrag_nr = result.get("auftrag_nr") or ""
     return ConvertOrderResult(
         auftrag_id=str(order.get("id") or order_id),

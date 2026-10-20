@@ -13423,6 +13423,7 @@
             "app/services/portal_lohndienst_service.py",
             "app/services/sales_credit_service.py",
             "app/services/sales_posting_service.py",
+            "app/services/webshop_integration_service.py",
             "app/services/whatsapp_agent_service.py"
           ],
           "written_by": [
@@ -14435,8 +14436,7 @@
             "app/services/procurement_service.py",
             "app/services/sales_credit_service.py",
             "app/services/sales_match_service.py",
-            "app/services/sales_storno_service.py",
-            "app/services/webshop_integration_service.py"
+            "app/services/sales_storno_service.py"
           ],
           "screens": [
             "sales/delivery-note"
@@ -58897,6 +58897,202 @@
           ],
           "written_by": [
             "app/services/webhook_service.py"
+          ]
+        },
+        "webshop_bestellungen": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "externe_bestellnr",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "shop_system",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "kunde_email",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "kunde_name",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "artikel_positionen",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "gesamtbetrag_brutto",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "bestelldatum",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "blockers",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "imported_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "erp_order_number",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "processed_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/webshop_integration_service.py"
+          ],
+          "written_by": [
+            "app/services/webshop_integration_service.py"
+          ]
+        },
+        "webshop_configs": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "shop_url",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "api_key_masked",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "shop_system",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "sync_interval_minutes",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "is_active",
+              "nullable": false,
+              "type": "boolean"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/webshop_integration_service.py"
+          ],
+          "written_by": [
+            "app/services/webshop_integration_service.py"
+          ]
+        },
+        "webshop_sync_log": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "shop_system",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "ereignis",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "details",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "erfolgreich",
+              "nullable": false,
+              "type": "boolean"
+            },
+            {
+              "name": "zeitpunkt",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/webshop_integration_service.py"
+          ],
+          "written_by": [
+            "app/services/webshop_integration_service.py"
           ]
         },
         "zahlungsbedingungen": {
