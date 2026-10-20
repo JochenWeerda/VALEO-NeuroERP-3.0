@@ -337,6 +337,12 @@ def google(monkeypatch):
     return anfragen
 
 
+def _verfaelscht(state: str) -> str:
+    """Garantiert andere Signatur: die letzten zwei Zeichen ersetzen, nie durch dieselben (sonst 1:256 kein Fehler)."""
+    ende = "00" if state[-2:] != "00" else "11"
+    return state[:-2] + ende
+
+
 class TestGoogle:
     def test_anmeldung_bis_zum_versand(self, engine, db, smtp, google):
         from urllib.parse import parse_qs, urlparse
@@ -373,7 +379,7 @@ class TestGoogle:
         with pytest.raises(konto.MailkontoFehler, match="anderen Mandanten"):
             konto.google_anmeldung_abschliessen(db, HAUS_B, "code-1", state)
         with pytest.raises(konto.MailkontoFehler, match="Signatur"):
-            konto.google_anmeldung_abschliessen(db, HAUS_A, "code-1", state[:-2] + "00")
+            konto.google_anmeldung_abschliessen(db, HAUS_A, "code-1", _verfaelscht(state))
 
 
 class TestMicrosoft:
