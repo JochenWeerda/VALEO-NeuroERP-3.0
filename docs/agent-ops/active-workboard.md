@@ -18926,3 +18926,25 @@ Handmade-Abloesung, Aktivierung und Ersatz alter Einzelmaskentests sind weiter
 offen; keine Baseline als Produktionsabnahme ausgegeben. QA:
 docs/quality-assurance/studio-cli-bulk-20261020.md. localhost-Transport repariert,
 keine OS-/Docker-Netzwerkaenderung oder neuen Rollen.
+
+
+## STUDIO-MIGRATION-ENGINE-20261020 - reserviert, Codex
+
+Nutzerentscheid: Funktionsmigration, automatische Verdrahtung und erforderliche
+Schema-/Tabellengenerierung werden funktionale Bestandteile des vorhandenen
+Studios. Owner Codex. Erster Lieferumfang: typisierter serverseitiger
+Migrationsplan, kataloggebundene automatische Bindung und additive versionierte
+Alembic-Artefakte, Zugriff ueber vorhandene Studio-API und CLI. Dateibesitz neue
+app/services/studio_migration.py, app/api/v1/schemas/studio_migration.py,
+studio_drafts.py ausschliesslich neuer Planweg/Kataloghinweis, valeo_cli/studio.py
+nur Planbefehl, eigene Tests, Architekturprefix, betroffene generierte
+API-/Inventar-/Handbuchprojektionen und Platform-Doku. Keine fremden
+MASK-STUDIO-ROLLOUT-Seiten/Builder. Abnahme: unregistrierte Commands/URLs,
+mehrdeutige Bindungen, SQL-/Namensinjektion und ueberschriebene Identitaetsfelder
+sperren; Artefakt-/Definitionshash bindet Freigabeplan; keine DDL-Ausfuehrung im
+Vorschlagsaufruf, vorhandene Freigabe/Simulation unveraendert. Tabellen verwenden
+gepruefte Mandantenstruktur. Schemaaktivierung nur ueber bestehenden geregelten
+Migrations-/Deploymentweg, kein neuer On-the-fly-DDL-Adapter oder eigener
+Geschaeftsdatenspeicher. Bestehender valeo_probe, eigene Rollbackdaten, kein Reset
+oder neue Datenbank/Container. Vollstaendige Aktivierung/UI-Abnahme und
+allgemeine Fachmigration bleiben separat nachzuweisen.
