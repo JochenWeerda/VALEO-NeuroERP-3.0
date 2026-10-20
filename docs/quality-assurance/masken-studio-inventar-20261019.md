@@ -8,8 +8,8 @@ Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentschei
 | Stufe | Routen | Anteil an Masken |
 |---|---:|---:|
 | studio_versioniert | 1 | 0.2 % |
-| screen_definition | 101 | 15.3 % |
-| builder_altmuster | 87 | 13.2 % |
+| screen_definition | 102 | 15.5 % |
+| builder_altmuster | 86 | 13.0 % |
 | handgebaut | 471 | 71.4 % |
 | weiterleitung | 2 |  |
 
@@ -107,7 +107,7 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 
 | Bereich | studio_versioniert | screen_definition | builder_altmuster | handgebaut | weiterleitung |
 |---|---:|---:|---:|---:|---:|
-| agrar | 0 | 10 | 4 | 45 | 0 |
+| agrar | 0 | 11 | 3 | 45 | 0 |
 | fibu | 0 | 0 | 1 | 42 | 0 |
 | finance | 0 | 9 | 16 | 28 | 0 |
 | admin | 0 | 4 | 0 | 27 | 0 |

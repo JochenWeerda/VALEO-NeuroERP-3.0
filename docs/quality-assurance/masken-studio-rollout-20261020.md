@@ -176,6 +176,16 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 - Kreditoren sind die Lieferanten des Einkaufs (`ProcurementService.list_lieferanten`); ein Beleg, ein Besitzer.
 - Ratsche: Altmuster 88 -> 87.
 
+## Befund (20.10.2026): erfundene Saatgut- und Duengerprodukte, erfundene Bestellnummer
+
+- `features/agrar/api.ts` lieferte bei *jedem* Fehler erfundene Produkte (`SEED_FALLBACK`, `FERTILIZER_FALLBACK`
+  mit Lieferant, Bestand und Staffelpreisen); weil `GET /api/v1/articles` ohne Schraegstrich keinen Weg traf, zeigte
+  `agrar/saatgut/liste` („Saatgutbestand und Forecast“) immer diese Scheindaten. `submitSeedOrder` meldete bei einem
+  Fehler eine erfundene Bestellnummer `SO-…` als Erfolg (ohne Aufrufer, entfernt).
+- Jetzt: Abrufe gegen `/api/v1/articles/` mit `category`, Fehler gehen an die Seite; `agrar/saatgut/liste` zeigt
+  dieselbe Studio-Saatgutliste wie `/agrar/saatgut`.
+- Ratsche: Altmuster 87 -> 86.
+
 ## Sichtung 20.10.2026: zurueckgestellt bzw. Entscheidung noetig
 
 | Seite | Befund | Weiter |
@@ -183,6 +193,8 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 | `verkauf/kunden-liste` | Fuehrt im Browser Business Partner und `kunden_lookup` zusammen, verschluckt beide Fehler; Kundenbestand verteilt auf crm-core, `domain_crm.customers`, Business Partner und `kunden_lookup`; Zeile oeffnet die Altmuster-Maske statt `crm/customer-360` | Quellenfrage gehoert zur CRM-Konsolidierung; danach Liste mit Serverblaetterung |
 | `agrar/aussaat` (Navigation) | `GET /api/v1/agrar/aussaaten` gibt es nicht: Seite zeigt immer einen Fehler; Links auf `/agrar/aussaat/{id}` und `/agrar/aussaat/neu` ohne Route | Nutzerentscheid: entfernen oder ins Feldbuch (Ackerschlagkartei) ueberfuehren |
 | `agrar/kulturpflanzen` (Navigation) | Liest die Kulturliste des Wettermoduls; Links auf `/agrar/kulturpflanzen/{id}` und `/neu` ohne Route | Nutzerentscheid: Stammdatum mit Objektmaske oder reine Wetter-Auswahl |
+| `finance/bankkonten` | Zwei Bestaende: `/banken/konten` (native Maske) und `/finance/bank-accounts` (`domain_erp.bank_accounts` mit Sachkonto, Altmuster-Formular); Route zeigt ein Formular statt einer Liste | Fachentscheid: massgeblicher Bankkontenbestand (Buchungsanbindung) |
+| `agrar/biostimulanzien` | Anlage-, Detail- und Bearbeiten-Routen zeigen wieder die Liste (keine Stamm-/Detailseite); API hat CRUD | Objektmaske `agrar/biostimulanz` anlegen, dann Liste |
 | `lager/bestandsuebersicht`, `lager/silo-uebersicht` | Cockpits mit mehreren Kennzahlquellen, keine Listen | Cockpit-Familie |
 | Datenquellen mit eigenen Parameternamen (`skip`/`search`) | Laufzeit sendet `page`/`limit`/`q`; Serverblaetterung braucht eine Parameterabbildung in der Datenquelle | Framework: `ScreenDataSource` um Parameterabbildung erweitern (auch fuer Kontrakte) |
 
