@@ -157,7 +157,7 @@ export default function SegmentsPage(): JSX.Element {
         try {
           await apiClient.delete(`/api/v1/crm/segments/${item.id as string}`)
           toast({ title: getSuccessMessage(t, 'delete', entityType) })
-          loadData()
+          void loadData()
         } catch {
           toast({ variant: 'destructive', title: getErrorMessage(t, 'delete', entityType) })
         }
@@ -168,7 +168,7 @@ export default function SegmentsPage(): JSX.Element {
         toast({
           title: t('crud.messages.segmentCalculated'),
         })
-        loadData()
+        void loadData()
       } catch (error) {
         toast({
           variant: 'destructive',
@@ -203,7 +203,7 @@ export default function SegmentsPage(): JSX.Element {
   }
 
   useEffect(() => {
-    loadData()
+    void loadData()
   }, [tenantId])
 
   const handleCreate = () => {
@@ -255,7 +255,7 @@ export default function SegmentsPage(): JSX.Element {
               await apiClient.post(`/api/v1/crm/segments/${item.id as string}/calculate`, { force_full: false })
             }
             toast({ title: t('crud.messages.segmentCalculated') })
-            loadData()
+            void loadData()
           } catch {
             toast({ variant: 'destructive', title: t('crud.messages.segmentCalculationError') })
           }

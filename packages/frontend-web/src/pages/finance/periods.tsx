@@ -55,7 +55,7 @@ export default function PeriodsPage(): JSX.Element {
   const [pendingPeriodId, setPendingPeriodId] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchPeriods()
+    void fetchPeriods()
   }, [])
 
   async function fetchPeriods(): Promise<void> {

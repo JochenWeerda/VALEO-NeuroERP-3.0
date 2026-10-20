@@ -44,6 +44,7 @@ import {
   FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2, Search,
 } from 'lucide-react'
 
+import { tastenKlick } from '@/lib/tastenklick'
 type SalesOrderRoleFocus = 'all' | 'sales' | 'order-desk' | 'logistics' | 'finance' | 'management'
 
 const salesOrderRoleProfiles: Array<{ id: SalesOrderRoleFocus; label: string; description: string }> = [
@@ -2345,6 +2346,9 @@ export default function OrderEditorLegacyPage(): JSX.Element {
           <div className="space-y-2 max-h-60 overflow-auto">
             {branchesList.map((b) => (
               <div
+                role="button"
+                tabIndex={0}
+                onKeyDown={tastenKlick}
                 key={b.id}
                 className="flex items-center justify-between p-2 rounded border cursor-pointer hover:bg-muted/50"
                 onClick={() => {

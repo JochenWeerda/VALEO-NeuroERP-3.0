@@ -100,7 +100,7 @@ export default function NeuroAISidePanel({
   const handleCopyClipboard = () => {
     if (!draftResult) return;
     const combined = `Betreff: ${draftResult.subject}\n\n${draftResult.body}`;
-    navigator.clipboard.writeText(combined);
+    void navigator.clipboard.writeText(combined);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

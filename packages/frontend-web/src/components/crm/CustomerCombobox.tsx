@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { apiClient } from '@/lib/api-client'
 import { cn } from '@/lib/utils'
 
+import { tastenKlick } from '@/lib/tastenklick'
 export type CustomerLite = {
   id: string
   customer_number: string
@@ -155,6 +156,7 @@ export function CustomerCombobox({
             <span className="flex items-center gap-1">
               {value ? (
                 <span
+                  onKeyDown={tastenKlick}
                   role="button"
                   tabIndex={-1}
                   onClick={handleClear}

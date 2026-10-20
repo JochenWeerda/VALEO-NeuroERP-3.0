@@ -193,7 +193,7 @@ function SegmentMembersList({ segmentId }: { segmentId: string }) {
       }
     }
     if (segmentId) {
-      loadMembers()
+      void loadMembers()
     }
   }, [segmentId])
 
@@ -250,7 +250,7 @@ function SegmentPerformanceTab({ segmentId }: { segmentId: string }) {
       }
     }
     if (segmentId) {
-      loadPerformance()
+      void loadPerformance()
     }
   }, [segmentId])
 

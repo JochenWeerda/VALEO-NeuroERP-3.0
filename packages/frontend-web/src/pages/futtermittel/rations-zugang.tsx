@@ -223,7 +223,7 @@ function ShareLinkDialog({ tenantId, open, onClose }: ShareLinkDialogProps) {
     : ''
 
   function handleCopy() {
-    navigator.clipboard.writeText(fullUrl)
+    void navigator.clipboard.writeText(fullUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

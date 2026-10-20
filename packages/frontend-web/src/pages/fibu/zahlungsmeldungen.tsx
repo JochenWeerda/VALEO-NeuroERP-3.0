@@ -110,7 +110,7 @@ export default function ZahlungsmeldungenPage() {
   }
 
   const handleVerarbeiten = (id: string, meldungs_nr: string) => {
-    withPending(`verarbeiten-${id}`, async () => {
+    void withPending(`verarbeiten-${id}`, async () => {
       try {
         await verarbeitenMutation.mutateAsync(id)
         toast.success(`Zahlungsmeldung ${meldungs_nr} verarbeitet.`)
@@ -121,7 +121,7 @@ export default function ZahlungsmeldungenPage() {
   }
 
   const handleDelete = (id: string, meldungs_nr: string) => {
-    withPending(`delete-${id}`, async () => {
+    void withPending(`delete-${id}`, async () => {
       try {
         await deleteMutation.mutateAsync(id)
         toast.success(`Zahlungsmeldung ${meldungs_nr} gelöscht.`)

@@ -3,7 +3,7 @@ Accounts Payable (AP) Invoices API
 FIBU-AP-02: Eingangsrechnungen
 """
 
-from fastapi import APIRouter, HTTPException, Depends, Query, Body
+from fastapi import APIRouter, HTTPException, Depends, Body
 from sqlalchemy.orm import Session
 from typing import List, Optional, Any
 from datetime import datetime, timedelta
@@ -288,7 +288,6 @@ async def delete_ap_invoice(
 )
 async def approve_ap_invoice(
     invoice_id: str,
-    approved_by: Optional[str] = Query(None, description="Ignoriert — Freigeber ist der angemeldete Nutzer"),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     user: dict = Depends(finance_admin),
@@ -339,14 +338,13 @@ async def approve_ap_invoice(
 )
 async def post_ap_invoice(
     invoice_id: str,
-    posted_by: Optional[str] = Query(None, description="Unbeachtet: Es bucht, wer angemeldet ist."),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     nutzer: dict = Depends(finance_admin),
 ) -> dict:
     """Bucht eine Eingangsrechnung (erzeugt GL-Buchung + OP)."""
     # Bis 13.10.2026 kam der Buchende aus der Anfrage: Jeder konnte unter fremdem Namen buchen.
-    posted_by = str(nutzer.get("sub") or "").strip() if isinstance(nutzer, dict) else ""
+    posted_by = str(nutzer.get("sub") or "").strip() if isinstance(nutzer, dict) else ''  # Buchender aus dem Token
     if not posted_by:
         raise HTTPException(status_code=403, detail="Gebucht wird nur mit einer angemeldeten Person.")
     logger.info(f"Posting AP invoice: {invoice_id} by {posted_by}")

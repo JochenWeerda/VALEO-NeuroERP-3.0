@@ -149,8 +149,8 @@ async def get_agent_mask_contract(
 _TRIVIAL_KEYS = frozenset({"id", "pk", "uuid", "key", "name", "bezeichnung"})
 _GENERIC_KEY_PATTERN = re.compile(r"^(col|column|field|item)\d+$", re.IGNORECASE)
 _DETAIL_FLOORPLANS = frozenset({"objectPage", "transaction", "cockpit", "wizard"})
-_FINANCIAL_SCREEN_PATTERN = re.compile(r"(^finance/|invoice|open-item|journal|payment|debitor|kreditor|bankkonto)", re.IGNORECASE)
-_INVENTORY_SCREEN_PATTERN = re.compile(r"(^lager/|stock|inventory|article)", re.IGNORECASE)
+_FINANCIAL_SCREEN_PATTERN = re.compile(r"invoice|open-item|journal|payment|debitor|kreditor|bankkonto", re.IGNORECASE)
+_INVENTORY_SCREEN_PATTERN = re.compile(r"stock|inventory|article", re.IGNORECASE)
 
 
 def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
@@ -285,9 +285,9 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
     screen_id = definition.get("id", "")
     expected_profile = (
         "financial"
-        if definition.get("domain") == "finance" or _FINANCIAL_SCREEN_PATTERN.search(screen_id)
+        if definition.get("domain") == "finance" or screen_id.lower().startswith("finance/") or _FINANCIAL_SCREEN_PATTERN.search(screen_id)
         else "inventory"
-        if definition.get("domain") == "inventory" or _INVENTORY_SCREEN_PATTERN.search(screen_id)
+        if definition.get("domain") == "inventory" or screen_id.lower().startswith("lager/") or _INVENTORY_SCREEN_PATTERN.search(screen_id)
         else None
     )
     has_table_profile = not all_tables or bool(layout.get("tableProfile"))

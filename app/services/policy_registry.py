@@ -219,7 +219,7 @@ def select_policy_variant(
     else:
         import secrets
 
-        roll = secrets.SystemRandom().random()
+        roll = secrets.randbelow(1_000_000) / 1_000_000
 
     threshold = roll * total
     running = 0.0

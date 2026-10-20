@@ -295,7 +295,7 @@ export default function DebitorenStammPage(): JSX.Element {
           updatedData.bic = result.bic
         }
         setFormData(updatedData)
-        updateData?.(updatedData)
+        void updateData?.(updatedData)
         
         toast.success(t('crud.messages.ibanLookupSuccess', { 
           defaultValue: 'Bankinformationen automatisch ausgefüllt',
@@ -334,7 +334,7 @@ export default function DebitorenStammPage(): JSX.Element {
         updatedData.bic = lookupData.bic
       }
       setFormData(updatedData)
-      updateData?.(updatedData)
+      void updateData?.(updatedData)
     }
   }, [lookupData, formData, updateData])
 

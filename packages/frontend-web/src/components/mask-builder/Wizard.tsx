@@ -76,7 +76,7 @@ const Wizard: React.FC<WizardProps> = ({
 
   const onSubmit = async () => {
     if (!isLastStep) {
-      handleNext()
+      void handleNext()
       return
     }
 

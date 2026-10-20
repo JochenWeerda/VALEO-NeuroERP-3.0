@@ -50,7 +50,7 @@ export function useCrudAuditTrail({
   };
 
   useEffect(() => {
-    loadAuditTrail();
+    void loadAuditTrail();
   }, [entityType, entityId, enabled]);
 
   return {

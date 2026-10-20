@@ -143,7 +143,7 @@ export default function ContractsPageV2(): JSX.Element {
         setIsLoading(false);
       }
     };
-    fetchContracts();
+    void fetchContracts();
   }, []);
 
   // Fetch amendments for selected contract
@@ -161,7 +161,7 @@ export default function ContractsPageV2(): JSX.Element {
         setAmendments([]);
       }
     };
-    fetchAmendments();
+    void fetchAmendments();
   }, [selectedContract]);
 
   // Amendment-Vorlagen laden, wenn Dialog geöffnet wird
@@ -175,7 +175,7 @@ export default function ContractsPageV2(): JSX.Element {
         setAmendmentTemplates([]);
       }
     };
-    fetchTemplates();
+    void fetchTemplates();
   }, [amendmentDialogOpen]);
 
   // Delete handler

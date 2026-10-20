@@ -265,7 +265,7 @@ export default function DebitorenListePage(): JSX.Element {
       try {
         await api.post('/api/v1/finance/dunning/run', { as_of_date: new Date().toISOString().slice(0, 10) })
         toast({ title: 'Mahnlauf gestartet', description: 'Mahnungen werden erstellt.' })
-        loadData()
+        void loadData()
       } catch (_rawErr: unknown) {
         toast({ title: 'Fehler', description: apiErrorDetail(_rawErr) ?? errorMessage(_rawErr), variant: 'destructive' })
       }
@@ -277,7 +277,7 @@ export default function DebitorenListePage(): JSX.Element {
           if (item.id) await api.patch(`/api/v1/finance/debtors/${String(item.id ?? '')}`, { is_active: false })
         }
         toast({ title: 'Gesperrt', description: `${items.length} Debitor(en) gesperrt.`, variant: 'destructive' })
-        loadData()
+        void loadData()
       } catch (_rawErr: unknown) {
         toast({ title: 'Fehler', description: apiErrorDetail(_rawErr) ?? errorMessage(_rawErr), variant: 'destructive' })
       }
@@ -295,7 +295,7 @@ export default function DebitorenListePage(): JSX.Element {
   }, [t])
 
   useEffect(() => {
-    loadData()
+    void loadData()
   }, [])
 
   const handleCreate = () => {
@@ -312,7 +312,7 @@ export default function DebitorenListePage(): JSX.Element {
     void withPending(id, async () => {
       try {
         await apiClient.delete(`/api/v1/finance/debitoren/${id}`)
-        loadData()
+        void loadData()
       } catch {
         toast({ title: t('common.error', { defaultValue: 'Fehler' }), description: t('crud.messages.deleteError', { defaultValue: 'Löschen fehlgeschlagen.' }), variant: 'destructive' })
       }
@@ -332,7 +332,7 @@ export default function DebitorenListePage(): JSX.Element {
       const res = await api.post('/api/v1/finance/import/debitoren', form, { headers: { 'Content-Type': 'multipart/form-data' } })
       const { created, updated, errors } = res.data as { created: number; updated: number; errors: string[] }
       toast({ title: 'Import abgeschlossen', description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.` })
-      loadData()
+      void loadData()
     } catch (_rawErr: unknown) {
       toast({ title: 'Import fehlgeschlagen', description: apiErrorDetail(_rawErr) ?? errorMessage(_rawErr), variant: 'destructive' })
     }

@@ -1,3 +1,4 @@
+import { tastenKlick } from '@/lib/tastenklick'
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -83,6 +84,9 @@ export default function DocumentPanel({ customer }: DocumentPanelProps) {
 
       {/* Dropzone */}
       <div
+        role="button"
+        tabIndex={0}
+        onKeyDown={tastenKlick}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}

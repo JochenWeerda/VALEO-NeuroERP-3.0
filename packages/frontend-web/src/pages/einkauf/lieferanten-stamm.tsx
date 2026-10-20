@@ -250,7 +250,7 @@ export default function LieferantenStammPage(): JSX.Element {
 
   useEffect(() => {
     if (id) {
-      loadSupplier()
+      void loadSupplier()
     }
   }, [id])
 

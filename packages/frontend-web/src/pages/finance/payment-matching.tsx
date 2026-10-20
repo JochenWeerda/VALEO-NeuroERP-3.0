@@ -81,7 +81,7 @@ export default function PaymentMatchingPage(): JSX.Element {
   const [isMatching, setIsMatching] = useState(false)
 
   useEffect(() => {
-    fetchUnmatchedPayments()
+    void fetchUnmatchedPayments()
   }, [])
 
   async function fetchUnmatchedPayments(): Promise<void> {
@@ -292,7 +292,7 @@ export default function PaymentMatchingPage(): JSX.Element {
           className="min-h-touch"
           onClick={() => {
             setSelectedPayment(row.original)
-            fetchMatchSuggestions(row.original.id)
+            void fetchMatchSuggestions(row.original.id)
             setIsMatchDialogOpen(true)
           }}
           disabled={row.original.match_status === 'MATCHED'}

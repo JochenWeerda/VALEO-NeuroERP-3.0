@@ -46,7 +46,7 @@ export default function ConsentConfirmPage(): JSX.Element {
       }
     }
 
-    confirmConsent()
+    void confirmConsent()
   }, [consentId, token, t])
 
   return (

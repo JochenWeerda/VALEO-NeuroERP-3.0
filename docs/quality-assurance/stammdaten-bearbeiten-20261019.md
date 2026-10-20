@@ -167,3 +167,40 @@ Mehrere Hotspots waren echte Fachfehler, keine Formalien.
   - `crm-security` lieferte erfundene Audit-Eintraege. Der Weg antwortet jetzt mit 501 (kein Audit-Speicher
     angebunden).
 - Nachweis: 225 Backend-Tests der beruehrten Module, 111 Frontend-Tests, `tsc` und ESLint sauber.
+
+## Sonar-Zuverlaessigkeit und -Sicherheit (20.10.2026): alle 147 Bugs und 9 Schwachstellen
+
+**Schwachstellen (9):**
+- XBRL-Namensraeume und Taxonomie-Verweise der E-Bilanz sowie der Feldtyp `password` sind Kennungen, keine Zugangs-
+  oder Netzwege. Sie bleiben unveraendert und sind mit Begruendung markiert.
+- Der Direktstart von `crm-ai` bindet jetzt an Loopback (`CRM_AI_HOST`). Der Container startet weiter ueber den
+  Entrypoint.
+
+**Bugs (147):**
+- **75 unbehandelte Promises:** ausdruecklich mit `void` gekennzeichnet; das aendert die Fehlersemantik nicht. Die
+  EPCIS-Seite zeigt Ladefehler jetzt an, statt sie zu verschlucken.
+- **18 Klick-Elemente:** jetzt per Tastatur bedienbar (`tastenKlick`: Enter und Leertaste; Overlays schliessen mit
+  Escape).
+- **14 Gleitkomma-Vergleiche:** jetzt mit `math.isclose` bzw. Toleranz.
+- **12 Sortierungen:** jetzt mit ausdruecklicher Vergleichsfunktion.
+- **11 identische Verzweigungen**, darunter echte Fehler:
+  - Die Kommissionierstrategie FEFO sortierte wie FIFO. Jetzt sortiert sie nach Ablaufdatum.
+  - `get_article_stock` gab bei Lagerangabe dennoch den Gesamtbestand aus. Die Antwort sagt jetzt
+    `warehouse_scoped: false`.
+- **Weitere echte Fehler:**
+  - Die Karte „PSM Abverkaufsfristen“ zeigte fest „0“ auf einer leeren Liste und verlinkte eine nicht vorhandene
+    Seite. Sie zeigt jetzt einen ehrlichen Hinweis.
+  - Die Trendpfeile in der Analyse waren als `?` verstuemmelt. Sie sind wiederhergestellt.
+  - Eine Testerwartung lief durch einen Komma-Ausdruck ins Leere. Sie ist korrigiert.
+  - Das Kanban sendete `changed_by` aus dem Client mit. Das ist entfernt.
+  - `ap_invoices` hatte die ungenutzten Anfrageparameter `posted_by` und `approved_by`. Beide sind entfernt; der
+    Vertrag prueft jetzt, dass es sie nicht gibt.
+- **Async-Dateischreiben:** laeuft jetzt im Threadpool (Annahme-Upload, DMS-Bilder, Finanzexporte). Die dreifach
+  kopierte CSV-Erzeugung ist in einer Funktion zusammengefuehrt.
+- **Hintergrund-Tasks:** halten ihre Referenz ueber `app.core.hintergrund.starte`.
+- **Regex:** Der Anker ist nicht mehr mehrdeutig in der Alternation.
+- **Toter Code:** `app/access_control/management.py` wurde von niemandem importiert; seine Konformitaetsbewertung war
+  immer „HIGH“. Entfernt.
+
+**Nachweis:** 4540 + 41 Backend-Tests, 330 Frontend-Tests, `tsc`, Gates (Rollen-Ratsche, Godfile, Mandant,
+Paginierung, Architekturindex) gruen.

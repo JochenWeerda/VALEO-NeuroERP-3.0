@@ -42,8 +42,11 @@ def test_invoice_approver_comes_from_verified_user_not_query(monkeypatch):
     monkeypatch.setattr(api, "save_to_store", lambda *a: None)
     monkeypatch.setattr(api.endpoint_gateways, "get_approval_workflow_gateway", lambda: gateway)
     db = object()
+    # Kein Anfrageparameter fuer den Freigeber (20.10.2026): eine Faelschung ist gar nicht uebergebbar.
+    import inspect
+    assert "approved_by" not in inspect.signature(api.approve_ap_invoice).parameters
     asyncio.run(api.approve_ap_invoice(
-        "unit-invoice", approved_by="forged-user", db=db, tenant_id="unit-tenant", user={"sub": "verified-user"},
+        "unit-invoice", db=db, tenant_id="unit-tenant", user={"sub": "verified-user"},
     ))
     gateway.request_approval.assert_awaited_once_with("unit-invoice", "unit-tenant", "verified-user", None, db)
     gateway.approve_invoice.assert_awaited_once_with("unit-invoice", "unit-tenant", "verified-user", "approve", None, db)

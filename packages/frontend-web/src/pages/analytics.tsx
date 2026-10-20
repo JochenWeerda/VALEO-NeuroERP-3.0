@@ -84,7 +84,7 @@ export default function AnalyticsDashboard(): JSX.Element {
         {kpis.map((k, idx): JSX.Element => {
           const label = k.label?.trim() || `Kennzahl ${idx + 1}`
           const valueText = `${k.value.toLocaleString('de-DE')} ${k.unit ?? ''}`.trim()
-          const deltaText = `${k.delta >= 0 ? '?' : '?'} ${Math.abs(k.delta).toFixed(DECIMAL_PLACES)} %`
+          const deltaText = `${k.delta >= 0 ? '▲' : '▼'} ${Math.abs(k.delta).toFixed(DECIMAL_PLACES)} %`
           return (
             <div key={k.id} className="animate-in fade-in-0 slide-in-from-bottom-1 duration-200">
               <Card className="bg-linear-to-br from-emerald-50 to-white p-4 shadow-md">

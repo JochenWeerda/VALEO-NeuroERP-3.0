@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/native-select'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
-import { useAuth } from '@/hooks/useAuth'
 import { numberValue, recordArrayFromResponse, stringValue } from '@/lib/record-utils'
 import { 
   ArrowLeft, 
@@ -61,7 +60,6 @@ interface OpportunityStage {
 export default function OpportunitiesKanbanPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { user } = useAuth()
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
   const [stages, setStages] = useState<OpportunityStage[]>([])
   const [loading, setLoading] = useState(true)
@@ -73,7 +71,7 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
 
   // Load opportunities and stages
   useEffect(() => {
-    loadData()
+    void loadData()
   }, [filterOwner, filterStatus])
 
   const loadData = async () => {
@@ -176,6 +174,7 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
       return
     }
 
+    const vorher = opportunities // Stand vor der optimistischen Aenderung, fuer die Ruecknahme
     try {
       // Optimistic update
       const updatedOpportunities = opportunities.map(opp =>
@@ -188,10 +187,6 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
       // Update via API
       await apiClient.put(`/api/v1/crm/opportunities/${draggedOpportunity.id}`, {
         stage: targetStage
-      }, {
-        params: {
-          changed_by: user?.email || user?.sub || 'current_user'
-        }
       })
 
       toast({
@@ -205,7 +200,7 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
       await loadData()
     } catch (error) {
       // Revert on error
-      setOpportunities(opportunities)
+      setOpportunities(vorher)
       toast({
         variant: 'destructive',
         title: t('crud.messages.updateError', { entityType: entityTypeLabel })

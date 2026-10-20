@@ -302,7 +302,7 @@ export default function OpportunitiesListePage(): JSX.Element {
   }
 
   useEffect(() => {
-    loadData()
+    void loadData()
   }, [])
 
   const handleCreate = () => {
@@ -458,7 +458,7 @@ export default function OpportunitiesListePage(): JSX.Element {
     void withPending(stringValue(item.id), async () => {
       try {
         await apiClient.delete(`/api/v1/crm/opportunities/${stringValue(item.id)}`)
-        loadData()
+        void loadData()
       } catch {
         toast({ variant: 'destructive', title: t('crud.messages.deleteError', { entityType: entityTypeLabel }) })
       }

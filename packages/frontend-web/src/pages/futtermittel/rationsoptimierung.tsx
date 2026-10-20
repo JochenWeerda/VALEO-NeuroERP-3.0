@@ -89,6 +89,7 @@ import { isRecord, numberValue, stringValue } from '@/lib/record-utils'
 import { createRationDraft, ensureFeedingGroup, evaluateFeedReadiness, transitionRationVersion } from '@/lib/api/rations-lifecycle'
 import { WizardFeedSections, type SectionFeed } from '@/features/feed-advice/WizardFeedSections'
 
+import { tastenKlick } from '@/lib/tastenklick'
 // ---------------------------------------------------------------------------
 // Meridian-/Terra-Semantikbruecke fuer den spezialisierten Solver-Arbeitsplatz.
 // Keine Produktpalette: Der Portal-Einstieg selbst wird nativ aus der
@@ -1533,6 +1534,9 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
               { name: 'Frischmelker 08/2026', group: 'Frischmelker', milk: 32, ctPerEcm: 18.4, status: 'Freigegeben' },
             ].map((r) => (
               <div
+                role="button"
+                tabIndex={0}
+                onKeyDown={tastenKlick}
                 key={r.name}
                 onClick={onStart}
                 className="bg-white p-5 rounded-lg border shadow-sm cursor-pointer group transition-all hover:shadow-md"
@@ -1555,6 +1559,9 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
               </div>
             ))}
             <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={tastenKlick}
               onClick={onStart}
               className="bg-slate-50 p-5 rounded-lg border-2 border-dashed flex flex-col items-center justify-center cursor-pointer min-h-[160px] transition-all hover:bg-white"
               style={{ borderColor: C.border }}
@@ -4056,6 +4063,9 @@ function Workbench({
             { name: 'Entwurf B', price: '–' },
           ].map((v) => (
             <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={tastenKlick}
               key={v.name}
               onClick={() => setActiveVariant(v.name)}
               className="p-2 rounded text-[13px] mb-1 cursor-pointer flex justify-between border transition-all"
@@ -6182,6 +6192,9 @@ export default function Rationsoptimierung() {
         style={{ background: C.dark }}
       >
         <div
+          role="button"
+          tabIndex={0}
+          onKeyDown={tastenKlick}
           className="flex items-center gap-1 cursor-pointer font-bold text-lg leading-none tracking-widest uppercase"
           onClick={() => setView('dashboard')}
         >

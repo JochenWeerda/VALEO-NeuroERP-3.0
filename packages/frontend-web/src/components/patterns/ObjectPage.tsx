@@ -166,14 +166,13 @@ export function ObjectPage({
 
   const mergedOverflowActions = useMemo<ToolbarAction[]>(() => {
     const fromProps = overflowActions ?? []
-    const hasPrimaryFromProps = Array.isArray(primaryActions) && primaryActions.length > 0
-    const quickOverflow = hasPrimaryFromProps ? contextualToolbarActions.overflow : contextualToolbarActions.overflow
+    const quickOverflow = contextualToolbarActions.overflow
     const byId = new Map<string, ToolbarAction>()
     for (const action of [...fromProps, ...quickOverflow]) {
       byId.set(action.id, action)
     }
     return Array.from(byId.values())
-  }, [contextualToolbarActions.overflow, overflowActions, primaryActions])
+  }, [contextualToolbarActions.overflow, overflowActions])
 
   const handleSectionChange = (value: string): void => {
     setActiveSection(value)
@@ -210,7 +209,7 @@ export function ObjectPage({
       />
 
       <PageSurface data-page-surface="object-pattern" contentClassName="space-y-6">
-        {roleDensityProfile.showKeyInfo && keyInfo !== undefined && keyInfo !== null ? (
+        {roleDensityProfile.showKeyInfo && (keyInfo ?? null) !== null ? (
           <PageSection
             title="Kerninformationen"
             description="Verdichtete Stammdaten, Status und Primärmerkmale des aktuellen Objekts."
@@ -233,7 +232,7 @@ export function ObjectPage({
                     <span className="mr-2 inline-flex h-4 w-4 items-center">{section.icon}</span>
                   ) : null}
                   <span>{section.label}</span>
-                  {roleDensityProfile.showSectionBadges && section.badge !== undefined && section.badge !== null ? (
+                  {roleDensityProfile.showSectionBadges && (section.badge ?? null) !== null ? (
                     <span className="ml-2 text-xs text-muted-foreground">{section.badge}</span>
                   ) : null}
                 </TabsTrigger>

@@ -150,7 +150,7 @@ describe('Einwilligung zur Aufbewahrung', () => {
     await waitFor(() => expect(mocks.toastError).toHaveBeenCalledWith('Einwilligung unvollständig', expect.anything()))
     expect(mocks.erteileEinwilligung).not.toHaveBeenCalled()
     // Jetzt zeigt die Maske, was fehlt.
-    expect(Object.keys(mocks.form?.visibleFieldErrors ?? {}).sort()).toEqual(['gueltig_bis', 'kanal'])
+    expect(Object.keys(mocks.form?.visibleFieldErrors ?? {}).sort((a, b) => a.localeCompare(b))).toEqual(['gueltig_bis', 'kanal'])
   })
 
   it('zeigt den Grund, wenn das Erteilen scheitert', async () => {

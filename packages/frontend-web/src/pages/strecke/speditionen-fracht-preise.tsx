@@ -62,7 +62,7 @@ export default function SpeditionenFrachtPreisePage(): JSX.Element {
   }
 
   useEffect(() => {
-    load()
+    void load()
   }, [])
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export default function SpeditionenFrachtPreisePage(): JSX.Element {
   const field = <K extends keyof EditRow>(key: K) => ({
     value: editRow ? String(editRow[key] ?? '') : '',
     onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-      setEditRow((prev) => prev ? { ...prev, [key]: key === 'preis_eur_t' ? e.target.value : e.target.value } : prev),
+      setEditRow((prev) => prev ? { ...prev, [key]: e.target.value } : prev),
   })
 
   const activeRows = rows.filter((row) => row.aktiv)

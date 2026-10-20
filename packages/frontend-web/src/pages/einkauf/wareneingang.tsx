@@ -159,13 +159,13 @@ export default function WareneingangPage(): JSX.Element {
 
   // Lade Bestellungen
   useEffect(() => {
-    loadPurchaseOrders()
+    void loadPurchaseOrders()
   }, [])
 
   // Lade Bestellung wenn ausgewählt
   useEffect(() => {
     if (selectedPoId) {
-      loadPurchaseOrder(selectedPoId)
+      void loadPurchaseOrder(selectedPoId)
     }
   }, [selectedPoId])
 

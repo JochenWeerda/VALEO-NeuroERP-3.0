@@ -102,7 +102,7 @@ export default function CampaignBuilderPage(): JSX.Element {
         // Vorlagen/Segmente bleiben leer — Formular ist weiter bedienbar
       }
     }
-    loadData()
+    void loadData()
   }, [tenantId])
 
   const updateField = (field: keyof CampaignData, value: unknown) => {
