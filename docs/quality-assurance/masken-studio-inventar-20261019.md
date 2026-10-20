@@ -8,9 +8,9 @@ Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentschei
 | Stufe | Routen | Anteil an Masken |
 |---|---:|---:|
 | studio_versioniert | 1 | 0.2 % |
-| screen_definition | 108 | 16.4 % |
+| screen_definition | 114 | 17.3 % |
 | builder_altmuster | 80 | 12.1 % |
-| handgebaut | 471 | 71.4 % |
+| handgebaut | 465 | 70.5 % |
 | weiterleitung | 2 |  |
 
 Gesamt 662 Routen, davon 660 Masken.
@@ -19,7 +19,7 @@ Gesamt 662 Routen, davon 660 Masken.
 
 | Befund | Anzahl |
 |---|---:|
-| Aktionen gesamt (ohne Doppel je Maske) | 396 |
+| Aktionen gesamt (ohne Doppel je Maske) | 404 |
 | davon serverwirksam | 267 |
 | … mit REST-Kommandoweg | 267 |
 | … mit eigenem MCP-Werkzeug | 46 |
@@ -107,7 +107,7 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 
 | Bereich | studio_versioniert | screen_definition | builder_altmuster | handgebaut | weiterleitung |
 |---|---:|---:|---:|---:|---:|
-| agrar | 0 | 11 | 3 | 45 | 0 |
+| agrar | 0 | 13 | 3 | 43 | 0 |
 | fibu | 0 | 0 | 1 | 42 | 0 |
 | finance | 0 | 9 | 16 | 28 | 0 |
 | admin | 0 | 4 | 0 | 27 | 0 |
@@ -118,9 +118,9 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | portal | 0 | 1 | 0 | 16 | 0 |
 | compliance | 0 | 0 | 2 | 14 | 0 |
 | workflow | 0 | 0 | 0 | 14 | 0 |
-| personal | 0 | 5 | 0 | 12 | 0 |
 | strecke | 0 | 0 | 0 | 12 | 0 |
 | verkauf | 0 | 3 | 0 | 11 | 2 |
+| personal | 0 | 7 | 0 | 10 | 0 |
 | futtermittel | 0 | 11 | 11 | 9 | 0 |
 | kontrakte | 0 | 1 | 0 | 9 | 0 |
 | pos | 0 | 0 | 2 | 9 | 0 |
@@ -131,17 +131,17 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | service | 0 | 0 | 0 | 5 | 0 |
 | waage | 0 | 0 | 0 | 5 | 0 |
 | agribusiness | 0 | 0 | 0 | 4 | 0 |
-| charge | 0 | 0 | 1 | 4 | 0 |
 | disposition | 0 | 0 | 0 | 4 | 0 |
 | nachhaltigkeit | 0 | 0 | 0 | 4 | 0 |
 | nawaro | 0 | 0 | 0 | 4 | 0 |
 | preise | 0 | 0 | 0 | 4 | 0 |
 | versand | 0 | 0 | 0 | 4 | 0 |
 | workflows | 0 | 0 | 0 | 4 | 0 |
-| artikel | 0 | 0 | 0 | 3 | 0 |
+| charge | 0 | 1 | 1 | 3 | 0 |
 | dashboard | 0 | 0 | 0 | 3 | 0 |
 | produktion | 0 | 0 | 2 | 3 | 0 |
 | vertrag | 0 | 0 | 0 | 3 | 0 |
+| artikel | 0 | 1 | 0 | 2 | 0 |
 | auth | 0 | 0 | 0 | 2 | 0 |
 | fuhrpark | 0 | 6 | 0 | 2 | 0 |
 | futter | 0 | 2 | 0 | 2 | 0 |

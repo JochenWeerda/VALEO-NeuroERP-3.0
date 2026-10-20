@@ -633,7 +633,7 @@ def build_crm_segmente_liste() -> dict[str, Any]:
     return _liste(
         screen_id="crm/segmente-liste", domain="crm", title="Segmente",
         subtitle="Kundensegmente mit Mitgliederzahl", endpoint="/api/v1/crm/segments",
-        row_route="/crm/segment/{id}", bundle="crm",
+        row_route="/crm/segment/{id}", bundle="crm", fetch_limit=200,
         columns=[
             {"key": "name", "label": "Segment", "sortable": True, "filterable": True, "priority": "primary"},
             {"key": "type", "label": "Typ", "filterable": True, "priority": "primary"},
@@ -699,6 +699,97 @@ def build_crm_opportunities_liste() -> dict[str, Any]:
     )
 
 
+def build_agrar_psm_liste() -> dict[str, Any]:
+    """Pflanzenschutzmittel aus dem BVL-Verzeichnis (wie die bisherige Seite)."""
+    return _liste(
+        screen_id="agrar/psm-liste", domain="agrar", title="Pflanzenschutzmittel",
+        subtitle="Zugelassene Mittel mit Wirkstoff, Kulturen und Zulassungsende",
+        endpoint="/api/v1/agrar/psm/?source=bvl", row_route="/agrar/psm/stamm/{id}", bundle="agrar", fetch_limit=200,
+        columns=[
+            {"key": "mittel", "label": "Mittel", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "wirkstoff", "label": "Wirkstoff", "filterable": True, "priority": "primary"},
+            {"key": "kulturen", "label": "Kulturen", "filterable": True, "priority": "secondary"},
+            {"key": "zulassungBis", "label": "Zulassung bis", "renderKind": "date", "sortable": True,
+             "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "secondary"},
+            {"key": "erklaerungLandwirtStatus", "label": "Erklaerung Landwirt", "priority": "tertiary"},
+        ],
+        actions=[_neu("Neues Mittel", "/agrar/psm/stamm/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Pflanzenschutzmittel mit Zulassung und Wirkstoff finden und oeffnen.",
+        prompts=["Welche Mittel laufen dieses Jahr aus?", "Welche Mittel enthalten Glyphosat?"],
+        no_workflow="Verzeichnisliste ohne eigenen Ablauf.",
+    )
+
+
+def build_artikel_liste() -> dict[str, Any]:
+    """Artikelstamm mit Warengruppe, Preis und Bestand."""
+    return _liste(
+        screen_id="artikel/liste", domain="lager", title="Artikel", subtitle="Artikelstamm mit Preis und Bestand",
+        endpoint="/api/v1/articles/", row_route="/artikel/{id}", bundle="lager", fetch_limit=200,
+        columns=[
+            {"key": "article_number", "label": "Artikel-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "category", "label": "Warengruppe", "filterable": True, "priority": "primary"},
+            {"key": "sales_price", "label": "VK-Preis", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "secondary"},
+            {"key": "current_stock", "label": "Bestand", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "unit", "label": "Einheit", "priority": "tertiary"},
+            {"key": "is_active", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neuer Artikel", "/artikel/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Artikel mit Warengruppe, Preis und Bestand finden und oeffnen.",
+        prompts=["Welche Artikel der Warengruppe Duenger fuehren wir?", "Welche Artikel haben keinen Bestand?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_chargen_liste() -> dict[str, Any]:
+    """Chargen mit Artikel, Menge, Lagerort und Status."""
+    return _liste(
+        screen_id="charge/liste", domain="lager", title="Chargen", subtitle="Chargen mit Lagerort und Freigabestatus",
+        endpoint="/api/v1/chargen", row_route="/charge/stamm/{id}", bundle="lager",
+        columns=[
+            {"key": "chargenId", "label": "Charge", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "artikel", "label": "Artikel", "filterable": True, "priority": "primary"},
+            {"key": "menge", "label": "Menge (t)", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "lagerort", "label": "Lagerort", "filterable": True, "priority": "secondary"},
+            {"key": "eingang", "label": "Eingang", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Wareneingang erfassen", "/charge/wareneingang"), _EXPORT],
+        row_actions=[],
+        purpose="Chargen nach Artikel, Lagerort und Status finden und ihre Spur oeffnen.",
+        prompts=["Welche Chargen sind noch in Pruefung?", "Welche Chargen liegen in Silo 3?"],
+        no_workflow="Der Status steht an der Charge; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_personal_mitarbeiter_liste() -> dict[str, Any]:
+    """Mitarbeitende; Zugriff und Felder wie der Personalweg."""
+    return _liste(
+        screen_id="personal/mitarbeiter-liste", domain="personal", title="Mitarbeitende",
+        subtitle="Mitarbeitende mit Abteilung und Position", endpoint="/api/v1/personal/mitarbeiter",
+        row_route="/personal/mitarbeiter/{id}", bundle="personal",
+        columns=[
+            {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "abteilung", "label": "Abteilung", "filterable": True, "priority": "primary"},
+            {"key": "position", "label": "Position", "filterable": True, "priority": "secondary"},
+            {"key": "email", "label": "E-Mail", "priority": "tertiary"},
+            {"key": "eintrittsdatum", "label": "Eintritt", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Neue Mitarbeiterin / neuer Mitarbeiter", "/personal/mitarbeiter/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Mitarbeitende nach Abteilung und Status finden und ihre Personalakte oeffnen.",
+        prompts=["Wer arbeitet im Lager?", "Wer ist seit diesem Jahr dabei?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -718,6 +809,10 @@ LISTEN_SCREEN_BUILDERS = {
     "crm/dsgvo-anfragen-liste": build_dsgvo_anfragen_liste,
     "crm/segmente-liste": build_crm_segmente_liste,
     "crm/opportunities-liste": build_crm_opportunities_liste,
+    "agrar/psm-liste": build_agrar_psm_liste,
+    "artikel/liste": build_artikel_liste,
+    "charge/liste": build_chargen_liste,
+    "personal/mitarbeiter-liste": build_personal_mitarbeiter_liste,
 }
 LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
                 "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
@@ -735,7 +830,11 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "crm/einwilligungen-liste": "/crm/consents",
                 "crm/dsgvo-anfragen-liste": "/crm/gdpr-requests",
                 "crm/segmente-liste": "/crm/segments",
-                "crm/opportunities-liste": "/crm/opportunities"}
+                "crm/opportunities-liste": "/crm/opportunities",
+                "agrar/psm-liste": "/agrar/psm",
+                "artikel/liste": "/artikel",
+                "charge/liste": "/charge/liste",
+                "personal/mitarbeiter-liste": "/personal/mitarbeiter"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
@@ -753,4 +852,8 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "crm/einwilligungen-liste": ["einwilligungen", "consent", "opt-in"],
                    "crm/dsgvo-anfragen-liste": ["dsgvo-anfragen", "betroffenenanfragen", "gdpr"],
                    "crm/segmente-liste": ["segmente", "kundensegmente", "zielgruppen"],
-                   "crm/opportunities-liste": ["verkaufschancen", "opportunities", "pipeline"]}
+                   "crm/opportunities-liste": ["verkaufschancen", "opportunities", "pipeline"],
+                   "agrar/psm-liste": ["psm", "pflanzenschutzmittel", "pflanzenschutz"],
+                   "artikel/liste": ["artikel", "artikelstamm", "produkte"],
+                   "charge/liste": ["chargen", "partien", "lose"],
+                   "personal/mitarbeiter-liste": ["mitarbeiter", "mitarbeitende", "personal"]}

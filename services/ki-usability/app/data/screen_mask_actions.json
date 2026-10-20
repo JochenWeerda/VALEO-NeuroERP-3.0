@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 176,
-    "screens_with_actions": 88,
-    "domains": 14
+    "actions": 184,
+    "screens_with_actions": 92,
+    "domains": 15
   },
   "actions": [
     {
@@ -654,6 +654,46 @@
       }
     },
     {
+      "id": "mask:agrar/psm-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (agrar/psm-liste)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/psm-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/psm-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/psm-liste:neu",
+      "label": "Neues Mittel",
+      "description": "Neues Mittel (agrar/psm-liste)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/psm-liste",
+      "intent_phrases": [
+        "Neues Mittel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/psm-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/agrar/psm/stamm/neu",
+        "command": null,
+        "method": null
+      }
+    },
+    {
       "id": "mask:agrar/ration:activate",
       "label": "Jetzt aktivieren",
       "description": "Jetzt aktivieren (agrar/ration)",
@@ -886,6 +926,46 @@
       }
     },
     {
+      "id": "mask:artikel/liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (artikel/liste)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "artikel/liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:artikel/liste:neu",
+      "label": "Neuer Artikel",
+      "description": "Neuer Artikel (artikel/liste)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/liste",
+      "intent_phrases": [
+        "Neuer Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "artikel/liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/artikel/neu",
+        "command": null,
+        "method": null
+      }
+    },
+    {
       "id": "mask:auswertungen/abfrage-center:create",
       "label": "Neue Abfrage",
       "description": "Neue Abfrage (auswertungen/abfrage-center)",
@@ -983,6 +1063,46 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:charge/liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (charge/liste)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "charge/liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "charge/liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:charge/liste:neu",
+      "label": "Wareneingang erfassen",
+      "description": "Wareneingang erfassen (charge/liste)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "charge/liste",
+      "intent_phrases": [
+        "Wareneingang erfassen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "charge/liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/charge/wareneingang",
+        "command": null,
+        "method": null
       }
     },
     {
@@ -3090,6 +3210,46 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "personal.newErklaerung",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/mitarbeiter-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (personal/mitarbeiter-liste)",
+      "category": "mask-action",
+      "domain": "personal",
+      "mask": "personal/mitarbeiter-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/mitarbeiter-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/mitarbeiter-liste:neu",
+      "label": "Neue Mitarbeiterin / neuer Mitarbeiter",
+      "description": "Neue Mitarbeiterin / neuer Mitarbeiter (personal/mitarbeiter-liste)",
+      "category": "mask-action",
+      "domain": "personal",
+      "mask": "personal/mitarbeiter-liste",
+      "intent_phrases": [
+        "Neue Mitarbeiterin / neuer Mitarbeiter"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/mitarbeiter-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/personal/mitarbeiter/neu",
+        "command": null,
         "method": null
       }
     },

@@ -1514,6 +1514,51 @@
       ]
     },
     {
+      "mask_id": "agrar/psm-liste",
+      "title": "Pflanzenschutzmittel",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__psm-liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/psm-liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/psm-liste/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/psm-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neues Mittel",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "agrar/ration",
       "title": "Rationsfreigabe",
       "domain": "agrar",
@@ -4112,6 +4157,90 @@
       ]
     },
     {
+      "mask_id": "artikel/liste",
+      "title": "Artikel",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/liste/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neuer Artikel",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "charge/liste",
+      "title": "Chargen",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/charge__liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/charge/liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/charge/liste/screen-definition",
+      "readiness_url": "/api/v1/masks/charge/liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Wareneingang erfassen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
       "mask_id": "lager/article-stock",
       "title": "Artikelbestand",
       "domain": "lager",
@@ -5002,6 +5131,43 @@
       "readiness_url": "/api/v1/masks/workspace/leitung/readiness",
       "risk_summary": "low",
       "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "personal/mitarbeiter-liste",
+      "title": "Mitarbeitende",
+      "domain": "personal",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/personal__mitarbeiter-liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/personal/mitarbeiter-liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/personal/mitarbeiter-liste/screen-definition",
+      "readiness_url": "/api/v1/masks/personal/mitarbeiter-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neue Mitarbeiterin / neuer Mitarbeiter",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },

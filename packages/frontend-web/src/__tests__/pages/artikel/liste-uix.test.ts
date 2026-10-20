@@ -8,12 +8,10 @@ const src = readFileSync(
 )
 
 describe('Artikel-Liste UIX', () => {
-  it('stellt Bezeichnung 44 px, Export wirkt, KPI nur Desktop', () => {
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('min-h-11 font-medium text-primary')
-    expect(src).toContain('persistExport')
-    expect(src).toContain('Suche Artikel')
-    expect(src).not.toContain('text-blue-600')
+  it('ist eine Studio-Liste aus der ScreenDefinition artikel/liste', () => {
+    // MASK-STUDIO-ROLLOUT: 44-px-Zeilen, Suche, Export und Touch-Verhalten liefert der universelle Renderer.
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="artikel/liste"')
+    expect(src).not.toContain('apiClient')
   })
 })

@@ -252,6 +252,15 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
   aber erreichbar, sobald sich die Router-Reihenfolge aendert.
 - Alle acht mit derselben Bereichsrolle wie der verdeckende Weg; die Ratsche prueft jetzt jedes Routenobjekt.
 
+## Welle 1, Schritt 13 (20.10.2026): Leselisten PSM, Artikel, Chargen, Mitarbeitende
+
+- Vier Studio-Listen ohne Zeilenaktionen (`agrar/psm-liste` aus dem BVL-Verzeichnis, `artikel/liste`,
+  `charge/liste`, `personal/mitarbeiter-liste`); Zeilen oeffnen die bisherigen Objektseiten.
+- Neuer Vertragstest: Jede Studio-Liste akzeptiert ihre Ladegrenze (`limit=pageSize`); ein 422 hiesse leere Liste.
+  Er fand den Fehler sofort in der Segmentliste (Dienst erlaubt 200, Liste lud 500) — behoben.
+- Ratsche: handgebaut 471 -> 465.
+- Zurueckgestellt: `zertifikate/liste` (Detail- und Anlage-Route zeigen die Liste selbst; Objektmaske fehlt).
+
 ## Sichtung 20.10.2026: zurueckgestellt bzw. Entscheidung noetig
 
 | Seite | Befund | Weiter |

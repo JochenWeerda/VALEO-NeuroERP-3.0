@@ -8,10 +8,10 @@ const src = readFileSync(
 )
 
 describe('PSM-Liste UIX', () => {
-  it('öffnet Mittel per 44-px-Tipp ohne Hover-Blau', () => {
-    expect(src).toContain('Suche Pflanzenschutzmittel')
-    expect(src).toContain('min-h-11 font-medium text-primary')
-    expect(src).not.toContain('text-blue-600')
-    expect(src).toContain('min-h-touch gap-2 touch-manipulation')
+  it('ist eine Studio-Liste aus der ScreenDefinition agrar/psm-liste', () => {
+    // MASK-STUDIO-ROLLOUT: 44-px-Zeilen, Suche, Export und Touch-Verhalten liefert der universelle Renderer.
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="agrar/psm-liste"')
+    expect(src).not.toContain('apiClient')
   })
 })

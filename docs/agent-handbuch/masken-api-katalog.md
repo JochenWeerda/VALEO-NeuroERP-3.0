@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (126 Masken).
+> Generiert aus `app/core/screen_definitions.py` (130 Masken).
 
 ## Übersicht
 
@@ -35,10 +35,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/harvest-controls` | Ernte-Abrechnung: Vertragsregeln und Freigaben | agrar | hoch | — | `GET /api/v1/masks/agrar/harvest-controls/agent-contract` |
 | `agrar/harvest-settlement` | Ernte-Abrechnung | agrar | niedrig | `harvest-to-settlement`, `contract-to-settlement` | `GET /api/v1/masks/agrar/harvest-settlement/agent-contract` |
 | `agrar/kontrakte` | Kontrakt | agrar | mittel | `contract-to-settlement`, `harvest-to-settlement` | `GET /api/v1/masks/agrar/kontrakte/agent-contract` |
+| `agrar/psm-liste` | Pflanzenschutzmittel | agrar | niedrig | — | `GET /api/v1/masks/agrar/psm-liste/agent-contract` |
 | `agrar/ration` | Rationsfreigabe | agrar | hoch | — | `GET /api/v1/masks/agrar/ration/agent-contract` |
 | `agrar/rations-lifecycle` | Rationen und Freigaben | agrar | niedrig | — | `GET /api/v1/masks/agrar/rations-lifecycle/agent-contract` |
 | `agrar/saatgut` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/agent-contract` |
 | `agrar/saatgut-liste` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut-liste/agent-contract` |
+| `artikel/liste` | Artikel | lager | niedrig | — | `GET /api/v1/masks/artikel/liste/agent-contract` |
 | `auswertungen/abfrage-center` | Abfrage-Center | reporting | mittel | — | `GET /api/v1/masks/auswertungen/abfrage-center/agent-contract` |
 | `auswertungen/aenderungshistorie` | Aenderungshistorie | audit | niedrig | — | `GET /api/v1/masks/auswertungen/aenderungshistorie/agent-contract` |
 | `auswertungen/auftrags-kontrolle` | Auftrags-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/auswertungen/auftrags-kontrolle/agent-contract` |
@@ -50,6 +52,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `auswertungen/lieferschein-kontrolle` | Lieferschein-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/auswertungen/lieferschein-kontrolle/agent-contract` |
 | `auswertungen/sanktionspruefung-kunden` | Terrorschutzpruefung Kunden | compliance | mittel | — | `GET /api/v1/masks/auswertungen/sanktionspruefung-kunden/agent-contract` |
 | `auswertungen/sanktionspruefung-personal` | Terrorschutzpruefung Personal | compliance | mittel | — | `GET /api/v1/masks/auswertungen/sanktionspruefung-personal/agent-contract` |
+| `charge/liste` | Chargen | lager | niedrig | — | `GET /api/v1/masks/charge/liste/agent-contract` |
 | `crm/customer-360` | Kundenakte | crm | niedrig | `order-to-cash`, `service-to-customer` | `GET /api/v1/masks/crm/customer-360/agent-contract` |
 | `crm/dsgvo-anfragen-liste` | DSGVO-Anfragen | crm | niedrig | — | `GET /api/v1/masks/crm/dsgvo-anfragen-liste/agent-contract` |
 | `crm/einwilligungen-liste` | Einwilligungen | crm | niedrig | — | `GET /api/v1/masks/crm/einwilligungen-liste/agent-contract` |
@@ -110,6 +113,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `personal/bewerbung-einwilligung` | Einwilligung zur Aufbewahrung | hr | mittel | — | `GET /api/v1/masks/personal/bewerbung-einwilligung/agent-contract` |
 | `personal/bewerbungen` | Bewerbungen | hr | niedrig | — | `GET /api/v1/masks/personal/bewerbungen/agent-contract` |
 | `personal/einwilligungserklaerungen` | Einwilligungserklärungen | hr | niedrig | — | `GET /api/v1/masks/personal/einwilligungserklaerungen/agent-contract` |
+| `personal/mitarbeiter-liste` | Mitarbeitende | personal | niedrig | — | `GET /api/v1/masks/personal/mitarbeiter-liste/agent-contract` |
 | `personal/onboarding` | Onboarding | hr | niedrig | — | `GET /api/v1/masks/personal/onboarding/agent-contract` |
 | `personal/qualifikationen` | Qualifikationen | hr | niedrig | — | `GET /api/v1/masks/personal/qualifikationen/agent-contract` |
 | `personal/schulungen` | Schulungen | hr | niedrig | — | `GET /api/v1/masks/personal/schulungen/agent-contract` |
@@ -736,6 +740,46 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | moderate | nein | `/api/v1/kontrakte/{entity_id}/actions/bearbeiten` |
+
+---
+
+### `agrar/psm-liste` — Pflanzenschutzmittel
+
+**Zweck:** Pflanzenschutzmittel mit Zulassung und Wirkstoff finden und oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/psm-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/psm-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/psm-liste/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__psm-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/agrar/psm/?source=bvl`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Mittel laufen dieses Jahr aus?
+- Welche Mittel enthalten Glyphosat?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neues Mittel | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -3332,6 +3376,80 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ## Domäne: lager
 
+### `artikel/liste` — Artikel
+
+**Zweck:** Artikel mit Warengruppe, Preis und Bestand finden und oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/artikel/liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/artikel/liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/artikel/liste/readiness` |
+| Rollout-Route | `/mask-rollout/artikel__liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/articles/`
+
+**MCP-Tools (Domäne):**
+
+- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.propose_opening` — scope `lager:write`, Risiko hoch
+- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Artikel der Warengruppe Duenger fuehren wir?
+- Welche Artikel haben keinen Bestand?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neuer Artikel | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `charge/liste` — Chargen
+
+**Zweck:** Chargen nach Artikel, Lagerort und Status finden und ihre Spur oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/charge/liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/charge/liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/charge/liste/readiness` |
+| Rollout-Route | `/mask-rollout/charge__liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/chargen`
+
+**MCP-Tools (Domäne):**
+
+- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.propose_opening` — scope `lager:write`, Risiko hoch
+- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Chargen sind noch in Pruefung?
+- Welche Chargen liegen in Silo 3?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Wareneingang erfassen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
 ### `lager/article-stock` — Artikelbestand
 
 **Zweck:** Artikelbestand-Cockpit: Stammdaten, Bestand je Lagerort und Bewegungshistorie fuer Disposition und Einkauf.
@@ -4165,6 +4283,38 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Was steht heute in Leitungs-Cockpit an?
 - Zeige die dringendsten Worklists fuer meine Rolle.
+
+---
+
+## Domäne: personal
+
+### `personal/mitarbeiter-liste` — Mitarbeitende
+
+**Zweck:** Mitarbeitende nach Abteilung und Status finden und ihre Personalakte oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/personal/mitarbeiter-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/personal/mitarbeiter-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/personal/mitarbeiter-liste/readiness` |
+| Rollout-Route | `/mask-rollout/personal__mitarbeiter-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/personal/mitarbeiter`
+
+**Beispiel-Prompts:**
+
+- Wer arbeitet im Lager?
+- Wer ist seit diesem Jahr dabei?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neue Mitarbeiterin / neuer Mitarbeiter | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

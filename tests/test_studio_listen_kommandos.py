@@ -592,3 +592,36 @@ def test_kontakte_aus_crm_core_nur_ueber_den_kunden_des_mandanten(engine, monkey
     assert client.get("/api/v1/crm/contacts/k-eigen", headers=kopf).status_code == 200
     assert client.delete("/api/v1/crm/contacts/k-fremd", headers=kopf).status_code == 404
     assert geloescht == []
+
+
+@pytest.mark.parametrize("liste,objekt_route", [
+    ("agrar/psm-liste", "/agrar/psm/stamm/{id}"), ("artikel/liste", "/artikel/{id}"),
+    ("charge/liste", "/charge/stamm/{id}"), ("personal/mitarbeiter-liste", "/personal/mitarbeiter/{id}"),
+])
+def test_leselisten_antworten_und_verlinken_ihre_objekte(client, liste, objekt_route):
+    """Die Datenquelle jeder Leseliste antwortet (mit Ladegrenze), die Zeile oeffnet die bisherige Objektseite."""
+    from app.core.screen_definitions import get_screen_definition
+
+    definition = get_screen_definition(liste)
+    quelle = definition["dataSources"][0]
+    assert definition["tables"][0]["rowRouteTemplate"] == objekt_route
+    trenner = "&" if "?" in quelle["endpoint"] else "?"
+    antwort = client.get(f"{quelle['endpoint']}{trenner}limit={quelle['pageSize']}", headers={"X-Tenant-ID": HAUS_A})
+    assert antwort.status_code == 200, antwort.text
+
+
+def _alle_listen():
+    from app.core.screen_definitions_listen import LISTEN_SCREEN_BUILDERS
+
+    return sorted(LISTEN_SCREEN_BUILDERS)
+
+
+@pytest.mark.parametrize("liste", _alle_listen())
+def test_jede_studio_liste_akzeptiert_ihre_ladegrenze(client, liste):
+    """Die Laufzeit laedt Tabellen ohne Serverblaetterung einmal mit limit=pageSize; ein 422 hiesse leere Liste."""
+    from app.core.screen_definitions import get_screen_definition
+
+    quelle = get_screen_definition(liste)["dataSources"][0]
+    trenner = "&" if "?" in quelle["endpoint"] else "?"
+    antwort = client.get(f"{quelle['endpoint']}{trenner}limit={quelle['pageSize']}", headers={"X-Tenant-ID": HAUS_A})
+    assert antwort.status_code != 422, antwort.text
