@@ -184,6 +184,9 @@
   "mask:einkauf/bestellungen:versenden",
   "mask:einkauf/purchase-order:speichern",
   "mask:einkauf/purchase-order:versenden",
+  "mask:einkauf/supplier:bearbeiten",
+  "mask:einkauf/supplier:entsperren",
+  "mask:einkauf/supplier:sperren",
   "mask:finance/ap-invoice:freigeben",
   "mask:finance/ar-open-item:mahnen",
   "mask:finance/bankkonto:bearbeiten",
@@ -272,6 +275,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 150
+  "kein_endpunkt": 149
  }
 }

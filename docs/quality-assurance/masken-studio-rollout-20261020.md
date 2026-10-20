@@ -310,6 +310,14 @@ alle Einstiege "Neuer Kunde" leiten dorthin) und ein wirksames **Bearbeiten** ue
 erreichbarem crm-core angelegter Kunde liess sich **nie** aendern (crm-core kannte ihn nicht, kein Fallback), und die
 lokale Anlage verwarf Ort, PLZ, Land und Branche — beides behoben; der lokale Eintrag traegt jede Aenderung.
 
+**Lieferant, 20.10.:** `einkauf/supplier` legt an (`creation`, `/einkauf/lieferant/neu`), bearbeitet
+(`/einkauf/lieferanten/{id}/actions/bearbeiten`) und sperrt/entsperrt mit Begruendung; die handgebaute
+Lieferantenseite (1.741 Zeilen) ist entfernt, der doppelte Alias `/einkauf/lieferanten/:id` aufgeloest. Befunde:
+jede Aenderung ohne Land setzte das Land auf "Deutschland" zurueck (geerbter Anlage-Standard im Aenderungsmodell);
+doppelte Lieferantennummern im Mandanten waren moeglich (jetzt 409; eine Datenbankregel fehlt weiter, weil gewachsene
+Bestaende Dubletten enthalten koennen); der Weg `DELETE /einkauf/lieferanten/{id}` (`app/einkauf/router.py`) liest die
+nicht vorhandene Tabelle `einkauf_lieferanten` und ist tot (offen).
+
 Offen: Unterobjekte (Anschriften, CpD, Rabatte, Chefanweisungen, Bankverbindung) pflegt weiter die handgebaute
 Kundenmaske `/verkauf/kunden-stamm` ("Erweiterte Pflege"); naechster Schritt sind Register mit Zeilenaktionen.
 

@@ -2344,8 +2344,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
+| `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/bearbeiten` |
 | `neue_bestellung` | Bestellung anlegen | safe | nein | `—` |
+| `sperren` | Sperren | warning | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren` |
+| `entsperren` | Entsperren | safe | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren` |
 
 ---
 

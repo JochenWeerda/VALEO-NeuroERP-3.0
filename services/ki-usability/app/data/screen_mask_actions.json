@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 199,
+    "actions": 201,
     "screens_with_actions": 102,
     "domains": 17
   },
@@ -1994,7 +1994,7 @@
       }
     },
     {
-      "id": "mask:einkauf/supplier:edit",
+      "id": "mask:einkauf/supplier:bearbeiten",
       "label": "Bearbeiten",
       "description": "Bearbeiten (einkauf/supplier)",
       "category": "mask-action",
@@ -2003,14 +2003,38 @@
       "intent_phrases": [
         "Bearbeiten"
       ],
-      "required_data": [],
+      "required_data": [
+        "entity_id"
+      ],
       "source": {
         "screenId": "einkauf/supplier",
-        "actionKey": "edit",
-        "commandEndpoint": null,
-        "navigationRoute": "/einkauf/lieferant/{entity_id}",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
         "command": null,
-        "method": null
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/supplier:entsperren",
+      "label": "Entsperren",
+      "description": "Entsperren (einkauf/supplier)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/supplier",
+      "intent_phrases": [
+        "Entsperren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/supplier",
+        "actionKey": "entsperren",
+        "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
       }
     },
     {
@@ -2031,6 +2055,28 @@
         "navigationRoute": "/einkauf/bestellungen/neu",
         "command": null,
         "method": null
+      }
+    },
+    {
+      "id": "mask:einkauf/supplier:sperren",
+      "label": "Sperren",
+      "description": "Sperren (einkauf/supplier)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/supplier",
+      "intent_phrases": [
+        "Sperren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/supplier",
+        "actionKey": "sperren",
+        "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
       }
     },
     {

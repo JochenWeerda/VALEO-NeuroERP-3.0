@@ -159,6 +159,64 @@ async def kunde_bearbeiten(entity_id: str, body: dict[str, Any] = Body(default_f
         aendern=aendern, event_type="crm.customer.updated")
 
 
+# --------------------------------------------------------------------------- Lieferant
+
+# Dieselben Rollen wie der Lieferanten-Aenderungsweg (``update_lieferant``: Einkauf schreiben).
+@router.post("/einkauf/lieferanten/{entity_id}/actions/bearbeiten", response_model=MaskActionResult,
+             summary="Lieferant bearbeiten", dependencies=SCHREIBEN["EINKAUF"])
+async def lieferant_bearbeiten(entity_id: str, body: dict[str, Any] = Body(default_factory=dict),
+                               db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    from app.api.v1.endpoints.einkauf_bestellvorschlag import LieferantUpdate, update_lieferant
+
+    async def aendern(session: Session, werte: Any, eid: str, tid: str) -> None:
+        await update_lieferant(eid, werte, db=session, tenant_id=tid)
+
+    return await bearbeiten(
+        db, entity_type="lieferant", entity_id=entity_id, tenant_id=tenant_id, body=body,
+        felder=_gleich("firmenname", "strasse", "plz", "ort", "land", "telefon", "email", "zahlungsbedingungen",
+                       "lieferzeit_tage"),
+        modell=LieferantUpdate,
+        lesen=zeile_per_sql("SELECT CASE WHEN COALESCE(aktiv, TRUE) THEN 'active' ELSE 'inactive' END AS status "
+                            "FROM domain_einkauf.lieferanten WHERE id::text = :id AND tenant_id = :tid"),
+        aendern=aendern, event_type="einkauf.lieferant.updated")
+
+
+_LIEFERANT_STATUS = ("SELECT CASE WHEN COALESCE(aktiv, TRUE) THEN 'active' ELSE 'inactive' END AS status "
+                     "FROM domain_einkauf.lieferanten WHERE id::text = :id AND tenant_id = :tid")
+
+
+async def _lieferant_aktiv_setzen(db: Session, entity_id: str, tenant_id: str, body: dict[str, Any], *,
+                                  aktiv: bool) -> MaskActionResult:
+    """Sperren/Entsperren statt Loeschen: Bestellungen und Belege behalten ihren Lieferanten (bis 20.10.2026 bot die
+    handgebaute Seite das an; der DELETE-Weg las die nicht vorhandene Tabelle ``einkauf_lieferanten``)."""
+    from sqlalchemy import text
+
+    def ausfuehren(session: Session, payload: dict[str, Any]) -> str:
+        session.execute(text("UPDATE domain_einkauf.lieferanten SET aktiv = :a WHERE id::text = :id AND tenant_id = :tid"),
+                        {"a": aktiv, "id": entity_id, "tid": tenant_id})
+        return "Lieferant entsperrt." if aktiv else "Lieferant gesperrt."
+
+    return await statusaktion(
+        db, action_key="entsperren" if aktiv else "sperren", entity_type="lieferant", entity_id=entity_id,
+        tenant_id=tenant_id, body=body, status_sql=_LIEFERANT_STATUS,
+        erlaubt={"inactive"} if aktiv else {"active"}, ausfuehren=ausfuehren,
+        event_type="einkauf.lieferant.entsperrt" if aktiv else "einkauf.lieferant.gesperrt")
+
+
+@router.post("/einkauf/lieferanten/{entity_id}/actions/sperren", response_model=MaskActionResult,
+             summary="Lieferant sperren", dependencies=SCHREIBEN["EINKAUF"])
+async def lieferant_sperren(entity_id: str, body: dict[str, Any] = Body(default_factory=dict),
+                            db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    return await _lieferant_aktiv_setzen(db, entity_id, tenant_id, body, aktiv=False)
+
+
+@router.post("/einkauf/lieferanten/{entity_id}/actions/entsperren", response_model=MaskActionResult,
+             summary="Lieferant entsperren", dependencies=SCHREIBEN["EINKAUF"])
+async def lieferant_entsperren(entity_id: str, body: dict[str, Any] = Body(default_factory=dict),
+                               db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    return await _lieferant_aktiv_setzen(db, entity_id, tenant_id, body, aktiv=True)
+
+
 # --------------------------------------------------------------------------- Artikel
 
 # Dieselben Rollen wie der Artikel-Aenderungsweg (``articles.update_article``: Stammdaten schreiben).

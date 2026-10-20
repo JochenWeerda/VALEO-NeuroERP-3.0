@@ -3105,14 +3105,14 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "edit",
+          "key": "bearbeiten",
           "label": "Bearbeiten",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "einkauf.lieferant.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -3124,6 +3124,28 @@
           "permission": "einkauf.bestellung.create",
           "commandEndpoint": null,
           "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "sperren",
+          "label": "Sperren",
+          "dangerLevel": "warning",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "einkauf.lieferant.update",
+          "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "entsperren",
+          "label": "Entsperren",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "einkauf.lieferant.update",
+          "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -6766,5 +6788,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 128
+  "event_count": 130
 }

@@ -117,15 +117,11 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).toContain('min-h-touch')
   })
 
-  it('stellt Lieferantenstamm Theater nur am Desktop', () => {
-    const src = read('../../pages/einkauf/lieferanten-stamm.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('Tabs')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('Löschen')
-    expect(src).not.toContain('size="sm"')
-    expect(src).not.toContain('text-orange-800')
+  it('stellt Lieferantenstamm als Studio-Maske dar', () => {
+    // Seit 20.10.2026 ScreenDefinition einkauf/supplier (Anlage, Bearbeiten, Sperren); die handgebaute Seite ist entfernt.
+    const src = read('../../pages/einkauf/supplier-native.tsx')
+    expect(src).toContain('UniversalNativeDetailPage')
+    expect(src).toContain('screenId="einkauf/supplier"')
   })
 
   it('stellt Dashboards ohne Theater auf Touch', () => {

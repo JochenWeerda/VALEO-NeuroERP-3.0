@@ -1005,10 +1005,6 @@
       "path": "einkauf/lieferanten"
     },
     {
-      "module": "@/pages/einkauf/lieferanten-stamm",
-      "path": "einkauf/lieferanten/:id"
-    },
-    {
       "module": "@/pages/einkauf/lieferantenbewertung",
       "path": "einkauf/lieferantenbewertung"
     },
@@ -1217,11 +1213,11 @@
       "path": "crm/betrieb/:id"
     },
     {
-      "module": "@/pages/einkauf/lieferanten-stamm",
+      "module": "@/pages/einkauf/supplier-native",
       "path": "einkauf/lieferant/neu"
     },
     {
-      "module": "@/pages/einkauf/lieferanten-stamm",
+      "module": "@/pages/einkauf/supplier-native",
       "path": "einkauf/lieferant/:id"
     },
     {

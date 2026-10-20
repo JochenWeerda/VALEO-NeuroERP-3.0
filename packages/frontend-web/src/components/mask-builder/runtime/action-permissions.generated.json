@@ -840,6 +840,22 @@
         ]
       ]
     },
+    "einkauf/supplier": {
+      "einkauf.lieferant.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.lieferant.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "finance/ap-invoice": {
       "finance.ap.freigabe": [
         [

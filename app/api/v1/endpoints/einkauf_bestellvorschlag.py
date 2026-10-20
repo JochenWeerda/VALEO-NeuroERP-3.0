@@ -635,7 +635,7 @@ async def create_lieferant(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    return _svc(db, tenant_id).create_lieferant(data.model_dump())
+    return _svc(db, tenant_id).create_lieferant(data.model_dump())  # Dublette: ConflictError -> 409 (global)
 
 
 @router.get("/einkauf/lieferanten/{lieferant_id}", summary="Lieferant abrufen",
@@ -661,7 +661,7 @@ async def update_lieferant(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     try:
-        return _svc(db, tenant_id).update_lieferant(lieferant_id, data.model_dump(exclude_none=True))
+        return _svc(db, tenant_id).update_lieferant(lieferant_id, data.model_dump(exclude_none=True, exclude_unset=True))
     except EntityNotFoundError:
         raise HTTPException(404, "Lieferant nicht gefunden")
 

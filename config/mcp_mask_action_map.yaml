@@ -5,7 +5,7 @@ sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 199
+    actions: 201
     screens_with_actions: 102
     domains: 17
 mcp_write_tools:

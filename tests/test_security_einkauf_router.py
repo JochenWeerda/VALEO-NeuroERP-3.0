@@ -34,6 +34,7 @@ async def test_missing_entity_lookup_keeps_id_and_context_tenant(kind, operation
 @pytest.mark.asyncio
 async def test_create_lieferant_persists_context_tenant_despite_payload_override():
     db = MagicMock()
+    db.query.return_value.filter.return_value.first.return_value = None  # keine Dublette (Pruefung seit 20.10.2026)
     payload = endpoint.LieferantCreate(
         lieferantennummer="L-100", firmenname="Lieferant GmbH",
         email="test@example.com", tenant_id="foreign-tenant",
