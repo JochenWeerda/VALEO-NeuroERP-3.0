@@ -60,7 +60,10 @@ def prepared_realm(source: dict) -> dict:
     known = {role['name'] for role in roles}
     desired = [{'name': role['name'], 'description': role['beschreibung']}
                for role in catalog['rollen']]
-    desired.append({'name': 'manager', 'description': 'Explicit management role; never assigned by default'})
+    descriptions = {r['name']: r['beschreibung'] for r in catalog['rollen'] + catalog.get('grundrollen', [])}
+    for role in roles:
+        if role['name'] in descriptions:
+            role['description'] = descriptions[role['name']]
     roles.extend(role for role in desired if role['name'] not in known)
     realm.update(accessTokenLifespan=300, ssoSessionIdleTimeout=900,
                  ssoSessionMaxLifespan=28800, revokeRefreshToken=True, refreshTokenMaxReuse=0)
@@ -238,6 +241,20 @@ def reconcile_realm_roles(client: httpx.Client, headers: dict, realm: str, roles
     for role in roles:
         response = client.get(f"/admin/realms/{realm}/roles/{role['name']}", headers=headers)
         if response.status_code == 200:
+            current = response.json()
+            if current.get('name') != role['name']:
+                raise RuntimeError('Realm role identity mismatch')
+            if 'description' not in role or current.get('description') == role['description']:
+                continue
+            if not current.get('id'):
+                raise RuntimeError('Realm role identifier was not verified')
+            desired = {**current, 'description': role['description']}
+            updated = client.put(f"/admin/realms/{realm}/roles/{role['name']}", headers=headers, json=desired)
+            if updated.status_code != 204:
+                raise RuntimeError('Realm role description update failed')
+            checked = client.get(f"/admin/realms/{realm}/roles/{role['name']}", headers=headers)
+            if checked.status_code != 200 or checked.json() != desired:
+                raise RuntimeError('Realm role description or preserved metadata did not persist')
             continue
         if response.status_code != 404:
             raise RuntimeError(f'Realm role inventory failed ({response.status_code})')

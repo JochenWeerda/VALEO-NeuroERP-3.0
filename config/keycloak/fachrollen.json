@@ -486,7 +486,7 @@
     },
     {
       "name": "manager",
-      "beschreibung": "Historische allgemeine Managementrolle",
+      "beschreibung": "Historische Managementrolle ohne eigene Rechte; nicht neu vergeben",
       "vertrag": {
         "zweck": "Altrolle in Abloesung; keine fachlich definierte Agrarhandelsleitung und keine Shop-spezifische Rolle.",
         "personenkreis": "Nur ausdruecklich beauftragte Personen; fuer Altrollen keine neue Vergabe.",

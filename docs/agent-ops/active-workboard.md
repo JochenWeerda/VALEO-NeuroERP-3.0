@@ -18782,3 +18782,6 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 
 **Katalog-Korrektur vor Push:** Generator hatte neun bestehende Tabellen wegen physischer Probe-Abweichung entfernt. Eintraege wiederhergestellt; nur neue HR-Tabelle und14 Lesepfadkorrekturen liefern.682 dokumentierte Tabellen,673 im Probe. Vollstaendiger physischer Drift bleibt offen (CRM contacts; Inventory article_alternative_eans, article_analyses, article_print_settings, article_units sowie vier nawaro-Untertabellen). Keine behauptete Schema-Gesamtkonformitaet.
+
+
+**ROLE-PROVIDER-ROLLOUT Abschluss20.10.:** 36 Tests/36 Unterfaelle gruen; lokale42 Rollen verifiziert,17 Beschreibungen aktualisiert, ausschliesslich manager aus Belegscope-Mappings entfernt (read16/write9). Wiederholung null Updates, identischer Zustand. Keine Benutzer-/Kennwort-/Rollenzuweisung oder Clientaenderung; Zugangsdaten nur RAM. QA role-provider-rollout-20261020.md. Backenddeployment/Neuanmeldung gesondert offen. GIT-MAIN-HISTORY-GUARD lokal installiert und verifiziert, keine globalen Einstellungen.
