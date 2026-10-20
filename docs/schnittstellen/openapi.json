@@ -404364,6 +404364,122 @@
         ]
       }
     },
+    "/api/v1/stammdaten/warengruppen/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "warengruppe_bearbeiten_api_v1_stammdaten_warengruppen__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Warengruppe bearbeiten",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/stammdaten/warengruppen/{entity_id}/actions/deaktivieren": {
+      "post": {
+        "operationId": "warengruppe_deaktivieren_api_v1_stammdaten_warengruppen__entity_id__actions_deaktivieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Warengruppe deaktivieren",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/stammdaten/warengruppen/{gruppe_nr}": {
       "delete": {
         "operationId": "delete_warengruppe_api_v1_stammdaten_warengruppen__gruppe_nr__delete",

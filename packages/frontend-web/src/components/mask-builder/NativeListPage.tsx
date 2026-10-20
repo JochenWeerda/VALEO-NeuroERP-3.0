@@ -40,6 +40,12 @@ function findeAktion(schema: ScreenDefinition | undefined, key: string): Aktion 
   return undefined
 }
 
+function vorbelegung(aktion: Aktion, row: Row): Row {
+  return Object.fromEntries((aktion.inputFields ?? [])
+    .filter(feld => row[feld.key] !== undefined && row[feld.key] !== null)
+    .map(feld => [feld.key, row[feld.key]]))
+}
+
 function zielRoute(vorlage: string, row: Row): string {
   return vorlage.replace(/\{(\w+)\}/g, (_ganz, feld: string) =>
     encodeURIComponent(String(feld === 'entity_id' ? row.id ?? '' : row[feld] ?? '')))
@@ -74,7 +80,8 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
     laufend.current.add(schluessel)
     setSendet(true)
     try {
-      const pfad = aktion.commandEndpoint.replace('{entity_id}', encodeURIComponent(String(row.id ?? '')))
+      // Jeder Platzhalter aus der Zeile ({entity_id} = id, sonst gleichnamiges Feld), wie bei Navigationsrouten.
+      const pfad = zielRoute(aktion.commandEndpoint, row)
       const { data } = await apiClient.request<MaskCommandResult>({
         url: pfad,
         method: aktion.method ?? 'POST',
@@ -141,6 +148,8 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
       {aktion && stufe === 'eingabe' && (
         <ActionInputDialog
           action={aktion as ScreenActionDefinition}
+          // Zeilenaktionen beginnen mit den Werten der Zeile (Bearbeiten), Kopfaktionen leer.
+          initialValues={vorbelegung(aktion, auftrag?.row ?? {})}
           open
           onCancel={schliessen}
           onSubmit={(werte) => {

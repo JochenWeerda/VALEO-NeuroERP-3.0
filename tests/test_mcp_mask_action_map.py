@@ -85,5 +85,7 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
     assert data["stats"]["by_coverage"].get("blocked_missing_tenant", 0) == 0
     from app.core.screen_definitions_listen import LISTEN_SCREEN_BUILDERS
 
-    listen_anlagen = sum(any(a["key"] == "neu" for a in bau()["actions"]) for bau in LISTEN_SCREEN_BUILDERS.values())
+    # Nur Anlage-*Navigationen* sind lokal; eine Anlage als Kommandoweg (Wechselkurse, Warengruppen) wird abgebildet.
+    listen_anlagen = sum(any(a["key"] == "neu" and a.get("navigationRoute") for a in bau()["actions"])
+                         for bau in LISTEN_SCREEN_BUILDERS.values())
     assert data["stats"]["by_coverage"].get("local_ui", 0) == 15 + listen_anlagen  # + Anlage-Navigation je Studio-Liste

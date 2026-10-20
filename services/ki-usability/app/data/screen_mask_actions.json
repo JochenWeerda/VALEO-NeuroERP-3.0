@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 204,
-    "screens_with_actions": 104,
+    "actions": 206,
+    "screens_with_actions": 105,
     "domains": 17
   },
   "actions": [
@@ -2074,6 +2074,46 @@
         "screenId": "einkauf/supplier",
         "actionKey": "sperren",
         "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/warengruppen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (einkauf/warengruppen)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/warengruppen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/warengruppen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:einkauf/warengruppen:neu",
+      "label": "Warengruppe anlegen",
+      "description": "Warengruppe anlegen (einkauf/warengruppen)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/warengruppen",
+      "intent_phrases": [
+        "Warengruppe anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/warengruppen",
+        "actionKey": "neu",
+        "commandEndpoint": "/api/v1/stammdaten/warengruppen",
         "navigationRoute": null,
         "command": null,
         "method": "POST"

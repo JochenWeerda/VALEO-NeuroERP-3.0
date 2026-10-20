@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-20
+last_reviewed: 2026-10-21
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (142 Masken).
+> Generiert aus `app/core/screen_definitions.py` (143 Masken).
 
 ## Übersicht
 
@@ -79,6 +79,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/lieferanten` | Lieferanten | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/lieferanten/agent-contract` |
 | `einkauf/purchase-order` | Bestellung | einkauf | mittel | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
 | `einkauf/supplier` | Lieferant | einkauf | niedrig | `procure-to-pay` | `GET /api/v1/masks/einkauf/supplier/agent-contract` |
+| `einkauf/warengruppen` | Warengruppen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/warengruppen/agent-contract` |
 | `finance/ap-invoice` | Eingangsrechnung | finance | mittel | `procure-to-pay` | `GET /api/v1/masks/finance/ap-invoice/agent-contract` |
 | `finance/ar-open-item` | Offener Posten | finance | mittel | `order-to-cash` | `GET /api/v1/masks/finance/ar-open-item/agent-contract` |
 | `finance/bankkonto` | Bankkonto | finance | mittel | — | `GET /api/v1/masks/finance/bankkonto/agent-contract` |
@@ -2350,6 +2351,45 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `neue_bestellung` | Bestellung anlegen | safe | nein | `—` |
 | `sperren` | Sperren | warning | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren` |
 | `entsperren` | Entsperren | safe | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren` |
+
+---
+
+### `einkauf/warengruppen` — Warengruppen
+
+**Zweck:** Warengruppen fuer Artikel, Auswertungen und Einkauf pflegen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/einkauf/warengruppen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/einkauf/warengruppen/agent-contract` |
+| Readiness | `GET /api/v1/masks/einkauf/warengruppen/readiness` |
+| Rollout-Route | `/mask-rollout/einkauf__warengruppen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/stammdaten/warengruppen`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Warengruppen gehoeren zu Saatgut?
+- Lege die Warengruppe Biostimulanzien an.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Warengruppe anlegen | safe | nein | `/api/v1/stammdaten/warengruppen` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

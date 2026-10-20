@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, architect, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-20
+last_reviewed: 2026-10-21
 version: 1.0.0
 description: Generierter Katalog der domain_*-Tabellen aus information_schema.
 ---
@@ -724,7 +724,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.vertreter_staffel_zeilen` | `app/api/v1/endpoints/vertreterprovisionen.py` | `app/api/v1/endpoints/vertreterprovisionen.py` | — |
 | `domain_shared.waage_hofliste` | `app/api/v1/endpoints/hofliste.py` | `app/api/v1/endpoints/hofliste.py` | — |
 | `domain_shared.waage_wiegungsgruppen` | `app/api/v1/endpoints/artikel_stamm_ext.py` | `app/api/v1/endpoints/artikel_stamm_ext.py` | — |
-| `domain_shared.warengruppen` | `app/api/v1/endpoints/warengruppen.py` | `app/api/v1/endpoints/warengruppen.py` | — |
+| `domain_shared.warengruppen` | `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/api/v1/endpoints/warengruppen.py` | `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/api/v1/endpoints/warengruppen.py` | — |
 | `domain_shared.webhook_deliveries` | `app/api/v1/endpoints/webhook_system.py`, `app/services/webhook_service.py` | `app/services/webhook_service.py` | — |
 | `domain_shared.webhook_registrations` | `app/api/v1/endpoints/webhook_system.py`, `app/infrastructure/models/l3c_models.py`, `app/services/webhook_service.py` | `app/services/webhook_service.py` | — |
 | `domain_shared.webshop_bestellungen` | `app/services/webshop_integration_service.py` | `app/services/webshop_integration_service.py` | — |

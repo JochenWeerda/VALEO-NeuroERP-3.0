@@ -336,6 +336,15 @@ Seite (Anlegen bot sie nicht). Befunde: **jede Vorlagenanlage scheiterte mit 500
 schon als Liste liefert); die Liste meldete jeden Fehler als leere Liste (jetzt 503); Anwenden pruefte nicht, ob der
 Entwurf ausgeglichen ist (jetzt 422 bei Soll != Haben). Mandant der sechs Wege aus dem Kontext statt Query.
 
+## Warengruppen als Studio-Liste (21.10.2026)
+
+`einkauf/warengruppen`: Anlegen (Kopfaktion mit Auswahl der Oberwarengruppe), Bearbeiten und Deaktivieren als
+Kommandowege `/stammdaten/warengruppen/{id}/actions/…` (Audit, Begruendung beim Deaktivieren). Framework:
+`NativeListPage` belegt Zeilenaktionen mit den Zeilenwerten vor und ersetzt jeden `{feld}`-Platzhalter im Kommandoweg.
+Befunde: Aendern pruefte die Oberwarengruppe nicht gegen den Mandanten (nur die Anlage); Loeschen meldete 204 auch
+fuer unbekannte Gruppen. Prozess: das Abschluss-Skript schrieb die Ratsche **vor** der Pruefung (wuchs still) —
+korrigiert; die eigenen Wellen-Commits haben sie nie erweitert (geprueft).
+
 ## Einordnung: Mandant aus Query/Body (20.10.2026)
 
 208 Wege deklarieren `tenant_id` als Query-Parameter (Standard oft `"system"`), weitere tragen ihn im Body. Das ist

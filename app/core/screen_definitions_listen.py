@@ -1090,6 +1090,44 @@ def build_finance_buchungsvorlagen_liste() -> dict[str, Any]:
     )
 
 
+def build_einkauf_warengruppen_liste() -> dict[str, Any]:
+    """Warengruppen (dritte Ebene unter Haupt- und Oberwarengruppe): anlegen, bearbeiten, deaktivieren."""
+    pfad = "/api/v1/stammdaten/warengruppen/{entity_id}/actions/"
+    ober = {"key": "ober_id", "label": "Oberwarengruppe", "type": "select", "required": True,
+            "optionsSource": {"endpoint": "/api/v1/stammdaten/warengruppen/ober", "valueKey": "id",
+                              "labelKey": "bezeichnung"}}
+    return _liste(
+        screen_id="einkauf/warengruppen", domain="einkauf", title="Warengruppen",
+        subtitle="Warengruppen unter Haupt- und Oberwarengruppe", endpoint="/api/v1/stammdaten/warengruppen",
+        row_route=None, bundle="einkauf",
+        columns=[
+            {"key": "gruppe_nr", "label": "Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "bezeichnung", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "ober_id", "label": "Oberwarengruppe", "filterable": True, "priority": "secondary"},
+            {"key": "created_at", "label": "Angelegt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[
+            {"key": "neu", "label": "Warengruppe anlegen", "kind": "primary", "dangerLevel": "safe", "zone": "header",
+             "permission": "stammdaten.warengruppe.create", "commandEndpoint": "/api/v1/stammdaten/warengruppen",
+             "method": "POST", "inputFields": [
+                 {"key": "gruppe_nr", "label": "Nr.", "type": "text", "required": True},
+                 {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True}, ober]},
+            _EXPORT,
+        ],
+        row_actions=[
+            {"key": "bearbeiten", "label": "Bearbeiten", "dangerLevel": "safe",
+             "permission": "stammdaten.warengruppe.update", "commandEndpoint": pfad + "bearbeiten", "method": "POST",
+             "inputFields": [{"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True}, ober]},
+            {"key": "deaktivieren", "label": "Deaktivieren", "dangerLevel": "moderate",
+             "permission": "stammdaten.warengruppe.deaktivieren", "commandEndpoint": pfad + "deaktivieren",
+             "method": "POST", "requiresConfirmation": True, "auditReasonRequired": True},
+        ],
+        purpose="Warengruppen fuer Artikel, Auswertungen und Einkauf pflegen.",
+        prompts=["Welche Warengruppen gehoeren zu Saatgut?", "Lege die Warengruppe Biostimulanzien an."],
+        no_workflow="Warengruppen sind Referenzdaten ohne eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -1113,6 +1151,7 @@ LISTEN_SCREEN_BUILDERS = {
     "artikel/liste": build_artikel_liste,
     "finance/wechselkurse": build_finance_wechselkurse_liste,
     "finance/buchungsvorlagen": build_finance_buchungsvorlagen_liste,
+    "einkauf/warengruppen": build_einkauf_warengruppen_liste,
     "charge/liste": build_chargen_liste,
     "personal/mitarbeiter-liste": build_personal_mitarbeiter_liste,
     "versicherungen/liste": build_versicherungen_liste,
@@ -1146,6 +1185,7 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "artikel/liste": "/artikel",
                 "finance/wechselkurse": "/finance/wechselkurse",
                 "finance/buchungsvorlagen": "/finance/buchungsvorlagen",
+                "einkauf/warengruppen": "/einkauf/warengruppen",
                 "charge/liste": "/charge/liste",
                 "personal/mitarbeiter-liste": "/personal/mitarbeiter",
                 "versicherungen/liste": "/versicherungen",

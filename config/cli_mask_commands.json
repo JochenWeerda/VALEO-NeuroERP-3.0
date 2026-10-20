@@ -187,6 +187,9 @@
   "mask:einkauf/supplier:bearbeiten",
   "mask:einkauf/supplier:entsperren",
   "mask:einkauf/supplier:sperren",
+  "mask:einkauf/warengruppen:bearbeiten",
+  "mask:einkauf/warengruppen:deaktivieren",
+  "mask:einkauf/warengruppen:neu",
   "mask:finance/ap-invoice:freigeben",
   "mask:finance/ar-open-item:mahnen",
   "mask:finance/bankkonto:bearbeiten",
@@ -280,6 +283,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 151
+  "kein_endpunkt": 152
  }
 }

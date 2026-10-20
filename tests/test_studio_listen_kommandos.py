@@ -73,6 +73,8 @@ def aufraeumen(engine):
         v.execute(text("DELETE FROM einkauf_angebote_positionen WHERE angebot_id IN "
                        "(SELECT id FROM einkauf_angebote WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_erp.exchange_rates WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        for wg in ("warengruppen", "oberwarengruppen", "hauptwarengruppen"):
+            v.execute(text(f"DELETE FROM domain_shared.{wg} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
         v.execute(text("DELETE FROM domain_erp.journal_entry_lines WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_erp.journal_entries WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_erp.booking_templates WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
@@ -542,6 +544,49 @@ def test_buchungsvorlage_anwenden_erzeugt_einen_ausgeglichenen_entwurf_im_mandan
                             {"i": angewendet.json()["journal_entry_id"]}).mappings().one()
     assert (entwurf["tenant_id"], entwurf["status"]) == (HAUS_A, "draft")
     assert client.post(pfad, headers={"X-Tenant-ID": HAUS_B}, json={"entry_date": "2026-10-20"}).status_code == 404
+
+
+def test_warengruppen_anlegen_bearbeiten_deaktivieren_mandantengenau(client):
+    """Kopf- und Zeilenaktionen der Studio-Liste; Oberwarengruppe eines fremden Mandanten wird beim Aendern abgewiesen
+    (vorher nur bei der Anlage geprueft), Deaktivieren unbekannter Gruppen 404 (vorher 204)."""
+    from app.core.screen_definitions import get_screen_definition
+
+    def kopf(haus=HAUS_A):
+        return {"X-Tenant-ID": haus}
+
+    def ober(haus):
+        nr = uuid.uuid4().hex[:6]
+        haupt = client.post("/api/v1/stammdaten/warengruppen/haupt", headers=kopf(haus),
+                            json={"gruppe_nr": f"H{nr}", "bezeichnung": "Betriebsmittel"})
+        assert haupt.status_code == 201, haupt.text
+        o = client.post("/api/v1/stammdaten/warengruppen/ober", headers=kopf(haus),
+                        json={"gruppe_nr": f"O{nr}", "bezeichnung": "Saatgut", "haupt_id": haupt.json()["id"]})
+        assert o.status_code == 201, o.text
+        return o.json()["id"]
+
+    eigene, fremde = ober(HAUS_A), ober(HAUS_B)
+    definition = get_screen_definition("einkauf/warengruppen")
+    neu = next(a for a in definition["actions"] if a["key"] == "neu")
+    nummer = f"WG{uuid.uuid4().hex[:5]}"
+    angelegt = client.post(neu["commandEndpoint"], headers=kopf(),
+                           json={"gruppe_nr": nummer, "bezeichnung": "Mais", "ober_id": eigene})
+    assert angelegt.status_code == 201, angelegt.text
+    kennung = angelegt.json()["id"]
+    zeilen = {a["key"]: a["commandEndpoint"].replace("{entity_id}", kennung)
+              for a in definition["tables"][0]["rowActions"]}
+    fremd = client.post(zeilen["bearbeiten"], headers=kopf(), json={"bezeichnung": "Silomais", "ober_id": fremde})
+    assert fremd.json()["success"] is False
+    geaendert = client.post(zeilen["bearbeiten"], headers=kopf(), json={"bezeichnung": "Silomais", "ober_id": eigene})
+    assert geaendert.json()["success"] is True, geaendert.json()
+    liste = definition["dataSources"][0]["endpoint"]
+    assert {z["gruppe_nr"]: z["bezeichnung"] for z in client.get(liste, headers=kopf()).json()}[nummer] == "Silomais"
+    assert nummer not in {z["gruppe_nr"] for z in client.get(liste, headers=kopf(HAUS_B)).json()}
+    assert client.post(zeilen["deaktivieren"], headers=kopf(HAUS_B), json={"_auditReason": "fremd"}).json()["success"] is False
+    assert client.post(zeilen["deaktivieren"], headers=kopf(), json={"_auditReason": "ersetzt durch WG 11"}).json()["success"]
+    assert client.post(zeilen["deaktivieren"], headers=kopf(), json={"_auditReason": "nochmal"}).json()["success"] is False
+    assert nummer not in {z["gruppe_nr"] for z in client.get(liste, headers=kopf()).json()}
+    # Der REST-Weg meldet unbekannte Gruppen jetzt mit 404 statt 204.
+    assert client.delete(f"/api/v1/stammdaten/warengruppen/{nummer}", headers=kopf()).status_code == 404
 
 
 def test_kreditorenliste_ist_eine_liste_und_oeffnet_die_objektmaske():

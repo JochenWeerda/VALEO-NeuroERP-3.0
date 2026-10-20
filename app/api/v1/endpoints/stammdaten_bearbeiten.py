@@ -217,6 +217,52 @@ async def lieferant_entsperren(entity_id: str, body: dict[str, Any] = Body(defau
     return await _lieferant_aktiv_setzen(db, entity_id, tenant_id, body, aktiv=True)
 
 
+# --------------------------------------------------------------------------- Warengruppe
+
+_WARENGRUPPE_STATUS = ("SELECT CASE WHEN aktiv THEN 'active' ELSE 'inactive' END AS status "
+                       "FROM domain_shared.warengruppen WHERE id::text = :id AND tenant_id = :tid")
+
+
+@router.post("/stammdaten/warengruppen/{entity_id}/actions/bearbeiten", response_model=MaskActionResult,
+             summary="Warengruppe bearbeiten", dependencies=SCHREIBEN["STAMMDATEN"])
+async def warengruppe_bearbeiten(entity_id: str, body: dict[str, Any] = Body(default_factory=dict),
+                                 db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    from sqlalchemy import text
+
+    from app.api.v1.endpoints.warengruppen import WarengruppeCreate, update_warengruppe
+
+    def ergaenzen(session: Session, eingabe: dict, eid: str, tid: str) -> dict[str, Any]:
+        # Vollersatz-Modell: Nummer und nicht gesendete Felder aus dem Ist-Stand.
+        zeile = session.execute(text("SELECT gruppe_nr, bezeichnung, ober_id FROM domain_shared.warengruppen "
+                                     "WHERE id::text = :id AND tenant_id = :tid"), {"id": eid, "tid": tid}).mappings().first()
+        return dict(zeile) if zeile else {}
+
+    def aendern(session: Session, werte: Any, eid: str, tid: str) -> None:
+        update_warengruppe(werte.gruppe_nr, werte, db=session, tenant_id=tid)
+
+    return await bearbeiten(
+        db, entity_type="warengruppe", entity_id=entity_id, tenant_id=tenant_id, body=body,
+        felder=_gleich("bezeichnung", "ober_id"), modell=WarengruppeCreate, erlaubt={"active"}, ergaenzen=ergaenzen,
+        lesen=zeile_per_sql(_WARENGRUPPE_STATUS), aendern=aendern, event_type="stammdaten.warengruppe.updated")
+
+
+@router.post("/stammdaten/warengruppen/{entity_id}/actions/deaktivieren", response_model=MaskActionResult,
+             summary="Warengruppe deaktivieren", dependencies=SCHREIBEN["STAMMDATEN"])
+async def warengruppe_deaktivieren(entity_id: str, body: dict[str, Any] = Body(default_factory=dict),
+                                   db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    from sqlalchemy import text
+
+    def ausfuehren(session: Session, payload: dict[str, Any]) -> str:
+        session.execute(text("UPDATE domain_shared.warengruppen SET aktiv = false "
+                             "WHERE id::text = :id AND tenant_id = :tid"), {"id": entity_id, "tid": tenant_id})
+        return "Warengruppe deaktiviert."
+
+    return await statusaktion(
+        db, action_key="deaktivieren", entity_type="warengruppe", entity_id=entity_id, tenant_id=tenant_id,
+        body=body, status_sql=_WARENGRUPPE_STATUS, erlaubt={"active"}, ausfuehren=ausfuehren,
+        event_type="stammdaten.warengruppe.deaktiviert")
+
+
 # --------------------------------------------------------------------------- Artikel
 
 # Dieselben Rollen wie der Artikel-Aenderungsweg (``articles.update_article``: Stammdaten schreiben).

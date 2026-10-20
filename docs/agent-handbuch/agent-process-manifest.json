@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-20",
+  "generatedAt": "2026-10-21",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -3153,6 +3153,50 @@
         "zahlungsbedingungen",
         "lieferzeit_tage"
       ],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "einkauf/warengruppen",
+      "title": "Warengruppen",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/einkauf__warengruppen/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/warengruppen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/warengruppen/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/warengruppen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Warengruppe anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "stammdaten.warengruppe.create",
+          "commandEndpoint": "/api/v1/stammdaten/warengruppen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
@@ -6859,5 +6903,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 131
+  "event_count": 133
 }

@@ -856,6 +856,41 @@
         ]
       ]
     },
+    "einkauf/warengruppen": {
+      "stammdaten.warengruppe.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "stammdaten.warengruppe.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "stammdaten.warengruppe.deaktivieren": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "finance/ap-invoice": {
       "finance.ap.freigabe": [
         [
