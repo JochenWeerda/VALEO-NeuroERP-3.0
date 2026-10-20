@@ -9,11 +9,11 @@ Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentschei
 |---|---:|---:|
 | studio_versioniert | 1 | 0.1 % |
 | screen_definition | 80 | 12.0 % |
-| builder_altmuster | 105 | 15.7 % |
-| handgebaut | 483 | 72.2 % |
+| builder_altmuster | 104 | 15.6 % |
+| handgebaut | 483 | 72.3 % |
 | weiterleitung | 2 |  |
 
-Gesamt 671 Routen, davon 669 Masken.
+Gesamt 670 Routen, davon 668 Masken.
 
 ## Aktionen
 
@@ -65,7 +65,6 @@ fachliche Zuordnung fuehrt `docs/design/beleg-studio-variantenmatrix.md`.
 | `einkauf/angebote` | builder_altmuster |
 | `einkauf/auftragsbestaetigung` | builder_altmuster |
 | `einkauf/auftragsbestaetigung/:id` | screen_definition |
-| `einkauf/auftragsbestaetigung/neu` | builder_altmuster |
 | `einkauf/auftragsbestaetigungen` | builder_altmuster |
 | `einkauf/bestellung/:id` | screen_definition |
 | `einkauf/bestellungen` | builder_altmuster |
@@ -112,7 +111,7 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | fibu | 0 | 0 | 1 | 42 | 0 |
 | finance | 0 | 7 | 18 | 28 | 0 |
 | admin | 0 | 4 | 0 | 27 | 0 |
-| einkauf | 0 | 7 | 16 | 27 | 0 |
+| einkauf | 0 | 7 | 15 | 27 | 0 |
 | sales | 0 | 8 | 0 | 22 | 0 |
 | crm | 0 | 8 | 26 | 21 | 0 |
 | lager | 0 | 3 | 3 | 16 | 0 |

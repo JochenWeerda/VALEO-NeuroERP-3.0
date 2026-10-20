@@ -33,7 +33,7 @@ BEARBEITER = f"bearb-{uuid.uuid4().hex[:8]}"
 
 TABELLEN = ("domain_crm.crm_action_audit_log", "public.outbox_events", "domain_ops.ops_bankkonten",
             "domain_shared.futtermittel_mischfutter", "public.crm_leads", "public.einkauf_auftragsbestaetigungen",
-            "domain_ops.reklamationen")
+            "domain_ops.reklamationen", "domain_einkauf.bestellungen", "domain_einkauf.lieferanten")
 
 
 @pytest.fixture(scope="module")
@@ -340,3 +340,35 @@ def test_unbekanntes_objekt_ist_nicht_gefunden_statt_sql_fehler(client, maske):
     assert antwort.status_code == 200, antwort.text
     assert antwort.json()["success"] is False
     assert antwort.json()["error"] == "Objekt nicht gefunden.", antwort.json()
+
+
+def test_auftragsbestaetigung_wird_zur_bestellung_erfasst(client, engine):
+    """Bis 20.10.2026 gab es keinen Erfassungsweg; Lieferant und Bestellnummer kommen aus der Bestellung."""
+    lieferant, bestellung = str(uuid.uuid4()), str(uuid.uuid4())
+    nummer = f"B-{bestellung[:6]}"
+    ausfuehren(engine, "INSERT INTO domain_einkauf.lieferanten (id, tenant_id, lieferantennummer, firmenname) "
+                       "VALUES (:id, :h, :nr, 'Muehle Nord')", id=lieferant, h=HAUS_A, nr=f"L-{lieferant[:6]}")
+    ausfuehren(engine, "INSERT INTO domain_einkauf.bestellungen (id, tenant_id, bestellnummer, lieferant_id, "
+                       "bestelldatum, waehrung) VALUES (:id, :h, :nr, :l, CURRENT_DATE, 'EUR')",
+               id=bestellung, h=HAUS_A, nr=nummer, l=lieferant)
+    daten = {"bestellung": nummer, "ab_nummer": "AB-77", "lieferdatum": "2026-11-05", "gesamtbetrag": 1234.5,
+             "lieferant_name": "vom Client erfunden"}
+    angelegt = client.post("/api/v1/einkauf/auftragsbestaetigungen", json=daten, headers=kopf())
+    assert angelegt.status_code == 201, angelegt.text
+    ab = zeile(engine, "SELECT lieferant_name, lieferant_id, bestell_nr, status FROM public.einkauf_auftragsbestaetigungen "
+                       "WHERE id = :id", id=angelegt.json()["id"])
+    assert (ab["lieferant_name"], ab["lieferant_id"], ab["bestell_nr"], ab["status"]) ==         ("Muehle Nord", lieferant, nummer, "OFFEN")
+    assert client.post("/api/v1/einkauf/auftragsbestaetigungen", json=daten, headers=kopf()).status_code == 409
+    # Eine Bestellung eines anderen Mandanten ist nicht auffindbar.
+    fremd = client.post("/api/v1/einkauf/auftragsbestaetigungen", json={**daten, "ab_nummer": "AB-78"},
+                        headers=kopf(HAUS_B))
+    assert fremd.status_code == 404
+
+
+def test_auftragsbestaetigung_deklariert_die_anlage():
+    from app.core.screen_definitions import get_screen_definition
+
+    anlage = get_screen_definition("einkauf/auftragsbestaetigung")["creation"]
+    assert anlage["endpoint"] == "/api/v1/einkauf/auftragsbestaetigungen"
+    assert {f["key"] for f in anlage["fields"]} >= {"bestellung", "ab_nummer"}
+

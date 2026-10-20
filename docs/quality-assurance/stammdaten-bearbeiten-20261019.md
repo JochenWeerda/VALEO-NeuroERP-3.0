@@ -64,8 +64,7 @@ Wirkung; er war entfernt. Jetzt hat jede einen echten Bearbeitungsweg, der fuer 
 
 ## Offen
 
-- Eingehende Auftragsbestaetigungen haben keinen Erfassungsweg; die Tabelle fuellt niemand. Das ist ein eigener
-  Fachslice: EDI-ORDRSP oder Erfassung, Abgleich mit der Bestellung.
+- EDI-Eingang (ORDRSP) und automatischer Positionsabgleich mit der Bestellung bleiben ein eigener Fachslice.
 - Gesamtlauf der Backend-Suite: lokal wegen Speichermangels nicht moeglich, CI ist Schiedsrichter.
 
 ## CI-Nachlauf (20.10.2026)
@@ -77,3 +76,27 @@ Wirkung; er war entfernt. Jetzt hat jede einen echten Bearbeitungsweg, der fuer 
 - „Role description contracts“ war seit `6070f8e68` rot. `check_fachrollen.py` hielt den Gruppenschluessel
   `FACHLICH_LESEN` fuer eine Rolle (Muster `*_LESEN`). Die Gruppe heisst jetzt `BERECHNEN`, der Katalog ist gruen.
 - Docs Build, Service Security und Security Scan waren schon vor diesen Commits rot und sind nicht Teil dieses Slices.
+
+## Erfassung eingehender Auftragsbestaetigungen (20.10.2026)
+
+- Neuer Weg `POST /api/v1/einkauf/auftragsbestaetigungen` (`einkauf_ab_erfassung.py`, Rolle EINKAUF).
+  - Die AB entsteht zu einer Bestellung des Mandanten.
+  - Lieferant, Bestellnummer und Waehrung leitet der Server aus der Bestellung ab. Ein vom Client gesendeter
+    Lieferant wird ignoriert.
+  - Dieselbe AB-Nummer wird mit 409 abgewiesen, eine fremde Bestellung mit 404.
+- Native Anlage ueber `creation` der Maske `einkauf/auftragsbestaetigung`. Die Route `/einkauf/auftragsbestaetigung/neu`
+  fuehrt jetzt in die native Anlage; vorher zeigte sie eine handgebaute Seite, die an einen nicht vorhandenen Weg
+  sendete.
+- Die Rechte-Projektion deckt auch Anlagen ab (61 Rechte).
+- Nebenbefund: `preis_kalkulation_bridge` und `stammdaten_bearbeiten` hatten keine Domaenenzuordnung im
+  Architekturindex (`test_generate_architecture_index` rot). Ergaenzt, Mapping 466/466.
+- Nachweis:
+  - `test_stammdaten_bearbeiten.py` mit 34 Tests und die Projektion gruen.
+  - Maskenbezogene Suiten: 3454 gruen; der eine Fehlschlag (Architekturindex) ist behoben.
+  - Routing-Integritaet, Navigationsziele, `tsc` sauber.
+
+## CI-Nachlauf 2 (20.10.2026)
+
+- Security Scan: `aiohttp` 3.14.4 behebt drei CVEs.
+- Service Security: die chromadb-Ausnahmen sind neu geprueft (siehe `security-dependency-policy-2026-09-15.md`).
+- Docs Build: die Inventare waren nicht aktuell (Drift). Alle Docs-Schritte laufen lokal gruen.

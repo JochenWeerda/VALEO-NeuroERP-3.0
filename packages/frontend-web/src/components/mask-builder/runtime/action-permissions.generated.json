@@ -339,6 +339,13 @@
           "CRM_BEARBEITEN",
           "admin"
         ]
+      ],
+      "crm.lead.create": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "admin"
+        ]
       ]
     },
     "crm/opportunity": {
@@ -397,6 +404,13 @@
         ]
       ],
       "einkauf.auftragsbestaetigung.confirm": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.auftragsbestaetigung.create": [
         [
           "EINKAUF_ADMIN",
           "EINKAUF_BEARBEITEN",

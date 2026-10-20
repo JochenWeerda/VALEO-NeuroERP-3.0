@@ -2,7 +2,7 @@
 
 Die Oberflaeche gab eine Aktion bisher nur frei, wenn ihr ``permission``-Name als Scope im Token stand (``erp_scopes``
 je Nutzer) — ein Fachanwender mit der passenden Bereichsrolle sah den Knopf nicht, obwohl der Server ihn zuliess.
-Hier entsteht dieselbe Entscheidung wie auf dem Server: Fuer jede Aktion mit Kommandoweg werden die Rollen der
+Hier entsteht dieselbe Entscheidung wie auf dem Server: Fuer jede Aktion mit Kommandoweg (und die Anlage) werden die Rollen der
 ``require_roles``-Abhaengigkeiten dieses Wegs gelesen. Jede Gruppe muss erfuellt sein (eine Rolle daraus).
 
     python scripts/generate_action_permission_projection.py          # schreiben
@@ -61,7 +61,10 @@ def render() -> str:
     screens: dict[str, dict[str, list[list[str]]]] = {}
     for screen_id in sorted(_SCREEN_DEFINITIONS):
         definition = get_screen_definition(screen_id) or {}
-        for action in definition.get("actions") or []:
+        anlage = definition.get("creation") or {}
+        anlage_als_aktion = [{"permission": anlage.get("permission"), "commandEndpoint": anlage.get("endpoint"),
+                              "method": "POST"}] if anlage.get("endpoint") else []
+        for action in [*(definition.get("actions") or []), *anlage_als_aktion]:
             permission, endpoint = action.get("permission"), action.get("commandEndpoint")
             if not permission or not endpoint or permission.startswith(("belege.", "platform:")):
                 continue

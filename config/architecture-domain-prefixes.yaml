@@ -513,6 +513,8 @@ domains:
       - mask_registry
       - mask_actions
       - mask_frontend_bridges
+      - preis_kalkulation_bridge
+      - stammdaten_bearbeiten
       - mask_rollout_
       - mask_screen_
       - beleg_vordrucke

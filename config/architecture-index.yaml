@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-20
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-20T00:29:06Z'
+generated_at: '2026-10-20T01:16:10Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -820,6 +820,7 @@ domains:
     - sales_invoices
     - sales_match
     - sales_offers
+    - sales_order_commands
     - sales_orders
     - sales_reports
     - sales_shipping_ext
@@ -1949,6 +1950,7 @@ domains:
     - operational_governance
     - operator_agent
     - planung_kalender
+    - preis_kalkulation_bridge
     - process_kernel_api
     - process_map
     - process_mining_api
@@ -1964,6 +1966,7 @@ domains:
     - security_monitoring
     - service_anfragen
     - sla_escalation_api
+    - stammdaten_bearbeiten
     - studio_drafts
     - studio_native_import
     - supply_chain_blockchain
@@ -2031,7 +2034,6 @@ domains:
     - /einkauf/audit-drilldown
     - /einkauf/auftragsbestaetigung
     - /einkauf/auftragsbestaetigung/:id
-    - /einkauf/auftragsbestaetigung/neu
     - /einkauf/auftragsbestaetigungen
     - /einkauf/auftragsbestaetigungen-liste
     - /einkauf/auftragsbestaetigungen/:id
@@ -2095,6 +2097,7 @@ domains:
     - rfq_service
     - wareneingang_avis_service
     backend_endpoints:
+    - einkauf_ab_erfassung
     - einkauf_bestellvorschlag
     - einkauf_kpis
     - einkauf_lieferschein
@@ -2110,12 +2113,12 @@ domains:
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 941
-  frontend_routes_mapped: 941
+  frontend_routes_total: 940
+  frontend_routes_mapped: 940
   backend_services_total: 302
   backend_services_mapped: 302
-  backend_endpoints_total: 462
-  backend_endpoints_mapped: 462
+  backend_endpoints_total: 466
+  backend_endpoints_mapped: 466
 unmapped:
   frontend_routes: []
   backend_services: []

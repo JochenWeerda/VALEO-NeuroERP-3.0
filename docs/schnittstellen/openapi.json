@@ -16979,6 +16979,137 @@
         "title": "AuftragCreateBody",
         "type": "object"
       },
+      "AuftragsbestaetigungAngelegt": {
+        "properties": {
+          "bestaetigungsNummer": {
+            "title": "Bestaetigungsnummer",
+            "type": "string"
+          },
+          "bestellung": {
+            "title": "Bestellung",
+            "type": "string"
+          },
+          "createdAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdat"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lieferant": {
+            "title": "Lieferant",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "bestaetigungsNummer",
+          "bestellung",
+          "lieferant",
+          "status"
+        ],
+        "title": "AuftragsbestaetigungAngelegt",
+        "type": "object"
+      },
+      "AuftragsbestaetigungAnlage": {
+        "properties": {
+          "ab_nummer": {
+            "description": "Nummer der AB des Lieferanten",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Ab Nummer",
+            "type": "string"
+          },
+          "abweichungen": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abweichungen"
+          },
+          "bestellung": {
+            "description": "Kennung oder Nummer der Bestellung",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Bestellung",
+            "type": "string"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "gesamtbetrag": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gesamtbetrag"
+          },
+          "lieferdatum": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferdatum"
+          },
+          "notizen": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notizen"
+          }
+        },
+        "required": [
+          "bestellung",
+          "ab_nummer"
+        ],
+        "title": "AuftragsbestaetigungAnlage",
+        "type": "object"
+      },
       "AusfuehrungOut": {
         "properties": {
           "ausfuehrungs_datum": {
@@ -278082,6 +278213,50 @@
         "summary": "Auftragsbestaetigungen list einkauf",
         "tags": [
           "compat"
+        ]
+      },
+      "post": {
+        "operationId": "ab_erfassen_api_v1_einkauf_auftragsbestaetigungen_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuftragsbestaetigungAnlage"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuftragsbestaetigungAngelegt"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Auftragsbestaetigung zu einer Bestellung erfassen",
+        "tags": [
+          "einkauf"
         ]
       }
     },

@@ -2168,10 +2168,7 @@
       "module": "@/pages/crm/kunden-liste",
       "path": "crm/customers"
     },
-    {
-      "module": "@/pages/einkauf/auftragsbestaetigung",
-      "path": "einkauf/auftragsbestaetigung/neu"
-    },
+    
     {
       "module": "@/pages/einkauf/rechnungseingaenge-liste",
       "path": "einkauf/rechnungseingaenge-liste"

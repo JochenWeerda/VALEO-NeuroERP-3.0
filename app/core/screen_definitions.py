@@ -2453,6 +2453,17 @@ def build_einkauf_auftragsbestaetigung_screen_definition() -> dict[str, Any]:
         "schemaVersion": 1, "id": "einkauf/auftragsbestaetigung", "domain": "einkauf", "mode": "detail",
         "title": "Auftragsbestaetigung", "subtitle": "Einkauf / Lieferanten-AB",
         "adapter": {"type": "native", "sourceId": "einkauf/auftragsbestaetigung", "temporary": False},
+        "creation": {"endpoint": "/api/v1/einkauf/auftragsbestaetigungen", "permission": "einkauf.auftragsbestaetigung.create",
+                     "detailRoute": "/einkauf/auftragsbestaetigung/{entity_id}",
+                     "fields": [
+                         {"key": "bestellung", "label": "Bestellung (Nummer)", "type": "text", "required": True},
+                         {"key": "ab_nummer", "label": "AB-Nummer des Lieferanten", "type": "text", "required": True},
+                         {"key": "datum", "label": "AB-Datum", "type": "date"},
+                         {"key": "lieferdatum", "label": "Bestaetigter Liefertermin", "type": "date"},
+                         {"key": "gesamtbetrag", "label": "Gesamtbetrag", "type": "number"},
+                         {"key": "abweichungen", "label": "Abweichungen zur Bestellung", "type": "textarea"},
+                         {"key": "notizen", "label": "Notizen", "type": "textarea"},
+                     ]},
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}"},
             {"key": "positionen", "endpoint": "/api/v1/masks/einkauf/auftragsbestaetigungen/entity/{entity_id}/tabs/positionen", "pageSize": 25},

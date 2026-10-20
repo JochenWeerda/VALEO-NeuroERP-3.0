@@ -1781,11 +1781,6 @@
       "source": "alias"
     },
     {
-      "module": "@/pages/einkauf/auftragsbestaetigung",
-      "path": "einkauf/auftragsbestaetigung/neu",
-      "source": "alias"
-    },
-    {
       "module": "@/pages/einkauf/auftragsbestaetigungen-liste",
       "path": "einkauf/auftragsbestaetigungen",
       "source": "alias"
