@@ -101,10 +101,16 @@ def _to_http_exception(error: httpx.HTTPStatusError) -> HTTPException:
 async def create_customer(
     customer_data: CustomerCreate,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> Customer:
-    """Create a new customer via crm-core, or in PostgreSQL if crm-core is unreachable."""
+    """Create a new customer via crm-core, or in PostgreSQL if crm-core is unreachable.
+
+    Mandant aus dem geprueften Kontext. Bis 20.10.2026 kam er aus dem Body (Standard: Dev-Mandant) — jede
+    CRM-Rolle konnte Kunden in fremden Mandanten anlegen, ohne Angabe landeten sie im Dev-Mandanten."""
+    if customer_data.tenant_id is not None and str(customer_data.tenant_id) != tenant_id:
+        raise HTTPException(status_code=403, detail="Customer payload belongs to a different tenant")
     try:
-        d = await _svc(db, str(customer_data.tenant_id)).create_customer(customer_data)  # type: ignore[arg-type]
+        d = await _svc(db, tenant_id).create_customer(customer_data)  # type: ignore[arg-type]
     except ValidationFailedError as exc:
         raise HTTPException(status_code=422, detail=exc.detail)
     except ConflictError as exc:
@@ -376,6 +382,8 @@ async def delete_customer(
 ) -> Response:
     try:
         await _svc(db, tenant_id).delete_customer(customer_id)
+    except EntityNotFoundError:
+        raise HTTPException(404, "Customer not found")
     except httpx.HTTPStatusError as exc:
         raise _to_http_exception(exc) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)

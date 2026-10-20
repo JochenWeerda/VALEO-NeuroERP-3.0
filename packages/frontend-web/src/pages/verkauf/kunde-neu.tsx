@@ -1,14 +1,10 @@
-import { useEffect } from 'react'
-import { useLocation, useNavigate } from '@/app/routing/typed-router'
+import { Navigate, useLocation } from '@/app/routing/typed-router'
 
+/**
+ * Kundenanlage laeuft seit 20.10.2026 ueber die Studio-Kundenakte (``crm/customer-360``, ``creation``);
+ * alte Einstiege ``/verkauf/kunde/neu`` und ``/verkauf/kunde-neu`` leiten dorthin.
+ */
 export default function KundeNeuPage(): JSX.Element {
   const location = useLocation()
-  const navigate = useNavigate()
-  const target = `/verkauf/kunde/neu${location.search}`
-
-  useEffect(() => {
-    navigate(target, { replace: true })
-  }, [navigate, target])
-
-  return <div className="p-6 text-sm text-muted-foreground">Kundenmaske wird geoeffnet...</div>
+  return <Navigate to={`/crm/kunden/neu${location.search}`} replace />
 }

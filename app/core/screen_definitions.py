@@ -10,6 +10,7 @@ from app.core.screen_definitions_harvest_controls import HARVEST_CONTROL_BUILDER
 from app.core.screen_definitions_identity import IDENTITY_SCREEN_BUILDERS
 from app.core.screen_definitions_kontrolle import KONTROLLE_ROUTEN, KONTROLLE_SCREEN_BUILDERS, KONTROLLE_SYNONYME
 from app.core.screen_definitions_listen import LISTEN_ROUTEN, LISTEN_SCREEN_BUILDERS, LISTEN_SYNONYME
+from app.core.screen_definitions_stamm import STAMM_ROUTEN, STAMM_SCREEN_BUILDERS
 from app.core.mask_rollout_catalog import ROLLOUT_WAVES_42_51
 from app.core.screen_definitions_capture import (
     build_strecke_disposition_screen_definition,
@@ -67,6 +68,23 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
             "type": "native",
             "sourceId": "crm/customer-360",
             "temporary": False,
+        },
+        # Anlage aus der Akte (20.10.2026); der Mandant kommt serverseitig aus dem Token.
+        "creation": {
+            "endpoint": "/api/v1/crm/customers/", "permission": "crm.customer.create",
+            "detailRoute": "/crm/kunden/{entity_id}", "defaults": {"country": "DE"},
+            "fields": [
+                {"key": "customer_number", "label": "Kunden-Nr.", "type": "text", "required": True},
+                {"key": "company_name", "label": "Firma", "type": "text", "required": True},
+                {"key": "contact_person", "label": "Ansprechpartner", "type": "text"},
+                {"key": "address", "label": "Strasse", "type": "text"},
+                {"key": "postal_code", "label": "PLZ", "type": "text"},
+                {"key": "city", "label": "Ort", "type": "text"},
+                {"key": "country", "label": "Land", "type": "text"},
+                {"key": "phone", "label": "Telefon", "type": "text"},
+                {"key": "email", "label": "E-Mail", "type": "email"},
+                {"key": "industry", "label": "Branche", "type": "text"},
+            ],
         },
         "summaryEndpoint": "/api/v1/crm/customers/{customer_id}/screen-summary",
         "summary": [
@@ -407,9 +425,31 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
         ],
         "actions": [
             {
-                "key": "edit",
+                # Kopfdaten aendern ohne handgebaute Maske (20.10.2026); Kommandoweg delegiert an update_customer.
+                "key": "bearbeiten",
                 "label": "Bearbeiten",
                 "kind": "primary",
+                "dangerLevel": "safe",
+                "permission": "crm.customer.update",
+                "zone": "commit",
+                "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/bearbeiten",
+                "method": "POST",
+                "inputFields": [
+                    {"key": "firma", "label": "Firma", "type": "text"},
+                    {"key": "strasse", "label": "Strasse", "type": "text"},
+                    {"key": "plz", "label": "PLZ", "type": "text"},
+                    {"key": "ort", "label": "Ort", "type": "text"},
+                    {"key": "land", "label": "Land", "type": "text"},
+                    {"key": "telefon", "label": "Telefon", "type": "text"},
+                    {"key": "email", "label": "E-Mail", "type": "email"},
+                    {"key": "branche", "label": "Branche", "type": "text"},
+                ],
+            },
+            {
+                # Unterobjekte (Anschriften, CpD, Rabatte, Chefanweisungen) pflegt noch die bisherige Kundenmaske.
+                "key": "edit",
+                "label": "Erweiterte Pflege",
+                "kind": "secondary",
                 "dangerLevel": "safe",
                 "permission": "crm.customer.update",
                 "zone": "commit",
@@ -4646,6 +4686,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     **HARVEST_CONTROL_BUILDERS,
     **KONTROLLE_SCREEN_BUILDERS,
     **LISTEN_SCREEN_BUILDERS,
+    **STAMM_SCREEN_BUILDERS,
     "schnittstelle/legacy-adapter-monitor": lambda: {
         "schemaVersion": 1, "id": "schnittstelle/legacy-adapter-monitor", "domain": "integration", "mode": "list",
         "title": "Standard-/Unimet-Adapter", "subtitle": "Eingang, Fehlerkorb, Staging und Reconciliation",
@@ -5689,6 +5730,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "agrar/harvest-controls": "/admin/screen-studio?harvestControls=1",
     **KONTROLLE_ROUTEN,
     **LISTEN_ROUTEN,
+    **STAMM_ROUTEN,
     "admin/identity-budgets": "/admin/identity-budgets",
     "admin/token-consumption": "/admin/token-consumption",
     "schnittstelle/legacy-adapter-monitor": "/schnittstelle/legacy-adapter-monitor",

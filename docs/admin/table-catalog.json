@@ -29784,6 +29784,7 @@
             "app/api/v1/endpoints/pos_retoure.py",
             "app/api/v1/endpoints/preis_kalkulation_bridge.py",
             "app/api/v1/endpoints/scan.py",
+            "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/api/v1/endpoints/stmd_duplikat.py",
             "app/api/v1/endpoints/supplier_portal.py",
             "app/infrastructure/models/__init__.py",
@@ -58339,6 +58340,7 @@
             "app/services/connector_config.py",
             "app/services/finance_read_model_service.py",
             "app/services/llm_gateway.py",
+            "app/services/studio_migration.py",
             "app/services/studio_process_simulation.py",
             "app/workers/mail_poll_worker.py",
             "app/workers/rag_indexer.py"

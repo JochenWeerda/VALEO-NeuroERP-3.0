@@ -8,26 +8,26 @@ Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentschei
 | Stufe | Routen | Anteil an Masken |
 |---|---:|---:|
 | studio_versioniert | 1 | 0.2 % |
-| screen_definition | 126 | 19.1 % |
+| screen_definition | 128 | 19.4 % |
 | builder_altmuster | 80 | 12.1 % |
-| handgebaut | 453 | 68.6 % |
-| weiterleitung | 2 |  |
+| handgebaut | 450 | 68.3 % |
+| weiterleitung | 3 |  |
 
-Gesamt 662 Routen, davon 660 Masken.
+Gesamt 662 Routen, davon 659 Masken.
 
 ## Aktionen
 
 | Befund | Anzahl |
 |---|---:|
-| Aktionen gesamt (ohne Doppel je Maske) | 417 |
-| davon serverwirksam | 267 |
-| … mit REST-Kommandoweg | 267 |
+| Aktionen gesamt (ohne Doppel je Maske) | 419 |
+| davon serverwirksam | 269 |
+| … mit REST-Kommandoweg | 269 |
 | … mit eigenem MCP-Werkzeug | 45 |
-| … per generischem MCP-Werkzeug (`mask.action.execute`) | 62 |
+| … per generischem MCP-Werkzeug (`mask.action.execute`) | 64 |
 | … MCP bewusst gesperrt | 160 |
 | … MCP offen (`open_high` u. a.) | 0 |
 | … MCP unklassifiziert | 0 |
-| … mit CLI-Zugang | 267 |
+| … mit CLI-Zugang | 269 |
 | nicht deklariert (kein Kommando, Endpunkt, Navigation) | 0 |
 | nicht verfuegbar (`stubReason`, die Maske nennt den Grund) | 0 |
 
@@ -119,7 +119,7 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | workflow | 0 | 0 | 0 | 14 | 0 |
 | compliance | 0 | 1 | 2 | 13 | 0 |
 | strecke | 0 | 0 | 0 | 12 | 0 |
-| verkauf | 0 | 3 | 0 | 11 | 2 |
+| verkauf | 0 | 3 | 0 | 10 | 3 |
 | futtermittel | 0 | 11 | 11 | 9 | 0 |
 | kontrakte | 0 | 1 | 0 | 9 | 0 |
 | pos | 0 | 0 | 2 | 9 | 0 |
@@ -141,7 +141,6 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | dashboard | 0 | 0 | 0 | 3 | 0 |
 | produktion | 0 | 0 | 2 | 3 | 0 |
 | vertrag | 0 | 0 | 0 | 3 | 0 |
-| artikel | 0 | 1 | 0 | 2 | 0 |
 | auth | 0 | 0 | 0 | 2 | 0 |
 | fuhrpark | 0 | 6 | 0 | 2 | 0 |
 | futter | 0 | 2 | 0 | 2 | 0 |
@@ -186,6 +185,7 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | vertrieb | 0 | 0 | 0 | 1 | 0 |
 | weighing | 0 | 0 | 0 | 1 | 0 |
 | wissen | 0 | 0 | 0 | 1 | 0 |
+| artikel | 0 | 3 | 0 | 0 | 0 |
 | belege | 1 | 0 | 0 | 0 | 0 |
 | dev | 0 | 1 | 0 | 0 | 0 |
 | etiketten | 0 | 0 | 1 | 0 | 0 |

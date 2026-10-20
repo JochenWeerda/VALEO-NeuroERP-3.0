@@ -44004,11 +44004,17 @@
             "title": "Tax Id"
           },
           "tenant_id": {
-            "default": "00000000-0000-0000-0000-000000000001",
-            "description": "Tenant ID (Default: Dev-Tenant)",
-            "format": "uuid",
-            "title": "Tenant Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional; Mandant aus dem Kontext (abweichend: 403)",
+            "title": "Tenant Id"
           },
           "website": {
             "anyOf": [
@@ -235928,6 +235934,64 @@
         ]
       }
     },
+    "/api/v1/articles/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "artikel_bearbeiten_api_v1_articles__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Artikel bearbeiten",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/artikel/bestandteile/stamm": {
       "get": {
         "operationId": "list_bestandteile_def_api_v1_artikel_bestandteile_stamm_get",
@@ -259406,7 +259470,7 @@
         ]
       },
       "post": {
-        "description": "Create a new customer via crm-core, or in PostgreSQL if crm-core is unreachable.",
+        "description": "Create a new customer via crm-core, or in PostgreSQL if crm-core is unreachable.\n\nMandant aus dem geprueften Kontext. Bis 20.10.2026 kam er aus dem Body (Standard: Dev-Mandant) — jede\nCRM-Rolle konnte Kunden in fremden Mandanten anlegen, ohne Angabe landeten sie im Dev-Mandanten.",
         "operationId": "create_customer_api_v1_crm_customers__post",
         "requestBody": {
           "content": {
@@ -262752,6 +262816,64 @@
           "crm",
           "customers",
           "screen-summary"
+        ]
+      }
+    },
+    "/api/v1/crm/customers/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "kunde_bearbeiten_api_v1_crm_customers__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kunde bearbeiten",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
