@@ -90,10 +90,11 @@ def inventar() -> list[str]:
     gesehen = set()
     routen = [*app.routes, *produktion.app.routes]
     for route in routen:
-        schluessel = (route.path, tuple(sorted(getattr(route, "methods", None) or ())))
-        if schluessel in gesehen:
+        # Je Routenobjekt, nicht je Pfad: Ein verdeckter Weg ohne Rolle wird erreichbar, sobald sich die Reihenfolge
+        # der Router aendert (20.10.2026: acht solche Wege, darunter das Verbuchen von Eingangsrechnungen).
+        if id(route) in gesehen:
             continue
-        gesehen.add(schluessel)
+        gesehen.add(id(route))
         if not isinstance(route, APIRoute):
             continue
         methoden = sorted(set(route.methods or ()) & {"POST", "PUT", "PATCH", "DELETE"})

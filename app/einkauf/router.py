@@ -846,7 +846,7 @@ def _get_audit_user(request: Request) -> str:
     return claims.get("sub") or claims.get("preferred_username") or "system"
 
 
-@router.post("/rechnungseingaenge/{rechnung_id}/pruefen")
+@router.post("/rechnungseingaenge/{rechnung_id}/pruefen", dependencies=SCHREIBEN["EINKAUF"])
 async def rechnungseingang_pruefen(
     rechnung_id: str,
     request: Request,
@@ -880,7 +880,7 @@ async def rechnungseingang_pruefen(
     return {"message": "Rechnungseingang geprüft", "status": "GEPRUEFT"}
 
 
-@router.post("/rechnungseingaenge/{rechnung_id}/freigeben")
+@router.post("/rechnungseingaenge/{rechnung_id}/freigeben", dependencies=SCHREIBEN["EINKAUF"])
 async def rechnungseingang_freigeben(
     rechnung_id: str,
     request: Request,
@@ -913,7 +913,7 @@ async def rechnungseingang_freigeben(
     return {"message": "Rechnungseingang freigegeben", "status": "FREIGEGEBEN"}
 
 
-@router.post("/rechnungseingaenge/{rechnung_id}/verbuchen")
+@router.post("/rechnungseingaenge/{rechnung_id}/verbuchen", dependencies=SCHREIBEN["EINKAUF"])
 async def rechnungseingang_verbuchen(
     rechnung_id: str,
     request: Request,

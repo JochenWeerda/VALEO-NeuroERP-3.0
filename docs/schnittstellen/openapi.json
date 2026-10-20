@@ -249460,6 +249460,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Activity",
         "tags": [
           "CRM",
@@ -249586,6 +249591,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Activity",
         "tags": [
           "CRM",
@@ -258548,6 +258558,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Revoke Consent",
         "tags": [
           "CRM",
@@ -258899,6 +258914,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Contact",
         "tags": [
           "CRM",
@@ -259025,6 +259045,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Contact",
         "tags": [
           "CRM",

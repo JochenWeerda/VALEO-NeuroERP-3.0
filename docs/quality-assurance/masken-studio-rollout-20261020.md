@@ -237,6 +237,15 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
   verdeckt (die Rollen-Ratsche dedupliziert gleiche Pfade). Auch die CRM-Lieferantenliste (alle Business Partner,
   tote Links) gehoert dorthin.
 
+## Rollen-Ratsche: verdeckte Wege (20.10.2026)
+
+- `scripts/check_write_routes_roles.py` dedupliziert nach Pfad und Methode und pruefte deshalb nur die erste Route
+  je Pfad. Acht verdeckte Schreibwege hatten keine Rolle: `PUT/DELETE /crm/contacts/{id}`,
+  `PUT/DELETE /crm/activities/{id}`, `POST /crm/consents/{id}/revoke` (`app/crm/router.py`) und
+  `POST /einkauf/rechnungseingaenge/{id}/pruefen|freigeben|verbuchen` (`app/einkauf/router.py`). Heute verdeckt,
+  aber erreichbar, sobald sich die Router-Reihenfolge aendert.
+- Alle acht mit derselben Bereichsrolle wie der verdeckende Weg; die Ratsche prueft jetzt jedes Routenobjekt.
+
 ## Sichtung 20.10.2026: zurueckgestellt bzw. Entscheidung noetig
 
 | Seite | Befund | Weiter |
