@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, Response
 from pydantic import Field
 from sqlalchemy.orm import Session
 
@@ -305,9 +305,12 @@ async def revoke_consent(
     consent_id: str,
     request: Request,
     reason: Optional[str] = Query(None),
+    body: Optional[dict] = Body(None),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
+    # Maske, CLI und MCP schicken die Begruendung im Body (``_auditReason``); vorher ging sie dort verloren.
+    reason = reason or (body or {}).get("reason") or (body or {}).get("_auditReason")
     row = _load(db, consent_id, tenant_id)
     if row.status != "granted":
         raise HTTPException(status_code=400, detail="Nur erteilte Einwilligungen koennen widerrufen werden")

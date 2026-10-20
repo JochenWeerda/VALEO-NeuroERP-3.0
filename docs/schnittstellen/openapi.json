@@ -318829,6 +318829,35 @@
       }
     },
     "/api/v1/gdpr/requests": {
+      "get": {
+        "description": "Anfragen des Mandanten, neueste zuerst. Bis 20.10.2026 fehlte der Weg; die Liste blieb immer leer.\n\nDie Liste zeigt E-Mail-Adressen der Betroffenen; deshalb dieselbe Rolle wie die Bearbeitung.",
+        "operationId": "list_gdpr_requests_api_v1_gdpr_requests_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GdprRequestResponse"
+                  },
+                  "title": "Response List Gdpr Requests Api V1 Gdpr Requests Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gdpr requests auflisten",
+        "tags": [
+          "gdpr"
+        ]
+      },
       "post": {
         "description": "Create a new GDPR data-subject request (Art. 15 / 17 / 20).",
         "operationId": "create_gdpr_request_api_v1_gdpr_requests_post",
@@ -319150,6 +319179,24 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {

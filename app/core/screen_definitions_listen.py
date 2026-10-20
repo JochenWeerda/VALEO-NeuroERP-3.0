@@ -489,6 +489,176 @@ def build_finance_kreditoren_liste() -> dict[str, Any]:
     )
 
 
+def build_crm_kampagnen_liste() -> dict[str, Any]:
+    """Marketing-Kampagnen mit Versand- und Oeffnungszahlen."""
+    return _liste(
+        screen_id="crm/kampagnen-liste", domain="crm", title="Kampagnen", subtitle="Marketing-Kampagnen und Reichweite",
+        endpoint="/api/v1/crm/campaigns", row_route="/crm/campaign/{id}", bundle="crm",
+        columns=[
+            {"key": "name", "label": "Kampagne", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "type", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "sent_count", "label": "Versendet", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "open_count", "label": "Geoeffnet", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "click_count", "label": "Klicks", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neue Kampagne", "/crm/campaign/new"), _EXPORT],
+        row_actions=[
+            {"key": "loeschen", "label": "Loeschen", "dangerLevel": "high", "permission": "crm.kampagne.loeschen",
+             "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}", "method": "DELETE",
+             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True},
+        ],
+        dangerous=[{"key": "loeschen", "reason": "Entfernt eine Kampagne; nur Mensch."}],
+        purpose="Kampagnen mit Versand-, Oeffnungs- und Klickzahlen finden und oeffnen.",
+        prompts=["Welche Kampagnen sind noch im Entwurf?", "Welche Kampagne hat die meisten Klicks?"],
+        no_workflow="Der Status steht an der Kampagne; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_crm_kampagnenvorlagen_liste() -> dict[str, Any]:
+    """Vorlagen fuer Kampagnen: aktivieren, deaktivieren, duplizieren, loeschen."""
+    pfad = "/api/v1/crm/campaigns/templates/{entity_id}"
+    return _liste(
+        screen_id="crm/kampagnenvorlagen-liste", domain="crm", title="Kampagnenvorlagen",
+        subtitle="Vorlagen fuer E-Mail-, Brief- und SMS-Kampagnen", endpoint="/api/v1/crm/campaigns/templates",
+        row_route="/crm/campaign-template/{id}", bundle="crm",
+        columns=[
+            {"key": "name", "label": "Vorlage", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "type", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "subject", "label": "Betreff", "filterable": True, "priority": "secondary"},
+            {"key": "is_active", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "primary"},
+            {"key": "usage_count", "label": "Verwendet", "numeric": True, "sortable": True, "priority": "tertiary"},
+            {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neue Vorlage", "/crm/campaign-template/new"), _EXPORT],
+        row_actions=[
+            {"key": "aktivieren", "label": "Aktivieren", "dangerLevel": "safe", "permission": "crm.vorlage.aktivieren",
+             "commandEndpoint": pfad + "/activate", "method": "POST", "requiresConfirmation": True,
+             "visibleWhen": {"field": "is_active", "values": [False]}},
+            {"key": "deaktivieren", "label": "Deaktivieren", "dangerLevel": "moderate",
+             "permission": "crm.vorlage.deaktivieren", "commandEndpoint": pfad + "/deactivate", "method": "POST",
+             "requiresConfirmation": True, "visibleWhen": {"field": "is_active", "values": [True]}},
+            {"key": "duplizieren", "label": "Duplizieren", "dangerLevel": "safe", "permission": "crm.vorlage.duplizieren",
+             "commandEndpoint": pfad + "/duplicate", "method": "POST", "requiresConfirmation": True},
+            {"key": "loeschen", "label": "Loeschen", "dangerLevel": "high", "permission": "crm.vorlage.loeschen",
+             "commandEndpoint": pfad, "method": "DELETE", "requiresConfirmation": True,
+             "auditReasonRequired": True, "forbiddenForAgents": True},
+        ],
+        dangerous=[{"key": "loeschen", "reason": "Entfernt eine Vorlage; nur Mensch."}],
+        purpose="Kampagnenvorlagen pflegen: aktivieren, deaktivieren, duplizieren.",
+        prompts=["Welche Vorlagen sind aktiv?", "Welche Vorlage wird am haeufigsten verwendet?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_crm_einwilligungen_liste() -> dict[str, Any]:
+    """Einwilligungen (Art. 7 DSGVO): widerrufen mit Grund; Loeschen wird nicht angeboten (Nachweispflicht)."""
+    return _liste(
+        screen_id="crm/einwilligungen-liste", domain="crm", title="Einwilligungen",
+        subtitle="Einwilligungen je Kontakt und Kanal mit Double-Opt-in", endpoint="/api/v1/crm/consents",
+        row_route="/crm/consent/{id}", bundle="crm",
+        columns=[
+            {"key": "contact_id", "label": "Kontakt", "filterable": True, "priority": "primary"},
+            {"key": "channel", "label": "Kanal", "filterable": True, "priority": "primary"},
+            {"key": "consent_type", "label": "Zweck", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "granted_at", "label": "Erteilt", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "double_opt_in_confirmed_at", "label": "Double-Opt-in", "renderKind": "date",
+             "priority": "secondary"},
+            {"key": "source", "label": "Quelle", "filterable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Einwilligung erfassen", "/crm/consent/new"), _EXPORT],
+        row_actions=[
+            {"key": "widerrufen", "label": "Widerrufen", "dangerLevel": "high",
+             "permission": "crm.einwilligung.widerrufen",
+             "commandEndpoint": "/api/v1/crm/consents/{entity_id}/revoke", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": {"field": "status", "values": ["granted"]}},
+        ],
+        dangerous=[{"key": "widerrufen", "reason": "Widerruft eine Einwilligung; nur Mensch mit Begruendung."}],
+        purpose="Einwilligungen je Kontakt und Kanal nachweisen und auf Wunsch widerrufen.",
+        prompts=["Welche Einwilligungen warten auf Double-Opt-in?", "Welche Einwilligungen wurden widerrufen?"],
+        no_workflow="Der Status steht an der Einwilligung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_dsgvo_anfragen_liste() -> dict[str, Any]:
+    """Betroffenenanfragen (Art. 15, 17, 20): pruefen, Auskunft, Daten loeschen, ablehnen."""
+    pfad = "/api/v1/gdpr/requests/{entity_id}/"
+    return _liste(
+        screen_id="crm/dsgvo-anfragen-liste", domain="crm", title="DSGVO-Anfragen",
+        subtitle="Auskunft, Loeschung und Datenuebertragung", endpoint="/api/v1/gdpr/requests",
+        row_route="/crm/gdpr-request/{id}", bundle="crm",
+        columns=[
+            {"key": "subject_email", "label": "Betroffene Person", "filterable": True, "priority": "primary"},
+            {"key": "request_type", "label": "Art", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "created_at", "label": "Eingegangen", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "verified_at", "label": "Geprueft", "renderKind": "date", "priority": "secondary"},
+            {"key": "completed_at", "label": "Abgeschlossen", "renderKind": "date", "priority": "secondary"},
+            {"key": "rejection_reason", "label": "Ablehnungsgrund", "priority": "tertiary"},
+        ],
+        actions=[_neu("Anfrage erfassen", "/crm/gdpr-request/new")],
+        row_actions=[
+            {"key": "pruefen", "label": "Identitaet bestaetigt", "dangerLevel": "moderate",
+             "permission": "dsgvo.anfrage.pruefen", "commandEndpoint": pfad + "verify", "method": "POST",
+             "requiresConfirmation": True, "forbiddenForAgents": True,
+             "visibleWhen": {"field": "status", "values": ["PENDING"]}},
+            {"key": "exportieren", "label": "Auskunft erstellen", "dangerLevel": "moderate",
+             "permission": "dsgvo.anfrage.exportieren", "commandEndpoint": pfad + "export", "method": "POST",
+             "requiresConfirmation": True, "forbiddenForAgents": True,
+             "visibleWhen": {"field": "status", "values": ["VERIFIED"]}},
+            {"key": "daten_loeschen", "label": "Daten loeschen (Art. 17)", "dangerLevel": "critical",
+             "permission": "dsgvo.anfrage.loeschen", "commandEndpoint": pfad + "delete", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True, "humanApprovalRequired": True,
+             "forbiddenForAgents": True, "visibleWhen": {"field": "status", "values": ["VERIFIED"]}},
+            {"key": "ablehnen", "label": "Ablehnen", "dangerLevel": "high", "permission": "dsgvo.anfrage.ablehnen",
+             "commandEndpoint": pfad + "reject", "method": "POST", "requiresConfirmation": True,
+             "auditReasonRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": {"field": "status", "values": ["PENDING", "VERIFIED", "PROCESSING"]}},
+        ],
+        dangerous=[
+            {"key": "daten_loeschen", "reason": "Loescht personenbezogene Daten unwiderruflich (Art. 17); nur Mensch."},
+            {"key": "ablehnen", "reason": "Lehnt eine Betroffenenanfrage ab; nur Mensch mit Begruendung."},
+        ],
+        purpose="Betroffenenanfragen fristgerecht pruefen, beantworten, loeschen oder begruendet ablehnen.",
+        prompts=["Welche DSGVO-Anfragen sind noch offen?", "Welche Loeschanfragen sind geprueft?"],
+        no_workflow="Der Ablauf (eingegangen, geprueft, abgeschlossen) steht an der Anfrage selbst.",
+    )
+
+
+def build_crm_segmente_liste() -> dict[str, Any]:
+    """Kundensegmente: Mitglieder neu berechnen, loeschen."""
+    return _liste(
+        screen_id="crm/segmente-liste", domain="crm", title="Segmente",
+        subtitle="Kundensegmente mit Mitgliederzahl", endpoint="/api/v1/crm/segments",
+        row_route="/crm/segment/{id}", bundle="crm",
+        columns=[
+            {"key": "name", "label": "Segment", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "type", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "member_count", "label": "Mitglieder", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "last_calculated_at", "label": "Berechnet", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neues Segment", "/crm/segment/new"), _EXPORT],
+        row_actions=[
+            {"key": "berechnen", "label": "Neu berechnen", "dangerLevel": "safe", "permission": "crm.segment.berechnen",
+             "commandEndpoint": "/api/v1/crm/segments/{entity_id}/calculate", "method": "POST",
+             "requiresConfirmation": True},
+            {"key": "loeschen", "label": "Loeschen", "dangerLevel": "high", "permission": "crm.segment.loeschen",
+             "commandEndpoint": "/api/v1/crm/segments/{entity_id}", "method": "DELETE",
+             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True},
+        ],
+        dangerous=[{"key": "loeschen", "reason": "Entfernt ein Segment; nur Mensch."}],
+        purpose="Kundensegmente finden, Mitglieder neu berechnen und nicht mehr genutzte entfernen.",
+        prompts=["Wie viele Mitglieder hat jedes Segment?", "Welche Segmente sind lange nicht berechnet?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -502,6 +672,11 @@ LISTEN_SCREEN_BUILDERS = {
     "futtermittel/mischfuttermittel-liste": build_futtermittel_mischfuttermittel_liste,
     "finance/debitoren-liste": build_finance_debitoren_liste,
     "finance/kreditoren-liste": build_finance_kreditoren_liste,
+    "crm/kampagnen-liste": build_crm_kampagnen_liste,
+    "crm/kampagnenvorlagen-liste": build_crm_kampagnenvorlagen_liste,
+    "crm/einwilligungen-liste": build_crm_einwilligungen_liste,
+    "crm/dsgvo-anfragen-liste": build_dsgvo_anfragen_liste,
+    "crm/segmente-liste": build_crm_segmente_liste,
 }
 LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
                 "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
@@ -513,7 +688,12 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "futtermittel/einzelfuttermittel-liste": "/futtermittel/einzelfuttermittel-liste",
                 "futtermittel/mischfuttermittel-liste": "/futtermittel/mischfuttermittel-liste",
                 "finance/debitoren-liste": "/finance/debitoren-liste",
-                "finance/kreditoren-liste": "/finance/kreditoren"}
+                "finance/kreditoren-liste": "/finance/kreditoren",
+                "crm/kampagnen-liste": "/crm/campaigns",
+                "crm/kampagnenvorlagen-liste": "/crm/campaign-templates",
+                "crm/einwilligungen-liste": "/crm/consents",
+                "crm/dsgvo-anfragen-liste": "/crm/gdpr-requests",
+                "crm/segmente-liste": "/crm/segments"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
@@ -525,4 +705,9 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "futtermittel/einzelfuttermittel-liste": ["einzelfuttermittel", "futterkatalog", "futtermittel"],
                    "futtermittel/mischfuttermittel-liste": ["mischfuttermittel", "mischfutter", "kraftfutter"],
                    "finance/debitoren-liste": ["debitoren", "debitorenliste", "forderungen"],
-                   "finance/kreditoren-liste": ["kreditoren", "kreditorenliste", "verbindlichkeiten stamm"]}
+                   "finance/kreditoren-liste": ["kreditoren", "kreditorenliste", "verbindlichkeiten stamm"],
+                   "crm/kampagnen-liste": ["kampagnen", "marketing", "campaigns"],
+                   "crm/kampagnenvorlagen-liste": ["kampagnenvorlagen", "vorlagen", "templates"],
+                   "crm/einwilligungen-liste": ["einwilligungen", "consent", "opt-in"],
+                   "crm/dsgvo-anfragen-liste": ["dsgvo-anfragen", "betroffenenanfragen", "gdpr"],
+                   "crm/segmente-liste": ["segmente", "kundensegmente", "zielgruppen"]}

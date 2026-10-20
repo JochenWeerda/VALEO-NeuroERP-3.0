@@ -74,3 +74,13 @@ it('blendet Zeilenaktionen ohne Recht im Plan aus', () => {
   expect(ohne.tablesByKey.list.rowActions).toEqual([])
   expect(mit.tablesByKey.list.rowActions?.map(a => a.key)).toEqual(['loeschen'])
 })
+
+it('wertet die 2xx-Antwort eines Fachwegs ohne Umschlag als Erfolg', async () => {
+  request.mockResolvedValue({ data: { id: 'A-1', status: 'ENTWURF' } })
+  mount()
+  fireEvent.click(screen.getByRole('button', { name: 'Zeile loeschen' }))
+  fireEvent.change(await screen.findByRole('textbox'), { target: { value: 'Doppelt erfasst' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Loeschen' }))
+  await waitFor(() => expect(toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Loeschen' })))
+  expect(toast).not.toHaveBeenCalledWith(expect.objectContaining({ variant: 'destructive' }))
+})

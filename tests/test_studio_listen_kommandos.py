@@ -60,6 +60,11 @@ def aufraeumen(engine):
     with engine.begin() as v:
         v.execute(text("DELETE FROM einkauf_anfragen_positionen WHERE anfrage_id IN "
                        "(SELECT id FROM einkauf_anfragen WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_crm.crm_contact_consent_history WHERE consent_id IN (SELECT id FROM "
+                       "domain_crm.crm_contact_consents WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_crm.crm_contact_consents WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM gdpr_request_history WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM gdpr_requests WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_crm.customers WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_shared.futtermittel_mischfutter WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_agrar.agrar_duenger WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
@@ -483,3 +488,36 @@ def test_kreditorenliste_ist_eine_liste_und_oeffnet_die_objektmaske():
     assert quelle == liste["dataSources"][0]["endpoint"] + "/{entity_id}"
     assert liste["tables"][0]["rowRouteTemplate"] == "/finance/kreditor/{id}"
     assert next(a for a in liste["actions"] if a["key"] == "neu")["navigationRoute"] == "/finance/kreditoren-stamm"
+
+
+def test_dsgvo_anfragen_liste_mandantengenau_und_ablehnung_mit_grund_aus_dem_body(client):
+    """Die Liste fehlte (Seite immer leer); der Ablehnungsgrund kam nur als Query-Parameter an."""
+    neu = client.post("/api/v1/gdpr/requests", headers={"X-Tenant-ID": HAUS_A},
+                      json={"subject_id": str(uuid.uuid4()), "subject_email": "betroffen@example.invalid",
+                            "request_type": "ACCESS"})
+    assert neu.status_code == 201, neu.text
+    kennung = neu.json()["id"]
+    assert [a["id"] for a in client.get("/api/v1/gdpr/requests", headers={"X-Tenant-ID": HAUS_A}).json()] == [kennung]
+    assert client.get("/api/v1/gdpr/requests", headers={"X-Tenant-ID": HAUS_B}).json() == []
+    abgelehnt = client.post(f"/api/v1/gdpr/requests/{kennung}/reject", headers={"X-Tenant-ID": HAUS_A},
+                            json={"_auditReason": "Identitaet nicht nachweisbar"})
+    assert abgelehnt.status_code == 200, abgelehnt.text
+    assert abgelehnt.json()["rejection_reason"] == "Identitaet nicht nachweisbar"
+
+
+def test_einwilligung_widerruf_nimmt_den_grund_aus_dem_body(engine, client):
+    kopf = {"X-Tenant-ID": HAUS_A}
+    neu = client.post("/api/v1/crm/consents", headers=kopf,
+                      json={"contact_id": "K-1", "channel": "email", "consent_type": "marketing"})
+    assert neu.status_code == 201, neu.text
+    kennung = neu.json()["id"]
+    token = zeile(engine, "SELECT double_opt_in_token FROM domain_crm.crm_contact_consents WHERE id = :i",
+                  i=kennung)["double_opt_in_token"]
+    bestaetigt = client.post(f"/api/v1/crm/consents/{kennung}/confirm", params={"token": token}, headers=kopf)
+    assert bestaetigt.status_code == 200, bestaetigt.text
+    widerruf = client.post(f"/api/v1/crm/consents/{kennung}/revoke", headers=kopf,
+                           json={"_auditReason": "Kunde per Telefon"})
+    assert widerruf.status_code == 200, widerruf.text
+    grund = zeile(engine, "SELECT reason FROM domain_crm.crm_contact_consent_history WHERE consent_id = :i "
+                          "AND new_status = 'revoked'", i=kennung)
+    assert grund["reason"] == "Kunde per Telefon"

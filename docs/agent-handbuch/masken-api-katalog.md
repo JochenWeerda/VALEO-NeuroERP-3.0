@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (120 Masken).
+> Generiert aus `app/core/screen_definitions.py` (125 Masken).
 
 ## Übersicht
 
@@ -51,9 +51,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `auswertungen/sanktionspruefung-kunden` | Terrorschutzpruefung Kunden | compliance | mittel | — | `GET /api/v1/masks/auswertungen/sanktionspruefung-kunden/agent-contract` |
 | `auswertungen/sanktionspruefung-personal` | Terrorschutzpruefung Personal | compliance | mittel | — | `GET /api/v1/masks/auswertungen/sanktionspruefung-personal/agent-contract` |
 | `crm/customer-360` | Kundenakte | crm | niedrig | `order-to-cash`, `service-to-customer` | `GET /api/v1/masks/crm/customer-360/agent-contract` |
+| `crm/dsgvo-anfragen-liste` | DSGVO-Anfragen | crm | niedrig | — | `GET /api/v1/masks/crm/dsgvo-anfragen-liste/agent-contract` |
+| `crm/einwilligungen-liste` | Einwilligungen | crm | niedrig | — | `GET /api/v1/masks/crm/einwilligungen-liste/agent-contract` |
+| `crm/kampagnen-liste` | Kampagnen | crm | niedrig | — | `GET /api/v1/masks/crm/kampagnen-liste/agent-contract` |
+| `crm/kampagnenvorlagen-liste` | Kampagnenvorlagen | crm | niedrig | — | `GET /api/v1/masks/crm/kampagnenvorlagen-liste/agent-contract` |
 | `crm/lead` | Kundenakte | crm | niedrig | — | `GET /api/v1/masks/crm/lead/agent-contract` |
 | `crm/mail-arbeitsplatz` | Mail-Arbeitsplatz | crm | niedrig | — | `GET /api/v1/masks/crm/mail-arbeitsplatz/agent-contract` |
 | `crm/opportunity` | Opportunity | crm | niedrig | `order-to-cash` | `GET /api/v1/masks/crm/opportunity/agent-contract` |
+| `crm/segmente-liste` | Segmente | crm | niedrig | — | `GET /api/v1/masks/crm/segmente-liste/agent-contract` |
 | `docflow/dokumenten-ruecklauf` | Dokumentenruecklauf | dms-compliance | niedrig | — | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/agent-contract` |
 | `einkauf/anfrage` | Einkaufsanfrage | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfrage/agent-contract` |
 | `einkauf/anfragen` | Anfragen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfragen/agent-contract` |
@@ -1240,6 +1245,161 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `crm/dsgvo-anfragen-liste` — DSGVO-Anfragen
+
+**Zweck:** Betroffenenanfragen fristgerecht pruefen, beantworten, loeschen oder begruendet ablehnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/crm/dsgvo-anfragen-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/crm/dsgvo-anfragen-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/crm/dsgvo-anfragen-liste/readiness` |
+| Rollout-Route | `/mask-rollout/crm__dsgvo-anfragen-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/gdpr/requests`
+
+**MCP-Tools (Domäne):**
+
+- `crm.customer.search` — scope `crm:read`, Risiko niedrig
+- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
+- `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche DSGVO-Anfragen sind noch offen?
+- Welche Loeschanfragen sind geprueft?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Anfrage erfassen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+
+---
+
+### `crm/einwilligungen-liste` — Einwilligungen
+
+**Zweck:** Einwilligungen je Kontakt und Kanal nachweisen und auf Wunsch widerrufen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/crm/einwilligungen-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/crm/einwilligungen-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/crm/einwilligungen-liste/readiness` |
+| Rollout-Route | `/mask-rollout/crm__einwilligungen-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/crm/consents`
+
+**MCP-Tools (Domäne):**
+
+- `crm.customer.search` — scope `crm:read`, Risiko niedrig
+- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
+- `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Einwilligungen warten auf Double-Opt-in?
+- Welche Einwilligungen wurden widerrufen?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Einwilligung erfassen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `crm/kampagnen-liste` — Kampagnen
+
+**Zweck:** Kampagnen mit Versand-, Oeffnungs- und Klickzahlen finden und oeffnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/crm/kampagnen-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/crm/kampagnen-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/crm/kampagnen-liste/readiness` |
+| Rollout-Route | `/mask-rollout/crm__kampagnen-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/crm/campaigns`
+
+**MCP-Tools (Domäne):**
+
+- `crm.customer.search` — scope `crm:read`, Risiko niedrig
+- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
+- `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Kampagnen sind noch im Entwurf?
+- Welche Kampagne hat die meisten Klicks?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neue Kampagne | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `crm/kampagnenvorlagen-liste` — Kampagnenvorlagen
+
+**Zweck:** Kampagnenvorlagen pflegen: aktivieren, deaktivieren, duplizieren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/crm/kampagnenvorlagen-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/crm/kampagnenvorlagen-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/crm/kampagnenvorlagen-liste/readiness` |
+| Rollout-Route | `/mask-rollout/crm__kampagnenvorlagen-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/crm/campaigns/templates`
+
+**MCP-Tools (Domäne):**
+
+- `crm.customer.search` — scope `crm:read`, Risiko niedrig
+- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
+- `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Vorlagen sind aktiv?
+- Welche Vorlage wird am haeufigsten verwendet?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neue Vorlage | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
 ### `crm/lead` — Kundenakte
 
 **Zweck:** Lead-Akte: Kundenpotenzial mit Aktivitaeten und Aufgaben fuer Vertriebssteuerung.
@@ -1368,6 +1528,45 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/crm/opportunities/{entity_id}/actions/bearbeiten` |
 | `create_activity` | Aktivitaet anlegen | safe | nein | `/api/v1/crm/opportunities/{entity_id}/actions/create_activity` |
+
+---
+
+### `crm/segmente-liste` — Segmente
+
+**Zweck:** Kundensegmente finden, Mitglieder neu berechnen und nicht mehr genutzte entfernen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/crm/segmente-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/crm/segmente-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/crm/segmente-liste/readiness` |
+| Rollout-Route | `/mask-rollout/crm__segmente-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/crm/segments`
+
+**MCP-Tools (Domäne):**
+
+- `crm.customer.search` — scope `crm:read`, Risiko niedrig
+- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
+- `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Wie viele Mitglieder hat jedes Segment?
+- Welche Segmente sind lange nicht berechnet?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neues Segment | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

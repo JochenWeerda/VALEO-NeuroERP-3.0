@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 164,
-    "screens_with_actions": 82,
+    "actions": 173,
+    "screens_with_actions": 87,
     "domains": 14
   },
   "actions": [
@@ -1028,6 +1028,146 @@
       }
     },
     {
+      "id": "mask:crm/dsgvo-anfragen-liste:neu",
+      "label": "Anfrage erfassen",
+      "description": "Anfrage erfassen (crm/dsgvo-anfragen-liste)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/dsgvo-anfragen-liste",
+      "intent_phrases": [
+        "Anfrage erfassen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/dsgvo-anfragen-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/gdpr-request/new",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/einwilligungen-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (crm/einwilligungen-liste)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/einwilligungen-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/einwilligungen-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/einwilligungen-liste:neu",
+      "label": "Einwilligung erfassen",
+      "description": "Einwilligung erfassen (crm/einwilligungen-liste)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/einwilligungen-liste",
+      "intent_phrases": [
+        "Einwilligung erfassen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/einwilligungen-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/consent/new",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/kampagnen-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (crm/kampagnen-liste)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kampagnen-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/kampagnen-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/kampagnen-liste:neu",
+      "label": "Neue Kampagne",
+      "description": "Neue Kampagne (crm/kampagnen-liste)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kampagnen-liste",
+      "intent_phrases": [
+        "Neue Kampagne"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/kampagnen-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/campaign/new",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/kampagnenvorlagen-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (crm/kampagnenvorlagen-liste)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kampagnenvorlagen-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/kampagnenvorlagen-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/kampagnenvorlagen-liste:neu",
+      "label": "Neue Vorlage",
+      "description": "Neue Vorlage (crm/kampagnenvorlagen-liste)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kampagnenvorlagen-liste",
+      "intent_phrases": [
+        "Neue Vorlage"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/kampagnenvorlagen-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/campaign-template/new",
+        "command": null,
+        "method": null
+      }
+    },
+    {
       "id": "mask:crm/lead:bearbeiten",
       "label": "Bearbeiten",
       "description": "Bearbeiten (crm/lead)",
@@ -1133,6 +1273,46 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:crm/segmente-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (crm/segmente-liste)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/segmente-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/segmente-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/segmente-liste:neu",
+      "label": "Neues Segment",
+      "description": "Neues Segment (crm/segmente-liste)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/segmente-liste",
+      "intent_phrases": [
+        "Neues Segment"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/segmente-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/segment/new",
+        "command": null,
+        "method": null
       }
     },
     {

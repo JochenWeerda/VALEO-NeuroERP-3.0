@@ -134,6 +134,16 @@
   "mask:beleg/sales-order:umwandeln:sales_delivery",
   "mask:beleg/sales-order:umwandeln:sales_invoice",
   "mask:crm/customer-360:create_activity",
+  "mask:crm/dsgvo-anfragen-liste:ablehnen",
+  "mask:crm/dsgvo-anfragen-liste:daten_loeschen",
+  "mask:crm/dsgvo-anfragen-liste:exportieren",
+  "mask:crm/dsgvo-anfragen-liste:pruefen",
+  "mask:crm/einwilligungen-liste:widerrufen",
+  "mask:crm/kampagnen-liste:loeschen",
+  "mask:crm/kampagnenvorlagen-liste:aktivieren",
+  "mask:crm/kampagnenvorlagen-liste:deaktivieren",
+  "mask:crm/kampagnenvorlagen-liste:duplizieren",
+  "mask:crm/kampagnenvorlagen-liste:loeschen",
   "mask:crm/lead:bearbeiten",
   "mask:crm/lead:qualifizieren",
   "mask:crm/mail-arbeitsplatz:assign",
@@ -142,6 +152,8 @@
   "mask:crm/mail-arbeitsplatz:transfer",
   "mask:crm/opportunity:bearbeiten",
   "mask:crm/opportunity:create_activity",
+  "mask:crm/segmente-liste:berechnen",
+  "mask:crm/segmente-liste:loeschen",
   "mask:docflow/dokumenten-ruecklauf:mark_received",
   "mask:docflow/dokumenten-ruecklauf:mark_sent",
   "mask:docflow/dokumenten-ruecklauf:verify_return",
@@ -256,6 +268,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 116
+  "kein_endpunkt": 125
  }
 }

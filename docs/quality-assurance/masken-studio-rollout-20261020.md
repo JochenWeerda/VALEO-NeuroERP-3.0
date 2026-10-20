@@ -197,6 +197,23 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 - Waechter `src/__tests__/security/keine-scheindaten.test.ts`: keine Ersatzlisten `FALLBACK_/MOCK_/DUMMY_/SAMPLE_/FAKE_`
   in Seiten, Features, Bibliotheken und Komponenten (ausdrueckliche Vorfuehrungen `DEMO_` bleiben).
 
+## Welle 1, Schritt 11 (20.10.2026): CRM-Marketing und DSGVO-Anfragen
+
+- Fuenf Studio-Listen: `crm/kampagnen-liste`, `crm/kampagnenvorlagen-liste` (aktivieren, deaktivieren,
+  duplizieren, loeschen), `crm/einwilligungen-liste` (widerrufen mit Grund), `crm/dsgvo-anfragen-liste` (Identitaet
+  bestaetigen, Auskunft, Daten loeschen Art. 17, ablehnen mit Grund), `crm/segmente-liste` (neu berechnen, loeschen).
+- `NativeListPage` wertet eine 2xx-Antwort eines Fachwegs ohne Umschlag als Erfolg (`success: false` bleibt
+  Ablehnung); so rufen die Listen die bestehenden Fachwege mit ihren Rollen, wie Objektmasken es schon tun.
+- **Befund, behoben:** `GET /gdpr/requests` gab es nicht — die Liste der Betroffenenanfragen war immer leer, ihre
+  Spalten passten zu keiner API, „Loeschen“ und „Als erledigt markieren“ zielten auf nicht vorhandene Wege. Neuer
+  Listenweg mandantengenau mit Bereichsrolle (die Liste zeigt E-Mail-Adressen Betroffener).
+- **Befund, behoben:** Ablehnen (DSGVO) und Widerruf (Einwilligung) lasen den Grund nur als Query-Parameter; der
+  Grund aus Maske, CLI und MCP (Body) ging verloren.
+- **Offen (Entscheidung):** `DELETE /crm/consents/{id}` loescht den Einwilligungsnachweis hart (Art. 7 Abs. 1
+  DSGVO verlangt den Nachweis); die Liste bietet Loeschen nicht an. Der Widerruf protokolliert immer
+  `changed_by="contact"`, auch wenn Mitarbeitende widerrufen.
+- Ratsche: Altmuster 86 -> 81.
+
 ## Sichtung 20.10.2026: zurueckgestellt bzw. Entscheidung noetig
 
 | Seite | Befund | Weiter |
