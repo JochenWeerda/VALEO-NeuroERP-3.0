@@ -79,7 +79,7 @@ function renderInvoice(definition: ScreenDefinition = invoice()): void {
 }
 
 function rowOf(text: string): HTMLElement {
-  const row = within(screen.getByTestId('table-positionen')).getByText(text).closest('[role="button"]')
+  const row = within(screen.getByTestId('table-positionen')).getByText(text).closest('[role="row"]')
   if (!(row instanceof HTMLElement)) throw new Error(`row for ${text} is not selectable`)
   return row
 }
@@ -156,7 +156,10 @@ describe('Row detail band (table.rowDetail)', () => {
 
   it('keeps rows plain when the table declares no detail band', () => {
     renderInvoice(invoice({ ...POSITIONS, rowDetail: undefined }, 'sales/invoice-plain'))
-    expect(screen.getByText('Weizen A').closest('[role="button"]')).toBeNull()
+    // Ohne Detailband: reine Tabellenzeile, nicht fokussierbar und nicht auswaehlbar.
+    const zeile = screen.getByText('Weizen A').closest('[role="row"]')
+    expect(zeile?.getAttribute('tabindex')).toBeNull()
+    expect(zeile?.hasAttribute('aria-selected')).toBe(false)
     expect(screen.queryByTestId('row-detail-band-positionen')).not.toBeInTheDocument()
   })
 })

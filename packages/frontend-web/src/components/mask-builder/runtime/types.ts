@@ -35,6 +35,9 @@ export interface TableBinding {
   tableKey: string
   endpoint: string
   requiresServerQuery: boolean
+  /** Ohne Serverblaetterung: einmal bis `fetchLimit` laden, Suche/Filter/Sortierung/Seite im Browser. */
+  clientQuery?: boolean
+  fetchLimit?: number
   staleTimeMs?: number
 }
 

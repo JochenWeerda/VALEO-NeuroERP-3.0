@@ -140,16 +140,12 @@ async def list_einzelfuttermittel(
     user: User = Depends(get_current_user),
 ):
     require_roles(user, READ_ROLES)
-    try:
-        q = db.query(Einzelfuttermittel).filter(Einzelfuttermittel.tenant_id == tenant_id)
-        if aktiv:
-            q = q.filter(Einzelfuttermittel.aktiv.is_(True))
-        if art:
-            q = q.filter(Einzelfuttermittel.art == art)
-        return q.order_by(Einzelfuttermittel.name).all()
-    except Exception:
-        db.rollback()
-        return []
+    q = db.query(Einzelfuttermittel).filter(Einzelfuttermittel.tenant_id == tenant_id)
+    if aktiv:
+        q = q.filter(Einzelfuttermittel.aktiv.is_(True))
+    if art:
+        q = q.filter(Einzelfuttermittel.art == art)
+    return q.order_by(Einzelfuttermittel.name).all()
 
 
 @router.get("/einzelfuttermittel/{futter_id}", response_model=EinzelfuttermittelOut,
@@ -243,16 +239,12 @@ async def list_mischfuttermittel(
     user: User = Depends(get_current_user),
 ):
     require_roles(user, READ_ROLES)
-    try:
-        q = db.query(Mischfuttermittel).filter(Mischfuttermittel.tenant_id == tenant_id)
-        if aktiv:
-            q = q.filter(Mischfuttermittel.aktiv.is_(True))
-        if tierart:
-            q = q.filter(Mischfuttermittel.tierart == tierart)
-        return q.order_by(Mischfuttermittel.name).all()
-    except Exception:
-        db.rollback()
-        return []
+    q = db.query(Mischfuttermittel).filter(Mischfuttermittel.tenant_id == tenant_id)
+    if aktiv:
+        q = q.filter(Mischfuttermittel.aktiv.is_(True))
+    if tierart:
+        q = q.filter(Mischfuttermittel.tierart == tierart)
+    return q.order_by(Mischfuttermittel.name).all()
 
 
 @router.get("/mischfuttermittel/{misch_id}", response_model=MischfuttermittelOut,

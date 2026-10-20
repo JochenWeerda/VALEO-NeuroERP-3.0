@@ -94,7 +94,7 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "kontenplan"
   },
   {
-    "module": "@/pages/finance/kreditoren-stamm",
+    "module": "@/pages/finance/kreditoren-liste",
     "path": "kreditoren"
   },
   {

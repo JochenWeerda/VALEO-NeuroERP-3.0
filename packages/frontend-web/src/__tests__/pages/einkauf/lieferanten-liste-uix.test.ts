@@ -8,14 +8,10 @@ const src = readFileSync(
 )
 
 describe('Lieferanten-Liste UIX', () => {
-  it('stellt Suche vor den KPI-Karten und oeffnet per 44-px-Tipp', () => {
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('Suche Lieferanten')
-    expect(src).toContain('min-h-11 font-medium text-primary')
-    expect(src).not.toContain('text-blue-600')
-    expect(src).not.toContain('hover:underline')
-    expect(src).toContain('min-h-touch gap-2 touch-manipulation')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('Suche Lieferanten')
+  it('ist eine Studio-Liste aus derselben Quelle wie die Objektmaske', () => {
+    // MASK-STUDIO-ROLLOUT: Suche, 44-px-Zeilen und Touch-Verhalten liefert der universelle Renderer.
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="einkauf/lieferanten"')
+    expect(src).not.toContain('/api/v1/crm/suppliers')
   })
 })

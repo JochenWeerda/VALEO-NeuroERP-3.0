@@ -25,7 +25,8 @@ type Aktion = Pick<ScreenActionDefinition, 'key' | 'label'> & {
   auditReasonRequired?: boolean
   dangerLevel?: string
 }
-type MaskCommandResult = { success: boolean; summary?: string | null; error?: string | null }
+/** Maskenkommando (``success``) oder ein Fachweg ohne Umschlag: dort zaehlt die 2xx-Antwort als Erfolg. */
+type MaskCommandResult = { success?: boolean; summary?: string | null; error?: string | null } | null
 
 const ernst = new Set(['moderate', 'high', 'critical'])
 
@@ -79,9 +80,11 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
         method: aktion.method ?? 'POST',
         data: { ...werte, ...(begruendung ? { _auditReason: begruendung } : {}), _idempotencyKey: crypto.randomUUID() },
       })
-      if (!data?.success) throw new Error(data?.error ?? 'Die Aktion wurde abgelehnt.')
+      if (data && typeof data === 'object' && data.success === false) {
+        throw new Error(data.error ?? 'Die Aktion wurde abgelehnt.')
+      }
       await queryClient.invalidateQueries({ queryKey: [screenId] })
-      toast({ title: aktion.label, description: data.summary ?? 'Ausgefuehrt.' })
+      toast({ title: aktion.label, description: data?.summary ?? 'Ausgefuehrt.' })
       schliessen()
     } catch (error) {
       toast({ title: `${aktion.label} fehlgeschlagen`, description: getAxiosErrorMessage(error), variant: 'destructive' })

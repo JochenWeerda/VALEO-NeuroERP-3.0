@@ -14,7 +14,8 @@ type KundenumsatzData = {
   topKunden: Array<{ name: string; umsatz: number; wachstum: number }>
 }
 
-const FALLBACK: KundenumsatzData = {
+/** Leerer Startwert (keine Kennzahlen), bis die Kundenumsaetze geladen sind. */
+const LEER: KundenumsatzData = {
   gesamtumsatz: 0,
   kunden: 0,
   durchschnitt: 0,
@@ -24,7 +25,7 @@ const FALLBACK: KundenumsatzData = {
 }
 
 export default function KundenumsatzPage(): JSX.Element {
-  const { data: analyse = FALLBACK, isLoading } = useQuery({
+  const { data: analyse = LEER, isLoading } = useQuery({
     queryKey: ['crm', 'kundenumsatz'],
     queryFn: async () => {
       const customersResponse = await apiClient.get<{ items: Array<{ id: string; name: string; revenue?: number }>; total: number }>('/api/v1/crm/customers/?limit=200')

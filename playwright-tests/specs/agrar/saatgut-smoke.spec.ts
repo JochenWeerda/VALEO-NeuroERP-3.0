@@ -8,13 +8,14 @@ import { waitForAppReady } from '../../helpers/ui';
 
 test.describe('Agrar - Saatgut @smoke', () => {
   test('Saatgut-Liste lädt', async ({ adminPage }) => {
-    await adminPage.route('**/api/v1/agrar/saatgut?**', async (route) => {
+    await adminPage.route('**/api/v1/agrar/saatgut/?**', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ items: [] }) });
     });
     await adminPage.goto('/agrar/saatgut-liste');
     await waitForAppReady(adminPage);
-    
-    await expect(adminPage.getByText('Saatgut-Verwaltung', { exact: true })).toBeVisible({ timeout: 15000 });
+
+    // Studio-Liste (MASK-STUDIO-ROLLOUT): Titel und Wurzel kommen aus der ScreenDefinition agrar/saatgut-liste.
+    await expect(adminPage.locator('[data-screen-definition="agrar/saatgut-liste"]')).toBeVisible({ timeout: 15000 });
   });
 
   test('Saatgut-Stamm lädt', async ({ adminPage }) => {

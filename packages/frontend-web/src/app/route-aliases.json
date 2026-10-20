@@ -1257,7 +1257,7 @@
       "path": "finance/kontenplan"
     },
     {
-      "module": "@/pages/finance/kreditoren-stamm",
+      "module": "@/pages/finance/kreditoren-liste",
       "path": "finance/kreditoren"
     },
     {

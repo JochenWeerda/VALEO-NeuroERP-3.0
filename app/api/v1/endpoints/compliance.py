@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import Optional
+import logging
 import csv
 import io
 from uuid import uuid4
@@ -43,6 +44,8 @@ class ComplianceOut(BaseSchema):
     """Typed response schema for ComplianceOut endpoints (extra fields forwarded)."""
     model_config = _ConfigDict(extra="allow")
 
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/compliance", tags=["Compliance"])
 
@@ -391,87 +394,9 @@ async def export_chargen_trace_report(
 # Wave 23 AP4: Intrastat-Meldungen
 # ---------------------------------------------------------------------------
 
-from ....core.intrastat_model import (
-    IntrastatRichtung,
-    build_stub_intrastat_meldung,
-    validate_intrastat_meldung,
-)
-
-_INTRASTAT_STORE: dict[str, dict] = {}
-
-
-@router.get("/intrastat/meldungen", response_model=ComplianceOut, summary="Intrastat meldungen auflisten")
-async def list_intrastat_meldungen(
-    meldezeitraum: Optional[str] = None,
-    richtung: Optional[str] = None,
-) -> dict:
-    """
-    Liste aller Intrastat-Meldungen (Gap 042).
-
-    Optional filterbar nach Meldezeitraum (YYYY-MM) und Richtung (EINGANG/AUSGANG).
-    """
-    meldungen = list(_INTRASTAT_STORE.values())
-
-    if meldezeitraum:
-        meldungen = [m for m in meldungen if m.get("meldezeitraum") == meldezeitraum]
-    if richtung:
-        meldungen = [m for m in meldungen if m.get("richtung") == richtung.upper()]
-
-    return {
-        "meldungen": meldungen,
-        "count": len(meldungen),
-        "schema_version": 1,
-    }
-
-
-@router.post("/intrastat/meldungen", response_model=ComplianceOut, status_code=201, summary="Intrastat meldung anlegen", dependencies=SCHREIBEN["QUALITAET"])
-async def create_intrastat_meldung(
-    body: dict,
-) -> dict:
-    """
-    Anlage einer neuen Intrastat-Meldung (Gap 042).
-
-    Fuehrt direkt eine Vollstaendigkeitspruefung gemaess VO (EG) 638/2004 durch.
-    Gibt validation_result mit allen Violations zurueck.
-    """
-    meldung_id = body.get("meldung_id", f"INTRA-{len(_INTRASTAT_STORE) + 1:04d}")
-    tenant_id = body.get("tenant_id", "demo-tenant")
-    meldezeitraum = body.get("meldezeitraum", "2026-03")
-    richtung_raw = body.get("richtung", "EINGANG")
-
-    try:
-        richtung = IntrastatRichtung(richtung_raw)
-    except ValueError:
-        richtung = IntrastatRichtung.EINGANG
-
-    meldung = build_stub_intrastat_meldung(
-        meldung_id=meldung_id,
-        tenant_id=tenant_id,
-        meldezeitraum=meldezeitraum,
-        richtung=richtung,
-    )
-    validation = validate_intrastat_meldung(meldung)
-    meldung_dict = meldung.as_dict()
-    _INTRASTAT_STORE[meldung_id] = meldung_dict
-
-    return {
-        "meldung": meldung_dict,
-        "validation_result": validation.as_dict(),
-        "schema_version": 1,
-    }
-
-
-@router.get("/intrastat/meldungen/{meldung_id}/validate", response_model=ComplianceOut, summary="Intrastat meldung endpoint validieren")
-async def validate_intrastat_meldung_endpoint(meldung_id: str) -> dict:
-    """
-    Vollstaendigkeitspruefung einer einzelnen Intrastat-Meldung nach EU-VO 638/2004.
-    """
-    meldung = build_stub_intrastat_meldung(
-        meldung_id=meldung_id,
-        tenant_id="demo-tenant",
-    )
-    result = validate_intrastat_meldung(meldung)
-    return result.as_dict()
+# Intrastat liegt in ``endpoints/intrastat.py`` (``domain_compliance.intrastat_meldungen``). Bis 20.10.2026 standen
+# hier Wege, die erfundene Beispielmeldungen anlegten (Mandant aus dem Body, Standard "demo-tenant"), sie ohne
+# Mandantenfilter im Arbeitsspeicher listeten und jede Kennung als "gueltig" prueften.
 
 
 # ── PCN-Meldungen (Product Classification Notification / UFI) ────────────────
@@ -479,7 +404,6 @@ async def validate_intrastat_meldung_endpoint(meldung_id: str) -> dict:
 import re as _re
 _UFI_PATTERN = _re.compile(r"^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$")
 _PCN_STATUS_VALUES = {"entwurf", "validiert", "eingereicht", "angenommen", "abgelehnt"}
-_PCN_STORE: dict[str, dict] = {}
 
 
 def _pcn_to_dict(m: PCNMeldung) -> dict:
@@ -494,22 +418,6 @@ def _pcn_to_dict(m: PCNMeldung) -> dict:
         "tenant_id": m.tenant_id,
         "created_at": m.created_at.isoformat() if m.created_at else None,
         "schema_version": 1,
-    }
-
-
-def _pcn_store_payload(meldung_id: str, body: dict, tenant_id: str) -> dict:
-    return {
-        "meldung_id": meldung_id,
-        "produktname": str(body["produktname"]).strip(),
-        "ufi": str(body.get("ufi") or ""),
-        "cas_nummern": body.get("cas_nummern") or "",
-        "gefahrenklassen": body.get("gefahrenklassen") or [],
-        "verwendungskategorie": body.get("verwendungskategorie") or "",
-        "pcnStatus": body.get("pcnStatus", "entwurf"),
-        "tenant_id": tenant_id,
-        "created_at": datetime.utcnow().isoformat(),
-        "schema_version": 1,
-        "persistence": "memory_fallback",
     }
 
 
@@ -553,15 +461,16 @@ async def create_pcn_meldung(
         pcn_status=pcn_status,
         tenant_id=tenant_id,
     )
+    # Bis 20.10.2026 meldete ein gescheitertes Speichern Erfolg und hielt die Meldung nur im Arbeitsspeicher
+    # (nach einem Neustart verloren). Eine PCN-Meldung (CLP-Anhang VIII) ist gespeichert oder nicht angelegt.
     try:
         db.add(meldung)
         db.commit()
         db.refresh(meldung)
-    except Exception:
+    except Exception as exc:
         db.rollback()
-        fallback = _pcn_store_payload(meldung.id, {**body, "pcnStatus": pcn_status}, tenant_id)
-        _PCN_STORE[meldung.id] = fallback
-        return fallback
+        logger.error("PCN-Meldung konnte nicht gespeichert werden: %s", exc, exc_info=True)
+        raise HTTPException(status_code=503, detail="PCN-Meldung konnte nicht gespeichert werden.") from exc
 
     return _pcn_to_dict(meldung)
 
@@ -574,20 +483,14 @@ async def list_pcn_meldungen(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Liste aller PCN-Meldungen (tenant-isoliert, paginiert)."""
-    try:
-        base_q = (
-            db.query(PCNMeldung)
-            .filter(PCNMeldung.tenant_id == tenant_id)
-            .order_by(PCNMeldung.created_at.desc())
-        )
-        total = base_q.count()
-        rows = base_q.offset(skip).limit(limit).all()
-        meldungen = [_pcn_to_dict(m) for m in rows]
-    except Exception:
-        db.rollback()
-        tenant_rows = [m for m in _PCN_STORE.values() if m.get("tenant_id") == tenant_id]
-        total = len(tenant_rows)
-        meldungen = tenant_rows[skip : skip + limit]
+    base_q = (
+        db.query(PCNMeldung)
+        .filter(PCNMeldung.tenant_id == tenant_id)
+        .order_by(PCNMeldung.created_at.desc())
+    )
+    total = base_q.count()
+    rows = base_q.offset(skip).limit(limit).all()
+    meldungen = [_pcn_to_dict(m) for m in rows]
     return {
         "total": total,
         "skip": skip,

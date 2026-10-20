@@ -8,9 +8,9 @@ Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentschei
 | Stufe | Routen | Anteil an Masken |
 |---|---:|---:|
 | studio_versioniert | 1 | 0.2 % |
-| screen_definition | 82 | 12.4 % |
-| builder_altmuster | 100 | 15.2 % |
-| handgebaut | 477 | 72.3 % |
+| screen_definition | 126 | 19.1 % |
+| builder_altmuster | 80 | 12.1 % |
+| handgebaut | 453 | 68.6 % |
 | weiterleitung | 2 |  |
 
 Gesamt 662 Routen, davon 660 Masken.
@@ -19,15 +19,15 @@ Gesamt 662 Routen, davon 660 Masken.
 
 | Befund | Anzahl |
 |---|---:|
-| Aktionen gesamt (ohne Doppel je Maske) | 335 |
-| davon serverwirksam | 239 |
-| … mit REST-Kommandoweg | 239 |
+| Aktionen gesamt (ohne Doppel je Maske) | 417 |
+| davon serverwirksam | 267 |
+| … mit REST-Kommandoweg | 267 |
 | … mit eigenem MCP-Werkzeug | 46 |
-| … per generischem MCP-Werkzeug (`mask.action.execute`) | 49 |
-| … MCP bewusst gesperrt | 144 |
+| … per generischem MCP-Werkzeug (`mask.action.execute`) | 62 |
+| … MCP bewusst gesperrt | 159 |
 | … MCP offen (`open_high` u. a.) | 0 |
 | … MCP unklassifiziert | 0 |
-| … mit CLI-Zugang | 239 |
+| … mit CLI-Zugang | 267 |
 | nicht deklariert (kein Kommando, Endpunkt, Navigation) | 0 |
 | nicht verfuegbar (`stubReason`, die Maske nennt den Grund) | 0 |
 
@@ -65,9 +65,9 @@ fachliche Zuordnung fuehrt `docs/design/beleg-studio-variantenmatrix.md`.
 | `einkauf/angebote` | screen_definition |
 | `einkauf/auftragsbestaetigung` | builder_altmuster |
 | `einkauf/auftragsbestaetigung/:id` | screen_definition |
-| `einkauf/auftragsbestaetigungen` | builder_altmuster |
+| `einkauf/auftragsbestaetigungen` | screen_definition |
 | `einkauf/bestellung/:id` | screen_definition |
-| `einkauf/bestellungen` | builder_altmuster |
+| `einkauf/bestellungen` | screen_definition |
 | `einkauf/bestellungen/:id` | builder_altmuster |
 | `einkauf/bestellungen/neu` | builder_altmuster |
 | `einkauf/gutschriften-belastungen` | handgebaut |
@@ -107,23 +107,23 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 
 | Bereich | studio_versioniert | screen_definition | builder_altmuster | handgebaut | weiterleitung |
 |---|---:|---:|---:|---:|---:|
-| agrar | 0 | 5 | 6 | 48 | 0 |
+| agrar | 0 | 13 | 3 | 43 | 0 |
 | fibu | 0 | 0 | 1 | 42 | 0 |
-| finance | 0 | 7 | 18 | 28 | 0 |
-| admin | 0 | 4 | 0 | 27 | 0 |
-| einkauf | 0 | 9 | 13 | 27 | 0 |
+| finance | 0 | 9 | 16 | 28 | 0 |
+| einkauf | 0 | 14 | 9 | 26 | 0 |
+| admin | 0 | 6 | 0 | 25 | 0 |
 | sales | 0 | 8 | 0 | 22 | 0 |
-| crm | 0 | 8 | 26 | 21 | 0 |
+| crm | 0 | 14 | 20 | 21 | 0 |
 | lager | 0 | 3 | 3 | 16 | 0 |
 | portal | 0 | 1 | 0 | 16 | 0 |
-| compliance | 0 | 0 | 2 | 14 | 0 |
 | workflow | 0 | 0 | 0 | 14 | 0 |
-| personal | 0 | 5 | 0 | 12 | 0 |
+| compliance | 0 | 1 | 2 | 13 | 0 |
 | strecke | 0 | 0 | 0 | 12 | 0 |
 | verkauf | 0 | 3 | 0 | 11 | 2 |
-| futtermittel | 0 | 6 | 16 | 9 | 0 |
+| futtermittel | 0 | 11 | 11 | 9 | 0 |
 | kontrakte | 0 | 1 | 0 | 9 | 0 |
 | pos | 0 | 0 | 2 | 9 | 0 |
+| personal | 0 | 9 | 0 | 8 | 0 |
 | controlling | 0 | 0 | 0 | 7 | 0 |
 | docflow | 0 | 0 | 0 | 6 | 0 |
 | annahme | 0 | 0 | 3 | 5 | 0 |
@@ -131,27 +131,26 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | service | 0 | 0 | 0 | 5 | 0 |
 | waage | 0 | 0 | 0 | 5 | 0 |
 | agribusiness | 0 | 0 | 0 | 4 | 0 |
-| charge | 0 | 0 | 1 | 4 | 0 |
 | disposition | 0 | 0 | 0 | 4 | 0 |
-| futter | 0 | 0 | 0 | 4 | 0 |
 | nachhaltigkeit | 0 | 0 | 0 | 4 | 0 |
 | nawaro | 0 | 0 | 0 | 4 | 0 |
 | preise | 0 | 0 | 0 | 4 | 0 |
 | versand | 0 | 0 | 0 | 4 | 0 |
 | workflows | 0 | 0 | 0 | 4 | 0 |
-| artikel | 0 | 0 | 0 | 3 | 0 |
+| charge | 0 | 1 | 1 | 3 | 0 |
 | dashboard | 0 | 0 | 0 | 3 | 0 |
 | produktion | 0 | 0 | 2 | 3 | 0 |
 | vertrag | 0 | 0 | 0 | 3 | 0 |
+| artikel | 0 | 1 | 0 | 2 | 0 |
 | auth | 0 | 0 | 0 | 2 | 0 |
 | fuhrpark | 0 | 6 | 0 | 2 | 0 |
+| futter | 0 | 2 | 0 | 2 | 0 |
 | genossenschaft | 0 | 0 | 0 | 2 | 0 |
 | inventory | 0 | 0 | 0 | 2 | 0 |
 | monitoring | 0 | 0 | 0 | 2 | 0 |
 | reports | 0 | 0 | 0 | 2 | 0 |
 | silo | 0 | 0 | 0 | 2 | 0 |
 | tankstelle | 0 | 0 | 0 | 2 | 0 |
-| wartung | 0 | 0 | 0 | 2 | 0 |
 | zertifikate | 0 | 0 | 0 | 2 | 0 |
 | alerts | 0 | 0 | 0 | 1 | 0 |
 | banken | 0 | 0 | 0 | 1 | 0 |
@@ -164,23 +163,19 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | einstellungen | 0 | 0 | 0 | 1 | 0 |
 | errors | 0 | 0 | 0 | 1 | 0 |
 | finanzplanung | 0 | 0 | 0 | 1 | 0 |
-| foerderung | 0 | 0 | 1 | 1 | 0 |
 | hilfe | 0 | 0 | 0 | 1 | 0 |
 | inbox | 0 | 0 | 0 | 1 | 0 |
 | inventory-dashboard | 0 | 0 | 0 | 1 | 0 |
 | inventory-reports | 0 | 0 | 0 | 1 | 0 |
-| labor | 0 | 0 | 0 | 1 | 0 |
 | mahnwesen | 0 | 0 | 0 | 1 | 0 |
 | management | 0 | 0 | 0 | 1 | 0 |
 | marketing | 0 | 0 | 0 | 1 | 0 |
 | mobile | 0 | 0 | 0 | 1 | 0 |
 | policies | 0 | 0 | 0 | 1 | 0 |
 | pricing | 0 | 0 | 0 | 1 | 0 |
-| projekte | 0 | 0 | 0 | 1 | 0 |
 | prospecting | 0 | 0 | 0 | 1 | 0 |
 | public | 0 | 0 | 0 | 1 | 0 |
 | rezepte | 0 | 0 | 0 | 1 | 0 |
-| schaeden | 0 | 0 | 2 | 1 | 0 |
 | schichtplan | 0 | 0 | 0 | 1 | 0 |
 | setup | 0 | 0 | 0 | 1 | 0 |
 | stammdaten | 0 | 0 | 0 | 1 | 0 |
@@ -188,7 +183,6 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | stock-management | 0 | 0 | 0 | 1 | 0 |
 | subventionen | 0 | 0 | 0 | 1 | 0 |
 | system | 0 | 0 | 0 | 1 | 0 |
-| versicherungen | 0 | 0 | 0 | 1 | 0 |
 | vertrieb | 0 | 0 | 0 | 1 | 0 |
 | weighing | 0 | 0 | 0 | 1 | 0 |
 | wissen | 0 | 0 | 0 | 1 | 0 |
@@ -196,10 +190,16 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | dev | 0 | 1 | 0 | 0 | 0 |
 | etiketten | 0 | 0 | 1 | 0 | 0 |
 | export | 0 | 0 | 1 | 0 | 0 |
+| foerderung | 0 | 1 | 1 | 0 | 0 |
+| labor | 0 | 1 | 0 | 0 | 0 |
 | logistik | 0 | 3 | 0 | 0 | 0 |
 | mask-rollout | 0 | 1 | 0 | 0 | 0 |
 | planung | 0 | 1 | 0 | 0 | 0 |
+| projekte | 0 | 1 | 0 | 0 | 0 |
+| schaeden | 0 | 1 | 2 | 0 | 0 |
 | studio | 0 | 1 | 0 | 0 | 0 |
 | transporte | 0 | 2 | 0 | 0 | 0 |
 | verladung | 0 | 1 | 1 | 0 | 0 |
+| versicherungen | 0 | 1 | 0 | 0 | 0 |
+| wartung | 0 | 2 | 0 | 0 | 0 |
 | workspace | 0 | 5 | 0 | 0 | 0 |

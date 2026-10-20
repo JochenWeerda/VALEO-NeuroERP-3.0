@@ -82,33 +82,6 @@ const KPI_MAPPING: Record<string, { key: string; label: string; format: (value: 
   },
 }
 
-// Mock-Daten als Fallback
-const MOCK_KPI_DATA: Record<string, { label: string; value: string; delta: number; icon: ReactNode }> = {
-  'kpi-revenue': {
-    label: 'Umsatz',
-    value: '€ 129.200',
-    delta: 12.5,
-    icon: <DollarSign className="h-4 w-4" />,
-  },
-  'kpi-orders': {
-    label: 'Aufträge',
-    value: '501',
-    delta: 8.2,
-    icon: <ShoppingCart className="h-4 w-4" />,
-  },
-  'kpi-customers': {
-    label: 'Kunden',
-    value: '1.234',
-    delta: 3.1,
-    icon: <Users className="h-4 w-4" />,
-  },
-  'kpi-stock': {
-    label: 'Lager',
-    value: '97%',
-    delta: -2.1,
-    icon: <Package className="h-4 w-4" />,
-  },
-}
 
 // Hilfsfunktionen fuer Datumsbereichsberechnung
 function getDateRange(offsetMonths: number): { start: string; end: string } {
@@ -127,7 +100,6 @@ function computeDelta(current: number, previous: number): number {
 // KPI Widget mit echten Backend-Daten und Trend-Berechnung
 function KPIWidget({ widget }: { widget: WidgetLayout }) {
   const kpiConfig = KPI_MAPPING[widget.id]
-  const mockData = MOCK_KPI_DATA[widget.id]
 
   const currentRange = getDateRange(0)
   const previousRange = getDateRange(-1)
@@ -182,11 +154,10 @@ function KPIWidget({ widget }: { widget: WidgetLayout }) {
       delta,
       icon: kpiConfig.icon,
     }
-  } else if (mockData) {
-    displayData = mockData
   } else {
+    // Ohne Wert kein Wert: bis 20.10.2026 standen hier erfundene Kennzahlen (z. B. "€ 129.200 Umsatz").
     displayData = {
-      label: 'KPI',
+      label: kpiConfig?.label ?? 'KPI',
       value: '-',
       delta: 0,
       icon: <BarChart3 className="h-4 w-4" />,

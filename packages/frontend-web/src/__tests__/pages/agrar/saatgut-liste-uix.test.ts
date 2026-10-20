@@ -8,13 +8,10 @@ const src = readFileSync(
 )
 
 describe('Saatgut-Liste UIX', () => {
-  it('zeigt Anzeigen und Bearbeiten als 44-px-Text, KPI nur Desktop', () => {
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('Anzeigen')
-    expect(src).toContain('Bearbeiten')
-    expect(src).toContain('min-h-touch touch-manipulation')
-    expect(src).not.toContain('size="sm"')
-    expect(src).not.toContain('title="Anzeigen"')
+  it('ist eine Studio-Liste; Zeilen oeffnen die native Objektmaske', () => {
+    // MASK-STUDIO-ROLLOUT: 44-px-Zeilen, Suche und Touch-Verhalten liefert der universelle Renderer.
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="agrar/saatgut-liste"')
+    expect(src).not.toContain('apiClient')
   })
 })

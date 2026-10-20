@@ -3586,8 +3586,8 @@ const appRoute0500 = createRoute({
 const appRoute0501 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "finance/kreditoren",
-  component: () => renderPage("@/pages/finance/kreditoren-stamm"),
-  staticData: {"breadcrumb":"Kreditoren","module":"@/pages/finance/kreditoren-stamm","legacyPath":"/finance/kreditoren"},
+  component: () => renderPage("@/pages/finance/kreditoren-liste"),
+  staticData: {"breadcrumb":"Kreditoren","module":"@/pages/finance/kreditoren-liste","legacyPath":"/finance/kreditoren"},
 })
 
 const appRoute0502 = createRoute({
@@ -10107,7 +10107,7 @@ export const generatedRouteInventory = [
     "source": "alias"
   },
   {
-    "module": "@/pages/finance/kreditoren-stamm",
+    "module": "@/pages/finance/kreditoren-liste",
     "path": "finance/kreditoren",
     "source": "alias"
   },

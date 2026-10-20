@@ -84,3 +84,25 @@ behaupten kein vollstaendiges GitHub-CI-Gruen und keine Live-Browserabnahme.
 Vollstaendige Frontend-Typpruefung und vorgelagerter Node-Konfigurationsbuild bestanden
 ohne Fehler. Die tatsaechlich geladene Vite-Konfiguration bestaetigt die Host-Allowlist
 localhost/frontend-web. Sieben Oberflaechentests bestanden.
+
+## Zweiter paralleler Nachlauf
+
+Der erste Main-Push wurde wegen inzwischen eingegangener paralleler Commits
+korrekt ohne Ueberschreiben zurueckgewiesen. Die Lieferung bis86d54acb1 ist
+zusaetzlich erhalten. 653 Backend-/SQL-/Studio-/PCN-Vertraege und anschliessend
+63 weitere Katalog-/Kanalmetadatenvertraege bestanden:716 Backendpruefungen.
+Alle Anwendungsmodule kamen aus unveraenderten kanonischen Integrationsquellen.
+Die weiteren Faelle verwenden die vorhandenen Finanzrollen auch in den reinen
+Dispatchbeispielen; dort wurden keine Geschaeftsschreibrechte hinzugefuegt.
+
+19 Oberflaechentests bestanden, ebenso die vollstaendige Frontend-Typpruefung und
+der erzwungene Node-Konfigurationsbuild. Das regulaere type-check-Paketkommando
+baut diesen Node-Teil nun selbst vorab; ein frischer Checkout setzt damit keine
+zufaellig vorhandenen Konfigurations-Deklarationsdateien mehr voraus.
+
+Alle erneut ausgefuehrten Qualitaets-/Architekturgates bestanden. OpenAPI3229 Pfade,
+reproduzierbar und ohne Pfadverlust.103 Aktionsrechte sind aus Serverrollen abgeleitet.
+Der aktuelle Upstream-Tabellenkatalog blieb physisch exakt erhalten; nur Lineage wurde
+aktualisiert. Der Testkonflikt mit dem veralteten direkten AP-MCP-Adapter wurde zugunsten
+der verbindlichen menschlichen Entscheidung und der neuen Studio-Pruefungen aufgeloest.
+GitHub-CI und lokaler Browserbetrieb sind weiterhin getrennte Nachweise.

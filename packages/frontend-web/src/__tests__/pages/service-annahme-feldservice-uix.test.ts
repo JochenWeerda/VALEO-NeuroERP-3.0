@@ -57,11 +57,11 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  it('stellt Opportunities-Theater nur am Desktop', () => {
+  it('stellt Opportunities als Studio-Liste', () => {
+    // MASK-STUDIO-ROLLOUT: Spalten, Aktionen und Touch-Verhalten aus der ScreenDefinition crm/opportunities-liste.
     const src = read('../../pages/crm/opportunities-liste.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('ListReport')
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="crm/opportunities-liste"')
   })
 
   it('stellt QS-Checkliste ohne toten Audit-Start', () => {
@@ -163,8 +163,8 @@ describe('Service/Annahme/Feldservice UIX', () => {
   it('stellt Benutzer- und Rollenlisten 44 px', () => {
     const users = read('../../pages/admin/benutzer-liste.tsx')
     const roles = read('../../pages/admin/rollen-verwaltung.tsx')
-    expect(users).toContain('Suche Benutzer')
-    expect(users).toContain('min-h-11 font-medium text-primary')
+    // Benutzer: Studio-Liste (Suche und 44-px-Zeilen aus dem Renderer).
+    expect(users).toContain('screenId="admin/benutzer-liste"')
     expect(roles).toContain('Suche Rollen')
     expect(roles).toContain('{!isTouch ? (')
   })

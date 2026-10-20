@@ -22,13 +22,6 @@ type TimelineEntry = {
   datum: string
 }
 
-const FALLBACK_TRACE: TimelineEntry[] = [
-  { stufe: 'Erzeugung', name: 'Landwirt Schmidt', ort: 'Nordhausen', datum: '2025-10-05' },
-  { stufe: 'Wareneingang', name: 'VALEO Landhandel', ort: 'Zentrallager', datum: '2025-10-11' },
-  { stufe: 'Lagerung', name: 'Silo 1', ort: 'Zentrallager', datum: '2025-10-11' },
-  { stufe: 'Auslieferung', name: 'Mühle Nord GmbH', ort: 'Südhausen', datum: '2025-10-15' },
-]
-
 export default function RueckverfolgungPage(): JSX.Element {
   const [searchValue, setSearchValue] = useState('')
   const [activeLotId, setActiveLotId] = useState<string | undefined>(undefined)
@@ -41,8 +34,9 @@ export default function RueckverfolgungPage(): JSX.Element {
   const traceData: LotTrace | undefined = query.data ?? undefined
 
   const timeline: TimelineEntry[] = useMemo(() => {
+    // Ohne gefundene Charge keine Spur: bis 20.10.2026 stand hier eine erfundene Kette (Landwirt bis Muehle).
     if (!traceData) {
-      return FALLBACK_TRACE
+      return []
     }
     return traceData.transactions.map((txn) => ({
       stufe: txn.transaction_type.toUpperCase(),
@@ -194,11 +188,16 @@ export default function RueckverfolgungPage(): JSX.Element {
               {traceData ? traceData.sku : 'Weizen Premium'}
             </div>
             <Badge variant="outline">
-              {query.isFetching ? 'Rückverfolgung lädt...' : traceData ? 'Live-Daten' : 'Fallback-Sicht'}
+              {query.isFetching ? 'Rückverfolgung lädt...' : traceData ? 'Live-Daten' : 'Keine Charge gewählt'}
             </Badge>
           </div>
 
           <div className="space-y-4">
+            {timeline.length === 0 && !query.isFetching ? (
+              <p className="text-sm text-muted-foreground">
+                {activeLotId ? 'Zu dieser Charge sind keine Bewegungen erfasst.' : 'Charge suchen, um ihre Spur zu sehen.'}
+              </p>
+            ) : null}
             {timeline.map((item, i) => (
               <div key={`${item.stufe}-${i}`}>
                 <div className="flex items-start gap-4">

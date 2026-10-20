@@ -63,3 +63,33 @@ def test_create_pcn_meldung_missing_produktname():
     resp = client.post("/api/v1/compliance/pcn-meldungen", json=payload, headers=HEADERS)
     skip_if_db_unavailable(resp)
     assert resp.status_code == 422
+
+
+
+def test_gescheitertes_speichern_meldet_keinen_erfolg():
+    """Bis 20.10.2026 antwortete die Anlage bei einem Datenbankfehler mit 201 und hielt die Meldung nur im
+    Arbeitsspeicher; die Liste las sie bei einem Lesefehler von dort. Jetzt: 503, nichts angelegt."""
+    import asyncio
+
+    from fastapi import HTTPException
+
+    from app.api.v1.endpoints.compliance import create_pcn_meldung
+
+    class Kaputt:
+        zurueckgerollt = False
+
+        def add(self, obj):  # noqa: ANN001
+            pass
+
+        def commit(self):
+            raise RuntimeError("Datenbank weg")
+
+        def rollback(self):
+            self.zurueckgerollt = True
+
+    db = Kaputt()
+    with pytest.raises(HTTPException) as fehler:
+        asyncio.run(create_pcn_meldung(body={"produktname": "Reiniger X", "ufi": "AB12-CD34-EF56-GH78"},
+                                       db=db, tenant_id="t-1"))
+    assert fehler.value.status_code == 503
+    assert db.zurueckgerollt

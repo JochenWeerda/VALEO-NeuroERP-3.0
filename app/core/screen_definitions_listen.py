@@ -9,10 +9,10 @@ from __future__ import annotations
 from typing import Any
 
 
-def _liste(*, screen_id: str, domain: str, title: str, subtitle: str, endpoint: str, row_route: str,
+def _liste(*, screen_id: str, domain: str, title: str, subtitle: str, endpoint: str, row_route: str | None,
            columns: list[dict[str, Any]], actions: list[dict[str, Any]], row_actions: list[dict[str, Any]],
            purpose: str, prompts: list[str], dangerous: list[dict[str, str]] | None = None,
-           bundle: str, no_workflow: str) -> dict[str, Any]:
+           bundle: str, no_workflow: str, fetch_limit: int = 500) -> dict[str, Any]:
     agent: dict[str, Any] = {
         "businessPurpose": purpose,
         "examplePrompts": prompts,
@@ -29,11 +29,14 @@ def _liste(*, screen_id: str, domain: str, title: str, subtitle: str, endpoint: 
         "title": title,
         "subtitle": subtitle,
         "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
-        "dataSources": [{"key": "list", "endpoint": endpoint, "pageSize": 500}],
+        # Ohne Serverblaetterung laedt die Laufzeit einmal bis pageSize (Grenze des Dienstes beachten).
+        "dataSources": [{"key": "list", "endpoint": endpoint, "pageSize": fetch_limit}],
         "actions": actions,
         "tables": [{
             "key": "list", "label": title, "dataSourceKey": "list", "serverPagination": False, "pageSize": 50,
-            "virtualized": True, "rowHeight": 40, "rowRouteTemplate": row_route,
+            "virtualized": True, "rowHeight": 40,
+            # Ohne Objektseite keine Zeilenroute (sonst toter Link).
+            **({"rowRouteTemplate": row_route} if row_route else {}),
             "columns": columns, "rowActions": row_actions,
         }],
         "noWorkflowReason": no_workflow,
@@ -47,7 +50,14 @@ def _liste(*, screen_id: str, domain: str, title: str, subtitle: str, endpoint: 
 
 #: CSV-Export der Liste mit ihren Spalten (NativeListPage, ohne Serverwirkung).
 _EXPORT = {"key": "export", "label": "CSV-Export", "kind": "secondary", "dangerLevel": "safe", "zone": "header",
-           "localEffect": "download"}
+           "command": "list.exportCsv", "localEffect": "download", "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."}
+
+
+def _neu(label: str, route: str) -> dict[str, Any]:
+    """Anlage oeffnen; Rechte prueft der Anlageweg der Zielmaske."""
+    return {"key": "neu", "label": label, "kind": "primary", "dangerLevel": "safe", "zone": "header",
+            "navigationRoute": route, "localEffect": "navigation",
+            "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."}
 
 
 def build_einkauf_anfragen_liste() -> dict[str, Any]:
@@ -65,8 +75,7 @@ def build_einkauf_anfragen_liste() -> dict[str, Any]:
             {"key": "faelligkeit", "label": "Faellig", "renderKind": "date", "sortable": True, "priority": "tertiary"},
             {"key": "createdAt", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
         ],
-        actions=[{"key": "neu", "label": "Neue Anfrage", "kind": "primary", "dangerLevel": "safe", "zone": "header",
-                  "navigationRoute": "/einkauf/anfrage-erfassung", "localEffect": "navigation"},
+        actions=[_neu("Neue Anfrage", "/einkauf/anfrage-erfassung"),
                  _EXPORT],
         row_actions=[
             {"key": "senden", "label": "Senden", "dangerLevel": "moderate", "permission": "einkauf.anfrage.senden",
@@ -118,8 +127,7 @@ def build_einkauf_angebote_liste() -> dict[str, Any]:
             {"key": "lieferzeit", "label": "Lieferzeit (Tage)", "numeric": True, "priority": "tertiary"},
             {"key": "createdAt", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
         ],
-        actions=[{"key": "neu", "label": "Neues Angebot", "kind": "primary", "dangerLevel": "safe", "zone": "header",
-                  "navigationRoute": "/einkauf/angebot", "localEffect": "navigation"},
+        actions=[_neu("Neues Angebot", "/einkauf/angebot"),
                  _EXPORT],
         row_actions=[
             {"key": "pruefen", "label": "Pruefen", "dangerLevel": "safe", "permission": "einkauf.angebot.review",
@@ -143,10 +151,952 @@ def build_einkauf_angebote_liste() -> dict[str, Any]:
     )
 
 
+
+def build_einkauf_anlieferavis_liste() -> dict[str, Any]:
+    """Lieferavise: senden, bestaetigen, stornieren, Wareneingang buchen."""
+    pfad = "/api/v1/einkauf/anlieferavis/{entity_id}/actions/"
+    return _liste(
+        screen_id="einkauf/anlieferavis-liste", domain="einkauf", title="Anlieferavis",
+        subtitle="Lieferavise fuer die Wareneingangsvorbereitung", endpoint="/api/v1/einkauf/anlieferavis",
+        row_route="/einkauf/anlieferavis/{id}", bundle="einkauf",
+        columns=[
+            {"key": "avisNummer", "label": "Avis-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "lieferant", "label": "Lieferant", "filterable": True, "sortable": True, "priority": "primary"},
+            {"key": "bestellung", "label": "Bestellung", "filterable": True, "priority": "secondary"},
+            {"key": "geplantesAnlieferDatum", "label": "Geplant", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "createdAt", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[
+            {"key": "senden", "label": "Senden", "dangerLevel": "safe", "permission": "einkauf.avis.senden",
+             "commandEndpoint": pfad + "senden", "method": "POST", "requiresConfirmation": True,
+             "visibleWhen": _status("OFFEN", "ANGEKUENDIGT")},
+            {"key": "bestaetigen", "label": "Bestaetigen", "dangerLevel": "safe",
+             "permission": "einkauf.avis.bestaetigen", "commandEndpoint": pfad + "bestaetigen", "method": "POST",
+             "requiresConfirmation": True, "visibleWhen": _status("OFFEN", "ANGEKUENDIGT", "GESENDET")},
+            {"key": "wareneingang", "label": "Wareneingang buchen", "dangerLevel": "moderate",
+             "permission": "lager.wareneingang.create", "commandEndpoint": pfad + "wareneingang", "method": "POST",
+             "requiresConfirmation": True, "visibleWhen": _status("BESTAETIGT", "GESENDET", "OFFEN"),
+             "inputFields": [
+                 {"key": "lieferschein_nr", "label": "Lieferschein-Nr.", "type": "text", "required": True},
+                 {"key": "lager_id", "label": "Lager", "type": "select", "required": True,
+                  "optionsSource": {"endpoint": "/api/v1/inventory/warehouses/", "valueKey": "id",
+                                    "labelKey": "name"}}]},
+            {"key": "stornieren", "label": "Stornieren", "dangerLevel": "high",
+             "permission": "einkauf.avis.stornieren", "commandEndpoint": pfad + "stornieren", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True,
+             "visibleWhen": _status("OFFEN", "ANGEKUENDIGT", "GESENDET", "BESTAETIGT")},
+        ],
+        purpose="Angekuendigte Lieferungen verfolgen, bestaetigen und als Wareneingang buchen.",
+        prompts=["Welche Lieferungen sind fuer diese Woche angekuendigt?", "Welche Avise sind noch offen?"],
+        no_workflow="Der Status steht am Avis; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+
+def build_einkauf_auftragsbestaetigungen_liste() -> dict[str, Any]:
+    """Auftragsbestaetigungen der Lieferanten: erfassen, pruefen, bestaetigen (Wege der Objektmaske)."""
+    pfad = "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/"
+    return _liste(
+        screen_id="einkauf/auftragsbestaetigungen", domain="einkauf", title="Auftragsbestaetigungen",
+        subtitle="Bestaetigungen der Lieferanten zu Bestellungen", endpoint="/api/v1/einkauf/auftragsbestaetigungen",
+        row_route="/einkauf/auftragsbestaetigung/{id}", bundle="einkauf",
+        columns=[
+            {"key": "bestaetigungsNummer", "label": "AB-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "bestellung", "label": "Bestellung", "filterable": True, "sortable": True, "priority": "primary"},
+            {"key": "lieferant", "label": "Lieferant", "filterable": True, "sortable": True, "priority": "secondary"},
+            {"key": "createdAt", "label": "Erfasst", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("AB erfassen", "/einkauf/auftragsbestaetigung/neu"),
+                 _EXPORT],
+        row_actions=[
+            {"key": "pruefen", "label": "Pruefen", "dangerLevel": "safe",
+             "permission": "einkauf.auftragsbestaetigung.review", "commandEndpoint": pfad + "pruefen",
+             "method": "POST", "requiresConfirmation": True,
+             "visibleWhen": _status("OFFEN")},
+            {"key": "bestaetigen", "label": "Bestaetigen", "dangerLevel": "moderate",
+             "permission": "einkauf.auftragsbestaetigung.confirm", "commandEndpoint": pfad + "bestaetigen",
+             "method": "POST", "requiresConfirmation": True,
+             "visibleWhen": _status("OFFEN", "GEPRUEFT")},
+        ],
+        purpose="Lieferanten-Bestaetigungen gegen Bestellungen pruefen und bestaetigen.",
+        prompts=["Welche Auftragsbestaetigungen sind noch ungeprueft?", "Zeige Bestaetigungen mit Abweichung."],
+        no_workflow="Der Status steht an der Auftragsbestaetigung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+
+def build_einkauf_lieferanten_liste() -> dict[str, Any]:
+    """Lieferanten aus derselben Quelle wie die Objektmaske ``einkauf/supplier``."""
+    return _liste(
+        screen_id="einkauf/lieferanten", domain="einkauf", title="Lieferanten", subtitle="Lieferanten suchen und oeffnen",
+        endpoint="/api/v1/einkauf/lieferanten", row_route="/einkauf/lieferanten/{id}", bundle="einkauf",
+        columns=[
+            {"key": "firmenname", "label": "Lieferant", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "lieferantennummer", "label": "Lieferantennr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "ort", "label": "Ort", "filterable": True, "sortable": True, "priority": "secondary"},
+            {"key": "telefon", "label": "Telefon", "priority": "tertiary"},
+            {"key": "email", "label": "E-Mail", "priority": "tertiary"},
+            {"key": "lieferzeit_tage", "label": "Lieferzeit (Tage)", "numeric": True, "priority": "tertiary"},
+            {"key": "bewertung", "label": "Bewertung", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "aktiv", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[_neu("Neuer Lieferant", "/einkauf/lieferant/neu"),
+                 _EXPORT],
+        row_actions=[],
+        purpose="Lieferanten finden und ihre Stammdaten, Bestellungen und Kontakte oeffnen.",
+        prompts=["Finde den Lieferanten Muehle Nord.", "Welche Lieferanten sind inaktiv?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+
+def build_einkauf_bestellungen_liste() -> dict[str, Any]:
+    """Bestellungen aus derselben Quelle wie die Objektmaske ``einkauf/purchase-order``."""
+    pfad = "/api/v1/einkauf/bestellungen/{entity_id}/actions/"
+    return _liste(
+        screen_id="einkauf/bestellungen", domain="einkauf", title="Bestellungen", subtitle="Bestellungen an Lieferanten",
+        endpoint="/api/v1/einkauf/bestellungen", row_route="/einkauf/bestellung/{id}", bundle="einkauf",
+        columns=[
+            {"key": "bestellnummer", "label": "Bestellnr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "lieferant_name", "label": "Lieferant", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "bestelldatum", "label": "Bestellt am", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "lieferdatum_wunsch", "label": "Liefertermin", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "netto_summe", "label": "Netto", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "secondary"},
+            {"key": "positionen_anz", "label": "Positionen", "numeric": True, "priority": "tertiary"},
+            {"key": "versandt_am", "label": "Versandt am", "renderKind": "date", "sortable": True,
+             "priority": "tertiary"},
+        ],
+        actions=[_neu("Neue Bestellung", "/einkauf/bestellungen/neu"), _EXPORT],
+        row_actions=[
+            {"key": "freigeben", "label": "Freigeben", "dangerLevel": "moderate",
+             "permission": "einkauf.bestellung.approve", "commandEndpoint": pfad + "freigeben", "method": "POST",
+             "requiresConfirmation": True, "humanApprovalRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": _status("ENTWURF", "DRAFT")},
+            {"key": "versenden", "label": "Versenden", "dangerLevel": "moderate",
+             "permission": "einkauf.bestellung.send", "commandEndpoint": pfad + "versenden", "method": "POST",
+             "requiresConfirmation": True, "humanApprovalRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": _status("ENTWURF", "FREIGEGEBEN", "VERSANDT")},
+            {"key": "stornieren", "label": "Stornieren", "dangerLevel": "high",
+             "permission": "einkauf.bestellung.cancel", "commandEndpoint": pfad + "stornieren", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": _status("ENTWURF", "DRAFT", "FREIGEGEBEN", "VERSANDT", "TEILGELIEFERT")},
+        ],
+        dangerous=[
+            {"key": "freigeben", "reason": "Gibt die Bestellung frei und bucht das Obligo; nur Mensch."},
+            {"key": "versenden", "reason": "Sendet die Bestellung an den Lieferanten; nur Mensch."},
+            {"key": "stornieren", "reason": "Storniert eine Bestellung; nur Mensch mit Begruendung."},
+        ],
+        purpose="Bestellungen an Lieferanten finden, freigeben, versenden und stornieren.",
+        prompts=["Welche Bestellungen sind noch Entwurf?", "Welche Liefertermine sind ueberfaellig?"],
+        no_workflow="Der Status steht an der Bestellung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+
+def build_agrar_saatgut_liste() -> dict[str, Any]:
+    """Saatgut-Stammdaten; Zeile oeffnet die native Objektmaske ``agrar/saatgut``."""
+    return _liste(
+        screen_id="agrar/saatgut-liste", domain="agrar", title="Saatgut", subtitle="Sorten, Zulassungen und Bestand",
+        endpoint="/api/v1/agrar/saatgut/", row_route="/agrar/saatgut/{id}", bundle="agrar", fetch_limit=200,
+        columns=[
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "artikelnummer", "label": "Artikel-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "sorte", "label": "Sorte", "filterable": True, "sortable": True, "priority": "primary"},
+            {"key": "art", "label": "Kultur", "filterable": True, "priority": "secondary"},
+            {"key": "zuechter", "label": "Zuechter", "filterable": True, "priority": "secondary"},
+            {"key": "bsa_zulassung", "label": "BSA", "renderKind": "boolean", "priority": "tertiary"},
+            {"key": "eu_zulassung", "label": "EU", "renderKind": "boolean", "priority": "tertiary"},
+            {"key": "vk_preis", "label": "VK-Preis", "numeric": True, "renderKind": "currency", "priority": "secondary"},
+            {"key": "verfuegbar", "label": "Verfuegbar", "numeric": True, "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_neu("Neues Saatgut", "/agrar/saatgut-stamm"), _EXPORT],
+        row_actions=[],
+        purpose="Saatgut-Sorten mit Zulassung, Preis und verfuegbarem Bestand finden.",
+        prompts=["Welche Weizensorten haben BSA-Zulassung?", "Welches Saatgut ist knapp?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+
+def build_agrar_duenger_liste() -> dict[str, Any]:
+    """Duenger-Stammdaten; Zeile oeffnet die native Objektmaske ``agrar/duenger``."""
+    return _liste(
+        screen_id="agrar/duenger-liste", domain="agrar", title="Duenger", subtitle="Duengemittel mit Naehrstoffen",
+        endpoint="/api/v1/agrar/duenger/", row_route="/agrar/duenger/{id}", bundle="agrar", fetch_limit=200,
+        columns=[
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "artikelnummer", "label": "Artikel-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "hersteller", "label": "Hersteller", "filterable": True, "priority": "secondary"},
+            {"key": "n_gehalt", "label": "N %", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "p_gehalt", "label": "P %", "numeric": True, "priority": "secondary"},
+            {"key": "k_gehalt", "label": "K %", "numeric": True, "priority": "secondary"},
+            {"key": "wassergefaehrdend", "label": "Wassergefaehrdend", "renderKind": "boolean", "priority": "tertiary"},
+            {"key": "ist_aktiv", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neuer Duenger", "/agrar/duenger-stamm"), _EXPORT],
+        row_actions=[
+            {"key": "deaktivieren", "label": "Deaktivieren", "dangerLevel": "high",
+             "permission": "agrar.duenger.deactivate",
+             "commandEndpoint": "/api/v1/agrar/duenger/{entity_id}/actions/deaktivieren", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True,
+             "visibleWhen": {"field": "ist_aktiv", "values": [True]}},
+        ],
+        purpose="Duengemittel mit Naehrstoffgehalten finden, oeffnen und nicht mehr gefuehrte deaktivieren.",
+        prompts=["Welche Stickstoffduenger fuehren wir?", "Welche Duenger sind wassergefaehrdend?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+
+def build_futtermittel_einzelfuttermittel_liste() -> dict[str, Any]:
+    """Einzelfuttermittel aus dem Futterkatalog, derselben Quelle wie die Objektmaske."""
+    return _liste(
+        screen_id="futtermittel/einzelfuttermittel-liste", domain="futtermittel", title="Einzelfuttermittel",
+        subtitle="Futterkatalog mit Freigabe und Revision",
+        endpoint="/api/v1/agrar/rations-optimization/feed-catalog/feeds",
+        row_route="/futtermittel/einzelfuttermittel/{id}", bundle="futtermittel",
+        columns=[
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "artikel_nummer", "label": "Artikel-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "art", "label": "Art", "filterable": True, "priority": "primary"},
+            {"key": "approval_status", "label": "Freigabe", "renderKind": "status", "filterable": True,
+             "priority": "secondary"},
+            {"key": "trockensubstanz", "label": "TS g/kg", "numeric": True, "priority": "secondary"},
+            {"key": "preis_pro_t", "label": "Preis/t", "numeric": True, "renderKind": "currency",
+             "priority": "secondary"},
+            {"key": "revision", "label": "Revision", "numeric": True, "priority": "tertiary"},
+            {"key": "updated_at", "label": "Geaendert", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neues Einzelfuttermittel", "/futtermittel/einzelfuttermittel/stamm/new"), _EXPORT],
+        row_actions=[
+            {"key": "stilllegen", "label": "Stilllegen", "dangerLevel": "high",
+             "permission": "futtermittel.einzelfutter.retire",
+             "commandEndpoint": "/api/v1/futter/einzelfuttermittel/{entity_id}/actions/stilllegen", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True,
+             "visibleWhen": {"field": "aktiv", "values": [True]}},
+        ],
+        purpose="Einzelfuttermittel des Futterkatalogs finden, oeffnen und nicht mehr gefuehrte stilllegen.",
+        prompts=["Welche Einzelfuttermittel sind freigegeben?", "Welche Futtermittel haben keinen Preis?"],
+        no_workflow="Freigabe und Revision stehen am Katalogeintrag; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_futtermittel_mischfuttermittel_liste() -> dict[str, Any]:
+    """Mischfuttermittel; dieselbe Quelle wie die Objektmaske ``futtermittel/mischfuttermittel``."""
+    return _liste(
+        screen_id="futtermittel/mischfuttermittel-liste", domain="futtermittel", title="Mischfuttermittel",
+        subtitle="Mischfutter je Tierart und Leistungsstufe", endpoint="/api/v1/futter/mischfuttermittel",
+        row_route="/futtermittel/mischfuttermittel/{id}", bundle="futtermittel",
+        columns=[
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "produkt_code", "label": "Produkt-Code", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "tierart", "label": "Tierart", "filterable": True, "priority": "primary"},
+            {"key": "leistungsstufe", "label": "Leistungsstufe", "filterable": True, "priority": "secondary"},
+            {"key": "protein", "label": "Protein %", "numeric": True, "priority": "secondary"},
+            {"key": "energie", "label": "Energie MJ", "numeric": True, "priority": "secondary"},
+        ],
+        actions=[_neu("Neues Mischfuttermittel", "/futtermittel/mischfuttermittel/stamm/new"), _EXPORT],
+        row_actions=[
+            {"key": "deaktivieren", "label": "Deaktivieren", "dangerLevel": "high",
+             "permission": "futtermittel.mischfutter.deactivate",
+             "commandEndpoint": "/api/v1/futter/mischfuttermittel/{entity_id}/actions/deaktivieren", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True,
+             "visibleWhen": {"field": "aktiv", "values": [True]}},
+        ],
+        purpose="Mischfuttermittel je Tierart finden, oeffnen und nicht mehr gefuehrte deaktivieren.",
+        prompts=["Welche Mischfutter fuehren wir fuer Milchkuehe?", "Zeige Mischfutter mit ueber 18 % Protein."],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+
+def build_finance_debitoren_liste() -> dict[str, Any]:
+    """Debitoren mit offenem Betrag und Mahnstufe; dieselbe Quelle wie die Objektmaske ``finance/debitor``."""
+    pfad = "/api/v1/finance/debitoren/{entity_id}/actions/"
+    return _liste(
+        screen_id="finance/debitoren-liste", domain="finance", title="Debitoren",
+        subtitle="Kunden mit Forderungen, Kreditlimit und Mahnstufe", endpoint="/api/v1/finance/debitoren",
+        row_route="/finance/debitor/{id}", bundle="finance",
+        columns=[
+            {"key": "name", "label": "Debitor", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "debitoren_nr", "label": "Debitoren-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "offenerBetrag", "label": "Offen", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "primary"},
+            {"key": "mahnstufe", "label": "Mahnstufe", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "faelligkeit", "label": "Faellig", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "kreditlimit", "label": "Kreditlimit", "numeric": True, "renderKind": "currency",
+             "priority": "secondary"},
+            {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "priority": "tertiary"},
+            {"key": "is_active", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neuer Debitor", "/finance/debitoren/new"), _EXPORT,
+                 {"key": "mahnwesen", "label": "Mahnwesen", "kind": "secondary", "dangerLevel": "safe",
+                  "zone": "header", "navigationRoute": "/finance/mahnwesen", "localEffect": "navigation",
+                  "stubReason": "Oeffnet das Mahnwesen; Mahnlaeufe laufen dort mit Vorschau und Freigabe."}],
+        row_actions=[
+            {"key": "sperren", "label": "Sperren", "dangerLevel": "high", "permission": "finance.debitor.sperren",
+             "commandEndpoint": pfad + "sperren", "method": "POST", "requiresConfirmation": True,
+             "auditReasonRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": {"field": "is_active", "values": [True]}},
+            {"key": "entsperren", "label": "Entsperren", "dangerLevel": "moderate",
+             "permission": "finance.debitor.entsperren", "commandEndpoint": pfad + "entsperren", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": {"field": "is_active", "values": [False]}},
+        ],
+        dangerous=[{"key": "sperren", "reason": "Sperrt einen Kunden fuer Verkauf und Zahlung; nur Mensch."}],
+        purpose="Debitoren mit offenen Forderungen und Mahnstufe finden, oeffnen und sperren.",
+        prompts=["Welche Debitoren haben Mahnstufe 2 oder hoeher?", "Welche Kunden haben die hoechsten offenen Posten?"],
+        no_workflow="Mahnungen laufen im Mahnwesen; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+
+def build_finance_kreditoren_liste() -> dict[str, Any]:
+    """Kreditoren (die Lieferanten des Einkaufs); dieselbe Quelle wie die Objektmaske ``finance/kreditor``."""
+    return _liste(
+        screen_id="finance/kreditoren-liste", domain="finance", title="Kreditoren",
+        subtitle="Lieferanten als Kreditoren mit Steuer- und Zahlungsdaten", endpoint="/api/v1/finance/kreditoren",
+        row_route="/finance/kreditor/{id}", bundle="finance",
+        columns=[
+            {"key": "name", "label": "Kreditor", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "kreditoren_nr", "label": "Kreditoren-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "city", "label": "Ort", "filterable": True, "priority": "secondary"},
+            {"key": "ust_id", "label": "USt-IdNr.", "filterable": True, "priority": "secondary"},
+            {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "priority": "tertiary"},
+            {"key": "email", "label": "E-Mail", "priority": "tertiary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[_neu("Neuer Kreditor", "/finance/kreditoren-stamm"), _EXPORT],
+        row_actions=[],
+        purpose="Kreditoren finden und ihre Stamm-, Steuer- und Bankdaten oeffnen.",
+        prompts=["Welche Kreditoren haben keine USt-IdNr.?", "Finde den Kreditor Muehle Nord."],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf; Kreditoren sind die Lieferanten des Einkaufs.",
+    )
+
+
+def build_crm_kampagnen_liste() -> dict[str, Any]:
+    """Marketing-Kampagnen mit Versand- und Oeffnungszahlen."""
+    return _liste(
+        screen_id="crm/kampagnen-liste", domain="crm", title="Kampagnen", subtitle="Marketing-Kampagnen und Reichweite",
+        endpoint="/api/v1/crm/campaigns", row_route="/crm/campaign/{id}", bundle="crm",
+        columns=[
+            {"key": "name", "label": "Kampagne", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "type", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "sent_count", "label": "Versendet", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "open_count", "label": "Geoeffnet", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "click_count", "label": "Klicks", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neue Kampagne", "/crm/campaign/new"), _EXPORT],
+        row_actions=[
+            {"key": "loeschen", "label": "Loeschen", "dangerLevel": "high", "permission": "crm.kampagne.loeschen",
+             "commandEndpoint": "/api/v1/crm/campaigns/{entity_id}", "method": "DELETE",
+             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True},
+        ],
+        dangerous=[{"key": "loeschen", "reason": "Entfernt eine Kampagne; nur Mensch."}],
+        purpose="Kampagnen mit Versand-, Oeffnungs- und Klickzahlen finden und oeffnen.",
+        prompts=["Welche Kampagnen sind noch im Entwurf?", "Welche Kampagne hat die meisten Klicks?"],
+        no_workflow="Der Status steht an der Kampagne; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_crm_kampagnenvorlagen_liste() -> dict[str, Any]:
+    """Vorlagen fuer Kampagnen: aktivieren, deaktivieren, duplizieren, loeschen."""
+    pfad = "/api/v1/crm/campaigns/templates/{entity_id}"
+    return _liste(
+        screen_id="crm/kampagnenvorlagen-liste", domain="crm", title="Kampagnenvorlagen",
+        subtitle="Vorlagen fuer E-Mail-, Brief- und SMS-Kampagnen", endpoint="/api/v1/crm/campaigns/templates",
+        row_route="/crm/campaign-template/{id}", bundle="crm",
+        columns=[
+            {"key": "name", "label": "Vorlage", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "type", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "subject", "label": "Betreff", "filterable": True, "priority": "secondary"},
+            {"key": "is_active", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "primary"},
+            {"key": "usage_count", "label": "Verwendet", "numeric": True, "sortable": True, "priority": "tertiary"},
+            {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neue Vorlage", "/crm/campaign-template/new"), _EXPORT],
+        row_actions=[
+            {"key": "aktivieren", "label": "Aktivieren", "dangerLevel": "safe", "permission": "crm.vorlage.aktivieren",
+             "commandEndpoint": pfad + "/activate", "method": "POST", "requiresConfirmation": True,
+             "visibleWhen": {"field": "is_active", "values": [False]}},
+            {"key": "deaktivieren", "label": "Deaktivieren", "dangerLevel": "moderate",
+             "permission": "crm.vorlage.deaktivieren", "commandEndpoint": pfad + "/deactivate", "method": "POST",
+             "requiresConfirmation": True, "visibleWhen": {"field": "is_active", "values": [True]}},
+            {"key": "duplizieren", "label": "Duplizieren", "dangerLevel": "safe", "permission": "crm.vorlage.duplizieren",
+             "commandEndpoint": pfad + "/duplicate", "method": "POST", "requiresConfirmation": True},
+            {"key": "loeschen", "label": "Loeschen", "dangerLevel": "high", "permission": "crm.vorlage.loeschen",
+             "commandEndpoint": pfad, "method": "DELETE", "requiresConfirmation": True,
+             "auditReasonRequired": True, "forbiddenForAgents": True},
+        ],
+        dangerous=[{"key": "loeschen", "reason": "Entfernt eine Vorlage; nur Mensch."}],
+        purpose="Kampagnenvorlagen pflegen: aktivieren, deaktivieren, duplizieren.",
+        prompts=["Welche Vorlagen sind aktiv?", "Welche Vorlage wird am haeufigsten verwendet?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_crm_einwilligungen_liste() -> dict[str, Any]:
+    """Einwilligungen (Art. 7 DSGVO): widerrufen mit Grund; Loeschen wird nicht angeboten (Nachweispflicht)."""
+    return _liste(
+        screen_id="crm/einwilligungen-liste", domain="crm", title="Einwilligungen",
+        subtitle="Einwilligungen je Kontakt und Kanal mit Double-Opt-in", endpoint="/api/v1/crm/consents",
+        row_route="/crm/consent/{id}", bundle="crm",
+        columns=[
+            {"key": "contact_id", "label": "Kontakt", "filterable": True, "priority": "primary"},
+            {"key": "channel", "label": "Kanal", "filterable": True, "priority": "primary"},
+            {"key": "consent_type", "label": "Zweck", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "granted_at", "label": "Erteilt", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "double_opt_in_confirmed_at", "label": "Double-Opt-in", "renderKind": "date",
+             "priority": "secondary"},
+            {"key": "source", "label": "Quelle", "filterable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Einwilligung erfassen", "/crm/consent/new"), _EXPORT],
+        row_actions=[
+            {"key": "widerrufen", "label": "Widerrufen", "dangerLevel": "high",
+             "permission": "crm.einwilligung.widerrufen",
+             "commandEndpoint": "/api/v1/crm/consents/{entity_id}/revoke", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": {"field": "status", "values": ["granted"]}},
+        ],
+        dangerous=[{"key": "widerrufen", "reason": "Widerruft eine Einwilligung; nur Mensch mit Begruendung."}],
+        purpose="Einwilligungen je Kontakt und Kanal nachweisen und auf Wunsch widerrufen.",
+        prompts=["Welche Einwilligungen warten auf Double-Opt-in?", "Welche Einwilligungen wurden widerrufen?"],
+        no_workflow="Der Status steht an der Einwilligung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_dsgvo_anfragen_liste() -> dict[str, Any]:
+    """Betroffenenanfragen (Art. 15, 17, 20): pruefen, Auskunft, Daten loeschen, ablehnen."""
+    pfad = "/api/v1/gdpr/requests/{entity_id}/"
+    return _liste(
+        screen_id="crm/dsgvo-anfragen-liste", domain="crm", title="DSGVO-Anfragen",
+        subtitle="Auskunft, Loeschung und Datenuebertragung", endpoint="/api/v1/gdpr/requests",
+        row_route="/crm/gdpr-request/{id}", bundle="crm",
+        columns=[
+            {"key": "subject_email", "label": "Betroffene Person", "filterable": True, "priority": "primary"},
+            {"key": "request_type", "label": "Art", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "created_at", "label": "Eingegangen", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "verified_at", "label": "Geprueft", "renderKind": "date", "priority": "secondary"},
+            {"key": "completed_at", "label": "Abgeschlossen", "renderKind": "date", "priority": "secondary"},
+            {"key": "rejection_reason", "label": "Ablehnungsgrund", "priority": "tertiary"},
+        ],
+        actions=[_neu("Anfrage erfassen", "/crm/gdpr-request/new")],
+        row_actions=[
+            {"key": "pruefen", "label": "Identitaet bestaetigt", "dangerLevel": "moderate",
+             "permission": "dsgvo.anfrage.pruefen", "commandEndpoint": pfad + "verify", "method": "POST",
+             "requiresConfirmation": True, "forbiddenForAgents": True,
+             "visibleWhen": {"field": "status", "values": ["PENDING"]}},
+            {"key": "exportieren", "label": "Auskunft erstellen", "dangerLevel": "moderate",
+             "permission": "dsgvo.anfrage.exportieren", "commandEndpoint": pfad + "export", "method": "POST",
+             "requiresConfirmation": True, "forbiddenForAgents": True,
+             "visibleWhen": {"field": "status", "values": ["VERIFIED"]}},
+            {"key": "daten_loeschen", "label": "Daten loeschen (Art. 17)", "dangerLevel": "critical",
+             "permission": "dsgvo.anfrage.loeschen", "commandEndpoint": pfad + "delete", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True, "humanApprovalRequired": True,
+             "forbiddenForAgents": True, "visibleWhen": {"field": "status", "values": ["VERIFIED"]}},
+            {"key": "ablehnen", "label": "Ablehnen", "dangerLevel": "high", "permission": "dsgvo.anfrage.ablehnen",
+             "commandEndpoint": pfad + "reject", "method": "POST", "requiresConfirmation": True,
+             "auditReasonRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": {"field": "status", "values": ["PENDING", "VERIFIED", "PROCESSING"]}},
+        ],
+        dangerous=[
+            {"key": "daten_loeschen", "reason": "Loescht personenbezogene Daten unwiderruflich (Art. 17); nur Mensch."},
+            {"key": "ablehnen", "reason": "Lehnt eine Betroffenenanfrage ab; nur Mensch mit Begruendung."},
+        ],
+        purpose="Betroffenenanfragen fristgerecht pruefen, beantworten, loeschen oder begruendet ablehnen.",
+        prompts=["Welche DSGVO-Anfragen sind noch offen?", "Welche Loeschanfragen sind geprueft?"],
+        no_workflow="Der Ablauf (eingegangen, geprueft, abgeschlossen) steht an der Anfrage selbst.",
+    )
+
+
+def build_crm_segmente_liste() -> dict[str, Any]:
+    """Kundensegmente: Mitglieder neu berechnen, loeschen."""
+    return _liste(
+        screen_id="crm/segmente-liste", domain="crm", title="Segmente",
+        subtitle="Kundensegmente mit Mitgliederzahl", endpoint="/api/v1/crm/segments",
+        row_route="/crm/segment/{id}", bundle="crm", fetch_limit=200,
+        columns=[
+            {"key": "name", "label": "Segment", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "type", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "member_count", "label": "Mitglieder", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "last_calculated_at", "label": "Berechnet", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neues Segment", "/crm/segment/new"), _EXPORT],
+        row_actions=[
+            {"key": "berechnen", "label": "Neu berechnen", "dangerLevel": "safe", "permission": "crm.segment.berechnen",
+             "commandEndpoint": "/api/v1/crm/segments/{entity_id}/calculate", "method": "POST",
+             "requiresConfirmation": True},
+            {"key": "loeschen", "label": "Loeschen", "dangerLevel": "high", "permission": "crm.segment.loeschen",
+             "commandEndpoint": "/api/v1/crm/segments/{entity_id}", "method": "DELETE",
+             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True},
+        ],
+        dangerous=[{"key": "loeschen", "reason": "Entfernt ein Segment; nur Mensch."}],
+        purpose="Kundensegmente finden, Mitglieder neu berechnen und nicht mehr genutzte entfernen.",
+        prompts=["Wie viele Mitglieder hat jedes Segment?", "Welche Segmente sind lange nicht berechnet?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_crm_opportunities_liste() -> dict[str, Any]:
+    """Verkaufschancen; Zeile oeffnet die native Objektmaske ``crm/opportunity``."""
+    pfad = "/api/v1/crm/opportunities/{entity_id}/actions/"
+    return _liste(
+        screen_id="crm/opportunities-liste", domain="crm", title="Verkaufschancen",
+        subtitle="Pipeline mit Phase, Betrag und Wahrscheinlichkeit", endpoint="/api/v1/crm/opportunities/",
+        row_route="/crm/opportunity/{id}", bundle="crm", fetch_limit=200,
+        columns=[
+            {"key": "name", "label": "Chance", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "stage", "label": "Phase", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "amount", "label": "Betrag", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "primary"},
+            {"key": "probability", "label": "Wahrscheinlichkeit %", "numeric": True, "sortable": True,
+             "priority": "secondary"},
+            {"key": "expected_close_date", "label": "Abschluss geplant", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "assigned_to", "label": "Verantwortlich", "filterable": True, "priority": "tertiary"},
+            {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neue Chance", "/crm/opportunity/new"), _EXPORT,
+                 {"key": "kanban", "label": "Pipeline-Ansicht", "kind": "secondary", "dangerLevel": "safe",
+                  "zone": "header", "navigationRoute": "/crm/opportunities-kanban", "localEffect": "navigation",
+                  "stubReason": "Oeffnet die Pipeline als Kanban."}],
+        row_actions=[
+            {"key": "angebot", "label": "Angebot erstellen", "dangerLevel": "safe",
+             "navigationRoute": "/sales/angebot-erstellen?opportunityId={id}", "localEffect": "navigation",
+             "stubReason": "Oeffnet die Angebotserfassung mit dieser Chance."},
+            {"key": "gewonnen", "label": "Gewonnen", "dangerLevel": "moderate", "permission": "crm.chance.gewonnen",
+             "commandEndpoint": pfad + "gewonnen", "method": "POST", "requiresConfirmation": True,
+             "forbiddenForAgents": True},
+            {"key": "verloren", "label": "Verloren", "dangerLevel": "moderate", "permission": "crm.chance.verloren",
+             "commandEndpoint": pfad + "verloren", "method": "POST", "requiresConfirmation": True,
+             "auditReasonRequired": True, "forbiddenForAgents": True},
+        ],
+        purpose="Verkaufschancen nach Phase und Betrag steuern, Angebote erstellen und abschliessen.",
+        prompts=["Welche Chancen schliessen diesen Monat?", "Welche Chancen haben ueber 70 % Wahrscheinlichkeit?"],
+        no_workflow="Die Phase steht an der Chance; die Pipeline-Ansicht zeigt den Ablauf.",
+    )
+
+
+def build_agrar_psm_liste() -> dict[str, Any]:
+    """Pflanzenschutzmittel aus dem BVL-Verzeichnis (wie die bisherige Seite)."""
+    return _liste(
+        screen_id="agrar/psm-liste", domain="agrar", title="Pflanzenschutzmittel",
+        subtitle="Zugelassene Mittel mit Wirkstoff, Kulturen und Zulassungsende",
+        endpoint="/api/v1/agrar/psm/?source=bvl", row_route="/agrar/psm/stamm/{id}", bundle="agrar", fetch_limit=200,
+        columns=[
+            {"key": "mittel", "label": "Mittel", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "wirkstoff", "label": "Wirkstoff", "filterable": True, "priority": "primary"},
+            {"key": "kulturen", "label": "Kulturen", "filterable": True, "priority": "secondary"},
+            {"key": "zulassungBis", "label": "Zulassung bis", "renderKind": "date", "sortable": True,
+             "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "secondary"},
+            {"key": "erklaerungLandwirtStatus", "label": "Erklaerung Landwirt", "priority": "tertiary"},
+        ],
+        actions=[_neu("Neues Mittel", "/agrar/psm/stamm/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Pflanzenschutzmittel mit Zulassung und Wirkstoff finden und oeffnen.",
+        prompts=["Welche Mittel laufen dieses Jahr aus?", "Welche Mittel enthalten Glyphosat?"],
+        no_workflow="Verzeichnisliste ohne eigenen Ablauf.",
+    )
+
+
+def build_artikel_liste() -> dict[str, Any]:
+    """Artikelstamm mit Warengruppe, Preis und Bestand."""
+    return _liste(
+        screen_id="artikel/liste", domain="lager", title="Artikel", subtitle="Artikelstamm mit Preis und Bestand",
+        endpoint="/api/v1/articles/", row_route="/artikel/{id}", bundle="lager", fetch_limit=200,
+        columns=[
+            {"key": "article_number", "label": "Artikel-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "category", "label": "Warengruppe", "filterable": True, "priority": "primary"},
+            {"key": "sales_price", "label": "VK-Preis", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "secondary"},
+            {"key": "current_stock", "label": "Bestand", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "unit", "label": "Einheit", "priority": "tertiary"},
+            {"key": "is_active", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neuer Artikel", "/artikel/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Artikel mit Warengruppe, Preis und Bestand finden und oeffnen.",
+        prompts=["Welche Artikel der Warengruppe Duenger fuehren wir?", "Welche Artikel haben keinen Bestand?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_chargen_liste() -> dict[str, Any]:
+    """Chargen mit Artikel, Menge, Lagerort und Status."""
+    return _liste(
+        screen_id="charge/liste", domain="lager", title="Chargen", subtitle="Chargen mit Lagerort und Freigabestatus",
+        endpoint="/api/v1/chargen", row_route="/charge/stamm/{id}", bundle="lager",
+        columns=[
+            {"key": "chargenId", "label": "Charge", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "artikel", "label": "Artikel", "filterable": True, "priority": "primary"},
+            {"key": "menge", "label": "Menge (t)", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "lagerort", "label": "Lagerort", "filterable": True, "priority": "secondary"},
+            {"key": "eingang", "label": "Eingang", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Wareneingang erfassen", "/charge/wareneingang"), _EXPORT],
+        row_actions=[],
+        purpose="Chargen nach Artikel, Lagerort und Status finden und ihre Spur oeffnen.",
+        prompts=["Welche Chargen sind noch in Pruefung?", "Welche Chargen liegen in Silo 3?"],
+        no_workflow="Der Status steht an der Charge; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_personal_mitarbeiter_liste() -> dict[str, Any]:
+    """Mitarbeitende; Zugriff und Felder wie der Personalweg."""
+    return _liste(
+        screen_id="personal/mitarbeiter-liste", domain="personal", title="Mitarbeitende",
+        subtitle="Mitarbeitende mit Abteilung und Position", endpoint="/api/v1/personal/mitarbeiter",
+        row_route="/personal/mitarbeiter/{id}", bundle="personal",
+        columns=[
+            {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "abteilung", "label": "Abteilung", "filterable": True, "priority": "primary"},
+            {"key": "position", "label": "Position", "filterable": True, "priority": "secondary"},
+            {"key": "email", "label": "E-Mail", "priority": "tertiary"},
+            {"key": "eintrittsdatum", "label": "Eintritt", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Neue Mitarbeiterin / neuer Mitarbeiter", "/personal/mitarbeiter/neu"), _EXPORT],
+        row_actions=[],
+        purpose="Mitarbeitende nach Abteilung und Status finden und ihre Personalakte oeffnen.",
+        prompts=["Wer arbeitet im Lager?", "Wer ist seit diesem Jahr dabei?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+#: Diese Bereiche haben noch keine Detail- oder Anlageseite: Ihre Routen zeigten die Liste selbst. Die Listen
+#: verlinken deshalb nichts, bis es eine Objektmaske gibt (MASK-STUDIO-ROLLOUT, keine toten Links).
+
+
+def build_versicherungen_liste() -> dict[str, Any]:
+    """Versicherungsvertraege mit Praemie und Ablauf."""
+    return _liste(
+        screen_id="versicherungen/liste", domain="finance", title="Versicherungen",
+        subtitle="Vertraege mit Praemie, Summe und Ablauf", endpoint="/api/v1/versicherungen", row_route=None,
+        bundle="finance",
+        columns=[
+            {"key": "art", "label": "Art", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "versicherer", "label": "Versicherer", "filterable": True, "priority": "primary"},
+            {"key": "vertragsnummer", "label": "Vertrag", "filterable": True, "priority": "secondary"},
+            {"key": "praemie", "label": "Praemie", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "primary"},
+            {"key": "versicherungssumme", "label": "Summe", "numeric": True, "renderKind": "currency",
+             "priority": "secondary"},
+            {"key": "ablauf", "label": "Ablauf", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Versicherungsvertraege mit Praemie und Ablauf im Blick behalten.",
+        prompts=["Welche Versicherungen laufen dieses Jahr aus?", "Was kosten alle Praemien zusammen?"],
+        no_workflow="Vertragsliste ohne eigenen Ablauf.",
+    )
+
+
+def build_wartung_anlagen_liste() -> dict[str, Any]:
+    """Anlagen mit letzter und naechster Wartung."""
+    return _liste(
+        screen_id="wartung/anlagen-liste", domain="lager", title="Wartung", subtitle="Anlagen und Wartungstermine",
+        endpoint="/api/v1/wartung/anlagen", row_route=None, bundle="lager",
+        columns=[
+            {"key": "name", "label": "Anlage", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "standort", "label": "Standort", "filterable": True, "priority": "secondary"},
+            {"key": "letzte_wartung", "label": "Letzte Wartung", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "naechste_wartung", "label": "Naechste Wartung", "renderKind": "date", "sortable": True,
+             "priority": "primary"},
+            {"key": "verantwortlicher", "label": "Verantwortlich", "filterable": True, "priority": "tertiary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Faellige Wartungen der Anlagen finden.",
+        prompts=["Welche Anlagen sind diesen Monat zur Wartung faellig?", "Welche Anlagen sind defekt?"],
+        no_workflow="Anlagenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_projekte_liste() -> dict[str, Any]:
+    """Projekte mit Fortschritt und Budget."""
+    return _liste(
+        screen_id="projekte/liste", domain="controlling", title="Projekte",
+        subtitle="Projekte mit Fortschritt, Budget und Ausgaben", endpoint="/api/v1/projekte", row_route=None,
+        bundle="controlling",
+        columns=[
+            {"key": "name", "label": "Projekt", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "projektleiter", "label": "Leitung", "filterable": True, "priority": "secondary"},
+            {"key": "kunde", "label": "Kunde", "filterable": True, "priority": "secondary"},
+            {"key": "fortschritt", "label": "Fortschritt %", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "budget", "label": "Budget", "numeric": True, "renderKind": "currency", "priority": "primary"},
+            {"key": "ausgaben", "label": "Ausgaben", "numeric": True, "renderKind": "currency", "priority": "secondary"},
+            {"key": "enddatum", "label": "Ende", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Projekte nach Fortschritt, Budget und Ausgaben steuern.",
+        prompts=["Welche Projekte liegen ueber Budget?", "Welche Projekte enden diesen Monat?"],
+        no_workflow="Projektliste ohne eigenen Ablauf.",
+    )
+
+
+def build_labor_proben_liste() -> dict[str, Any]:
+    """Laborproben mit Typ, Artikel und Status."""
+    return _liste(
+        screen_id="labor/proben-liste", domain="qualitaet", title="Laborproben", subtitle="Proben und ihr Bearbeitungsstand",
+        endpoint="/api/v1/labor/proben", row_route=None, bundle="qualitaet",
+        columns=[
+            {"key": "probennummer", "label": "Probe", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "artikel", "label": "Artikel", "filterable": True, "priority": "secondary"},
+            {"key": "labor", "label": "Labor", "filterable": True, "priority": "secondary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Laborproben und ihren Bearbeitungsstand verfolgen.",
+        prompts=["Welche Proben sind noch ausstehend?", "Welche Proben gingen diese Woche ans Labor?"],
+        no_workflow="Probenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_foerder_antraege_liste() -> dict[str, Any]:
+    """Foerderantraege; Zeile oeffnet den Antrag."""
+    return _liste(
+        screen_id="foerderung/liste", domain="agrar", title="Foerderantraege",
+        subtitle="Antraege mit Programm, Flaeche und Betrag", endpoint="/api/v1/foerderung/antraege",
+        row_route="/foerderung/antrag/{id}", bundle="agrar",
+        columns=[
+            {"key": "nummer", "label": "Antrag", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "programm", "label": "Programm", "filterable": True, "priority": "primary"},
+            {"key": "antragsdatum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "flaeche", "label": "Flaeche (ha)", "numeric": True, "priority": "secondary"},
+            {"key": "betrag", "label": "Betrag", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Neuer Antrag", "/foerderung/antrag"), _EXPORT],
+        row_actions=[],
+        purpose="Foerderantraege nach Programm und Stand verfolgen.",
+        prompts=["Welche Antraege sind eingereicht?", "Welche Foerdersumme ist bewilligt?"],
+        no_workflow="Der Stand steht am Antrag; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_schaeden_liste() -> dict[str, Any]:
+    """Schadenmeldungen mit Frist; Zeile oeffnet die Meldung."""
+    return _liste(
+        screen_id="schaeden/liste", domain="finance", title="Schadenmeldungen",
+        subtitle="Schaeden mit Meldefrist und Regulierung", endpoint="/api/v1/schaeden/meldungen",
+        row_route="/schaeden/{id}", bundle="finance",
+        columns=[
+            {"key": "meldungsnummer", "label": "Meldung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "art", "label": "Art", "filterable": True, "priority": "primary"},
+            {"key": "schadendatum", "label": "Schadendatum", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "melden_bis", "label": "Melden bis", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "schadenhoehe", "label": "Schadenhoehe", "numeric": True, "renderKind": "currency",
+             "priority": "secondary"},
+            {"key": "regulierungsbetrag", "label": "Reguliert", "numeric": True, "renderKind": "currency",
+             "priority": "tertiary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Schaden melden", "/schaeden/meldung"), _EXPORT],
+        row_actions=[],
+        purpose="Schadenmeldungen mit Meldefrist und Regulierungsstand verfolgen.",
+        prompts=["Welche Schaeden muessen diese Woche gemeldet werden?", "Welche Schaeden sind reguliert?"],
+        no_workflow="Der Stand steht an der Meldung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_admin_benutzer_liste() -> dict[str, Any]:
+    """Benutzer des Mandanten; Detail- und Anlage-Route zeigten die Liste selbst, deshalb ohne Links."""
+    return _liste(
+        screen_id="admin/benutzer-liste", domain="admin", title="Benutzer", subtitle="Benutzer mit Rolle und letzter Anmeldung",
+        endpoint="/api/v1/admin/benutzer", row_route=None, bundle="admin",
+        columns=[
+            {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "email", "label": "E-Mail", "filterable": True, "priority": "primary"},
+            {"key": "rolle", "label": "Rolle", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "secondary"},
+            {"key": "letzteAnmeldung", "label": "Letzte Anmeldung", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Benutzer mit Rolle und letzter Anmeldung pruefen.",
+        prompts=["Wer hat sich seit drei Monaten nicht angemeldet?", "Welche Benutzer sind Administratoren?"],
+        no_workflow="Benutzerliste ohne eigenen Ablauf.",
+    )
+
+
+def build_compliance_pcn_liste() -> dict[str, Any]:
+    """PCN-Meldungen (Giftinformationszentren) mit UFI und Status."""
+    return _liste(
+        screen_id="compliance/pcn-liste", domain="compliance", title="PCN-Meldungen",
+        subtitle="Meldungen an die Giftinformationszentren mit UFI", endpoint="/api/v1/compliance/pcn-meldungen",
+        row_route=None, bundle="compliance", fetch_limit=200,
+        columns=[
+            {"key": "produktname", "label": "Produkt", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "ufi", "label": "UFI", "filterable": True, "priority": "primary"},
+            {"key": "verwendungskategorie", "label": "Verwendung", "filterable": True, "priority": "secondary"},
+            {"key": "cas_nummern", "label": "CAS-Nummern", "priority": "tertiary"},
+            {"key": "pcnStatus", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_neu("Neue PCN-Meldung", "/compliance/pcn-ufi"), _EXPORT],
+        row_actions=[],
+        purpose="PCN-Meldungen mit UFI und Uebermittlungsstand nachweisen.",
+        prompts=["Welche PCN-Meldungen sind noch Entwurf?", "Welche UFI hat Produkt X?"],
+        no_workflow="Der Status steht an der Meldung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_personal_stundenzettel_liste() -> dict[str, Any]:
+    """Stundenzettel der Fahrer mit Arbeitszeit und Ueberstunden."""
+    return _liste(
+        screen_id="personal/stundenzettel-liste", domain="personal", title="Stundenzettel",
+        subtitle="Fahrer-Stundenzettel mit Arbeitszeit und Ueberstunden", endpoint="/api/v1/personal/stundenzettel",
+        row_route=None, bundle="personal",
+        columns=[
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "fahrer", "label": "Fahrer", "filterable": True, "sortable": True, "priority": "primary"},
+            {"key": "kennzeichen", "label": "Kennzeichen", "filterable": True, "priority": "secondary"},
+            {"key": "gesamtArbeitszeit", "label": "Arbeitszeit (h)", "numeric": True, "sortable": True,
+             "priority": "primary"},
+            {"key": "ueberstunden", "label": "Ueberstunden (h)", "numeric": True, "sortable": True,
+             "priority": "primary"},
+            {"key": "erstelltAm", "label": "Erfasst", "renderKind": "date", "priority": "tertiary"},
+        ],
+        actions=[_neu("Stundenzettel erfassen", "/personal/stundenzettel"), _EXPORT],
+        row_actions=[],
+        purpose="Fahrer-Stundenzettel mit Arbeitszeit und Ueberstunden auswerten.",
+        prompts=["Wer hatte diese Woche Ueberstunden?", "Wie viele Stunden fuhr Fahrer X im Monat?"],
+        no_workflow="Erfassungsliste ohne eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
+    "einkauf/anlieferavis-liste": build_einkauf_anlieferavis_liste,
+    "einkauf/auftragsbestaetigungen": build_einkauf_auftragsbestaetigungen_liste,
+    "einkauf/lieferanten": build_einkauf_lieferanten_liste,
+    "einkauf/bestellungen": build_einkauf_bestellungen_liste,
+    "agrar/saatgut-liste": build_agrar_saatgut_liste,
+    "agrar/duenger-liste": build_agrar_duenger_liste,
+    "futtermittel/einzelfuttermittel-liste": build_futtermittel_einzelfuttermittel_liste,
+    "futtermittel/mischfuttermittel-liste": build_futtermittel_mischfuttermittel_liste,
+    "finance/debitoren-liste": build_finance_debitoren_liste,
+    "finance/kreditoren-liste": build_finance_kreditoren_liste,
+    "crm/kampagnen-liste": build_crm_kampagnen_liste,
+    "crm/kampagnenvorlagen-liste": build_crm_kampagnenvorlagen_liste,
+    "crm/einwilligungen-liste": build_crm_einwilligungen_liste,
+    "crm/dsgvo-anfragen-liste": build_dsgvo_anfragen_liste,
+    "crm/segmente-liste": build_crm_segmente_liste,
+    "crm/opportunities-liste": build_crm_opportunities_liste,
+    "agrar/psm-liste": build_agrar_psm_liste,
+    "artikel/liste": build_artikel_liste,
+    "charge/liste": build_chargen_liste,
+    "personal/mitarbeiter-liste": build_personal_mitarbeiter_liste,
+    "versicherungen/liste": build_versicherungen_liste,
+    "wartung/anlagen-liste": build_wartung_anlagen_liste,
+    "projekte/liste": build_projekte_liste,
+    "labor/proben-liste": build_labor_proben_liste,
+    "foerderung/liste": build_foerder_antraege_liste,
+    "schaeden/liste": build_schaeden_liste,
+    "admin/benutzer-liste": build_admin_benutzer_liste,
+    "compliance/pcn-liste": build_compliance_pcn_liste,
+    "personal/stundenzettel-liste": build_personal_stundenzettel_liste,
 }
-LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote"}
+LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
+                "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
+                "einkauf/auftragsbestaetigungen": "/einkauf/auftragsbestaetigungen",
+                "einkauf/lieferanten": "/einkauf/lieferanten",
+                "einkauf/bestellungen": "/einkauf/bestellungen",
+                "agrar/saatgut-liste": "/agrar/saatgut",
+                "agrar/duenger-liste": "/agrar/duenger",
+                "futtermittel/einzelfuttermittel-liste": "/futtermittel/einzelfuttermittel-liste",
+                "futtermittel/mischfuttermittel-liste": "/futtermittel/mischfuttermittel-liste",
+                "finance/debitoren-liste": "/finance/debitoren-liste",
+                "finance/kreditoren-liste": "/finance/kreditoren",
+                "crm/kampagnen-liste": "/crm/campaigns",
+                "crm/kampagnenvorlagen-liste": "/crm/campaign-templates",
+                "crm/einwilligungen-liste": "/crm/consents",
+                "crm/dsgvo-anfragen-liste": "/crm/gdpr-requests",
+                "crm/segmente-liste": "/crm/segments",
+                "crm/opportunities-liste": "/crm/opportunities",
+                "agrar/psm-liste": "/agrar/psm",
+                "artikel/liste": "/artikel",
+                "charge/liste": "/charge/liste",
+                "personal/mitarbeiter-liste": "/personal/mitarbeiter",
+                "versicherungen/liste": "/versicherungen",
+                "wartung/anlagen-liste": "/wartung/anlagen",
+                "projekte/liste": "/projekte",
+                "labor/proben-liste": "/labor/proben",
+                "foerderung/liste": "/foerderung",
+                "schaeden/liste": "/schaeden",
+                "admin/benutzer-liste": "/admin/benutzer",
+                "compliance/pcn-liste": "/compliance/pcn-liste",
+                "personal/stundenzettel-liste": "/personal/stundenzettel-liste"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
-                   "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"]}
+                   "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
+                   "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
+                   "einkauf/auftragsbestaetigungen": ["auftragsbestaetigungen", "ab", "ordrsp"],
+                   "einkauf/lieferanten": ["lieferanten", "lieferantenliste", "kreditoren einkauf"],
+                   "einkauf/bestellungen": ["bestellungen", "einkaufsbestellungen", "po"],
+                   "agrar/saatgut-liste": ["saatgut", "sorten", "saatgutliste"],
+                   "agrar/duenger-liste": ["duenger", "duengemittel", "duengerliste"],
+                   "futtermittel/einzelfuttermittel-liste": ["einzelfuttermittel", "futterkatalog", "futtermittel"],
+                   "futtermittel/mischfuttermittel-liste": ["mischfuttermittel", "mischfutter", "kraftfutter"],
+                   "finance/debitoren-liste": ["debitoren", "debitorenliste", "forderungen"],
+                   "finance/kreditoren-liste": ["kreditoren", "kreditorenliste", "verbindlichkeiten stamm"],
+                   "crm/kampagnen-liste": ["kampagnen", "marketing", "campaigns"],
+                   "crm/kampagnenvorlagen-liste": ["kampagnenvorlagen", "vorlagen", "templates"],
+                   "crm/einwilligungen-liste": ["einwilligungen", "consent", "opt-in"],
+                   "crm/dsgvo-anfragen-liste": ["dsgvo-anfragen", "betroffenenanfragen", "gdpr"],
+                   "crm/segmente-liste": ["segmente", "kundensegmente", "zielgruppen"],
+                   "crm/opportunities-liste": ["verkaufschancen", "opportunities", "pipeline"],
+                   "agrar/psm-liste": ["psm", "pflanzenschutzmittel", "pflanzenschutz"],
+                   "artikel/liste": ["artikel", "artikelstamm", "produkte"],
+                   "charge/liste": ["chargen", "partien", "lose"],
+                   "personal/mitarbeiter-liste": ["mitarbeiter", "mitarbeitende", "personal"],
+                   "versicherungen/liste": ["versicherungen", "policen", "versicherungsvertraege"],
+                   "wartung/anlagen-liste": ["wartung", "anlagen", "instandhaltung"],
+                   "projekte/liste": ["projekte", "projektliste", "vorhaben"],
+                   "labor/proben-liste": ["laborproben", "proben", "labor"],
+                   "foerderung/liste": ["foerderantraege", "foerderung", "antraege"],
+                   "schaeden/liste": ["schaeden", "schadenmeldungen", "versicherungsschaeden"],
+                   "admin/benutzer-liste": ["benutzer", "nutzer", "konten"],
+                   "compliance/pcn-liste": ["pcn", "ufi", "giftinformation"],
+                   "personal/stundenzettel-liste": ["stundenzettel", "fahrerzeiten", "arbeitszeit"]}

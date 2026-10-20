@@ -34,6 +34,21 @@
         ]
       ]
     },
+    "agrar/duenger-liste": {
+      "agrar.duenger.deactivate": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "agrar/harvest-controls": {
       "create_rule": [
         [
@@ -377,6 +392,128 @@
         ]
       ]
     },
+    "crm/dsgvo-anfragen-liste": {
+      "dsgvo.anfrage.pruefen": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "dsgvo.anfrage.exportieren": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "dsgvo.anfrage.loeschen": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "dsgvo.anfrage.ablehnen": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "crm/einwilligungen-liste": {
+      "crm.einwilligung.widerrufen": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "crm/kampagnen-liste": {
+      "crm.kampagne.loeschen": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "crm/kampagnenvorlagen-liste": {
+      "crm.vorlage.aktivieren": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "crm.vorlage.deaktivieren": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "crm.vorlage.duplizieren": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "crm.vorlage.loeschen": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "crm/lead": {
       "crm.lead.update": [
         [
@@ -400,6 +537,26 @@
         ]
       ]
     },
+    "crm/opportunities-liste": {
+      "crm.chance.gewonnen": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "crm.chance.verloren": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "crm/opportunity": {
       "crm.opportunity.update": [
         [
@@ -411,6 +568,26 @@
         ]
       ],
       "crm.activity.create": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "crm/segmente-liste": {
+      "crm.segment.berechnen": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "crm.segment.loeschen": [
         [
           "CRM_ADMIN",
           "CRM_BEARBEITEN",
@@ -513,6 +690,36 @@
         ]
       ]
     },
+    "einkauf/anlieferavis-liste": {
+      "einkauf.avis.senden": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.avis.bestaetigen": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "lager.wareneingang.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.avis.stornieren": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "einkauf/auftragsbestaetigung": {
       "einkauf.auftragsbestaetigung.review": [
         [
@@ -529,6 +736,45 @@
         ]
       ],
       "einkauf.auftragsbestaetigung.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "einkauf/auftragsbestaetigungen": {
+      "einkauf.auftragsbestaetigung.review": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.auftragsbestaetigung.confirm": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "einkauf/bestellungen": {
+      "einkauf.bestellung.approve": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.bestellung.send": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.bestellung.cancel": [
         [
           "EINKAUF_ADMIN",
           "EINKAUF_BEARBEITEN",
@@ -580,6 +826,22 @@
     },
     "finance/debitor": {
       "finance.debitor.update": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "finance/debitoren-liste": {
+      "finance.debitor.sperren": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.debitor.entsperren": [
         [
           "FINANCE_ADMIN",
           "FINANCE_BEARBEITEN",
@@ -674,8 +936,30 @@
         ]
       ]
     },
+    "futtermittel/einzelfuttermittel-liste": {
+      "futtermittel.einzelfutter.retire": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "futtermittel/mischfuttermittel": {
       "futtermittel.mischfutter.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "futtermittel/mischfuttermittel-liste": {
+      "futtermittel.mischfutter.deactivate": [
         [
           "AGRAR_ADMIN",
           "AGRAR_BEARBEITEN",

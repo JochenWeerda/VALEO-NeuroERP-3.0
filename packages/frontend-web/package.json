@@ -22,7 +22,7 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "pretype-check": "npm run routes:generate",
-    "type-check": "tsc --noEmit --project tsconfig.json",
+    "type-check": "tsc -b tsconfig.node.json && tsc --noEmit --project tsconfig.json",
     "type-check:focused": "tsc --noEmit --project tsconfig.typecheck.json",
     "spec-kit:generate": "spec-kit generate",
     "spec-kit:validate": "spec-kit validate",

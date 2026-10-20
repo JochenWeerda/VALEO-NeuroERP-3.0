@@ -75305,71 +75305,6 @@
         "title": "FuhrparkTerminartPayload",
         "type": "object"
       },
-      "FutterBulkDeleteErrorOut": {
-        "properties": {
-          "detail": {
-            "title": "Detail",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "detail"
-        ],
-        "title": "FutterBulkDeleteErrorOut",
-        "type": "object"
-      },
-      "FutterBulkDeleteIn": {
-        "properties": {
-          "ids": {
-            "items": {
-              "type": "string"
-            },
-            "maxItems": 100,
-            "minItems": 1,
-            "title": "Ids",
-            "type": "array"
-          }
-        },
-        "title": "FutterBulkDeleteIn",
-        "type": "object"
-      },
-      "FutterBulkDeleteOut": {
-        "properties": {
-          "deleted": {
-            "title": "Deleted",
-            "type": "integer"
-          },
-          "errors": {
-            "items": {
-              "$ref": "#/components/schemas/FutterBulkDeleteErrorOut"
-            },
-            "title": "Errors",
-            "type": "array"
-          },
-          "missing_ids": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Missing Ids",
-            "type": "array"
-          },
-          "requested": {
-            "title": "Requested",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "requested",
-          "deleted"
-        ],
-        "title": "FutterBulkDeleteOut",
-        "type": "object"
-      },
       "FuttermittelRezeptOut": {
         "additionalProperties": true,
         "description": "Typed response schema for FuttermittelRezeptOut endpoints (extra fields forwarded).",
@@ -208093,6 +208028,64 @@
         ]
       }
     },
+    "/api/v1/agrar/duenger/{entity_id}/actions/deaktivieren": {
+      "post": {
+        "operationId": "duenger_deaktivieren_api_v1_agrar_duenger__entity_id__actions_deaktivieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Duenger mit Begruendung deaktivieren",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/agrar/ernte": {
       "get": {
         "operationId": "list_ernten_api_v1_agrar_ernte_get",
@@ -244726,172 +244719,6 @@
         ]
       }
     },
-    "/api/v1/compliance/intrastat/meldungen": {
-      "get": {
-        "description": "Liste aller Intrastat-Meldungen (Gap 042).\n\nOptional filterbar nach Meldezeitraum (YYYY-MM) und Richtung (EINGANG/AUSGANG).",
-        "operationId": "list_intrastat_meldungen_api_v1_compliance_intrastat_meldungen_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "meldezeitraum",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Meldezeitraum"
-            }
-          },
-          {
-            "in": "query",
-            "name": "richtung",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Richtung"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ComplianceOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Intrastat meldungen auflisten",
-        "tags": [
-          "Compliance"
-        ]
-      },
-      "post": {
-        "description": "Anlage einer neuen Intrastat-Meldung (Gap 042).\n\nFuehrt direkt eine Vollstaendigkeitspruefung gemaess VO (EG) 638/2004 durch.\nGibt validation_result mit allen Violations zurueck.",
-        "operationId": "create_intrastat_meldung_api_v1_compliance_intrastat_meldungen_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ComplianceOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Intrastat meldung anlegen",
-        "tags": [
-          "Compliance"
-        ]
-      }
-    },
-    "/api/v1/compliance/intrastat/meldungen/{meldung_id}/validate": {
-      "get": {
-        "description": "Vollstaendigkeitspruefung einer einzelnen Intrastat-Meldung nach EU-VO 638/2004.",
-        "operationId": "validate_intrastat_meldung_endpoint_api_v1_compliance_intrastat_meldungen__meldung_id__validate_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "meldung_id",
-            "required": true,
-            "schema": {
-              "title": "Meldung Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ComplianceOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Intrastat meldung endpoint validieren",
-        "tags": [
-          "Compliance"
-        ]
-      }
-    },
     "/api/v1/compliance/lksg/annual-report-preview": {
       "get": {
         "operationId": "lksg_annual_report_preview_api_v1_compliance_lksg_annual_report_preview_get",
@@ -249559,6 +249386,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Activity",
         "tags": [
           "CRM",
@@ -249685,6 +249517,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Activity",
         "tags": [
           "CRM",
@@ -258647,6 +258484,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Revoke Consent",
         "tags": [
           "CRM",
@@ -258998,6 +258840,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Contact",
         "tags": [
           "CRM",
@@ -259124,6 +258971,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Contact",
         "tags": [
           "CRM",
@@ -268095,6 +267947,122 @@
           }
         ],
         "summary": "CRM-Aktivitaet fuer Opportunity anlegen (SPEC-P1-04)",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/crm/opportunities/{entity_id}/actions/gewonnen": {
+      "post": {
+        "operationId": "chance_gewonnen_api_v1_crm_opportunities__entity_id__actions_gewonnen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Verkaufschance als gewonnen abschliessen",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/crm/opportunities/{entity_id}/actions/verloren": {
+      "post": {
+        "operationId": "chance_verloren_api_v1_crm_opportunities__entity_id__actions_verloren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Verkaufschance mit Begruendung als verloren abschliessen",
         "tags": [
           "mask-actions"
         ]
@@ -278362,6 +278330,180 @@
         ]
       }
     },
+    "/api/v1/einkauf/anlieferavis/{entity_id}/actions/bestaetigen": {
+      "post": {
+        "operationId": "avis_bestaetigen_api_v1_einkauf_anlieferavis__entity_id__actions_bestaetigen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Anlieferavis bestaetigen",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/einkauf/anlieferavis/{entity_id}/actions/senden": {
+      "post": {
+        "operationId": "avis_senden_api_v1_einkauf_anlieferavis__entity_id__actions_senden_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Anlieferavis als gesendet fuehren",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/einkauf/anlieferavis/{entity_id}/actions/stornieren": {
+      "post": {
+        "operationId": "avis_stornieren_api_v1_einkauf_anlieferavis__entity_id__actions_stornieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Anlieferavis mit Begruendung stornieren",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang": {
       "post": {
         "description": "Lieferschein-Nr. und Lager fragt die Maske deklarativ (``inputFields``).",
@@ -279754,6 +279896,180 @@
           "lager-konten",
           "einkauf",
           "bestellvorschlag"
+        ]
+      }
+    },
+    "/api/v1/einkauf/bestellungen/{entity_id}/actions/freigeben": {
+      "post": {
+        "operationId": "bestellung_freigeben_api_v1_einkauf_bestellungen__entity_id__actions_freigeben_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellentwurf freigeben (Obligo)",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/einkauf/bestellungen/{entity_id}/actions/stornieren": {
+      "post": {
+        "operationId": "bestellung_stornieren_api_v1_einkauf_bestellungen__entity_id__actions_stornieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellung mit Begruendung stornieren",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/einkauf/bestellungen/{entity_id}/actions/versenden": {
+      "post": {
+        "operationId": "bestellung_versenden_api_v1_einkauf_bestellungen__entity_id__actions_versenden_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellung an den Lieferanten senden",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
@@ -300026,6 +300342,122 @@
         ]
       }
     },
+    "/api/v1/finance/debitoren/{entity_id}/actions/entsperren": {
+      "post": {
+        "operationId": "debitor_entsperren_api_v1_finance_debitoren__entity_id__actions_entsperren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Debitor mit Begruendung entsperren",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/finance/debitoren/{entity_id}/actions/sperren": {
+      "post": {
+        "operationId": "debitor_sperren_api_v1_finance_debitoren__entity_id__actions_sperren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Debitor mit Begruendung sperren",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/finance/debtors/": {
       "get": {
         "description": "List debtors with pagination and filtering.",
@@ -313909,25 +314341,37 @@
         ]
       }
     },
-    "/api/v1/futter/einzelfuttermittel/bulk-delete": {
+    "/api/v1/futter/einzelfuttermittel/{entity_id}/actions/stilllegen": {
       "post": {
-        "operationId": "bulk_delete_futter_einzel_api_v1_futter_einzelfuttermittel_bulk_delete_post",
+        "operationId": "einzelfutter_stilllegen_api_v1_futter_einzelfuttermittel__entity_id__actions_stilllegen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FutterBulkDeleteIn"
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FutterBulkDeleteOut"
+                  "$ref": "#/components/schemas/MaskActionResult"
                 }
               }
             },
@@ -313949,9 +314393,9 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Delete futter einzel Bulk",
+        "summary": "Einzelfuttermittel im Futterkatalog stilllegen",
         "tags": [
-          "compat"
+          "mask-actions"
         ]
       }
     },
@@ -314101,46 +314545,6 @@
           "stammdaten",
           "futter",
           "stammdaten"
-        ]
-      }
-    },
-    "/api/v1/futter/einzelfuttermittel/{item_id}": {
-      "delete": {
-        "operationId": "delete_futter_einzel_item_api_v1_futter_einzelfuttermittel__item_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "item_id",
-            "required": true,
-            "schema": {
-              "title": "Item Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Futter einzel item lÃ¶schen",
-        "tags": [
-          "compat"
         ]
       }
     },
@@ -314400,52 +314804,6 @@
         ]
       }
     },
-    "/api/v1/futter/mischfuttermittel/bulk-delete": {
-      "post": {
-        "operationId": "bulk_delete_futter_misch_api_v1_futter_mischfuttermittel_bulk_delete_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FutterBulkDeleteIn"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FutterBulkDeleteOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Delete futter misch Bulk",
-        "tags": [
-          "compat"
-        ]
-      }
-    },
     "/api/v1/futter/mischfuttermittel/naehrwerte/berechnen": {
       "post": {
         "description": "Berechnet NÃ¤hrwerte einer Mischfuttermittel-Rezeptur nach DLG 503/504 (10/2025).\n\nEnergie (DLG 503 / GfE 2023): OMD â†’ ED â†’ DE â†’ UE + CH4E â†’ ME_FAN1/FANi.\nProtein (DLG 504 / GfE 2023): CP â†’ RDP/UDP â†’ siDUDP + MCP â†’ sidP.\nErgebnis enthÃ¤lt Formel-Versionierung fÃ¼r vollstÃ¤ndige RÃ¼ckverfolgbarkeit.",
@@ -314551,22 +314909,40 @@
         ]
       }
     },
-    "/api/v1/futter/mischfuttermittel/{item_id}": {
-      "delete": {
-        "operationId": "delete_futter_misch_item_api_v1_futter_mischfuttermittel__item_id__delete",
+    "/api/v1/futter/mischfuttermittel/{entity_id}/actions/deaktivieren": {
+      "post": {
+        "operationId": "mischfutter_deaktivieren_api_v1_futter_mischfuttermittel__entity_id__actions_deaktivieren_post",
         "parameters": [
           {
             "in": "path",
-            "name": "item_id",
+            "name": "entity_id",
             "required": true,
             "schema": {
-              "title": "Item Id",
+              "title": "Entity Id",
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
-          "204": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
             "description": "Successful Response"
           },
           "422": {
@@ -314585,9 +314961,9 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Futter misch item lÃ¶schen",
+        "summary": "Mischfuttermittel mit Begruendung deaktivieren",
         "tags": [
-          "compat"
+          "mask-actions"
         ]
       }
     },
@@ -315060,65 +315436,6 @@
         "summary": "Stats futter",
         "tags": [
           "compat"
-        ]
-      }
-    },
-    "/api/v1/futter/{kategorie}/bulk-delete": {
-      "post": {
-        "operationId": "futter_bulk_delete_api_v1_futter__kategorie__bulk_delete_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "kategorie",
-            "required": true,
-            "schema": {
-              "title": "Kategorie",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "default": {},
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BridgeOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Futtermittel sammeln löschen",
-        "tags": [
-          "mask-frontend-bridges"
         ]
       }
     },
@@ -318589,6 +318906,35 @@
       }
     },
     "/api/v1/gdpr/requests": {
+      "get": {
+        "description": "Anfragen des Mandanten, neueste zuerst. Bis 20.10.2026 fehlte der Weg; die Liste blieb immer leer.\n\nDie Liste zeigt E-Mail-Adressen der Betroffenen; deshalb dieselbe Rolle wie die Bearbeitung.",
+        "operationId": "list_gdpr_requests_api_v1_gdpr_requests_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GdprRequestResponse"
+                  },
+                  "title": "Response List Gdpr Requests Api V1 Gdpr Requests Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gdpr requests auflisten",
+        "tags": [
+          "gdpr"
+        ]
+      },
       "post": {
         "description": "Create a new GDPR data-subject request (Art. 15 / 17 / 20).",
         "operationId": "create_gdpr_request_api_v1_gdpr_requests_post",
@@ -318910,6 +319256,24 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -322408,6 +322772,57 @@
           }
         ],
         "summary": "Intrastat-Meldung aktualisieren",
+        "tags": [
+          "Intrastat",
+          "Außenhandel"
+        ]
+      }
+    },
+    "/api/v1/intrastat/meldungen/{meldung_id}/validate": {
+      "get": {
+        "description": "Prueft die gespeicherte Meldung des Mandanten (Positionspflichtfelder).\n\nBis 20.10.2026 pruefte ``/compliance/intrastat/meldungen/{id}/validate`` eine erfundene Beispielmeldung und\nmeldete fuer jede Kennung \"gueltig\" — auch dem Agenten-Werkzeug ``valeo_compliance_intrastat_validate``.\nDie Kopfangaben des Meldepflichtigen (USt-IdNr., Betriebsstaette) prueft die Abgabe beim Statistischen Amt.",
+        "operationId": "validate_meldung_api_v1_intrastat_meldungen__meldung_id__validate_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meldung_id",
+            "required": true,
+            "schema": {
+              "title": "Meldung Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Validate Meldung Api V1 Intrastat Meldungen  Meldung Id  Validate Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Intrastat-Meldung vor der Abgabe pruefen",
         "tags": [
           "Intrastat",
           "Außenhandel"

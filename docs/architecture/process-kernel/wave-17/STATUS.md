@@ -45,4 +45,4 @@ Stand: 2026-03-19
 Reale ApproveAPInvoice/RejectAPInvoice/PostAPInvoice verwenden die gemeinsame
 gepruefte Identitaets-, Antrags-, Inhalts- und Transaktionsgrenze. Direkte Status-
 mutationen und still erfolgreiche Buchungsabbrueche sind entfernt. Dies ist keine
-Vollabnahme saemtlicher anderer Kernel-Domaenen. [572 integrierte Vertraege und Grenzen](../../../quality-assurance/ap-workflow-security-20261020.md).
+Vollabnahme saemtlicher anderer Kernel-Domaenen. [716 integrierte Vertraege und Grenzen](../../../quality-assurance/ap-workflow-security-20261020.md).

@@ -40,6 +40,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `agrar_maschinen` | Agrar Maschinen — CRUD für Maschinenpark (Landhandel + Lohnunternehmer) |
 | `agrar_p0` | — |
 | `agrar_settlements` | Agrar self-billing settlements with deduction and posting workflow (AGRAR-SET-01). |
+| `agrar_stammdaten_kommandos` | Zeilenaktionen der Agrar- und Futtermittel-Stammdatenlisten als Fachaktion fuer Maske, CLI und MCP. |
 | `agrar_varieties` | Agrar Sorten/Varieties API fuer Ernte-Annahme. |
 | `agrar_wetter` | Agrar Wetter — Wetter-Proxy für BrightSky (DWD) + Open-Meteo (ICON-D2) |
 | `agri_lot_link_booking` | WM-AGRI-LOT-LINK-001 endpoint: Annahme/Waage-Lot in Silozelle buchen. |
@@ -133,6 +134,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `crm_kontakte` | Kunden-Kontakte (Kontakthistorie + Wiedervorlage) — Kunden-Cockpit. |
 | `crm_kunden_map` | CRM-Kundenkarte — alle Kunden als GeoJSON (Karte + Hover-Kennzahlen). |
 | `crm_lead_gen` | CRM Lead-Generierung — region-universale Lead-Kandidaten (GAP/LKV). |
+| `crm_listen_kommandos` | Zeilenaktionen der CRM-Listen als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `crm_mail_capture` | KIM E-Mail-Connector — ein-/ausgehende Mails als Kontakt erfassen. |
 | `crm_ownership` | Kunden-Ownership (DOM-CRM-004.3) — Zuordnung/Übergabe Außendienst/Innendienst. |
 | `crm_partner_suche` | Einheitliche Partner-Suche über Kunden, Lieferanten und Leads (Multi-Rolle). |
@@ -165,6 +167,8 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `einkauf_ab_erfassung` | Erfassung eingehender Auftragsbestaetigungen (STAMMDATEN-BEARBEITEN-20261019, Folgepunkt). |
 | `einkauf_anfrage_kommandos` | Zeilenaktionen der Anfragen-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `einkauf_angebot_kommandos` | Zeilenaktionen der Angebots-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
+| `einkauf_avis_kommandos` | Zeilenaktionen der Anlieferavis-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
+| `einkauf_bestellung_kommandos` | Zeilenaktionen der Bestell-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `einkauf_bestellvorschlag` | Einkauf â€” Bestell-Vorschlag Endpoints |
 | `einkauf_kpis` | Einkauf — KPIs |
 | `einkauf_lieferschein` | Einkauf Lieferschein + Frachtauftrag CRUD endpoints. |
@@ -218,13 +222,13 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `finance_period` | Periodenabschluss & Storno-Konsistenz (DOM-FIN-004.4). |
 | `finance_read_models` | Finance Read-Models — Wave 2 AP2 |
 | `finance_stammdaten` | Finance-Stamm fuer Debitoren und Kreditoren — Maskengenerator und Listen. |
+| `finance_stammdaten_kommandos` | Zeilenaktionen der Finance-Stammdatenlisten als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `financial_reports` | Financial Reports API |
 | `flow_spines` | — |
 | `foerderung` | Foerderung API - DB-backed endpoints. |
 | `forderungsgruppen` | Forderungsgruppen [FORG] — Kundensegmentierung für Bestandskontenzuordnung. |
 | `foreign_goods_worklist` | Foreign-goods operator worklist API. |
 | `fuhrpark` | Fuhrpark API Endpoints - zvoove style master data mask. |
-| `futter_read` | Guarded feed list projections preserving the existing frontend read contract. |
 | `futter_stamm` | Futtermittel-Stammdaten & Rezepte API |
 | `futtermittel_qs` | FEED-QS-001 — Futtermittel QS: HACCP-Plaene, VLOG-Meldungen, QS-Leitfaden. |
 | `futtermittel_rezepte` | Futtermittel Rezepturverwaltung |

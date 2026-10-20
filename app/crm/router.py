@@ -87,7 +87,7 @@ async def get_contact(
     return contact
 
 
-@router.put("/contacts/{contact_id}", response_model=schemas.Contact)
+@router.put("/contacts/{contact_id}", response_model=schemas.Contact, dependencies=SCHREIBEN["CRM"])
 async def update_contact(
     contact_id: str,
     contact_update: schemas.ContactUpdate,
@@ -112,7 +112,7 @@ async def update_contact(
     return db_contact
 
 
-@router.delete("/contacts/{contact_id}", status_code=204)
+@router.delete("/contacts/{contact_id}", status_code=204, dependencies=SCHREIBEN["CRM"])
 async def delete_contact(
     contact_id: str,
     db: Session = Depends(get_db),
@@ -275,7 +275,7 @@ async def get_activity(
     return activity
 
 
-@router.put("/activities/{activity_id}", response_model=schemas.Activity)
+@router.put("/activities/{activity_id}", response_model=schemas.Activity, dependencies=SCHREIBEN["CRM"])
 async def update_activity(
     activity_id: str,
     activity_update: schemas.ActivityUpdate,
@@ -299,7 +299,7 @@ async def update_activity(
     return db_activity
 
 
-@router.delete("/activities/{activity_id}", status_code=204)
+@router.delete("/activities/{activity_id}", status_code=204, dependencies=SCHREIBEN["CRM"])
 async def delete_activity(
     activity_id: str,
     db: Session = Depends(get_db),
@@ -705,7 +705,7 @@ async def list_consents(
     ]
 
 
-@router.post("/consents/{consent_id}/revoke", response_model=dict)
+@router.post("/consents/{consent_id}/revoke", response_model=dict, dependencies=SCHREIBEN["CRM"])
 async def revoke_consent(
     consent_id: str,
     db: Session = Depends(get_db),
