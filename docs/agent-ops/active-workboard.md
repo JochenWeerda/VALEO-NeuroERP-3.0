@@ -18862,3 +18862,14 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 **Katalogverbraucher:** Verbleibende reine Dispatch-/Kanalmetadaten-Vertraege test_process_kernel_wave5_commands.py und test_process_kernel_wave73_channel_process_actions.py verwenden noch die entfallenen AP-Aliasrollen; nur AP-Beispiele auf FINANCE_ADMIN vereinheitlichen. Keine Kanalgeschaeftslogik oder Berechtigung erweitern. Zusaetzliche Verbrauchersuiten pruefen, damit die CI den neuen Rollenvertrag vollstaendig abbildet.
 
 **Finale AP-Integration:** Parallele Lieferungen bis86d54acb1 erhalten.716 Backendpruefungen,19 Oberflaechenfaelle, vollstaendige Typpruefung/Node-Build und alle ausgefuehrten Gates gruen. Keine neue Datenbank/Container/Migration/Reset. Eigenen AP-Meilenstein338b34973 und Integrationscommit4405f1fca nicht zurueckgenommen; erneuter Main-Zusammenfuehrungscommit bewahrt beide Historien. [Abnahme und Grenzen](../quality-assurance/ap-workflow-security-20261020.md).
+
+## AP-CI-SELECTION-20261020 - reserviert, Codex
+
+Ziel: AP-SQL-Vertraege muessen auch im verpflichtenden needs_live_db-Gate ausgewaehlt
+werden. Besitz: test_ap_workflow_security_contract.py nur gemeinsame case-Fixture,
+test_ap_workflow_concurrency.py nur require_db-Abhaengigkeit, QA und Workboard.
+Transitive require_db-Fixture nutzt die vorhandene strikte Sammlung in conftest;
+keine neue Datenbank, Container oder Workflow-Pipeline. Abnahme: strikte Gateauswahl
+fuehrt AP-, Kernel-, native und Parallelitaetsfaelle auf bestehendem valeo_probe aus.
+Geschaeftscode bleibt unveraendert. Vollsuite deckte sie bereits ab; der schnelle
+PostgreSQL-Pflichtlauf muss denselben Schutz explizit enthalten.
