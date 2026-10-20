@@ -31,15 +31,6 @@ type EinlagerungData = {
   lagerplatz: string
 }
 
-const FALLBACK_LAGERORTE = [
-  { id: 'silo-1', label: 'Silo 1', description: 'Weizen / Roggen' },
-  { id: 'silo-2', label: 'Silo 2', description: 'Gerste / Hafer' },
-  { id: 'halle-a', label: 'Halle A', description: 'Allgemein' },
-  { id: 'halle-b', label: 'Halle B', description: 'Saecke / Paletten' },
-]
-
-const FALLBACK_ARTIKEL = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer', 'Sonnenblumen']
-
 export default function EinlagerungPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -72,23 +63,17 @@ export default function EinlagerungPage(): JSX.Element {
     },
   })
 
-  const ARTIKEL = useMemo(() => {
-    if (artikelQuery.data && artikelQuery.data.length > 0) {
-      return artikelQuery.data.map((a) => a.name)
-    }
-    return FALLBACK_ARTIKEL
-  }, [artikelQuery.data])
+  // Nur echte Artikel und Lagerorte: bis 20.10.2026 boten die Auswahlen bei leerer Antwort erfundene Eintraege an.
+  const ARTIKEL = useMemo(() => (artikelQuery.data ?? []).map((a) => a.name), [artikelQuery.data])
 
-  const LAGERORTE = useMemo(() => {
-    if (warehouseQuery.data && warehouseQuery.data.length > 0) {
-      return warehouseQuery.data.map((w) => ({
-        id: w.warehouse_code || w.id,
-        label: w.name,
-        description: w.warehouse_type || '',
-      }))
-    }
-    return FALLBACK_LAGERORTE
-  }, [warehouseQuery.data])
+  const LAGERORTE = useMemo(
+    () => (warehouseQuery.data ?? []).map((w) => ({
+      id: w.warehouse_code || w.id,
+      label: w.name,
+      description: w.warehouse_type || '',
+    })),
+    [warehouseQuery.data],
+  )
 
   function set<K extends keyof EinlagerungData>(key: K, value: EinlagerungData[K]): void {
     setEinlagerung((prev) => ({ ...prev, [key]: value }))

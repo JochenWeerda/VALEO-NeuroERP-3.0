@@ -42,18 +42,6 @@ const GRUND_OPTIONS = [
   { code: 'sonstige', label: 'Sonstige', icon: '📝' },
 ]
 
-const FALLBACK_ARTIKEL = [
-  { id: 'weizen', name: 'Weizen' },
-  { id: 'gerste', name: 'Gerste' },
-  { id: 'raps', name: 'Raps' },
-]
-
-const FALLBACK_LAGERORTE = [
-  { id: 'silo-1', name: 'Silo 1' },
-  { id: 'silo-2', name: 'Silo 2' },
-  { id: 'halle-a', name: 'Halle A' },
-]
-
 export default function BestandskorrekturPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -88,19 +76,16 @@ export default function BestandskorrekturPage(): JSX.Element {
     },
   })
 
-  const ARTIKEL = useMemo(() => {
-    if (artikelQuery.data && artikelQuery.data.length > 0) {
-      return artikelQuery.data.map((a) => ({ id: a.id, name: a.name }))
-    }
-    return FALLBACK_ARTIKEL
-  }, [artikelQuery.data])
+  // Nur echte Artikel und Lagerorte: bis 20.10.2026 boten die Auswahlen bei leerer Antwort erfundene Eintraege an.
+  const ARTIKEL = useMemo(
+    () => (artikelQuery.data ?? []).map((a) => ({ id: a.id, name: a.name })),
+    [artikelQuery.data],
+  )
 
-  const LAGERORTE = useMemo(() => {
-    if (warehouseQuery.data && warehouseQuery.data.length > 0) {
-      return warehouseQuery.data.map((w) => ({ id: w.warehouse_code || w.id, name: w.name }))
-    }
-    return FALLBACK_LAGERORTE
-  }, [warehouseQuery.data])
+  const LAGERORTE = useMemo(
+    () => (warehouseQuery.data ?? []).map((w) => ({ id: w.warehouse_code || w.id, name: w.name })),
+    [warehouseQuery.data],
+  )
 
   function set<K extends keyof KorrekturData>(key: K, value: KorrekturData[K]) {
     setData((prev) => ({ ...prev, [key]: value }))

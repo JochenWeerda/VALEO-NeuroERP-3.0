@@ -34,8 +34,6 @@ type BeladungData = {
   verladeort: string
 }
 
-const FALLBACK_ARTIKEL = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer', 'Sonnenblumen']
-
 type SiloOption = { id: string; label: string; description: string }
 
 function istKennzeichen(wert: string): boolean {
@@ -60,7 +58,7 @@ export default function LKWBeladungPage(): JSX.Element {
     },
     staleTime: 5 * 60_000,
   })
-  const ARTIKEL_OPTIONEN = articlesData?.items?.map((a) => a.name ?? a.article_number ?? a.id) ?? FALLBACK_ARTIKEL
+  const ARTIKEL_OPTIONEN = articlesData?.items?.map((a) => a.name ?? a.article_number ?? a.id) ?? []  // nur echte Artikel; vorher erfundene bei leerer Antwort
 
   const { data: silosData } = useQuery({
     queryKey: ['silo', 'verladeorte'],

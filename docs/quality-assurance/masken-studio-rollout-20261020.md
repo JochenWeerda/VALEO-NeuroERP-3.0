@@ -186,6 +186,17 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
   dieselbe Studio-Saatgutliste wie `/agrar/saatgut`.
 - Ratsche: Altmuster 87 -> 86.
 
+## Befund (20.10.2026): Scheindaten in Fachablaeufen — systemweit entfernt, Waechter
+
+- `charge/rueckverfolgung`: ohne gefundene Charge eine erfundene Kette (Landwirt bis Muehle), als „Fallback-Sicht“.
+- `lager/einlagerung`, `lager/bestandskorrektur`: erfundene Lagerorte und Artikel, wenn die Abfrage leer war —
+  Buchungen auf Orte, die es nicht gibt.
+- `annahme/lkw-registrierung`, `verladung/lkw-beladung`: erfundene Artikel; in der Registrierung mit dem Namen als
+  Artikelkennung.
+- Alle entfernt; Auswahlen zeigen nur echte Eintraege, die Rueckverfolgung einen Leerzustand.
+- Waechter `src/__tests__/security/keine-scheindaten.test.ts`: keine Ersatzlisten `FALLBACK_/MOCK_/DUMMY_/SAMPLE_/FAKE_`
+  in Seiten, Features, Bibliotheken und Komponenten (ausdrueckliche Vorfuehrungen `DEMO_` bleiben).
+
 ## Sichtung 20.10.2026: zurueckgestellt bzw. Entscheidung noetig
 
 | Seite | Befund | Weiter |
