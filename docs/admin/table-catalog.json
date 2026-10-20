@@ -13394,6 +13394,7 @@
             "app/agrar/feldbuch/portal_zugang.py",
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/compliance_dsgvo.py",
+            "app/api/v1/endpoints/contacts.py",
             "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/crm_360_sql.py",
             "app/api/v1/endpoints/customers.py",

@@ -554,3 +554,41 @@ def test_chance_gewonnen_und_verloren_mit_pruefung(monkeypatch, client):
     assert aktion("offen", "verloren", {"_auditReason": "Preis beim Wettbewerber"})["success"] is True
     assert aktion("offen", "gewonnen", {})["success"] is True
     assert geaendert == [("offen", "closed_lost"), ("offen", "closed_won")]
+
+
+def test_kontakte_aus_crm_core_nur_ueber_den_kunden_des_mandanten(engine, monkeypatch, client):
+    """crm-core kennt an Kontakten keinen Mandanten: vorher lieferten Liste, Abruf und Loeschen fremde Kontakte."""
+    from sqlalchemy import text
+
+    from app.integrations import crm_core_client
+
+    eigener, fremder = str(uuid.uuid4()), str(uuid.uuid4())
+    with engine.begin() as v:
+        v.execute(text("INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name) VALUES "
+                       "(:a, :ha, :na, 'Hof A'), (:b, :hb, :nb, 'Hof B')"),
+                  {"a": eigener, "ha": HAUS_A, "na": f"K-{eigener[:6]}", "b": fremder, "hb": HAUS_B,
+                   "nb": f"K-{fremder[:6]}"})
+    kontakte = {k: crm_core_client.CRMCoreContact(id=k, customer_id=kunde, first_name="Max", last_name=k)
+                for k, kunde in (("k-eigen", eigener), ("k-fremd", fremder))}
+    geloescht: list[str] = []
+
+    async def liste(**kwargs):  # noqa: ANN003
+        return list(kontakte.values()), 2
+
+    async def holen(kennung):  # noqa: ANN001
+        return kontakte[kennung]
+
+    async def loeschen(kennung):  # noqa: ANN001
+        geloescht.append(kennung)
+
+    monkeypatch.setattr(crm_core_client, "list_contacts", liste)
+    monkeypatch.setattr(crm_core_client, "get_contact", holen)
+    monkeypatch.setattr(crm_core_client, "delete_contact", loeschen)
+    kopf = {"X-Tenant-ID": HAUS_A}
+
+    antwort = client.get("/api/v1/crm/contacts/", headers=kopf).json()
+    assert [k["id"] for k in antwort["data"]] == ["k-eigen"] and antwort["total"] == 1
+    assert client.get("/api/v1/crm/contacts/k-fremd", headers=kopf).status_code == 404
+    assert client.get("/api/v1/crm/contacts/k-eigen", headers=kopf).status_code == 200
+    assert client.delete("/api/v1/crm/contacts/k-fremd", headers=kopf).status_code == 404
+    assert geloescht == []

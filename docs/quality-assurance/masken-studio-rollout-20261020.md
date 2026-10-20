@@ -223,6 +223,20 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
   `update_opportunity` (wie das Bearbeiten der Objektmaske), Verloren mit Begruendung, Abgeschlossene abgewiesen.
 - Ratsche: Altmuster 81 -> 80.
 
+## Sicherheitsbefund (20.10.2026): Kontakte aus crm-core ohne Mandant
+
+- `app/api/v1/endpoints/contacts.py` reicht Liste (`/crm/contacts/`), Abruf, Anlage, Aendern und Loeschen an
+  crm-core durch; crm-core fuehrt an Kontakten keinen Mandanten. Damit sah jeder Nutzer die Kontakte *aller*
+  Mandanten und konnte fremde Kontakte aendern oder loeschen (wenn crm-core laeuft).
+- Behoben, ohne die Quelle umzubauen: Ein Kontakt gilt nur ueber seinen Kunden als eigener (`domain_crm.customers`
+  per `id` oder `business_partner_id` im Mandanten); fremde werden aus der Liste gefiltert und im Abruf, Aendern
+  und Loeschen mit 404 abgewiesen; Anlage nur fuer einen eigenen Kunden. Test in `test_studio_listen_kommandos.py`.
+- Offen (CRM-Konsolidierung): In `main:app` liest `GET /crm/contacts` (ohne Schraegstrich) die lokale Tabelle
+  `crm_contacts` (`app/crm/router.py`), alle uebrigen Wege gehen an crm-core — neu angelegte Kontakte erscheinen
+  dort nicht in der Liste. `PUT`/`DELETE` in `app/crm/router.py` haben keine Rolle, sind aber von `contacts.py`
+  verdeckt (die Rollen-Ratsche dedupliziert gleiche Pfade). Auch die CRM-Lieferantenliste (alle Business Partner,
+  tote Links) gehoert dorthin.
+
 ## Sichtung 20.10.2026: zurueckgestellt bzw. Entscheidung noetig
 
 | Seite | Befund | Weiter |
