@@ -6,7 +6,7 @@
     "app/api/v1/endpoints/agrar_feldbuch.py": 1096,
     "app/api/v1/endpoints/business_partners.py": 2719,
     "app/api/v1/endpoints/compat.py": 3338,
-    "app/api/v1/endpoints/compliance.py": 1100,
+    "app/api/v1/endpoints/compliance.py": 1081,
     "app/api/v1/endpoints/einkauf_bestellvorschlag.py": 1010,
     "app/api/v1/endpoints/flow_spines.py": 1498,
     "app/api/v1/endpoints/kontrakte.py": 1088,
