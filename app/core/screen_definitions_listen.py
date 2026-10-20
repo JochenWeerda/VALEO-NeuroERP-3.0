@@ -252,19 +252,69 @@ def build_einkauf_lieferanten_liste() -> dict[str, Any]:
     )
 
 
+
+def build_einkauf_bestellungen_liste() -> dict[str, Any]:
+    """Bestellungen aus derselben Quelle wie die Objektmaske ``einkauf/purchase-order``."""
+    pfad = "/api/v1/einkauf/bestellungen/{entity_id}/actions/"
+    return _liste(
+        screen_id="einkauf/bestellungen", domain="einkauf", title="Bestellungen", subtitle="Bestellungen an Lieferanten",
+        endpoint="/api/v1/einkauf/bestellungen", row_route="/einkauf/bestellung/{id}", bundle="einkauf",
+        columns=[
+            {"key": "bestellnummer", "label": "Bestellnr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "lieferant_name", "label": "Lieferant", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "bestelldatum", "label": "Bestellt am", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "lieferdatum_wunsch", "label": "Liefertermin", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "netto_summe", "label": "Netto", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "secondary"},
+            {"key": "positionen_anz", "label": "Positionen", "numeric": True, "priority": "tertiary"},
+            {"key": "versandt_am", "label": "Versandt am", "renderKind": "date", "sortable": True,
+             "priority": "tertiary"},
+        ],
+        actions=[_neu("Neue Bestellung", "/einkauf/bestellungen/neu"), _EXPORT],
+        row_actions=[
+            {"key": "freigeben", "label": "Freigeben", "dangerLevel": "moderate",
+             "permission": "einkauf.bestellung.approve", "commandEndpoint": pfad + "freigeben", "method": "POST",
+             "requiresConfirmation": True, "humanApprovalRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": _status("ENTWURF", "DRAFT")},
+            {"key": "versenden", "label": "Versenden", "dangerLevel": "moderate",
+             "permission": "einkauf.bestellung.send", "commandEndpoint": pfad + "versenden", "method": "POST",
+             "requiresConfirmation": True, "humanApprovalRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": _status("ENTWURF", "FREIGEGEBEN", "VERSANDT")},
+            {"key": "stornieren", "label": "Stornieren", "dangerLevel": "high",
+             "permission": "einkauf.bestellung.cancel", "commandEndpoint": pfad + "stornieren", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": _status("ENTWURF", "DRAFT", "FREIGEGEBEN", "VERSANDT", "TEILGELIEFERT")},
+        ],
+        dangerous=[
+            {"key": "freigeben", "reason": "Gibt die Bestellung frei und bucht das Obligo; nur Mensch."},
+            {"key": "versenden", "reason": "Sendet die Bestellung an den Lieferanten; nur Mensch."},
+            {"key": "stornieren", "reason": "Storniert eine Bestellung; nur Mensch mit Begruendung."},
+        ],
+        purpose="Bestellungen an Lieferanten finden, freigeben, versenden und stornieren.",
+        prompts=["Welche Bestellungen sind noch Entwurf?", "Welche Liefertermine sind ueberfaellig?"],
+        no_workflow="Der Status steht an der Bestellung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
     "einkauf/anlieferavis-liste": build_einkauf_anlieferavis_liste,
     "einkauf/auftragsbestaetigungen": build_einkauf_auftragsbestaetigungen_liste,
     "einkauf/lieferanten": build_einkauf_lieferanten_liste,
+    "einkauf/bestellungen": build_einkauf_bestellungen_liste,
 }
 LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
                 "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
                 "einkauf/auftragsbestaetigungen": "/einkauf/auftragsbestaetigungen",
-                "einkauf/lieferanten": "/einkauf/lieferanten"}
+                "einkauf/lieferanten": "/einkauf/lieferanten",
+                "einkauf/bestellungen": "/einkauf/bestellungen"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
                    "einkauf/auftragsbestaetigungen": ["auftragsbestaetigungen", "ab", "ordrsp"],
-                   "einkauf/lieferanten": ["lieferanten", "lieferantenliste", "kreditoren einkauf"]}
+                   "einkauf/lieferanten": ["lieferanten", "lieferantenliste", "kreditoren einkauf"],
+                   "einkauf/bestellungen": ["bestellungen", "einkaufsbestellungen", "po"]}

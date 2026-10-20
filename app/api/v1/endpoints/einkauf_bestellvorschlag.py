@@ -759,11 +759,8 @@ async def import_bestellungen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    content = await file.read()
-    lines = content.decode("utf-8", errors="ignore").strip().splitlines()
-    received = max(1, len(lines))
-    return {"received": received, "message": "Import in Verarbeitung. Bestellungen werden angelegt.",
-            "filename": file.filename or "upload"}
+    # Bis 20.10.2026 las der Weg die Datei, meldete "Bestellungen werden angelegt" und legte nichts an.
+    raise HTTPException(501, "Der Bestellimport ist nicht angebunden; Bestellungen bitte einzeln anlegen.")
 
 
 @router.post("/einkauf/bestellungen", status_code=201, summary="Bestellung anlegen",

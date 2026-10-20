@@ -7,7 +7,6 @@ const ALLOWED_DOCUMENT_WRITE_FILES = new Set([
   'lib/export-utils.ts',
   'lib/nawaro-communication.ts',
   'lib/services/bon-druck.ts',
-  'pages/einkauf/bestellungen-liste.tsx',
 ])
 
 const DANGEROUS_PATTERNS: Array<{ name: string; regex: RegExp }> = [

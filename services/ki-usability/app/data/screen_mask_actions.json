@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 149,
-    "screens_with_actions": 75,
+    "actions": 151,
+    "screens_with_actions": 76,
     "domains": 14
   },
   "actions": [
@@ -1301,6 +1301,46 @@
         "actionKey": "neu",
         "commandEndpoint": null,
         "navigationRoute": "/einkauf/auftragsbestaetigung/neu",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:einkauf/bestellungen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (einkauf/bestellungen)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/bestellungen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/bestellungen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:einkauf/bestellungen:neu",
+      "label": "Neue Bestellung",
+      "description": "Neue Bestellung (einkauf/bestellungen)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/bestellungen",
+      "intent_phrases": [
+        "Neue Bestellung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/bestellungen",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellungen/neu",
         "command": null,
         "method": null
       }

@@ -209,7 +209,10 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `einkauf.auftragsbestaetigung.confirmed` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.auftragsbestaetigung.reviewed` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.bestellung.created_from_angebot` | outbox | `app/api/v1/endpoints/mask_actions.py` |
+| `einkauf.bestellung.freigegeben` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
+| `einkauf.bestellung.storniert` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
 | `einkauf.bestellung.updated` | outbox | `app/api/v1/command_handlers/procurement.py` |
+| `einkauf.bestellung.versendet` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
 | `einkauf.wareneingang.gebucht` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `finance.ap_invoice.approved` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
 | `finance.ar_open_item.dunning_created` | outbox | `app/api/v1/endpoints/open_items.py` |
@@ -232,10 +235,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `logistik.frachttabelle.created` | outbox | `app/api/v1/endpoints/logistik_frachttabellen.py` |
 | `logistik.tour.created` | outbox | `app/api/v1/command_handlers/logistics.py` |
 | `mobile.event.retry` | outbox | `app/api/v1/endpoints/mobile_sync.py` |
-| `personal.bewerbung.created` | outbox | `app/api/v1/endpoints/personal_bewerbungen.py` |
-| `personal.einwilligungserklaerung.created` | outbox | `app/api/v1/endpoints/personal_bewerbungen.py` |
-| `personal.onboarding.created` | outbox | `app/api/v1/command_handlers/training.py` |
-| … | | 14 weitere |
+| … | | 17 weitere |
 
 ### System
 

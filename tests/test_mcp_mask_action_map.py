@@ -84,4 +84,7 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
     assert data["stats"]["by_coverage"].get("mapped", 0) == 43
     assert data["stats"]["by_coverage"].get("blocked_no_endpoint", 0) == 0
     assert data["stats"]["by_coverage"].get("blocked_missing_tenant", 0) == 0
-    assert data["stats"]["by_coverage"].get("local_ui", 0) == 19  # inkl. vier Anlage-Navigationen der Studio-Listen
+    from app.core.screen_definitions_listen import LISTEN_SCREEN_BUILDERS
+
+    listen_anlagen = sum(any(a["key"] == "neu" for a in bau()["actions"]) for bau in LISTEN_SCREEN_BUILDERS.values())
+    assert data["stats"]["by_coverage"].get("local_ui", 0) == 15 + listen_anlagen  # + Anlage-Navigation je Studio-Liste

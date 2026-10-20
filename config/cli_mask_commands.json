@@ -162,6 +162,9 @@
   "mask:einkauf/auftragsbestaetigung:pruefen",
   "mask:einkauf/auftragsbestaetigungen:bestaetigen",
   "mask:einkauf/auftragsbestaetigungen:pruefen",
+  "mask:einkauf/bestellungen:freigeben",
+  "mask:einkauf/bestellungen:stornieren",
+  "mask:einkauf/bestellungen:versenden",
   "mask:einkauf/purchase-order:speichern",
   "mask:einkauf/purchase-order:versenden",
   "mask:finance/ap-invoice:freigeben",
@@ -248,6 +251,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 101
+  "kein_endpunkt": 103
  }
 }

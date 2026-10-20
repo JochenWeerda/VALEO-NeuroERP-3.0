@@ -98,6 +98,21 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
   Liste folgt jetzt dieser Quelle. Offen: `/crm/suppliers` selbst bleibt ein toter Weg.
 - Ratsche: handgebaut 477 -> 476.
 
+## Welle 1, Schritt 6 (20.10.2026): Einkauf Bestellungen
+
+- ScreenDefinition `einkauf/bestellungen` auf `NativeListPage`, Quelle `/api/v1/einkauf/bestellungen` wie die
+  Objektmaske `einkauf/purchase-order` (vorher `/purchase-orders`, eine Mischung aus Beleg- und Altdaten mit
+  Zeilenlink auf die Altmuster-Maske). Zeilenaktionen `freigeben` (Obligo), `versenden`, `stornieren` (Begruendung),
+  alle nur Mensch; Kommando-Wege `einkauf_bestellung_kommandos.py` delegieren an den `ProcurementService`.
+- **Befund, behoben:** `POST /einkauf/bestellungen/import` las die Datei, meldete „Bestellungen werden angelegt“
+  und legte nichts an. Jetzt ehrlich 501; die Liste bietet keinen Import an.
+- Entfallen: Massendruck per `document.write` (die Seite steht nicht mehr auf der Ausnahmeliste der
+  HTML-Senken); Druck gehoert zum Beleg.
+- **Offene Fachfrage:** Der Versand setzt einen Entwurf direkt auf „versandt“ (Vertrag `test_versandwege_vertrag`)
+  und umgeht damit Freigabe und Obligo-Buchung. Ob Versand eine Freigabe voraussetzt, ist eine Nutzerentscheidung.
+- MCP-Zaehltests leiten die Zahl der `local_ui`-Eintraege aus den Listen-Definitionen ab.
+- Ratsche: Altmuster 98 -> 96 (`einkauf/bestellungen` und `einkauf`).
+
 ## CI-Nachlauf (20.10.2026)
 
 - Reine Oberflaechenaktionen der Listen (Export, Anlage oeffnen) tragen `stubReason` und einen `command`/eine

@@ -11,6 +11,8 @@ halten fest:
   Angebot wird nicht zurueckgesetzt (der alte Statusweg setzte jeden Status);
 * Anlieferavis: Liste und Objekt lesen die echten Spalten (vorher immer leer bzw. 404); stornieren mit Begruendung,
   nie ein erhaltenes Avis;
+* Bestellungen: freigeben nur Entwuerfe, stornieren mit Begruendung und nie zweimal; der Import meldet ehrlich 501
+  statt "Bestellungen werden angelegt";
 * die Listen deklarieren jede Aktion mit diesem Kommandoweg und den Export.
 
 Geprueft gegen eine frische Pruefstand-Datenbank (``TEST_DATABASE_URL``/``DATABASE_URL``).
@@ -56,6 +58,8 @@ def aufraeumen(engine):
     with engine.begin() as v:
         v.execute(text("DELETE FROM einkauf_anfragen_positionen WHERE anfrage_id IN "
                        "(SELECT id FROM einkauf_anfragen WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_einkauf.lieferanten WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM einkauf_angebote_positionen WHERE angebot_id IN "
                        "(SELECT id FROM einkauf_angebote WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
         for tabelle in ("einkauf_anfragen", "einkauf_angebote", "einkauf_anlieferavis", "domain_crm.crm_action_audit_log", "public.outbox_events"):
@@ -300,3 +304,60 @@ def test_lieferantenliste_liest_die_quelle_der_objektmaske():
     quelle = next(d["endpoint"] for d in objekt["dataSources"] if d["key"] == "entity")
     assert quelle == liste["dataSources"][0]["endpoint"] + "/{entity_id}"
     assert liste["tables"][0]["rowRouteTemplate"] == "/einkauf/lieferanten/{id}"
+
+
+def bestellung(engine, status: str) -> str:
+    from sqlalchemy import text
+
+    kennung, lieferant = str(uuid.uuid4()), str(uuid.uuid4())
+    with engine.begin() as v:
+        v.execute(text("INSERT INTO domain_einkauf.lieferanten (id, tenant_id, lieferantennummer, firmenname) "
+                       "VALUES (:l, :h, :n, 'Muehle Nord')"), {"l": lieferant, "h": HAUS_A, "n": f"L-{lieferant[:6]}"})
+        v.execute(text("INSERT INTO domain_einkauf.bestellungen (id, tenant_id, bestellnummer, lieferant_id, "
+                       "bestelldatum, status) VALUES (:i, :h, :n, :l, CURRENT_DATE, :s)"),
+                  {"i": kennung, "h": HAUS_A, "n": f"EK-{kennung[:8]}", "l": lieferant, "s": status})
+    return kennung
+
+
+def bestell_status(engine, kennung: str) -> str:
+    return zeile(engine, "SELECT status FROM domain_einkauf.bestellungen WHERE id = CAST(:i AS uuid)", i=kennung)["status"]
+
+
+def bestell_aktion(client, kennung: str, aktion: str, body: dict) -> dict:
+    antwort = client.post(f"/api/v1/einkauf/bestellungen/{kennung}/actions/{aktion}", json=body,
+                          headers={"X-Tenant-ID": HAUS_A})
+    assert antwort.status_code == 200, antwort.text
+    return antwort.json()
+
+
+def test_bestellung_freigeben_nur_aus_dem_entwurf(engine, client):
+    kennung = bestellung(engine, "entwurf")
+    assert bestell_aktion(client, kennung, "freigeben", {})["success"] is True
+    assert bestell_status(engine, kennung) == "freigegeben"
+    assert bestell_aktion(client, kennung, "freigeben", {})["success"] is False
+
+
+def test_bestellung_stornieren_mit_grund_und_nur_einmal(engine, client):
+    kennung = bestellung(engine, "freigegeben")
+    assert bestell_aktion(client, kennung, "stornieren", {})["success"] is False
+    assert bestell_aktion(client, kennung, "stornieren", {"_auditReason": "Lieferant nicht lieferfaehig"})["success"]
+    assert bestell_status(engine, kennung) == "storniert"
+    assert bestell_aktion(client, kennung, "stornieren", {"_auditReason": "Noch einmal"})["success"] is False
+    assert bestell_aktion(client, kennung, "versenden", {})["success"] is False
+
+
+def test_bestellimport_meldet_keine_scheinwirkung(client):
+    antwort = client.post("/api/v1/einkauf/bestellungen/import", headers={"X-Tenant-ID": HAUS_A},
+                          files={"file": ("bestellungen.csv", b"nr;lieferant;1;Muehle", "text/csv")})
+    assert antwort.status_code == 501, antwort.text
+
+
+def test_bestellliste_liest_die_quelle_der_objektmaske():
+    from app.core.screen_definitions import get_screen_definition
+
+    liste = get_screen_definition("einkauf/bestellungen")
+    objekt = get_screen_definition("einkauf/purchase-order")
+    quelle = next(d["endpoint"] for d in objekt["dataSources"] if d["key"] == "entity")
+    assert quelle == liste["dataSources"][0]["endpoint"] + "/{entity_id}"
+    zeilen = {a["key"] for a in liste["tables"][0]["rowActions"]}
+    assert zeilen == {"freigeben", "versenden", "stornieren"}

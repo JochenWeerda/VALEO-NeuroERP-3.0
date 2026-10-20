@@ -582,6 +582,29 @@
         ]
       ]
     },
+    "einkauf/bestellungen": {
+      "einkauf.bestellung.approve": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.bestellung.send": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.bestellung.cancel": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "einkauf/purchase-order": {
       "einkauf.bestellung.update": [
         [
