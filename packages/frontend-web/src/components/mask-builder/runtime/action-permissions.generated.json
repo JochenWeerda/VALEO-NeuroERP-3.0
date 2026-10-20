@@ -671,6 +671,22 @@
         ]
       ]
     },
+    "finance/debitoren-liste": {
+      "finance.debitor.sperren": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.debitor.entsperren": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "finance/kreditor": {
       "finance.kreditor.update": [
         [

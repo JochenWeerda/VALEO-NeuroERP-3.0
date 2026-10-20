@@ -13397,6 +13397,7 @@
             "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/crm_360_sql.py",
             "app/api/v1/endpoints/customers.py",
+            "app/api/v1/endpoints/finance_stammdaten_kommandos.py",
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/portal_kundenzugaenge.py",
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
@@ -13425,6 +13426,7 @@
           "written_by": [
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/compliance_dsgvo.py",
+            "app/api/v1/endpoints/finance_stammdaten_kommandos.py",
             "app/services/business_partner_service.py",
             "app/services/customer_service.py"
           ]

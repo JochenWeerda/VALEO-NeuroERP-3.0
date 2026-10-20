@@ -172,6 +172,8 @@
   "mask:finance/ar-open-item:mahnen",
   "mask:finance/bankkonto:bearbeiten",
   "mask:finance/debitor:bearbeiten",
+  "mask:finance/debitoren-liste:entsperren",
+  "mask:finance/debitoren-liste:sperren",
   "mask:finance/kreditor:bearbeiten",
   "mask:finance/payment-run:freigeben",
   "mask:finance/pruefkorb:pruefen",
@@ -254,6 +256,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 111
+  "kein_endpunkt": 114
  }
 }

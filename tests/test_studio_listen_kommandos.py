@@ -60,6 +60,7 @@ def aufraeumen(engine):
     with engine.begin() as v:
         v.execute(text("DELETE FROM einkauf_anfragen_positionen WHERE anfrage_id IN "
                        "(SELECT id FROM einkauf_anfragen WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_crm.customers WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_shared.futtermittel_mischfutter WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_agrar.agrar_duenger WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
@@ -448,3 +449,25 @@ def test_einzelfutter_liste_oeffnet_die_einzelansicht_und_stilllegen_braucht_gru
     ergebnis = client.post(weg, json={"_auditReason": "Nicht mehr bezogen"}, headers=kopf).json()
     assert ergebnis["success"] is True, ergebnis
     assert client.get("/api/v1/futter/einzelfuttermittel", headers=kopf).json() == []
+
+
+def test_debitor_sperren_und_entsperren_mit_grund(engine, client):
+    from sqlalchemy import text
+
+    kennung = str(uuid.uuid4())
+    with engine.begin() as v:
+        v.execute(text("INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name, is_active) "
+                       "VALUES (:i, :h, :n, 'Hof Janssen', true)"), {"i": kennung, "h": HAUS_A, "n": f"K-{kennung[:6]}"})
+
+    def aktion(schritt: str, body: dict) -> bool:
+        antwort = client.post(f"/api/v1/finance/debitoren/{kennung}/actions/{schritt}", json=body,
+                              headers={"X-Tenant-ID": HAUS_A})
+        assert antwort.status_code == 200, antwort.text
+        return antwort.json()["success"]
+
+    assert aktion("sperren", {}) is False
+    assert aktion("entsperren", {"_auditReason": "Zahlung eingegangen"}) is False
+    assert aktion("sperren", {"_auditReason": "Zahlungsverzug ueber 90 Tage"}) is True
+    liste = client.get("/api/v1/finance/debitoren", headers={"X-Tenant-ID": HAUS_A}).json()
+    assert [(d["id"], d["is_active"]) for d in liste] == [(kennung, False)]
+    assert aktion("entsperren", {"_auditReason": "Zahlung eingegangen"}) is True

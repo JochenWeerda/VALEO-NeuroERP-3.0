@@ -2942,6 +2942,59 @@
       ]
     },
     {
+      "mask_id": "finance/debitoren-liste",
+      "title": "Debitoren",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/finance__debitoren-liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/debitoren-liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/debitoren-liste/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/debitoren-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neuer Debitor",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "mahnwesen",
+          "label": "Mahnwesen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet das Mahnwesen; Mahnlaeufe laufen dort mit Vorschau und Freigabe."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "finance.ap_invoice.freigeben",
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
       "mask_id": "finance/kreditor",
       "title": "Kreditor",
       "domain": "finance",
@@ -5909,5 +5962,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 125
+  "event_count": 126
 }

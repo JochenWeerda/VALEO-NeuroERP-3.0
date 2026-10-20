@@ -156,6 +156,17 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 - Regressionstest `tests/test_lifespan_kette.py` startet beide Anwendungen mit Rekursionsgrenze 400 (ohne Korrektur
   rot) und prueft, dass Start-Handler einmal laufen.
 
+## Welle 1, Schritt 9 (20.10.2026): Finance Debitoren
+
+- ScreenDefinition `finance/debitoren-liste` auf `NativeListPage`, Quelle `/api/v1/finance/debitoren` wie die
+  Objektmaske `finance/debitor`; Zeile oeffnet die native Maske (vorher `/finance/debitoren/{id}`, Altmuster).
+- Sperren/Entsperren als Kommando-Wege `finance_stammdaten_kommandos.py` mit Begruendung, Audit und Finance-
+  Schreibrolle (vorher `PATCH /finance/debtors/{id}` ohne Grund und Audit); „Mahnwesen“ fuehrt ins Mahnwesen.
+- **Befunde der alten Seite:** „Zahlungserinnerung“ meldete Erfolg ohne jede Anfrage; „Mahnung senden“ fuer eine
+  Auswahl startete einen Mahnlauf fuer *alle* Debitoren; „Loeschen“ rief `DELETE /finance/debitoren/{id}`, den es
+  nicht gibt. Alle drei entfallen; Mahnungen laufen im Mahnwesen mit Vorschau.
+- Ratsche: Altmuster 89 -> 88.
+
 ## Sichtung 20.10.2026: zurueckgestellt bzw. Entscheidung noetig
 
 | Seite | Befund | Weiter |

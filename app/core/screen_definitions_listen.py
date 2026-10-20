@@ -422,6 +422,48 @@ def build_futtermittel_mischfuttermittel_liste() -> dict[str, Any]:
     )
 
 
+
+def build_finance_debitoren_liste() -> dict[str, Any]:
+    """Debitoren mit offenem Betrag und Mahnstufe; dieselbe Quelle wie die Objektmaske ``finance/debitor``."""
+    pfad = "/api/v1/finance/debitoren/{entity_id}/actions/"
+    return _liste(
+        screen_id="finance/debitoren-liste", domain="finance", title="Debitoren",
+        subtitle="Kunden mit Forderungen, Kreditlimit und Mahnstufe", endpoint="/api/v1/finance/debitoren",
+        row_route="/finance/debitor/{id}", bundle="finance",
+        columns=[
+            {"key": "name", "label": "Debitor", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "debitoren_nr", "label": "Debitoren-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "offenerBetrag", "label": "Offen", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "primary"},
+            {"key": "mahnstufe", "label": "Mahnstufe", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "faelligkeit", "label": "Faellig", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "kreditlimit", "label": "Kreditlimit", "numeric": True, "renderKind": "currency",
+             "priority": "secondary"},
+            {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "priority": "tertiary"},
+            {"key": "is_active", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neuer Debitor", "/finance/debitoren/new"), _EXPORT,
+                 {"key": "mahnwesen", "label": "Mahnwesen", "kind": "secondary", "dangerLevel": "safe",
+                  "zone": "header", "navigationRoute": "/finance/mahnwesen", "localEffect": "navigation",
+                  "stubReason": "Oeffnet das Mahnwesen; Mahnlaeufe laufen dort mit Vorschau und Freigabe."}],
+        row_actions=[
+            {"key": "sperren", "label": "Sperren", "dangerLevel": "high", "permission": "finance.debitor.sperren",
+             "commandEndpoint": pfad + "sperren", "method": "POST", "requiresConfirmation": True,
+             "auditReasonRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": {"field": "is_active", "values": [True]}},
+            {"key": "entsperren", "label": "Entsperren", "dangerLevel": "moderate",
+             "permission": "finance.debitor.entsperren", "commandEndpoint": pfad + "entsperren", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True,
+             "visibleWhen": {"field": "is_active", "values": [False]}},
+        ],
+        dangerous=[{"key": "sperren", "reason": "Sperrt einen Kunden fuer Verkauf und Zahlung; nur Mensch."}],
+        purpose="Debitoren mit offenen Forderungen und Mahnstufe finden, oeffnen und sperren.",
+        prompts=["Welche Debitoren haben Mahnstufe 2 oder hoeher?", "Welche Kunden haben die hoechsten offenen Posten?"],
+        no_workflow="Mahnungen laufen im Mahnwesen; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -433,6 +475,7 @@ LISTEN_SCREEN_BUILDERS = {
     "agrar/duenger-liste": build_agrar_duenger_liste,
     "futtermittel/einzelfuttermittel-liste": build_futtermittel_einzelfuttermittel_liste,
     "futtermittel/mischfuttermittel-liste": build_futtermittel_mischfuttermittel_liste,
+    "finance/debitoren-liste": build_finance_debitoren_liste,
 }
 LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
                 "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
@@ -442,7 +485,8 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "agrar/saatgut-liste": "/agrar/saatgut",
                 "agrar/duenger-liste": "/agrar/duenger",
                 "futtermittel/einzelfuttermittel-liste": "/futtermittel/einzelfuttermittel-liste",
-                "futtermittel/mischfuttermittel-liste": "/futtermittel/mischfuttermittel-liste"}
+                "futtermittel/mischfuttermittel-liste": "/futtermittel/mischfuttermittel-liste",
+                "finance/debitoren-liste": "/finance/debitoren-liste"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
@@ -452,4 +496,5 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "agrar/saatgut-liste": ["saatgut", "sorten", "saatgutliste"],
                    "agrar/duenger-liste": ["duenger", "duengemittel", "duengerliste"],
                    "futtermittel/einzelfuttermittel-liste": ["einzelfuttermittel", "futterkatalog", "futtermittel"],
-                   "futtermittel/mischfuttermittel-liste": ["mischfuttermittel", "mischfutter", "kraftfutter"]}
+                   "futtermittel/mischfuttermittel-liste": ["mischfuttermittel", "mischfutter", "kraftfutter"],
+                   "finance/debitoren-liste": ["debitoren", "debitorenliste", "forderungen"]}

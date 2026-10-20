@@ -221,6 +221,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `finance_period` | Periodenabschluss & Storno-Konsistenz (DOM-FIN-004.4). |
 | `finance_read_models` | Finance Read-Models — Wave 2 AP2 |
 | `finance_stammdaten` | Finance-Stamm fuer Debitoren und Kreditoren — Maskengenerator und Listen. |
+| `finance_stammdaten_kommandos` | Zeilenaktionen der Finance-Stammdatenlisten als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `financial_reports` | Financial Reports API |
 | `flow_spines` | — |
 | `foerderung` | Foerderung API - DB-backed endpoints. |

@@ -530,7 +530,6 @@
   "finance/buchungen",
   "finance/buchungserfassung",
   "finance/debitoren",
-  "finance/debitoren-liste",
   "finance/debitoren/:id",
   "finance/debitoren/new",
   "finance/dunning-editor",

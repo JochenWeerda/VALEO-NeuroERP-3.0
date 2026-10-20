@@ -220,6 +220,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `finance.bankkonto.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.billing_batch_line.retry` | outbox | `app/api/v1/endpoints/billing_batch.py` |
 | `finance.control_finding.reviewed` | outbox | `app/api/v1/endpoints/kontrolle.py` |
+| `finance.debitor.entsperrt` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
 | `finance.debitor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.kreditor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.payment_run.approved` | outbox | `app/api/v1/endpoints/mask_actions.py` |
@@ -235,8 +236,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `identity.tenant.` | outbox | `app/services/tenant_lifecycle_service.py` |
 | `inventur.abgeschlossen` | outbox | `app/services/inventory_compat_service.py` |
 | `kontrakt.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
-| `logistik.frachttabelle.created` | outbox | `app/api/v1/endpoints/logistik_frachttabellen.py` |
-| … | | 19 weitere |
+| … | | 20 weitere |
 
 ### System
 

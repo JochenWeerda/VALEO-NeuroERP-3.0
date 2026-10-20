@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 159,
-    "screens_with_actions": 80,
+    "actions": 162,
+    "screens_with_actions": 81,
     "domains": 14
   },
   "actions": [
@@ -1655,6 +1655,66 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:finance/debitoren-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (finance/debitoren-liste)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/debitoren-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/debitoren-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:finance/debitoren-liste:mahnwesen",
+      "label": "Mahnwesen",
+      "description": "Mahnwesen (finance/debitoren-liste)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/debitoren-liste",
+      "intent_phrases": [
+        "Mahnwesen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/debitoren-liste",
+        "actionKey": "mahnwesen",
+        "commandEndpoint": null,
+        "navigationRoute": "/finance/mahnwesen",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:finance/debitoren-liste:neu",
+      "label": "Neuer Debitor",
+      "description": "Neuer Debitor (finance/debitoren-liste)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/debitoren-liste",
+      "intent_phrases": [
+        "Neuer Debitor"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/debitoren-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/finance/debitoren/new",
+        "command": null,
+        "method": null
       }
     },
     {
