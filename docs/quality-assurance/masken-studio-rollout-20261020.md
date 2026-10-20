@@ -146,6 +146,16 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 - Abschluss: Der Tabellenkatalog verzeichnet auch lesende/schreibende Codedateien; neue SQL-Wege brauchen einen
   neu erzeugten Katalog gegen einen frischen `init_db`-Pruefstand (DRIFT im Quality Gate auf `fb3e69ff1`).
 
+## Start-Befund (20.10.2026): Lifespan-Kette
+
+- Seit `fb3e69ff1` starteten die E2E-Laeufe kein Backend mehr (`RecursionError` in `merged_lifespan`). FastAPI
+  verschachtelt je `include_router` den Lifespan; `api_router` hatte 454 Ebenen, die neuen Listen-Router kippten den
+  Start unter uvicorn. TestClient-Tests betreten keinen Lifespan und blieben gruen.
+- Behoben in `app/api/v1/api.py` (`_Sammelrouter`): Standard-Lifespans der Unterrouter werden nicht verkettet (ihre
+  Start-/Stop-Handler hat `include_router` schon uebernommen und fuehrte sie verkettet doppelt aus). Tiefe 454 -> 7.
+- Regressionstest `tests/test_lifespan_kette.py` startet beide Anwendungen mit Rekursionsgrenze 400 (ohne Korrektur
+  rot) und prueft, dass Start-Handler einmal laufen.
+
 ## Zurueckgestellt: Kontraktuebersicht
 
 `/kontrakte` (LstKontraktUebersicht) ist ein Arbeitsvorrat mit zehn Serverfiltern und Engagement-/Steuerungskennzahlen.

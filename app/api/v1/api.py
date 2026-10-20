@@ -344,8 +344,26 @@ from app.documents.router import router as documents_router
 from app.reports.router import router as reports_router
 from app.verkauf.router import router as verkauf_router
 
+class _Sammelrouter(APIRouter):
+    """APIRouter, der Standard-Lifespans der Unterrouter nicht verkettet.
+
+    FastAPI verschachtelt je ``include_router`` den Lifespan um eine Ebene (``merged_lifespan``). Bei ueber 450
+    Unterroutern sprengte das am 20.10.2026 beim Start unter uvicorn den Python-Stack (RecursionError, E2E rot).
+    Ein Standard-Lifespan fuehrt nur on_startup/on_shutdown des Unterrouters aus, und die hat ``include_router``
+    bereits in diesen Router uebernommen; verkettet liefen sie doppelt. Eigene Lifespans werden weiter verkettet.
+    """
+
+    def include_router(self, router: APIRouter, *args, **kwargs) -> None:  # type: ignore[override]
+        from fastapi.routing import _DefaultLifespan
+
+        vorher = self.lifespan_context
+        super().include_router(router, *args, **kwargs)
+        if isinstance(router.lifespan_context, _DefaultLifespan):
+            self.lifespan_context = vorher
+
+
 # Create main API router — auth enforced globally; exempt paths handled in require_bearer_token
-api_router = APIRouter(dependencies=[Depends(require_bearer_token)])
+api_router = _Sammelrouter(dependencies=[Depends(require_bearer_token)])
 
 # WebSocket routes manage their own auth; excluded from the global auth dependency
 ws_router = APIRouter()
