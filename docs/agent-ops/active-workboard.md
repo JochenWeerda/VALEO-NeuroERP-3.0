@@ -18978,3 +18978,22 @@ diese fachfremden Generatorfolgen werden nicht ausgeliefert. Beide Katalogdateie
 bleiben exakt auf dem vorherigen kanonischen Commit. Der Tabellen-FK in einem
 nur erzeugten Alembic-String ist ausserdem kein laufender Tabellenlesezugriff.
 Keine physische Tabelle/Spalte wurde fuer diesen Planer dauerhaft geaendert.
+
+
+## STUDIO-MULTICHANNEL-READ-20261020 - reserviert, Codex
+
+Owner Codex. Fortsetzung des vollstaendigen Studio-Ziels: neue Masken muessen
+Daten und Aktionen ueber Human/CLI/MCP mit identischen Fachrechten und
+Mandantenbindung anbieten. Ist-Befund: generische Aktionsadapter vorhanden,
+gemeinsamer lesender Datenquellenweg fehlt. Besitz neuer
+app/services/mask_data_read.py und app/api/v1/schemas/mask_data_contracts.py,
+mask_screen_definition.py nur neuer async GET-Datenweg, mcp_mask_actions.py nur
+Read-Adapter ohne Aenderung des Writewegs, mcp_execution_service.py nur dessen
+Dispatch, config/mcp_erp_tools.yaml nur neues Lesewerkzeug, valeo_cli/cli.py nur
+Daten-Lesekommando. Eigene Tests und betroffene generierte Registry-/API-/CLI-/
+Inventar-/Architektur-/Handbuchprojektionen, Workboard/QA/Platform-Doku.
+Abnahme: echte Domain-Daten in drei Wegen, gleiche Fremdmandanten-/Rollen-404/403,
+keine Aufruferidentitaet aus Query/Payload, nur deklarierte lokale GET-Quellen,
+Bounded Paging, unbekannte Quellen/SSRF/Redirect/Stubantworten sperren.
+Gemeinsamer valeo_probe, eigene Rollbackdaten, kein Reset/neue DB/Container.
+Kein Eingriff in Claudes Seiten-/Builderbesitz; keine neuen Schreibfreigaben.
