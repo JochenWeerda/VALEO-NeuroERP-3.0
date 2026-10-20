@@ -5,8 +5,8 @@ sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 143
-    screens_with_actions: 73
+    actions: 144
+    screens_with_actions: 74
     domains: 14
 mcp_write_tools:
 - crm.contact.log
@@ -81,12 +81,12 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 86
+  mask_actions_considered: 87
   mask_mutations_considered: 68
   by_coverage:
     adjacent: 1
     blocked_human_only: 14
-    local_ui: 18
+    local_ui: 19
     mapped: 43
     mapped_generic: 3
     mapped_propose_only: 1
@@ -461,6 +461,16 @@ mappings:
   domain: einkauf
   action_key: neu
   label: AB erfassen
+  command_endpoint: null
+  command: null
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:einkauf/lieferanten:neu
+  mask: einkauf/lieferanten
+  domain: einkauf
+  action_key: neu
+  label: Neuer Lieferant
   command_endpoint: null
   command: null
   coverage: local_ui
@@ -1003,5 +1013,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 0; blocked_human_only 14; blocked_no_endpoint 0; local_ui 18; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 14; blocked_no_endpoint 0; local_ui 19; FIN-CLOSE
   blocked_adr_076.'

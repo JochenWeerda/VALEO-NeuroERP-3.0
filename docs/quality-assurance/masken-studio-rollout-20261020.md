@@ -88,6 +88,16 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
   Avise gab es ebenfalls keinen DELETE-Weg.
 - Ratsche: Altmuster 99 -> 98.
 
+## Welle 1, Schritt 5 (20.10.2026): Einkauf Lieferanten
+
+- ScreenDefinition `einkauf/lieferanten` auf `NativeListPage`, Quelle `/api/v1/einkauf/lieferanten` und
+  Zeilenroute `/einkauf/lieferanten/{id}` — dieselbe Quelle wie die native Objektmaske `einkauf/supplier`.
+- **Befund:** Die alte Liste las `/api/v1/crm/suppliers` (Tabelle `public.einkauf_lieferanten`) und oeffnete die
+  Altmuster-Maske; die native Objektmaske liest `domain_einkauf.lieferanten` ueber den Einkaufsdienst. Liste und
+  Objekt zeigten damit verschiedene Bestaende. Die Zusammenfuehrung beider Tabellen ist eine eigene Datenaufgabe
+  (offen); die Liste folgt jetzt dem Einkaufsdienst.
+- Ratsche: handgebaut 477 -> 476.
+
 ## Sichtung der uebrigen Routen
 
 | Bereich | handgebaut | Altmuster |

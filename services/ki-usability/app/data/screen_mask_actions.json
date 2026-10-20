@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 143,
-    "screens_with_actions": 73,
+    "actions": 144,
+    "screens_with_actions": 74,
     "domains": 14
   },
   "actions": [
@@ -1221,6 +1221,26 @@
         "actionKey": "neu",
         "commandEndpoint": null,
         "navigationRoute": "/einkauf/auftragsbestaetigung/neu",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:einkauf/lieferanten:neu",
+      "label": "Neuer Lieferant",
+      "description": "Neuer Lieferant (einkauf/lieferanten)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/lieferanten",
+      "intent_phrases": [
+        "Neuer Lieferant"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/lieferanten",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/lieferant/neu",
         "command": null,
         "method": null
       }

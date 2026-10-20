@@ -169,7 +169,6 @@
   "einkauf/gutschriften-belastungen",
   "einkauf/lieferant/:id",
   "einkauf/lieferant/neu",
-  "einkauf/lieferanten",
   "einkauf/lieferanten-dokumente",
   "einkauf/lieferanten/:id",
   "einkauf/lieferantenbewertung",

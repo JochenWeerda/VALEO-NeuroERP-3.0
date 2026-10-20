@@ -222,16 +222,46 @@ def build_einkauf_auftragsbestaetigungen_liste() -> dict[str, Any]:
     )
 
 
+
+def build_einkauf_lieferanten_liste() -> dict[str, Any]:
+    """Lieferanten aus derselben Quelle wie die Objektmaske ``einkauf/supplier``."""
+    return _liste(
+        screen_id="einkauf/lieferanten", domain="einkauf", title="Lieferanten", subtitle="Lieferanten suchen und oeffnen",
+        endpoint="/api/v1/einkauf/lieferanten", row_route="/einkauf/lieferanten/{id}", bundle="einkauf",
+        columns=[
+            {"key": "firmenname", "label": "Lieferant", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "lieferantennummer", "label": "Lieferantennr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "ort", "label": "Ort", "filterable": True, "sortable": True, "priority": "secondary"},
+            {"key": "telefon", "label": "Telefon", "priority": "tertiary"},
+            {"key": "email", "label": "E-Mail", "priority": "tertiary"},
+            {"key": "lieferzeit_tage", "label": "Lieferzeit (Tage)", "numeric": True, "priority": "tertiary"},
+            {"key": "bewertung", "label": "Bewertung", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "aktiv", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[{"key": "neu", "label": "Neuer Lieferant", "kind": "primary", "dangerLevel": "safe", "zone": "header",
+                  "navigationRoute": "/einkauf/lieferant/neu", "localEffect": "navigation"},
+                 _EXPORT],
+        row_actions=[],
+        purpose="Lieferanten finden und ihre Stammdaten, Bestellungen und Kontakte oeffnen.",
+        prompts=["Finde den Lieferanten Muehle Nord.", "Welche Lieferanten sind inaktiv?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
     "einkauf/anlieferavis-liste": build_einkauf_anlieferavis_liste,
     "einkauf/auftragsbestaetigungen": build_einkauf_auftragsbestaetigungen_liste,
+    "einkauf/lieferanten": build_einkauf_lieferanten_liste,
 }
 LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
                 "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
-                "einkauf/auftragsbestaetigungen": "/einkauf/auftragsbestaetigungen"}
+                "einkauf/auftragsbestaetigungen": "/einkauf/auftragsbestaetigungen",
+                "einkauf/lieferanten": "/einkauf/lieferanten"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
-                   "einkauf/auftragsbestaetigungen": ["auftragsbestaetigungen", "ab", "ordrsp"]}
+                   "einkauf/auftragsbestaetigungen": ["auftragsbestaetigungen", "ab", "ordrsp"],
+                   "einkauf/lieferanten": ["lieferanten", "lieferantenliste", "kreditoren einkauf"]}

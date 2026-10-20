@@ -290,3 +290,13 @@ def test_ab_liste_nutzt_die_wege_der_objektmaske():
         assert aktion["commandEndpoint"] == wege[aktion["key"]]
     neu = next(a for a in liste["actions"] if a["key"] == "neu")
     assert neu["navigationRoute"] == "/einkauf/auftragsbestaetigung/neu" and objekt["creation"]["endpoint"]
+
+
+def test_lieferantenliste_liest_die_quelle_der_objektmaske():
+    from app.core.screen_definitions import get_screen_definition
+
+    liste = get_screen_definition("einkauf/lieferanten")
+    objekt = get_screen_definition("einkauf/supplier")
+    quelle = next(d["endpoint"] for d in objekt["dataSources"] if d["key"] == "entity")
+    assert quelle == liste["dataSources"][0]["endpoint"] + "/{entity_id}"
+    assert liste["tables"][0]["rowRouteTemplate"] == "/einkauf/lieferanten/{id}"
