@@ -259,8 +259,21 @@ def test_atlas_uebermitteln_mrn_format():
     resp = client.post(f"/zoll/ausfuhranmeldungen/{rec_id}/uebermitteln")
     assert resp.status_code == 200
     body = resp.json()
-    assert body["uebermittelt"] is True
+    # Entwicklung: ausdruecklich Simulation, keine Uebermittlung (20.10.2026).
+    assert body["uebermittelt"] is False and body["simuliert"] is True
+    assert body["neuer_status"] == "SIMULIERT"
     assert body["atlas_mrn"].startswith("DE")
+
+
+@pytest.mark.unit
+def test_atlas_uebermitteln_ausserhalb_der_entwicklung_wird_nicht_vorgetaeuscht(monkeypatch):
+    from app.core.config import settings
+
+    atlas_zollausfuhr._store.clear()
+    monkeypatch.setattr(settings, "APP_ENV", "production")
+    resp = _atlas_client().post("/zoll/ausfuhranmeldungen/egal/uebermitteln")
+    assert resp.status_code == 503
+    assert "nicht eingerichtet" in resp.json()["detail"]
 
 
 @pytest.mark.unit

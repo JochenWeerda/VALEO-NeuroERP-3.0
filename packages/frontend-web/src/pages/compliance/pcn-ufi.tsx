@@ -57,12 +57,9 @@ export default function PCNUFIPage(): JSX.Element {
     pcnStatus: 'entwurf',
   })
 
-  function generateUFI(): void {
-    // UFI-Format: XXXX-XXXX-XXXX-XXXX
-    const part = () => Math.random().toString(36).substring(2, 6).toUpperCase()
-    const ufi = `${part()}-${part()}-${part()}-${part()}`
-    setPCN({ ...pcn, ufi })
-  }
+  // Die UFI ist kein Zufallswert: Der ECHA-UFI-Generator bildet sie aus USt-ID und Rezepturnummer mit Pruefzeichen.
+  // Hier wird sie nur erfasst und im Format geprueft (16 Zeichen aus dem UFI-Alphabet, in Vierergruppen).
+  const ufiGueltig = /^[0-9ACDEFGHJKMNPQRSTUVWXY]{4}(-[0-9ACDEFGHJKMNPQRSTUVWXY]{4}){3}$/.test(pcn.ufi)
 
   const steps = [
     {
@@ -85,17 +82,23 @@ export default function PCNUFIPage(): JSX.Element {
               <Input
                 id="ufi"
                 value={pcn.ufi}
-                onChange={(e) => setPCN({ ...pcn, ufi: e.target.value })}
+                onChange={(e) => setPCN({ ...pcn, ufi: e.target.value.trim().toUpperCase() })}
                 placeholder="XXXX-XXXX-XXXX-XXXX"
                 className="font-mono"
               />
-              <Button type="button" onClick={generateUFI} variant="outline">
-                Generieren
-              </Button>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              16-stelliger Code nach Annex VIII (ab 01.01.2025 Pflicht)
+              16-stelliger Code nach Annex VIII, erzeugt mit dem{' '}
+              <a className="underline" href="https://ufi.echa.europa.eu/" target="_blank" rel="noreferrer">
+                ECHA-UFI-Generator
+              </a>{' '}
+              aus USt-ID und Rezepturnummer.
             </p>
+            {pcn.ufi && !ufiGueltig && (
+              <p role="alert" className="mt-1 text-xs text-status-error">
+                Kein gueltiges UFI-Format (XXXX-XXXX-XXXX-XXXX, Zeichen 0-9 und A-Y ohne B, I, L, O).
+              </p>
+            )}
           </div>
           <div>
             <Label htmlFor="verwendung">Verwendungskategorie</Label>
@@ -167,7 +170,7 @@ export default function PCNUFIPage(): JSX.Element {
               </div>
               <div className="flex justify-between border-b pb-2">
                 <dt>UFI</dt>
-                <dd className="font-mono font-semibold">{pcn.ufi || 'Nicht generiert'}</dd>
+                <dd className="font-mono font-semibold">{pcn.ufi || 'Nicht erfasst'}</dd>
               </div>
               <div className="flex justify-between border-b pb-2">
                 <dt>Verwendung</dt>
@@ -200,7 +203,13 @@ export default function PCNUFIPage(): JSX.Element {
         title="PCN/UFI Generator"
         subtitle="Poison Centre Notification (ECHA Annex VIII)"
         steps={steps}
-        onFinish={() => { createMutation.mutate(pcn) }}
+        onFinish={() => {
+          if (!ufiGueltig) {
+            toast({ title: 'UFI ungueltig', description: 'Bitte die UFI aus dem ECHA-UFI-Generator erfassen.', variant: 'destructive' })
+            return
+          }
+          createMutation.mutate(pcn)
+        }}
         onCancel={() => navigate('/compliance/pcn-liste')}
       />
     </div>

@@ -269,6 +269,9 @@ def uebermitteln(
         return svc.submit_to_atlas(anmeldung_id=id, db=db)
     except Exception as exc:
         from app.core.exceptions import EntityNotFoundError, ValidationFailedError
+        from app.services.atlas_customs_service import AtlasNichtEingerichtet
+        if isinstance(exc, AtlasNichtEingerichtet):
+            raise HTTPException(status_code=503, detail=str(exc))
         if isinstance(exc, EntityNotFoundError):
             raise HTTPException(status_code=404, detail=str(exc))
         if isinstance(exc, ValidationFailedError):
@@ -301,9 +304,14 @@ def ausfuhrnachricht(
     tenant_id: str = Depends(get_tenant_id),
 ):
     """Ruft Ausfuhrnachricht (IE529/IE518) für eine MRN ab."""
+    from app.services.atlas_customs_service import AtlasNichtEingerichtet
+
     svc = ATLASCustomsService(db=db, tenant_id=tenant_id)
     svc._fallback_store = _store  # type: ignore[attr-defined]
-    return svc.get_ausfuhrnachricht(mrn=mrn, db=db)
+    try:
+        return svc.get_ausfuhrnachricht(mrn=mrn, db=db)
+    except AtlasNichtEingerichtet as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 @router.post("/atlas-callback", summary="Callback atlas",

@@ -182,51 +182,15 @@ async def get_audit_logs(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000)
 ):
-    """Query audit logs with filtering."""
-    # Mock audit log data
-    mock_entries = [
-        {
-            "id": "audit_001",
-            "timestamp": datetime.utcnow() - timedelta(hours=1),
-            "event_type": "user_login",
-            "user_id": "user_123",
-            "client_ip": "192.168.1.100",
-            "action": "login",
-            "resource": "auth",
-            "details": {"user_agent": "Mobile App", "device": "iPhone"},
-            "severity": "info"
-        },
-        {
-            "id": "audit_002",
-            "timestamp": datetime.utcnow() - timedelta(minutes=30),
-            "event_type": "data_access",
-            "user_id": "user_456",
-            "client_ip": "10.0.0.50",
-            "action": "view",
-            "resource": "customer_data",
-            "details": {"customer_id": "cust_789", "fields_accessed": ["email", "phone"]},
-            "severity": "info"
-        }
-    ]
+    """Query audit logs with filtering.
 
-    # Apply filters
-    filtered_entries = mock_entries
-    if user_id:
-        filtered_entries = [e for e in filtered_entries if e["user_id"] == user_id]
-    if event_type:
-        filtered_entries = [e for e in filtered_entries if e["event_type"] == event_type]
-    if severity:
-        filtered_entries = [e for e in filtered_entries if e["severity"] == severity]
-
-    # Pagination
-    total = len(filtered_entries)
-    paginated_entries = filtered_entries[skip:skip + limit]
-
-    return AuditLogResponse(
-        entries=[AuditLogEntry(**entry) for entry in paginated_entries],
-        total=total,
-        page=(skip // limit) + 1,
-        size=limit
+    Bis 20.10.2026 lieferte dieser Weg fest eingetragene Beispieleintraege ("user_123", 192.168.1.100) als waeren es
+    Audit-Ereignisse. Der Dienst hat keinen abfragbaren Audit-Speicher (die Middleware schreibt ins Protokoll);
+    ein Nachweis wird nicht vorgetaeuscht.
+    """
+    raise HTTPException(
+        status_code=status.HTTP_501_NOT_IMPLEMENTED,
+        detail="Kein Audit-Speicher angebunden; Audit-Ereignisse stehen im Protokoll des Dienstes.",
     )
 
 

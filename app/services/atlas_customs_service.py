@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import random
 from datetime import datetime
 from typing import Optional
 from uuid import uuid4
@@ -121,10 +120,15 @@ _ATLAS_STATUS_WEIGHTS = [
 ]
 
 
-def _gewichteter_status() -> str:
+def _zahl_aus(schluessel: str, bereich: int) -> int:
+    """Reproduzierbarer Wert 0..bereich-1 aus der Kennung — dieselbe Anmeldung ergibt dieselbe Simulation."""
+    return int(hashlib.sha256(schluessel.encode("utf-8")).hexdigest()[:8], 16) % bereich
+
+
+def _gewichteter_status(schluessel: str) -> str:
     choices, weights = zip(*_ATLAS_STATUS_WEIGHTS)
     total = sum(weights)
-    r = random.randint(1, total)
+    r = _zahl_aus(schluessel, total) + 1
     cumulative = 0
     for choice, w in zip(choices, weights):
         cumulative += w
@@ -141,7 +145,7 @@ def _simulate_atlas_soap_response(mrn: str, anmeldung_id: str) -> dict:
     POST https://atlas.zoll.bund.de/business-apis/atlas/eex/...
     mit PKCS#12 Zertifikat (Zollbeteiligter-Zertifikat).
     """
-    status = _gewichteter_status()
+    status = _gewichteter_status(anmeldung_id)
     timestamp = datetime.utcnow().isoformat() + "Z"
 
     base = {
@@ -171,7 +175,7 @@ def _simulate_atlas_soap_response(mrn: str, anmeldung_id: str) -> dict:
             "nachricht_typ": "IE528",
             "beschreibung": "Anmeldung in zollamtlicher Prüfung",
             "pruefungs_grund": "Routinemäßige Stichprobenkontrolle",
-            "erwartete_bearbeitungszeit_min": random.randint(15, 120),
+            "erwartete_bearbeitungszeit_min": 15 + _zahl_aus(mrn, 106),
             "naechste_schritte": [
                 "Ausfuhranmeldung wird geprüft — bitte auf Freigabe warten",
                 "Gegebenenfalls Vorlage von Begleitdokumenten erforderlich",
@@ -183,7 +187,7 @@ def _simulate_atlas_soap_response(mrn: str, anmeldung_id: str) -> dict:
             ("D003", "Ungültiger Warennummerncode"),
             ("E001", "Pflichtfeld fehlt: Statischer Wert"),
         ]
-        code, beschreibung = random.choice(fehler_codes)
+        code, beschreibung = fehler_codes[_zahl_aus(mrn, len(fehler_codes))]
         return {
             **base,
             "status": "FEHLERHAFT",
@@ -195,6 +199,10 @@ def _simulate_atlas_soap_response(mrn: str, anmeldung_id: str) -> dict:
 
 
 # ── Haupt-Service-Klasse ──────────────────────────────────────────────────────
+
+
+class AtlasNichtEingerichtet(RuntimeError):
+    """Keine ATLAS-Anbindung: eine Uebermittlung waere vorgetaeuscht."""
 
 
 class ATLASCustomsService:
@@ -299,6 +307,16 @@ class ATLASCustomsService:
         Status: ANGENOMMEN | IN_PRUEFUNG | FEHLERHAFT
         """
         db = db or self.db
+        from app.core.config import settings
+
+        # Bis 20.10.2026 lief die Simulation in jeder Umgebung und schrieb eine erfundene MRN mit Status
+        # UEBERMITTELT — die Anmeldung galt als beim Zoll eingereicht, obwohl nichts gesendet wurde. Eine echte
+        # ATLAS-Anbindung (Zollbeteiligten-Zertifikat, SOAP) gibt es nicht; ausserhalb der Entwicklung wird
+        # deshalb abgelehnt, in der Entwicklung ausdruecklich als Simulation gekennzeichnet.
+        if settings.APP_ENV != "development":
+            raise AtlasNichtEingerichtet(
+                "ATLAS-Anbindung ist nicht eingerichtet (Zollbeteiligten-Zertifikat fehlt); keine Uebermittlung."
+            )
 
         # Anmeldung laden
         anmeldung = self._load_anmeldung(anmeldung_id, db)
@@ -328,11 +346,8 @@ class ATLASCustomsService:
 
         # ATLAS-Antwort simulieren
         atlas_antwort = _simulate_atlas_soap_response(mrn, anmeldung_id)
-        neuer_status = {
-            "ANGENOMMEN": "UEBERMITTELT",
-            "IN_PRUEFUNG": "UEBERMITTELT",
-            "FEHLERHAFT": "ABGELEHNT",
-        }.get(atlas_antwort["status"], "UEBERMITTELT")
+        # Eine Simulation ist keine Uebermittlung: Status SIMULIERT, nie UEBERMITTELT/ABGELEHNT.
+        neuer_status = "SIMULIERT"
 
         # Status + MRN persistieren
         if db is not None:
@@ -363,7 +378,8 @@ class ATLASCustomsService:
                 self._fallback_store[anmeldung_id]["atlas_mrn"] = mrn
 
         return {
-            "uebermittelt": True,
+            "uebermittelt": False,
+            "simuliert": True,
             "anmeldung_id": anmeldung_id,
             "atlas_mrn": mrn,
             "neuer_status": neuer_status,
@@ -383,6 +399,15 @@ class ATLASCustomsService:
         In Produktion: Polling-Abfrage ATLAS-Auskunftssystem
         """
         db = db or self.db
+        from app.core.config import settings
+
+        # Ohne ATLAS-Anbindung gibt es keine Zollnachricht. Bis 20.10.2026 erzeugte dieser Weg einen erfundenen
+        # Erledigungsvermerk IE529 ("verwendbar fuer Mehrwertsteuerbefreiung §6 UStG") — ein Ausfuhrnachweis
+        # darf nie vorgetaeuscht werden.
+        if settings.APP_ENV != "development":
+            raise AtlasNichtEingerichtet(
+                "ATLAS-Anbindung ist nicht eingerichtet; eine Ausfuhrnachricht kann nicht abgerufen werden."
+            )
 
         if not mrn or len(mrn) < 10:
             raise ValidationFailedError(f"Ungültige MRN: '{mrn}'")
@@ -400,8 +425,11 @@ class ATLASCustomsService:
                 "beschreibung": "Ausfuhranmeldung mit dieser MRN nicht bekannt",
             }
 
-        # Status-basierte Nachricht simulieren
+        # Status-basierte Nachricht simulieren (nur Entwicklung, ausdruecklich gekennzeichnet).
         status = anmeldung.get("status", "UEBERMITTELT")
+        if status == "SIMULIERT":
+            return {"mrn": mrn, "gefunden": True, "simuliert": True, "status": "SIMULIERT",
+                    "hinweis": "Simulation in der Entwicklung — keine Zollnachricht, kein Ausfuhrnachweis."}
         if status == "BEWILLIGT":
             return {
                 "mrn": mrn,
@@ -411,8 +439,10 @@ class ATLASCustomsService:
                 "erledigt_am": datetime.utcnow().isoformat() + "Z",
                 "ausgangszollstelle": "DE004020",
                 "ausgang_am": business_today().isoformat(),
-                "bescheinigung": "Ausfuhr ordnungsgemäß erfolgt — Erledigungsvermerk erteilt",
-                "verwendbar_fuer": ["Mehrwertsteuerbefreiung §6 UStG", "Ausfuhrnachweis"],
+                "bescheinigung": "Simulation: Erledigungsvermerk nur in der Entwicklung",
+                "simuliert": True,
+                # Ein simulierter Vermerk ist kein Ausfuhrnachweis und keine Grundlage fuer §6 UStG.
+                "verwendbar_fuer": [],
             }
         elif status in ("UEBERMITTELT", "IN_PRUEFUNG"):
             return {

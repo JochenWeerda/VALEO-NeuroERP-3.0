@@ -71,7 +71,7 @@ def build_ustva_elster_xml(
     Erzeugt ELSTER-konforme UStVA-XML (Anmeldungssteuern).
     Encoding: ISO-8859-15.
     """
-    ns = "http://finkonsens.de/elster/elsteranmeldung/ustva/v2023"
+    ns = "http://finkonsens.de/elster/elsteranmeldung/ustva/v2023"  # NOSONAR - XML-Namensraum ist eine feste Kennung des Standards, kein Netzzugriff
     ET: Any
     import xml.etree.ElementTree as ET
 

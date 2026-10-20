@@ -140,3 +140,30 @@ mitlaufen.
     Folgedokument nach dem schliessenden `---`.
   - `test_beleg_aktionen`: Eine reine Leserolle wird seit dem Rollenblock schon am Schreibweg abgewiesen (403). Es
     wird weiterhin nichts gebucht; der Vertrag haelt das fest.
+
+## Sonar-Security-Hotspots (20.10.2026): alle 37 im Code bearbeitet
+
+Mehrere Hotspots waren echte Fachfehler, keine Formalien.
+
+- **ATLAS-Ausfuhr (`atlas_customs_service.py`):** Die Uebermittlung schrieb in jeder Umgebung eine erfundene MRN und
+  den Status `UEBERMITTELT`. Die Ausfuhrnachricht erzeugte einen erfundenen Erledigungsvermerk IE529 mit dem Hinweis
+  „verwendbar fuer Mehrwertsteuerbefreiung §6 UStG“.
+  - Ohne ATLAS-Anbindung antworten beide Wege jetzt mit 503.
+  - In der Entwicklung laeuft die Simulation ausdruecklich als `SIMULIERT`, deterministisch statt gewuerfelt und
+    ohne Ausfuhrnachweis.
+- **UFI (`pcn-ufi.tsx`):** Die UFI wurde gewuerfelt. Jetzt wird sie aus dem ECHA-UFI-Generator uebernommen, im
+  Format (UFI-Alphabet) geprueft und eine ungueltige UFI nicht gespeichert.
+- **Mischfutter-Charge:** Die Maske wuerfelte 1 von 1000 je Tag (Kollisionsgefahr). Jetzt vergibt der Server die
+  Chargen-ID bei der Anlage.
+- **Varianten-Auswahl und A/B-Zuteilung:** `secrets.SystemRandom` bzw. `secrets.choice`; Zeilenschluessel der
+  Meldewesen-Konsole ueber `crypto.randomUUID()`.
+- **HTTP:** XML-Namensraeume von ELSTER, EZB und Destatis sind feste Kennungen der Standards und bleiben; sie sind
+  mit Begruendung markiert. Das Adaptive-Card-Schema laeuft jetzt ueber https.
+- **DSGVO-Exporte:** eigenes Datenverzeichnis des Dienstes statt `/tmp`.
+- **Feste IP-Adressen:**
+  - `app/communications_security/management.py` (erfundene Netzsegmente und DNS-Server) und
+    `app/security/network_security.py` (stufte 10.0.0.0/8 als verdaechtig ein) waren toter Code ohne einen einzigen
+    Import. Beide sind entfernt.
+  - `crm-security` lieferte erfundene Audit-Eintraege. Der Weg antwortet jetzt mit 501 (kein Audit-Speicher
+    angebunden).
+- Nachweis: 225 Backend-Tests der beruehrten Module, 111 Frontend-Tests, `tsc` und ESLint sauber.
