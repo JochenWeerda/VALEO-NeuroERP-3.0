@@ -134,6 +134,29 @@ async def lead_bearbeiten(entity_id: str, body: dict[str, Any] = Body(default_fa
         aendern=aendern, event_type="crm.lead.updated")
 
 
+# --------------------------------------------------------------------------- Artikel
+
+# Dieselben Rollen wie der Artikel-Aenderungsweg (``articles.update_article``: Stammdaten schreiben).
+@router.post("/articles/{entity_id}/actions/bearbeiten", response_model=MaskActionResult,
+             summary="Artikel bearbeiten", dependencies=SCHREIBEN["STAMMDATEN"])
+async def artikel_bearbeiten(entity_id: str, body: dict[str, Any] = Body(default_factory=dict),
+                             db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    from app.api.v1.endpoints.articles import update_article
+    from app.api.v1.schemas.inventory import ArticleUpdate
+    from app.core.screen_definitions_stamm import ARTIKEL_BEARBEITEN_FELDER
+
+    async def aendern(session: Session, werte: Any, eid: str, tid: str) -> None:
+        await update_article(eid, werte, tenant_id=tid, db=session)
+
+    return await bearbeiten(
+        db, entity_type="article", entity_id=entity_id, tenant_id=tenant_id, body=body,
+        felder=_gleich(*ARTIKEL_BEARBEITEN_FELDER), modell=ArticleUpdate,
+        lesen=zeile_per_sql("SELECT CASE WHEN is_active THEN 'active' ELSE 'inactive' END AS status "
+                            "FROM domain_inventory.articles WHERE id::text = :id AND tenant_id = :tid "
+                            "AND deleted_at IS NULL"),
+        aendern=aendern, event_type="article.updated")
+
+
 # --------------------------------------------------------------------------- Einkauf
 
 @router.post("/einkauf/anfragen/{entity_id}/actions/bearbeiten", response_model=MaskActionResult,

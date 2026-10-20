@@ -197,6 +197,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 |---|---|---|
 | `...` | outbox | `scripts/extract_events.py` |
 | `admin.postfach.saved` | outbox | `app/api/v1/endpoints/mailkonto.py` |
+| `article.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `beleg.aktion.ausgefuehrt` | outbox | `app/api/v1/endpoints/belege.py` |
 | `cash_closing.posted` | outbox | `app/api/v1/endpoints/compat.py` |
 | `collab.note.created` | outbox | `app/api/v1/endpoints/collab_notes.py` |
@@ -234,8 +235,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `futtermittel.mischfutter.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `identity.tenant.` | outbox | `app/services/tenant_lifecycle_service.py` |
 | `inventur.abgeschlossen` | outbox | `app/services/inventory_compat_service.py` |
-| `kontrakt.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
-| … | | 20 weitere |
+| … | | 21 weitere |
 
 ### System
 

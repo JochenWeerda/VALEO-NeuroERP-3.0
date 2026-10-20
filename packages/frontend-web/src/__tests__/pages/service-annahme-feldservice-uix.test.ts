@@ -644,12 +644,11 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  it('stellt Artikel-Stamm ohne Icon-only Aktionen', () => {
+  it('stellt Artikel-Stamm als Studio-Maske dar', () => {
+    // Seit 20.10.2026 ScreenDefinition artikel/stamm: beschriftete Aktionen und 44-px-Ziele aus dem Renderer.
     const src = read('../../pages/artikel/stamm.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('Herunterladen')
-    expect(src).toContain('Bearbeiten')
-    expect(src).not.toContain('size="sm"')
+    expect(src).toContain('UniversalNativeDetailPage')
+    expect(src).toContain('screenId="artikel/stamm"')
   })
 
   it('stellt Zeiterfassung Arbeit zuerst und 44 px', () => {

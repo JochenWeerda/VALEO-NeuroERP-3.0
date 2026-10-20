@@ -27,10 +27,14 @@ class _FakeMappings:
 
 
 class _FakeResult:
-    def __init__(self, *, scalar_value=None, fetchone_value=None, mapping_value=None):
+    def __init__(self, *, scalar_value=None, fetchone_value=None, mapping_value=None, scalars_value=None):
         self._scalar_value = scalar_value
         self._fetchone_value = fetchone_value
         self._mapping_value = mapping_value
+        self._scalars_value = list(scalars_value or [])
+
+    def scalars(self):
+        return SimpleNamespace(all=lambda: list(self._scalars_value))
 
     def scalar(self):
         return self._scalar_value
@@ -98,7 +102,8 @@ async def test_create_customer_persists_business_partner_link_for_request_tenant
     )
     monkeypatch.setattr(customer_service_module, "_crm_create", lambda body: _async_value(_core_customer()))
 
-    created = await customers_endpoint.create_customer(payload, db=db)
+    # Mandant aus dem Kontext (seit 20.10.2026); der Body-Mandant muss ihm entsprechen.
+    created = await customers_endpoint.create_customer(payload, db=db, tenant_id="11111111-1111-1111-1111-111111111111")
 
     ensure_statement, ensure_params = db.calls[0]
     insert_statement, insert_params = db.calls[1]
@@ -118,6 +123,8 @@ async def test_create_customer_persists_business_partner_link_for_request_tenant
 async def test_update_customer_persists_business_partner_link_for_request_tenant(monkeypatch):
     db = _CapturingDb(
         results=[
+            # Erst die Mandantenpruefung: crm-core fuehrt keinen Mandanten (seit 20.10.2026).
+            _FakeResult(scalars_value=["aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"]),
             _FakeResult(scalar_value=1),
             _FakeResult(),
             _FakeResult(fetchone_value=SimpleNamespace(chefanweisung=None, business_partner_id="bp-77")),
@@ -137,9 +144,12 @@ async def test_update_customer_persists_business_partner_link_for_request_tenant
         tenant_id="22222222-2222-2222-2222-222222222222",
     )
 
-    ensure_statement, ensure_params = db.calls[0]
-    insert_statement, insert_params = db.calls[1]
-    fetch_statement, fetch_params = db.calls[2]
+    eigen_statement, eigen_params = db.calls[0]
+    assert "FROM domain_crm.customers" in eigen_statement
+    assert eigen_params["tid"] == "22222222-2222-2222-2222-222222222222"
+    ensure_statement, ensure_params = db.calls[1]
+    insert_statement, insert_params = db.calls[2]
+    fetch_statement, fetch_params = db.calls[3]
     assert "FROM domain_crm.business_partners" in ensure_statement
     assert ensure_params == {"pid": "bp-77", "tid": "22222222-2222-2222-2222-222222222222"}
     assert "INSERT INTO domain_crm.customers" in insert_statement

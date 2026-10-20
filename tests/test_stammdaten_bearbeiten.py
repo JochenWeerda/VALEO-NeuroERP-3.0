@@ -34,7 +34,7 @@ BEARBEITER = f"bearb-{uuid.uuid4().hex[:8]}"
 TABELLEN = ("domain_crm.crm_action_audit_log", "public.outbox_events", "domain_ops.ops_bankkonten",
             "domain_shared.futtermittel_mischfutter", "public.crm_leads", "public.einkauf_auftragsbestaetigungen",
             "domain_ops.reklamationen", "domain_einkauf.bestellungen",
-            "domain_einkauf.lieferanten")
+            "domain_einkauf.lieferanten", "domain_inventory.articles")
 
 
 @pytest.fixture(scope="module")
@@ -285,6 +285,7 @@ ERWARTET = {
     "finance/kreditor": "/api/v1/finance/kreditoren/{entity_id}/actions/bearbeiten",
     "futtermittel/mischfuttermittel": "/api/v1/futter/mischfuttermittel/{entity_id}/actions/bearbeiten",
     "qualitaet/reklamation": "/api/v1/reklamationen/{entity_id}/actions/bearbeiten",
+    "artikel/stamm": "/api/v1/articles/{entity_id}/actions/bearbeiten",
 }
 
 
@@ -344,6 +345,37 @@ def test_unbekanntes_objekt_ist_nicht_gefunden_statt_sql_fehler(client, maske):
     assert antwort.status_code == 200, antwort.text
     assert antwort.json()["success"] is False
     assert antwort.json()["error"] == "Objekt nicht gefunden.", antwort.json()
+
+
+def test_artikel_wird_ueber_die_studio_maske_angelegt_und_bearbeitet(client, engine):
+    """Anlage ohne Mandant im Body (bis 20.10.2026 Pflicht: die Maske schickte einen eingebauten und scheiterte mit
+    403), Bearbeiten nur der deklarierten Felder, fremder Mandant abgewiesen."""
+    from app.core.screen_definitions import get_screen_definition
+
+    anlage = get_screen_definition("artikel/stamm")["creation"]
+    nummer = f"ART-{uuid.uuid4().hex[:6]}"
+    angelegt = client.post(anlage["endpoint"], headers=kopf(), json={
+        **anlage["defaults"], "article_number": nummer, "name": "Winterweizen Elite", "unit": "t",
+        "category": "getreide", "sales_price": 215.5, "purchase_price": 198.0})
+    assert angelegt.status_code == 201, angelegt.text
+    kennung = angelegt.json()["id"]
+    assert angelegt.json()["tenant_id"] == HAUS_A
+
+    pfad = f"/api/v1/articles/{kennung}/actions/bearbeiten"
+    # Die Maske schickt den ganzen Objektkontext; Bestand ist kein Eingabefeld.
+    antwort = client.post(pfad, headers=kopf(), json={
+        **angelegt.json(), "sales_price": 219.0, "warengruppe": "Getreide", "current_stock": 999})
+    assert antwort.status_code == 200, antwort.text
+    assert antwort.json()["success"] is True, antwort.json()
+    artikel = zeile(engine, "SELECT sales_price, purchase_price, warengruppe, current_stock "
+                            "FROM domain_inventory.articles WHERE id::text = :id", id=kennung)
+    assert (float(artikel["sales_price"]), float(artikel["purchase_price"]), artikel["warengruppe"]) == (
+        219.0, 198.0, "Getreide")
+    assert float(artikel["current_stock"] or 0) == 0
+
+    fremd = client.post(pfad, headers=kopf(HAUS_B), json={"sales_price": 1.0})
+    assert fremd.json()["success"] is False
+    assert client.get(f"/api/v1/articles/{kennung}", headers=kopf(HAUS_B)).status_code == 404
 
 
 def test_auftragsbestaetigung_wird_zur_bestellung_erfasst(client, engine):

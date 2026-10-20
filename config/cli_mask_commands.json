@@ -36,6 +36,7 @@
   "mask:agrar/ration:schedule",
   "mask:agrar/ration:submit_review",
   "mask:agrar/rations-lifecycle:create_group",
+  "mask:artikel/stamm:bearbeiten",
   "mask:auswertungen/abfrage-center:create",
   "mask:auswertungen/abfrage-center:import",
   "mask:auswertungen/auftrags-kontrolle:assign_me",

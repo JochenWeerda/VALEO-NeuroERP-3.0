@@ -293,6 +293,22 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 - Aufgefallen im E2E-Smoke der PSM-Liste (suchte `table`/`grid`); der Smoke prueft jetzt die Wurzel der
   ScreenDefinition wie beim Saatgut.
 
+## Stammdatenwelle 20.10.2026: Artikel als Studio-Objektmaske, Kundenstamm mandantengenau
+
+Nutzerentscheid 20.10.: echte Stammdaten (Artikel, Kunden …) duerfen angelegt werden, sobald die zugehoerige Maske
+Studio-konform ist. Dafuer fehlten Objektmasken mit Anlage und Bearbeiten.
+
+| Gegenstand | Befund | Umsetzung |
+|---|---|---|
+| Artikelstamm `/artikel/:id`, `/artikel/neu` | handgebaute Seite (1.736 Zeilen); die Anlage schickte einen eingebauten Mandanten mit (VITE_TENANT_ID bzw. Null-UUID) und scheiterte in jedem echten Mandanten mit 403 | ScreenDefinition `artikel/stamm` (`app/core/screen_definitions_stamm.py`): Register Stammdaten, Preise und Steuer, Lager, Qualitaet und Gefahrgut, Lieferanten, Preisvereinbarungen, Dokumente; Anlage ueber `creation` (`POST /api/v1/articles/`), Bearbeiten ueber `/api/v1/articles/{id}/actions/bearbeiten` (delegiert an `update_article`, nur deklarierte Felder) |
+| Kundenanlage `POST /api/v1/crm/customers/` | Mandant aus dem Body, Standard Dev-Mandant: jede CRM-Rolle konnte Kunden in fremden Mandanten anlegen, ohne Angabe landeten sie im Dev-Mandanten | Mandant aus dem Kontext, abweichender Body-Mandant 403 |
+| Kunden aus crm-core (Liste, Abruf, Aendern, Loeschen) | crm-core fuehrt keinen Mandanten — alle Wege reichten Kunden **aller** Mandanten durch (gleiches Muster wie die Kontakte) | ein crm-core-Kunde gilt nur ueber seinen Eintrag in `domain_crm.customers` als eigener; die Anlage traegt ihn immer ein (vorher nur mit Geschaeftspartner, Fehler verschluckt); `upsert_monolith_stub` aktualisiert keine fremden Zeilen mehr (`tests/test_kunden_crm_core_mandant.py`) |
+
+Offen: Die Kundenakte `crm/customer-360` ist Studio-SD, ihr "Bearbeiten" fuehrt aber noch in die handgebaute
+Kundenmaske `/verkauf/kunden-stamm` (2.506 Zeilen mit Unterobjekten Anschriften, Kontakte, CpD, Rabatte,
+Chefanweisungen). Naechster Schritt: Bearbeiten und Anlage als Kommandowege an der Kundenakte, Unterobjekte als
+Register mit Zeilenaktionen.
+
 ## Persistenzluecken: Fachdaten nur im Arbeitsspeicher (offen, je eigener Slice)
 
 | Stelle | Befund | Einstufung |

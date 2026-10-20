@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 197,
-    "screens_with_actions": 101,
+    "actions": 198,
+    "screens_with_actions": 102,
     "domains": 17
   },
   "actions": [
@@ -983,6 +983,28 @@
         "navigationRoute": "/artikel/neu",
         "command": null,
         "method": null
+      }
+    },
+    {
+      "id": "mask:artikel/stamm:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (artikel/stamm)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "artikel/stamm",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "artikel/stamm",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
       }
     },
     {

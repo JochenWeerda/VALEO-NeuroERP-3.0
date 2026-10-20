@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (139 Masken).
+> Generiert aus `app/core/screen_definitions.py` (140 Masken).
 
 ## Übersicht
 
@@ -42,6 +42,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/saatgut` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/agent-contract` |
 | `agrar/saatgut-liste` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut-liste/agent-contract` |
 | `artikel/liste` | Artikel | lager | niedrig | — | `GET /api/v1/masks/artikel/liste/agent-contract` |
+| `artikel/stamm` | Artikel | lager | niedrig | — | `GET /api/v1/masks/artikel/stamm/agent-contract` |
 | `auswertungen/abfrage-center` | Abfrage-Center | reporting | mittel | — | `GET /api/v1/masks/auswertungen/abfrage-center/agent-contract` |
 | `auswertungen/aenderungshistorie` | Aenderungshistorie | audit | niedrig | — | `GET /api/v1/masks/auswertungen/aenderungshistorie/agent-contract` |
 | `auswertungen/auftrags-kontrolle` | Auftrags-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/auswertungen/auftrags-kontrolle/agent-contract` |
@@ -3611,6 +3612,48 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `neu` | Neuer Artikel | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `artikel/stamm` — Artikel
+
+**Zweck:** Artikelstamm fuer Verkauf, Einkauf und Lager: Kennungen, Preise und Steuer, Lagerfuehrung, Qualitaet; Lieferanten, Preisvereinbarungen und Dokumente.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/artikel/stamm/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/artikel/stamm/agent-contract` |
+| Readiness | `GET /api/v1/masks/artikel/stamm/readiness` |
+| Rollout-Route | `/mask-rollout/artikel__stamm/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/articles/{entity_id}`
+- `lieferanten` → `/api/v1/articles/{entity_id}/suppliers`
+- `preise` → `/api/v1/articles/{entity_id}/prices`
+- `dokumente` → `/api/v1/articles/{entity_id}/documents`
+
+**MCP-Tools (Domäne):**
+
+- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.propose_opening` — scope `lager:write`, Risiko hoch
+- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welchen Verkaufspreis und Steuerschluessel hat Artikel {entity_id}?
+- Welche Lieferanten liefern Artikel {entity_id} und zu welchem EK-Preis?
+- Ist Artikel {entity_id} chargen- oder QS-pflichtig?
+
+**Sensible Felder:** `purchase_price`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/articles/{entity_id}/actions/bearbeiten` |
 
 ---
 

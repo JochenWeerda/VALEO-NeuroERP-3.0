@@ -123,7 +123,7 @@ def test_create_customer_rejects_invalid_country_before_crm_call(monkeypatch: py
     )
 
     with pytest.raises(HTTPException) as exc:
-        asyncio.run(create_customer(payload, db=MagicMock()))
+        asyncio.run(create_customer(payload, db=MagicMock(), tenant_id="00000000-0000-0000-0000-000000000001"))
 
     assert exc.value.status_code == 422
     assert exc.value.detail["entity_typ"] == "Debitor"

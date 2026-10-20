@@ -80,8 +80,6 @@
   "annahme/qr",
   "annahme/qr-scanner",
   "annahme/warteschlange",
-  "artikel/:id",
-  "artikel/neu",
   "auth/Callback",
   "auth/Login",
   "banken/konten",

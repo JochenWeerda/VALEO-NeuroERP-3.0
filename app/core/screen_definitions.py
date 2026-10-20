@@ -10,6 +10,7 @@ from app.core.screen_definitions_harvest_controls import HARVEST_CONTROL_BUILDER
 from app.core.screen_definitions_identity import IDENTITY_SCREEN_BUILDERS
 from app.core.screen_definitions_kontrolle import KONTROLLE_ROUTEN, KONTROLLE_SCREEN_BUILDERS, KONTROLLE_SYNONYME
 from app.core.screen_definitions_listen import LISTEN_ROUTEN, LISTEN_SCREEN_BUILDERS, LISTEN_SYNONYME
+from app.core.screen_definitions_stamm import STAMM_ROUTEN, STAMM_SCREEN_BUILDERS
 from app.core.mask_rollout_catalog import ROLLOUT_WAVES_42_51
 from app.core.screen_definitions_capture import (
     build_strecke_disposition_screen_definition,
@@ -4646,6 +4647,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     **HARVEST_CONTROL_BUILDERS,
     **KONTROLLE_SCREEN_BUILDERS,
     **LISTEN_SCREEN_BUILDERS,
+    **STAMM_SCREEN_BUILDERS,
     "schnittstelle/legacy-adapter-monitor": lambda: {
         "schemaVersion": 1, "id": "schnittstelle/legacy-adapter-monitor", "domain": "integration", "mode": "list",
         "title": "Standard-/Unimet-Adapter", "subtitle": "Eingang, Fehlerkorb, Staging und Reconciliation",
@@ -5689,6 +5691,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "agrar/harvest-controls": "/admin/screen-studio?harvestControls=1",
     **KONTROLLE_ROUTEN,
     **LISTEN_ROUTEN,
+    **STAMM_ROUTEN,
     "admin/identity-budgets": "/admin/identity-budgets",
     "admin/token-consumption": "/admin/token-consumption",
     "schnittstelle/legacy-adapter-monitor": "/schnittstelle/legacy-adapter-monitor",
