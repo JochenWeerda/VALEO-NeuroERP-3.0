@@ -9,6 +9,7 @@ from app.core.screen_definitions_studio_history import STUDIO_HISTORY_BUILDERS
 from app.core.screen_definitions_harvest_controls import HARVEST_CONTROL_BUILDERS
 from app.core.screen_definitions_identity import IDENTITY_SCREEN_BUILDERS
 from app.core.screen_definitions_kontrolle import KONTROLLE_ROUTEN, KONTROLLE_SCREEN_BUILDERS, KONTROLLE_SYNONYME
+from app.core.screen_definitions_listen import LISTEN_ROUTEN, LISTEN_SCREEN_BUILDERS, LISTEN_SYNONYME
 from app.core.mask_rollout_catalog import ROLLOUT_WAVES_42_51
 from app.core.screen_definitions_capture import (
     build_strecke_disposition_screen_definition,
@@ -4643,6 +4644,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     **STUDIO_HISTORY_BUILDERS,
     **HARVEST_CONTROL_BUILDERS,
     **KONTROLLE_SCREEN_BUILDERS,
+    **LISTEN_SCREEN_BUILDERS,
     "schnittstelle/legacy-adapter-monitor": lambda: {
         "schemaVersion": 1, "id": "schnittstelle/legacy-adapter-monitor", "domain": "integration", "mode": "list",
         "title": "Standard-/Unimet-Adapter", "subtitle": "Eingang, Fehlerkorb, Staging und Reconciliation",
@@ -5557,6 +5559,7 @@ for _spec in ROLLOUT_WAVES_42_51:
 # (/ui/mask-registry/omnibox-catalog) eine Wartungsstelle hat.
 _AGENT_SYNONYMS: dict[str, list[str]] = {
     **KONTROLLE_SYNONYME,
+    **LISTEN_SYNONYME,
     # Fuetterungsberatung: die Masken kamen mit dem Programm dazu, die
     # Suchbegriffe nicht. Ohne Synonyme findet weder Omnibox noch Agent sie
     # unter den Woertern, die im Stall und in der Beratung benutzt werden.
@@ -5684,6 +5687,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "platform/studio-history-diff": "/admin/screen-studio",
     "agrar/harvest-controls": "/admin/screen-studio?harvestControls=1",
     **KONTROLLE_ROUTEN,
+    **LISTEN_ROUTEN,
     "admin/identity-budgets": "/admin/identity-budgets",
     "admin/token-consumption": "/admin/token-consumption",
     "schnittstelle/legacy-adapter-monitor": "/schnittstelle/legacy-adapter-monitor",

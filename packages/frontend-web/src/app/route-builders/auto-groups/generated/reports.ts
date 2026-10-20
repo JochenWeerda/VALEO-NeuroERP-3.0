@@ -10,15 +10,7 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "deckungsbeitrag"
   },
   {
-    "module": "@/pages/reports/lagerbestand",
-    "path": "lagerbestand"
-  },
-  {
     "module": "@/pages/reports/ReportsDashboardCharts",
     "path": "ReportsDashboardCharts"
-  },
-  {
-    "module": "@/pages/reports/umsatz",
-    "path": "umsatz"
-  },
+  }
 ]

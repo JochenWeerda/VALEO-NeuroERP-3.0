@@ -106,7 +106,6 @@
     "*.js",
     "*.d.ts",
     "**/vite.config.ts",
-    "**/vite.config.performance.ts",
     "**/__tests__/**",
     "**/*.test.ts",
     "**/*.spec.ts"

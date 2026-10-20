@@ -7,27 +7,27 @@ Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentschei
 
 | Stufe | Routen | Anteil an Masken |
 |---|---:|---:|
-| studio_versioniert | 1 | 0.1 % |
-| screen_definition | 80 | 12.0 % |
-| builder_altmuster | 104 | 15.6 % |
-| handgebaut | 483 | 72.3 % |
+| studio_versioniert | 1 | 0.2 % |
+| screen_definition | 82 | 12.4 % |
+| builder_altmuster | 100 | 15.2 % |
+| handgebaut | 477 | 72.3 % |
 | weiterleitung | 2 |  |
 
-Gesamt 670 Routen, davon 668 Masken.
+Gesamt 662 Routen, davon 660 Masken.
 
 ## Aktionen
 
 | Befund | Anzahl |
 |---|---:|
-| Aktionen gesamt (ohne Doppel je Maske) | 324 |
-| davon serverwirksam | 232 |
-| … mit REST-Kommandoweg | 232 |
+| Aktionen gesamt (ohne Doppel je Maske) | 335 |
+| davon serverwirksam | 239 |
+| … mit REST-Kommandoweg | 239 |
 | … mit eigenem MCP-Werkzeug | 46 |
-| … per generischem MCP-Werkzeug (`mask.action.execute`) | 45 |
-| … MCP bewusst gesperrt | 141 |
+| … per generischem MCP-Werkzeug (`mask.action.execute`) | 49 |
+| … MCP bewusst gesperrt | 144 |
 | … MCP offen (`open_high` u. a.) | 0 |
 | … MCP unklassifiziert | 0 |
-| … mit CLI-Zugang | 232 |
+| … mit CLI-Zugang | 239 |
 | nicht deklariert (kein Kommando, Endpunkt, Navigation) | 0 |
 | nicht verfuegbar (`stubReason`, die Maske nennt den Grund) | 0 |
 
@@ -62,7 +62,7 @@ fachliche Zuordnung fuehrt `docs/design/beleg-studio-variantenmatrix.md`.
 | `charge/wareneingang` | builder_altmuster |
 | `einkauf/angebot` | builder_altmuster |
 | `einkauf/angebot/:id` | screen_definition |
-| `einkauf/angebote` | builder_altmuster |
+| `einkauf/angebote` | screen_definition |
 | `einkauf/auftragsbestaetigung` | builder_altmuster |
 | `einkauf/auftragsbestaetigung/:id` | screen_definition |
 | `einkauf/auftragsbestaetigungen` | builder_altmuster |
@@ -111,7 +111,7 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | fibu | 0 | 0 | 1 | 42 | 0 |
 | finance | 0 | 7 | 18 | 28 | 0 |
 | admin | 0 | 4 | 0 | 27 | 0 |
-| einkauf | 0 | 7 | 15 | 27 | 0 |
+| einkauf | 0 | 9 | 13 | 27 | 0 |
 | sales | 0 | 8 | 0 | 22 | 0 |
 | crm | 0 | 8 | 26 | 21 | 0 |
 | lager | 0 | 3 | 3 | 16 | 0 |
@@ -137,7 +137,6 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | nachhaltigkeit | 0 | 0 | 0 | 4 | 0 |
 | nawaro | 0 | 0 | 0 | 4 | 0 |
 | preise | 0 | 0 | 0 | 4 | 0 |
-| reports | 0 | 0 | 0 | 4 | 0 |
 | versand | 0 | 0 | 0 | 4 | 0 |
 | workflows | 0 | 0 | 0 | 4 | 0 |
 | artikel | 0 | 0 | 0 | 3 | 0 |
@@ -145,11 +144,11 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | produktion | 0 | 0 | 2 | 3 | 0 |
 | vertrag | 0 | 0 | 0 | 3 | 0 |
 | auth | 0 | 0 | 0 | 2 | 0 |
-| energie | 0 | 0 | 0 | 2 | 0 |
 | fuhrpark | 0 | 6 | 0 | 2 | 0 |
 | genossenschaft | 0 | 0 | 0 | 2 | 0 |
 | inventory | 0 | 0 | 0 | 2 | 0 |
 | monitoring | 0 | 0 | 0 | 2 | 0 |
+| reports | 0 | 0 | 0 | 2 | 0 |
 | silo | 0 | 0 | 0 | 2 | 0 |
 | tankstelle | 0 | 0 | 0 | 2 | 0 |
 | wartung | 0 | 0 | 0 | 2 | 0 |
@@ -186,11 +185,9 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | setup | 0 | 0 | 0 | 1 | 0 |
 | stammdaten | 0 | 0 | 0 | 1 | 0 |
 | start | 0 | 0 | 0 | 1 | 0 |
-| statistik | 0 | 0 | 0 | 1 | 0 |
 | stock-management | 0 | 0 | 0 | 1 | 0 |
 | subventionen | 0 | 0 | 0 | 1 | 0 |
 | system | 0 | 0 | 0 | 1 | 0 |
-| termine | 0 | 0 | 0 | 1 | 0 |
 | versicherungen | 0 | 0 | 0 | 1 | 0 |
 | vertrieb | 0 | 0 | 0 | 1 | 0 |
 | weighing | 0 | 0 | 0 | 1 | 0 |
@@ -199,7 +196,6 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | dev | 0 | 1 | 0 | 0 | 0 |
 | etiketten | 0 | 0 | 1 | 0 | 0 |
 | export | 0 | 0 | 1 | 0 | 0 |
-| kasse | 0 | 0 | 2 | 0 | 0 |
 | logistik | 0 | 3 | 0 | 0 | 0 |
 | mask-rollout | 0 | 1 | 0 | 0 | 0 |
 | planung | 0 | 1 | 0 | 0 | 0 |

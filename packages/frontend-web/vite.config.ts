@@ -122,7 +122,11 @@ export default defineConfig(({ mode }) => {
     port: DEV_PORT,
     host: '0.0.0.0',
     strictPort: true,
-    allowedHosts: 'all',
+    allowedHosts: [
+      'localhost', 'frontend-web',
+      ...(process.env.VITE_ALLOWED_HOSTS || env.VITE_ALLOWED_HOSTS || '').split(',')
+        .map((host) => host.trim()).filter(Boolean),
+    ],
     warmup: {
       clientFiles: [
         'index.html',

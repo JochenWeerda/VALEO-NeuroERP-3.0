@@ -822,3 +822,10 @@ Browserabnahme mit sieben Historienereignissen und sieben echten Handbuchbildern
 ## Ernte-Abrechnungsregel: Sicherheitsgrenze 2026-10-15
 
 Implizite Besatzfreigrenze entfernt; Nullmesswerte und Nullpreise bleiben erhalten. Der Produktionsrouter verwendet jetzt den append-only Versionsspeicher mit getrennter menschlicher Regelgenehmigung, Messprovenienz und unveraenderlichem Berechnungsnachweis. Finanzielle Gegenpruefung und Ausfuehrung binden dieselbe konkrete Fassung; veraltete oder fehlende Nachweise sperren vor Geschaeftswirkung. 31 Backend-, 47 Frontend- und vier vollstaendige SQL-Prozessfaelle bestanden; Historienpagination zusaetzlich real geprueft. Lokale additive Migration integriert, reale synthetische Neuanmeldung erfolgreich. Finanzielle Browserabnahme, Modellkontingent-Abnahme und Lieferung bleiben offen. [Nachweise und Restumfang](../../quality-assurance/harvest-rule-store-20261015.md).
+
+## AP-Sicherheitsnachtrag 2026-10-20
+
+Reale ApproveAPInvoice/RejectAPInvoice/PostAPInvoice verwenden die gemeinsame
+gepruefte Identitaets-, Antrags-, Inhalts- und Transaktionsgrenze. Direkte Status-
+mutationen und still erfolgreiche Buchungsabbrueche sind entfernt. Dies ist keine
+Vollabnahme saemtlicher anderer Kernel-Domaenen. [572 integrierte Vertraege und Grenzen](../../quality-assurance/ap-workflow-security-20261020.md).

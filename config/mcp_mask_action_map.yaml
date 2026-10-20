@@ -5,8 +5,8 @@ sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 140
-    screens_with_actions: 70
+    actions: 142
+    screens_with_actions: 72
     domains: 14
 mcp_write_tools:
 - crm.contact.log
@@ -81,12 +81,12 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 83
+  mask_actions_considered: 85
   mask_mutations_considered: 68
   by_coverage:
     adjacent: 1
     blocked_human_only: 15
-    local_ui: 15
+    local_ui: 17
     mapped: 42
     mapped_generic: 3
     mapped_propose_only: 1
@@ -416,6 +416,16 @@ mappings:
   mcp_tool_id: crm.activity.create
   coverage: mapped
   notes: Gleicher Activity-Adapter; Opportunity-Kontext via kunden_nr/entity.
+- mask_action_id: mask:einkauf/anfragen:neu
+  mask: einkauf/anfragen
+  domain: einkauf
+  action_key: neu
+  label: Neue Anfrage
+  command_endpoint: null
+  command: null
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
 - mask_action_id: mask:einkauf/angebot:bestellen
   mask: einkauf/angebot
   domain: einkauf
@@ -426,6 +436,16 @@ mappings:
   mcp_tool_id: einkauf.angebot.bestellen
   coverage: mapped
   notes: MCP-MASK-WRITES-NEXT-20261008; Angebot→Bestellung via EinkaufCompatService.
+- mask_action_id: mask:einkauf/angebote:neu
+  mask: einkauf/angebote
+  domain: einkauf
+  action_key: neu
+  label: Neues Angebot
+  command_endpoint: null
+  command: null
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
 - mask_action_id: mask:einkauf/anlieferavis:wareneingang
   mask: einkauf/anlieferavis
   domain: einkauf
@@ -973,5 +993,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 0; blocked_human_only 15; blocked_no_endpoint 0; local_ui 15; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 15; blocked_no_endpoint 0; local_ui 17; FIN-CLOSE
   blocked_adr_076.'

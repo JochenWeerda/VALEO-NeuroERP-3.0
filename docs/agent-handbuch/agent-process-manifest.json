@@ -2115,6 +2115,50 @@
       ]
     },
     {
+      "mask_id": "einkauf/anfragen",
+      "title": "Anfragen",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/einkauf__anfragen/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/anfragen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/anfragen/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/anfragen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neue Anfrage",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
       "mask_id": "einkauf/angebot",
       "title": "Lieferantenangebot",
       "domain": "einkauf",
@@ -2141,6 +2185,50 @@
         "gesamtbetrag",
         "einzelpreis"
       ],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "einkauf/angebote",
+      "title": "Angebote",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/einkauf__angebote/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/angebote/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/angebote/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/angebote/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neues Angebot",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
@@ -5469,5 +5557,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 116
+  "event_count": 119
 }

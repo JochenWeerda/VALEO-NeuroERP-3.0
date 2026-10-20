@@ -64,7 +64,10 @@ def render() -> str:
         anlage = definition.get("creation") or {}
         anlage_als_aktion = [{"permission": anlage.get("permission"), "commandEndpoint": anlage.get("endpoint"),
                               "method": "POST"}] if anlage.get("endpoint") else []
-        for action in [*(definition.get("actions") or []), *anlage_als_aktion]:
+        tabellen = [*(definition.get("tables") or []),
+                    *(t for tab in definition.get("tabs") or [] for t in tab.get("tables") or [])]
+        zeilen = [aktion for tabelle in tabellen for aktion in tabelle.get("rowActions") or []]
+        for action in [*(definition.get("actions") or []), *zeilen, *anlage_als_aktion]:
             permission, endpoint = action.get("permission"), action.get("commandEndpoint")
             if not permission or not endpoint or permission.startswith(("belege.", "platform:")):
                 continue

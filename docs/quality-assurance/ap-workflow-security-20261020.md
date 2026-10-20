@@ -49,3 +49,38 @@ anschliessend gezielt korrigiert und mit 18 Faellen gruen nachgeprueft wurden.
 Frontend: vier Vertragsfaelle und vollstaendige Typpruefung bestanden.
 Private Commit-Guards fuer 60 Dateien bestanden. Der gemeinsame Endstand mit
 der inzwischen eingegangenen Studio-Lieferung wird separat erneut abgenommen.
+
+## Zusammengefuehrte Abnahme
+
+AP-Meilenstein338b34973 wurde mit der parallelen Studio-Lieferung bis e0a657298
+zusammengefuehrt. Drei generierte Konflikte wurden aus den vereinigten Quellen
+aufgeloest; keine Fachquellen zurueckgenommen. 572 Backend-/SQL-/Adaptervertraege
+bestanden auf unveraenderten kanonischen Anwendungsquellen. Zusaetzlich bestanden
+24 Faelle der tatsaechlich mitgelieferten Einkaufslisten-Kommandos, Rechteprojektion
+und Studio-Ratsche: zusammen596 Backendpruefungen. Zwei tatsaechliche Kernel-Buchungsfaelle pruefen
+Erfolg und kompletten Outbox-Fehlerrollback; geaenderte Steuersaetze koennen keine
+abweichenden Betraege unter alter AP-Pruefung buchen.
+
+Alle ausgefuehrten Gates bestanden: exakte Godfile- und Paginierungsratsche,
+Codeinventare, Screen-Aktionskatalog, MCP-Map und -Referenz, CLI-Register,
+Agent-Handbuch, C4, vollstaendige Architekturzuordnung und strikter Architekturdrift.
+OpenAPI:3222 Pfade, zweimal identische Ableitung, keine verlorenen Pfade.
+Physischer Tabellenkatalog einschliesslich Spalten/Constraints exakt erhalten;
+nur Code-/Maskenverweise nachgezogen.
+
+Oberflaeche: sieben Faelle aus AP-Antragsbindung und neuer nativer Studio-Liste
+bestanden. Der erste Vitest-Start scheiterte vor den Tests an einem gesperrten
+Systemtemp-Rename; ein eigenes Arbeits-Tempverzeichnis beseitigte die Umgebungssperre.
+Die nachgelagerte Node-Projektpruefung fand zwei vorhandene Buildaltlasten:
+ungueltiges allowedHosts=all sowie einen ungenutzten Alternativconfig mit nicht
+deklariertem Analysepaket. Verbraucherpruefung ergab nur Config-/Ignoreverweise.
+Alternativconfig und diese Verweise sind entfernt; regulaerer Vite-Config erlaubt
+localhost/frontend-web und zusaetzliche Hosts nur explizit per VITE_ALLOWED_HOSTS.
+Keine Paketinstallation oder neue zweite Buildkonfiguration.
+
+GitHub-Nachlauf wird nach Lieferung separat festgehalten; lokale Gateergebnisse
+behaupten kein vollstaendiges GitHub-CI-Gruen und keine Live-Browserabnahme.
+
+Vollstaendige Frontend-Typpruefung und vorgelagerter Node-Konfigurationsbuild bestanden
+ohne Fehler. Die tatsaechlich geladene Vite-Konfiguration bestaetigt die Host-Allowlist
+localhost/frontend-web. Sieben Oberflaechentests bestanden.

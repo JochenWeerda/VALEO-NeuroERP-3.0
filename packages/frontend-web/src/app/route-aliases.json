@@ -1053,10 +1053,6 @@
       "path": "einkauf/zahlungsbedingungen"
     },
     {
-      "module": "@/pages/energie/verbrauch",
-      "path": "energie/verbrauch"
-    },
-    {
       "module": "@/pages/errors/NotFound",
       "path": "errors/NotFound"
     },
@@ -1379,10 +1375,6 @@
     {
       "module": "@/pages/inventory-reports",
       "path": "inventory-reports"
-    },
-    {
-      "module": "@/pages/kasse/tagesabschluss",
-      "path": "kasse/tagesabschluss"
     },
     {
       "module": "@/pages/labor/proben-liste",
@@ -1773,14 +1765,6 @@
       "path": "reports/deckungsbeitrag"
     },
     {
-      "module": "@/pages/reports/lagerbestand",
-      "path": "reports/lagerbestand"
-    },
-    {
-      "module": "@/pages/reports/umsatz",
-      "path": "reports/umsatz"
-    },
-    {
       "module": "@/pages/reports",
       "path": "reports"
     },
@@ -1853,10 +1837,6 @@
       "path": "silo"
     },
     {
-      "module": "@/pages/energie/verbrauch",
-      "path": "energie"
-    },
-    {
       "module": "@/pages/genossenschaft/mitglieder",
       "path": "genossenschaft/mitglieder"
     },
@@ -1867,10 +1847,6 @@
     {
       "module": "@/pages/tankstelle/zapfungen",
       "path": "tankstelle"
-    },
-    {
-      "module": "@/pages/statistik/bewegungen",
-      "path": "statistik/bewegungen"
     },
     {
       "module": "@/pages/stock-management",
@@ -1887,10 +1863,6 @@
     {
       "module": "@/pages/tankstelle/zapfungen",
       "path": "tankstelle/zapfungen"
-    },
-    {
-      "module": "@/pages/termine/kalender",
-      "path": "termine/kalender"
     },
     {
       "module": "@/pages/transporte/fahrer-liste",
@@ -2168,7 +2140,6 @@
       "module": "@/pages/crm/kunden-liste",
       "path": "crm/customers"
     },
-
     {
       "module": "@/pages/einkauf/rechnungseingaenge-liste",
       "path": "einkauf/rechnungseingaenge-liste"
@@ -2252,10 +2223,6 @@
     {
       "module": "@/pages/sales/invoice-editor",
       "path": "verkauf/rechnungen/neu"
-    },
-    {
-      "module": "@/pages/kasse/tagesabschluss",
-      "path": "kasse/historie"
     },
     {
       "module": "@/pages/workflow/workflow-monitoring",

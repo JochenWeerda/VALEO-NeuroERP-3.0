@@ -39,3 +39,10 @@ Action-Ausfuehrung und Idempotenz sollen als gemeinsame Schicht fuer menschliche
 
 `abgeschlossen`
 Stand: 2026-03-19
+
+## AP-Sicherheitsnachtrag 2026-10-20
+
+Reale ApproveAPInvoice/RejectAPInvoice/PostAPInvoice verwenden die gemeinsame
+gepruefte Identitaets-, Antrags-, Inhalts- und Transaktionsgrenze. Direkte Status-
+mutationen und still erfolgreiche Buchungsabbrueche sind entfernt. Dies ist keine
+Vollabnahme saemtlicher anderer Kernel-Domaenen. [572 integrierte Vertraege und Grenzen](../../../quality-assurance/ap-workflow-security-20261020.md).

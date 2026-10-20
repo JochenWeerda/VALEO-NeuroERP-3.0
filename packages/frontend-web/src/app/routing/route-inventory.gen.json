@@ -2041,16 +2041,6 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/energie/verbrauch",
-      "path": "energie",
-      "source": "alias"
-    },
-    {
-      "module": "@/pages/energie/verbrauch",
-      "path": "energie/verbrauch",
-      "source": "auto"
-    },
-    {
       "module": "@/pages/errors/NotFound",
       "path": "errors/NotFound",
       "source": "alias"
@@ -3011,16 +3001,6 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/kasse/tagesabschluss",
-      "path": "kasse/historie",
-      "source": "alias"
-    },
-    {
-      "module": "@/pages/kasse/tagesabschluss",
-      "path": "kasse/tagesabschluss",
-      "source": "auto"
-    },
-    {
       "module": "@/pages/kontrakte/LstKontraktUebersicht",
       "path": "kontrakte",
       "source": "alias"
@@ -3831,18 +3811,8 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/reports/lagerbestand",
-      "path": "reports/lagerbestand",
-      "source": "auto"
-    },
-    {
       "module": "@/pages/reports/ReportsDashboardCharts",
       "path": "reports/ReportsDashboardCharts",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/reports/umsatz",
-      "path": "reports/umsatz",
       "source": "auto"
     },
     {
@@ -4166,11 +4136,6 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/statistik/bewegungen",
-      "path": "statistik/bewegungen",
-      "source": "auto"
-    },
-    {
       "module": "@/pages/stock-management",
       "path": "stock-management",
       "source": "auto"
@@ -4263,11 +4228,6 @@
     {
       "module": "@/pages/tankstelle/zapfungen",
       "path": "tankstelle/zapfungen",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/termine/kalender",
-      "path": "termine/kalender",
       "source": "auto"
     },
     {

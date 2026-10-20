@@ -415,3 +415,25 @@ def test_complete_review_posting_chain_and_atomic_outbox(case, monkeypatch, outb
         case[1].commit()
         status = case[0].get(PREFIX+'/status/'+number, headers=headers(case)).json()
         assert status['status'] == 'approved' and status['can_pay'] and not status['can_post'], status
+
+
+def test_changed_tax_basis_cannot_post_different_amount_under_old_review(case):
+    from app.finance.steuerschluessel import richte_skr03_ein
+    richte_skr03_ein(case[1], case[3])
+    number = "SYN-T-" + uuid4().hex[:8]
+    created = case[0].post("/api/v1/finance/ap/invoices/", headers=headers(case), json={
+        "number": number, "date": "2026-10-20", "dueDate": "2026-11-20", "customerId": "synthetic-tax-supplier",
+        "lines": [{"article": "Synthetic grain", "qty": 1, "price": 100, "taxCode": "9"}]})
+    assert created.status_code == 201, created.text
+    local_case = (*case[:5], number, case[6])
+    pending = request(local_case)
+    assert decide(local_case, pending["approval_request_id"]).status_code == 200
+    case[1].execute(text("UPDATE domain_erp.tax_keys SET steuersatz=7 WHERE tenant_id=:t AND code='9'"), {"t":case[3]})
+    case[1].commit()
+    posted = case[0].post("/api/v1/finance/ap/invoices/"+number+"/post", headers=headers(case))
+    assert posted.status_code == 409, posted.text
+    for table in ["domain_erp.journal_entries", "domain_erp.offene_posten", "outbox_events"]:
+        assert case[1].execute(text(f"SELECT count(*) FROM {table} WHERE tenant_id=:t"),
+            {"t":case[3]}).scalar_one() == 0
+    doc = DocumentRepository(case[1]).get_document("ap_invoice", number)
+    assert doc["status"] == "FREIGEGEBEN" and doc["totalGross"] == 119
