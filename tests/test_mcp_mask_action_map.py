@@ -84,4 +84,4 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
     assert data["stats"]["by_coverage"].get("mapped", 0) == 43
     assert data["stats"]["by_coverage"].get("blocked_no_endpoint", 0) == 0
     assert data["stats"]["by_coverage"].get("blocked_missing_tenant", 0) == 0
-    assert data["stats"]["by_coverage"].get("local_ui", 0) == 15
+    assert data["stats"]["by_coverage"].get("local_ui", 0) == 19  # inkl. vier Anlage-Navigationen der Studio-Listen

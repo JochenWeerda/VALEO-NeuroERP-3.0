@@ -93,10 +93,17 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 - ScreenDefinition `einkauf/lieferanten` auf `NativeListPage`, Quelle `/api/v1/einkauf/lieferanten` und
   Zeilenroute `/einkauf/lieferanten/{id}` — dieselbe Quelle wie die native Objektmaske `einkauf/supplier`.
 - **Befund:** Die alte Liste las `/api/v1/crm/suppliers` (Tabelle `public.einkauf_lieferanten`) und oeffnete die
-  Altmuster-Maske; die native Objektmaske liest `domain_einkauf.lieferanten` ueber den Einkaufsdienst. Liste und
-  Objekt zeigten damit verschiedene Bestaende. Die Zusammenfuehrung beider Tabellen ist eine eigene Datenaufgabe
-  (offen); die Liste folgt jetzt dem Einkaufsdienst.
+  Altmuster-Maske. Diese Tabelle gibt es weder in der frischen noch in der gewachsenen Datenbank; die Liste konnte
+  nie Lieferanten zeigen. Die native Objektmaske liest `domain_einkauf.lieferanten` ueber den Einkaufsdienst; die
+  Liste folgt jetzt dieser Quelle. Offen: `/crm/suppliers` selbst bleibt ein toter Weg.
 - Ratsche: handgebaut 477 -> 476.
+
+## CI-Nachlauf (20.10.2026)
+
+- Reine Oberflaechenaktionen der Listen (Export, Anlage oeffnen) tragen `stubReason` und einen `command`/eine
+  Route wie die Vorbilder im Bestand; Agentenvertrag und Wege-Inventar verlangen das.
+- Die MCP-Karte zaehlt vier neue `local_ui`-Eintraege (Anlage-Navigation der Listen); die Zaehltests pruefen sie
+  einzeln.
 
 ## Sichtung der uebrigen Routen
 

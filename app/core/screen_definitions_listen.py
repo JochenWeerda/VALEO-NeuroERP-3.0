@@ -47,7 +47,14 @@ def _liste(*, screen_id: str, domain: str, title: str, subtitle: str, endpoint: 
 
 #: CSV-Export der Liste mit ihren Spalten (NativeListPage, ohne Serverwirkung).
 _EXPORT = {"key": "export", "label": "CSV-Export", "kind": "secondary", "dangerLevel": "safe", "zone": "header",
-           "localEffect": "download"}
+           "command": "list.exportCsv", "localEffect": "download", "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."}
+
+
+def _neu(label: str, route: str) -> dict[str, Any]:
+    """Anlage oeffnen; Rechte prueft der Anlageweg der Zielmaske."""
+    return {"key": "neu", "label": label, "kind": "primary", "dangerLevel": "safe", "zone": "header",
+            "navigationRoute": route, "localEffect": "navigation",
+            "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."}
 
 
 def build_einkauf_anfragen_liste() -> dict[str, Any]:
@@ -65,8 +72,7 @@ def build_einkauf_anfragen_liste() -> dict[str, Any]:
             {"key": "faelligkeit", "label": "Faellig", "renderKind": "date", "sortable": True, "priority": "tertiary"},
             {"key": "createdAt", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
         ],
-        actions=[{"key": "neu", "label": "Neue Anfrage", "kind": "primary", "dangerLevel": "safe", "zone": "header",
-                  "navigationRoute": "/einkauf/anfrage-erfassung", "localEffect": "navigation"},
+        actions=[_neu("Neue Anfrage", "/einkauf/anfrage-erfassung"),
                  _EXPORT],
         row_actions=[
             {"key": "senden", "label": "Senden", "dangerLevel": "moderate", "permission": "einkauf.anfrage.senden",
@@ -118,8 +124,7 @@ def build_einkauf_angebote_liste() -> dict[str, Any]:
             {"key": "lieferzeit", "label": "Lieferzeit (Tage)", "numeric": True, "priority": "tertiary"},
             {"key": "createdAt", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
         ],
-        actions=[{"key": "neu", "label": "Neues Angebot", "kind": "primary", "dangerLevel": "safe", "zone": "header",
-                  "navigationRoute": "/einkauf/angebot", "localEffect": "navigation"},
+        actions=[_neu("Neues Angebot", "/einkauf/angebot"),
                  _EXPORT],
         row_actions=[
             {"key": "pruefen", "label": "Pruefen", "dangerLevel": "safe", "permission": "einkauf.angebot.review",
@@ -203,8 +208,7 @@ def build_einkauf_auftragsbestaetigungen_liste() -> dict[str, Any]:
             {"key": "lieferant", "label": "Lieferant", "filterable": True, "sortable": True, "priority": "secondary"},
             {"key": "createdAt", "label": "Erfasst", "renderKind": "date", "sortable": True, "priority": "tertiary"},
         ],
-        actions=[{"key": "neu", "label": "AB erfassen", "kind": "primary", "dangerLevel": "safe", "zone": "header",
-                  "navigationRoute": "/einkauf/auftragsbestaetigung/neu", "localEffect": "navigation"},
+        actions=[_neu("AB erfassen", "/einkauf/auftragsbestaetigung/neu"),
                  _EXPORT],
         row_actions=[
             {"key": "pruefen", "label": "Pruefen", "dangerLevel": "safe",
@@ -239,8 +243,7 @@ def build_einkauf_lieferanten_liste() -> dict[str, Any]:
             {"key": "bewertung", "label": "Bewertung", "numeric": True, "sortable": True, "priority": "secondary"},
             {"key": "aktiv", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "secondary"},
         ],
-        actions=[{"key": "neu", "label": "Neuer Lieferant", "kind": "primary", "dangerLevel": "safe", "zone": "header",
-                  "navigationRoute": "/einkauf/lieferant/neu", "localEffect": "navigation"},
+        actions=[_neu("Neuer Lieferant", "/einkauf/lieferant/neu"),
                  _EXPORT],
         row_actions=[],
         purpose="Lieferanten finden und ihre Stammdaten, Bestellungen und Kontakte oeffnen.",

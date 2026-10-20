@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 144,
-    "screens_with_actions": 74,
+    "actions": 149,
+    "screens_with_actions": 75,
     "domains": 14
   },
   "actions": [
@@ -1078,6 +1078,26 @@
       }
     },
     {
+      "id": "mask:einkauf/anfragen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (einkauf/anfragen)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/anfragen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/anfragen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
       "id": "mask:einkauf/anfragen:neu",
       "label": "Neue Anfrage",
       "description": "Neue Anfrage (einkauf/anfragen)",
@@ -1120,6 +1140,26 @@
       }
     },
     {
+      "id": "mask:einkauf/angebote:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (einkauf/angebote)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/angebote",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/angebote",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
       "id": "mask:einkauf/angebote:neu",
       "label": "Neues Angebot",
       "description": "Neues Angebot (einkauf/angebote)",
@@ -1136,6 +1176,26 @@
         "commandEndpoint": null,
         "navigationRoute": "/einkauf/angebot",
         "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:einkauf/anlieferavis-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (einkauf/anlieferavis-liste)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/anlieferavis-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/anlieferavis-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
         "method": null
       }
     },
@@ -1206,6 +1266,26 @@
       }
     },
     {
+      "id": "mask:einkauf/auftragsbestaetigungen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (einkauf/auftragsbestaetigungen)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/auftragsbestaetigungen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/auftragsbestaetigungen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
       "id": "mask:einkauf/auftragsbestaetigungen:neu",
       "label": "AB erfassen",
       "description": "AB erfassen (einkauf/auftragsbestaetigungen)",
@@ -1222,6 +1302,26 @@
         "commandEndpoint": null,
         "navigationRoute": "/einkauf/auftragsbestaetigung/neu",
         "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:einkauf/lieferanten:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (einkauf/lieferanten)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/lieferanten",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/lieferanten",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
         "method": null
       }
     },

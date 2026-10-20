@@ -2134,7 +2134,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
         },
         {
           "key": "export",
@@ -2145,7 +2145,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -2214,7 +2214,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
         },
         {
           "key": "export",
@@ -2225,7 +2225,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -2291,7 +2291,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -2370,7 +2370,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
         },
         {
           "key": "export",
@@ -2381,7 +2381,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -2414,7 +2414,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
         },
         {
           "key": "export",
@@ -2425,7 +2425,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
