@@ -18749,7 +18749,7 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **MANAGER-ROLE-ENFORCEMENT GitHub-Nachweis:** Rollenvertrags-Gate39304043159 auf0d2b9d40b und39305406642 auf403842bec erfolgreich. Katalog, Realmabgleich und Pflicht-/Negativvertraege gruen. Beide parallelen Historien (Codex-Claim29c28d815 und Claudes CRM-/Einkaufs-/Stammdatenlieferung8f28e442d) als Vorfahren von main geprueft. Dies ist keine Aussage ueber Sonar oder saemtliche anderen CI-Workflows und keine Live-Keycloak-Abnahme.
 
-## PERSONAL-FILE-AUTH-PERSISTENCE-20261019 - reserviert, Codex
+## PERSONAL-FILE-AUTH-PERSISTENCE-20261019 - abgeschlossen, Codex
 
 **Owner:** Codex. Nutzerauftrag: verbleibende Sichtbarkeits-/Nebenbefunde auch fremden Ursprungs schliessen. Dateibesitz app/api/v1/endpoints/personal.py ausschliesslich GET employee-files und POST employee-files/documents: vorhandene PERSONAL-Fachrollen aus geprueftem Token, actorRole nur lesender Ansichtsfilter, Schreiburheber aus Token, generische Persistenzfehler; app/services/personal_service.py ausschliesslich Personalakten-Pilotfallback entfernen und fehlgeschlagene Persistenz nicht als Erfolg ausgeben. Bestehende tests/test_personal_employee_file_api.py explizite Identitaetsgrenze und Negativvertraege, neue signierte SQL-/Persistenztests; eigene QA/Workboard und exakt diese API-Projektionen falls erforderlich. Keine neue Rolle oder Selbstservice-/Vorgesetztenbeziehung behaupten; keine neue DB/Container/Reset/Migration. Claudes aktiver Bereichsclaim: keine parallelen Decorator-/Importrollen-Edits anderer Personalwege; nur zwei abgegrenzte Signatur-/Fachkoerper und erforderliche Imports. Godfile-Ratsche personal.py3083 nicht erhoehen.
 
@@ -18763,19 +18763,19 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **PERSONAL-FILE-AUTH-PERSISTENCE weiterer Metadatenabgleich:** Nach Synchronisierung schon committeter Mail-/Mobile-Quellen drei weitere ausschliesslich read_by-Luecken bestaetigt: domain_crm.mail_workspace_attachments, domain_crm.mail_workspace_messages und domain_ops.mobile_event_queue. Diese Nachweise im bestehenden Katalog mit berichtigen; keine Fach-/Fremdcodeaenderung. Der vollstaendige Tabellenkatalog bleibt Gatesoll, nicht nur die neue HR-Zeile.
 
-## COMMITTED-API-INTEGRATION-20261019 - reserviert, Codex
+## COMMITTED-API-INTEGRATION-20261019 - abgeschlossen, Codex
 
 **Owner:** Codex. Nebenbefund: gesamter OpenAPI-Abgleich ist rot; mehrere alte Pruefbaumkopien verdeckten fehlende bereits committete Quellen. Dateibesitz docs/schnittstellen/openapi.json als vollstaendige Projektion von aktuellem HEAD plus explizitem Personalakten-Slice; keine fremden uncommitteten Hauptbaumquellen. Fuer reproduzierbaren Abgleich einmalige wiederverwendbare Quellansicht artifacts/security-integrated-source aus Git-Objekten; keine weiteren DB/Container oder Git-Worktrees. Die14 geschuetzten alten Dateien im bisherigen ci-closure-canonical werden nicht ueberschrieben. Alle neuen Quellen aus HEAD, nur eigene Personalakten-Dateien ueberlagert. Vor jeder Commit-Integration parallelen HEAD erneut pruefen, fremde Lieferungen erhalten.
 
-## ROLE-PROVIDER-ROLLOUT-20261019 - reserviert, Codex
+## ROLE-PROVIDER-ROLLOUT-20261019 - abgeschlossen, Codex
 
 **Owner:** Codex. Nutzerauftrag weiter einschliesslich Rollen-/Scope-Rollout. Lesende lokale Abnahme: manager noch in beiden Belegscope-Mappings,17 Rollenbeschreibungen veraltet. Dateibesitz scripts/provision_identity_provider.py ausschliesslich kanonische Rollenbeschreibung aus bestehendem Katalog und verifizierte Beschreibungsaktualisierung (Identitaet/Attribute/Composites/Zuweisungen erhalten); config/keycloak/fachrollen.json ausschliesslich manager-Kurzbeschreibung als inaktiv; realm-export.json/realm-staging.json ausschliesslich vorhandene Rollenbeschreibungen, keine Clients/Scopes/Benutzer; tests/test_identity_provider_provisioning.py und neue zielgerichtete Beschreibungsvertraege; eigene QA/Workboard. Lokaler Schritt verwendet vorhandene Adminzugangsdaten nur im Speicher: Beschreibungen aktualisieren, durch bereits abgenommenen Reconciler ausschliesslich manager aus belege:read/write entfernen und exakt zuruecklesen. Keine Benutzer-/Kennwort-/Rollenzuweisung, keine neuen Altrollen, keine Profil-/Realm-/Clientumkonfiguration. Claudes CLI-Client-Region bleibt unangetastet. Keine DB/Container.
 
-## GIT-MAIN-HISTORY-GUARD-20261019 - reserviert, Codex
+## GIT-MAIN-HISTORY-GUARD-20261019 - abgeschlossen, Codex
 
 **Owner:** Codex. Wiederholter Nebenbefund: parallele private Ref-Aktualisierung verdrängte aktuelle Claim-Commits. Beide Historien per Merge erhalten. Dateibesitz neue .husky/reference-transaction (nur nicht-vorwaerts fuehrende Aenderungen von refs/heads/main ablehnen), scripts/install_main_history_guard.py (bestehende Husky-Hooks erhalten, lokaler absoluter Hookpfad auch fuer private GIT_WORK_TREE-Ansichten), tests/test_git_main_history_guard.py, docs/agent-ops/parallel-work-protocol.md nur verpflichtender Vorwaerts-/CAS-Hinweis und Installationsnachweis. Keine globalen Git-Einstellungen, keine fremden Hooks ueberschreiben. Abnahme in kleinen temporaeren Git-Repositories: Vorwaerts/Integrationsmerge erlaubt, Ruecksprung/Divergenz/Loeschung von main verweigert, andere Branches unveraendert. Keine DB/Container.
 
-## PARALLEL-MIGRATION-MERGE-20261019 - reserviert, Codex
+## PARALLEL-MIGRATION-MERGE-20261019 - abgeschlossen, Codex
 
 **Owner:** Codex. Neue committete Steuermigration tax_account_category_20261019 und eigene bereits gepruefte HR-Migration teilen harvest_rule_store_20261015 als Eltern. Dateibesitz neuer alembic/versions/merge_hr_tax_20261019.py, zugehoeriger DAG-Vertrag und Migrationsinventar. Bestehende Migrationen nicht umschreiben; additiver Mergekopf ohne eigenes Schema-DML, beide Zweige ausfuehren. Vor Anwendung auf bestehendem valeo_probe Nutzung pruefen; nur ausstehende Steuermigration plus Merge, kein Reset/neue DB. Claudes Steuerkategorienreparatur und alle anderen aktuellen Lieferungen bleiben erhalten.
 
@@ -18802,3 +18802,6 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 
 **Integrationsnachlauf20.10.:** Zusaetzliche parallele Qualitaetslieferung570d92fd4 ohne Inhaltskonflikt aufgenommen. Vorige Integration a6e4b2cf8 hatte356 Dateien samt regulaeren Guards bestanden; beide Codex-Meilensteine und saemtliche fremden Vorfahren erhalten.
+
+
+**Finale Integrationsabnahme20.10.:** 72e21039e nach main gepusht; remote identisch,570d92fd4 und900cd7309 als Vorfahren geprueft. Nach beiden parallelen Integrationen nochmals60 Personalaktenfaelle bestanden, alle app-Module nachweislich aus diesem Git-Stand. Gesamte erzeugte OpenAPI inhaltlich identisch zum Commit.36 Providervertraege/36 Unterfaelle, drei Git-Guard-Vertraege und ein Migrations-DAG-Vertrag bestanden. Rollenvertrags-CI auf72e21039e erfolgreich; andere GitHub-Suiten zum Abnahmezeitpunkt noch laufend/wartend. Nicht geschlossen: neun physische Katalogabweichungen, alte AP-Freigabewege, Backenddeployment und acht bestehende Dependabot-Meldungen; keine pauschale CI-/Sicherheitsfreigabe.
