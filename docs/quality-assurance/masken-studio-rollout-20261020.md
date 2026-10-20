@@ -194,8 +194,14 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 - `annahme/lkw-registrierung`, `verladung/lkw-beladung`: erfundene Artikel; in der Registrierung mit dem Namen als
   Artikelkennung.
 - Alle entfernt; Auswahlen zeigen nur echte Eintraege, die Rueckverfolgung einen Leerzustand.
+- `lib/api/betrieb.ts`: 30 Abfragen starteten mit erfundenen Daten als `initialData` (Bankkonten mit Salden,
+  Cross-Compliance-Stand, Sachkunde- und VVVO-Register, Zertifikate, Wiegungen …); das Management-Dashboard zeigte
+  erfundene Kennzahlen („Umsatz MTD 1.85M“, „Liquiditaet 785K“) und Top-Kunden mit Umsaetzen. Bis zur Antwort und
+  bei Fehlern dauerhaft. Jetzt leer.
+- Dashboard-KPI-Widget: bei ausbleibenden Kennzahlen erfundene Werte („€ 129.200“); jetzt „–“.
 - Waechter `src/__tests__/security/keine-scheindaten.test.ts`: keine Ersatzlisten `FALLBACK_/MOCK_/DUMMY_/SAMPLE_/FAKE_`
-  in Seiten, Features, Bibliotheken und Komponenten (ausdrueckliche Vorfuehrungen `DEMO_` bleiben).
+  in Seiten, Features, Bibliotheken und Komponenten, auch kleingeschriebene Ersatzobjekte (`fb`, `fallback…`,
+  `mock…`); ausdrueckliche Vorfuehrungen `DEMO_` bleiben.
 
 ## Welle 1, Schritt 11 (20.10.2026): CRM-Marketing und DSGVO-Anfragen
 
