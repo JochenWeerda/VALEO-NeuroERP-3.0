@@ -19,7 +19,7 @@ import os
 import sys
 import time
 import uuid
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 from typing import Any, Callable
 
 import httpx
@@ -276,6 +276,13 @@ def parser() -> argparse.ArgumentParser:
     login.add_argument("--kein-browser", action="store_true", help="Browser nicht automatisch oeffnen")
     sub.add_parser("abmelden", help="Sitzung beenden")
     sub.add_parser("status", help="Angemeldete Identitaet anzeigen")
+    d = sub.add_parser("daten", help="Deklarierte Maskendaten mit denselben Fachrechten lesen")
+    d.add_argument("maske")
+    d.add_argument("quelle", help="Datenquellenschluessel aus der ScreenDefinition")
+    d.add_argument("--id", help="Objektkennung fuer eine Detailquelle")
+    d.add_argument("--seite", type=int, default=1)
+    d.add_argument("--limit", type=int, default=50)
+    d.add_argument("--suche")
     a = sub.add_parser("aktionen", help="Aktionen einer Maske")
     a.add_argument("maske")
     z = sub.add_parser("zeigen", help="Vertrag einer Aktion")
@@ -328,6 +335,17 @@ def main(argv: list[str] | None = None, *, http: httpx.Client | None = None, out
         if args.befehl == "status":
             return cmd_status(args, http, settings, out)
         token = auth.access_token(http, settings)
+        if args.befehl == "daten":
+            if not 1 <= args.seite <= 1000000 or not 1 <= args.limit <= 100:
+                raise UsageError("Seite muss 1..1000000 und Limit 1..100 sein.")
+            params = {"page": args.seite, "limit": args.limit}
+            if args.id is not None:
+                params["entity_id"] = args.id
+            if args.suche is not None:
+                params["q"] = args.suche
+            path = f"/api/v1/masks/{quote(args.maske, safe='')}/data/{quote(args.quelle, safe='')}?" + urlencode(params)
+            out(json.dumps(_request(http, token, "GET", path), ensure_ascii=False, indent=2))
+            return 0
         if args.befehl == "studio":
             return studio.run(args, lambda method, path, body=None: _request(http, token, method, path, body), out, stdin)
         if args.befehl == "aktionen":

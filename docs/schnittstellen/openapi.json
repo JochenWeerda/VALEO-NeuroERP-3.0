@@ -103732,6 +103732,48 @@
         "title": "MaskClass",
         "type": "string"
       },
+      "MaskDataReadOut": {
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "items": {},
+                "type": "array"
+              }
+            ],
+            "title": "Data"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "screen_id": {
+            "title": "Screen Id",
+            "type": "string"
+          },
+          "source_key": {
+            "title": "Source Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "screen_id",
+          "source_key",
+          "page",
+          "limit",
+          "data"
+        ],
+        "title": "MaskDataReadOut",
+        "type": "object"
+      },
       "MaskDomain": {
         "enum": [
           "finance",
@@ -347335,6 +347377,137 @@
           }
         ],
         "summary": "AgentMaskContract abrufen",
+        "tags": [
+          "ui",
+          "masks",
+          "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/masks/{mask_id}/data/{source_key}": {
+      "get": {
+        "operationId": "get_mask_source_data_api_v1_masks__mask_id__data__source_key__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "mask_id",
+            "required": true,
+            "schema": {
+              "title": "Mask Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "source_key",
+            "required": true,
+            "schema": {
+              "title": "Source Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "maximum": 1000000,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskDataReadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Deklarierte Maskendaten mit Fachrechten des Aufrufers lesen",
         "tags": [
           "ui",
           "masks",

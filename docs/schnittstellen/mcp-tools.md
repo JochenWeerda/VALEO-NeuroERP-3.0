@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 63 Tools in 20 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 64 Tools in 20 Domaenen.
 
 ## Uebersicht
 
@@ -67,6 +67,7 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 63 Tools in 20 Domaenen.
 | `logistik.tour.anlegen` | logistics | `logistics:write` | ja | mittel | nein |
 | `mask.action.execute` | masks | `masks:write` | ja | mittel | nein |
 | `mask.actions.list` | masks | `masks:read` | ja | niedrig | nein |
+| `mask.data.read` | masks | `masks:read` | ja | niedrig | nein |
 | `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein |
 | `planung.calendar.reproject` | planung | `planung:write` | ja | mittel | nein |
 | `produktion.control.sync` | produktion | `ops:write` | ja | mittel | nein |
@@ -3042,6 +3043,89 @@ Liest die Aktionen einer Maske aus der mandantengenauen ScreenDefinition, mit Ei
     },
     "actions": {
       "type": "array"
+    }
+  }
+}
+```
+
+### `mask.data.read` — Maskendaten lesen
+
+Liest eine deklarierte GET-Datenquelle derselben mandantengenauen Maske wie Human-UI und CLI. Fachrollen und Objektzugriff prueft der Ziel-Endpunkt erneut mit dem Token des Aufrufers; keine freie URL oder Mandantenangabe.
+
+- **Scope:** `masks:read`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** read
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "source_key": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "page": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "q": {
+      "type": "string",
+      "nullable": true,
+      "maxLength": 200
+    }
+  },
+  "required": [
+    "screen_id",
+    "source_key"
+  ]
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "screen_id": {
+      "type": "string"
+    },
+    "source_key": {
+      "type": "string"
+    },
+    "page": {
+      "type": "integer"
+    },
+    "limit": {
+      "type": "integer"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "array"
+        }
+      ]
     }
   }
 }

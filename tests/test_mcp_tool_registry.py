@@ -57,8 +57,13 @@ def test_summary_structure(svc: McpToolRegistryService) -> None:
     assert summary["validation_errors"] == []
 
 
-def test_registry_has_63_supported_tools(svc: McpToolRegistryService) -> None:
-    assert len(svc.list_tools()) == 63  # AP review is human-only; its old unbound MCP write was removed.
+def test_generic_mask_read_and_write_tools_keep_their_boundaries(svc: McpToolRegistryService) -> None:
+    ids = {tool["tool_id"] for tool in svc.list_tools()}
+    assert {"mask.actions.list", "mask.action.execute", "mask.data.read"} <= ids
+    assert "finance.ap_invoice.freigeben" not in ids
+    tool = svc.get_tool("mask.data.read")
+    assert tool["scope"] == "masks:read" and tool["audit"] == "read"
+    assert tool["input_schema"]["additionalProperties"] is False
 
 
 def test_bonus_and_query_import_writes_are_catalogued(svc: McpToolRegistryService) -> None:

@@ -371,3 +371,12 @@ Human-, CLI- und MCP-Bedienung mit identischen Fachrechten und Mandantengrenzen
 ist gemaess STUDIO-CHANNEL-001 Pflicht. Der neue Planer weist fehlende Nachweise
 als Blocker aus. Dieser Backend-/CLI-Meilenstein aendert keine Darstellung und
 behauptet keine neue visuelle oder allgemeine Dreikanal-Releaseabnahme.
+
+
+## Gemeinsamer Datenlesevertrag (20.10.2026)
+
+Native und Studio-Definitionen dienen nun auch dem generischen CLI-/MCP-
+Datenleseweg als fuehrende Quellenbindung. Das fuehrt kein zweites Layout oder
+handgebaute Ersatzmasken ein. Lokale Tabellenprojektionen bleiben in der
+Meridian-Laufzeit, bis deren zentrale Dreikanalgleichheit separat abgenommen ist.
+Ein bestandener Domain-Lesetest allein ist kein visueller Readinessnachweis.

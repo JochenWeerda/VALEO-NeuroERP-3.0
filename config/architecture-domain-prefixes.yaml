@@ -611,6 +611,7 @@ exact_service_stems:
   studio_propose: platform
   studio_semantic: platform
   studio_semantic_model: platform
+  mask_data_read: platform
   studio_migration: platform
   studio_native_import: platform
   studio_history_view: platform

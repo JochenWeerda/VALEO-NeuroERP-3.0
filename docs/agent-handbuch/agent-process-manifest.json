@@ -6748,6 +6748,15 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
+      "tool_id": "mask.data.read",
+      "domain": "masks",
+      "scope": "masks:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
       "tool_id": "mask.action.execute",
       "domain": "masks",
       "scope": "masks:write",

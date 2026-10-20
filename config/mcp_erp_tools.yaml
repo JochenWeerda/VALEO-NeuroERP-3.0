@@ -1666,6 +1666,40 @@ tools:
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false
 
+  - tool_id: mask.data.read
+    domain: masks
+    name: "Maskendaten lesen"
+    description: "Liest eine deklarierte GET-Datenquelle derselben mandantengenauen Maske wie Human-UI und CLI. Fachrollen und Objektzugriff prueft der Ziel-Endpunkt erneut mit dem Token des Aufrufers; keine freie URL oder Mandantenangabe."
+    scope: masks:read
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    input_schema:
+      type: object
+      additionalProperties: false
+      properties:
+        screen_id: { type: string }
+        source_key: { type: string }
+        entity_id: { type: string, nullable: true }
+        page: { type: integer, minimum: 1, maximum: 1000000 }
+        limit: { type: integer, minimum: 1, maximum: 100 }
+        q: { type: string, nullable: true, maxLength: 200 }
+      required: [screen_id, source_key]
+    output_schema:
+      type: object
+      properties:
+        screen_id: { type: string }
+        source_key: { type: string }
+        page: { type: integer }
+        limit: { type: integer }
+        data:
+          oneOf:
+            - { type: object }
+            - { type: array }
+    audit: read
+    endpoint: "POST /api/v1/mcp/tools/call"
+    human_approval_required: false
+
   - tool_id: mask.action.execute
     domain: masks
     name: "Maskenaktion ausfuehren"

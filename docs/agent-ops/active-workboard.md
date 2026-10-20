@@ -18980,7 +18980,7 @@ nur erzeugten Alembic-String ist ausserdem kein laufender Tabellenlesezugriff.
 Keine physische Tabelle/Spalte wurde fuer diesen Planer dauerhaft geaendert.
 
 
-## STUDIO-MULTICHANNEL-READ-20261020 - reserviert, Codex
+## STUDIO-MULTICHANNEL-READ-20261020 - abgeschlossen, Codex
 
 Owner Codex. Fortsetzung des vollstaendigen Studio-Ziels: neue Masken muessen
 Daten und Aktionen ueber Human/CLI/MCP mit identischen Fachrechten und
@@ -18997,3 +18997,18 @@ keine Aufruferidentitaet aus Query/Payload, nur deklarierte lokale GET-Quellen,
 Bounded Paging, unbekannte Quellen/SSRF/Redirect/Stubantworten sperren.
 Gemeinsamer valeo_probe, eigene Rollbackdaten, kein Reset/neue DB/Container.
 Kein Eingriff in Claudes Seiten-/Builderbesitz; keine neuen Schreibfreigaben.
+
+
+**STUDIO-MULTICHANNEL-READ Abnahme:**100 Faelle gruen. Echte signierte
+Dreikanal-AP-Lesevertraege mit SQL/Domainroute/Rollen-/Zwei-Mandanten-404/403,
+Selector-/Tokennegativfaellen; alle eigenen Daten zurueckgerollt. REST async,
+CLI daten und mask.data.read verwenden denselben Resolver; nur Aufrufertoken,
+keine neuen Rollen/Writes. Antworten2MiB, kein Redirect/Stub oder fremder Weg.
+64 registrierte Tools; Katalogueberpruefung semantisch statt alter Gesamtzahl.
+Brittle Registrytest-Besitz um diese eine Erwartung erweitert. Kanonischer
+Tabellenkatalog exakt erhalten, Claudes Artikel-/Kundenmasken bis ef0b5b51c
+integriert. Kein allgemeines Qualitaetssiegel oder Live-Rollout behauptet.
+Offen: per-Version-Publikationsnachweise, gleichwertige Tabellenprojektionen und
+Paging-Aliasse sowie Fachketten fuer alle weiteren Quellen. Gesamtclaim
+STUDIO-MIGRATION-ENGINE bleibt in Arbeit. QA:
+docs/quality-assurance/studio-multichannel-read-20261020.md.

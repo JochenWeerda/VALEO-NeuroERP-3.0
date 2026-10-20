@@ -81,3 +81,29 @@ Alembic-Quelle samt Hash. CLI: `python -m valeo_cli studio migrationsentwurf
 auftrag.json --ausgabe plan.json`. Die Planung schreibt weder Tabellen noch
 Fachdaten und aktiviert keine Commands. Sie ist im vorhandenen Studio-Katalog
 entdeckbar; Rechte werden durch die Ausgabe nicht erweitert.
+
+
+## Gemeinsame Maskendaten (20.10.2026)
+
+`GET /api/v1/masks/{mask_id}/data/{source_key}` liest ausschliesslich die genau
+benannte, deklarierte lokale GET-Quelle der mandantengenauen ScreenDefinition.
+Optional: entity_id, page (1..1000000), limit (1..100), q (max200 Zeichen).
+CLI: `python -m valeo_cli daten finance/ap-invoice entity --id BELEGKENNUNG`.
+MCP: `mask.data.read` mit demselben screen_id/source_key/entity_id-Vertrag und
+vorhandenem Transport-Scope masks:read.
+
+Beide Adapter verwenden denselben Quellenresolver und dieselbe sichere
+Antwortpruefung. Der REST-Adapter arbeitet asynchron; MCP delegiert synchron an
+denselben Fach-Endpunkt. Ausschliesslich der Bearer-Token des Aufrufers geht
+weiter, kein frei waehlbarer Mandantenheader und kein technischer Superuser.
+Der Fach-Endpunkt prueft Token, Rollen, Datensatz und Mandant erneut; sein
+Status401/403/404 bleibt erhalten. masks:read ist kein Fachleserecht.
+
+Nicht aufloesbare/mehrdeutige Quellen, freie URLs, Pfadnavigation, unbekannte
+Kontextvariablen, POST-Quellen, Redirects, Nicht-JSON, doppelte JSON-Felder,
+nichtendliche Zahlen, Stubantworten und Antworten ueber2MiB scheitern geschlossen.
+Feste Mehrfachfilter bleiben erhalten. Diese Schnittstelle liefert die
+Domain-Antwort; Browserprojektionen fuer lokale Tabellenfilter/-sortierung und
+API-spezifische Paging-Aliasse muessen im weiteren Dreikanalvertrag noch
+vereinheitlicht werden. Der neue Weg bescheinigt noch keine vollständige
+Abnahme aller Quellen oder Tabellenfunktionen.

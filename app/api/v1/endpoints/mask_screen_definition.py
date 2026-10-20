@@ -5,8 +5,12 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header, Query, Request
 
+from pydantic import ValidationError
+from app.auth.deps import get_current_user
+from app.api.v1.schemas.mask_data_contracts import MaskDataReadIn, MaskDataReadOut
+from app.services import mask_data_read
 from ....core.screen_definitions import get_screen_definition
 from ....core.tenant import get_tenant_id
 from app.api.v1.schemas.base import TypedObjectOut
@@ -680,3 +684,23 @@ async def get_mask_tab_stub(
         "_entity_id": entity_id,
         "_tab_key": tab_key,
     }
+
+
+@router.get("/{mask_id:path}/data/{source_key}", response_model=MaskDataReadOut,
+            summary="Deklarierte Maskendaten mit Fachrechten des Aufrufers lesen")
+async def get_mask_source_data(request: Request, mask_id: str, source_key: str,
+                               entity_id: str | None = None,
+                               page: int = Query(1, ge=1, le=1000000),
+                               limit: int = Query(50, ge=1, le=100),
+                               q: str | None = Query(None, max_length=200),
+                               authorization: str | None = Header(None),
+                               tenant_id: str = Depends(get_tenant_id),
+                               user: dict = Depends(get_current_user)) -> MaskDataReadOut:
+    if set(request.query_params) - {"entity_id", "page", "limit", "q"}:
+        raise HTTPException(422, "Unbekannter Parameter im Maskendatenabruf")
+    try:
+        body = MaskDataReadIn(screen_id=_normalize_mask_id(mask_id), source_key=source_key,
+                              entity_id=entity_id, page=page, limit=limit, q=q)
+    except ValidationError as error:
+        raise HTTPException(422, "Ungueltiger Maskendatenauftrag") from error
+    return await mask_data_read.read_async(body, tenant_id, authorization)

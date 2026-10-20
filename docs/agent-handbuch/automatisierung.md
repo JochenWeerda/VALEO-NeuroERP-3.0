@@ -78,6 +78,7 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `logistik.tour.anlegen` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `mask.action.execute` | masks | `masks:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `mask.actions.list` | masks | `masks:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `mask.data.read` | masks | `masks:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `planung.calendar.reproject` | planung | `planung:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `produktion.control.sync` | produktion | `ops:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |

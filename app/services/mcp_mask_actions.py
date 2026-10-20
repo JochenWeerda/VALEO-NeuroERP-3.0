@@ -22,7 +22,7 @@ import httpx
 import yaml
 from fastapi import HTTPException
 
-TOOLS = {"mask.actions.list", "mask.action.execute"}
+TOOLS = {"mask.actions.list", "mask.action.execute", "mask.data.read"}
 _PLACEHOLDER = re.compile(r"\{[^}]+\}")
 _GENERIC_PARAMETERS = {"{entity_id}", "{screen_id}"}
 _DOCFLOW = re.compile(r"^/api/v1/docflow(?:/|$)")
@@ -204,3 +204,24 @@ def execute(request: Any, tenant: str, authorization: str | None, *, transport: 
         raise HTTPException(response.status_code, detail if isinstance(detail, str) else "Aktion abgelehnt")
     return {"success": not (isinstance(data, dict) and data.get("success") is False), "screen_id": definition["id"],
             "action": action["key"], "mode": request.mode, "result": data}
+
+
+
+def read_source(parameters: dict[str, Any], tenant: str, authorization: str | None) -> dict:
+    from pydantic import ValidationError
+    from app.api.v1.schemas.mask_data_contracts import MaskDataReadIn
+    from app.services.mask_data_read import read_sync
+    try:
+        body = MaskDataReadIn.model_validate(parameters)
+    except ValidationError as error:
+        raise HTTPException(422, "Ungueltiger Maskendatenauftrag") from error
+    return read_sync(body, tenant, authorization).model_dump()
+
+
+
+def dispatch(request: Any, tenant: str, authorization: str | None) -> dict:
+    if request.tool_name == "mask.actions.list":
+        return list_actions(request.parameters, tenant)
+    if request.tool_name == "mask.data.read":
+        return read_source(request.parameters, tenant, authorization)
+    return execute(request, tenant, authorization)
