@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 201,
-    "screens_with_actions": 102,
+    "actions": 203,
+    "screens_with_actions": 103,
     "domains": 17
   },
   "actions": [
@@ -2348,6 +2348,46 @@
         "commandEndpoint": "/api/v1/finance/tax-keys/actions/speichern",
         "navigationRoute": null,
         "command": "finance.steuerschluesselSpeichern",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:finance/wechselkurse:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (finance/wechselkurse)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/wechselkurse",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/wechselkurse",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:finance/wechselkurse:neu",
+      "label": "Kurs erfassen",
+      "description": "Kurs erfassen (finance/wechselkurse)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/wechselkurse",
+      "intent_phrases": [
+        "Kurs erfassen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/wechselkurse",
+        "actionKey": "neu",
+        "commandEndpoint": "/api/v1/finance/exchange-rates",
+        "navigationRoute": null,
+        "command": null,
         "method": "POST"
       }
     },

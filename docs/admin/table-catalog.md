@@ -298,7 +298,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_erp.drucker` | `app/services/etikettendruck_service.py` | — | — |
 | `domain_erp.dunning_notices` | `app/api/v1/endpoints/dunning.py`, `app/api/v1/endpoints/export_service.py`, `app/services/finance_dunning_service.py`, `app/services/mcp_execution_service.py` | `app/api/v1/endpoints/dunning.py`, `app/services/finance_dunning_service.py` | — |
 | `domain_erp.dunning_rules` | `app/api/v1/endpoints/dunning.py`, `app/services/finance_dunning_service.py`, `app/services/scheduler_service.py` | `app/api/v1/endpoints/dunning.py` | — |
-| `domain_erp.exchange_rates` | `app/api/v1/endpoints/exchange_rates.py` | `app/api/v1/endpoints/exchange_rates.py` | — |
+| `domain_erp.exchange_rates` | `app/api/v1/endpoints/exchange_rates.py`, `app/api/v1/endpoints/finance_stammdaten_kommandos.py` | `app/api/v1/endpoints/exchange_rates.py`, `app/api/v1/endpoints/finance_stammdaten_kommandos.py` | — |
 | `domain_erp.fibu_connector_profiles` | `app/api/v1/endpoints/fibu_connectors.py`, `app/core/connectors/workflow.py` | `app/api/v1/endpoints/fibu_connectors.py` | — |
 | `domain_erp.fibu_connector_run_items` | `app/api/v1/endpoints/fibu_connectors.py`, `app/core/connectors/workflow.py` | `app/core/connectors/workflow.py` | — |
 | `domain_erp.fibu_connector_runs` | `app/api/v1/endpoints/fibu_connectors.py`, `app/core/connectors/workflow.py` | `app/core/connectors/workflow.py` | — |

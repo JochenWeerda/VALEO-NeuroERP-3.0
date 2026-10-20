@@ -942,6 +942,29 @@
         ]
       ]
     },
+    "finance/wechselkurse": {
+      "finance.wechselkurs.create": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.wechselkurs.deaktivieren": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.wechselkurs.aktivieren": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "fuhrpark/ausgehende-dokumente": {
       "logistics:write": [
         [

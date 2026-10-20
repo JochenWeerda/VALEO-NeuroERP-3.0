@@ -201,6 +201,9 @@
   "mask:finance/rechnungstapel:retry",
   "mask:finance/rechnungstapel:validate",
   "mask:finance/steuerschluessel:speichern",
+  "mask:finance/wechselkurse:aktivieren",
+  "mask:finance/wechselkurse:deaktivieren",
+  "mask:finance/wechselkurse:neu",
   "mask:fuhrpark/ausgehende-dokumente:loeschen",
   "mask:fuhrpark/ausgehende-dokumente:speichern",
   "mask:fuhrpark/fahrzeug-stamm:drucker",
@@ -275,6 +278,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 149
+  "kein_endpunkt": 150
  }
 }

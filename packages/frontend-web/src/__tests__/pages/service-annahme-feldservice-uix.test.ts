@@ -887,11 +887,12 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  it('stellt Wechselkurse Loeschen beschriftet', () => {
+  it('stellt Wechselkurse als Studio-Liste dar', () => {
+    // Seit 20.10.2026 ScreenDefinition finance/wechselkurse; "Loeschen" rief einen nie vorhandenen Weg und ist durch
+    // Deaktivieren/Aktivieren mit Begruendung ersetzt.
     const src = read('../../pages/finance/wechselkurse.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('Löschen')
-    expect(src).not.toContain('size="sm"')
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="finance/wechselkurse"')
   })
 
   it('stellt Sachkonto Aktualisieren beschriftet', () => {

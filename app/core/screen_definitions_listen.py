@@ -1006,6 +1006,53 @@ def build_personal_stundenzettel_liste() -> dict[str, Any]:
     )
 
 
+def build_finance_wechselkurse_liste() -> dict[str, Any]:
+    """Wechselkurse je Waehrungspaar und Stichtag; anlegen, deaktivieren und aktivieren mit Begruendung."""
+    pfad = "/api/v1/finance/exchange-rates/{entity_id}/actions/"
+    aktiv = {"field": "active", "values": [True]}
+    inaktiv = {"field": "active", "values": [False]}
+    return _liste(
+        screen_id="finance/wechselkurse", domain="finance", title="Wechselkurse",
+        subtitle="Kurse je Waehrungspaar und Stichtag", endpoint="/api/v1/finance/exchange-rates?active_only=false",
+        row_route=None, bundle="finance",
+        columns=[
+            {"key": "from_currency", "label": "Von", "filterable": True, "sortable": True, "priority": "primary"},
+            {"key": "to_currency", "label": "Nach", "filterable": True, "sortable": True, "priority": "primary"},
+            {"key": "rate", "label": "Kurs", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "rate_date", "label": "Stichtag", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "rate_type", "label": "Kursart", "filterable": True, "priority": "secondary"},
+            {"key": "source", "label": "Quelle", "filterable": True, "priority": "secondary"},
+            {"key": "active", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[
+            {"key": "neu", "label": "Kurs erfassen", "kind": "primary", "dangerLevel": "safe", "zone": "header",
+             "permission": "finance.wechselkurs.create", "commandEndpoint": "/api/v1/finance/exchange-rates",
+             "method": "POST", "inputFields": [
+                 {"key": "from_currency", "label": "Von (ISO)", "type": "text", "required": True},
+                 {"key": "to_currency", "label": "Nach (ISO)", "type": "text", "required": True},
+                 {"key": "rate", "label": "Kurs", "type": "number", "required": True},
+                 {"key": "rate_date", "label": "Stichtag", "type": "date", "required": True},
+                 {"key": "rate_type", "label": "Kursart", "type": "select", "options": [
+                     {"value": "SPOT", "label": "Tageskurs"}, {"value": "AVERAGE", "label": "Durchschnitt"},
+                     {"value": "FORWARD", "label": "Terminkurs"}]},
+                 {"key": "source", "label": "Quelle", "type": "text"},
+             ]},
+            _EXPORT,
+        ],
+        row_actions=[
+            {"key": "deaktivieren", "label": "Deaktivieren", "dangerLevel": "moderate",
+             "permission": "finance.wechselkurs.deaktivieren", "commandEndpoint": pfad + "deaktivieren",
+             "method": "POST", "requiresConfirmation": True, "auditReasonRequired": True, "visibleWhen": aktiv},
+            {"key": "aktivieren", "label": "Aktivieren", "dangerLevel": "safe",
+             "permission": "finance.wechselkurs.aktivieren", "commandEndpoint": pfad + "aktivieren",
+             "method": "POST", "requiresConfirmation": True, "auditReasonRequired": True, "visibleWhen": inaktiv},
+        ],
+        purpose="Wechselkurse fuer Fremdwaehrungsbelege pflegen und nachweisen.",
+        prompts=["Welcher USD-Kurs galt am Monatsende?", "Welche Kurse sind deaktiviert?"],
+        no_workflow="Kurse sind Referenzdaten ohne eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -1027,6 +1074,7 @@ LISTEN_SCREEN_BUILDERS = {
     "crm/opportunities-liste": build_crm_opportunities_liste,
     "agrar/psm-liste": build_agrar_psm_liste,
     "artikel/liste": build_artikel_liste,
+    "finance/wechselkurse": build_finance_wechselkurse_liste,
     "charge/liste": build_chargen_liste,
     "personal/mitarbeiter-liste": build_personal_mitarbeiter_liste,
     "versicherungen/liste": build_versicherungen_liste,
@@ -1058,6 +1106,7 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "crm/opportunities-liste": "/crm/opportunities",
                 "agrar/psm-liste": "/agrar/psm",
                 "artikel/liste": "/artikel",
+                "finance/wechselkurse": "/finance/wechselkurse",
                 "charge/liste": "/charge/liste",
                 "personal/mitarbeiter-liste": "/personal/mitarbeiter",
                 "versicherungen/liste": "/versicherungen",

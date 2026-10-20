@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (140 Masken).
+> Generiert aus `app/core/screen_definitions.py` (141 Masken).
 
 ## Übersicht
 
@@ -90,6 +90,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/pruefkorb` | Prüfkorb | finance | niedrig | — | `GET /api/v1/masks/finance/pruefkorb/agent-contract` |
 | `finance/rechnungstapel` | Rechnungstapel | finance | niedrig | — | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
 | `finance/steuerschluessel` | Steuerschlüssel | finance | mittel | — | `GET /api/v1/masks/finance/steuerschluessel/agent-contract` |
+| `finance/wechselkurse` | Wechselkurse | finance | niedrig | — | `GET /api/v1/masks/finance/wechselkurse/agent-contract` |
 | `foerderung/liste` | Foerderantraege | agrar | niedrig | — | `GET /api/v1/masks/foerderung/liste/agent-contract` |
 | `fuhrpark/ausgehende-dokumente` | Ausgehende Belege | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/ausgehende-dokumente/agent-contract` |
 | `fuhrpark/fahrzeug-stamm` | Fahrzeug-Stamm | logistics | hoch | — | `GET /api/v1/masks/fuhrpark/fahrzeug-stamm/agent-contract` |
@@ -2923,6 +2924,42 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `speichern` | Steuerschlüssel speichern | moderate | ja | `/api/v1/finance/tax-keys/actions/speichern` |
 | `neu` | Neuer Steuerschlüssel | safe | nein | `Leert die Eingabe fuer einen neuen Steuerschluessel.` |
+
+---
+
+### `finance/wechselkurse` — Wechselkurse
+
+**Zweck:** Wechselkurse fuer Fremdwaehrungsbelege pflegen und nachweisen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/finance/wechselkurse/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/finance/wechselkurse/agent-contract` |
+| Readiness | `GET /api/v1/masks/finance/wechselkurse/readiness` |
+| Rollout-Route | `/mask-rollout/finance__wechselkurse/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/finance/exchange-rates?active_only=false`
+
+**MCP-Tools (Domäne):**
+
+- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welcher USD-Kurs galt am Monatsende?
+- Welche Kurse sind deaktiviert?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Kurs erfassen | safe | nein | `/api/v1/finance/exchange-rates` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

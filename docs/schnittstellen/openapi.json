@@ -302856,18 +302856,6 @@
               "title": "Active Only",
               "type": "boolean"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -302912,20 +302900,6 @@
       "post": {
         "description": "Create a new exchange rate.",
         "operationId": "create_exchange_rate_api_v1_finance_exchange_rates_post",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -302976,20 +302950,6 @@
       "post": {
         "description": "Convert amount from one currency to another.",
         "operationId": "convert_currency_api_v1_finance_exchange_rates_convert_post",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -303058,18 +303018,6 @@
               "title": "To Currency",
               "type": "string"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -303108,6 +303056,122 @@
         ]
       }
     },
+    "/api/v1/finance/exchange-rates/{entity_id}/actions/aktivieren": {
+      "post": {
+        "operationId": "kurs_aktivieren_api_v1_finance_exchange_rates__entity_id__actions_aktivieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Wechselkurs mit Begruendung aktivieren",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/finance/exchange-rates/{entity_id}/actions/deaktivieren": {
+      "post": {
+        "operationId": "kurs_deaktivieren_api_v1_finance_exchange_rates__entity_id__actions_deaktivieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Wechselkurs mit Begruendung deaktivieren",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/finance/exchange-rates/{rate_id}": {
       "get": {
         "description": "Get a single exchange rate by ID.",
@@ -303119,18 +303183,6 @@
             "required": true,
             "schema": {
               "title": "Rate Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -303180,18 +303232,6 @@
             "required": true,
             "schema": {
               "title": "Rate Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }

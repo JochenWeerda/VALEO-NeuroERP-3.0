@@ -229,6 +229,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `finance.kreditor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.payment_run.approved` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `finance.tax_key.saved` | outbox | `app/api/v1/endpoints/tax_keys.py` |
+| `finance.wechselkurs.aktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
 | `fuhrpark.dokument.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.fahrzeug.deleted` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.fahrzeug.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
@@ -236,8 +237,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `fuhrpark.terminart.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `futtermittel.einzelfutter.stillgelegt` | outbox | `app/api/v1/endpoints/agrar_stammdaten_kommandos.py` |
 | `futtermittel.mischfutter.deaktiviert` | outbox | `app/api/v1/endpoints/agrar_stammdaten_kommandos.py` |
-| `futtermittel.mischfutter.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
-| … | | 23 weitere |
+| … | | 24 weitere |
 
 ### System
 

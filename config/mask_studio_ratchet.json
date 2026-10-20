@@ -239,7 +239,6 @@
   "finance/periods",
   "finance/skonto-optimizer",
   "finance/umsatz",
-  "finance/wechselkurse",
   "finance/zahlungseingang",
   "finanzplanung/liquiditaet",
   "fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug",

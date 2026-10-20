@@ -72,6 +72,7 @@ def aufraeumen(engine):
         v.execute(text("DELETE FROM domain_einkauf.lieferanten WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM einkauf_angebote_positionen WHERE angebot_id IN "
                        "(SELECT id FROM einkauf_angebote WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_erp.exchange_rates WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         for tabelle in ("einkauf_anfragen", "einkauf_angebote", "einkauf_anlieferavis", "domain_crm.crm_action_audit_log", "public.outbox_events"):
             v.execute(text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
 
@@ -476,6 +477,36 @@ def test_debitor_sperren_und_entsperren_mit_grund(engine, client):
     liste = client.get("/api/v1/finance/debitoren", headers={"X-Tenant-ID": HAUS_A}).json()
     assert [(d["id"], d["is_active"]) for d in liste] == [(kennung, False)]
     assert aktion("entsperren", {"_auditReason": "Zahlung eingegangen"}) is True
+
+
+def test_wechselkurse_erfassen_mandantengenau_und_deaktivieren_mit_grund(engine, client):
+    """Erfassen ueber die Kopfaktion der Liste; Mandant aus dem Kontext (vorher Query-Parameter, Standard "system");
+    Deaktivieren und Aktivieren mit Begruendung statt des nie vorhandenen DELETE."""
+    from app.core.screen_definitions import get_screen_definition
+
+    definition = get_screen_definition("finance/wechselkurse")
+    neu = next(a for a in definition["actions"] if a["key"] == "neu")
+    angelegt = client.post(neu["commandEndpoint"], headers={"X-Tenant-ID": HAUS_A}, json={
+        "from_currency": "usd", "to_currency": "EUR", "rate": "0.9234", "rate_date": "2026-10-20",
+        "rate_type": "SPOT", "source": "EZB"})
+    assert angelegt.status_code == 201, angelegt.text
+    kennung = angelegt.json()["id"]
+    liste = definition["dataSources"][0]["endpoint"]
+    assert kennung in {z["id"] for z in client.get(liste, headers={"X-Tenant-ID": HAUS_A}).json()}
+    assert kennung not in {z["id"] for z in client.get(liste, headers={"X-Tenant-ID": HAUS_B}).json()}
+
+    pfad = f"/api/v1/finance/exchange-rates/{kennung}/actions/"
+    assert client.post(pfad + "deaktivieren", headers={"X-Tenant-ID": HAUS_A}, json={}).json()["success"] is False
+    assert client.post(pfad + "deaktivieren", headers={"X-Tenant-ID": HAUS_B},
+                       json={"_auditReason": "fremder Mandant"}).json()["success"] is False
+    assert client.post(pfad + "deaktivieren", headers={"X-Tenant-ID": HAUS_A},
+                       json={"_auditReason": "Kurs falsch erfasst"}).json()["success"] is True
+    with engine.connect() as v:
+        from sqlalchemy import text
+        assert v.execute(text("SELECT active FROM domain_erp.exchange_rates WHERE id::text = :i"),
+                         {"i": kennung}).scalar() is False
+    assert client.post(pfad + "aktivieren", headers={"X-Tenant-ID": HAUS_A},
+                       json={"_auditReason": "doch korrekt"}).json()["success"] is True
 
 
 def test_kreditorenliste_ist_eine_liste_und_oeffnet_die_objektmaske():

@@ -321,6 +321,14 @@ nicht vorhandene Tabelle `einkauf_lieferanten` und ist tot (offen).
 Offen: Unterobjekte (Anschriften, CpD, Rabatte, Chefanweisungen, Bankverbindung) pflegt weiter die handgebaute
 Kundenmaske `/verkauf/kunden-stamm` ("Erweiterte Pflege"); naechster Schritt sind Register mit Zeilenaktionen.
 
+## Wechselkurse als Studio-Liste (20.10.2026)
+
+`finance/wechselkurse` (NativeListPage): Kurs erfassen als Kopfaktion, Deaktivieren/Aktivieren mit Begruendung.
+Befunde: **jede Kursanlage scheiterte mit 500** — `valid_from` ist im Schema NOT NULL und wurde nie gesetzt (frisch
+wie gewachsen); die handgebaute Seite loeschte ueber `DELETE /finance/exchange-rates/{id}`, einen Weg, den es nie gab;
+die Liste meldete jeden Fehler als leere Liste (jetzt 503). Mandant der sechs Wege aus dem Kontext statt Query
+(produktiv war er gebunden, siehe unten).
+
 ## Einordnung: Mandant aus Query/Body (20.10.2026)
 
 208 Wege deklarieren `tenant_id` als Query-Parameter (Standard oft `"system"`), weitere tragen ihn im Body. Das ist
