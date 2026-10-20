@@ -27,6 +27,10 @@ import ast
 import os
 import uuid
 from datetime import date, timedelta
+
+# Geschaeftstag (Europe/Berlin) wie der Code; date.today() ist auf dem Runner UTC und kippte um
+# Mitternacht deutscher Zeit die Erwartung (CI 20./21.10.2026).
+from app.core.business_time import business_today
 from pathlib import Path
 
 import pytest
@@ -159,7 +163,7 @@ def bewerbung_anlegen(
 
     kennung = str(uuid.uuid4())
     entschieden = (
-        None if status in ("EINGANG", "VORAUSWAHL") else date.today() - timedelta(days=tage_her)
+        None if status in ("EINGANG", "VORAUSWAHL") else business_today() - timedelta(days=tage_her)
     )
     with engine.begin() as v:
         v.execute(
@@ -179,7 +183,7 @@ def bewerbung_anlegen(
                 "grund": "Fachlich nicht passend" if status == "ABGELEHNT" else None,
                 "ent": entschieden,
                 "bis": einwilligung_bis,
-                "am": date.today() if einwilligung_bis else None,
+                "am": business_today() if einwilligung_bis else None,
             },
         )
     return kennung
@@ -338,7 +342,7 @@ class TestTrockenlauf:
         assert daten["geprueft"] == 1
         assert daten["wird_geloescht"] == 1
         assert daten["aufbewahrung_tage"] == TAGE
-        assert daten["stichtag"] == (date.today() - timedelta(days=TAGE)).isoformat()
+        assert daten["stichtag"] == (business_today() - timedelta(days=TAGE)).isoformat()
         assert daten["faellige"][0]["wird_geloescht"] is True
         assert daten["faellige"][0]["bleibt_wegen"] is None
 
@@ -365,7 +369,7 @@ class TestTrockenlauf:
         frist_setzen(client, HAUS_A)
         gesperrt = bewerbung_anlegen(engine, HAUS_A)
         sperre_setzen(engine, HAUS_A, gesperrt)
-        bewerbung_anlegen(engine, HAUS_A, einwilligung_bis=date.today() + timedelta(days=90))
+        bewerbung_anlegen(engine, HAUS_A, einwilligung_bis=business_today() + timedelta(days=90))
         daten = client.get(TROCKEN, headers=kopf(HAUS_A)).json()
         gruende = {z["bleibt_wegen"] for z in daten["faellige"]}
         assert gruende == {"LOESCHSPERRE", "EINWILLIGUNG"}
@@ -447,7 +451,7 @@ class TestLauf:
 
     def test_laufende_einwilligung_schuetzt(self, client, engine):
         frist_setzen(client, HAUS_A)
-        bewerbung_anlegen(engine, HAUS_A, einwilligung_bis=date.today() + timedelta(days=90))
+        bewerbung_anlegen(engine, HAUS_A, einwilligung_bis=business_today() + timedelta(days=90))
         daten = client.post(LAUF, json=AUFTRAG, headers=kopf(HAUS_A)).json()
         assert daten["geloescht"] == 0
         assert daten["uebersprungen_einwilligung"] == 1
@@ -455,7 +459,7 @@ class TestLauf:
     def test_abgelaufene_einwilligung_schuetzt_nicht_mehr(self, client, engine):
         # Die Einwilligung hat selbst ein Ende; danach gilt wieder die Frist.
         frist_setzen(client, HAUS_A)
-        bewerbung_anlegen(engine, HAUS_A, einwilligung_bis=date.today() - timedelta(days=1))
+        bewerbung_anlegen(engine, HAUS_A, einwilligung_bis=business_today() - timedelta(days=1))
         assert client.post(LAUF, json=AUFTRAG, headers=kopf(HAUS_A)).json()["geloescht"] == 1
 
     def test_fremde_bewerbungen_bleiben(self, client, engine):
@@ -470,7 +474,7 @@ class TestLauf:
             bewerbung_anlegen(engine, HAUS_A)
         gesperrt = bewerbung_anlegen(engine, HAUS_A)
         sperre_setzen(engine, HAUS_A, gesperrt)
-        bewerbung_anlegen(engine, HAUS_A, einwilligung_bis=date.today() + timedelta(days=5))
+        bewerbung_anlegen(engine, HAUS_A, einwilligung_bis=business_today() + timedelta(days=5))
         bewerbung_anlegen(engine, HAUS_A, status="EINGANG")
         daten = client.post(LAUF, json=AUFTRAG, headers=kopf(HAUS_A)).json()
         assert daten["geprueft"] == 5
@@ -636,7 +640,7 @@ class TestEinwilligung:
 
     def test_bewerbung_zeigt_die_einwilligung(self, client, engine):
         kennung = bewerbung_anlegen(
-            engine, HAUS_A, einwilligung_bis=date.today() + timedelta(days=30)
+            engine, HAUS_A, einwilligung_bis=business_today() + timedelta(days=30)
         )
         antwort = client.get(f"{WEG}/{kennung}", headers=kopf(HAUS_A))
         assert antwort.status_code == 200
