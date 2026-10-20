@@ -18,9 +18,8 @@
 @utility container {
   margin-inline: auto;
   padding-inline: 2rem;
-  @media (width >= 1400px) {
-    max-width: 1400px;
-  }
+  /* Wirkt erst ab 1400px Fensterbreite; darunter ist der Container ohnehin schmaler. */
+  max-width: 1400px;
 }
 
 /* @theme inline: Tailwind referenziert die Runtime-CSS-Tokens (index.css :root,
