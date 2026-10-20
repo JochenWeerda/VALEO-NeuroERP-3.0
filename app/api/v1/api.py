@@ -1942,6 +1942,8 @@ api_router.include_router(import_pipeline.router)
 api_router.include_router(iot_telemetry.router)
 api_router.include_router(mask_registry.router)
 api_router.include_router(mask_actions.router)
+from app.api.v1.endpoints import stammdaten_bearbeiten  # noqa: E402  # Bearbeiten der Objektmasken
+api_router.include_router(stammdaten_bearbeiten.router)
 api_router.include_router(mask_rollout_summaries.router)
 api_router.include_router(mask_screen_definition.router)
 api_router.include_router(studio_drafts.router)

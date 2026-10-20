@@ -1,0 +1,759 @@
+{
+  "schemaVersion": 1,
+  "source": "require_roles der Kommandowege (scripts/generate_action_permission_projection.py)",
+  "screens": {
+    "admin/identity-budgets": {
+      "identity:quota:allocate": [
+        [
+          "admin"
+        ]
+      ]
+    },
+    "admin/postfaecher": {
+      "admin.postfach.write": [
+        [
+          "admin"
+        ]
+      ],
+      "admin.postfach.testen": [
+        [
+          "admin"
+        ]
+      ]
+    },
+    "agrar/harvest-controls": {
+      "create_rule": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "CRM_LESEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "EINKAUF_LESEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "SALES_LESEN",
+          "admin"
+        ],
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "approve_rule": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "CRM_LESEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "EINKAUF_LESEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "SALES_LESEN",
+          "admin"
+        ],
+        [
+          "EINKAUF_ADMIN",
+          "FINANCE_ADMIN",
+          "admin"
+        ]
+      ],
+      "revoke_rule": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "CRM_LESEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "EINKAUF_LESEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "SALES_LESEN",
+          "admin"
+        ],
+        [
+          "EINKAUF_ADMIN",
+          "FINANCE_ADMIN",
+          "admin"
+        ]
+      ],
+      "bind_rule": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "CRM_LESEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "EINKAUF_LESEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "SALES_LESEN",
+          "admin"
+        ],
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "attest": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "CRM_LESEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "EINKAUF_LESEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "SALES_LESEN",
+          "admin"
+        ],
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "calculate": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "CRM_LESEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "EINKAUF_LESEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "SALES_LESEN",
+          "admin"
+        ],
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "approve_calculation": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "CRM_LESEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "EINKAUF_LESEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "SALES_LESEN",
+          "admin"
+        ],
+        [
+          "FINANCE_ADMIN",
+          "admin"
+        ]
+      ]
+    },
+    "agrar/harvest-settlement": {
+      "agrar.abrechnung.drucken": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "agrar/kontrakte": {
+      "kontrakt.update": [
+        [
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN"
+        ]
+      ]
+    },
+    "agrar/ration": {
+      "futtermittel.rations.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "auswertungen/abfrage-center": {
+      "reporting.query.write": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "auswertungen/bonus-berechnung": {
+      "reporting.bonus.write": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "auswertungen/sanktionspruefung-kunden": {
+      "compliance.sanctions.check": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "auswertungen/sanktionspruefung-personal": {
+      "compliance.sanctions.check": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "crm/customer-360": {
+      "crm.activity.create": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "crm/lead": {
+      "crm.lead.update": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "crm.lead.qualify": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "crm/opportunity": {
+      "crm.opportunity.update": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "crm.activity.create": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "einkauf/anfrage": {
+      "einkauf.anfrage.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "einkauf/angebot": {
+      "einkauf.angebot.order": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "einkauf/anlieferavis": {
+      "lager.wareneingang.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "einkauf/auftragsbestaetigung": {
+      "einkauf.auftragsbestaetigung.review": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.auftragsbestaetigung.confirm": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "einkauf/purchase-order": {
+      "einkauf.bestellung.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.bestellung.send": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "finance/ap-invoice": {
+      "finance.ap.freigabe": [
+        [
+          "FINANCE_ADMIN",
+          "admin"
+        ]
+      ]
+    },
+    "finance/ar-open-item": {
+      "finance.ar.mahnung": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "finance/bankkonto": {
+      "finance.bankkonto.update": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "finance/debitor": {
+      "finance.debitor.update": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "finance/kreditor": {
+      "finance.kreditor.update": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "finance/payment-run": {
+      "finance.payment_run.freigabe": [
+        [
+          "FINANCE_ADMIN",
+          "admin"
+        ]
+      ]
+    },
+    "finance/steuerschluessel": {
+      "finance.steuerschluessel.write": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "fuhrpark/ausgehende-dokumente": {
+      "logistics:write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "fuhrpark/fahrzeug-stamm": {
+      "logistics:write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "fuhrpark/rechnungen": {
+      "logistics:write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "fuhrpark/terminarten": {
+      "logistics:write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "futtermittel/mischfuttermittel": {
+      "futtermittel.mischfutter.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "lager/inventur-nebenlaeufe": {
+      "inventory.aux.write": [
+        [
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "lager/stock-movement": {
+      "lager.bewegung.stornieren": [
+        [
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "logistik/frachttabellen": {
+      "logistics:write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "logistik/tourenplanung": {
+      "logistik.tour.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "personal/bewerbungen": {
+      "personal.bewerbung.write": [
+        [
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "personal/einwilligungserklaerungen": {
+      "personal.bewerbung.admin": [
+        [
+          "PERSONAL_ADMIN",
+          "admin"
+        ]
+      ]
+    },
+    "personal/onboarding": {
+      "hr:write": [
+        [
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "personal/qualifikationen": {
+      "hr:write": [
+        [
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "personal/schulungen": {
+      "hr:write": [
+        [
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "planung/kalender": {
+      "planung.calendar.reproject": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "produktion/produktionsleitstand": {
+      "production.control.write": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "qualitaet/reklamation": {
+      "qualitaet.reklamation.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "qualitaet.reklamation.close": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "sales/delivery-note": {
+      "sales.lieferschein.drucken": [
+        [
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "sales/gutschrift": {
+      "sales.gutschrift.write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "sales.gutschrift.post": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "sales/sales-order": {
+      "sales.order.update": [
+        [
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "schnittstelle/mde-inbox": {
+      "mobile.sync.process": [
+        [
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    }
+  }
+}

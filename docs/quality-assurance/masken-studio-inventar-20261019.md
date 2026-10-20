@@ -1,4 +1,4 @@
-# Masken-Studio-Inventar (2026-10-19)
+# Masken-Studio-Inventar (2026-10-20)
 
 Erzeugt mit `python scripts/mask_studio_inventory.py --markdown <datei>`. Ziel: nur Studio-generierte
 Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentscheid 2026-10-19).
@@ -19,15 +19,15 @@ Gesamt 671 Routen, davon 669 Masken.
 
 | Befund | Anzahl |
 |---|---:|
-| Aktionen gesamt (ohne Doppel je Maske) | 312 |
-| davon serverwirksam | 220 |
-| … mit REST-Kommandoweg | 220 |
+| Aktionen gesamt (ohne Doppel je Maske) | 324 |
+| davon serverwirksam | 232 |
+| … mit REST-Kommandoweg | 232 |
 | … mit eigenem MCP-Werkzeug | 46 |
-| … per generischem MCP-Werkzeug (`mask.action.execute`) | 37 |
-| … MCP bewusst gesperrt | 137 |
+| … per generischem MCP-Werkzeug (`mask.action.execute`) | 45 |
+| … MCP bewusst gesperrt | 141 |
 | … MCP offen (`open_high` u. a.) | 0 |
 | … MCP unklassifiziert | 0 |
-| … mit CLI-Zugang | 220 |
+| … mit CLI-Zugang | 232 |
 | nicht deklariert (kein Kommando, Endpunkt, Navigation) | 0 |
 | nicht verfuegbar (`stubReason`, die Maske nennt den Grund) | 0 |
 

@@ -570,6 +570,15 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
+            {"key": "bearbeiten", "label": "Bearbeiten", "kind": "secondary", "dangerLevel": "safe", "permission": "sales.order.update", "commandEndpoint": "/api/v1/sales/orders/{entity_id}/actions/bearbeiten", "method": "POST", "inputFields": [
+                {"key": "subject", "label": "Betreff", "type": "text"},
+                {"key": "delivery_date", "label": "Liefertermin", "type": "date"},
+                {"key": "contact_person", "label": "Ansprechpartner", "type": "text"},
+                {"key": "shipping_method", "label": "Versandart", "type": "text"},
+                {"key": "payment_terms", "label": "Zahlungsbedingung", "type": "text"},
+                {"key": "delivery_address", "label": "Lieferanschrift", "type": "textarea"},
+                {"key": "notes", "label": "Notizen", "type": "textarea"},
+            ]},
             ],
         "noWorkflowReason": "Verkaufsauftrag-Status wird durch Liefer- und Rechnungsfortschritt automatisch gesetzt — kein deklarativer Prozess-Workflow.",
         "agentContract": {
@@ -661,6 +670,15 @@ def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
+            {"key": "bearbeiten", "label": "Bearbeiten", "kind": "secondary", "dangerLevel": "moderate", "permission": "kontrakt.update", "commandEndpoint": "/api/v1/kontrakte/{entity_id}/actions/bearbeiten", "method": "POST", "auditReasonRequired": True, "requiresConfirmation": True, "forbiddenForAgents": True, "inputFields": [
+                {"key": "contract_date", "label": "Kontraktdatum", "type": "date"},
+                {"key": "valid_from", "label": "Gueltig ab", "type": "date"},
+                {"key": "valid_to", "label": "Gueltig bis", "type": "date"},
+                {"key": "total_quantity", "label": "Gesamtmenge", "type": "number"},
+                {"key": "unit", "label": "Einheit", "type": "text"},
+                {"key": "payment_terms", "label": "Zahlungsbedingung", "type": "text"},
+                {"key": "notes", "label": "Notizen", "type": "textarea"},
+            ]},
             ],
         "noWorkflowReason": "Kontrakt-Status wird durch Lieferfortschritt automatisch gesetzt — Freigabe erfolgt ausserhalb des Masken-Lebenszyklus.",
         "agentContract": {
@@ -671,6 +689,9 @@ def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
                 "Welche Sorten und Mengen sind in Kontrakt {entity_id} vereinbart?",
             ],
             "sensitiveFields": ["preis"],
+            "dangerousActions": [
+                {"key": "bearbeiten", "reason": "Kontraktaenderung bindet Mengen, Termine und Zahlungsbedingungen gegenueber dem Partner; nur Mensch mit Kontraktrolle und Begruendung."},
+            ],
             "testSelectors": {"screenRoot": "[data-testid='agrar-kontrakte']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
         },
         "layout": {
@@ -931,6 +952,15 @@ def build_crm_opportunity_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
+            {"key": "bearbeiten", "label": "Bearbeiten", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.opportunity.update", "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/bearbeiten", "method": "POST", "inputFields": [
+                {"key": "name", "label": "Bezeichnung", "type": "text"},
+                {"key": "assigned_to", "label": "Zustaendig", "type": "text"},
+                {"key": "stage", "label": "Phase", "type": "text"},
+                {"key": "amount", "label": "Wert", "type": "number"},
+                {"key": "probability", "label": "Wahrscheinlichkeit %", "type": "number"},
+                {"key": "expected_close_date", "label": "Erwarteter Abschluss", "type": "date"},
+                {"key": "lead_source", "label": "Quelle", "type": "text"},
+            ]},
             {
                 "key": "create_activity",
                 "label": "Aktivitaet anlegen",
@@ -2123,12 +2153,20 @@ def build_finance_debitor_screen_definition() -> dict[str, Any]:
                              {"key": "anzahl_belege", "label": "Belege", "numeric": True},
                          ]}]},
         ],
-        "actions": [],
+        "actions": [
+            {"key": "bearbeiten", "label": "Bearbeiten", "kind": "secondary", "dangerLevel": "moderate", "permission": "finance.debitor.update", "commandEndpoint": "/api/v1/finance/debitoren/{entity_id}/actions/bearbeiten", "method": "POST", "auditReasonRequired": True, "requiresConfirmation": True, "forbiddenForAgents": True, "inputFields": [
+                {"key": "credit_limit", "label": "Kreditlimit", "type": "number"},
+                {"key": "is_active", "label": "Aktiv (nicht gesperrt)", "type": "boolean"},
+            ]},
+        ],
         "noWorkflowReason": "Debitorenstamm ist Referenzdaten — kein Prozess-Lebenszyklus.",
         "agentContract": {
             "businessPurpose": "Debitoren-Stammdaten: Kreditlimit, offene Posten und Umsatzhistorie fuer Debitorenbuchhaltung.",
             "examplePrompts": ["Was ist das Kreditlimit von Debitor {entity_id}?", "Zeige alle offenen Posten von Debitor {entity_id}."],
             "sensitiveFields": ["kreditlimit", "steuernummer", "ust_id"],
+            "dangerousActions": [
+                {"key": "bearbeiten", "reason": "Kreditlimit und Sperre wirken auf Auftragsannahme und Mahnwesen; nur Mensch der Buchhaltung mit Begruendung."},
+            ],
             "testSelectors": {"screenRoot": "[data-testid='finance-debitor']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
         },
         "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
@@ -2177,12 +2215,31 @@ def build_finance_kreditor_screen_definition() -> dict[str, Any]:
                              {"key": "status", "label": "Status", "filterable": True, "width": 100},
                          ]}]},
         ],
-        "actions": [],
+        "actions": [
+            {"key": "bearbeiten", "label": "Bearbeiten", "kind": "secondary", "dangerLevel": "moderate", "permission": "finance.kreditor.update", "commandEndpoint": "/api/v1/finance/kreditoren/{entity_id}/actions/bearbeiten", "method": "POST", "auditReasonRequired": True, "requiresConfirmation": True, "forbiddenForAgents": True, "inputFields": [
+                {"key": "company_name", "label": "Firma", "type": "text"},
+                {"key": "contact_person", "label": "Ansprechpartner", "type": "text"},
+                {"key": "street", "label": "Strasse", "type": "text"},
+                {"key": "postal_code", "label": "PLZ", "type": "text"},
+                {"key": "city", "label": "Ort", "type": "text"},
+                {"key": "country", "label": "Land", "type": "text"},
+                {"key": "phone", "label": "Telefon", "type": "text"},
+                {"key": "email", "label": "E-Mail", "type": "email"},
+                {"key": "vat_id", "label": "USt-IdNr.", "type": "text"},
+                {"key": "tax_number", "label": "Steuernummer", "type": "text"},
+                {"key": "payment_terms_days", "label": "Zahlungsziel (Tage)", "type": "number"},
+                {"key": "is_active", "label": "Aktiv", "type": "boolean"},
+                {"key": "notes", "label": "Notiz", "type": "textarea"},
+            ]},
+        ],
         "noWorkflowReason": "Kreditorenstamm ist Referenzdaten — kein Prozess-Lebenszyklus.",
         "agentContract": {
             "businessPurpose": "Kreditoren-Stammdaten: Zahlungsbedingungen, offene Posten und Bestellhistorie fuer Kreditorenbuchhaltung.",
             "examplePrompts": ["Welche offenen Posten hat Kreditor {entity_id}?", "Zeige alle Bestellungen bei Kreditor {entity_id}."],
             "sensitiveFields": ["steuernummer", "ust_id"],
+            "dangerousActions": [
+                {"key": "bearbeiten", "reason": "Kreditorenstamm steuert Zahlungsausgang und Steuerdaten; nur Mensch der Buchhaltung mit Begruendung."},
+            ],
             "testSelectors": {"screenRoot": "[data-testid='finance-kreditor']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
         },
         "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
@@ -2221,12 +2278,21 @@ def build_finance_bankkonto_screen_definition() -> dict[str, Any]:
                              {"key": "gegenpartei", "label": "Gegenpartei", "width": 180},
                          ]}]},
         ],
-        "actions": [],
+        "actions": [
+            {"key": "bearbeiten", "label": "Bearbeiten", "kind": "secondary", "dangerLevel": "moderate", "permission": "finance.bankkonto.update", "commandEndpoint": "/api/v1/banken/konten/{entity_id}/actions/bearbeiten", "method": "POST", "auditReasonRequired": True, "requiresConfirmation": True, "forbiddenForAgents": True, "inputFields": [
+                {"key": "bank", "label": "Bank", "type": "text"},
+                {"key": "kontoart", "label": "Kontoart", "type": "text"},
+                {"key": "ist_aktiv", "label": "Aktiv", "type": "boolean"},
+            ]},
+        ],
         "noWorkflowReason": "Bankkonten-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
         "agentContract": {
             "businessPurpose": "Bankkonto-Stamm: Kontodaten und Buchungshistorie fuer Finanzbuchhaltung.",
             "examplePrompts": ["Was ist der aktuelle Saldo von Bankkonto {entity_id}?", "Zeige die letzten Buchungen auf Bankkonto {entity_id}."],
             "sensitiveFields": ["iban", "bic", "saldo"],
+            "dangerousActions": [
+                {"key": "bearbeiten", "reason": "Bankstamm der Zahlungswege; Aenderung nur durch Menschen der Buchhaltung mit Begruendung (kein Saldo, keine IBAN)."},
+            ],
             "testSelectors": {"screenRoot": "[data-testid='finance-bankkonto']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
         },
         "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
@@ -2264,7 +2330,18 @@ def build_einkauf_anfrage_screen_definition() -> dict[str, Any]:
                              {"key": "einheit", "label": "Einheit", "width": 70},
                          ]}]},
         ],
-        "actions": [],
+        "actions": [
+            {"key": "bearbeiten", "label": "Bearbeiten", "kind": "secondary", "dangerLevel": "safe", "permission": "einkauf.anfrage.update", "commandEndpoint": "/api/v1/einkauf/anfragen/{entity_id}/actions/bearbeiten", "method": "POST", "inputFields": [
+                {"key": "anforderer", "label": "Anforderer", "type": "text"},
+                {"key": "abteilung", "label": "Abteilung", "type": "text"},
+                {"key": "prioritaet", "label": "Prioritaet", "type": "text"},
+                {"key": "artikel", "label": "Artikel", "type": "text"},
+                {"key": "menge", "label": "Menge", "type": "number"},
+                {"key": "einheit", "label": "Einheit", "type": "text"},
+                {"key": "begruendung", "label": "Begruendung", "type": "textarea"},
+                {"key": "notizen", "label": "Notizen", "type": "textarea"},
+            ]},
+        ],
         "noWorkflowReason": "Anfrage-Status wird durch Lieferantenantwort gesetzt — kein deklarativer Workflow.",
         "agentContract": {
             "businessPurpose": "Einkaufsanfrage: Kopfdaten und Positionen fuer Beschaffungsanfragen an Lieferanten.",
@@ -2400,7 +2477,10 @@ def build_einkauf_auftragsbestaetigung_screen_definition() -> dict[str, Any]:
                              {"key": "einzelpreis", "label": "Einzelpreis", "numeric": True, "renderKind": "currency"},
                          ]}]},
         ],
-        "actions": [],
+        "actions": [
+            {"key": "pruefen", "label": "Pruefen", "kind": "secondary", "dangerLevel": "safe", "permission": "einkauf.auftragsbestaetigung.review", "commandEndpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/pruefen", "method": "POST"},
+            {"key": "bestaetigen", "label": "Bestaetigen", "kind": "secondary", "dangerLevel": "moderate", "permission": "einkauf.auftragsbestaetigung.confirm", "commandEndpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/bestaetigen", "method": "POST"},
+        ],
         "noWorkflowReason": "AB-Status wird durch Lieferfortschritt gesetzt — kein separater Workflow.",
         "agentContract": {
             "businessPurpose": "Auftragsbestaetigung: Lieferanten-Rueckmeldung auf Bestellung mit zugesagtem Liefertermin.",
@@ -2459,6 +2539,10 @@ def build_qualitaet_reklamation_screen_definition() -> dict[str, Any]:
                          ]}]},
         ],
         "actions": [
+            {"key": "bearbeiten", "label": "Zustaendigkeit/Frist", "kind": "secondary", "dangerLevel": "safe", "permission": "qualitaet.reklamation.update", "commandEndpoint": "/api/v1/reklamationen/{entity_id}/actions/bearbeiten", "method": "POST", "inputFields": [
+                {"key": "zustaendiger", "label": "Zustaendig", "type": "text"},
+                {"key": "frist_datum", "label": "Frist", "type": "date"},
+            ]},
             {"key": "abschliessen", "label": "Abschliessen", "kind": "secondary", "dangerLevel": "moderate", "permission": "qualitaet.reklamation.close", "requiresConfirmation": True, "commandEndpoint": "/api/v1/reklamationen/{entity_id}/actions/abschliessen", "method": "POST"},
         ],
         "noWorkflowReason": "Reklamations-Status wird manuell gesetzt — Massnahmentracking ist tabellenbasiert.",
@@ -2713,7 +2797,16 @@ def build_futtermittel_mischfuttermittel_screen_definition() -> dict[str, Any]:
                              {"key": "einheit", "label": "Einheit", "width": 80},
                          ]}]},
         ],
-        "actions": [],
+        "actions": [
+            {"key": "bearbeiten", "label": "Bearbeiten", "kind": "secondary", "dangerLevel": "safe", "permission": "futtermittel.mischfutter.update", "commandEndpoint": "/api/v1/futter/mischfuttermittel/{entity_id}/actions/bearbeiten", "method": "POST", "inputFields": [
+                {"key": "name", "label": "Bezeichnung", "type": "text"},
+                {"key": "tierart", "label": "Tierart", "type": "text"},
+                {"key": "leistungsstufe", "label": "Leistungsstufe", "type": "text"},
+                {"key": "protein", "label": "Rohprotein %", "type": "number"},
+                {"key": "energie", "label": "Energie (MJ)", "type": "number"},
+                {"key": "beschreibung", "label": "Beschreibung", "type": "textarea"},
+            ]},
+        ],
         "noWorkflowReason": "Mischfuttermittel-Stamm ist Referenzdaten ohne Prozess-Lebenszyklus.",
         "agentContract": {
             "businessPurpose": "Mischfuttermittel: Rezeptur-Komponenten und berechnete Naehrstoffgehalte fuer Rationsoptimierung.",
@@ -2782,6 +2875,16 @@ def build_crm_lead_screen_definition() -> dict[str, Any]:
                          ]}]},
         ],
         "actions": [
+            {"key": "bearbeiten", "label": "Bearbeiten", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.lead.update", "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/bearbeiten", "method": "POST", "inputFields": [
+                {"key": "company_name", "label": "Unternehmen", "type": "text"},
+                {"key": "contact_person", "label": "Ansprechpartner", "type": "text"},
+                {"key": "email", "label": "E-Mail", "type": "email"},
+                {"key": "phone", "label": "Telefon", "type": "text"},
+                {"key": "source", "label": "Quelle", "type": "text"},
+                {"key": "estimated_value", "label": "Geschaetzter Wert", "type": "number"},
+                {"key": "priority", "label": "Prioritaet", "type": "text"},
+                {"key": "assigned_to", "label": "Zustaendig", "type": "text"},
+            ]},
             {"key": "qualifizieren", "label": "Als Opportunity qualifizieren", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.lead.qualify", "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/qualifizieren", "method": "POST", "inputFields": [{"key": "customer_id", "label": "Kunde", "type": "select", "required": True, "optionsSource": {"endpoint": "/api/v1/crm/customers/", "valueKey": "id", "labelKey": "company_name"}}]},
         ],
         "workflow": {

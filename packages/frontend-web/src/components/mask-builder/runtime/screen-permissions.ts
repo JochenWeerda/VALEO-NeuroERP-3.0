@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import documentPermissions from './beleg-permissions.generated.json'
+import actionPermissions from './action-permissions.generated.json'
 import { useAuth } from '@/hooks/useAuth'
 import type { User } from '@/lib/auth'
 import type { ScreenDefinition } from '../schema'
@@ -17,6 +18,9 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
       return (screens[screen.id]?.[permission] ?? []).some(role => roles.has(role))
     }
     if (permission.startsWith('platform:')) return scopes.has(permission)
+    // Rollen der Kommandowege, aus deren Server-Abhaengigkeiten erzeugt: jede Gruppe braucht eine ihrer Rollen.
+    const projected = (actionPermissions.screens as Record<string, Record<string, string[][]>>)[screen.id]?.[permission]
+    if (projected) return projected.every(group => group.some(role => roles.has(role)))
     if (permission === 'identity:quota:read') return true // Server returns only own allocations.
     if (scopes.has('admin:all') || roles.has('admin')) return true
     if (scopes.has(permission)) return true

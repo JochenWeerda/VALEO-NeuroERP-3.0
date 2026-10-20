@@ -131,6 +131,12 @@ class EinkaufCompatService:
             "createdAt": m.get("created_at").isoformat() if m.get("created_at") else None,
         }
 
+    #: Spalten der Tabelle aus ``einkauf_missing_tables_20260305`` (``ab_nummer``, ``bestell_nr``). Bis 19.10.2026
+    #: fragte der Dienst ``bestaetigungs_nummer``/``bestellung_id`` ab, die keine Migration anlegt; der Fehler wurde
+    #: geschluckt, Liste und Einzelansicht waren in jeder Datenbank leer bzw. 404.
+    _AB_SPALTEN = ("id, ab_nummer AS bestaetigungs_nummer, bestell_nr AS bestellung_id, lieferant_name, status, "
+                   "created_at")
+
     @staticmethod
     def _auftragsbestaetigung_row_to_dict(m: Any) -> dict:
         return {
@@ -588,26 +594,18 @@ class EinkaufCompatService:
 
     def list_auftragsbestaetigungen(self) -> list:
         from sqlalchemy import text
-        try:
-            rows = self.db.execute(text(
-                "SELECT id, bestaetigungs_nummer, bestellung_id, lieferant_name, status, created_at "
-                "FROM einkauf_auftragsbestaetigungen WHERE tenant_id = :tid ORDER BY created_at DESC LIMIT 500"
-            ), {"tid": self.tenant_id}).fetchall()
-        except Exception:
-            return []
+        rows = self.db.execute(text(
+            f"SELECT {self._AB_SPALTEN} FROM einkauf_auftragsbestaetigungen "
+            "WHERE tenant_id = :tid ORDER BY created_at DESC LIMIT 500"  # nosec B608  # feste Spaltenliste
+        ), {"tid": self.tenant_id}).fetchall()
         return [self._auftragsbestaetigung_row_to_dict(r._mapping) for r in rows]
 
     def get_auftragsbestaetigung(self, bestaetigung_id: str) -> dict:
         from sqlalchemy import text
-        try:
-            row = self.db.execute(text(
-                "SELECT id, bestaetigungs_nummer, bestellung_id, lieferant_name, status, created_at "
-                "FROM einkauf_auftragsbestaetigungen "
-                "WHERE (id = :aid OR bestaetigungs_nummer = :aid) AND tenant_id = :tid "
-                "ORDER BY created_at DESC LIMIT 1"
-            ), {"aid": bestaetigung_id, "tid": self.tenant_id}).fetchone()
-        except Exception:
-            row = None
+        row = self.db.execute(text(
+            f"SELECT {self._AB_SPALTEN} FROM einkauf_auftragsbestaetigungen "
+            "WHERE (id = :aid OR ab_nummer = :aid) AND tenant_id = :tid ORDER BY created_at DESC LIMIT 1"  # nosec B608
+        ), {"aid": bestaetigung_id, "tid": self.tenant_id}).fetchone()
         if row is None:
             raise EntityNotFoundError("Auftragsbestaetigung", bestaetigung_id)
         return self._auftragsbestaetigung_row_to_dict(row._mapping)
@@ -617,14 +615,10 @@ class EinkaufCompatService:
         status_map = {"review": "GEPRUEFT", "confirm": "BESTAETIGT"}
         if action not in status_map:
             raise ValidationFailedError(f"Unknown action: {action}")
-        try:
-            row = self.db.execute(text(
-                "SELECT id, bestaetigungs_nummer FROM einkauf_auftragsbestaetigungen "
-                "WHERE (id = :bid OR bestaetigungs_nummer = :bid) AND tenant_id = :tid "
-                "ORDER BY created_at DESC LIMIT 1"
-            ), {"bid": bestaetigung_id, "tid": self.tenant_id}).fetchone()
-        except Exception:
-            row = None
+        row = self.db.execute(text(
+            "SELECT id, ab_nummer AS bestaetigungs_nummer FROM einkauf_auftragsbestaetigungen "
+            "WHERE (id = :bid OR ab_nummer = :bid) AND tenant_id = :tid ORDER BY created_at DESC LIMIT 1"
+        ), {"bid": bestaetigung_id, "tid": self.tenant_id}).fetchone()
         if row is None:
             raise EntityNotFoundError("Auftragsbestaetigung", bestaetigung_id)
         new_status = status_map[action]
