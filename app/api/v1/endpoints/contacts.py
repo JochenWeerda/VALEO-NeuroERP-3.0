@@ -33,9 +33,11 @@ def _kunden_des_mandanten(db: Session, tenant_id: str, kunden: set[str]) -> set[
         return set()
     zeilen = db.execute(
         text("SELECT id::text AS id, business_partner_id::text AS bp FROM domain_crm.customers "
-             "WHERE tenant_id = :tid AND (id::text = ANY(:k) OR business_partner_id::text = ANY(:k))"),
-        {"tid": tenant_id, "k": sorted(kunden)},
-    ).mappings().all()
+             "WHERE tenant_id = :tid AND (id::text = ANY(:k) OR business_partner_id::text = ANY(:k)) "
+             "LIMIT :grenze"),
+        # Hoechstens zwei Treffer je gesuchter Kennung (ueber id und business_partner_id).
+        {"tid": tenant_id, "k": sorted(kunden), "grenze": 2 * len(kunden)},
+    ).mappings().fetchmany(2 * len(kunden))
     return {wert for zeile in zeilen for wert in (zeile["id"], zeile["bp"]) if wert} & kunden
 
 
