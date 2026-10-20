@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 206,
-    "screens_with_actions": 105,
+    "actions": 208,
+    "screens_with_actions": 106,
     "domains": 17
   },
   "actions": [
@@ -2114,6 +2114,46 @@
         "screenId": "einkauf/warengruppen",
         "actionKey": "neu",
         "commandEndpoint": "/api/v1/stammdaten/warengruppen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/zahlungsbedingungen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (einkauf/zahlungsbedingungen)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "einkauf/zahlungsbedingungen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/zahlungsbedingungen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:einkauf/zahlungsbedingungen:neu",
+      "label": "Zahlungsbedingung anlegen",
+      "description": "Zahlungsbedingung anlegen (einkauf/zahlungsbedingungen)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "einkauf/zahlungsbedingungen",
+      "intent_phrases": [
+        "Zahlungsbedingung anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/zahlungsbedingungen",
+        "actionKey": "neu",
+        "commandEndpoint": "/api/v1/fibu/zahlungsbedingungen",
         "navigationRoute": null,
         "command": null,
         "method": "POST"

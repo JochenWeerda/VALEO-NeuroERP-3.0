@@ -59429,9 +59429,11 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/finance_stammdaten_kommandos.py",
             "app/api/v1/endpoints/zahlungsbedingungen.py"
           ],
           "written_by": [
+            "app/api/v1/endpoints/finance_stammdaten_kommandos.py",
             "app/api/v1/endpoints/zahlungsbedingungen.py"
           ]
         },

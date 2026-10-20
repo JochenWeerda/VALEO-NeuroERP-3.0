@@ -73,6 +73,7 @@ def aufraeumen(engine):
         v.execute(text("DELETE FROM einkauf_angebote_positionen WHERE angebot_id IN "
                        "(SELECT id FROM einkauf_angebote WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_erp.exchange_rates WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_shared.zahlungsbedingungen WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         for wg in ("warengruppen", "oberwarengruppen", "hauptwarengruppen"):
             v.execute(text(f"DELETE FROM domain_shared.{wg} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
         v.execute(text("DELETE FROM domain_erp.journal_entry_lines WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
@@ -587,6 +588,33 @@ def test_warengruppen_anlegen_bearbeiten_deaktivieren_mandantengenau(client):
     assert nummer not in {z["gruppe_nr"] for z in client.get(liste, headers=kopf()).json()}
     # Der REST-Weg meldet unbekannte Gruppen jetzt mit 404 statt 204.
     assert client.delete(f"/api/v1/stammdaten/warengruppen/{nummer}", headers=kopf()).status_code == 404
+
+
+def test_zahlungsbedingungen_anlegen_bearbeiten_ohne_leeren_und_deaktivieren(client):
+    """Bearbeiten nur der gesendeten Felder (Vollersatz-Modell wird aus dem Ist-Stand ergaenzt), fremder Mandant
+    abgewiesen, Deaktivieren mit Begruendung; der REST-Loeschweg meldet Unbekanntes mit 404 (vorher 204)."""
+    from app.core.screen_definitions import get_screen_definition
+
+    definition = get_screen_definition("einkauf/zahlungsbedingungen")
+    neu = next(a for a in definition["actions"] if a["key"] == "neu")
+    nummer = f"Z{uuid.uuid4().hex[:5]}"
+    angelegt = client.post(neu["commandEndpoint"], headers={"X-Tenant-ID": HAUS_A}, json={
+        "zabd_nr": nummer, "bezeichnung": "30 Tage netto, 10 Tage 2 %", "zahlungsziel_tage": 30,
+        "skonto1_tage": 10, "skonto1_prozent": 2, "zahlungsart": "ueberweisung"})
+    assert angelegt.status_code == 201, angelegt.text
+    zeilen = {a["key"]: a["commandEndpoint"].replace("{entity_id}", angelegt.json()["id"])
+              for a in definition["tables"][0]["rowActions"]}
+    assert client.post(zeilen["bearbeiten"], headers={"X-Tenant-ID": HAUS_B},
+                       json={"zahlungsziel_tage": 1}).json()["success"] is False
+    geaendert = client.post(zeilen["bearbeiten"], headers={"X-Tenant-ID": HAUS_A}, json={"zahlungsziel_tage": 45})
+    assert geaendert.json()["success"] is True, geaendert.json()
+    stand = client.get(f"/api/v1/fibu/zahlungsbedingungen/{nummer}", headers={"X-Tenant-ID": HAUS_A}).json()
+    assert (stand["zahlungsziel_tage"], stand["skonto1_tage"], float(stand["skonto1_prozent"])) == (45, 10, 2.0)
+    assert client.post(zeilen["deaktivieren"], headers={"X-Tenant-ID": HAUS_A}, json={}).json()["success"] is False
+    assert client.post(zeilen["deaktivieren"], headers={"X-Tenant-ID": HAUS_A},
+                       json={"_auditReason": "ersetzt durch Z2"}).json()["success"] is True
+    assert client.delete(f"/api/v1/fibu/zahlungsbedingungen/{nummer}",
+                         headers={"X-Tenant-ID": HAUS_A}).status_code == 404
 
 
 def test_kreditorenliste_ist_eine_liste_und_oeffnet_die_objektmaske():

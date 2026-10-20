@@ -345,6 +345,12 @@ Befunde: Aendern pruefte die Oberwarengruppe nicht gegen den Mandanten (nur die 
 fuer unbekannte Gruppen. Prozess: das Abschluss-Skript schrieb die Ratsche **vor** der Pruefung (wuchs still) —
 korrigiert; die eigenen Wellen-Commits haben sie nie erweitert (geprueft).
 
+## Zahlungsbedingungen als Studio-Liste (21.10.2026)
+
+`einkauf/zahlungsbedingungen`: Anlegen, Bearbeiten (Kommandoweg ergaenzt das Vollersatz-Modell aus dem Ist-Stand —
+nicht gesendete Skontostufen bleiben erhalten) und Deaktivieren mit Begruendung (Rolle wie der bisherige Loeschweg,
+`finance_admin`). Befund: Loeschen meldete 204 auch fuer unbekannte Bedingungen (jetzt 404).
+
 ## Einordnung: Mandant aus Query/Body (20.10.2026)
 
 208 Wege deklarieren `tenant_id` als Query-Parameter (Standard oft `"system"`), weitere tragen ihn im Body. Das ist

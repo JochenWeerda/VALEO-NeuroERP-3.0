@@ -167,7 +167,6 @@
   "einkauf/service-entry-sheets",
   "einkauf/wareneingang",
   "einkauf/wareneingangsabgleich",
-  "einkauf/zahlungsbedingungen",
   "einstellungen/system",
   "errors/NotFound",
   "fibu",

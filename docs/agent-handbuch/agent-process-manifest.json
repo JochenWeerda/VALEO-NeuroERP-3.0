@@ -3316,6 +3316,47 @@
       ]
     },
     {
+      "mask_id": "einkauf/zahlungsbedingungen",
+      "title": "Zahlungsbedingungen",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/einkauf__zahlungsbedingungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/zahlungsbedingungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/zahlungsbedingungen/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/zahlungsbedingungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Zahlungsbedingung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "finance.zahlungsbedingung.create",
+          "commandEndpoint": "/api/v1/fibu/zahlungsbedingungen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
       "mask_id": "finance/ap-invoice",
       "title": "Eingangsrechnung",
       "domain": "finance",
@@ -6903,5 +6944,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 133
+  "event_count": 135
 }

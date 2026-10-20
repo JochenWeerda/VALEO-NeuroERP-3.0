@@ -891,6 +891,28 @@
         ]
       ]
     },
+    "einkauf/zahlungsbedingungen": {
+      "finance.zahlungsbedingung.create": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.zahlungsbedingung.update": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.zahlungsbedingung.deaktivieren": [
+        [
+          "FINANCE_ADMIN",
+          "admin"
+        ]
+      ]
+    },
     "finance/ap-invoice": {
       "finance.ap.freigabe": [
         [

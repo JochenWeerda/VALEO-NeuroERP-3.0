@@ -190,6 +190,9 @@
   "mask:einkauf/warengruppen:bearbeiten",
   "mask:einkauf/warengruppen:deaktivieren",
   "mask:einkauf/warengruppen:neu",
+  "mask:einkauf/zahlungsbedingungen:bearbeiten",
+  "mask:einkauf/zahlungsbedingungen:deaktivieren",
+  "mask:einkauf/zahlungsbedingungen:neu",
   "mask:finance/ap-invoice:freigeben",
   "mask:finance/ar-open-item:mahnen",
   "mask:finance/bankkonto:bearbeiten",
@@ -283,6 +286,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 152
+  "kein_endpunkt": 153
  }
 }

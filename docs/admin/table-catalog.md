@@ -730,7 +730,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.webshop_bestellungen` | `app/services/webshop_integration_service.py` | `app/services/webshop_integration_service.py` | — |
 | `domain_shared.webshop_configs` | `app/services/webshop_integration_service.py` | `app/services/webshop_integration_service.py` | — |
 | `domain_shared.webshop_sync_log` | `app/services/webshop_integration_service.py` | `app/services/webshop_integration_service.py` | — |
-| `domain_shared.zahlungsbedingungen` | `app/api/v1/endpoints/zahlungsbedingungen.py` | `app/api/v1/endpoints/zahlungsbedingungen.py` | — |
+| `domain_shared.zahlungsbedingungen` | `app/api/v1/endpoints/finance_stammdaten_kommandos.py`, `app/api/v1/endpoints/zahlungsbedingungen.py` | `app/api/v1/endpoints/finance_stammdaten_kommandos.py`, `app/api/v1/endpoints/zahlungsbedingungen.py` | — |
 | `domain_shared.zahlungsformulare` | `app/api/v1/endpoints/fibu_stammdaten.py` | `app/api/v1/endpoints/fibu_stammdaten.py` | — |
 | `domain_shared.zinsgruppen` | `app/api/v1/endpoints/fibu_stammdaten.py` | `app/api/v1/endpoints/fibu_stammdaten.py` | — |
 | `domain_shared.zu_abschlag_konditionen` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/zu_abschlaggruppen.py` | `app/api/v1/endpoints/zu_abschlaggruppen.py` | — |

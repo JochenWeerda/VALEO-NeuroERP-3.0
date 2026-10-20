@@ -20,8 +20,8 @@ Ergänzt das [Endnutzer-Benutzerhandbuch](../benutzerhandbuch/index.md) um die *
 | Dokument | Inhalt |
 |---|---|
 | [Prozessketten](prozessketten.md) | 9 Flow-Spine E2E-Ketten mit Knoten, Deep-Links, Instanz-API |
-| [Masken-API-Katalog](masken-api-katalog.md) | 143 ScreenDefinitions mit AgentContract, Endpoints, Actions |
-| [Automatisierung](automatisierung.md) | 64 MCP-Tools, 133 Domain-Events, ActionRuntime-Modi |
+| [Masken-API-Katalog](masken-api-katalog.md) | 144 ScreenDefinitions mit AgentContract, Endpoints, Actions |
+| [Automatisierung](automatisierung.md) | 64 MCP-Tools, 135 Domain-Events, ActionRuntime-Modi |
 | [agent-process-manifest.json](agent-process-manifest.json) | JSON-Manifest für SDK/Agent-Router |
 
 ## Entscheidungsbaum für Agenten

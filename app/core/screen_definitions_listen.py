@@ -1128,6 +1128,58 @@ def build_einkauf_warengruppen_liste() -> dict[str, Any]:
     )
 
 
+def build_einkauf_zahlungsbedingungen_liste() -> dict[str, Any]:
+    """Zahlungsbedingungen mit Ziel und zwei Skontostufen: anlegen, bearbeiten, deaktivieren."""
+    pfad = "/api/v1/fibu/zahlungsbedingungen/{entity_id}/actions/"
+    art = {"key": "zahlungsart", "label": "Zahlungsart", "type": "select", "options": [
+        {"value": "ueberweisung", "label": "Ueberweisung"}, {"value": "lastschrift", "label": "Lastschrift"},
+        {"value": "scheck", "label": "Scheck"}, {"value": "kasse", "label": "Kasse"},
+        {"value": "vorkasse", "label": "Vorkasse"}]}
+    werte = [
+        {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+        {"key": "zahlungsziel_tage", "label": "Zahlungsziel (Tage)", "type": "number", "required": True},
+        {"key": "skonto1_tage", "label": "Skonto 1 Tage", "type": "number"},
+        {"key": "skonto1_prozent", "label": "Skonto 1 %", "type": "number"},
+        {"key": "skonto2_tage", "label": "Skonto 2 Tage", "type": "number"},
+        {"key": "skonto2_prozent", "label": "Skonto 2 %", "type": "number"},
+        {"key": "netto_tage", "label": "Netto (Tage)", "type": "number"},
+        art,
+    ]
+    return _liste(
+        screen_id="einkauf/zahlungsbedingungen", domain="finance", title="Zahlungsbedingungen",
+        subtitle="Zahlungsziel und Skontostufen", endpoint="/api/v1/fibu/zahlungsbedingungen",
+        row_route=None, bundle="finance",
+        columns=[
+            {"key": "zabd_nr", "label": "Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "bezeichnung", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "zahlungsziel_tage", "label": "Ziel (Tage)", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "skonto1_tage", "label": "Skonto 1 Tage", "numeric": True, "priority": "secondary"},
+            {"key": "skonto1_prozent", "label": "Skonto 1 %", "numeric": True, "priority": "secondary"},
+            {"key": "skonto2_tage", "label": "Skonto 2 Tage", "numeric": True, "priority": "tertiary"},
+            {"key": "skonto2_prozent", "label": "Skonto 2 %", "numeric": True, "priority": "tertiary"},
+            {"key": "zahlungsart", "label": "Zahlungsart", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[
+            {"key": "neu", "label": "Zahlungsbedingung anlegen", "kind": "primary", "dangerLevel": "safe",
+             "zone": "header", "permission": "finance.zahlungsbedingung.create",
+             "commandEndpoint": "/api/v1/fibu/zahlungsbedingungen", "method": "POST",
+             "inputFields": [{"key": "zabd_nr", "label": "Nr.", "type": "text", "required": True}, *werte]},
+            _EXPORT,
+        ],
+        row_actions=[
+            {"key": "bearbeiten", "label": "Bearbeiten", "dangerLevel": "safe",
+             "permission": "finance.zahlungsbedingung.update", "commandEndpoint": pfad + "bearbeiten",
+             "method": "POST", "inputFields": werte},
+            {"key": "deaktivieren", "label": "Deaktivieren", "dangerLevel": "moderate",
+             "permission": "finance.zahlungsbedingung.deaktivieren", "commandEndpoint": pfad + "deaktivieren",
+             "method": "POST", "requiresConfirmation": True, "auditReasonRequired": True},
+        ],
+        purpose="Zahlungsbedingungen fuer Kunden, Lieferanten und Belege pflegen.",
+        prompts=["Welche Zahlungsbedingungen gewaehren 2 % Skonto?", "Lege 30 Tage netto, 10 Tage 2 % an."],
+        no_workflow="Zahlungsbedingungen sind Referenzdaten ohne eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -1152,6 +1204,7 @@ LISTEN_SCREEN_BUILDERS = {
     "finance/wechselkurse": build_finance_wechselkurse_liste,
     "finance/buchungsvorlagen": build_finance_buchungsvorlagen_liste,
     "einkauf/warengruppen": build_einkauf_warengruppen_liste,
+    "einkauf/zahlungsbedingungen": build_einkauf_zahlungsbedingungen_liste,
     "charge/liste": build_chargen_liste,
     "personal/mitarbeiter-liste": build_personal_mitarbeiter_liste,
     "versicherungen/liste": build_versicherungen_liste,
@@ -1186,6 +1239,7 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "finance/wechselkurse": "/finance/wechselkurse",
                 "finance/buchungsvorlagen": "/finance/buchungsvorlagen",
                 "einkauf/warengruppen": "/einkauf/warengruppen",
+                "einkauf/zahlungsbedingungen": "/einkauf/zahlungsbedingungen",
                 "charge/liste": "/charge/liste",
                 "personal/mitarbeiter-liste": "/personal/mitarbeiter",
                 "versicherungen/liste": "/versicherungen",

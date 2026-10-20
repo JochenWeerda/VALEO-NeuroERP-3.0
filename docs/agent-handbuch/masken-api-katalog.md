@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (143 Masken).
+> Generiert aus `app/core/screen_definitions.py` (144 Masken).
 
 ## Übersicht
 
@@ -80,6 +80,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/purchase-order` | Bestellung | einkauf | mittel | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
 | `einkauf/supplier` | Lieferant | einkauf | niedrig | `procure-to-pay` | `GET /api/v1/masks/einkauf/supplier/agent-contract` |
 | `einkauf/warengruppen` | Warengruppen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/warengruppen/agent-contract` |
+| `einkauf/zahlungsbedingungen` | Zahlungsbedingungen | finance | niedrig | — | `GET /api/v1/masks/einkauf/zahlungsbedingungen/agent-contract` |
 | `finance/ap-invoice` | Eingangsrechnung | finance | mittel | `procure-to-pay` | `GET /api/v1/masks/finance/ap-invoice/agent-contract` |
 | `finance/ar-open-item` | Offener Posten | finance | mittel | `order-to-cash` | `GET /api/v1/masks/finance/ar-open-item/agent-contract` |
 | `finance/bankkonto` | Bankkonto | finance | mittel | — | `GET /api/v1/masks/finance/bankkonto/agent-contract` |
@@ -2552,6 +2553,42 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Welche Belegausnahmen sind ueberfaellig?
 
 **Sensible Felder:** `partner_name, partner_ref, notes`
+
+---
+
+### `einkauf/zahlungsbedingungen` — Zahlungsbedingungen
+
+**Zweck:** Zahlungsbedingungen fuer Kunden, Lieferanten und Belege pflegen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/einkauf/zahlungsbedingungen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/einkauf/zahlungsbedingungen/agent-contract` |
+| Readiness | `GET /api/v1/masks/einkauf/zahlungsbedingungen/readiness` |
+| Rollout-Route | `/mask-rollout/einkauf__zahlungsbedingungen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/fibu/zahlungsbedingungen`
+
+**MCP-Tools (Domäne):**
+
+- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Zahlungsbedingungen gewaehren 2 % Skonto?
+- Lege 30 Tage netto, 10 Tage 2 % an.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Zahlungsbedingung anlegen | safe | nein | `/api/v1/fibu/zahlungsbedingungen` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
