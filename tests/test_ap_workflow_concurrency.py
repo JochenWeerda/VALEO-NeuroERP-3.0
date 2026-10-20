@@ -17,7 +17,7 @@ from testgrenze import pruefstand_erlaubt
 
 @pytest.mark.integration
 @pytest.mark.parametrize("subjects,expected", [(("reviewer-b", "reviewer-c"), 2), (("reviewer-b", "reviewer-b"), 1)])
-def test_parallel_reviewers_do_not_lose_votes_or_double_count_one_person(subjects, expected):
+def test_parallel_reviewers_do_not_lose_votes_or_double_count_one_person(subjects, expected, require_db):
     assert pruefstand_erlaubt(engine.url), "Never run write contracts against the development database"
     tenant, invoice_id = "ap-race-" + uuid4().hex[:16], "ap-race-" + uuid4().hex
     now = datetime.now(timezone.utc)
@@ -62,7 +62,7 @@ def test_parallel_reviewers_do_not_lose_votes_or_double_count_one_person(subject
 
 
 @pytest.mark.integration
-def test_concurrent_insert_only_documents_never_replace_another_tenant():
+def test_concurrent_insert_only_documents_never_replace_another_tenant(require_db):
     from sqlalchemy.exc import IntegrityError
     from app.documents.repository import DocumentAlreadyExists
     assert pruefstand_erlaubt(engine.url)

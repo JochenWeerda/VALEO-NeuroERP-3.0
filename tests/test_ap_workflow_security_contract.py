@@ -19,7 +19,7 @@ PREFIX = "/api/v1/finance/ap/approval-workflow"
 
 
 @pytest.fixture
-def case(subject_data, monkeypatch):
+def case(require_db, subject_data, monkeypatch):
     monkeypatch.setattr("app.core.endpoint_gateways._approval_workflow_gateway", None)
     _, db, provider, tenant, foreign, *_ = subject_data
     own, other = "ap-review-" + uuid4().hex, "ap-review-" + uuid4().hex

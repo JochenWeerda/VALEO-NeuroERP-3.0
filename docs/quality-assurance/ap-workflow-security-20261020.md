@@ -106,3 +106,19 @@ Der aktuelle Upstream-Tabellenkatalog blieb physisch exakt erhalten; nur Lineage
 aktualisiert. Der Testkonflikt mit dem veralteten direkten AP-MCP-Adapter wurde zugunsten
 der verbindlichen menschlichen Entscheidung und der neuen Studio-Pruefungen aufgeloest.
 GitHub-CI und lokaler Browserbetrieb sind weiterhin getrennte Nachweise.
+
+## Pflicht-Gateauswahl
+
+Der neue SQL-Vertrag war in der Vollsuite enthalten, seine gemeinsame case-Fixture
+forderte jedoch require_db noch nicht an. Dadurch waehlte das separate schnelle
+PostgreSQL-Pflichtgate nicht alle neuen AP-Faelle aus. Die Fixture und beide echten
+Parallelitaetstests fordern nun require_db an; die bestehende Sammlung markiert
+auch transitive Verbraucher in Kernel-/Maskenvertraegen als needs_live_db.
+
+Exakt der CI-Selektor, lokal mit PYTEST_REQUIRE_DB_STRICT=1 gegen valeo_probe:
+71 bestanden,39 reine andere Faelle abgewaehlt. Unveraenderter Anwendungscode,
+keine neue Datenbank oder Container, kein Reset. Die71 Faelle sind eine streng
+nachgepruefte Teilmenge der716, keine zusaetzlich aufaddierte Pruefzahl.
+Auf7ee86fc80 waren OpenAPI-Drift, Rollenvertraege, PostgreSQL-Gate, Docs-Build/-Governance,
+kritische semantische E2E-Pfade und Compliance auf GitHub bereits erfolgreich;
+Gesamtpipeline/Quality Gate liefen beim Abruf noch.

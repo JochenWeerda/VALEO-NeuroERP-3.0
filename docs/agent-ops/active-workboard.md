@@ -18863,7 +18863,7 @@ Alle 16 Slices des Qualitäts-ERP-Programms abgeschlossen:
 
 **Finale AP-Integration:** Parallele Lieferungen bis86d54acb1 erhalten.716 Backendpruefungen,19 Oberflaechenfaelle, vollstaendige Typpruefung/Node-Build und alle ausgefuehrten Gates gruen. Keine neue Datenbank/Container/Migration/Reset. Eigenen AP-Meilenstein338b34973 und Integrationscommit4405f1fca nicht zurueckgenommen; erneuter Main-Zusammenfuehrungscommit bewahrt beide Historien. [Abnahme und Grenzen](../quality-assurance/ap-workflow-security-20261020.md).
 
-## AP-CI-SELECTION-20261020 - reserviert, Codex
+## AP-CI-SELECTION-20261020 - abgeschlossen, Codex
 
 Ziel: AP-SQL-Vertraege muessen auch im verpflichtenden needs_live_db-Gate ausgewaehlt
 werden. Besitz: test_ap_workflow_security_contract.py nur gemeinsame case-Fixture,
@@ -18873,3 +18873,5 @@ keine neue Datenbank, Container oder Workflow-Pipeline. Abnahme: strikte Gateaus
 fuehrt AP-, Kernel-, native und Parallelitaetsfaelle auf bestehendem valeo_probe aus.
 Geschaeftscode bleibt unveraendert. Vollsuite deckte sie bereits ab; der schnelle
 PostgreSQL-Pflichtlauf muss denselben Schutz explizit enthalten.
+
+**Abnahme AP-CI-SELECTION:** Exakter CI-Selektor needs_live_db mit PYTEST_REQUIRE_DB_STRICT=1:71 AP-/Kernel-/native-/Parallelitaetsfaelle bestanden,39 reine sonstige Faelle planmaessig abgewaehlt. Gemeinsame case-Fixture und beide Parallelitaetstests fordern require_db an; conftest markiert auch transitive Verbraucher. Keine Geschaeftscodeaenderung, DB/Container/Reset oder Migrationsaenderung.
