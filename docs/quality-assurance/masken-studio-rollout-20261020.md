@@ -63,6 +63,21 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
   Loeschen entfaellt in der Liste (Ablehnen mit Begruendung ist der Fachweg).
 - Ratsche: Altmuster 101 -> 100.
 
+## Welle 1, Schritt 3 (20.10.2026): Einkauf Anlieferavis
+
+- ScreenDefinition `einkauf/anlieferavis-liste` (die Objektmaske heisst `einkauf/anlieferavis`) auf
+  `NativeListPage`: senden, bestaetigen, Wareneingang buchen (bestehender Weg mit Lieferschein und Lager),
+  stornieren mit Begruendung, CSV-Export.
+- **Befund, behoben:** `EinkaufCompatService.list_anlieferavis`/`get_anlieferavis` lasen `bestellung_id`,
+  `geplantes_anliefer_datum` und `kennzeichen` — Spalten, die keine Migration anlegt und auch die gewachsene
+  Datenbank nicht hat — und verschluckten den Fehler: Die Liste war immer leer, die Objektmaske immer 404.
+  Jetzt die Spalten der Migration (`bestell_nr`, `erwartetes_datum`), ohne verschluckten Fehler.
+- Kommando-Wege `einkauf_avis_kommandos.py` mit Statusgrenzen; der alte Weg `/{id}/{action}` setzte jeden Status,
+  auch ein erhaltenes Avis auf STORNIERT.
+- Offen: Es gibt keinen Anlageweg fuer Avise (`POST /einkauf/anlieferavis` fehlt); die Seite
+  `einkauf/anlieferavis/neu` kann nicht speichern. Die Liste bietet deshalb keine Anlage an.
+- Ratsche: Altmuster 100 -> 99.
+
 ## Sichtung der uebrigen Routen
 
 | Bereich | handgebaut | Altmuster |

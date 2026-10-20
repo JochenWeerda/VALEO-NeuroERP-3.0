@@ -46,6 +46,9 @@ _ANGEBOT_FELDER = (
 
 #: Ein Angebot in diesen Zustaenden wird nicht (noch einmal) bestellt.
 _NICHT_BESTELLBAR = {"IN_BESTELLUNG", "BESTELLT", "ABGELEHNT"}
+#: Spalten des Avis wie in der Migration ``einkauf_missing_tables_20260305``; ein Kennzeichen fuehrt die Tabelle nicht.
+_AVIS_FELDER = ("id, avis_nummer, bestell_nr AS bestellung_id, lieferant_name, status, "
+                "erwartetes_datum AS geplantes_anliefer_datum, NULL AS kennzeichen, created_at")
 
 
 class EinkaufCompatService:
@@ -538,28 +541,21 @@ class EinkaufCompatService:
 
     def list_anlieferavis(self) -> list:
         from sqlalchemy import text
-        try:
-            rows = self.db.execute(text(
-                "SELECT id, avis_nummer, bestellung_id, lieferant_name, status, "
-                "geplantes_anliefer_datum, kennzeichen, created_at "
-                "FROM einkauf_anlieferavis WHERE tenant_id = :tid ORDER BY created_at DESC LIMIT 500"
-            ), {"tid": self.tenant_id}).fetchall()
-        except Exception:
-            return []
+        # Bis 20.10.2026 las die Abfrage Spalten, die keine Migration anlegt, und verschluckte den Fehler:
+        # Liste immer leer, Objektmaske immer 404.
+        rows = self.db.execute(text(
+            f"SELECT {_AVIS_FELDER} FROM einkauf_anlieferavis "  # nosec B608  # reviewed-safe: Feldliste ist ein Code-Literal
+            "WHERE tenant_id = :tid ORDER BY created_at DESC LIMIT 500"
+        ), {"tid": self.tenant_id}).fetchall()
         return [self._anlieferavis_row_to_dict(r._mapping) for r in rows]
 
     def get_anlieferavis(self, avis_id: str) -> dict:
         from sqlalchemy import text
-        try:
-            row = self.db.execute(text(
-                "SELECT id, avis_nummer, bestellung_id, lieferant_name, status, "
-                "geplantes_anliefer_datum, kennzeichen, created_at "
-                "FROM einkauf_anlieferavis "
-                "WHERE (id = :aid OR avis_nummer = :aid) AND tenant_id = :tid "
-                "ORDER BY created_at DESC LIMIT 1"
-            ), {"aid": avis_id, "tid": self.tenant_id}).fetchone()
-        except Exception:
-            row = None
+        row = self.db.execute(text(
+            f"SELECT {_AVIS_FELDER} FROM einkauf_anlieferavis "  # nosec B608  # reviewed-safe: Feldliste ist ein Code-Literal
+            "WHERE (id = :aid OR avis_nummer = :aid) AND tenant_id = :tid "
+            "ORDER BY created_at DESC LIMIT 1"
+        ), {"aid": avis_id, "tid": self.tenant_id}).fetchone()
         if row is None:
             raise EntityNotFoundError("Anlieferavis", avis_id)
         return self._anlieferavis_row_to_dict(row._mapping)

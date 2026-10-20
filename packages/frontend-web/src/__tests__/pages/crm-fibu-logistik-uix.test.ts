@@ -102,12 +102,11 @@ describe('CRM/FIBU/Logistik UIX', () => {
     expect(src).toContain('Zahlungslauf erstellen')
   })
 
-  it('stellt Anlieferavis Liste zuerst und echten Export', () => {
+  it('stellt Anlieferavis als Studio-Liste', () => {
+    // MASK-STUDIO-ROLLOUT: Spalten, Aktionen und Export stehen in der ScreenDefinition einkauf/anlieferavis-liste.
     const src = read('../../pages/einkauf/anlieferavis-liste.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('exportToCSV')
-    expect(src).toContain('Import nicht am Server')
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="einkauf/anlieferavis-liste"')
   })
 
   it('stellt Zahlungslaeufe Wizard zuerst mit 44-px-Auswahl', () => {

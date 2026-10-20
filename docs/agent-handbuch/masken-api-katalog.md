@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (110 Masken).
+> Generiert aus `app/core/screen_definitions.py` (111 Masken).
 
 ## Übersicht
 
@@ -58,6 +58,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/angebot` | Lieferantenangebot | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/angebot/agent-contract` |
 | `einkauf/angebote` | Angebote | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/angebote/agent-contract` |
 | `einkauf/anlieferavis` | Anlieferavis | einkauf | mittel | — | `GET /api/v1/masks/einkauf/anlieferavis/agent-contract` |
+| `einkauf/anlieferavis-liste` | Anlieferavis | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anlieferavis-liste/agent-contract` |
 | `einkauf/auftragsbestaetigung` | Auftragsbestaetigung | einkauf | mittel | — | `GET /api/v1/masks/einkauf/auftragsbestaetigung/agent-contract` |
 | `einkauf/purchase-order` | Bestellung | einkauf | mittel | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
 | `einkauf/supplier` | Lieferant | einkauf | niedrig | `procure-to-pay` | `GET /api/v1/masks/einkauf/supplier/agent-contract` |
@@ -1533,6 +1534,44 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `wareneingang` | Wareneingang buchen | moderate | nein | `/api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang` |
+
+---
+
+### `einkauf/anlieferavis-liste` — Anlieferavis
+
+**Zweck:** Angekuendigte Lieferungen verfolgen, bestaetigen und als Wareneingang buchen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/einkauf/anlieferavis-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/einkauf/anlieferavis-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/einkauf/anlieferavis-liste/readiness` |
+| Rollout-Route | `/mask-rollout/einkauf__anlieferavis-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/einkauf/anlieferavis`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Lieferungen sind fuer diese Woche angekuendigt?
+- Welche Avise sind noch offen?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `—` |
 
 ---
 

@@ -513,6 +513,36 @@
         ]
       ]
     },
+    "einkauf/anlieferavis-liste": {
+      "einkauf.avis.senden": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.avis.bestaetigen": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "lager.wareneingang.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.avis.stornieren": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "einkauf/auftragsbestaetigung": {
       "einkauf.auftragsbestaetigung.review": [
         [

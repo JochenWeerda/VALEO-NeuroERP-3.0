@@ -2272,6 +2272,39 @@
       ]
     },
     {
+      "mask_id": "einkauf/anlieferavis-liste",
+      "title": "Anlieferavis",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/einkauf__anlieferavis-liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/anlieferavis-liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/anlieferavis-liste/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/anlieferavis-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
       "mask_id": "einkauf/auftragsbestaetigung",
       "title": "Auftragsbestaetigung",
       "domain": "einkauf",

@@ -143,10 +143,57 @@ def build_einkauf_angebote_liste() -> dict[str, Any]:
     )
 
 
+
+def build_einkauf_anlieferavis_liste() -> dict[str, Any]:
+    """Lieferavise: senden, bestaetigen, stornieren, Wareneingang buchen."""
+    pfad = "/api/v1/einkauf/anlieferavis/{entity_id}/actions/"
+    return _liste(
+        screen_id="einkauf/anlieferavis-liste", domain="einkauf", title="Anlieferavis",
+        subtitle="Lieferavise fuer die Wareneingangsvorbereitung", endpoint="/api/v1/einkauf/anlieferavis",
+        row_route="/einkauf/anlieferavis/{id}", bundle="einkauf",
+        columns=[
+            {"key": "avisNummer", "label": "Avis-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "lieferant", "label": "Lieferant", "filterable": True, "sortable": True, "priority": "primary"},
+            {"key": "bestellung", "label": "Bestellung", "filterable": True, "priority": "secondary"},
+            {"key": "geplantesAnlieferDatum", "label": "Geplant", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "createdAt", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[
+            {"key": "senden", "label": "Senden", "dangerLevel": "safe", "permission": "einkauf.avis.senden",
+             "commandEndpoint": pfad + "senden", "method": "POST", "requiresConfirmation": True,
+             "visibleWhen": _status("OFFEN", "ANGEKUENDIGT")},
+            {"key": "bestaetigen", "label": "Bestaetigen", "dangerLevel": "safe",
+             "permission": "einkauf.avis.bestaetigen", "commandEndpoint": pfad + "bestaetigen", "method": "POST",
+             "requiresConfirmation": True, "visibleWhen": _status("OFFEN", "ANGEKUENDIGT", "GESENDET")},
+            {"key": "wareneingang", "label": "Wareneingang buchen", "dangerLevel": "moderate",
+             "permission": "lager.wareneingang.create", "commandEndpoint": pfad + "wareneingang", "method": "POST",
+             "requiresConfirmation": True, "visibleWhen": _status("BESTAETIGT", "GESENDET", "OFFEN"),
+             "inputFields": [
+                 {"key": "lieferschein_nr", "label": "Lieferschein-Nr.", "type": "text", "required": True},
+                 {"key": "lager_id", "label": "Lager", "type": "select", "required": True,
+                  "optionsSource": {"endpoint": "/api/v1/inventory/warehouses/", "valueKey": "id",
+                                    "labelKey": "name"}}]},
+            {"key": "stornieren", "label": "Stornieren", "dangerLevel": "high",
+             "permission": "einkauf.avis.stornieren", "commandEndpoint": pfad + "stornieren", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True,
+             "visibleWhen": _status("OFFEN", "ANGEKUENDIGT", "GESENDET", "BESTAETIGT")},
+        ],
+        purpose="Angekuendigte Lieferungen verfolgen, bestaetigen und als Wareneingang buchen.",
+        prompts=["Welche Lieferungen sind fuer diese Woche angekuendigt?", "Welche Avise sind noch offen?"],
+        no_workflow="Der Status steht am Avis; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
+    "einkauf/anlieferavis-liste": build_einkauf_anlieferavis_liste,
 }
-LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote"}
+LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
+                "einkauf/anlieferavis-liste": "/einkauf/anlieferavis"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
-                   "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"]}
+                   "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
+                   "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"]}

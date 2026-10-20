@@ -9,6 +9,8 @@ halten fest:
 * ``in_bestellung`` gilt nur fuer freigegebene Anfragen bzw. in der Angebotsphase;
 * Angebote: pruefen/genehmigen/ablehnen nur aus den erlaubten Status, ablehnen mit Begruendung; ein bestelltes
   Angebot wird nicht zurueckgesetzt (der alte Statusweg setzte jeden Status);
+* Anlieferavis: Liste und Objekt lesen die echten Spalten (vorher immer leer bzw. 404); stornieren mit Begruendung,
+  nie ein erhaltenes Avis;
 * die Listen deklarieren jede Aktion mit diesem Kommandoweg und den Export.
 
 Geprueft gegen eine frische Pruefstand-Datenbank (``TEST_DATABASE_URL``/``DATABASE_URL``).
@@ -56,7 +58,7 @@ def aufraeumen(engine):
                        "(SELECT id FROM einkauf_anfragen WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM einkauf_angebote_positionen WHERE angebot_id IN "
                        "(SELECT id FROM einkauf_angebote WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
-        for tabelle in ("einkauf_anfragen", "einkauf_angebote", "domain_crm.crm_action_audit_log", "public.outbox_events"):
+        for tabelle in ("einkauf_anfragen", "einkauf_angebote", "einkauf_anlieferavis", "domain_crm.crm_action_audit_log", "public.outbox_events"):
             v.execute(text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
 
 
@@ -237,3 +239,42 @@ def test_angebotsliste_deklariert_kommandowege():
         assert zeilen[aktion]["commandEndpoint"] == f"/api/v1/einkauf/angebote/{{entity_id}}/actions/{aktion}"
     assert zeilen["ablehnen"]["auditReasonRequired"] is True
     assert definition["tables"][0]["rowRouteTemplate"] == "/einkauf/angebot/{id}"
+
+
+def avis(engine, status: str) -> str:
+    from sqlalchemy import text
+
+    kennung = str(uuid.uuid4())
+    with engine.begin() as v:
+        v.execute(text("INSERT INTO einkauf_anlieferavis (id, tenant_id, lieferant_name, avis_nummer, bestell_nr, "
+                       "erwartetes_datum, status) VALUES (:id, :h, 'Muehle Nord', :nr, 'PO-1', DATE '2026-10-22', :s)"),
+                  {"id": kennung, "h": HAUS_A, "nr": f"AV-{kennung[:8]}", "s": status})
+    return kennung
+
+
+def test_avis_liste_und_objekt_lesen_die_echten_spalten(engine, client):
+    kennung = avis(engine, "offen")
+    liste = client.get("/api/v1/einkauf/anlieferavis", headers={"X-Tenant-ID": HAUS_A})
+    assert liste.status_code == 200, liste.text
+    eintrag = next(e for e in liste.json() if e["id"] == kennung)
+    assert eintrag["bestellung"] == "PO-1"
+    assert eintrag["geplantesAnlieferDatum"] == "2026-10-22"
+    assert client.get(f"/api/v1/einkauf/anlieferavis/{kennung}", headers={"X-Tenant-ID": HAUS_A}).status_code == 200
+
+
+def test_avis_statusgrenzen(engine, client):
+    def aktion(kennung: str, schritt: str, body: dict) -> bool:
+        antwort = client.post(f"/api/v1/einkauf/anlieferavis/{kennung}/actions/{schritt}", json=body,
+                              headers={"X-Tenant-ID": HAUS_A})
+        assert antwort.status_code == 200, antwort.text
+        return antwort.json()["success"]
+
+    kennung = avis(engine, "offen")
+    assert aktion(kennung, "senden", {}) is True
+    assert aktion(kennung, "bestaetigen", {}) is True
+    assert aktion(kennung, "senden", {}) is False
+    assert aktion(kennung, "stornieren", {}) is False
+    assert aktion(kennung, "stornieren", {"_auditReason": "Lieferung abgesagt"}) is True
+    erhalten = avis(engine, "ERHALTEN")
+    assert aktion(erhalten, "stornieren", {"_auditReason": "Versehentlich"}) is False
+    assert zeile(engine, "SELECT status FROM einkauf_anlieferavis WHERE id = :id", id=erhalten)["status"] == "ERHALTEN"
