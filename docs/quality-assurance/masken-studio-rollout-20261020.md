@@ -32,6 +32,25 @@ Jede Welle senkt die Ratsche `config/mask_studio_ratchet.json`.
 Keine dieser Seiten war ueber Navigation, Links, Importe, Backend-Verweise oder externe Einstiege erreichbar.
 Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 
+## Welle 1, Schritt 1 (20.10.2026): Einkauf Anfragen als Studio-Liste
+
+- Neue generische Listenseite `NativeListPage` (`components/mask-builder/NativeListPage.tsx`): Spalten, Kopf- und
+  Zeilenaktionen, Export und Zeilenroute kommen aus der ScreenDefinition; Kommando-Wege mit deklarierten Eingaben,
+  Bestaetigung, Pflichtgrund und Doppelausfuehrungsschutz je Zeile und Aktion. Kein seitenspezifischer Code.
+- ScreenDefinition `einkauf/anfragen` (`app/core/screen_definitions_listen.py`): Anlage (Navigation), CSV-Export
+  (`localEffect: download`), Zeilenaktionen `senden` (Lieferantenauswahl, nur Mensch), `in_bestellung`, `loeschen`
+  (nur Entwurf/Offen, Begruendung, nur Mensch).
+- Kommando-Wege `app/api/v1/endpoints/einkauf_anfrage_kommandos.py` delegieren an die bestehenden Fachwege
+  (`versende_einkauf_anfrage`, `convert_anfrage_to_order`) mit Audit, Ereignis, Trockenlauf und Wiederholungsschutz.
+- Befunde der alten Seite behoben: Massenversand rief `/send` ohne Lieferanten (immer 422), Loeschen in jedem Status,
+  Zeilenlink auf eine nicht vorhandene Route `/einkauf/anfragen/{id}`.
+- Zeilenaktionen werden wie Kopfaktionen nur mit Recht gezeigt: Plan-Compiler filtert `rowActions` nach Recht, die
+  Rollen-Projektion (`generate_action_permission_projection.py`) liest auch Zeilenaktionen (Tabellen und Tabs).
+- Tests: `tests/test_einkauf_anfrage_kommandos.py` (7, Pruefstand), `native-list-page.test.tsx` (3).
+  Ratsche: Altmuster 102 -> 101.
+- Offen aus der Sichtung: Die Erfassung `anfrage-erfassung.tsx` sendet PATCH, der Server kennt nur PUT;
+  `EinkaufCompatService.list_anfragen` verschluckt Fehler (leere Liste).
+
 ## Sichtung der uebrigen Routen
 
 | Bereich | handgebaut | Altmuster |

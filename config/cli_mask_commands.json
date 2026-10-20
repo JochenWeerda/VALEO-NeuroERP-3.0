@@ -145,6 +145,9 @@
   "mask:docflow/dokumenten-ruecklauf:mark_sent",
   "mask:docflow/dokumenten-ruecklauf:verify_return",
   "mask:einkauf/anfrage:bearbeiten",
+  "mask:einkauf/anfragen:in_bestellung",
+  "mask:einkauf/anfragen:loeschen",
+  "mask:einkauf/anfragen:senden",
   "mask:einkauf/angebot:bestellen",
   "mask:einkauf/anlieferavis:wareneingang",
   "mask:einkauf/auftragsbestaetigung:bestaetigen",
@@ -235,6 +238,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 92
+  "kein_endpunkt": 94
  }
 }

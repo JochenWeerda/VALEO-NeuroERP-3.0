@@ -72,7 +72,7 @@ MCP_OHNE_SERVERWIRKUNG = {"local_ui"}
 
 _IMPORT = re.compile(r"""(?:import|export)\s[^'"]*?from\s+['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)""")
 _SCREEN_ID = re.compile(r"""screenId\s*=\s*(?:\{\s*)?[`'"]([^`'"]+)[`'"]|useScreenDefinition\(\s*[`'"]([^`'"]+)[`'"]""")
-_BUILDER = re.compile(r"\b(UniversalNative(?:Detail|Create|Cockpit)Page|UniversalMaskRenderer|useScreenDefinition|"
+_BUILDER = re.compile(r"\b(UniversalNative(?:Detail|Create|Cockpit)Page|NativeListPage|UniversalMaskRenderer|useScreenDefinition|"
                       r"compileRenderPlanFromScreenDefinition|CaptureScreenHost)\b")
 _ALTMUSTER = re.compile(r"""from\s+['"]@/components/(?:mask-builder/(?:ObjectPage|ListReport|Wizard|Worklist|OverviewPage)"""
                         r"""|patterns/(?:ListReport|Wizard)|mask-builder['"])""")

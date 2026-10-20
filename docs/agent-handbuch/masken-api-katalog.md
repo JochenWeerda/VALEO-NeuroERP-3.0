@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (108 Masken).
+> Generiert aus `app/core/screen_definitions.py` (109 Masken).
 
 ## Übersicht
 
@@ -54,6 +54,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `crm/opportunity` | Opportunity | crm | niedrig | `order-to-cash` | `GET /api/v1/masks/crm/opportunity/agent-contract` |
 | `docflow/dokumenten-ruecklauf` | Dokumentenruecklauf | dms-compliance | niedrig | — | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/agent-contract` |
 | `einkauf/anfrage` | Einkaufsanfrage | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfrage/agent-contract` |
+| `einkauf/anfragen` | Anfragen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfragen/agent-contract` |
 | `einkauf/angebot` | Lieferantenangebot | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/angebot/agent-contract` |
 | `einkauf/anlieferavis` | Anlieferavis | einkauf | mittel | — | `GET /api/v1/masks/einkauf/anlieferavis/agent-contract` |
 | `einkauf/auftragsbestaetigung` | Auftragsbestaetigung | einkauf | mittel | — | `GET /api/v1/masks/einkauf/auftragsbestaetigung/agent-contract` |
@@ -1373,6 +1374,45 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/einkauf/anfragen/{entity_id}/actions/bearbeiten` |
+
+---
+
+### `einkauf/anfragen` — Anfragen
+
+**Zweck:** Bedarfsanforderungen des Einkaufs finden, an Lieferanten senden und in Bestellungen ueberfuehren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/einkauf/anfragen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/einkauf/anfragen/agent-contract` |
+| Readiness | `GET /api/v1/masks/einkauf/anfragen/readiness` |
+| Rollout-Route | `/mask-rollout/einkauf__anfragen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/einkauf/anfragen`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Anfragen sind noch im Entwurf?
+- Zeige dringende Anfragen.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neue Anfrage | safe | nein | `—` |
+| `export` | CSV-Export | safe | nein | `—` |
 
 ---
 

@@ -2,6 +2,19 @@
   "schemaVersion": 1,
   "source": "require_roles der Kommandowege (scripts/generate_action_permission_projection.py)",
   "screens": {
+    "abrechnung/eb-lieferschein-kontrolle": {
+      "document_control.write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "admin/identity-budgets": {
       "identity:quota:allocate": [
         [
@@ -253,6 +266,32 @@
         ]
       ]
     },
+    "auswertungen/auftrags-kontrolle": {
+      "document_control.write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "auswertungen/beleg-kontrolle": {
+      "document_control.write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "auswertungen/bonus-berechnung": {
       "reporting.bonus.write": [
         [
@@ -274,6 +313,19 @@
           "LAGER_BEARBEITEN",
           "PERSONAL_ADMIN",
           "PERSONAL_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "auswertungen/lieferschein-kontrolle": {
+      "document_control.write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
           "admin"
@@ -368,8 +420,44 @@
         ]
       ]
     },
+    "docflow/dokumenten-ruecklauf": {
+      "docflow.returns.write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "einkauf/anfrage": {
       "einkauf.anfrage.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "einkauf/anfragen": {
+      "einkauf.anfrage.senden": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.anfrage.bestellen": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.anfrage.loeschen": [
         [
           "EINKAUF_ADMIN",
           "EINKAUF_BEARBEITEN",
@@ -486,6 +574,15 @@
         ]
       ]
     },
+    "finance/rechnungstapel": {
+      "billing.batch.write": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "finance/steuerschluessel": {
       "finance.steuerschluessel.write": [
         [
@@ -554,6 +651,15 @@
           "AGRAR_BEARBEITEN",
           "FUTTERMITTEL_ADMIN",
           "FUTTERMITTEL_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "lager/fremdware": {
+      "inventory.foreign-goods.write": [
+        [
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
           "admin"
         ]
       ]

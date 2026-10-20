@@ -10,7 +10,9 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
   if (!screen || !user) return []
   const scopes = new Set(user.scopes ?? [])
   const roles = new Set(user.roles ?? [])
-  const declared = new Set((screen.actions ?? []).flatMap(action => action.permission ? [action.permission] : []))
+  const zeilen = [...(screen.tables ?? []), ...(screen.tabs ?? []).flatMap(tab => tab.tables ?? [])]
+    .flatMap(table => table.rowActions ?? [])
+  const declared = new Set([...(screen.actions ?? []), ...zeilen].flatMap(action => action.permission ? [action.permission] : []))
   if (screen.creation) declared.add(screen.creation.permission)
   return [...declared].filter(permission => {
     if (permission.startsWith('belege.')) {

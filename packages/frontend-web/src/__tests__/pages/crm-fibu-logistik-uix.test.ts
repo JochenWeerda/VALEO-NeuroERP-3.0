@@ -140,12 +140,14 @@ describe('CRM/FIBU/Logistik UIX', () => {
     expect(src.indexOf('<ListReport')).toBeLessThan(src.indexOf('<OperationalCaseHeader'))
   })
 
-  it('stellt Einkaufsanfragen Liste zuerst und echten Export', () => {
+  it('stellt Einkaufsanfragen als Studio-Liste mit echtem Export', () => {
+    // MASK-STUDIO-ROLLOUT: Spalten, Aktionen und Export stehen in der ScreenDefinition einkauf/anfragen.
     const src = read('../../pages/einkauf/anfragen-liste.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('exportToCSV')
-    expect(src.indexOf('<ListReport')).toBeLessThan(src.indexOf('<OperationalCaseHeader'))
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('einkauf/anfragen')
+    const seite = read('../../components/mask-builder/NativeListPage.tsx')
+    expect(seite).toContain('exportToCSV')
+    expect(seite).toContain("localEffect === 'download'")
   })
 
   it('stellt FIBU Offene Posten Arbeit zuerst mit Mahnlauf', () => {

@@ -202,6 +202,9 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `collab.note.created` | outbox | `app/api/v1/endpoints/collab_notes.py` |
 | `compliance.sanctions.checked` | outbox | `app/api/v1/endpoints/sanctions_compliance.py` |
 | `compliance.violations_detected` | outbox | `app/workers/compliance_monitor.py` |
+| `einkauf.anfrage.bestellt` | outbox | `app/api/v1/endpoints/einkauf_anfrage_kommandos.py` |
+| `einkauf.anfrage.geloescht` | outbox | `app/api/v1/endpoints/einkauf_anfrage_kommandos.py` |
+| `einkauf.anfrage.gesendet` | outbox | `app/api/v1/endpoints/einkauf_anfrage_kommandos.py` |
 | `einkauf.anfrage.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.auftragsbestaetigung.confirmed` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.auftragsbestaetigung.reviewed` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
@@ -232,10 +235,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `personal.bewerbung.created` | outbox | `app/api/v1/endpoints/personal_bewerbungen.py` |
 | `personal.einwilligungserklaerung.created` | outbox | `app/api/v1/endpoints/personal_bewerbungen.py` |
 | `personal.onboarding.created` | outbox | `app/api/v1/command_handlers/training.py` |
-| `personal.qualifikation.created` | outbox | `app/api/v1/command_handlers/training.py` |
-| `personal.schulung.created` | outbox | `app/api/v1/command_handlers/training.py` |
-| `qualitaet.reklamation.closed` | outbox | `app/api/v1/endpoints/mask_actions.py` |
-| … | | 11 weitere |
+| … | | 14 weitere |
 
 ### System
 

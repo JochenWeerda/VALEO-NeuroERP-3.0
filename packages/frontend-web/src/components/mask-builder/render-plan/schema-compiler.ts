@@ -65,6 +65,7 @@ function compileTable(
   tableProfile: ScreenTableProfile,
   density: ScreenDensity,
   onePage: boolean,
+  permissions: string[],
   tabKey?: string,
 ): RenderTablePlan {
   const pageSize = Math.min(table.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
@@ -96,7 +97,8 @@ function compileTable(
     serverPagination: table.serverPagination ?? true,
     tableProfile,
     rowRouteTemplate: table.rowRouteTemplate,
-    rowActions: table.rowActions,
+    // Zeilenaktionen wie Kopfaktionen nur mit Recht (Rollen-Projektion der Kommandowege).
+    rowActions: table.rowActions?.filter((action) => !action.permission || permissions.includes(action.permission)),
     bulkActions: table.bulkActions,
     rowDetail: compileRowDetail(table, onePage),
   }
@@ -284,7 +286,7 @@ export function compileRenderPlan(
   const sectionNavigation = resolveSectionNavigation(floorplan, columnNavigation, schema.layout?.sectionNavigation)
   const onePage = sectionNavigation === 'anchors'
 
-  const rootTables = (schema.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage))
+  const rootTables = (schema.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage, context.auth.permissions))
   for (const table of rootTables) {
     tablesByKey[table.key] = table
   }
@@ -307,7 +309,7 @@ export function compileRenderPlan(
       fieldsByKey[field.key] = field
     }
 
-    const tabTables = (tab.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage, tab.key))
+    const tabTables = (tab.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage, context.auth.permissions, tab.key))
     tablesByTab[tab.key] = tabTables
     for (const table of tabTables) {
       tablesByKey[table.key] = table

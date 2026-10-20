@@ -119,6 +119,8 @@ export interface ScreenTableDefinition {
     key: string
     label: string
     command?: string
+    /** Recht wie bei Kopfaktionen; ohne Recht blendet der Plan die Aktion aus. */
+    permission?: string
     dangerLevel?: ActionDangerLevel
     requiresConfirmation?: boolean
     enabledWhen?: ScreenCondition
@@ -133,6 +135,10 @@ export interface ScreenTableDefinition {
     /** Formular der Seite mit Sendeweg; nie automatisch abgeschickt (wie bei Kopfaktionen). */
     inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
     localEffect?: ScreenActionDefinition['localEffect']
+    /** Deklarierte Eingaben vor dem Kommando (Dialog der Maske, nie automatisch abgeschickt). */
+    inputFields?: ScreenActionInputField[]
+    /** Reine Navigation; Platzhalter wie {id} kommen aus der Zeile. */
+    navigationRoute?: string
   }>
   /** Selection-based actions; payload contains selectedRows and selectedIds. */
   bulkActions?: Array<{

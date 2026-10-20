@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 140,
-    "screens_with_actions": 70,
+    "actions": 141,
+    "screens_with_actions": 71,
     "domains": 14
   },
   "actions": [
@@ -1075,6 +1075,26 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/anfragen:neu",
+      "label": "Neue Anfrage",
+      "description": "Neue Anfrage (einkauf/anfragen)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/anfragen",
+      "intent_phrases": [
+        "Neue Anfrage"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/anfragen",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/anfrage-erfassung",
+        "command": null,
+        "method": null
       }
     },
     {

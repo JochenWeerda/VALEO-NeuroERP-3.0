@@ -507,6 +507,11 @@ def _generic_coverage(action: dict[str, Any]) -> dict[str, Any] | None:
     sd_action = next((a for a in iter_actions(definition or {}) if a.get("key") == key), None)
     if not sd_action:
         return None
+    if not sd_action.get("commandEndpoint") and not sd_action.get("inputFlow") and (
+            sd_action.get("localEffect") or sd_action.get("navigationRoute")):
+        # Deklarierte Oberflaechenwirkung (Navigation, Anzeige) ohne Serverwirkung — kein MCP-Write noetig.
+        return {"coverage": "local_ui", "mcp_tool_id": None,
+                "notes": "Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung."}
     if sd_action.get("inputFlow") and not sd_action.get("commandEndpoint"):
         # Eingabefluss der Maske: Ein Mensch fuellt das Formular (auch per CLI); Agenten bleiben gesperrt.
         return {"mcp_tool_id": None, "coverage": "blocked_human_only",

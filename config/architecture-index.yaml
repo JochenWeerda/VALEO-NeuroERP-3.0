@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-20
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-20T05:31:12Z'
+generated_at: '2026-10-20T08:03:24Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -177,8 +177,6 @@ domains:
     - /charge/wareneingang
     - /contracts
     - /contracts-v2
-    - /energie
-    - /energie/verbrauch
     - /foerderung
     - /foerderung/antrag
     - /foerderung/antrag/:id
@@ -680,7 +678,6 @@ domains:
     - /service/anfrage/neu
     - /service/anfragen
     - /service/rueckmeldung
-    - /termine/kalender
     - /verkauf
     - /verkauf/auftraege
     - /verkauf/auftraege/neu
@@ -1179,8 +1176,6 @@ domains:
     - /finance/zahlungseingang
     - /finance/zahlungslauf-kreditoren
     - /finanzplanung/liquiditaet
-    - /kasse/historie
-    - /kasse/tagesabschluss
     - /pos/customer-display
     - /pos/gift-card-neu
     - /pos/gift-card/:id
@@ -1206,9 +1201,6 @@ domains:
     - /reports
     - /reports/ReportsDashboardCharts
     - /reports/deckungsbeitrag
-    - /reports/lagerbestand
-    - /reports/umsatz
-    - /statistik/bewegungen
     backend_services:
     - accounting_export_profiles
     - ap_invoice_kernel_posting
@@ -2114,8 +2106,8 @@ domains:
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 940
-  frontend_routes_mapped: 940
+  frontend_routes_total: 932
+  frontend_routes_mapped: 932
   backend_services_total: 303
   backend_services_mapped: 303
   backend_endpoints_total: 466
