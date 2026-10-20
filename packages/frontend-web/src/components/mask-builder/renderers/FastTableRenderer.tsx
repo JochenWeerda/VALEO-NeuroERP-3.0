@@ -131,7 +131,8 @@ export const FastTableRenderer = memo(function FastTableRenderer({
   onRowSelect,
   suppressHeading = false,
 }: FastTableRendererProps): JSX.Element {
-  const isServerPaged = table.serverPagination && Boolean(onQueryChange)
+  // Blaettern am Server oder, ohne Serverblaetterung, in der Laufzeit (die dann `total` liefert und die Seite schneidet).
+  const isServerPaged = Boolean(onQueryChange) && (table.serverPagination || total !== undefined)
   const visibleRows = isServerPaged ? rows : rows.slice(0, table.pageSize)
   const totalPages = total !== undefined ? Math.ceil(total / table.pageSize) : undefined
   const activeFilterPlan = filterPlan && Object.keys(filterPlan).length > 0 ? filterPlan : undefined

@@ -113,6 +113,22 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 - MCP-Zaehltests leiten die Zahl der `local_ui`-Eintraege aus den Listen-Definitionen ab.
 - Ratsche: Altmuster 98 -> 96 (`einkauf/bestellungen` und `einkauf`).
 
+## Laufzeit: Tabellen ohne Serverblaetterung (20.10.2026)
+
+- **Befund, behoben (zentral):** Fuer Tabellen mit `serverPagination: false` schickte die Laufzeit trotzdem
+  `page`/`limit`/`q` an den Dienst, und der Renderer zeigte nur die ersten `pageSize` Zeilen ohne Blaettern. Dienste
+  ohne `q`-Auswertung (alle Einkaufslisten) machten die Suche wirkungslos; Dienste mit `limit` lieferten still nur
+  die erste Seite.
+- Jetzt: einmal bis zur `pageSize` der Datenquelle laden, Suche/Filter/Sortierung/Seite im Browser
+  (`runtime/client-table-query.ts`), Blaettern mit Gesamtzahl. Gilt fuer alle Masken mit solchen Tabellen.
+
+## Eingangsrechnungen zurueckgestellt
+
+`einkauf/rechnungseingaenge-liste` hat vier parallele Wege (Compat `/einkauf/rechnungseingaenge/*`, Einkaufsrouter,
+`finance/ap/invoices` der nativen Maske `finance/ap-invoice`, DocFlow-Beleg `beleg/purchase-invoice`). Nach den
+Vorgaben (DocFlow fuehrend, ein Beleg ein Besitzer, eine Belegmaske mit Varianten, Kontroll-Engine beim Buchen)
+gehoert die Liste in die Belegwelle, nicht in einen Listenumbau.
+
 ## CI-Nachlauf (20.10.2026)
 
 - Reine Oberflaechenaktionen der Listen (Export, Anlage oeffnen) tragen `stubReason` und einen `command`/eine
