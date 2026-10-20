@@ -1,14 +1,19 @@
 """
 CRM activity endpoints proxied via crm-core.
+
+crm-core fuehrt den Mandanten an der Aktivitaet, der Proxy wertete ihn bis 21.10.2026 nicht aus: Liste, Abruf,
+Aendern, Loeschen und die Unterlisten reichten Aktivitaeten *aller* Mandanten durch, die Anlage trug den
+Standardmandanten ein. Jetzt gilt der gepruefte Kontext (``get_tenant_id``) an jedem Weg.
 """
 
+from contextvars import ContextVar
 from typing import Any
 
 import httpx
-from fastapi import APIRouter, HTTPException, Path, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from pydantic import BaseModel, Field
 
-from ....core.config import settings
+from ....core.tenant import get_tenant_id
 from ....integrations import crm_core_client
 from ..schemas.base import PaginatedResponse
 from ..schemas.crm import Activity, ActivityCreate, ActivityUpdate
@@ -18,7 +23,15 @@ from app.api.v1.schemas.activities_schemas import ActivitiesOut
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
-router = APIRouter()
+_MANDANT: ContextVar[str] = ContextVar("aktivitaeten_mandant")
+
+
+async def _mandant_merken(tenant_id: str = Depends(get_tenant_id)) -> None:
+    # async: der Wert muss im selben Kontext wie der Endpunkt gesetzt werden (sync liefe im Threadpool).
+    _MANDANT.set(tenant_id)
+
+
+router = APIRouter(dependencies=[Depends(_mandant_merken)])
 
 
 class _StringListItem(BaseModel):
@@ -44,7 +57,7 @@ def _adapt_activity(core_activity: crm_core_client.CRMCoreActivity) -> dict:
         "main_topics": core_activity.main_topics or [],
         "orders_placed": core_activity.orders_placed or [],
         "follow_up_actions": core_activity.follow_up_actions or [],
-        "tenant_id": settings.DEFAULT_TENANT_ID,
+        "tenant_id": core_activity.tenant_id,
         "created_at": core_activity.created_at,
         "updated_at": core_activity.updated_at,
     }
@@ -73,10 +86,13 @@ def _raise_core_error(exc: Exception, not_found_detail: str, default_detail: str
 
 async def _get_activity_or_404(activity_id: str) -> crm_core_client.CRMCoreActivity:
     try:
-        return await crm_core_client.get_activity(activity_id)
+        activity = await crm_core_client.get_activity(activity_id)
     except Exception as exc:
         _raise_core_error(exc, "Activity not found", f"Failed to retrieve activity: {exc}")
-    raise HTTPException(status_code=500, detail="Failed to retrieve activity")
+        raise HTTPException(status_code=500, detail="Failed to retrieve activity") from exc
+    if activity.tenant_id != _MANDANT.get():
+        raise HTTPException(status_code=404, detail="Activity not found")
+    return activity
 
 
 def _validate_item_index(items: list[Any], item_index: int, field_label: str) -> None:
@@ -118,7 +134,10 @@ async def list_activities(
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to list activities: {exc}") from exc
 
-    items = [_adapt_activity(activity) for activity in activities]
+    eigene = [activity for activity in activities if activity.tenant_id == _MANDANT.get()]
+    if len(eigene) != len(activities):
+        total = len(eigene)  # crm-core filterte nicht nach Mandant; die Seite zaehlt nur eigene
+    items = [_adapt_activity(activity) for activity in eigene]
     return PaginatedResponse[Activity](
         items=[Activity.model_validate(item) for item in items],
         total=total,
@@ -132,21 +151,13 @@ async def list_activities(
 
 @router.get("/{activity_id}", response_model=Activity, summary="Activity abrufen")
 async def get_activity(activity_id: str):
-    try:
-        activity = await crm_core_client.get_activity(activity_id)
-    except httpx.HTTPStatusError as exc:
-        if exc.response.status_code == 404:
-            raise HTTPException(status_code=404, detail="Activity not found") from exc
-        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve activity: {exc}") from exc
-    return Activity.model_validate(_adapt_activity(activity))
+    return Activity.model_validate(_adapt_activity(await _get_activity_or_404(activity_id)))
 
 
 @router.post("/", response_model=Activity, status_code=status.HTTP_201_CREATED, summary="Activity anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_activity(payload: ActivityCreate):
     try:
-        body = _map_activity_payload(payload)
+        body = {**_map_activity_payload(payload), "tenant_id": _MANDANT.get()}
         created = await crm_core_client.create_activity(body)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to create activity: {exc}") from exc
@@ -155,6 +166,7 @@ async def create_activity(payload: ActivityCreate):
 
 @router.put("/{activity_id}", response_model=Activity, summary="Activity aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_activity(activity_id: str, payload: ActivityUpdate):
+    await _get_activity_or_404(activity_id)
     try:
         body = _map_activity_payload(payload)
         updated = await crm_core_client.update_activity(activity_id, body)
@@ -170,6 +182,7 @@ async def update_activity(activity_id: str, payload: ActivityUpdate):
 @router.delete("/{activity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Activity lÃ¶schen",
     response_model=None, dependencies=SCHREIBEN["CRM"])
 async def delete_activity(activity_id: str):
+    await _get_activity_or_404(activity_id)
     try:
         await crm_core_client.delete_activity(activity_id)
     except httpx.HTTPStatusError as exc:

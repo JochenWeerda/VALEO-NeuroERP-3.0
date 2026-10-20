@@ -358,6 +358,18 @@ optionalem Ergebnis. Befund: Erledigen einer **fremden** Wiedervorlage aenderte 
 zurueck (Lesen ohne Mandant) — jetzt 404. Kein Befund: der Kundenname aus `public.kunden` (Kontakte verweisen per
 Fremdschluessel dorthin, Kundennummer systemweit eindeutig).
 
+## CRM-Aktivitaeten: Mandant und zwei Speicher (21.10.2026)
+
+**Sicherheitsbefund, behoben:** `app/api/v1/endpoints/activities.py` (crm-core-Proxy) wertete den Mandanten der
+Aktivitaet nicht aus. Produktiv beschattet er fuer `/api/v1/crm/activities/{id}` die mandantengebundenen Wege von
+`app.crm.router`: Abruf, Aendern, Loeschen und Unterlisten fremder Aktivitaeten waren moeglich, die Anlage trug den
+Standardmandanten ein. Jetzt Kontextmandant an jedem Weg (`tests/test_aktivitaeten_crm_core_mandant.py`).
+
+**Offen (CRM-Konsolidierung):** zwei Speicher am selben Pfad — `GET/POST /api/v1/crm/activities` (ohne Schraegstrich)
+treffen `app.crm.router` (lokale Tabelle, Liste als Array), `/{id}` den crm-core-Proxy. Die handgebaute Seite las
+`items` aus dem Array und zeigte deshalb nie Aktivitaeten; eine angelegte Aktivitaet war ueber die Detailansicht
+nicht auffindbar. Die Studio-Liste wartet auf die Entscheidung des fuehrenden Speichers.
+
 ## Einordnung: Mandant aus Query/Body (20.10.2026)
 
 208 Wege deklarieren `tenant_id` als Query-Parameter (Standard oft `"system"`), weitere tragen ihn im Body. Das ist
