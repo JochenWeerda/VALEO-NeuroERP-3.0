@@ -121,7 +121,7 @@ async def lead_bearbeiten(entity_id: str, body: dict[str, Any] = Body(default_fa
     from app.api.v1.endpoints.leads import LeadUpdate
     from app.services import crm_lead_service
 
-    async def aendern(session: Session, werte: Any, eid: str, tid: str) -> None:
+    def aendern(session: Session, werte: Any, eid: str, tid: str) -> None:
         crm_lead_service.update(session, tid, eid, werte.model_dump(exclude_unset=True))
         session.commit()
 
@@ -289,7 +289,7 @@ async def reklamation_bearbeiten(entity_id: str, request: Request, body: dict[st
     from app.api.v1.endpoints.reklamation_api import _add_audit, _query_reklamation
     from app.core.reklamation import ReklamationsStatus
 
-    async def aendern(session: Session, werte: Any, eid: str, tid: str) -> None:
+    def aendern(session: Session, werte: Any, eid: str, tid: str) -> None:
         zeile = _query_reklamation(session, eid, tid)
         neu = werte.model_dump(exclude_unset=True)
         vorher = {"zustaendiger": zeile.zustaendiger, "frist_datum": str(zeile.frist_datum)}

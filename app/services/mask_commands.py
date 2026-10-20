@@ -19,7 +19,7 @@ from pydantic import BaseModel, ValidationError
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
+from app.services.mask_action_runtime_service import MaskActionResult, _ergebnis, run_delegated_mask_action
 
 
 def begruendung(body: dict[str, Any]) -> str:
@@ -44,7 +44,7 @@ async def statusaktion(
     """``status_sql`` liest eine Zeile mit ``status`` fuer ``:id`` und ``:tid`` (mandantengenau)."""
     reason = begruendung(body)
 
-    async def pruefen(db_: Session, payload: dict, eid: str, tid: str) -> list[dict]:
+    def pruefen(db_: Session, payload: dict, eid: str, tid: str) -> list[dict]:
         if begruendung_pflicht and not 5 <= len(reason) <= 500:
             return [{"field": "_auditReason", "message": "Begruendung mit 5 bis 500 Zeichen erforderlich.",
                      "severity": "blocking"}]
@@ -60,7 +60,7 @@ async def statusaktion(
                 return [{"field": "_entity", "message": grund, "severity": "blocking"}]
         return []
 
-    async def delegieren(db_: Session, payload: dict, eid: str, tid: str) -> str:
+    def delegieren(db_: Session, payload: dict, eid: str, tid: str) -> str:
         return ausfuehren(db_, payload) or f"{action_key} ausgefuehrt."
 
     return await run_delegated_mask_action(
@@ -70,9 +70,9 @@ async def statusaktion(
     )
 
 
-def zeile_per_sql(sql: str) -> Callable[[Session, str, str], Awaitable[Mapping[str, Any] | None]]:
+def zeile_per_sql(sql: str) -> Callable[[Session, str, str], Mapping[str, Any] | None]:
     """Lesefunktion fuer ``bearbeiten``: ``sql`` liest eine Zeile mit ``status`` fuer ``:id`` und ``:tid``."""
-    async def lesen(db: Session, entity_id: str, tenant_id: str) -> Mapping[str, Any] | None:
+    def lesen(db: Session, entity_id: str, tenant_id: str) -> Mapping[str, Any] | None:
         return db.execute(text(sql), {"id": entity_id, "tid": tenant_id}).mappings().first()
     return lesen
 
@@ -91,8 +91,8 @@ async def bearbeiten(
     body: dict[str, Any],
     felder: Mapping[str, str],
     modell: type[BaseModel],
-    lesen: Callable[[Session, str, str], Awaitable[Mapping[str, Any] | None]],
-    aendern: Callable[[Session, BaseModel, str, str], Awaitable[Any]],
+    lesen: Callable[[Session, str, str], Awaitable[Mapping[str, Any] | None] | Mapping[str, Any] | None],
+    aendern: Callable[[Session, BaseModel, str, str], Awaitable[Any] | Any],
     event_type: str,
     erlaubt: Collection[str] | None = None,
     ergaenzen: Callable[[Session, dict[str, Any], str, str], dict[str, Any]] | None = None,
@@ -122,7 +122,7 @@ async def bearbeiten(
                      "severity": "blocking"}]
         if not eingabe:
             return [{"field": "_entity", "message": "Keine Aenderung angegeben.", "severity": "blocking"}]
-        row = await lesen(db_, eid, tid)
+        row = await _ergebnis(lesen(db_, eid, tid))
         if row is None:
             return [{"field": "_entity", "message": "Objekt nicht gefunden.", "severity": "blocking"}]
         if erlaubt is not None and row["status"] not in erlaubt:
@@ -135,7 +135,7 @@ async def bearbeiten(
         return []
 
     async def delegieren(db_: Session, payload: dict, eid: str, tid: str) -> str:
-        await aendern(db_, werte_aus(db_, eid, tid), eid, tid)
+        await _ergebnis(aendern(db_, werte_aus(db_, eid, tid), eid, tid))
         return f"Geaendert: {', '.join(sorted(eingabe))}."
 
     return await run_delegated_mask_action(

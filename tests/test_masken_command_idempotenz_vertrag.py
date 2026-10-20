@@ -309,6 +309,6 @@ def test_der_standardweg_prueft_vor_der_zustandspruefung_und_in_der_schreibtrans
     quelle = (WURZEL / "app/services/mask_action_runtime_service.py").read_text(encoding="utf-8")
     rumpf = quelle[quelle.index("async def run_delegated_mask_action("):]
     erster = rumpf.index("wiederholter_auftrag(")
-    pruefung = rumpf.index("await check_fn(")
+    pruefung = rumpf.index("await _ergebnis(check_fn(")
     zweiter = rumpf.index("wiederholter_auftrag(", pruefung)
     assert erster < pruefung < zweiter < rumpf.index("audit_id = _write_audit(")
