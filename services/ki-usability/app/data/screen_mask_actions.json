@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 184,
-    "screens_with_actions": 92,
-    "domains": 15
+    "actions": 192,
+    "screens_with_actions": 98,
+    "domains": 16
   },
   "actions": [
     {
@@ -2202,6 +2202,46 @@
       }
     },
     {
+      "id": "mask:foerderung/liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (foerderung/liste)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "foerderung/liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "foerderung/liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:foerderung/liste:neu",
+      "label": "Neuer Antrag",
+      "description": "Neuer Antrag (foerderung/liste)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "foerderung/liste",
+      "intent_phrases": [
+        "Neuer Antrag"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "foerderung/liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/foerderung/antrag",
+        "command": null,
+        "method": null
+      }
+    },
+    {
       "id": "mask:fuhrpark/ausgehende-dokumente:neu",
       "label": "Neu",
       "description": "Neu (fuhrpark/ausgehende-dokumente)",
@@ -2649,6 +2689,26 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:labor/proben-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (labor/proben-liste)",
+      "category": "mask-action",
+      "domain": "qualitaet",
+      "mask": "labor/proben-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "labor/proben-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
       }
     },
     {
@@ -3414,6 +3474,26 @@
       }
     },
     {
+      "id": "mask:projekte/liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (projekte/liste)",
+      "category": "mask-action",
+      "domain": "controlling",
+      "mask": "projekte/liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "projekte/liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
       "id": "mask:qualitaet/reklamation:abschliessen",
       "label": "Abschliessen",
       "description": "Abschliessen (qualitaet/reklamation)",
@@ -3628,6 +3708,46 @@
       }
     },
     {
+      "id": "mask:schaeden/liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (schaeden/liste)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "schaeden/liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "schaeden/liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:schaeden/liste:neu",
+      "label": "Schaden melden",
+      "description": "Schaden melden (schaeden/liste)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "schaeden/liste",
+      "intent_phrases": [
+        "Schaden melden"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "schaeden/liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/schaeden/meldung",
+        "command": null,
+        "method": null
+      }
+    },
+    {
       "id": "mask:schnittstelle/mde-inbox:process_pending",
       "label": "Ausstehende verarbeiten",
       "description": "Ausstehende verarbeiten (schnittstelle/mde-inbox)",
@@ -3764,6 +3884,46 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "driver.openAvailable",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:versicherungen/liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (versicherungen/liste)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "versicherungen/liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "versicherungen/liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:wartung/anlagen-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (wartung/anlagen-liste)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "wartung/anlagen-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "wartung/anlagen-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
         "method": null
       }
     }

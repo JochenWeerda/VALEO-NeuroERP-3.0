@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (130 Masken).
+> Generiert aus `app/core/screen_definitions.py` (136 Masken).
 
 ## Übersicht
 
@@ -87,6 +87,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/pruefkorb` | Prüfkorb | finance | niedrig | — | `GET /api/v1/masks/finance/pruefkorb/agent-contract` |
 | `finance/rechnungstapel` | Rechnungstapel | finance | niedrig | — | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
 | `finance/steuerschluessel` | Steuerschlüssel | finance | mittel | — | `GET /api/v1/masks/finance/steuerschluessel/agent-contract` |
+| `foerderung/liste` | Foerderantraege | agrar | niedrig | — | `GET /api/v1/masks/foerderung/liste/agent-contract` |
 | `fuhrpark/ausgehende-dokumente` | Ausgehende Belege | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/ausgehende-dokumente/agent-contract` |
 | `fuhrpark/fahrzeug-stamm` | Fahrzeug-Stamm | logistics | hoch | — | `GET /api/v1/masks/fuhrpark/fahrzeug-stamm/agent-contract` |
 | `fuhrpark/fahrzeuge` | Fahrzeuge | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/fahrzeuge/agent-contract` |
@@ -99,6 +100,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `futtermittel/einzelfuttermittel-liste` | Einzelfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/einzelfuttermittel-liste/agent-contract` |
 | `futtermittel/mischfuttermittel` | Mischfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/mischfuttermittel/agent-contract` |
 | `futtermittel/mischfuttermittel-liste` | Mischfuttermittel | futtermittel | niedrig | — | `GET /api/v1/masks/futtermittel/mischfuttermittel-liste/agent-contract` |
+| `labor/proben-liste` | Laborproben | qualitaet | niedrig | — | `GET /api/v1/masks/labor/proben-liste/agent-contract` |
 | `lager/article-stock` | Artikelbestand | lager | niedrig | `inventory-to-settlement` | `GET /api/v1/masks/lager/article-stock/agent-contract` |
 | `lager/fremdware` | Fremdware und Fremdbestand | inventory | niedrig | — | `GET /api/v1/masks/lager/fremdware/agent-contract` |
 | `lager/inventur-nebenlaeufe` | Inventur-Nebenlaeufe | inventory | hoch | — | `GET /api/v1/masks/lager/inventur-nebenlaeufe/agent-contract` |
@@ -122,12 +124,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `platform/studio-history-diff` | Änderungsvergleich | platform | niedrig | — | `GET /api/v1/masks/platform/studio-history-diff/agent-contract` |
 | `produktion/chargen-bearbeiten` | Chargen-Nummern bearbeiten | inventory | niedrig | — | `GET /api/v1/masks/produktion/chargen-bearbeiten/agent-contract` |
 | `produktion/produktionsleitstand` | Produktionsleitstand | agrar | mittel | — | `GET /api/v1/masks/produktion/produktionsleitstand/agent-contract` |
+| `projekte/liste` | Projekte | controlling | niedrig | — | `GET /api/v1/masks/projekte/liste/agent-contract` |
 | `qualitaet/reklamation` | Reklamation | qualitaet | mittel | `complaint-to-resolution` | `GET /api/v1/masks/qualitaet/reklamation/agent-contract` |
 | `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
 | `sales/gutschrift` | Gutschrift | sales | mittel | — | `GET /api/v1/masks/sales/gutschrift/agent-contract` |
 | `sales/invoice` | Ausgangsrechnung | sales | niedrig | — | `GET /api/v1/masks/sales/invoice/agent-contract` |
 | `sales/invoices` | Ausgangsrechnungen | sales | niedrig | — | `GET /api/v1/masks/sales/invoices/agent-contract` |
 | `sales/sales-order` | Verkaufsauftrag | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/sales-order/agent-contract` |
+| `schaeden/liste` | Schadenmeldungen | finance | niedrig | — | `GET /api/v1/masks/schaeden/liste/agent-contract` |
 | `schnittstelle/legacy-adapter-monitor` | Standard-/Unimet-Adapter | integration | niedrig | — | `GET /api/v1/masks/schnittstelle/legacy-adapter-monitor/agent-contract` |
 | `schnittstelle/mde-inbox` | MDE-Eingangskorb | platform | mittel | — | `GET /api/v1/masks/schnittstelle/mde-inbox/agent-contract` |
 | `strecke/disposition` | Strecken-Disposition | logistics | niedrig | — | `GET /api/v1/masks/strecke/disposition/agent-contract` |
@@ -141,6 +145,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `transporte/fahrer` | Fahrer | logistics | niedrig | — | `GET /api/v1/masks/transporte/fahrer/agent-contract` |
 | `verkauf/betriebsauftrag` | Betriebsauftrag drucken | sales | niedrig | — | `GET /api/v1/masks/verkauf/betriebsauftrag/agent-contract` |
 | `versand/versand-avis` | Versand-Avis | logistics | niedrig | — | `GET /api/v1/masks/versand/versand-avis/agent-contract` |
+| `versicherungen/liste` | Versicherungen | finance | niedrig | — | `GET /api/v1/masks/versicherungen/liste/agent-contract` |
+| `wartung/anlagen-liste` | Wartung | lager | niedrig | — | `GET /api/v1/masks/wartung/anlagen-liste/agent-contract` |
 | `workspace/einkauf` | Einkauf-Cockpit | einkauf | niedrig | — | `GET /api/v1/masks/workspace/einkauf/agent-contract` |
 | `workspace/fibu` | FIBU-Cockpit | finance | niedrig | — | `GET /api/v1/masks/workspace/fibu/agent-contract` |
 | `workspace/lager` | Lager-Cockpit | lager | niedrig | — | `GET /api/v1/masks/workspace/lager/agent-contract` |
@@ -991,6 +997,46 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `foerderung/liste` — Foerderantraege
+
+**Zweck:** Foerderantraege nach Programm und Stand verfolgen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/foerderung/liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/foerderung/liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/foerderung/liste/readiness` |
+| Rollout-Route | `/mask-rollout/foerderung__liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/foerderung/antraege`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Antraege sind eingereicht?
+- Welche Foerdersumme ist bewilligt?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neuer Antrag | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
 ### `produktion/produktionsleitstand` — Produktionsleitstand
 
 **Zweck:** Produktionsvorgaenge aus kanonischen Auftraegen und Bewegungen steuern.
@@ -1227,6 +1273,37 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `check` | Personal pruefen | moderate | nein | `/api/v1/compliance/sanctions/actions/pruefen/personal` |
+
+---
+
+## Domäne: controlling
+
+### `projekte/liste` — Projekte
+
+**Zweck:** Projekte nach Fortschritt, Budget und Ausgaben steuern.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/projekte/liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/projekte/liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/projekte/liste/readiness` |
+| Rollout-Route | `/mask-rollout/projekte__liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/projekte`
+
+**Beispiel-Prompts:**
+
+- Welche Projekte liegen ueber Budget?
+- Welche Projekte enden diesen Monat?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -2791,6 +2868,79 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `schaeden/liste` — Schadenmeldungen
+
+**Zweck:** Schadenmeldungen mit Meldefrist und Regulierungsstand verfolgen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/schaeden/liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/schaeden/liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/schaeden/liste/readiness` |
+| Rollout-Route | `/mask-rollout/schaeden__liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/schaeden/meldungen`
+
+**MCP-Tools (Domäne):**
+
+- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
+- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Schaeden muessen diese Woche gemeldet werden?
+- Welche Schaeden sind reguliert?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Schaden melden | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `versicherungen/liste` — Versicherungen
+
+**Zweck:** Versicherungsvertraege mit Praemie und Ablauf im Blick behalten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/versicherungen/liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/versicherungen/liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/versicherungen/liste/readiness` |
+| Rollout-Route | `/mask-rollout/versicherungen__liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/versicherungen`
+
+**MCP-Tools (Domäne):**
+
+- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
+- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Versicherungen laufen dieses Jahr aus?
+- Was kosten alle Praemien zusammen?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
 ### `workspace/fibu` — FIBU-Cockpit
 
 **Zweck:** Rollen-Startseite FIBU — offene Posten, faellige Zahlungen und Mahnstufen mit Sprung in Zahlungslauf und OP-Masken.
@@ -3562,6 +3712,42 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `stornieren` | Stornieren | high | ja | `/api/v1/lager/stock-movements/{entity_id}/actions/stornieren` |
+
+---
+
+### `wartung/anlagen-liste` — Wartung
+
+**Zweck:** Faellige Wartungen der Anlagen finden.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/wartung/anlagen-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/wartung/anlagen-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/wartung/anlagen-liste/readiness` |
+| Rollout-Route | `/mask-rollout/wartung__anlagen-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/wartung/anlagen`
+
+**MCP-Tools (Domäne):**
+
+- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.propose_opening` — scope `lager:write`, Risiko hoch
+- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Anlagen sind diesen Monat zur Wartung faellig?
+- Welche Anlagen sind defekt?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -4542,6 +4728,39 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 ---
 
 ## Domäne: qualitaet
+
+### `labor/proben-liste` — Laborproben
+
+**Zweck:** Laborproben und ihren Bearbeitungsstand verfolgen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/labor/proben-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/labor/proben-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/labor/proben-liste/readiness` |
+| Rollout-Route | `/mask-rollout/labor__proben-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/labor/proben`
+
+**MCP-Tools (Domäne):**
+
+- `qualitaet.reklamation.abschliessen` — scope `quality:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Proben sind noch ausstehend?
+- Welche Proben gingen diese Woche ans Labor?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
 
 ### `qualitaet/reklamation` — Reklamation
 

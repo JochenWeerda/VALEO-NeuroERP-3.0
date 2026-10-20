@@ -261,6 +261,17 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 - Ratsche: handgebaut 471 -> 465.
 - Zurueckgestellt: `zertifikate/liste` (Detail- und Anlage-Route zeigen die Liste selbst; Objektmaske fehlt).
 
+## Welle 1, Schritt 14 (20.10.2026): Betriebslisten ohne tote Links
+
+- Sechs Studio-Listen: Versicherungen, Wartung (Anlagen), Projekte, Laborproben (ohne Zeilenroute), Foerderantraege
+  (Zeile oeffnet den Antrag) und Schadenmeldungen (Zeile oeffnet die Meldung).
+- **Befund:** Bei Versicherungen, Wartung, Projekten und Laborproben zeigten die Detail- und Anlage-Routen die Liste
+  selbst (keine Objektseite); die Listen verlinken dort jetzt nichts, bis es eine Objektmaske gibt. Die Wartungsseite
+  erwartete `letzteWartung`/`naechsteWartung`, die API liefert `letzte_wartung`/`naechste_wartung` — die Spalten
+  waren immer leer.
+- `_liste` nimmt `row_route=None` (keine Zeilenroute statt totem Link).
+- Ratsche: handgebaut 465 -> 458.
+
 ## Barrierefreiheit: virtuelle Tabelle ohne Tabellenrolle (behoben 20.10.2026)
 
 - `components/ui/VirtualDataTable.tsx` zeichnet Kopf und Zeilen als `div`; Zeilen tragen `role="row"` (oder

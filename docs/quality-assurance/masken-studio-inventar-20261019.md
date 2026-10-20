@@ -8,9 +8,9 @@ Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentschei
 | Stufe | Routen | Anteil an Masken |
 |---|---:|---:|
 | studio_versioniert | 1 | 0.2 % |
-| screen_definition | 114 | 17.3 % |
+| screen_definition | 121 | 18.3 % |
 | builder_altmuster | 80 | 12.1 % |
-| handgebaut | 465 | 70.5 % |
+| handgebaut | 458 | 69.4 % |
 | weiterleitung | 2 |  |
 
 Gesamt 662 Routen, davon 660 Masken.
@@ -19,7 +19,7 @@ Gesamt 662 Routen, davon 660 Masken.
 
 | Befund | Anzahl |
 |---|---:|
-| Aktionen gesamt (ohne Doppel je Maske) | 404 |
+| Aktionen gesamt (ohne Doppel je Maske) | 412 |
 | davon serverwirksam | 267 |
 | … mit REST-Kommandoweg | 267 |
 | … mit eigenem MCP-Werkzeug | 46 |
@@ -151,7 +151,6 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | reports | 0 | 0 | 0 | 2 | 0 |
 | silo | 0 | 0 | 0 | 2 | 0 |
 | tankstelle | 0 | 0 | 0 | 2 | 0 |
-| wartung | 0 | 0 | 0 | 2 | 0 |
 | zertifikate | 0 | 0 | 0 | 2 | 0 |
 | alerts | 0 | 0 | 0 | 1 | 0 |
 | banken | 0 | 0 | 0 | 1 | 0 |
@@ -164,23 +163,19 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | einstellungen | 0 | 0 | 0 | 1 | 0 |
 | errors | 0 | 0 | 0 | 1 | 0 |
 | finanzplanung | 0 | 0 | 0 | 1 | 0 |
-| foerderung | 0 | 0 | 1 | 1 | 0 |
 | hilfe | 0 | 0 | 0 | 1 | 0 |
 | inbox | 0 | 0 | 0 | 1 | 0 |
 | inventory-dashboard | 0 | 0 | 0 | 1 | 0 |
 | inventory-reports | 0 | 0 | 0 | 1 | 0 |
-| labor | 0 | 0 | 0 | 1 | 0 |
 | mahnwesen | 0 | 0 | 0 | 1 | 0 |
 | management | 0 | 0 | 0 | 1 | 0 |
 | marketing | 0 | 0 | 0 | 1 | 0 |
 | mobile | 0 | 0 | 0 | 1 | 0 |
 | policies | 0 | 0 | 0 | 1 | 0 |
 | pricing | 0 | 0 | 0 | 1 | 0 |
-| projekte | 0 | 0 | 0 | 1 | 0 |
 | prospecting | 0 | 0 | 0 | 1 | 0 |
 | public | 0 | 0 | 0 | 1 | 0 |
 | rezepte | 0 | 0 | 0 | 1 | 0 |
-| schaeden | 0 | 0 | 2 | 1 | 0 |
 | schichtplan | 0 | 0 | 0 | 1 | 0 |
 | setup | 0 | 0 | 0 | 1 | 0 |
 | stammdaten | 0 | 0 | 0 | 1 | 0 |
@@ -188,7 +183,6 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | stock-management | 0 | 0 | 0 | 1 | 0 |
 | subventionen | 0 | 0 | 0 | 1 | 0 |
 | system | 0 | 0 | 0 | 1 | 0 |
-| versicherungen | 0 | 0 | 0 | 1 | 0 |
 | vertrieb | 0 | 0 | 0 | 1 | 0 |
 | weighing | 0 | 0 | 0 | 1 | 0 |
 | wissen | 0 | 0 | 0 | 1 | 0 |
@@ -196,10 +190,16 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | dev | 0 | 1 | 0 | 0 | 0 |
 | etiketten | 0 | 0 | 1 | 0 | 0 |
 | export | 0 | 0 | 1 | 0 | 0 |
+| foerderung | 0 | 1 | 1 | 0 | 0 |
+| labor | 0 | 1 | 0 | 0 | 0 |
 | logistik | 0 | 3 | 0 | 0 | 0 |
 | mask-rollout | 0 | 1 | 0 | 0 | 0 |
 | planung | 0 | 1 | 0 | 0 | 0 |
+| projekte | 0 | 1 | 0 | 0 | 0 |
+| schaeden | 0 | 1 | 2 | 0 | 0 |
 | studio | 0 | 1 | 0 | 0 | 0 |
 | transporte | 0 | 2 | 0 | 0 | 0 |
 | verladung | 0 | 1 | 1 | 0 | 0 |
+| versicherungen | 0 | 1 | 0 | 0 | 0 |
+| wartung | 0 | 2 | 0 | 0 | 0 |
 | workspace | 0 | 5 | 0 | 0 | 0 |

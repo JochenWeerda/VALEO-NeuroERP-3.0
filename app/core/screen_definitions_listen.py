@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 
-def _liste(*, screen_id: str, domain: str, title: str, subtitle: str, endpoint: str, row_route: str,
+def _liste(*, screen_id: str, domain: str, title: str, subtitle: str, endpoint: str, row_route: str | None,
            columns: list[dict[str, Any]], actions: list[dict[str, Any]], row_actions: list[dict[str, Any]],
            purpose: str, prompts: list[str], dangerous: list[dict[str, str]] | None = None,
            bundle: str, no_workflow: str, fetch_limit: int = 500) -> dict[str, Any]:
@@ -34,7 +34,9 @@ def _liste(*, screen_id: str, domain: str, title: str, subtitle: str, endpoint: 
         "actions": actions,
         "tables": [{
             "key": "list", "label": title, "dataSourceKey": "list", "serverPagination": False, "pageSize": 50,
-            "virtualized": True, "rowHeight": 40, "rowRouteTemplate": row_route,
+            "virtualized": True, "rowHeight": 40,
+            # Ohne Objektseite keine Zeilenroute (sonst toter Link).
+            **({"rowRouteTemplate": row_route} if row_route else {}),
             "columns": columns, "rowActions": row_actions,
         }],
         "noWorkflowReason": no_workflow,
@@ -790,6 +792,153 @@ def build_personal_mitarbeiter_liste() -> dict[str, Any]:
     )
 
 
+#: Diese Bereiche haben noch keine Detail- oder Anlageseite: Ihre Routen zeigten die Liste selbst. Die Listen
+#: verlinken deshalb nichts, bis es eine Objektmaske gibt (MASK-STUDIO-ROLLOUT, keine toten Links).
+
+
+def build_versicherungen_liste() -> dict[str, Any]:
+    """Versicherungsvertraege mit Praemie und Ablauf."""
+    return _liste(
+        screen_id="versicherungen/liste", domain="finance", title="Versicherungen",
+        subtitle="Vertraege mit Praemie, Summe und Ablauf", endpoint="/api/v1/versicherungen", row_route=None,
+        bundle="finance",
+        columns=[
+            {"key": "art", "label": "Art", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "versicherer", "label": "Versicherer", "filterable": True, "priority": "primary"},
+            {"key": "vertragsnummer", "label": "Vertrag", "filterable": True, "priority": "secondary"},
+            {"key": "praemie", "label": "Praemie", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "primary"},
+            {"key": "versicherungssumme", "label": "Summe", "numeric": True, "renderKind": "currency",
+             "priority": "secondary"},
+            {"key": "ablauf", "label": "Ablauf", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Versicherungsvertraege mit Praemie und Ablauf im Blick behalten.",
+        prompts=["Welche Versicherungen laufen dieses Jahr aus?", "Was kosten alle Praemien zusammen?"],
+        no_workflow="Vertragsliste ohne eigenen Ablauf.",
+    )
+
+
+def build_wartung_anlagen_liste() -> dict[str, Any]:
+    """Anlagen mit letzter und naechster Wartung."""
+    return _liste(
+        screen_id="wartung/anlagen-liste", domain="lager", title="Wartung", subtitle="Anlagen und Wartungstermine",
+        endpoint="/api/v1/wartung/anlagen", row_route=None, bundle="lager",
+        columns=[
+            {"key": "name", "label": "Anlage", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "standort", "label": "Standort", "filterable": True, "priority": "secondary"},
+            {"key": "letzte_wartung", "label": "Letzte Wartung", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "naechste_wartung", "label": "Naechste Wartung", "renderKind": "date", "sortable": True,
+             "priority": "primary"},
+            {"key": "verantwortlicher", "label": "Verantwortlich", "filterable": True, "priority": "tertiary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Faellige Wartungen der Anlagen finden.",
+        prompts=["Welche Anlagen sind diesen Monat zur Wartung faellig?", "Welche Anlagen sind defekt?"],
+        no_workflow="Anlagenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_projekte_liste() -> dict[str, Any]:
+    """Projekte mit Fortschritt und Budget."""
+    return _liste(
+        screen_id="projekte/liste", domain="controlling", title="Projekte",
+        subtitle="Projekte mit Fortschritt, Budget und Ausgaben", endpoint="/api/v1/projekte", row_route=None,
+        bundle="controlling",
+        columns=[
+            {"key": "name", "label": "Projekt", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "projektleiter", "label": "Leitung", "filterable": True, "priority": "secondary"},
+            {"key": "kunde", "label": "Kunde", "filterable": True, "priority": "secondary"},
+            {"key": "fortschritt", "label": "Fortschritt %", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "budget", "label": "Budget", "numeric": True, "renderKind": "currency", "priority": "primary"},
+            {"key": "ausgaben", "label": "Ausgaben", "numeric": True, "renderKind": "currency", "priority": "secondary"},
+            {"key": "enddatum", "label": "Ende", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Projekte nach Fortschritt, Budget und Ausgaben steuern.",
+        prompts=["Welche Projekte liegen ueber Budget?", "Welche Projekte enden diesen Monat?"],
+        no_workflow="Projektliste ohne eigenen Ablauf.",
+    )
+
+
+def build_labor_proben_liste() -> dict[str, Any]:
+    """Laborproben mit Typ, Artikel und Status."""
+    return _liste(
+        screen_id="labor/proben-liste", domain="qualitaet", title="Laborproben", subtitle="Proben und ihr Bearbeitungsstand",
+        endpoint="/api/v1/labor/proben", row_route=None, bundle="qualitaet",
+        columns=[
+            {"key": "probennummer", "label": "Probe", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "artikel", "label": "Artikel", "filterable": True, "priority": "secondary"},
+            {"key": "labor", "label": "Labor", "filterable": True, "priority": "secondary"},
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Laborproben und ihren Bearbeitungsstand verfolgen.",
+        prompts=["Welche Proben sind noch ausstehend?", "Welche Proben gingen diese Woche ans Labor?"],
+        no_workflow="Probenliste ohne eigenen Ablauf.",
+    )
+
+
+def build_foerder_antraege_liste() -> dict[str, Any]:
+    """Foerderantraege; Zeile oeffnet den Antrag."""
+    return _liste(
+        screen_id="foerderung/liste", domain="agrar", title="Foerderantraege",
+        subtitle="Antraege mit Programm, Flaeche und Betrag", endpoint="/api/v1/foerderung/antraege",
+        row_route="/foerderung/antrag/{id}", bundle="agrar",
+        columns=[
+            {"key": "nummer", "label": "Antrag", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "programm", "label": "Programm", "filterable": True, "priority": "primary"},
+            {"key": "antragsdatum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
+            {"key": "flaeche", "label": "Flaeche (ha)", "numeric": True, "priority": "secondary"},
+            {"key": "betrag", "label": "Betrag", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Neuer Antrag", "/foerderung/antrag"), _EXPORT],
+        row_actions=[],
+        purpose="Foerderantraege nach Programm und Stand verfolgen.",
+        prompts=["Welche Antraege sind eingereicht?", "Welche Foerdersumme ist bewilligt?"],
+        no_workflow="Der Stand steht am Antrag; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_schaeden_liste() -> dict[str, Any]:
+    """Schadenmeldungen mit Frist; Zeile oeffnet die Meldung."""
+    return _liste(
+        screen_id="schaeden/liste", domain="finance", title="Schadenmeldungen",
+        subtitle="Schaeden mit Meldefrist und Regulierung", endpoint="/api/v1/schaeden/meldungen",
+        row_route="/schaeden/{id}", bundle="finance",
+        columns=[
+            {"key": "meldungsnummer", "label": "Meldung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "art", "label": "Art", "filterable": True, "priority": "primary"},
+            {"key": "schadendatum", "label": "Schadendatum", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "melden_bis", "label": "Melden bis", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "schadenhoehe", "label": "Schadenhoehe", "numeric": True, "renderKind": "currency",
+             "priority": "secondary"},
+            {"key": "regulierungsbetrag", "label": "Reguliert", "numeric": True, "renderKind": "currency",
+             "priority": "tertiary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[_neu("Schaden melden", "/schaeden/meldung"), _EXPORT],
+        row_actions=[],
+        purpose="Schadenmeldungen mit Meldefrist und Regulierungsstand verfolgen.",
+        prompts=["Welche Schaeden muessen diese Woche gemeldet werden?", "Welche Schaeden sind reguliert?"],
+        no_workflow="Der Stand steht an der Meldung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -813,6 +962,12 @@ LISTEN_SCREEN_BUILDERS = {
     "artikel/liste": build_artikel_liste,
     "charge/liste": build_chargen_liste,
     "personal/mitarbeiter-liste": build_personal_mitarbeiter_liste,
+    "versicherungen/liste": build_versicherungen_liste,
+    "wartung/anlagen-liste": build_wartung_anlagen_liste,
+    "projekte/liste": build_projekte_liste,
+    "labor/proben-liste": build_labor_proben_liste,
+    "foerderung/liste": build_foerder_antraege_liste,
+    "schaeden/liste": build_schaeden_liste,
 }
 LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
                 "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
@@ -834,7 +989,13 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "agrar/psm-liste": "/agrar/psm",
                 "artikel/liste": "/artikel",
                 "charge/liste": "/charge/liste",
-                "personal/mitarbeiter-liste": "/personal/mitarbeiter"}
+                "personal/mitarbeiter-liste": "/personal/mitarbeiter",
+                "versicherungen/liste": "/versicherungen",
+                "wartung/anlagen-liste": "/wartung/anlagen",
+                "projekte/liste": "/projekte",
+                "labor/proben-liste": "/labor/proben",
+                "foerderung/liste": "/foerderung",
+                "schaeden/liste": "/schaeden"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
@@ -856,4 +1017,10 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "agrar/psm-liste": ["psm", "pflanzenschutzmittel", "pflanzenschutz"],
                    "artikel/liste": ["artikel", "artikelstamm", "produkte"],
                    "charge/liste": ["chargen", "partien", "lose"],
-                   "personal/mitarbeiter-liste": ["mitarbeiter", "mitarbeitende", "personal"]}
+                   "personal/mitarbeiter-liste": ["mitarbeiter", "mitarbeitende", "personal"],
+                   "versicherungen/liste": ["versicherungen", "policen", "versicherungsvertraege"],
+                   "wartung/anlagen-liste": ["wartung", "anlagen", "instandhaltung"],
+                   "projekte/liste": ["projekte", "projektliste", "vorhaben"],
+                   "labor/proben-liste": ["laborproben", "proben", "labor"],
+                   "foerderung/liste": ["foerderantraege", "foerderung", "antraege"],
+                   "schaeden/liste": ["schaeden", "schadenmeldungen", "versicherungsschaeden"]}
