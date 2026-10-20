@@ -18903,3 +18903,11 @@ Abnahme: mehr als100 Quellen, vollstaendige eindeutige Planung, unveraenderte
 Quellhashes/Idempotenz bei Wiederaufnahme, Drift/Fehler sperren, nur registrierte
 API-Wege; klare Trennung importiert/aktiviert. Bestehender Pruefstand, keine neue
 Datenbank/Container/Reset. Weitere Fachmigration bleibt nach Inventarbefund offen.
+
+
+**STUDIO-CLI-BULK Erreichbarkeit, Nutzerauftrag:** IPv4 localhost:8000 health200,
+Studio native-sources401 (korrekte Authgrenze); IPv6 ::1 akzeptiert Verbindung,
+antwortet aber nicht. Keycloak-Discovery ebenfalls200 ueber IPv4. Zusatzbesitz
+valeo_cli/cli.py ausschliesslich localhost-Transport mit IPv4-Quellbindung;
+externe Hosts/Issuer/TLS/Tokenpruefung unveraendert. Keine Docker-/OS-weite
+Netzwerkaenderung oder Dienstneustarts. Lokale CLI-Sitzung fehlt weiterhin.
