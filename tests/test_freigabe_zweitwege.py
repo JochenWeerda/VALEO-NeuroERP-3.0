@@ -72,10 +72,11 @@ def haus(monkeypatch):
             {"id": f"{mandant}-1400", "t": mandant})
         db.commit()
 
-    async def freigegeben(*_a, **_k):  # Der Freigabeablauf des AP-Moduls ist hier nicht Gegenstand.
+    def freigegeben(*_a, **_k):  # Der Freigabeablauf des AP-Moduls ist hier nicht Gegenstand.
         return SimpleNamespace(can_post=True, status="approved", required_approvals=1, current_approvals=1)
 
-    monkeypatch.setattr(ap_approval_workflow, "get_approval_status", freigegeben)
+    from app.services.ap_invoice_approval_service import APApprovalWorkflowService
+    monkeypatch.setattr(APApprovalWorkflowService, "status", freigegeben)
     monkeypatch.setattr(docflow_service, "assert_customer_allowed_for_invoice", lambda *_a, **_k: None)
     monkeypatch.setattr(sales_credit_notes, "assert_customer_allowed_for_invoice", lambda *_a, **_k: None)
     monkeypatch.setattr(finance_invoices, "assert_customer_allowed_for_invoice", lambda *_a, **_k: None)
@@ -205,16 +206,22 @@ def test_die_doppelte_finanzrechnung_sperrt_bis_zur_unabhaengigen_freigabe(haus)
     assert ereignisse[0] == ("approval_request", "anna") and ereignisse[-2:] == [("approval_grant", "carl"), ("approval_consume", "anna")]
 
 
-def test_auch_der_kernel_bucht_routine_und_sperrt_die_dublette(haus):
+def test_auch_der_kernel_bucht_routine_und_sperrt_die_dublette(haus, monkeypatch):
     from app.services.ap_invoice_kernel_posting import post_ap_invoice_kernel_sync
+    from app.services import ap_invoice_kernel_posting
+    from fastapi import HTTPException
+    monkeypatch.setattr(ap_invoice_kernel_posting, "verified_ap_user", lambda tenant: {"sub": "buchhaltung-1", "roles": ["FINANCE_ADMIN"]})
 
     erste = _eingangsrechnung(haus, ANNA, 700)
     with SessionLocal() as db:
         post_ap_invoice_kernel_sync(db, invoice_id=erste, tenant_id=haus["mandant"], posted_by="kernel")
+        db.commit()
     assert _buchungen(haus) == 1
     doppelt = _eingangsrechnung(haus, ANNA, 700)
     with SessionLocal() as db:
-        post_ap_invoice_kernel_sync(db, invoice_id=doppelt, tenant_id=haus["mandant"], posted_by="kernel")
+        with pytest.raises(HTTPException) as error:
+            post_ap_invoice_kernel_sync(db, invoice_id=doppelt, tenant_id=haus["mandant"], posted_by="kernel")
+        assert error.value.status_code == 409
     assert _buchungen(haus) == 1
 
 

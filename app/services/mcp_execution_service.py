@@ -423,9 +423,6 @@ class ApInvoiceProposeInput(BaseModel):
     invoice_id: str = Field(min_length=1, max_length=64)
 
 
-class ApInvoiceFreigebenInput(BaseModel):
-    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
-    proposal_id: str = Field(min_length=1, max_length=36)
 
 
 class InventurOpeningProposeInput(BaseModel):
@@ -703,8 +700,6 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _post_invoice(db, request, actor, tenant)
     if request.tool_name == "finance.ap_invoice.propose":
         return _propose_ap_freigabe(db, request, actor, tenant)
-    if request.tool_name == "finance.ap_invoice.freigeben":
-        return _freigeben_ap_invoice(db, request, actor, tenant)
     if request.tool_name == "fibu.open_items.list":
         return _list_open_items(db, request, actor, tenant)
     if request.tool_name == "fibu.dunning.status":
@@ -3643,7 +3638,7 @@ def _propose_ap_freigabe(db: Session, request: ToolExecutionRequest, actor: str,
     except ValidationError as exc:
         raise HTTPException(422, "Invalid AP invoice propose parameters") from exc
     if request.mode == "execute":
-        raise HTTPException(501, "AP freigabe is not an MCP execution on propose; use finance.ap_invoice.freigeben")
+        raise HTTPException(501, "AP sign-off requires the human review screen; proposals do not approve invoices")
     parameters = opened.model_dump(mode="json")
     if request.mode == "propose" and not (request.idempotency_key or "").strip():
         raise HTTPException(422, "propose requires an idempotency_key")
@@ -3728,116 +3723,6 @@ def _propose_ap_freigabe(db: Session, request: ToolExecutionRequest, actor: str,
         raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
 
 
-def _freigeben_ap_invoice(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
-    """Call the real AP freigeben CommandEndpoint only after an approved proposal."""
-    try:
-        payload = ApInvoiceFreigebenInput.model_validate(request.parameters)
-    except ValidationError as exc:
-        raise HTTPException(422, "Invalid AP invoice freigeben parameters") from exc
-    if request.mode == "propose":
-        raise HTTPException(422, "finance.ap_invoice.freigeben does not accept propose; use finance.ap_invoice.propose")
-    parameters = payload.model_dump(mode="json")
-    if request.mode == "execute" and not (request.idempotency_key or "").strip():
-        raise HTTPException(422, "execute requires an idempotency_key")
-    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-    try:
-        if request.mode == "execute":
-            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
-            replayed = _replay_or_none(
-                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
-            )
-            if replayed is not None:
-                return replayed
-        proposal = db.execute(text("""
-            SELECT proposal_id, action_type, approval_status, risk_level,
-                   context_snapshot, execution_result
-            FROM public.agent_proposals
-            WHERE proposal_id=:id AND tenant_id=:tenant
-            FOR UPDATE OF agent_proposals
-        """), {"id": payload.proposal_id, "tenant": tenant}).mappings().first()
-        if not proposal:
-            raise HTTPException(404, "Proposal not found in the authenticated tenant")
-        if proposal["action_type"] != _AP_FREIGABE_ACTION_TYPE:
-            raise HTTPException(409, "Proposal is not an AP freigabe proposal")
-        if proposal["approval_status"] != "approved":
-            raise HTTPException(409, "Proposal is not approved")
-        if proposal["execution_result"] is not None:
-            existing = proposal["execution_result"]
-            if isinstance(existing, str):
-                existing = json.loads(existing)
-            if isinstance(existing, dict) and existing.get("invoice_id"):
-                if request.mode != "execute":
-                    return {
-                        "success": True, "mode": request.mode, "approved": False,
-                        "already_executed": True,
-                        **{k: existing[k] for k in ("invoice_id", "invoice_number", "status") if k in existing},
-                    }
-                raise HTTPException(409, "Proposal was already executed")
-        snapshot = proposal["context_snapshot"] or {}
-        if isinstance(snapshot, str):
-            snapshot = json.loads(snapshot)
-        if not isinstance(snapshot, dict):
-            raise HTTPException(409, "Proposal snapshot is unusable")
-        invoice_id = snapshot.get("invoice_id")
-        if not isinstance(invoice_id, str) or not invoice_id.strip():
-            raise HTTPException(409, "Proposal snapshot lacks invoice_id")
-        invoice = _load_ap_invoice(db, invoice_id, tenant)
-        preview = _ap_invoice_preview(invoice, invoice_id)
-        preview["proposal_id"] = payload.proposal_id
-        if request.mode != "execute":
-            return {"success": True, "mode": request.mode, "approved": False, **preview}
-        from app.api.v1.endpoints.ap_invoices import approve_ap_invoice
-
-        user = {"sub": actor}
-        with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as child:
-            asyncio.run(
-                approve_ap_invoice(
-                    invoice_id,
-                    approved_by=None,
-                    db=child,
-                    tenant_id=tenant,
-                    user=user,
-                )
-            )
-        refreshed = _load_ap_invoice(db, invoice_id, tenant)
-        final_preview = _ap_invoice_preview(refreshed, invoice_id)
-        execution_result = {
-            "invoice_id": invoice_id,
-            "invoice_number": final_preview["invoice_number"],
-            "status": final_preview["status"],
-            "executed_by": actor,
-            "executed_at": datetime.now(timezone.utc).isoformat(),
-        }
-        db.execute(text("""
-            UPDATE public.agent_proposals
-            SET execution_result = CAST(:result AS json)
-            WHERE proposal_id = :id AND tenant_id = :tenant
-        """), {"result": json.dumps(execution_result), "id": payload.proposal_id, "tenant": tenant})
-        audit_id = _write_audit(
-            db, tenant_id=tenant, action_key=request.tool_name,
-            entity_type="ap_invoice", entity_id=invoice_id,
-            audit_reason="MCP AP freigabe from approved proposal",
-            idempotency_key=request.idempotency_key,
-            summary=f"AP freigabe {invoice_id} from proposal {payload.proposal_id} by {actor}",
-        )
-        result = {
-            "success": True, "mode": "execute", "replayed": False, "approved": True,
-            "proposal_id": payload.proposal_id, "auditEntryId": audit_id,
-            "fibu_journal": False,
-            **final_preview,
-        }
-        _store_execution(
-            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
-            actor=actor, fingerprint=fingerprint, result=result,
-        )
-        db.commit()
-        return result
-    except HTTPException:
-        db.rollback()
-        raise
-    except Exception as exc:
-        db.rollback()
-        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
 
 
 def _propose_invoice(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:

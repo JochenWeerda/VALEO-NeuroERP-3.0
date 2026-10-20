@@ -37,7 +37,8 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `ai_data_classification_service` | P2.3 — Lokale KI-Datenklassen fuer VALEO NeuroERP. |
 | `ai_engineering_metrics_service` | P2.2 — Produktivitaetsmetriken fuer AI-Engineering in VALEO. |
 | `annahme_service` | Service layer for compat Annahme (goods intake) and LKW queue routes. |
-| `ap_invoice_kernel_posting` | Kernel PostAPInvoice: gleiche Fachlogik wie POST /ap/invoices/{id}/post, aber ohne |
+| `ap_invoice_approval_service` | AP review before posting; every adapter uses the same locked transaction. |
+| `ap_invoice_kernel_posting` | Kernel adapter: same AP posting command, transaction owned by caller. |
 | `archive_service` | Archive Service |
 | `article_image_enrichment` | Article Image Enrichment Service |
 | `article_import` | FSX-ARTIKEL-IMPORT — kanonisches Zwischenformat fuer den Artikelstamm. |
@@ -55,7 +56,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `calendar_projection_service` | UIX-063 planning calendar projections. |
 | `case_management` | Case Management Service — NC-08 |
 | `closing_checklists_service` | Schemas and helpers for the Closing Checklists domain (FIBU-CLS-01). |
-| `command_handlers_finance` | Domain-Mutationen fuer Process-Kernel-Commands (Finance / AP). |
+| `command_handlers_finance` | AP kernel transport delegates to the same tenant-bound domain commands. |
 | `command_handlers_procurement` | Domain-Mutationen fuer Process-Kernel-Commands (Einkauf). |
 | `compat_helpers` | Shared helpers for compat service classes. |
 | `compensation_engine` | Compensation Engine — NC-006 |

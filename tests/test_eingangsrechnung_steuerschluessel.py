@@ -55,16 +55,17 @@ def haus(monkeypatch):
                 {"id": f"{mandant}-sk{code}", "t": mandant, "code": code, "name": name, "satz": satz, "vst": vst})
         db.commit()
 
-    async def freigegeben(*_a, **_k):
+    def freigegeben(*_a, **_k):
         return SimpleNamespace(can_post=True, status="approved", required_approvals=1, current_approvals=1)
 
-    monkeypatch.setattr(ap_approval_workflow, "get_approval_status", freigegeben)
+    from app.services.ap_invoice_approval_service import APApprovalWorkflowService
+    monkeypatch.setattr(APApprovalWorkflowService, "status", freigegeben)
     monkeypatch.setattr(ap_invoices, "evaluate_ap_invoice_datensatz", lambda *_a, **_k: SimpleNamespace(bestanden=True))
 
-    async def kein_ereignis(*_a, **_k):
+    def kein_ereignis(*_a, **_k):
         return None
 
-    monkeypatch.setattr(ap_invoices, "_store_ap_invoice_posted_event_in_outbox", kein_ereignis)
+    monkeypatch.setattr(APApprovalWorkflowService, "_post_event", staticmethod(kein_ereignis))
     app = FastAPI()
     register_domain_exception_handlers(app)
     app.include_router(ap_invoices.router)
@@ -248,8 +249,11 @@ def test_ohne_kontenrahmen_kein_kreditorenkonto(haus):
 
 # --- Der Kernel-Weg bucht dasselbe ----------------------------------------------------------
 
-def test_kernel_bucht_ueber_denselben_weg(haus):
+def test_kernel_bucht_ueber_denselben_weg(haus, monkeypatch):
     from app.services.ap_invoice_kernel_posting import post_ap_invoice_kernel_sync
+    from app.services import ap_invoice_kernel_posting
+    from fastapi import HTTPException
+    monkeypatch.setattr(ap_invoice_kernel_posting, "verified_ap_user", lambda tenant: {"sub": "buchhaltung-1", "roles": ["FINANCE_ADMIN"]})
 
     nummer = _anlegen(haus, [("9", None, 1, 100)])
     unklar = _anlegen(haus, [(None, 19, 1, 100)])
@@ -257,8 +261,10 @@ def test_kernel_bucht_ueber_denselben_weg(haus):
     _freigeben(unklar)
     with SessionLocal() as db:
         post_ap_invoice_kernel_sync(db, invoice_id=nummer, tenant_id=haus["mandant"], posted_by="buchhaltung-1")
-        post_ap_invoice_kernel_sync(db, invoice_id=unklar, tenant_id=haus["mandant"], posted_by="buchhaltung-1")
         db.commit()
+        with pytest.raises(HTTPException) as error:
+            post_ap_invoice_kernel_sync(db, invoice_id=unklar, tenant_id=haus["mandant"], posted_by="buchhaltung-1")
+        assert error.value.status_code == 409
     assert _buchung(haus["mandant"]) == [
         ("1576", Decimal("19.00"), Decimal("0.00")),
         ("1600", Decimal("0.00"), Decimal("119.00")),

@@ -78,7 +78,7 @@ def log_fibu_audit(
         user_agent: Optional User-Agent (sonst aus request)
         commit: False wenn der Aufrufer die gesamte Transaktion abschliesst
     """
-    uid, email = (user_id, user_email) if request is None and user_id and user_email else _user_from_request(request)
+    uid, email = (user_id, user_email or "") if request is None and user_id else _user_from_request(request)
     if request and not ip_address:
         ip_address = request.client.host if request.client else None
     if request and not user_agent:

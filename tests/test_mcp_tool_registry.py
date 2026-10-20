@@ -57,8 +57,8 @@ def test_summary_structure(svc: McpToolRegistryService) -> None:
     assert summary["validation_errors"] == []
 
 
-def test_registry_has_45_tools(svc: McpToolRegistryService) -> None:
-    assert len(svc.list_tools()) == 64  # +mask.actions.list, mask.action.execute (MCP-MASK-GENERIC)
+def test_registry_has_63_supported_tools(svc: McpToolRegistryService) -> None:
+    assert len(svc.list_tools()) == 63  # AP review is human-only; its old unbound MCP write was removed.
 
 
 def test_bonus_and_query_import_writes_are_catalogued(svc: McpToolRegistryService) -> None:
@@ -84,11 +84,8 @@ def test_ap_freigabe_tools_are_catalogued(svc: McpToolRegistryService) -> None:
     assert propose["scope"] == "finance:write"
     assert propose["risk_class"] == "high"
     assert propose["human_approval_required"] is True
-    freigeben = svc.get_tool("finance.ap_invoice.freigeben")
-    assert freigeben["scope"] == "finance:write"
-    assert freigeben["risk_class"] == "high"
-    assert freigeben["human_approval_required"] is True
-    assert freigeben["idempotent"] is True
+    with pytest.raises(KeyError):
+        svc.get_tool("finance.ap_invoice.freigeben")
 
 
 def test_sanctions_and_fracht_writes_are_catalogued(svc: McpToolRegistryService) -> None:

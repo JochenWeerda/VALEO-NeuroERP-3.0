@@ -19506,11 +19506,11 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/ap_approval_workflow.py",
-            "app/api/v1/endpoints/system_metrics.py"
+            "app/api/v1/endpoints/system_metrics.py",
+            "app/services/ap_invoice_approval_service.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/ap_approval_workflow.py"
+            "app/services/ap_invoice_approval_service.py"
           ]
         },
         "ap_approval_rules": {
@@ -19631,11 +19631,11 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/ap_approval_workflow.py",
-            "app/api/v1/endpoints/system_metrics.py"
+            "app/api/v1/endpoints/system_metrics.py",
+            "app/services/ap_invoice_approval_service.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/ap_approval_workflow.py"
+            "app/services/ap_invoice_approval_service.py"
           ]
         },
         "bank_accounts": {
@@ -21812,6 +21812,7 @@
             "app/finance/gobd.py",
             "app/finance/router.py",
             "app/infrastructure/models/journal.py",
+            "app/services/ap_invoice_approval_service.py",
             "app/services/finance_belegbuchung.py",
             "app/services/finance_closing_service.py",
             "app/services/finance_datev_service.py",

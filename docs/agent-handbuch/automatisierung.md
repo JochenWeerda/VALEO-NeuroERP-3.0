@@ -59,7 +59,6 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `einkauf.bestellung.versenden` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
-| `finance.ap_invoice.freigeben` | finance | `finance:write` | ja | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `finance.ap_invoice.propose` | finance | `finance:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `hr.bewerbung.speichern` | hr | `hr:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `hr.einwilligung.anlegen` | hr | `hr:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
@@ -208,7 +207,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `einkauf.bestellung.created_from_angebot` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `einkauf.bestellung.updated` | outbox | `app/api/v1/command_handlers/procurement.py` |
 | `einkauf.wareneingang.gebucht` | outbox | `app/api/v1/endpoints/mask_actions.py` |
-| `finance.ap_invoice.approved` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
+| `finance.ap_invoice.approval_decided` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
 | `finance.ar_open_item.dunning_created` | outbox | `app/api/v1/endpoints/open_items.py` |
 | `finance.bankkonto.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.billing_batch_line.retry` | outbox | `app/api/v1/endpoints/billing_batch.py` |

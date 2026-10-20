@@ -11659,19 +11659,22 @@
         "type": "object"
       },
       "ApprovalAction": {
-        "description": "Schema for approving/rejecting",
         "properties": {
           "action": {
-            "description": "Action: approve or reject",
+            "enum": [
+              "approve",
+              "reject"
+            ],
             "title": "Action",
             "type": "string"
           },
-          "approved_by": {
-            "description": "User approving/rejecting",
-            "title": "Approved By",
+          "approval_request_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Approval Request Id",
             "type": "string"
           },
-          "comment": {
+          "approved_by": {
             "anyOf": [
               {
                 "type": "string"
@@ -11680,21 +11683,62 @@
                 "type": "null"
               }
             ],
-            "description": "Comment/notes",
+            "deprecated": true,
+            "description": "Ignored; verified token subject is used",
+            "title": "Approved By"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Comment"
           },
           "invoice_id": {
-            "description": "AP Invoice ID",
+            "maxLength": 64,
+            "minLength": 1,
             "title": "Invoice Id",
             "type": "string"
           }
         },
         "required": [
+          "approval_request_id",
           "invoice_id",
-          "approved_by",
           "action"
         ],
         "title": "ApprovalAction",
+        "type": "object"
+      },
+      "ApprovalDecisionReference": {
+        "properties": {
+          "approval_request_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Approval Request Id",
+            "type": "string"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "required": [
+          "approval_request_id"
+        ],
+        "title": "ApprovalDecisionReference",
         "type": "object"
       },
       "ApprovalEvaluationIn": {
@@ -11719,9 +11763,26 @@
         "type": "object"
       },
       "ApprovalRequest": {
-        "description": "Schema for requesting approval",
         "properties": {
           "comment": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "invoice_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Invoice Id",
+            "type": "string"
+          },
+          "requested_by": {
             "anyOf": [
               {
                 "type": "string"
@@ -11730,42 +11791,41 @@
                 "type": "null"
               }
             ],
-            "description": "Comment/notes",
-            "title": "Comment"
-          },
-          "invoice_id": {
-            "description": "AP Invoice ID",
-            "title": "Invoice Id",
-            "type": "string"
-          },
-          "requested_by": {
-            "description": "User requesting approval",
-            "title": "Requested By",
-            "type": "string"
+            "deprecated": true,
+            "description": "Ignored; verified token subject is used",
+            "title": "Requested By"
           }
         },
         "required": [
-          "invoice_id",
-          "requested_by"
+          "invoice_id"
         ],
         "title": "ApprovalRequest",
         "type": "object"
       },
       "ApprovalRuleCondition": {
-        "description": "Condition for approval rule",
         "properties": {
           "field": {
-            "description": "Field to check (amount, material_group, supplier_id)",
+            "enum": [
+              "amount",
+              "material_group",
+              "supplier_id"
+            ],
             "title": "Field",
             "type": "string"
           },
           "operator": {
-            "description": "Operator (gt, gte, lt, lte, eq, in)",
+            "enum": [
+              "gt",
+              "gte",
+              "lt",
+              "lte",
+              "eq",
+              "in"
+            ],
             "title": "Operator",
             "type": "string"
           },
           "value": {
-            "description": "Value to compare",
             "title": "Value"
           }
         },
@@ -11778,28 +11838,26 @@
         "type": "object"
       },
       "ApprovalRuleCreate": {
-        "description": "Schema for creating an approval rule",
         "properties": {
           "active": {
             "default": true,
-            "description": "Active status",
             "title": "Active",
             "type": "boolean"
           },
           "approval_roles": {
-            "description": "Roles that can approve (e.g., ['manager', 'finance'])",
             "items": {
               "type": "string"
             },
+            "maxItems": 2,
             "minItems": 1,
             "title": "Approval Roles",
             "type": "array"
           },
           "conditions": {
-            "description": "Conditions that trigger this rule",
             "items": {
               "$ref": "#/components/schemas/ApprovalRuleCondition"
             },
+            "maxItems": 50,
             "minItems": 1,
             "title": "Conditions",
             "type": "array"
@@ -11814,11 +11872,9 @@
                 "type": "null"
               }
             ],
-            "description": "Rule description",
             "title": "Description"
           },
           "name": {
-            "description": "Rule name",
             "maxLength": 100,
             "minLength": 1,
             "title": "Name",
@@ -11826,12 +11882,10 @@
           },
           "priority": {
             "default": 0,
-            "description": "Rule priority (higher = checked first)",
             "title": "Priority",
             "type": "integer"
           },
           "required_approvals": {
-            "description": "Number of required approvals (2/3/4-eyes)",
             "maximum": 4.0,
             "minimum": 1.0,
             "title": "Required Approvals",
@@ -11848,7 +11902,6 @@
         "type": "object"
       },
       "ApprovalRuleResponse": {
-        "description": "Response schema for approval rule",
         "properties": {
           "active": {
             "title": "Active",
@@ -11933,7 +11986,6 @@
         "type": "string"
       },
       "ApprovalStatusResponse": {
-        "description": "Response schema for approval status",
         "properties": {
           "applicable_rule": {
             "anyOf": [
@@ -11947,6 +11999,17 @@
             ],
             "title": "Applicable Rule"
           },
+          "approval_request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Request Id"
+          },
           "approvals": {
             "items": {
               "additionalProperties": true,
@@ -11954,6 +12017,11 @@
             },
             "title": "Approvals",
             "type": "array"
+          },
+          "can_decide": {
+            "default": false,
+            "title": "Can Decide",
+            "type": "boolean"
           },
           "can_pay": {
             "title": "Can Pay",
@@ -11967,9 +12035,15 @@
             "title": "Current Approvals",
             "type": "integer"
           },
+          "explainability": {
+            "$ref": "#/components/schemas/ExplainabilityView"
+          },
           "invoice_id": {
             "title": "Invoice Id",
             "type": "string"
+          },
+          "override_resolution": {
+            "$ref": "#/components/schemas/PolicyOverrideResolution"
           },
           "rejections": {
             "items": {
@@ -11997,7 +12071,9 @@
           "rejections",
           "applicable_rule",
           "can_post",
-          "can_pay"
+          "can_pay",
+          "override_resolution",
+          "explainability"
         ],
         "title": "ApprovalStatusResponse",
         "type": "object"
@@ -68960,6 +69036,22 @@
         "additionalProperties": true,
         "description": "Englische Belegfelder plus deutsche Masken-Aliase.",
         "properties": {
+          "approval_can_decide": {
+            "default": false,
+            "title": "Approval Can Decide",
+            "type": "boolean"
+          },
+          "approval_request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Request Id"
+          },
           "beleg_nr": {
             "anyOf": [
               {
@@ -292146,7 +292238,7 @@
     },
     "/api/v1/finance/ap/approval-workflow/approve": {
       "post": {
-        "description": "Approve or reject an AP invoice.\n\nFreigeber ist der **angemeldete Nutzer**. Bis 07.10.2026 zaehlte der Workflow\nverschiedene Freigeber ueber ``approved_by`` aus dem Rumpf — eine Person konnte\neine Zwei-Stufen-Freigabe mit zwei Namen erfuellen.",
+        "description": "Decide on exactly the displayed request; verified independent human only.",
         "operationId": "approve_invoice_api_v1_finance_ap_approval_workflow_approve_post",
         "requestBody": {
           "content": {
@@ -292198,7 +292290,7 @@
     },
     "/api/v1/finance/ap/approval-workflow/request": {
       "post": {
-        "description": "Request approval for an AP invoice.",
+        "description": "Request a content-bound AP review using the verified requester.",
         "operationId": "request_approval_api_v1_finance_ap_approval_workflow_request_post",
         "requestBody": {
           "content": {
@@ -292360,7 +292452,7 @@
     },
     "/api/v1/finance/ap/approval-workflow/status/{invoice_id}": {
       "get": {
-        "description": "Get approval status for an AP invoice.",
+        "description": "No request, changed content or expired review never grants posting rights.",
         "operationId": "get_approval_status_api_v1_finance_ap_approval_workflow_status__invoice_id__get",
         "parameters": [
           {
@@ -292808,7 +292900,7 @@
     },
     "/api/v1/finance/ap/invoices/{invoice_id}/approve": {
       "post": {
-        "description": "Genehmigt eine Eingangsrechnung (für Freigabeworkflow).\n\nFreigeber ist der angemeldete Nutzer; ``approved_by`` wird nicht mehr uebernommen.",
+        "description": "Same content-bound decision as the workflow endpoint; no implicit self-request.",
         "operationId": "approve_ap_invoice_api_v1_finance_ap_invoices__invoice_id__approve_post",
         "parameters": [
           {
@@ -292821,6 +292913,16 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprovalDecisionReference"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {

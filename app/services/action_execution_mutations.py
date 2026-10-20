@@ -51,13 +51,11 @@ def apply_accepted_action_mutations(
     if result.status != ActionExecutionStatus.ACCEPTED:
         return
 
-    _persist_kernel_action_audit_no_commit(db, request, result)
-
-    handler = _DOMAIN_MUTATIONS.get(request.command_name)
-    if handler is not None:
-        handler(db, request, result)
-
     try:
+        _persist_kernel_action_audit_no_commit(db, request, result)
+        handler = _DOMAIN_MUTATIONS.get(request.command_name)
+        if handler is not None:
+            handler(db, request, result)
         db.commit()
     except Exception:
         try:

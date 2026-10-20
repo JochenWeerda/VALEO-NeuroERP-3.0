@@ -5,34 +5,33 @@ FIBU-AP-02: Eingangsrechnungen
 
 from fastapi import APIRouter, HTTPException, Depends, Body
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from typing import List, Optional, Any
 from datetime import datetime, timedelta
 import logging
 
 from app.core.database import get_db
 from app.auth.finance_roles import finance_admin, finance_read, finance_write
-from app.services.finance_freigabe import EingangsrechnungFreigabe, verlange_oder_409
 from app.core.tenant import get_tenant_id
 from app.core.data_quality_enforcement import (
     build_dq_error_detail,
     evaluate_ap_invoice_datensatz,
 )
 from app.core import endpoint_gateways
-from app.core.fibu_audit import log_fibu_audit
 from app.core.ap_approval_status import APPROVAL_STATUS_TO_DOCUMENT_STATUS
 from app.documents.models import SalesInvoice  # Reusing model structure for now
 from app.documents.router_helpers import get_repository, save_to_store, get_from_store, list_from_store, delete_from_store
-from app.domains.shared.events import get_event_publisher
-from app.domains.shared.process_events import APInvoicePosted
-from app.infrastructure.eventbus.outbox import OutboxPublisher
+from app.documents.repository import DocumentAlreadyExists, DocumentOwnershipError
 from app.finance.steuerschluessel import Steuerklaerung, vorsteuergruppen
-from app.services.finance_eingangsrechnung_buchung import buche_eingangsrechnung, positionen, summen
+from app.services.finance_eingangsrechnung_buchung import positionen, summen
 
 logger = logging.getLogger(__name__)
 from app.api.v1.schemas.base import StatusResponse, TypedObjectOut
 from app.api.v1.schemas.ap_invoices_schemas import ApInvoicesOut
 from app.api.v1.schemas.mask_entity_contracts import FinanceApInvoiceOut, ap_invoice_mask_aliases
-from app.core import finance_periods
+from app.core.akteur import gepruefter_akteur
+from app.api.v1.schemas.ap_approval_workflow_schemas import ApprovalAction, ApprovalDecisionReference
+from app.services.ap_invoice_approval_service import APApprovalWorkflowService
 
 
 router = APIRouter(prefix="/ap/invoices", tags=["finance", "ap", "invoices"])
@@ -68,6 +67,8 @@ def _compute_ap_invoice_semantic_status(invoice: dict[str, Any]) -> str:
 def _serialize_approval_snapshot(response) -> dict[str, Any]:
     return {
         "approval_status": response.status,
+        "approval_request_id": getattr(response, "approval_request_id", None),
+        "approval_can_decide": getattr(response, "can_decide", False),
         "approval_required_approvals": response.required_approvals,
         "approval_current_approvals": response.current_approvals,
         "approval_override_resolution": response.override_resolution.model_dump(exclude_none=True),
@@ -94,27 +95,6 @@ async def _enrich_invoice_with_approval(invoice: dict[str, Any], db: Session) ->
     enriched.update(_serialize_approval_snapshot(response))
     enriched["semantic_status"] = _compute_ap_invoice_semantic_status(enriched)
     return ap_invoice_mask_aliases(enriched)
-
-
-async def _store_ap_invoice_posted_event_in_outbox(
-    db,
-    *,
-    tenant_id: str,
-    invoice_id: str,
-    posted_by: str,
-    journal_entry_id: str | None,
-) -> None:
-    event = APInvoicePosted(
-        aggregate_id=invoice_id,
-        timestamp=datetime.utcnow(),
-        tenant_id=tenant_id,
-        workflow_instance_id=f"wf-ap-{invoice_id}",
-        invoice_id=invoice_id,
-        posted_by=posted_by,
-        journal_entry_id=journal_entry_id,
-    )
-    outbox = OutboxPublisher(db, get_event_publisher())
-    await outbox.store_event(event, tenant_id=tenant_id)
 
 
 def calculate_invoice_totals(invoice: SalesInvoice, db: Session, tenant_id: str) -> SalesInvoice:
@@ -165,6 +145,7 @@ async def create_ap_invoice(
     nutzer: dict = Depends(finance_write),
 ) -> dict:
     """Erstellt eine neue Eingangsrechnung (Kreditoren)."""
+    actor = gepruefter_akteur(nutzer)
     logger.info(f"Creating AP invoice: {doc.number}")
     try:
         doc.date = datetime.now().isoformat()[:10]  # Set current date
@@ -184,14 +165,24 @@ async def create_ap_invoice(
         daten = doc.model_dump()
         daten["tenantId"] = tenant_id
         # Wer angelegt hat, gibt spaeter nicht frei (Funktionstrennung, APPROVAL-001).
-        daten["createdBy"] = str((nutzer or {}).get("sub") or "") if isinstance(nutzer, dict) else ""
-        result = save_to_store("ap_invoice", doc.number, daten, repo)
+        daten["createdBy"] = actor
+        if repo is None:
+            raise HTTPException(503, "Eingangsrechnung benoetigt den Dokumentspeicher")
+        result = repo.save_document("ap_invoice", doc.number, daten, create_only=True)
         return {"status": "ok", "message": "AP Invoice created", "data": result}
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Error creating AP invoice: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to create AP invoice: {str(e)}")
+    except (DocumentAlreadyExists, DocumentOwnershipError):
+        db.rollback()
+        raise HTTPException(409, "Rechnungsnummer ist bereits vergeben") from None
+    except IntegrityError as error:
+        db.rollback()
+        if getattr(error.orig, "pgcode", None) == "23505":
+            raise HTTPException(409, "Rechnungsnummer ist bereits vergeben") from None
+        raise HTTPException(503, "Eingangsrechnung konnte nicht gespeichert werden") from None
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(503, "Eingangsrechnung konnte nicht gespeichert werden") from None
 
 
 @router.get("/{invoice_id}", summary="Ap invoice abrufen",
@@ -210,12 +201,13 @@ async def get_ap_invoice(
     response_model=ApInvoicesOut, dependencies=[Depends(finance_write)]
 )
 async def update_ap_invoice(
-    invoice_id: str, doc: SalesInvoice, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+    invoice_id: str, doc: SalesInvoice, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
+    user: dict = Depends(finance_write),
 ) -> dict:
     """Aktualisiert eine bestehende Eingangsrechnung."""
     logger.info(f"Updating AP invoice: {invoice_id}")
     repo = get_repository(db)
-    _rechnung(repo, invoice_id, tenant_id)
+    original = APApprovalWorkflowService(db, tenant_id).editable_invoice(invoice_id, user)
 
     doc.number = invoice_id  # Ensure number matches ID
     doc = calculate_invoice_totals(doc, db, tenant_id)
@@ -225,6 +217,9 @@ async def update_ap_invoice(
 
     daten = doc.model_dump()
     daten["tenantId"] = tenant_id
+    daten["createdBy"] = original.get("createdBy")
+    daten["updatedBy"] = gepruefter_akteur(user)
+    daten["status"] = "ENTWURF"
     result = save_to_store("ap_invoice", doc.number, daten, repo)
     return {"status": "ok", "message": "AP Invoice updated", "data": result}
 
@@ -271,12 +266,13 @@ async def list_ap_invoices(
     response_model=StatusResponse, dependencies=[Depends(finance_admin)]
 )
 async def delete_ap_invoice(
-    invoice_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)
+    invoice_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
+    user: dict = Depends(finance_admin),
 ) -> dict:
     """Löscht eine Eingangsrechnung."""
     logger.info(f"Deleting AP invoice: {invoice_id}")
     repo = get_repository(db)
-    _rechnung(repo, invoice_id, tenant_id)
+    APApprovalWorkflowService(db, tenant_id).editable_invoice(invoice_id, user, deleting=True)
     success = delete_from_store("ap_invoice", invoice_id, repo)
     if not success:
         raise HTTPException(status_code=404, detail="AP Invoice not found")
@@ -288,49 +284,16 @@ async def delete_ap_invoice(
 )
 async def approve_ap_invoice(
     invoice_id: str,
+    reference: ApprovalDecisionReference,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
     user: dict = Depends(finance_admin),
 ) -> dict:
-    """Genehmigt eine Eingangsrechnung (für Freigabeworkflow).
-
-    Freigeber ist der angemeldete Nutzer; ``approved_by`` wird nicht mehr uebernommen.
-    """
-    approver_id = str(user.get("sub") or "").strip()
-    logger.info(f"Approving AP invoice: {invoice_id} by {approver_id}")
-    repo = get_repository(db)
-    invoice = _rechnung(repo, invoice_id, tenant_id)
-
-    gateway = endpoint_gateways.get_approval_workflow_gateway()
-    if gateway is None:
-        from app.api.v1.endpoints.ap_approval_workflow import approve_invoice
-
-        response = await approve_invoice(
-            type("ApprovalActionCompat", (), {
-                "invoice_id": invoice_id,
-                "approved_by": approver_id,
-                "action": "approve",
-                "comment": None,
-            })(),
-            tenant_id=tenant_id,
-            db=db,
-            user=user,
-        )
-    else:
-        current_status = await gateway.get_status(invoice_id, tenant_id, db)
-        if current_status.status == "not_requested":
-            await gateway.request_approval(invoice_id, tenant_id, approver_id, None, db)
-        response = await gateway.approve_invoice(invoice_id, tenant_id, approver_id, "approve", None, db)
-
-    invoice["status"] = APPROVAL_STATUS_TO_DOCUMENT_STATUS.get(response.status, invoice.get("status", "ENTWURF"))
-    invoice["approvedBy"] = approver_id
-    invoice["approvedAt"] = datetime.now().isoformat()
-    save_to_store("ap_invoice", invoice_id, invoice, repo)
-    return {
-        "status": "ok",
-        "message": "AP Invoice approved",
-        "data": response.model_dump(exclude_none=True),
-    }
+    """Same content-bound decision as the workflow endpoint; no implicit self-request."""
+    action = ApprovalAction(invoice_id=invoice_id, approval_request_id=reference.approval_request_id,
+                            action="approve", comment=reference.comment)
+    response = APApprovalWorkflowService(db, tenant_id).decide(action, user)
+    return {"status": "ok", "message": "AP review decision recorded", "data": response.model_dump(exclude_none=True)}
 
 
 @router.post("/{invoice_id}/post", summary="Ap invoice erstellen",
@@ -343,90 +306,7 @@ async def post_ap_invoice(
     nutzer: dict = Depends(finance_admin),
 ) -> dict:
     """Bucht eine Eingangsrechnung (erzeugt GL-Buchung + OP)."""
-    # Bis 13.10.2026 kam der Buchende aus der Anfrage: Jeder konnte unter fremdem Namen buchen.
-    posted_by = str(nutzer.get("sub") or "").strip() if isinstance(nutzer, dict) else ''  # Buchender aus dem Token
-    if not posted_by:
-        raise HTTPException(status_code=403, detail="Gebucht wird nur mit einer angemeldeten Person.")
-    logger.info(f"Posting AP invoice: {invoice_id} by {posted_by}")
-    repo = get_repository(db)
-    # Ab hier ist invoice["tenantId"] der gepruefte Mandant.
-    invoice = _rechnung(repo, invoice_id, tenant_id)
-
-    # Check approval status via workflow API
-    try:
-        from app.api.v1.endpoints.ap_approval_workflow import get_approval_status
-        approval_status = await get_approval_status(invoice_id, tenant_id=invoice.get("tenantId", "system"), db=db)
-        
-        if not approval_status.can_post:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invoice must be approved before posting. Current status: {approval_status.status}, Required: {approval_status.required_approvals}, Current: {approval_status.current_approvals}"
-            )
-    except ImportError:
-        # Fallback to simple status check if workflow API not available
-        if invoice.get("status") != "FREIGEGEBEN":
-            raise HTTPException(
-                status_code=400,
-                detail="Invoice must be approved before posting"
-            )
-
-    # FIBU-GL-05: block posting in closed periods
-    invoice_date = invoice.get("date", datetime.now().isoformat()[:10])
-    period = str(invoice_date)[:7]
-    gesperrt = finance_periods.gesperrter_zustand(
-        db, invoice.get("tenantId", "system"), period
-    )
-    if gesperrt:
-        raise HTTPException(
-            status_code=403,
-            detail=finance_periods.meldung(period, gesperrt),
-        )
-
-    # Zentrale Freigabe (APPROVAL-001): Eine Finanzrechnung hat keinen Rechnungsabgleich und braucht deshalb die
-    # Freigabe einer zweiten Person — zusaetzlich zum Freigabeablauf dieses Moduls.
-    freigabe = EingangsrechnungFreigabe(db, tenant_id)
-    akteur = str(nutzer.get("sub") or "") if isinstance(nutzer, dict) else None
-    try:
-        verlange_oder_409(freigabe, freigabe.vorgang_aus(invoice_id, invoice), "post", akteur)
-    except HTTPException:
-        db.rollback()
-        raise
-    # Journal, offener Posten und Beleg in einer Transaktion. Scheitert etwas, bleibt die Rechnung freigegeben.
-    try:
-        je_id, gruppen = buche_eingangsrechnung(
-            db, tenant_id, invoice_id=invoice_id, invoice=invoice, posted_by=posted_by)
-    except Steuerklaerung as klaerung:
-        db.rollback()
-        raise HTTPException(
-            status_code=409,
-            detail=f"Eingangsrechnung {invoice.get('number', invoice_id)} nicht gebucht, bitte prüfen: {klaerung}",
-        ) from klaerung
-    except Exception:
-        db.rollback()
-        raise
-    netto, steuer, brutto = summen(gruppen)
-    invoice["subtotalNet"], invoice["totalTax"], invoice["totalGross"] = float(netto), float(steuer), float(brutto)
-    invoice["steuerPruefgrund"] = None
-    invoice["status"] = "VERBUCHT"
-    invoice["postedBy"] = posted_by
-    invoice["postedAt"] = datetime.now().isoformat()
-    invoice["journalEntryId"] = je_id
-    log_fibu_audit(
-        db, tenant_id, "create", "journal_entry", je_id,
-        {"source": "ap_invoice", "invoice_id": invoice_id},
-        request=None,
-    )
-    result = repo.save_document("ap_invoice", invoice_id, invoice, commit=False) if repo is not None \
-        else save_to_store("ap_invoice", invoice_id, invoice, repo)
-    db.commit()
-    try:
-        await _store_ap_invoice_posted_event_in_outbox(
-            db, tenant_id=tenant_id, invoice_id=invoice_id, posted_by=posted_by, journal_entry_id=je_id,
-        )
-    except Exception as exc:  # noqa: BLE001 — das Ereignis ist Benachrichtigung; die Buchung steht
-        db.rollback()
-        logger.warning("Could not store AP invoice posted outbox event: %s", exc)
-    return {"status": "ok", "message": "AP Invoice posted", "data": result}
+    return APApprovalWorkflowService(db, tenant_id).post_invoice(invoice_id, nutzer)
 
 
 @router.post("/{entity_id}/actions/freigeben", response_model=TypedObjectOut, summary="Eingangsrechnung freigeben (SPEC-P1-04)",
@@ -440,18 +320,42 @@ async def action_freigeben(
 ):
     """Delegiert an den Freigabeweg. Bis zum 07.10.2026 meldete diese Aktion Erfolg,
     ohne die Rechnung anzufassen."""
-    from app.services.mask_action_runtime_service import run_delegated_mask_action
+    from app.services.mask_action_runtime_service import run_delegated_mask_action, parse_action_body, MaskActionResult
+
+    def action_for(payload: dict, eid: str) -> ApprovalAction:
+        return ApprovalAction(invoice_id=eid, action="approve",
+            approval_request_id=payload.get("approval_request_id"), comment=payload.get("comment"))
 
     async def pruefen(db_: Session, payload: dict, eid: str, tid: str) -> list[dict]:
-        rechnung = get_from_store("ap_invoice", eid, get_repository(db_))
-        # Der Freigabeweg liest ohne Mandantenfilter; hier wird er nachgeholt.
-        if not rechnung or str(rechnung.get("tenantId") or "") != tid:
-            return [{"field": "_entity", "message": "Eingangsrechnung nicht gefunden.", "severity": "blocking"}]
+        from pydantic import ValidationError
+        try:
+            APApprovalWorkflowService(db_, tid).validate_decision(action_for(payload, eid), user)
+        except ValidationError:
+            return [{"field": "approval_request_id", "message": "Aktuelle Freigabeanfrage erforderlich.", "severity": "blocking"}]
+        except HTTPException as exc:
+            return [{"field": "_approval", "message": str(exc.detail), "severity": "blocking"}]
         return []
 
     async def freigeben(db_: Session, payload: dict, eid: str, tid: str) -> str:
-        await approve_ap_invoice(eid, approved_by=None, db=db_, tenant_id=tid, user=user)
-        return "Eingangsrechnung freigegeben."
+        response = APApprovalWorkflowService(db_, tid).decide(action_for(payload, eid), user)
+        return f"Freigabeentscheidung gespeichert ({response.status})."
+
+    # A cached outcome must not bypass today's person, policy or request checks.
+    try:
+        mode, _, key, payload = parse_action_body(body)
+    except ValueError:
+        return MaskActionResult(actionKey="freigeben", mode="invalid", success=False,
+                                error="Ungueltiger Aktionsmodus").model_dump()
+    errors = await pruefen(db, payload, entity_id, tenant_id)
+    db.rollback()
+    if errors:
+        return MaskActionResult(actionKey="freigeben", mode=mode, success=False,
+                                validationErrors=errors, error="Freigabepruefung fehlgeschlagen").model_dump()
+    if key:
+        import hashlib
+        from app.core.akteur import gepruefter_akteur
+        scoped = f"{tenant_id}:{gepruefter_akteur(user)}:{payload['approval_request_id']}:{key}"
+        body = {**body, "_idempotencyKey": hashlib.sha256(scoped.encode()).hexdigest()}
 
     result = await run_delegated_mask_action(
         db,
@@ -460,8 +364,8 @@ async def action_freigeben(
         entity_id=entity_id,
         tenant_id=tenant_id,
         body=body,
-        check_fn=pruefen,
+        check_fn=lambda *_: [],  # Same payload was checked before even considering a cached result.
         delegate_fn=freigeben,
-        outbox_event_type="finance.ap_invoice.approved",
+        outbox_event_type="finance.ap_invoice.approval_decided",
     )
     return result.model_dump()

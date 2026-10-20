@@ -33,8 +33,8 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
     assert by_id["mask:crm/customer-360:create_activity"]["mcp_tool_id"] == "crm.activity.create"
     assert by_id["mask:crm/opportunity:create_activity"]["mcp_tool_id"] == "crm.activity.create"
     assert by_id["mask:finance/payment-run:freigeben"]["coverage"] == "open_high"
-    assert by_id["mask:finance/ap-invoice:freigeben"]["coverage"] == "mapped"
-    assert by_id["mask:finance/ap-invoice:freigeben"]["mcp_tool_id"] == "finance.ap_invoice.freigeben"
+    assert by_id["mask:finance/ap-invoice:freigeben"]["coverage"] == "blocked_human_only"
+    assert by_id["mask:finance/ap-invoice:freigeben"]["mcp_tool_id"] is None
 
     native = {n["mcp_tool_id"] for n in data["mcp_native_writes"]}
     assert native >= {
@@ -81,7 +81,7 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
     assert by_id["mask:einkauf/purchase-order:speichern"]["mcp_tool_id"] == (
         "einkauf.bestellung.speichern"
     )
-    assert data["stats"]["by_coverage"].get("mapped", 0) == 43
+    assert data["stats"]["by_coverage"].get("mapped", 0) == 42
     assert data["stats"]["by_coverage"].get("blocked_no_endpoint", 0) == 0
     assert data["stats"]["by_coverage"].get("blocked_missing_tenant", 0) == 0
     assert data["stats"]["by_coverage"].get("local_ui", 0) == 15

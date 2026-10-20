@@ -101,3 +101,13 @@ def test_http_audit_never_falls_back_to_system_without_identity():
     with pytest.raises(HTTPException) as denied:
         _user_from_request(SimpleNamespace(state=SimpleNamespace()))
     assert denied.value.status_code == 403
+
+
+@pytest.mark.parametrize("email", [None, ""])
+def test_explicit_internal_actor_is_preserved_without_an_email(email):
+    db = MagicMock()
+    log_fibu_audit(db, 'synthetic-tenant', 'post', 'journal_entry', 'own', {},
+                   user_id='verified-provider-subject', user_email=email, commit=False)
+    entry = db.add.call_args.args[0]
+    assert entry.user_id == 'verified-provider-subject' and entry.user_email == ''
+    db.commit.assert_not_called()

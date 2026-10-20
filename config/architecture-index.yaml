@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-20
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-20T05:31:12Z'
+generated_at: '2026-10-20T08:13:03Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1211,6 +1211,7 @@ domains:
     - /statistik/bewegungen
     backend_services:
     - accounting_export_profiles
+    - ap_invoice_approval_service
     - ap_invoice_kernel_posting
     - billing_batch_service
     - closing_checklists_service
@@ -2116,8 +2117,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 940
   frontend_routes_mapped: 940
-  backend_services_total: 303
-  backend_services_mapped: 303
+  backend_services_total: 304
+  backend_services_mapped: 304
   backend_endpoints_total: 466
   backend_endpoints_mapped: 466
 unmapped:

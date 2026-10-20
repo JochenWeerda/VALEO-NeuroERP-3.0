@@ -10,12 +10,14 @@ type ExplainabilityDetail = {
 
 export type APApprovalStatusResponse = {
   invoice_id: string
+  approval_request_id?: string | null
   status: APApprovalStatus
   required_approvals: number
   current_approvals: number
   approvals: Array<Record<string, unknown>>
   rejections: Array<Record<string, unknown>>
   applicable_rule: Record<string, unknown> | null
+  can_decide?: boolean
   can_post: boolean
   can_pay: boolean
   override_resolution: Record<string, unknown>
@@ -31,13 +33,12 @@ export type APApprovalStatusResponse = {
 
 type APApprovalRequestPayload = {
   invoice_id: string
-  requested_by: string
   comment?: string
 }
 
 type APApprovalActionPayload = {
   invoice_id: string
-  approved_by: string
+  approval_request_id: string
   action: 'approve' | 'reject'
   comment?: string
 }

@@ -316,7 +316,15 @@ def pruefe_befund(db: Session, tenant_id: str, befund_id: str, pruefer: Any, not
 
 
 def technisches_konto(nutzer: Any) -> bool:
-    """Dienstkonten des Anmeldeanbieters (Client-Credentials) sind keine zweite Person."""
+    """Service accounts and marked delegated/agent identities are not a second person."""
+    if not isinstance(nutzer, dict):
+        return True
     roh = nutzer.get("raw") if isinstance(nutzer, dict) else None
+    if roh is not None and not isinstance(roh, dict):
+        return True
+    roh = roh or {}
+    if (nutzer.get("agent_id") or roh.get("agent_id") or roh.get("act") is not None
+            or str(roh.get("actor_type") or "").lower() in {"agent", "ai_agent", "service", "automation", "system"}):
+        return True
     name = str((roh or {}).get("preferred_username") or (nutzer.get("name") if isinstance(nutzer, dict) else "") or "")
     return name.startswith("service-account-") or bool((roh or {}).get("client_id") and not (roh or {}).get("preferred_username"))

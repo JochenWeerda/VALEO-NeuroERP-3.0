@@ -1682,7 +1682,7 @@ def build_finance_ap_invoice_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [
-            {"key": "freigeben", "label": "Freigeben", "kind": "primary", "dangerLevel": "moderate", "permission": "finance.ap.freigabe", "requiresConfirmation": True, "commandEndpoint": "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben", "method": "POST"},
+            {"key": "freigeben", "label": "Freigeben", "kind": "primary", "dangerLevel": "moderate", "permission": "finance.ap.freigabe", "enabledWhen": "approval_can_decide", "humanApprovalRequired": True, "forbiddenForAgents": True, "requiresConfirmation": True, "commandEndpoint": "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben", "method": "POST"},
         ],
         "noWorkflowReason": "Freigabe-Workflow ist tabellenbasiert — explizite Workflow-Deklaration nach vollstaendiger AP-Parity.",
         "agentContract": {

@@ -2132,3 +2132,13 @@ Fachkatalog, kataloggefuehrter Dialog, optionale kontingentierte Modellinterpret
 Der implizite Zwei-Prozent-Standard ist entfernt. Persistenter append-only Versionsspeicher, getrennte menschliche Genehmigung, Messprovenienz, Berechnungsnachweis und finanzielle Freigabebindung sind im Produktionsrouter integriert. Fehlende, manipulierte, widerrufene oder veraltete Nachweise sperren; Altbetraege umgehen die Grenze nicht. Nichtfinanzielle Warenannahme bleibt getrennt. 31 Backend-, 47 Frontend- und vier reale SQL-Prozessfaelle bestanden; lokale additive Migration integriert.
 
 Offen bleiben finanzielle Browserabnahme, begrenzter Modellaufruf, Liefer-/CI-Nachlauf und vollstaendige operative Abnahme. Hash/Formeltext oder eine vom Aufrufer gelieferte Behauptung sind kein Genehmigungsnachweis. Slice HARVEST-RULE-STORE-20261015 bleibt in Arbeit. Nicht unterstuetzte alternative Abzugsmodelle bleiben bewusst deaktiviert. [Standard](../architecture/harvest-deduction-contract-standard.md), [aktueller QA-Stand](../quality-assurance/harvest-rule-store-20261015.md).
+
+## AP-WORKFLOW-SECURITY-20261020 — verbindliche Sicherheitsgrenze
+
+AP-Antraege/Entscheidungen sind an gepruefte Urheber, Mandant, Inhalt, Antrags-ID,
+Funktionstrennung und bestehende Finanzrollen gebunden. HTTP, native Maske und reale
+Kernel-Kommandos verwenden dieselbe Fachgrenze; der obsolete direkte MCP-Freigabeadapter
+ist entfernt. Buchung umfasst Journal/OP/Dokument/Audit/Outbox in einer Transaktion.
+[Nachweise und verbleibende Betriebsgrenzen](../quality-assurance/ap-workflow-security-20261020.md).
+Dies ersetzt weder lokale Auslieferung noch Browserabnahme oder die separat offenen
+Studio-/Tabellen-/Providerbefunde.

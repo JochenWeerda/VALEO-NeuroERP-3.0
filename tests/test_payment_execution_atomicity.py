@@ -6,6 +6,7 @@ Every fixture owns unique records; never reset a shared database.
 from __future__ import annotations
 
 import os
+import json
 from concurrent.futures import ThreadPoolExecutor
 from decimal import Decimal
 from uuid import uuid4
@@ -190,7 +191,14 @@ def test_invalid_invoice_rolls_back_open_item(execution_case, invalid_doc):
     db, _, ids = execution_case
     doc = DocumentRepository(db).get_document("ap_invoice", ids["invoice"])
     doc.update(invalid_doc)
-    DocumentRepository(db).save_document("ap_invoice", ids["invoice"], doc)
+    if "tenantId" in invalid_doc:
+        # Deliberate own-row corruption for this payment-boundary test. The normal
+        # repository correctly forbids moving an existing document between tenants.
+        db.execute(text("UPDATE documents SET data=CAST(:data AS jsonb) WHERE doc_type='ap_invoice' AND doc_number=:id"),
+                   {"data":json.dumps(doc), "id":ids["invoice"]})
+        db.commit()
+    else:
+        DocumentRepository(db).save_document("ap_invoice", ids["invoice"], doc)
     db.commits = 0
     assert execute(execution_case).status_code == 409
     assert db.commits == 0

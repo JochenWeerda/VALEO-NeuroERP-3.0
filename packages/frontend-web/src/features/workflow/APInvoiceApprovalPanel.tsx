@@ -20,8 +20,6 @@ type APInvoiceApprovalPanelProps = {
   onStatusChanged: () => Promise<void> | void
 }
 
-const CURRENT_USER = 'current_user'
-
 export default function APInvoiceApprovalPanel({
   invoiceId,
   canRequestApproval,
@@ -42,7 +40,6 @@ export default function APInvoiceApprovalPanel({
   const handleRequestApproval = async (): Promise<void> => {
     await requestApproval.mutateAsync({
       invoice_id: invoiceId,
-      requested_by: CURRENT_USER,
       comment: comment.trim() || undefined,
     })
     setComment('')
@@ -50,9 +47,10 @@ export default function APInvoiceApprovalPanel({
   }
 
   const handleApprovalAction = async (action: 'approve' | 'reject'): Promise<void> => {
+    if (!approval?.approval_request_id) return
     await actOnApproval.mutateAsync({
       invoice_id: invoiceId,
-      approved_by: CURRENT_USER,
+      approval_request_id: approval.approval_request_id,
       action,
       comment: comment.trim() || undefined,
     })
@@ -111,13 +109,13 @@ export default function APInvoiceApprovalPanel({
               Freigabe anfordern
             </Button>
           ) : null}
-          {approval?.status === 'pending' || approval?.status === 'partially_approved' ? (
+          {approval?.can_decide && (approval.status === 'pending' || approval.status === 'partially_approved') ? (
             <>
-              <Button disabled={isBusy} onClick={() => void handleApprovalAction('approve')}>
+              <Button disabled={isBusy || !approval.approval_request_id} onClick={() => void handleApprovalAction('approve')}>
                 Freigeben
               </Button>
               <Button
-                disabled={isBusy || comment.trim().length === 0}
+                disabled={isBusy || !approval.approval_request_id || comment.trim().length === 0}
                 onClick={() => void handleApprovalAction('reject')}
                 variant="destructive"
               >

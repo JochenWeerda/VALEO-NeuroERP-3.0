@@ -61,7 +61,7 @@ def test_action_execution_request_accepts_wave11_reference_context():
         aggregate_id="INV-1",
         payload={"status": "ZUR_FREIGABE"},
         tenant_id="t1",
-        issuer_role="ap_approver",
+        issuer_role="FINANCE_ADMIN",
         issuer_type="human",
         idempotency_key="idem-1",
         reference_context={
@@ -86,7 +86,7 @@ def test_action_execution_service_accepts_valid_human_command():
             aggregate_id="INV-1",
             payload={"status": "ZUR_FREIGABE"},
             tenant_id="t1",
-            issuer_role="ap_approver",
+            issuer_role="FINANCE_ADMIN",
             issuer_type="human",
             idempotency_key="idem-2",
         )
@@ -102,12 +102,12 @@ def test_action_execution_service_calls_db_when_accepted():
     service = ActionExecutionService()
     result = service.execute(
         ActionExecutionRequest(
-            command_name="ApproveAPInvoice",
-            aggregate_type="ap_invoice",
+            command_name="FinalizeHarvestAcceptance",
+            aggregate_type="harvest_acceptance",
             aggregate_id="INV-1",
-            payload={"status": "ZUR_FREIGABE"},
+            payload={"release_status": "final"},
             tenant_id="t1",
-            issuer_role="ap_approver",
+            issuer_role="warehouse_manager",
             issuer_type="human",
             idempotency_key="idem-db-mutation",
         ),
@@ -196,7 +196,7 @@ def test_action_execution_service_returns_pending_approval_when_human_confirmati
             aggregate_id="INV-1",
             payload={"status": "FREIGEGEBEN"},
             tenant_id="t1",
-            issuer_role="finance_manager",
+            issuer_role="FINANCE_ADMIN",
             issuer_type="human",
             idempotency_key="idem-5",
             human_confirmation=False,
@@ -273,7 +273,7 @@ def test_action_execute_api_returns_404_for_unknown_aggregate(client: TestClient
             "aggregate_id": "INV-1",
             "payload": {"status": "ZUR_FREIGABE"},
             "tenant_id": "t1",
-            "issuer_role": "ap_approver",
+            "issuer_role": "FINANCE_ADMIN",
             "issuer_type": "human",
             "idempotency_key": "idem-9",
         },
@@ -298,12 +298,12 @@ def test_action_execute_api_returns_422_for_missing_required_fields(client: Test
 
 def test_action_execute_api_replays_same_execution_id_for_same_request(client: TestClient):
     body = {
-        "command_name": "ApproveAPInvoice",
-        "aggregate_type": "ap_invoice",
+        "command_name": "FinalizeHarvestAcceptance",
+        "aggregate_type": "harvest_acceptance",
         "aggregate_id": "INV-1",
-        "payload": {"status": "ZUR_FREIGABE"},
+        "payload": {"release_status": "final"},
         "tenant_id": "t1",
-        "issuer_role": "ap_approver",
+        "issuer_role": "warehouse_manager",
         "issuer_type": "human",
         "idempotency_key": "idem-11",
     }
@@ -323,18 +323,18 @@ def test_action_execute_api_returns_409_on_idempotency_key_reuse_with_other_payl
     client: TestClient,
 ):
     first = {
-        "command_name": "ApproveAPInvoice",
-        "aggregate_type": "ap_invoice",
+        "command_name": "FinalizeHarvestAcceptance",
+        "aggregate_type": "harvest_acceptance",
         "aggregate_id": "INV-1",
-        "payload": {"status": "ZUR_FREIGABE"},
+        "payload": {"release_status": "final"},
         "tenant_id": "t1",
-        "issuer_role": "ap_approver",
+        "issuer_role": "warehouse_manager",
         "issuer_type": "human",
         "idempotency_key": "idem-12",
     }
     second = {
         **first,
-        "payload": {"status": "TEILWEISE_FREIGEGEBEN"},
+        "payload": {"release_status": "changed"},
     }
     assert client.post("/process/actions/execute", json=first).status_code == 200
     conflict = client.post("/process/actions/execute", json=second)
@@ -346,12 +346,12 @@ def test_get_action_by_execution_id_returns_canonical_snapshot(client: TestClien
     response = client.post(
         "/process/actions/execute",
         json={
-            "command_name": "ApproveAPInvoice",
-            "aggregate_type": "ap_invoice",
+            "command_name": "FinalizeHarvestAcceptance",
+            "aggregate_type": "harvest_acceptance",
             "aggregate_id": "INV-1",
-            "payload": {"status": "ZUR_FREIGABE"},
+            "payload": {"release_status": "final"},
             "tenant_id": "t1",
-            "issuer_role": "ap_approver",
+            "issuer_role": "warehouse_manager",
             "issuer_type": "human",
             "idempotency_key": "idem-13",
         },

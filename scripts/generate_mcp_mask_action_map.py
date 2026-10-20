@@ -159,14 +159,7 @@ MAPPED_RULES: dict[str, dict[str, str]] = {
         "coverage": "adjacent",
         "notes": "Druck ≠ Rechnung; Invoice-Propose/Post sind MCP-Writes der Belegkette.",
     },
-    "mask:finance/ap-invoice:freigeben": {
-        "mcp_tool_id": "finance.ap_invoice.freigeben",
-        "coverage": "mapped",
-        "notes": (
-            "MCP-AP-FREIGABE-20261008; Freigabe nur nach approved Proposal "
-            "(finance.ap_invoice.propose); echter CommandEndpoint; kein Journal/FIN-CLOSE."
-        ),
-    },
+
     "mask:lager/inventur-nebenlaeufe:create_opening": {
         "mcp_tool_id": "lager.inventur.propose_opening",
         "coverage": "mapped_propose_only",
@@ -465,7 +458,7 @@ MCP_NATIVE_WRITES = (
         "mcp_tool_id": "finance.ap_invoice.propose",
         "mask_action_id": None,
         "coverage": "mcp_native",
-        "notes": "AP-Freigabe-Vorschlag; Freigeben ist mask:finance/ap-invoice:freigeben.",
+        "notes": "AP-Pruefvorschlag ohne Belegfreigabe; die verbindliche Entscheidung bleibt der menschlichen AP-Maske vorbehalten.",
     },
 )
 

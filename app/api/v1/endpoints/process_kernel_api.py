@@ -510,20 +510,20 @@ def execute_action(body: ActionExecutionRequest, db: Session = Depends(get_db)) 
         get_aggregate_definition(body.aggregate_type)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
-
     store = get_action_idempotency_store()
     fingerprint = body.request_fingerprint()
     existing = store.get_by_key(body.tenant_id, body.idempotency_key)
-    if existing is not None:
+    if existing is not None and body.command_name not in {"ApproveAPInvoice", "RejectAPInvoice", "PostAPInvoice"}:
         if existing.request_fingerprint != fingerprint:
             error = build_action_conflict_error()
             raise HTTPException(status_code=409, detail=error.model_dump(mode="json"))
         replay = existing.result.as_idempotent_replay()
         return replay.model_dump(mode="json")
-
     service = ActionExecutionService()
     # Idempotenz-Persistenz erfolgt ausschliesslich in ActionExecutionService.execute
     result = service.execute(body, db=db)
+    if result.error and result.error.code == "IDEMPOTENCY_KEY_REUSED":
+        raise HTTPException(409, detail=result.error.model_dump(mode="json"))
     return result.model_dump(mode="json")
 
 

@@ -162,7 +162,6 @@ export default function APInvoicesListPage(): JSX.Element {
               onClick={() => void withPending(`approval-${row.original.number}`, async () => {
                 await apiClient.post('/api/v1/finance/ap/approval-workflow/request', {
                   invoice_id: row.original.number,
-                  requested_by: 'current_user',
                 })
                 toast({
                   title: t('common.success'),

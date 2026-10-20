@@ -1642,7 +1642,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
 - `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
 - `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
 
@@ -1676,7 +1675,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
 - `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
 - `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
 
@@ -1710,7 +1708,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
 - `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
 - `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
 
@@ -1744,7 +1741,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
 - `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
 - `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
 
@@ -1781,7 +1777,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
 - `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
 - `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
 
@@ -1796,7 +1791,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `freigeben` | Freigeben | moderate | nein | `/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben` |
+| `freigeben` | Freigeben | moderate | ja | `/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben` |
 
 ---
 
@@ -1822,7 +1817,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
 - `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
 - `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
 
@@ -1861,7 +1855,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
 - `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
 - `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
 
@@ -1901,7 +1894,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
 - `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
 - `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
 
@@ -1941,7 +1933,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
 - `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
 - `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
 
@@ -1982,7 +1973,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
 - `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
 - `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
 
@@ -2021,7 +2011,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
 - `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
 - `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
 
@@ -2056,7 +2045,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
 - `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
 - `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
 
@@ -2089,7 +2077,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
 - `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
 - `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
 
@@ -2122,7 +2109,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **MCP-Tools (Domäne):**
 
 - `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
-- `finance.ap_invoice.freigeben` — scope `finance:write`, Risiko hoch
 - `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
 - `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
 

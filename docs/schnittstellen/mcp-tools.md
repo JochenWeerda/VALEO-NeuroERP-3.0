@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 64 Tools in 20 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 63 Tools in 20 Domaenen.
 
 ## Uebersicht
 
@@ -48,7 +48,6 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 64 Tools in 20 Domaenen.
 | `einkauf.bestellung.versenden` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein |
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein |
-| `finance.ap_invoice.freigeben` | finance | `finance:write` | ja | hoch | ja |
 | `finance.ap_invoice.propose` | finance | `finance:write` | nein | hoch | ja |
 | `hr.bewerbung.speichern` | hr | `hr:write` | ja | mittel | nein |
 | `hr.einwilligung.anlegen` | hr | `hr:write` | ja | mittel | nein |
@@ -1810,65 +1809,9 @@ Listet offene Forderungen oder Verbindlichkeiten im Authentifizierungs-Mandanten
 }
 ```
 
-### `finance.ap_invoice.freigeben` — AP-Rechnung aus freigegebenem Vorschlag freigeben
-
-Ruft den echten CommandEndpoint POST /api/v1/finance/ap/invoices/{id}/actions/freigeben nur nach freigegebenem agent_proposals-Datensatz (ap_invoice_freigabe) auf. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved. Kein Freigabe-Boolean im Aufruf. Kein Journal-Post/FIN-CLOSE (fibu_journal=false). OIDC-Token mit finance:write und tenant_id erforderlich.
-
-- **Scope:** `finance:write`
-- **Idempotent:** ja
-- **Risikoklasse:** hoch
-- **Audit:** write
-- **Human-Approval erforderlich:** ja
-- **Endpoint:** `POST /api/v1/mcp/tools/call`
-
-**Eingabe-Schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "proposal_id": {
-      "type": "string",
-      "description": "entwurf_id aus finance.ap_invoice.propose"
-    }
-  },
-  "required": [
-    "proposal_id"
-  ]
-}
-```
-
-**Ausgabe-Schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "invoice_id": {
-      "type": "string"
-    },
-    "invoice_number": {
-      "type": "string"
-    },
-    "status": {
-      "type": "string"
-    },
-    "approved": {
-      "type": "boolean"
-    },
-    "route_path": {
-      "type": "string"
-    },
-    "screen_id": {
-      "type": "string"
-    }
-  }
-}
-```
-
 ### `finance.ap_invoice.propose` — AP-Freigabe vorschlagen
 
-Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id. Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist nicht angebunden (nutze finance.ap_invoice.freigeben nach Freigabe). Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE.
+Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id. Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist deaktiviert; die verbindliche Entscheidung trifft eine berechtigte unabhaengige Person in der AP-Maske. Ein freigegebener Vorschlag ist keine Belegfreigabe. Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE.
 
 - **Scope:** `finance:write`
 - **Idempotent:** nein

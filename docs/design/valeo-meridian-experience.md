@@ -352,3 +352,10 @@ Die Belegfamilie verwendet eine gemeinsame deklarierte Tabellen-Eingabeaktion ue
 ## Gemeinsame Belegneuanlage (19.10.2026)
 
 Deklarierte creation-Felder und Partnerquellen laufen durch denselben Compiler, RenderPlan, Formularzustand und Renderer. Auswahl nach Namen statt technischer Kennung, alte Auswahl beim Uebertippen invalidiert. Detailnavigation erst nach erfolgreichem Formularabschluss, damit der zentrale Ungespeichertschutz keine erfolgreiche Anlage festhaelt. Echte Buchungsabnahme hell/dunkel bei1440 dokumentiert: ../quality-assurance/beleg-studio-create-20261019.md.
+
+## AP-Freigabe 2026-10-20
+
+finance/ap-invoice.freigeben nutzt serverseitiges approval_can_decide und die gebundene
+approval_request_id aus dem Entity. Der bestehende ScreenDefinition-/RenderPlan-/Runtime-
+Pfad und zentrale Themebehandlung bleiben erhalten; keine lokale Layoutalternative.
+Menschliche Fachfreigabe und Agentensperre stehen explizit in der ScreenDefinition.

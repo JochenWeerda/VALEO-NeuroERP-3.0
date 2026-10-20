@@ -351,7 +351,7 @@ tools:
   - tool_id: finance.ap_invoice.propose
     domain: finance
     name: "AP-Freigabe vorschlagen"
-    description: "Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id. Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist nicht angebunden (nutze finance.ap_invoice.freigeben nach Freigabe). Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE."
+    description: "Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id. Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist deaktiviert; die verbindliche Entscheidung trifft eine berechtigte unabhaengige Person in der AP-Maske. Ein freigegebener Vorschlag ist keine Belegfreigabe. Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE."
     scope: finance:write
     idempotent: false
     risk_class: high
@@ -376,33 +376,6 @@ tools:
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: true
 
-  - tool_id: finance.ap_invoice.freigeben
-    domain: finance
-    name: "AP-Rechnung aus freigegebenem Vorschlag freigeben"
-    description: "Ruft den echten CommandEndpoint POST /api/v1/finance/ap/invoices/{id}/actions/freigeben nur nach freigegebenem agent_proposals-Datensatz (ap_invoice_freigabe) auf. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved. Kein Freigabe-Boolean im Aufruf. Kein Journal-Post/FIN-CLOSE (fibu_journal=false). OIDC-Token mit finance:write und tenant_id erforderlich."
-    scope: finance:write
-    idempotent: true
-    risk_class: high
-    data_classification: LOCAL_ONLY
-    input_schema:
-      type: object
-      properties:
-        proposal_id: { type: string, description: "entwurf_id aus finance.ap_invoice.propose" }
-      required: [proposal_id]
-    output_schema:
-      type: object
-      properties:
-        invoice_id: { type: string }
-        invoice_number: { type: string }
-        status: { type: string }
-        approved: { type: boolean }
-        route_path: { type: string }
-        screen_id: { type: string }
-    audit: write
-    endpoint: "POST /api/v1/mcp/tools/call"
-    human_approval_required: true
-
-  # ── FIBU ───────────────────────────────────────────────────────────────────
   - tool_id: fibu.open_items.list
     domain: finance
     name: "Offene Posten auflisten"

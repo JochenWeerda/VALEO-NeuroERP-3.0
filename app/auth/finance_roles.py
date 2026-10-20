@@ -15,8 +15,10 @@ from __future__ import annotations
 from app.auth.deps import require_roles
 
 finance_read = require_roles("FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin")
-finance_write = require_roles("FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin")
-finance_admin = require_roles("FINANCE_ADMIN", "admin")
+FINANCE_WRITE_ROLES = ("FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin")
+FINANCE_APPROVAL_ROLES = ("FINANCE_ADMIN", "admin")
+finance_write = require_roles(*FINANCE_WRITE_ROLES)
+finance_admin = require_roles(*FINANCE_APPROVAL_ROLES)
 
 # Offene Posten lesen auch Verkauf, Vertrieb und Einkauf: Wer einen Auftrag annimmt oder eine
 # Bestellung ausloest, muss sehen, was der Kunde schuldet und was dem Lieferanten zusteht.

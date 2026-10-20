@@ -18,7 +18,6 @@ mcp_write_tools:
 - sales.invoice.propose
 - sales.invoice.post
 - finance.ap_invoice.propose
-- finance.ap_invoice.freigeben
 - compliance.sanctions.check
 - logistik.frachttabelle.anlegen
 - reporting.bonus.calculate
@@ -72,7 +71,8 @@ mcp_native_writes:
 - mcp_tool_id: finance.ap_invoice.propose
   mask_action_id: null
   coverage: mcp_native
-  notes: AP-Freigabe-Vorschlag; Freigeben ist mask:finance/ap-invoice:freigeben.
+  notes: AP-Pruefvorschlag ohne Belegfreigabe; die verbindliche Entscheidung bleibt der menschlichen AP-Maske
+    vorbehalten.
 fin_close:
   status: blocked_adr_076
   adr: docs/adr/adr-076-cash-close-retirement.md
@@ -85,9 +85,9 @@ stats:
   mask_mutations_considered: 68
   by_coverage:
     adjacent: 1
-    blocked_human_only: 14
+    blocked_human_only: 15
     local_ui: 15
-    mapped: 43
+    mapped: 42
     mapped_generic: 3
     mapped_propose_only: 1
     mapped_read: 2
@@ -475,10 +475,10 @@ mappings:
   label: Freigeben
   command_endpoint: /api/v1/finance/ap/invoices/{entity_id}/actions/freigeben
   command: null
-  mcp_tool_id: finance.ap_invoice.freigeben
-  coverage: mapped
-  notes: MCP-AP-FREIGABE-20261008; Freigabe nur nach approved Proposal (finance.ap_invoice.propose); echter
-    CommandEndpoint; kein Journal/FIN-CLOSE.
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:finance/ar-open-item:mahnen
   mask: finance/ar-open-item
   domain: finance
@@ -973,5 +973,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 0; blocked_human_only 14; blocked_no_endpoint 0; local_ui 15; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 15; blocked_no_endpoint 0; local_ui 15; FIN-CLOSE
   blocked_adr_076.'

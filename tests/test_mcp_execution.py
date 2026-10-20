@@ -2277,86 +2277,36 @@ def test_ap_propose_stores_pending_proposal_and_does_not_freigeben(client):
     db.commit.assert_called_once()
 
 
-def test_ap_freigeben_requires_approved_proposal(client):
+@pytest.mark.parametrize("mode", ["validate", "dryRun", "propose", "execute"])
+def test_retired_ap_review_write_is_not_available_in_any_mode(client, mode):
     http, db = _as_finance_write(client)
-    db.execute.return_value.mappings.return_value.first.return_value = {
-        "proposal_id": "p-ap",
-        "action_type": "ap_invoice_freigabe",
-        "approval_status": "pending",
-        "risk_level": "high",
-        "context_snapshot": {"invoice_id": "AP-100"},
-        "execution_result": None,
-    }
-    response = http.post("/mcp/tools/call", json={
-        "tool_name": "finance.ap_invoice.freigeben",
-        "parameters": {"proposal_id": "p-ap"},
-    })
-    assert response.status_code == 409
+    response = http.post('/mcp/tools/call', json={
+        'tool_name':'finance.ap_invoice.freigeben', 'parameters':{'proposal_id':'synthetic-proposal'},
+        'mode':mode, 'idempotency_key':'synthetic-key'})
+    assert response.status_code == 404, response.text
+    db.execute.assert_not_called()
     db.commit.assert_not_called()
 
 
-def test_ap_freigeben_dry_run_reads_approved_proposal_without_writing(client):
+def test_an_approved_agent_proposal_cannot_restore_the_retired_review_adapter(client):
     http, db = _as_finance_write(client)
     db.execute.return_value.mappings.return_value.first.return_value = {
-        "proposal_id": "p-ap",
-        "action_type": "ap_invoice_freigabe",
-        "approval_status": "approved",
-        "risk_level": "high",
-        "context_snapshot": {"invoice_id": "AP-100"},
-        "execution_result": None,
-    }
-    with patch("app.services.mcp_execution_service._load_ap_invoice", return_value=AP_INVOICE_ROW):
-        response = http.post("/mcp/tools/call", json={
-            "tool_name": "finance.ap_invoice.freigeben",
-            "parameters": {"proposal_id": "p-ap"},
-        })
-    assert response.status_code == 200
-    body = response.json()
-    assert body["mode"] == "dryRun"
-    assert body["approved"] is False
-    assert body["invoice_id"] == "AP-100"
-    assert body["route_path"] == "/finance/ap-invoice/AP-100"
-    db.commit.assert_not_called()
+        'proposal_id':'synthetic-proposal', 'approval_status':'approved',
+        'action_type':'ap_invoice_freigabe', 'context_snapshot':{'invoice_id':'AP-100'}}
+    response = http.post('/mcp/tools/call', json={'tool_name':'finance.ap_invoice.freigeben',
+        'parameters':{'proposal_id':'synthetic-proposal'}, 'mode':'execute', 'idempotency_key':'synthetic-key'})
+    assert response.status_code == 404, response.text
+    db.execute.assert_not_called()
 
 
-def test_ap_freigeben_execute_calls_real_endpoint_after_approval(client):
+def test_retired_ap_tool_never_calls_the_human_review_endpoint(client):
     http, db = _as_finance_write(client)
-    db.execute.return_value.mappings.return_value.first.return_value = {
-        "proposal_id": "p-ap",
-        "action_type": "ap_invoice_freigabe",
-        "approval_status": "approved",
-        "risk_level": "high",
-        "context_snapshot": {"invoice_id": "AP-100"},
-        "execution_result": None,
-    }
-    approved_row = {**AP_INVOICE_ROW, "status": "FREIGEGEBEN"}
-
-    async def fake_approve(invoice_id, approved_by=None, db=None, tenant_id=None, user=None):
-        assert invoice_id == "AP-100"
-        assert tenant_id == "tenant-a"
-        assert user["sub"] == USER["sub"]
-        return {"status": "ok"}
-
-    with patch("app.services.mcp_execution_service._load_ap_invoice", side_effect=[AP_INVOICE_ROW, approved_row]), \
-         patch("app.services.mcp_execution_service.Session"), \
-         patch("app.api.v1.endpoints.ap_invoices.approve_ap_invoice", side_effect=fake_approve), \
-         patch("app.services.mcp_execution_service._write_audit", return_value="audit-ap-f"), \
-         patch("app.services.mcp_execution_service._store_execution"), \
-         patch("app.services.mcp_execution_service._advisory_lock"), \
-         patch("app.services.mcp_execution_service._replay_or_none", return_value=None):
-        response = http.post("/mcp/tools/call", json={
-            "tool_name": "finance.ap_invoice.freigeben",
-            "parameters": {"proposal_id": "p-ap"},
-            "mode": "execute",
-            "idempotency_key": "ap-freigabe-1",
-        })
-    assert response.status_code == 200
-    body = response.json()
-    assert body["approved"] is True
-    assert body["fibu_journal"] is False
-    assert body["status"] == "FREIGEGEBEN"
-    assert body["auditEntryId"] == "audit-ap-f"
-    db.commit.assert_called_once()
+    with patch('app.api.v1.endpoints.ap_invoices.approve_ap_invoice') as endpoint:
+        response = http.post('/mcp/tools/call', json={'tool_name':'finance.ap_invoice.freigeben',
+            'parameters':{'proposal_id':'synthetic-proposal'}, 'mode':'execute', 'idempotency_key':'synthetic-key'})
+    assert response.status_code == 404, response.text
+    endpoint.assert_not_called()
+    db.execute.assert_not_called()
 
 
 def test_ap_freigeben_rejects_client_approval_flag(client):
