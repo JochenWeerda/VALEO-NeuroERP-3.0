@@ -27,6 +27,7 @@ import {
   type PdfUploadResult,
 } from '@/lib/api/rations-optimization'
 
+import { tastenKlick } from '@/lib/tastenklick'
 // ---------------------------------------------------------------------------
 // Styles
 // ---------------------------------------------------------------------------
@@ -101,6 +102,9 @@ function AnalyseKarte({ a, onVerify, onDelete, onPromote }: {
     <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, marginBottom: 12, overflow: 'hidden' }}>
       {/* Header */}
       <div
+        role="button"
+        tabIndex={0}
+        onKeyDown={tastenKlick}
         style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', borderBottom: open ? `1px solid ${C.border}` : 'none' }}
         onClick={() => setOpen(v => !v)}
       >
@@ -255,6 +259,9 @@ function UploadZone({ onResult }: { onResult: (r: PdfUploadResult, file: File) =
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      onKeyDown={tastenKlick}
       onDragOver={e => { e.preventDefault(); setDragging(true) }}
       onDragLeave={() => setDragging(false)}
       onDrop={e => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handle(f) }}

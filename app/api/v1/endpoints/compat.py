@@ -6,11 +6,12 @@ from app.auth.finance_roles import finance_admin
 import json
 import os
 from datetime import date, datetime, timezone
+from pathlib import Path
 from typing import Any, List, Optional
 from uuid import uuid4
-
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import Response
+from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -2064,8 +2065,7 @@ async def annahme_upload(
     path = os.path.realpath(os.path.join(base_dir, safe_name))
     if not path.startswith(base_dir + os.sep) and path != base_dir:
         raise HTTPException(status_code=400, detail="Ungueltiger Dateipfad")
-    with open(path, "wb") as f:
-        f.write(content)
+    await run_in_threadpool(Path(path).write_bytes, content)  # Dateischreiben nicht in der Ereignisschleife
     cache_set_json(f"annahme:upload:{upload_id}", {"id": upload_id, "filename": file.filename, "path": path}, ttl_seconds=86400 * 7)
     return AnnahmeUploadOut(id=upload_id, filename=file.filename or safe_name)
 
@@ -2591,7 +2591,7 @@ async def create_auslagerung(
         if row:
             warehouse_id = row[0]
     elif payload.strategie in ("fifo", "fefo"):
-        order_col = "created_at ASC" if payload.strategie == "fifo" else "created_at ASC"
+        order_col = "created_at ASC" if payload.strategie == "fifo" else "expiry_date ASC NULLS LAST, created_at ASC"  # FEFO
         row = db.execute(
             text(f"""
                 SELECT batch_number, warehouse_id FROM domain_inventory.article_batches

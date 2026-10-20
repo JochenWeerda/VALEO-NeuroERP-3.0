@@ -70,7 +70,7 @@ export function prefetchVisibleModules(items: NavItem[], maxPrefetch = 8): void 
     for (const [domain, modulePaths] of groupedByDomain.entries()) {
       void loadDomainModuleMap(domain).then((pageModules) => {
         for (const modulePath of modulePaths) {
-          pageModules[modulePath]?.()
+          void pageModules[modulePath]?.()
         }
       })
     }

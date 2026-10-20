@@ -174,5 +174,5 @@ export function cellStyle(
 
 /** Reihenfolge fuer Tab-Navigation: stabile Sortierung nach Zellen-id. */
 export function keyboardOrder(cells: TwinCellDef[]): string[] {
-  return [...cells].map((c) => c.id).sort()
+  return [...cells].map((c) => c.id).sort((a, b) => a.localeCompare(b))
 }

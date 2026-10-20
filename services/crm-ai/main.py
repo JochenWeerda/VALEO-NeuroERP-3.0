@@ -3,6 +3,8 @@ CRM AI Service
 FastAPI application for advanced AI, machine learning, and predictive analytics.
 """
 
+import os
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,10 +40,9 @@ async def health_check():
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
-        # 0.0.0.0, nicht 127.0.0.1: der Entrypoint startet diese Datei im Container,
-        # und an die Loopback-Adresse gebunden ist der Dienst trotz EXPOSE 6200 von
-        # aussen nicht erreichbar.
-        host="0.0.0.0",  # noqa: S104
+        # Nur lokaler Direktstart (mit reload): Loopback. Der Container startet ueber docker-entrypoint.sh
+        # (uvicorn --host 0.0.0.0), nicht ueber diesen Block; eine andere Bindung gibt CRM_AI_HOST vor.
+        host=os.environ.get("CRM_AI_HOST", "127.0.0.1"),
         port=6200,
         reload=True,
     )

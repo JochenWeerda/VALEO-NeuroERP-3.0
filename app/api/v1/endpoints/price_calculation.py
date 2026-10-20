@@ -5,6 +5,7 @@ POST /preis-kalkulation/berechne — compute price for artikel/kunde/menge
 """
 from __future__ import annotations
 
+import math
 from datetime import date
 from typing import List, Optional
 
@@ -125,7 +126,7 @@ def berechne_preis(
     sorte_faktor = 1.0
     if payload.sorte_klasse and payload.sorte_klasse.upper() in SORTE_FAKTOR:
         sorte_faktor = SORTE_FAKTOR[payload.sorte_klasse.upper()]
-        if sorte_faktor != 1.0:
+        if not math.isclose(sorte_faktor, 1.0):
             abschlag = basis_preis * (1.0 - sorte_faktor)
             zu_abschlaege.append(
                 KalkulationsSchritt(

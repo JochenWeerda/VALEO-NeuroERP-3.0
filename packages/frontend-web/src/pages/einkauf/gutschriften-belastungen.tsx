@@ -161,9 +161,9 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
   })
 
   useEffect(() => {
-    loadCreditMemos()
-    loadDebitMemos()
-    loadOpenInvoices()
+    void loadCreditMemos()
+    void loadDebitMemos()
+    void loadOpenInvoices()
   }, [])
 
   useEffect(() => {
@@ -363,9 +363,9 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
       })
       
       if (activeTab === 'credit') {
-        loadCreditMemos()
+        void loadCreditMemos()
       } else {
-        loadDebitMemos()
+        void loadDebitMemos()
       }
     } catch (_rawErr: unknown) {
       const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
@@ -415,11 +415,11 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
       setMemoData(prev => ({ ...prev, settlementInvoiceIds: [] }))
       
       if (activeTab === 'credit') {
-        loadCreditMemos()
+        void loadCreditMemos()
       } else {
-        loadDebitMemos()
+        void loadDebitMemos()
       }
-      loadOpenInvoices()
+      void loadOpenInvoices()
     } catch (_rawErr: unknown) {
       const error = _rawErr as { response?: { data?: { detail?: string } }; message?: string; name?: string }
       toast({

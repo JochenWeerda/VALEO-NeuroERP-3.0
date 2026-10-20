@@ -12,13 +12,6 @@ import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 
-type PsmArtikel = {
-  name: string
-  quantity: number
-  abverkaufsfrist: string
-}
-
-const EMPTY_PSM_ARTIKEL: PsmArtikel[] = []
 const EMPTY_TOP_ARTICLES: Array<{ name: string; quantity: number; value: number }> = []
 
 
@@ -329,42 +322,15 @@ export default function BestandsuebersichtPage(): JSX.Element {
                 <ShieldAlert className="h-4 w-4" />
                 PSM Abverkaufsfristen
               </span>
-              <Button 
-                variant="outline" 
-                className="min-h-touch touch-manipulation"
-                onClick={() => { void navigateWithWorkflowResume('/lager/psm-abverkauf', 'quality') }}
-              >
-                Zur Übersicht <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
-              <div className="space-y-2">
-                {[...Array(2)].map((_, i) => (
-                  <Skeleton key={i} className="h-10 w-full" />
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl font-bold text-status-error">
-                    {0}
-                  </span>
-                  <span className="text-sm text-status-error">PSM mit endender Abverkaufsfrist</span>
-                </div>
-                {EMPTY_PSM_ARTIKEL.map((item, i) => (
-                  <div key={i} className="flex items-center justify-between rounded border border-red-200 p-2 bg-white/50 text-sm">
-                    <span className="font-medium truncate max-w-[200px]">{item.name}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">{item.quantity} Stk</span>
-                      <Badge variant="destructive">
-                        Frist: {new Date(item.abverkaufsfrist).toLocaleDateString('de-DE')}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}              </div>
-            )}
+            {/* Bis 20.10.2026 stand hier fest "0 PSM mit endender Abverkaufsfrist" auf einer leeren Liste, mit Link
+                auf eine nicht vorhandene Seite: eine Entwarnung ohne Pruefung. Es gibt noch keine Datenquelle. */}
+            <p className="text-sm text-muted-foreground">
+              Abverkaufs- und Aufbrauchfristen von Pflanzenschutzmitteln werden noch nicht gefuehrt. Bitte die Fristen
+              der Zulassung (BVL) direkt pruefen.
+            </p>
           </CardContent>
         </Card>
       </div>

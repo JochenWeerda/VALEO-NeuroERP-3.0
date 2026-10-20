@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
+import { tastenKlick } from '@/lib/tastenklick'
 /**
  * Wizard-Futterliste als fachliche Bereichsansicht (FEED-WIZ-051).
  *
@@ -101,6 +102,8 @@ function SectionPicker({ sectionLabel, candidates, onSelect }: {
             className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-md border bg-popover p-1 shadow-md">
           {matches.map((feed) => (
             <li key={feed.id} role="option" aria-selected={false}
+              tabIndex={0}
+              onKeyDown={tastenKlick}
                 className="flex cursor-pointer items-center justify-between gap-3 rounded px-2 py-1.5 text-sm hover:bg-muted"
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => { onSelect(feed.id); setQuery(''); setOpen(false) }}>

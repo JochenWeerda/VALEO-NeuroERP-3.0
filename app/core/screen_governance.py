@@ -51,7 +51,7 @@ PRIMITIVE_BY_FIELD_TYPE = {
     "boolean": "Checkbox",
     "file": "FileField",
     "table": "DataTable",
-    "password": "TextField",
+    "password": "TextField",  # NOSONAR - Feldtyp der Maske, kein Zugangswert
 }
 
 REJECTED_KEYS = ("screenType", "listReport", "form")

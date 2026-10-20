@@ -292817,24 +292817,6 @@
               "title": "Invoice Id",
               "type": "string"
             }
-          },
-          {
-            "description": "Ignoriert — Freigeber ist der angemeldete Nutzer",
-            "in": "query",
-            "name": "approved_by",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Ignoriert — Freigeber ist der angemeldete Nutzer",
-              "title": "Approved By"
-            }
           }
         ],
         "responses": {
@@ -292887,24 +292869,6 @@
             "schema": {
               "title": "Invoice Id",
               "type": "string"
-            }
-          },
-          {
-            "description": "Unbeachtet: Es bucht, wer angemeldet ist.",
-            "in": "query",
-            "name": "posted_by",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Unbeachtet: Es bucht, wer angemeldet ist.",
-              "title": "Posted By"
             }
           }
         ],

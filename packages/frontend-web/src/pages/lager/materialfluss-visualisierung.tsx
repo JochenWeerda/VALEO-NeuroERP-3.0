@@ -129,7 +129,7 @@ function CreateNodeDialog({ warehouseId, onClose }: CreateNodeDialogProps): JSX.
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose() }}>
       <Card className="w-full max-w-sm shadow-xl" onClick={(e) => e.stopPropagation()}>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Neuer Materialfluss-Knoten</CardTitle>
@@ -199,7 +199,7 @@ function CreateEdgeDialog({ warehouseId, nodes, onClose }: CreateEdgeDialogProps
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose} onKeyDown={(e) => { if (e.key === 'Escape') onClose() }}>
       <Card className="w-full max-w-sm shadow-xl" onClick={(e) => e.stopPropagation()}>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Neue Kante</CardTitle>

@@ -623,7 +623,7 @@ export default function RfqBidsPage(): JSX.Element {
                 onChange={(e) => {
                   const file = e.target.files?.[0]
                   if (file) {
-                    handleImportBids(file)
+                    void handleImportBids(file)
                   }
                 }}
               />

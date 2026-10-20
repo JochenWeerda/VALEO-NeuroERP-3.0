@@ -1,6 +1,7 @@
 """DOM-FINANCE-004.3 — Ratenzahlungsplan-Lifecycle Service."""
 from __future__ import annotations
 
+import math
 import logging
 import uuid
 from datetime import date, timedelta
@@ -120,7 +121,7 @@ def buche_rate(
     if neuer_rest < 0:
         neuer_rest = 0.0
 
-    new_plan_status = "ABGESCHLOSSEN" if neuer_rest == 0.0 else "AKTIV"
+    new_plan_status = "ABGESCHLOSSEN" if math.isclose(neuer_rest, 0.0, abs_tol=1e-9) else "AKTIV"
     db.execute(
         text("""
             UPDATE domain_finance.finance_ratenzahlungsplaene

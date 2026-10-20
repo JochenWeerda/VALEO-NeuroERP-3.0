@@ -605,7 +605,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
             updatedData.auftraggeberBic = result.bic
           }
           setFormData(updatedData)
-          updateData?.(updatedData)
+          void updateData?.(updatedData)
           toast.success(t('crud.messages.ibanLookupSuccess', {
             defaultValue: 'BIC automatisch ausgefüllt',
             bankName: result.bank_name || 'Bank'
@@ -625,7 +625,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
     // Auto-lookup Auftraggeber-IBAN
     if (newData?.auftraggeberIban) {
       const timer = setTimeout(() => {
-        handleAuftraggeberIbanChange(String(newData.auftraggeberIban))
+        void handleAuftraggeberIbanChange(String(newData.auftraggeberIban))
       }, 1000)
       return () => clearTimeout(timer)
     }

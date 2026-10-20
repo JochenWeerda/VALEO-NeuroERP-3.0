@@ -367,7 +367,7 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
       }
     }
 
-    loadRequests()
+    void loadRequests()
   }, [contactId, tenantId])
 
   if (loading) {
@@ -489,7 +489,7 @@ function ConsentsList({ contactId }: { contactId?: string }) {
       }
     }
 
-    loadConsents()
+    void loadConsents()
   }, [contactId, tenantId])
 
   if (loading) {

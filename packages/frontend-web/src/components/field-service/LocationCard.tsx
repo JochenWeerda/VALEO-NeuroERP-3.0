@@ -25,6 +25,7 @@ import {
   openNavigation,
 } from '@/hooks/useGeolocation'
 
+import { tastenKlick } from '@/lib/tastenklick'
 export interface CustomerLocation {
   id: string
   name: string
@@ -144,6 +145,9 @@ export function LocationCard({
 
   return (
     <div
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={tastenKlick}
       className={cn(
         'rounded-xl border-l-4 overflow-hidden',
         'bg-card shadow-sm',

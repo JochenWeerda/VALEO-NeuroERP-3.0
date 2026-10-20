@@ -279,15 +279,15 @@ export default function BestellungAnlegenPage(): JSX.Element {
   useEffect(() => {
     // Lade Requisition-Daten, falls requisitionId vorhanden
     if (requisitionId) {
-      loadRequisitionData(requisitionId)
+      void loadRequisitionData(requisitionId)
     }
     // Lade Contract-Daten, falls contractId vorhanden
     if (contractId) {
-      loadContractData(contractId)
+      void loadContractData(contractId)
     }
     // Lade RFQ-Daten, falls rfqId vorhanden
     if (rfqId) {
-      loadRFQData(rfqId)
+      void loadRFQData(rfqId)
     }
   }, [requisitionId, contractId, rfqId])
 

@@ -603,11 +603,7 @@ const DuengerStammPage: React.FC = () => {
                     className="rounded"
                   />
                   <Label htmlFor="wassergefaehrdend" className="flex items-center gap-2">
-                    {formData.wassergefaehrdend ? (
-                      <Droplets className="w-4 h-4 text-muted-foreground" />
-                    ) : (
-                      <Droplets className="w-4 h-4 text-muted-foreground" />
-                    )}
+                    <Droplets className="w-4 h-4 text-muted-foreground" />
                     Wassergefährdend
                   </Label>
                 </div>

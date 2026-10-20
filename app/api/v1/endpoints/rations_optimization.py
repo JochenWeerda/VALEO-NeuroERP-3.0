@@ -6705,7 +6705,7 @@ def _optimize_internal(
     inject_buffer = bool(seasonal.get("inject_buffer", 0.0))
     buffer_min_kg = float(seasonal.get("buffer_min_kg", 0.0))
 
-    if dmi_factor != 1.0:
+    if abs(dmi_factor - 1.0) > 1e-9:
         req = _CowReq(
             me_mj=req.me_mj,
             sidp_g=req.sidp_g,
@@ -6721,7 +6721,7 @@ def _optimize_internal(
             mg_min_g=req.mg_min_g,
             k_max_g=req.k_max_g * dmi_factor,
         )
-    elif na_boost != 1.0:
+    elif abs(na_boost - 1.0) > 1e-9:
         req = _CowReq(**{**req.model_dump(), "na_min_g": req.na_min_g * na_boost})
 
     if inject_buffer:

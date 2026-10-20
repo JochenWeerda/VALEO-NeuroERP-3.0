@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/hooks/use-toast'
 
+import { tastenKlick } from '@/lib/tastenklick'
 type TimeRange = '7d' | '30d' | '90d' | '365d' | 'ytd'
 
 interface DashboardData {
@@ -319,6 +320,9 @@ export default function ExecutiveDashboardPage(): JSX.Element {
             <div className="space-y-2">
               {data.topCustomers.map((customer, index) => (
                 <div
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={tastenKlick}
                   key={customer.name}
                   className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                   onClick={() => navigate(`/verkauf/kunden-liste?search=${encodeURIComponent(customer.name)}`)}

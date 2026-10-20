@@ -237,7 +237,7 @@ export default function POSTerminalPage(): JSX.Element {
   // ── Kategorie-Filter ──────────────────────────────────────────────────────────
   const categories = useMemo(() => {
     const cats = new Set(articles.map((a) => a.category).filter(Boolean) as string[])
-    return Array.from(cats).sort()
+    return Array.from(cats).sort((a, b) => a.localeCompare(b))
   }, [articles])
 
   // ── B2B Kunden-Suche ──────────────────────────────────────────────────────────

@@ -88,12 +88,12 @@ export default function RechnungAbgleichPage(): JSX.Element {
   const [blocked, setBlocked] = useState(false)
 
   useEffect(() => {
-    loadInvoices()
+    void loadInvoices()
   }, [])
 
   useEffect(() => {
     if (selectedInvoiceId) {
-      performMatch()
+      void performMatch()
     }
   }, [selectedInvoiceId, toleranceConfig])
 

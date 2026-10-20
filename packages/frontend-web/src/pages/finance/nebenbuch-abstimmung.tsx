@@ -95,12 +95,12 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
   const [matchingInProgress, setMatchingInProgress] = useState(false)
 
   useEffect(() => {
-    loadSummary()
+    void loadSummary()
   }, [period])
 
   useEffect(() => {
     if (ledgerType && period) {
-      loadReconciliation()
+      void loadReconciliation()
     }
   }, [ledgerType, period])
 
@@ -452,7 +452,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
                   const unmatchedIds = details
                     .filter(d => !d.matched && d.entry_id)
                     .map(d => d.entry_id)
-                  matchEntries(unmatchedIds)
+                  void matchEntries(unmatchedIds)
                 }}
               >
                 {matchingInProgress ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}

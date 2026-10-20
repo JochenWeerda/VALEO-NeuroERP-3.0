@@ -6,6 +6,7 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Response, UploadFile
 from pydantic import BaseModel
+from starlette.concurrency import run_in_threadpool
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -16,6 +17,13 @@ from ....integrations.dms_client import get_document_url, is_configured, upload_
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
+
+
+def _in_tempdatei(endung: str, inhalt: bytes) -> str:
+    """Synchron in eine temporaere Datei schreiben (aus async-Wegen ueber den Threadpool)."""
+    with NamedTemporaryFile(suffix=endung, delete=False) as datei:
+        datei.write(inhalt)
+        return datei.name
 
 
 class DMSDocumentOut(BaseModel):
@@ -210,9 +218,7 @@ async def upload_dms_document(
     filename = file.filename or "upload"
     temp_path: Optional[str] = None
     try:
-        with NamedTemporaryFile(suffix=Path(filename).suffix, delete=False) as temp_file:
-            temp_file.write(content)
-            temp_path = temp_file.name
+        temp_path = await run_in_threadpool(_in_tempdatei, Path(filename).suffix, content)
         result = upload_document("article", filename, temp_path, {"tenant_id": tenant_id, "article_id": entity_id})
     finally:
         if temp_path:

@@ -59,7 +59,7 @@ export default function FarmersPage(): JSX.Element {
         setIsLoading(false);
       }
     };
-    fetchFarmers();
+    void fetchFarmers();
   }, []);
 
   // Delete handler

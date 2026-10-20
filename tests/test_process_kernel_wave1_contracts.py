@@ -405,7 +405,7 @@ def test_ap_invoice_legacy_approve_facade_delegates_to_workflow(monkeypatch):
     )
 
     response = asyncio.run(ap_invoices.approve_ap_invoice(
-        "inv-legacy", approved_by=None, db=None, tenant_id="tenant-wave1", user={"sub": "lead", "roles": ["FINANCE_ADMIN"]}
+        "inv-legacy", db=None, tenant_id="tenant-wave1", user={"sub": "lead", "roles": ["FINANCE_ADMIN"]}
     ))
 
     assert response["status"] == "ok"

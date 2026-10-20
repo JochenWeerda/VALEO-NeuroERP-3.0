@@ -14,6 +14,7 @@ function formatDate(iso?: string | null) {
 export default function EpcisEventsPage() {
   const [events, setEvents] = useState<EpcisEvent[]>([])
   const [loading, setLoading] = useState(false)
+  const [ladefehler, setLadefehler] = useState<string | null>(null)
   const [tenantId, setTenantId] = useState<string>('default')
   const [bizStep, setBizStep] = useState<string>('')
   const [sku, setSku] = useState<string>('')
@@ -22,10 +23,14 @@ export default function EpcisEventsPage() {
   useEffect(() => {
     let mounted = true
     setLoading(true)
-    inventoryService
+    setLadefehler(null)
+    void inventoryService
       .listEpcisEvents({ limit }, tenantId)
       .then((res) => {
         if (mounted) setEvents(res.items || [])
+      })
+      .catch((fehler: unknown) => {
+        if (mounted) setLadefehler(fehler instanceof Error ? fehler.message : 'EPCIS-Ereignisse nicht geladen.')
       })
       .finally(() => mounted && setLoading(false))
     return () => {
@@ -127,6 +132,12 @@ export default function EpcisEventsPage() {
               <tr>
                 <td className="p-2" colSpan={6}>
                   Lädt ...
+                </td>
+              </tr>
+            ) : ladefehler ? (
+              <tr>
+                <td role="alert" className="p-2 text-status-error" colSpan={6}>
+                  {ladefehler}
                 </td>
               </tr>
             ) : filtered.length === 0 ? (

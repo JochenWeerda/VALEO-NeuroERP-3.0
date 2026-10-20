@@ -14,6 +14,7 @@ import time
 
 from app.auth.guards import require_scopes
 from app.core.sse import sse_hub
+from app.core.hintergrund import starte
 from app.repositories.document_repository import DocumentRepository
 from app.core.dependency_container import container
 
@@ -129,8 +130,7 @@ async def export_documents(
         logger.info(f"User {user.get('sub', 'unknown')} exported {len(rows)} {domain_slug} documents as {fmt_slug}")
 
         # SSE Broadcast für Export-Audit
-        import asyncio
-        asyncio.create_task(sse_hub.broadcast("audit", {
+        starte(sse_hub.broadcast("audit", {
             "id": f"export-{domain}-{int(time.time())}",
             "ts": time.time(),
             "source": "mcp",

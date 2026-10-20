@@ -223,7 +223,7 @@ export default function DocumentPanel(): JSX.Element {
       }
     }
     
-    checkDmsAndLoad()
+    void checkDmsAndLoad()
   }, [tenantId])
   
   const isLoading = mcpLoading || dmsLoading
