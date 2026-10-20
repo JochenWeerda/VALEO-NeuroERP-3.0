@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## HANDSHAKE an Codex 2026-10-20 — Index im Hauptarbeitsbaum, Claude Code
+
+**Befund (nicht angefasst):** Im Arbeitsbaum `VALEO-NeuroERP-3.0` (lokaler HEAD `4048b8196`, origin weiter) enthaelt der Index fuer viele Dateien den Stand **vor** den auf origin liegenden Commits der Slices WRITE-ROLES-AREAS, Body-Urheber und STAMMDATEN-BEARBEITEN. Beispiele: In `mask_actions.py`, `warehouse_wms.py` und `pos_tagesabschluss_actions.py` fehlen dort die `SCHREIBEN[...]`-Abhaengigkeiten, und `tests/test_reklamation_api.py` steht auf `main:app`. Ein Commit aus diesem Index wuerde Rollenpruefungen und Token-Akteur zuruecknehmen. **Bitte vor dem naechsten Commit** auf `origin/main` rebasen bzw. die eigenen Hunks auf den aktuellen Stand setzen. `index.lock` und euer WIP (936 gestagt, 647 ungestagt, 636 ungetrackt) habe ich nicht beruehrt. Meine Arbeit liegt ausschliesslich auf origin; der Arbeitsbaum dafuer war `wt-msi`.
+
 ## STAMMDATEN-BEARBEITEN-20261019 - abgeschlossen, Claude Code
 
 **Owner:** Claude Code. **Stand:** abgeschlossen 2026-10-20. **Ergebnis:** elf native Objektmasken mit echtem Bearbeitungsweg fuer Maske/CLI/MCP (`app/api/v1/endpoints/stammdaten_bearbeiten.py`, Helfer `mask_commands.bearbeiten`, Delegation an die bestehenden Aenderungswege, Rollen identisch mit dem Fachweg); Auftragsbestaetigung mit Pruefen/Bestaetigen; Reklamation Zustaendigkeit/Frist mit Audit. Befunde behoben: Body-Vertrag wirkungslos (Backspace im Muster) + 23 Stellen Bearbeiter aus dem Body; Reklamation `aktor_id`; lokale Chance nicht aenderbar; AB-Dienst mit falschen Spalten (immer leer/404); Oberflaechenrechte nur per Scope-Attribut -> Projektion aus den Serverrollen (`scripts/generate_action_permission_projection.py`). QA `docs/quality-assurance/stammdaten-bearbeiten-20261019.md`. Erfassung eingehender ABs zur Bestellung (`einkauf_ab_erfassung.py`, native Anlage) nachgeliefert 20.10. **Offen:** EDI-ORDRSP-Eingang und Positionsabgleich (eigener Fachslice).
