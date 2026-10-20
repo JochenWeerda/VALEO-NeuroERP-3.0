@@ -78,7 +78,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/bestellungen` | Bestellungen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/bestellungen/agent-contract` |
 | `einkauf/lieferanten` | Lieferanten | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/lieferanten/agent-contract` |
 | `einkauf/purchase-order` | Bestellung | einkauf | mittel | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
-| `einkauf/supplier` | Lieferant | einkauf | niedrig | `procure-to-pay` | `GET /api/v1/masks/einkauf/supplier/agent-contract` |
+| `einkauf/supplier` | Lieferant | einkauf | hoch | `procure-to-pay` | `GET /api/v1/masks/einkauf/supplier/agent-contract` |
 | `einkauf/warengruppen` | Warengruppen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/warengruppen/agent-contract` |
 | `einkauf/zahlungsbedingungen` | Zahlungsbedingungen | finance | niedrig | — | `GET /api/v1/masks/einkauf/zahlungsbedingungen/agent-contract` |
 | `finance/ap-invoice` | Eingangsrechnung | finance | mittel | `procure-to-pay` | `GET /api/v1/masks/finance/ap-invoice/agent-contract` |
@@ -2350,8 +2350,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/bearbeiten` |
 | `neue_bestellung` | Bestellung anlegen | safe | nein | `—` |
-| `sperren` | Sperren | warning | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren` |
-| `entsperren` | Entsperren | safe | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren` |
+| `sperren` | Sperren | high | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren` |
+| `entsperren` | Entsperren | high | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren` |
 
 ---
 

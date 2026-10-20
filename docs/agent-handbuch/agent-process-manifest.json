@@ -3102,7 +3102,7 @@
       "agent_contract_url": "/api/v1/masks/einkauf/supplier/agent-contract",
       "screen_definition_url": "/api/v1/masks/einkauf/supplier/screen-definition",
       "readiness_url": "/api/v1/masks/einkauf/supplier/readiness",
-      "risk_summary": "low",
+      "risk_summary": "high",
       "actions": [
         {
           "key": "bearbeiten",
@@ -3129,7 +3129,7 @@
         {
           "key": "sperren",
           "label": "Sperren",
-          "dangerLevel": "warning",
+          "dangerLevel": "high",
           "humanApprovalRequired": false,
           "requiresConfirmation": true,
           "permission": "einkauf.lieferant.update",
@@ -3140,7 +3140,7 @@
         {
           "key": "entsperren",
           "label": "Entsperren",
-          "dangerLevel": "safe",
+          "dangerLevel": "high",
           "humanApprovalRequired": false,
           "requiresConfirmation": true,
           "permission": "einkauf.lieferant.update",

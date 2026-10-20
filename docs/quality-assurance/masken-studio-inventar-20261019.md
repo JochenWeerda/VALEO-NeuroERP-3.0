@@ -23,8 +23,8 @@ Gesamt 661 Routen, davon 658 Masken.
 | davon serverwirksam | 283 |
 | … mit REST-Kommandoweg | 283 |
 | … mit eigenem MCP-Werkzeug | 45 |
-| … per generischem MCP-Werkzeug (`mask.action.execute`) | 78 |
-| … MCP bewusst gesperrt | 160 |
+| … per generischem MCP-Werkzeug (`mask.action.execute`) | 76 |
+| … MCP bewusst gesperrt | 162 |
 | … MCP offen (`open_high` u. a.) | 0 |
 | … MCP unklassifiziert | 0 |
 | … mit CLI-Zugang | 283 |
