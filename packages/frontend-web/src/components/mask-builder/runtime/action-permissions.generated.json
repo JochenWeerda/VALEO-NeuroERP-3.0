@@ -882,6 +882,21 @@
         ]
       ]
     },
+    "finance/buchungsvorlagen": {
+      "finance.buchung.create": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.buchungsvorlage.delete": [
+        [
+          "FINANCE_ADMIN",
+          "admin"
+        ]
+      ]
+    },
     "finance/debitor": {
       "finance.debitor.update": [
         [

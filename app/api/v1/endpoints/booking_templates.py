@@ -16,6 +16,7 @@ import logging
 from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
+from app.core.tenant import get_tenant_id
 from ....core.fibu_audit import log_fibu_audit
 
 logger = logging.getLogger(__name__)
@@ -105,7 +106,7 @@ class ApplyTemplateResponse(BaseModel):
 async def list_booking_templates(
     category: Optional[str] = Query(None, description="Filter by category"),
     active_only: bool = Query(True, description="Show only active templates"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -163,14 +164,16 @@ async def list_booking_templates(
         return result
         
     except Exception as e:
+        # Bis 20.10.2026 wurde jeder Fehler zur leeren Liste — nicht von "keine Vorlagen" unterscheidbar.
+        db.rollback()
         logger.error("Error listing booking templates: %s", e, exc_info=True)
-        return []
+        raise HTTPException(status_code=503, detail="Buchungsvorlagen derzeit nicht verfuegbar") from e
 
 
 @router.get("/{template_id}", response_model=BookingTemplateResponse, summary="Booking template abrufen", dependencies=[Depends(finance_read)])
 async def get_booking_template(
     template_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -223,7 +226,7 @@ async def get_booking_template(
 @router.post("", response_model=BookingTemplateResponse, status_code=201, summary="Booking template anlegen", dependencies=[Depends(finance_write)])
 async def create_booking_template(
     template: BookingTemplateCreate,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -274,7 +277,8 @@ async def create_booking_template(
         
         db.commit()
         
-        lines_data = json.loads(row[6]) if row[6] else []
+        # JSONB kommt von psycopg2 schon als Liste; json.loads darauf liess jede Anlage mit 500 scheitern (20.10.2026).
+        lines_data = json.loads(row[6]) if isinstance(row[6], str) else (row[6] or [])
         
         return BookingTemplateResponse(
             id=str(row[0]),
@@ -303,7 +307,7 @@ async def create_booking_template(
 async def apply_booking_template(
     template_id: str,
     request: ApplyTemplateRequest,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
     http_request: Request = None,
 ):
@@ -360,6 +364,11 @@ async def apply_booking_template(
             elif line.fixed_credit:
                 total_credit += line.fixed_credit
         
+        # Ein Buchungsentwurf muss ausgeglichen sein; vorher entstand er bei fehlerhafter Vorlage mit Soll != Haben.
+        if round(total_debit, 2) != round(total_credit, 2):
+            raise HTTPException(status_code=422, detail=(
+                f"Vorlage ergibt keinen ausgeglichenen Beleg (Soll {total_debit:.2f} / Haben {total_credit:.2f})"))
+
         db.execute(journal_entry_insert, {
             "id": entry_id,
             "tenant_id": tenant_id,
@@ -475,7 +484,7 @@ async def apply_booking_template(
 async def update_booking_template(
     template_id: str,
     template: BookingTemplateUpdate,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -576,7 +585,7 @@ async def update_booking_template(
 @router.delete("/{template_id}", status_code=204, response_class=Response, response_model=None, summary="Booking template löschen", dependencies=[Depends(finance_admin)])
 async def delete_booking_template(
     template_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """

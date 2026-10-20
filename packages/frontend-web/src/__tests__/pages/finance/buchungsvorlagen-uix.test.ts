@@ -8,11 +8,10 @@ const src = readFileSync(
 )
 
 describe('Buchungsvorlagen UIX (Buchhaltung)', () => {
-  it('hat 44-px-Anwenden/Löschen, deutsche Filter und ehrliches Anlegen', () => {
-    expect(src).toContain('min-h-touch touch-manipulation')
-    expect(src).toContain('CATEGORY_LABELS')
-    expect(src).toContain('Anlegen folgt noch')
-    expect(src).toContain('wirklich löschen')
-    expect(src).not.toMatch(/size="sm"/)
+  // Seit 20.10.2026 Studio-Liste: Anwenden (mit Bestaetigung und Eingaben) und Loeschen (mit Bestaetigung) stehen
+  // in der ScreenDefinition finance/buchungsvorlagen; die 44-px-Ziele liefert der Renderer.
+  it('rendert die Studio-Liste aus der ScreenDefinition', () => {
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="finance/buchungsvorlagen"')
   })
 })

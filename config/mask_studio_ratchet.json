@@ -221,7 +221,6 @@
   "finance/bank-stamm",
   "finance/bookings/new",
   "finance/buchungsimport",
-  "finance/buchungsvorlagen",
   "finance/chart-of-accounts",
   "finance/datev-export",
   "finance/dunning",

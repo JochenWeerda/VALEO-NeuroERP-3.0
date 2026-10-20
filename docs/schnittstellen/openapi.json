@@ -296728,18 +296728,6 @@
               "title": "Active Only",
               "type": "boolean"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -296784,20 +296772,6 @@
       "post": {
         "description": "Create a new booking template.",
         "operationId": "create_booking_template_api_v1_finance_booking_templates_post",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -296857,18 +296831,6 @@
               "title": "Template Id",
               "type": "string"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -296909,18 +296871,6 @@
             "required": true,
             "schema": {
               "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -296970,18 +296920,6 @@
             "required": true,
             "schema": {
               "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -297043,18 +296981,6 @@
             "required": true,
             "schema": {
               "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }

@@ -329,6 +329,13 @@ wie gewachsen); die handgebaute Seite loeschte ueber `DELETE /finance/exchange-r
 die Liste meldete jeden Fehler als leere Liste (jetzt 503). Mandant der sechs Wege aus dem Kontext statt Query
 (produktiv war er gebunden, siehe unten).
 
+## Buchungsvorlagen als Studio-Liste (20.10.2026)
+
+`finance/buchungsvorlagen`: Anwenden (erzeugt einen Buchungsentwurf) und Loeschen mit Bestaetigung, wie die bisherige
+Seite (Anlegen bot sie nicht). Befunde: **jede Vorlagenanlage scheiterte mit 500** (`json.loads` auf JSONB, das psycopg2
+schon als Liste liefert); die Liste meldete jeden Fehler als leere Liste (jetzt 503); Anwenden pruefte nicht, ob der
+Entwurf ausgeglichen ist (jetzt 422 bei Soll != Haben). Mandant der sechs Wege aus dem Kontext statt Query.
+
 ## Einordnung: Mandant aus Query/Body (20.10.2026)
 
 208 Wege deklarieren `tenant_id` als Query-Parameter (Standard oft `"system"`), weitere tragen ihn im Body. Das ist

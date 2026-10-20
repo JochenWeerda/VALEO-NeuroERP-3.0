@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 203,
-    "screens_with_actions": 103,
+    "actions": 204,
+    "screens_with_actions": 104,
     "domains": 17
   },
   "actions": [
@@ -2143,6 +2143,26 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:finance/buchungsvorlagen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (finance/buchungsvorlagen)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/buchungsvorlagen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/buchungsvorlagen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
       }
     },
     {

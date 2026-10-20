@@ -1053,6 +1053,43 @@ def build_finance_wechselkurse_liste() -> dict[str, Any]:
     )
 
 
+def build_finance_buchungsvorlagen_liste() -> dict[str, Any]:
+    """Buchungsvorlagen: anwenden (erzeugt einen Buchungsentwurf) und loeschen, wie die bisherige Seite."""
+    return _liste(
+        screen_id="finance/buchungsvorlagen", domain="finance", title="Buchungsvorlagen",
+        subtitle="Wiederkehrende Buchungen als Vorlage", endpoint="/api/v1/finance/booking-templates?active_only=false",
+        row_route=None, bundle="finance",
+        columns=[
+            {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "category", "label": "Kategorie", "filterable": True, "priority": "primary"},
+            {"key": "trigger_type", "label": "Ausloeser", "filterable": True, "priority": "secondary"},
+            {"key": "default_amount", "label": "Standardbetrag", "numeric": True, "renderKind": "currency",
+             "priority": "secondary"},
+            {"key": "currency", "label": "Waehrung", "priority": "tertiary"},
+            {"key": "active", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[
+            {"key": "anwenden", "label": "Anwenden", "dangerLevel": "moderate", "permission": "finance.buchung.create",
+             "commandEndpoint": "/api/v1/finance/booking-templates/{entity_id}/apply", "method": "POST",
+             "requiresConfirmation": True, "visibleWhen": {"field": "active", "values": [True]},
+             "inputFields": [
+                 {"key": "entry_date", "label": "Belegdatum", "type": "date", "required": True},
+                 {"key": "amount", "label": "Betrag (leer: Standardbetrag)", "type": "number"},
+                 {"key": "reference", "label": "Referenz", "type": "text"},
+                 {"key": "description", "label": "Buchungstext (leer: aus der Vorlage)", "type": "text"},
+             ]},
+            {"key": "loeschen", "label": "Loeschen", "dangerLevel": "high", "permission": "finance.buchungsvorlage.delete",
+             "commandEndpoint": "/api/v1/finance/booking-templates/{entity_id}", "method": "DELETE",
+             "requiresConfirmation": True},
+        ],
+        purpose="Wiederkehrende Buchungen als Entwurf erzeugen; der Entwurf geht durch die normale Buchungspruefung.",
+        prompts=["Welche Buchungsvorlagen gibt es fuer Abschreibungen?", "Wende die Mietvorlage fuer Oktober an."],
+        dangerous=[{"key": "loeschen", "reason": "Entfernt die Vorlage dauerhaft."}],
+        no_workflow="Anwenden erzeugt einen Buchungsentwurf; Freigabe und Buchung laufen im Journal.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -1075,6 +1112,7 @@ LISTEN_SCREEN_BUILDERS = {
     "agrar/psm-liste": build_agrar_psm_liste,
     "artikel/liste": build_artikel_liste,
     "finance/wechselkurse": build_finance_wechselkurse_liste,
+    "finance/buchungsvorlagen": build_finance_buchungsvorlagen_liste,
     "charge/liste": build_chargen_liste,
     "personal/mitarbeiter-liste": build_personal_mitarbeiter_liste,
     "versicherungen/liste": build_versicherungen_liste,
@@ -1107,6 +1145,7 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "agrar/psm-liste": "/agrar/psm",
                 "artikel/liste": "/artikel",
                 "finance/wechselkurse": "/finance/wechselkurse",
+                "finance/buchungsvorlagen": "/finance/buchungsvorlagen",
                 "charge/liste": "/charge/liste",
                 "personal/mitarbeiter-liste": "/personal/mitarbeiter",
                 "versicherungen/liste": "/versicherungen",

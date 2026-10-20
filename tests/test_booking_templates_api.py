@@ -248,6 +248,9 @@ def _bt_client(db: _FakeDb):
     _app.include_router(bt_router)
     _app.dependency_overrides[get_db] = lambda: db
     _app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_ADMIN"]}
+    # Mandant aus dem geprueften Kontext (seit 20.10.2026; vorher Query-Parameter mit Standard "system").
+    from testgrenze import ersetze_mandant
+    ersetze_mandant(_app, "system")
     return TestClient(_app, raise_server_exceptions=False)
 
 

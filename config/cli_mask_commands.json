@@ -190,6 +190,8 @@
   "mask:finance/ap-invoice:freigeben",
   "mask:finance/ar-open-item:mahnen",
   "mask:finance/bankkonto:bearbeiten",
+  "mask:finance/buchungsvorlagen:anwenden",
+  "mask:finance/buchungsvorlagen:loeschen",
   "mask:finance/debitor:bearbeiten",
   "mask:finance/debitoren-liste:entsperren",
   "mask:finance/debitoren-liste:sperren",
@@ -278,6 +280,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 150
+  "kein_endpunkt": 151
  }
 }

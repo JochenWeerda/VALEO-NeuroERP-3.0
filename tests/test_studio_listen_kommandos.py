@@ -73,6 +73,10 @@ def aufraeumen(engine):
         v.execute(text("DELETE FROM einkauf_angebote_positionen WHERE angebot_id IN "
                        "(SELECT id FROM einkauf_angebote WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_erp.exchange_rates WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_erp.journal_entry_lines WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_erp.journal_entries WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_erp.booking_templates WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_erp.chart_of_accounts WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         for tabelle in ("einkauf_anfragen", "einkauf_angebote", "einkauf_anlieferavis", "domain_crm.crm_action_audit_log", "public.outbox_events"):
             v.execute(text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
 
@@ -507,6 +511,37 @@ def test_wechselkurse_erfassen_mandantengenau_und_deaktivieren_mit_grund(engine,
                          {"i": kennung}).scalar() is False
     assert client.post(pfad + "aktivieren", headers={"X-Tenant-ID": HAUS_A},
                        json={"_auditReason": "doch korrekt"}).json()["success"] is True
+
+
+def test_buchungsvorlage_anwenden_erzeugt_einen_ausgeglichenen_entwurf_im_mandanten(engine, client):
+    """Zeilenaktion "Anwenden" der Studio-Liste: Entwurf im Journal des Kontext-Mandanten (vorher Query-Mandant mit
+    Standard "system"); fremder Mandant findet die Vorlage nicht."""
+    from sqlalchemy import text
+
+    from app.core.screen_definitions import get_screen_definition
+
+    with engine.begin() as v:
+        for nummer, typ in (("4210", "expense"), ("1200", "asset")):
+            v.execute(text("INSERT INTO domain_erp.chart_of_accounts (id, tenant_id, account_number, account_name, "
+                           "account_type) VALUES (:i, :h, :n, :n, :t)"),
+                      {"i": str(uuid.uuid4()), "h": HAUS_A, "n": nummer, "t": typ})
+    vorlage = client.post("/api/v1/finance/booking-templates", headers={"X-Tenant-ID": HAUS_A}, json={
+        "name": "Miete", "category": "GENERAL", "default_amount": "1200.00", "lines": [
+            {"line_number": 1, "account_number": "4210", "debit_percentage": "100"},
+            {"line_number": 2, "account_number": "1200", "credit_percentage": "100"}]})
+    assert vorlage.status_code == 201, vorlage.text
+    kennung = vorlage.json()["id"]
+    aktion = next(a for a in get_screen_definition("finance/buchungsvorlagen")["tables"][0]["rowActions"]
+                  if a["key"] == "anwenden")
+    pfad = aktion["commandEndpoint"].replace("{entity_id}", kennung)
+    angewendet = client.post(pfad, headers={"X-Tenant-ID": HAUS_A}, json={"entry_date": "2026-10-20"})
+    assert angewendet.status_code == 200, angewendet.text
+    assert angewendet.json()["total_debit"] == angewendet.json()["total_credit"]
+    with engine.connect() as v:
+        entwurf = v.execute(text("SELECT tenant_id, status FROM domain_erp.journal_entries WHERE id::text = :i"),
+                            {"i": angewendet.json()["journal_entry_id"]}).mappings().one()
+    assert (entwurf["tenant_id"], entwurf["status"]) == (HAUS_A, "draft")
+    assert client.post(pfad, headers={"X-Tenant-ID": HAUS_B}, json={"entry_date": "2026-10-20"}).status_code == 404
 
 
 def test_kreditorenliste_ist_eine_liste_und_oeffnet_die_objektmaske():
