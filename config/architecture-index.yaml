@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-20
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-20T19:25:21Z'
+generated_at: '2026-10-20T21:32:12Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -2055,7 +2055,6 @@ domains:
     - /einkauf/lieferanten
     - /einkauf/lieferanten-dokumente
     - /einkauf/lieferanten-liste
-    - /einkauf/lieferanten-stamm
     - /einkauf/lieferanten/:id
     - /einkauf/lieferantenbewertung
     - /einkauf/lieferschein-erfassung
@@ -2115,8 +2114,8 @@ domains:
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
 mapping_stats:
-  frontend_routes_total: 932
-  frontend_routes_mapped: 932
+  frontend_routes_total: 931
+  frontend_routes_mapped: 931
   backend_services_total: 306
   backend_services_mapped: 306
   backend_endpoints_total: 472
