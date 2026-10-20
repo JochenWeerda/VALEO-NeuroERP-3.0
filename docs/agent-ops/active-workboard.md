@@ -19012,3 +19012,20 @@ Offen: per-Version-Publikationsnachweise, gleichwertige Tabellenprojektionen und
 Paging-Aliasse sowie Fachketten fuer alle weiteren Quellen. Gesamtclaim
 STUDIO-MIGRATION-ENGINE bleibt in Arbeit. QA:
 docs/quality-assurance/studio-multichannel-read-20261020.md.
+
+
+## STUDIO-TABLE-QUERY-20261020 - reserviert, Codex
+
+Owner Codex. Unveraendertes Gesamtziel made by Studio: gleiche Tabellenfunktion
+in Human/CLI/MCP, kein Qualitaetssiegel aus blossen Metadaten. Besitz neue
+app/services/mask_table_query.py, bestehende mask_data_read.py und
+mask_data_contracts.py nur Tabellenprojektion, mask_screen_definition.py nur
+Query-Parameter, valeo_cli/cli.py und MCP-Readschema nur passende Leseparameter.
+Zentrale Runtime useUniversalMaskRuntime/compile-data-binding-plan/types nur
+explizite Datenquellenbindung ueber gemeinsamen Leseweg; keine fremden
+Seiten/ScreenBuilder. Eigene Backend-/Frontendvertraege, notwendige generierte
+Artefakte, QA/Workboard/Platform-Doku. Abnahme: Suche, neun Filteroperatoren,
+Sortierung, richtige zweite Seite, gleicher Domain-/Mandanten-/Rollenweg;
+unvollstaendige Quellen duerfen keinen vollstaendigen Tabellenstand behaupten.
+Keine neue DB/Container/Reset, bestehender valeo_probe mit Rollbackdaten.
+Bestehende Server-Paging-Vertraege werden nicht still auf lokal umgedeutet.
