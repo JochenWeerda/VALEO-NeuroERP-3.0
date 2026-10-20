@@ -566,6 +566,22 @@
         ]
       ]
     },
+    "einkauf/auftragsbestaetigungen": {
+      "einkauf.auftragsbestaetigung.review": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.auftragsbestaetigung.confirm": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "einkauf/purchase-order": {
       "einkauf.bestellung.update": [
         [

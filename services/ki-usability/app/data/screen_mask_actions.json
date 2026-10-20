@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 142,
-    "screens_with_actions": 72,
+    "actions": 143,
+    "screens_with_actions": 73,
     "domains": 14
   },
   "actions": [
@@ -1203,6 +1203,26 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/auftragsbestaetigungen:neu",
+      "label": "AB erfassen",
+      "description": "AB erfassen (einkauf/auftragsbestaetigungen)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/auftragsbestaetigungen",
+      "intent_phrases": [
+        "AB erfassen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/auftragsbestaetigungen",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/auftragsbestaetigung/neu",
+        "command": null,
+        "method": null
       }
     },
     {

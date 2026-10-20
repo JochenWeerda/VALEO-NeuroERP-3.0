@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (111 Masken).
+> Generiert aus `app/core/screen_definitions.py` (112 Masken).
 
 ## Übersicht
 
@@ -60,6 +60,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/anlieferavis` | Anlieferavis | einkauf | mittel | — | `GET /api/v1/masks/einkauf/anlieferavis/agent-contract` |
 | `einkauf/anlieferavis-liste` | Anlieferavis | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anlieferavis-liste/agent-contract` |
 | `einkauf/auftragsbestaetigung` | Auftragsbestaetigung | einkauf | mittel | — | `GET /api/v1/masks/einkauf/auftragsbestaetigung/agent-contract` |
+| `einkauf/auftragsbestaetigungen` | Auftragsbestaetigungen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/auftragsbestaetigungen/agent-contract` |
 | `einkauf/purchase-order` | Bestellung | einkauf | mittel | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
 | `einkauf/supplier` | Lieferant | einkauf | niedrig | `procure-to-pay` | `GET /api/v1/masks/einkauf/supplier/agent-contract` |
 | `finance/ap-invoice` | Eingangsrechnung | finance | mittel | `procure-to-pay` | `GET /api/v1/masks/finance/ap-invoice/agent-contract` |
@@ -1614,6 +1615,45 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `pruefen` | Pruefen | safe | nein | `/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/pruefen` |
 | `bestaetigen` | Bestaetigen | moderate | nein | `/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/bestaetigen` |
+
+---
+
+### `einkauf/auftragsbestaetigungen` — Auftragsbestaetigungen
+
+**Zweck:** Lieferanten-Bestaetigungen gegen Bestellungen pruefen und bestaetigen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/einkauf/auftragsbestaetigungen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/einkauf/auftragsbestaetigungen/agent-contract` |
+| Readiness | `GET /api/v1/masks/einkauf/auftragsbestaetigungen/readiness` |
+| Rollout-Route | `/mask-rollout/einkauf__auftragsbestaetigungen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/einkauf/auftragsbestaetigungen`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Auftragsbestaetigungen sind noch ungeprueft?
+- Zeige Bestaetigungen mit Abweichung.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | AB erfassen | safe | nein | `—` |
+| `export` | CSV-Export | safe | nein | `—` |
 
 ---
 

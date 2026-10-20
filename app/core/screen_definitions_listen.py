@@ -187,13 +187,51 @@ def build_einkauf_anlieferavis_liste() -> dict[str, Any]:
     )
 
 
+
+def build_einkauf_auftragsbestaetigungen_liste() -> dict[str, Any]:
+    """Auftragsbestaetigungen der Lieferanten: erfassen, pruefen, bestaetigen (Wege der Objektmaske)."""
+    pfad = "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/"
+    return _liste(
+        screen_id="einkauf/auftragsbestaetigungen", domain="einkauf", title="Auftragsbestaetigungen",
+        subtitle="Bestaetigungen der Lieferanten zu Bestellungen", endpoint="/api/v1/einkauf/auftragsbestaetigungen",
+        row_route="/einkauf/auftragsbestaetigung/{id}", bundle="einkauf",
+        columns=[
+            {"key": "bestaetigungsNummer", "label": "AB-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "bestellung", "label": "Bestellung", "filterable": True, "sortable": True, "priority": "primary"},
+            {"key": "lieferant", "label": "Lieferant", "filterable": True, "sortable": True, "priority": "secondary"},
+            {"key": "createdAt", "label": "Erfasst", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[{"key": "neu", "label": "AB erfassen", "kind": "primary", "dangerLevel": "safe", "zone": "header",
+                  "navigationRoute": "/einkauf/auftragsbestaetigung/neu", "localEffect": "navigation"},
+                 _EXPORT],
+        row_actions=[
+            {"key": "pruefen", "label": "Pruefen", "dangerLevel": "safe",
+             "permission": "einkauf.auftragsbestaetigung.review", "commandEndpoint": pfad + "pruefen",
+             "method": "POST", "requiresConfirmation": True,
+             "visibleWhen": _status("OFFEN")},
+            {"key": "bestaetigen", "label": "Bestaetigen", "dangerLevel": "moderate",
+             "permission": "einkauf.auftragsbestaetigung.confirm", "commandEndpoint": pfad + "bestaetigen",
+             "method": "POST", "requiresConfirmation": True,
+             "visibleWhen": _status("OFFEN", "GEPRUEFT")},
+        ],
+        purpose="Lieferanten-Bestaetigungen gegen Bestellungen pruefen und bestaetigen.",
+        prompts=["Welche Auftragsbestaetigungen sind noch ungeprueft?", "Zeige Bestaetigungen mit Abweichung."],
+        no_workflow="Der Status steht an der Auftragsbestaetigung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
     "einkauf/anlieferavis-liste": build_einkauf_anlieferavis_liste,
+    "einkauf/auftragsbestaetigungen": build_einkauf_auftragsbestaetigungen_liste,
 }
 LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
-                "einkauf/anlieferavis-liste": "/einkauf/anlieferavis"}
+                "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
+                "einkauf/auftragsbestaetigungen": "/einkauf/auftragsbestaetigungen"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
-                   "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"]}
+                   "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
+                   "einkauf/auftragsbestaetigungen": ["auftragsbestaetigungen", "ab", "ordrsp"]}

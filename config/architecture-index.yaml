@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-20
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-20T08:32:05Z'
+generated_at: '2026-10-20T08:39:45Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -2093,6 +2093,7 @@ domains:
     - einkauf_ab_erfassung
     - einkauf_anfrage_kommandos
     - einkauf_angebot_kommandos
+    - einkauf_avis_kommandos
     - einkauf_bestellvorschlag
     - einkauf_kpis
     - einkauf_lieferschein
@@ -2112,8 +2113,8 @@ mapping_stats:
   frontend_routes_mapped: 932
   backend_services_total: 303
   backend_services_mapped: 303
-  backend_endpoints_total: 468
-  backend_endpoints_mapped: 468
+  backend_endpoints_total: 469
+  backend_endpoints_mapped: 469
 unmapped:
   frontend_routes: []
   backend_services: []

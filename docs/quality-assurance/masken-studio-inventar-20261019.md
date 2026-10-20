@@ -8,8 +8,8 @@ Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentschei
 | Stufe | Routen | Anteil an Masken |
 |---|---:|---:|
 | studio_versioniert | 1 | 0.2 % |
-| screen_definition | 83 | 12.6 % |
-| builder_altmuster | 99 | 15.0 % |
+| screen_definition | 84 | 12.7 % |
+| builder_altmuster | 98 | 14.8 % |
 | handgebaut | 477 | 72.3 % |
 | weiterleitung | 2 |  |
 
@@ -19,15 +19,15 @@ Gesamt 662 Routen, davon 660 Masken.
 
 | Befund | Anzahl |
 |---|---:|
-| Aktionen gesamt (ohne Doppel je Maske) | 340 |
-| davon serverwirksam | 243 |
-| … mit REST-Kommandoweg | 243 |
+| Aktionen gesamt (ohne Doppel je Maske) | 344 |
+| davon serverwirksam | 245 |
+| … mit REST-Kommandoweg | 245 |
 | … mit eigenem MCP-Werkzeug | 46 |
-| … per generischem MCP-Werkzeug (`mask.action.execute`) | 53 |
+| … per generischem MCP-Werkzeug (`mask.action.execute`) | 55 |
 | … MCP bewusst gesperrt | 144 |
 | … MCP offen (`open_high` u. a.) | 0 |
 | … MCP unklassifiziert | 0 |
-| … mit CLI-Zugang | 243 |
+| … mit CLI-Zugang | 245 |
 | nicht deklariert (kein Kommando, Endpunkt, Navigation) | 0 |
 | nicht verfuegbar (`stubReason`, die Maske nennt den Grund) | 0 |
 
@@ -65,7 +65,7 @@ fachliche Zuordnung fuehrt `docs/design/beleg-studio-variantenmatrix.md`.
 | `einkauf/angebote` | screen_definition |
 | `einkauf/auftragsbestaetigung` | builder_altmuster |
 | `einkauf/auftragsbestaetigung/:id` | screen_definition |
-| `einkauf/auftragsbestaetigungen` | builder_altmuster |
+| `einkauf/auftragsbestaetigungen` | screen_definition |
 | `einkauf/bestellung/:id` | screen_definition |
 | `einkauf/bestellungen` | builder_altmuster |
 | `einkauf/bestellungen/:id` | builder_altmuster |
@@ -111,7 +111,7 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | fibu | 0 | 0 | 1 | 42 | 0 |
 | finance | 0 | 7 | 18 | 28 | 0 |
 | admin | 0 | 4 | 0 | 27 | 0 |
-| einkauf | 0 | 10 | 12 | 27 | 0 |
+| einkauf | 0 | 11 | 11 | 27 | 0 |
 | sales | 0 | 8 | 0 | 22 | 0 |
 | crm | 0 | 8 | 26 | 21 | 0 |
 | lager | 0 | 3 | 3 | 16 | 0 |

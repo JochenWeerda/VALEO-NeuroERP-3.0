@@ -2351,6 +2351,50 @@
       ]
     },
     {
+      "mask_id": "einkauf/auftragsbestaetigungen",
+      "title": "Auftragsbestaetigungen",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/einkauf__auftragsbestaetigungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/auftragsbestaetigungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/auftragsbestaetigungen/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/auftragsbestaetigungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "AB erfassen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
       "mask_id": "einkauf/purchase-order",
       "title": "Bestellung",
       "domain": "einkauf",

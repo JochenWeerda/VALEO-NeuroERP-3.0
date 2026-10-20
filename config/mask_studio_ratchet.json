@@ -523,7 +523,6 @@
   "einkauf/angebot",
   "einkauf/anlieferavis/neu",
   "einkauf/auftragsbestaetigung",
-  "einkauf/auftragsbestaetigungen",
   "einkauf/bestellungen",
   "einkauf/bestellungen/:id",
   "einkauf/bestellungen/neu",

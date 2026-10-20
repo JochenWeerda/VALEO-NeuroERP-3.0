@@ -78,6 +78,16 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
   `einkauf/anlieferavis/neu` kann nicht speichern. Die Liste bietet deshalb keine Anlage an.
 - Ratsche: Altmuster 100 -> 99.
 
+## Welle 1, Schritt 4 (20.10.2026): Einkauf Auftragsbestaetigungen
+
+- ScreenDefinition `einkauf/auftragsbestaetigungen` auf `NativeListPage`; Erfassen oeffnet die native Anlage
+  (`/einkauf/auftragsbestaetigung/neu`), Pruefen und Bestaetigen nutzen die Wege der Objektmaske (Statusgrenzen
+  seit STAMMDATEN-BEARBEITEN). Kein neuer Serverweg.
+- Befunde der alten Seite: Loeschen rief `DELETE /einkauf/auftragsbestaetigungen/{id}` (gibt es nicht); Zeilenlink
+  auf die nicht vorhandene Route `/einkauf/auftragsbestaetigungen/{id}`; „Import“ sprang in die Bestellliste. Fuer
+  Avise gab es ebenfalls keinen DELETE-Weg.
+- Ratsche: Altmuster 99 -> 98.
+
 ## Sichtung der uebrigen Routen
 
 | Bereich | handgebaut | Altmuster |

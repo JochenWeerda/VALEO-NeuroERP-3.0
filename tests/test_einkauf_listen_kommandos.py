@@ -278,3 +278,15 @@ def test_avis_statusgrenzen(engine, client):
     erhalten = avis(engine, "ERHALTEN")
     assert aktion(erhalten, "stornieren", {"_auditReason": "Versehentlich"}) is False
     assert zeile(engine, "SELECT status FROM einkauf_anlieferavis WHERE id = :id", id=erhalten)["status"] == "ERHALTEN"
+
+
+def test_ab_liste_nutzt_die_wege_der_objektmaske():
+    from app.core.screen_definitions import get_screen_definition
+
+    liste = get_screen_definition("einkauf/auftragsbestaetigungen")
+    objekt = get_screen_definition("einkauf/auftragsbestaetigung")
+    wege = {a["key"]: a["commandEndpoint"] for a in objekt["actions"]}
+    for aktion in liste["tables"][0]["rowActions"]:
+        assert aktion["commandEndpoint"] == wege[aktion["key"]]
+    neu = next(a for a in liste["actions"] if a["key"] == "neu")
+    assert neu["navigationRoute"] == "/einkauf/auftragsbestaetigung/neu" and objekt["creation"]["endpoint"]
