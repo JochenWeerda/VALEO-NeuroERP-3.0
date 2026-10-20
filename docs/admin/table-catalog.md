@@ -167,7 +167,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_compliance.eudr_geolokationen` | `app/services/eudr_register_service.py` | — | — |
 | `domain_compliance.eudr_vorgelagerte_erklaerungen` | `app/services/eudr_register_service.py` | — | — |
 | `domain_compliance.gelangensbestaetigung` | `app/api/v1/endpoints/gelangensbestaetigung.py` | `app/api/v1/endpoints/gelangensbestaetigung.py` | — |
-| `domain_compliance.intrastat_meldungen` | `app/api/v1/endpoints/intrastat.py` | `app/api/v1/endpoints/intrastat.py` | — |
+| `domain_compliance.intrastat_meldungen` | `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/intrastat.py` | `app/api/v1/endpoints/intrastat.py` | — |
 | `domain_compliance.lksg_supplier_risk_assessments` | `app/api/v1/endpoints/compliance_whistleblower_lksg.py` | `app/api/v1/endpoints/compliance_whistleblower_lksg.py` | — |
 | `domain_compliance.sanctions_checks` | `app/api/v1/endpoints/sanctions_compliance.py` | `app/api/v1/endpoints/sanctions_compliance.py` | — |
 | `domain_compliance.sanctions_list` | `app/api/v1/endpoints/sanctions_compliance.py` | `app/api/v1/endpoints/sanctions_compliance.py` | — |

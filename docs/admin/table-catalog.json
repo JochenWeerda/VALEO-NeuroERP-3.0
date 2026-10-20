@@ -8352,6 +8352,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/compliance.py",
             "app/api/v1/endpoints/intrastat.py"
           ],
           "written_by": [

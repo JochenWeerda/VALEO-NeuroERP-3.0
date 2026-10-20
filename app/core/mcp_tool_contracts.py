@@ -512,7 +512,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             operation="intrastat_validate",
             beschreibung="Validiert eine Intrastat-Meldung vor der Einreichung",
             kategorie=MCPToolKategorie.VALIDIEREN,
-            api_endpoint="GET /api/v1/compliance/intrastat/meldungen/{meldung_id}/validate",
+            api_endpoint="GET /api/v1/intrastat/meldungen/{meldung_id}/validate",
             output_beschreibung="Validierungsergebnis: valid/invalid, Violations-Liste",
             parameter=[
                 _p_str("meldung_id", "Intrastat-Meldungs-ID", True),

@@ -244627,172 +244627,6 @@
         ]
       }
     },
-    "/api/v1/compliance/intrastat/meldungen": {
-      "get": {
-        "description": "Liste aller Intrastat-Meldungen (Gap 042).\n\nOptional filterbar nach Meldezeitraum (YYYY-MM) und Richtung (EINGANG/AUSGANG).",
-        "operationId": "list_intrastat_meldungen_api_v1_compliance_intrastat_meldungen_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "meldezeitraum",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Meldezeitraum"
-            }
-          },
-          {
-            "in": "query",
-            "name": "richtung",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Richtung"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ComplianceOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Intrastat meldungen auflisten",
-        "tags": [
-          "Compliance"
-        ]
-      },
-      "post": {
-        "description": "Anlage einer neuen Intrastat-Meldung (Gap 042).\n\nFuehrt direkt eine Vollstaendigkeitspruefung gemaess VO (EG) 638/2004 durch.\nGibt validation_result mit allen Violations zurueck.",
-        "operationId": "create_intrastat_meldung_api_v1_compliance_intrastat_meldungen_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ComplianceOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Intrastat meldung anlegen",
-        "tags": [
-          "Compliance"
-        ]
-      }
-    },
-    "/api/v1/compliance/intrastat/meldungen/{meldung_id}/validate": {
-      "get": {
-        "description": "Vollstaendigkeitspruefung einer einzelnen Intrastat-Meldung nach EU-VO 638/2004.",
-        "operationId": "validate_intrastat_meldung_endpoint_api_v1_compliance_intrastat_meldungen__meldung_id__validate_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "meldung_id",
-            "required": true,
-            "schema": {
-              "title": "Meldung Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ComplianceOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Intrastat meldung endpoint validieren",
-        "tags": [
-          "Compliance"
-        ]
-      }
-    },
     "/api/v1/compliance/lksg/annual-report-preview": {
       "get": {
         "operationId": "lksg_annual_report_preview_api_v1_compliance_lksg_annual_report_preview_get",
@@ -322836,6 +322670,57 @@
           }
         ],
         "summary": "Intrastat-Meldung aktualisieren",
+        "tags": [
+          "Intrastat",
+          "Außenhandel"
+        ]
+      }
+    },
+    "/api/v1/intrastat/meldungen/{meldung_id}/validate": {
+      "get": {
+        "description": "Prueft die gespeicherte Meldung des Mandanten (Positionspflichtfelder).\n\nBis 20.10.2026 pruefte ``/compliance/intrastat/meldungen/{id}/validate`` eine erfundene Beispielmeldung und\nmeldete fuer jede Kennung \"gueltig\" — auch dem Agenten-Werkzeug ``valeo_compliance_intrastat_validate``.\nDie Kopfangaben des Meldepflichtigen (USt-IdNr., Betriebsstaette) prueft die Abgabe beim Statistischen Amt.",
+        "operationId": "validate_meldung_api_v1_intrastat_meldungen__meldung_id__validate_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meldung_id",
+            "required": true,
+            "schema": {
+              "title": "Meldung Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Validate Meldung Api V1 Intrastat Meldungen  Meldung Id  Validate Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Intrastat-Meldung vor der Abgabe pruefen",
         "tags": [
           "Intrastat",
           "Außenhandel"
