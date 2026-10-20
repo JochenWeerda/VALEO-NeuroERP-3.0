@@ -277,8 +277,9 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 - Drei Studio-Listen: `admin/benutzer-liste` (ohne Zeilenroute; Detail- und Anlage-Route zeigten die Liste
   selbst), `compliance/pcn-liste` (Anlage ueber den PCN-/UFI-Assistenten, Ladegrenze 200 wie der Dienst),
   `personal/stundenzettel-liste` (Erfassung ueber die Stundenzettel-Seite).
-- Hinweis: `GET /compliance/pcn-meldungen` faellt bei einem Datenbankfehler auf einen Speicher-Store zurueck
-  (`_PCN_STORE`) statt den Fehler zu melden — offen.
+- **Befund, behoben:** `POST /compliance/pcn-meldungen` meldete bei einem Speicherfehler 201 und hielt die
+  Meldung (CLP-Anhang VIII) nur im Arbeitsspeicher; `GET` las bei Lesefehlern von dort. Jetzt 503 bzw. Fehler;
+  `_PCN_STORE` entfernt (Test in `tests/test_pcn_meldungen.py`).
 - Ratsche: handgebaut 458 -> 453.
 
 ## Barrierefreiheit: virtuelle Tabelle ohne Tabellenrolle (behoben 20.10.2026)
@@ -291,6 +292,19 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
   `row` mit `aria-rowindex` (klickbar: fokussierbar, `aria-selected`), Zellen `cell`/`gridcell`.
 - Aufgefallen im E2E-Smoke der PSM-Liste (suchte `table`/`grid`); der Smoke prueft jetzt die Wurzel der
   ScreenDefinition wie beim Saatgut.
+
+## Persistenzluecken: Fachdaten nur im Arbeitsspeicher (offen, je eigener Slice)
+
+| Stelle | Befund | Einstufung |
+|---|---|---|
+| `compliance.py` `_INTRASTAT_STORE` | Intrastat-Meldungen ausschliesslich im Arbeitsspeicher; nach Neustart weg | hoch (gesetzliche Meldung) |
+| `services/case_management.py` `_CASE_STORE` | Freigabefaelle (ApprovalCase) ausschliesslich im Speicher | hoch (Freigaben) |
+| `audit_evidence.py` `_STORE` | GoBD-Pruefnachweise fallen ohne Tabelle in den Speicher | hoch (GoBD) |
+| `services/webshop_integration_service.py` `_ORDER_STORE`/`_CONFIG_STORE` | Webshop-Bestellungen und -Konfiguration im Speicher | mittel |
+| `portal_interessent_service.py`, `portal_preisspiegel_service.py` `_STORE` | Portal-Interessenten/Preisspiegel im Speicher | mittel |
+| `knowledge_store`, `policy_registry`, `prompt_pack_registry`, `secrets_vault`, `pii_detector`, `whatsapp_agent_service` | Speicher-Ersatz bzw. Laufzeitzustand | pruefen |
+
+Jede Zeile braucht eine Tabelle mit Migration (Pruefstand frisch) und Tests; kein stilles Zurueckfallen.
 
 ## Sichtung 20.10.2026: zurueckgestellt bzw. Entscheidung noetig
 

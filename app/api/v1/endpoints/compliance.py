@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import Optional
+import logging
 import csv
 import io
 from uuid import uuid4
@@ -43,6 +44,8 @@ class ComplianceOut(BaseSchema):
     """Typed response schema for ComplianceOut endpoints (extra fields forwarded)."""
     model_config = _ConfigDict(extra="allow")
 
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/compliance", tags=["Compliance"])
 
@@ -479,7 +482,6 @@ async def validate_intrastat_meldung_endpoint(meldung_id: str) -> dict:
 import re as _re
 _UFI_PATTERN = _re.compile(r"^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$")
 _PCN_STATUS_VALUES = {"entwurf", "validiert", "eingereicht", "angenommen", "abgelehnt"}
-_PCN_STORE: dict[str, dict] = {}
 
 
 def _pcn_to_dict(m: PCNMeldung) -> dict:
@@ -494,22 +496,6 @@ def _pcn_to_dict(m: PCNMeldung) -> dict:
         "tenant_id": m.tenant_id,
         "created_at": m.created_at.isoformat() if m.created_at else None,
         "schema_version": 1,
-    }
-
-
-def _pcn_store_payload(meldung_id: str, body: dict, tenant_id: str) -> dict:
-    return {
-        "meldung_id": meldung_id,
-        "produktname": str(body["produktname"]).strip(),
-        "ufi": str(body.get("ufi") or ""),
-        "cas_nummern": body.get("cas_nummern") or "",
-        "gefahrenklassen": body.get("gefahrenklassen") or [],
-        "verwendungskategorie": body.get("verwendungskategorie") or "",
-        "pcnStatus": body.get("pcnStatus", "entwurf"),
-        "tenant_id": tenant_id,
-        "created_at": datetime.utcnow().isoformat(),
-        "schema_version": 1,
-        "persistence": "memory_fallback",
     }
 
 
@@ -553,15 +539,16 @@ async def create_pcn_meldung(
         pcn_status=pcn_status,
         tenant_id=tenant_id,
     )
+    # Bis 20.10.2026 meldete ein gescheitertes Speichern Erfolg und hielt die Meldung nur im Arbeitsspeicher
+    # (nach einem Neustart verloren). Eine PCN-Meldung (CLP-Anhang VIII) ist gespeichert oder nicht angelegt.
     try:
         db.add(meldung)
         db.commit()
         db.refresh(meldung)
-    except Exception:
+    except Exception as exc:
         db.rollback()
-        fallback = _pcn_store_payload(meldung.id, {**body, "pcnStatus": pcn_status}, tenant_id)
-        _PCN_STORE[meldung.id] = fallback
-        return fallback
+        logger.error("PCN-Meldung konnte nicht gespeichert werden: %s", exc, exc_info=True)
+        raise HTTPException(status_code=503, detail="PCN-Meldung konnte nicht gespeichert werden.") from exc
 
     return _pcn_to_dict(meldung)
 
@@ -574,20 +561,14 @@ async def list_pcn_meldungen(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Liste aller PCN-Meldungen (tenant-isoliert, paginiert)."""
-    try:
-        base_q = (
-            db.query(PCNMeldung)
-            .filter(PCNMeldung.tenant_id == tenant_id)
-            .order_by(PCNMeldung.created_at.desc())
-        )
-        total = base_q.count()
-        rows = base_q.offset(skip).limit(limit).all()
-        meldungen = [_pcn_to_dict(m) for m in rows]
-    except Exception:
-        db.rollback()
-        tenant_rows = [m for m in _PCN_STORE.values() if m.get("tenant_id") == tenant_id]
-        total = len(tenant_rows)
-        meldungen = tenant_rows[skip : skip + limit]
+    base_q = (
+        db.query(PCNMeldung)
+        .filter(PCNMeldung.tenant_id == tenant_id)
+        .order_by(PCNMeldung.created_at.desc())
+    )
+    total = base_q.count()
+    rows = base_q.offset(skip).limit(limit).all()
+    meldungen = [_pcn_to_dict(m) for m in rows]
     return {
         "total": total,
         "skip": skip,
