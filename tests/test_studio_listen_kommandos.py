@@ -521,3 +521,36 @@ def test_einwilligung_widerruf_nimmt_den_grund_aus_dem_body(engine, client):
     grund = zeile(engine, "SELECT reason FROM domain_crm.crm_contact_consent_history WHERE consent_id = :i "
                           "AND new_status = 'revoked'", i=kennung)
     assert grund["reason"] == "Kunde per Telefon"
+
+
+def test_chance_gewonnen_und_verloren_mit_pruefung(monkeypatch, client):
+    """Abschluss nur fuer offene Chancen, Verloren mit Begruendung; Aenderung ueber update_opportunity."""
+    from app.api.v1.endpoints import opportunities
+
+    chancen = {"offen": {"id": "offen", "tenant_id": HAUS_A, "stage": "proposal"},
+               "zu": {"id": "zu", "tenant_id": HAUS_A, "stage": "closed_won"}}
+    geaendert: list[tuple[str, str]] = []
+
+    async def lesen(db, eid, tid):  # noqa: ANN001
+        if eid not in chancen or tid != HAUS_A:
+            raise opportunities.HTTPException(status_code=404, detail="Opportunity not found")
+        return chancen[eid]
+
+    async def aendern(eid, werte, db=None, tenant_id=None):  # noqa: ANN001
+        geaendert.append((eid, werte.stage))
+        return {}
+
+    monkeypatch.setattr(opportunities, "_opportunity_im_mandanten", lesen)
+    monkeypatch.setattr(opportunities, "update_opportunity", aendern)
+
+    def aktion(eid: str, schritt: str, body: dict) -> dict:
+        antwort = client.post(f"/api/v1/crm/opportunities/{eid}/actions/{schritt}", json=body,
+                              headers={"X-Tenant-ID": HAUS_A})
+        assert antwort.status_code == 200, antwort.text
+        return antwort.json()
+
+    assert aktion("zu", "gewonnen", {})["success"] is False
+    assert aktion("offen", "verloren", {})["success"] is False
+    assert aktion("offen", "verloren", {"_auditReason": "Preis beim Wettbewerber"})["success"] is True
+    assert aktion("offen", "gewonnen", {})["success"] is True
+    assert geaendert == [("offen", "closed_lost"), ("offen", "closed_won")]

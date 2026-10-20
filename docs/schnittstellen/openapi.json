@@ -268001,6 +268001,122 @@
         ]
       }
     },
+    "/api/v1/crm/opportunities/{entity_id}/actions/gewonnen": {
+      "post": {
+        "operationId": "chance_gewonnen_api_v1_crm_opportunities__entity_id__actions_gewonnen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Verkaufschance als gewonnen abschliessen",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/crm/opportunities/{entity_id}/actions/verloren": {
+      "post": {
+        "operationId": "chance_verloren_api_v1_crm_opportunities__entity_id__actions_verloren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Verkaufschance mit Begruendung als verloren abschliessen",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/crm/opportunities/{opp_id}": {
       "delete": {
         "description": "Soft-delete opportunity.",

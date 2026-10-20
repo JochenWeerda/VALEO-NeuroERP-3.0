@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (125 Masken).
+> Generiert aus `app/core/screen_definitions.py` (126 Masken).
 
 ## Übersicht
 
@@ -57,6 +57,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `crm/kampagnenvorlagen-liste` | Kampagnenvorlagen | crm | niedrig | — | `GET /api/v1/masks/crm/kampagnenvorlagen-liste/agent-contract` |
 | `crm/lead` | Kundenakte | crm | niedrig | — | `GET /api/v1/masks/crm/lead/agent-contract` |
 | `crm/mail-arbeitsplatz` | Mail-Arbeitsplatz | crm | niedrig | — | `GET /api/v1/masks/crm/mail-arbeitsplatz/agent-contract` |
+| `crm/opportunities-liste` | Verkaufschancen | crm | niedrig | — | `GET /api/v1/masks/crm/opportunities-liste/agent-contract` |
 | `crm/opportunity` | Opportunity | crm | niedrig | `order-to-cash` | `GET /api/v1/masks/crm/opportunity/agent-contract` |
 | `crm/segmente-liste` | Segmente | crm | niedrig | — | `GET /api/v1/masks/crm/segmente-liste/agent-contract` |
 | `docflow/dokumenten-ruecklauf` | Dokumentenruecklauf | dms-compliance | niedrig | — | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/agent-contract` |
@@ -1482,6 +1483,46 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `draft` | Neue Mail | low | nein | `—` |
+
+---
+
+### `crm/opportunities-liste` — Verkaufschancen
+
+**Zweck:** Verkaufschancen nach Phase und Betrag steuern, Angebote erstellen und abschliessen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/crm/opportunities-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/crm/opportunities-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/crm/opportunities-liste/readiness` |
+| Rollout-Route | `/mask-rollout/crm__opportunities-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/crm/opportunities/`
+
+**MCP-Tools (Domäne):**
+
+- `crm.customer.search` — scope `crm:read`, Risiko niedrig
+- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
+- `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Chancen schliessen diesen Monat?
+- Welche Chancen haben ueber 70 % Wahrscheinlichkeit?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neue Chance | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `kanban` | Pipeline-Ansicht | safe | nein | `Oeffnet die Pipeline als Kanban.` |
 
 ---
 

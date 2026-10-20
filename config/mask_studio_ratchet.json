@@ -499,7 +499,6 @@
   "crm/lieferanten",
   "crm/lieferanten/:id",
   "crm/lieferanten/liste",
-  "crm/opportunities",
   "crm/opportunity/:id",
   "crm/opportunity/new",
   "crm/segment/:id",

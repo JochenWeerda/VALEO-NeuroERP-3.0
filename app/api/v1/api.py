@@ -1976,6 +1976,8 @@ from app.api.v1.endpoints import agrar_stammdaten_kommandos  # noqa: E402  # Zei
 api_router.include_router(agrar_stammdaten_kommandos.router)
 from app.api.v1.endpoints import finance_stammdaten_kommandos  # noqa: E402  # Zeilenaktionen der Finance-Listen
 api_router.include_router(finance_stammdaten_kommandos.router)
+from app.api.v1.endpoints import crm_listen_kommandos  # noqa: E402  # Zeilenaktionen der CRM-Listen
+api_router.include_router(crm_listen_kommandos.router)
 api_router.include_router(mask_rollout_summaries.router)
 api_router.include_router(mask_screen_definition.router)
 api_router.include_router(studio_drafts.router)

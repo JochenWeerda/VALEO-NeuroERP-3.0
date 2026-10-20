@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 173,
-    "screens_with_actions": 87,
+    "actions": 176,
+    "screens_with_actions": 88,
     "domains": 14
   },
   "actions": [
@@ -1227,6 +1227,66 @@
         "actionKey": "draft",
         "commandEndpoint": null,
         "navigationRoute": null,
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/opportunities-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (crm/opportunities-liste)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/opportunities-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/opportunities-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/opportunities-liste:kanban",
+      "label": "Pipeline-Ansicht",
+      "description": "Pipeline-Ansicht (crm/opportunities-liste)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/opportunities-liste",
+      "intent_phrases": [
+        "Pipeline-Ansicht"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/opportunities-liste",
+        "actionKey": "kanban",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/opportunities-kanban",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:crm/opportunities-liste:neu",
+      "label": "Neue Chance",
+      "description": "Neue Chance (crm/opportunities-liste)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/opportunities-liste",
+      "intent_phrases": [
+        "Neue Chance"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/opportunities-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/opportunity/new",
         "command": null,
         "method": null
       }

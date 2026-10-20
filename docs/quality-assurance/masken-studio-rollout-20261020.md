@@ -214,6 +214,15 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
   `changed_by="contact"`, auch wenn Mitarbeitende widerrufen.
 - Ratsche: Altmuster 86 -> 81.
 
+## Welle 1, Schritt 12 (20.10.2026): CRM Verkaufschancen
+
+- ScreenDefinition `crm/opportunities-liste` (Ladegrenze 200 wie der Dienst); Zeile oeffnet die native Maske
+  `crm/opportunity`; „Angebot erstellen“ fuehrt in die Angebotserfassung, „Pipeline-Ansicht“ ins Kanban.
+- **Befund, behoben:** „Gewonnen“/„Verloren“ setzten per `PUT` je Zeile den Status ohne Pruefung, Grund und Audit,
+  auch fuer bereits abgeschlossene Chancen. Jetzt Kommando-Wege `crm_listen_kommandos.py` ueber
+  `update_opportunity` (wie das Bearbeiten der Objektmaske), Verloren mit Begruendung, Abgeschlossene abgewiesen.
+- Ratsche: Altmuster 81 -> 80.
+
 ## Sichtung 20.10.2026: zurueckgestellt bzw. Entscheidung noetig
 
 | Seite | Befund | Weiter |

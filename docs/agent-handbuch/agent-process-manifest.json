@@ -2252,6 +2252,61 @@
       ]
     },
     {
+      "mask_id": "crm/opportunities-liste",
+      "title": "Verkaufschancen",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__opportunities-liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/opportunities-liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/opportunities-liste/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/opportunities-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neue Chance",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "kanban",
+          "label": "Pipeline-Ansicht",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Pipeline als Kanban."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.lead.qualify"
+      ]
+    },
+    {
       "mask_id": "crm/opportunity",
       "title": "Opportunity",
       "domain": "crm",

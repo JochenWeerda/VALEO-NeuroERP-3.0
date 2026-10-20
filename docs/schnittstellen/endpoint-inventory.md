@@ -134,6 +134,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `crm_kontakte` | Kunden-Kontakte (Kontakthistorie + Wiedervorlage) — Kunden-Cockpit. |
 | `crm_kunden_map` | CRM-Kundenkarte — alle Kunden als GeoJSON (Karte + Hover-Kennzahlen). |
 | `crm_lead_gen` | CRM Lead-Generierung — region-universale Lead-Kandidaten (GAP/LKV). |
+| `crm_listen_kommandos` | Zeilenaktionen der CRM-Listen als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `crm_mail_capture` | KIM E-Mail-Connector — ein-/ausgehende Mails als Kontakt erfassen. |
 | `crm_ownership` | Kunden-Ownership (DOM-CRM-004.3) — Zuordnung/Übergabe Außendienst/Innendienst. |
 | `crm_partner_suche` | Einheitliche Partner-Suche über Kunden, Lieferanten und Leads (Multi-Rolle). |

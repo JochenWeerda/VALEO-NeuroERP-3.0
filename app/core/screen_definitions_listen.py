@@ -659,6 +659,46 @@ def build_crm_segmente_liste() -> dict[str, Any]:
     )
 
 
+def build_crm_opportunities_liste() -> dict[str, Any]:
+    """Verkaufschancen; Zeile oeffnet die native Objektmaske ``crm/opportunity``."""
+    pfad = "/api/v1/crm/opportunities/{entity_id}/actions/"
+    return _liste(
+        screen_id="crm/opportunities-liste", domain="crm", title="Verkaufschancen",
+        subtitle="Pipeline mit Phase, Betrag und Wahrscheinlichkeit", endpoint="/api/v1/crm/opportunities/",
+        row_route="/crm/opportunity/{id}", bundle="crm", fetch_limit=200,
+        columns=[
+            {"key": "name", "label": "Chance", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "stage", "label": "Phase", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "amount", "label": "Betrag", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "primary"},
+            {"key": "probability", "label": "Wahrscheinlichkeit %", "numeric": True, "sortable": True,
+             "priority": "secondary"},
+            {"key": "expected_close_date", "label": "Abschluss geplant", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+            {"key": "assigned_to", "label": "Verantwortlich", "filterable": True, "priority": "tertiary"},
+            {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neue Chance", "/crm/opportunity/new"), _EXPORT,
+                 {"key": "kanban", "label": "Pipeline-Ansicht", "kind": "secondary", "dangerLevel": "safe",
+                  "zone": "header", "navigationRoute": "/crm/opportunities-kanban", "localEffect": "navigation",
+                  "stubReason": "Oeffnet die Pipeline als Kanban."}],
+        row_actions=[
+            {"key": "angebot", "label": "Angebot erstellen", "dangerLevel": "safe",
+             "navigationRoute": "/sales/angebot-erstellen?opportunityId={id}", "localEffect": "navigation",
+             "stubReason": "Oeffnet die Angebotserfassung mit dieser Chance."},
+            {"key": "gewonnen", "label": "Gewonnen", "dangerLevel": "moderate", "permission": "crm.chance.gewonnen",
+             "commandEndpoint": pfad + "gewonnen", "method": "POST", "requiresConfirmation": True,
+             "forbiddenForAgents": True},
+            {"key": "verloren", "label": "Verloren", "dangerLevel": "moderate", "permission": "crm.chance.verloren",
+             "commandEndpoint": pfad + "verloren", "method": "POST", "requiresConfirmation": True,
+             "auditReasonRequired": True, "forbiddenForAgents": True},
+        ],
+        purpose="Verkaufschancen nach Phase und Betrag steuern, Angebote erstellen und abschliessen.",
+        prompts=["Welche Chancen schliessen diesen Monat?", "Welche Chancen haben ueber 70 % Wahrscheinlichkeit?"],
+        no_workflow="Die Phase steht an der Chance; die Pipeline-Ansicht zeigt den Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -677,6 +717,7 @@ LISTEN_SCREEN_BUILDERS = {
     "crm/einwilligungen-liste": build_crm_einwilligungen_liste,
     "crm/dsgvo-anfragen-liste": build_dsgvo_anfragen_liste,
     "crm/segmente-liste": build_crm_segmente_liste,
+    "crm/opportunities-liste": build_crm_opportunities_liste,
 }
 LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
                 "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
@@ -693,7 +734,8 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "crm/kampagnenvorlagen-liste": "/crm/campaign-templates",
                 "crm/einwilligungen-liste": "/crm/consents",
                 "crm/dsgvo-anfragen-liste": "/crm/gdpr-requests",
-                "crm/segmente-liste": "/crm/segments"}
+                "crm/segmente-liste": "/crm/segments",
+                "crm/opportunities-liste": "/crm/opportunities"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
@@ -710,4 +752,5 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "crm/kampagnenvorlagen-liste": ["kampagnenvorlagen", "vorlagen", "templates"],
                    "crm/einwilligungen-liste": ["einwilligungen", "consent", "opt-in"],
                    "crm/dsgvo-anfragen-liste": ["dsgvo-anfragen", "betroffenenanfragen", "gdpr"],
-                   "crm/segmente-liste": ["segmente", "kundensegmente", "zielgruppen"]}
+                   "crm/segmente-liste": ["segmente", "kundensegmente", "zielgruppen"],
+                   "crm/opportunities-liste": ["verkaufschancen", "opportunities", "pipeline"]}

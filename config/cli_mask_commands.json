@@ -150,6 +150,8 @@
   "mask:crm/mail-arbeitsplatz:draft",
   "mask:crm/mail-arbeitsplatz:queue",
   "mask:crm/mail-arbeitsplatz:transfer",
+  "mask:crm/opportunities-liste:gewonnen",
+  "mask:crm/opportunities-liste:verloren",
   "mask:crm/opportunity:bearbeiten",
   "mask:crm/opportunity:create_activity",
   "mask:crm/segmente-liste:berechnen",
@@ -268,6 +270,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 125
+  "kein_endpunkt": 129
  }
 }

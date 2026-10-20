@@ -537,6 +537,26 @@
         ]
       ]
     },
+    "crm/opportunities-liste": {
+      "crm.chance.gewonnen": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "crm.chance.verloren": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "crm/opportunity": {
       "crm.opportunity.update": [
         [

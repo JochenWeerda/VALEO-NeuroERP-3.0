@@ -57,11 +57,11 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  it('stellt Opportunities-Theater nur am Desktop', () => {
+  it('stellt Opportunities als Studio-Liste', () => {
+    // MASK-STUDIO-ROLLOUT: Spalten, Aktionen und Touch-Verhalten aus der ScreenDefinition crm/opportunities-liste.
     const src = read('../../pages/crm/opportunities-liste.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('ListReport')
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="crm/opportunities-liste"')
   })
 
   it('stellt QS-Checkliste ohne toten Audit-Start', () => {
