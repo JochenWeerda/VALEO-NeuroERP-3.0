@@ -34,7 +34,7 @@ BEARBEITER = f"bearb-{uuid.uuid4().hex[:8]}"
 TABELLEN = ("domain_crm.crm_action_audit_log", "public.outbox_events", "domain_ops.ops_bankkonten",
             "domain_shared.futtermittel_mischfutter", "public.crm_leads", "public.einkauf_auftragsbestaetigungen",
             "domain_ops.reklamationen", "domain_einkauf.bestellungen",
-            "domain_einkauf.lieferanten", "domain_inventory.articles")
+            "domain_einkauf.lieferanten", "domain_inventory.articles", "domain_crm.customers")
 
 
 @pytest.fixture(scope="module")
@@ -286,6 +286,7 @@ ERWARTET = {
     "futtermittel/mischfuttermittel": "/api/v1/futter/mischfuttermittel/{entity_id}/actions/bearbeiten",
     "qualitaet/reklamation": "/api/v1/reklamationen/{entity_id}/actions/bearbeiten",
     "artikel/stamm": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+    "crm/customer-360": "/api/v1/crm/customers/{entity_id}/actions/bearbeiten",
 }
 
 
@@ -340,7 +341,7 @@ def test_unbekanntes_objekt_ist_nicht_gefunden_statt_sql_fehler(client, maske):
     pfad = ERWARTET[maske].format(entity_id=uuid.uuid4())
     antwort = client.post(pfad, json={"_mode": "dryRun", "_auditReason": "Pruefung ohne Objekt",
                                       "notes": "x", "name": "x", "company_name": "x", "anforderer": "x",
-                                      "subject": "x", "bank": "x", "credit_limit": 1, "zustaendiger": "x"},
+                                      "subject": "x", "bank": "x", "credit_limit": 1, "zustaendiger": "x", "firma": "x"},
                           headers=kopf())
     assert antwort.status_code == 200, antwort.text
     assert antwort.json()["success"] is False
@@ -376,6 +377,40 @@ def test_artikel_wird_ueber_die_studio_maske_angelegt_und_bearbeitet(client, eng
     fremd = client.post(pfad, headers=kopf(HAUS_B), json={"sales_price": 1.0})
     assert fremd.json()["success"] is False
     assert client.get(f"/api/v1/articles/{kennung}", headers=kopf(HAUS_B)).status_code == 404
+
+
+def test_kunde_wird_ueber_die_akte_angelegt_und_bearbeitet(client, engine):
+    """Anlage ueber ``creation`` der Kundenakte (Mandant aus dem Token), Bearbeiten der deutschen Aliasfelder ueber
+    den Kommandoweg — auch ohne crm-core (vorher liess sich ein lokal angelegter Kunde nie aendern)."""
+    from unittest.mock import AsyncMock, patch
+
+    import httpx
+
+    from app.core.screen_definitions import get_screen_definition
+
+    anlage = get_screen_definition("crm/customer-360")["creation"]
+    nummer = f"K-{uuid.uuid4().hex[:6]}"
+    offline = AsyncMock(side_effect=httpx.ConnectError("crm-core aus"))
+    with patch("app.services.customer_service._crm_create", offline), \
+         patch("app.services.customer_service._crm_update", offline), \
+         patch("app.services.customer_service._crm_get", offline):
+        angelegt = client.post(anlage["endpoint"], headers=kopf(), json={
+            **anlage["defaults"], "customer_number": nummer, "company_name": "Hof Janssen", "city": "Aurich",
+            "postal_code": "26603"})
+        assert angelegt.status_code == 201, angelegt.text
+        kennung = str(angelegt.json()["id"])
+        antwort = client.post(f"/api/v1/crm/customers/{kennung}/actions/bearbeiten", headers=kopf(),
+                              json={"firma": "Hof Janssen GbR", "ort": "Norden", "kreditlimit": 99999})
+        assert antwort.status_code == 200, antwort.text
+        assert antwort.json()["success"] is True, antwort.json()
+        fremd = client.post(f"/api/v1/crm/customers/{kennung}/actions/bearbeiten", headers=kopf(HAUS_B),
+                            json={"firma": "Uebernahme"})
+        assert fremd.json()["success"] is False
+    kunde = zeile(engine, "SELECT tenant_id, company_name, city, postal_code, credit_limit FROM domain_crm.customers "
+                          "WHERE id::text = :id", id=kennung)
+    assert (kunde["tenant_id"], kunde["company_name"], kunde["city"], kunde["postal_code"]) == (
+        HAUS_A, "Hof Janssen GbR", "Norden", "26603")
+    assert kunde["credit_limit"] is None or float(kunde["credit_limit"]) != 99999
 
 
 def test_auftragsbestaetigung_wird_zur_bestellung_erfasst(client, engine):

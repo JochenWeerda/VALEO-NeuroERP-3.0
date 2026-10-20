@@ -119,6 +119,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 
 | Event-ID | Kanal | Quelle |
 |---|---|---|
+| `crm.customer.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `crm.lead.qualified` | outbox | `app/api/v1/endpoints/leads.py` |
 | `crm.lead.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `crm.mail_workspace.attachment_transfer` | outbox | `app/api/v1/endpoints/mail_workspace.py` |

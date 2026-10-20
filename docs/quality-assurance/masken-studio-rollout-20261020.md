@@ -304,10 +304,14 @@ Studio-konform ist. Dafuer fehlten Objektmasken mit Anlage und Bearbeiten.
 | Kundenanlage `POST /api/v1/crm/customers/` | Mandant aus dem Body, Standard Dev-Mandant: jede CRM-Rolle konnte Kunden in fremden Mandanten anlegen, ohne Angabe landeten sie im Dev-Mandanten | Mandant aus dem Kontext, abweichender Body-Mandant 403 |
 | Kunden aus crm-core (Liste, Abruf, Aendern, Loeschen) | crm-core fuehrt keinen Mandanten — alle Wege reichten Kunden **aller** Mandanten durch (gleiches Muster wie die Kontakte) | ein crm-core-Kunde gilt nur ueber seinen Eintrag in `domain_crm.customers` als eigener; die Anlage traegt ihn immer ein (vorher nur mit Geschaeftspartner, Fehler verschluckt); `upsert_monolith_stub` aktualisiert keine fremden Zeilen mehr (`tests/test_kunden_crm_core_mandant.py`) |
 
-Offen: Die Kundenakte `crm/customer-360` ist Studio-SD, ihr "Bearbeiten" fuehrt aber noch in die handgebaute
-Kundenmaske `/verkauf/kunden-stamm` (2.506 Zeilen mit Unterobjekten Anschriften, Kontakte, CpD, Rabatte,
-Chefanweisungen). Naechster Schritt: Bearbeiten und Anlage als Kommandowege an der Kundenakte, Unterobjekte als
-Register mit Zeilenaktionen.
+**Kundenakte, 20.10. (zweiter Schritt):** `crm/customer-360` hat jetzt eine Anlage (`creation`, `/crm/kunden/neu`;
+alle Einstiege "Neuer Kunde" leiten dorthin) und ein wirksames **Bearbeiten** ueber
+`/api/v1/crm/customers/{id}/actions/bearbeiten` (deutsche Aliasfelder -> `update_customer`). Befund dabei: ein bei nicht
+erreichbarem crm-core angelegter Kunde liess sich **nie** aendern (crm-core kannte ihn nicht, kein Fallback), und die
+lokale Anlage verwarf Ort, PLZ, Land und Branche — beides behoben; der lokale Eintrag traegt jede Aenderung.
+
+Offen: Unterobjekte (Anschriften, CpD, Rabatte, Chefanweisungen, Bankverbindung) pflegt weiter die handgebaute
+Kundenmaske `/verkauf/kunden-stamm` ("Erweiterte Pflege"); naechster Schritt sind Register mit Zeilenaktionen.
 
 ## Persistenzluecken: Fachdaten nur im Arbeitsspeicher (offen, je eigener Slice)
 

@@ -134,6 +134,31 @@ async def lead_bearbeiten(entity_id: str, body: dict[str, Any] = Body(default_fa
         aendern=aendern, event_type="crm.lead.updated")
 
 
+# --------------------------------------------------------------------------- Kunde
+
+# Dieselben Rollen wie der Kunden-Aenderungsweg (``customers.update_customer``: CRM schreiben).
+@router.post("/crm/customers/{entity_id}/actions/bearbeiten", response_model=MaskActionResult,
+             summary="Kunde bearbeiten", dependencies=SCHREIBEN["CRM"])
+async def kunde_bearbeiten(entity_id: str, body: dict[str, Any] = Body(default_factory=dict),
+                           db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    from app.api.v1.endpoints.customers import update_customer
+    from app.api.v1.schemas.crm import CustomerUpdate
+
+    async def aendern(session: Session, werte: Any, eid: str, tid: str) -> None:
+        await update_customer(eid, werte, db=session, tenant_id=tid)
+
+    # Die Akte zeigt deutsche Aliasfelder (``attach_mask_aliases``); der Fachweg fuehrt die englischen.
+    return await bearbeiten(
+        db, entity_type="customer", entity_id=entity_id, tenant_id=tenant_id, body=body,
+        felder={"firma": "company_name", "strasse": "address", "plz": "postal_code", "ort": "city",
+                "land": "country", "telefon": "phone", "email": "email", "branche": "industry"},
+        modell=CustomerUpdate,
+        lesen=zeile_per_sql("SELECT CASE WHEN COALESCE(is_active, TRUE) THEN 'active' ELSE 'inactive' END AS status "
+                            "FROM domain_crm.customers WHERE id::text = :id AND tenant_id = :tid "
+                            "AND deleted_at IS NULL"),
+        aendern=aendern, event_type="crm.customer.updated")
+
+
 # --------------------------------------------------------------------------- Artikel
 
 # Dieselben Rollen wie der Artikel-Aenderungsweg (``articles.update_article``: Stammdaten schreiben).

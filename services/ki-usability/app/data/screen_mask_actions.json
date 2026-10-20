@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 198,
+    "actions": 199,
     "screens_with_actions": 102,
     "domains": 17
   },
@@ -1188,6 +1188,28 @@
       }
     },
     {
+      "id": "mask:crm/customer-360:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (crm/customer-360)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/customer-360",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/customer-360",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
       "id": "mask:crm/customer-360:create_activity",
       "label": "Aktivitaet anlegen",
       "description": "Aktivitaet anlegen (crm/customer-360)",
@@ -1211,13 +1233,13 @@
     },
     {
       "id": "mask:crm/customer-360:edit",
-      "label": "Bearbeiten",
-      "description": "Bearbeiten (crm/customer-360)",
+      "label": "Erweiterte Pflege",
+      "description": "Erweiterte Pflege (crm/customer-360)",
       "category": "mask-action",
       "domain": "crm",
       "mask": "crm/customer-360",
       "intent_phrases": [
-        "Bearbeiten"
+        "Erweiterte Pflege"
       ],
       "required_data": [],
       "source": {

@@ -262819,6 +262819,64 @@
         ]
       }
     },
+    "/api/v1/crm/customers/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "kunde_bearbeiten_api_v1_crm_customers__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kunde bearbeiten",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/crm/dashboard": {
       "get": {
         "operationId": "crm_dashboard_api_v1_crm_dashboard_get",

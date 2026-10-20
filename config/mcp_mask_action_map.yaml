@@ -5,7 +5,7 @@ sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 198
+    actions: 199
     screens_with_actions: 102
     domains: 17
 mcp_write_tools:
@@ -450,7 +450,7 @@ mappings:
   mask: crm/customer-360
   domain: crm
   action_key: edit
-  label: Bearbeiten
+  label: Erweiterte Pflege
   command_endpoint: null
   command: null
   mcp_tool_id: crm.customer.open

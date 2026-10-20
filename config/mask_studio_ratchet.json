@@ -411,7 +411,6 @@
   "verkauf/betriebs-auftraege",
   "verkauf/kommissions-auftraege",
   "verkauf/kunde/:id",
-  "verkauf/kunde/neu",
   "verkauf/kunden-liste",
   "verkauf/kunden-stamm/:id",
   "verkauf/lieferschein-erfassung",

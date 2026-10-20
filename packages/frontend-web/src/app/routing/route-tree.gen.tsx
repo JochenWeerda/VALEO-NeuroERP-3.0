@@ -5973,8 +5973,8 @@ const appRoute0835 = createRoute({
 const appRoute0836 = createRoute({
   getParentRoute: () => appLayoutRoute,
   path: "verkauf/kunde/neu",
-  component: () => renderPage("@/pages/verkauf/kunden-stamm"),
-  staticData: {"breadcrumb":"Neu","module":"@/pages/verkauf/kunden-stamm","legacyPath":"/verkauf/kunde/neu"},
+  component: () => renderPage("@/pages/verkauf/kunde-neu"),
+  staticData: {"breadcrumb":"Neu","module":"@/pages/verkauf/kunde-neu","legacyPath":"/verkauf/kunde/neu"},
 })
 
 const appRoute0837 = createRoute({
@@ -11892,7 +11892,7 @@ export const generatedRouteInventory = [
     "source": "alias"
   },
   {
-    "module": "@/pages/verkauf/kunden-stamm",
+    "module": "@/pages/verkauf/kunde-neu",
     "path": "verkauf/kunde/neu",
     "source": "alias"
   },

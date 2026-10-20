@@ -1432,7 +1432,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
+| `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/bearbeiten` |
+| `edit` | Erweiterte Pflege | safe | nein | `—` |
 | `create_activity` | Aktivitaet anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/create_activity` |
 
 ---

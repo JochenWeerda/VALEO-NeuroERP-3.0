@@ -406,7 +406,25 @@
       ]
     },
     "crm/customer-360": {
+      "crm.customer.update": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
       "crm.activity.create": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "crm.customer.create": [
         [
           "CRM_ADMIN",
           "CRM_BEARBEITEN",

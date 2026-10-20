@@ -69,6 +69,23 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
             "sourceId": "crm/customer-360",
             "temporary": False,
         },
+        # Anlage aus der Akte (20.10.2026); der Mandant kommt serverseitig aus dem Token.
+        "creation": {
+            "endpoint": "/api/v1/crm/customers/", "permission": "crm.customer.create",
+            "detailRoute": "/crm/kunden/{entity_id}", "defaults": {"country": "DE"},
+            "fields": [
+                {"key": "customer_number", "label": "Kunden-Nr.", "type": "text", "required": True},
+                {"key": "company_name", "label": "Firma", "type": "text", "required": True},
+                {"key": "contact_person", "label": "Ansprechpartner", "type": "text"},
+                {"key": "address", "label": "Strasse", "type": "text"},
+                {"key": "postal_code", "label": "PLZ", "type": "text"},
+                {"key": "city", "label": "Ort", "type": "text"},
+                {"key": "country", "label": "Land", "type": "text"},
+                {"key": "phone", "label": "Telefon", "type": "text"},
+                {"key": "email", "label": "E-Mail", "type": "email"},
+                {"key": "industry", "label": "Branche", "type": "text"},
+            ],
+        },
         "summaryEndpoint": "/api/v1/crm/customers/{customer_id}/screen-summary",
         "summary": [
             {"key": "kunden_nr", "label": "Kunden-Nr.", "value": None, "kind": "identity"},
@@ -408,9 +425,31 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
         ],
         "actions": [
             {
-                "key": "edit",
+                # Kopfdaten aendern ohne handgebaute Maske (20.10.2026); Kommandoweg delegiert an update_customer.
+                "key": "bearbeiten",
                 "label": "Bearbeiten",
                 "kind": "primary",
+                "dangerLevel": "safe",
+                "permission": "crm.customer.update",
+                "zone": "commit",
+                "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/bearbeiten",
+                "method": "POST",
+                "inputFields": [
+                    {"key": "firma", "label": "Firma", "type": "text"},
+                    {"key": "strasse", "label": "Strasse", "type": "text"},
+                    {"key": "plz", "label": "PLZ", "type": "text"},
+                    {"key": "ort", "label": "Ort", "type": "text"},
+                    {"key": "land", "label": "Land", "type": "text"},
+                    {"key": "telefon", "label": "Telefon", "type": "text"},
+                    {"key": "email", "label": "E-Mail", "type": "email"},
+                    {"key": "branche", "label": "Branche", "type": "text"},
+                ],
+            },
+            {
+                # Unterobjekte (Anschriften, CpD, Rabatte, Chefanweisungen) pflegt noch die bisherige Kundenmaske.
+                "key": "edit",
+                "label": "Erweiterte Pflege",
+                "kind": "secondary",
                 "dangerLevel": "safe",
                 "permission": "crm.customer.update",
                 "zone": "commit",

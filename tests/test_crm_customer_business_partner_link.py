@@ -152,9 +152,10 @@ async def test_update_customer_persists_business_partner_link_for_request_tenant
     fetch_statement, fetch_params = db.calls[3]
     assert "FROM domain_crm.business_partners" in ensure_statement
     assert ensure_params == {"pid": "bp-77", "tid": "22222222-2222-2222-2222-222222222222"}
-    assert "INSERT INTO domain_crm.customers" in insert_statement
+    # Seit 20.10.2026 aendert der Weg den lokalen Mandantenanker direkt (statt nachtraeglichem Stub-Insert).
+    assert "UPDATE domain_crm.customers" in insert_statement
     assert insert_params["tid"] == "22222222-2222-2222-2222-222222222222"
-    assert insert_params["bid"] == "bp-77"
+    assert insert_params["business_partner_id"] == "bp-77"
     assert "tenant_id = :tid" in fetch_statement
     assert fetch_params == {"cid": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", "tid": "22222222-2222-2222-2222-222222222222"}
     assert updated.business_partner_id == "bp-77"

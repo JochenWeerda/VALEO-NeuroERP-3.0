@@ -2145,8 +2145,19 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "edit",
+          "key": "bearbeiten",
           "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "edit",
+          "label": "Erweiterte Pflege",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
@@ -6746,5 +6757,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 127
+  "event_count": 128
 }

@@ -114,7 +114,7 @@ interface KpiTile {
 }
 
 const HOME_PRIMARY_ACTIONS = [
-  { id: 'home-kunde', label: '+ Kunde', path: '/verkauf/kunden-stamm' },
+  { id: 'home-kunde', label: '+ Kunde', path: '/crm/kunden/neu' },
   { id: 'home-angebot', label: '+ Angebot', path: '/sales/angebote' },
   { id: 'home-auftrag', label: '+ Auftrag', path: '/sales/order' },
   { id: 'home-aktivitaet', label: '+ Aktivität', path: '/crm/aktivitaeten' },

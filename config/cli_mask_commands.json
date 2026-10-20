@@ -134,6 +134,7 @@
   "mask:beleg/sales-order:stornieren",
   "mask:beleg/sales-order:umwandeln:sales_delivery",
   "mask:beleg/sales-order:umwandeln:sales_invoice",
+  "mask:crm/customer-360:bearbeiten",
   "mask:crm/customer-360:create_activity",
   "mask:crm/dsgvo-anfragen-liste:ablehnen",
   "mask:crm/dsgvo-anfragen-liste:daten_loeschen",

@@ -550,10 +550,15 @@ class CustomerService:
             tenant_id=self.tenant_id,
             customer_number=customer_data.customer_number.strip(),
             company_name=customer_data.company_name.strip(),
-            contact_person=None,
+            contact_person=customer_data.contact_person,
             email=str(customer_data.email) if customer_data.email else None,
             phone=customer_data.phone,
             address=customer_data.address,
+            # Bis 20.10.2026 verwarf die lokale Anlage Ort, PLZ, Land und Branche.
+            city=customer_data.city,
+            postal_code=customer_data.postal_code,
+            country=customer_data.country,
+            industry=customer_data.industry,
             credit_limit=customer_data.credit_limit,
             payment_terms=payment_terms,
             tax_id=customer_data.tax_id,
@@ -944,26 +949,26 @@ class CustomerService:
                 raise ValidationFailedError(build_dq_error_detail("Debitor", dq_result))
         if not self._eigene_kunden({str(customer_id)}):
             raise EntityNotFoundError("Customer", customer_id)
+        if data.get("business_partner_id"):
+            self.ensure_bp_belongs_to_tenant(data["business_partner_id"])
+        # Der lokale Eintrag ist Mandantenanker und Fallback; er traegt die Aenderung immer (bis 20.10.2026 liess
+        # sich ein ohne crm-core angelegter Kunde nie aendern: crm-core kannte ihn nicht, es gab keinen Fallback).
+        self._update_in_monolith_db(customer_id, data)
         payload = _map_update_payload(customer_data)
-        if payload:
-            updated = await _crm_update(customer_id, payload)
-        else:
-            updated = await _crm_get(customer_id)
+        try:
+            updated = await _crm_update(customer_id, payload) if payload else await _crm_get(customer_id)
+        except httpx.RequestError as exc:
+            logger.warning("crm-core unreachable, monolith update only: %s", exc)
+            updated = None
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code != 404:
+                raise
+            updated = None  # nur lokal gefuehrt (Anlage bei nicht erreichbarem crm-core)
         if updated is None:
-            raise EntityNotFoundError("Customer", customer_id)
-        if "business_partner_id" in data:
-            bid = data["business_partner_id"]
-            if bid:
-                self.ensure_bp_belongs_to_tenant(bid)
-            try:
-                self.upsert_monolith_stub(
-                    customer_id,
-                    bid,
-                    (updated.display_name or "Kunde").strip() or "Kunde",
-                    f"CRM-{customer_id[:8].upper()}",
-                )
-            except Exception:
-                logger.warning("Monolith stub update failed for customer %s", customer_id)
+            row = self.get_from_db_any_key(customer_id)
+            if row is None:
+                raise EntityNotFoundError("Customer", customer_id)
+            return self.merge_extensions(row)
         d = _adapt_customer(updated)
         return self.merge_extensions(d)
 
@@ -971,6 +976,26 @@ class CustomerService:
         if not self._eigene_kunden({str(customer_id)}):
             raise EntityNotFoundError("Customer", customer_id)
         await _crm_delete(customer_id)
+
+    _LOKALE_SPALTEN = ("customer_number", "company_name", "contact_person", "email", "phone", "address", "city",
+                       "postal_code", "country", "industry", "website", "is_active", "business_partner_id")
+
+    def _update_in_monolith_db(self, customer_id: str, data: dict[str, Any]) -> None:
+        werte = {k: (str(v) if k == "email" and v is not None else v)
+                 for k, v in data.items() if k in self._LOKALE_SPALTEN}
+        if not werte:
+            return
+        zuweisung = ", ".join(f"{k} = :{k}" for k in werte)  # Spaltennamen aus der festen Liste
+        try:
+            self.db.execute(
+                text(f"UPDATE domain_crm.customers SET {zuweisung}, updated_at = NOW() "  # nosec B608
+                     "WHERE id::text = :cid AND tenant_id = :tid"),
+                {**werte, "cid": str(customer_id), "tid": self.tenant_id},
+            )
+            self.db.commit()
+        except IntegrityError as exc:
+            self.db.rollback()
+            raise ConflictError("Kundennummer oder Datensatz existiert bereits.") from exc
 
     def _eigene_kunden(self, kennungen: set[str]) -> set[str]:
         """Die Kennungen, die im Mandanten als Kunde gefuehrt sind.
