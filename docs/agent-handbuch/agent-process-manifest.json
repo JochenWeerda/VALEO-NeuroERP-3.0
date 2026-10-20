@@ -858,6 +858,32 @@
   ],
   "masks": [
     {
+      "mask_id": "admin/benutzer-liste",
+      "title": "Benutzer",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__benutzer-liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/benutzer-liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/benutzer-liste/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/benutzer-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "agrar/duenger",
       "title": "Duenger",
       "domain": "agrar",
@@ -2033,6 +2059,46 @@
         "entity_ref",
         "checked_by"
       ],
+      "mcp_tool_ids": [
+        "compliance.gate.status",
+        "compliance.sanctions.check"
+      ]
+    },
+    {
+      "mask_id": "compliance/pcn-liste",
+      "title": "PCN-Meldungen",
+      "domain": "compliance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/compliance__pcn-liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/compliance/pcn-liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/compliance/pcn-liste/screen-definition",
+      "readiness_url": "/api/v1/masks/compliance/pcn-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neue PCN-Meldung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "compliance.gate.status",
         "compliance.sanctions.check"
@@ -5323,6 +5389,43 @@
         {
           "key": "neu",
           "label": "Neue Mitarbeiterin / neuer Mitarbeiter",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "personal/stundenzettel-liste",
+      "title": "Stundenzettel",
+      "domain": "personal",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/personal__stundenzettel-liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/personal/stundenzettel-liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/personal/stundenzettel-liste/screen-definition",
+      "readiness_url": "/api/v1/masks/personal/stundenzettel-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Stundenzettel erfassen",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,

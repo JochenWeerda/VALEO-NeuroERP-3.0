@@ -272,6 +272,15 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 - `_liste` nimmt `row_route=None` (keine Zeilenroute statt totem Link).
 - Ratsche: handgebaut 465 -> 458.
 
+## Welle 1, Schritt 15 (20.10.2026): Benutzer, PCN-Meldungen, Stundenzettel
+
+- Drei Studio-Listen: `admin/benutzer-liste` (ohne Zeilenroute; Detail- und Anlage-Route zeigten die Liste
+  selbst), `compliance/pcn-liste` (Anlage ueber den PCN-/UFI-Assistenten, Ladegrenze 200 wie der Dienst),
+  `personal/stundenzettel-liste` (Erfassung ueber die Stundenzettel-Seite).
+- Hinweis: `GET /compliance/pcn-meldungen` faellt bei einem Datenbankfehler auf einen Speicher-Store zurueck
+  (`_PCN_STORE`) statt den Fehler zu melden — offen.
+- Ratsche: handgebaut 458 -> 453.
+
 ## Barrierefreiheit: virtuelle Tabelle ohne Tabellenrolle (behoben 20.10.2026)
 
 - `components/ui/VirtualDataTable.tsx` zeichnet Kopf und Zeilen als `div`; Zeilen tragen `role="row"` (oder

@@ -939,6 +939,73 @@ def build_schaeden_liste() -> dict[str, Any]:
     )
 
 
+def build_admin_benutzer_liste() -> dict[str, Any]:
+    """Benutzer des Mandanten; Detail- und Anlage-Route zeigten die Liste selbst, deshalb ohne Links."""
+    return _liste(
+        screen_id="admin/benutzer-liste", domain="admin", title="Benutzer", subtitle="Benutzer mit Rolle und letzter Anmeldung",
+        endpoint="/api/v1/admin/benutzer", row_route=None, bundle="admin",
+        columns=[
+            {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "email", "label": "E-Mail", "filterable": True, "priority": "primary"},
+            {"key": "rolle", "label": "Rolle", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "secondary"},
+            {"key": "letzteAnmeldung", "label": "Letzte Anmeldung", "renderKind": "date", "sortable": True,
+             "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose="Benutzer mit Rolle und letzter Anmeldung pruefen.",
+        prompts=["Wer hat sich seit drei Monaten nicht angemeldet?", "Welche Benutzer sind Administratoren?"],
+        no_workflow="Benutzerliste ohne eigenen Ablauf.",
+    )
+
+
+def build_compliance_pcn_liste() -> dict[str, Any]:
+    """PCN-Meldungen (Giftinformationszentren) mit UFI und Status."""
+    return _liste(
+        screen_id="compliance/pcn-liste", domain="compliance", title="PCN-Meldungen",
+        subtitle="Meldungen an die Giftinformationszentren mit UFI", endpoint="/api/v1/compliance/pcn-meldungen",
+        row_route=None, bundle="compliance", fetch_limit=200,
+        columns=[
+            {"key": "produktname", "label": "Produkt", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "ufi", "label": "UFI", "filterable": True, "priority": "primary"},
+            {"key": "verwendungskategorie", "label": "Verwendung", "filterable": True, "priority": "secondary"},
+            {"key": "cas_nummern", "label": "CAS-Nummern", "priority": "tertiary"},
+            {"key": "pcnStatus", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_neu("Neue PCN-Meldung", "/compliance/pcn-ufi"), _EXPORT],
+        row_actions=[],
+        purpose="PCN-Meldungen mit UFI und Uebermittlungsstand nachweisen.",
+        prompts=["Welche PCN-Meldungen sind noch Entwurf?", "Welche UFI hat Produkt X?"],
+        no_workflow="Der Status steht an der Meldung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_personal_stundenzettel_liste() -> dict[str, Any]:
+    """Stundenzettel der Fahrer mit Arbeitszeit und Ueberstunden."""
+    return _liste(
+        screen_id="personal/stundenzettel-liste", domain="personal", title="Stundenzettel",
+        subtitle="Fahrer-Stundenzettel mit Arbeitszeit und Ueberstunden", endpoint="/api/v1/personal/stundenzettel",
+        row_route=None, bundle="personal",
+        columns=[
+            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "fahrer", "label": "Fahrer", "filterable": True, "sortable": True, "priority": "primary"},
+            {"key": "kennzeichen", "label": "Kennzeichen", "filterable": True, "priority": "secondary"},
+            {"key": "gesamtArbeitszeit", "label": "Arbeitszeit (h)", "numeric": True, "sortable": True,
+             "priority": "primary"},
+            {"key": "ueberstunden", "label": "Ueberstunden (h)", "numeric": True, "sortable": True,
+             "priority": "primary"},
+            {"key": "erstelltAm", "label": "Erfasst", "renderKind": "date", "priority": "tertiary"},
+        ],
+        actions=[_neu("Stundenzettel erfassen", "/personal/stundenzettel"), _EXPORT],
+        row_actions=[],
+        purpose="Fahrer-Stundenzettel mit Arbeitszeit und Ueberstunden auswerten.",
+        prompts=["Wer hatte diese Woche Ueberstunden?", "Wie viele Stunden fuhr Fahrer X im Monat?"],
+        no_workflow="Erfassungsliste ohne eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -968,6 +1035,9 @@ LISTEN_SCREEN_BUILDERS = {
     "labor/proben-liste": build_labor_proben_liste,
     "foerderung/liste": build_foerder_antraege_liste,
     "schaeden/liste": build_schaeden_liste,
+    "admin/benutzer-liste": build_admin_benutzer_liste,
+    "compliance/pcn-liste": build_compliance_pcn_liste,
+    "personal/stundenzettel-liste": build_personal_stundenzettel_liste,
 }
 LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
                 "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
@@ -995,7 +1065,10 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "projekte/liste": "/projekte",
                 "labor/proben-liste": "/labor/proben",
                 "foerderung/liste": "/foerderung",
-                "schaeden/liste": "/schaeden"}
+                "schaeden/liste": "/schaeden",
+                "admin/benutzer-liste": "/admin/benutzer",
+                "compliance/pcn-liste": "/compliance/pcn-liste",
+                "personal/stundenzettel-liste": "/personal/stundenzettel-liste"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
@@ -1023,4 +1096,7 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "projekte/liste": ["projekte", "projektliste", "vorhaben"],
                    "labor/proben-liste": ["laborproben", "proben", "labor"],
                    "foerderung/liste": ["foerderantraege", "foerderung", "antraege"],
-                   "schaeden/liste": ["schaeden", "schadenmeldungen", "versicherungsschaeden"]}
+                   "schaeden/liste": ["schaeden", "schadenmeldungen", "versicherungsschaeden"],
+                   "admin/benutzer-liste": ["benutzer", "nutzer", "konten"],
+                   "compliance/pcn-liste": ["pcn", "ufi", "giftinformation"],
+                   "personal/stundenzettel-liste": ["stundenzettel", "fahrerzeiten", "arbeitszeit"]}

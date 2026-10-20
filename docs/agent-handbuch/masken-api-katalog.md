@@ -11,13 +11,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (136 Masken).
+> Generiert aus `app/core/screen_definitions.py` (139 Masken).
 
 ## Übersicht
 
 | mask_id | Titel | Domäne | Risiko | Prozessketten | Agent-Contract |
 |---|---|---|---|---|---|
 | `abrechnung/eb-lieferschein-kontrolle` | EB-Lieferschein-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/abrechnung/eb-lieferschein-kontrolle/agent-contract` |
+| `admin/benutzer-liste` | Benutzer | admin | niedrig | — | `GET /api/v1/masks/admin/benutzer-liste/agent-contract` |
 | `admin/identity-budgets` | Nutzer- und Agentenkontingente | platform | mittel | — | `GET /api/v1/masks/admin/identity-budgets/agent-contract` |
 | `admin/postfaecher` | Postfächer | platform | niedrig | — | `GET /api/v1/masks/admin/postfaecher/agent-contract` |
 | `admin/token-consumption` | Technisches Verbrauchsnebenbuch | platform | niedrig | — | `GET /api/v1/masks/admin/token-consumption/agent-contract` |
@@ -53,6 +54,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `auswertungen/sanktionspruefung-kunden` | Terrorschutzpruefung Kunden | compliance | mittel | — | `GET /api/v1/masks/auswertungen/sanktionspruefung-kunden/agent-contract` |
 | `auswertungen/sanktionspruefung-personal` | Terrorschutzpruefung Personal | compliance | mittel | — | `GET /api/v1/masks/auswertungen/sanktionspruefung-personal/agent-contract` |
 | `charge/liste` | Chargen | lager | niedrig | — | `GET /api/v1/masks/charge/liste/agent-contract` |
+| `compliance/pcn-liste` | PCN-Meldungen | compliance | niedrig | — | `GET /api/v1/masks/compliance/pcn-liste/agent-contract` |
 | `crm/customer-360` | Kundenakte | crm | niedrig | `order-to-cash`, `service-to-customer` | `GET /api/v1/masks/crm/customer-360/agent-contract` |
 | `crm/dsgvo-anfragen-liste` | DSGVO-Anfragen | crm | niedrig | — | `GET /api/v1/masks/crm/dsgvo-anfragen-liste/agent-contract` |
 | `crm/einwilligungen-liste` | Einwilligungen | crm | niedrig | — | `GET /api/v1/masks/crm/einwilligungen-liste/agent-contract` |
@@ -119,6 +121,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `personal/onboarding` | Onboarding | hr | niedrig | — | `GET /api/v1/masks/personal/onboarding/agent-contract` |
 | `personal/qualifikationen` | Qualifikationen | hr | niedrig | — | `GET /api/v1/masks/personal/qualifikationen/agent-contract` |
 | `personal/schulungen` | Schulungen | hr | niedrig | — | `GET /api/v1/masks/personal/schulungen/agent-contract` |
+| `personal/stundenzettel-liste` | Stundenzettel | personal | niedrig | — | `GET /api/v1/masks/personal/stundenzettel-liste/agent-contract` |
 | `planung/kalender` | Planungskalender | platform | mittel | — | `GET /api/v1/masks/planung/kalender/agent-contract` |
 | `platform/studio-history` | Studio-Historie | platform | niedrig | — | `GET /api/v1/masks/platform/studio-history/agent-contract` |
 | `platform/studio-history-diff` | Änderungsvergleich | platform | niedrig | — | `GET /api/v1/masks/platform/studio-history-diff/agent-contract` |
@@ -153,6 +156,37 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `workspace/leitung` | Leitungs-Cockpit | management | niedrig | — | `GET /api/v1/masks/workspace/leitung/agent-contract` |
 | `workspace/letzte-dokumente` | Letzte Dokumente | workspace | niedrig | — | `GET /api/v1/masks/workspace/letzte-dokumente/agent-contract` |
 | `workspace/verkauf` | Verkauf-Cockpit | sales | niedrig | — | `GET /api/v1/masks/workspace/verkauf/agent-contract` |
+
+---
+
+## Domäne: admin
+
+### `admin/benutzer-liste` — Benutzer
+
+**Zweck:** Benutzer mit Rolle und letzter Anmeldung pruefen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/benutzer-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/benutzer-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/benutzer-liste/readiness` |
+| Rollout-Route | `/mask-rollout/admin__benutzer-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/admin/benutzer`
+
+**Beispiel-Prompts:**
+
+- Wer hat sich seit drei Monaten nicht angemeldet?
+- Welche Benutzer sind Administratoren?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -1273,6 +1307,41 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `check` | Personal pruefen | moderate | nein | `/api/v1/compliance/sanctions/actions/pruefen/personal` |
+
+---
+
+### `compliance/pcn-liste` — PCN-Meldungen
+
+**Zweck:** PCN-Meldungen mit UFI und Uebermittlungsstand nachweisen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/compliance/pcn-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/compliance/pcn-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/compliance/pcn-liste/readiness` |
+| Rollout-Route | `/mask-rollout/compliance__pcn-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/compliance/pcn-meldungen`
+
+**MCP-Tools (Domäne):**
+
+- `compliance.gate.status` — scope `compliance:read`, Risiko niedrig
+- `compliance.sanctions.check` — scope `compliance:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche PCN-Meldungen sind noch Entwurf?
+- Welche UFI hat Produkt X?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neue PCN-Meldung | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -4500,6 +4569,36 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `neu` | Neue Mitarbeiterin / neuer Mitarbeiter | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `personal/stundenzettel-liste` — Stundenzettel
+
+**Zweck:** Fahrer-Stundenzettel mit Arbeitszeit und Ueberstunden auswerten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/personal/stundenzettel-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/personal/stundenzettel-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/personal/stundenzettel-liste/readiness` |
+| Rollout-Route | `/mask-rollout/personal__stundenzettel-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/personal/stundenzettel`
+
+**Beispiel-Prompts:**
+
+- Wer hatte diese Woche Ueberstunden?
+- Wie viele Stunden fuhr Fahrer X im Monat?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Stundenzettel erfassen | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---

@@ -2,11 +2,31 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 192,
-    "screens_with_actions": 98,
-    "domains": 16
+    "actions": 197,
+    "screens_with_actions": 101,
+    "domains": 17
   },
   "actions": [
+    {
+      "id": "mask:admin/benutzer-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/benutzer-liste)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/benutzer-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/benutzer-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
     {
       "id": "mask:admin/identity-budgets:allocate",
       "label": "Kontingent vergeben",
@@ -1101,6 +1121,46 @@
         "actionKey": "neu",
         "commandEndpoint": null,
         "navigationRoute": "/charge/wareneingang",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:compliance/pcn-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (compliance/pcn-liste)",
+      "category": "mask-action",
+      "domain": "compliance",
+      "mask": "compliance/pcn-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "compliance/pcn-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:compliance/pcn-liste:neu",
+      "label": "Neue PCN-Meldung",
+      "description": "Neue PCN-Meldung (compliance/pcn-liste)",
+      "category": "mask-action",
+      "domain": "compliance",
+      "mask": "compliance/pcn-liste",
+      "intent_phrases": [
+        "Neue PCN-Meldung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "compliance/pcn-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/compliance/pcn-ufi",
         "command": null,
         "method": null
       }
@@ -3430,6 +3490,46 @@
         "commandEndpoint": "/api/v1/training/assignments/actions/speichern",
         "navigationRoute": null,
         "command": "personal.saveSchulung",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/stundenzettel-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (personal/stundenzettel-liste)",
+      "category": "mask-action",
+      "domain": "personal",
+      "mask": "personal/stundenzettel-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/stundenzettel-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:personal/stundenzettel-liste:neu",
+      "label": "Stundenzettel erfassen",
+      "description": "Stundenzettel erfassen (personal/stundenzettel-liste)",
+      "category": "mask-action",
+      "domain": "personal",
+      "mask": "personal/stundenzettel-liste",
+      "intent_phrases": [
+        "Stundenzettel erfassen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "personal/stundenzettel-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/personal/stundenzettel",
+        "command": null,
         "method": null
       }
     },

@@ -163,8 +163,8 @@ describe('Service/Annahme/Feldservice UIX', () => {
   it('stellt Benutzer- und Rollenlisten 44 px', () => {
     const users = read('../../pages/admin/benutzer-liste.tsx')
     const roles = read('../../pages/admin/rollen-verwaltung.tsx')
-    expect(users).toContain('Suche Benutzer')
-    expect(users).toContain('min-h-11 font-medium text-primary')
+    // Benutzer: Studio-Liste (Suche und 44-px-Zeilen aus dem Renderer).
+    expect(users).toContain('screenId="admin/benutzer-liste"')
     expect(roles).toContain('Suche Rollen')
     expect(roles).toContain('{!isTouch ? (')
   })
