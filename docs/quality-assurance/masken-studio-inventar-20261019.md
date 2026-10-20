@@ -8,9 +8,9 @@ Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentschei
 | Stufe | Routen | Anteil an Masken |
 |---|---:|---:|
 | studio_versioniert | 1 | 0.2 % |
-| screen_definition | 87 | 13.2 % |
-| builder_altmuster | 96 | 14.5 % |
-| handgebaut | 476 | 72.1 % |
+| screen_definition | 92 | 13.9 % |
+| builder_altmuster | 94 | 14.2 % |
+| handgebaut | 473 | 71.7 % |
 | weiterleitung | 2 |  |
 
 Gesamt 662 Routen, davon 660 Masken.
@@ -19,15 +19,15 @@ Gesamt 662 Routen, davon 660 Masken.
 
 | Befund | Anzahl |
 |---|---:|
-| Aktionen gesamt (ohne Doppel je Maske) | 351 |
-| davon serverwirksam | 248 |
-| … mit REST-Kommandoweg | 248 |
+| Aktionen gesamt (ohne Doppel je Maske) | 356 |
+| davon serverwirksam | 249 |
+| … mit REST-Kommandoweg | 249 |
 | … mit eigenem MCP-Werkzeug | 46 |
-| … per generischem MCP-Werkzeug (`mask.action.execute`) | 55 |
+| … per generischem MCP-Werkzeug (`mask.action.execute`) | 56 |
 | … MCP bewusst gesperrt | 147 |
 | … MCP offen (`open_high` u. a.) | 0 |
 | … MCP unklassifiziert | 0 |
-| … mit CLI-Zugang | 248 |
+| … mit CLI-Zugang | 249 |
 | nicht deklariert (kein Kommando, Endpunkt, Navigation) | 0 |
 | nicht verfuegbar (`stubReason`, die Maske nennt den Grund) | 0 |
 
@@ -107,7 +107,7 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 
 | Bereich | studio_versioniert | screen_definition | builder_altmuster | handgebaut | weiterleitung |
 |---|---:|---:|---:|---:|---:|
-| agrar | 0 | 5 | 6 | 48 | 0 |
+| agrar | 0 | 10 | 4 | 45 | 0 |
 | fibu | 0 | 0 | 1 | 42 | 0 |
 | finance | 0 | 7 | 18 | 28 | 0 |
 | admin | 0 | 4 | 0 | 27 | 0 |

@@ -8,13 +8,7 @@ const src = readFileSync(
 )
 
 describe('Düngemittel-Stamm-Liste UIX', () => {
-  it('stellt Name 44 px, Loeschen pro Id, KPI nur Desktop', () => {
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('min-h-11 font-medium text-primary')
-    expect(src).toContain('deletePendingId')
-    expect(src).toContain('Anzeigen')
-    expect(src).not.toContain('text-blue-600')
-    expect(src).not.toContain('size="sm"')
+  it('ist dieselbe Studio-Liste wie /agrar/duenger-liste (Deaktivieren als Kommando-Weg mit Grund)', () => {
+    expect(src).toContain("export { default } from '../duenger-liste'")
   })
 })

@@ -34,6 +34,21 @@
         ]
       ]
     },
+    "agrar/duenger-liste": {
+      "agrar.duenger.deactivate": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "agrar/harvest-controls": {
       "create_rule": [
         [

@@ -1954,6 +1954,8 @@ from app.api.v1.endpoints import einkauf_avis_kommandos  # noqa: E402  # Zeilena
 api_router.include_router(einkauf_avis_kommandos.router)
 from app.api.v1.endpoints import einkauf_bestellung_kommandos  # noqa: E402  # Zeilenaktionen der Bestell-Liste
 api_router.include_router(einkauf_bestellung_kommandos.router)
+from app.api.v1.endpoints import agrar_stammdaten_kommandos  # noqa: E402  # Zeilenaktionen der Agrar-Listen
+api_router.include_router(agrar_stammdaten_kommandos.router)
 api_router.include_router(mask_rollout_summaries.router)
 api_router.include_router(mask_screen_definition.router)
 api_router.include_router(studio_drafts.router)

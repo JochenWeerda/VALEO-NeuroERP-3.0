@@ -46,7 +46,7 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
   Zeilenlink auf eine nicht vorhandene Route `/einkauf/anfragen/{id}`.
 - Zeilenaktionen werden wie Kopfaktionen nur mit Recht gezeigt: Plan-Compiler filtert `rowActions` nach Recht, die
   Rollen-Projektion (`generate_action_permission_projection.py`) liest auch Zeilenaktionen (Tabellen und Tabs).
-- Tests: `tests/test_einkauf_listen_kommandos.py` (Pruefstand), `native-list-page.test.tsx` (3).
+- Tests: `tests/test_studio_listen_kommandos.py` (Pruefstand), `native-list-page.test.tsx` (3).
   Ratsche: Altmuster 102 -> 101.
 - Offen aus der Sichtung: Die Erfassung `anfrage-erfassung.tsx` sendet PATCH, der Server kennt nur PUT;
   `EinkaufCompatService.list_anfragen` verschluckt Fehler (leere Liste).
@@ -112,6 +112,20 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
   und umgeht damit Freigabe und Obligo-Buchung. Ob Versand eine Freigabe voraussetzt, ist eine Nutzerentscheidung.
 - MCP-Zaehltests leiten die Zahl der `local_ui`-Eintraege aus den Listen-Definitionen ab.
 - Ratsche: Altmuster 98 -> 96 (`einkauf/bestellungen` und `einkauf`).
+
+## Welle 1, Schritt 7 (20.10.2026): Agrar Saatgut und Duenger
+
+- ScreenDefinitions `agrar/saatgut-liste` und `agrar/duenger-liste` auf `NativeListPage`; Zeilen oeffnen die
+  nativen Objektmasken `agrar/saatgut` bzw. `agrar/duenger` (vorher die Altmuster-Stammmasken). Beide Dienste
+  erlauben `limit <= 200`; die Listen laden einmal bis zu dieser Grenze (`fetch_limit`).
+- Duenger hatte zwei handgebaute Listen (`/agrar/duenger` und `/agrar/duenger-liste`); beide Routen zeigen jetzt
+  dieselbe Liste. Deaktivieren als Kommando-Weg `agrar_stammdaten_kommandos.py` mit Begruendung und Audit; ein schon
+  inaktiver Duenger wird abgewiesen.
+- Geprueft und kein Befund: Die Agrar-Dienste nehmen `tenant_id` als Abfrageparameter; `tenant_binding` setzt ihn
+  auf den geprueften Mandanten und weist Abweichungen ab.
+- Ratsche: handgebaut 476 -> 473, Altmuster 96 -> 94.
+- Abschluss-Reihenfolge: Code-Inventare vor dem Architekturindex erzeugen (der Index liest sie; sonst DRIFT im
+  Quality Gate wie auf `bce21e65f`).
 
 ## Laufzeit: Tabellen ohne Serverblaetterung (20.10.2026)
 

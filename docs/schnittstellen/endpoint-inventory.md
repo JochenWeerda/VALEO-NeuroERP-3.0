@@ -40,6 +40,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `agrar_maschinen` | Agrar Maschinen — CRUD für Maschinenpark (Landhandel + Lohnunternehmer) |
 | `agrar_p0` | — |
 | `agrar_settlements` | Agrar self-billing settlements with deduction and posting workflow (AGRAR-SET-01). |
+| `agrar_stammdaten_kommandos` | Zeilenaktionen der Agrar-Stammdatenlisten als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `agrar_varieties` | Agrar Sorten/Varieties API fuer Ernte-Annahme. |
 | `agrar_wetter` | Agrar Wetter — Wetter-Proxy für BrightSky (DWD) + Open-Meteo (ICON-D2) |
 | `agri_lot_link_booking` | WM-AGRI-LOT-LINK-001 endpoint: Annahme/Waage-Lot in Silozelle buchen. |

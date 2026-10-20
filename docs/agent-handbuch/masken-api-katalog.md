@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (114 Masken).
+> Generiert aus `app/core/screen_definitions.py` (116 Masken).
 
 ## Übersicht
 
@@ -22,6 +22,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `admin/postfaecher` | Postfächer | platform | niedrig | — | `GET /api/v1/masks/admin/postfaecher/agent-contract` |
 | `admin/token-consumption` | Technisches Verbrauchsnebenbuch | platform | niedrig | — | `GET /api/v1/masks/admin/token-consumption/agent-contract` |
 | `agrar/duenger` | Duenger | agrar | niedrig | — | `GET /api/v1/masks/agrar/duenger/agent-contract` |
+| `agrar/duenger-liste` | Duenger | agrar | niedrig | — | `GET /api/v1/masks/agrar/duenger-liste/agent-contract` |
 | `agrar/feed-advice` | Fuetterungsberatung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
 | `agrar/feed-controlling` | Fuetterungscontrolling | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-controlling/agent-contract` |
 | `agrar/feed-readiness` | Futterversorgung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
@@ -37,6 +38,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/ration` | Rationsfreigabe | agrar | hoch | — | `GET /api/v1/masks/agrar/ration/agent-contract` |
 | `agrar/rations-lifecycle` | Rationen und Freigaben | agrar | niedrig | — | `GET /api/v1/masks/agrar/rations-lifecycle/agent-contract` |
 | `agrar/saatgut` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/agent-contract` |
+| `agrar/saatgut-liste` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut-liste/agent-contract` |
 | `auswertungen/abfrage-center` | Abfrage-Center | reporting | mittel | — | `GET /api/v1/masks/auswertungen/abfrage-center/agent-contract` |
 | `auswertungen/aenderungshistorie` | Aenderungshistorie | audit | niedrig | — | `GET /api/v1/masks/auswertungen/aenderungshistorie/agent-contract` |
 | `auswertungen/auftrags-kontrolle` | Auftrags-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/auswertungen/auftrags-kontrolle/agent-contract` |
@@ -176,6 +178,46 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `agrar/duenger-liste` — Duenger
+
+**Zweck:** Duengemittel mit Naehrstoffgehalten finden, oeffnen und nicht mehr gefuehrte deaktivieren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/duenger-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/duenger-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/duenger-liste/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__duenger-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/agrar/duenger/`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Stickstoffduenger fuehren wir?
+- Welche Duenger sind wassergefaehrdend?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neuer Duenger | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -816,6 +858,46 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `agrar/saatgut-liste` — Saatgut
+
+**Zweck:** Saatgut-Sorten mit Zulassung, Preis und verfuegbarem Bestand finden.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/saatgut-liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/saatgut-liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/saatgut-liste/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__saatgut-liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/agrar/saatgut/`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Weizensorten haben BSA-Zulassung?
+- Welches Saatgut ist knapp?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Neues Saatgut | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

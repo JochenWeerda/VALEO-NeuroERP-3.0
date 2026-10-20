@@ -10,6 +10,7 @@
   "mask:admin/postfaecher:entfernen",
   "mask:admin/postfaecher:speichern",
   "mask:admin/postfaecher:testen",
+  "mask:agrar/duenger-liste:deaktivieren",
   "mask:agrar/feed-controlling:record_observation",
   "mask:agrar/feed-readiness:create_handoff",
   "mask:agrar/feeding-actuals:configure_threshold",
@@ -251,6 +252,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 103
+  "kein_endpunkt": 107
  }
 }

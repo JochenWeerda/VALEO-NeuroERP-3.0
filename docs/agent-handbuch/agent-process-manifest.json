@@ -894,6 +894,51 @@
       ]
     },
     {
+      "mask_id": "agrar/duenger-liste",
+      "title": "Duenger",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__duenger-liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/duenger-liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/duenger-liste/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/duenger-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neuer Duenger",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "agrar/feed-advice",
       "title": "Fuetterungsberatung",
       "domain": "agrar",
@@ -1628,6 +1673,51 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/saatgut-liste",
+      "title": "Saatgut",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__saatgut-liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/saatgut-liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/saatgut-liste/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/saatgut-liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Neues Saatgut",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -5745,5 +5835,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 122
+  "event_count": 123
 }

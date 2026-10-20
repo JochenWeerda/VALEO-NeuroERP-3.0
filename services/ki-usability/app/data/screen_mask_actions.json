@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 151,
-    "screens_with_actions": 76,
+    "actions": 155,
+    "screens_with_actions": 78,
     "domains": 14
   },
   "actions": [
@@ -166,6 +166,46 @@
         "commandEndpoint": null,
         "navigationRoute": "/admin/identity-budgets",
         "command": "identity.budgets.open",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/duenger-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (agrar/duenger-liste)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/duenger-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/duenger-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/duenger-liste:neu",
+      "label": "Neuer Duenger",
+      "description": "Neuer Duenger (agrar/duenger-liste)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/duenger-liste",
+      "intent_phrases": [
+        "Neuer Duenger"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/duenger-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/agrar/duenger-stamm",
+        "command": null,
         "method": null
       }
     },
@@ -781,6 +821,46 @@
         "actionKey": "plan_ration",
         "commandEndpoint": null,
         "navigationRoute": "/portal/rationsoptimierung?mode=expert",
+        "command": null,
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/saatgut-liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (agrar/saatgut-liste)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/saatgut-liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/saatgut-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:agrar/saatgut-liste:neu",
+      "label": "Neues Saatgut",
+      "description": "Neues Saatgut (agrar/saatgut-liste)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/saatgut-liste",
+      "intent_phrases": [
+        "Neues Saatgut"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/saatgut-liste",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/agrar/saatgut-stamm",
         "command": null,
         "method": null
       }

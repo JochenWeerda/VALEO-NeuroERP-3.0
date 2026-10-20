@@ -12,7 +12,7 @@ from typing import Any
 def _liste(*, screen_id: str, domain: str, title: str, subtitle: str, endpoint: str, row_route: str,
            columns: list[dict[str, Any]], actions: list[dict[str, Any]], row_actions: list[dict[str, Any]],
            purpose: str, prompts: list[str], dangerous: list[dict[str, str]] | None = None,
-           bundle: str, no_workflow: str) -> dict[str, Any]:
+           bundle: str, no_workflow: str, fetch_limit: int = 500) -> dict[str, Any]:
     agent: dict[str, Any] = {
         "businessPurpose": purpose,
         "examplePrompts": prompts,
@@ -29,7 +29,8 @@ def _liste(*, screen_id: str, domain: str, title: str, subtitle: str, endpoint: 
         "title": title,
         "subtitle": subtitle,
         "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
-        "dataSources": [{"key": "list", "endpoint": endpoint, "pageSize": 500}],
+        # Ohne Serverblaetterung laedt die Laufzeit einmal bis pageSize (Grenze des Dienstes beachten).
+        "dataSources": [{"key": "list", "endpoint": endpoint, "pageSize": fetch_limit}],
         "actions": actions,
         "tables": [{
             "key": "list", "label": title, "dataSourceKey": "list", "serverPagination": False, "pageSize": 50,
@@ -299,6 +300,64 @@ def build_einkauf_bestellungen_liste() -> dict[str, Any]:
     )
 
 
+
+def build_agrar_saatgut_liste() -> dict[str, Any]:
+    """Saatgut-Stammdaten; Zeile oeffnet die native Objektmaske ``agrar/saatgut``."""
+    return _liste(
+        screen_id="agrar/saatgut-liste", domain="agrar", title="Saatgut", subtitle="Sorten, Zulassungen und Bestand",
+        endpoint="/api/v1/agrar/saatgut/", row_route="/agrar/saatgut/{id}", bundle="agrar", fetch_limit=200,
+        columns=[
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "artikelnummer", "label": "Artikel-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "sorte", "label": "Sorte", "filterable": True, "sortable": True, "priority": "primary"},
+            {"key": "art", "label": "Kultur", "filterable": True, "priority": "secondary"},
+            {"key": "zuechter", "label": "Zuechter", "filterable": True, "priority": "secondary"},
+            {"key": "bsa_zulassung", "label": "BSA", "renderKind": "boolean", "priority": "tertiary"},
+            {"key": "eu_zulassung", "label": "EU", "renderKind": "boolean", "priority": "tertiary"},
+            {"key": "vk_preis", "label": "VK-Preis", "numeric": True, "renderKind": "currency", "priority": "secondary"},
+            {"key": "verfuegbar", "label": "Verfuegbar", "numeric": True, "sortable": True, "priority": "secondary"},
+        ],
+        actions=[_neu("Neues Saatgut", "/agrar/saatgut-stamm"), _EXPORT],
+        row_actions=[],
+        purpose="Saatgut-Sorten mit Zulassung, Preis und verfuegbarem Bestand finden.",
+        prompts=["Welche Weizensorten haben BSA-Zulassung?", "Welches Saatgut ist knapp?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
+
+def build_agrar_duenger_liste() -> dict[str, Any]:
+    """Duenger-Stammdaten; Zeile oeffnet die native Objektmaske ``agrar/duenger``."""
+    return _liste(
+        screen_id="agrar/duenger-liste", domain="agrar", title="Duenger", subtitle="Duengemittel mit Naehrstoffen",
+        endpoint="/api/v1/agrar/duenger/", row_route="/agrar/duenger/{id}", bundle="agrar", fetch_limit=200,
+        columns=[
+            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "artikelnummer", "label": "Artikel-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "primary"},
+            {"key": "hersteller", "label": "Hersteller", "filterable": True, "priority": "secondary"},
+            {"key": "n_gehalt", "label": "N %", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "p_gehalt", "label": "P %", "numeric": True, "priority": "secondary"},
+            {"key": "k_gehalt", "label": "K %", "numeric": True, "priority": "secondary"},
+            {"key": "wassergefaehrdend", "label": "Wassergefaehrdend", "renderKind": "boolean", "priority": "tertiary"},
+            {"key": "ist_aktiv", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "tertiary"},
+        ],
+        actions=[_neu("Neuer Duenger", "/agrar/duenger-stamm"), _EXPORT],
+        row_actions=[
+            {"key": "deaktivieren", "label": "Deaktivieren", "dangerLevel": "high",
+             "permission": "agrar.duenger.deactivate",
+             "commandEndpoint": "/api/v1/agrar/duenger/{entity_id}/actions/deaktivieren", "method": "POST",
+             "requiresConfirmation": True, "auditReasonRequired": True,
+             "visibleWhen": {"field": "ist_aktiv", "values": [True]}},
+        ],
+        purpose="Duengemittel mit Naehrstoffgehalten finden, oeffnen und nicht mehr gefuehrte deaktivieren.",
+        prompts=["Welche Stickstoffduenger fuehren wir?", "Welche Duenger sind wassergefaehrdend?"],
+        no_workflow="Stammdatenliste ohne eigenen Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -306,15 +365,21 @@ LISTEN_SCREEN_BUILDERS = {
     "einkauf/auftragsbestaetigungen": build_einkauf_auftragsbestaetigungen_liste,
     "einkauf/lieferanten": build_einkauf_lieferanten_liste,
     "einkauf/bestellungen": build_einkauf_bestellungen_liste,
+    "agrar/saatgut-liste": build_agrar_saatgut_liste,
+    "agrar/duenger-liste": build_agrar_duenger_liste,
 }
 LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
                 "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
                 "einkauf/auftragsbestaetigungen": "/einkauf/auftragsbestaetigungen",
                 "einkauf/lieferanten": "/einkauf/lieferanten",
-                "einkauf/bestellungen": "/einkauf/bestellungen"}
+                "einkauf/bestellungen": "/einkauf/bestellungen",
+                "agrar/saatgut-liste": "/agrar/saatgut",
+                "agrar/duenger-liste": "/agrar/duenger"}
 LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
                    "einkauf/auftragsbestaetigungen": ["auftragsbestaetigungen", "ab", "ordrsp"],
                    "einkauf/lieferanten": ["lieferanten", "lieferantenliste", "kreditoren einkauf"],
-                   "einkauf/bestellungen": ["bestellungen", "einkaufsbestellungen", "po"]}
+                   "einkauf/bestellungen": ["bestellungen", "einkaufsbestellungen", "po"],
+                   "agrar/saatgut-liste": ["saatgut", "sorten", "saatgutliste"],
+                   "agrar/duenger-liste": ["duenger", "duengemittel", "duengerliste"]}

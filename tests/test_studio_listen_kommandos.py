@@ -58,6 +58,7 @@ def aufraeumen(engine):
     with engine.begin() as v:
         v.execute(text("DELETE FROM einkauf_anfragen_positionen WHERE anfrage_id IN "
                        "(SELECT id FROM einkauf_anfragen WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_agrar.agrar_duenger WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_einkauf.lieferanten WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM einkauf_angebote_positionen WHERE angebot_id IN "
@@ -361,3 +362,39 @@ def test_bestellliste_liest_die_quelle_der_objektmaske():
     assert quelle == liste["dataSources"][0]["endpoint"] + "/{entity_id}"
     zeilen = {a["key"] for a in liste["tables"][0]["rowActions"]}
     assert zeilen == {"freigeben", "versenden", "stornieren"}
+
+
+def test_saatgutliste_bleibt_in_der_grenze_des_dienstes():
+    """Der Saatgut-Dienst erlaubt limit <= 200; die Liste laedt einmal bis zu ihrer pageSize."""
+    from app.core.screen_definitions import get_screen_definition
+
+    liste = get_screen_definition("agrar/saatgut-liste")
+    assert liste["dataSources"][0]["pageSize"] <= 200
+    assert liste["tables"][0]["rowRouteTemplate"] == "/agrar/saatgut/{id}"
+
+
+def test_saatgutliste_antwortet_mit_der_ladegrenze(client):
+    antwort = client.get("/api/v1/agrar/saatgut/", params={"limit": 200}, headers={"X-Tenant-ID": HAUS_A})
+    assert antwort.status_code == 200, antwort.text
+    assert antwort.json()["items"] == []
+
+
+def test_duenger_deaktivieren_mit_grund_und_nur_einmal(engine, client):
+    from sqlalchemy import text
+
+    kennung = str(uuid.uuid4())
+    with engine.begin() as v:
+        v.execute(text("INSERT INTO domain_agrar.agrar_duenger (id, tenant_id, artikelnummer, name, typ, ist_aktiv) "
+                       "VALUES (:i, :h, :a, 'KAS 27', 'Mineralduenger', true)"),
+                  {"i": kennung, "h": HAUS_A, "a": f"D-{kennung[:8]}"})
+
+    def aktion(body: dict) -> bool:
+        antwort = client.post(f"/api/v1/agrar/duenger/{kennung}/actions/deaktivieren", json=body,
+                              headers={"X-Tenant-ID": HAUS_A})
+        assert antwort.status_code == 200, antwort.text
+        return antwort.json()["success"]
+
+    assert aktion({}) is False
+    assert aktion({"_auditReason": "Nicht mehr im Sortiment"}) is True
+    assert zeile(engine, "SELECT ist_aktiv FROM domain_agrar.agrar_duenger WHERE id = :i", i=kennung)["ist_aktiv"] is False
+    assert aktion({"_auditReason": "Noch einmal"}) is False
