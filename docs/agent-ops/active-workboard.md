@@ -18887,3 +18887,19 @@ Abnahme: komplette test_uix046_048_command_endpoints_safety.py-Suite und MCP-Map
 sowie Handbuchdrift gruen. Keine Datenbank-/Container-/Geschaeftscodeaenderung.
 
 **Abnahme AP-MASK-CONTRACT-CI:** Fehlende dangerousActions-Deklaration nur fuer finance/ap-invoice.freigeben ergaenzt. Gesamte UIX-046/048-Sicherheitssuite und MCP-Map:797 bestanden auf unveraendertem Quellstand. Agent-Handbuch regeneriert und Driftpruefung gruen. Menschliche Freigabe/Agentensperre unveraendert; keine Layout-/Buchungs-/Rechteaenderung und keine zusaetzliche Datenbankressource.
+
+## STUDIO-CLI-BULK-20261020 - reserviert, Codex
+
+Owner Codex. Nutzerauftrag: fehlende/handgebaute Masken ueber CLI in Studio
+ueberfuehren und abgeloeste Einzelmaskentests erst nach gleichwertigem Nachweis
+entfernen. Erster Meilenstein: vollstaendiger paginierter Quellenabruf, expliziter
+hashgebundener Uebernahmeplan und wiederholbare stapelweise Ausgangsimporte ueber
+die bestehende authentifizierte Studio-API. Besitz valeo_cli/studio.py, eigene
+CLI-Vertraege, docs/architecture/studio-native-migration.md und eigene QA.
+Keine Uebernahme von Claudes aktivem MASK-STUDIO-ROLLOUT-Seiten-/Builderbesitz.
+Keine automatische Publikation/Umleitung, keine Umgehung von Simulation/Freigabe.
+Keine Abschaffung fachlicher/Sicherheitspruefungen aufgrund eines Baselineimports.
+Abnahme: mehr als100 Quellen, vollstaendige eindeutige Planung, unveraenderte
+Quellhashes/Idempotenz bei Wiederaufnahme, Drift/Fehler sperren, nur registrierte
+API-Wege; klare Trennung importiert/aktiviert. Bestehender Pruefstand, keine neue
+Datenbank/Container/Reset. Weitere Fachmigration bleibt nach Inventarbefund offen.
