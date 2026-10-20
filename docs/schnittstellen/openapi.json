@@ -48023,8 +48023,16 @@
             "type": "string"
           },
           "decided_by": {
-            "title": "Decided By",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "veraltet, wird ignoriert",
+            "title": "Decided By"
           },
           "decision": {
             "description": "GENEHMIGT | ABGELEHNT | ESKALIERT",
@@ -48033,8 +48041,7 @@
           }
         },
         "required": [
-          "decision",
-          "decided_by"
+          "decision"
         ],
         "title": "DecideRequest",
         "type": "object"
@@ -350611,7 +350618,7 @@
     },
     "/api/v1/neuro/cases/escalate-overdue": {
       "post": {
-        "description": "Alle ueberfaelligen Cases automatisch eskalieren.",
+        "description": "Ueberfaellige Cases des eigenen Mandanten eskalieren (bis 20.10.2026: aller Mandanten).",
         "operationId": "escalate_overdue_api_v1_neuro_cases_escalate_overdue_post",
         "responses": {
           "200": {

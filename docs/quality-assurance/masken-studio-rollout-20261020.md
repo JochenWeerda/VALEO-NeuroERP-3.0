@@ -298,7 +298,7 @@ Ratsche: handgebaut 483 -> 477, Altmuster 104 -> 102.
 | Stelle | Befund | Einstufung |
 |---|---|---|
 | ~~`compliance.py` `_INTRASTAT_STORE`~~ | **behoben 20.10.:** Die Wege `/compliance/intrastat/*` legten erfundene Beispielmeldungen an (Mandant aus dem Body, Standard `demo-tenant`), listeten sie ohne Mandantenfilter aus dem Speicher und prueften jede Kennung als gueltig — auch fuer das Agenten-Werkzeug `valeo_compliance_intrastat_validate`. Entfernt; neue Pruefung `GET /intrastat/meldungen/{id}/validate` auf der gespeicherten Meldung des Mandanten, Werkzeug zeigt darauf | erledigt |
-| `services/case_management.py` `_CASE_STORE` | Freigabefaelle (ApprovalCase) ausschliesslich im Speicher | hoch (Freigaben) |
+| `services/case_management.py` `_CASE_STORE` | Freigabefaelle (`/neuro/cases`, Neuro-Core-Prototyp) im Speicher; kein produktiver Weg legt Faelle an, kein Frontend nutzt sie. **Teilweise behoben 20.10.:** fremde Faelle 404, Entscheider aus dem Token statt aus dem Body, Eskalation nur fuer den eigenen Mandanten (`tests/test_neuro_cases_mandant.py`). Offen: Persistenz, sobald Faelle produktiv entstehen | mittel |
 | `audit_evidence.py` `_STORE` | GoBD-Pruefnachweise fallen ohne Tabelle in den Speicher | hoch (GoBD) |
 | `services/webshop_integration_service.py` `_ORDER_STORE`/`_CONFIG_STORE` | Webshop-Bestellungen und -Konfiguration im Speicher | mittel |
 | `portal_interessent_service.py`, `portal_preisspiegel_service.py` `_STORE` | Portal-Interessenten/Preisspiegel im Speicher | mittel |
