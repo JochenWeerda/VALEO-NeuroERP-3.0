@@ -49,15 +49,6 @@ class AskIn(BaseModel):
     context: dict[str, Any] | None = None
 
 
-class PreisBerechnenIn(BaseModel):
-    model_config = ConfigDict(extra="allow")
-    artikel_id: str | None = None
-    menge_kg: float | None = None
-    kundengruppe: str | None = None
-    sorte_klasse: str | None = None
-    kontrakt_id: str | None = None
-
-
 class EpcisEventIn(BaseModel):
     model_config = ConfigDict(extra="allow")
     event_type: str = "ObjectEvent"
@@ -224,7 +215,7 @@ def get_agrar_kunde(
         return _kunde_payload(customer, 0, 0.0)
 
 
-@router.post("/agrar/seed-orders", response_model=BridgeOut, status_code=201, summary="Saatgutbestellung anlegen")
+@router.post("/agrar/seed-orders", response_model=BridgeOut, status_code=201, summary="Saatgutbestellung anlegen", dependencies=SCHREIBEN["AGRAR"])
 def create_seed_order(
     body: SeedOrderIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -928,28 +919,6 @@ def list_tse_journal(
     ]
 
 
-@router.post("/preise/berechnen", response_model=BridgeOut, summary="Preis kalkulieren", dependencies=SCHREIBEN["VERKAUF"])
-def preise_berechnen(body: PreisBerechnenIn) -> dict[str, Any]:
-    menge = float(body.menge_kg or 1)
-    basis = 100.0
-    if body.kundengruppe and body.kundengruppe.upper() == "GROSSHANDEL":
-        rabatt = 8.0
-    else:
-        rabatt = 0.0
-    netto = round(basis * menge * (1 - rabatt / 100.0), 2)
-    mwst = round(netto * 0.19, 2)
-    return {
-        "netto_preis": netto,
-        "brutto_preis": round(netto + mwst, 2),
-        "mwst_betrag": mwst,
-        "kalkulationsweg": [
-            {"schritt": "Basispreis", "wert": round(basis * menge, 2), "delta": 0},
-            {"schritt": f"Kundengruppe {body.kundengruppe or '-'}", "wert": netto, "delta": -round(basis * menge * rabatt / 100.0, 2)},
-            {"schritt": "MwSt 19%", "wert": round(netto + mwst, 2), "delta": mwst},
-        ],
-    }
-
-
 @router.get("/preise/historie", response_model=BridgeOut, summary="Preishistorie")
 def preise_historie(
     tenant_id: str = Depends(get_tenant_id),
@@ -1158,7 +1127,7 @@ def create_waage_vorlage(
 # ---------------------------------------------------------------------------
 
 
-@router.post("/personal/work-plan/assignments", response_model=BridgeOut, status_code=201, summary="Dienstplan-Zuweisung anlegen")
+@router.post("/personal/work-plan/assignments", response_model=BridgeOut, status_code=201, summary="Dienstplan-Zuweisung anlegen", dependencies=SCHREIBEN["PERSONAL"])
 def create_work_plan_assignment(
     body: WorkPlanAssignmentIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -1230,7 +1199,7 @@ def list_epcis_events(
     return {"items": items, "total": len(items)}
 
 
-@router.post("/inventory/epcis/events", response_model=BridgeOut, status_code=201, summary="EPCIS-Ereignis anlegen")
+@router.post("/inventory/epcis/events", response_model=BridgeOut, status_code=201, summary="EPCIS-Ereignis anlegen", dependencies=SCHREIBEN["GERAET"])
 def create_epcis_event(
     body: EpcisEventIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -1309,7 +1278,7 @@ def analytics_contract_positions(
     return {"data": data}
 
 
-@router.post("/ai/ask", response_model=BridgeOut, summary="Fachfrage beantworten")
+@router.post("/ai/ask", response_model=BridgeOut, summary="Fachfrage beantworten", dependencies=SCHREIBEN["BERECHNEN"])
 def ai_ask(body: AskIn) -> dict[str, Any]:
     prompt = body.prompt.strip()
     domain = ""
@@ -1444,7 +1413,7 @@ def audit_trail(
     return {"data": data}
 
 
-@router.post("/futter/{kategorie}/bulk-delete", response_model=BridgeOut, summary="Futtermittel sammeln löschen")
+@router.post("/futter/{kategorie}/bulk-delete", response_model=BridgeOut, summary="Futtermittel sammeln löschen", dependencies=SCHREIBEN["FUTTERMITTEL"])
 def futter_bulk_delete(
     kategorie: str,
     body: dict[str, Any] = Body(default={}),

@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-19
+last_reviewed: 2026-10-20
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -228,6 +228,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `numbering_service_pg` | Numbering Service (PostgreSQL) |
 | `o2c_chain_service` | Order-to-Cash-Kette (DOM-SALES-004) — Angebot → Auftrag → Lieferschein → Rechnung. |
 | `operator_agent_service` | OPERATOR-AGENT-001 — ERP-Operator-Agent: Proposal + kontrollierte LOW-Schreibaktionen. |
+| `ordrsp_service` | EDIFACT ORDRSP (Bestellantwort, D.96A) lesen und gegen die Bestellung abgleichen. |
 | `payment_run_freigabe` | Freigabe eines Zahlungslaufs: Mandant und Vier-Augen-Prinzip. |
 | `pdf_service` | PDF Service |
 | `pdf_template_service` | PDF Template Service |

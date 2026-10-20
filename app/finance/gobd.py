@@ -17,6 +17,7 @@ from app.auth.deps import get_current_user, get_tenant_id
 from app.core.database import get_db
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/gobd", tags=["GoBD Compliance"])
 
@@ -217,7 +218,7 @@ async def get_buchungslog(
     return entries
 
 
-@router.post("/journal/eintrag")
+@router.post("/journal/eintrag", dependencies=SCHREIBEN["FINANZ"])
 async def create_buchungslog_eintrag(
     buchungs_id: str,
     aktion: str,
@@ -307,7 +308,7 @@ class HashChainVerifyResponse(BaseModel):
     sequenznummer_luecken: List[int]
 
 
-@router.post("/hash-chain/verify", response_model=HashChainVerifyResponse)
+@router.post("/hash-chain/verify", response_model=HashChainVerifyResponse, dependencies=SCHREIBEN["FINANZ"])
 async def verify_hash_chain(
     request: HashChainVerifyRequest,
     tenant_id: str = Depends(get_tenant_id),

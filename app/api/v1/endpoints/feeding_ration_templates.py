@@ -27,6 +27,7 @@ from app.services.rations_lifecycle_service import (
     RationLifecycleNotFound,
     RationLifecycleService,
 )
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/feeding", tags=["feeding-ration-templates"])
 
@@ -257,7 +258,7 @@ class TemplateApplyFormIn(TemplateApplyIn):
 
 
 @router.post("/ration-templates/actions/apply_template", response_model=VersionCopyOut, status_code=201,
-             summary="Rationsvorlage anwenden (Eingabefluss der Maske; Vorlage im Formular)")
+             summary="Rationsvorlage anwenden (Eingabefluss der Maske; Vorlage im Formular)", dependencies=SCHREIBEN["AGRAR"])
 async def apply_template_form(body: TemplateApplyFormIn, db: Session = Depends(get_db),
                               tenant_id: str = Depends(get_tenant_id),
                               user: User = Depends(get_current_user)) -> dict[str, Any]:

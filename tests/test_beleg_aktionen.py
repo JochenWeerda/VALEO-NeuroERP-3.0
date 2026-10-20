@@ -137,8 +137,8 @@ def test_ohne_recht_geschieht_nichts(satz, maske):
     vorher = _buchungen(satz)
     assert aktion(None, "vk-rechnung-2", "buchen")["http"] == 403                # keine Rolle: der Beleg existiert fuer sie nicht
     assert aktion(EVA, "vk-rechnung-2", "buchen")["http"] == 403                 # Einkauf an einem Verkaufsbeleg
-    nur_lesen = aktion(LEO, "vk-rechnung-2", "buchen")
-    assert nur_lesen["success"] is False and nur_lesen["error"] == "Keine Berechtigung."
+    # Nur lesen: seit WRITE-ROLES (19.10.2026) weist schon die Bereichsrolle des Schreibwegs ab, nicht erst der Befehl.
+    assert aktion(LEO, "vk-rechnung-2", "buchen")["http"] == 403
     assert _buchungen(satz) == vorher and _status(satz, "vk-rechnung-2") == "open"
 
 

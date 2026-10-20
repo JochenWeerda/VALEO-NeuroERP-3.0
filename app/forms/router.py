@@ -11,6 +11,7 @@ from pydantic import BaseModel
 import logging
 from app.core.dependency_container import container
 from app.infrastructure.repositories import CustomerRepository, ArticleRepository
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 class FollowRequest(BaseModel):
     source_id: str
@@ -286,7 +287,7 @@ async def get_schema(schema_id: str) -> dict:
     return {"ok": True, "data": s}
 
 
-@router.post("/follow")
+@router.post("/follow", dependencies=SCHREIBEN["FACHLICH"])
 async def create_follow_up(req: FollowRequest) -> dict:
     """
     Erstellt Folgebeleg aus Quell-Beleg

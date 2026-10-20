@@ -131,7 +131,7 @@ const meldewesenRoles = [
 ] satisfies Array<{ id: MeldewesenRole; label: string; description: string }>
 
 function uid(prefix: string) {
-  return `${prefix}_${Math.random().toString(16).slice(2)}_${Date.now().toString(16)}`
+  return `${prefix}_${crypto.randomUUID()}`
 }
 
 function safeJsonParse<T>(s: string, fallback: T): T {

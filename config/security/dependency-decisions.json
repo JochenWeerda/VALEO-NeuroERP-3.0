@@ -9,7 +9,7 @@
       "decision": "not_affected",
       "exploitability": "unreachable",
       "owner": "Codex (assessment under user policy 2026-09-15)",
-      "reviewed_on": "2026-10-19",
+      "reviewed_on": "2026-10-20",
       "review_by": "2026-10-23",
       "reason": "Re-reviewed both unchanged embedded consumers and all 98 committed evidence files on 2026-10-19. The only changed file is docker-compose.yml: backend probe URL and read-only runtime config mount; no Chroma HTTP server, remote client, server RBAC provider or trust_remote_code path. Primary advisories still list no patched version. Existing expiry 2026-10-23 unchanged; source/deployment drift and new findings block. Raw scanner findings remain visible.",
       "sources": [
@@ -114,7 +114,7 @@
         "services/ai/app/services/vector_store.py": "f26be06fc7ec1791f911125e76d7aaa2cfd871cb4c1f014a6a45b14364990590",
         "services/ai/Dockerfile": "a19046e77c4ecfdd24326d4ca199389d55649c51ab834287a422f6ca2c40de72",
         "services/ai/main.py": "342f0c963cffb9fe68ba08ca0f81547b2e1da5229c204c497125a1538aedb942",
-        "services/ai/requirements.txt": "e9fa6118fdd81fd0a022a70eadf00da7100f6e20d545394af0474a2242184409"
+        "services/ai/requirements.txt": "dd0ec78384c14d8d1b64aa0be93247cdfb21770b576784052296da7fb5a347da"
       }
     },
     {
@@ -125,7 +125,7 @@
       "decision": "not_affected",
       "exploitability": "unreachable",
       "owner": "Codex (assessment under user policy 2026-09-15)",
-      "reviewed_on": "2026-10-19",
+      "reviewed_on": "2026-10-20",
       "review_by": "2026-10-23",
       "reason": "Re-reviewed both unchanged embedded consumers and all 98 committed evidence files on 2026-10-19. The only changed file is docker-compose.yml: backend probe URL and read-only runtime config mount; no Chroma HTTP server, remote client, server RBAC provider or trust_remote_code path. Primary advisories still list no patched version. Existing expiry 2026-10-23 unchanged; source/deployment drift and new findings block. Raw scanner findings remain visible.",
       "sources": [
@@ -230,7 +230,7 @@
         "services/ai/app/services/vector_store.py": "f26be06fc7ec1791f911125e76d7aaa2cfd871cb4c1f014a6a45b14364990590",
         "services/ai/Dockerfile": "a19046e77c4ecfdd24326d4ca199389d55649c51ab834287a422f6ca2c40de72",
         "services/ai/main.py": "342f0c963cffb9fe68ba08ca0f81547b2e1da5229c204c497125a1538aedb942",
-        "services/ai/requirements.txt": "e9fa6118fdd81fd0a022a70eadf00da7100f6e20d545394af0474a2242184409"
+        "services/ai/requirements.txt": "dd0ec78384c14d8d1b64aa0be93247cdfb21770b576784052296da7fb5a347da"
       }
     },
     {
@@ -241,7 +241,7 @@
       "decision": "not_affected",
       "exploitability": "unreachable",
       "owner": "Codex (assessment under user policy 2026-09-15)",
-      "reviewed_on": "2026-10-19",
+      "reviewed_on": "2026-10-20",
       "review_by": "2026-10-23",
       "reason": "Re-reviewed both unchanged embedded consumers and all 98 committed evidence files on 2026-10-19. The only changed file is docker-compose.yml: backend probe URL and read-only runtime config mount; no Chroma HTTP server, remote client, server RBAC provider or trust_remote_code path. Primary advisories still list no patched version. Existing expiry 2026-10-23 unchanged; source/deployment drift and new findings block. Raw scanner findings remain visible.",
       "sources": [
@@ -346,7 +346,7 @@
         "services/ai/app/services/vector_store.py": "f26be06fc7ec1791f911125e76d7aaa2cfd871cb4c1f014a6a45b14364990590",
         "services/ai/Dockerfile": "a19046e77c4ecfdd24326d4ca199389d55649c51ab834287a422f6ca2c40de72",
         "services/ai/main.py": "342f0c963cffb9fe68ba08ca0f81547b2e1da5229c204c497125a1538aedb942",
-        "services/ai/requirements.txt": "e9fa6118fdd81fd0a022a70eadf00da7100f6e20d545394af0474a2242184409"
+        "services/ai/requirements.txt": "dd0ec78384c14d8d1b64aa0be93247cdfb21770b576784052296da7fb5a347da"
       }
     }
   ]

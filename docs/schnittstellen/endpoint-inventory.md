@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-16
+last_reviewed: 2026-10-20
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -162,6 +162,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `e2e_chain` | — |
 | `ebilanz_elster` | eBilanz / ELSTER export and ERiC submission endpoint. |
 | `edi_api` | — |
+| `einkauf_ab_erfassung` | Erfassung eingehender Auftragsbestaetigungen (STAMMDATEN-BEARBEITEN-20261019, Folgepunkt). |
 | `einkauf_bestellvorschlag` | Einkauf â€” Bestell-Vorschlag Endpoints |
 | `einkauf_kpis` | Einkauf — KPIs |
 | `einkauf_lieferschein` | Einkauf Lieferschein + Frachtauftrag CRUD endpoints. |
@@ -350,6 +351,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `pos_tagesabschluss_actions` | DOM-POS-004 — POS Tagesabschluss: Z-Bon, TSE-Simulation, DSFinV-K. |
 | `position_overrides` | Commodity Position Override API (Freigabe anfordern / genehmigen / ablehnen). |
 | `position_rules` | Commodity Position Rules API (No-Speculation Guard Regeln). |
+| `preis_kalkulation_bridge` | Preiskalkulation der Maske ``preise/kalkulation`` (aus ``mask_frontend_bridges`` herausgeloest, 19.10.2026). |
 | `preis_rabattgruppen` | Rabattgruppen und Rabattklassen — Stammdaten für die Rabattpflege. |
 | `preparation_lists` | Preparation list endpoints (l3c-lager Rüstlisten) |
 | `price_calculation` | Preis-Kalkulations-Engine (dynamisch). |
@@ -404,6 +406,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `sales_invoices` | Die Ausgangsrechnung mit ihren Positionen. |
 | `sales_match` | Auftrag-↔-Lieferschein-Positions-Match (DOM-SALES-004.2) — read-only. |
 | `sales_offers` | Domain sales offers (Angebote) CRUD endpoints. |
+| `sales_order_commands` | Auftrag stornieren als Kommando-Weg (Studio-Katalog ``stornieren``, MASK-COMMANDS-ROLLOUT-20261019). |
 | `sales_orders` | Domain sales orders CRUD endpoints. |
 | `sales_reports` | Sales Reports and Dashboards endpoints. |
 | `sales_shipping_ext` | Sales shipping extension endpoints (l3c-verkaufslieferschein extras) |
@@ -419,6 +422,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `silo_operations_api` | — |
 | `silo_target_cell` | WM-SILO-RULE-ENGINE-001 — Zielzellen-Vorschlag API. |
 | `sla_escalation_api` | SLA-Eskalation API — Wave 12 |
+| `stammdaten_bearbeiten` | Bearbeiten nativer Objektmasken als Fachaktion fuer Maske, CLI und MCP (STAMMDATEN-BEARBEITEN-20261019). |
 | `stmd_duplikat` | STMD-DUP-001: Cross-Domain-Dublettenprüfung für Stammdaten. |
 | `strecke` | Strecke – Streckengeschaefte CRUD |
 | `strecke_speditionen` | Strecke – Speditionen / Frachttarife nach PLZ |

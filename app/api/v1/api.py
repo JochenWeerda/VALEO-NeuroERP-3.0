@@ -478,6 +478,9 @@ api_router.include_router(
     prefix="/sales/orders",
     tags=["sales", "orders"]
 )
+from app.api.v1.endpoints import sales_order_commands  # noqa: E402
+
+api_router.include_router(sales_order_commands.router, prefix="/sales/orders", tags=["sales", "orders"])
 
 api_router.include_router(
     sales_blanket_orders.router,
@@ -1939,12 +1942,19 @@ api_router.include_router(import_pipeline.router)
 api_router.include_router(iot_telemetry.router)
 api_router.include_router(mask_registry.router)
 api_router.include_router(mask_actions.router)
+from app.api.v1.endpoints import stammdaten_bearbeiten  # noqa: E402  # Bearbeiten der Objektmasken
+api_router.include_router(stammdaten_bearbeiten.router)
+from app.api.v1.endpoints import einkauf_ab_erfassung  # noqa: E402  # Erfassung eingehender ABs
+api_router.include_router(einkauf_ab_erfassung.router)
 api_router.include_router(mask_rollout_summaries.router)
 api_router.include_router(mask_screen_definition.router)
 api_router.include_router(studio_drafts.router)
 api_router.include_router(finance_stammdaten.router)
 api_router.include_router(crm_consents.router)
 api_router.include_router(mask_frontend_bridges.router)
+from app.api.v1.endpoints import preis_kalkulation_bridge  # noqa: E402
+
+api_router.include_router(preis_kalkulation_bridge.router)  # aus mask_frontend_bridges herausgeloest
 api_router.include_router(operational_governance.router)
 api_router.include_router(planung_kalender.router)
 api_router.include_router(pricing_governance.router)

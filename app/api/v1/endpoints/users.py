@@ -24,6 +24,7 @@ from ..schemas.base import PaginatedResponse
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.users_schemas import UsersOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(tags=["users"])
@@ -37,7 +38,7 @@ def _profile_output(profile: Profile) -> User:
 
 
 
-@router.post("/", response_model=User, status_code=status.HTTP_201_CREATED, summary="User anlegen")
+@router.post("/", response_model=User, status_code=status.HTTP_201_CREATED, summary="User anlegen", dependencies=SCHREIBEN["PLATTFORM"])
 async def create_user(
     user_data: UserCreate,
     db: Session = Depends(get_db)
@@ -153,7 +154,7 @@ async def list_users(
         raise HTTPException(status_code=500, detail="Failed to list users")
 
 
-@router.put("/{user_id}", response_model=User, summary="User aktualisieren")
+@router.put("/{user_id}", response_model=User, summary="User aktualisieren", dependencies=SCHREIBEN["PLATTFORM"])
 async def update_user(
     user_id: str,
     user_data: UserUpdate,
@@ -188,8 +189,7 @@ async def update_user(
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="User löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["PLATTFORM"])
 async def delete_user(
     user_id: str,
     oidc_user: OIDCUser = Depends(authenticated_user),
@@ -215,7 +215,7 @@ async def delete_user(
         raise HTTPException(status_code=500, detail=f"Failed to delete user: {str(e)}")
 
 
-@router.post("/login", response_model=UsersOut, summary="Anmelden")
+@router.post("/login", response_model=UsersOut, summary="Anmelden", dependencies=SCHREIBEN["PLATTFORM"])
 async def login(
     login_data: UserLogin,
     db: Session = Depends(get_db)
@@ -236,8 +236,7 @@ async def login(
 
 
 @router.post("/change-password", summary="Password change",
-    response_model=UsersOut
-)
+    response_model=UsersOut, dependencies=SCHREIBEN["PLATTFORM"])
 async def change_password(
     password_data: ChangePasswordRequest,
     oidc_user: OIDCUser = Depends(authenticated_user),

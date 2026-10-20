@@ -1150,7 +1150,7 @@ class NaehrwertBerechnungResult(BaseModel):
     modus: str
 
 
-@router.post("/futter/mischfuttermittel/naehrwerte/berechnen", response_model=NaehrwertBerechnungResult, summary="Naehrwerte berechne")
+@router.post("/futter/mischfuttermittel/naehrwerte/berechnen", response_model=NaehrwertBerechnungResult, summary="Naehrwerte berechne", dependencies=SCHREIBEN["FUTTERMITTEL"])
 async def berechne_naehrwerte(
     body: NaehrwertBerechnungRequest,
     db: Session = Depends(get_db),
@@ -1757,7 +1757,7 @@ async def import_debitoren_csv(
     return {"created": created, "updated": updated, "errors": errors}
 
 
-@router.post("/futter/import/einzelfuttermittel", response_model=CsvImportResponse, summary="Einzelfuttermittel csv importieren")
+@router.post("/futter/import/einzelfuttermittel", response_model=CsvImportResponse, summary="Einzelfuttermittel csv importieren", dependencies=SCHREIBEN["FUTTERMITTEL"])
 async def import_einzelfuttermittel_csv(
     file: UploadFile = File(...), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -1777,7 +1777,7 @@ async def import_einzelfuttermittel_csv(
     return result
 
 
-@router.post("/futter/import/mischfuttermittel", response_model=CsvImportResponse, summary="Mischfuttermittel csv importieren")
+@router.post("/futter/import/mischfuttermittel", response_model=CsvImportResponse, summary="Mischfuttermittel csv importieren", dependencies=SCHREIBEN["FUTTERMITTEL"])
 async def import_mischfuttermittel_csv(
     file: UploadFile = File(...), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -1796,7 +1796,7 @@ async def import_mischfuttermittel_csv(
     return result
 
 
-@router.post("/futter/import/chargen", response_model=CsvImportResponse, summary="Chargen csv importieren")
+@router.post("/futter/import/chargen", response_model=CsvImportResponse, summary="Chargen csv importieren", dependencies=SCHREIBEN["FUTTERMITTEL"])
 async def import_chargen_csv(
     file: UploadFile = File(...), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -2976,7 +2976,7 @@ async def get_firma(
     return {}
 
 
-@router.put("/setup/firma", response_model=SetupFirmaOut, tags=["setup"], summary="Firma save")
+@router.put("/setup/firma", response_model=SetupFirmaOut, tags=["setup"], summary="Firma save", dependencies=SCHREIBEN["PLATTFORM"])
 async def save_firma(
     payload: dict = Body(...),
     tenant_id: str = Depends(get_tenant_id),
@@ -3252,8 +3252,7 @@ class FieldServiceTaskCreateBody(BaseModel):
 
 
 @router.post("/agribusiness/field-service-tasks", summary="Field service task anlegen",
-    response_model=FieldServiceTaskOut
-)
+    response_model=FieldServiceTaskOut, dependencies=SCHREIBEN["AGRAR"])
 async def create_field_service_task(
     body: FieldServiceTaskCreateBody,
     tenant_id: str = Depends(get_tenant_id),
@@ -3295,8 +3294,7 @@ class FieldServiceTaskUpdateBody(BaseModel):
 
 
 @router.put("/agribusiness/field-service-tasks/{task_id}", summary="Field service task aktualisieren",
-    response_model=FieldServiceTaskOut
-)
+    response_model=FieldServiceTaskOut, dependencies=SCHREIBEN["AGRAR"])
 async def update_field_service_task(task_id: str, body: FieldServiceTaskUpdateBody) -> dict[str, Any]:
     """Aufgabe aktualisieren (CRM update_case oder Demo-Liste)."""
     if task_id.startswith("fst-seed-"):
@@ -3339,8 +3337,7 @@ class FieldServiceTaskDeleteBody(BaseModel):
 
 
 @router.delete("/agribusiness/field-service-tasks/{task_id}", summary="Field service task lÃ¶schen",
-    response_model=FieldServiceTaskOut
-)
+    response_model=FieldServiceTaskOut, dependencies=SCHREIBEN["AGRAR"])
 async def delete_field_service_task(
     task_id: str,
     body: FieldServiceTaskDeleteBody | None = Body(None),
@@ -3359,8 +3356,7 @@ class FieldServiceTaskCancelBody(BaseModel):
 
 
 @router.post("/agribusiness/field-service-tasks/{task_id}/cancel", summary="Field service task stornieren",
-    response_model=FieldServiceTaskOut
-)
+    response_model=FieldServiceTaskOut, dependencies=SCHREIBEN["AGRAR"])
 async def cancel_field_service_task(
     task_id: str,
     body: FieldServiceTaskCancelBody | None = None,

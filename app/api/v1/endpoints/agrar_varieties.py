@@ -18,6 +18,7 @@ from app.core.uuid7 import uuid7
 from app.infrastructure.models.futtermittel_models import AgrarSorte
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -92,7 +93,7 @@ async def get_variety(
     return item
 
 
-@router.post("/", response_model=VarietyOut, status_code=201, summary="Variety anlegen")
+@router.post("/", response_model=VarietyOut, status_code=201, summary="Variety anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_variety(
     payload: VarietyIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -106,7 +107,7 @@ async def create_variety(
     return item
 
 
-@router.put("/{sorte_id}", response_model=VarietyOut, summary="Variety aktualisieren")
+@router.put("/{sorte_id}", response_model=VarietyOut, summary="Variety aktualisieren", dependencies=SCHREIBEN["AGRAR"])
 async def update_variety(
     sorte_id: str,
     payload: VarietyIn,
@@ -126,7 +127,7 @@ async def update_variety(
     return item
 
 
-@router.delete("/{sorte_id}", status_code=204, response_class=Response, response_model=None, summary="Variety löschen")
+@router.delete("/{sorte_id}", status_code=204, response_class=Response, response_model=None, summary="Variety löschen", dependencies=SCHREIBEN["AGRAR"])
 async def delete_variety(
     sorte_id: str,
     tenant_id: str = Depends(get_tenant_id),

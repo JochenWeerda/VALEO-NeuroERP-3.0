@@ -11,6 +11,7 @@ import time
 
 import pytest
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import channel_work_surfaces
@@ -21,6 +22,7 @@ from app.core.channel_ingress import format_slack_dispatch_result, normalize_sla
 @pytest.fixture
 def client() -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(channel_work_surfaces.router)
     return TestClient(app)
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-19",
+  "generatedAt": "2026-10-20",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -1441,8 +1441,20 @@
       "agent_contract_url": "/api/v1/masks/agrar/kontrakte/agent-contract",
       "screen_definition_url": "/api/v1/masks/agrar/kontrakte/screen-definition",
       "readiness_url": "/api/v1/masks/agrar/kontrakte/readiness",
-      "risk_summary": "low",
-      "actions": [],
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "kontrakt.update",
+          "commandEndpoint": "/api/v1/kontrakte/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [
         "preis"
       ],
@@ -1911,6 +1923,17 @@
       "risk_summary": "low",
       "actions": [
         {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.lead.update",
+          "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
           "key": "qualifizieren",
           "label": "Als Opportunity qualifizieren",
           "dangerLevel": "safe",
@@ -1987,6 +2010,17 @@
       "risk_summary": "low",
       "actions": [
         {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.opportunity.update",
+          "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
           "key": "create_activity",
           "label": "Aktivitaet anlegen",
           "dangerLevel": "safe",
@@ -2057,7 +2091,19 @@
       "screen_definition_url": "/api/v1/masks/einkauf/anfrage/screen-definition",
       "readiness_url": "/api/v1/masks/einkauf/anfrage/readiness",
       "risk_summary": "low",
-      "actions": [],
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.anfrage.update",
+          "commandEndpoint": "/api/v1/einkauf/anfragen/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "einkauf.bestellung.speichern",
@@ -2146,8 +2192,31 @@
       "agent_contract_url": "/api/v1/masks/einkauf/auftragsbestaetigung/agent-contract",
       "screen_definition_url": "/api/v1/masks/einkauf/auftragsbestaetigung/screen-definition",
       "readiness_url": "/api/v1/masks/einkauf/auftragsbestaetigung/readiness",
-      "risk_summary": "low",
-      "actions": [],
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "pruefen",
+          "label": "Pruefen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.auftragsbestaetigung.review",
+          "commandEndpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/pruefen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "bestaetigen",
+          "label": "Bestaetigen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.auftragsbestaetigung.confirm",
+          "commandEndpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/bestaetigen",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [
         "einzelpreis"
       ],
@@ -2468,8 +2537,20 @@
       "agent_contract_url": "/api/v1/masks/finance/bankkonto/agent-contract",
       "screen_definition_url": "/api/v1/masks/finance/bankkonto/screen-definition",
       "readiness_url": "/api/v1/masks/finance/bankkonto/readiness",
-      "risk_summary": "low",
-      "actions": [],
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "finance.bankkonto.update",
+          "commandEndpoint": "/api/v1/banken/konten/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [
         "iban",
         "bic",
@@ -2491,8 +2572,20 @@
       "agent_contract_url": "/api/v1/masks/finance/debitor/agent-contract",
       "screen_definition_url": "/api/v1/masks/finance/debitor/screen-definition",
       "readiness_url": "/api/v1/masks/finance/debitor/readiness",
-      "risk_summary": "low",
-      "actions": [],
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "finance.debitor.update",
+          "commandEndpoint": "/api/v1/finance/debitoren/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [
         "kreditlimit",
         "steuernummer",
@@ -2514,8 +2607,20 @@
       "agent_contract_url": "/api/v1/masks/finance/kreditor/agent-contract",
       "screen_definition_url": "/api/v1/masks/finance/kreditor/screen-definition",
       "readiness_url": "/api/v1/masks/finance/kreditor/readiness",
-      "risk_summary": "low",
-      "actions": [],
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "finance.kreditor.update",
+          "commandEndpoint": "/api/v1/finance/kreditoren/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [
         "steuernummer",
         "ust_id"
@@ -2790,7 +2895,19 @@
       "screen_definition_url": "/api/v1/masks/futtermittel/mischfuttermittel/screen-definition",
       "readiness_url": "/api/v1/masks/futtermittel/mischfuttermittel/readiness",
       "risk_summary": "low",
-      "actions": [],
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.mischfutter.update",
+          "commandEndpoint": "/api/v1/futter/mischfuttermittel/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
@@ -4380,6 +4497,17 @@
       "risk_summary": "medium",
       "actions": [
         {
+          "key": "bearbeiten",
+          "label": "Zustaendigkeit/Frist",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "qualitaet.reklamation.update",
+          "commandEndpoint": "/api/v1/reklamationen/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
           "key": "abschliessen",
           "label": "Abschliessen",
           "dangerLevel": "moderate",
@@ -4699,7 +4827,19 @@
       "screen_definition_url": "/api/v1/masks/sales/sales-order/screen-definition",
       "readiness_url": "/api/v1/masks/sales/sales-order/readiness",
       "risk_summary": "low",
-      "actions": [],
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "sales.order.update",
+          "commandEndpoint": "/api/v1/sales/orders/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [
         "einzelpreis",
         "betrag"
@@ -5352,5 +5492,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 104
+  "event_count": 116
 }

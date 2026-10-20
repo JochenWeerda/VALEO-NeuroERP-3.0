@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.gdpr_schemas import GdprOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -119,8 +120,7 @@ async def export_user_data(
 
 
 @router.delete("/delete-user/{user_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Lokales Benutzerprofil anonymisieren",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["QUALITAET"])
 async def delete_user_data(
     user_id: str,
     request: Request,

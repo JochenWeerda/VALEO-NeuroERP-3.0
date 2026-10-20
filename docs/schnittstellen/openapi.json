@@ -7,18 +7,6 @@
             "title": "New Status",
             "type": "string"
           },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
-          },
           "reason": {
             "anyOf": [
               {
@@ -801,6 +789,46 @@
         "title": "AbsenderOut",
         "type": "object"
       },
+      "Abweichung": {
+        "properties": {
+          "art": {
+            "title": "Art",
+            "type": "string"
+          },
+          "bestaetigt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestaetigt"
+          },
+          "bestellt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestellt"
+          },
+          "position": {
+            "title": "Position",
+            "type": "string"
+          }
+        },
+        "required": [
+          "art",
+          "position"
+        ],
+        "title": "Abweichung",
+        "type": "object"
+      },
       "AbwesenheitCreateRequest": {
         "properties": {
           "abwesenheit_typ": {
@@ -822,11 +850,6 @@
           },
           "mitarbeiter_id": {
             "title": "Mitarbeiter Id",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           },
           "von_datum": {
@@ -853,11 +876,6 @@
           },
           "new_status": {
             "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           }
         },
@@ -16999,6 +17017,137 @@
           "typ"
         ],
         "title": "AuftragCreateBody",
+        "type": "object"
+      },
+      "AuftragsbestaetigungAngelegt": {
+        "properties": {
+          "bestaetigungsNummer": {
+            "title": "Bestaetigungsnummer",
+            "type": "string"
+          },
+          "bestellung": {
+            "title": "Bestellung",
+            "type": "string"
+          },
+          "createdAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdat"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lieferant": {
+            "title": "Lieferant",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "bestaetigungsNummer",
+          "bestellung",
+          "lieferant",
+          "status"
+        ],
+        "title": "AuftragsbestaetigungAngelegt",
+        "type": "object"
+      },
+      "AuftragsbestaetigungAnlage": {
+        "properties": {
+          "ab_nummer": {
+            "description": "Nummer der AB des Lieferanten",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Ab Nummer",
+            "type": "string"
+          },
+          "abweichungen": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abweichungen"
+          },
+          "bestellung": {
+            "description": "Kennung oder Nummer der Bestellung",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Bestellung",
+            "type": "string"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "gesamtbetrag": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gesamtbetrag"
+          },
+          "lieferdatum": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferdatum"
+          },
+          "notizen": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notizen"
+          }
+        },
+        "required": [
+          "bestellung",
+          "ab_nummer"
+        ],
+        "title": "AuftragsbestaetigungAnlage",
         "type": "object"
       },
       "AusfuehrungOut": {
@@ -53486,18 +53635,6 @@
             "title": "Content Hash Sha256",
             "type": "string"
           },
-          "created_by": {
-            "anyOf": [
-              {
-                "maxLength": 100,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created By"
-          },
           "file_name": {
             "anyOf": [
               {
@@ -53614,11 +53751,6 @@
             "title": "Dokument Typ",
             "type": "string"
           },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
           "referenz_id": {
             "title": "Referenz Id",
             "type": "string"
@@ -53722,11 +53854,6 @@
           },
           "new_status": {
             "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           },
           "wiedervorlage_datum": {
@@ -76976,11 +77103,6 @@
       },
       "GoBDExportCreateRequest": {
         "properties": {
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
           "periode": {
             "title": "Periode",
             "type": "string"
@@ -77026,11 +77148,6 @@
           },
           "new_status": {
             "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           }
         },
@@ -87732,18 +87849,6 @@
             "title": "Content Hash Sha256",
             "type": "string"
           },
-          "created_by": {
-            "anyOf": [
-              {
-                "maxLength": 100,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created By"
-          },
           "format_type": {
             "default": "XRechnung",
             "maxLength": 40,
@@ -95370,18 +95475,6 @@
           "new_status": {
             "title": "New Status",
             "type": "string"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
           },
           "quittiert_von": {
             "anyOf": [
@@ -106050,11 +106143,6 @@
             "title": "Meldung Typ",
             "type": "string"
           },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
           "periode": {
             "title": "Periode",
             "type": "string"
@@ -106184,11 +106272,6 @@
           },
           "new_status": {
             "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           }
         },
@@ -114693,6 +114776,79 @@
         "title": "OrdersResponse",
         "type": "object"
       },
+      "OrdrspEingang": {
+        "properties": {
+          "nachricht": {
+            "description": "EDIFACT ORDRSP (D.96A)",
+            "maxLength": 2000000,
+            "minLength": 10,
+            "title": "Nachricht",
+            "type": "string"
+          }
+        },
+        "required": [
+          "nachricht"
+        ],
+        "title": "OrdrspEingang",
+        "type": "object"
+      },
+      "OrdrspErgebnis": {
+        "properties": {
+          "abweichungen": {
+            "items": {
+              "$ref": "#/components/schemas/Abweichung"
+            },
+            "title": "Abweichungen",
+            "type": "array"
+          },
+          "bestaetigungsNummer": {
+            "title": "Bestaetigungsnummer",
+            "type": "string"
+          },
+          "bestellung": {
+            "title": "Bestellung",
+            "type": "string"
+          },
+          "createdAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Createdat"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lieferant": {
+            "title": "Lieferant",
+            "type": "string"
+          },
+          "positionsabgleich": {
+            "title": "Positionsabgleich",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "bestaetigungsNummer",
+          "bestellung",
+          "lieferant",
+          "status",
+          "abweichungen",
+          "positionsabgleich"
+        ],
+        "title": "OrdrspErgebnis",
+        "type": "object"
+      },
       "OrgUnitIn": {
         "additionalProperties": false,
         "description": "Eine Organisationseinheit. Die Arten stehen im Dienst, nicht zweimal hier.",
@@ -115510,64 +115666,11 @@
         "title": "OwnershipOut",
         "type": "object"
       },
-      "PCNCreateIn": {
-        "properties": {
-          "artikel_id": {
-            "title": "Artikel Id",
-            "type": "string"
-          },
-          "bemerkung": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bemerkung"
-          },
-          "meldungstyp": {
-            "title": "Meldungstyp",
-            "type": "string"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
-          }
-        },
-        "required": [
-          "artikel_id",
-          "meldungstyp"
-        ],
-        "title": "PCNCreateIn",
-        "type": "object"
-      },
       "PCNTransitionIn": {
         "properties": {
           "new_status": {
             "title": "New Status",
             "type": "string"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
           },
           "reason": {
             "anyOf": [
@@ -115592,18 +115695,6 @@
           "grund": {
             "title": "Grund",
             "type": "string"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
           }
         },
         "required": [
@@ -120854,17 +120945,6 @@
       },
       "PickListFromDeliveryNoteIn": {
         "properties": {
-          "created_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created By"
-          },
           "strategy": {
             "default": "FEFO",
             "title": "Strategy",
@@ -120887,17 +120967,6 @@
       },
       "PickListIn": {
         "properties": {
-          "created_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created By"
-          },
           "items": {
             "items": {
               "$ref": "#/components/schemas/PickListItem"
@@ -126145,7 +126214,7 @@
             ],
             "title": "Kontrakt Id"
           },
-          "kundengruppe": {
+          "kunde_id": {
             "anyOf": [
               {
                 "type": "string"
@@ -126154,7 +126223,7 @@
                 "type": "null"
               }
             ],
-            "title": "Kundengruppe"
+            "title": "Kunde Id"
           },
           "menge_kg": {
             "anyOf": [
@@ -126166,17 +126235,6 @@
               }
             ],
             "title": "Menge Kg"
-          },
-          "sorte_klasse": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sorte Klasse"
           }
         },
         "title": "PreisBerechnenIn",
@@ -126487,15 +126545,10 @@
               }
             ],
             "title": "Grund"
-          },
-          "operator": {
-            "title": "Operator",
-            "type": "string"
           }
         },
         "required": [
-          "entscheidung",
-          "operator"
+          "entscheidung"
         ],
         "title": "PreisabweichungFreigabeIn",
         "type": "object"
@@ -129760,11 +129813,6 @@
             "title": "New Status",
             "type": "string"
           },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
           "qs_befund": {
             "default": "",
             "title": "Qs Befund",
@@ -129785,11 +129833,6 @@
           },
           "geplant_datum": {
             "title": "Geplant Datum",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           },
           "rezeptur_id": {
@@ -138691,11 +138734,6 @@
       },
       "ReklamationCreateRequest": {
         "properties": {
-          "aktor_id": {
-            "default": "system",
-            "title": "Aktor Id",
-            "type": "string"
-          },
           "crm_referenz": {
             "anyOf": [
               {
@@ -138861,11 +138899,6 @@
       },
       "ReklamationLaborBefundRequest": {
         "properties": {
-          "aktor_id": {
-            "default": "system",
-            "title": "Aktor Id",
-            "type": "string"
-          },
           "analysewerte": {
             "additionalProperties": true,
             "title": "Analysewerte",
@@ -139162,11 +139195,6 @@
       },
       "ReklamationReferenzUpdateRequest": {
         "properties": {
-          "aktor_id": {
-            "default": "system",
-            "title": "Aktor Id",
-            "type": "string"
-          },
           "crm_referenz": {
             "anyOf": [
               {
@@ -139190,11 +139218,6 @@
       },
       "ReklamationTransitionRequest": {
         "properties": {
-          "aktor_id": {
-            "default": "system",
-            "title": "Aktor Id",
-            "type": "string"
-          },
           "kommentar": {
             "anyOf": [
               {
@@ -141680,11 +141703,6 @@
             "title": "Bezeichnung",
             "type": "string"
           },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
           "positionen": {
             "items": {
               "$ref": "#/components/schemas/RezepturPosition"
@@ -141827,11 +141845,6 @@
         "properties": {
           "new_status": {
             "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           }
         },
@@ -154476,18 +154489,6 @@
               }
             ],
             "title": "Nachweis Ref"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
           }
         },
         "required": [
@@ -154501,18 +154502,6 @@
           "grund": {
             "title": "Grund",
             "type": "string"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
           }
         },
         "required": [
@@ -160239,11 +160228,6 @@
           "kasse_id": {
             "title": "Kasse Id",
             "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
           }
         },
         "required": [
@@ -160468,11 +160452,6 @@
           },
           "new_status": {
             "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           },
           "tse_signatur": {
@@ -166780,18 +166759,6 @@
       },
       "VVVOPruefungIn": {
         "properties": {
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
-          },
           "pruefung_am": {
             "title": "Pruefung Am",
             "type": "string"
@@ -176409,11 +176376,6 @@
             "title": "Mitarbeiter Id",
             "type": "string"
           },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
-            "type": "string"
-          },
           "taetigkeit": {
             "title": "Taetigkeit",
             "type": "string"
@@ -176443,11 +176405,6 @@
           },
           "new_status": {
             "title": "New Status",
-            "type": "string"
-          },
-          "operator": {
-            "default": "system",
-            "title": "Operator",
             "type": "string"
           }
         },
@@ -180544,18 +180501,6 @@
               }
             ],
             "title": "Nachweis Ref"
-          },
-          "operator": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "system",
-            "title": "Operator"
           }
         },
         "title": "FreigabeIn",
@@ -186191,11 +186136,6 @@
             "title": "Changes",
             "type": "object"
           },
-          "created_by": {
-            "default": "system",
-            "title": "Created By",
-            "type": "string"
-          },
           "reason": {
             "title": "Reason",
             "type": "string"
@@ -188731,7 +188671,7 @@
         ]
       },
       "put": {
-        "description": "Update a sales opportunity via crm-sales — nur im eigenen Mandanten.",
+        "description": "Update a sales opportunity via crm-sales — nur im eigenen Mandanten.\n\nWie beim Lesen gilt die lokale Pipeline-Tabelle, wenn crm-sales die Chance nicht kennt oder nicht erreichbar\nist (bis 19.10.2026 scheiterte jede Aenderung einer lokal gefuehrten Chance mit 500).",
         "operationId": "update_opportunity_api_crm_sales_opportunities__opportunity_id__put",
         "parameters": [
           {
@@ -189008,6 +188948,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Inbox Document",
         "tags": [
           "dms"
@@ -189100,6 +189045,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create From Inbox",
         "tags": [
           "dms"
@@ -189140,6 +189090,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Handle Webhook",
         "tags": [
           "dms"
@@ -189940,6 +189895,11 @@
             "description": "Successful Response"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Mcp Kpis Stub"
       }
     },
@@ -189956,6 +189916,11 @@
             "description": "Successful Response"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Mcp Trends Stub"
       }
     },
@@ -189972,6 +189937,11 @@
             "description": "Successful Response"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Mcp Copilot Forecast Stub"
       }
     },
@@ -190746,6 +190716,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Calculate Due Date",
         "tags": [
           "documents"
@@ -190790,6 +190765,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Follow Up",
         "tags": [
           "documents"
@@ -191653,6 +191633,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Follow Up",
         "tags": [
           "forms"
@@ -192143,6 +192128,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Policy testen",
         "tags": [
           "policy"
@@ -192644,6 +192634,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create New Translation",
         "tags": [
           "translations"
@@ -192688,6 +192683,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Bulk Seed Translations",
         "tags": [
           "translations"
@@ -192926,6 +192926,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Translation",
         "tags": [
           "translations"
@@ -202587,15 +202592,6 @@
           },
           {
             "in": "query",
-            "name": "resolved_by",
-            "required": true,
-            "schema": {
-              "title": "Resolved By",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "note",
             "required": false,
             "schema": {
@@ -202657,15 +202653,6 @@
             "required": true,
             "schema": {
               "title": "Entry Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "retried_by",
-            "required": true,
-            "schema": {
-              "title": "Retried By",
               "type": "string"
             }
           },
@@ -239609,6 +239596,64 @@
         ]
       }
     },
+    "/api/v1/banken/konten/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "bankkonto_bearbeiten_api_v1_banken_konten__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bankkonto bearbeiten",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/banken/konten/{konto_id}": {
       "delete": {
         "operationId": "delete_bankkonto_api_v1_banken_konten__konto_id__delete",
@@ -243516,22 +243561,6 @@
               "title": "Artikel Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -243588,22 +243617,6 @@
             "schema": {
               "title": "Artikel Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -243662,22 +243675,6 @@
               "title": "Artikel Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -243724,22 +243721,6 @@
             "schema": {
               "title": "Artikel Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -245021,30 +245002,15 @@
         ]
       },
       "post": {
-        "operationId": "create_pcn_meldung_v2_api_v1_compliance_pcn_meldungen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
-          }
-        ],
+        "description": "Anlage einer neuen PCN-Meldung (Product Classification Notification) mit UFI.\n\nValidiert das UFI-Format (XXXX-XXXX-XXXX-XXXX) und legt die Meldung persistent an.\nEntspricht den Anforderungen der EU-Verordnung 2017/542 (CLP-Anhang VIII).",
+        "operationId": "create_pcn_meldung_api_v1_compliance_pcn_meldungen_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PCNCreateIn"
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
               }
             }
           },
@@ -245077,7 +245043,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "PCN-Meldung anlegen",
+        "summary": "Pcn meldung anlegen",
         "tags": [
           "Compliance"
         ]
@@ -245094,22 +245060,6 @@
             "schema": {
               "title": "Meldung Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -245167,22 +245117,6 @@
             "schema": {
               "title": "Meldung Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -245398,22 +245332,6 @@
               "default": 30,
               "title": "Within Days",
               "type": "integer"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -245842,22 +245760,6 @@
               "title": "Within Days",
               "type": "integer"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "responses": {
@@ -245904,22 +245806,6 @@
             "schema": {
               "title": "Vvvo Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -249384,6 +249270,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Activity",
         "tags": [
           "CRM",
@@ -250970,6 +250861,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Betriebsprofil",
         "tags": [
           "CRM",
@@ -251023,6 +250919,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Betriebsprofil",
         "tags": [
           "CRM",
@@ -251149,6 +251050,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Betriebsprofil",
         "tags": [
           "CRM",
@@ -258024,6 +257930,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Consent",
         "tags": [
           "CRM",
@@ -258790,6 +258701,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Contact",
         "tags": [
           "CRM",
@@ -263862,6 +263778,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Gdpr Anonymize",
         "tags": [
           "CRM",
@@ -267095,10 +267016,73 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Route Unassigned Leads",
         "tags": [
           "CRM",
           "CRM"
+        ]
+      }
+    },
+    "/api/v1/crm/leads/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "lead_bearbeiten_api_v1_crm_leads__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lead bearbeiten",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
@@ -267367,6 +267351,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Assign Lead",
         "tags": [
           "CRM",
@@ -267573,6 +267562,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Opportunity",
         "tags": [
           "CRM",
@@ -267897,6 +267891,64 @@
         ]
       }
     },
+    "/api/v1/crm/opportunities/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "chance_bearbeiten_api_v1_crm_opportunities__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Verkaufschance bearbeiten",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/crm/opportunities/{entity_id}/actions/create_activity": {
       "post": {
         "description": "Legt die Aktivitaet ueber den mandantengebundenen Fachweg an.\n\nBetreff und Typ fragt die Maske deklarativ (``inputFields`` der Aktion).",
@@ -268002,6 +268054,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Opportunity",
         "tags": [
           "CRM",
@@ -268128,6 +268185,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Opportunity",
         "tags": [
           "CRM",
@@ -268260,6 +268322,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Link Opportunity To Documents",
         "tags": [
           "CRM",
@@ -268356,7 +268423,7 @@
         ]
       },
       "put": {
-        "description": "Update a sales opportunity via crm-sales — nur im eigenen Mandanten.",
+        "description": "Update a sales opportunity via crm-sales — nur im eigenen Mandanten.\n\nWie beim Lesen gilt die lokale Pipeline-Tabelle, wenn crm-sales die Chance nicht kennt oder nicht erreichbar\nist (bis 19.10.2026 scheiterte jede Aenderung einer lokal gefuehrten Chance mit 500).",
         "operationId": "update_opportunity_api_v1_crm_opportunities__opportunity_id__put",
         "parameters": [
           {
@@ -269154,6 +269221,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Segment",
         "tags": [
           "CRM",
@@ -269207,6 +269279,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Delete Segment",
         "tags": [
           "CRM",
@@ -269333,6 +269410,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Update Segment",
         "tags": [
           "CRM",
@@ -269469,6 +269551,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Add Segment Member",
         "tags": [
           "CRM",
@@ -269531,6 +269618,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Recalculate Segment",
         "tags": [
           "CRM",
@@ -277316,6 +277408,64 @@
         ]
       }
     },
+    "/api/v1/einkauf/anfragen/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "anfrage_bearbeiten_api_v1_einkauf_anfragen__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Anfrage bearbeiten",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/einkauf/angebote": {
       "get": {
         "operationId": "einkauf_angebote_list_api_v1_einkauf_angebote_get",
@@ -278168,6 +278318,96 @@
         "tags": [
           "compat"
         ]
+      },
+      "post": {
+        "operationId": "ab_erfassen_api_v1_einkauf_auftragsbestaetigungen_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuftragsbestaetigungAnlage"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuftragsbestaetigungAngelegt"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Auftragsbestaetigung zu einer Bestellung erfassen",
+        "tags": [
+          "einkauf"
+        ]
+      }
+    },
+    "/api/v1/einkauf/auftragsbestaetigungen/edi-ordrsp": {
+      "post": {
+        "operationId": "ab_aus_ordrsp_api_v1_einkauf_auftragsbestaetigungen_edi_ordrsp_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrdrspEingang"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdrspErgebnis"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellantwort (EDIFACT ORDRSP) einlesen und mit der Bestellung abgleichen",
+        "tags": [
+          "einkauf"
+        ]
       }
     },
     "/api/v1/einkauf/auftragsbestaetigungen/{bestaetigung_id}": {
@@ -278270,6 +278510,122 @@
         "summary": "Auftragsbestaetigung transition einkauf",
         "tags": [
           "compat"
+        ]
+      }
+    },
+    "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/bestaetigen": {
+      "post": {
+        "operationId": "ab_bestaetigen_api_v1_einkauf_auftragsbestaetigungen__entity_id__actions_bestaetigen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Auftragsbestaetigung bestaetigen",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/pruefen": {
+      "post": {
+        "operationId": "ab_pruefen_api_v1_einkauf_auftragsbestaetigungen__entity_id__actions_pruefen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Auftragsbestaetigung pruefen",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
@@ -287330,6 +287686,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Anlage",
         "tags": [
           "fibu"
@@ -287601,6 +287962,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Create Buchung",
         "tags": [
           "fibu"
@@ -287800,6 +288166,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Mahnen",
         "tags": [
           "fibu"
@@ -289425,6 +289796,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Zahlungslauf",
         "tags": [
           "fibu"
@@ -299178,6 +299554,64 @@
         ]
       }
     },
+    "/api/v1/finance/debitoren/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "debitor_bearbeiten_api_v1_finance_debitoren__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Debitor bearbeiten",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/finance/debtors/": {
       "get": {
         "description": "List debtors with pagination and filtering.",
@@ -303951,6 +304385,64 @@
         "tags": [
           "finance",
           "stammdaten"
+        ]
+      }
+    },
+    "/api/v1/finance/kreditoren/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "kreditor_bearbeiten_api_v1_finance_kreditoren__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kreditor bearbeiten",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
@@ -313584,6 +314076,64 @@
         "summary": "Naehrwerte berechne",
         "tags": [
           "compat"
+        ]
+      }
+    },
+    "/api/v1/futter/mischfuttermittel/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "mischfutter_bearbeiten_api_v1_futter_mischfuttermittel__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mischfuttermittel bearbeiten",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
@@ -329190,6 +329740,64 @@
           "kontrakte",
           "kontrakte",
           "screen-summary"
+        ]
+      }
+    },
+    "/api/v1/kontrakte/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "kontrakt_bearbeiten_api_v1_kontrakte__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kontrakt bearbeiten",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
@@ -388297,6 +388905,64 @@
         ]
       }
     },
+    "/api/v1/reklamationen/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "reklamation_bearbeiten_api_v1_reklamationen__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Reklamation: Zustaendigkeit und Frist",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/reklamationen/{reklamation_id}": {
       "get": {
         "operationId": "get_reklamation_api_v1_reklamationen__reklamation_id__get",
@@ -396217,22 +396883,6 @@
               "title": "Ls Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -396290,22 +396940,6 @@
             "schema": {
               "title": "Auftrag Id",
               "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
             }
           }
         ],
@@ -396365,22 +396999,6 @@
               "title": "Auftrag Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -396439,22 +397057,6 @@
               "title": "Abweichung Id",
               "type": "string"
             }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Tenant-Id"
-            }
           }
         ],
         "requestBody": {
@@ -396498,6 +397100,64 @@
         "tags": [
           "sales",
           "orders"
+        ]
+      }
+    },
+    "/api/v1/sales/orders/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "auftrag_bearbeiten_api_v1_sales_orders__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Auftragskopf bearbeiten",
+        "tags": [
+          "mask-actions"
         ]
       }
     },
@@ -412814,6 +413474,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Resolve Voice",
         "tags": [
           "ki-usability",
@@ -421455,6 +422120,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Validate Vat",
         "tags": [
           "vies"
@@ -421720,6 +422390,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Migrate Workflow",
         "tags": [
           "workflow"
@@ -421807,6 +422482,11 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Do Transition",
         "tags": [
           "workflow"

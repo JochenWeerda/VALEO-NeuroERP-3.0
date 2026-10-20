@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.gdpr_requests_schemas import GdprRequestsOut
 from app.core.akteur import akteur_aus_request
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/gdpr/requests", tags=["gdpr"])
@@ -159,7 +160,7 @@ def _current_user(request: Request) -> Optional[str]:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("", response_model=GdprRequestResponse, status_code=status.HTTP_201_CREATED, summary="Gdpr request anlegen")
+@router.post("", response_model=GdprRequestResponse, status_code=status.HTTP_201_CREATED, summary="Gdpr request anlegen", dependencies=SCHREIBEN["QUALITAET"])
 async def create_gdpr_request(
     payload: GdprRequestCreate,
     request: Request,
@@ -227,7 +228,7 @@ async def get_gdpr_request_history(
     return [GdprHistoryEntry.model_validate(e) for e in entries]
 
 
-@router.post("/{request_id}/verify", response_model=GdprRequestResponse, summary="Gdpr request verifizieren")
+@router.post("/{request_id}/verify", response_model=GdprRequestResponse, summary="Gdpr request verifizieren", dependencies=SCHREIBEN["QUALITAET"])
 async def verify_gdpr_request(
     request_id: str,
     request: Request,
@@ -256,7 +257,7 @@ async def verify_gdpr_request(
     return GdprRequestResponse.model_validate(obj)
 
 
-@router.post("/{request_id}/export", response_model=GdprRequestResponse, summary="Gdpr request exportieren")
+@router.post("/{request_id}/export", response_model=GdprRequestResponse, summary="Gdpr request exportieren", dependencies=SCHREIBEN["QUALITAET"])
 async def export_gdpr_request(
     request_id: str,
     request: Request,
@@ -317,7 +318,7 @@ async def export_gdpr_request(
     return GdprRequestResponse.model_validate(obj)
 
 
-@router.post("/{request_id}/delete", response_model=GdprRequestResponse, summary="Subject data löschen")
+@router.post("/{request_id}/delete", response_model=GdprRequestResponse, summary="Subject data löschen", dependencies=SCHREIBEN["QUALITAET"])
 async def delete_subject_data(
     request_id: str,
     request: Request,
@@ -375,7 +376,7 @@ async def delete_subject_data(
     return GdprRequestResponse.model_validate(obj)
 
 
-@router.post("/{request_id}/reject", response_model=GdprRequestResponse, summary="Gdpr request ablehnen")
+@router.post("/{request_id}/reject", response_model=GdprRequestResponse, summary="Gdpr request ablehnen", dependencies=SCHREIBEN["QUALITAET"])
 async def reject_gdpr_request(
     request_id: str,
     request: Request,

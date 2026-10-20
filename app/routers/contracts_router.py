@@ -17,6 +17,7 @@ from app.core.uuid7 import uuid7
 from app.infrastructure.models import AgrarContract, ContractAmendment, AmendmentTemplate
 from app.domains.operations.repository import RahmenvertragRepository
 from app.domains.operations.models import KonContract
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/api/contracts", tags=["contracts"])
 
@@ -235,7 +236,7 @@ async def get_contract(
     return _agrar_to_item(contract)
 
 
-@router.delete("/{contract_id}")
+@router.delete("/{contract_id}", dependencies=SCHREIBEN["KONTRAKT"])
 async def delete_contract(
     contract_id: str,
     db: Session = Depends(get_db),
@@ -260,7 +261,7 @@ async def delete_contract(
     return {"ok": True}
 
 
-@router.post("/{contract_id}/cancel")
+@router.post("/{contract_id}/cancel", dependencies=SCHREIBEN["KONTRAKT"])
 async def cancel_contract(
     contract_id: str,
     db: Session = Depends(get_db),
@@ -309,7 +310,7 @@ async def list_amendments(
     return {"items": [_amendment_to_item(a) for a in rows]}
 
 
-@router.post("/{contract_id}/amendments")
+@router.post("/{contract_id}/amendments", dependencies=SCHREIBEN["KONTRAKT"])
 async def create_amendment(
     contract_id: str,
     body: AmendmentCreate,

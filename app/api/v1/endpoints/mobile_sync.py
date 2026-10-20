@@ -21,6 +21,7 @@ from app.services.mask_action_runtime_service import MaskActionResult as MaskAct
 from app.services.mask_commands import begruendung, statusaktion
 from app.services.mobile_sync_service import MobileSyncService
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/mobile", tags=["mobile", "sync"])
 
@@ -44,7 +45,7 @@ class ProcessQueueIn(BaseModel):
     reason: str = Field(default="Manuelle MDE-Verarbeitung", min_length=5, max_length=500)
 
 
-@router.post("/sync-events", response_model=TypedObjectOut, summary="MOB-SYNC-001: Offline-Events in Queue hochladen", status_code=202)
+@router.post("/sync-events", response_model=TypedObjectOut, summary="MOB-SYNC-001: Offline-Events in Queue hochladen", status_code=202, dependencies=SCHREIBEN["GERAET"])
 def sync_events(
     body: SyncBatchIn,
     db: Session = Depends(get_db),

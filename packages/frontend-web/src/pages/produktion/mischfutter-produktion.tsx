@@ -197,7 +197,7 @@ export default function MischfutterProduktionPage(): JSX.Element {
     }))
   }, [selectedRezept, menge, verfuegbarkeitMap])
   const missingComponents = komponenten.filter((k) => k.verfuegbar < k.bedarf)
-  const productionReady = Boolean(selectedRezept && menge > 0 && chargenId && komponenten.length > 0 && missingComponents.length === 0)
+  const productionReady = Boolean(selectedRezept && menge > 0 && komponenten.length > 0 && missingComponents.length === 0)
   const nextProductionAction = !selectedRezept
     ? 'Rezeptur auswaehlen.'
     : menge <= 0
@@ -206,28 +206,19 @@ export default function MischfutterProduktionPage(): JSX.Element {
         ? `${missingComponents.length} Komponente(n) fehlen: Bestand klaeren oder Menge anpassen.`
         : 'Produktionsauftrag erstellen und Chargennachweis sichern.'
 
+  // Die Chargen-ID vergibt der Server bei der Anlage (eindeutig); bis 20.10.2026 wuerfelte die Maske 1 von 1000.
   function handleRezeptChange(id: string) {
     setRezeptId(id)
-    if (menge > 0) {
-      setChargenId(
-        `MF-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
-      )
-    }
   }
 
   function handleMengeChange(value: number) {
     setMenge(value)
-    if (value > 0) {
-      setChargenId(
-        `MF-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
-      )
-    }
   }
 
   function handleFinish() {
     if (createAuftrag.isPending) return
     createAuftrag.mutate(
-      { rezept_id: rezeptId, menge_t: menge, chargen_id: chargenId },
+      { rezept_id: rezeptId, menge_t: menge },
       {
         onSuccess: (result) => {
           toast({
@@ -236,7 +227,7 @@ export default function MischfutterProduktionPage(): JSX.Element {
           })
           setRezeptId('')
           setMenge(0)
-          setChargenId('')
+          setChargenId(result.chargen_id)
           setWizardKey((k) => k + 1)
         },
         onError: (e) => {
@@ -352,7 +343,7 @@ export default function MischfutterProduktionPage(): JSX.Element {
               </div>
               <div className="flex justify-between">
                 <dt>Chargen-ID</dt>
-                <dd className="font-mono font-semibold">{chargenId}</dd>
+                <dd className="font-mono font-semibold">{chargenId || 'wird bei der Anlage vergeben'}</dd>
               </div>
             </dl>
             <Callout variant="info" className="mt-6 rounded-lg p-4 text-center text-sm">
@@ -396,7 +387,7 @@ export default function MischfutterProduktionPage(): JSX.Element {
             { label: 'Rezeptur waehlen', done: Boolean(selectedRezept), hint: selectedRezept?.name ?? 'Noch keine Rezeptur gewaehlt.' },
             { label: 'Menge festlegen', done: menge > 0, hint: menge > 0 ? `${menge} t geplant.` : 'Produktionsmenge fehlt.' },
             { label: 'Komponenten pruefen', done: komponenten.length > 0 && missingComponents.length === 0, hint: missingComponents.length > 0 ? `${missingComponents.length} Komponente(n) fehlen.` : `${komponenten.length} Komponente(n) geprueft.` },
-            { label: 'Charge sichern', done: Boolean(chargenId), hint: chargenId || 'Chargen-ID entsteht nach Rezeptur und Menge.' },
+            { label: 'Charge sichern', done: Boolean(chargenId), hint: chargenId || 'Chargen-ID vergibt das System bei der Anlage.' },
           ]}
         />
         <CrudCapabilityChecklist

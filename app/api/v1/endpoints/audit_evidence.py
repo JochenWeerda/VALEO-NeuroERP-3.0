@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.audit_evidence_schemas import AuditEvidenceOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/audit-evidence", tags=["audit", "evidence", "gobd"])
@@ -136,7 +137,7 @@ async def get_evidence_entry(
     return entry.model_dump(mode="json")
 
 
-@router.post("", response_model=AuditEvidenceOut, status_code=201, summary="Evidence entry anlegen")
+@router.post("", response_model=AuditEvidenceOut, status_code=201, summary="Evidence entry anlegen", dependencies=SCHREIBEN["QUALITAET"])
 async def create_evidence_entry(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -177,7 +178,7 @@ async def create_evidence_entry(
     return entry.model_dump(mode="json")
 
 
-@router.post("/{audit_entry_id}/evidence-refs", response_model=AuditEvidenceOut, status_code=201, summary="Evidence ref attach")
+@router.post("/{audit_entry_id}/evidence-refs", response_model=AuditEvidenceOut, status_code=201, summary="Evidence ref attach", dependencies=SCHREIBEN["QUALITAET"])
 async def attach_evidence_ref(
     audit_entry_id: str,
     body: dict,

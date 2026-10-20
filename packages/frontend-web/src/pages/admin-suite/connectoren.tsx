@@ -154,7 +154,7 @@ export default function AdminSuiteConnectorenPage(): JSX.Element {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="stt_base">Base-URL</Label>
-              <Input id="stt_base" value={sttBaseUrl} onChange={(e) => setSttBaseUrl(e.target.value)} placeholder="http://whisper:8000/v1" />
+              <Input id="stt_base" value={sttBaseUrl} onChange={(e) => setSttBaseUrl(e.target.value)} placeholder="http://whisper:8000/v1" /> {/* NOSONAR - Beispiel fuer einen internen Dienst im Containernetz */}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="stt_model">Modell</Label>

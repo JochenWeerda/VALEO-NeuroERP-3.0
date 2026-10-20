@@ -6,6 +6,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 from fastapi import FastAPI
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 import pytest
 
@@ -42,6 +43,7 @@ def register_procurement_command_mutations():
 @pytest.fixture
 def client() -> TestClient:
     app = FastAPI()
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.include_router(process_kernel_api.router)
     mock_session = MagicMock()
 

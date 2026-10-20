@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_user_id_from_request
 from app.core.tenant import get_tenant_id
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/ux/overlays", tags=["ux-overlays"])
 
@@ -186,7 +187,7 @@ async def get_overlay(
     )
 
 
-@router.put("/{screen_id:path}", response_model=OverlayOut, summary="User overlay fuer Maske speichern")
+@router.put("/{screen_id:path}", response_model=OverlayOut, summary="User overlay fuer Maske speichern", dependencies=SCHREIBEN["EIGENE_DATEN"])
 async def put_overlay(
     screen_id: str,
     payload: OverlayPut,
@@ -238,7 +239,7 @@ async def put_overlay(
     )
 
 
-@router.delete("/{screen_id:path}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response, summary="User overlay zuruecksetzen")
+@router.delete("/{screen_id:path}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response, summary="User overlay zuruecksetzen", dependencies=SCHREIBEN["EIGENE_DATEN"])
 async def delete_overlay(
     screen_id: str,
     request: Request,

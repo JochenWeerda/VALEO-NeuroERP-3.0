@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class FuttermittelRezeptOut(BaseSchema):
@@ -177,8 +178,7 @@ async def list_rezepte(
 
 
 @router.post("", status_code=201, summary="Rezept anlegen",
-    response_model=FuttermittelRezeptOut
-)
+    response_model=FuttermittelRezeptOut, dependencies=SCHREIBEN["FUTTERMITTEL"])
 async def create_rezept(
     payload: RezeptIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -232,8 +232,7 @@ async def get_rezept(
 
 
 @router.post("/{rezept_id}/ingredients", status_code=201, summary="Ingredient hinzufügen",
-    response_model=FuttermittelRezeptOut
-)
+    response_model=FuttermittelRezeptOut, dependencies=SCHREIBEN["FUTTERMITTEL"])
 async def add_ingredient(
     rezept_id: str,
     payload: IngredientIn,
@@ -268,8 +267,7 @@ async def add_ingredient(
 
 
 @router.patch("/{rezept_id}/ingredients/{ingredient_id}", summary="Ingredient aktualisieren",
-    response_model=FuttermittelRezeptOut
-)
+    response_model=FuttermittelRezeptOut, dependencies=SCHREIBEN["FUTTERMITTEL"])
 async def update_ingredient(
     rezept_id: str,
     ingredient_id: str,
@@ -300,7 +298,7 @@ async def update_ingredient(
     return _row_to_dict(row)
 
 
-@router.delete("/{rezept_id}/ingredients/{ingredient_id}", status_code=204, response_class=Response, response_model=None, summary="Ingredient löschen")
+@router.delete("/{rezept_id}/ingredients/{ingredient_id}", status_code=204, response_class=Response, response_model=None, summary="Ingredient löschen", dependencies=SCHREIBEN["FUTTERMITTEL"])
 async def delete_ingredient(
     rezept_id: str,
     ingredient_id: str,
@@ -321,8 +319,7 @@ async def delete_ingredient(
 
 
 @router.post("/{rezept_id}/copy", status_code=201, summary="Rezept kopieren",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["FUTTERMITTEL"])
 async def copy_rezept(
     rezept_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -384,8 +381,7 @@ async def copy_rezept(
 
 
 @router.post("/{rezept_id}/activate", summary="Rezept aktivieren",
-    response_model=FuttermittelRezeptOut
-)
+    response_model=FuttermittelRezeptOut, dependencies=SCHREIBEN["FUTTERMITTEL"])
 async def activate_rezept(
     rezept_id: str,
     tenant_id: str = Depends(get_tenant_id),

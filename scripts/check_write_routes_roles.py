@@ -41,7 +41,15 @@ KOERPER = re.compile(
 ABHAENGIGKEIT = re.compile(r"(require_|_dep$|role|recht|permission|scope|write|admin|read|beleg_|_lesen|_schreiben)",
                            re.I)
 #: Wege, die bewusst ohne Fachrolle offen sind (Anmeldung, eigene Sitzung, Geraeteeingang mit eigener Pruefung).
-AUSGENOMMEN = re.compile(r"^/api/v1/(auth|session|sessions|me|users/me|portal)(/|$)|^/api/events|^/health|^/metrics")
+AUSGENOMMEN = re.compile(r"^/api/v1/(auth|session|sessions|me|users/me|portal)(/|$)|^/auth/|^/api/events|^/health|^/metrics")
+#: Delegierte Wege, die ihr Recht tiefer im Aufruf pruefen (Nutzerentscheid 19.10.2026: "delegierte Commands
+#: [koennen] ihre Rechte auch tiefer im Aufruf pruefen"). Jeder Eintrag nennt, wo und was geprueft wird.
+DELEGIERT = {
+    "POST /api/v1/mcp/tools/call": "app.services.mcp_execution_service.execute_mcp_tool: Werkzeug-Scope aus dem "
+                                   "Token, Mandanten-Claim, Sperre fuer reine Mensch-Aktionen; der Zielweg laeuft mit "
+                                   "dem Token des Aufrufers und prueft seine Bereichsrolle selbst. Eine Fachrolle "
+                                   "davor wuerde Agenten-Identitaeten (Scopes statt Fachrollen) aussperren.",
+}
 
 
 def _abhaengigkeit_prueft(dependant) -> bool:  # noqa: ANN001
@@ -75,10 +83,17 @@ def inventar() -> list[str]:
     os.environ.setdefault("DATABASE_URL", "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_probe")
     from fastapi.routing import APIRoute
 
+    import main as produktion  # main:app, die Anwendung des Containers (haengt weitere Router an)
     from app.main import app
 
     offen = set()
-    for route in app.routes:
+    gesehen = set()
+    routen = [*app.routes, *produktion.app.routes]
+    for route in routen:
+        schluessel = (route.path, tuple(sorted(getattr(route, "methods", None) or ())))
+        if schluessel in gesehen:
+            continue
+        gesehen.add(schluessel)
         if not isinstance(route, APIRoute):
             continue
         methoden = sorted(set(route.methods or ()) & {"POST", "PUT", "PATCH", "DELETE"})
@@ -87,7 +102,8 @@ def inventar() -> list[str]:
         if _abhaengigkeit_prueft(route.dependant) or _koerper_prueft(route.endpoint):
             continue
         for methode in methoden:
-            offen.add(f"{methode} {route.path}")
+            if f"{methode} {route.path}" not in DELEGIERT:
+                offen.add(f"{methode} {route.path}")
     return sorted(offen)
 
 

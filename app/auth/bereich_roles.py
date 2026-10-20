@@ -43,12 +43,21 @@ CONTROLLING = (*_bearbeiten("FINANCE"), "controller", "CONTROLLING")
 PERSONAL = _bearbeiten("PERSONAL")
 #: Belege, an denen mehrere Bereiche arbeiten (wie ``finance_roles.BELEG_WRITE_ROLES``).
 BELEGE = _bearbeiten("FINANCE", "SALES", "EINKAUF", "LAGER")
+#: Freigabe als zweite Person (APPROVAL-001, ``beleg_roles.rollen_fuer("freigeben")``): die Bereiche des Belegs, die
+#: Buchhaltung und das Controlling. Die Funktionstrennung prueft die Approval Engine.
+FREIGABE = (*BELEGE, "controller", "CONTROLLING")
 #: Qualitaet, Reklamation, Nachweise: die Bereiche, deren Ware oder Beleg es betrifft.
 QUALITAET = _bearbeiten("LAGER", "EINKAUF", "SALES", "AGRAR", "FUTTERMITTEL")
 #: Bereichsuebergreifende Fachwege (Prozesskern, Agenten, Workflow, Berichte): eine Bearbeitungsrolle irgendeines
 #: Bereichs. Reine Leser und Konten ohne Fachrolle schreiben nicht.
 FACHLICH = _bearbeiten("SALES", "CRM", "EINKAUF", "LAGER", "AGRAR", "HARVEST", "KONTRAKT", "FUTTERMITTEL",
                        "FINANCE", "PERSONAL")
+#: Bereichsuebergreifende Berechnungen ohne Schreibwirkung (Prozesskern: Policy aufloesen, pruefen, erklaeren):
+#: eine Lese- oder Bearbeitungsrolle irgendeines Bereichs. Konten ohne Fachrolle rechnen nicht.
+BERECHNEN = (*FACHLICH, *(f"{b}_LESEN" for b in ("SALES", "CRM", "EINKAUF", "LAGER", "AGRAR", "HARVEST",
+                                                        "KONTRAKT", "FUTTERMITTEL", "FINANCE", "PERSONAL",
+                                                        "QUALITAET", "SETTLEMENT")),
+                  "controller", "CONTROLLING")
 #: Plattformverwaltung (Mandanten, Nutzer, Identitaet, Konfiguration, Governance, Entwicklung/Abnahme).
 PLATTFORM = ("admin",)
 
@@ -61,7 +70,8 @@ SCHREIBEN = {name: _liste(rollen) for name, rollen in {
     "VERKAUF": VERKAUF, "CRM": CRM, "EINKAUF": EINKAUF, "LAGER": LAGER, "STAMMDATEN": STAMMDATEN,
     "LOGISTIK": LOGISTIK, "AGRAR": AGRAR, "ERNTE": ERNTE, "KONTRAKT": KONTRAKT, "FUTTERMITTEL": FUTTERMITTEL,
     "PRODUKTION": PRODUKTION, "FINANZ": FINANZ, "CONTROLLING": CONTROLLING, "PERSONAL": PERSONAL,
-    "BELEGE": BELEGE, "QUALITAET": QUALITAET, "FACHLICH": FACHLICH, "PLATTFORM": PLATTFORM,
+    "BELEGE": BELEGE, "FREIGABE": FREIGABE, "QUALITAET": QUALITAET, "FACHLICH": FACHLICH,
+    "BERECHNEN": BERECHNEN, "PLATTFORM": PLATTFORM,
 }.items()}
 
 

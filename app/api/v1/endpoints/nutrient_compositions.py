@@ -13,6 +13,7 @@ from ..schemas.base import PaginatedResponse
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.nutrient_compositions_schemas import NutrientCompositionsOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -130,7 +131,7 @@ async def get_nutrient_composition(
     return _to_schema(item)
 
 
-@router.post("/", response_model=NutrientCompositionsOut, status_code=status.HTTP_201_CREATED, summary="Nutrient composition anlegen")
+@router.post("/", response_model=NutrientCompositionsOut, status_code=status.HTTP_201_CREATED, summary="Nutrient composition anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_nutrient_composition(
     data: dict,
     db: Session = Depends(get_db),
@@ -179,7 +180,7 @@ async def create_nutrient_composition(
     return _to_schema(item)
 
 
-@router.put("/{composition_id}", response_model=NutrientCompositionsOut, summary="Nutrient composition aktualisieren")
+@router.put("/{composition_id}", response_model=NutrientCompositionsOut, summary="Nutrient composition aktualisieren", dependencies=SCHREIBEN["AGRAR"])
 async def update_nutrient_composition(
     composition_id: str,
     data: dict,
@@ -244,8 +245,7 @@ async def update_nutrient_composition(
 
 
 @router.delete("/{composition_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Nutrient composition löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["AGRAR"])
 async def delete_nutrient_composition(
     composition_id: str,
     tenant_id: Optional[str] = Query(None),

@@ -23,6 +23,7 @@ from app.services.freigabe_engine import KONTROLLROLLEN, pruefe_befund, pruefkor
 from app.api.v1.schemas.base import TypedObjectOut
 from app.services.mask_action_runtime_service import MaskActionResult as MaskActionResultOut
 from app.services.mask_commands import statusaktion
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -87,7 +88,7 @@ def lage(
     return kontrollkorb.lagebild(db, tenant_id)
 
 
-@router.post("/befunde/{befund_id}/pruefung", response_model=TypedObjectOut, summary="Befund als geprueft bewerten")
+@router.post("/befunde/{befund_id}/pruefung", response_model=TypedObjectOut, summary="Befund als geprueft bewerten", dependencies=SCHREIBEN["CONTROLLING"])
 def befund_pruefen(
     befund_id: str,
     payload: Befundpruefung,

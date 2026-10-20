@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-19
+last_reviewed: 2026-10-20
 version: 3.0.0
 description: MCP-Tools, Domain-Events und Automatisierungsregeln für Agenten.
 ---
@@ -120,9 +120,11 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | Event-ID | Kanal | Quelle |
 |---|---|---|
 | `crm.lead.qualified` | outbox | `app/api/v1/endpoints/leads.py` |
+| `crm.lead.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `crm.mail_workspace.attachment_transfer` | outbox | `app/api/v1/endpoints/mail_workspace.py` |
 | `crm.mail_workspace.queue` | outbox | `app/api/v1/endpoints/mail_workspace.py` |
 | `crm.opportunity.activity_created` | outbox | `app/api/v1/endpoints/mask_actions.py` |
+| `crm.opportunity.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `crm_case.created` | outbox | `app/services/crm_compat_service.py` |
 
 ### Einkauf
@@ -200,13 +202,19 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `collab.note.created` | outbox | `app/api/v1/endpoints/collab_notes.py` |
 | `compliance.sanctions.checked` | outbox | `app/api/v1/endpoints/sanctions_compliance.py` |
 | `compliance.violations_detected` | outbox | `app/workers/compliance_monitor.py` |
+| `einkauf.anfrage.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `einkauf.auftragsbestaetigung.confirmed` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `einkauf.auftragsbestaetigung.reviewed` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.bestellung.created_from_angebot` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `einkauf.bestellung.updated` | outbox | `app/api/v1/command_handlers/procurement.py` |
 | `einkauf.wareneingang.gebucht` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `finance.ap_invoice.approved` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
 | `finance.ar_open_item.dunning_created` | outbox | `app/api/v1/endpoints/open_items.py` |
+| `finance.bankkonto.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.billing_batch_line.retry` | outbox | `app/api/v1/endpoints/billing_batch.py` |
 | `finance.control_finding.reviewed` | outbox | `app/api/v1/endpoints/kontrolle.py` |
+| `finance.debitor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `finance.kreditor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.payment_run.approved` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `finance.tax_key.saved` | outbox | `app/api/v1/endpoints/tax_keys.py` |
 | `fuhrpark.dokument.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
@@ -214,8 +222,10 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `fuhrpark.fahrzeug.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.rechnung.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.terminart.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
+| `futtermittel.mischfutter.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `identity.tenant.` | outbox | `app/services/tenant_lifecycle_service.py` |
 | `inventur.abgeschlossen` | outbox | `app/services/inventory_compat_service.py` |
+| `kontrakt.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `logistik.frachttabelle.created` | outbox | `app/api/v1/endpoints/logistik_frachttabellen.py` |
 | `logistik.tour.created` | outbox | `app/api/v1/command_handlers/logistics.py` |
 | `mobile.event.retry` | outbox | `app/api/v1/endpoints/mobile_sync.py` |
@@ -225,15 +235,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `personal.qualifikation.created` | outbox | `app/api/v1/command_handlers/training.py` |
 | `personal.schulung.created` | outbox | `app/api/v1/command_handlers/training.py` |
 | `qualitaet.reklamation.closed` | outbox | `app/api/v1/endpoints/mask_actions.py` |
-| `reporting.bonus_run.calculated` | outbox | `app/api/v1/endpoints/l3_report_catalog.py` |
-| `reporting.query_definition.imported` | outbox | `app/api/v1/endpoints/query_center.py` |
-| `sales.credit_note.posted` | outbox | `app/api/v1/endpoints/sales_credit_notes.py` |
-| `sales.credit_note.posting_approved` | outbox | `app/api/v1/endpoints/sales_credit_notes.py` |
-| `sales.credit_note.posting_rejected` | outbox | `app/api/v1/endpoints/sales_credit_notes.py` |
-| `sales.credit_note.saved` | outbox | `app/api/v1/endpoints/sales_credit_notes.py` |
-| `sales.delivery_note.print_requested` | outbox | `app/api/v1/endpoints/mask_actions.py` |
-| `sales.order.cancelled` | outbox | `app/api/v1/endpoints/sales_orders.py` |
-| … | | 1 weitere |
+| … | | 11 weitere |
 
 ### System
 

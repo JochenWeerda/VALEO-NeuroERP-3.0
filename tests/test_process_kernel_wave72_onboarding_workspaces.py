@@ -16,6 +16,7 @@ from app.core.database import get_db
 from app.core.knowledge_core_contracts import KnowledgeChannel
 from app.core.onboarding_workspaces import OnboardingWorkspace, build_onboarding_workspace
 from app.core.tenant import get_tenant_id
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 
 
 @dataclass
@@ -46,6 +47,7 @@ class _FakeDb:
 def client() -> TestClient:
     app = FastAPI()
     app.include_router(training.router)
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
     app.dependency_overrides[get_db] = lambda: _FakeDb()
     app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
     return TestClient(app)
@@ -157,6 +159,7 @@ class TestOnboardingWorkspaceApi:
             }
         )
         app.include_router(training.router)
+        ersetze_nutzer(app, *ALLE_FACHROLLEN)  # Schreibwege pruefen die Bereichsrolle (19.10.2026)
         app.dependency_overrides[get_db] = lambda: fake_db
         app.dependency_overrides[get_tenant_id] = lambda: "tenant-a"
         captured: dict[str, Any] = {}

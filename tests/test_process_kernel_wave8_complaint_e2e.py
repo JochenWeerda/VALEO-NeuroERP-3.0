@@ -4,6 +4,7 @@ from datetime import date, timedelta
 
 import pytest
 from fastapi import FastAPI, Request, HTTPException
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.core.database import engine, get_db
@@ -33,6 +34,7 @@ def client(require_db, tenant_id) -> TestClient:
                        {'id': tenant_id, 'name': 'Synthetic complaint tenant', 'domain': tenant_id+'.test.invalid'})
             db.commit()
             app = FastAPI()
+            ersetze_nutzer(app, *ALLE_FACHROLLEN)
             app.dependency_overrides[get_db] = lambda: db
             def declared_test_tenant(request: Request) -> str:
                 if request.headers.get('X-Tenant-ID') != tenant_id:

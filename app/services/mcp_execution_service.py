@@ -17,11 +17,7 @@ from sqlalchemy.orm import Session
 from app.agrar.rations.actual_measures import DeviationPolicyError
 from app.agrar.rations.feed_analysis import AnalysisStatus
 from app.agrar.rations.lifecycle import RationStatus, TransitionError, validate_transition
-from app.api.v1.endpoints.reklamation_api import (
-    ReklamationTransitionRequest,
-    _query_reklamation,
-    transition_status,
-)
+from app.api.v1.endpoints.reklamation_api import _query_reklamation, wechsle_status
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.reklamation import ReklamationsStatus, ReklamationZustandsmaschine
 from app.services import crm_lead_service, mcp_beleg_tools, mcp_mask_actions
@@ -4660,16 +4656,8 @@ def _reklamation_abschliessen(db: Session, request: ToolExecutionRequest, actor:
                 },
             }
         with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as child:
-            transition_status(
-                opened.reklamation_id,
-                ReklamationTransitionRequest(
-                    neuer_status=ReklamationsStatus.GESCHLOSSEN.value,
-                    aktor_id=actor,
-                    kommentar=opened.kommentar,
-                ),
-                db=child,
-                tenant_id=tenant,
-            )
+            wechsle_status(child, tenant, opened.reklamation_id, ReklamationsStatus.GESCHLOSSEN.value,
+                           aktor=actor, kommentar=opened.kommentar)
         audit_id = _write_audit(
             db, tenant_id=tenant, action_key=request.tool_name,
             entity_type="reklamation", entity_id=opened.reklamation_id,

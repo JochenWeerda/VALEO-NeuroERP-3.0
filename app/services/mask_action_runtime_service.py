@@ -4,6 +4,7 @@ commandEndpoint → validate/dryRun/propose/execute → Service-Mutation → Out
 """
 from __future__ import annotations
 
+import inspect
 import json
 import logging
 import uuid
@@ -198,8 +199,13 @@ def _write_outbox(
     return event_id
 
 
-CheckFn = Callable[[Session, dict[str, Any], str, str], Awaitable[list[dict[str, Any]]]]
-DelegateFn = Callable[[Session, dict[str, Any], str, str], Awaitable[str]]
+#: Pruef- und Fachweg-Rueckrufe duerfen synchron oder asynchron sein (``_ergebnis`` wartet nur auf Awaitables).
+CheckFn = Callable[[Session, dict[str, Any], str, str], Awaitable[list[dict[str, Any]]] | list[dict[str, Any]]]
+DelegateFn = Callable[[Session, dict[str, Any], str, str], Awaitable[str] | str]
+
+
+async def _ergebnis(wert: Any) -> Any:
+    return await wert if inspect.isawaitable(wert) else wert
 
 
 def _fehlertext(exc: Exception) -> str:
@@ -271,7 +277,7 @@ async def run_delegated_mask_action(
             return wiederholt
 
     try:
-        fehler = await check_fn(db, payload, entity_id, tenant_id)
+        fehler = await _ergebnis(check_fn(db, payload, entity_id, tenant_id))
     except Exception as exc:  # noqa: BLE001 — Pruefung als Antwort, nicht als 500
         db.rollback()
         fehler = [{"field": "_entity", "message": _fehlertext(exc), "severity": "blocking"}]
@@ -318,11 +324,11 @@ async def run_delegated_mask_action(
         # Der produktive get_db-Vertrag liefert eine SQLAlchemy-Session.
         if isinstance(db, Session):
             with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as delegate_db:
-                summary = await delegate_fn(delegate_db, payload, entity_id, tenant_id)
+                summary = await _ergebnis(delegate_fn(delegate_db, payload, entity_id, tenant_id))
                 delegate_db.commit()  # Auch Fachwege ohne eigenen Commit geben den Savepoint frei.
         else:
             # Kleine In-Memory-Adapter in den isolierten Vertragspruefungen.
-            summary = await delegate_fn(db, payload, entity_id, tenant_id)
+            summary = await _ergebnis(delegate_fn(db, payload, entity_id, tenant_id))
         db.commit()
     except Exception as exc:  # noqa: BLE001 — der Grund geht an die Maske
         db.rollback()

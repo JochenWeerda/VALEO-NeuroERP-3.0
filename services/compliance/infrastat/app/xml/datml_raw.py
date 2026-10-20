@@ -6,7 +6,7 @@ from typing import Any, Dict, Iterable
 
 from xml.etree import ElementTree as ET
 
-NAMESPACE = "http://www.destatis.de/schema/datml-raw/2.0/de"
+NAMESPACE = "http://www.destatis.de/schema/datml-raw/2.0/de"  # NOSONAR - XML-Namensraum ist eine feste Kennung des Standards, kein Netzzugriff
 ET.register_namespace("", NAMESPACE)
 
 

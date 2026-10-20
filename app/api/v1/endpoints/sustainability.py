@@ -35,6 +35,7 @@ from app.integrations.bvl_psm_client import BVLPSMClient
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class SustainabilityOut(BaseSchema):
@@ -159,8 +160,7 @@ async def get_psm_runtime(
 
 
 @router.post("/emissions/estimate", summary="Emissions estimate",
-    response_model=SustainabilityOut
-)
+    response_model=SustainabilityOut, dependencies=SCHREIBEN["AGRAR"])
 async def estimate_emissions(payload: EmissionsEstimateRequest) -> dict[str, Any]:
     """
     Estimate CO2 emissions via Climatiq.

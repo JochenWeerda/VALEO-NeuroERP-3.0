@@ -20,6 +20,7 @@ from app.core.tenant_context import get_current_tenant_id
 from app.models.documents import WorkflowAudit, WorkflowStatus
 from app.repositories.workflow_repository import WorkflowRepository
 from app.services.workflow_service import workflow
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ async def get_status(
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-@router.post("/{domain}/{number}/migrate")
+@router.post("/{domain}/{number}/migrate", dependencies=SCHREIBEN["FACHLICH"])
 async def migrate_workflow(
     domain: Literal["sales", "purchase"],
     number: str,
@@ -74,7 +75,7 @@ async def migrate_workflow(
     return {"ok": True, "state": state, "workflow_version": version}
 
 
-@router.post("/{domain}/{number}/transition")
+@router.post("/{domain}/{number}/transition", dependencies=SCHREIBEN["FACHLICH"])
 async def do_transition(
     domain: Literal["sales", "purchase"],
     number: str,

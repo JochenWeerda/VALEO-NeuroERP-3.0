@@ -23,6 +23,7 @@ from ....integrations.dms_client import upload_document, is_configured as dms_co
 from ....integrations.bvl_psm_client import BVLPSMClient, map_bvl_mittel_to_psm_payload, psm_api_metrics
 from ....services.sync_scheduler import sync_scheduler
 from ....services.competitor_monitor import competitor_monitor
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -293,7 +294,7 @@ async def get_psm(
     return PSM.model_validate(psm)
 
 
-@router.post("/", response_model=PSM, status_code=201)
+@router.post("/", response_model=PSM, status_code=201, dependencies=SCHREIBEN["AGRAR"])
 async def create_psm(
     psm_data: PSMCreate,
     tenant_id: Optional[str] = Query(None),
@@ -344,7 +345,7 @@ async def create_psm(
     return PSM.model_validate(psm)
 
 
-@router.put("/{psm_id}", response_model=PSM)
+@router.put("/{psm_id}", response_model=PSM, dependencies=SCHREIBEN["AGRAR"])
 async def update_psm(
     psm_id: str,
     psm_data: PSMUpdate,
@@ -416,7 +417,7 @@ async def update_psm(
     return PSM.model_validate(psm)
 
 
-@router.delete("/{psm_id}", status_code=204)
+@router.delete("/{psm_id}", status_code=204, dependencies=SCHREIBEN["AGRAR"])
 async def delete_psm(
     psm_id: str,
     tenant_id: Optional[str] = Query(None),
@@ -443,7 +444,7 @@ async def delete_psm(
     return None
 
 
-@router.post("/{psm_id}/erklaerung", response_model=PSM)
+@router.post("/{psm_id}/erklaerung", response_model=PSM, dependencies=SCHREIBEN["AGRAR"])
 async def upload_farmer_declaration(
     psm_id: str,
     erklaerung_data: dict = {"status": "eingegangen"},
@@ -506,7 +507,7 @@ async def upload_farmer_declaration(
     return PSM.model_validate(psm)
 
 
-@router.put("/{psm_id}/erklaerung/status", response_model=PSM)
+@router.put("/{psm_id}/erklaerung/status", response_model=PSM, dependencies=SCHREIBEN["AGRAR"])
 async def update_farmer_declaration_status(
     psm_id: str,
     status_data: dict = {"status": "geprueft"},
@@ -666,7 +667,7 @@ async def get_psm_stats(
     }
 
 
-@router.post("/sync/proplanta", response_model=dict)
+@router.post("/sync/proplanta", response_model=dict, dependencies=SCHREIBEN["AGRAR"])
 async def sync_proplanta_psm(
     sync_config: dict = {
         "url": "https://www.proplanta.de/psm-database",
@@ -760,7 +761,7 @@ async def get_sync_status(
     }
 
 
-@router.post("/sync/schedule")
+@router.post("/sync/schedule", dependencies=SCHREIBEN["AGRAR"])
 async def schedule_sync(
     schedule_config: dict = {
         "name": "custom_psm_sync",
@@ -798,7 +799,7 @@ async def schedule_sync(
     }
 
 
-@router.post("/sync/run-due")
+@router.post("/sync/run-due", dependencies=SCHREIBEN["AGRAR"])
 async def run_due_schedules(
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
@@ -863,7 +864,7 @@ async def run_due_schedules(
     }
 
 
-@router.put("/sync/schedule/{schedule_name}")
+@router.put("/sync/schedule/{schedule_name}", dependencies=SCHREIBEN["AGRAR"])
 async def update_sync_schedule(
     schedule_name: str,
     updates: dict,
@@ -886,7 +887,7 @@ async def update_sync_schedule(
         raise HTTPException(status_code=500, detail=f"Failed to update schedule: {str(e)}")
 
 
-@router.delete("/sync/schedule/{schedule_name}")
+@router.delete("/sync/schedule/{schedule_name}", dependencies=SCHREIBEN["AGRAR"])
 async def delete_sync_schedule(
     schedule_name: str,
     tenant_id: Optional[str] = Query(None),
@@ -909,7 +910,7 @@ async def delete_sync_schedule(
         raise HTTPException(status_code=500, detail=f"Failed to delete schedule: {str(e)}")
 
 
-@router.post("/competitor/search")
+@router.post("/competitor/search", dependencies=SCHREIBEN["AGRAR"])
 async def search_competitor_products(
     query: str = Query(..., description="Search query for products"),
     category: str = Query("psm", description="Product category"),
@@ -937,7 +938,7 @@ async def search_competitor_products(
         raise HTTPException(status_code=500, detail=f"Competitor search failed: {str(e)}")
 
 
-@router.post("/competitor/scrape")
+@router.post("/competitor/scrape", dependencies=SCHREIBEN["AGRAR"])
 async def scrape_competitor_data(
     product_urls: List[str] = Query(..., description="List of product URLs to scrape"),
     tenant_id: Optional[str] = Query(None),
@@ -1040,7 +1041,7 @@ async def get_price_history(
         raise HTTPException(status_code=500, detail=f"Failed to get price history: {str(e)}")
 
 
-@router.post("/competitor/monitor")
+@router.post("/competitor/monitor", dependencies=SCHREIBEN["AGRAR"])
 async def start_competitor_monitoring(
     config: dict = {
         "categories": ["psm", "duenger", "saatgut"],

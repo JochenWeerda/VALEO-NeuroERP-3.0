@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-19
+last_reviewed: 2026-10-20
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -33,7 +33,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/feeding-reference-data` | Naehrstoffe und Einheiten | agrar | niedrig | — | `GET /api/v1/masks/agrar/feeding-reference-data/agent-contract` |
 | `agrar/harvest-controls` | Ernte-Abrechnung: Vertragsregeln und Freigaben | agrar | hoch | — | `GET /api/v1/masks/agrar/harvest-controls/agent-contract` |
 | `agrar/harvest-settlement` | Ernte-Abrechnung | agrar | niedrig | `harvest-to-settlement`, `contract-to-settlement` | `GET /api/v1/masks/agrar/harvest-settlement/agent-contract` |
-| `agrar/kontrakte` | Kontrakt | agrar | niedrig | `contract-to-settlement`, `harvest-to-settlement` | `GET /api/v1/masks/agrar/kontrakte/agent-contract` |
+| `agrar/kontrakte` | Kontrakt | agrar | mittel | `contract-to-settlement`, `harvest-to-settlement` | `GET /api/v1/masks/agrar/kontrakte/agent-contract` |
 | `agrar/ration` | Rationsfreigabe | agrar | hoch | — | `GET /api/v1/masks/agrar/ration/agent-contract` |
 | `agrar/rations-lifecycle` | Rationen und Freigaben | agrar | niedrig | — | `GET /api/v1/masks/agrar/rations-lifecycle/agent-contract` |
 | `agrar/saatgut` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/agent-contract` |
@@ -56,14 +56,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/anfrage` | Einkaufsanfrage | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfrage/agent-contract` |
 | `einkauf/angebot` | Lieferantenangebot | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/angebot/agent-contract` |
 | `einkauf/anlieferavis` | Anlieferavis | einkauf | mittel | — | `GET /api/v1/masks/einkauf/anlieferavis/agent-contract` |
-| `einkauf/auftragsbestaetigung` | Auftragsbestaetigung | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/auftragsbestaetigung/agent-contract` |
+| `einkauf/auftragsbestaetigung` | Auftragsbestaetigung | einkauf | mittel | — | `GET /api/v1/masks/einkauf/auftragsbestaetigung/agent-contract` |
 | `einkauf/purchase-order` | Bestellung | einkauf | mittel | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
 | `einkauf/supplier` | Lieferant | einkauf | niedrig | `procure-to-pay` | `GET /api/v1/masks/einkauf/supplier/agent-contract` |
 | `finance/ap-invoice` | Eingangsrechnung | finance | mittel | `procure-to-pay` | `GET /api/v1/masks/finance/ap-invoice/agent-contract` |
 | `finance/ar-open-item` | Offener Posten | finance | mittel | `order-to-cash` | `GET /api/v1/masks/finance/ar-open-item/agent-contract` |
-| `finance/bankkonto` | Bankkonto | finance | niedrig | — | `GET /api/v1/masks/finance/bankkonto/agent-contract` |
-| `finance/debitor` | Debitor | finance | niedrig | — | `GET /api/v1/masks/finance/debitor/agent-contract` |
-| `finance/kreditor` | Kreditor | finance | niedrig | — | `GET /api/v1/masks/finance/kreditor/agent-contract` |
+| `finance/bankkonto` | Bankkonto | finance | mittel | — | `GET /api/v1/masks/finance/bankkonto/agent-contract` |
+| `finance/debitor` | Debitor | finance | mittel | — | `GET /api/v1/masks/finance/debitor/agent-contract` |
+| `finance/kreditor` | Kreditor | finance | mittel | — | `GET /api/v1/masks/finance/kreditor/agent-contract` |
 | `finance/payment-run` | Zahlungslauf | finance | niedrig | `procure-to-pay`, `order-to-cash`, `finance-to-close` | `GET /api/v1/masks/finance/payment-run/agent-contract` |
 | `finance/pruefkorb` | Prüfkorb | finance | niedrig | — | `GET /api/v1/masks/finance/pruefkorb/agent-contract` |
 | `finance/rechnungstapel` | Rechnungstapel | finance | niedrig | — | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
@@ -673,6 +673,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Sensible Felder:** `preis`
 
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `bearbeiten` | Bearbeiten | moderate | nein | `/api/v1/kontrakte/{entity_id}/actions/bearbeiten` |
+
 ---
 
 ### `agrar/ration` — Rationsfreigabe
@@ -1181,6 +1187,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
+| `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/crm/leads/{entity_id}/actions/bearbeiten` |
 | `qualifizieren` | Als Opportunity qualifizieren | safe | nein | `/api/v1/crm/leads/{entity_id}/actions/qualifizieren` |
 
 ---
@@ -1267,6 +1274,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
+| `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/crm/opportunities/{entity_id}/actions/bearbeiten` |
 | `create_activity` | Aktivitaet anlegen | safe | nein | `/api/v1/crm/opportunities/{entity_id}/actions/create_activity` |
 
 ---
@@ -1359,6 +1367,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Was ist der Status von Anfrage {entity_id}?
 - Zeige alle Positionen von Anfrage {entity_id}.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/einkauf/anfragen/{entity_id}/actions/bearbeiten` |
 
 ---
 
@@ -1474,6 +1488,13 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Zeige alle Positionen von AB {entity_id}.
 
 **Sensible Felder:** `einzelpreis`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `pruefen` | Pruefen | safe | nein | `/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/pruefen` |
+| `bestaetigen` | Bestaetigen | moderate | nein | `/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/bestaetigen` |
 
 ---
 
@@ -1851,6 +1872,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Sensible Felder:** `iban, bic, saldo`
 
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `bearbeiten` | Bearbeiten | moderate | nein | `/api/v1/banken/konten/{entity_id}/actions/bearbeiten` |
+
 ---
 
 ### `finance/debitor` — Debitor
@@ -1885,6 +1912,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Sensible Felder:** `kreditlimit, steuernummer, ust_id`
 
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `bearbeiten` | Bearbeiten | moderate | nein | `/api/v1/finance/debitoren/{entity_id}/actions/bearbeiten` |
+
 ---
 
 ### `finance/kreditor` — Kreditor
@@ -1918,6 +1951,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Zeige alle Bestellungen bei Kreditor {entity_id}.
 
 **Sensible Felder:** `steuernummer, ust_id`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `bearbeiten` | Bearbeiten | moderate | nein | `/api/v1/finance/kreditoren/{entity_id}/actions/bearbeiten` |
 
 ---
 
@@ -2217,6 +2256,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Welche Komponenten hat Mischfutter {entity_id}?
 - Zeige die berechneten Naehrstoffgehalte von Mischfutter {entity_id}.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/futter/mischfuttermittel/{entity_id}/actions/bearbeiten` |
 
 ---
 
@@ -3679,6 +3724,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
+| `bearbeiten` | Zustaendigkeit/Frist | safe | nein | `/api/v1/reklamationen/{entity_id}/actions/bearbeiten` |
 | `abschliessen` | Abschliessen | moderate | nein | `/api/v1/reklamationen/{entity_id}/actions/abschliessen` |
 
 ---
@@ -4023,6 +4069,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Zeige alle Dokumente von Auftrag {entity_id}.
 
 **Sensible Felder:** `einzelpreis, betrag`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/sales/orders/{entity_id}/actions/bearbeiten` |
 
 ---
 

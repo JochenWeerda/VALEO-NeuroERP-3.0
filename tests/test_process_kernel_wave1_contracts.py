@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import asyncio
 import importlib.util
 from datetime import date, datetime
@@ -1025,6 +1027,8 @@ def test_finance_actions_closing_approve_delegates_to_checklist_workspace(monkey
                 closing_type="monatsabschluss",
                 actor="controller@example.com",
             ),
+            # Der Bearbeiter kommt aus den geprueften Claims, nicht aus ``actor`` im Body (19.10.2026).
+            request=SimpleNamespace(state=SimpleNamespace(token_claims={"sub": "controller@example.com"})),
             tenant_id="tenant-wave1",
             db=None,
         )

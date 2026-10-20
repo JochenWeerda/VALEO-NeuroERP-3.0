@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 128,
-    "screens_with_actions": 62,
+    "actions": 140,
+    "screens_with_actions": 70,
     "domains": 14
   },
   "actions": [
@@ -592,6 +592,28 @@
       }
     },
     {
+      "id": "mask:agrar/kontrakte:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (agrar/kontrakte)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/kontrakte",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/kontrakte",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/kontrakte/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
       "id": "mask:agrar/ration:activate",
       "label": "Jetzt aktivieren",
       "description": "Jetzt aktivieren (agrar/ration)",
@@ -926,6 +948,28 @@
       }
     },
     {
+      "id": "mask:crm/lead:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (crm/lead)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/lead",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/lead",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
       "id": "mask:crm/lead:qualifizieren",
       "label": "Als Opportunity qualifizieren",
       "description": "Als Opportunity qualifizieren (crm/lead)",
@@ -968,6 +1012,28 @@
       }
     },
     {
+      "id": "mask:crm/opportunity:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (crm/opportunity)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/opportunity",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/opportunity",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
       "id": "mask:crm/opportunity:create_activity",
       "label": "Aktivitaet anlegen",
       "description": "Aktivitaet anlegen (crm/opportunity)",
@@ -984,6 +1050,28 @@
         "screenId": "crm/opportunity",
         "actionKey": "create_activity",
         "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/create_activity",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/anfrage:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (einkauf/anfrage)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/anfrage",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/anfrage",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/einkauf/anfragen/{entity_id}/actions/bearbeiten",
         "navigationRoute": null,
         "command": null,
         "method": "POST"
@@ -1028,6 +1116,50 @@
         "screenId": "einkauf/anlieferavis",
         "actionKey": "wareneingang",
         "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/auftragsbestaetigung:bestaetigen",
+      "label": "Bestaetigen",
+      "description": "Bestaetigen (einkauf/auftragsbestaetigung)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/auftragsbestaetigung",
+      "intent_phrases": [
+        "Bestaetigen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/auftragsbestaetigung",
+        "actionKey": "bestaetigen",
+        "commandEndpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/bestaetigen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/auftragsbestaetigung:pruefen",
+      "label": "Pruefen",
+      "description": "Pruefen (einkauf/auftragsbestaetigung)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/auftragsbestaetigung",
+      "intent_phrases": [
+        "Pruefen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/auftragsbestaetigung",
+        "actionKey": "pruefen",
+        "commandEndpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/pruefen",
         "navigationRoute": null,
         "command": null,
         "method": "POST"
@@ -1176,6 +1308,72 @@
         "screenId": "finance/ar-open-item",
         "actionKey": "mahnen",
         "commandEndpoint": "/api/v1/finance/open-items/{entity_id}/actions/mahnen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:finance/bankkonto:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (finance/bankkonto)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/bankkonto",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "finance/bankkonto",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/banken/konten/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:finance/debitor:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (finance/debitor)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/debitor",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "finance/debitor",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/finance/debitoren/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:finance/kreditor:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (finance/kreditor)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/kreditor",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "finance/kreditor",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/finance/kreditoren/{entity_id}/actions/bearbeiten",
         "navigationRoute": null,
         "command": null,
         "method": "POST"
@@ -1589,6 +1787,28 @@
         "navigationRoute": null,
         "command": null,
         "method": null
+      }
+    },
+    {
+      "id": "mask:futtermittel/mischfuttermittel:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (futtermittel/mischfuttermittel)",
+      "category": "mask-action",
+      "domain": "futtermittel",
+      "mask": "futtermittel/mischfuttermittel",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "futtermittel/mischfuttermittel",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/futter/mischfuttermittel/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
       }
     },
     {
@@ -2336,6 +2556,28 @@
       }
     },
     {
+      "id": "mask:qualitaet/reklamation:bearbeiten",
+      "label": "Zustaendigkeit/Frist",
+      "description": "Zustaendigkeit/Frist (qualitaet/reklamation)",
+      "category": "mask-action",
+      "domain": "qualitaet",
+      "mask": "qualitaet/reklamation",
+      "intent_phrases": [
+        "Zustaendigkeit/Frist"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "qualitaet/reklamation",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/reklamationen/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
       "id": "mask:sales/delivery-note:drucken",
       "label": "Lieferschein drucken",
       "description": "Lieferschein drucken (sales/delivery-note)",
@@ -2480,6 +2722,28 @@
         "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
         "navigationRoute": null,
         "command": "sales.gutschriftVorschlagFreigeben",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:sales/sales-order:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (sales/sales-order)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "sales/sales-order",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "sales/sales-order",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/sales/orders/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
         "method": "POST"
       }
     },

@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema, IDResponse
 from app.api.v1.schemas.intrastat_schemas import IntrastatOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/intrastat", tags=["Intrastat", "Außenhandel"])
@@ -179,8 +180,7 @@ def list_meldungen(
 
 
 @router.post("/meldungen", status_code=201, summary="Intrastat-Meldung erstellen",
-    response_model=IntrastatMeldungCreateOut
-)
+    response_model=IntrastatMeldungCreateOut, dependencies=SCHREIBEN["FINANZ"])
 def create_meldung(
     payload: IntrastatMeldungCreate,
     db: Session = Depends(get_db),
@@ -227,8 +227,7 @@ def create_meldung(
 
 
 @router.put("/meldungen/{meldung_id}", summary="Intrastat-Meldung aktualisieren",
-    response_model=IDResponse
-)
+    response_model=IDResponse, dependencies=SCHREIBEN["FINANZ"])
 def update_meldung(
     meldung_id: str,
     payload: IntrastatMeldungUpdate,
@@ -271,7 +270,7 @@ def update_meldung(
         )
 
 
-@router.delete("/meldungen/{meldung_id}", status_code=204, summary="Intrastat-Entwurf löschen", response_class=Response, response_model=None)
+@router.delete("/meldungen/{meldung_id}", status_code=204, summary="Intrastat-Entwurf löschen", response_class=Response, response_model=None, dependencies=SCHREIBEN["FINANZ"])
 def delete_meldung(
     meldung_id: str,
     db: Session = Depends(get_db),
@@ -354,8 +353,7 @@ def zusammenfassung(
 @router.post(
     "/meldungen/{meldezeitraum}/export-csv",
     response_model=IntrastatOut,
-    summary="Intrastat-Meldung als CSV exportieren (INTRASTAT-DE)",
-)
+    summary="Intrastat-Meldung als CSV exportieren (INTRASTAT-DE)", dependencies=SCHREIBEN["FINANZ"])
 def export_csv(
     meldezeitraum: str,
     db: Session = Depends(get_db),

@@ -1,4 +1,4 @@
-# Masken-Studio-Inventar (2026-10-19)
+# Masken-Studio-Inventar (2026-10-20)
 
 Erzeugt mit `python scripts/mask_studio_inventory.py --markdown <datei>`. Ziel: nur Studio-generierte
 Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentscheid 2026-10-19).
@@ -9,25 +9,25 @@ Masken; jede Maskenfunktion auch per CLI und MCP, in CI geprueft (Nutzerentschei
 |---|---:|---:|
 | studio_versioniert | 1 | 0.1 % |
 | screen_definition | 80 | 12.0 % |
-| builder_altmuster | 105 | 15.7 % |
-| handgebaut | 483 | 72.2 % |
+| builder_altmuster | 104 | 15.6 % |
+| handgebaut | 483 | 72.3 % |
 | weiterleitung | 2 |  |
 
-Gesamt 671 Routen, davon 669 Masken.
+Gesamt 670 Routen, davon 668 Masken.
 
 ## Aktionen
 
 | Befund | Anzahl |
 |---|---:|
-| Aktionen gesamt (ohne Doppel je Maske) | 312 |
-| davon serverwirksam | 220 |
-| … mit REST-Kommandoweg | 220 |
+| Aktionen gesamt (ohne Doppel je Maske) | 324 |
+| davon serverwirksam | 232 |
+| … mit REST-Kommandoweg | 232 |
 | … mit eigenem MCP-Werkzeug | 46 |
-| … per generischem MCP-Werkzeug (`mask.action.execute`) | 37 |
-| … MCP bewusst gesperrt | 137 |
+| … per generischem MCP-Werkzeug (`mask.action.execute`) | 45 |
+| … MCP bewusst gesperrt | 141 |
 | … MCP offen (`open_high` u. a.) | 0 |
 | … MCP unklassifiziert | 0 |
-| … mit CLI-Zugang | 220 |
+| … mit CLI-Zugang | 232 |
 | nicht deklariert (kein Kommando, Endpunkt, Navigation) | 0 |
 | nicht verfuegbar (`stubReason`, die Maske nennt den Grund) | 0 |
 
@@ -65,7 +65,6 @@ fachliche Zuordnung fuehrt `docs/design/beleg-studio-variantenmatrix.md`.
 | `einkauf/angebote` | builder_altmuster |
 | `einkauf/auftragsbestaetigung` | builder_altmuster |
 | `einkauf/auftragsbestaetigung/:id` | screen_definition |
-| `einkauf/auftragsbestaetigung/neu` | builder_altmuster |
 | `einkauf/auftragsbestaetigungen` | builder_altmuster |
 | `einkauf/bestellung/:id` | screen_definition |
 | `einkauf/bestellungen` | builder_altmuster |
@@ -112,7 +111,7 @@ Registrierte ScreenDefinitions ohne eigene Route: 57.
 | fibu | 0 | 0 | 1 | 42 | 0 |
 | finance | 0 | 7 | 18 | 28 | 0 |
 | admin | 0 | 4 | 0 | 27 | 0 |
-| einkauf | 0 | 7 | 16 | 27 | 0 |
+| einkauf | 0 | 7 | 15 | 27 | 0 |
 | sales | 0 | 8 | 0 | 22 | 0 |
 | crm | 0 | 8 | 26 | 21 | 0 |
 | lager | 0 | 3 | 3 | 16 | 0 |

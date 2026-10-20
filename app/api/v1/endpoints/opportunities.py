@@ -538,17 +538,49 @@ async def update_opportunity(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    """Update a sales opportunity via crm-sales — nur im eigenen Mandanten."""
+    """Update a sales opportunity via crm-sales — nur im eigenen Mandanten.
+
+    Wie beim Lesen gilt die lokale Pipeline-Tabelle, wenn crm-sales die Chance nicht kennt oder nicht erreichbar
+    ist (bis 19.10.2026 scheiterte jede Aenderung einer lokal gefuehrten Chance mit 500)."""
     await _opportunity_im_mandanten(db, opportunity_id, tenant_id)
+    daten = opportunity_data.model_dump(exclude_unset=True)
     try:
-        updated = await crm_update_opportunity(opportunity_id, opportunity_data.model_dump(exclude_unset=True))
+        updated = await crm_update_opportunity(opportunity_id, daten)
     except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 404 and _local_opportunity(db, opportunity_id, tenant_id):
+            return Opportunity.model_validate(_update_local_opportunity(db, opportunity_id, tenant_id, daten))
         if exc.response.status_code == 404:
             raise HTTPException(status_code=404, detail="Opportunity not found") from exc
         raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
+    except (httpx.RequestError, RuntimeError) as exc:
+        if not _local_opportunity(db, opportunity_id, tenant_id):
+            raise HTTPException(status_code=503, detail="crm-sales nicht erreichbar") from exc
+        return Opportunity.model_validate(_update_local_opportunity(db, opportunity_id, tenant_id, daten))
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to update opportunity: {exc}") from exc
     return Opportunity.model_validate(updated)
+
+
+#: Felder des crm-sales-Vertrags -> Spalten der lokalen Pipeline-Tabelle (Umkehrung von ``_opportunity_from_local``).
+_LOKALE_SPALTEN = {"name": "title", "description": "description", "amount": "estimated_value",
+                   "probability": "probability", "expected_close_date": "expected_close_date", "status": "status",
+                   "stage": "stage", "lead_source": "source", "assigned_to": "assigned_to", "customer_id": "customer_id"}
+
+
+def _update_local_opportunity(db: Session, opportunity_id: str, tenant_id: str, daten: dict[str, Any]) -> dict:
+    fremd = sorted(set(daten) - set(_LOKALE_SPALTEN))
+    if fremd:
+        raise HTTPException(status_code=422, detail=f"Lokal gefuehrte Chance: nicht aenderbar {', '.join(fremd)}")
+    werte = {_LOKALE_SPALTEN[k]: (str(v) if k == "customer_id" and v is not None else v) for k, v in daten.items()}
+    if werte:
+        zuweisung = ", ".join(f"{spalte} = :{spalte}" for spalte in werte)
+        db.execute(
+            text(f"UPDATE domain_crm.crm_opportunities SET {zuweisung}, updated_at = now() "
+                 "WHERE id = :id AND tenant_id = :tid"),  # nosec B608  # Spalten aus fester Zuordnung, Werte gebunden
+            {**werte, "id": opportunity_id, "tid": tenant_id},
+        )
+        db.commit()
+    return _local_opportunity(db, opportunity_id, tenant_id)
 
 
 @router.delete("/{opportunity_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Opportunity löschen",

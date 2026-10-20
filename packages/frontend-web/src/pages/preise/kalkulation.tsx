@@ -3,18 +3,20 @@ import { useMutation } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { apiClient } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { Calculator } from 'lucide-react'
 
 type KalkSchritt = { schritt: string; wert: number; delta: number }
-type KalkResult = { netto_preis: number; brutto_preis: number; mwst_betrag: number; kalkulationsweg: KalkSchritt[] }
+type KalkResult = {
+  netto_preis: number; brutto_preis: number | null; mwst_betrag: number | null
+  kalkulationsweg: KalkSchritt[]; steuerhinweis?: string
+}
 
 export default function PreisKalkulationPage(): JSX.Element {
   const [form, setForm] = useState({
     artikel_id: '',
     menge_kg: '',
-    kundengruppe: 'GROSSHANDEL',
-    sorte_klasse: '',
+    kunde_id: '',
     kontrakt_id: '',
   })
   const [result, setResult] = useState<KalkResult | null>(null)
@@ -24,14 +26,14 @@ export default function PreisKalkulationPage(): JSX.Element {
       (await apiClient.post<KalkResult>('/api/v1/preise/berechnen', {
         artikel_id: form.artikel_id,
         menge_kg: Number(form.menge_kg),
-        kundengruppe: form.kundengruppe,
-        sorte_klasse: form.sorte_klasse || undefined,
+        kunde_id: form.kunde_id || undefined,
         kontrakt_id: form.kontrakt_id || undefined,
       })).data,
     onSuccess: (data) => setResult(data),
+    onError: () => setResult(null),
   })
 
-  const fmt = (n: number) => n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const fmt = (n: number | null) => n === null ? '—' : n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
   return (
     <div className="flex flex-col">
@@ -46,41 +48,20 @@ export default function PreisKalkulationPage(): JSX.Element {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="text-sm font-medium">Artikel-ID</label>
-                <Input placeholder="z.B. ART-0001" value={form.artikel_id} onChange={(e) => setForm({ ...form, artikel_id: e.target.value })} />
+                <label htmlFor="kalk-artikel" className="text-sm font-medium">Artikel-ID</label>
+                <Input id="kalk-artikel" placeholder="z.B. ART-0001" value={form.artikel_id} onChange={(e) => setForm({ ...form, artikel_id: e.target.value })} />
               </div>
               <div>
-                <label className="text-sm font-medium">Menge (kg)</label>
-                <Input type="number" placeholder="1000" value={form.menge_kg} onChange={(e) => setForm({ ...form, menge_kg: e.target.value })} />
+                <label htmlFor="kalk-menge" className="text-sm font-medium">Menge (Artikeleinheit)</label>
+                <Input id="kalk-menge" type="number" placeholder="1000" value={form.menge_kg} onChange={(e) => setForm({ ...form, menge_kg: e.target.value })} />
               </div>
               <div>
-                <label className="text-sm font-medium">Kundengruppe</label>
-                <select
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                  value={form.kundengruppe}
-                  onChange={(e) => setForm({ ...form, kundengruppe: e.target.value })}
-                >
-                  <option value="GROSSHANDEL">Großhandel</option>
-                  <option value="EINZELHANDEL">Einzelhandel</option>
-                  <option value="GENOSSENSCHAFT">Genossenschaft</option>
-                </select>
+                <label htmlFor="kalk-kunde" className="text-sm font-medium">Kunden-ID (optional)</label>
+                <Input id="kalk-kunde" placeholder="Kundenkennung fuer Kundenpreise" value={form.kunde_id} onChange={(e) => setForm({ ...form, kunde_id: e.target.value })} />
               </div>
               <div>
-                <label className="text-sm font-medium">Sortenklasse (optional)</label>
-                <select
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                  value={form.sorte_klasse}
-                  onChange={(e) => setForm({ ...form, sorte_klasse: e.target.value })}
-                >
-                  <option value="">– keine –</option>
-                  <option value="A">A</option>
-                  <option value="B">B</option>
-                  <option value="C">C</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Kontrakt-ID (optional)</label>
-                <Input placeholder="z.B. KON-2024-001" value={form.kontrakt_id} onChange={(e) => setForm({ ...form, kontrakt_id: e.target.value })} />
+                <label htmlFor="kalk-kontrakt" className="text-sm font-medium">Kontrakt-ID (optional)</label>
+                <Input id="kalk-kontrakt" placeholder="z.B. KON-2024-001" value={form.kontrakt_id} onChange={(e) => setForm({ ...form, kontrakt_id: e.target.value })} />
               </div>
             </div>
             <div className="mt-4">
@@ -91,6 +72,12 @@ export default function PreisKalkulationPage(): JSX.Element {
           </CardContent>
         </Card>
 
+        {calcMutation.isError && (
+          <p role="alert" className="text-sm text-status-error">
+            Preis nicht ermittelbar: {getAxiosErrorMessage(calcMutation.error)}
+          </p>
+        )}
+        {result?.steuerhinweis && <p className="text-sm text-status-warning">Keine Steuer berechnet: {result.steuerhinweis}</p>}
         {result && (
           <>
             <div className="grid gap-4 md:grid-cols-3">
@@ -105,8 +92,8 @@ export default function PreisKalkulationPage(): JSX.Element {
                 <table className="w-full text-sm">
                   <thead><tr className="border-b"><th className="text-left pb-2">Schritt</th><th className="text-right pb-2">Wert</th><th className="text-right pb-2">Delta</th></tr></thead>
                   <tbody>
-                    {result.kalkulationsweg.map((k, i) => (
-                      <tr key={i} className="border-b">
+                    {result.kalkulationsweg.map((k) => (
+                      <tr key={k.schritt} className="border-b">
                         <td className="py-1">{k.schritt}</td>
                         <td className="py-1 text-right font-mono">{fmt(k.wert)} €</td>
                         <td className={`py-1 text-right font-mono ${k.delta < 0 ? 'text-status-error' : 'text-status-success'}`}>

@@ -217,9 +217,9 @@ def select_policy_variant(
         digest = hashlib.sha256(seed.encode()).hexdigest()
         roll = int(digest, 16) / float(2**256)
     else:
-        from random import random
+        import secrets
 
-        roll = random()
+        roll = secrets.SystemRandom().random()
 
     threshold = roll * total
     running = 0.0

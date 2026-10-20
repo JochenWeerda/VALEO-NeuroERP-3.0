@@ -58,7 +58,7 @@ async def list_segments(
     return {"items": items[offset : offset + limit], "total": len(items)}
 
 
-@router.post("", status_code=201, response_model=SegmentOut, summary="Kundensegment anlegen")
+@router.post("", status_code=201, response_model=SegmentOut, summary="Kundensegment anlegen", dependencies=SCHREIBEN["CRM"])
 @router.post("/", status_code=201, response_model=SegmentOut, summary="Kundensegment anlegen", include_in_schema=False, dependencies=SCHREIBEN["CRM"])
 async def create_segment(
     body: dict[str, Any] = Body(default={}),

@@ -1956,7 +1956,7 @@ def test_reklamation_abschliessen_dry_run_and_execute(client):
 
     with patch("app.services.mcp_execution_service._query_reklamation", return_value=zeile), \
          patch("app.services.mcp_execution_service.ReklamationZustandsmaschine.pruefe_statuswechsel"), \
-         patch("app.services.mcp_execution_service.transition_status"), \
+         patch("app.services.mcp_execution_service.wechsle_status"), \
          patch("app.services.mcp_execution_service.Session"), \
          patch("app.services.mcp_execution_service._write_audit", return_value="audit-rek"), \
          patch("app.services.mcp_execution_service._store_execution"), \

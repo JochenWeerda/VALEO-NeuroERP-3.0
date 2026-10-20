@@ -12985,6 +12985,7 @@
             "app/services/mask_rollout_summary_service.py"
           ],
           "written_by": [
+            "app/api/v1/endpoints/opportunities.py",
             "app/services/crm_lead_service.py"
           ]
         },
@@ -13394,6 +13395,7 @@
             "app/api/v1/endpoints/customers.py",
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/portal_kundenzugaenge.py",
+            "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/api/v1/schemas/crm.py",
             "app/auth/portal_kunde.py",
             "app/domains/logistik/strecke.py",
@@ -14413,8 +14415,10 @@
             "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/crm_360_reads.py",
             "app/api/v1/endpoints/crm_kim.py",
+            "app/api/v1/endpoints/sales_order_commands.py",
             "app/api/v1/endpoints/sales_orders.py",
             "app/api/v1/endpoints/sales_reports.py",
+            "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/services/customer_reference.py",
             "app/services/docflow_service.py",
             "app/services/ist_aggregation_service.py",
@@ -14434,6 +14438,7 @@
             "app/api/v1/endpoints/pick_lists.py",
             "app/api/v1/endpoints/sales_delivery_notes.py",
             "app/api/v1/endpoints/sales_offers.py",
+            "app/api/v1/endpoints/sales_order_commands.py",
             "app/api/v1/endpoints/sales_orders.py",
             "app/services/webshop_integration_service.py"
           ]
@@ -17450,6 +17455,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/articles.py",
+            "app/api/v1/endpoints/einkauf_ab_erfassung.py",
             "app/api/v1/endpoints/einkauf_kpis.py",
             "app/api/v1/endpoints/einkauf_lieferschein.py",
             "app/infrastructure/models/einkauf_models.py",
@@ -17838,6 +17844,7 @@
             "app/api/v1/command_handlers/procurement.py",
             "app/api/v1/endpoints/articles.py",
             "app/api/v1/endpoints/compat.py",
+            "app/api/v1/endpoints/einkauf_ab_erfassung.py",
             "app/api/v1/endpoints/einkauf_kpis.py",
             "app/api/v1/endpoints/einkauf_lieferschein.py",
             "app/api/v1/endpoints/purchase_invoice_verification.py",
@@ -18889,6 +18896,7 @@
           "read_by": [
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/crm_partner_suche.py",
+            "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/infrastructure/models/einkauf_models.py",
             "app/services/bestell_kommunikation_service.py",
             "app/services/customer_reference.py",
@@ -23118,6 +23126,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/preis_kalkulation_bridge.py",
             "app/api/v1/endpoints/tax_keys.py",
             "app/api/v1/endpoints/vat_return_export.py",
             "app/core/screen_definitions_capture.py",
@@ -29763,6 +29772,7 @@
             "app/api/v1/endpoints/inventory_operations.py",
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/pos_retoure.py",
+            "app/api/v1/endpoints/preis_kalkulation_bridge.py",
             "app/api/v1/endpoints/scan.py",
             "app/api/v1/endpoints/stmd_duplikat.py",
             "app/api/v1/endpoints/supplier_portal.py",
@@ -37683,6 +37693,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/crm_360_reads.py",
+            "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/domains/operations/models.py",
             "app/services/calendar_projection_service.py",
             "app/services/contract_engagement_service.py",
@@ -38422,6 +38433,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/domains/operations/models.py",
             "app/domains/operations/repository.py"
           ]
@@ -43271,6 +43283,7 @@
           "read_by": [
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/reklamation_api.py",
+            "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/domains/operations/models.py"
           ],
           "screens": [
@@ -51985,6 +51998,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/infrastructure/models/futtermittel_models.py"
           ]
         },

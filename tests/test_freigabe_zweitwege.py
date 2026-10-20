@@ -88,9 +88,21 @@ def haus(monkeypatch):
     app.include_router(approvals.router, prefix="/approvals")
     app.include_router(kontrolle.router, prefix="/kontrolle")
     ersetze_mandant(app, mandant)
+    aktuell: dict = {}
+
+    @app.middleware("http")
+    async def _claims(request, call_next):  # noqa: ANN001, ANN202
+        # Wie die echte Bearer-Pruefung: die gepruefte Identitaet liegt im Request (FiBu-Audit liest sie dort).
+        if aktuell:
+            request.state.token_claims = {"sub": aktuell["sub"], "preferred_username": aktuell.get("name"),
+                                          "roles": list(aktuell.get("roles") or [])}
+        return await call_next(request)
+
     client = TestClient(app, raise_server_exceptions=False)
 
     def als(nutzer: dict) -> TestClient:
+        aktuell.clear()
+        aktuell.update(nutzer)
         app.dependency_overrides[get_current_user] = lambda: nutzer
         return client
 

@@ -4,12 +4,13 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.api.v1.schemas.base import TypedObjectOut
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 router = APIRouter(prefix="/pos/tagesabschluss", tags=["pos-tagesabschluss"])
 logger = logging.getLogger(__name__)
@@ -18,12 +19,10 @@ logger = logging.getLogger(__name__)
 class TagesabschlussCreateRequest(BaseModel):
     kasse_id: str
     datum: str
-    operator: str = "system"
 
 
 class TagesabschlussTransitionRequest(BaseModel):
     new_status: str
-    operator: str = "system"
     z_bon_nr: Optional[str] = None
     tse_signatur: Optional[str] = None
     dsfinvk_export_pfad: Optional[str] = None
@@ -34,6 +33,7 @@ class TagesabschlussTransitionRequest(BaseModel):
 @router.post("", response_model=TypedObjectOut, summary="POS-Tagesabschluss anlegen", dependencies=SCHREIBEN["VERKAUF"])
 def create_tagesabschluss(
     req: TagesabschlussCreateRequest,
+    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -47,7 +47,7 @@ def create_tagesabschluss(
             tenant_id=x_tenant_id,
             kasse_id=req.kasse_id,
             datum=req.datum,
-            operator=req.operator,
+            operator=gepruefter_akteur_aus_request(request),
         )
     except POSTagesabschlussError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -60,6 +60,7 @@ def create_tagesabschluss(
 def transition_tagesabschluss(
     abschluss_id: str,
     req: TagesabschlussTransitionRequest,
+    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -84,7 +85,7 @@ def transition_tagesabschluss(
             abschluss_id=abschluss_id,
             new_status=req.new_status,
             tenant_id=x_tenant_id,
-            operator=req.operator,
+            operator=gepruefter_akteur_aus_request(request),
             payload=payload or None,
         )
     except POSTagesabschlussError as e:

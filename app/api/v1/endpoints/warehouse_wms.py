@@ -1,7 +1,7 @@
 from __future__ import annotations
 from decimal import Decimal
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -12,6 +12,7 @@ from app.services.warehouse_service import WarehouseService
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from pydantic import ConfigDict as _ConfigDict
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 
 class WarehouseWmsOut(BaseSchema):
@@ -89,7 +90,6 @@ class PickListIn(BaseModel):
     source_doc_ref: Optional[str] = None
     source_doc_type: str = "MANUAL"
     strategy: str = "FEFO"
-    created_by: Optional[str] = None
 
 
 class PickConfirmLine(BaseModel):
@@ -278,7 +278,7 @@ def fefo_suggestion(payload: FefoSuggestionIn, svc: WarehouseService = Depends(_
 
 @router.post("/pick-lists", status_code=status.HTTP_201_CREATED, summary="Pick list anlegen",
     response_model=WarehouseWmsOut, dependencies=SCHREIBEN["LAGER"])
-def create_pick_list(payload: PickListIn, svc: WarehouseService = Depends(_svc)):
+def create_pick_list(payload: PickListIn, request: Request, svc: WarehouseService = Depends(_svc)):
     items = [item.model_dump() for item in payload.items]
     return svc.create_pick_list(
         warehouse_id=payload.warehouse_id,
@@ -286,7 +286,7 @@ def create_pick_list(payload: PickListIn, svc: WarehouseService = Depends(_svc))
         source_doc_ref=payload.source_doc_ref,
         source_doc_type=payload.source_doc_type,
         strategy=payload.strategy,
-        created_by=payload.created_by,
+        created_by=gepruefter_akteur_aus_request(request),
     )
 
 
@@ -336,7 +336,6 @@ def get_pick_list(pick_list_id: str, svc: WarehouseService = Depends(_svc)):
 class PickListFromDeliveryNoteIn(BaseModel):
     warehouse_id: Optional[str] = None
     strategy: str = "FEFO"
-    created_by: Optional[str] = None
 
 
 @router.post(
@@ -347,6 +346,7 @@ class PickListFromDeliveryNoteIn(BaseModel):
 def create_pick_list_from_delivery_note(
     ls_id: str,
     payload: PickListFromDeliveryNoteIn,
+    request: Request,
     svc: WarehouseService = Depends(_svc),
 ):
     """Erstellt eine WMS-Kommissionierliste (Pick-Liste) aus einem gebuchten Lieferschein.
@@ -360,7 +360,7 @@ def create_pick_list_from_delivery_note(
             ls_id=ls_id,
             warehouse_id=payload.warehouse_id,
             strategy=payload.strategy,
-            created_by=payload.created_by,
+            created_by=gepruefter_akteur_aus_request(request),
         )
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))

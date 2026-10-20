@@ -15,6 +15,7 @@ from ....api.v1.schemas.base import BaseSchema
 from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import Biostimulanz as BiostimulanzModel
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class BiostimulanzListOut(BaseSchema):
@@ -139,8 +140,8 @@ async def get_biostimulanz(
     return _item_dict(row)
 
 
-@router.post("", response_model=Biostimulanz, status_code=201, summary="Biostimulanz anlegen")
-@router.post("/", response_model=Biostimulanz, status_code=201, summary="Biostimulanz anlegen", include_in_schema=False)
+@router.post("", response_model=Biostimulanz, status_code=201, summary="Biostimulanz anlegen", dependencies=SCHREIBEN["AGRAR"])
+@router.post("/", response_model=Biostimulanz, status_code=201, summary="Biostimulanz anlegen", include_in_schema=False, dependencies=SCHREIBEN["AGRAR"])
 async def create_biostimulanz(
     body: BiostimulanzCreate,
     tenant_id: Optional[str] = Query(None),
@@ -168,7 +169,7 @@ async def create_biostimulanz(
     return Biostimulanz.model_validate(row)
 
 
-@router.patch("/{item_id}", response_model=Biostimulanz, summary="Biostimulanz aktualisieren")
+@router.patch("/{item_id}", response_model=Biostimulanz, summary="Biostimulanz aktualisieren", dependencies=SCHREIBEN["AGRAR"])
 async def update_biostimulanz(
     item_id: str,
     body: BiostimulanzUpdate,

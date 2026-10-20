@@ -11,6 +11,8 @@ from datetime import datetime, timezone
 
 import pytest
 
+from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+
 from app.core.neuro_state_graph import (
     EdgeRelation,
     StateEdge,
@@ -483,6 +485,7 @@ def client():
 
     app = FastAPI()
     app.include_router(router, prefix="/api/v1/neuro")
+    ersetze_nutzer(app, *ALLE_FACHROLLEN)
     app.dependency_overrides[get_db] = lambda: None
     return TestClient(app)
 
