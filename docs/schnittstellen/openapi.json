@@ -158011,6 +158011,40 @@
         "title": "StreckengeschaeftUpdate",
         "type": "object"
       },
+      "StudioColumnIn": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "pattern": "^[a-z][a-z0-9_]{0,47}$",
+            "title": "Name",
+            "type": "string"
+          },
+          "nullable": {
+            "default": true,
+            "title": "Nullable",
+            "type": "boolean"
+          },
+          "type": {
+            "enum": [
+              "text",
+              "integer",
+              "boolean",
+              "date",
+              "datetime",
+              "decimal",
+              "uuid"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "StudioColumnIn",
+        "type": "object"
+      },
       "StudioDefinitionIn": {
         "properties": {
           "definition": {
@@ -158326,6 +158360,149 @@
         "title": "StudioHistoryViewOut",
         "type": "object"
       },
+      "StudioMigrationIn": {
+        "additionalProperties": false,
+        "properties": {
+          "definition": {
+            "additionalProperties": true,
+            "title": "Definition",
+            "type": "object"
+          },
+          "schema_changes": {
+            "items": {
+              "$ref": "#/components/schemas/StudioSchemaChangeIn"
+            },
+            "maxItems": 20,
+            "title": "Schema Changes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "definition"
+        ],
+        "title": "StudioMigrationIn",
+        "type": "object"
+      },
+      "StudioMigrationOut": {
+        "properties": {
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "bindings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Bindings",
+            "type": "array"
+          },
+          "blockers": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Blockers",
+            "type": "array"
+          },
+          "can_activate": {
+            "const": false,
+            "default": false,
+            "title": "Can Activate",
+            "type": "boolean"
+          },
+          "catalog_hash": {
+            "title": "Catalog Hash",
+            "type": "string"
+          },
+          "channel_status": {
+            "additionalProperties": {
+              "const": "not_verified",
+              "type": "string"
+            },
+            "title": "Channel Status",
+            "type": "object"
+          },
+          "definition": {
+            "additionalProperties": true,
+            "title": "Definition",
+            "type": "object"
+          },
+          "definition_hash": {
+            "title": "Definition Hash",
+            "type": "string"
+          },
+          "migration_filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Migration Filename"
+          },
+          "migration_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Migration Hash"
+          },
+          "migration_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Migration Source"
+          },
+          "plan_hash": {
+            "title": "Plan Hash",
+            "type": "string"
+          },
+          "plan_version": {
+            "const": 1,
+            "default": 1,
+            "title": "Plan Version",
+            "type": "integer"
+          },
+          "required_contracts": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Contracts",
+            "type": "array"
+          },
+          "schema_catalog_hash": {
+            "title": "Schema Catalog Hash",
+            "type": "string"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_id",
+          "actor",
+          "plan_hash",
+          "definition_hash",
+          "catalog_hash",
+          "schema_catalog_hash",
+          "definition",
+          "bindings",
+          "blockers"
+        ],
+        "title": "StudioMigrationOut",
+        "type": "object"
+      },
       "StudioProposeIn": {
         "properties": {
           "intent": {
@@ -158378,6 +158555,46 @@
           "idempotency_key"
         ],
         "title": "StudioSaveIn",
+        "type": "object"
+      },
+      "StudioSchemaChangeIn": {
+        "additionalProperties": false,
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/StudioColumnIn"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Columns",
+            "type": "array"
+          },
+          "operation": {
+            "enum": [
+              "create_table",
+              "add_columns"
+            ],
+            "title": "Operation",
+            "type": "string"
+          },
+          "schema_name": {
+            "pattern": "^domain_[a-z][a-z0-9_]{0,35}$",
+            "title": "Schema Name",
+            "type": "string"
+          },
+          "table": {
+            "pattern": "^[a-z][a-z0-9_]{0,47}$",
+            "title": "Table",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation",
+          "schema_name",
+          "table",
+          "columns"
+        ],
+        "title": "StudioSchemaChangeIn",
         "type": "object"
       },
       "StudioSimulationEvidenceOut": {
@@ -404884,6 +405101,54 @@
           }
         ],
         "summary": "Studio-Ereignis fuer native Vergleichsmaske",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/studio/migration-plan": {
+      "post": {
+        "operationId": "studio_migration_plan_api_v1_studio_migration_plan_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudioMigrationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudioMigrationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Funktionen kataloggebunden verdrahten und additive Schemaartefakte planen",
         "tags": [
           "ui",
           "studio",

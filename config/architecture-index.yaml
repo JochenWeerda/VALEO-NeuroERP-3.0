@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-20
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-20T16:37:05Z'
+generated_at: '2026-10-20T18:28:41Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1854,6 +1854,7 @@ domains:
     - stt_client
     - studio_draft_store
     - studio_history_view
+    - studio_migration
     - studio_native_import
     - studio_process_simulation
     - studio_propose
@@ -2115,8 +2116,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 932
   frontend_routes_mapped: 932
-  backend_services_total: 304
-  backend_services_mapped: 304
+  backend_services_total: 305
+  backend_services_mapped: 305
   backend_endpoints_total: 472
   backend_endpoints_mapped: 472
 unmapped:

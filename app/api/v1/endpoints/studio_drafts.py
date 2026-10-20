@@ -19,6 +19,8 @@ from app.services.studio_draft_store import StudioStorageUnavailable, list_histo
 from app.services.studio_propose import propose_studio_draft
 from app.services.studio_validation import load_studio_catalog, validate_studio_draft
 from app.services.studio_semantic import DialogueTurn, HarvestPreviewIn, HarvestPreviewOut, StudioDialogueIn, StudioDialogueOut, dialogue, preview, semantic_catalog
+from app.api.v1.schemas.studio_migration import StudioMigrationIn, StudioMigrationOut
+from app.services.studio_migration import plan_migration
 from app.core.database import get_db
 from sqlalchemy.orm import Session
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
@@ -193,8 +195,21 @@ def studio_catalog(user: dict = Depends(get_current_user)) -> dict[str, Any]:
         "dataSources": catalog["data_sources"],
         "actions": catalog["command_actions"],
         "semantic": semantic_catalog(),
+        "migration": {"planVersion": 1, "endpoint": "/api/v1/studio/migration-plan",
+                      "operations": ["catalog_wiring", "create_table", "add_columns"],
+                      "directSchemaExecution": False},
         "permissions": {"canDesign": _may_design(user), "canPublish": _may_publish(user)},
     }
+
+
+@router.post("/migration-plan", response_model=StudioMigrationOut,
+             summary="Funktionen kataloggebunden verdrahten und additive Schemaartefakte planen")
+def studio_migration_plan(body: StudioMigrationIn, tenant_id: str = Depends(get_tenant_id),
+                          user: dict = Depends(beleg_write)) -> StudioMigrationOut:
+    try:
+        return plan_migration(body, tenant_id, _actor(user))
+    except ValueError as error:
+        raise HTTPException(409, str(error)) from error
 
 
 @router.post("/validate", summary="Studio-ScreenDefinition gegen Katalog und Gates prüfen", dependencies=SCHREIBEN["BERECHNEN"])

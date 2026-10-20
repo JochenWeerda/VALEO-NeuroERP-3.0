@@ -399,3 +399,16 @@ def test_gesamter_registrierter_bestand_per_cli_in_echtem_studio_speicher(requir
                     assert store.get_published_definition(tenant, record["screen_id"]) is None
         finally:
             transaction.rollback()
+
+
+
+def test_migrationsentwurf_verwendet_denselben_studio_planweg(monkeypatch, tmp_path):
+    spec, result = tmp_path / "input.json", tmp_path / "plan.json"
+    spec.write_text(json.dumps({"definition": PROPOSAL, "schema_changes": []}))
+    calls = []
+    def server(request):
+        calls.append((request.method, request.url.path, json.loads(request.content)))
+        return httpx.Response(200, json={"can_activate": False, "plan_hash": "a"*64})
+    code, _ = run(["migrationsentwurf", str(spec), "--ausgabe", str(result)], server, monkeypatch)
+    assert code == 0 and json.loads(result.read_text())["can_activate"] is False
+    assert calls == [("POST", "/api/v1/studio/migration-plan", {"definition": PROPOSAL, "schema_changes": []})]

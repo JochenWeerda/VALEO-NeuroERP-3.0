@@ -229,6 +229,13 @@ def run(args, call, out, stdin) -> int:
             out(f"  {row['screen_id']:<48} {row['title']}")
         out(f"{len(rows)} vorhandene Masken uebernehmbar.")
         return 0
+    if cmd == "migrationsentwurf":
+        body = json.loads(Path(args.datei).read_text(encoding="utf-8"))
+        if not isinstance(body, dict):
+            raise ValueError("Migrationsauftrag muss ein JSON-Objekt sein.")
+        report = call("POST", f"{STUDIO}/migration-plan", body)
+        _write(args.ausgabe, report, out)
+        return 0
     if cmd == "migrationsplan":
         target = Path(args.ausgabe)
         if target.exists():
@@ -347,6 +354,9 @@ def add_parser(sub) -> None:
     k.add_argument("--json", action="store_true")
     q = s.add_parser("quellen", help="Vorhandene Masken, die als Ausgangsfassung uebernehmbar sind")
     q.add_argument("suche", nargs="?")
+    proposal = s.add_parser("migrationsentwurf", help="Funktionen verdrahten und versionierte Schemaartefakte planen")
+    proposal.add_argument("datei", help="JSON mit definition und optional schema_changes")
+    proposal.add_argument("--ausgabe", metavar="DATEI", help="Servergeprueften Plan samt Alembic-Quelltext speichern")
     mp = s.add_parser("migrationsplan", help="Alle registrierten Quellen hashgebunden fuer Stapeluebernahme planen")
     mp.add_argument("--suche", default="", help="Quellen nach Kennung/Bezeichnung einschraenken")
     mp.add_argument("--ausgabe", required=True, metavar="DATEI")

@@ -68,3 +68,16 @@ Snapshot-Lesewege unter /read-models/snapshots verwenden ebenfalls den gepruefte
 GET /api/v1/personal/employee-files/{employee_ref} verlangt PERSONAL_LESEN, PERSONAL_BEARBEITEN, PERSONAL_ADMIN oder admin. actorRole ist ausschliesslich ein Ansichtsfilter nach dieser Berechtigung, keine Rollenvergabe. POST desselben Weges mit /documents verlangt PERSONAL_BEARBEITEN, PERSONAL_ADMIN oder admin; sein Urheber wird aus dem geprueften Token uebernommen. Der alte POST-Queryparameter actorRole ist entfernt und uebermittelt keine Rechte.
 
 Die kanonische Metadatentabelle domain_hr.employee_file_documents wird durch hr_employee_files_20261019 angelegt. Fehlende oder fehlerhafte Persistenz antwortet generisch503, niemals mit einem erzeugten Demo-Dokument oder falschem201. Ungueltige Kalenderdaten und umgekehrte Gueltigkeitszeiträume werden vor SQL abgewiesen. Die Personalakten-Sichtbarkeitsklasse manager ist keine allgemeine Realm-Berechtigung. Selbstservice und zugelassene Vorgesetztenbeziehungen benoetigen eigene gepruefte Objektbeziehungen; dieser Vertrag erteilt sie nicht.
+
+
+## Studio-Migrationsplanung (20.10.2026)
+
+`POST /api/v1/studio/migration-plan` verwendet die vorhandene Beleg-Bearbeitungsrolle
+und den geprueften aktiven Mandanten. Eingabe: `definition` und optionale additive
+`schema_changes` mit `create_table` oder `add_columns`. Freie SQL-Ausdruecke,
+Aufruferidentitaet und Mandantenangaben sind kein Bestandteil des Eingabeschemas.
+Ausgabe: verdrahtete Definition, Bindungen, Blocker und gegebenenfalls versionierte
+Alembic-Quelle samt Hash. CLI: `python -m valeo_cli studio migrationsentwurf
+auftrag.json --ausgabe plan.json`. Die Planung schreibt weder Tabellen noch
+Fachdaten und aktiviert keine Commands. Sie ist im vorhandenen Studio-Katalog
+entdeckbar; Rechte werden durch die Ausgabe nicht erweitert.

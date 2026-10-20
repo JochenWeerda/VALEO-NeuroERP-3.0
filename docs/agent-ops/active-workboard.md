@@ -18948,3 +18948,33 @@ Migrations-/Deploymentweg, kein neuer On-the-fly-DDL-Adapter oder eigener
 Geschaeftsdatenspeicher. Bestehender valeo_probe, eigene Rollbackdaten, kein Reset
 oder neue Datenbank/Container. Vollstaendige Aktivierung/UI-Abnahme und
 allgemeine Fachmigration bleiben separat nachzuweisen.
+
+
+**STUDIO-MIGRATION-ENGINE erster Meilenstein:** Serverplaner und CLI-Aufruf,
+kataloggebundene Verdrahtung, typisierte additive Alembic-Artefakte und
+Compiler-/Katalog-/Definitions-/Mandanten-/Urheber-/Headbindung umgesetzt.
+Vorlaeufig60 Faelle bestanden, inklusive echter generierter Tabelle auf bestehendem
+Pruefstand mit vollstaendigem Rollback. STUDIO-CHANNEL-001 ergaenzt: Human, CLI,
+MCP und echte Rollen-/Datensatz-/Mandanten-/Wiederholungsvertraege vor Aktivierung.
+Neue Plaene markieren diese Nachweise not_verified; kein selbstbestaetigter Pass.
+Claim bleibt in Arbeit fuer allgemeinen CRUD-/Capability-Generator, UI-Editor,
+persistierte Freigabeplanbindung und vollstaendiges Dreikanal-Releasegate.
+Kein pauschaler Backend-Rollout oder Austausch fremder Mountdateien.
+
+
+**STUDIO-MIGRATION-ENGINE Schlusspruefung erster Meilenstein:**64 Tests gruen,
+inklusive ausgefuehrtem Alembic-Artefakt mit eigener zurueckgerollter Tabelle;
+kanonische OpenAPI3230 Pfade wiederholbar stabil, alle vorherigen Pfade erhalten.
+Neue API ist typisiert und nutzt beleg_write/get_tenant_id/_actor. Der Compiler
+bindet auch seinen eigenen Quellhash, damit geaenderte Erzeugungslogik keinen
+unveraenderten Plan behauptet. Dreikanal-Abnahme bleibt absichtlich ein Blocker,
+bis echte aequivalente Rollen-/Mandanten-/Replayvertraege vorliegen. Keine
+pauschale Vollmigration oder Liveaktivierung behauptet.
+
+
+**Studio-Kataloggrenze:** Generischer Lineage-Nachlauf veraenderte zusaetzlich
+Ownership-/ORM-Metadaten und eine physische Spaltenbeschreibung aus dem Bestand;
+diese fachfremden Generatorfolgen werden nicht ausgeliefert. Beide Katalogdateien
+bleiben exakt auf dem vorherigen kanonischen Commit. Der Tabellen-FK in einem
+nur erzeugten Alembic-String ist ausserdem kein laufender Tabellenlesezugriff.
+Keine physische Tabelle/Spalte wurde fuer diesen Planer dauerhaft geaendert.

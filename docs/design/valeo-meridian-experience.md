@@ -359,3 +359,15 @@ finance/ap-invoice.freigeben nutzt serverseitiges approval_can_decide und die ge
 approval_request_id aus dem Entity. Der bestehende ScreenDefinition-/RenderPlan-/Runtime-
 Pfad und zentrale Themebehandlung bleiben erhalten; keine lokale Layoutalternative.
 Menschliche Fachfreigabe und Agentensperre stehen explizit in der ScreenDefinition.
+
+
+## Studio-Migrationsplanung und Zugangsgleichheit (20.10.2026)
+
+Automatische Funktionsverdrahtung und additive Schemaartefakte werden im
+bestehenden Studio geplant. Die daraus entstehenden Masken bleiben an
+ScreenDefinition -> RenderPlan -> UniversalMaskRuntime -> UniversalMaskRenderer
+gebunden; ein generiertes Datenmodell rechtfertigt keine handgebaute Ersatzseite.
+Human-, CLI- und MCP-Bedienung mit identischen Fachrechten und Mandantengrenzen
+ist gemaess STUDIO-CHANNEL-001 Pflicht. Der neue Planer weist fehlende Nachweise
+als Blocker aus. Dieser Backend-/CLI-Meilenstein aendert keine Darstellung und
+behauptet keine neue visuelle oder allgemeine Dreikanal-Releaseabnahme.
