@@ -46,3 +46,16 @@ Unbekannte Befunde, geaenderte Quellen und abgelaufene Reviews bleiben blockiere
 GitHub-Gesamtnachlauf und Live-Installation sind gesonderte Schritte. Dieses
 Ergebnis bescheinigt weder alle Abhaengigkeiten ausserhalb dieses Production-
 Scans noch den vollstaendigen Abschluss des Studio-Gesamtziels.
+
+
+## Nachlauf und getrennte Dependabot-Meldungen
+
+Korrekturen a9f454271 nach main gepusht. GitHub-Nachlauf gestartet, noch keine
+Gesamtfreigabe. GitHub-Dependabot-API meldet am21.10. zusaetzlich offene Alerts
+in pnpm-lock.yaml: markdown-it692/691/690, sprintf-js677, stream-json666/665,
+http-cache-semantics653 sowie den bekannten node-forge651. Ausserdem chromadb
+in services/ai/requirements.txt502(Critical),501/500(High), ohne dort angegebene
+Patchversion. Diese Meldungen werden durch einen reinen pnpm-Production-Audit
+nicht vollstaendig abgedeckt; Abhaengigkeits-/Verbraucherpfade und Python-
+Altbestand sind separat zu klaeren. Keine Entwarnung aus einem einzelnen Scan,
+keine Alert-Schliessung oder unsicheren Major-Overrides vorgenommen.
