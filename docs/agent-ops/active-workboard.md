@@ -19423,3 +19423,8 @@ Docker-Kontext erlaubt nur Katalogdatei, benachbarte Admin-Dokumente bleiben
 ausgeschlossen. Alle lokalen Driftgates gruen, ein neuer lesender Pfad,
 vorhandene OpenAPI-Pfade unveraendert. Gesamtziel und reale Browser-/Image-
 Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
+
+
+## SONAR-TEST-ASSERTIONS-20261021 - reserviert, Codex
+
+**Owner:** Codex. **Ziel:** sieben konkrete Zuverlaessigkeitsbefunde aus Quality-Lauf 39600314443 beheben, ohne Tests auszublenden oder Qualitaetsschwellen zu senken. **Dateibesitz:** tests/test_slice_yaml_contracts.py, test_service_units_wave99.py, test_service_units_wave77.py, test_docflow_artifact.py, test_process_kernel_wave58_cost_audit.py, test_process_kernel_wave42_schema_compensation.py; eigene QA und Workboard. **Abnahme:** YAML-Fehler sammeln ohne verschluckte Assertions; Hash-Tests gegen unabhaengige bekannte Werte statt Selbstvergleich; vollstaendige sechs Testsuiten gruen ohne DB. Bestehende fachliche Hashimplementierungen bleiben unveraendert. **Offen:** neue Coverage 63,6 unter80; Browserdienst3001 derzeit nicht erreichbar; Gesamtziel bleibt aktiv.
