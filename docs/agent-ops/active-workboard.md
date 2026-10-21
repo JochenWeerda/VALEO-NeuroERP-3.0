@@ -19165,3 +19165,19 @@ Chroma-Nachpruefung ohne neue Bewertung: bestehende3 Reviews (bis23.10.) mit
 allen98 kanonischen Quell-/Deploydateien und Embeddedkontrolle exakt bestaetigt;
 12 vorhandene Failclosed-Vertraege bestanden. Keine Fristverlaengerung oder
 Alertschliessung. Nicht mit Herstellerreparatur oder neuem Scannerlauf verwechseln.
+
+
+## STUDIO-PLAN-HISTORY-20261021 - reserviert, Codex
+
+Fortsetzung des eigenen STUDIO-MIGRATION-ENGINE-Claims: Migrationsplan nur aus
+serverseitig gespeicherter Entwurfsfassung erzeugen und unveraenderbar in der
+bestehenden Studio-Historie speichern. Besitz neuer studio_migration_store.py,
+Migration-DTO nur gespeicherter Auftrag/Antwort, studio_drafts.py nur neuer
+POST drafts/{id}/migration-plan, CLI nur plan-speichern, eigene Tests und
+ADR084 Proposed/Platform-/QA-Doku, notwendige Projektionen/Architekturprefix.
+Kein Edit fremder Seiten/Builder oder Umdeuten bestehender Publikation.
+Abnahme erwartete Revision, Tenant/Actor nur Kontext, schluesselgebundene
+Wiederholung mit Inhaltsvergleich, reale Postgres-Historie und Rollback bei
+Fehler, Fremdmandant404; Plan bleibt blockiert fuer Aktivierung/DDL. Speicherung
+ist weder Freigabe noch vollstaendige Dreikanalabnahme. Bestehender valeo_probe
+mit eigenen Rollbackdaten, kein neuer DB/Container/Reset. C4 unveraendert.
