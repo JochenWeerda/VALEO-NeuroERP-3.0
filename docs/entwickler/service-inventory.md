@@ -296,6 +296,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `studio_draft_store` | Studio drafts with tenant isolation, four-eyes publish, and optional Postgres. |
 | `studio_history_view` | Read-only, type-preserving comparison of immutable Studio snapshots. |
 | `studio_migration` | Studio migration compiler: catalog wiring and reviewable additive Alembic artifacts. |
+| `studio_migration_store` | Revision-bound plans in the existing append-only Studio history, never DDL. |
 | `studio_native_import` | Version native masks through the existing Studio store, without activation. |
 | `studio_process_simulation` | Real domain-service simulation on the shared probe, always rolled back. |
 | `studio_propose` | Deterministic ScreenDefinition proposals for humans and agents. |

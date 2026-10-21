@@ -159069,6 +159069,85 @@
         "title": "StudioSaveIn",
         "type": "object"
       },
+      "StudioSavedMigrationIn": {
+        "additionalProperties": false,
+        "properties": {
+          "expected_revision": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Expected Revision",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "schema_changes": {
+            "items": {
+              "$ref": "#/components/schemas/StudioSchemaChangeIn"
+            },
+            "maxItems": 20,
+            "title": "Schema Changes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "expected_revision",
+          "idempotency_key"
+        ],
+        "title": "StudioSavedMigrationIn",
+        "type": "object"
+      },
+      "StudioSavedMigrationOut": {
+        "properties": {
+          "binding_hash": {
+            "title": "Binding Hash",
+            "type": "string"
+          },
+          "candidate_definition_hash": {
+            "title": "Candidate Definition Hash",
+            "type": "string"
+          },
+          "candidate_revision": {
+            "title": "Candidate Revision",
+            "type": "string"
+          },
+          "draft_id": {
+            "title": "Draft Id",
+            "type": "string"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/StudioMigrationOut"
+          },
+          "requires_definition_update": {
+            "title": "Requires Definition Update",
+            "type": "boolean"
+          },
+          "schema_changes": {
+            "items": {
+              "$ref": "#/components/schemas/StudioSchemaChangeIn"
+            },
+            "title": "Schema Changes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "event_id",
+          "draft_id",
+          "candidate_revision",
+          "candidate_definition_hash",
+          "binding_hash",
+          "requires_definition_update",
+          "schema_changes",
+          "plan"
+        ],
+        "title": "StudioSavedMigrationOut",
+        "type": "object"
+      },
       "StudioSchemaChangeIn": {
         "additionalProperties": false,
         "properties": {
@@ -405918,6 +405997,65 @@
           }
         ],
         "summary": "Studio-Fassungen fuer native Auditmaske",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/studio/drafts/{draft_id}/migration-plan": {
+      "post": {
+        "operationId": "studio_save_migration_plan_api_v1_studio_drafts__draft_id__migration_plan_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "draft_id",
+            "required": true,
+            "schema": {
+              "title": "Draft Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudioSavedMigrationIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudioSavedMigrationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Migrationsplan fuer gespeicherte Studio-Revision unveraenderbar protokollieren",
         "tags": [
           "ui",
           "studio",

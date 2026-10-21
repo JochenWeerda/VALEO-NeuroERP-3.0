@@ -18928,7 +18928,7 @@ docs/quality-assurance/studio-cli-bulk-20261020.md. localhost-Transport reparier
 keine OS-/Docker-Netzwerkaenderung oder neuen Rollen.
 
 
-## STUDIO-MIGRATION-ENGINE-20261020 - reserviert, Codex
+## STUDIO-MIGRATION-ENGINE-20261020 - in arbeit, Codex
 
 Nutzerentscheid: Funktionsmigration, automatische Verdrahtung und erforderliche
 Schema-/Tabellengenerierung werden funktionale Bestandteile des vorhandenen
@@ -19167,7 +19167,7 @@ allen98 kanonischen Quell-/Deploydateien und Embeddedkontrolle exakt bestaetigt;
 Alertschliessung. Nicht mit Herstellerreparatur oder neuem Scannerlauf verwechseln.
 
 
-## STUDIO-PLAN-HISTORY-20261021 - reserviert, Codex
+## STUDIO-PLAN-HISTORY-20261021 - abgeschlossen, Codex
 
 Fortsetzung des eigenen STUDIO-MIGRATION-ENGINE-Claims: Migrationsplan nur aus
 serverseitig gespeicherter Entwurfsfassung erzeugen und unveraenderbar in der
@@ -19181,3 +19181,21 @@ Wiederholung mit Inhaltsvergleich, reale Postgres-Historie und Rollback bei
 Fehler, Fremdmandant404; Plan bleibt blockiert fuer Aktivierung/DDL. Speicherung
 ist weder Freigabe noch vollstaendige Dreikanalabnahme. Bestehender valeo_probe
 mit eigenen Rollbackdaten, kein neuer DB/Container/Reset. C4 unveraendert.
+
+
+STUDIO-PLAN-HISTORY Abnahme:85 Tests bestanden (neuer gespeicherter Plan,
+Compiler, bestehende Revisionshistorie, Tokenidentitaet und CLI). Echte signierte
+REST-/CLI-Aufrufe mit Rollen-/Fremdmandanten-/Header-/Token-Negativfaellen und
+realer PostgreSQL-Historie; deren Mutation wird vom bestehenden Trigger blockiert.
+Ein Speicherfehler rollt vollstaendig zurueck. Alte Wiederholung liefert
+historischen Nachweis; neue Revision braucht neuen Auftrag.45 erste Tests plus
+85 erweiterte finale Tests gruen; Zaehler nicht addieren. Alle lokalen Drift- und
+Architekturgates gruen, OpenAPI3243 Pfade,308 Services,931 Frontendrouten,
+472 Endpunktmodule. Kanonischer Tabellenkatalog exakt erhalten. Kein neuer
+Container/DB/Reset und keine Schemaaktivierung/Publikation. Autorisierter
+Compiler-Command ueber bestehende beleg_write-/Tenantgrenze; kein MCP-Write neu
+freigeschaltet. ADR084 Proposed/QA studio-plan-history-20261021.md.
+Gesamtclaim bleibt offen fuer CRUD-/Capability-Generierung, UI-/MCP-Authoring und
+verpflichtende Auswertung aller revisionsgebundenen Nachweise im Publikationsgate.
+D8dee7717-Nachlauf: Security/ServiceSecurity/SQL/Smoke/critical/Docs gruen;
+Quality und CI/CD zum letzten Abruf noch nicht abgeschlossen.

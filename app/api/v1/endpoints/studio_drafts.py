@@ -19,7 +19,7 @@ from app.services.studio_draft_store import StudioStorageUnavailable, list_histo
 from app.services.studio_propose import propose_studio_draft
 from app.services.studio_validation import load_studio_catalog, validate_studio_draft
 from app.services.studio_semantic import DialogueTurn, HarvestPreviewIn, HarvestPreviewOut, StudioDialogueIn, StudioDialogueOut, dialogue, preview, semantic_catalog
-from app.api.v1.schemas.studio_migration import StudioMigrationIn, StudioMigrationOut
+from app.api.v1.schemas.studio_migration import StudioMigrationIn, StudioMigrationOut, StudioSavedMigrationIn, StudioSavedMigrationOut
 from app.services.studio_migration import plan_migration
 from app.core.database import get_db
 from sqlalchemy.orm import Session
@@ -460,3 +460,17 @@ def studio_simulate(draft_id: str, body: StudioRevisionIn,
 
 from app.api.v1.endpoints.studio_native_import import router as native_import_router
 router.include_router(native_import_router)
+
+
+@router.post("/drafts/{draft_id}/migration-plan", response_model=StudioSavedMigrationOut,
+             summary="Migrationsplan fuer gespeicherte Studio-Revision unveraenderbar protokollieren")
+def studio_save_migration_plan(draft_id: str, body: StudioSavedMigrationIn,
+                               tenant_id: str = Depends(get_tenant_id),
+                               user: dict = Depends(beleg_write)) -> dict[str, Any]:
+    from app.services.studio_migration_store import save_migration_plan
+    try:
+        return _storage_call(save_migration_plan, tenant_id, draft_id, _actor(user), body)
+    except KeyError as error:
+        raise HTTPException(404, "draft_nicht_gefunden") from error
+    except ValueError as error:
+        raise HTTPException(409, str(error)) from error

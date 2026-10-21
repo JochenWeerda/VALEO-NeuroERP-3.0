@@ -117,3 +117,21 @@ Human-Runtime, CLI und MCP; page/skip/offset werden am deklarierten Fachvertrag
 ausgerichtet. Unvollstaendige Quellen scheitern statt Teildaten zu filtern.
 Serverpagination erfordert passende deklarierte Such-/Sortier-/Filterparameter.
 Details und Grenzen: docs/quality-assurance/studio-table-query-20261021.md.
+
+
+## Gespeicherter Migrationsplan (21.10.2026)
+
+POST /api/v1/studio/drafts/{draft_id}/migration-plan nimmt ausschliesslich
+expected_revision, idempotency_key und optionale schema_changes entgegen.
+Derselbe beleg_write-/verifizierte Mandantenkontext wie bestehende Authoring-
+Commands gilt. Die Definition wird unter Draftsperre serverseitig gelesen.
+Antwort StudioSavedMigrationOut bindet Planhash, Kandidatenrevision/-hash,
+Urheber, Mandant und validierten Schemaauftrag. Speicherung als migration_plan
+in der bestehenden unveraenderbaren Studio-Historie, keine neue Tabelle.
+CLI: studio plan-speichern ENTWURF --revision REVISION [--schema DATEI]
+[--idempotenz UUID] [--ausgabe DATEI]. Wiederholung gibt den urspruenglichen
+Historienstand zurueck; sie ist keine neue Abnahme gegen heutige Kataloge.
+requires_definition_update kennzeichnet noch ungespeicherte Bindungsvorschlaege.
+Keine Statusaenderung, DDL oder Publikation; Erweiterung des vollstaendigen
+Dreikanal-Freigabegates bleibt offen. ADR084 Proposed und QA
+studio-plan-history-20261021.md dokumentieren Nachweis und Grenzen.

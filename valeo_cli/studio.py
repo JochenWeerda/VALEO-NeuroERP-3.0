@@ -229,6 +229,14 @@ def run(args, call, out, stdin) -> int:
             out(f"  {row['screen_id']:<48} {row['title']}")
         out(f"{len(rows)} vorhandene Masken uebernehmbar.")
         return 0
+    if cmd == "plan-speichern":
+        changes = json.loads(Path(args.schema).read_text(encoding="utf-8")) if args.schema else []
+        if not isinstance(changes, list):
+            raise ValueError("Schemaauftrag muss eine Liste sein.")
+        report = call("POST", f"{STUDIO}/drafts/{str(uuid.UUID(args.entwurf))}/migration-plan", {
+            "expected_revision": args.revision, "idempotency_key": _key(args), "schema_changes": changes})
+        _write(args.ausgabe, report, out)
+        return 0
     if cmd == "migrationsentwurf":
         body = json.loads(Path(args.datei).read_text(encoding="utf-8"))
         if not isinstance(body, dict):
@@ -354,6 +362,11 @@ def add_parser(sub) -> None:
     k.add_argument("--json", action="store_true")
     q = s.add_parser("quellen", help="Vorhandene Masken, die als Ausgangsfassung uebernehmbar sind")
     q.add_argument("suche", nargs="?")
+    saved = with_key(s.add_parser("plan-speichern", help="Migrationsplan an gespeicherte Entwurfsrevision binden"))
+    saved.add_argument("entwurf")
+    saved.add_argument("--revision", required=True)
+    saved.add_argument("--schema", metavar="DATEI", help="Optionale Liste additiver Schemaaenderungen")
+    saved.add_argument("--ausgabe", metavar="DATEI")
     proposal = s.add_parser("migrationsentwurf", help="Funktionen verdrahten und versionierte Schemaartefakte planen")
     proposal.add_argument("datei", help="JSON mit definition und optional schema_changes")
     proposal.add_argument("--ausgabe", metavar="DATEI", help="Servergeprueften Plan samt Alembic-Quelltext speichern")

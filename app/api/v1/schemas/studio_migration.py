@@ -1,5 +1,6 @@
 """Typed additive schema proposals; no executable SQL or caller-supplied identity."""
 from typing import Any, Literal
+from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
@@ -55,3 +56,21 @@ class StudioMigrationOut(BaseModel):
         "same_domain_commands", "verified_tenant", "tenant_isolation", "domain_roles",
         "record_permissions", "idempotency", "negative_cases", "human_cli_mcp_parity"])
     can_activate: Literal[False] = False
+
+
+class StudioSavedMigrationIn(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    expected_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
+    idempotency_key: UUID = Field(strict=False)
+    schema_changes: list[StudioSchemaChangeIn] = Field(default_factory=list, max_length=20)
+
+
+class StudioSavedMigrationOut(BaseModel):
+    event_id: str
+    draft_id: str
+    candidate_revision: str
+    candidate_definition_hash: str
+    binding_hash: str
+    requires_definition_update: bool
+    schema_changes: list[StudioSchemaChangeIn]
+    plan: StudioMigrationOut
