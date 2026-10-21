@@ -19396,3 +19396,13 @@ und CLI entitaet-uebernehmen erweitert; dieselben bestehenden Draft-/Plan-/
 Simulations-/Publikationscommands. Eigener signierter HTTP-/CLI-Gesamttest
 einschliesslich Readiness, Vier-Augen und Ruecknahme. Keine Aktivierung durch
 den Lookup, keine zweite Registry oder andere Rollen.
+
+
+STUDIO-ENTITY-RELEASE echter CLI-Befund: definitionReady=false, weil generierte
+Aktionen keine permission deklarieren. Keine Readiness-Ausnahme. Besitz eng
+um generate_action_permission_projection.py, action-permissions.generated.json,
+zentralen runtime/screen-permissions.ts und eigenen Frontend-Vertrag erweitert.
+Generierte Entityrechte ausschliesslich aus require_roles des vorhandenen
+Entityrouters ableiten, Scope allein darf keine Bereichsrolle ersetzen.
+Kleine Stammdatentabellen erhalten sichtbaren Erstellzeitpunkt neben Version
+statt erfundener Fachspalten; bestehende Mindestspaltengrenze bleibt erhalten.
