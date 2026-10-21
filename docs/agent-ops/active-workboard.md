@@ -19065,3 +19065,12 @@ Abnahme: echter Production-Audit, boesartige Arrayheader/Regex-Headernamen und
 normale Redirects, bestehende Backport-Failclosed-Vertraege, frozen Lock.
 Keine Severity-/Workflowausnahme, kein Eingriff in gemeinsame node_modules,
 keine DB/Container. Andere Agenten behalten ihre Fach-/Maskenclaims.
+
+
+NODE-FOLLOW-REDIRECTS-20261021 Besitz vor Erweiterung: frischer Production-Audit
+meldet zusaetzlich Vite 6.4.3 (ein High, zwei Moderate; gebuendeltes launch-editor).
+Gleicher Slice umfasst nun gezielten root Override nur fuer betroffene Vite-6-
+Versionen auf Hersteller-Patch 6.4.4, zugehoerige Lockeintraege und isolierte
+Vite-Build-/Editor-Negativabnahme. Vite 7/8 werden nicht herabgestuft. Bestehender
+Audit-CLI-Einstieg ruft den neuen Redirect-Runtimevertrag verbindlich mit auf;
+keine Workflow-/Schwellen-/Ausnahmeregel aendern. Keine gemeinsame Installation.
