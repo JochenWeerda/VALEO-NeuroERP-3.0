@@ -19074,3 +19074,11 @@ Versionen auf Hersteller-Patch 6.4.4, zugehoerige Lockeintraege und isolierte
 Vite-Build-/Editor-Negativabnahme. Vite 7/8 werden nicht herabgestuft. Bestehender
 Audit-CLI-Einstieg ruft den neuen Redirect-Runtimevertrag verbindlich mit auf;
 keine Workflow-/Schwellen-/Ausnahmeregel aendern. Keine gemeinsame Installation.
+
+
+## STUDIO-TABLE-ROUTES-20261021 - reserviert, Codex
+
+CI-Nachlauf 882ffbd9a zeigt eigene fehlende Suchschluessel-Projektion filter_plan.
+Besitz ausschliesslich generierte route-inventory.gen.json/route-tree.gen.tsx,
+Generator unveraendert, eigene QA/Workboard. Abnahme Regeneration byteidentisch,
+keine fehlende Route und zentrale Tabellenvertraege unveraendert. Keine DB.
