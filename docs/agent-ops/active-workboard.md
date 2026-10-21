@@ -19114,3 +19114,16 @@ Patchversion. Diese Meldungen werden durch einen reinen pnpm-Production-Audit
 nicht vollstaendig abgedeckt; Abhaengigkeits-/Verbraucherpfade und Python-
 Altbestand sind separat zu klaeren. Keine Entwarnung aus einem einzelnen Scan,
 keine Alert-Schliessung oder unsicheren Major-Overrides vorgenommen.
+
+
+## CRM-CASE-OUTAGE-CONTRACT-20261021 - reserviert, Codex
+
+Nachlauf a9f454271: Security Scan, Universal Mask Platform und SQL-Gate gruen;
+CI/CD scheitert einzig am alten direkten Aufruf des Cases-Listenhandlers ohne
+Router-Mandantenabhaengigkeit (ContextVar LookupError). Besitz nur betreffender
+Test in tests/test_runtime_sweep_category_d.py, eigene QA/Workboard. Handler und
+Mandantenbindung bleiben unveraendert. Abnahme realer HTTP-Router mit expliziter
+isolierter Testmandantengrenze, Downstream-Verbindungsabbruch, leerer gepruefter
+Antwort und Nachweis des weitergereichten Kontextmandanten; bestehende
+Faelle-/Betriebsprofile-/Aktivitaeten-Isolationsvertraege bleiben gruen.
+Keine Authumgehung in Produktionsapp, keine DB/Container.
