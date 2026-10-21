@@ -19127,3 +19127,18 @@ isolierter Testmandantengrenze, Downstream-Verbindungsabbruch, leerer gepruefter
 Antwort und Nachweis des weitergereichten Kontextmandanten; bestehende
 Faelle-/Betriebsprofile-/Aktivitaeten-Isolationsvertraege bleiben gruen.
 Keine Authumgehung in Produktionsapp, keine DB/Container.
+
+
+## NODE-MARKDOWN-20261021 - reserviert, Codex
+
+Vollscan des kanonischen Locks bestaetigt drei neue markdown-it-Befunde gegen
+14.3.1 (GHSA-gfr2-rv44-r23c, GHSA-vfgh-jcmw-g37q, GHSA-r7fv-28h4-cvq7).
+Primaeradvisories gelesen, Herstellerpatch14.3.3 vorhanden. Besitz root
+package.json nur vorhandener markdown-it-Override, Lock nur dieser Patch und
+Referenzen; bestehende Backportmanifest-/Lockhashes nach unveraenderten
+Quell-/Runtimepruefungen; neuer scripts/verify_markdown_security.cjs und dessen
+verbindlicher Aufruf im bestehenden Audit-CLI, eigene QA/Workboard. Keine
+Gate-/Workflowabsenkung oder neue Ausnahme. Abnahme Normalrendering und
+abgebrochene Referenzen, Quotes und vier HTML-Varianten in zeit-/speicherbegrenzten
+Unterprozessen, Auditvollscan ohne diese Befunde, frozen36 Workspaces. Keine
+geteilte Installation, kein neuer DB/Container. Andere offene Pakete gesondert.
