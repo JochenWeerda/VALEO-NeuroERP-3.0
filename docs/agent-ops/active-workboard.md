@@ -19303,3 +19303,15 @@ Nur additive nullable Felder an serverseitig registrierter Studio-Entity;
 Basisfingerprint verpflichtend, kein vom Aufrufer vorgegebenes Altschema.
 DDL sperrt Zieltabellen und verifiziert Basis vor Aenderung. Keine automatische
 Ausfuehrung, Freischaltung, Typaenderung, Fremdtabelle oder Datenruecksetzung.
+
+
+STUDIO-GENERATED-ENTITIES Kanal-/Evolutionsmeilenstein:28 Unit- und27
+SQL-Vertraege gruen. HTTP-Anlage/CLI-Replay/MCP-Update mit echten signierten
+Identitaeten und SQL-/Audit-/Outboxnachweis. Additive nullable Erweiterung nur
+aus registriertem Basisvertrag, Migration mit Tabellenlock/Basisnachweis;
+Altdaten erhalten, alter Router sperrt, neue Fassung aendert korrekt.
+Authoring-API/CLI identisch und ohne DDL-Wirkung. Alle lokalen Driftgates gruen,
+OpenAPI ein neuer Pfad,314 Services vollstaendig zugeordnet.
+Claim bleibt in arbeit: echte Studio-Publikation/visuelle Browserabnahme und
+weitere Fachketten sind nicht durch synthetische Testregistrierung erledigt.
+SonarCloud-Gesamtnachlauf separat rot (S1226 cases.py, neue Coverage59,6%).

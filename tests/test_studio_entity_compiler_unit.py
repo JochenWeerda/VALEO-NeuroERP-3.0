@@ -136,3 +136,23 @@ def test_bundle_exports_same_typed_openapi_as_generated_command_router():
     assert exported['components']==runtime['components']
     row=exported['components']['schemas'][spec().name+'_record_v1']
     assert {'tenant_id','id','version','description','quantity'} <= set(row['required'])
+
+
+@pytest.mark.parametrize('case',['unknown','stale','required','duplicate','reserved'])
+def test_evolution_uses_trusted_registration_and_rejects_unsafe_changes(case, monkeypatch, tmp_path):
+    import json
+    from app.services.studio_entity_contracts import EntitySpec, EntityExtensionIn, contract_hash
+    from app.services.studio_entity_evolution import compile_extension
+    from app.services import studio_validation
+    spec = EntitySpec(name='studio_evolution_probe',domain='crm',label='Synthetic',
+        columns=[{'name':'name','type':'text','nullable':False}])
+    config=tmp_path/'catalog.yaml';config.write_text(json.dumps({'generated_entities':[{'spec':spec.model_dump()}]}),encoding='utf-8')
+    monkeypatch.setattr(studio_validation,'_CONFIG_PATH',config)
+    body={'name':spec.name,'expected_contract_hash':contract_hash(spec),
+          'columns':[{'name':'note','type':'text','nullable':True}]}
+    if case=='unknown':body['name']='studio_unknown'
+    if case=='stale':body['expected_contract_hash']='0'*64
+    if case=='required':body['columns'][0]['nullable']=False
+    if case=='duplicate':body['columns'][0]['name']='name'
+    if case=='reserved':body['columns'][0]['name']='tenant_id'
+    with pytest.raises(ValueError):compile_extension(EntityExtensionIn.model_validate(body))

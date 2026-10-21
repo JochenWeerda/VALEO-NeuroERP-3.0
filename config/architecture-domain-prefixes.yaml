@@ -617,6 +617,7 @@ exact_service_stems:
   studio_entity_contracts: platform
   studio_entity_commands: platform
   studio_entity_router: platform
+  studio_entity_evolution: platform
   mcp_studio_plans: platform
   studio_migration_store: platform
   studio_migration: platform

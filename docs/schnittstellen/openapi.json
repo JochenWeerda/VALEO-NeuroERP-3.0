@@ -63062,6 +63062,55 @@
         "title": "EntityColumn",
         "type": "object"
       },
+      "EntityExtensionIn": {
+        "additionalProperties": false,
+        "description": "Only the trusted registration supplies the previous schema and permissions.",
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/EntityColumn"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Columns",
+            "type": "array"
+          },
+          "expected_contract_hash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Expected Contract Hash",
+            "type": "string"
+          },
+          "name": {
+            "pattern": "^studio_[a-z][a-z0-9_]{0,27}$",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "expected_contract_hash",
+          "columns"
+        ],
+        "title": "EntityExtensionIn",
+        "type": "object"
+      },
+      "EntityExtensionOut": {
+        "properties": {
+          "base_contract_hash": {
+            "title": "Base Contract Hash",
+            "type": "string"
+          },
+          "bundle": {
+            "$ref": "#/components/schemas/EntityBundleOut"
+          }
+        },
+        "required": [
+          "base_contract_hash",
+          "bundle"
+        ],
+        "title": "EntityExtensionOut",
+        "type": "object"
+      },
       "EntitySpec": {
         "additionalProperties": false,
         "properties": {
@@ -406494,6 +406543,54 @@
           }
         ],
         "summary": "Stammdatenvertrag in pruefbare Schema-, Command- und Maskenartefakte uebersetzen",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/studio/entity-extension-bundle": {
+      "post": {
+        "operationId": "studio_entity_extension_api_v1_studio_entity_extension_bundle_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntityExtensionIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityExtensionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Registrierte Studio-Stammdaten additiv erweitern, ohne Bereitstellung",
         "tags": [
           "ui",
           "studio",

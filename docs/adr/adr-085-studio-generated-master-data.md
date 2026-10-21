@@ -54,3 +54,21 @@ Der Stammdatenvertrag ersetzt weder eine unbekannte Fachregel noch den Nachweis
 aller Finanz-, Beleg-, Lager- und Workflowketten. Das bisherige grain.v1-Profil
 wird nicht pauschal fuer neue Schreibmasken geoeffnet. Nicht bestandene
 Dreikanal-/Browser-/Fachkettenpruefungen bleiben Freigabevoraussetzung.
+
+
+## Additive Weiterentwicklung registrierter Entitaeten
+
+Der Erweiterungsauftrag enthaelt ausschliesslich Kennung, erwarteten
+Basisfingerprint und neue nullable Spalten. Das bisherige Schema kommt aus
+der geprueften serverseitigen Registrierung. Typwechsel, Entfernen, neue
+Pflichtspalten ohne Backfill, reservierte Namen und fremde Tabellen bleiben
+ausgeschlossen. Die Migration sperrt Daten-/Ereignistabelle und prueft beide
+Basis-Markierungen vor dem ersten ALTER; neue Markierungen werden in derselben
+Migration geschrieben. Bestehende Datensaetze und unveraenderliche Auditbelege
+bleiben erhalten. Ein alter Runtimevertrag sperrt danach. Das neue Paket
+setzt Schreibfreigabe und Agentenrollen erneut auf deaktiviert; Bereitstellung
+und positive Abnahme sind ein expliziter Integrationsschritt. Die unveraenderte
+Command-Schemaversion v1 wird nur um optionale Felder erweitert, die neue
+Vertragsfassung besitzt einen anderen Inhaltsfingerprint und Migrationsstand.
+Inkompatible Fach-/Schemaveraenderungen benoetigen einen eigenen versionierten
+Domaincommand und sind nicht durch diesen Compiler freigegeben.

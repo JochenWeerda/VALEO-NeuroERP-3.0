@@ -58,7 +58,7 @@ separat zu bewerten und hier nicht als behoben erklaert.
 
 ## Weiter offene Abnahmen
 
-Allgemeine Schemaerweiterung bereits bereitgestellter Entity-Vertraege,
+Nicht additive Schemaaenderungen bereits bereitgestellter Entity-Vertraege,
 weitere Domaenen, fachliche Referenz-/Freigaberegeln und die positive
 UI/CLI/MCP-Publikationsabnahme sind nicht aus einem Typvertrag ableitbar.
 Diese Luecken sind keine automatisch bestandenen Simulationen. Das Gesamtziel
@@ -106,3 +106,69 @@ angefordert; bei Nutzerhinweis auf Update keine erzwungene WSL-Beendigung.
 Nach bestaetigtem Update: alle laufenden Gesundheitschecks gruen, valeo_probe
 erreichbar, Revision merge_hr_tax_20261019. Kein Reset, keine neue DB/Container.
 Lokaler SQL-Nachlauf und positive Dreikanalabnahme bleiben gesonderte Nachweise.
+
+
+Lokaler Nachlauf nach Wiederherstellung:25 bestanden,20 Warnungen,125,93s
+(test_studio_entity_generation, test_studio_release_sql,
+test_studio_status_idempotency). Saemtliche Anwendungsimporte aus unveraendertem
+kanonischem Quellbaum nachgewiesen. Warnungen enthalten bestehende doppelte
+CRM-Operation-IDs; daraus wird keine vollstaendige OpenAPI-Fehlerfreiheit behauptet.
+Gemeinsamer Pruefstand ist aelter als HEAD (merge_hr_tax_20261019) und besitzt
+nicht alle kanonischen Tabellen; seine physische Katalogabweichung wird deshalb
+nicht blind eingecheckt. Katalogkorrektur8c3dfac50 aendert nachweislich nur
+read_by von domain_shared.tenants. Aktueller CI-PostgreSQL-/Docs-Nachlauf gruen.
+
+
+## Additive Erweiterung
+
+`python -m valeo_cli studio entitaet-erweitern erweiterung.json --ausgabe paket.json`
+verwendet denselben Authoring-Rechteweg wie die Neugenerierung:
+POST /api/v1/studio/entity-extension-bundle. Beispiel:
+
+```json
+{"name":"studio_silo_gruppen","expected_contract_hash":"64-stelliger Basisfingerprint",
+ "columns":[{"name":"lieferhinweis","type":"text","nullable":true}]}
+```
+
+Der reale Fingerprint stammt aus dem registrierten Vertrag; das Beispiel
+ist bewusst kein ausfuehrbarer Scheinwert. Der Server akzeptiert kein
+uebermitteltes Altschema. Nur neue optionale Felder, kein Typwechsel oder
+Datenverlust. Antwort enthaelt base_contract_hash und bundle; die Migration
+prueft beide Tabellenmarkierungen unter exklusiver Sperre und aktualisiert sie
+atomar. Kein DDL im HTTP-/CLI-Aufruf. Neue Registrierung bleibt deaktiviert.
+Ein bestehender alter Router sperrt nach der Migration mit409, bis die passende
+Vertragsfassung ausgeliefert ist. Keine automatische Publikation oder Freigabe.
+
+Der neue Dreikanalvertrag verwendet den echten MCP-HTTP-Einstieg einschliesslich
+Scopepruefung und Weiterleitung desselben Tokens an den echten Commandrouter.
+Nur die Netzverbindung wird im Test lokal zurueckgeleitet. Signatur, Rollen,
+Tenant, SQL, Audit und Outbox bleiben real. Die synthetische Definition wird
+nur im Testregister eingesetzt und ist kein Nachweis einer Studio-Publikation
+oder realen visuellen Browserabnahme.
+
+
+## Abnahme der Kanal- und Erweiterungsintegration
+
+28 Generator-/Negativvertraege bestanden. Kombinierte SQL-Abnahme:27 bestanden,
+20 bestehende Warnungen,94,31s. Darin echte signierte HTTP-Anlage, identische
+CLI-Wiederholung ohne Dublette und MCP-Aenderung mit demselben Commandrouter;
+fehlender Scope vor Weiterleitung403, fehlende Rolle403, fremder Mandant404,
+veraltete Version409, fremder Urheber beim Replay409, injizierter Tenant schon
+an der zentralen Grenze403. Genau eine Zeile/zwei Audit-Outboxereignisse.
+
+Erweiterungspaket ueber Authoring-API und CLI identisch; vor Ausfuehrung keine
+Schema-/Datenwirkung. Generierte Migration in derselben Rollbacktransaktion
+ausgefuehrt: vorhandener Datensatz unveraendert mit neuem Feld null, alter
+Router409, neuer Vertrag kann versionsgebunden aendern. Erneute Migration
+scheitert am Basisnachweis, Daten bleiben erhalten. Alles am gemeinsamen
+valeo_probe, keine zusaetzlichen DB/Container/Reset.
+
+Alle lokalen Inventar-/Handbuch-/Architektur-/Ratschengates gruen.
+OpenAPI genau ein neuer Authoringpfad; vorhandene Pfade unveraendert.
+314/314 Services,472/472 Endpointmodule,931/931 Frontendrouten zugeordnet.
+
+Katalog-Fix-CI: alle zwoelf vorgeschalteten Qualitaetsjobs gruen, SonarCloud
+separat rot: new_reliability_rating2 statt1 (cases.py S1226) und new_coverage
+59,6 statt mindestens80. Keine Schwellwertsenkung oder Umdeutung in Erfolg.
+Live-Studio-Publikation schreibender Stammdaten und reale visuelle Browserabnahme
+bleiben offen; dieser Testregister-Nachweis ersetzt sie nicht.

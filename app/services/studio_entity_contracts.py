@@ -131,3 +131,16 @@ def response_models(spec):
     result = create_model(spec.name + '_result_v1',success=(Literal[True],...),actionKey=(str,...),
                           mode=(Literal['execute','dryRun','validate','propose'],...),result=(row | preview,...))
     return row, page, result
+
+
+class EntityExtensionIn(BaseModel):
+    """Only the trusted registration supplies the previous schema and permissions."""
+    model_config = ConfigDict(extra='forbid', strict=True)
+    name: str = Field(pattern=r'^studio_[a-z][a-z0-9_]{0,27}$')
+    expected_contract_hash: str = Field(pattern=r'^[0-9a-f]{64}$')
+    columns: list[EntityColumn] = Field(min_length=1, max_length=30)
+
+
+class EntityExtensionOut(BaseModel):
+    base_contract_hash: str
+    bundle: EntityBundleOut

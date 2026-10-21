@@ -491,3 +491,18 @@ def studio_entity_bundle(body: EntitySpec, tenant_id: str = Depends(get_tenant_i
 
 from app.services.studio_entity_router import install_registered_entities
 install_registered_entities(router)
+
+
+from app.services.studio_entity_contracts import EntityExtensionIn, EntityExtensionOut
+
+
+@router.post('/entity-extension-bundle', response_model=EntityExtensionOut,
+             summary='Registrierte Studio-Stammdaten additiv erweitern, ohne Bereitstellung')
+def studio_entity_extension(body: EntityExtensionIn, tenant_id: str = Depends(get_tenant_id),
+                            user: dict = Depends(beleg_write)):
+    from app.services.studio_entity_evolution import compile_extension
+    _actor(user)
+    try:
+        return compile_extension(body)
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error

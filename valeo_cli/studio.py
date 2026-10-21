@@ -229,8 +229,9 @@ def run(args, call, out, stdin) -> int:
             out(f"  {row['screen_id']:<48} {row['title']}")
         out(f"{len(rows)} vorhandene Masken uebernehmbar.")
         return 0
-    if cmd == "entitaet-generieren":
-        report = call("POST", f"{STUDIO}/entity-bundle", _read_definition(args.datei, stdin))
+    if cmd in {"entitaet-generieren", "entitaet-erweitern"}:
+        endpoint = "entity-extension-bundle" if cmd == "entitaet-erweitern" else "entity-bundle"
+        report = call("POST", f"{STUDIO}/{endpoint}", _read_definition(args.datei, stdin))
         _write(args.ausgabe, report, out)
         return 0
     if cmd == "plan-speichern":
@@ -366,6 +367,9 @@ def add_parser(sub) -> None:
     k.add_argument("--json", action="store_true")
     q = s.add_parser("quellen", help="Vorhandene Masken, die als Ausgangsfassung uebernehmbar sind")
     q.add_argument("suche", nargs="?")
+    extension = s.add_parser("entitaet-erweitern", help="Registrierte Studio-Stammdaten additiv erweitern (nur Paket)")
+    extension.add_argument("datei", help="JSON mit name, expected_contract_hash und nullable columns")
+    extension.add_argument("--ausgabe", metavar="DATEI")
     entity = s.add_parser("entitaet-generieren", help="Schema, Commands und Maske aus einem Stammdatenvertrag generieren")
     entity.add_argument("datei")
     entity.add_argument("--ausgabe")

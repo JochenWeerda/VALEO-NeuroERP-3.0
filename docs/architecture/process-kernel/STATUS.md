@@ -850,3 +850,22 @@ neue CRM-/Agrar-/Lager-Stammdaten implementiert, standardmaessig deaktiviert.
 unerreichbarem gemeinsamem Docker-/PostgreSQL-Pruefstand noch offen; kein Reset
 oder Ersatz. Details: docs/quality-assurance/studio-generated-entities-20261021.md.
 Kein Abschluss der universellen CRUD-/Schema-/Fachkettenaufgabe behauptet.
+
+
+### Studio-Stammdaten: Nachlauf 2026-10-21
+
+SQL-CI606 bestanden/5 andere uebersprungen; alle16 neuen Generierungsvertraege
+bestanden. Nach Docker-Update lokale25 SQL-/Freigabe-/Statusvertraege gruen.
+Katalogkorrektur8c3dfac50 synchronisiert ausschliesslich den Leser-Verweis des
+Generators auf tenants. Keine physische Katalogersetzung aus aelterem Pruefstand.
+Positiver Kanalvertrag und Schemaerweiterungen bleiben im laufenden Claim;
+keine universelle Studio-Publikation oder vollstaendige Fachmigration behauptet.
+Details: [QA](../../quality-assurance/studio-generated-entities-20261021.md).
+
+
+Studio-Integration (21.10., Fortsetzung): additive nullable Erweiterungen
+registrierter Stammdaten ueber hashgebundenes Paket/API/CLI nachgewiesen.
+28 Unit-/27 SQL-Vertraege gruen, darunter HTTP-/CLI-/MCP-Commandkette und
+Altdatenerhalt mit gesperrtem alten Runtimevertrag nach Schemaerweiterung.
+Alle lokalen Driftgates bestanden. Schreibende Live-Studio-Publikation und
+visuelle Abnahme bleiben offen; SonarCloud separat rot, keine Gateabsenkung.
