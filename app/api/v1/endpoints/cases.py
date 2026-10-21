@@ -140,10 +140,10 @@ async def list_cases(
     limit: int = Query(50, ge=1, le=200, description="Maximum number of items to return"),
 ):
     """List support cases from crm-service with pagination."""
-    tenant_id = _MANDANT.get()  # der Filter ist Pflicht, nicht Wunsch
+    verified_tenant = _MANDANT.get()  # Queryparameter bleibt nur fuer API-Kompatibilitaet.
     try:
         cases, total = await crm_list_cases(
-            tenant_id=tenant_id,
+            tenant_id=verified_tenant,
             status=status,
             priority=priority,
             assigned_to=assigned_to,

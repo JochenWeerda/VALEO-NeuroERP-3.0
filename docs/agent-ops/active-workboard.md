@@ -19335,3 +19335,12 @@ sonar-project.properties, eigener Klassifikationsvertrag und QA/Workboard.
 Ziel: Tests positiv als Tests klassifizieren, Produktivcode weiter analysieren;
 keine Coverage-Grenze, Baseline oder Produktivcode-Coverage-Ausnahme veraendern.
 Quelle: offizielle Sonar-Dokumentation zu test.inclusions und Quell-/Testscope.
+
+
+SONAR-CASES-IDENTITY und SONAR-TEST-CLASSIFICATION Implementierungsabnahme:
+25 direkte Kontext-/Scope-/Sonar-Runtimevertraege gruen. Separater
+verified_tenant statt Queryparameter-Wiederzuweisung; HTTP-/Rechtevertrag
+unveraendert. Positive Testklassifikation statt Testausschluss; Produktionsscope,
+Coverage-Ausnahmen und Schwellen unveraendert. QA sonar-scope-and-cases-20261021.md.
+Neuer CI-/Sonar-Nachlauf bleibt abzuwarten; echte globale Coverage-Luecken
+werden weder verdeckt noch als geschlossen behauptet.
