@@ -19051,3 +19051,17 @@ Belegidentitaet). Claudes Quell-/Testkorrekturen bleiben erhalten. Alle
 Projektions-/Architekturgates gruen; 3242 OpenAPI-Pfade, 931 Routen,
 307 Services, 472 Endpunktmodule. follow-redirects-Sicherheitsbefunde
 bleiben als eigener Folgeschritt offen. Kein pauschal gruener CI-Status.
+
+
+## NODE-FOLLOW-REDIRECTS-20261021 - reserviert, Codex
+
+Ziel: zwei neue High-Advisories GHSA-q3jh-wrc6-jgq8 und GHSA-8r9p-f939-6h3c
+mit Herstellerfassung 1.16.1 beheben. Vor Umsetzung Primaerquellen geprueft;
+keine vorhandene offene Zustaendigkeit fuer diese Befunde gefunden.
+Besitz root package.json nur follow-redirects-Override, pnpm-lock.yaml nur
+zugehoerige Aufloesung, bestehende Backport-Reviewhashes nur nach erneuter
+Verifikation des unveraenderten Quellpatches, eigener Runtimevertrag/QA/Workboard.
+Abnahme: echter Production-Audit, boesartige Arrayheader/Regex-Headernamen und
+normale Redirects, bestehende Backport-Failclosed-Vertraege, frozen Lock.
+Keine Severity-/Workflowausnahme, kein Eingriff in gemeinsame node_modules,
+keine DB/Container. Andere Agenten behalten ihre Fach-/Maskenclaims.
