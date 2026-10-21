@@ -19453,3 +19453,6 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 
 
 **STUDIO-LIVE-PROBE Identitaetshartung:** Router behandelt bislang nur identity_type=agent als Agent; service/fehlende Typen fallen auf human zurueck. Derselbe Routerbesitz erweitert auf ausdrueckliche menschliche Kennzeichnung, Agent-/Servicekonto nur bei aktivierter bestehender Bereichsrolle, unbekannter/fehlender Typ gesperrt. Eigene signierte Negativtests; synthetische menschliche Entity-Testtokens werden ausdruecklich human gekennzeichnet. Keine produktive Berechtigung erweitert.
+
+
+**STUDIO-LIVE-PROBE Historien-/Statusanzeige:** reale finale Sichtung zeigt gueltige aktive Veroeffentlichung in der Historie, waehrend der pauschale Gatesatz weiterhin erneute Freigabe fordert. Besitz zusaetzlich features/screen-studio/ScreenStudioPage.tsx, neue reine StudioGateSummary-Komponente und deren UI-Vertraege. Anzeige trennt gespeicherten Veroeffentlichungsstatus von erneuter Autorpruefung; fehlender Pruefbericht darf keinen gruenen Text liefern. Nur erwarteten non_temporary-Hinweis der unveraenderten bereits publizierten Autorvorlage erklaeren; keine Serverfreigabe oder sonstigen Fehler unterdruecken. Historien-Invalidierung auf den bestehenden mandantenpraefigierten Query-Key berichtigen.
