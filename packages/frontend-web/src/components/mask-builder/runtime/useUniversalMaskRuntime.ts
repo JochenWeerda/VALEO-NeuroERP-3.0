@@ -8,6 +8,7 @@ import { applyOverlay, hashOverlay, type ScreenOverlay } from '../render-plan/ov
 import type { DataBindingPlan, LookupBinding, TableQueryState } from './types'
 import { compileDataBindingPlan } from './compile-data-binding-plan'
 import { applyClientTableQuery } from './client-table-query'
+import { tableSourceRequest } from './table-source-request'
 import { defaultTableQueryState, toQueryParams } from './table-query-state'
 import { appendQueryParams } from './data-source-resolver'
 import { apiClient } from '@/lib/api-client'
@@ -257,10 +258,15 @@ export function useUniversalMaskRuntime({
 
   const tableResults = useQueries({
     queries: tableEntries.map(([tableKey, tb]) => ({
-      queryKey: tb.clientQuery
-        ? [screenId, entityId, 'table', tableKey]
-        : [screenId, entityId, 'table', tableKey, resolvedTableQueryStates[tableKey]],
+      queryKey: tb.clientQuery && !tb.sourceKey
+        ? [tenantId, screenId, entityId, 'table', tableKey]
+        : [tenantId, screenId, entityId, 'table', tableKey, resolvedTableQueryStates[tableKey]],
       queryFn: async () => {
+        const shared = tableSourceRequest(screenId, entityId, tb, resolvedTableQueryStates[tableKey] ?? defaultTableQueryState(25))
+        if (shared) {
+          const res = await apiClient.get<{ data: { items: Record<string, unknown>[]; total: number } }>(shared)
+          return res.data.data
+        }
         const params = tb.clientQuery
           ? { limit: String(tb.fetchLimit ?? 500) }
           : toQueryParams(resolvedTableQueryStates[tableKey] ?? defaultTableQueryState(25))
@@ -282,7 +288,7 @@ export function useUniversalMaskRuntime({
       const loaded = Array.isArray(data)
         ? data as Record<string, unknown>[]
         : Array.isArray((data as { items?: unknown }).items) ? (data as { items: Record<string, unknown>[] }).items : undefined
-      if (tb.clientQuery && loaded) {
+      if (tb.clientQuery && !tb.sourceKey && loaded) {
         const state = resolvedTableQueryStates[tableKey] ?? defaultTableQueryState(25)
         const page = applyClientTableQuery(loaded, state)
         rows[tableKey] = page.rows

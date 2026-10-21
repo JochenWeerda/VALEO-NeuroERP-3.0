@@ -693,14 +693,22 @@ async def get_mask_source_data(request: Request, mask_id: str, source_key: str,
                                page: int = Query(1, ge=1, le=1000000),
                                limit: int = Query(50, ge=1, le=100),
                                q: str | None = Query(None, max_length=200),
+                               table_key: str | None = None,
+                               sort: str | None = None,
+                               sort_dir: str = "asc",
+                               filter_plan: str | None = Query(None, max_length=50000),
                                authorization: str | None = Header(None),
                                tenant_id: str = Depends(get_tenant_id),
                                user: dict = Depends(get_current_user)) -> MaskDataReadOut:
-    if set(request.query_params) - {"entity_id", "page", "limit", "q"}:
+    if set(request.query_params) - {"entity_id", "page", "limit", "q", "table_key", "sort", "sort_dir", "filter_plan"}:
         raise HTTPException(422, "Unbekannter Parameter im Maskendatenabruf")
     try:
+        import json
+        filters = json.loads(filter_plan, object_pairs_hook=mask_data_read._json_object,
+                             parse_constant=mask_data_read._json_constant) if filter_plan is not None else {}
         body = MaskDataReadIn(screen_id=_normalize_mask_id(mask_id), source_key=source_key,
-                              entity_id=entity_id, page=page, limit=limit, q=q)
-    except ValidationError as error:
+                              entity_id=entity_id, page=page, limit=limit, q=q,
+                              table_key=table_key, sort=sort, sort_dir=sort_dir, filter_plan=filters)
+    except (ValidationError, ValueError) as error:
         raise HTTPException(422, "Ungueltiger Maskendatenauftrag") from error
     return await mask_data_read.read_async(body, tenant_id, authorization)

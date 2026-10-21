@@ -283,6 +283,10 @@ def parser() -> argparse.ArgumentParser:
     d.add_argument("--seite", type=int, default=1)
     d.add_argument("--limit", type=int, default=50)
     d.add_argument("--suche")
+    d.add_argument("--tabelle")
+    d.add_argument("--sortieren")
+    d.add_argument("--richtung", choices=["asc", "desc"], default="asc")
+    d.add_argument("--filter", dest="tabellenfilter", metavar="DATEI|-", help="Filterplan als JSON-Objekt")
     a = sub.add_parser("aktionen", help="Aktionen einer Maske")
     a.add_argument("maske")
     z = sub.add_parser("zeigen", help="Vertrag einer Aktion")
@@ -343,6 +347,12 @@ def main(argv: list[str] | None = None, *, http: httpx.Client | None = None, out
                 params["entity_id"] = args.id
             if args.suche is not None:
                 params["q"] = args.suche
+            if args.tabelle is not None:
+                params["table_key"] = args.tabelle
+            if args.sortieren is not None:
+                params.update(sort=args.sortieren, sort_dir=args.richtung)
+            if args.tabellenfilter is not None:
+                params["filter_plan"] = json.dumps(_read_data(args.tabellenfilter, stdin), ensure_ascii=False)
             path = f"/api/v1/masks/{quote(args.maske, safe='')}/data/{quote(args.quelle, safe='')}?" + urlencode(params)
             out(json.dumps(_request(http, token, "GET", path), ensure_ascii=False, indent=2))
             return 0

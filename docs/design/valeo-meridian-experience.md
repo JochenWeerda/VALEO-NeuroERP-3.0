@@ -380,3 +380,13 @@ Datenleseweg als fuehrende Quellenbindung. Das fuehrt kein zweites Layout oder
 handgebaute Ersatzmasken ein. Lokale Tabellenprojektionen bleiben in der
 Meridian-Laufzeit, bis deren zentrale Dreikanalgleichheit separat abgenommen ist.
 Ein bestandener Domain-Lesetest allein ist kein visueller Readinessnachweis.
+
+
+## Zentrale Tabellenprojektion (21.10.2026)
+
+Explizite GET-Quellen ohne Serverpagination laufen nun zentral ueber den
+gemeinsamen Maskendatenweg. RenderPlan und BindingPlan bleiben fuehrend; keine
+Seiten-Sonderimplementierung. Serverantworten werden nicht nochmals lokal
+gefiltert oder paginiert. Alte Tab-Endpunkte ohne Quellenbindung behalten
+ihren bisherigen Vertrag und sind damit noch nicht kanalgleich zertifiziert.
+Siehe studio-table-query-20261021.md fuer Abnahme und Begrenzungen.

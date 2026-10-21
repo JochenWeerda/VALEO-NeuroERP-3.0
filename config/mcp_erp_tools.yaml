@@ -1684,6 +1684,20 @@ tools:
         page: { type: integer, minimum: 1, maximum: 1000000 }
         limit: { type: integer, minimum: 1, maximum: 100 }
         q: { type: string, nullable: true, maxLength: 200 }
+        table_key: { type: string }
+        sort: { type: string }
+        sort_dir: { type: string, enum: [asc, desc] }
+        filter_plan:
+          type: object
+          maxProperties: 20
+          additionalProperties:
+            type: object
+            additionalProperties: false
+            required: [op, value]
+            properties:
+              op: { type: string, enum: [eq, neq, contains, lt, lte, gt, gte, in, between] }
+              value: {}
+              label: { type: string, nullable: true, maxLength: 200 }
       required: [screen_id, source_key]
     output_schema:
       type: object

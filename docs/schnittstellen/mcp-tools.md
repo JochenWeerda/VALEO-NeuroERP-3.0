@@ -3090,6 +3090,53 @@ Liest eine deklarierte GET-Datenquelle derselben mandantengenauen Maske wie Huma
       "type": "string",
       "nullable": true,
       "maxLength": 200
+    },
+    "table_key": {
+      "type": "string"
+    },
+    "sort": {
+      "type": "string"
+    },
+    "sort_dir": {
+      "type": "string",
+      "enum": [
+        "asc",
+        "desc"
+      ]
+    },
+    "filter_plan": {
+      "type": "object",
+      "maxProperties": 20,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "op",
+          "value"
+        ],
+        "properties": {
+          "op": {
+            "type": "string",
+            "enum": [
+              "eq",
+              "neq",
+              "contains",
+              "lt",
+              "lte",
+              "gt",
+              "gte",
+              "in",
+              "between"
+            ]
+          },
+          "value": {},
+          "label": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 200
+          }
+        }
+      }
     }
   },
   "required": [

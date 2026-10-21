@@ -19014,7 +19014,7 @@ STUDIO-MIGRATION-ENGINE bleibt in Arbeit. QA:
 docs/quality-assurance/studio-multichannel-read-20261020.md.
 
 
-## STUDIO-TABLE-QUERY-20261020 - reserviert, Codex
+## STUDIO-TABLE-QUERY-20261020 - abgeschlossen, Codex
 
 Owner Codex. Unveraendertes Gesamtziel made by Studio: gleiche Tabellenfunktion
 in Human/CLI/MCP, kein Qualitaetssiegel aus blossen Metadaten. Besitz neue
@@ -19029,3 +19029,17 @@ Sortierung, richtige zweite Seite, gleicher Domain-/Mandanten-/Rollenweg;
 unvollstaendige Quellen duerfen keinen vollstaendigen Tabellenstand behaupten.
 Keine neue DB/Container/Reset, bestehender valeo_probe mit Rollbackdaten.
 Bestehende Server-Paging-Vertraege werden nicht still auf lokal umgedeutet.
+
+
+Abnahme 21.10.2026: 103 Backendtests, sieben Frontendtests, TypeScript und alle
+lokalen Projektions-/Architekturgates gruen. Echte signierte drei-Kanal-
+Debitorenabfrage mit zwei Mandanten, zweite Seite, Filter, gleiche Ergebnisse.
+Quellen werden vor lokaler Projektion vollstaendig und begrenzt gesammelt;
+Wiederholungen/unvollstaendige Bestaende scheitern. Kein allgemeines
+Qualitaetssiegel: Serverpagination/alte Tab-Quellen, Snapshotstabilitaet,
+versionsgebundene Releaseevidenz, allgemeine CRUD-/Schema-Verdrahtung und
+Altmaskenmigration bleiben Folgearbeit. QA studio-table-query-20261021.md.
+CI-Nachlauf 7bb8e4858: Plattform/OpenAPI/SQL/Security-Agent gruen; Quality/CI-CD
+rot wegen Artikel-Zeilenformen/Identitaetstest; Security Scan wegen zwei neuen
+follow-redirects-Advisories. Incoming main seitdem weiterentwickelt, vor
+weiterer Korrektur integriert/pruefen. Keine Gates abgeschwaecht.

@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-20
+last_reviewed: 2026-10-21
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -211,6 +211,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `mask_commands` | Statusaktionen einer Maske als Kommando-Weg (MASK-COMMANDS-ROLLOUT-20261019). |
 | `mask_data_read` | Shared GET-source access for Human, CLI and MCP; no SQL or alternate business rights. |
 | `mask_rollout_summary_service` | Data service for batch mask rollout screen-summary endpoints (Waves 42–51). |
+| `mask_table_query` | Deterministic table projection; all channels share this implementation. |
 | `mcp_beleg_tools` | Lesende MCP-Werkzeuge fuer Belege (BELEG-013). |
 | `mcp_execution_service` | Authenticated ERP adapters; a catalog entry alone never enables execution. |
 | `mcp_mask_actions` | Generische MCP-Werkzeuge fuer Maskenaktionen — eine Fachaktion, derselbe Kommandoweg wie die Maske. |

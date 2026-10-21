@@ -107,3 +107,13 @@ Domain-Antwort; Browserprojektionen fuer lokale Tabellenfilter/-sortierung und
 API-spezifische Paging-Aliasse muessen im weiteren Dreikanalvertrag noch
 vereinheitlicht werden. Der neue Weg bescheinigt noch keine vollständige
 Abnahme aller Quellen oder Tabellenfunktionen.
+
+
+## Tabellenvertrag (21.10.2026)
+
+Der gemeinsame Datenleseweg akzeptiert table_key, sort, sort_dir und filter_plan.
+Explizite Quellen lokaler Tabellen verwenden denselben begrenzten Projektor in
+Human-Runtime, CLI und MCP; page/skip/offset werden am deklarierten Fachvertrag
+ausgerichtet. Unvollstaendige Quellen scheitern statt Teildaten zu filtern.
+Serverpagination erfordert passende deklarierte Such-/Sortier-/Filterparameter.
+Details und Grenzen: docs/quality-assurance/studio-table-query-20261021.md.

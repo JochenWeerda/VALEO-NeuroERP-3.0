@@ -33,6 +33,7 @@ export interface TableQueryState {
 
 export interface TableBinding {
   tableKey: string
+  sourceKey?: string
   endpoint: string
   requiresServerQuery: boolean
   /** Ohne Serverblaetterung: einmal bis `fetchLimit` laden, Suche/Filter/Sortierung/Seite im Browser. */

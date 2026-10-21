@@ -2,6 +2,8 @@
 import json
 import os
 import re
+import time
+from functools import lru_cache
 from urllib.parse import parse_qsl, quote, urlencode, urlsplit, urlunsplit, unquote
 
 import httpx
@@ -119,29 +121,103 @@ def _append(parts, chunk, size):
     return size
 
 
+@lru_cache(maxsize=1024)
+def _query_parameters(path):
+    # Query-name translation only, never an authorization heuristic.
+    from fastapi.routing import APIRoute
+    from starlette.routing import Match
+    from main import app
+    scope = {"type": "http", "method": "GET", "path": unquote(urlsplit(path).path), "root_path": ""}
+    def collect(dependant):
+        names = {parameter.alias for parameter in dependant.query_params}
+        for dependency in dependant.dependencies:names.update(collect(dependency))
+        return names
+    for route in app.routes:
+        if isinstance(route, APIRoute) and route.matches(scope)[0] == Match.FULL:
+            return frozenset(collect(route.dependant))
+    return frozenset()
+
+
+def _page_path(path, page, limit, aliases):
+    parts = urlsplit(path)
+    paging = {"page": page, "skip": (page-1)*limit, "offset": (page-1)*limit,
+              "limit": limit, "page_size": limit}
+    pairs = [(key,value) for key,value in parse_qsl(parts.query, keep_blank_values=True) if key not in paging]
+    pairs.extend((key,str(value)) for key,value in paging.items() if key in aliases)
+    return urlunsplit(("", "", parts.path, urlencode(pairs), ""))
+
+
+def _sequence(body, tenant):
+    if body.table_key is None:
+        output = yield resolve_source(body, tenant)
+        return output
+    from app.services.mask_table_query import TableCollector, table_definition, project_rows
+    try:
+        definition = get_screen_definition(body.screen_id, tenant_id=tenant)
+    except StudioStorageUnavailable as error:
+        raise HTTPException(503, "Studio-Masken derzeit nicht verfuegbar") from error
+    if definition is None:raise HTTPException(404, "Maske im Mandanten nicht gefunden")
+    table = table_definition(definition, body)
+    project_rows([], table, body)  # Validate field policy before the first network/SQL access.
+    raw = body.model_copy(update={"table_key": None, "q": None, "sort": None, "filter_plan": {}, "page": 1, "limit": 50})
+    path = resolve_source(raw, tenant)
+    aliases = _query_parameters(path)
+    can_page = bool(aliases & {"page", "skip", "offset"})
+    if table.get("serverPagination") is True:
+        if not can_page:raise HTTPException(409, "Serverblaetterung besitzt keinen passenden Fachvertrag")
+        required = {"sort", "sort_dir"} if body.sort else set()
+        if body.filter_plan:required.add("filter_plan")
+        if not required <= aliases:raise HTTPException(409, "Fachquelle muss ihren Sortier-/Filtervertrag erweitern")
+        path = _page_path(path, body.page, body.limit, aliases)
+        parts=urlsplit(path);pairs=parse_qsl(parts.query,keep_blank_values=True)
+        params={}
+        if body.q is not None:
+            search = "q" if "q" in aliases else "search" if "search" in aliases else None
+            if not search:raise HTTPException(409, "Fachquelle besitzt keinen Suchvertrag")
+            params[search]=body.q
+        if body.sort:params.update(sort=body.sort,sort_dir=body.sort_dir)
+        if body.filter_plan:params["filter_plan"]=json.dumps({key:value.model_dump() for key,value in body.filter_plan.items()},separators=(",",":"))
+        pairs=[(key,value) for key,value in pairs if key not in params]+list(params.items())
+        output=yield urlunsplit(("","",parts.path,urlencode(pairs),""))
+        return output
+    collector = TableCollector(table, body)
+    while True:
+        output = yield _page_path(path, collector.page, collector.fetch_limit, aliases)
+        projected = collector.receive(output.data, can_page)
+        if projected is not None:return output.model_copy(update={"data": projected})
+
+
 def read_sync(body: MaskDataReadIn, tenant: str, authorization: str | None, *, transport=None) -> MaskDataReadOut:
     headers = _headers(authorization)
-    path = resolve_source(body, tenant)
+    sequence = _sequence(body, tenant); path = next(sequence)
+    started, consumed = time.monotonic(), 0
     try:
         with httpx.Client(base_url=_base(), timeout=30, transport=transport, follow_redirects=False) as client:
-            with client.stream("GET", path, headers=headers) as response:
-                chunks, size = [], 0
-                for chunk in response.iter_bytes():
-                    size = _append(chunks, chunk, size)
-                return _result(body, response, b"".join(chunks))
+            while True:
+                if time.monotonic()-started > 30:raise HTTPException(503, "Zeitbudget der Tabellenquelle ueberschritten")
+                with client.stream("GET", path, headers=headers) as response:
+                    chunks=[]
+                    for chunk in response.iter_bytes():consumed=_append(chunks,chunk,consumed)
+                    output=_result(body,response,b"".join(chunks))
+                try:path=sequence.send(output)
+                except StopIteration as done:return done.value
     except httpx.HTTPError as error:
         raise HTTPException(503, "Datenquelle derzeit nicht erreichbar") from error
 
 
 async def read_async(body: MaskDataReadIn, tenant: str, authorization: str | None, *, transport=None) -> MaskDataReadOut:
     headers = _headers(authorization)
-    path = resolve_source(body, tenant)
+    sequence = _sequence(body, tenant); path = next(sequence)
+    started, consumed = time.monotonic(), 0
     try:
         async with httpx.AsyncClient(base_url=_base(), timeout=30, transport=transport, follow_redirects=False) as client:
-            async with client.stream("GET", path, headers=headers) as response:
-                chunks, size = [], 0
-                async for chunk in response.aiter_bytes():
-                    size = _append(chunks, chunk, size)
-                return _result(body, response, b"".join(chunks))
+            while True:
+                if time.monotonic()-started > 30:raise HTTPException(503, "Zeitbudget der Tabellenquelle ueberschritten")
+                async with client.stream("GET", path, headers=headers) as response:
+                    chunks=[]
+                    async for chunk in response.aiter_bytes():consumed=_append(chunks,chunk,consumed)
+                    output=_result(body,response,b"".join(chunks))
+                try:path=sequence.send(output)
+                except StopIteration as done:return done.value
     except httpx.HTTPError as error:
         raise HTTPException(503, "Datenquelle derzeit nicht erreichbar") from error
