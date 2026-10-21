@@ -19237,3 +19237,23 @@ Gesamtclaim STUDIO-MIGRATION-ENGINE-20261020 bleibt in arbeit: allgemeine
 CRUD-/Capability-Generierung, Schemaeditor/-bereitstellung und vollstaendige
 kanalweise Fachkettenabnahmen sind hiermit nicht behauptet. Bestehendes
 begrenzt read-only grain.v1-Profil und not_verified bleiben ehrlich ausgewiesen.
+
+
+## STUDIO-GENERATED-ENTITIES-20261021 - reserviert, Codex
+
+Nutzerauftrag: allgemeine CRUD-/Tabellengenerierung und Fachkettenabnahme.
+Eigener Gesamtclaim STUDIO-MIGRATION-ENGINE wird fortgesetzt. Besitz neuer
+studio_entity_contracts/compiler/commands sowie eigener Tests; bestehender
+Migrationscompiler nur notwendige gemeinsame Schemagenerierung, eigene CLI-
+Unterbefehle und Studio-Authoringroute nur Anschluss. Keine fremden Fuhrpark-
+oder Maskenseiten. Gemeinsamer Vertrag generiert typisierte Domaincommands,
+Schemaartefakt, ScreenDefinition und Kanalspezifikationen. Ausschliesslich neue
+Studio-Stammdatentabellen; Fachbuchungen, Zahlungen und Bestaende bleiben in
+registrierten Fachcommands. Rollen aus bestehendem Bereichsmodell, Mandant aus
+verifizierter Identitaet, Idempotenz/Version/Audit transaktional. Keine freie
+SQL-Ausfuehrung oder Aktivierung durch MCP. Bestehende Register statt zweiter
+Rechteverwaltung; ungepruefte Writes bleiben deaktiviert. DDL-Abnahme nur eigene
+transaktionale Tabellen im vorhandenen valeo_probe, kein Reset/DB/Container.
+Abnahme mit zwei Mandanten, Replays, Konflikten, Rollback und echten SQL-Wirkungen;
+keine Umdeutung von Mocktests in volle Fachkettenabnahme. CI-Nachlauf und Doku
+werden als Integrationsvoraussetzung mitgeprueft.
