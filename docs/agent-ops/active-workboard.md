@@ -19324,3 +19324,14 @@ Variable fuer geprueften Mandanten statt Ueberschreiben des ignorierten
 Kompatibilitaetsparameters; eigener direkter Kontext-/Weiterleitungsvertrag,
 QA/Workboard. HTTP-Vertrag, Rechte und Mandantenisolation unveraendert.
 Keine Datenbank-/Container-/Schemaaenderung, keine Sonar-Ausnahme.
+
+
+## SONAR-TEST-CLASSIFICATION-20261021 - reserviert, Codex
+
+Befund: Sonar new_uncovered_lines zaehlt mindestens668 Zeilen einer
+Frontend-Testdatei als ungetesteten Produktionscode. sonar.test.exclusions
+schliesst bisher alle Testmuster aus dem Testbereich aus. Besitz ausschliesslich
+sonar-project.properties, eigener Klassifikationsvertrag und QA/Workboard.
+Ziel: Tests positiv als Tests klassifizieren, Produktivcode weiter analysieren;
+keine Coverage-Grenze, Baseline oder Produktivcode-Coverage-Ausnahme veraendern.
+Quelle: offizielle Sonar-Dokumentation zu test.inclusions und Quell-/Testscope.
