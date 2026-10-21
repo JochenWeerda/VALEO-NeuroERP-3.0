@@ -19444,3 +19444,6 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 
 
 **STUDIO-LIVE-PROBE Erweiterung Dateibesitz:** reale Browserabnahme findet nach erfolgreicher echter CLI-Simulation/Freigabe fehlende Aktionsverdrahtung im StudioRunPage: keine Rechteprojektion und kein onAction. Besitz zusaetzlich pages/admin/studio-run.tsx, zentrale NativeListPage.tsx (generierte Versionspruefung und stabiler Wiederholungsschluessel), eigene UI-Regressionen. Keine individuelle neue Maskenoberflaeche; bestehende ScreenDefinition-/Runtime-/Renderer-/Dialogkette wiederverwenden. Abnahme echte Anlage/Aendern/Deaktivieren im Browser mit serverseitiger Versionierung.
+
+
+**STUDIO-LIVE-PROBE CLI-Nebenbefund/Besitz:** generischer CLI-Aufruf ohne --idempotenz sendet keinen Schluessel (generierter Command422); --version wird im generischen Zweig ignoriert. Besitz zusaetzlich valeo_cli/cli.py und __main__.py, eigene CLI-Regression. Automatischer UUID-Schluessel und Wiederholungshinweis fuer generierte Entity-Commands, verpflichtende gelesene Version beim Aendern/Deaktivieren; Windows-Ausgabe darf an einer Fehlerpfeil-Unicodeausgabe nicht abstuerzen. Keine allgemeine Freischaltung von Agent-Writes.
