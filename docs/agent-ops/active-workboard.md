@@ -19278,3 +19278,12 @@ Historienvertraege auf echten Pflichtplan erweitert. QA studio-generated-entitie
 20261021.md, ADR085 Proposed. Claim bleibt in arbeit: SQL-/CI-Nachlauf, positive
 Human/CLI/MCP-Fachkette und Schemaerweiterung bestehender Entity-Vertraege offen.
 Keine vollstaendige universelle Masken-/Fachkettenabnahme behauptet.
+
+
+STUDIO-GENERATED-ENTITIES Nachlauf: PostgreSQL-CI606 bestanden/5 andere
+uebersprungen, alle16 neuen SQL-Vertraege gruen. Quality-Gate39592332034:
+Besitz um generierte table-catalog.json/md erweitert; nur fehlendes read_by
+bei domain_shared.tenants nachgezogen, physischer Katalog unveraendert.
+Docker-Update laut Nutzer abgeschlossen; gemeinsamer valeo_probe erreichbar.
+Regulaeren Desktop-Neustart zuvor angefordert, keine erzwungene WSL-Beendigung
+oder Loeschung/Reset/neue Ressourcen. Positiver Dreikanalnachweis bleibt offen.

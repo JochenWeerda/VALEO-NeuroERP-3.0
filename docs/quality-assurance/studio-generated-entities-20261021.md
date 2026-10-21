@@ -92,3 +92,17 @@ Anlage/Aenderung, Detail, Paging und Antworten sind generisch aus dem typisierte
 Entity-Vertrag abgeleitet. Numerische Spalten sind zentral numerisch ausgerichtet,
 Lagerdefinitionen erhalten das bestehende inventory-Tabellenprofil. Noch nicht
 unterstuetzte Serversortierung/-filterung wird nicht angeboten.
+
+
+## Nachlauf nach Docker-Update
+
+GitHub PostgreSQL-Run39592332003:606 bestanden,5 andere Faelle uebersprungen;
+alle16 neuen SQL-Vertraege bestanden. Docs, OpenAPI, Maskenplattform, Security,
+Rollen und kritische E2E ebenfalls gruen. Quality39592332034 scheitert am
+Tabellenkatalog: ausschliesslich read_by fuer domain_shared.tenants fehlte.
+Lineage mit bestehendem Generator aktualisiert; physische Tabellen/Spalten/FKs
+unveraendert. Kein Gate abgeschwaecht. Regulären Desktop-Neustart nach Engine500
+angefordert; bei Nutzerhinweis auf Update keine erzwungene WSL-Beendigung.
+Nach bestaetigtem Update: alle laufenden Gesundheitschecks gruen, valeo_probe
+erreichbar, Revision merge_hr_tax_20261019. Kein Reset, keine neue DB/Container.
+Lokaler SQL-Nachlauf und positive Dreikanalabnahme bleiben gesonderte Nachweise.
