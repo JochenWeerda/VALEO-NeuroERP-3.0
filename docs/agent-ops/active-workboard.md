@@ -19456,3 +19456,6 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 
 
 **STUDIO-LIVE-PROBE Historien-/Statusanzeige:** reale finale Sichtung zeigt gueltige aktive Veroeffentlichung in der Historie, waehrend der pauschale Gatesatz weiterhin erneute Freigabe fordert. Besitz zusaetzlich features/screen-studio/ScreenStudioPage.tsx, neue reine StudioGateSummary-Komponente und deren UI-Vertraege. Anzeige trennt gespeicherten Veroeffentlichungsstatus von erneuter Autorpruefung; fehlender Pruefbericht darf keinen gruenen Text liefern. Nur erwarteten non_temporary-Hinweis der unveraenderten bereits publizierten Autorvorlage erklaeren; keine Serverfreigabe oder sonstigen Fehler unterdruecken. Historien-Invalidierung auf den bestehenden mandantenpraefigierten Query-Key berichtigen.
+
+
+**STUDIO-LIVE-PROBE visuelle Zentralreparatur:** Reale Historien-Sichtpruefung bei1440x900 zeigt abgeschnittene Aktionsbuttons: Compiler erzwingt36px expertDense auch bei44px Touch-Zielen. Besitz zusaetzlich zentraler render-plan/schema-compiler.ts und dessen bestehende Vertraege; Zeilen mit sichtbaren Aktionen erhalten ausreichende Hoehe, reine Datenzeilen bleiben dicht. History-ScreenDefinition erhaelt ausdruecklich einspaltige Auditliste statt automatisch schmaler Mehrspaltenansicht. Keine individuelle React-Maske.
