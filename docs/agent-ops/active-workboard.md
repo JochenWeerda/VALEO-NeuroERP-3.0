@@ -19053,7 +19053,7 @@ Projektions-/Architekturgates gruen; 3242 OpenAPI-Pfade, 931 Routen,
 bleiben als eigener Folgeschritt offen. Kein pauschal gruener CI-Status.
 
 
-## NODE-FOLLOW-REDIRECTS-20261021 - reserviert, Codex
+## NODE-FOLLOW-REDIRECTS-20261021 - abgeschlossen, Codex
 
 Ziel: zwei neue High-Advisories GHSA-q3jh-wrc6-jgq8 und GHSA-8r9p-f939-6h3c
 mit Herstellerfassung 1.16.1 beheben. Vor Umsetzung Primaerquellen geprueft;
@@ -19076,9 +19076,28 @@ Audit-CLI-Einstieg ruft den neuen Redirect-Runtimevertrag verbindlich mit auf;
 keine Workflow-/Schwellen-/Ausnahmeregel aendern. Keine gemeinsame Installation.
 
 
-## STUDIO-TABLE-ROUTES-20261021 - reserviert, Codex
+## STUDIO-TABLE-ROUTES-20261021 - abgeschlossen, Codex
 
 CI-Nachlauf 882ffbd9a zeigt eigene fehlende Suchschluessel-Projektion filter_plan.
 Besitz ausschliesslich generierte route-inventory.gen.json/route-tree.gen.tsx,
 Generator unveraendert, eigene QA/Workboard. Abnahme Regeneration byteidentisch,
 keine fehlende Route und zentrale Tabellenvertraege unveraendert. Keine DB.
+
+
+Abnahme beider Claims 21.10.2026: follow-redirects exakt1.16.1 und gezieltes
+Vite-6-Patch6.4.4 im regulaer generierten Lock. Paketbestand3012 unveraendert
+bis auf diese beiden Patchidentitaeten. 36 Workspaces frozen/ignore-scripts.
+Production-Audit: fuenf neue Befunde entfernt, verbleibend genau zwei bestehende
+High (node-forge/braces), nach erneuter Original-/Patch-/Installationspruefung
+beide source_backported, null blocked. Keine Severity-Ausnahme. 59 originale
+JS-Dateien geprueft; Original RSA/Braces3 normale Faelle gruen/9 Angriffe rot;
+reparierte Laufzeit plus fail-closed Pruefung und neue Redirect/Vite-Vertraege
+37/37 gruen. Reviewhashes an neuen Manifest/Lock gebunden, neue Abnahme21.10.,
+Wiedervorlage28.10. Regularem Audit-CLI beide neuen Runtimevertraege hinzugefuegt;
+Testpfad-Umgebungsvariablen dort entfernt. Full Frontendbuild Vite6.4.4 gruen
+45,47s; isoliertes Pruefumfeld musste den bereits installierten terser lesen.
+Gemeinsame node_modules unangetastet. Keine Datenbank/Container.
+Routenfolge: unveraenderter Generator, exakt zweimal +filter_plan,931 Routen,
+zweite Generierung byteidentisch. Vorheriger CI-Rotbefund korrekt nachgezogen;
+kein Gate angepasst. QA dependency-security-follow-vite-20261021.md und
+studio-table-query-20261021.md. Neuer GitHub-Nachlauf nach Push ausstehend.

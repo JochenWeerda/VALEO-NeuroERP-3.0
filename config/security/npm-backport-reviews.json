@@ -9,15 +9,15 @@
       "patch_sha256": "2798686e4488058ad81c3b8e32eb763c0feff21f4c717ce4d13b6ef2432cd5b8",
       "original_integrity": "sha512-LarFH0+6VfriEhqMMcLX2F7SwSXeWwnEAJEsYm5QKWchiVYVvJyV9v7UDvUv+w5HO23ZpQTXDv/GxdDdMyOuoQ==",
       "license": "(BSD-3-Clause OR GPL-2.0)",
-      "reviewed_on": "2026-10-15",
-      "review_by": "2026-10-22",
+      "reviewed_on": "2026-10-21",
+      "review_by": "2026-10-28",
       "owner": "Codex-01a0f3fc",
       "source": "https://github.com/digitalbazaar/forge/pull/1152",
       "installed_sha256": {
         "lib/rsa.js": "c9b1e3799e230528b6d6815c1f6cd3c6058b9d45975264b55d995abb976589af"
       },
-      "lock_sha256": "caa5a465fcf4d80f4c2821de2ed7f61d0a7d33ae030e029bcd5fed7f6cd309fa",
-      "manifest_sha256": "bbced867646598eb648b02ce1fdbb6b8f4522d9e9ac116d8d2c6df43ab6890ea"
+      "lock_sha256": "14b8927f3f8c62d1a669fdb365e8dbc01a8cd2ec9a56e0a485b3ee293ce8a905",
+      "manifest_sha256": "7db2c454ed7d395bd99d7f463b26578ca83b1a468a9f852f4b2fc855e5aafb55"
     },
     {
       "package": "braces",
@@ -27,8 +27,8 @@
       "patch_sha256": "803945b6b11ff5b6d9966ee59136eb23bf76953dbbcbc764740d0858c3eccb11",
       "original_integrity": "sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==",
       "license": "MIT",
-      "reviewed_on": "2026-10-15",
-      "review_by": "2026-10-22",
+      "reviewed_on": "2026-10-21",
+      "review_by": "2026-10-28",
       "owner": "Codex-01a0f3fc",
       "source": "https://github.com/micromatch/braces/issues/70",
       "installed_sha256": {
@@ -37,8 +37,8 @@
         "lib/stringify.js": "1d059d40df3eea35ccecc8fafcd64fca67e02dcfb1edaf1e8e0c94fd88338fc9",
         "lib/parse.js": "540c920c9186405e6d059b468a2a440c247f5c9aa0fdbdae5cd3d0a021697549"
       },
-      "lock_sha256": "caa5a465fcf4d80f4c2821de2ed7f61d0a7d33ae030e029bcd5fed7f6cd309fa",
-      "manifest_sha256": "bbced867646598eb648b02ce1fdbb6b8f4522d9e9ac116d8d2c6df43ab6890ea"
+      "lock_sha256": "14b8927f3f8c62d1a669fdb365e8dbc01a8cd2ec9a56e0a485b3ee293ce8a905",
+      "manifest_sha256": "7db2c454ed7d395bd99d7f463b26578ca83b1a468a9f852f4b2fc855e5aafb55"
     }
   ]
 }

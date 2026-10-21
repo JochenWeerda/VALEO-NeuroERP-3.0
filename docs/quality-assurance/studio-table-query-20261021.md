@@ -46,3 +46,12 @@ Belegidentitaet). Claudes Quell-/Testkorrekturen bleiben erhalten. Alle
 Projektions-/Architekturgates gruen; 3242 OpenAPI-Pfade, 931 Routen,
 307 Services, 472 Endpunktmodule. follow-redirects-Sicherheitsbefunde
 bleiben als eigener Folgeschritt offen. Kein pauschal gruener CI-Status.
+
+
+## Routenprojektion nach CI-Nachlauf
+
+882ffbd9a liess in der Universal-Mask-CI zwei generierte Suchschluessellisten
+zurueck. Eigener Folgeclaim STUDIO-TABLE-ROUTES-20261021 fuehrt den bestehenden
+Generator unveraendert aus: in route-inventory.gen.json und route-tree.gen.tsx
+jeweils ausschliesslich filter_plan hinzugefuegt. 931 Routen, zweite Generierung
+byteidentisch. Keine Route geloescht, kein Gate gelockert.

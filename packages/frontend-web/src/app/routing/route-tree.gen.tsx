@@ -12264,6 +12264,7 @@ export const generatedSearchKeys = [
   "date",
   "entryMode",
   "error",
+  "filter_plan",
   "flaeche",
   "flik",
   "fromOffer",
