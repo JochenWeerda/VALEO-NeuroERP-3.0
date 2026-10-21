@@ -19294,3 +19294,12 @@ tests/test_studio_entity_channels.py erweitert. Synthetische registrierte
 Definition und explizit freigeschaltete Testcapability nur in Rollback-Fixture;
 echte signierte Identitaeten und vorhandener MCP-/CLI-/HTTP-Ausfuehrungsweg.
 Keine produktive Registrierung oder vorgetaeuschte Studio-Publikation.
+
+
+STUDIO-GENERATED-ENTITIES Schemaerweiterung: Besitz neuer
+studio_entity_evolution.py und eigener Unit-/SQL-Vertraege; bestehende
+Entity-Vertraege/Authoringroute/CLI nur typisierter Anschluss und Projektionen.
+Nur additive nullable Felder an serverseitig registrierter Studio-Entity;
+Basisfingerprint verpflichtend, kein vom Aufrufer vorgegebenes Altschema.
+DDL sperrt Zieltabellen und verifiziert Basis vor Aenderung. Keine automatische
+Ausfuehrung, Freischaltung, Typaenderung, Fremdtabelle oder Datenruecksetzung.
