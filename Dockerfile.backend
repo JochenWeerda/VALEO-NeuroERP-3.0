@@ -53,11 +53,12 @@ COPY --chown=appuser:appuser app/ ./app/
 COPY --chown=appuser:appuser modules/ ./modules/
 # Laufzeitkonfiguration: Belegvarianten, Studio-Katalog, MCP-Werkzeuge und -Aktionskarte (MASK-CLI/MCP-MASK-GENERIC).
 COPY --chown=appuser:appuser config/ ./config/
+# Canonical schema contract consumed by Studio authoring and release plans.
+COPY --chown=appuser:appuser docs/admin/table-catalog.json ./docs/admin/table-catalog.json
 COPY --chown=appuser:appuser scripts/ ./scripts/
 COPY --chown=appuser:appuser main.py ./
 COPY --chown=appuser:appuser alembic/ ./alembic/
 COPY --chown=appuser:appuser alembic.ini ./
-COPY --chown=appuser:appuser config/ ./config/
 
 RUN python scripts/verify_cpython_security.py
 

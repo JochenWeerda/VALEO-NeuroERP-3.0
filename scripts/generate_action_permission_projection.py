@@ -75,8 +75,17 @@ def render() -> str:
             gruppen = _rollen_gruppen(route.dependant) if route is not None and hasattr(route, "dependant") else []
             if gruppen:
                 screens.setdefault(screen_id, {})[permission] = gruppen
+    from app.services.studio_entity_contracts import EntitySpec, POLICIES
+    from app.services.studio_entity_router import build_router
+    generated_entities = {}
+    for domain in POLICIES:
+        spec = EntitySpec(name='studio_permission_probe', domain=domain, label='Permission projection',
+                          columns=[{'name':'label','type':'text','nullable':False}])
+        commands = build_router(spec)
+        route = next(route for route in commands.routes if route.path.endswith('/actions/create'))
+        generated_entities[f'studio.entity.{domain}.write'] = _rollen_gruppen(route.dependant)
     return json.dumps({"schemaVersion": 1, "source": "require_roles der Kommandowege (scripts/"
-                       "generate_action_permission_projection.py)", "screens": screens},
+                       "generate_action_permission_projection.py)", "screens": screens, "generatedEntities": generated_entities},
                       ensure_ascii=False, indent=2) + "\n"
 
 

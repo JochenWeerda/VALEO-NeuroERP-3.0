@@ -63111,6 +63111,35 @@
         "title": "EntityExtensionOut",
         "type": "object"
       },
+      "EntityRegisteredDefinitionOut": {
+        "properties": {
+          "contract_hash": {
+            "title": "Contract Hash",
+            "type": "string"
+          },
+          "definition": {
+            "additionalProperties": true,
+            "title": "Definition",
+            "type": "object"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "writes_enabled": {
+            "title": "Writes Enabled",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "contract_hash",
+          "writes_enabled",
+          "definition"
+        ],
+        "title": "EntityRegisteredDefinitionOut",
+        "type": "object"
+      },
       "EntitySpec": {
         "additionalProperties": false,
         "properties": {
@@ -406543,6 +406572,55 @@
           }
         ],
         "summary": "Stammdatenvertrag in pruefbare Schema-, Command- und Maskenartefakte uebersetzen",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/studio/entity-definitions/{name}": {
+      "get": {
+        "operationId": "studio_registered_entity_definition_api_v1_studio_entity_definitions__name__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityRegisteredDefinitionOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Registrierte Studio-Stammdatenmaske fuer einen Entwurf abrufen",
         "tags": [
           "ui",
           "studio",

@@ -45,6 +45,11 @@ def simulation_artifact_hash():
              "app/services/llm_gateway.py", "app/services/studio_migration.py",
              "app/services/studio_migration_store.py", "app/api/v1/schemas/studio_migration.py",
              "app/services/mcp_studio_plans.py"]
+    files.extend(['app/services/studio_entity_simulation.py','app/services/studio_entity_contracts.py',
+                  'app/services/studio_entity_compiler.py','app/services/studio_entity_commands.py',
+                  'app/services/studio_entity_router.py','app/services/studio_entity_evolution.py',
+                  'app/auth/bereich_roles.py','app/auth/deps.py','app/core/tenant.py',
+                  'app/core/tenant_binding.py','app/services/mcp_mask_actions.py'])
     digest = hashlib.sha256()
     for name in files:
         path = root / name

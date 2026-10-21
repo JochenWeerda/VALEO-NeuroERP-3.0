@@ -102,7 +102,8 @@ def contract_hash(spec):
     root = Path(__file__).parent
     return definition_hash({'spec': spec.model_dump(), 'runtime': {
         name: sha256((root / name).read_bytes().replace(b'\r\n', b'\n')).hexdigest() for name in (
-            'studio_entity_contracts.py', 'studio_entity_commands.py', 'studio_entity_router.py')}})
+            'studio_entity_contracts.py', 'studio_entity_commands.py', 'studio_entity_router.py',
+            '../auth/bereich_roles.py', '../auth/deps.py', '../core/tenant.py', '../core/tenant_binding.py')}})
 
 
 class EntityBundleOut(BaseModel):
@@ -144,3 +145,18 @@ class EntityExtensionIn(BaseModel):
 class EntityExtensionOut(BaseModel):
     base_contract_hash: str
     bundle: EntityBundleOut
+
+
+def registration_for(name):
+    """Resolve only reviewed server configuration, never a request-supplied schema."""
+    import yaml
+    from app.services.studio_validation import _CONFIG_PATH
+    data=yaml.safe_load(_CONFIG_PATH.read_text(encoding='utf-8')) or {}
+    return next((entry for entry in registrations(data) if entry.spec.name==name),None)
+
+
+class EntityRegisteredDefinitionOut(BaseModel):
+    name: str
+    contract_hash: str
+    writes_enabled: bool
+    definition: dict

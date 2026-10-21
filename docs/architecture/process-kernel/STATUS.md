@@ -869,3 +869,23 @@ registrierter Stammdaten ueber hashgebundenes Paket/API/CLI nachgewiesen.
 Altdatenerhalt mit gesperrtem alten Runtimevertrag nach Schemaerweiterung.
 Alle lokalen Driftgates bestanden. Schreibende Live-Studio-Publikation und
 visuelle Abnahme bleiben offen; SonarCloud separat rot, keine Gateabsenkung.
+
+
+### Studio: schreibendes Stammdaten-Freigabeprofil (21.10.2026)
+
+Eigenes studio.entity.v1 statt pauschaler Oeffnung von grain.v1. Exakter
+registrierter Vertrag und reale isolierte CRUD-/Audit-/Outbox-/Rollbackkette
+an bestehende unveraenderliche Evidenz, Migrationsplan und Vier-Augen-Publikation
+gebunden.43 Generator-/Profil- und41 SQL-/Freigabevertraege sowie2
+Paketvertraege gruen; alle lokalen Driftgates bestanden. Keine neue DB/Container.
+Laufzeitkatalog gezielt paketiert. CI/Image-/reale visuelle Abnahme und alle
+weiteren Fachketten/Altmaskenmigration bleiben im aktiven Gesamtziel offen.
+[Nachweise und Grenzen](../../quality-assurance/studio-entity-release-20261021.md).
+
+
+Studio-Entity-CLI-Fortsetzung:44 Generator-/Profil-/Readiness-,42 SQL-/
+Freigabe-/Kanal- und30 UI-Vertraege gruen; Typpruefung bestanden. Vollstaendiger
+signierter CLI-Lebenszyklus bis unabhaengiger Publikation und Ruecknahme
+nachgewiesen. Readiness/Rechteprojektion an vorhandene Backend-Rollen gebunden.
+Ein neuer lesender Metadatenpfad, bestehende API-Pfade unveraendert.
+Reale Browser-/Imageabnahme und komplette Maskenmigration bleiben offen.

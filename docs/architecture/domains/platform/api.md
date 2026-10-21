@@ -146,3 +146,24 @@ Studio-Katalog generated_entities verdrahtet spaeter gepruefte Quellen,
 Commands und Routen. Ausgabeschreibrechte und Agentenrollen bleiben aus.
 Details/Grenzen: docs/quality-assurance/studio-generated-entities-20261021.md
 und ADR-085; keine automatische universelle Publikationsfreigabe.
+
+
+## Studio-Freigabeprofile (21.10.2026)
+
+Bestehende simulate-/status-/history-APIs bleiben unveraendert.
+processSimulation kann fuer exakt registrierte generierte Stammdaten das
+Profil studio.entity.v1 mit entity und contractHash binden. Es prueft reale
+CRUD-/Versions-/Replay-/Tenant-/Rollen-/Audit-/Outbox-/Rollbackinvarianten.
+Die Freigabe verlangt dieselbe unveraenderliche Kandidatenrevision, aktuellen
+Artefaktfingerprint, gespeicherten Migrationsplan und unabhaengigen Publisher.
+Profilnachweise sind nicht austauschbar. Deaktivierte Registrierung oder
+geaenderter geladener Runtimevertrag sperrt. Keine neue direkte DDL-,
+Freischalt- oder Umgehungs-API.
+
+
+GET /api/v1/studio/entity-definitions/{name} liefert EntityRegisteredDefinitionOut
+mit exakter registrierter Definition, Vertragsfingerprint und bestehendem
+Freischaltstatus. Keine DDL oder Rechtevergabe. Bestehendes beleg_write und
+Tenant-/Akteurkontext. CLI studio entitaet-uebernehmen NAME speichert diese
+Definition ueber den bestehenden idempotenten Draftcommand. Anschliessend
+bestehender Review-/Plan-/Simulations-/Vier-Augen-Freigabeweg.

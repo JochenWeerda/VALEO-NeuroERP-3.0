@@ -145,8 +145,8 @@ def test_agent_role_needs_capability_enablement_beyond_normal_writer_role(entity
 
 
 def test_deployment_marker_rejects_runtime_or_contract_drift(entity,monkeypatch):
-    from app.services import studio_entity_router
-    monkeypatch.setattr(studio_entity_router,'contract_hash',lambda _: '0'*64)
+    from app.services import studio_entity_contracts
+    monkeypatch.setattr(studio_entity_contracts,'contract_hash',lambda _: '0'*64)
     response=entity[0].post(path(entity)+'/actions/create',headers=auth(entity),json=command(values()))
     assert response.status_code==409
     for table in tables(entity[5]): assert entity[1].scalar(sa.select(sa.func.count()).select_from(table))==0

@@ -401,3 +401,17 @@ Aenderungs-/Deaktivierungscommands uebermittelt die ActionRuntime die gelesene
 Version; ein fehlender Versionswert wird serverseitig abgelehnt. Deaktivierte
 Ausgaben und fehlende Fachkettenabnahme duerfen nicht als generator-ready
 Freigabe umgedeutet werden. Details: ADR-085 und Studio-Generierungs-QA.
+
+
+## Generierte Studio-Stammdaten und Rechte (21.10.2026)
+
+Entitymasken bleiben in ScreenDefinition -> RenderPlan -> UniversalMaskRuntime
+-> UniversalMaskRenderer. Aktionsrechte studio.entity.{domain}.write werden
+durch die bestehende Projektion aus dem Backend-Entityrouter gewonnen;
+Frontend und Server verwenden dieselben Bereichsrollen. Leser, andere
+Bereiche, abgelegte manager-Rolle oder ein blosser Scope erhalten kein
+Schreibrecht. Version und Erstellzeitpunkt liefern pruefbaren Listenkontext.
+Das echte Readiness-Gate und der signierte CLI-Lebenszyklus bleiben
+Freigabevoraussetzungen, keine Sonderfreigabe fuer Compiler-Ausgaben.
+Reale Theme-/Lesbarkeits-/Viewportabnahme bleibt ein eigener Nachweis vor
+einem umfassenden made-by-studio-Qualitaetsversprechen.

@@ -506,3 +506,20 @@ def studio_entity_extension(body: EntityExtensionIn, tenant_id: str = Depends(ge
         return compile_extension(body)
     except ValueError as error:
         raise HTTPException(422, str(error)) from error
+
+
+from app.services.studio_entity_contracts import EntityRegisteredDefinitionOut
+
+
+@router.get('/entity-definitions/{name}', response_model=EntityRegisteredDefinitionOut,
+            summary='Registrierte Studio-Stammdatenmaske fuer einen Entwurf abrufen')
+def studio_registered_entity_definition(name: str, tenant_id: str = Depends(get_tenant_id),
+                                        user: dict = Depends(beleg_write)):
+    from app.services.studio_entity_contracts import registration_for, contract_hash
+    from app.services.studio_entity_compiler import registered_definition
+    _actor(user)
+    entry=registration_for(name)
+    if entry is None:
+        raise HTTPException(404,'registered_studio_entity_not_found')
+    return {'name':entry.spec.name,'contract_hash':contract_hash(entry.spec),
+            'writes_enabled':entry.writes_enabled,'definition':registered_definition(entry)}

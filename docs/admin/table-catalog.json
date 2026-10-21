@@ -58346,6 +58346,7 @@
             "app/services/finance_read_model_service.py",
             "app/services/llm_gateway.py",
             "app/services/studio_entity_commands.py",
+            "app/services/studio_entity_simulation.py",
             "app/services/studio_migration.py",
             "app/services/studio_process_simulation.py",
             "app/workers/mail_poll_worker.py",

@@ -229,6 +229,14 @@ def run(args, call, out, stdin) -> int:
             out(f"  {row['screen_id']:<48} {row['title']}")
         out(f"{len(rows)} vorhandene Masken uebernehmbar.")
         return 0
+    if cmd == "entitaet-uebernehmen":
+        if not re.fullmatch(r'studio_[a-z][a-z0-9_]{0,27}',args.name):
+            raise ValueError("Ungueltige Studio-Entitaetskennung.")
+        registered=call("GET",f"{STUDIO}/entity-definitions/{args.name}")
+        record=call("POST",f"{STUDIO}/drafts",{
+            "definition":registered["definition"],"idempotency_key":_key(args)})
+        _write(args.ausgabe,record,out)
+        return 0
     if cmd in {"entitaet-generieren", "entitaet-erweitern"}:
         endpoint = "entity-extension-bundle" if cmd == "entitaet-erweitern" else "entity-bundle"
         report = call("POST", f"{STUDIO}/{endpoint}", _read_definition(args.datei, stdin))
@@ -367,6 +375,9 @@ def add_parser(sub) -> None:
     k.add_argument("--json", action="store_true")
     q = s.add_parser("quellen", help="Vorhandene Masken, die als Ausgangsfassung uebernehmbar sind")
     q.add_argument("suche", nargs="?")
+    registered = with_key(s.add_parser("entitaet-uebernehmen", help="Registrierte Stammdatenmaske ohne Paketbearbeitung als Studio-Entwurf speichern"))
+    registered.add_argument("name", help="Registrierte Studio-Entitaetskennung")
+    registered.add_argument("--ausgabe", metavar="DATEI")
     extension = s.add_parser("entitaet-erweitern", help="Registrierte Studio-Stammdaten additiv erweitern (nur Paket)")
     extension.add_argument("datei", help="JSON mit name, expected_contract_hash und nullable columns")
     extension.add_argument("--ausgabe", metavar="DATEI")

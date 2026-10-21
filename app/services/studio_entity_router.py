@@ -12,6 +12,7 @@ from app.services.studio_entity_commands import execute, read
 
 def build_router(spec: EntitySpec, *, writes_enabled=False, agent_roles=()):
     """Called from reviewed generated deployment code, never a caller-supplied target."""
+    loaded_contract = contract_hash(spec)
     roles = POLICIES[spec.domain][1]
     if set(agent_roles) - set(roles): raise ValueError('agent_roles_must_use_domain_policy')
     read_roles = (*roles, *(role.replace('_BEARBEITEN', '_LESEN') for role in roles if role.endswith('_BEARBEITEN')))
@@ -21,14 +22,8 @@ def build_router(spec: EntitySpec, *, writes_enabled=False, agent_roles=()):
     RowOut, PageOut, CommandOut = response_models(spec)
 
     def deployment(db):
-        import sqlalchemy as sa
-        from fastapi import HTTPException
-        schema = POLICIES[spec.domain][0]
-        for table in (spec.name, spec.name + '_events'):
-            marker = db.scalar(sa.text("SELECT obj_description(to_regclass(:table), 'pg_class')"),
-                               {'table': f'{schema}.{table}'})
-            if marker != 'studio-entity:' + contract_hash(spec):
-                raise HTTPException(409, 'generated_schema_deployment_not_current')
+        from app.services.studio_entity_commands import verify_deployment
+        verify_deployment(db, spec, expected_contract=loaded_contract)
 
     def actor(user):
         from fastapi import HTTPException

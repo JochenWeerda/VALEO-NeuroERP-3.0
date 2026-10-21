@@ -1353,5 +1353,36 @@
         ]
       ]
     }
+  },
+  "generatedEntities": {
+    "studio.entity.crm.write": [
+      [
+        "CRM_ADMIN",
+        "CRM_BEARBEITEN",
+        "SALES_ADMIN",
+        "SALES_BEARBEITEN",
+        "admin"
+      ]
+    ],
+    "studio.entity.agrar.write": [
+      [
+        "AGRAR_ADMIN",
+        "AGRAR_BEARBEITEN",
+        "FUTTERMITTEL_ADMIN",
+        "FUTTERMITTEL_BEARBEITEN",
+        "HARVEST_ADMIN",
+        "HARVEST_BEARBEITEN",
+        "KONTRAKT_ADMIN",
+        "KONTRAKT_BEARBEITEN",
+        "admin"
+      ]
+    ],
+    "studio.entity.inventory.write": [
+      [
+        "LAGER_ADMIN",
+        "LAGER_BEARBEITEN",
+        "admin"
+      ]
+    ]
   }
 }

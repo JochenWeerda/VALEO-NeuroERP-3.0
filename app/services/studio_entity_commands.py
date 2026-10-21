@@ -120,3 +120,17 @@ def read(session, spec, tenant, entity_id=None, *, limit=50, offset=0):
         if row is None: raise HTTPException(404, 'entity_not_found')
         return public_row(row)
     return [public_row(row) for row in session.execute(query.order_by(rows.c.id).limit(limit).offset(offset)).mappings()]
+
+
+def verify_deployment(session, spec, *, expected_contract=None):
+    """Both reviewed schema markers must match the loaded command implementation."""
+    from app.services.studio_entity_contracts import contract_hash
+    current_contract = contract_hash(spec)
+    if expected_contract is not None and current_contract != expected_contract:
+        raise HTTPException(409, 'generated_runtime_requires_restart')
+    schema = POLICIES[spec.domain][0]
+    for table in (spec.name, spec.name + '_events'):
+        marker = session.scalar(sa.text("SELECT obj_description(to_regclass(:table), 'pg_class')"),
+                                {'table': f'{schema}.{table}'})
+        if marker != 'studio-entity:' + current_contract:
+            raise HTTPException(409, 'generated_schema_deployment_not_current')

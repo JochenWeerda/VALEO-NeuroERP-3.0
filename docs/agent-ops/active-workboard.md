@@ -19406,3 +19406,20 @@ Generierte Entityrechte ausschliesslich aus require_roles des vorhandenen
 Entityrouters ableiten, Scope allein darf keine Bereichsrolle ersetzen.
 Kleine Stammdatentabellen erhalten sichtbaren Erstellzeitpunkt neben Version
 statt erfundener Fachspalten; bestehende Mindestspaltengrenze bleibt erhalten.
+
+
+STUDIO-ENTITY-RELEASE abschliessende CLI-Abnahme:44 datenbankfreie
+Generator-/Profil-/Readinessvertraege,42 SQL-/Freigabe-/Grain-/Kanalvertraege,
+30 UI-/Aktionsruntimefaelle und vollstaendige TypeScript-Pruefung gruen.
+Neuer typisierter lesender Authoringpfad entity-definitions/{name} und
+CLI entitaet-uebernehmen nutzen denselben idempotenten Draftcommand.
+Signierter CLI-Lebenszyklus mit Replay, Review, gespeichertem Plan, realer
+Simulation, gesperrter Eigenfreigabe, unabhaengiger Publikation,
+Fremdmandant404 und Ruecknahme bestanden. Rechte aus echten Entityrouter-
+Abhaengigkeiten in bestehender UI-Projektion;75 vorhandene Maskenprojektionen
+unveraendert. Neue Namespaceprojektion fuer CRM/Agrar/Lager.
+Readinessfehler behoben, keine Gateabsenkung. Zwei Paketvertraege gruen;
+Docker-Kontext erlaubt nur Katalogdatei, benachbarte Admin-Dokumente bleiben
+ausgeschlossen. Alle lokalen Driftgates gruen, ein neuer lesender Pfad,
+vorhandene OpenAPI-Pfade unveraendert. Gesamtziel und reale Browser-/Image-
+Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.

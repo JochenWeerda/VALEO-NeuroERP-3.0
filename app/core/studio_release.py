@@ -13,23 +13,39 @@ def definition_hash(definition):
 
 
 def simulate_candidate(item):
-    from app.services.studio_process_simulation import simulate_process
     errors = profile_errors(item["definition"])
     if not errors:
         ensure_interface_sync()
     report = ({"passed": False, "error": "simulation_profile_not_supported", "checks": {}, "failed_checks": errors}
-              if errors else simulate_process(item["definition"]))
+              if errors else _simulate_profile(item["definition"]))
     return {**report,"tenant_id":item["tenant_id"],"draft_id":item["id"],
             "candidate_revision":item["revision"],"definition_hash":definition_hash(item["definition"])}
 
 
+def simulation_requirements(definition):
+    from app.services.studio_process_simulation import _REQUIRED
+    if (definition.get('processSimulation') or {}).get('profile') == 'studio.entity.v1':
+        from app.services.studio_entity_simulation import PROFILE, REQUIRED
+        return PROFILE, REQUIRED
+    return 'grain.v1', _REQUIRED
+
+
+def _simulate_profile(definition):
+    if simulation_requirements(definition)[0] == 'studio.entity.v1':
+        from app.services.studio_entity_simulation import simulate
+        return simulate(definition)
+    from app.services.studio_process_simulation import simulate_process
+    return simulate_process(definition)
+
+
 def require_simulation(item, entries):
-    from app.services.studio_process_simulation import simulation_artifact_hash, _REQUIRED
+    from app.services.studio_process_simulation import simulation_artifact_hash
     from app.services.studio_validation import validate_studio_draft
     from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS
     if profile_errors(item["definition"]) or validate_studio_draft(item["definition"], native_screen_ids=set(SCREEN_DEFINITION_BUILDERS)):
         raise ValueError("studio_definition_nicht_freigabefaehig")
     ensure_interface_sync()
+    expected_profile, required = simulation_requirements(item["definition"])
     for entry in reversed(entries):
         proof=entry.get("snapshot",{}).get("simulation")
         if entry.get("action")!="simulation" or not isinstance(proof,dict):
@@ -40,8 +56,8 @@ def require_simulation(item, entries):
                 or proof.get("definition_hash")!=definition_hash(item["definition"])
                 or proof.get("artifact_hash")!=simulation_artifact_hash()
                 or proof.get("passed") is not True
-                or proof.get("profile")!="grain.v1"
-                or any(proof.get("checks",{}).get(name) is not True for name in _REQUIRED)):
+                or proof.get("profile")!=expected_profile
+                or any(proof.get("checks",{}).get(name) is not True for name in required)):
             raise ValueError("simulation_unvollstaendig_veraltet_oder_fehlgeschlagen")
         from app.services.studio_migration_store import require_saved_plan
         return {**proof, "migration_plan": require_saved_plan(item, entries)}
@@ -51,14 +67,17 @@ def require_simulation(item, entries):
 
 def published_definition(record):
     """Previously published development records get no invented release evidence."""
-    from app.services.studio_process_simulation import simulation_artifact_hash, _REQUIRED
+    from app.services.studio_process_simulation import simulation_artifact_hash
     proof=(record.get("readiness") or {}).get("release_evidence")
+    if profile_errors(record.get("definition") or {}):
+        return None
+    expected_profile, required = simulation_requirements(record.get("definition") or {})
     if (record.get("status")!="published_temp" or not isinstance(proof,dict)
-            or proof.get("passed") is not True or proof.get("profile")!="grain.v1"
+            or proof.get("passed") is not True or proof.get("profile")!=expected_profile
             or proof.get("tenant_id")!=record.get("tenant_id") or proof.get("draft_id")!=record.get("id")
             or proof.get("definition_hash")!=definition_hash(record.get("definition"))
             or proof.get("artifact_hash")!=simulation_artifact_hash()
-            or any(proof.get("checks",{}).get(name) is not True for name in _REQUIRED)):
+            or any(proof.get("checks",{}).get(name) is not True for name in required)):
         return None
     from app.services.studio_migration_store import published_plan_valid
     if not published_plan_valid(record, proof):
@@ -73,6 +92,10 @@ def published_definition(record):
 def profile_errors(definition):
     """grain.v1 proves the fixed domain chain; unmodeled commands/rules never pass."""
     from app.services.studio_validation import _iter_actions, _nodes
+    requested = definition.get('processSimulation')
+    if isinstance(requested, dict) and requested.get('profile') == 'studio.entity.v1':
+        from app.services.studio_entity_simulation import profile_errors as entity_errors
+        return entity_errors(definition)
     errors=[]
     if definition.get("studioSemantic") is not None:
         errors.append("semantic_preview_not_a_release_profile")

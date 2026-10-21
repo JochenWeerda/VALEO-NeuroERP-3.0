@@ -292,6 +292,8 @@ services:
       - ./main.py:/app/main.py
       # Laufzeitkonfiguration (Belegvarianten, Studio-Katalog); ohne sie 500 auf beleg/* und Studio-Simulation.
       - ./config:/app/config:ro
+      # Studio requires the same reviewed schema catalog in development and image runtime.
+      - ./docs/admin/table-catalog.json:/app/docs/admin/table-catalog.json:ro
     command: sh -c "python scripts/init_db.py && uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4 --timeout-keep-alive 5"
 
   inventory-service:

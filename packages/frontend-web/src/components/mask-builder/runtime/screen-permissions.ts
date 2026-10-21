@@ -19,6 +19,10 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
       const screens = documentPermissions.screens as Record<string, Record<string, string[]>>
       return (screens[screen.id]?.[permission] ?? []).some(role => roles.has(role))
     }
+    if (permission.startsWith('studio.entity.')) {
+      const groups = (actionPermissions.generatedEntities as Record<string, string[][]>)[permission]
+      return Boolean(groups && groups.length > 0 && groups.every(group => group.some(role => roles.has(role))))
+    }
     if (permission.startsWith('platform:')) return scopes.has(permission)
     // Rollen der Kommandowege, aus deren Server-Abhaengigkeiten erzeugt: jede Gruppe braucht eine ihrer Rollen.
     const projected = (actionPermissions.screens as Record<string, Record<string, string[][]>>)[screen.id]?.[permission]

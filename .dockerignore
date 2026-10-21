@@ -64,7 +64,10 @@ swarm
 .env.*
 !.env.example
 
-# Docs tragen nicht zum Laufzeitverhalten bei
-docs
+# Only the canonical Studio runtime schema catalog belongs in backend images.
+docs/**
+!docs/admin/
+docs/admin/**
+!docs/admin/table-catalog.json
 *.md
 !README.md
