@@ -390,3 +390,14 @@ Seiten-Sonderimplementierung. Serverantworten werden nicht nochmals lokal
 gefiltert oder paginiert. Alte Tab-Endpunkte ohne Quellenbindung behalten
 ihren bisherigen Vertrag und sind damit noch nicht kanalgleich zertifiziert.
 Siehe studio-table-query-20261021.md fuer Abnahme und Begrenzungen.
+
+
+## Studio-generierte Stammdaten (2026-10-21)
+
+Entity-Vertraege erzeugen ScreenDefinitions und Aktions-Eingabefelder statt
+eigener React-Seiten. Darstellung und Theme laufen weiter zentral ueber
+RenderPlan, UniversalMaskRuntime und UniversalMaskRenderer. Fuer generierte
+Aenderungs-/Deaktivierungscommands uebermittelt die ActionRuntime die gelesene
+Version; ein fehlender Versionswert wird serverseitig abgelehnt. Deaktivierte
+Ausgaben und fehlende Fachkettenabnahme duerfen nicht als generator-ready
+Freigabe umgedeutet werden. Details: ADR-085 und Studio-Generierungs-QA.

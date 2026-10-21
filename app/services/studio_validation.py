@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+import json
 
 _CONFIG_PATH = Path(__file__).resolve().parents[2] / "config" / "studio_data_sources.yaml"
 
@@ -44,6 +45,15 @@ def load_studio_catalog() -> dict[str, Any]:
     if not _CONFIG_PATH.exists():
         raise StudioConfigError(f"Studio-Katalog fehlt: {_CONFIG_PATH}")
     data = yaml.safe_load(_CONFIG_PATH.read_text(encoding="utf-8")) or {}
+    from app.services.studio_entity_contracts import registrations
+    from app.services.studio_entity_compiler import compile_entity
+    for entry in registrations(data):
+        generated = json.loads(compile_entity(entry.spec, catalog_only=True)['files']['catalog.json'])
+        data.setdefault('data_sources', []).extend(generated['data_sources'])
+        for action in generated['command_actions']:
+            action['disabled'] = not entry.writes_enabled
+            action['forbiddenForAgents'] = not bool(entry.agent_roles)
+            data.setdefault('command_actions', []).append(action)
     actions = {a["key"]: a for a in data.get("command_actions", []) if a.get("key")}
     data_sources = list(data.get("data_sources") or [])
     endpoints = {ds["endpoint"] for ds in data_sources if ds.get("endpoint")}

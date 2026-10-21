@@ -31,6 +31,21 @@ describe('human input flow dispatch', () => {
   })
 })
 
+describe('generated master-data concurrency contract', () => {
+  it('sends the displayed version to generated update commands', async () => {
+    vi.mocked(apiClient.request).mockClear()
+    vi.mocked(apiClient.request).mockResolvedValueOnce({ data: { success: true } })
+    const { result } = renderHook(() => useActionRuntime([
+      { key: 'update', label: 'Ändern', commandEndpoint: '/api/v1/studio/entities/studio_silos/{entity_id}/actions/update' },
+    ], { screenId: 'tenant/studio_silos', entityId: 'synthetic-record', permissions: [] }))
+    await result.current.executeAction({ actionKey: 'update', mode: 'execute', expectedVersion: 7,
+      auditReason: 'Korrektur', idempotencyKey: 'stable-key', payload: { name: 'Silo' } })
+    expect(apiClient.request).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ expected_version: 7, name: 'Silo' }),
+    }))
+  })
+})
+
 
 describe('DocFlow execution boundary', () => {
   const post: ScreenActionDefinition = { key: 'post', label: 'Buchen', permission: 'belege.buchen',

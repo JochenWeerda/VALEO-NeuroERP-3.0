@@ -840,3 +840,13 @@ R1-MCP-Authoring nutzen denselben Command mit bisherigen Rollen/Tenantgrenzen.
 Details und Grenzen: docs/quality-assurance/studio-plan-integration-20261021.md.
 Allgemeine CRUD-/Schemaaktivierung und universelle Kanalzertifizierung bleiben
 im Gesamtclaim offen; keine Ausweitung des grain.v1-Releaseprofils.
+
+
+### 2026-10-21: Generierte Studio-Stammdaten (in arbeit)
+
+Compiler/Schema-/Command-/Maskenartefakte und bestehende Katalogverdrahtung fuer
+neue CRM-/Agrar-/Lager-Stammdaten implementiert, standardmaessig deaktiviert.
+23 reine Vertraege und24 Frontendtests gruen. Finale SQL-/Kanalabnahme wegen
+unerreichbarem gemeinsamem Docker-/PostgreSQL-Pruefstand noch offen; kein Reset
+oder Ersatz. Details: docs/quality-assurance/studio-generated-entities-20261021.md.
+Kein Abschluss der universellen CRUD-/Schema-/Fachkettenaufgabe behauptet.

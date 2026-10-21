@@ -52,6 +52,10 @@ def test_sql_real_evidence_is_durable_replayable_and_publishable(sql_candidate,m
     event=store.history_event(item["tenant_id"],item["id"],event_id=key)
     assert event["snapshot"]["simulation"]==result["simulation"]
     assert store.count_history(item["tenant_id"],item["id"])==3
+    from app.services.studio_migration_store import save_migration_plan
+    from app.api.v1.schemas.studio_migration import StudioSavedMigrationIn
+    save_migration_plan(item['tenant_id'],item['id'],'editor',StudioSavedMigrationIn(
+        expected_revision=item['revision'],idempotency_key=uuid4()))
     published=store.set_status(item["tenant_id"],item["id"],"reviewer","published_temp",expected_snapshot=item)
     assert published["status"]=="published_temp"
 

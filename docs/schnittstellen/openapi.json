@@ -62962,6 +62962,154 @@
         "title": "EnrichImagesResponse",
         "type": "object"
       },
+      "EntityBundleOut": {
+        "properties": {
+          "contract_hash": {
+            "title": "Contract Hash",
+            "type": "string"
+          },
+          "enabled": {
+            "const": false,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "file_hashes": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "File Hashes",
+            "type": "object"
+          },
+          "files": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Files",
+            "type": "object"
+          },
+          "required_checks": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Checks",
+            "type": "array"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/EntitySpec"
+          },
+          "version": {
+            "const": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "contract_hash",
+          "spec",
+          "files",
+          "file_hashes",
+          "required_checks",
+          "enabled"
+        ],
+        "title": "EntityBundleOut",
+        "type": "object"
+      },
+      "EntityColumn": {
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "name": {
+            "pattern": "^[a-z][a-z0-9_]{0,47}$",
+            "title": "Name",
+            "type": "string"
+          },
+          "nullable": {
+            "default": true,
+            "title": "Nullable",
+            "type": "boolean"
+          },
+          "type": {
+            "enum": [
+              "text",
+              "integer",
+              "boolean",
+              "date",
+              "datetime",
+              "decimal",
+              "uuid"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "EntityColumn",
+        "type": "object"
+      },
+      "EntitySpec": {
+        "additionalProperties": false,
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/EntityColumn"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Columns",
+            "type": "array"
+          },
+          "domain": {
+            "enum": [
+              "crm",
+              "agrar",
+              "inventory"
+            ],
+            "title": "Domain",
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "name": {
+            "pattern": "^studio_[a-z][a-z0-9_]{0,27}$",
+            "title": "Name",
+            "type": "string"
+          },
+          "version": {
+            "const": 1,
+            "default": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "domain",
+          "label",
+          "columns"
+        ],
+        "title": "EntitySpec",
+        "type": "object"
+      },
       "EpcisEventIn": {
         "additionalProperties": true,
         "properties": {
@@ -406298,6 +406446,54 @@
           }
         ],
         "summary": "Studio-Entwurf zur Vier-Augen-Prüfung geben",
+        "tags": [
+          "ui",
+          "studio",
+          "screen-definition"
+        ]
+      }
+    },
+    "/api/v1/studio/entity-bundle": {
+      "post": {
+        "operationId": "studio_entity_bundle_api_v1_studio_entity_bundle_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntitySpec"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityBundleOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Stammdatenvertrag in pruefbare Schema-, Command- und Maskenartefakte uebersetzen",
         "tags": [
           "ui",
           "studio",

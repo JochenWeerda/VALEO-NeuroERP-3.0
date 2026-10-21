@@ -229,6 +229,10 @@ def run(args, call, out, stdin) -> int:
             out(f"  {row['screen_id']:<48} {row['title']}")
         out(f"{len(rows)} vorhandene Masken uebernehmbar.")
         return 0
+    if cmd == "entitaet-generieren":
+        report = call("POST", f"{STUDIO}/entity-bundle", _read_definition(args.datei, stdin))
+        _write(args.ausgabe, report, out)
+        return 0
     if cmd == "plan-speichern":
         changes = json.loads(Path(args.schema).read_text(encoding="utf-8")) if args.schema else []
         if not isinstance(changes, list):
@@ -362,6 +366,9 @@ def add_parser(sub) -> None:
     k.add_argument("--json", action="store_true")
     q = s.add_parser("quellen", help="Vorhandene Masken, die als Ausgangsfassung uebernehmbar sind")
     q.add_argument("suche", nargs="?")
+    entity = s.add_parser("entitaet-generieren", help="Schema, Commands und Maske aus einem Stammdatenvertrag generieren")
+    entity.add_argument("datei")
+    entity.add_argument("--ausgabe")
     saved = with_key(s.add_parser("plan-speichern", help="Migrationsplan an gespeicherte Entwurfsrevision binden"))
     saved.add_argument("entwurf")
     saved.add_argument("--revision", required=True)

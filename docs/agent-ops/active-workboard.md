@@ -19239,7 +19239,7 @@ kanalweise Fachkettenabnahmen sind hiermit nicht behauptet. Bestehendes
 begrenzt read-only grain.v1-Profil und not_verified bleiben ehrlich ausgewiesen.
 
 
-## STUDIO-GENERATED-ENTITIES-20261021 - reserviert, Codex
+## STUDIO-GENERATED-ENTITIES-20261021 - in arbeit, Codex
 
 Nutzerauftrag: allgemeine CRUD-/Tabellengenerierung und Fachkettenabnahme.
 Eigener Gesamtclaim STUDIO-MIGRATION-ENGINE wird fortgesetzt. Besitz neuer
@@ -19257,3 +19257,24 @@ transaktionale Tabellen im vorhandenen valeo_probe, kein Reset/DB/Container.
 Abnahme mit zwei Mandanten, Replays, Konflikten, Rollback und echten SQL-Wirkungen;
 keine Umdeutung von Mocktests in volle Fachkettenabnahme. CI-Nachlauf und Doku
 werden als Integrationsvoraussetzung mitgeprueft.
+
+STUDIO-GENERATED-ENTITIES Meilenstein: typisierter Compiler fuer neue CRM-/Agrar-/
+Lager-Stammdaten, additive Tabellen-/Ereignismigration, zentraler Commandrouter,
+Masken-/Schema-/Katalog-/Registrierungsartefakte und Authoring-API/CLI umgesetzt.
+Vorhandener Studio-Katalog verdrahtet registrierte Routen/Quellen/Commands beim
+Start. Ausgaben bleiben writes_enabled=false und agent_roles=[]; Schema-/
+Laufzeitfingerprint sperrt fehlende/veraltete Bereitstellung. Kein Fachbuchungs-
+SQL oder offener Agenten-Write. Savepoint umfasst Row, unveraenderbare Receipt/
+Audit-Historie und bestehende Outbox; versioniertes Ersetzen und Deaktivieren.
+Zusaetzlicher enger Besitz: ActionRuntime nur gelesene Version an generierte
+Update-/Delete-Endpunkte; zugehoeriger Regressionstest. Keine fremden Maskenseiten.
+23 datenbankfreie Vertraege,24 Frontendtests, TypeScript und lokale Drift-/
+Architekturgates gruen. Erste SQL-Abnahme59 gruen/eine Status-Erwartung falsch;
+403 an Tenantgrenze statt422. Nach weiteren Schutz-/Verdrahtungsaenderungen
+breiten finalen SQL-Lauf wegen nicht mehr erreichbarem valeo_probe/Docker500
+beendet, nicht als bestanden gezaehlt. Keine DB/Container/Reset/Dienstneustarts.
+CI-Ausgangsfehler korrigiert: ADR-Navigation92 und drei veraltete SQL-/Status-
+Historienvertraege auf echten Pflichtplan erweitert. QA studio-generated-entities-
+20261021.md, ADR085 Proposed. Claim bleibt in arbeit: SQL-/CI-Nachlauf, positive
+Human/CLI/MCP-Fachkette und Schemaerweiterung bestehender Entity-Vertraege offen.
+Keine vollstaendige universelle Masken-/Fachkettenabnahme behauptet.

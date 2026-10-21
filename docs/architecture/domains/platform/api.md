@@ -135,3 +135,14 @@ requires_definition_update kennzeichnet noch ungespeicherte Bindungsvorschlaege.
 Keine Statusaenderung, DDL oder Publikation; Erweiterung des vollstaendigen
 Dreikanal-Freigabegates bleibt offen. ADR084 Proposed und QA
 studio-plan-history-20261021.md dokumentieren Nachweis und Grenzen.
+
+
+## Generierte neue Stammdaten (21.10.2026)
+
+POST /api/v1/studio/entity-bundle nimmt EntitySpec und liefert EntityBundleOut.
+Bestehendes beleg_write, verifizierter Tenant/Actor, keine DDL im Request.
+CLI: studio entitaet-generieren DATEI --ausgabe PAKET. Der bestehende
+Studio-Katalog generated_entities verdrahtet spaeter gepruefte Quellen,
+Commands und Routen. Ausgabeschreibrechte und Agentenrollen bleiben aus.
+Details/Grenzen: docs/quality-assurance/studio-generated-entities-20261021.md
+und ADR-085; keine automatische universelle Publikationsfreigabe.

@@ -462,6 +462,8 @@ nav:
           - "ADR-081: Persistente WhatsApp-Benachrichtigungsvorbereitung": adr/adr-081-whatsapp-browser-notification-persistence.md
           - "ADR-082: Verifizierte Identitaet an den Transportgrenzen": adr/adr-082-verified-identity-transport.md
           - "ADR-083: Gemeinsame Sitzungs- und Agentengrenze": adr/adr-083-shared-session-and-agent-boundary.md
+          - "ADR-084: Migrationsplan in bestehender Studio-Historie": adr/adr-084-studio-migration-plan-history.md
+          - "ADR-085: Generierte Studio-Stammdatencommands": adr/adr-085-studio-generated-master-data.md
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
           - Explizite Ernte-Abrechnungsregeln statt impliziter Freigrenze: adr/adr-harvest-deduction-resolver.md
           - "ADR Studio: Fachvertraege und kontingentierte Modellinterpretation": adr/adr-studio-semantic-contracts.md

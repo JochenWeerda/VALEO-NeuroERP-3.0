@@ -24,6 +24,7 @@ from app.services.studio_migration import plan_migration
 from app.core.database import get_db
 from sqlalchemy.orm import Session
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.services.studio_entity_contracts import EntitySpec, EntityBundleOut
 
 router = APIRouter(prefix="/studio", tags=["ui", "studio", "screen-definition"])
 
@@ -474,3 +475,19 @@ def studio_save_migration_plan(draft_id: str, body: StudioSavedMigrationIn,
         raise HTTPException(404, "draft_nicht_gefunden") from error
     except ValueError as error:
         raise HTTPException(409, str(error)) from error
+
+
+@router.post('/entity-bundle', response_model=EntityBundleOut,
+             summary='Stammdatenvertrag in pruefbare Schema-, Command- und Maskenartefakte uebersetzen')
+def studio_entity_bundle(body: EntitySpec, tenant_id: str = Depends(get_tenant_id),
+                         user: dict = Depends(beleg_write)) -> dict[str, Any]:
+    from app.services.studio_entity_compiler import compile_entity
+    _actor(user)
+    try:
+        return compile_entity(body)
+    except ValueError as error:
+        raise HTTPException(409, str(error)) from error
+
+
+from app.services.studio_entity_router import install_registered_entities
+install_registered_entities(router)

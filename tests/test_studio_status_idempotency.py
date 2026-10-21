@@ -26,7 +26,7 @@ def test_each_status_repeats_without_duplicate_history(probe):
         second = client.post(path+'/'+action, json=request)
         assert second.status_code == 200, second.text
         assert second.json() == first.json()
-        assert len(store.list_history(record['tenant_id'], record['id'])) == index + 2 + (1 if index >= 1 else 0)
+        assert len(store.list_history(record['tenant_id'], record['id'])) == index + 2 + (2 if index >= 1 else 0)
         record = first.json()
 
 
@@ -78,7 +78,7 @@ def test_sql_unknown_ack_replays_committed_history_once(studio_db, monkeypatch):
     assert retry.status_code == 200, retry.text
     assert retry.json()['status'] == 'published_temp'
     history = store.list_history(created['tenant_id'], created['id'])
-    assert [entry['action'] for entry in history] == ['create', 'review', 'simulation', 'published_temp']
+    assert [entry['action'] for entry in history] == ['create', 'review', 'migration_plan', 'simulation', 'published_temp']
     assert history[-1]['id'] == request['idempotency_key']
 
 
@@ -96,4 +96,4 @@ def test_sql_key_collision_rolls_back_status(studio_db, monkeypatch):
         store.set_status(_TENANT_A, original['id'], 'reviewer', 'published_temp',
                          expected_snapshot=reviewed, idempotency_key=key, request_revision=reviewed['revision'])
     assert store.get_draft(_TENANT_A, original['id']) == reviewed
-    assert len(store.list_history(_TENANT_A, original['id'])) == 3
+    assert len(store.list_history(_TENANT_A, original['id'])) == 4

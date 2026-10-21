@@ -295,6 +295,10 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `silo_rule_engine_service` | WM-SILO-RULE-ENGINE-001 — Automatische Zielzellen-Vorschlaege fuer Einlagerung. |
 | `stt_client` | Speech-to-Text-Client (anbieterunabhängig, OpenAI-kompatibel). |
 | `studio_draft_store` | Studio drafts with tenant isolation, four-eyes publish, and optional Postgres. |
+| `studio_entity_commands` | Generated domain-command implementation. Only deployment-owned EntitySpec selects tables. |
+| `studio_entity_compiler` | Deterministic deployable entity bundle. Does not execute DDL or activate writes. |
+| `studio_entity_contracts` | Compile-time contracts for new Studio-owned master data, never existing ledgers. |
+| `studio_entity_router` | One authenticated HTTP command adapter for generated master-data contracts. |
 | `studio_history_view` | Read-only, type-preserving comparison of immutable Studio snapshots. |
 | `studio_migration` | Studio migration compiler: catalog wiring and reviewable additive Alembic artifacts. |
 | `studio_migration_store` | Revision-bound plans in the existing append-only Studio history, never DDL. |

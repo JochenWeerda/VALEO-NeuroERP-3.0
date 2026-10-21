@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-21
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-21T06:53:05Z'
+generated_at: '2026-10-21T11:26:04Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -483,6 +483,7 @@ domains:
     - docs/adr/adr-077-leading-weighing-ticket.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-079-ebilanz-xbrl-drafts.md
+    - docs/adr/adr-085-studio-generated-master-data.md
     - docs/adr/adr-harvest-deduction-resolver.md
     - docs/adr/adr-studio-semantic-contracts.md
     status: active
@@ -846,6 +847,7 @@ domains:
     - docs/adr/adr-072-mcp-execution-adapters.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-081-whatsapp-browser-notification-persistence.md
+    - docs/adr/adr-085-studio-generated-master-data.md
     status: pilot
   dms-compliance:
     owner: domain/dms-compliance
@@ -1564,6 +1566,7 @@ domains:
     - docs/adr/adr-062-foreign-goods-operator-projection.md
     - docs/adr/adr-077-leading-weighing-ticket.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
+    - docs/adr/adr-085-studio-generated-master-data.md
     status: active
   logistics:
     owner: domain/logistics
@@ -1857,6 +1860,10 @@ domains:
     - security_observability
     - stt_client
     - studio_draft_store
+    - studio_entity_commands
+    - studio_entity_compiler
+    - studio_entity_contracts
+    - studio_entity_router
     - studio_history_view
     - studio_migration
     - studio_migration_store
@@ -2120,8 +2127,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 931
   frontend_routes_mapped: 931
-  backend_services_total: 309
-  backend_services_mapped: 309
+  backend_services_total: 313
+  backend_services_mapped: 313
   backend_endpoints_total: 472
   backend_endpoints_mapped: 472
 unmapped:
