@@ -19374,3 +19374,25 @@ Dockerfile.backend (nur Katalog-COPY), .dockerignore (nur Katalog zulassen),
 docker-compose.yml (nur read-only Katalogmount); eigener Paketvertrag.
 Dateien aus Git HEAD in kanonischer Quellansicht, fremde physische
 Dockerfile-Arbeitskopie nicht ueberschreiben. Kein Containerneustart/Reset.
+
+
+STUDIO-ENTITY-RELEASE Meilenstein:43 Generator-/Profil-,41 SQL-/Freigabe-/
+Grain-/Kanalvertraege und2 Paketvertraege gruen. Neues studio.entity.v1 prueft
+exakte registrierte Definition und reale CRUD-/Audit-/Outbox-/Rollbackkette;
+bestehende gespeicherte Plaene, unveraenderliche Evidenz und Vier-Augen-Freigabe
+bleiben aktiv. Runtime-/Authorizer-/Tenantsourcen gebunden, alter geladener
+Router lehnt Quellwechsel vor SQL ab. Kanonischen Schema-Katalog gezielt
+ausliefern; identischen doppelten Config-COPY im Dockerfile entfernt.
+Alle lokalen Driftgates gruen, OpenAPI unveraendert, nur tenants-read_by
+im physischen Katalog nachgezogen.315 Services vollstaendig zugeordnet.
+QA studio-entity-release-20261021.md. CI/Image und reale visuelle Abnahme
+bleiben offen; kein universelles made-by-studio-Zertifikat oder Gesamtabschluss.
+
+
+STUDIO-ENTITY-RELEASE CLI-Integrationsluecke: serverseitig registrierte
+Definition muss ohne manuelle Paketmanipulation uebernehmbar sein. Enger Besitz
+um gemeinsamen Registrierungslookup, lesenden typisierten Authoring-Endpunkt
+und CLI entitaet-uebernehmen erweitert; dieselben bestehenden Draft-/Plan-/
+Simulations-/Publikationscommands. Eigener signierter HTTP-/CLI-Gesamttest
+einschliesslich Readiness, Vier-Augen und Ruecknahme. Keine Aktivierung durch
+den Lookup, keine zweite Registry oder andere Rollen.
