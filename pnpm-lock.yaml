@@ -51,7 +51,7 @@ overrides:
   undici: ^7.29.0
   '@grpc/grpc-js': ^1.14.5
   linkify-it: ^5.0.2
-  markdown-it: 14.3.1
+  markdown-it: 14.3.3
   js-yaml: ^4.3.2
   ajv: ^8.18.0
   '@eslint/eslintrc>ajv': ^6.12.6
@@ -13111,8 +13111,8 @@ packages:
     resolution: {integrity: sha512-vFMwMK0Zs+NM/rOMSdtu8bO30DIexhBEVi5KC6f70/XtI+L/K2wC3LsDCAXFZ4s8ik5gAuDugfCNbpllpdJ9bA==}
     engines: {node: '>=16.14.0', npm: '>=8.1.0'}
 
-  markdown-it@14.3.1:
-    resolution: {integrity: sha512-4Ej49aYTDFIQ+uBkfX8GBvJGccoARxxPep+7aWTs55ozbjQJpW9M26Fe53vnGgvLeVzva/amzjQQaQu9w0vMhA==}
+  markdown-it@14.3.3:
+    resolution: {integrity: sha512-L//tDAkjTjJCU6pBUSBTgs3Kg4InVaZuUZog/b6V12UKhcDQ7S78877ibbCanRExwPuYP1CZD7Gd2dxSy1GXRg==}
     hasBin: true
 
   matcher-collection@1.1.2:
@@ -29725,7 +29725,7 @@ snapshots:
       quickselect: 3.0.0
       tinyqueue: 3.0.0
 
-  markdown-it@14.3.1:
+  markdown-it@14.3.3:
     dependencies:
       argparse: 2.0.1
       entities: 4.5.0
@@ -33299,7 +33299,7 @@ snapshots:
   typedoc@0.26.11(typescript@5.9.2):
     dependencies:
       lunr: 2.3.9
-      markdown-it: 14.3.1
+      markdown-it: 14.3.3
       minimatch: 9.0.9
       shiki: 1.29.2
       typescript: 5.9.2

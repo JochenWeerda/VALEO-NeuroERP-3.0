@@ -19129,7 +19129,7 @@ Faelle-/Betriebsprofile-/Aktivitaeten-Isolationsvertraege bleiben gruen.
 Keine Authumgehung in Produktionsapp, keine DB/Container.
 
 
-## NODE-MARKDOWN-20261021 - reserviert, Codex
+## NODE-MARKDOWN-20261021 - abgeschlossen, Codex
 
 Vollscan des kanonischen Locks bestaetigt drei neue markdown-it-Befunde gegen
 14.3.1 (GHSA-gfr2-rv44-r23c, GHSA-vfgh-jcmw-g37q, GHSA-r7fv-28h4-cvq7).
@@ -19147,3 +19147,21 @@ CRM-CASE-OUTAGE-CONTRACT Abnahme:22 Tests gruen (Runtime-Sweep D, Faelle und
 Betriebsprofile). HTTP statt direktem Handleraufruf, zwei explizite Testmandanten
 und weitergereichter Kontext geprueft. Produktionscode unveraendert. QA
 crm-case-outage-contract-20261021.md. Keine DB/Container angelegt.
+
+
+NODE-MARKDOWN Abnahme21.10.: Herstellerpatch14.3.3, offizielle SHA512-Archive
+und jeweils57 installierte JS/MJS/CJS-Quelldateien von14.3.1/14.3.3 verifiziert.
+Originale2/8 gruen; sechs Angriffe im8s-Unterprozesslimit abgebrochen. Repariert
+8/8, einschliesslich normalem Rendering und sieben begrenzten Problemformen.
+Gemeinsame Quell-/Audit-/Redirect-/Vite-/Markdownvertraege45/45; Production-Audit
+weiter2 High als bereits gepruefte Quellreparaturen/0 blocked; Vollscan von10
+auf7 Findings (3 High/4 Moderate), alle3 Markdownbefunde entfernt. Keine
+paketfremden Aufloesungen:3012 Pakete,36 Workspaces frozen. Bestehende Review-
+Quellhashes und Fristen unveraendert; nur Manifest-/Lockbindung nach erneuter
+Runtimepruefung aktualisiert. Audit-CLI erzwingt neuen Vertrag ohne Testpfad-
+Override. QA node-markdown-security-20261021.md. Keine gemeinsame Installation.
+
+Chroma-Nachpruefung ohne neue Bewertung: bestehende3 Reviews (bis23.10.) mit
+allen98 kanonischen Quell-/Deploydateien und Embeddedkontrolle exakt bestaetigt;
+12 vorhandene Failclosed-Vertraege bestanden. Keine Fristverlaengerung oder
+Alertschliessung. Nicht mit Herstellerreparatur oder neuem Scannerlauf verwechseln.
