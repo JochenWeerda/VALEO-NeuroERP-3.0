@@ -19459,3 +19459,8 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 
 
 **STUDIO-LIVE-PROBE visuelle Zentralreparatur:** Reale Historien-Sichtpruefung bei1440x900 zeigt abgeschnittene Aktionsbuttons: Compiler erzwingt36px expertDense auch bei44px Touch-Zielen. Besitz zusaetzlich zentraler render-plan/schema-compiler.ts und dessen bestehende Vertraege; Zeilen mit sichtbaren Aktionen erhalten ausreichende Hoehe, reine Datenzeilen bleiben dicht. History-ScreenDefinition erhaelt ausdruecklich einspaltige Auditliste statt automatisch schmaler Mehrspaltenansicht. Keine individuelle React-Maske.
+
+
+## IDENTITY-SELF-LOGOUT-20261021 - reserviert, Codex
+
+**Owner:** Codex. **Befund:** eigener Sitzungslogout erhielt beim breiten Schreibrollen-Rollout dependencies=SCHREIBEN[PLATTFORM] (nuradmin). Normale Mitarbeitende koennen damit die eigene Serversitzung nicht widerrufen; bestehender signierter Test verwendet FINANCE_BEARBEITEN. **Besitz:** identity_management.py ausschliesslich eigener session/logout; check_write_routes_roles.py exakter begruendeter Delegationsvertrag; test_identity_sessions.py signierte rollenlose/Leser-/Fremdselector-/Widerrufstests. **Entscheidung:** jede authentifizierte Person darf ausschliesslich die aus ihrem Token bestimmte eigene Sitzung beenden, ohne Fachrolle. Kein Eingabefeld fuer Zielidentitaet. subjects/revoke bleibtadmin. Keine pauschale Identity-Prefix-Ausnahme oder Baselineerhoehung. Vorhandenes Redis und valeo_probe, keine neuen Ressourcen. **Abnahme:** alte Route reproduzierbar403; korrigierte Route204, erneute Tokenverwendung401; fremde Sitzungen unveraendert.
