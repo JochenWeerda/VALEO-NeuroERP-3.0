@@ -19199,3 +19199,24 @@ Gesamtclaim bleibt offen fuer CRUD-/Capability-Generierung, UI-/MCP-Authoring un
 verpflichtende Auswertung aller revisionsgebundenen Nachweise im Publikationsgate.
 D8dee7717-Nachlauf: Security/ServiceSecurity/SQL/Smoke/critical/Docs gruen;
 Quality und CI/CD zum letzten Abruf noch nicht abgeschlossen.
+
+
+## STUDIO-PLAN-INTEGRATION-20261021 - reserviert, Codex
+
+Nutzer: offene Publikations-/UI-/MCP-Anbindung abschliessen. Besitz bestehender
+studio_migration_store.py nur aktuelle Planpruefung, studio_release.py und
+studio_draft_store.py nur Pflicht-/Runtimebindung, simulation_artifact_hash nur
+Abhaengigkeitsliste. Studio-Oberflaeche/APIclient plus neue Plan-Komponente,
+zugehoerige Tests; neuer MCP-Transportadapter und explizites versioniertes
+Tool im vorhandenen Register, mcp_mask_actions.py nur Dispatch (kein Wachstum
+MCP-Godfile). Keine fremden Seiten/Builder. Vorhandene Rollen/Scopes bleiben
+fuehrend, MCP-Adapter schreibt niemals SQL oder publiziert; gleiche Authoring-
+Domainoperation wie HTTP/CLI. Autorisierter Nutzerauftrag ist Freigabe dieser
+eng begrenzten R1-Plan-Capability, keine neue Kontenrolle/Schemaausfuehrung.
+Abnahme: Plan fehlt/veraltet/manipuliert sperrt Publikation, SQL-/Memoryparitaet,
+auf Revision bezogene UI, drei gleiche Transportergebnisse und echte negative
+JWT-/Rollen-/Tenant-/Replayfaelle. Bestehende Lifecycle-Testhelfer werden fuer
+verpflichtenden Planschritt angepasst, keine Gateabschwaechung. Vollstaendige
+allgemeine Human/CLI/MCP-Fachkettenzertifizierung bleibt eigener Umfang;
+not_verified wird nicht zu bestanden umetikettiert. Bestehender valeo_probe,
+Rollback, kein Reset/DB/Container. Doku/ADR084/Projektionen nachziehen.
