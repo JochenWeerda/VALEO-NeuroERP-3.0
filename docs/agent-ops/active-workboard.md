@@ -19116,7 +19116,7 @@ Altbestand sind separat zu klaeren. Keine Entwarnung aus einem einzelnen Scan,
 keine Alert-Schliessung oder unsicheren Major-Overrides vorgenommen.
 
 
-## CRM-CASE-OUTAGE-CONTRACT-20261021 - reserviert, Codex
+## CRM-CASE-OUTAGE-CONTRACT-20261021 - abgeschlossen, Codex
 
 Nachlauf a9f454271: Security Scan, Universal Mask Platform und SQL-Gate gruen;
 CI/CD scheitert einzig am alten direkten Aufruf des Cases-Listenhandlers ohne
@@ -19142,3 +19142,8 @@ Gate-/Workflowabsenkung oder neue Ausnahme. Abnahme Normalrendering und
 abgebrochene Referenzen, Quotes und vier HTML-Varianten in zeit-/speicherbegrenzten
 Unterprozessen, Auditvollscan ohne diese Befunde, frozen36 Workspaces. Keine
 geteilte Installation, kein neuer DB/Container. Andere offene Pakete gesondert.
+
+CRM-CASE-OUTAGE-CONTRACT Abnahme:22 Tests gruen (Runtime-Sweep D, Faelle und
+Betriebsprofile). HTTP statt direktem Handleraufruf, zwei explizite Testmandanten
+und weitergereichter Kontext geprueft. Produktionscode unveraendert. QA
+crm-case-outage-contract-20261021.md. Keine DB/Container angelegt.
