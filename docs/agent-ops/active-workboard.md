@@ -19287,3 +19287,10 @@ bei domain_shared.tenants nachgezogen, physischer Katalog unveraendert.
 Docker-Update laut Nutzer abgeschlossen; gemeinsamer valeo_probe erreichbar.
 Regulaeren Desktop-Neustart zuvor angefordert, keine erzwungene WSL-Beendigung
 oder Loeschung/Reset/neue Ressourcen. Positiver Dreikanalnachweis bleibt offen.
+
+
+STUDIO-GENERATED-ENTITIES Kanalabnahme: eigener Testbesitz um
+tests/test_studio_entity_channels.py erweitert. Synthetische registrierte
+Definition und explizit freigeschaltete Testcapability nur in Rollback-Fixture;
+echte signierte Identitaeten und vorhandener MCP-/CLI-/HTTP-Ausfuehrungsweg.
+Keine produktive Registrierung oder vorgetaeuschte Studio-Publikation.
