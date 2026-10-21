@@ -16,7 +16,7 @@ def test_http_history_preserves_reviewed_content_and_identity(probe):
     published = publish_reviewed(client, '/studio/drafts/'+record['id']+'/publish')
     assert published.status_code == 200
     history = client.get('/studio/drafts/'+record['id']+'/history').json()['history']
-    assert [e['action'] for e in history] == ['create', 'review', 'simulation', 'published_temp']
+    assert [e['action'] for e in history] == ['create', 'review', 'migration_plan', 'simulation', 'published_temp']
     assert history[0]['actor'] == 'editor'
     assert history[-1]['actor'] == 'reviewer'
     assert history[-1]['snapshot']['definition'] == record['definition']

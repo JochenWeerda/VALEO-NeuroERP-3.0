@@ -19201,7 +19201,7 @@ D8dee7717-Nachlauf: Security/ServiceSecurity/SQL/Smoke/critical/Docs gruen;
 Quality und CI/CD zum letzten Abruf noch nicht abgeschlossen.
 
 
-## STUDIO-PLAN-INTEGRATION-20261021 - reserviert, Codex
+## STUDIO-PLAN-INTEGRATION-20261021 - abgeschlossen, Codex
 
 Nutzer: offene Publikations-/UI-/MCP-Anbindung abschliessen. Besitz bestehender
 studio_migration_store.py nur aktuelle Planpruefung, studio_release.py und
@@ -19220,3 +19220,20 @@ verpflichtenden Planschritt angepasst, keine Gateabschwaechung. Vollstaendige
 allgemeine Human/CLI/MCP-Fachkettenzertifizierung bleibt eigener Umfang;
 not_verified wird nicht zu bestanden umetikettiert. Bestehender valeo_probe,
 Rollback, kein Reset/DB/Container. Doku/ADR084/Projektionen nachziehen.
+
+Ergebnis: Pflichtplan in Memory-/SQL-Publikation und Runtime angebunden.
+Compiler-/Katalogdrift, manipulierte Belege, fehlende Revision, ungespeicherte
+Bindungen und Schemaaenderungen ohne Bereitstellungsnachweis sperren. Bestehende
+Studio-Oberflaeche haelt den aktuellen Plan ueber denselben Servercommand fest;
+CLI und explizit freigeschaltetes R1-MCP studio.migration.plan v1 liefern bei
+Wiederholung identisches Ergebnis. Vorhandene belege:write-/beleg_write- und
+Token-Tenantgrenzen bleiben verbindlich. Kein Agenten-SQL oder Publikationsrecht.
+107 eindeutige Backendtests (106 breiter Lauf + 16 ueberlappende Tests mit einem
+neuen SQL-Publikationsvertrag),14 UI/APIclienttests und TypeScript gruen.
+UI-Leerzustand und kollidierende React-Keys von Plan/Historie mitbehoben.
+Keine neue DB/Container/Reset; eigener SQL-Datenstand zurueckgerollt.
+QA studio-plan-integration-20261021.md; ADR084 weiterhin Proposed.
+Gesamtclaim STUDIO-MIGRATION-ENGINE-20261020 bleibt in arbeit: allgemeine
+CRUD-/Capability-Generierung, Schemaeditor/-bereitstellung und vollstaendige
+kanalweise Fachkettenabnahmen sind hiermit nicht behauptet. Bestehendes
+begrenzt read-only grain.v1-Profil und not_verified bleiben ehrlich ausgewiesen.

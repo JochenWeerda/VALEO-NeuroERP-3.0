@@ -15,11 +15,13 @@ import {
   submitStudioReview,
   simulateStudioDraft,
   type StudioSimulationResult,
+  type StudioSavedMigrationPlan,
   validateStudioDraft,
   type StudioReport,
   type StudioDialogueTurn,
 } from '@/lib/api/studio'
 import { StudioVariantPresentation } from './StudioVariantPresentation'
+import { StudioMigrationPlan } from './StudioMigrationPlan'
 import { StudioHistoryPanel } from './StudioHistoryPanel'
 import { emptyStudioDraft } from './studio-defaults'
 import { studioReducer } from './studio-reducer'
@@ -42,6 +44,7 @@ export function ScreenStudioPage(): JSX.Element {
   const [savedSignature, setSavedSignature] = useState<string>()
   const [savedRevision, setSavedRevision] = useState<string>()
   const [savedStatus, setSavedStatus] = useState<string>()
+  const [migrationPlan, setMigrationPlan] = useState<StudioSavedMigrationPlan>()
   const [simulation, setSimulation] = useState<StudioSimulationResult>()
   const [publishedRoute, setPublishedRoute] = useState<string>()
   const [report, setReport] = useState<StudioReport>()
@@ -53,6 +56,8 @@ export function ScreenStudioPage(): JSX.Element {
   const catalog = useQuery({ queryKey: ['studio-catalog'], queryFn: fetchStudioCatalog })
   const drafts = useQuery({ queryKey: ['studio-drafts'], queryFn: fetchStudioDrafts })
   const dirty = savedSignature !== JSON.stringify(definition)
+  const migrationReady = migrationPlan && migrationPlan.draft_id === draftId && migrationPlan?.candidate_revision === savedRevision
+    && !migrationPlan.requires_definition_update && migrationPlan.schema_changes.length === 0
   const semanticPreview = Boolean((definition as ScreenDefinition & { studioSemantic?: unknown }).studioSemantic)
   const semanticContext = (definition as ScreenDefinition & { studioSemantic?: {
     dialogue?: StudioDialogueTurn[]; decisions?: { weighing?: 'manual'; acceptPreviewLimits?: boolean }
@@ -239,7 +244,7 @@ export function ScreenStudioPage(): JSX.Element {
             refreshHistory(draftId)
             setFeedback(checked.simulation.passed ? 'Prozesssimulation bestanden.' : 'Prozesssimulation fehlgeschlagen; Freigabe gesperrt.')
           })}>Prozess simulieren</Button>
-          <Button type="button" variant="outline" disabled={!draftId || !savedRevision || savedStatus !== 'review' || dirty || Boolean(pending) || !report?.definitionReady || !catalog.data?.permissions?.canPublish || !simulation?.passed || simulation.candidate_revision !== savedRevision} onClick={() => void run('publish', async () => {
+          <Button type="button" variant="outline" disabled={!draftId || !savedRevision || savedStatus !== 'review' || dirty || Boolean(pending) || !report?.definitionReady || !catalog.data?.permissions?.canPublish || !simulation?.passed || simulation.candidate_revision !== savedRevision || !migrationReady} onClick={() => void run('publish', async () => {
             if (dirty || !savedRevision || savedStatus !== 'review') return
             const published = await publishStudioDraft(draftId ?? '', savedRevision)
             setReport(published)
@@ -279,10 +284,13 @@ export function ScreenStudioPage(): JSX.Element {
         ) : (
           <p className="text-sm text-muted-foreground">Keine Studio-Verletzungen.</p>
         )}
-        <p className="text-sm">{report?.definitionReady && catalog.data?.permissions?.canPublish && simulation?.passed && simulation.candidate_revision === savedRevision && !dirty ? 'Freigabe nach menschlicher Prüfung möglich.' : 'Freigabe gesperrt, bis Vertragsprüfung und Prozesssimulation bestanden sind.'}</p>
+        <p className="text-sm">{report?.definitionReady && catalog.data?.permissions?.canPublish && simulation?.passed && simulation.candidate_revision === savedRevision && migrationReady && !dirty ? 'Freigabe nach menschlicher Prüfung möglich.' : 'Freigabe gesperrt, bis Vertragsprüfung und Prozesssimulation bestanden sind.'}</p>
         {semanticPreview ? <p className="text-sm text-destructive">Diese Kalkulationsprobe besitzt noch keine freigegebene produktive Datenbindung und Prozessvariante.</p>
           : (report?.readiness.errors ?? []).map((item) => <p key={item} className="text-sm text-destructive">{item}</p>)}
       </aside>
+      <StudioMigrationPlan key={`plan:${draftId ?? 'new'}:${savedRevision ?? 'unsaved'}`} draftId={draftId} revision={savedRevision}
+        disabled={dirty || Boolean(pending) || !catalog.data?.permissions?.canDesign || !['draft', 'review'].includes(savedStatus ?? '')}
+        onPrepared={plan => { setMigrationPlan(plan); if (draftId) refreshHistory(draftId) }} />
       {simulation && <p role="status">Simulation: {simulation.passed ? 'bestanden' : 'fehlgeschlagen'}{simulation.failed_checks?.length ? ` (${simulation.failed_checks.map(check => check === 'semantic_preview_not_a_release_profile' ? 'Kalkulationsprobe ist noch kein abgenommener produktiver Prozess' : check).join(', ')})` : ''}</p>}
       {draftId && <StudioHistoryPanel key={`${draftId}:${savedRevision ?? ""}`} draftId={draftId} />}
     </div>

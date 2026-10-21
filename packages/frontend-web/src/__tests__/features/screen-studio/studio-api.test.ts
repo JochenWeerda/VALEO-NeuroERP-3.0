@@ -1,6 +1,6 @@
 import { beforeEach, expect, it, vi } from 'vitest'
 import { emptyStudioDraft } from '@/features/screen-studio/studio-defaults'
-import { proposeStudioDraft, saveStudioDraft, submitStudioReview, publishStudioDraft } from '@/lib/api/studio'
+import { proposeStudioDraft, saveStudioDraft, submitStudioReview, publishStudioDraft, saveStudioMigrationPlan } from '@/lib/api/studio'
 
 const client = vi.hoisted(() => ({ post: vi.fn(), put: vi.fn() }))
 vi.mock('@/lib/api-client', () => ({ apiClient: client }))
@@ -42,4 +42,15 @@ it('binds save retry keys to definition and displayed revision', async () => {
   const bodies = client.post.mock.calls.map(call => call[1])
   expect(bodies[0].idempotency_key).toBe(bodies[1].idempotency_key)
   expect(bodies[0].idempotency_key).not.toBe(bodies[2].idempotency_key)
+})
+
+it('binds plan retries to the saved revision and escapes the draft path', async () => {
+  await saveStudioMigrationPlan('draft/one', 'revision-a')
+  await saveStudioMigrationPlan('draft/one', 'revision-a')
+  await saveStudioMigrationPlan('draft/one', 'revision-b')
+  const calls = client.post.mock.calls
+  expect(calls[0][0]).toBe('/api/v1/studio/drafts/draft%2Fone/migration-plan')
+  expect(calls[0][1]).toEqual({ expected_revision: 'revision-a', schema_changes: [], idempotency_key: expect.any(String) })
+  expect(calls[0][1].idempotency_key).toBe(calls[1][1].idempotency_key)
+  expect(calls[0][1].idempotency_key).not.toBe(calls[2][1].idempotency_key)
 })

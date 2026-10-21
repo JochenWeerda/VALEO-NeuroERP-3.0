@@ -74,3 +74,53 @@ def save_migration_plan(tenant: str, draft_id: str, actor: str, body: StudioSave
         raise
     finally:
         session.close()
+
+
+def verify_saved_plan(item, saved, actor):
+    """Recompute against current compiler/catalog; stored evidence is never self-authorizing."""
+    from app.api.v1.schemas.studio_migration import StudioSavedMigrationOut
+    from pydantic import ValidationError
+    try:
+        checked = StudioSavedMigrationOut.model_validate(saved).model_dump(mode="json")
+        body = StudioSavedMigrationIn(expected_revision=item["revision"], idempotency_key=checked["event_id"],
+                                      schema_changes=checked["schema_changes"])
+        current = _compile(item, item["tenant_id"], actor, body)["saved_migration"]
+    except (ValidationError, KeyError, TypeError) as error:
+        raise ValueError("migrationsplan_nachweis_ungueltig") from error
+    if checked != current:
+        raise ValueError("migrationsplan_nachweis_veraltet_oder_veraendert")
+    if checked["requires_definition_update"]:
+        raise ValueError("migrationsplan_vorschlaege_zuerst_speichern")
+    if checked["schema_changes"]:
+        raise ValueError("schema_deployment_nachweis_fehlt")
+    expected = {"studio_revision_simulation_and_independent_release_required",
+                "human_cli_mcp_role_tenant_and_replay_contract_tests_required"}
+    if set(checked["plan"]["blockers"]) - expected:
+        raise ValueError("migrationsplan_fachvertrag_nicht_freigabefaehig")
+    return {**checked, "actor": actor, "tenant_id": item["tenant_id"]}
+
+
+def require_saved_plan(item, entries):
+    for entry in reversed(entries):
+        if entry.get("action") != "migration_plan":
+            continue
+        saved = entry.get("snapshot", {}).get("saved_migration")
+        if not isinstance(saved, dict) or saved.get("candidate_revision") != item["revision"]:
+            continue
+        if (entry.get("tenant_id") != item["tenant_id"] or entry.get("draft_id") != item["id"]
+                or entry.get("id") != saved.get("event_id")):
+            raise ValueError("migrationsplan_nachweis_ungueltig")
+        return verify_saved_plan(item, saved, entry["actor"])
+    raise ValueError("migrationsplan_fuer_diese_revision_fehlt")
+
+
+def published_plan_valid(record, proof):
+    try:
+        saved = proof["migration_plan"]
+        candidate = {**record, "status": "review", "revision": proof["candidate_revision"]}
+        if saved["tenant_id"] != record["tenant_id"]:
+            return False
+        expected = verify_saved_plan(candidate, {key:value for key,value in saved.items() if key not in {"actor","tenant_id"}}, saved["actor"])
+        return saved == expected
+    except (ValueError, KeyError, TypeError):
+        return False

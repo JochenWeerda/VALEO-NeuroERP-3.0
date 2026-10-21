@@ -42,6 +42,9 @@ def test_exact_trusted_evidence_replays_once_and_allows_four_eyes(monkeypatch):
     first=store.simulate_draft("own",item["id"],"editor",item["revision"],key)
     assert store.simulate_draft("own",item["id"],"editor",item["revision"],key)==first
     assert store.count_history("own",item["id"])==3
+    from app.services.studio_migration_store import save_migration_plan
+    from app.api.v1.schemas.studio_migration import StudioSavedMigrationIn
+    save_migration_plan("own",item["id"],"editor",StudioSavedMigrationIn(expected_revision=item["revision"],idempotency_key=uuid4()))
     assert store.set_status("own",item["id"],"human-reviewer","published_temp",expected_snapshot=item)["status"]=="published_temp"
 
 @pytest.mark.parametrize("broken",["checks","artifact_hash","definition_hash","tenant_id","passed"])
@@ -69,6 +72,9 @@ def test_evidence_does_not_follow_an_edit(monkeypatch):
 def test_active_runtime_requires_current_evidence(monkeypatch):
     item=candidate();monkeypatch.setattr(release,"simulate_candidate",proof)
     store.simulate_draft("own",item["id"],"editor",item["revision"],str(uuid4()))
+    from app.services.studio_migration_store import save_migration_plan
+    from app.api.v1.schemas.studio_migration import StudioSavedMigrationIn
+    save_migration_plan("own",item["id"],"editor",StudioSavedMigrationIn(expected_revision=item["revision"],idempotency_key=uuid4()))
     store.set_status("own",item["id"],"reviewer","published_temp",expected_snapshot=item)
     active=store.get_published_definition("own",item["screen_id"])
     assert active["studioRelease"]["candidateRevision"]==item["revision"]

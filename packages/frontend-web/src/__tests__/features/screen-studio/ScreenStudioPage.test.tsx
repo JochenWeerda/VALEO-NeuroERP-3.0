@@ -1,8 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from '@/app/routing/test-router'
 import { ScreenStudioPage } from '@/features/screen-studio/ScreenStudioPage'
+
+afterEach(cleanup)
 
 const postMock = vi.hoisted(() => vi.fn())
 const getMock = vi.hoisted(() => vi.fn())
@@ -39,6 +41,9 @@ function renderStudio() {
 
 describe('ScreenStudioPage', () => {
   beforeEach(() => {
+    cleanup()
+    document.body.replaceChildren()
+    vi.clearAllMocks()
     getMock.mockResolvedValue({
       data: {
         permissions: { canDesign: true, canPublish: true },
@@ -107,7 +112,7 @@ describe('ScreenStudioPage', () => {
   })
 
   it('requires saving local changes before review or publication', async () => {
-    const response = async (url: string, body: { definition?: unknown }) => ({ data: {
+    const response = async (url: string, body: { definition?: unknown }) => ({ data: url.endsWith('/migration-plan') ? { draft_id: 'draft-a', candidate_revision: 'revision-a', requires_definition_update: false, schema_changes: [] } : {
       id: 'draft-a', status: url.endsWith('/submit-review') ? 'review' : 'draft', revision: 'revision-a', definition: body.definition,
       violations: [], canPublish: true, definitionReady: true, readiness: { errors: [] },
       simulation: { passed: true, candidate_revision: 'revision-a', profile: 'grain.v1' },
@@ -123,6 +128,9 @@ describe('ScreenStudioPage', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Prozess simulieren' })).toBeEnabled())
     expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Prozess simulieren' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Änderungsplan festhalten' })).toBeEnabled())
+    expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Änderungsplan festhalten' }))
     await waitFor(() => expect(screen.getByRole('button', { name: 'Freigeben' })).toBeEnabled())
     fireEvent.change(screen.getByLabelText('Titel'), { target: { value: 'Ungespeicherter Entwurf' } })
     expect(screen.getByRole('button', { name: 'Prüfung' })).toBeDisabled()
@@ -146,7 +154,7 @@ describe('ScreenStudioPage', () => {
       url.endsWith('/drafts') ? { drafts: [record] } : url.endsWith('/draft-review') ? record : { floorplans: ['worklist'], permissions: { canDesign: true, canPublish: true } },
     }))
     postMock.mockImplementation(async (url: string, body: { definition?: unknown }) => ({ data:
-      url.endsWith('/simulate') ? { ...record, simulation: { passed: true, candidate_revision: record.revision, profile: 'grain.v1' } } : url.endsWith('/publish') ? { ...record, status: 'published_temp', violations: [], canPublish: true, definitionReady: true, readiness: { errors: [] } }
+      url.endsWith('/migration-plan') ? { draft_id: record.id, candidate_revision: record.revision, requires_definition_update: false, schema_changes: [] } : url.endsWith('/simulate') ? { ...record, simulation: { passed: true, candidate_revision: record.revision, profile: 'grain.v1' } } : url.endsWith('/publish') ? { ...record, status: 'published_temp', violations: [], canPublish: true, definitionReady: true, readiness: { errors: [] } }
         : { definition: body.definition, violations: [], canPublish: true, definitionReady: true, readiness: { errors: [] } },
     }))
     renderStudio()
@@ -158,6 +166,9 @@ describe('ScreenStudioPage', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Prozess simulieren' })).toBeEnabled())
     expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Prozess simulieren' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Änderungsplan festhalten' })).toBeEnabled())
+    expect(screen.getByRole('button', { name: 'Freigeben' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Änderungsplan festhalten' }))
     await waitFor(() => expect(screen.getByRole('button', { name: 'Freigeben' })).toBeEnabled())
     fireEvent.click(screen.getByRole('button', { name: 'Freigeben' }))
     await waitFor(() => expect(postMock).toHaveBeenCalledWith('/api/v1/studio/drafts/draft-review/publish', { expected_revision: 'loaded-revision', idempotency_key: expect.any(String) }))

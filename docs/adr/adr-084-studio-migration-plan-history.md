@@ -45,10 +45,23 @@ unveraendert; plan.can_activate bleibt false, Kanalnachweise not_verified.
 
 ## Konsequenzen
 
-API und CLI verwenden denselben Servercommand. Ein Human-UI-Editor, MCP-
-Authoring-Write, allgemeine CRUD-Generierung und die verpflichtende Auswertung
-dieses Plans im erweiterten Publikationsgate bleiben eigene Integrationsschritte.
-Bestehende Publikation wird weder umgangen noch als vollstaendig erweitert
-bezeichnet. Die aktuelle Simulation beweist weiterhin ihren begrenzten Fachumfang.
+UI, CLI und MCP verwenden denselben Servercommand. Das versionierte MCP-Tool
+studio.migration.plan ist ausschliesslich fuer diese R1-Authoring-Operation
+freigeschaltet; belege:write im Transport ersetzt keine beleg_write-Rollenpruefung
+am Ziel. Es leitet nur das Bearer-Token weiter, niemals Tenant- oder Actorwerte.
+Validate/dryRun/propose pruefen nur die Auftragssyntax und behaupten keine
+fachliche Freigabe. Keine DDL oder Publikation durch diesen Adapter.
+
+Publikation verlangt zusaetzlich einen unveraenderten Plan exakt der geprueften
+Revision. Compiler-/Katalogdrift, ungespeicherte Bindungsvorschlaege, andere
+Fachblocker und Schemaaenderungen ohne Bereitstellungsnachweis sperren. Ein
+Schema-Bereitstellungsnachweis ist noch nicht implementiert; entsprechende
+Plaene koennen deshalb nicht publiziert werden. Runtime prueft den angebundenen
+Plan erneut. Alte Plan-Replays bleiben historisch, nicht aktuell freigabefaehig.
+Allgemeine CRUD-Generierung, Schemaeditor und vollstaendige Human/CLI/MCP-
+Fachkettenzertifizierung bleiben offen. Die beiden allgemeinen Nachweisanmerkungen
+im Compilerplan bleiben sichtbar, Kanalstatus bleibt not_verified. Die bestehende
+grain.v1-Freigabe bleibt auf ihren geprueften read-only UI-Umfang beschraenkt;
+sie ist keine universelle Geschaeftsprozessfreigabe.
 C4-Grenzen bleiben unveraendert; interner Serviceprefix und API-Projektionen
 werden nachgezogen. Keine DDL waehrend Planerstellung oder Testvorbereitung.

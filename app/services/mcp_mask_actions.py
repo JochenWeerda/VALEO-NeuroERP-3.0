@@ -22,7 +22,7 @@ import httpx
 import yaml
 from fastapi import HTTPException
 
-TOOLS = {"mask.actions.list", "mask.action.execute", "mask.data.read"}
+TOOLS = {"mask.actions.list", "mask.action.execute", "mask.data.read", "studio.migration.plan"}
 _PLACEHOLDER = re.compile(r"\{[^}]+\}")
 _GENERIC_PARAMETERS = {"{entity_id}", "{screen_id}"}
 _DOCFLOW = re.compile(r"^/api/v1/docflow(?:/|$)")
@@ -220,6 +220,9 @@ def read_source(parameters: dict[str, Any], tenant: str, authorization: str | No
 
 
 def dispatch(request: Any, tenant: str, authorization: str | None) -> dict:
+    if request.tool_name == "studio.migration.plan":
+        from app.services.mcp_studio_plans import execute as prepare_plan
+        return prepare_plan(request, authorization)
     if request.tool_name == "mask.actions.list":
         return list_actions(request.parameters, tenant)
     if request.tool_name == "mask.data.read":

@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 64 Tools in 20 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 65 Tools in 21 Domaenen.
 
 ## Uebersicht
 
@@ -80,6 +80,7 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 64 Tools in 20 Domaenen.
 | `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein |
+| `studio.migration.plan` | studio | `belege:write` | ja | niedrig | nein |
 | `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein |
 | `wms.lot.trace` | inventory | `inventory:read` | ja | niedrig | nein |
 
@@ -4111,5 +4112,136 @@ Gibt Lifecycle-Status, offene Positionen, naechsten Schritt und kanonische Maske
       "type": "string"
     }
   }
+}
+```
+
+## Domaene: studio
+
+### `studio.migration.plan` — Studio-Aenderungsplan festhalten
+
+Versionierter Authoring-Command: erzeugt nur einen revisionsgebundenen Plan in der vorhandenen Historie; keine Freigabe, Schemaausfuehrung oder Geschaeftsbuchung. Fachrollen prueft derselbe HTTP-Endpunkt wie Human-UI/CLI.
+
+- **Scope:** `belege:write`
+- **Idempotent:** ja
+- **Risikoklasse:** niedrig
+- **Audit:** write
+- **Human-Approval erforderlich:** nein
+- **Endpoint:** `POST /api/v1/mcp/tools/call`
+
+**Eingabe-Schema:**
+
+```json
+{
+  "$defs": {
+    "StudioColumnIn": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[a-z][a-z0-9_]{0,47}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "text",
+            "integer",
+            "boolean",
+            "date",
+            "datetime",
+            "decimal",
+            "uuid"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "nullable": {
+          "default": true,
+          "title": "Nullable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "type"
+      ],
+      "title": "StudioColumnIn",
+      "type": "object"
+    },
+    "StudioSchemaChangeIn": {
+      "additionalProperties": false,
+      "properties": {
+        "operation": {
+          "enum": [
+            "create_table",
+            "add_columns"
+          ],
+          "title": "Operation",
+          "type": "string"
+        },
+        "schema_name": {
+          "pattern": "^domain_[a-z][a-z0-9_]{0,35}$",
+          "title": "Schema Name",
+          "type": "string"
+        },
+        "table": {
+          "pattern": "^[a-z][a-z0-9_]{0,47}$",
+          "title": "Table",
+          "type": "string"
+        },
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/StudioColumnIn"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Columns",
+          "type": "array"
+        }
+      },
+      "required": [
+        "operation",
+        "schema_name",
+        "table",
+        "columns"
+      ],
+      "title": "StudioSchemaChangeIn",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "draft_id": {
+      "format": "uuid",
+      "title": "Draft Id",
+      "type": "string"
+    },
+    "expected_revision": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Expected Revision",
+      "type": "string"
+    },
+    "schema_changes": {
+      "items": {
+        "$ref": "#/$defs/StudioSchemaChangeIn"
+      },
+      "maxItems": 20,
+      "title": "Schema Changes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "draft_id",
+    "expected_revision"
+  ],
+  "title": "StudioPlanParameters",
+  "type": "object"
+}
+```
+
+**Ausgabe-Schema:**
+
+```json
+{
+  "type": "object"
 }
 ```

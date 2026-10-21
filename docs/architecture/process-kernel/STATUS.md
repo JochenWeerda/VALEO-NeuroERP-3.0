@@ -829,3 +829,14 @@ Reale ApproveAPInvoice/RejectAPInvoice/PostAPInvoice verwenden die gemeinsame
 gepruefte Identitaets-, Antrags-, Inhalts- und Transaktionsgrenze. Direkte Status-
 mutationen und still erfolgreiche Buchungsabbrueche sind entfernt. Dies ist keine
 Vollabnahme saemtlicher anderer Kernel-Domaenen. [716 integrierte Vertraege und Grenzen](../../quality-assurance/ap-workflow-security-20261020.md).
+
+
+### 2026-10-21: Studio-Planintegration
+
+STUDIO-PLAN-INTEGRATION-20261021: gespeicherter revisionsgebundener Plan ist
+Pflicht im bestehenden Freigabeweg und Runtimeabruf; UI, CLI und begrenztes
+R1-MCP-Authoring nutzen denselben Command mit bisherigen Rollen/Tenantgrenzen.
+107 eindeutige Backend- und14 Frontendvertraege gruen, TypeScript fehlerfrei.
+Details und Grenzen: docs/quality-assurance/studio-plan-integration-20261021.md.
+Allgemeine CRUD-/Schemaaktivierung und universelle Kanalzertifizierung bleiben
+im Gesamtclaim offen; keine Ausweitung des grain.v1-Releaseprofils.

@@ -43,7 +43,8 @@ def require_simulation(item, entries):
                 or proof.get("profile")!="grain.v1"
                 or any(proof.get("checks",{}).get(name) is not True for name in _REQUIRED)):
             raise ValueError("simulation_unvollstaendig_veraltet_oder_fehlgeschlagen")
-        return proof
+        from app.services.studio_migration_store import require_saved_plan
+        return {**proof, "migration_plan": require_saved_plan(item, entries)}
     raise ValueError("simulation_fuer_diese_revision_fehlt")
 
 
@@ -58,6 +59,9 @@ def published_definition(record):
             or proof.get("definition_hash")!=definition_hash(record.get("definition"))
             or proof.get("artifact_hash")!=simulation_artifact_hash()
             or any(proof.get("checks",{}).get(name) is not True for name in _REQUIRED)):
+        return None
+    from app.services.studio_migration_store import published_plan_valid
+    if not published_plan_valid(record, proof):
         return None
     from copy import deepcopy
     definition=deepcopy(record["definition"])

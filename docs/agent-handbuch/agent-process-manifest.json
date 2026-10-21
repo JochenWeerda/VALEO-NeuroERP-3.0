@@ -6975,6 +6975,15 @@
       "risk_class": "medium",
       "human_approval_required": false,
       "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "studio.migration.plan",
+      "domain": "studio",
+      "scope": "belege:write",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
   "event_count": 135

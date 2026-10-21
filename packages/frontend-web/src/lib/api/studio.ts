@@ -156,3 +156,24 @@ export async function simulateStudioDraft(draftId: string, expectedRevision: str
   try { sessionStorage.removeItem(intent) } catch { /* client-memory key was cleared */ }
   return response.data as StudioDraftRecord & { simulation: StudioSimulationResult }
 }
+
+
+export interface StudioSavedMigrationPlan {
+  event_id: string
+  draft_id: string
+  candidate_revision: string
+  candidate_definition_hash: string
+  binding_hash: string
+  requires_definition_update: boolean
+  schema_changes: Record<string, unknown>[]
+  plan: { bindings: string[]; blockers: string[]; can_activate: false; plan_hash: string }
+}
+
+export async function saveStudioMigrationPlan(draftId: string, expectedRevision: string): Promise<StudioSavedMigrationPlan> {
+  const response = await apiClient.post(`/api/v1/studio/drafts/${encodeURIComponent(draftId)}/migration-plan`, {
+    expected_revision: expectedRevision,
+    idempotency_key: statusKey('migration-plan', draftId, expectedRevision),
+    schema_changes: [],
+  })
+  return response.data as StudioSavedMigrationPlan
+}

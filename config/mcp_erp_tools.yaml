@@ -1741,3 +1741,104 @@ tools:
     audit: write
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false
+
+  - tool_id: studio.migration.plan
+    domain: studio
+    name: Studio-Aenderungsplan festhalten
+    description: 'Versionierter Authoring-Command: erzeugt nur einen revisionsgebundenen
+      Plan in der vorhandenen Historie; keine Freigabe, Schemaausfuehrung oder Geschaeftsbuchung.
+      Fachrollen prueft derselbe HTTP-Endpunkt wie Human-UI/CLI.'
+    scope: belege:write
+    idempotent: true
+    risk_class: low
+    data_classification: LOCAL_ONLY
+    audit: write
+    endpoint: POST /api/v1/mcp/tools/call
+    human_approval_required: false
+    agent_write_enabled: true
+    domain_command: studio.migration_plan.prepare
+    command_version: 1
+    role_policy: beleg_write
+    input_schema:
+      $defs:
+        StudioColumnIn:
+          additionalProperties: false
+          properties:
+            name:
+              pattern: ^[a-z][a-z0-9_]{0,47}$
+              title: Name
+              type: string
+            type:
+              enum:
+              - text
+              - integer
+              - boolean
+              - date
+              - datetime
+              - decimal
+              - uuid
+              title: Type
+              type: string
+            nullable:
+              default: true
+              title: Nullable
+              type: boolean
+          required:
+          - name
+          - type
+          title: StudioColumnIn
+          type: object
+        StudioSchemaChangeIn:
+          additionalProperties: false
+          properties:
+            operation:
+              enum:
+              - create_table
+              - add_columns
+              title: Operation
+              type: string
+            schema_name:
+              pattern: ^domain_[a-z][a-z0-9_]{0,35}$
+              title: Schema Name
+              type: string
+            table:
+              pattern: ^[a-z][a-z0-9_]{0,47}$
+              title: Table
+              type: string
+            columns:
+              items:
+                $ref: '#/$defs/StudioColumnIn'
+              maxItems: 50
+              minItems: 1
+              title: Columns
+              type: array
+          required:
+          - operation
+          - schema_name
+          - table
+          - columns
+          title: StudioSchemaChangeIn
+          type: object
+      additionalProperties: false
+      properties:
+        draft_id:
+          format: uuid
+          title: Draft Id
+          type: string
+        expected_revision:
+          pattern: ^[0-9a-f]{64}$
+          title: Expected Revision
+          type: string
+        schema_changes:
+          items:
+            $ref: '#/$defs/StudioSchemaChangeIn'
+          maxItems: 20
+          title: Schema Changes
+          type: array
+      required:
+      - draft_id
+      - expected_revision
+      title: StudioPlanParameters
+      type: object
+    output_schema:
+      type: object

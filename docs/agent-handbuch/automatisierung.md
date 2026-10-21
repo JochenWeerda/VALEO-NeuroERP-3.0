@@ -91,6 +91,7 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `studio.migration.plan` | studio | `belege:write` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `wms.lot.trace` | inventory | `inventory:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 

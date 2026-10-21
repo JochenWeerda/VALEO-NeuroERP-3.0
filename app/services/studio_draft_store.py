@@ -521,8 +521,8 @@ def _sql_set_status(
         if status == "published_temp":
             from app.core.studio_release import require_simulation
             from app.infrastructure.models.studio_models import ScreenDefinitionHistory
-            entries = session.query(ScreenDefinitionHistory).filter_by(tenant_id=tenant_id, draft_id=draft_id, action="simulation").order_by(ScreenDefinitionHistory.recorded_at, ScreenDefinitionHistory.id).all()
-            proof = require_simulation(_with_revision(_row_to_dict(row)), [{"action": e.action, "snapshot": e.snapshot} for e in entries])
+            entries = session.query(ScreenDefinitionHistory).filter_by(tenant_id=tenant_id, draft_id=draft_id).filter(ScreenDefinitionHistory.action.in_(["simulation", "migration_plan"])).order_by(ScreenDefinitionHistory.recorded_at, ScreenDefinitionHistory.id).all()
+            proof = require_simulation(_with_revision(_row_to_dict(row)), [{"id": e.id, "actor": e.actor, "tenant_id": e.tenant_id, "draft_id": e.draft_id, "action": e.action, "snapshot": e.snapshot} for e in entries])
             row.readiness = {**(row.readiness or {}), "release_evidence": deepcopy(proof)}
         previous = _with_revision(_row_to_dict(row))["revision"]
         row.status = status

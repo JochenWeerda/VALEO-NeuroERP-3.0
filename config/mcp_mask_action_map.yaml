@@ -50,6 +50,7 @@ mcp_write_tools:
 - planung.calendar.reproject
 - mobile.sync.process_pending
 - mask.action.execute
+- studio.migration.plan
 mcp_read_tools_count: 23
 mcp_native_writes:
 - mcp_tool_id: crm.contact.log

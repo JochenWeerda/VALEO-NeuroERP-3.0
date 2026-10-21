@@ -28,6 +28,8 @@ def isolated_lifecycle_proof(item):
 
 
 def simulate_reviewed(client,path,revision,**kwargs):
+    prepared=client.post(path+"/migration-plan",json={"expected_revision":revision,"idempotency_key":str(uuid4())},**kwargs)
+    assert prepared.status_code==200,prepared.text
     with patch("app.core.studio_release.simulate_candidate",side_effect=isolated_lifecycle_proof):
         result=client.post(path+"/simulate",json={"expected_revision":revision,"idempotency_key":str(uuid4())},**kwargs)
     assert result.status_code==200,result.text
@@ -35,6 +37,9 @@ def simulate_reviewed(client,path,revision,**kwargs):
 
 
 def record_lifecycle_proof(item,actor="editor"):
+    from app.api.v1.schemas.studio_migration import StudioSavedMigrationIn
+    from app.services.studio_migration_store import save_migration_plan
+    save_migration_plan(item["tenant_id"], item["id"], actor, StudioSavedMigrationIn(expected_revision=item["revision"], idempotency_key=uuid4()))
     from app.services.studio_draft_store import simulate_draft
     with patch("app.core.studio_release.simulate_candidate",side_effect=isolated_lifecycle_proof):
         return simulate_draft(item["tenant_id"],item["id"],actor,item["revision"],str(uuid4()))
