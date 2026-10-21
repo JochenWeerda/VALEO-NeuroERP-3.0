@@ -19364,3 +19364,13 @@ reale CRUD-/Version-/Replay-/Tenancy-/Rollen-/Audit-/Outbox-/Rollbackkette,
 dauerhafte Evidenz und Vier-Augen-Publikation mit bestehendem Migrationsplan.
 Offen danach: reale visuelle Browserabnahme und Profilabdeckung weiterer
 Masken/Fachketten, keine vorgetaeuschte Gesamtmigration.
+
+
+STUDIO-ENTITY-RELEASE Laufzeitnebenbefund: Entitycompiler und Migrationsplan
+lesen den kanonischen physischen Tabellenkatalog; Dockerfile.backend liefert
+docs/admin/table-catalog.json bisher nicht aus, .dockerignore schliesst docs
+aus. Besitz auf diese drei exakten Bereitstellungsstellen erweitert:
+Dockerfile.backend (nur Katalog-COPY), .dockerignore (nur Katalog zulassen),
+docker-compose.yml (nur read-only Katalogmount); eigener Paketvertrag.
+Dateien aus Git HEAD in kanonischer Quellansicht, fremde physische
+Dockerfile-Arbeitskopie nicht ueberschreiben. Kein Containerneustart/Reset.
