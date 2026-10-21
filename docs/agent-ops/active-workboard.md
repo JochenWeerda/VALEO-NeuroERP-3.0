@@ -19315,3 +19315,12 @@ OpenAPI ein neuer Pfad,314 Services vollstaendig zugeordnet.
 Claim bleibt in arbeit: echte Studio-Publikation/visuelle Browserabnahme und
 weitere Fachketten sind nicht durch synthetische Testregistrierung erledigt.
 SonarCloud-Gesamtnachlauf separat rot (S1226 cases.py, neue Coverage59,6%).
+
+
+## SONAR-CASES-IDENTITY-20261021 - reserviert, Codex
+
+Ziel: konkreter Sonar-Neubefund S1226 cases.py list_cases. Besitz nur lokale
+Variable fuer geprueften Mandanten statt Ueberschreiben des ignorierten
+Kompatibilitaetsparameters; eigener direkter Kontext-/Weiterleitungsvertrag,
+QA/Workboard. HTTP-Vertrag, Rechte und Mandantenisolation unveraendert.
+Keine Datenbank-/Container-/Schemaaenderung, keine Sonar-Ausnahme.
