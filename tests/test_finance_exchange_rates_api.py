@@ -159,6 +159,9 @@ def _build_client(db: FakeDb) -> TestClient:
     app.include_router(exchange_rates.router, prefix="/finance")
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_current_user] = lambda: {"sub": "5f0c2a9e", "name": "t.de-vries", "roles": ["FINANCE_ADMIN"]}
+    # Mandant aus dem geprueften Kontext (seit 20.10.2026; vorher Query-Parameter mit Standard "system").
+    from testgrenze import ersetze_mandant
+    ersetze_mandant(app, "system")
     return TestClient(app)
 
 

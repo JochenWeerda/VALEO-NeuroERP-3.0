@@ -216,6 +216,8 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `einkauf.bestellung.storniert` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
 | `einkauf.bestellung.updated` | outbox | `app/api/v1/command_handlers/procurement.py` |
 | `einkauf.bestellung.versendet` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
+| `einkauf.lieferant.entsperrt` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `einkauf.lieferant.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.wareneingang.gebucht` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `finance.ap_invoice.approval_decided` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
 | `finance.ar_open_item.dunning_created` | outbox | `app/api/v1/endpoints/open_items.py` |
@@ -227,17 +229,15 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `finance.kreditor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.payment_run.approved` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `finance.tax_key.saved` | outbox | `app/api/v1/endpoints/tax_keys.py` |
+| `finance.wechselkurs.aktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
+| `finance.zahlungsbedingung.deaktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
+| `finance.zahlungsbedingung.updated` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
 | `fuhrpark.dokument.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.fahrzeug.deleted` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.fahrzeug.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.rechnung.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.terminart.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| `futtermittel.einzelfutter.stillgelegt` | outbox | `app/api/v1/endpoints/agrar_stammdaten_kommandos.py` |
-| `futtermittel.mischfutter.deaktiviert` | outbox | `app/api/v1/endpoints/agrar_stammdaten_kommandos.py` |
-| `futtermittel.mischfutter.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
-| `identity.tenant.` | outbox | `app/services/tenant_lifecycle_service.py` |
-| `inventur.abgeschlossen` | outbox | `app/services/inventory_compat_service.py` |
-| … | | 21 weitere |
+| … | | 28 weitere |
 
 ### System
 

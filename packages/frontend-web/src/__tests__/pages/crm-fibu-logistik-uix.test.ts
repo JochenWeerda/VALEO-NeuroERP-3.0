@@ -13,14 +13,11 @@ describe('CRM/FIBU/Logistik UIX', () => {
     expect(src).not.toContain('text-blue-600')
   })
 
-  it('stellt Warengruppen beschriftet 44 px', () => {
+  it('stellt Warengruppen als Studio-Liste dar', () => {
+    // Seit 20.10.2026 ScreenDefinition einkauf/warengruppen (Anlegen, Bearbeiten, Deaktivieren beschriftet im Renderer).
     const src = read('../../pages/einkauf/warengruppen.tsx')
-    expect(src).toContain('min-h-11 font-medium text-primary')
-    expect(src).toContain('Bearbeiten')
-    expect(src).toContain('Deaktivieren')
-    expect(src).toContain('Speichern')
-    expect(src).not.toContain('text-blue-600')
-    expect(src).not.toContain('size="sm"')
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="einkauf/warengruppen"')
   })
 
   it('stellt Debitoren-Liste 44 px ohne Rohorange', () => {

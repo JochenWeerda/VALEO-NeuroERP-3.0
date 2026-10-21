@@ -158,6 +158,7 @@
   "mask:crm/opportunity:create_activity",
   "mask:crm/segmente-liste:berechnen",
   "mask:crm/segmente-liste:loeschen",
+  "mask:crm/wiedervorlagen:erledigen",
   "mask:docflow/dokumenten-ruecklauf:mark_received",
   "mask:docflow/dokumenten-ruecklauf:mark_sent",
   "mask:docflow/dokumenten-ruecklauf:verify_return",
@@ -184,9 +185,20 @@
   "mask:einkauf/bestellungen:versenden",
   "mask:einkauf/purchase-order:speichern",
   "mask:einkauf/purchase-order:versenden",
+  "mask:einkauf/supplier:bearbeiten",
+  "mask:einkauf/supplier:entsperren",
+  "mask:einkauf/supplier:sperren",
+  "mask:einkauf/warengruppen:bearbeiten",
+  "mask:einkauf/warengruppen:deaktivieren",
+  "mask:einkauf/warengruppen:neu",
+  "mask:einkauf/zahlungsbedingungen:bearbeiten",
+  "mask:einkauf/zahlungsbedingungen:deaktivieren",
+  "mask:einkauf/zahlungsbedingungen:neu",
   "mask:finance/ap-invoice:freigeben",
   "mask:finance/ar-open-item:mahnen",
   "mask:finance/bankkonto:bearbeiten",
+  "mask:finance/buchungsvorlagen:anwenden",
+  "mask:finance/buchungsvorlagen:loeschen",
   "mask:finance/debitor:bearbeiten",
   "mask:finance/debitoren-liste:entsperren",
   "mask:finance/debitoren-liste:sperren",
@@ -198,6 +210,9 @@
   "mask:finance/rechnungstapel:retry",
   "mask:finance/rechnungstapel:validate",
   "mask:finance/steuerschluessel:speichern",
+  "mask:finance/wechselkurse:aktivieren",
+  "mask:finance/wechselkurse:deaktivieren",
+  "mask:finance/wechselkurse:neu",
   "mask:fuhrpark/ausgehende-dokumente:loeschen",
   "mask:fuhrpark/ausgehende-dokumente:speichern",
   "mask:fuhrpark/fahrzeug-stamm:drucker",
@@ -272,6 +287,6 @@
   "mask:workspace/letzte-dokumente:remove"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 150
+  "kein_endpunkt": 154
  }
 }

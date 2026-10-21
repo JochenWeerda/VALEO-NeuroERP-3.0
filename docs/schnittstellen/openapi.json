@@ -15346,6 +15346,137 @@
         "title": "ArtifactVerifyOut",
         "type": "object"
       },
+      "ArtikelDokumentZeile": {
+        "properties": {
+          "article_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "format": "uuid",
+                "type": "string"
+              }
+            ],
+            "title": "Article Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "document_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Category"
+          },
+          "document_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id"
+          },
+          "document_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Name"
+          },
+          "document_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Type"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "format": "uuid",
+                "type": "string"
+              }
+            ],
+            "title": "Id"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "id",
+          "article_id"
+        ],
+        "title": "ArtikelDokumentZeile",
+        "type": "object"
+      },
+      "ArtikelDokumenteOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ArtikelDokumentZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ArtikelDokumenteOut",
+        "type": "object"
+      },
       "ArtikelFreigabeIn": {
         "properties": {
           "bemerkung": {
@@ -15728,6 +15859,192 @@
         "title": "ArtikelLagerParamUpdate",
         "type": "object"
       },
+      "ArtikelLieferantZeile": {
+        "properties": {
+          "article_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "format": "uuid",
+                "type": "string"
+              }
+            ],
+            "title": "Article Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "format": "uuid",
+                "type": "string"
+              }
+            ],
+            "title": "Id"
+          },
+          "is_preferred": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Preferred"
+          },
+          "lead_time_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead Time Days"
+          },
+          "min_order_quantity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Order Quantity"
+          },
+          "partner_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Id"
+          },
+          "price_valid_from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Valid From"
+          },
+          "price_valid_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Valid To"
+          },
+          "purchase_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Price"
+          },
+          "supplier_article_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Article Number"
+          },
+          "supplier_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Name"
+          },
+          "supplier_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplier Number"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "id",
+          "article_id"
+        ],
+        "title": "ArtikelLieferantZeile",
+        "type": "object"
+      },
+      "ArtikelLieferantenOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ArtikelLieferantZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ArtikelLieferantenOut",
+        "type": "object"
+      },
       "ArtikelPosition": {
         "properties": {
           "artikel_nr": {
@@ -15750,6 +16067,153 @@
           "preis_brutto"
         ],
         "title": "ArtikelPosition",
+        "type": "object"
+      },
+      "ArtikelPreisZeile": {
+        "properties": {
+          "article_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "format": "uuid",
+                "type": "string"
+              }
+            ],
+            "title": "Article Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "format": "uuid",
+                "type": "string"
+              }
+            ],
+            "title": "Id"
+          },
+          "partner_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partner Id"
+          },
+          "price_incl_freight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Incl Freight"
+          },
+          "price_net": {
+            "title": "Price Net",
+            "type": "number"
+          },
+          "price_unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Unit"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          },
+          "valid_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid To"
+          }
+        },
+        "required": [
+          "id",
+          "article_id",
+          "price_net"
+        ],
+        "title": "ArtikelPreisZeile",
+        "type": "object"
+      },
+      "ArtikelPreiseOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ArtikelPreisZeile"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ArtikelPreiseOut",
         "type": "object"
       },
       "ArtikelSperreIn": {
@@ -235540,7 +236004,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticlesOut"
+                  "$ref": "#/components/schemas/ArtikelDokumenteOut"
                 }
               }
             },
@@ -235705,7 +236169,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticlesOut"
+                  "$ref": "#/components/schemas/ArtikelPreiseOut"
                 }
               }
             },
@@ -235947,7 +236411,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticlesOut"
+                  "$ref": "#/components/schemas/ArtikelLieferantenOut"
                 }
               }
             },
@@ -257935,7 +258399,7 @@
     },
     "/api/v1/crm/cases/{case_id}/escalate": {
       "post": {
-        "description": "Eskalation eines Service-Cases mit Priorität auf CRITICAL.",
+        "description": "Eskalation eines Service-Cases mit Priorität auf CRITICAL.\n\nDer Eskalierende kommt aus dem geprueften Token (bis 21.10.2026 aus einem frei setzbaren Anfrageparameter).",
         "operationId": "escalate_case_api_v1_crm_cases__case_id__escalate_post",
         "parameters": [
           {
@@ -257955,17 +258419,6 @@
             "schema": {
               "description": "Reason for escalation",
               "title": "Reason",
-              "type": "string"
-            }
-          },
-          {
-            "description": "User performing escalation",
-            "in": "query",
-            "name": "escalated_by",
-            "required": true,
-            "schema": {
-              "description": "User performing escalation",
-              "title": "Escalated By",
               "type": "string"
             }
           }
@@ -283825,6 +284278,180 @@
         ]
       }
     },
+    "/api/v1/einkauf/lieferanten/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "lieferant_bearbeiten_api_v1_einkauf_lieferanten__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lieferant bearbeiten",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren": {
+      "post": {
+        "operationId": "lieferant_entsperren_api_v1_einkauf_lieferanten__entity_id__actions_entsperren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lieferant entsperren",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren": {
+      "post": {
+        "operationId": "lieferant_sperren_api_v1_einkauf_lieferanten__entity_id__actions_sperren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lieferant sperren",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/einkauf/lieferanten/{lieferant_id}": {
       "delete": {
         "description": "Löscht Lieferanten",
@@ -292227,6 +292854,122 @@
         ]
       }
     },
+    "/api/v1/fibu/zahlungsbedingungen/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "zahlungsbedingung_bearbeiten_api_v1_fibu_zahlungsbedingungen__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Zahlungsbedingung bearbeiten",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/fibu/zahlungsbedingungen/{entity_id}/actions/deaktivieren": {
+      "post": {
+        "operationId": "zahlungsbedingung_deaktivieren_api_v1_fibu_zahlungsbedingungen__entity_id__actions_deaktivieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Zahlungsbedingung deaktivieren",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/fibu/zahlungsbedingungen/{zabd_nr}": {
       "delete": {
         "operationId": "delete_zahlungsbedingung_api_v1_fibu_zahlungsbedingungen__zabd_nr__delete",
@@ -296090,18 +296833,6 @@
               "title": "Active Only",
               "type": "boolean"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -296146,20 +296877,6 @@
       "post": {
         "description": "Create a new booking template.",
         "operationId": "create_booking_template_api_v1_finance_booking_templates_post",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -296219,18 +296936,6 @@
               "title": "Template Id",
               "type": "string"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -296271,18 +296976,6 @@
             "required": true,
             "schema": {
               "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -296332,18 +297025,6 @@
             "required": true,
             "schema": {
               "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -296405,18 +297086,6 @@
             "required": true,
             "schema": {
               "title": "Template Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -302218,18 +302887,6 @@
               "title": "Active Only",
               "type": "boolean"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -302274,20 +302931,6 @@
       "post": {
         "description": "Create a new exchange rate.",
         "operationId": "create_exchange_rate_api_v1_finance_exchange_rates_post",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -302338,20 +302981,6 @@
       "post": {
         "description": "Convert amount from one currency to another.",
         "operationId": "convert_currency_api_v1_finance_exchange_rates_convert_post",
-        "parameters": [
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -302420,18 +303049,6 @@
               "title": "To Currency",
               "type": "string"
             }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -302470,6 +303087,122 @@
         ]
       }
     },
+    "/api/v1/finance/exchange-rates/{entity_id}/actions/aktivieren": {
+      "post": {
+        "operationId": "kurs_aktivieren_api_v1_finance_exchange_rates__entity_id__actions_aktivieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Wechselkurs mit Begruendung aktivieren",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/finance/exchange-rates/{entity_id}/actions/deaktivieren": {
+      "post": {
+        "operationId": "kurs_deaktivieren_api_v1_finance_exchange_rates__entity_id__actions_deaktivieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Wechselkurs mit Begruendung deaktivieren",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/finance/exchange-rates/{rate_id}": {
       "get": {
         "description": "Get a single exchange rate by ID.",
@@ -302481,18 +303214,6 @@
             "required": true,
             "schema": {
               "title": "Rate Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -302542,18 +303263,6 @@
             "required": true,
             "schema": {
               "title": "Rate Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Tenant ID",
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "default": "system",
-              "description": "Tenant ID",
-              "title": "Tenant Id",
               "type": "string"
             }
           }
@@ -323715,7 +324424,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticlesOut"
+                  "$ref": "#/components/schemas/ArtikelDokumenteOut"
                 }
               }
             },
@@ -323880,7 +324589,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticlesOut"
+                  "$ref": "#/components/schemas/ArtikelPreiseOut"
                 }
               }
             },
@@ -324122,7 +324831,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticlesOut"
+                  "$ref": "#/components/schemas/ArtikelLieferantenOut"
                 }
               }
             },
@@ -403816,6 +404525,122 @@
         "summary": "Oberwarengruppe aktualisieren",
         "tags": [
           "Stammdaten - Warengruppen"
+        ]
+      }
+    },
+    "/api/v1/stammdaten/warengruppen/{entity_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "warengruppe_bearbeiten_api_v1_stammdaten_warengruppen__entity_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Warengruppe bearbeiten",
+        "tags": [
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/stammdaten/warengruppen/{entity_id}/actions/deaktivieren": {
+      "post": {
+        "operationId": "warengruppe_deaktivieren_api_v1_stammdaten_warengruppen__entity_id__actions_deaktivieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Warengruppe deaktivieren",
+        "tags": [
+          "mask-actions"
         ]
       }
     },

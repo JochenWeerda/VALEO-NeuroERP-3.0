@@ -38,6 +38,7 @@ test.describe('CRM - Kundenstamm-Tiefe @smoke', () => {
 
   test('Wiedervorlagen lädt', async ({ adminPage }) => {
     await open(adminPage, '/crm/wiedervorlagen', 'Wiedervorlagen');
-    await expect(adminPage.getByText('Aktualisieren').first()).toBeVisible({ timeout: 30000 });
+    // Studio-Liste (seit 21.10.2026): Wurzel aus der ScreenDefinition; Tabelle oder Leerzustand je nach Daten.
+    await expect(adminPage.locator('[data-screen-definition="crm/wiedervorlagen"]')).toBeVisible({ timeout: 30000 });
   });
 });

@@ -301,7 +301,7 @@ Studio-konform ist. Dafuer fehlten Objektmasken mit Anlage und Bearbeiten.
 | Gegenstand | Befund | Umsetzung |
 |---|---|---|
 | Artikelstamm `/artikel/:id`, `/artikel/neu` | handgebaute Seite (1.736 Zeilen); die Anlage schickte einen eingebauten Mandanten mit (VITE_TENANT_ID bzw. Null-UUID) und scheiterte in jedem echten Mandanten mit 403 | ScreenDefinition `artikel/stamm` (`app/core/screen_definitions_stamm.py`): Register Stammdaten, Preise und Steuer, Lager, Qualitaet und Gefahrgut, Lieferanten, Preisvereinbarungen, Dokumente; Anlage ueber `creation` (`POST /api/v1/articles/`), Bearbeiten ueber `/api/v1/articles/{id}/actions/bearbeiten` (delegiert an `update_article`, nur deklarierte Felder) |
-| Kundenanlage `POST /api/v1/crm/customers/` | Mandant aus dem Body, Standard Dev-Mandant: jede CRM-Rolle konnte Kunden in fremden Mandanten anlegen, ohne Angabe landeten sie im Dev-Mandanten | Mandant aus dem Kontext, abweichender Body-Mandant 403 |
+| Kundenanlage `POST /api/v1/crm/customers/` | Mandant aus dem Body, Standard Dev-Mandant. **Korrektur 20.10.:** produktiv (`main:app`) bindet `install_tenant_bindings` Body-Mandanten an den geprueften Kontext (fremd 403, fehlend aufgefuellt) — die Luecke bestand nur in `app.main` (Tests/Dev), nicht im Betrieb | Mandant aus dem Kontext, abweichender Body-Mandant 403 (Verteidigung in der Tiefe, gleiches Verhalten in beiden Apps) |
 | Kunden aus crm-core (Liste, Abruf, Aendern, Loeschen) | crm-core fuehrt keinen Mandanten — alle Wege reichten Kunden **aller** Mandanten durch (gleiches Muster wie die Kontakte) | ein crm-core-Kunde gilt nur ueber seinen Eintrag in `domain_crm.customers` als eigener; die Anlage traegt ihn immer ein (vorher nur mit Geschaeftspartner, Fehler verschluckt); `upsert_monolith_stub` aktualisiert keine fremden Zeilen mehr (`tests/test_kunden_crm_core_mandant.py`) |
 
 **Kundenakte, 20.10. (zweiter Schritt):** `crm/customer-360` hat jetzt eine Anlage (`creation`, `/crm/kunden/neu`;
@@ -310,8 +310,78 @@ alle Einstiege "Neuer Kunde" leiten dorthin) und ein wirksames **Bearbeiten** ue
 erreichbarem crm-core angelegter Kunde liess sich **nie** aendern (crm-core kannte ihn nicht, kein Fallback), und die
 lokale Anlage verwarf Ort, PLZ, Land und Branche — beides behoben; der lokale Eintrag traegt jede Aenderung.
 
+**Lieferant, 20.10.:** `einkauf/supplier` legt an (`creation`, `/einkauf/lieferant/neu`), bearbeitet
+(`/einkauf/lieferanten/{id}/actions/bearbeiten`) und sperrt/entsperrt mit Begruendung; die handgebaute
+Lieferantenseite (1.741 Zeilen) ist entfernt, der doppelte Alias `/einkauf/lieferanten/:id` aufgeloest. Befunde:
+jede Aenderung ohne Land setzte das Land auf "Deutschland" zurueck (geerbter Anlage-Standard im Aenderungsmodell);
+doppelte Lieferantennummern im Mandanten waren moeglich (jetzt 409; eine Datenbankregel fehlt weiter, weil gewachsene
+Bestaende Dubletten enthalten koennen); der Weg `DELETE /einkauf/lieferanten/{id}` (`app/einkauf/router.py`) liest die
+nicht vorhandene Tabelle `einkauf_lieferanten` und ist tot (offen).
+
 Offen: Unterobjekte (Anschriften, CpD, Rabatte, Chefanweisungen, Bankverbindung) pflegt weiter die handgebaute
 Kundenmaske `/verkauf/kunden-stamm` ("Erweiterte Pflege"); naechster Schritt sind Register mit Zeilenaktionen.
+
+## Wechselkurse als Studio-Liste (20.10.2026)
+
+`finance/wechselkurse` (NativeListPage): Kurs erfassen als Kopfaktion, Deaktivieren/Aktivieren mit Begruendung.
+Befunde: **jede Kursanlage scheiterte mit 500** — `valid_from` ist im Schema NOT NULL und wurde nie gesetzt (frisch
+wie gewachsen); die handgebaute Seite loeschte ueber `DELETE /finance/exchange-rates/{id}`, einen Weg, den es nie gab;
+die Liste meldete jeden Fehler als leere Liste (jetzt 503). Mandant der sechs Wege aus dem Kontext statt Query
+(produktiv war er gebunden, siehe unten).
+
+## Buchungsvorlagen als Studio-Liste (20.10.2026)
+
+`finance/buchungsvorlagen`: Anwenden (erzeugt einen Buchungsentwurf) und Loeschen mit Bestaetigung, wie die bisherige
+Seite (Anlegen bot sie nicht). Befunde: **jede Vorlagenanlage scheiterte mit 500** (`json.loads` auf JSONB, das psycopg2
+schon als Liste liefert); die Liste meldete jeden Fehler als leere Liste (jetzt 503); Anwenden pruefte nicht, ob der
+Entwurf ausgeglichen ist (jetzt 422 bei Soll != Haben). Mandant der sechs Wege aus dem Kontext statt Query.
+
+## Warengruppen als Studio-Liste (21.10.2026)
+
+`einkauf/warengruppen`: Anlegen (Kopfaktion mit Auswahl der Oberwarengruppe), Bearbeiten und Deaktivieren als
+Kommandowege `/stammdaten/warengruppen/{id}/actions/…` (Audit, Begruendung beim Deaktivieren). Framework:
+`NativeListPage` belegt Zeilenaktionen mit den Zeilenwerten vor und ersetzt jeden `{feld}`-Platzhalter im Kommandoweg.
+Befunde: Aendern pruefte die Oberwarengruppe nicht gegen den Mandanten (nur die Anlage); Loeschen meldete 204 auch
+fuer unbekannte Gruppen. Prozess: das Abschluss-Skript schrieb die Ratsche **vor** der Pruefung (wuchs still) —
+korrigiert; die eigenen Wellen-Commits haben sie nie erweitert (geprueft).
+
+## Zahlungsbedingungen als Studio-Liste (21.10.2026)
+
+`einkauf/zahlungsbedingungen`: Anlegen, Bearbeiten (Kommandoweg ergaenzt das Vollersatz-Modell aus dem Ist-Stand —
+nicht gesendete Skontostufen bleiben erhalten) und Deaktivieren mit Begruendung (Rolle wie der bisherige Loeschweg,
+`finance_admin`). Befund: Loeschen meldete 204 auch fuer unbekannte Bedingungen (jetzt 404).
+
+## Wiedervorlagen als Studio-Liste (21.10.2026)
+
+`crm/wiedervorlagen`: offene Wiedervorlagen, Zeile oeffnet die Kundenakte (`/crm/kunden/{kunden_nr}`), Erledigen mit
+optionalem Ergebnis. Befund: Erledigen einer **fremden** Wiedervorlage aenderte nichts, gab den fremden Kontakt aber
+zurueck (Lesen ohne Mandant) — jetzt 404. Kein Befund: der Kundenname aus `public.kunden` (Kontakte verweisen per
+Fremdschluessel dorthin, Kundennummer systemweit eindeutig).
+
+## CRM-Aktivitaeten: Mandant und zwei Speicher (21.10.2026)
+
+**Sicherheitsbefund, behoben:** `app/api/v1/endpoints/activities.py` (crm-core-Proxy) wertete den Mandanten der
+Aktivitaet nicht aus. Produktiv beschattet er fuer `/api/v1/crm/activities/{id}` die mandantengebundenen Wege von
+`app.crm.router`: Abruf, Aendern, Loeschen und Unterlisten fremder Aktivitaeten waren moeglich, die Anlage trug den
+Standardmandanten ein. Jetzt Kontextmandant an jedem Weg (`tests/test_aktivitaeten_crm_core_mandant.py`).
+
+**Gleiches Muster, behoben (21.10.):** Betriebsprofile (`farm_profiles.py`, crm-core fuehrt den Mandanten, der Proxy nicht — Kulturen, Tierbestand, Zertifikate fremder Betriebe lesbar und aenderbar) und Service-Faelle (`cases.py`: Abruf/Aendern/Loeschen/Eskalieren/SLA-Status ohne Mandant, lokale Tabelle ebenso; Eskalierender aus einem frei setzbaren Parameter -> jetzt aus dem Token; Liste und Dashboard filtern jetzt immer). Tests `test_betriebsprofile_crm_core_mandant.py`, `test_faelle_crm_mandant.py`. Opportunities waren schon gebunden.
+
+**Offen (CRM-Konsolidierung):** zwei Speicher am selben Pfad — `GET/POST /api/v1/crm/activities` (ohne Schraegstrich)
+treffen `app.crm.router` (lokale Tabelle, Liste als Array), `/{id}` den crm-core-Proxy. Die handgebaute Seite las
+`items` aus dem Array und zeigte deshalb nie Aktivitaeten; eine angelegte Aktivitaet war ueber die Detailansicht
+nicht auffindbar. Die Studio-Liste wartet auf die Entscheidung des fuehrenden Speichers.
+
+## Einordnung: Mandant aus Query/Body (20.10.2026)
+
+208 Wege deklarieren `tenant_id` als Query-Parameter (Standard oft `"system"`), weitere tragen ihn im Body. Das ist
+**produktiv keine Luecke**: `main:app` (Dockerfile, Compose) installiert `app.core.tenant_binding.install_tenant_bindings`
+— jeder deklarierte Mandanten-Selektor in Pfad, Query und Body wird gegen den geprueften Kontext geprueft (fremd 403)
+und fehlend aufgefuellt. `app.main` (Tests, Mini-Apps) installiert die Bindung **nicht**; dort sind diese Wege
+mandantenoffen. Echte Luecken bleiben, wo die Daten selbst keinen Mandanten tragen (crm-core-Kunden und -Kontakte —
+behoben) oder ein eingebauter Mandant mitgeschickt wird (Artikelanlage — scheiterte produktiv mit 403, behoben).
+Offen: `app.main` auf dieselbe Bindung bringen, damit Tests den Betrieb abbilden (eigener Slice: aendert das Verhalten
+vieler Bestandstests).
 
 ## Persistenzluecken: Fachdaten nur im Arbeitsspeicher (offen, je eigener Slice)
 

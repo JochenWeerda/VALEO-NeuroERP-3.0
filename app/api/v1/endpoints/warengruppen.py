@@ -290,6 +290,11 @@ def update_warengruppe(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
+    # Die Oberwarengruppe muss zum Mandanten gehoeren (bis 20.10.2026 nur bei der Anlage geprueft).
+    if not db.execute(text("""
+        SELECT id FROM domain_shared.oberwarengruppen WHERE id = :oid AND tenant_id = :tid
+    """), {"oid": payload.ober_id, "tid": tenant_id}).fetchone():
+        raise HTTPException(404, "Oberwarengruppe nicht gefunden.")
     result = db.execute(text("""
         UPDATE domain_shared.warengruppen SET bezeichnung = :bez, ober_id = :oid
         WHERE tenant_id = :tid AND gruppe_nr = :nr AND aktiv = true
@@ -310,11 +315,13 @@ def delete_warengruppe(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    db.execute(text("""
+    result = db.execute(text("""
         UPDATE domain_shared.warengruppen SET aktiv = false
-        WHERE tenant_id = :tid AND gruppe_nr = :nr
+        WHERE tenant_id = :tid AND gruppe_nr = :nr AND aktiv = true
     """), {"tid": tenant_id, "nr": gruppe_nr})
     db.commit()
+    if result.rowcount == 0:  # vorher 204 auch fuer unbekannte Gruppen
+        raise HTTPException(404, f"Warengruppe {gruppe_nr} nicht gefunden.")
     return Response(status_code=204)
 
 

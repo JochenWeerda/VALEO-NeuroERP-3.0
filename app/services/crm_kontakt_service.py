@@ -88,8 +88,9 @@ class CrmKontaktService:
                 {"e": erledigt, "id": kontakt_id, "t": self.tenant_id},
             )
         self.db.commit()
-        # reviewed-safe: _COLS is a module-owned constant; the contact id is bound.
-        r = self.db.execute(text(f"SELECT {_COLS} FROM public.kunden_kontakte WHERE id = :id"), {"id": kontakt_id}).mappings().first()  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden
+        # Nur im eigenen Mandanten lesen: bis 20.10.2026 lieferte eine fremde ID den fremden Kontakt (ohne Aenderung).
+        r = self.db.execute(text(f"SELECT {_COLS} FROM public.kunden_kontakte WHERE id = :id AND tenant_id = :t"),  # nosec B608
+                            {"id": kontakt_id, "t": self.tenant_id}).mappings().first()
         return self._row(r) if r else {}
 
     def wiedervorlagen_offen(self, tage: int = 14) -> list[dict]:

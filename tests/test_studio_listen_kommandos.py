@@ -72,6 +72,15 @@ def aufraeumen(engine):
         v.execute(text("DELETE FROM domain_einkauf.lieferanten WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM einkauf_angebote_positionen WHERE angebot_id IN "
                        "(SELECT id FROM einkauf_angebote WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_erp.exchange_rates WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_shared.zahlungsbedingungen WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM public.kunden_kontakte WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        for wg in ("warengruppen", "oberwarengruppen", "hauptwarengruppen"):
+            v.execute(text(f"DELETE FROM domain_shared.{wg} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
+        v.execute(text("DELETE FROM domain_erp.journal_entry_lines WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_erp.journal_entries WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_erp.booking_templates WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM domain_erp.chart_of_accounts WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         for tabelle in ("einkauf_anfragen", "einkauf_angebote", "einkauf_anlieferavis", "domain_crm.crm_action_audit_log", "public.outbox_events"):
             v.execute(text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
 
@@ -476,6 +485,170 @@ def test_debitor_sperren_und_entsperren_mit_grund(engine, client):
     liste = client.get("/api/v1/finance/debitoren", headers={"X-Tenant-ID": HAUS_A}).json()
     assert [(d["id"], d["is_active"]) for d in liste] == [(kennung, False)]
     assert aktion("entsperren", {"_auditReason": "Zahlung eingegangen"}) is True
+
+
+def test_wechselkurse_erfassen_mandantengenau_und_deaktivieren_mit_grund(engine, client):
+    """Erfassen ueber die Kopfaktion der Liste; Mandant aus dem Kontext (vorher Query-Parameter, Standard "system");
+    Deaktivieren und Aktivieren mit Begruendung statt des nie vorhandenen DELETE."""
+    from app.core.screen_definitions import get_screen_definition
+
+    definition = get_screen_definition("finance/wechselkurse")
+    neu = next(a for a in definition["actions"] if a["key"] == "neu")
+    angelegt = client.post(neu["commandEndpoint"], headers={"X-Tenant-ID": HAUS_A}, json={
+        "from_currency": "usd", "to_currency": "EUR", "rate": "0.9234", "rate_date": "2026-10-20",
+        "rate_type": "SPOT", "source": "EZB"})
+    assert angelegt.status_code == 201, angelegt.text
+    kennung = angelegt.json()["id"]
+    liste = definition["dataSources"][0]["endpoint"]
+    assert kennung in {z["id"] for z in client.get(liste, headers={"X-Tenant-ID": HAUS_A}).json()}
+    assert kennung not in {z["id"] for z in client.get(liste, headers={"X-Tenant-ID": HAUS_B}).json()}
+
+    pfad = f"/api/v1/finance/exchange-rates/{kennung}/actions/"
+    assert client.post(pfad + "deaktivieren", headers={"X-Tenant-ID": HAUS_A}, json={}).json()["success"] is False
+    assert client.post(pfad + "deaktivieren", headers={"X-Tenant-ID": HAUS_B},
+                       json={"_auditReason": "fremder Mandant"}).json()["success"] is False
+    assert client.post(pfad + "deaktivieren", headers={"X-Tenant-ID": HAUS_A},
+                       json={"_auditReason": "Kurs falsch erfasst"}).json()["success"] is True
+    with engine.connect() as v:
+        from sqlalchemy import text
+        assert v.execute(text("SELECT active FROM domain_erp.exchange_rates WHERE id::text = :i"),
+                         {"i": kennung}).scalar() is False
+    assert client.post(pfad + "aktivieren", headers={"X-Tenant-ID": HAUS_A},
+                       json={"_auditReason": "doch korrekt"}).json()["success"] is True
+
+
+def test_buchungsvorlage_anwenden_erzeugt_einen_ausgeglichenen_entwurf_im_mandanten(engine, client):
+    """Zeilenaktion "Anwenden" der Studio-Liste: Entwurf im Journal des Kontext-Mandanten (vorher Query-Mandant mit
+    Standard "system"); fremder Mandant findet die Vorlage nicht."""
+    from sqlalchemy import text
+
+    from app.core.screen_definitions import get_screen_definition
+
+    with engine.begin() as v:
+        for nummer, typ in (("4210", "expense"), ("1200", "asset")):
+            v.execute(text("INSERT INTO domain_erp.chart_of_accounts (id, tenant_id, account_number, account_name, "
+                           "account_type) VALUES (:i, :h, :n, :n, :t)"),
+                      {"i": str(uuid.uuid4()), "h": HAUS_A, "n": nummer, "t": typ})
+    vorlage = client.post("/api/v1/finance/booking-templates", headers={"X-Tenant-ID": HAUS_A}, json={
+        "name": "Miete", "category": "GENERAL", "default_amount": "1200.00", "lines": [
+            {"line_number": 1, "account_number": "4210", "debit_percentage": "100"},
+            {"line_number": 2, "account_number": "1200", "credit_percentage": "100"}]})
+    assert vorlage.status_code == 201, vorlage.text
+    kennung = vorlage.json()["id"]
+    aktion = next(a for a in get_screen_definition("finance/buchungsvorlagen")["tables"][0]["rowActions"]
+                  if a["key"] == "anwenden")
+    pfad = aktion["commandEndpoint"].replace("{entity_id}", kennung)
+    angewendet = client.post(pfad, headers={"X-Tenant-ID": HAUS_A}, json={"entry_date": "2026-10-20"})
+    assert angewendet.status_code == 200, angewendet.text
+    assert angewendet.json()["total_debit"] == angewendet.json()["total_credit"]
+    with engine.connect() as v:
+        entwurf = v.execute(text("SELECT tenant_id, status FROM domain_erp.journal_entries WHERE id::text = :i"),
+                            {"i": angewendet.json()["journal_entry_id"]}).mappings().one()
+    assert (entwurf["tenant_id"], entwurf["status"]) == (HAUS_A, "draft")
+    assert client.post(pfad, headers={"X-Tenant-ID": HAUS_B}, json={"entry_date": "2026-10-20"}).status_code == 404
+
+
+def test_warengruppen_anlegen_bearbeiten_deaktivieren_mandantengenau(client):
+    """Kopf- und Zeilenaktionen der Studio-Liste; Oberwarengruppe eines fremden Mandanten wird beim Aendern abgewiesen
+    (vorher nur bei der Anlage geprueft), Deaktivieren unbekannter Gruppen 404 (vorher 204)."""
+    from app.core.screen_definitions import get_screen_definition
+
+    def kopf(haus=HAUS_A):
+        return {"X-Tenant-ID": haus}
+
+    def ober(haus):
+        nr = uuid.uuid4().hex[:6]
+        haupt = client.post("/api/v1/stammdaten/warengruppen/haupt", headers=kopf(haus),
+                            json={"gruppe_nr": f"H{nr}", "bezeichnung": "Betriebsmittel"})
+        assert haupt.status_code == 201, haupt.text
+        o = client.post("/api/v1/stammdaten/warengruppen/ober", headers=kopf(haus),
+                        json={"gruppe_nr": f"O{nr}", "bezeichnung": "Saatgut", "haupt_id": haupt.json()["id"]})
+        assert o.status_code == 201, o.text
+        return o.json()["id"]
+
+    eigene, fremde = ober(HAUS_A), ober(HAUS_B)
+    definition = get_screen_definition("einkauf/warengruppen")
+    neu = next(a for a in definition["actions"] if a["key"] == "neu")
+    nummer = f"WG{uuid.uuid4().hex[:5]}"
+    angelegt = client.post(neu["commandEndpoint"], headers=kopf(),
+                           json={"gruppe_nr": nummer, "bezeichnung": "Mais", "ober_id": eigene})
+    assert angelegt.status_code == 201, angelegt.text
+    kennung = angelegt.json()["id"]
+    zeilen = {a["key"]: a["commandEndpoint"].replace("{entity_id}", kennung)
+              for a in definition["tables"][0]["rowActions"]}
+    fremd = client.post(zeilen["bearbeiten"], headers=kopf(), json={"bezeichnung": "Silomais", "ober_id": fremde})
+    assert fremd.json()["success"] is False
+    geaendert = client.post(zeilen["bearbeiten"], headers=kopf(), json={"bezeichnung": "Silomais", "ober_id": eigene})
+    assert geaendert.json()["success"] is True, geaendert.json()
+    liste = definition["dataSources"][0]["endpoint"]
+    assert {z["gruppe_nr"]: z["bezeichnung"] for z in client.get(liste, headers=kopf()).json()}[nummer] == "Silomais"
+    assert nummer not in {z["gruppe_nr"] for z in client.get(liste, headers=kopf(HAUS_B)).json()}
+    assert client.post(zeilen["deaktivieren"], headers=kopf(HAUS_B), json={"_auditReason": "fremd"}).json()["success"] is False
+    assert client.post(zeilen["deaktivieren"], headers=kopf(), json={"_auditReason": "ersetzt durch WG 11"}).json()["success"]
+    assert client.post(zeilen["deaktivieren"], headers=kopf(), json={"_auditReason": "nochmal"}).json()["success"] is False
+    assert nummer not in {z["gruppe_nr"] for z in client.get(liste, headers=kopf()).json()}
+    # Der REST-Weg meldet unbekannte Gruppen jetzt mit 404 statt 204.
+    assert client.delete(f"/api/v1/stammdaten/warengruppen/{nummer}", headers=kopf()).status_code == 404
+
+
+def test_zahlungsbedingungen_anlegen_bearbeiten_ohne_leeren_und_deaktivieren(client):
+    """Bearbeiten nur der gesendeten Felder (Vollersatz-Modell wird aus dem Ist-Stand ergaenzt), fremder Mandant
+    abgewiesen, Deaktivieren mit Begruendung; der REST-Loeschweg meldet Unbekanntes mit 404 (vorher 204)."""
+    from app.core.screen_definitions import get_screen_definition
+
+    definition = get_screen_definition("einkauf/zahlungsbedingungen")
+    neu = next(a for a in definition["actions"] if a["key"] == "neu")
+    nummer = f"Z{uuid.uuid4().hex[:5]}"
+    angelegt = client.post(neu["commandEndpoint"], headers={"X-Tenant-ID": HAUS_A}, json={
+        "zabd_nr": nummer, "bezeichnung": "30 Tage netto, 10 Tage 2 %", "zahlungsziel_tage": 30,
+        "skonto1_tage": 10, "skonto1_prozent": 2, "zahlungsart": "ueberweisung"})
+    assert angelegt.status_code == 201, angelegt.text
+    zeilen = {a["key"]: a["commandEndpoint"].replace("{entity_id}", angelegt.json()["id"])
+              for a in definition["tables"][0]["rowActions"]}
+    assert client.post(zeilen["bearbeiten"], headers={"X-Tenant-ID": HAUS_B},
+                       json={"zahlungsziel_tage": 1}).json()["success"] is False
+    geaendert = client.post(zeilen["bearbeiten"], headers={"X-Tenant-ID": HAUS_A}, json={"zahlungsziel_tage": 45})
+    assert geaendert.json()["success"] is True, geaendert.json()
+    stand = client.get(f"/api/v1/fibu/zahlungsbedingungen/{nummer}", headers={"X-Tenant-ID": HAUS_A}).json()
+    assert (stand["zahlungsziel_tage"], stand["skonto1_tage"], float(stand["skonto1_prozent"])) == (45, 10, 2.0)
+    assert client.post(zeilen["deaktivieren"], headers={"X-Tenant-ID": HAUS_A}, json={}).json()["success"] is False
+    assert client.post(zeilen["deaktivieren"], headers={"X-Tenant-ID": HAUS_A},
+                       json={"_auditReason": "ersetzt durch Z2"}).json()["success"] is True
+    assert client.delete(f"/api/v1/fibu/zahlungsbedingungen/{nummer}",
+                         headers={"X-Tenant-ID": HAUS_A}).status_code == 404
+
+
+def test_wiedervorlagen_mandantengenau_mit_namen_und_erledigen(engine, client):
+    """Liste mandantengenau; Erledigen einer fremden Wiedervorlage ist 404 statt Rueckgabe des fremden Kontakts
+    (vorher las der Weg nach dem wirkungslosen UPDATE den Kontakt ohne Mandant)."""
+    from sqlalchemy import text
+
+    from app.core.screen_definitions import get_screen_definition
+
+    nummer = f"K-{uuid.uuid4().hex[:6]}"
+    with engine.begin() as v:
+        # Kontakte verweisen auf den Kundenstamm public.kunden (systemweit eindeutige Kundennummer).
+        v.execute(text("INSERT INTO public.kunden (kunden_nr, name1) VALUES (:n, 'Hof Janssen')"), {"n": nummer})
+        kontakt = v.execute(text("INSERT INTO public.kunden_kontakte (kunden_nr, kurzinfo, wiedervorlage, tenant_id) "
+                                 "VALUES (:n, 'Rueckruf Saatgut', current_date - 1, :h) RETURNING id::text"),
+                            {"n": nummer, "h": HAUS_A}).scalar()
+    definition = get_screen_definition("crm/wiedervorlagen")
+    zeilen = {z["id"]: z for z in client.get(definition["dataSources"][0]["endpoint"],
+                                             headers={"X-Tenant-ID": HAUS_A}).json()["items"]}
+    assert zeilen[kontakt]["kunde"] == "Hof Janssen" and zeilen[kontakt]["ueberfaellig"] is True
+    assert kontakt not in {z["id"] for z in client.get(definition["dataSources"][0]["endpoint"],
+                                                       headers={"X-Tenant-ID": HAUS_B}).json()["items"]}
+    pfad = definition["tables"][0]["rowActions"][0]["commandEndpoint"].replace("{entity_id}", kontakt)
+    assert client.post(pfad, headers={"X-Tenant-ID": HAUS_B}, json={"ergebnis": "fremd"}).status_code == 404
+    erledigt = client.post(pfad, headers={"X-Tenant-ID": HAUS_A}, json={"ergebnis": "Angebot geschickt"})
+    assert erledigt.status_code == 200, erledigt.text
+    with engine.connect() as v:
+        zeile = v.execute(text("SELECT erledigt, notiz FROM public.kunden_kontakte WHERE id::text = :i"),
+                          {"i": kontakt}).mappings().one()
+    assert zeile["erledigt"] is True and "Angebot geschickt" in zeile["notiz"]
+    with engine.begin() as v:
+        v.execute(text("DELETE FROM public.kunden_kontakte WHERE kunden_nr = :n"), {"n": nummer})
+        v.execute(text("DELETE FROM public.kunden WHERE kunden_nr = :n"), {"n": nummer})
 
 
 def test_kreditorenliste_ist_eine_liste_und_oeffnet_die_objektmaske():

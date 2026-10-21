@@ -90,10 +90,6 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "lieferanten-liste"
   },
   {
-    "module": "@/pages/einkauf/lieferanten-stamm",
-    "path": "lieferanten-stamm"
-  },
-  {
     "module": "@/pages/einkauf/lieferantenbewertung",
     "path": "lieferantenbewertung"
   },

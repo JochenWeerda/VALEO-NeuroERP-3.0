@@ -639,6 +639,17 @@
         ]
       ]
     },
+    "crm/wiedervorlagen": {
+      "crm.kontakt.erledigen": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "docflow/dokumenten-ruecklauf": {
       "docflow.returns.write": [
         [
@@ -840,6 +851,79 @@
         ]
       ]
     },
+    "einkauf/supplier": {
+      "einkauf.lieferant.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.lieferant.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "einkauf/warengruppen": {
+      "stammdaten.warengruppe.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "stammdaten.warengruppe.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "stammdaten.warengruppe.deaktivieren": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "einkauf/zahlungsbedingungen": {
+      "finance.zahlungsbedingung.create": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.zahlungsbedingung.update": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.zahlungsbedingung.deaktivieren": [
+        [
+          "FINANCE_ADMIN",
+          "admin"
+        ]
+      ]
+    },
     "finance/ap-invoice": {
       "finance.ap.freigabe": [
         [
@@ -862,6 +946,21 @@
         [
           "FINANCE_ADMIN",
           "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "finance/buchungsvorlagen": {
+      "finance.buchung.create": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.buchungsvorlage.delete": [
+        [
+          "FINANCE_ADMIN",
           "admin"
         ]
       ]
@@ -919,6 +1018,29 @@
     },
     "finance/steuerschluessel": {
       "finance.steuerschluessel.write": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "finance/wechselkurse": {
+      "finance.wechselkurs.create": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.wechselkurs.deaktivieren": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.wechselkurs.aktivieren": [
         [
           "FINANCE_ADMIN",
           "FINANCE_BEARBEITEN",

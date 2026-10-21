@@ -18915,6 +18915,9 @@
             "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py",
             "app/services/rfq_service.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/stammdaten_bearbeiten.py"
           ]
         },
         "paletten_konto_buchungen": {
@@ -21369,10 +21372,12 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/exchange_rates.py"
+            "app/api/v1/endpoints/exchange_rates.py",
+            "app/api/v1/endpoints/finance_stammdaten_kommandos.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/exchange_rates.py"
+            "app/api/v1/endpoints/exchange_rates.py",
+            "app/api/v1/endpoints/finance_stammdaten_kommandos.py"
           ]
         },
         "fibu_connector_profiles": {
@@ -59002,9 +59007,11 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/api/v1/endpoints/warengruppen.py"
           ],
           "written_by": [
+            "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/api/v1/endpoints/warengruppen.py"
           ]
         },
@@ -59422,9 +59429,11 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/finance_stammdaten_kommandos.py",
             "app/api/v1/endpoints/zahlungsbedingungen.py"
           ],
           "written_by": [
+            "app/api/v1/endpoints/finance_stammdaten_kommandos.py",
             "app/api/v1/endpoints/zahlungsbedingungen.py"
           ]
         },

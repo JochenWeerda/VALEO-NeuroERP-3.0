@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (140 Masken).
+> Generiert aus `app/core/screen_definitions.py` (145 Masken).
 
 ## Übersicht
 
@@ -66,6 +66,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `crm/opportunities-liste` | Verkaufschancen | crm | niedrig | — | `GET /api/v1/masks/crm/opportunities-liste/agent-contract` |
 | `crm/opportunity` | Opportunity | crm | niedrig | `order-to-cash` | `GET /api/v1/masks/crm/opportunity/agent-contract` |
 | `crm/segmente-liste` | Segmente | crm | niedrig | — | `GET /api/v1/masks/crm/segmente-liste/agent-contract` |
+| `crm/wiedervorlagen` | Wiedervorlagen | crm | niedrig | — | `GET /api/v1/masks/crm/wiedervorlagen/agent-contract` |
 | `docflow/dokumenten-ruecklauf` | Dokumentenruecklauf | dms-compliance | niedrig | — | `GET /api/v1/masks/docflow/dokumenten-ruecklauf/agent-contract` |
 | `einkauf/anfrage` | Einkaufsanfrage | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfrage/agent-contract` |
 | `einkauf/anfragen` | Anfragen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfragen/agent-contract` |
@@ -78,10 +79,13 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/bestellungen` | Bestellungen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/bestellungen/agent-contract` |
 | `einkauf/lieferanten` | Lieferanten | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/lieferanten/agent-contract` |
 | `einkauf/purchase-order` | Bestellung | einkauf | mittel | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
-| `einkauf/supplier` | Lieferant | einkauf | niedrig | `procure-to-pay` | `GET /api/v1/masks/einkauf/supplier/agent-contract` |
+| `einkauf/supplier` | Lieferant | einkauf | hoch | `procure-to-pay` | `GET /api/v1/masks/einkauf/supplier/agent-contract` |
+| `einkauf/warengruppen` | Warengruppen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/warengruppen/agent-contract` |
+| `einkauf/zahlungsbedingungen` | Zahlungsbedingungen | finance | niedrig | — | `GET /api/v1/masks/einkauf/zahlungsbedingungen/agent-contract` |
 | `finance/ap-invoice` | Eingangsrechnung | finance | mittel | `procure-to-pay` | `GET /api/v1/masks/finance/ap-invoice/agent-contract` |
 | `finance/ar-open-item` | Offener Posten | finance | mittel | `order-to-cash` | `GET /api/v1/masks/finance/ar-open-item/agent-contract` |
 | `finance/bankkonto` | Bankkonto | finance | mittel | — | `GET /api/v1/masks/finance/bankkonto/agent-contract` |
+| `finance/buchungsvorlagen` | Buchungsvorlagen | finance | niedrig | — | `GET /api/v1/masks/finance/buchungsvorlagen/agent-contract` |
 | `finance/debitor` | Debitor | finance | mittel | — | `GET /api/v1/masks/finance/debitor/agent-contract` |
 | `finance/debitoren-liste` | Debitoren | finance | niedrig | — | `GET /api/v1/masks/finance/debitoren-liste/agent-contract` |
 | `finance/kreditor` | Kreditor | finance | mittel | — | `GET /api/v1/masks/finance/kreditor/agent-contract` |
@@ -90,6 +94,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `finance/pruefkorb` | Prüfkorb | finance | niedrig | — | `GET /api/v1/masks/finance/pruefkorb/agent-contract` |
 | `finance/rechnungstapel` | Rechnungstapel | finance | niedrig | — | `GET /api/v1/masks/finance/rechnungstapel/agent-contract` |
 | `finance/steuerschluessel` | Steuerschlüssel | finance | mittel | — | `GET /api/v1/masks/finance/steuerschluessel/agent-contract` |
+| `finance/wechselkurse` | Wechselkurse | finance | niedrig | — | `GET /api/v1/masks/finance/wechselkurse/agent-contract` |
 | `foerderung/liste` | Foerderantraege | agrar | niedrig | — | `GET /api/v1/masks/foerderung/liste/agent-contract` |
 | `fuhrpark/ausgehende-dokumente` | Ausgehende Belege | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/ausgehende-dokumente/agent-contract` |
 | `fuhrpark/fahrzeug-stamm` | Fahrzeug-Stamm | logistics | hoch | — | `GET /api/v1/masks/fuhrpark/fahrzeug-stamm/agent-contract` |
@@ -1803,6 +1808,44 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `crm/wiedervorlagen` — Wiedervorlagen
+
+**Zweck:** Faellige Rueckrufe und Aufgaben abarbeiten; das Ergebnis wird an die Kontaktnotiz angehaengt.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/crm/wiedervorlagen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/crm/wiedervorlagen/agent-contract` |
+| Readiness | `GET /api/v1/masks/crm/wiedervorlagen/readiness` |
+| Rollout-Route | `/mask-rollout/crm__wiedervorlagen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/crm/kunden-kontakte/wiedervorlagen?tage=365`
+
+**MCP-Tools (Domäne):**
+
+- `crm.customer.search` — scope `crm:read`, Risiko niedrig
+- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
+- `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Wiedervorlagen sind ueberfaellig?
+- Was steht diese Woche fuer Kunde X an?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
 ## Domäne: dms-compliance
 
 ### `docflow/dokumenten-ruecklauf` — Dokumentenruecklauf
@@ -2344,8 +2387,49 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
+| `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/bearbeiten` |
 | `neue_bestellung` | Bestellung anlegen | safe | nein | `—` |
+| `sperren` | Sperren | high | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren` |
+| `entsperren` | Entsperren | high | nein | `/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren` |
+
+---
+
+### `einkauf/warengruppen` — Warengruppen
+
+**Zweck:** Warengruppen fuer Artikel, Auswertungen und Einkauf pflegen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/einkauf/warengruppen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/einkauf/warengruppen/agent-contract` |
+| Readiness | `GET /api/v1/masks/einkauf/warengruppen/readiness` |
+| Rollout-Route | `/mask-rollout/einkauf__warengruppen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/stammdaten/warengruppen`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Warengruppen gehoeren zu Saatgut?
+- Lege die Warengruppe Biostimulanzien an.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Warengruppe anlegen | safe | nein | `/api/v1/stammdaten/warengruppen` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -2511,6 +2595,42 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `einkauf/zahlungsbedingungen` — Zahlungsbedingungen
+
+**Zweck:** Zahlungsbedingungen fuer Kunden, Lieferanten und Belege pflegen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/einkauf/zahlungsbedingungen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/einkauf/zahlungsbedingungen/agent-contract` |
+| Readiness | `GET /api/v1/masks/einkauf/zahlungsbedingungen/readiness` |
+| Rollout-Route | `/mask-rollout/einkauf__zahlungsbedingungen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/fibu/zahlungsbedingungen`
+
+**MCP-Tools (Domäne):**
+
+- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Zahlungsbedingungen gewaehren 2 % Skonto?
+- Lege 30 Tage netto, 10 Tage 2 % an.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Zahlungsbedingung anlegen | safe | nein | `/api/v1/fibu/zahlungsbedingungen` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
 ### `finance/ap-invoice` — Eingangsrechnung
 
 **Zweck:** Eingangsrechnung: Kopfdaten, Positionen und Freigabe-Historie fuer AP-Buchhalter und Audit.
@@ -2627,6 +2747,41 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | moderate | nein | `/api/v1/banken/konten/{entity_id}/actions/bearbeiten` |
+
+---
+
+### `finance/buchungsvorlagen` — Buchungsvorlagen
+
+**Zweck:** Wiederkehrende Buchungen als Entwurf erzeugen; der Entwurf geht durch die normale Buchungspruefung.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/finance/buchungsvorlagen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/finance/buchungsvorlagen/agent-contract` |
+| Readiness | `GET /api/v1/masks/finance/buchungsvorlagen/readiness` |
+| Rollout-Route | `/mask-rollout/finance__buchungsvorlagen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/finance/booking-templates?active_only=false`
+
+**MCP-Tools (Domäne):**
+
+- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welche Buchungsvorlagen gibt es fuer Abschreibungen?
+- Wende die Mietvorlage fuer Oktober an.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -2921,6 +3076,42 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `speichern` | Steuerschlüssel speichern | moderate | ja | `/api/v1/finance/tax-keys/actions/speichern` |
 | `neu` | Neuer Steuerschlüssel | safe | nein | `Leert die Eingabe fuer einen neuen Steuerschluessel.` |
+
+---
+
+### `finance/wechselkurse` — Wechselkurse
+
+**Zweck:** Wechselkurse fuer Fremdwaehrungsbelege pflegen und nachweisen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/finance/wechselkurse/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/finance/wechselkurse/agent-contract` |
+| Readiness | `GET /api/v1/masks/finance/wechselkurse/readiness` |
+| Rollout-Route | `/mask-rollout/finance__wechselkurse/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/finance/exchange-rates?active_only=false`
+
+**MCP-Tools (Domäne):**
+
+- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Welcher USD-Kurs galt am Monatsende?
+- Welche Kurse sind deaktiviert?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `neu` | Kurs erfassen | safe | nein | `/api/v1/finance/exchange-rates` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

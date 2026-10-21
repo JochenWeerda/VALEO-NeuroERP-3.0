@@ -6,5 +6,5 @@ export function tableSourceRequest(screenId: string, entityId: string | undefine
   if (!binding.clientQuery || !binding.sourceKey) return undefined
   const params = new URLSearchParams({ ...toQueryParams(state), table_key: binding.tableKey })
   if (entityId) params.set('entity_id', entityId)
-  return `/api/v1/masks/${encodeURIComponent(screenId)}/data/${encodeURIComponent(binding.sourceKey)}?${params}`
+  return `/api/v1/masks/${encodeURIComponent(screenId)}/data/${encodeURIComponent(binding.sourceKey)}?${params.toString()}`
 }

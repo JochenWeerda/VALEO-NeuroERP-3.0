@@ -2593,6 +2593,39 @@
       ]
     },
     {
+      "mask_id": "crm/wiedervorlagen",
+      "title": "Wiedervorlagen",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__wiedervorlagen/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/wiedervorlagen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/wiedervorlagen/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/wiedervorlagen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.lead.qualify"
+      ]
+    },
+    {
       "mask_id": "docflow/dokumenten-ruecklauf",
       "title": "Dokumentenruecklauf",
       "domain": "dms-compliance",
@@ -3102,17 +3135,17 @@
       "agent_contract_url": "/api/v1/masks/einkauf/supplier/agent-contract",
       "screen_definition_url": "/api/v1/masks/einkauf/supplier/screen-definition",
       "readiness_url": "/api/v1/masks/einkauf/supplier/readiness",
-      "risk_summary": "low",
+      "risk_summary": "high",
       "actions": [
         {
-          "key": "edit",
+          "key": "bearbeiten",
           "label": "Bearbeiten",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "einkauf.lieferant.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -3125,12 +3158,78 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
+        },
+        {
+          "key": "sperren",
+          "label": "Sperren",
+          "dangerLevel": "high",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "einkauf.lieferant.update",
+          "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "entsperren",
+          "label": "Entsperren",
+          "dangerLevel": "high",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "einkauf.lieferant.update",
+          "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren",
+          "method": "POST",
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
         "zahlungsbedingungen",
         "lieferzeit_tage"
       ],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "einkauf/warengruppen",
+      "title": "Warengruppen",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/einkauf__warengruppen/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/warengruppen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/warengruppen/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/warengruppen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Warengruppe anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "stammdaten.warengruppe.create",
+          "commandEndpoint": "/api/v1/stammdaten/warengruppen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
@@ -3250,6 +3349,47 @@
       ]
     },
     {
+      "mask_id": "einkauf/zahlungsbedingungen",
+      "title": "Zahlungsbedingungen",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/einkauf__zahlungsbedingungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/zahlungsbedingungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/zahlungsbedingungen/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/zahlungsbedingungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Zahlungsbedingung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "finance.zahlungsbedingung.create",
+          "commandEndpoint": "/api/v1/fibu/zahlungsbedingungen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
       "mask_id": "finance/ap-invoice",
       "title": "Eingangsrechnung",
       "domain": "finance",
@@ -3350,6 +3490,36 @@
         "bic",
         "saldo"
       ],
+      "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "finance/buchungsvorlagen",
+      "title": "Buchungsvorlagen",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/finance__buchungsvorlagen/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/buchungsvorlagen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/buchungsvorlagen/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/buchungsvorlagen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
         "fibu.open_items.list",
@@ -3632,6 +3802,47 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Leert die Eingabe fuer einen neuen Steuerschluessel."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "finance/wechselkurse",
+      "title": "Wechselkurse",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/finance__wechselkurse/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/wechselkurse/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/wechselkurse/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/wechselkurse/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Kurs erfassen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "finance.wechselkurs.create",
+          "commandEndpoint": "/api/v1/finance/exchange-rates",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -6766,5 +6977,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 128
+  "event_count": 135
 }

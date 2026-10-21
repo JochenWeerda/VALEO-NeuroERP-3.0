@@ -49,10 +49,9 @@ describe('FIBU / Portal / NaWaRo UIX', () => {
   })
 
   it('beschriftet Einkauf-Stamm und Rechnungs-Toolbar 44 px', () => {
+    // Zahlungsbedingungen seit 21.10.2026 als Studio-Liste (Aktionen und 44-px-Ziele aus der Definition/dem Renderer).
     const zabd = read('../../pages/einkauf/zahlungsbedingungen.tsx')
-    expect(zabd).toContain('Bearbeiten')
-    expect(zabd).toContain('min-h-touch')
-    expect(zabd).not.toMatch(/size="sm"/)
+    expect(zabd).toContain('screenId="einkauf/zahlungsbedingungen"')
     const eingang = read('../../pages/einkauf/rechnung-eingang-erfassung.tsx')
     expect(eingang).toContain('Speichern')
     expect(eingang).toContain('aria-label="Kostenstelle suchen"')

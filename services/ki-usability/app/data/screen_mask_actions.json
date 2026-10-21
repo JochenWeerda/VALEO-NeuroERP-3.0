@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 199,
-    "screens_with_actions": 102,
+    "actions": 209,
+    "screens_with_actions": 107,
     "domains": 17
   },
   "actions": [
@@ -1600,6 +1600,26 @@
       }
     },
     {
+      "id": "mask:crm/wiedervorlagen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (crm/wiedervorlagen)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/wiedervorlagen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/wiedervorlagen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
       "id": "mask:einkauf/anfrage:bearbeiten",
       "label": "Bearbeiten",
       "description": "Bearbeiten (einkauf/anfrage)",
@@ -1994,7 +2014,7 @@
       }
     },
     {
-      "id": "mask:einkauf/supplier:edit",
+      "id": "mask:einkauf/supplier:bearbeiten",
       "label": "Bearbeiten",
       "description": "Bearbeiten (einkauf/supplier)",
       "category": "mask-action",
@@ -2003,14 +2023,38 @@
       "intent_phrases": [
         "Bearbeiten"
       ],
-      "required_data": [],
+      "required_data": [
+        "entity_id"
+      ],
       "source": {
         "screenId": "einkauf/supplier",
-        "actionKey": "edit",
-        "commandEndpoint": null,
-        "navigationRoute": "/einkauf/lieferant/{entity_id}",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
         "command": null,
-        "method": null
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/supplier:entsperren",
+      "label": "Entsperren",
+      "description": "Entsperren (einkauf/supplier)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/supplier",
+      "intent_phrases": [
+        "Entsperren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/supplier",
+        "actionKey": "entsperren",
+        "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
       }
     },
     {
@@ -2031,6 +2075,108 @@
         "navigationRoute": "/einkauf/bestellungen/neu",
         "command": null,
         "method": null
+      }
+    },
+    {
+      "id": "mask:einkauf/supplier:sperren",
+      "label": "Sperren",
+      "description": "Sperren (einkauf/supplier)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/supplier",
+      "intent_phrases": [
+        "Sperren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/supplier",
+        "actionKey": "sperren",
+        "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/warengruppen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (einkauf/warengruppen)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/warengruppen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/warengruppen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:einkauf/warengruppen:neu",
+      "label": "Warengruppe anlegen",
+      "description": "Warengruppe anlegen (einkauf/warengruppen)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/warengruppen",
+      "intent_phrases": [
+        "Warengruppe anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/warengruppen",
+        "actionKey": "neu",
+        "commandEndpoint": "/api/v1/stammdaten/warengruppen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:einkauf/zahlungsbedingungen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (einkauf/zahlungsbedingungen)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "einkauf/zahlungsbedingungen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/zahlungsbedingungen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:einkauf/zahlungsbedingungen:neu",
+      "label": "Zahlungsbedingung anlegen",
+      "description": "Zahlungsbedingung anlegen (einkauf/zahlungsbedingungen)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "einkauf/zahlungsbedingungen",
+      "intent_phrases": [
+        "Zahlungsbedingung anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "einkauf/zahlungsbedingungen",
+        "actionKey": "neu",
+        "commandEndpoint": "/api/v1/fibu/zahlungsbedingungen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST"
       }
     },
     {
@@ -2097,6 +2243,26 @@
         "navigationRoute": null,
         "command": null,
         "method": "POST"
+      }
+    },
+    {
+      "id": "mask:finance/buchungsvorlagen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (finance/buchungsvorlagen)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/buchungsvorlagen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/buchungsvorlagen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
       }
     },
     {
@@ -2302,6 +2468,46 @@
         "commandEndpoint": "/api/v1/finance/tax-keys/actions/speichern",
         "navigationRoute": null,
         "command": "finance.steuerschluesselSpeichern",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "mask:finance/wechselkurse:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (finance/wechselkurse)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/wechselkurse",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/wechselkurse",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null
+      }
+    },
+    {
+      "id": "mask:finance/wechselkurse:neu",
+      "label": "Kurs erfassen",
+      "description": "Kurs erfassen (finance/wechselkurse)",
+      "category": "mask-action",
+      "domain": "finance",
+      "mask": "finance/wechselkurse",
+      "intent_phrases": [
+        "Kurs erfassen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "finance/wechselkurse",
+        "actionKey": "neu",
+        "commandEndpoint": "/api/v1/finance/exchange-rates",
+        "navigationRoute": null,
+        "command": null,
         "method": "POST"
       }
     },

@@ -1876,12 +1876,12 @@
       "source": "navigation"
     },
     {
-      "module": "@/pages/einkauf/lieferanten-stamm",
+      "module": "@/pages/einkauf/supplier-native",
       "path": "einkauf/lieferant/:id",
       "source": "alias"
     },
     {
-      "module": "@/pages/einkauf/lieferanten-stamm",
+      "module": "@/pages/einkauf/supplier-native",
       "path": "einkauf/lieferant/neu",
       "source": "alias"
     },
@@ -1898,11 +1898,6 @@
     {
       "module": "@/pages/einkauf/lieferanten-liste",
       "path": "einkauf/lieferanten-liste",
-      "source": "auto"
-    },
-    {
-      "module": "@/pages/einkauf/lieferanten-stamm",
-      "path": "einkauf/lieferanten-stamm",
       "source": "auto"
     },
     {

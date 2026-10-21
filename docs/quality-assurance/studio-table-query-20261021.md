@@ -38,3 +38,11 @@ Keine Browser-Sichtpruefung oder Live-Bereitstellung in diesem Meilenstein. Kein
 kein neuer Container oder Datenbank; SQL-Vertraege verwenden valeo_probe mit Rollback.
 Gesamtziel made by Studio bleibt offen: immutable Freigabenachweise je Version,
 allgemeine CRUD-/Schema-Verdrahtung und vollstaendige Migration der Altmasken.
+
+
+Integrationsabnahme mit main bis a059c51bf: 205 Backendtests bestanden,
+einschliesslich der beiden zuvor roten Maskenvertraege (Zeilenformen und
+Belegidentitaet). Claudes Quell-/Testkorrekturen bleiben erhalten. Alle
+Projektions-/Architekturgates gruen; 3242 OpenAPI-Pfade, 931 Routen,
+307 Services, 472 Endpunktmodule. follow-redirects-Sicherheitsbefunde
+bleiben als eigener Folgeschritt offen. Kein pauschal gruener CI-Status.

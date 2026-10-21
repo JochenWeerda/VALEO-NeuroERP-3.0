@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, architect, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-20
+last_reviewed: 2026-10-21
 version: 1.0.0
 description: Generierter Katalog der domain_*-Tabellen aus information_schema.
 ---
@@ -267,7 +267,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_einkauf.kontrakt_positionen` | `app/api/v1/endpoints/price_calculation.py`, `app/infrastructure/models/einkauf_models.py` | — | — |
 | `domain_einkauf.kontrakte` | `app/api/v1/endpoints/price_calculation.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/customer_reference.py` | — | — |
 | `domain_einkauf.lager_kontenzuordnung` | `app/api/v1/endpoints/inventory_operations.py`, `app/infrastructure/models/einkauf_models.py` | — | — |
-| `domain_einkauf.lieferanten` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/crm_partner_suche.py`, `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/bestell_kommunikation_service.py`, `app/services/customer_reference.py`, `app/services/docflow_belegadapter.py`, `app/services/docflow_creation_context.py`, `app/services/einkauf_compat_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/mcp_execution_service.py`, `app/services/rfq_service.py` | — | — |
+| `domain_einkauf.lieferanten` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/crm_partner_suche.py`, `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/bestell_kommunikation_service.py`, `app/services/customer_reference.py`, `app/services/docflow_belegadapter.py`, `app/services/docflow_creation_context.py`, `app/services/einkauf_compat_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/mcp_execution_service.py`, `app/services/rfq_service.py` | `app/api/v1/endpoints/stammdaten_bearbeiten.py` | — |
 | `domain_einkauf.paletten_konto_buchungen` | `app/infrastructure/models/einkauf_models.py` | — | — |
 | `domain_einkauf.pfand_konto_buchungen` | `app/infrastructure/models/einkauf_models.py` | — | — |
 | `domain_einkauf.procurement_ers_credits` | `app/services/procurement_match_service.py` | `app/services/procurement_match_service.py` | — |
@@ -298,7 +298,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_erp.drucker` | `app/services/etikettendruck_service.py` | — | — |
 | `domain_erp.dunning_notices` | `app/api/v1/endpoints/dunning.py`, `app/api/v1/endpoints/export_service.py`, `app/services/finance_dunning_service.py`, `app/services/mcp_execution_service.py` | `app/api/v1/endpoints/dunning.py`, `app/services/finance_dunning_service.py` | — |
 | `domain_erp.dunning_rules` | `app/api/v1/endpoints/dunning.py`, `app/services/finance_dunning_service.py`, `app/services/scheduler_service.py` | `app/api/v1/endpoints/dunning.py` | — |
-| `domain_erp.exchange_rates` | `app/api/v1/endpoints/exchange_rates.py` | `app/api/v1/endpoints/exchange_rates.py` | — |
+| `domain_erp.exchange_rates` | `app/api/v1/endpoints/exchange_rates.py`, `app/api/v1/endpoints/finance_stammdaten_kommandos.py` | `app/api/v1/endpoints/exchange_rates.py`, `app/api/v1/endpoints/finance_stammdaten_kommandos.py` | — |
 | `domain_erp.fibu_connector_profiles` | `app/api/v1/endpoints/fibu_connectors.py`, `app/core/connectors/workflow.py` | `app/api/v1/endpoints/fibu_connectors.py` | — |
 | `domain_erp.fibu_connector_run_items` | `app/api/v1/endpoints/fibu_connectors.py`, `app/core/connectors/workflow.py` | `app/core/connectors/workflow.py` | — |
 | `domain_erp.fibu_connector_runs` | `app/api/v1/endpoints/fibu_connectors.py`, `app/core/connectors/workflow.py` | `app/core/connectors/workflow.py` | — |
@@ -724,13 +724,13 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.vertreter_staffel_zeilen` | `app/api/v1/endpoints/vertreterprovisionen.py` | `app/api/v1/endpoints/vertreterprovisionen.py` | — |
 | `domain_shared.waage_hofliste` | `app/api/v1/endpoints/hofliste.py` | `app/api/v1/endpoints/hofliste.py` | — |
 | `domain_shared.waage_wiegungsgruppen` | `app/api/v1/endpoints/artikel_stamm_ext.py` | `app/api/v1/endpoints/artikel_stamm_ext.py` | — |
-| `domain_shared.warengruppen` | `app/api/v1/endpoints/warengruppen.py` | `app/api/v1/endpoints/warengruppen.py` | — |
+| `domain_shared.warengruppen` | `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/api/v1/endpoints/warengruppen.py` | `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/api/v1/endpoints/warengruppen.py` | — |
 | `domain_shared.webhook_deliveries` | `app/api/v1/endpoints/webhook_system.py`, `app/services/webhook_service.py` | `app/services/webhook_service.py` | — |
 | `domain_shared.webhook_registrations` | `app/api/v1/endpoints/webhook_system.py`, `app/infrastructure/models/l3c_models.py`, `app/services/webhook_service.py` | `app/services/webhook_service.py` | — |
 | `domain_shared.webshop_bestellungen` | `app/services/webshop_integration_service.py` | `app/services/webshop_integration_service.py` | — |
 | `domain_shared.webshop_configs` | `app/services/webshop_integration_service.py` | `app/services/webshop_integration_service.py` | — |
 | `domain_shared.webshop_sync_log` | `app/services/webshop_integration_service.py` | `app/services/webshop_integration_service.py` | — |
-| `domain_shared.zahlungsbedingungen` | `app/api/v1/endpoints/zahlungsbedingungen.py` | `app/api/v1/endpoints/zahlungsbedingungen.py` | — |
+| `domain_shared.zahlungsbedingungen` | `app/api/v1/endpoints/finance_stammdaten_kommandos.py`, `app/api/v1/endpoints/zahlungsbedingungen.py` | `app/api/v1/endpoints/finance_stammdaten_kommandos.py`, `app/api/v1/endpoints/zahlungsbedingungen.py` | — |
 | `domain_shared.zahlungsformulare` | `app/api/v1/endpoints/fibu_stammdaten.py` | `app/api/v1/endpoints/fibu_stammdaten.py` | — |
 | `domain_shared.zinsgruppen` | `app/api/v1/endpoints/fibu_stammdaten.py` | `app/api/v1/endpoints/fibu_stammdaten.py` | — |
 | `domain_shared.zu_abschlag_konditionen` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/zu_abschlaggruppen.py` | `app/api/v1/endpoints/zu_abschlaggruppen.py` | — |

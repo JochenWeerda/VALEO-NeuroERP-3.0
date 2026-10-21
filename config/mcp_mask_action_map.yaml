@@ -5,8 +5,8 @@ sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 199
-    screens_with_actions: 102
+    actions: 209
+    screens_with_actions: 107
     domains: 17
 mcp_write_tools:
 - crm.contact.log
@@ -81,14 +81,14 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 108
-  mask_mutations_considered: 68
+  mask_actions_considered: 111
+  mask_mutations_considered: 71
   by_coverage:
     adjacent: 1
     blocked_human_only: 15
     local_ui: 40
     mapped: 42
-    mapped_generic: 3
+    mapped_generic: 6
     mapped_propose_only: 1
     mapped_read: 2
     open_high: 4
@@ -638,6 +638,26 @@ mappings:
   local_effect: navigation
   notes: SD navigationRoute /einkauf/bestellungen/neu; legt keine Bestellung an. MCP-MASK-CE-BATCH2-20261009.
   mcp_tool_id: null
+- mask_action_id: mask:einkauf/warengruppen:neu
+  mask: einkauf/warengruppen
+  domain: einkauf
+  action_key: neu
+  label: Warengruppe anlegen
+  command_endpoint: /api/v1/stammdaten/warengruppen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:einkauf/zahlungsbedingungen:neu
+  mask: einkauf/zahlungsbedingungen
+  domain: finance
+  action_key: neu
+  label: Zahlungsbedingung anlegen
+  command_endpoint: /api/v1/fibu/zahlungsbedingungen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
 - mask_action_id: mask:finance/ap-invoice:freigeben
   mask: finance/ap-invoice
   domain: finance
@@ -711,6 +731,16 @@ mappings:
   notes: Steuerschluessel bestimmen Satz und Konten aller Belege; ein Agent darf eine Regel vorschlagen,
     nie in Kraft setzen. Bewusst ohne MCP-Werkzeug; forbiddenForAgents.
   mcp_tool_id: null
+- mask_action_id: mask:finance/wechselkurse:neu
+  mask: finance/wechselkurse
+  domain: finance
+  action_key: neu
+  label: Kurs erfassen
+  command_endpoint: /api/v1/finance/exchange-rates
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
 - mask_action_id: mask:foerderung/liste:neu
   mask: foerderung/liste
   domain: agrar

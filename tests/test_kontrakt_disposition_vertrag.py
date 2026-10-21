@@ -22,7 +22,10 @@ from __future__ import annotations
 
 import os
 import uuid
-from datetime import date
+
+# Geschaeftstag (Europe/Berlin) wie der Code; date.today() ist auf dem Runner UTC und kippte um
+# Mitternacht deutscher Zeit die Erwartung (CI 20./21.10.2026).
+from app.core.business_time import business_today
 
 import pytest
 
@@ -416,7 +419,7 @@ class TestLieferbeleg:
         assert antwort.status_code == 200, antwort.text
         daten = antwort.json()
         assert daten["status"] == "GELIEFERT"
-        assert daten["lieferdatum"] == date.today().isoformat()
+        assert daten["lieferdatum"] == business_today().isoformat()
         with engine.connect() as c:
             nummer = c.execute(
                 text(f"SELECT ticket_number FROM {SCHEINE} WHERE id = :id"),

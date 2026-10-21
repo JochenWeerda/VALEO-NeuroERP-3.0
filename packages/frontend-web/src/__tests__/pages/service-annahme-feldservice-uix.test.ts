@@ -117,15 +117,11 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).toContain('min-h-touch')
   })
 
-  it('stellt Lieferantenstamm Theater nur am Desktop', () => {
-    const src = read('../../pages/einkauf/lieferanten-stamm.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('Tabs')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('Löschen')
-    expect(src).not.toContain('size="sm"')
-    expect(src).not.toContain('text-orange-800')
+  it('stellt Lieferantenstamm als Studio-Maske dar', () => {
+    // Seit 20.10.2026 ScreenDefinition einkauf/supplier (Anlage, Bearbeiten, Sperren); die handgebaute Seite ist entfernt.
+    const src = read('../../pages/einkauf/supplier-native.tsx')
+    expect(src).toContain('UniversalNativeDetailPage')
+    expect(src).toContain('screenId="einkauf/supplier"')
   })
 
   it('stellt Dashboards ohne Theater auf Touch', () => {
@@ -352,13 +348,11 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  it('stellt Wiedervorlagen mit Tokens und 44-px-Erledigen', () => {
+  it('stellt Wiedervorlagen als Studio-Liste dar', () => {
+    // Seit 21.10.2026 ScreenDefinition crm/wiedervorlagen (Erledigen mit Ergebnis, Zeile oeffnet die Kundenakte).
     const src = read('../../pages/crm/wiedervorlagen.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('Erledigen')
-    expect(src).toContain('bg-status-error/10')
-    expect(src).not.toContain('bg-red-50')
-    expect(src).not.toContain('size="sm"')
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="crm/wiedervorlagen"')
   })
 
   it('stellt Saatgut-Stamm mit 44-px-Zurueck', () => {
@@ -891,11 +885,12 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  it('stellt Wechselkurse Loeschen beschriftet', () => {
+  it('stellt Wechselkurse als Studio-Liste dar', () => {
+    // Seit 20.10.2026 ScreenDefinition finance/wechselkurse; "Loeschen" rief einen nie vorhandenen Weg und ist durch
+    // Deaktivieren/Aktivieren mit Begruendung ersetzt.
     const src = read('../../pages/finance/wechselkurse.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('Löschen')
-    expect(src).not.toContain('size="sm"')
+    expect(src).toContain('NativeListPage')
+    expect(src).toContain('screenId="finance/wechselkurse"')
   })
 
   it('stellt Sachkonto Aktualisieren beschriftet', () => {

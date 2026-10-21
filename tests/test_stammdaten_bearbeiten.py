@@ -287,6 +287,7 @@ ERWARTET = {
     "qualitaet/reklamation": "/api/v1/reklamationen/{entity_id}/actions/bearbeiten",
     "artikel/stamm": "/api/v1/articles/{entity_id}/actions/bearbeiten",
     "crm/customer-360": "/api/v1/crm/customers/{entity_id}/actions/bearbeiten",
+    "einkauf/supplier": "/api/v1/einkauf/lieferanten/{entity_id}/actions/bearbeiten",
 }
 
 
@@ -341,7 +342,7 @@ def test_unbekanntes_objekt_ist_nicht_gefunden_statt_sql_fehler(client, maske):
     pfad = ERWARTET[maske].format(entity_id=uuid.uuid4())
     antwort = client.post(pfad, json={"_mode": "dryRun", "_auditReason": "Pruefung ohne Objekt",
                                       "notes": "x", "name": "x", "company_name": "x", "anforderer": "x",
-                                      "subject": "x", "bank": "x", "credit_limit": 1, "zustaendiger": "x", "firma": "x"},
+                                      "subject": "x", "bank": "x", "credit_limit": 1, "zustaendiger": "x", "firma": "x", "ort": "x"},
                           headers=kopf())
     assert antwort.status_code == 200, antwort.text
     assert antwort.json()["success"] is False
@@ -411,6 +412,40 @@ def test_kunde_wird_ueber_die_akte_angelegt_und_bearbeitet(client, engine):
     assert (kunde["tenant_id"], kunde["company_name"], kunde["city"], kunde["postal_code"]) == (
         HAUS_A, "Hof Janssen GbR", "Norden", "26603")
     assert kunde["credit_limit"] is None or float(kunde["credit_limit"]) != 99999
+
+
+def test_lieferant_wird_ueber_die_studio_maske_angelegt_und_bearbeitet(client, engine):
+    """Anlage ueber ``creation``, Bearbeiten ohne Land laesst das Land stehen (vorher erbte das Aenderungsmodell
+    den Anlage-Standard "Deutschland" und setzte es bei jeder Aenderung zurueck), Dublette 409, fremder Mandant nein."""
+    from app.core.screen_definitions import get_screen_definition
+
+    anlage = get_screen_definition("einkauf/supplier")["creation"]
+    nummer = f"L-{uuid.uuid4().hex[:6]}"
+    daten = {**anlage["defaults"], "lieferantennummer": nummer, "firmenname": "Muehle Nord", "land": "Niederlande",
+             "ort": "Groningen"}
+    angelegt = client.post(anlage["endpoint"], headers=kopf(), json=daten)
+    assert angelegt.status_code == 201, angelegt.text
+    kennung = angelegt.json()["id"]
+    assert client.post(anlage["endpoint"], headers=kopf(), json=daten).status_code == 409
+
+    antwort = client.post(f"/api/v1/einkauf/lieferanten/{kennung}/actions/bearbeiten", headers=kopf(),
+                          json={"ort": "Delfzijl", "lieferzeit_tage": 5})
+    assert antwort.json()["success"] is True, antwort.json()
+    lieferant = zeile(engine, "SELECT ort, land, lieferzeit_tage, tenant_id FROM domain_einkauf.lieferanten "
+                              "WHERE id::text = :id", id=kennung)
+    assert (lieferant["ort"], lieferant["land"], lieferant["lieferzeit_tage"], lieferant["tenant_id"]) == (
+        "Delfzijl", "Niederlande", 5, HAUS_A)
+    fremd = client.post(f"/api/v1/einkauf/lieferanten/{kennung}/actions/bearbeiten", headers=kopf(HAUS_B),
+                        json={"ort": "Uebernahme"})
+    assert fremd.json()["success"] is False
+
+    sperren = f"/api/v1/einkauf/lieferanten/{kennung}/actions/sperren"
+    assert client.post(sperren, headers=kopf(), json={}).json()["success"] is False  # ohne Begruendung
+    assert client.post(sperren, headers=kopf(), json={"_auditReason": "Qualitaetsmaengel 2026"}).json()["success"]
+    assert zeile(engine, "SELECT aktiv FROM domain_einkauf.lieferanten WHERE id::text = :id", id=kennung)["aktiv"] is False
+    assert client.post(sperren, headers=kopf(), json={"_auditReason": "nochmal sperren"}).json()["success"] is False
+    assert client.post(f"/api/v1/einkauf/lieferanten/{kennung}/actions/entsperren", headers=kopf(),
+                       json={"_auditReason": "Maengel behoben"}).json()["success"] is True
 
 
 def test_auftragsbestaetigung_wird_zur_bestellung_erfasst(client, engine):

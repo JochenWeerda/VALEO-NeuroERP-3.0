@@ -1006,6 +1006,209 @@ def build_personal_stundenzettel_liste() -> dict[str, Any]:
     )
 
 
+def build_finance_wechselkurse_liste() -> dict[str, Any]:
+    """Wechselkurse je Waehrungspaar und Stichtag; anlegen, deaktivieren und aktivieren mit Begruendung."""
+    pfad = "/api/v1/finance/exchange-rates/{entity_id}/actions/"
+    aktiv = {"field": "active", "values": [True]}
+    inaktiv = {"field": "active", "values": [False]}
+    return _liste(
+        screen_id="finance/wechselkurse", domain="finance", title="Wechselkurse",
+        subtitle="Kurse je Waehrungspaar und Stichtag", endpoint="/api/v1/finance/exchange-rates?active_only=false",
+        row_route=None, bundle="finance",
+        columns=[
+            {"key": "from_currency", "label": "Von", "filterable": True, "sortable": True, "priority": "primary"},
+            {"key": "to_currency", "label": "Nach", "filterable": True, "sortable": True, "priority": "primary"},
+            {"key": "rate", "label": "Kurs", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "rate_date", "label": "Stichtag", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "rate_type", "label": "Kursart", "filterable": True, "priority": "secondary"},
+            {"key": "source", "label": "Quelle", "filterable": True, "priority": "secondary"},
+            {"key": "active", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[
+            {"key": "neu", "label": "Kurs erfassen", "kind": "primary", "dangerLevel": "safe", "zone": "header",
+             "permission": "finance.wechselkurs.create", "commandEndpoint": "/api/v1/finance/exchange-rates",
+             "method": "POST", "inputFields": [
+                 {"key": "from_currency", "label": "Von (ISO)", "type": "text", "required": True},
+                 {"key": "to_currency", "label": "Nach (ISO)", "type": "text", "required": True},
+                 {"key": "rate", "label": "Kurs", "type": "number", "required": True},
+                 {"key": "rate_date", "label": "Stichtag", "type": "date", "required": True},
+                 {"key": "rate_type", "label": "Kursart", "type": "select", "options": [
+                     {"value": "SPOT", "label": "Tageskurs"}, {"value": "AVERAGE", "label": "Durchschnitt"},
+                     {"value": "FORWARD", "label": "Terminkurs"}]},
+                 {"key": "source", "label": "Quelle", "type": "text"},
+             ]},
+            _EXPORT,
+        ],
+        row_actions=[
+            {"key": "deaktivieren", "label": "Deaktivieren", "dangerLevel": "moderate",
+             "permission": "finance.wechselkurs.deaktivieren", "commandEndpoint": pfad + "deaktivieren",
+             "method": "POST", "requiresConfirmation": True, "auditReasonRequired": True, "visibleWhen": aktiv},
+            {"key": "aktivieren", "label": "Aktivieren", "dangerLevel": "safe",
+             "permission": "finance.wechselkurs.aktivieren", "commandEndpoint": pfad + "aktivieren",
+             "method": "POST", "requiresConfirmation": True, "auditReasonRequired": True, "visibleWhen": inaktiv},
+        ],
+        purpose="Wechselkurse fuer Fremdwaehrungsbelege pflegen und nachweisen.",
+        prompts=["Welcher USD-Kurs galt am Monatsende?", "Welche Kurse sind deaktiviert?"],
+        no_workflow="Kurse sind Referenzdaten ohne eigenen Ablauf.",
+    )
+
+
+def build_finance_buchungsvorlagen_liste() -> dict[str, Any]:
+    """Buchungsvorlagen: anwenden (erzeugt einen Buchungsentwurf) und loeschen, wie die bisherige Seite."""
+    return _liste(
+        screen_id="finance/buchungsvorlagen", domain="finance", title="Buchungsvorlagen",
+        subtitle="Wiederkehrende Buchungen als Vorlage", endpoint="/api/v1/finance/booking-templates?active_only=false",
+        row_route=None, bundle="finance",
+        columns=[
+            {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "category", "label": "Kategorie", "filterable": True, "priority": "primary"},
+            {"key": "trigger_type", "label": "Ausloeser", "filterable": True, "priority": "secondary"},
+            {"key": "default_amount", "label": "Standardbetrag", "numeric": True, "renderKind": "currency",
+             "priority": "secondary"},
+            {"key": "currency", "label": "Waehrung", "priority": "tertiary"},
+            {"key": "active", "label": "Aktiv", "renderKind": "boolean", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[
+            {"key": "anwenden", "label": "Anwenden", "dangerLevel": "moderate", "permission": "finance.buchung.create",
+             "commandEndpoint": "/api/v1/finance/booking-templates/{entity_id}/apply", "method": "POST",
+             "requiresConfirmation": True, "visibleWhen": {"field": "active", "values": [True]},
+             "inputFields": [
+                 {"key": "entry_date", "label": "Belegdatum", "type": "date", "required": True},
+                 {"key": "amount", "label": "Betrag (leer: Standardbetrag)", "type": "number"},
+                 {"key": "reference", "label": "Referenz", "type": "text"},
+                 {"key": "description", "label": "Buchungstext (leer: aus der Vorlage)", "type": "text"},
+             ]},
+            {"key": "loeschen", "label": "Loeschen", "dangerLevel": "high", "permission": "finance.buchungsvorlage.delete",
+             "commandEndpoint": "/api/v1/finance/booking-templates/{entity_id}", "method": "DELETE",
+             "requiresConfirmation": True},
+        ],
+        purpose="Wiederkehrende Buchungen als Entwurf erzeugen; der Entwurf geht durch die normale Buchungspruefung.",
+        prompts=["Welche Buchungsvorlagen gibt es fuer Abschreibungen?", "Wende die Mietvorlage fuer Oktober an."],
+        dangerous=[{"key": "loeschen", "reason": "Entfernt die Vorlage dauerhaft."}],
+        no_workflow="Anwenden erzeugt einen Buchungsentwurf; Freigabe und Buchung laufen im Journal.",
+    )
+
+
+def build_einkauf_warengruppen_liste() -> dict[str, Any]:
+    """Warengruppen (dritte Ebene unter Haupt- und Oberwarengruppe): anlegen, bearbeiten, deaktivieren."""
+    pfad = "/api/v1/stammdaten/warengruppen/{entity_id}/actions/"
+    ober = {"key": "ober_id", "label": "Oberwarengruppe", "type": "select", "required": True,
+            "optionsSource": {"endpoint": "/api/v1/stammdaten/warengruppen/ober", "valueKey": "id",
+                              "labelKey": "bezeichnung"}}
+    return _liste(
+        screen_id="einkauf/warengruppen", domain="einkauf", title="Warengruppen",
+        subtitle="Warengruppen unter Haupt- und Oberwarengruppe", endpoint="/api/v1/stammdaten/warengruppen",
+        row_route=None, bundle="einkauf",
+        columns=[
+            {"key": "gruppe_nr", "label": "Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "bezeichnung", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "ober_id", "label": "Oberwarengruppe", "filterable": True, "priority": "secondary"},
+            {"key": "created_at", "label": "Angelegt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[
+            {"key": "neu", "label": "Warengruppe anlegen", "kind": "primary", "dangerLevel": "safe", "zone": "header",
+             "permission": "stammdaten.warengruppe.create", "commandEndpoint": "/api/v1/stammdaten/warengruppen",
+             "method": "POST", "inputFields": [
+                 {"key": "gruppe_nr", "label": "Nr.", "type": "text", "required": True},
+                 {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True}, ober]},
+            _EXPORT,
+        ],
+        row_actions=[
+            {"key": "bearbeiten", "label": "Bearbeiten", "dangerLevel": "safe",
+             "permission": "stammdaten.warengruppe.update", "commandEndpoint": pfad + "bearbeiten", "method": "POST",
+             "inputFields": [{"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True}, ober]},
+            {"key": "deaktivieren", "label": "Deaktivieren", "dangerLevel": "moderate",
+             "permission": "stammdaten.warengruppe.deaktivieren", "commandEndpoint": pfad + "deaktivieren",
+             "method": "POST", "requiresConfirmation": True, "auditReasonRequired": True},
+        ],
+        purpose="Warengruppen fuer Artikel, Auswertungen und Einkauf pflegen.",
+        prompts=["Welche Warengruppen gehoeren zu Saatgut?", "Lege die Warengruppe Biostimulanzien an."],
+        no_workflow="Warengruppen sind Referenzdaten ohne eigenen Ablauf.",
+    )
+
+
+def build_einkauf_zahlungsbedingungen_liste() -> dict[str, Any]:
+    """Zahlungsbedingungen mit Ziel und zwei Skontostufen: anlegen, bearbeiten, deaktivieren."""
+    pfad = "/api/v1/fibu/zahlungsbedingungen/{entity_id}/actions/"
+    art = {"key": "zahlungsart", "label": "Zahlungsart", "type": "select", "options": [
+        {"value": "ueberweisung", "label": "Ueberweisung"}, {"value": "lastschrift", "label": "Lastschrift"},
+        {"value": "scheck", "label": "Scheck"}, {"value": "kasse", "label": "Kasse"},
+        {"value": "vorkasse", "label": "Vorkasse"}]}
+    werte = [
+        {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+        {"key": "zahlungsziel_tage", "label": "Zahlungsziel (Tage)", "type": "number", "required": True},
+        {"key": "skonto1_tage", "label": "Skonto 1 Tage", "type": "number"},
+        {"key": "skonto1_prozent", "label": "Skonto 1 %", "type": "number"},
+        {"key": "skonto2_tage", "label": "Skonto 2 Tage", "type": "number"},
+        {"key": "skonto2_prozent", "label": "Skonto 2 %", "type": "number"},
+        {"key": "netto_tage", "label": "Netto (Tage)", "type": "number"},
+        art,
+    ]
+    return _liste(
+        screen_id="einkauf/zahlungsbedingungen", domain="finance", title="Zahlungsbedingungen",
+        subtitle="Zahlungsziel und Skontostufen", endpoint="/api/v1/fibu/zahlungsbedingungen",
+        row_route=None, bundle="finance",
+        columns=[
+            {"key": "zabd_nr", "label": "Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "bezeichnung", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "zahlungsziel_tage", "label": "Ziel (Tage)", "numeric": True, "sortable": True, "priority": "primary"},
+            {"key": "skonto1_tage", "label": "Skonto 1 Tage", "numeric": True, "priority": "secondary"},
+            {"key": "skonto1_prozent", "label": "Skonto 1 %", "numeric": True, "priority": "secondary"},
+            {"key": "skonto2_tage", "label": "Skonto 2 Tage", "numeric": True, "priority": "tertiary"},
+            {"key": "skonto2_prozent", "label": "Skonto 2 %", "numeric": True, "priority": "tertiary"},
+            {"key": "zahlungsart", "label": "Zahlungsart", "filterable": True, "priority": "secondary"},
+        ],
+        actions=[
+            {"key": "neu", "label": "Zahlungsbedingung anlegen", "kind": "primary", "dangerLevel": "safe",
+             "zone": "header", "permission": "finance.zahlungsbedingung.create",
+             "commandEndpoint": "/api/v1/fibu/zahlungsbedingungen", "method": "POST",
+             "inputFields": [{"key": "zabd_nr", "label": "Nr.", "type": "text", "required": True}, *werte]},
+            _EXPORT,
+        ],
+        row_actions=[
+            {"key": "bearbeiten", "label": "Bearbeiten", "dangerLevel": "safe",
+             "permission": "finance.zahlungsbedingung.update", "commandEndpoint": pfad + "bearbeiten",
+             "method": "POST", "inputFields": werte},
+            {"key": "deaktivieren", "label": "Deaktivieren", "dangerLevel": "moderate",
+             "permission": "finance.zahlungsbedingung.deaktivieren", "commandEndpoint": pfad + "deaktivieren",
+             "method": "POST", "requiresConfirmation": True, "auditReasonRequired": True},
+        ],
+        purpose="Zahlungsbedingungen fuer Kunden, Lieferanten und Belege pflegen.",
+        prompts=["Welche Zahlungsbedingungen gewaehren 2 % Skonto?", "Lege 30 Tage netto, 10 Tage 2 % an."],
+        no_workflow="Zahlungsbedingungen sind Referenzdaten ohne eigenen Ablauf.",
+    )
+
+
+def build_crm_wiedervorlagen_liste() -> dict[str, Any]:
+    """Offene Wiedervorlagen ueber alle Kunden; erledigen mit optionalem Ergebnis (haengt an die Kontaktnotiz)."""
+    return _liste(
+        screen_id="crm/wiedervorlagen", domain="crm", title="Wiedervorlagen",
+        subtitle="Offene Wiedervorlagen und Aufgaben ueber alle Kunden",
+        endpoint="/api/v1/crm/kunden-kontakte/wiedervorlagen?tage=365", row_route="/crm/kunden/{kunden_nr}",
+        bundle="crm",
+        columns=[
+            {"key": "wiedervorlage", "label": "Faellig", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "ueberfaellig", "label": "Ueberfaellig", "renderKind": "boolean", "filterable": True,
+             "priority": "primary"},
+            {"key": "kunde", "label": "Kunde", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "kunden_nr", "label": "Kunden-Nr.", "filterable": True, "priority": "secondary"},
+            {"key": "art", "label": "Art", "filterable": True, "priority": "secondary"},
+            {"key": "kurzinfo", "label": "Kurzinfo", "filterable": True, "priority": "primary"},
+            {"key": "bediener", "label": "Bediener", "filterable": True, "priority": "tertiary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[
+            {"key": "erledigen", "label": "Erledigen", "dangerLevel": "safe", "permission": "crm.kontakt.erledigen",
+             "commandEndpoint": "/api/v1/crm/kunden-kontakte/{entity_id}/erledigt", "method": "POST",
+             "inputFields": [{"key": "ergebnis", "label": "Ergebnis (optional)", "type": "textarea"}]},
+        ],
+        purpose="Faellige Rueckrufe und Aufgaben abarbeiten; das Ergebnis wird an die Kontaktnotiz angehaengt.",
+        prompts=["Welche Wiedervorlagen sind ueberfaellig?", "Was steht diese Woche fuer Kunde X an?"],
+        no_workflow="Erledigen schliesst die Wiedervorlage am Kontakt; kein eigener Ablauf.",
+    )
+
+
 LISTEN_SCREEN_BUILDERS = {
     "einkauf/anfragen": build_einkauf_anfragen_liste,
     "einkauf/angebote": build_einkauf_angebote_liste,
@@ -1027,6 +1230,11 @@ LISTEN_SCREEN_BUILDERS = {
     "crm/opportunities-liste": build_crm_opportunities_liste,
     "agrar/psm-liste": build_agrar_psm_liste,
     "artikel/liste": build_artikel_liste,
+    "finance/wechselkurse": build_finance_wechselkurse_liste,
+    "finance/buchungsvorlagen": build_finance_buchungsvorlagen_liste,
+    "einkauf/warengruppen": build_einkauf_warengruppen_liste,
+    "einkauf/zahlungsbedingungen": build_einkauf_zahlungsbedingungen_liste,
+    "crm/wiedervorlagen": build_crm_wiedervorlagen_liste,
     "charge/liste": build_chargen_liste,
     "personal/mitarbeiter-liste": build_personal_mitarbeiter_liste,
     "versicherungen/liste": build_versicherungen_liste,
@@ -1058,6 +1266,11 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "crm/opportunities-liste": "/crm/opportunities",
                 "agrar/psm-liste": "/agrar/psm",
                 "artikel/liste": "/artikel",
+                "finance/wechselkurse": "/finance/wechselkurse",
+                "finance/buchungsvorlagen": "/finance/buchungsvorlagen",
+                "einkauf/warengruppen": "/einkauf/warengruppen",
+                "einkauf/zahlungsbedingungen": "/einkauf/zahlungsbedingungen",
+                "crm/wiedervorlagen": "/crm/wiedervorlagen",
                 "charge/liste": "/charge/liste",
                 "personal/mitarbeiter-liste": "/personal/mitarbeiter",
                 "versicherungen/liste": "/versicherungen",
