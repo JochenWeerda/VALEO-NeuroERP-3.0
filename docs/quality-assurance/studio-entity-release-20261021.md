@@ -130,3 +130,26 @@ Fehler. Bestehende Rollenprojektion plus neue Namespaceprojektion gegen
 Backend-Abhaengigkeiten erneut geprueft. Ein React-act-Hinweis aus bestehender
 Aktionsruntime ist keine reale Browserabnahme und wird nicht als solche
 ausgegeben. Der Pflichtschritt reale visuelle Abnahme bleibt bestehen.
+
+
+## Reale Browserfortsetzung 21.10.2026
+
+Der eigene Frontendprozess3001 laeuft aus der geprueften Quellfassung.
+Fehlende PostCSS-Konfiguration und sechs oeffentliche Darstellungsdateien
+der selektiven Pruefkopie aus HEAD ergaenzt (keine bestehenden Dateien
+ueberschrieben). Kopierter Vite-Wrapper zeigte auf nicht vorhandenen Store;
+direkter vorhandener Vite-Startpunkt behebt nur die lokale Startumgebung.
+SSO mit bestehender synthetischer Testkennung erfolgreich: Keycloak, Callback,
+angemeldeter Arbeitsplatz, anschliessend Screen-Studio. Heller und dunkler
+Modus sichtbar; Studio ueberschreibt die gewaehlte dunkle Darstellung nicht.
+Screenshot lokal: artifacts/studio-dark-browser-20261021.png.
+
+Keine Freigaberolle vergeben. Studio weist fehlendes Freigaberecht aus und
+sperrt Freigabe ohne Vertragspruefung/Simulation. Die Ansicht zeigt den
+bestehenden lokalen Lieferanten-Bewertungsentwurf mit temporary-Adapter und
+entsprechender non_temporary-Verletzung; keine erfolgreiche Publikation
+behauptet. Backend8000 ist weiterhin der bestehende geteilte Container,
+nicht die separate neue Entity-Release-Prueffassung. Deshalb beweist diese
+Sichtung Anmeldung, Studio-Darstellung und Theme-Vererbung, nicht die neue
+vollstaendige Live-Entity-Freigabekette oder WCAG-Kontrast aller Masken.
+Dieser Teil und weitere Maskenmigrationen bleiben offen.
