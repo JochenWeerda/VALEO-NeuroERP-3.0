@@ -19425,6 +19425,11 @@ vorhandene OpenAPI-Pfade unveraendert. Gesamtziel und reale Browser-/Image-
 Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 
 
-## SONAR-TEST-ASSERTIONS-20261021 - reserviert, Codex
+## SONAR-TEST-ASSERTIONS-20261021 - implementiert, Codex
 
 **Owner:** Codex. **Ziel:** sieben konkrete Zuverlaessigkeitsbefunde aus Quality-Lauf 39600314443 beheben, ohne Tests auszublenden oder Qualitaetsschwellen zu senken. **Dateibesitz:** tests/test_slice_yaml_contracts.py, test_service_units_wave99.py, test_service_units_wave77.py, test_docflow_artifact.py, test_process_kernel_wave58_cost_audit.py, test_process_kernel_wave42_schema_compensation.py; eigene QA und Workboard. **Abnahme:** YAML-Fehler sammeln ohne verschluckte Assertions; Hash-Tests gegen unabhaengige bekannte Werte statt Selbstvergleich; vollstaendige sechs Testsuiten gruen ohne DB. Bestehende fachliche Hashimplementierungen bleiben unveraendert. **Offen:** neue Coverage 63,6 unter80; Browserdienst3001 derzeit nicht erreichbar; Gesamtziel bleibt aktiv.
+
+
+**SONAR-TEST-ASSERTIONS Abnahme:**268 Tests der sechs Suiten gruen (27,20s); YAML-Fehler explizit gesammelt, fuenf Hash-Selbstvergleiche durch feste Referenzwerte ersetzt. Bestehende Audit-Enum-Serialisierung erhalten. Keine Produktcode-Ausnahme/Schwellenaenderung. Vorheriger Quality39600314443: alle12 Vorjobs gruen, cases.py-Bug geschlossen; neue Testklassifikation wirksam, Coverage63,6 unter80. Testreparatur-Rescan und Coverage offen. QA sonar-scope-and-cases-20261021.md.
+
+**STUDIO-ENTITY-RELEASE Lieferstand:**431cd5f66 nach main gepusht; alle31 Commitdateien stimmen mit getesteter Quellfassung ueberein. Neuer CI-Lauf gestartet. Docker-Dienste gesund; separate Browserabnahme3001 noch offen (Dienst bisher nicht gestartet, lokaler kopierter Vite-Wrapper verweist auf falsches node_modules). Kein neuer Container/keine Datenbank.

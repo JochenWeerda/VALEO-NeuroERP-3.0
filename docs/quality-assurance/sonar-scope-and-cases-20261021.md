@@ -43,3 +43,27 @@ Rationsoptimierung1460/1506 neue ausfuehrbare Zeilen ungetestet, Materialfluss
 560/560, Businesspartner-Service553/728 (Momentaufnahme Sonar8c3dfac50).
 Die Scopekorrektur allein garantiert keine80-Prozent-Abnahme. Kein Gate
 geschwaecht, kein Sonar-Erfolg vor dem erneuten Scan behauptet.
+
+
+## Nachlauf 22f488825 und Testreparatur
+
+Quality39600314443: alle zwoelf vorgeschalteten Jobs erfolgreich, darunter
+Backend, Frontend, WCAG, Docker-Build und Security. S1226 cases.py ist im
+neuen Scan geschlossen. Testklassifikation wirksam: neue Coverage63,6 Prozent
+(statt59,6), weiterhin unter80. Kein Coverage-Gate abgesenkt.
+
+Der nun analysierte Testbereich enthaelt sieben echte Zuverlaessigkeitsbefunde:
+zwei Assertions im abgefangenen AssertionError-Zweig des YAML-Waechters und
+fuenf Hash-Selbstvergleiche. YAML sammelt jetzt Parse-/Strukturfehler explizit;
+Hashvertraege verwenden feste SHA256-Referenzwerte. Beim Audit bleibt die
+bestehende Enum-Serialisierung (AuditAktionsTyp.ERSTELLT) unveraendert.
+
+Alle sechs betroffenen Testsuiten:268 bestanden,27,20s, zwei Werkzeugwarnungen.
+Lokaler Runner verwendet ausschliesslich die vorhandene Kompatibilitaets-
+Anmeldefixture aus tests/conftest.py, ohne deren Datenbank-Seeding. Dies ist
+kein Nachweis produktiver Signaturpruefung. Erster Lauf ohne diese Fixture
+lieferte21 fehlende Tenant-Kontexte und deckte einen zunaechst falsch
+angenommenen Audit-Enum-Referenzwert auf; beides im finalen Lauf geklaert.
+Ein lokaler Plugin-Registrierungsfehler wurde im Runner korrigiert.
+Keine Produktlogik, produktive Rechte, Datenbanken oder Container geaendert.
+Sonar-Rescan der Testreparatur und echte Coverage-Erweiterung bleiben offen.

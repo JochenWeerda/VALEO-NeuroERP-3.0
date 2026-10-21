@@ -12,8 +12,11 @@ def test_all_slice_documents_are_valid_yaml_mappings():
     for path in files:
         try:
             document = yaml.safe_load(path.read_text(encoding='utf-8'))
-            assert isinstance(document, dict), 'expected mapping'
-            assert document.get('slice_id'), 'missing slice_id'
-        except (yaml.YAMLError, AssertionError) as error:
+        except yaml.YAMLError as error:
             errors.append(f'{path.name}: {error}')
+            continue
+        if not isinstance(document, dict):
+            errors.append(f'{path.name}: expected mapping')
+        elif not document.get('slice_id'):
+            errors.append(f'{path.name}: missing slice_id')
     assert not errors, '\n'.join(errors)
