@@ -19344,3 +19344,23 @@ unveraendert. Positive Testklassifikation statt Testausschluss; Produktionsscope
 Coverage-Ausnahmen und Schwellen unveraendert. QA sonar-scope-and-cases-20261021.md.
 Neuer CI-/Sonar-Nachlauf bleibt abzuwarten; echte globale Coverage-Luecken
 werden weder verdeckt noch als geschlossen behauptet.
+
+
+## STUDIO-ENTITY-RELEASE-20261021 - reserviert, Codex
+
+Gesamtziel: Studio voll funktionsfaehig, alle Masken ueber CLI mit belastbarem
+Qualitaetsnachweis migrieren. Naechster Integrationsslice: eigenes
+studio.entity.v1-Freigabeprofil fuer registrierte generierte Stammdaten.
+Besitz: neues studio_entity_simulation.py, studio_release.py nur Profilauswahl/
+Nachweispruefung; studio_process_simulation.py nur Artefaktbindung; Entitycompiler
+nur Profil-/Registrierungsprojektion, Commandrouter/-service nur gemeinsamer
+Bereitstellungscheck. Eigene Unit-/SQL-/Freigabetests und generierte Projektionen.
+Kein pauschales Oeffnen von grain.v1, keine fremden Fachmasken oder Gateabsenkung.
+Simulation: vorhandener valeo_probe, echte Domaincommands und zurueckgerollte
+synthetische Daten/Outbox; kein neuer Container/DB/Reset. Testtabellen nur eigene
+eindeutig bezeichnete Artefakte, kontrollierte eigene Bereinigung.
+Abnahme: serverseitige Registrierung und exakter Definitions-/Vertragshash,
+reale CRUD-/Version-/Replay-/Tenancy-/Rollen-/Audit-/Outbox-/Rollbackkette,
+dauerhafte Evidenz und Vier-Augen-Publikation mit bestehendem Migrationsplan.
+Offen danach: reale visuelle Browserabnahme und Profilabdeckung weiterer
+Masken/Fachketten, keine vorgetaeuschte Gesamtmigration.
