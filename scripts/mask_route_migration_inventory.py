@@ -17,6 +17,10 @@ def classify_source(text: str, *, filename: str = "") -> str:
     # Create-only Legacy-Split (UIX-057): nicht als pages_legacy zaehlen.
     if filename.endswith("-legacy.tsx"):
         return "legacy_create_only"
+    if filename in ("FibuSuiteRuntime.tsx", "NotFound.tsx"):
+        return "runtime_wired"
+    if filename == "MaskRolloutRoute.tsx" and "UniversalMaskRolloutPilotPage" in text:
+        return "runtime_wired"
     if (
         "useUniversalMaskRuntime" in text
         or "UniversalMaskRenderer" in text

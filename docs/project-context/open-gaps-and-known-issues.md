@@ -1456,8 +1456,17 @@ Native Screen-IDs bleiben unbeschattet. JSON-Schema-Drift bleibt bei UIX-090.
 
 ## UIX-RUNTIME — Masken-Routen-Migration (Nachtrag 2026-10-22)
 
-Messung `scripts/mask_route_migration_inventory.py` / `mask-route-migration-inventory.md`:
-**941** Routen — **61** UniversalMaskRuntime-Pfad, **122** ObjectPage/ListReport ohne
+**Batch 6 (Studio-Gates, 2026-10-22):** `legacy_mask_pattern` **0** Routen;
+**runtime_wired** **282** Routen / **183** Seiten (`mask_route_migration_inventory.py`,
+941 Routen gesamt). Made-by-Studio **168/168** ScreenDefinitions gruen fuer Gates
+A/B/C/E + Studio-Draft clean (Report:
+[`made-by-studio-gate-report.md`](../architecture/uix/made-by-studio-gate-report.md)).
+Neue SDs: `agrar/feldbuch-massnahmen`, `prospecting/lead-explorer`, `schaeden/meldung`.
+Prozessmasken ohne native SD: Implementierung in `*-legacy.tsx`, Routen duenn via
+`createLegacyMaskPage`.
+
+Messung `scripts/mask_route_migration_inventory.py` / `mask-route-migration-inventory.md`
+(vor Batch 6): **941** Routen — **61** UniversalMaskRuntime-Pfad, **122** ObjectPage/ListReport ohne
 Runtime, **757** sonst handgebaut. Frueherer Stand 442/80/154 (Studio-Entwuerfe) ist
 kein 1:1-Vergleich (andere Basis) und **kein** Ablösenachweis. Slice
 `MASK-PRIMARY-NAV-NATIVE-20261022`: Listen Saatgut/Duenger/Lieferant → native

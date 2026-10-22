@@ -11,6 +11,23 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 # Universal Mask Runtime — Plattformstatus
 
+> **Nachtrag 2026-10-22 (Batches 7–10, in Abnahme):** +125 Listen-/Worklist-/Stamm-/Cockpit-ScreenDefinitions
+> und Seitenmigrationen (StammListenParent, KontrollWorklistParent, CockpitOverviewParent).
+> Inventar-Stand nach `mask_route_migration_inventory.py`: **`runtime_wired` 941**, **`legacy_mask_pattern` 0**,
+> **`hand_built` 0** (941 Routen). Made-by-Studio-Gates: Registry im Arbeitsbaum noch durch parallele
+> Batch-12/15-Entwuerfe aufgeblaeht — Zielabnahme **293/293** A/B/C/E + Draft-clean; Verifikation
+> `python scripts/verify_made_by_studio_gates.py --write-report`. pytest `tests/test_made_by_studio_gates.py`: 11/11 gruen.
+
+> **Nachtrag 2026-10-22 (Batch 6 — `legacy_mask_pattern` 0):** Massenmigration der
+> Produktiv-Routen auf `NativeListPage` / `UniversalNativeDetailPage` /
+> `createStammNativeDetailPage` / `createLegacyMaskPage` (Prozess-Legacy in `*-legacy.tsx`).
+> Inventar (`mask_route_migration_inventory.py`): **`legacy_mask_pattern` = 0** Routen,
+> **`runtime_wired` = 282** Routen / **183** Seiten (941 Routen gesamt). Made-by-Studio
+> Gates A/B/C/E + Studio-Draft clean: **168/168** ScreenDefinitions (inkl. Batch-6-SDs
+> `agrar/feldbuch-massnahmen`, `prospecting/lead-explorer`, `schaeden/meldung`).
+> Verifikation: `python scripts/verify_made_by_studio_gates.py --write-report`,
+> `python -m pytest tests/test_made_by_studio_gates.py -q -o addopts=`.
+
 > **Nachtrag 2026-10-22 (`UIX-STAMM-OBJECTPAGE-ALL`):** Alle 12 Stamm-ObjectPage-ScreenDefinitions (`agrar/duenger`, `agrar/saatgut`, `einkauf/supplier`, `finance/debitor`, `finance/kreditor`, `finance/bankkonto`, `lager/article-stock`, `crm/opportunity`, `crm/lead`, `futtermittel/einzelfuttermittel`, `futtermittel/mischfuttermittel`, `artikel/stamm`) nutzen nun `StammObjectPageParent` (`build_stamm_object_page`) mit `generatorReady=True` (Gate A–C). `banken/konten.tsx` oeffnet bei Zeilenklick `/finance/bankkonto/:id`; `NativeListPage` und `UniversalNativeCockpitPage` zaehlen im Inventar als `runtime_wired` (61 → 104 Routen, 52 → 89 Seiten). Create bleibt Legacy. QA: [`stamm-objectpage-parent-20261022.md`](../../quality-assurance/stamm-objectpage-parent-20261022.md).
 
 > **Nachtrag 2026-10-22 (`UIX-STAMM-OBJECTPAGE-PARENT`):** P1-Pilot
