@@ -1461,8 +1461,11 @@ Messung `scripts/mask_route_migration_inventory.py` / `mask-route-migration-inve
 Runtime, **757** sonst handgebaut. Frueherer Stand 442/80/154 (Studio-Entwuerfe) ist
 kein 1:1-Vergleich (andere Basis) und **kein** Ablösenachweis. Slice
 `MASK-PRIMARY-NAV-NATIVE-20261022`: Listen Saatgut/Duenger/Lieferant → native
-Detailrouten; Create Legacy. Offen: Bestellung-Plural-Pfad, Beleg-Alt-Einstiege
-(Sonderfeldparitaet), Studio-Draft-Zaehlung gegen Live-DB, restliche Dual-Pfade.
+Detailrouten; Create Legacy. Slice `MASK-BESTELLUNG-NAV-NATIVE-20261022`: Bestellung
+Primaernav + Folgebelege → `/einkauf/bestellung/:id`; Create Legacy; Paritaetsluecken
+CaseBand/Allokation/Freigabe-Detail/Komm-Senden dokumentiert. Offen: Beleg-Alt-Einstiege
+(Sonderfeldparitaet), Studio-Draft-Zaehlung gegen Live-DB, restliche Dual-Pfade,
+Bestellung-Detail-Paritaet (Actions/CaseBand).
 
 ## UIX-RUNTIME-022…030 — Universal Mask Runtime Platform (2026-06-29)
 

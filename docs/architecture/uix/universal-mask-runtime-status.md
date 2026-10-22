@@ -11,6 +11,13 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 # Universal Mask Runtime — Plattformstatus
 
+> **Nachtrag 2026-10-22 (`MASK-BESTELLUNG-NAV-NATIVE`):** Bestellungen-Liste und
+> Folgebeleg-Einstiege oeffnen bestehende Saetze auf `/einkauf/bestellung/:id`
+> (SD `einkauf/purchase-order`); Neuanlage bleibt `/einkauf/bestellungen/neu`.
+> Paritaetsluecken (CaseBand, Allokation, Freigabe/Storno-Detail, Komm-Senden)
+> dokumentiert; Legacy-Plural bleibt Rollback. QA:
+> [`mask-bestellung-nav-native-20261022.md`](../../quality-assurance/mask-bestellung-nav-native-20261022.md).
+
 > **Nachtrag 2026-10-22 (`MASK-PRIMARY-NAV-NATIVE`):** Routen-Inventur gegen
 > `route-inventory.gen.json`: 941 Routen — 61 runtime_wired, 122 Legacy-
 > ObjectPage/ListReport, 757 handgebaut. Studio-Entwuerfe ≠ Produktivablösung.

@@ -12,8 +12,8 @@ Stand: 2026-10-22 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 |--------|--------|
 | Gesamt Routen | 941 |
 | runtime_wired (UniversalMaskRuntime-Pfad) | 61 |
-| legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 122 |
-| hand_built (weder Runtime noch ObjectPage/ListReport) | 757 |
+| legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 115 |
+| hand_built (weder Runtime noch ObjectPage/ListReport) | 764 |
 | non_page_module (Layout/Redirect/sonstiges) | 1 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
@@ -22,8 +22,8 @@ Stand: 2026-10-22 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 |--------|--------|
 | Gesamt TSX-Seiten | 700 |
 | runtime_wired | 52 |
-| legacy_mask_pattern | 60 |
-| hand_built | 588 |
+| legacy_mask_pattern | 57 |
+| hand_built | 591 |
 
 ## ScreenDefinitions / Studio
 
@@ -35,8 +35,8 @@ Stand: 2026-10-22 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Metrik | Frueher | Jetzt (2026-10-22) |
 |--------|---------|---------------------|
-| handgebaute Routen | 442 | 757 |
-| Routen mit alten Maskenmustern | 80 | 122 |
+| handgebaute Routen | 442 | 764 |
+| Routen mit alten Maskenmustern | 80 | 115 |
 | Runtime-verdrahtet | — | 61 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
@@ -46,10 +46,11 @@ ist deshalb nicht 1:1 vergleichbar, aber die Luecke zur Runtime bleibt gross.
 
 ## Dual-Pfad (Native Wrapper existiert, Primaernav oft Legacy)
 
-Siehe UIX-057 und Slice MASK-PRIMARY-NAV-NATIVE-20261022: Listen oeffneten teilweise
-`*-stamm` / Singular-Legacy, waehrend `*-native` unter der kanonischen `/:id`-Route lag.
-Niedrig-riskante Stammdaten (Saatgut, Duenger, Lieferant) wurden auf Native umgehaengt;
-Neuanlage bleibt Legacy. Medium/High (Bestellung, Beleg-Alt-Einstiege) bleiben offen.
+Siehe UIX-057, MASK-PRIMARY-NAV-NATIVE-20261022 und MASK-BESTELLUNG-NAV-NATIVE-20261022:
+Listen oeffneten teilweise `*-stamm` / Plural-Legacy, waehrend `*-native` unter der
+kanonischen `/:id`-Route lag. Stammdaten (Saatgut, Duenger, Lieferant) und Bestellung-
+Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken Bestellung
+(CaseBand, Allokation, Freigabe-Detail, Komm-Senden) und Beleg-Alt-Einstiege bleiben offen.
 
 ## Legacy ObjectPage/ListReport (erste 40)
 

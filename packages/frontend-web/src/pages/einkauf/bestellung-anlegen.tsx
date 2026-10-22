@@ -229,7 +229,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   const persistWorkflowLink = async (purchaseOrderId: string): Promise<void> => {
     const query = buildWorkflowResumeQuery(purchaseOrderId)
-    const resumeRoute = `/einkauf/bestellungen/${encodeURIComponent(purchaseOrderId)}${query ? `?${query}` : ''}`
+    const resumeRoute = `/einkauf/bestellung/${encodeURIComponent(purchaseOrderId)}${query ? `?${query}` : ''}`
     await linkPurchaseOrderToFlowSpine({
       documentId: purchaseOrderId,
       documentNumber: purchaseOrderId,
@@ -279,15 +279,15 @@ export default function BestellungAnlegenPage(): JSX.Element {
   useEffect(() => {
     // Lade Requisition-Daten, falls requisitionId vorhanden
     if (requisitionId) {
-      void loadRequisitionData(requisitionId)
+      loadRequisitionData(requisitionId)
     }
     // Lade Contract-Daten, falls contractId vorhanden
     if (contractId) {
-      void loadContractData(contractId)
+      loadContractData(contractId)
     }
     // Lade RFQ-Daten, falls rfqId vorhanden
     if (rfqId) {
-      void loadRFQData(rfqId)
+      loadRFQData(rfqId)
     }
   }, [requisitionId, contractId, rfqId])
 
@@ -597,7 +597,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
         description: `Bestellung ${pendingLink.purchaseOrderId} ist dem Prozessfall zugeordnet.`,
       })
       navigate(
-        `/einkauf/bestellungen/${encodeURIComponent(pendingLink.purchaseOrderId)}?${buildWorkflowResumeQuery(pendingLink.purchaseOrderId)}`,
+        `/einkauf/bestellung/${encodeURIComponent(pendingLink.purchaseOrderId)}?${buildWorkflowResumeQuery(pendingLink.purchaseOrderId)}`,
       )
     } catch (error) {
       const message = purchaseOrderWorkflowLinkErrorMessage(error)
@@ -653,7 +653,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
         title: 'Bestellung angelegt',
         description: `Beleg ${purchaseOrderId} gespeichert.`,
       })
-      navigate(`/einkauf/bestellungen/${encodeURIComponent(purchaseOrderId)}?${buildWorkflowResumeQuery(purchaseOrderId)}`)
+      navigate(`/einkauf/bestellung/${encodeURIComponent(purchaseOrderId)}?${buildWorkflowResumeQuery(purchaseOrderId)}`)
     } catch (error) {
       const message = purchaseOrderWorkflowLinkErrorMessage(error)
       setPendingLink({ purchaseOrderId, message })

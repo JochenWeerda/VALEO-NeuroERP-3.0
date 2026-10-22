@@ -37,10 +37,11 @@ aktuelle Inventur umfasst **941** generierte Routen. Studio-Entwuerfe sind
 
 Legacy-Module bleiben unter ihren Pfaden erreichbar (Rollback UIX-057).
 
-## Bewusst nicht umgestellt
+## Bewusst nicht umgestellt (Stand damaliger Slice)
 
-- `einkauf/bestellungen/:id` → weiterhin `bestellung-stamm` (medium: Flow-Spine,
-  Kommunikation, Allokation fehlen in der nativen SD).
+- ~~`einkauf/bestellungen/:id` → weiterhin `bestellung-stamm`~~ → nachgezogen in
+  `MASK-BESTELLUNG-NAV-NATIVE-20261022` (Listen/Folgebelege → native; Create Legacy;
+  Paritaetsluecken CaseBand/Allokation/Freigabe-Detail/Komm-Senden bleiben).
 - Beleg-Alt-Einstiege (14er Matrix) — Create/Edit ueber Belegfamilie vorhanden,
   Sonderfeld-/Kettenparitaet offen; STUDIO-BELEG-THEME bei Codex.
 - CRM Opportunity Create (`/crm/opportunity/new`) — Legacy ObjectPage mit

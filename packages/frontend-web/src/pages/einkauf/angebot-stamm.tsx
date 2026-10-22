@@ -165,7 +165,7 @@ export default function AngebotStammPage(): JSX.Element {
             )
             if (actionKey === 'inBestellung' && response.data?.purchaseOrderId) {
               toast({ title: 'Bestellung erzeugt', description: response.data.purchaseOrderNumber || 'Folgebeleg erzeugt.' })
-              navigate(`/einkauf/bestellungen/${encodeURIComponent(response.data.purchaseOrderId)}`)
+              navigate(`/einkauf/bestellung/${encodeURIComponent(response.data.purchaseOrderId)}`)
               return
             }
             toast({ title: 'Aktion ausgefuehrt', description: `Angebot ${id} wurde aktualisiert.` })

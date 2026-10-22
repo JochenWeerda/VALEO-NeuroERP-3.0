@@ -11,6 +11,15 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-BELEG-FAMILIE-VERERBUNG-20261022 — offen (Plan), Cursor Composer
+
+**Owner:** — (Status \offen\, nicht reserviert). **Stand:** Planartefakt 2026-10-22. **Ziel:** Eingehende/ausgehende Belegfolgen als Parent/Child-Familie einer Maske planen (Taxonomie, Vererbungsmodell ScreenDefinition/Studio, Mapping ~9–14 Einstiege, Migrationsreihenfolge, Abgrenzung Studio-Import vs Runtime). **Artefakt:** \docs/architecture/uix/beleg-maskenfamilie-vererbung.md\; Slice-YAML \docs/agent-ops/slices/UIX-BELEG-FAMILIE-VERERBUNG-20261022.yaml\; Querverweis in \docs/design/beleg-studio-variantenmatrix.md\. **Nicht anfassen:** STUDIO-BELEG-THEME / STUDIO-MODEL / \screen_definitions_beleg.py\ / \document_screen_versions.json\ ohne Codex-Handshake; Bestellung-Create/Listen-WIP nicht ueberschreiben. **Abnahme dieses Plan-Slices:** Doku vollstaendig; keine Implementierungspflicht.
+
+## MASK-BESTELLUNG-NAV-NATIVE-20261022 — abgeschlossen, Cursor Composer
+
+**Owner:** Cursor Composer. **Stand:** abgeschlossen 2026-10-22. **Ziel:** Restliche Dual-Pfad-Einstiege Einkaufsbestellung (Anlegen-Resume, Angebot-Stamm Folgebestellung) von Legacy-Plural auf `/einkauf/bestellung/:id` umhaengen. Primaerliste war bereits NativeListPage mit `row_route` native (MASK-STUDIO-ROLLOUT). Create bleibt Legacy. Paritaetsluecken dokumentiert. **Dateibesitz:** `bestellung-anlegen.tsx`, `angebot-stamm.tsx` (nur Detail-/Resume-Nav); Vitest; QA/Slice/Inventar/UMR/Open-Gaps/Workboard. **Ergebnis:** Resume + Angebot-Folgebeleg → native; Liste unveraendert NativeListPage; Vitest 4/4; Inventar 941/61/122/757 (Delta 0). QA: `docs/quality-assurance/mask-bestellung-nav-native-20261022.md`.
+
+
 ## MASK-PRIMARY-NAV-NATIVE-20261022 — abgeschlossen, Cursor Composer
 
 **Owner:** Cursor Composer. **Stand:** abgeschlossen 2026-10-22. **Ziel:** Migrationsinventar der Frontend-Routen aktualisieren (handgebaut / Legacy-ObjectPage-ListReport / Runtime-verdrahtet / Studio-Entwuerfe) und primaere Listen-Navigation fuer niedrig-riskante Stammdaten (UIX-057) von Legacy-Detailpfaden auf bereits vorhandene `*-native` / UniversalMaskRuntime-Routen umhaengen — Anlage bleibt auf Legacy bis Create-Paritaet. **Dateibesitz:** `scripts/mask_route_migration_inventory.py`; `docs/architecture/uix/mask-route-migration-inventory.md`; `docs/architecture/uix/universal-mask-runtime-status.md` (Nachtrag); `docs/quality-assurance/mask-primary-nav-native-20261022.md`; `docs/agent-ops/slices/MASK-PRIMARY-NAV-NATIVE-20261022.yaml`; Listen `packages/frontend-web/src/pages/agrar/saatgut-liste.tsx`, `agrar/duenger-liste.tsx`, `einkauf/lieferanten-liste.tsx` und eigene Vitest-Vertraege; Workboard/Open-Gaps-Hunks. **Nicht anfassen:** Tourenplanung/Training/Bestellvorschlag-Godfiles; STUDIO-BELEG-THEME / STUDIO-MODEL / STUDIO-SEMANTIC (Codex); Beleg-Alt-Einstiege mit Sonderfeldluecken. **Abnahme:** Inventarzahlen reproduzierbar; Detailklick oeffnet native ScreenDefinition-Route; Neuanlage weiter Legacy; Legacy-Module bleiben als Rollback (UIX-057). Keine neue DB/Container/Reset.

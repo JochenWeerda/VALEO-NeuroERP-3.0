@@ -1,0 +1,40 @@
+slice_id: MASK-BESTELLUNG-NAV-NATIVE-20261022
+title: Bestellung Listen-Detail auf native Runtime-Route
+owner: Cursor Composer
+status: completed
+created_at: 2026-10-22
+goal: >
+  Dual-Pfad Einkaufsbestellung schliessen: Rest-Einstiege (Anlegen-Resume,
+  Angebot-Stamm Folgebestellung), die noch Legacy-Plural /einkauf/bestellungen/:id
+  nutzten, auf /einkauf/bestellung/:id (SD einkauf/purchase-order). Primaerliste
+  war bereits NativeListPage mit row_route native (MASK-STUDIO-ROLLOUT).
+  Neuanlage bleibt Legacy. Paritaetsluecken dokumentieren; Rollback erhalten.
+file_ownership:
+  - packages/frontend-web/src/pages/einkauf/angebot-stamm.tsx
+  - packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx
+  - packages/frontend-web/src/__tests__/pages/mask-bestellung-nav-native.test.ts
+  - docs/quality-assurance/mask-bestellung-nav-native-20261022.md
+  - docs/agent-ops/slices/MASK-BESTELLUNG-NAV-NATIVE-20261022.yaml
+  - docs/architecture/uix/mask-route-migration-inventory.md
+  - docs/architecture/uix/universal-mask-runtime-status.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/active-workboard.md
+  - docs/quality-assurance/mask-primary-nav-native-20261022.md
+  - scripts/mask_route_migration_inventory.py
+acceptance:
+  - Primaerliste bleibt NativeListPage einkauf/bestellungen (row_route native)
+  - Anlegen-Resume und Angebot-Stamm treffen /einkauf/bestellung/:id
+  - Neuanlage bleibt /einkauf/bestellungen/neu
+  - Legacy /einkauf/bestellungen/:id bleibt Rollback
+  - Paritaetsluecken in QA; Inventar; Vitest gruen
+  - Keine Aenderung an Touren/Training/Bestellvorschlag oder Codex Studio-Claims
+tests:
+  - vitest packages/frontend-web/src/__tests__/pages/mask-bestellung-nav-native.test.ts
+  - python scripts/mask_route_migration_inventory.py
+risks:
+  - Native SD hat ProcessBand-Phasen und Kommunikations-Lesetabelle, aber kein
+    DocumentCaseBand, keine Positionsallokation, kein Freigeben/Storno am Detail
+    und kein Kommunikations-Senden — Nutzer brauchen dafuer Legacy-URL oder Liste.
+  - Zwei Bestandsspeicher Compat vs domain_einkauf bleiben ausserhalb dieses Slices.
+external_gates: []
+test_database: Keine; reine Frontend-/Doku-Messung.
