@@ -39,3 +39,5 @@ Kein Gesamtabnahmesiegel fuer alle Masken, keine Browser-/Bildabnahme dieser Rep
 Es werden ausschliesslich die vorhandene `valeo_probe` und eigene Testdatensaetze verwendet, keine neue Datenbank, kein Container, kein Reset. Zugangsdaten und persoenliche Identitaeten sind kein Bestandteil dieser Lieferung.
 
 Aktuelles strenges Routeninventar: 941 Routen, davon833 mit Runtime-Pfad,50 Legacy-Wrapper,53 handgebaut,1 altes Maskenmuster und4 technische Seiten. Runtime-Pfad allein ist kein Fachparitaets-/Browserbeleg. Statische Gates: 20 Definitionen ohne bestaetigten API-Vertrag,52 ohne aktuellen Runtime-Evidenznachweis; diese Luecken werden nicht als fertig freigegeben.
+
+Die zusaetzliche Typpruefung der zusammengefuehrten fremden Arbeitskopie ist wegen fuenf noch offenen Workspace-/Routen-Testbefunden nicht gruen. Sie ist nicht mit der erfolgreichen Typpruefung des Reparaturcommits gleichzusetzen. Einzelheiten im Handshake docs/agent-ops/handshakes/migration-parity-repair-20261022.md.
