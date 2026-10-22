@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-STAMM-OBJECTPAGE-ALL-20261022 — reserviert, Cursor Composer
+
+**Owner:** Cursor Composer. **Stand:** reserviert 2026-10-22. **Ziel:** Verbleibende Stamm-ObjectPage-ScreenDefinitions (`finance/bankkonto`, `lager/article-stock`, `crm/opportunity`, `crm/lead`, `futtermittel/einzelfuttermittel`, `futtermittel/mischfuttermittel`, `artikel/stamm`) auf `StammObjectPageParent` (`build_stamm_object_page`) umstellen; Studio-Gates A–C fuer alle 12 Stamm-Masken verifizieren; zugehoerige Frontend-Listen (`agrar/duenger/liste.tsx`, `banken/konten.tsx`, `finance/debitoren-liste.tsx`, `futtermittel/mischfuttermittel-liste.tsx`, `futter/misch/liste.tsx`, `futter/einzel/liste.tsx`) bei Zeilenklick auf native Detailrouten umstellen (Create bleibt Legacy). **Dateibesitz:** `app/core/stamm_object_page_parent.py`, `app/core/screen_definitions.py`, `app/core/screen_definitions_stamm.py`, `app/core/process_chains.py`, die 6 genannten Frontend-Listen, `tests/test_stamm_object_page_parent.py`, `packages/frontend-web/src/__tests__/pages/mask-primary-nav-native.test.ts`, QA/Slice/Doku/Agent-Handbuch. **Nicht anfassen:** Tourenplanung/Training/Bestellvorschlag; `fuhrpark/fahrzeug-stamm` (`screen_definitions_capture.py` / `capture-screens.ts` Paritaet); `crm/customer-360` (Ausnahme); Belegfamilie / Codex Studio-Entity-Release Gate D.
+
 ## UIX-STAMM-OBJECTPAGE-PARENT-20261022 — abgeschlossen, Cursor Composer
 
 **Owner:** Cursor Composer. **Stand:** abgeschlossen 2026-10-22. **Ziel:** P1 Taxonomie — `StammObjectPageParent`-Factory; Pilot Duenger/Saatgut/Supplier/Debitor/Kreditor. **Ergebnis:** `app/core/stamm_object_page_parent.py`; fuenf Builder auf Parent+Patch (Meridian objectPage/anchors; Finance audit-rail; Supplier extra Bestellung); pytest 10/10 + meridian-party 5/5; QA `docs/quality-assurance/stamm-objectpage-parent-20261022.md`. Create Legacy. Codex Gate D unangetastet. **Folge:** Rest-Stamm-Children an Parent; CLI-Siegel einer Pilot-Maske nach Entity-Release Image/CI.

@@ -1,0 +1,60 @@
+slice_id: UIX-STAMM-OBJECTPAGE-ALL-20261022
+title: StammObjectPageParent Rollout (alle verbleibenden Stamm-SDs + Listen-Detailnav + Studio Gates A-C)
+owner: Cursor Composer
+status: reserved
+created_at: 2026-10-22
+goal: >
+  Verbleibende Stamm-ObjectPage-ScreenDefinitions (finance/bankkonto, lager/article-stock,
+  crm/opportunity, crm/lead, futtermittel/einzelfuttermittel, futtermittel/mischfuttermittel,
+  artikel/stamm) auf build_stamm_object_page (StammObjectPageParent) umstellen, Studio-Gates A-C
+  fuer die gesamte 12er Stamm-Familie pruefen und zugehoerige Stammdaten-Listen bei Zeilenklick
+  auf die nativen Detailrouten umhaengen (Create bleibt Legacy).
+file_ownership:
+  - app/core/stamm_object_page_parent.py
+  - app/core/screen_definitions.py
+  - app/core/screen_definitions_stamm.py
+  - app/core/process_chains.py
+  - packages/frontend-web/src/pages/agrar/duenger/liste.tsx
+  - packages/frontend-web/src/pages/banken/konten.tsx
+  - packages/frontend-web/src/pages/finance/debitoren-liste.tsx
+  - packages/frontend-web/src/pages/futtermittel/mischfuttermittel-liste.tsx
+  - packages/frontend-web/src/pages/futter/misch/liste.tsx
+  - packages/frontend-web/src/pages/futter/einzel/liste.tsx
+  - packages/frontend-web/src/__tests__/pages/mask-primary-nav-native.test.ts
+  - tests/test_stamm_object_page_parent.py
+  - docs/quality-assurance/stamm-objectpage-parent-20261022.md
+  - docs/architecture/uix/maskenfamilien-taxonomie.md
+  - docs/architecture/uix/made-by-studio-qualitaetsversprechen.md
+  - docs/architecture/uix/mask-route-migration-inventory.md
+  - docs/architecture/uix/universal-mask-runtime-status.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-handbuch/index.md
+  - docs/agent-handbuch/prozessketten.md
+  - docs/agent-handbuch/masken-api-katalog.md
+  - docs/agent-handbuch/automatisierung.md
+  - docs/agent-handbuch/agent-process-manifest.json
+  - docs/agent-ops/slices/UIX-STAMM-OBJECTPAGE-ALL-20261022.yaml
+  - docs/agent-ops/active-workboard.md
+nicht_anfassen:
+  - app/core/screen_definitions_beleg.py
+  - app/core/screen_definitions_capture.py
+  - config/document_screen_versions.json
+  - STUDIO-ENTITY-RELEASE / STUDIO-GENERATED-ENTITIES / STUDIO-BELEG-THEME / STUDIO-MODEL
+  - Tourenplanung / Training / Bestellvorschlag
+acceptance:
+  - Alle 12 Stamm-ObjectPage-ScreenDefinitions nutzen build_stamm_object_page
+  - Generator-Readiness (Gate A) und Studio-Quellenkatalog / Feldvertraege (Gate B/C) gruen
+  - Sechs Stammdaten-Listen navigieren bei Zeilenklick auf native Detailrouten; Create bleibt Legacy
+  - Pytest + Vitest + Drift-Checks gruen
+tests:
+  - pytest tests/test_stamm_object_page_parent.py -q
+  - npx vitest run src/__tests__/pages/mask-primary-nav-native.test.ts
+risks:
+  - finance/bankkonto hat kein Nummer-/Namensfeld im Kopf (id ist Trivial-Key); identity_field=None erlauben
+  - crm/lead besitzt einen deklarativen Workflow statt noWorkflowReason; workflow-Override im Parent erlauben
+external_gates: []
+test_database: Keine; reine Vertrags- und Frontend-Navigationspruefungen.
+related:
+  - docs/agent-ops/slices/UIX-STAMM-OBJECTPAGE-PARENT-20261022.yaml
+  - docs/architecture/uix/maskenfamilien-taxonomie.md
+  - docs/architecture/uix/made-by-studio-qualitaetsversprechen.md
