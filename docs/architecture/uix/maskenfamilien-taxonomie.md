@@ -76,7 +76,8 @@ Nie zusammenführen nur weil beide Chevrons zeichnen.
 
 ### 1.4 Studio-Qualität vs. Runtime
 
-- „Made by studio“ = Definition/Freigabe über Meridian-Governance.
+- „Made by studio“ = Qualitätsversprechen (Freigabe + CLI + Runtime + Browser), nicht Draft-Count.
+  Verbindliche Checkliste: [made-by-studio-qualitaetsversprechen.md](made-by-studio-qualitaetsversprechen.md).
 - Studio-Import eines Drafts **ersetzt nicht** `runtime_wired` (Route → UniversalNative* → freigegebene SD).
 - Theme/Compiler: Codex-Claims respektieren (siehe §6 Handshake).
 

@@ -1476,6 +1476,24 @@ beide **offen** (Plan, nicht reserviert). Naechste Implementierungscluster laut 
 StammObjectPageParent, KontrollWorklist-Ausbau, Listen Dual-Pfad — getrennt claimen;
 Codex STUDIO-BELEG-THEME / Touren/Training/Bestellvorschlag unangetastet.
 
+## STUDIO — Made-by-Studio Qualitätslücke (Nachtrag 2026-10-22)
+
+Nachweis-Katalog: [`made-by-studio-qualitaetsversprechen.md`](../architecture/uix/made-by-studio-qualitaetsversprechen.md).
+Entity-CLI-Freigabe (`studio.entity.v1`) auf main weitgehend; **größter offener Gate-Blocker
+für das Qualitätskennzeichen:** Image-/CI-Nachlauf + reale Browserabnahme der
+*publizierten* Entity-Maske (Gate D) — nicht Massenmigration. Workboard-Sync
+`STUDIO-WB-SYNC-20261022` stellt verdrängte Codex-Slices (GENERATED/ENTITY-RELEASE/LIVE-PROBE)
+wieder her; 63 lokal gelöschte Studio-Pfade aus HEAD restored. Codex-Claims
+STUDIO-GENERATED-ENTITIES / ENTITY-RELEASE / BELEG-THEME / MODEL unangetastet.
+
+**Made-by-Studio Qualitätsversprechen (2026-10-22):** Nachweis-Katalog
+[`made-by-studio-qualitaetsversprechen.md`](../architecture/uix/made-by-studio-qualitaetsversprechen.md).
+Draft-/Import-Zaehlung reicht nicht. Codex hat `studio.entity.v1` CLI/SQL/Live-Probe auf main
+(`431cd5f66`/`6e40b3212`); Siegel pro Maske braucht Image-/CI-Nachlauf + Browser der
+*publizierten* Fassung. Cursor-Sync: WIP hatte 63 Studio-Dateien lokal geloescht (wiederhergestellt);
+Workboard-Abschnitte 20.–22.10. wieder sichtbar (`STUDIO-SYNC-CURSOR-20261022`).
+Naechster freier Schritt: eine Stamm-Parent-Maske CLI-Lebenszyklus → Siegel — nicht 757 Routen.
+
 ## UIX-RUNTIME-022…030 — Universal Mask Runtime Platform (2026-06-29)
 
 Status: **abgeschlossen** — alle Phasen implementiert, getestet und gepusht (`81d706da8` bis `e6cabb380`).

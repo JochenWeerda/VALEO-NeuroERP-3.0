@@ -1,0 +1,27 @@
+slice_id: STUDIO-MADE-BY-EVIDENCE-20261022
+title: Made-by-Studio Qualitaetsversprechen Nachweis-Katalog
+status: abgeschlossen
+owner: Cursor Composer
+date: 2026-10-22
+goal: >
+  Verbindlichen Nachweis-Katalog definieren, wann eine Maske das Kennzeichen
+  „made by studio“ tragen darf (CLI + Freigabe + Runtime + Browser).
+  Parallel: Codex-vs-Cursor-Sync am Workboard; WIP-Loeschungen am Studio-Pfad
+  aus HEAD wiederherstellen — ohne Codex-Dateibesitz.
+artifacts:
+  - docs/architecture/uix/made-by-studio-qualitaetsversprechen.md
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/handshakes/maskenfamilien-taxonomie-20261022.md
+  - docs/architecture/uix/maskenfamilien-taxonomie.md
+  - docs/architecture/uix/universal-mask-runtime-status.md
+  - docs/project-context/open-gaps-and-known-issues.md
+  - docs/agent-ops/slices/STUDIO-MADE-BY-EVIDENCE-20261022.yaml
+non_goals:
+  - Massenmigration handgebauter Routen
+  - STUDIO-BELEG-THEME / STUDIO-MODEL / screen_definitions_beleg.py
+  - pruefstand_db Reset / neue DBs
+acceptance:
+  - Katalog mit Checkliste Freigabe/CLI/Runtime/Browser und Anti-Patterns
+  - Workboard Sync-Abschnitt + sichtbare Codex-Claims 20.–22.10.
+  - Studio-Pfad-Dateien (valeo_cli, studio_entity_*) wieder vorhanden
+  - Naechster Siegel-Schritt dokumentiert (eine Stamm-Parent-Maske)
