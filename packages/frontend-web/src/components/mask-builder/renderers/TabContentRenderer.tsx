@@ -13,10 +13,10 @@ export function TabContentRenderer({
 }: {
   fields?: ScreenFieldDefinition[]
   tables?: ScreenTableDefinition[]
-  screenTitle?: string
   fieldsClassName: string
   payload: Record<string, unknown>
   tableRows: Record<string, Record<string, unknown>[]>
+  screenTitle?: string
 }): JSX.Element {
   return (
     <div className="space-y-4">
@@ -28,7 +28,12 @@ export function TabContentRenderer({
         </div>
       ) : null}
       {(tables ?? []).map((table) => (
-        <TableRenderer key={table.key} table={table} rows={tableRows[table.key] ?? []} suppressHeading={repeatsCaption(table.label, screenTitle)} />
+        <TableRenderer
+          key={table.key}
+          table={table}
+          rows={tableRows[table.key] ?? []}
+          suppressHeading={repeatsCaption(table.label, screenTitle)}
+        />
       ))}
     </div>
   )

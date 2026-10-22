@@ -1,21 +1,28 @@
 import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
-import { seg, useMaskRowCommands } from '@/components/mask-builder/runtime/useMaskRowCommands'
+import { apiClient } from '@/lib/api-client'
+import { useToast } from '@/hooks/use-toast'
 
-const SCREEN_ID = 'schnittstelle/legacy-adapter-monitor'
-const batch = (key: string) => (row: Record<string, unknown>) =>
-  `/api/v1/legacy-interface-adapters/batches/${seg(row.id)}/actions/${key}`
-
-/** Altsystem-Adapter: Staging, Abstimmung und Pilotfreigabe ueber dieselben Kommando-Wege wie CLI und MCP. */
 export default function LegacyAdapterMonitorPage(): JSX.Element {
-  const handleAction = useMaskRowCommands({
-    screenId: SCREEN_ID,
-    commands: { stage: batch('stage'), reconcile: batch('reconcile'), approve: batch('approve') },
-    reasonPrompt: 'Begruendung (Audit):',
-    successTitle: 'Adapter-Batch aktualisiert',
-  })
+  const { toast } = useToast()
+
+  async function handleAction(actionKey: string, row: Record<string, unknown>): Promise<void> {
+    if (!['stage', 'reconcile', 'approve'].includes(actionKey)) return
+    const reason = window.prompt('Begruendung (Audit):')?.trim()
+    if (!reason || reason.length < 5) return
+    const result = await apiClient.post<Record<string, unknown>>(
+      `/api/v1/legacy-interface-adapters/batches/${encodeURIComponent(String(row.id ?? ''))}/${actionKey}`,
+      { reason },
+    )
+    toast({
+      title: 'Adapter-Batch aktualisiert',
+      description: `Status: ${String(result.status ?? 'unbekannt')}. Produktivbuchung bleibt gesperrt.`,
+    })
+    window.location.reload()
+  }
+
   return (
     <UniversalNativeCockpitPage
-      screenId={SCREEN_ID}
+      screenId="schnittstelle/legacy-adapter-monitor"
       testId="legacy-adapter-monitor"
       permissions={['integration.legacy-adapter.read']}
       onAction={handleAction}

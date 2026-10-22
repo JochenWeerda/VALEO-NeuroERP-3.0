@@ -17,7 +17,6 @@ from app.domains.operations.models import EdiNachrichtDB, EdiPartnerDB
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.edi_api_schemas import EdiApiOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/edi", tags=["edi"])
@@ -40,7 +39,8 @@ class EdiPartnerCreateRequest(BaseModel):
 
 
 @router.post("/nachrichten", status_code=201, summary="Nachricht empfange",
-    response_model=EdiApiOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=EdiApiOut
+)
 def empfange_nachricht(req: EdiNachrichtEmpfangRequest, db: Session = Depends(get_db)):
     typ = EdiNachrichtenTyp(req.typ)
     ergebnis = parse_edi_nachricht(req.payload_raw, typ)
@@ -83,7 +83,8 @@ def get_offene_nachrichten(empfaenger_gln: str, db: Session = Depends(get_db)):
 
 
 @router.post("/partner", status_code=201, summary="Partner anlegen",
-    response_model=EdiApiOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=EdiApiOut
+)
 def create_partner(req: EdiPartnerCreateRequest, db: Session = Depends(get_db)):
     pid = str(uuid.uuid4())
     row = EdiPartnerDB(

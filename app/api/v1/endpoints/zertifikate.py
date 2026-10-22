@@ -11,7 +11,6 @@ from app.domains.operations.models import ZertifikatEintrag
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.zertifikate_schemas import ZertifikateOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/zertifikate", tags=["Zertifikate"])
@@ -118,7 +117,7 @@ from fastapi import HTTPException
 from starlette.responses import Response
 
 
-@router.post("", response_model=ZertifikateOut, status_code=201, summary="Zertifikat anlegen", dependencies=SCHREIBEN["QUALITAET"])
+@router.post("", response_model=ZertifikateOut, status_code=201, summary="Zertifikat anlegen")
 async def create_zertifikat(
     body: ZertifikatCreate,
     db: Session = Depends(get_db),
@@ -146,7 +145,7 @@ async def create_zertifikat(
     }
 
 
-@router.put("/{zertifikat_id}", response_model=ZertifikateOut, summary="Zertifikat aktualisieren", dependencies=SCHREIBEN["QUALITAET"])
+@router.put("/{zertifikat_id}", response_model=ZertifikateOut, summary="Zertifikat aktualisieren")
 async def update_zertifikat(
     zertifikat_id: int,
     body: ZertifikatUpdate,
@@ -176,7 +175,7 @@ async def update_zertifikat(
     }
 
 
-@router.delete("/{zertifikat_id}", response_class=Response, status_code=204, response_model=None, summary="Zertifikat löschen", dependencies=SCHREIBEN["QUALITAET"])
+@router.delete("/{zertifikat_id}", response_class=Response, status_code=204, response_model=None, summary="Zertifikat löschen")
 async def delete_zertifikat(
     zertifikat_id: int,
     db: Session = Depends(get_db),

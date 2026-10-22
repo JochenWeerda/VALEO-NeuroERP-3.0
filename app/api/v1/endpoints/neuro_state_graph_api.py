@@ -47,7 +47,6 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class NeuroStateOut(BaseSchema):
@@ -190,7 +189,8 @@ def _ledger_record_to_model(record: ConfidenceLedgerRecord) -> ConfidenceLedgerE
 # ---------------------------------------------------------------------------
 
 @router.post("/state-graph/nodes", tags=["neuro-state-graph"], summary="Node anlegen",
-    response_model=NeuroStateOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=NeuroStateOut
+)
 async def create_node(req: CreateNodeRequest, db: Session | None = Depends(get_db)):
     """Register a new business-object node in the state graph."""
     try:
@@ -310,7 +310,8 @@ async def reachable_phases(node_id: str, db: Session | None = Depends(get_db)):
 # ---------------------------------------------------------------------------
 
 @router.post("/state-graph/nodes/{node_id}/transitions", tags=["neuro-state-graph"], summary="Node transition",
-    response_model=NeuroStateOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=NeuroStateOut
+)
 async def transition_node(
     node_id: str,
     req: TransitionRequest,
@@ -414,7 +415,8 @@ async def list_transitions(
 # ---------------------------------------------------------------------------
 
 @router.post("/state-graph/edges", tags=["neuro-state-graph"], summary="Edge anlegen",
-    response_model=NeuroStateOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=NeuroStateOut
+)
 async def create_edge(req: CreateEdgeRequest, db: Session | None = Depends(get_db)):
     """Create a directed edge between two state nodes."""
     if db is None:
@@ -512,7 +514,8 @@ async def list_node_types():
 # ---------------------------------------------------------------------------
 
 @router.post("/confidence-ledger/entries", tags=["confidence-ledger"], summary="Confidence record",
-    response_model=NeuroStateOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=NeuroStateOut
+)
 async def record_confidence(req: RecordConfidenceRequest, db: Session | None = Depends(get_db)):
     """Append a new entry to the confidence ledger."""
     try:
@@ -648,7 +651,8 @@ async def get_confidence_entry(entry_id: str, db: Session | None = Depends(get_d
 
 
 @router.post("/confidence-ledger/verify", tags=["confidence-ledger"], summary="Chain verifizieren",
-    response_model=NeuroStateOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=NeuroStateOut
+)
 async def verify_chain(tenant_id: str = Query(...), db: Session | None = Depends(get_db)):
     """Verify the hash-chain integrity for a tenant's ledger."""
     if db is None:

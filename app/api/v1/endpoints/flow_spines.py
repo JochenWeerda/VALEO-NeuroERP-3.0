@@ -40,7 +40,6 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class FlowSpineOut(BaseSchema):
@@ -491,7 +490,7 @@ def _find_open_instance_for_document(
     )
 
 
-@router.post("/{process_key}/instances", response_model=FlowSpineOut, summary="Instance anlegen", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/{process_key}/instances", response_model=FlowSpineOut, summary="Instance anlegen")
 async def create_instance(
     process_key: str,
     body: InstanceCreateRequest,
@@ -696,7 +695,7 @@ def get_instance(
     return _instance_to_dict(inst)
 
 
-@router.patch("/{process_key}/instances/{instance_id}", response_model=FlowSpineOut, summary="Instance aktualisieren", dependencies=SCHREIBEN["FACHLICH"])
+@router.patch("/{process_key}/instances/{instance_id}", response_model=FlowSpineOut, summary="Instance aktualisieren")
 def update_instance(
     process_key: str,
     instance_id: str,
@@ -779,7 +778,7 @@ def update_instance(
     return _instance_to_dict(inst)
 
 
-@router.post("/{process_key}/instances/{instance_id}/save", response_model=FlowSpineOut, summary="Instance save", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/{process_key}/instances/{instance_id}/save", response_model=FlowSpineOut, summary="Instance save")
 def save_instance(
     process_key: str,
     instance_id: str,
@@ -827,7 +826,7 @@ def save_instance(
     return _instance_to_dict(inst)
 
 
-@router.post("/{process_key}/instances/{instance_id}/resume", response_model=FlowSpineOut, summary="Instance fortsetzen", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/{process_key}/instances/{instance_id}/resume", response_model=FlowSpineOut, summary="Instance fortsetzen")
 def resume_instance(
     process_key: str,
     instance_id: str,
@@ -874,7 +873,7 @@ def resume_instance(
     }
 
 
-@router.post("/{process_key}/instances/{instance_id}/hold", response_model=FlowSpineOut, summary="Instance hold", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/{process_key}/instances/{instance_id}/hold", response_model=FlowSpineOut, summary="Instance hold")
 def hold_instance(
     process_key: str,
     instance_id: str,
@@ -913,7 +912,7 @@ def hold_instance(
     return _instance_to_dict(inst)
 
 
-@router.post("/{process_key}/instances/{instance_id}/complete", response_model=FlowSpineOut, summary="Instance complete", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/{process_key}/instances/{instance_id}/complete", response_model=FlowSpineOut, summary="Instance complete")
 def complete_instance(
     process_key: str,
     instance_id: str,
@@ -965,7 +964,7 @@ def _validate_required_reason(body: LifecycleActionRequest) -> None:
         )
 
 
-@router.post("/{process_key}/instances/{instance_id}/cancel", response_model=FlowSpineOut, summary="Instance stornieren", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/{process_key}/instances/{instance_id}/cancel", response_model=FlowSpineOut, summary="Instance stornieren")
 def cancel_instance(
     process_key: str,
     instance_id: str,
@@ -1007,7 +1006,7 @@ def cancel_instance(
     return _instance_to_dict(inst)
 
 
-@router.post("/{process_key}/instances/{instance_id}/fail", response_model=FlowSpineOut, summary="Instance fail", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/{process_key}/instances/{instance_id}/fail", response_model=FlowSpineOut, summary="Instance fail")
 def fail_instance(
     process_key: str,
     instance_id: str,
@@ -1074,7 +1073,7 @@ def get_instance_timeline(
     }
 
 
-@router.post("/{process_key}/instances/{instance_id}/transitions", response_model=FlowSpineOut, summary="Instance transition", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/{process_key}/instances/{instance_id}/transitions", response_model=FlowSpineOut, summary="Instance transition")
 async def transition_instance(
     process_key: str,
     instance_id: str,
@@ -1137,7 +1136,7 @@ async def transition_instance(
     return _instance_to_dict(inst)
 
 
-@router.delete("/{process_key}/instances/{instance_id}", status_code=204, response_class=Response, response_model=None, summary="Instance löschen", dependencies=SCHREIBEN["FACHLICH"])
+@router.delete("/{process_key}/instances/{instance_id}", status_code=204, response_class=Response, response_model=None, summary="Instance löschen")
 def delete_instance(
     process_key: str,
     instance_id: str,
@@ -1152,7 +1151,7 @@ def delete_instance(
 
 # ── Agent Action (GAP-104-H) ──────────────────────────────────────────────────
 
-@router.post("/{process_key}/agent-action", response_model=FlowSpineOut, summary="Agent action ausführen", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/{process_key}/agent-action", response_model=FlowSpineOut, summary="Agent action ausführen")
 async def execute_agent_action(
     process_key: str,
     body: AgentActionRequest,
@@ -1298,7 +1297,8 @@ def list_instance_documents(
 @router.post(
     "/{process_key}/instances/{instance_id}/documents",
     response_model=FlowSpineOut,
-    summary="Beleg an einen Vorgang anhaengen", dependencies=SCHREIBEN["FACHLICH"])
+    summary="Beleg an einen Vorgang anhaengen",
+)
 def attach_instance_document(
     process_key: str,
     instance_id: str,
@@ -1384,7 +1384,8 @@ def attach_instance_document(
     status_code=204,
     response_class=Response,
     response_model=None,
-    summary="Beleg vom Vorgang loesen", dependencies=SCHREIBEN["FACHLICH"])
+    summary="Beleg vom Vorgang loesen",
+)
 def detach_instance_document(
     process_key: str,
     instance_id: str,

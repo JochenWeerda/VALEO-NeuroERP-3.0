@@ -8,7 +8,6 @@ from typing import Any, Literal
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
-from app.auth.deps import require_roles  # Admin-Wege: nur admin (Connector seit 08.10., Konfiguration seit 19.10.2026)
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -618,7 +617,7 @@ async def get_setup_session(
     return _build_setup_session(tenant_id, settings.get("admin_suite_setup"))
 
 
-@router.patch("/setup/steps/{step_key}", response_model=SetupSessionOut, summary="Admin Suite setup step aktualisieren", dependencies=[Depends(require_roles("admin"))])
+@router.patch("/setup/steps/{step_key}", response_model=SetupSessionOut, summary="Admin Suite setup step aktualisieren")
 async def update_setup_step(
     step_key: str,
     payload: SetupStepUpdate,
@@ -659,7 +658,7 @@ async def get_migration_cockpit(
     return _migration_cockpit(tenant_id, _migration_store(settings))
 
 
-@router.post("/migration/batches", response_model=MigrationBatchOut, status_code=201, summary="Migration Dry Run Batch anlegen", dependencies=[Depends(require_roles("admin"))])
+@router.post("/migration/batches", response_model=MigrationBatchOut, status_code=201, summary="Migration Dry Run Batch anlegen")
 async def create_migration_batch(
     payload: MigrationBatchCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -693,7 +692,7 @@ async def create_migration_batch(
     return MigrationBatchOut(**batch)
 
 
-@router.patch("/migration/batches/{batch_id}/reconciliation", response_model=MigrationBatchOut, summary="Migration Reconciliation aktualisieren", dependencies=[Depends(require_roles("admin"))])
+@router.patch("/migration/batches/{batch_id}/reconciliation", response_model=MigrationBatchOut, summary="Migration Reconciliation aktualisieren")
 async def update_migration_reconciliation(
     batch_id: str,
     payload: MigrationReconciliationUpdate,
@@ -716,7 +715,7 @@ async def update_migration_reconciliation(
     return MigrationBatchOut(**batch)
 
 
-@router.post("/migration/batches/{batch_id}/approve", response_model=MigrationBatchOut, summary="Migration Batch freigeben", dependencies=[Depends(require_roles("admin"))])
+@router.post("/migration/batches/{batch_id}/approve", response_model=MigrationBatchOut, summary="Migration Batch freigeben")
 async def approve_migration_batch(
     batch_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -743,7 +742,7 @@ async def get_security_cockpit() -> SecurityCockpitOut:
     return SecurityCockpitOut(roles=_security_roles(), agent_roles=_agent_roles())
 
 
-@router.post("/security/simulate", response_model=SecuritySimulationOut, summary="Effektive Rechte simulieren", dependencies=[Depends(require_roles("admin"))])
+@router.post("/security/simulate", response_model=SecuritySimulationOut, summary="Effektive Rechte simulieren")
 async def simulate_security(payload: SecuritySimulationIn) -> SecuritySimulationOut:
     """Simuliert effektive Rechte ohne Rollen oder Tenant-Daten zu veraendern."""
     return _simulate_security(payload.roles)
@@ -841,7 +840,7 @@ async def get_llm_gateway(
     return _llm_config_out(load_llm_config(db, tenant_id))
 
 
-@router.put("/llm-gateway", response_model=LlmGatewayConfigOut, summary="LLM-Anbieter-Konfiguration speichern", dependencies=[Depends(require_roles("admin"))])
+@router.put("/llm-gateway", response_model=LlmGatewayConfigOut, summary="LLM-Anbieter-Konfiguration speichern")
 async def update_llm_gateway(
     payload: LlmGatewayUpdateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -866,7 +865,7 @@ async def update_llm_gateway(
     return _llm_config_out(load_llm_config(db, tenant_id))
 
 
-@router.post("/llm-gateway/test", response_model=LlmTestOut, summary="LLM-Anbieter testen", dependencies=[Depends(require_roles("admin"))])
+@router.post("/llm-gateway/test", response_model=LlmTestOut, summary="LLM-Anbieter testen")
 async def test_llm_gateway(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -879,6 +878,7 @@ async def test_llm_gateway(
 from app.services.connector_config import load_imap_config, load_stt_config, save_connectors  # noqa: E402
 from app.services.mail_ingest_service import MailIngestService  # noqa: E402
 from app.services.stt_client import SttClient  # noqa: E402
+from app.auth.deps import require_roles  # noqa: E402  (Connector-Wege: nur admin; bis 08.10.2026 ohne Rolle)
 
 
 class ConnectorSttOut(BaseModel):

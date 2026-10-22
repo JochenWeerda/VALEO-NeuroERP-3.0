@@ -25,7 +25,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/artikel/bestandteile", tags=["Artikelstamm - Bestandteile & Qualitätsmerkmale"])
@@ -103,7 +102,7 @@ def list_bestandteile_def(
     return [BestandteilDefOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/stamm", response_model=BestandteilDefOut, status_code=201, summary="Bestandteil def anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.post("/stamm", response_model=BestandteilDefOut, status_code=201, summary="Bestandteil def anlegen")
 def create_bestandteil_def(
     payload: BestandteilDefCreate,
     db=Depends(get_db),
@@ -138,7 +137,7 @@ def create_bestandteil_def(
     return BestandteilDefOut(**dict(row._mapping))
 
 
-@router.put("/stamm/{bestandteil_nr}", response_model=BestandteilDefOut, summary="Bestandteil def aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.put("/stamm/{bestandteil_nr}", response_model=BestandteilDefOut, summary="Bestandteil def aktualisieren")
 def update_bestandteil_def(
     bestandteil_nr: str,
     payload: BestandteilDefCreate,
@@ -174,7 +173,8 @@ def update_bestandteil_def(
 
 
 @router.delete("/stamm/{bestandteil_nr}", summary="Bestandteil def löschen",
-    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
+    response_model=None
+)
 def delete_bestandteil_def(
     bestandteil_nr: str,
     db=Depends(get_db),
@@ -206,7 +206,7 @@ def list_zuordnungen(
 
 
 @router.post("/{artikel_nr}/zuordnungen",
-             response_model=BestandteilZuordnungOut, status_code=201, summary="Zuordnung anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
+             response_model=BestandteilZuordnungOut, status_code=201, summary="Zuordnung anlegen")
 def create_zuordnung(
     artikel_nr: str,
     payload: BestandteilZuordnungCreate,
@@ -237,7 +237,8 @@ def create_zuordnung(
 
 
 @router.delete("/{artikel_nr}/zuordnungen/{zuordnung_id}", summary="Zuordnung löschen",
-    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
+    response_model=None
+)
 def delete_zuordnung(
     artikel_nr: str,
     zuordnung_id: str,

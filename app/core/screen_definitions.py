@@ -9,6 +9,13 @@ from app.core.screen_definitions_studio_history import STUDIO_HISTORY_BUILDERS
 from app.core.screen_definitions_harvest_controls import HARVEST_CONTROL_BUILDERS
 from app.core.screen_definitions_identity import IDENTITY_SCREEN_BUILDERS
 from app.core.screen_definitions_kontrolle import KONTROLLE_ROUTEN, KONTROLLE_SCREEN_BUILDERS, KONTROLLE_SYNONYME
+from app.core.screen_definitions_listen import (
+    LISTEN_ROUTEN,
+    LISTEN_SCREEN_BUILDERS,
+    LISTEN_SYNONYME,
+)
+from app.core.screen_definitions_cockpit import COCKPIT_SCREEN_BUILDERS
+from app.core.screen_definitions_domain_batch15 import BATCH15_SCREEN_BUILDERS
 from app.core.mask_rollout_catalog import ROLLOUT_WAVES_42_51
 from app.core.kontroll_worklist_parent import (
     build_document_control_variant,
@@ -1116,7 +1123,7 @@ def build_sales_invoices_worklist_screen_definition() -> dict[str, Any]:
                 "key": "rechnungen", "label": "Rechnungen", "lazy": False, "keepAlive": True,
                 "tables": [{"key": "list", "label": "Ausgangsrechnungen", "dataSourceKey": "list",
                             "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
-                            "rowRouteTemplate": "/verkauf/rechnung/{id}",
+                            "rowRouteTemplate": "/belege/sales_invoice/{id}",
                             "columns": [
                                 {"key": "invoice_number", "label": "Rechnungsnr.", "sortable": True, "filterable": True, "width": 150},
                                 {"key": "customer_id", "label": "Kunde", "sortable": True, "filterable": True, "width": 160},
@@ -2136,7 +2143,7 @@ def build_finance_bankkonto_screen_definition() -> dict[str, Any]:
         domain="finance",
         title="Bankkonto",
         subtitle="Finance / Bankkonten-Stamm",
-        identity_field=None,
+        identity_field="iban",
         data_sources=[
             stamm_entity_source("/api/v1/banken/konten/{entity_id}"),
             stamm_tab_source("buchungen", "/api/v1/masks/finance/bankkonten/entity/{entity_id}/tabs/buchungen", page_size=50),
@@ -4661,11 +4668,6 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "planung/kalender": build_planung_kalender_screen_definition,
     "schnittstelle/mde-inbox": build_mde_inbox_screen_definition,
     "lager/leitstand": build_lager_leitstand_screen_definition,
-    "workspace/einkauf": build_workspace_einkauf_screen_definition,
-    "workspace/verkauf": build_workspace_verkauf_screen_definition,
-    "workspace/lager": build_workspace_lager_screen_definition,
-    "workspace/fibu": build_workspace_fibu_screen_definition,
-    "workspace/leitung": build_workspace_leitung_screen_definition,
     "agrar/feed-advice": build_agrar_feed_advice_screen_definition,
     "agrar/rations-lifecycle": build_agrar_rations_lifecycle_screen_definition,
     "agrar/feeding-businesses": build_agrar_feeding_businesses_screen_definition,
@@ -4712,7 +4714,6 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "logistik/frachtbrief": build_logistik_frachtbrief_screen_definition,
     "logistik/verladung": build_logistik_verladung_screen_definition,
     "logistik/tourenplanung": build_logistik_tourenplanung_screen_definition,
-    "transporte/fahrer": build_transporte_fahrer_screen_definition,
     "logistik/tour-fracht-arbeitsraum": build_logistik_tour_fracht_arbeitsraum_screen_definition,
     "logistik/frachttabellen": build_logistik_frachttabellen_screen_definition,
     "logistik/versandprofile": build_logistik_versandprofile_screen_definition,
@@ -4739,6 +4740,9 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "futtermittel/mischfuttermittel": build_futtermittel_mischfuttermittel_screen_definition,
     "crm/lead": build_crm_lead_screen_definition,
     **KONTROLLE_SCREEN_BUILDERS,
+    **LISTEN_SCREEN_BUILDERS,
+    **COCKPIT_SCREEN_BUILDERS,
+    **BATCH15_SCREEN_BUILDERS,
 }
 
 
@@ -5276,6 +5280,7 @@ for _spec in ROLLOUT_WAVES_42_51:
 # (/ui/mask-registry/omnibox-catalog) eine Wartungsstelle hat.
 _AGENT_SYNONYMS: dict[str, list[str]] = {
     **KONTROLLE_SYNONYME,
+    **LISTEN_SYNONYME,
     # Fuetterungsberatung: die Masken kamen mit dem Programm dazu, die
     # Suchbegriffe nicht. Ohne Synonyme findet weder Omnibox noch Agent sie
     # unter den Woertern, die im Stall und in der Beratung benutzt werden.
@@ -5399,6 +5404,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
 # direkt, sodass das Frontend keinen fragilen ID-Join gegen die MaskRegistry
 # (deren mask_ids fuer 19 von 26 SDs divergieren) mehr braucht.
 _SCREEN_LIST_ROUTE: dict[str, str] = {
+    **LISTEN_ROUTEN,
     "platform/studio-history": "/admin/screen-studio",
     "platform/studio-history-diff": "/admin/screen-studio",
     "agrar/harvest-controls": "/admin/screen-studio?harvestControls=1",
@@ -5407,6 +5413,12 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "admin/token-consumption": "/admin/token-consumption",
     "schnittstelle/legacy-adapter-monitor": "/schnittstelle/legacy-adapter-monitor",
     "workspace/letzte-dokumente": "/workspace/letzte-dokumente",
+    "workspace/start-dashboard": "/start-dashboard",
+    "start-dashboard": "/start-dashboard",
+    "finance/bookings/new": "/finance/bookings/new",
+    "fibu/kostenstellenrechnung": "/fibu/kostenstellenrechnung",
+    "kontrakte/liste": "/kontrakte/LstKontraktUebersicht",
+    "transporte/fahrer/neu": "/transporte/fahrer/neu",
     "auswertungen/l3-berichtskatalog": "/auswertungen/l3-berichtskatalog",
     "auswertungen/dms-volltext": "/auswertungen/dms-volltext",
     "auswertungen/aenderungshistorie": "/auswertungen/aenderungshistorie",

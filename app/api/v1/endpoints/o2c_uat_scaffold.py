@@ -17,7 +17,6 @@ from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.o2c_uat_scaffold_schemas import O2cUatScaffoldOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/uat/o2c", tags=["uat", "o2c", "testing"])
@@ -214,7 +213,7 @@ def list_szenarien(
         return [UATSzenarioOut(**v) for v in _store.values()]
 
 
-@router.post("/szenarien", response_model=UATSzenarioOut, status_code=201, summary="Szenario anlegen", dependencies=SCHREIBEN["PLATTFORM"])
+@router.post("/szenarien", response_model=UATSzenarioOut, status_code=201, summary="Szenario anlegen")
 def create_szenario(
     payload: UATSzenarioCreate,
     db: Session = Depends(get_db),
@@ -267,7 +266,8 @@ def create_szenario(
 
 
 @router.post("/szenarien/{id}/schritt/{nr}/ausfuehren", summary="Ausfuehren schritt",
-    response_model=O2cUatScaffoldOut, dependencies=SCHREIBEN["PLATTFORM"])
+    response_model=O2cUatScaffoldOut
+)
 def schritt_ausfuehren(
     id: str,
     nr: int,
@@ -355,7 +355,8 @@ def bericht(
 
 
 @router.post("/szenarien/{id}/reset", summary="Szenario zurücksetzen",
-    response_model=O2cUatScaffoldOut, dependencies=SCHREIBEN["PLATTFORM"])
+    response_model=O2cUatScaffoldOut
+)
 def reset_szenario(
     id: str,
     db: Session = Depends(get_db),

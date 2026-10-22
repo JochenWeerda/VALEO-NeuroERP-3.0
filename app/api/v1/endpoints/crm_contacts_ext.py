@@ -19,7 +19,6 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_contact_ext_service import CrmContactExtService
 from app.api.v1.schemas.base import TypedObjectOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/crm/kim", tags=["crm", "kim", "360"])
 
@@ -44,7 +43,7 @@ def list_marketing(
     return CrmContactExtService(db, tenant_id).list_marketing(contact_id)
 
 
-@router.put("/contacts/{contact_id}/marketing-prefs", response_model=MarketingPrefSetOut, summary="Werbepräferenz setzen", dependencies=SCHREIBEN["CRM"])
+@router.put("/contacts/{contact_id}/marketing-prefs", response_model=MarketingPrefSetOut, summary="Werbepräferenz setzen")
 def set_marketing(
     contact_id: str,
     body: MarketingPrefIn,
@@ -57,7 +56,7 @@ def set_marketing(
     )
 
 
-@router.post("/contacts/{contact_id}/pseudonymize", response_model=TypedObjectOut, summary="Ansprechpartner DSGVO-pseudonymisieren", dependencies=SCHREIBEN["CRM"])
+@router.post("/contacts/{contact_id}/pseudonymize", response_model=TypedObjectOut, summary="Ansprechpartner DSGVO-pseudonymisieren")
 def pseudonymize(
     contact_id: str,
     db: Session = Depends(get_db),

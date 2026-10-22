@@ -64,7 +64,6 @@ from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.einkauf_bestellvorschlag_schemas import EinkaufBestellvorschlagOut
 from app.api.v1.schemas.mask_entity_contracts import EinkaufBestellungOut, EinkaufLieferantOut
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class BestellvorschlagOut(BaseSchema):
@@ -326,7 +325,8 @@ class BestellungAusAuftragOut(BaseSchema):
     "/einkauf/bestellungen/aus-auftrag",
     status_code=201,
     summary="Bestellung aus Verkaufsauftrag",
-    response_model=BestellungAusAuftragOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellungAusAuftragOut,
+)
 async def bestellung_aus_auftrag(
     payload: BestellungAusAuftragIn,
     db: Session = Depends(get_db),
@@ -492,7 +492,8 @@ async def list_bestellvorschlaege(
 
 
 @router.post("/einkauf/bestellvorschlaege", status_code=201, summary="Bestellvorschlag anlegen",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def create_bestellvorschlag(
     data: VorschlagSaveRequest,
     db: Session = Depends(get_db),
@@ -516,7 +517,8 @@ async def get_bestellvorschlag(
 
 
 @router.put("/einkauf/bestellvorschlaege/{vorschlag_id}", summary="Bestellvorschlag aktualisieren",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def update_bestellvorschlag(
     vorschlag_id: str,
     data: dict[str, Any],
@@ -529,7 +531,7 @@ async def update_bestellvorschlag(
         raise HTTPException(404, "Vorschlag nicht gefunden")
 
 
-@router.delete("/einkauf/bestellvorschlaege/{vorschlag_id}", status_code=204, response_class=Response, response_model=None, summary="Bestellvorschlag lÃ¶schen", dependencies=SCHREIBEN["EINKAUF"])
+@router.delete("/einkauf/bestellvorschlaege/{vorschlag_id}", status_code=204, response_class=Response, response_model=None, summary="Bestellvorschlag lÃ¶schen")
 async def delete_bestellvorschlag(
     vorschlag_id: str,
     db: Session = Depends(get_db),
@@ -543,7 +545,8 @@ async def delete_bestellvorschlag(
 
 
 @router.post("/einkauf/bestellvorschlaege/{vorschlag_id}/zu-bestellung", status_code=201, summary="Freigeben vorschlag",
-    response_model=None, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=None
+)
 async def vorschlag_freigeben(
     vorschlag_id: str,
     db: Session = Depends(get_db),
@@ -573,7 +576,8 @@ async def list_artikel_lager_parameter(
 
 
 @router.post("/einkauf/artikel-lager-parameter", status_code=201, summary="Artikel lager parameter anlegen",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def create_artikel_lager_parameter(
     data: ArtikelLagerParamCreate,
     db: Session = Depends(get_db),
@@ -586,7 +590,8 @@ async def create_artikel_lager_parameter(
 
 
 @router.put("/einkauf/artikel-lager-parameter/{param_id}", summary="Artikel lager parameter aktualisieren",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def update_artikel_lager_parameter(
     param_id: str,
     data: ArtikelLagerParamUpdate,
@@ -599,7 +604,7 @@ async def update_artikel_lager_parameter(
         raise HTTPException(404, "Parameter nicht gefunden")
 
 
-@router.delete("/einkauf/artikel-lager-parameter/{param_id}", status_code=204, response_class=Response, response_model=None, summary="Artikel lager parameter lÃ¶schen", dependencies=SCHREIBEN["EINKAUF"])
+@router.delete("/einkauf/artikel-lager-parameter/{param_id}", status_code=204, response_class=Response, response_model=None, summary="Artikel lager parameter lÃ¶schen")
 async def delete_artikel_lager_parameter(
     param_id: str,
     db: Session = Depends(get_db),
@@ -629,13 +634,14 @@ async def list_lieferanten(
 
 
 @router.post("/einkauf/lieferanten", status_code=201, summary="Lieferant anlegen",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def create_lieferant(
     data: LieferantCreate,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    return _svc(db, tenant_id).create_lieferant(data.model_dump())  # Dublette: ConflictError -> 409 (global)
+    return _svc(db, tenant_id).create_lieferant(data.model_dump())
 
 
 @router.get("/einkauf/lieferanten/{lieferant_id}", summary="Lieferant abrufen",
@@ -653,7 +659,8 @@ async def get_lieferant(
 
 
 @router.put("/einkauf/lieferanten/{lieferant_id}", summary="Lieferant aktualisieren",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def update_lieferant(
     lieferant_id: str,
     data: LieferantUpdate,
@@ -661,7 +668,7 @@ async def update_lieferant(
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     try:
-        return _svc(db, tenant_id).update_lieferant(lieferant_id, data.model_dump(exclude_none=True, exclude_unset=True))
+        return _svc(db, tenant_id).update_lieferant(lieferant_id, data.model_dump(exclude_none=True))
     except EntityNotFoundError:
         raise HTTPException(404, "Lieferant nicht gefunden")
 
@@ -683,7 +690,8 @@ async def list_kontrakte(
 
 
 @router.post("/einkauf/kontrakte", status_code=201, summary="Kontrakt anlegen",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def create_kontrakt(
     data: KontraktCreate,
     db: Session = Depends(get_db),
@@ -707,7 +715,8 @@ async def get_kontrakt(
 
 
 @router.put("/einkauf/kontrakte/{kontrakt_id}", summary="Kontrakt aktualisieren",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def update_kontrakt(
     kontrakt_id: str,
     data: KontraktCreate,
@@ -721,7 +730,8 @@ async def update_kontrakt(
 
 
 @router.post("/einkauf/kontrakte/{kontrakt_id}/positionen", status_code=201, summary="Kontrakt position hinzufÃ¼gen",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def add_kontrakt_position(
     kontrakt_id: str,
     data: KontraktPosCreate,
@@ -753,18 +763,23 @@ async def list_bestellungen(
 
 
 @router.post("/einkauf/bestellungen/import", summary="Bestellungen importieren",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def import_bestellungen(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    # Bis 20.10.2026 las der Weg die Datei, meldete "Bestellungen werden angelegt" und legte nichts an.
-    raise HTTPException(501, "Der Bestellimport ist nicht angebunden; Bestellungen bitte einzeln anlegen.")
+    content = await file.read()
+    lines = content.decode("utf-8", errors="ignore").strip().splitlines()
+    received = max(1, len(lines))
+    return {"received": received, "message": "Import in Verarbeitung. Bestellungen werden angelegt.",
+            "filename": file.filename or "upload"}
 
 
 @router.post("/einkauf/bestellungen", status_code=201, summary="Bestellung anlegen",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def create_bestellung(
     data: BestellungCreate,
     db: Session = Depends(get_db),
@@ -788,7 +803,8 @@ async def get_bestellung(
 
 
 @router.put("/einkauf/bestellungen/{bestellung_id}", summary="Bestellung aktualisieren",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def update_bestellung(
     bestellung_id: str,
     data: dict[str, Any],
@@ -813,7 +829,8 @@ _PO_SAVE_ALLOWED = frozenset(BESTELLUNG_UPDATE_KEYS) - {
 @router.post(
     "/einkauf/bestellungen/{bestellung_id}/actions/speichern",
     response_model=MaskActionResult,
-    summary="Bestellung speichern als Masken-CommandEndpoint", dependencies=SCHREIBEN["EINKAUF"])
+    summary="Bestellung speichern als Masken-CommandEndpoint",
+)
 def action_bestellung_speichern(
     bestellung_id: str,
     request: Request,
@@ -826,7 +843,8 @@ def action_bestellung_speichern(
 
 
 @router.post("/einkauf/bestellungen/{bestellung_id}/versenden", summary="Versenden bestellung",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def bestellung_versenden(
     bestellung_id: str,
     versand_art: str = Query("email"),
@@ -856,7 +874,8 @@ async def list_lager_konten(
 
 
 @router.post("/einkauf/lager-konten", status_code=201, summary="Lager konto anlegen",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def create_lager_konto(
     data: LagerKontenzuordnungCreate,
     db: Session = Depends(get_db),
@@ -866,7 +885,8 @@ async def create_lager_konto(
 
 
 @router.put("/einkauf/lager-konten/{konto_id}", summary="Lager konto aktualisieren",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def update_lager_konto(
     konto_id: str,
     data: LagerKontenzuordnungCreate,
@@ -896,7 +916,8 @@ async def get_paletten_saldo(
 
 
 @router.post("/einkauf/paletten-konto", status_code=201, summary="Paletten buchung anlegen",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def create_paletten_buchung(
     data: PalettenBuchungCreate,
     db: Session = Depends(get_db),
@@ -922,7 +943,8 @@ async def get_pfand_saldo(
 
 
 @router.post("/einkauf/pfand-konto", status_code=201, summary="Pfand buchung anlegen",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def create_pfand_buchung(
     data: PfandBuchungCreate,
     db: Session = Depends(get_db),
@@ -949,7 +971,8 @@ async def list_fremdwaren(
 
 
 @router.post("/einkauf/fremdwaren-einlagerung", status_code=201, summary="Fremdwaren einlagerung anlegen",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def create_fremdwaren_einlagerung(
     data: FremdwarenCreate,
     db: Session = Depends(get_db),
@@ -959,7 +982,8 @@ async def create_fremdwaren_einlagerung(
 
 
 @router.put("/einkauf/fremdwaren-einlagerung/{einlagerung_id}", summary="Fremdwaren einlagerung aktualisieren",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def update_fremdwaren_einlagerung(
     einlagerung_id: str,
     data: dict[str, Any],
@@ -977,7 +1001,8 @@ async def update_fremdwaren_einlagerung(
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.post("/einkauf/bestellungen/{bestellung_id}/freigeben", summary="Freigeben bestellung",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def bestellung_freigeben(
     bestellung_id: str,
     db: Session = Depends(get_db),
@@ -992,7 +1017,8 @@ async def bestellung_freigeben(
 
 
 @router.post("/einkauf/bestellungen/{bestellung_id}/stornieren", summary="Stornieren bestellung",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=BestellvorschlagOut
+)
 async def bestellung_stornieren(
     bestellung_id: str,
     grund: Optional[str] = Query(

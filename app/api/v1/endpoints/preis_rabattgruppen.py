@@ -20,7 +20,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/preise/rabatte", tags=["Preise - Rabattgruppen & Rabattklassen"])
@@ -108,7 +107,7 @@ def list_rabattgruppen(
     return [RabattgruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/gruppen", response_model=RabattgruppeOut, status_code=201, summary="Rabattgruppe anlegen", dependencies=SCHREIBEN["VERKAUF"])
+@router.post("/gruppen", response_model=RabattgruppeOut, status_code=201, summary="Rabattgruppe anlegen")
 def create_rabattgruppe(
     payload: RabattgruppeCreate,
     db=Depends(get_db),
@@ -136,7 +135,8 @@ def create_rabattgruppe(
 
 
 @router.delete("/gruppen/{gruppe_id}", summary="Rabattgruppe löschen",
-    response_model=None, dependencies=SCHREIBEN["VERKAUF"])
+    response_model=None
+)
 def delete_rabattgruppe(
     gruppe_id: str,
     db=Depends(get_db),
@@ -168,7 +168,7 @@ def list_rabattklassen(
     return [RabattklasseOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/klassen", response_model=RabattklasseOut, status_code=201, summary="Rabattklasse anlegen", dependencies=SCHREIBEN["VERKAUF"])
+@router.post("/klassen", response_model=RabattklasseOut, status_code=201, summary="Rabattklasse anlegen")
 def create_rabattklasse(
     payload: RabattklasseCreate,
     db=Depends(get_db),
@@ -196,7 +196,8 @@ def create_rabattklasse(
 
 
 @router.delete("/klassen/{klasse_id}", summary="Rabattklasse löschen",
-    response_model=None, dependencies=SCHREIBEN["VERKAUF"])
+    response_model=None
+)
 def delete_rabattklasse(
     klasse_id: str,
     db=Depends(get_db),
@@ -240,7 +241,7 @@ def list_rabattsaetze(
     return [RabattsatzOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/saetze", response_model=RabattsatzOut, status_code=201, summary="Rabattsatz anlegen", dependencies=SCHREIBEN["VERKAUF"])
+@router.post("/saetze", response_model=RabattsatzOut, status_code=201, summary="Rabattsatz anlegen")
 def create_rabattsatz(
     payload: RabattsatzCreate,
     db=Depends(get_db),
@@ -268,7 +269,8 @@ def create_rabattsatz(
 
 
 @router.delete("/saetze/{satz_id}", summary="Rabattsatz löschen",
-    response_model=None, dependencies=SCHREIBEN["VERKAUF"])
+    response_model=None
+)
 def delete_rabattsatz(
     satz_id: str,
     db=Depends(get_db),

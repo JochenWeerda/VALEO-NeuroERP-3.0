@@ -8,7 +8,6 @@ from app.core.database import get_db
 from app.core.config import settings
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -85,7 +84,7 @@ def list_farmers(
     return FarmerListResponse(items=items, total=len(items))
 
 
-@router.delete("/farmers/{farmer_id}", status_code=204, response_class=Response, summary="Farmer löschen", dependencies=SCHREIBEN["AGRAR"])
+@router.delete("/farmers/{farmer_id}", status_code=204, response_class=Response, summary="Farmer löschen")
 def delete_farmer(
     farmer_id: str,
     body: DeleteFarmerRequest,

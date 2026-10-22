@@ -31,7 +31,6 @@ from app.core.database import get_db
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class RohwareOut(BaseSchema):
@@ -99,7 +98,7 @@ async def list_schemata(
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.post("", response_model=RohwareOut, status_code=201, summary="Schema anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("", response_model=RohwareOut, status_code=201, summary="Schema anlegen")
 async def create_schema(
     payload: Dict[str, Any],
     db: Session = Depends(get_db),
@@ -168,7 +167,7 @@ async def get_schema(schema_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.patch("/{schema_id}", response_model=RohwareOut, summary="Schema aktualisieren", dependencies=SCHREIBEN["LAGER"])
+@router.patch("/{schema_id}", response_model=RohwareOut, summary="Schema aktualisieren")
 async def update_schema(
     schema_id: str,
     payload: Dict[str, Any],
@@ -209,7 +208,7 @@ async def update_schema(
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.post("/{schema_id}/aktivieren", response_model=RohwareOut, summary="Aktivieren", dependencies=SCHREIBEN["LAGER"])
+@router.post("/{schema_id}/aktivieren", response_model=RohwareOut, summary="Aktivieren")
 async def aktivieren(schema_id: str, db: Session = Depends(get_db)):
     """Setzt Status ENTWURF â†’ AKTIV. Voraussetzung: gueltig_ab muss gesetzt sein."""
     try:
@@ -249,7 +248,7 @@ async def aktivieren(schema_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.post("/{schema_id}/archivieren", response_model=RohwareOut, summary="Archivieren", dependencies=SCHREIBEN["LAGER"])
+@router.post("/{schema_id}/archivieren", response_model=RohwareOut, summary="Archivieren")
 async def archivieren(schema_id: str, db: Session = Depends(get_db)):
     """Setzt Status AKTIV â†’ ARCHIV."""
     try:
@@ -306,7 +305,7 @@ async def list_lines(schema_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.post("/{schema_id}/lines", response_model=RohwareOut, status_code=201, summary="Line hinzufÃ¼gen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/{schema_id}/lines", response_model=RohwareOut, status_code=201, summary="Line hinzufÃ¼gen")
 async def add_line(
     schema_id: str,
     payload: Dict[str, Any],
@@ -346,7 +345,7 @@ async def add_line(
         raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
 
 
-@router.delete("/{schema_id}/lines/{line_id}", status_code=204, response_class=Response, response_model=None, summary="Line lÃ¶schen", dependencies=SCHREIBEN["LAGER"])
+@router.delete("/{schema_id}/lines/{line_id}", status_code=204, response_class=Response, response_model=None, summary="Line lÃ¶schen")
 async def delete_line(
     schema_id: str,
     line_id: str,
@@ -400,7 +399,7 @@ def _eval_formula(formula: str, context: Dict[str, float]) -> Optional[float]:
         return None
 
 
-@router.post("/{schema_id}/testrechnung", response_model=RohwareOut, summary="Testrechnung", dependencies=SCHREIBEN["LAGER"])
+@router.post("/{schema_id}/testrechnung", response_model=RohwareOut, summary="Testrechnung")
 async def testrechnung(
     schema_id: str,
     payload: Dict[str, Any],

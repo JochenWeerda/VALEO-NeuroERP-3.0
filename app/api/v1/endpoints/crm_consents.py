@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from pydantic import Field
 from sqlalchemy.orm import Session
 
@@ -18,7 +18,6 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.infrastructure.models.crm_consent import CrmConsent, CrmConsentHistory
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/crm/consents", tags=["crm", "dsgvo"])
 
@@ -159,8 +158,8 @@ async def list_contact_consents(
     return [_to_dict(row) for row in rows]
 
 
-@router.post("", response_model=TypedObjectOut, status_code=201, summary="Einwilligung anlegen", dependencies=SCHREIBEN["CRM"])
-@router.post("/", response_model=TypedObjectOut, status_code=201, summary="Einwilligung anlegen", dependencies=SCHREIBEN["CRM"])
+@router.post("", response_model=TypedObjectOut, status_code=201, summary="Einwilligung anlegen")
+@router.post("/", response_model=TypedObjectOut, status_code=201, summary="Einwilligung anlegen")
 async def create_consent(
     payload: ConsentCreate,
     request: Request,
@@ -210,7 +209,7 @@ async def get_consent(
     return _to_dict(_load(db, consent_id, tenant_id))
 
 
-@router.put("/{consent_id}", response_model=TypedObjectOut, summary="Einwilligung aktualisieren", dependencies=SCHREIBEN["CRM"])
+@router.put("/{consent_id}", response_model=TypedObjectOut, summary="Einwilligung aktualisieren")
 async def update_consent(
     consent_id: str,
     payload: ConsentUpdate,
@@ -242,7 +241,7 @@ async def update_consent(
     return _to_dict(row)
 
 
-@router.delete("/{consent_id}", status_code=204, response_class=Response, response_model=None, summary="Einwilligung loeschen", dependencies=SCHREIBEN["CRM"])
+@router.delete("/{consent_id}", status_code=204, response_class=Response, response_model=None, summary="Einwilligung loeschen")
 async def delete_consent(
     consent_id: str,
     db: Session = Depends(get_db),
@@ -274,7 +273,7 @@ async def get_consent_history(
     return [_history_dict(row) for row in rows]
 
 
-@router.post("/{consent_id}/confirm", response_model=TypedObjectOut, summary="Double-Opt-In bestaetigen", dependencies=SCHREIBEN["CRM"])
+@router.post("/{consent_id}/confirm", response_model=TypedObjectOut, summary="Double-Opt-In bestaetigen")
 async def confirm_consent(
     consent_id: str,
     request: Request,
@@ -300,17 +299,14 @@ async def confirm_consent(
     return _to_dict(row)
 
 
-@router.post("/{consent_id}/revoke", response_model=TypedObjectOut, summary="Einwilligung widerrufen", dependencies=SCHREIBEN["CRM"])
+@router.post("/{consent_id}/revoke", response_model=TypedObjectOut, summary="Einwilligung widerrufen")
 async def revoke_consent(
     consent_id: str,
     request: Request,
     reason: Optional[str] = Query(None),
-    body: Optional[dict] = Body(None),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
-    # Maske, CLI und MCP schicken die Begruendung im Body (``_auditReason``); vorher ging sie dort verloren.
-    reason = reason or (body or {}).get("reason") or (body or {}).get("_auditReason")
     row = _load(db, consent_id, tenant_id)
     if row.status != "granted":
         raise HTTPException(status_code=400, detail="Nur erteilte Einwilligungen koennen widerrufen werden")
@@ -328,7 +324,8 @@ async def revoke_consent(
 @router.post(
     "/{consent_id}/resend-confirmation",
     response_model=TypedObjectOut,
-    summary="Double-Opt-In erneut senden", dependencies=SCHREIBEN["CRM"])
+    summary="Double-Opt-In erneut senden",
+)
 async def resend_confirmation(
     consent_id: str,
     db: Session = Depends(get_db),

@@ -31,7 +31,6 @@ from app.core.database import get_db
 from app.infrastructure.models.futtermittel_models import RationsZugang
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -180,7 +179,8 @@ def list_zugang(
     "/{tenant_id}/zugang",
     response_model=ZugangOut,
     status_code=status.HTTP_201_CREATED,
-    summary="Zugang anlegen", dependencies=SCHREIBEN["AGRAR"])
+    summary="Zugang anlegen",
+)
 def create_zugang(
     tenant_id: str,
     payload: ZugangCreate,
@@ -218,7 +218,8 @@ def create_zugang(
 @router.patch(
     "/{tenant_id}/zugang/{eintrag_id}",
     response_model=ZugangOut,
-    summary="Zugang bearbeiten / sperren / entsperren", dependencies=SCHREIBEN["AGRAR"])
+    summary="Zugang bearbeiten / sperren / entsperren",
+)
 def patch_zugang(
     tenant_id: str,
     eintrag_id: str,
@@ -256,7 +257,8 @@ def patch_zugang(
     "/{tenant_id}/zugang/{eintrag_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Zugang widerrufen (löschen)",
-    response_model=None, dependencies=SCHREIBEN["AGRAR"])
+    response_model=None,
+)
 def delete_zugang(
     tenant_id: str,
     eintrag_id: str,
@@ -283,7 +285,8 @@ def delete_zugang(
     "/{tenant_id}/zugang/share-link",
     response_model=ShareLinkOut,
     status_code=status.HTTP_201_CREATED,
-    summary="Share-Link mit einmaligem Token generieren", dependencies=SCHREIBEN["AGRAR"])
+    summary="Share-Link mit einmaligem Token generieren",
+)
 def create_share_link(
     tenant_id: str,
     payload: ShareLinkCreate,

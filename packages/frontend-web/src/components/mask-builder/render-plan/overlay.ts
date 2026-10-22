@@ -165,7 +165,7 @@ export function hashOverlay(overlay: ScreenOverlay | null | undefined): string {
     if (Array.isArray(value)) return value.map(stable)
     if (value && typeof value === 'object') {
       return Object.keys(value as Record<string, unknown>)
-        .sort((a, b) => a.localeCompare(b))
+        .sort()
         .reduce<Record<string, unknown>>((acc, k) => {
           acc[k] = stable((value as Record<string, unknown>)[k])
           return acc

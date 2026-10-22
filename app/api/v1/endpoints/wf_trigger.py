@@ -11,7 +11,6 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.wf_trigger_service import WfTriggerService, TRIGGER_MAP
 from app.api.v1.schemas.base import TypedObjectOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/wf-trigger", tags=["workflow", "automation"])
 
@@ -23,7 +22,7 @@ class TriggerIn(BaseModel):
     context: dict[str, Any] = {}
 
 
-@router.post("", response_model=TypedObjectOut, status_code=200, summary="Status-Trigger manuell feuern (WF-TRIGGER-001)", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("", response_model=TypedObjectOut, status_code=200, summary="Status-Trigger manuell feuern (WF-TRIGGER-001)")
 def fire_trigger(
     body: TriggerIn,
     tenant_id: str = Depends(get_tenant_id),

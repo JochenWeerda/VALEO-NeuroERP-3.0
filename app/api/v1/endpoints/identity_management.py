@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel, Field
 from app.auth.deps import get_current_user, require_roles
 from app.core import identity_session
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router=APIRouter(prefix='/identity',tags=['identity'])
 
@@ -26,7 +25,7 @@ def current_session(request: Request,user: dict=Depends(get_current_user)) -> Se
         absolute_seconds=identity_session.settings.IDENTITY_SESSION_MAX_SECONDS)
 
 
-@router.post('/session/logout',status_code=204,response_class=Response,response_model=None,summary='Aktuelle eigene verifizierte Sitzung serverseitig widerrufen')
+@router.post('/session/logout',status_code=204,response_class=Response,response_model=None,summary='Aktuelle Sitzung serverseitig widerrufen')
 def logout(request: Request,user: dict=Depends(get_current_user)) -> Response:
     identity_session.revoke_session(request.state.token_claims,request.state.authenticated_token)
     return Response(status_code=204)
@@ -96,13 +95,13 @@ def budgets() -> list[dict]:
 
 
 @router.post('/budgets/root',response_model=BudgetOut,status_code=201,
-             summary='Mandantenkontingent mit ausdrücklicher Plattformberechtigung bereitstellen', dependencies=SCHREIBEN["PLATTFORM"])
+             summary='Mandantenkontingent mit ausdrücklicher Plattformberechtigung bereitstellen')
 def create_budget(payload: BudgetCreate) -> dict:
     return identity_quota.create_root(payload.tokens,payload.max_children)
 
 
 @router.post('/budgets/allocate',response_model=BudgetOut,status_code=201,
-             summary='Elternkontingent an Nutzer oder Agenten verteilen', dependencies=SCHREIBEN["PLATTFORM"])
+             summary='Elternkontingent an Nutzer oder Agenten verteilen')
 def allocate_budget(payload: BudgetAllocate) -> dict:
     return identity_quota.allocate(**payload.model_dump())
 
@@ -128,7 +127,7 @@ class BudgetCommand(BudgetCreate):
 
 
 @router.post('/budgets/actions/{action_key}',response_model=MaskActionResult,
-             summary='Kontingentvergabe im Maskbuilder prüfen und kontrolliert ausführen', dependencies=SCHREIBEN["PLATTFORM"])
+             summary='Kontingentvergabe im Maskbuilder prüfen und kontrolliert ausführen')
 def budget_command(action_key: Literal['root','allocate'],payload: BudgetCommand) -> MaskActionResult:
     human()  # Interactive mask contract; service subdelegation uses the typed API.
     preview=payload.mode!='execute'

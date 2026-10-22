@@ -17,7 +17,6 @@ from app.domains.operations.repository import SpeditionFrachttarifRepository
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.strecke_speditionen_schemas import StreckeSpeditionenOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/strecke/speditionen", tags=["Strecke - Speditionen"])
@@ -65,14 +64,14 @@ async def get_frachttarif(tarif_id: str, db: Session = Depends(get_db)):
     return _to_dict(row)
 
 
-@router.post("/frachttarife", response_model=StreckeSpeditionenOut, status_code=201, summary="Frachttarif anlegen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.post("/frachttarife", response_model=StreckeSpeditionenOut, status_code=201, summary="Frachttarif anlegen")
 async def create_frachttarif(payload: FrachttarifPayload, db: Session = Depends(get_db)):
     repo = SpeditionFrachttarifRepository(db)
     row = repo.create(payload.model_dump())
     return _to_dict(row)
 
 
-@router.patch("/frachttarife/{tarif_id}", response_model=StreckeSpeditionenOut, summary="Frachttarif aktualisieren", dependencies=SCHREIBEN["LOGISTIK"])
+@router.patch("/frachttarife/{tarif_id}", response_model=StreckeSpeditionenOut, summary="Frachttarif aktualisieren")
 async def update_frachttarif(
     tarif_id: str,
     payload: FrachttarifPayload,
@@ -86,7 +85,7 @@ async def update_frachttarif(
     return _to_dict(updated)
 
 
-@router.delete("/frachttarife/{tarif_id}", status_code=204, response_class=Response, response_model=None, summary="Frachttarif löschen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.delete("/frachttarife/{tarif_id}", status_code=204, response_class=Response, response_model=None, summary="Frachttarif löschen")
 async def delete_frachttarif(tarif_id: str, db: Session = Depends(get_db)):
     repo = SpeditionFrachttarifRepository(db)
     if not repo.delete(tarif_id):

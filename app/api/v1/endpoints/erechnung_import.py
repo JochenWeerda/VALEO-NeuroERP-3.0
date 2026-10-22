@@ -23,7 +23,6 @@ from app.core.business_time import business_date_after, business_today
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.erechnung_import_schemas import ErrechnungImportOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/erechnung", tags=["erechnung"])
@@ -125,7 +124,7 @@ def _parse_xrechnung(content: str) -> dict:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("/import", response_model=ERechnungImportResult, status_code=200, summary="Erechnung importieren", dependencies=SCHREIBEN["FINANZ"])
+@router.post("/import", response_model=ERechnungImportResult, status_code=200, summary="Erechnung importieren")
 async def import_erechnung(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -208,7 +207,8 @@ def list_imports(
 
 
 @router.post("/imports/{import_id}/buchen", summary="Buchen",
-    response_model=ErrechnungImportOut, dependencies=SCHREIBEN["FINANZ"])
+    response_model=ErrechnungImportOut
+)
 def buchen(
     import_id: str,
     db: Session = Depends(get_db),

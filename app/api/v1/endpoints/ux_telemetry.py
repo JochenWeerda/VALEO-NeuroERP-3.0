@@ -16,7 +16,6 @@ from pydantic import Field, field_validator
 
 from ....core.tenant import get_tenant_id
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/ux-telemetry", tags=["ui", "telemetry"])
@@ -62,7 +61,8 @@ _AGGREGATE: dict[str, dict[str | None, list[float]]] = defaultdict(lambda: defau
     "/omnibox",
     status_code=204,
     response_class=Response,
-    summary="Omnibox-Intent-Signal erfassen", dependencies=SCHREIBEN["EIGENE_DATEN"])
+    summary="Omnibox-Intent-Signal erfassen",
+)
 async def record_omnibox_signal(
     payload: OmniboxTelemetryIn,
     tenant_id: str = Depends(get_tenant_id),

@@ -17,7 +17,6 @@ from ..schemas.base import BaseSchema
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.customer_extensions_schemas import CustomerExtensionsOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -55,7 +54,7 @@ def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
-@router.post("/geo-search", response_model=list[CustomerBrief], summary="Geo search customer", dependencies=SCHREIBEN["CRM"])
+@router.post("/geo-search", response_model=list[CustomerBrief], summary="Geo search customer")
 async def customer_geo_search(
     payload: GeoSearchRequest,
     tenant_id: Optional[str] = Query(None),
@@ -72,7 +71,7 @@ async def customer_geo_search(
     return [CustomerBrief.model_validate(c) for c in customers[:50]]
 
 
-@router.post("/convert-lead", response_model=CustomerBrief, summary="Lead to customer umwandeln", dependencies=SCHREIBEN["CRM"])
+@router.post("/convert-lead", response_model=CustomerBrief, summary="Lead to customer umwandeln")
 async def convert_lead_to_customer(
     payload: ConvertLeadRequest,
     tenant_id: Optional[str] = Query(None),
@@ -104,7 +103,8 @@ async def convert_lead_to_customer(
 
 
 @router.post("/operator-status", summary="Operator status aktualisieren",
-    response_model=CustomerExtensionsOut, dependencies=SCHREIBEN["CRM"])
+    response_model=CustomerExtensionsOut
+)
 async def update_operator_status(payload: OperatorStatusUpdate, db: Session = Depends(get_db)):
     """POST Kontakt Bediener Gelesen/Erledigt setzen"""
     contact = db.query(Contact).filter(Contact.id == payload.contact_id).first()

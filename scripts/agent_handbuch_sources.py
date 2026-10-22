@@ -74,7 +74,7 @@ def load_screen_definitions() -> dict[str, dict[str, Any]]:
     from app.core.screen_definitions import _SCREEN_DEFINITIONS
 
     out: dict[str, dict[str, Any]] = {}
-    for mask_id, builder in _SCREEN_DEFINITIONS.items():
+    for mask_id, builder in list(_SCREEN_DEFINITIONS.items()):
         if callable(builder):
             out[mask_id] = builder()
         else:

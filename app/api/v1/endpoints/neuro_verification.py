@@ -13,7 +13,6 @@ from app.core.tenant import get_tenant_id
 from app.services.neuro_verification_engine import verify_plan, VerificationResult
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/neuro/verify", tags=["neuro-core", "verification"])
@@ -42,7 +41,7 @@ class VerifyPlanResponse(BaseModel):
     plan_summary: str
 
 
-@router.post("", response_model=VerifyPlanResponse, summary="Verifizieren", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("", response_model=VerifyPlanResponse, summary="Verifizieren")
 async def verify(
     request: VerifyPlanRequest,
     tenant_id: str = Depends(get_tenant_id),

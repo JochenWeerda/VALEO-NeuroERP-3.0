@@ -22,7 +22,6 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/kontrakt-hedging", tags=["kontrakt-hedging"])
@@ -88,7 +87,7 @@ def list_hedges(
         return []  # migration_hint: domain_agrar.kontrakt_hedges not yet migrated
 
 
-@router.post("/{kontrakt_id}/hedges", response_model=HedgeOut, status_code=201, summary="Hedge anlegen", dependencies=SCHREIBEN["KONTRAKT"])
+@router.post("/{kontrakt_id}/hedges", response_model=HedgeOut, status_code=201, summary="Hedge anlegen")
 def create_hedge(
     kontrakt_id: str,
     payload: HedgeCreate,
@@ -132,7 +131,8 @@ def create_hedge(
 @router.post(
     "/{kontrakt_id}/hedges/{hedge_id}/mark-to-market",
     response_model=MarkToMarketResult,
-    summary="To market markieren", dependencies=SCHREIBEN["KONTRAKT"])
+    summary="To market markieren",
+)
 def mark_to_market(
     kontrakt_id: str,
     hedge_id: str,
@@ -177,7 +177,7 @@ def mark_to_market(
 @router.delete(
     "/{kontrakt_id}/hedges/{hedge_id}",
     status_code=204,
-    response_class=Response, response_model=None, summary="Hedge stornieren", dependencies=SCHREIBEN["KONTRAKT"])
+    response_class=Response, response_model=None, summary="Hedge stornieren")
 def cancel_hedge(
     kontrakt_id: str,
     hedge_id: str,

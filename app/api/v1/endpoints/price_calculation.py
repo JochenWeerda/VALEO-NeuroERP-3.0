@@ -5,7 +5,6 @@ POST /preis-kalkulation/berechne — compute price for artikel/kunde/menge
 """
 from __future__ import annotations
 
-import math
 from datetime import date
 from typing import List, Optional
 
@@ -18,7 +17,6 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/preis-kalkulation", tags=["preis-kalkulation"])
@@ -69,7 +67,7 @@ MWST = 19.0
 # Endpoint
 # ---------------------------------------------------------------------------
 
-@router.post("/berechne", response_model=PreisKalkulationResult, summary="Preis berechne", dependencies=SCHREIBEN["VERKAUF"])
+@router.post("/berechne", response_model=PreisKalkulationResult, summary="Preis berechne")
 def berechne_preis(
     payload: PreisKalkulationInput,
     db: Session = Depends(get_db),
@@ -126,7 +124,7 @@ def berechne_preis(
     sorte_faktor = 1.0
     if payload.sorte_klasse and payload.sorte_klasse.upper() in SORTE_FAKTOR:
         sorte_faktor = SORTE_FAKTOR[payload.sorte_klasse.upper()]
-        if not math.isclose(sorte_faktor, 1.0):
+        if sorte_faktor != 1.0:
             abschlag = basis_preis * (1.0 - sorte_faktor)
             zu_abschlaege.append(
                 KalkulationsSchritt(

@@ -20,8 +20,6 @@ from app.core.tenant import get_tenant_id
 from app.api.v1.schemas.base import IDResponse
 from app.api.v1.schemas.sanctions_compliance_schemas import SanctionsComplianceOut
 from app.services.mask_action_runtime_service import MaskActionResult, parse_action_body
-from app.core.akteur import gepruefter_akteur_aus_request
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
@@ -245,7 +243,8 @@ def list_eintraege(
     "/eintraege",
     status_code=201,
     summary="Sanktionseintrag anlegen",
-    response_model=IDResponse, dependencies=SCHREIBEN["QUALITAET"])
+    response_model=IDResponse,
+)
 def create_eintrag(
     payload: SanktionsEintragCreate,
     db: Session = Depends(get_db),
@@ -289,7 +288,8 @@ def create_eintrag(
 @router.post(
     "/pruefen",
     summary="Name gegen Sanktionsliste prüfen",
-    response_model=SanktionsPruefungResult, dependencies=SCHREIBEN["QUALITAET"])
+    response_model=SanktionsPruefungResult,
+)
 def pruefen(
     payload: SanktionsPruefungInput,
     request: Request,
@@ -308,7 +308,7 @@ def pruefen(
             status=status,
             scope=payload.scope,
             entity_ref=payload.entity_ref,
-            checked_by=gepruefter_akteur_aus_request(request),
+            checked_by=request.headers.get("X-User-ID") or "sanctions-operator",
             commit=True,
         )
     except Exception:
@@ -327,7 +327,8 @@ def pruefen(
 @router.post(
     "/actions/pruefen/{scope}",
     response_model=MaskActionResult,
-    summary="Sanktionspruefung als Masken-CommandEndpoint (validate/dryRun/propose/execute)", dependencies=SCHREIBEN["QUALITAET"])
+    summary="Sanktionspruefung als Masken-CommandEndpoint (validate/dryRun/propose/execute)",
+)
 def action_pruefen(
     scope: Literal["manual", "personal", "customers"],
     request: Request,
@@ -418,7 +419,7 @@ def action_pruefen(
             proposedChanges=[preview],
         )
 
-    checked_by = gepruefter_akteur_aus_request(request)
+    checked_by = request.headers.get("X-User-ID") or "sanctions-operator"
     try:
         from app.services.mask_action_runtime_service import _write_audit, _write_outbox, wiederholter_auftrag
 

@@ -1,5 +1,7 @@
-import FlowSpineWorkspace from '@/components/workflow/FlowSpineWorkspace'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default function FlowSpineServiceToCustomerPage(): JSX.Element {
-  return <FlowSpineWorkspace processKey="service-to-customer" />
+export default function Page(): JSX.Element {
+  return (
+    <NativeListPage screenId="workflow/flow-spine-service-to-customer" testId="screen-workflow/flow-spine-service-to-customer" />
+  )
 }

@@ -17,7 +17,6 @@ from sqlalchemy.orm import Session
 from ....core.database import get_db
 
 from app.api.v1.schemas.base import BaseSchema, IDResponse
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -101,7 +100,7 @@ def list_ruestlisten(
         return []
 
 
-@router.post("", response_model=RuestlisteOut, status_code=201, tags=["lager", "ruestliste"], summary="Ruestliste anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("", response_model=RuestlisteOut, status_code=201, tags=["lager", "ruestliste"], summary="Ruestliste anlegen")
 def create_ruestliste(payload: RuestlisteCreate, db: Session = Depends(get_db)) -> RuestlisteOut:
     """Create a new Rüstliste with status=OFFEN."""
     new_id = str(uuid.uuid4())
@@ -206,21 +205,24 @@ def _set_status(nr: str, new_status: str, allowed_from: list[str], db: Session, 
 
 
 @router.post("/{nr}/bearbeiten", tags=["lager", "ruestliste"], summary="Bearbeiten",
-    response_model=RuestlisteOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=RuestlisteOut
+)
 def bearbeiten(nr: str, db: Session = Depends(get_db)) -> dict:
     """Set Rüstliste to IN_BEARBEITUNG (irreversible)."""
     return _set_status(nr, "IN_BEARBEITUNG", ["OFFEN"], db)
 
 
 @router.post("/{nr}/verarbeitet", tags=["lager", "ruestliste"], summary="Verarbeitet",
-    response_model=RuestlisteOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=RuestlisteOut
+)
 def verarbeitet(nr: str, db: Session = Depends(get_db)) -> dict:
     """Complete Rüstliste — set to VERARBEITET."""
     return _set_status(nr, "VERARBEITET", ["IN_BEARBEITUNG"], db, verarbeitet=True)
 
 
 @router.post("/{nr}/verarbeitet/bemerkung", tags=["lager", "ruestliste"], summary="Hinzufuegen bemerkung",
-    response_model=RuestlisteOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=RuestlisteOut
+)
 def bemerkung_hinzufuegen(nr: str, payload: RuestlisteBearbeiten, db: Session = Depends(get_db)) -> dict:
     """Add a note to an already-completed Rüstliste."""
     try:
@@ -245,7 +247,8 @@ def bemerkung_hinzufuegen(nr: str, payload: RuestlisteBearbeiten, db: Session = 
 
 
 @router.post("/{nr}/abbrechen", tags=["lager", "ruestliste"], summary="Abbrechen",
-    response_model=RuestlisteOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=RuestlisteOut
+)
 def abbrechen(nr: str, db: Session = Depends(get_db)) -> dict:
     """Cancel a Rüstliste (only from OFFEN or IN_BEARBEITUNG)."""
     return _set_status(nr, "ABGEBROCHEN", ["OFFEN", "IN_BEARBEITUNG"], db)

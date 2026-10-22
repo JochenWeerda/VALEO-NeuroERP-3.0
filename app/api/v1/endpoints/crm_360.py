@@ -28,7 +28,6 @@ from app.api.v1.endpoints.crm_360_sql import _kunde_finden, _query_one
 from app.api.v1.endpoints.crm_360_tabs import router as _customer_tabs_router
 from app.api.v1.schemas.base import TypedObjectOut
 from app.api.v1.schemas.crm_360_schemas import Crm360Out
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 router.include_router(_customer_tabs_router)
@@ -547,7 +546,8 @@ def _validate_create_activity(payload: dict[str, Any]) -> list[dict[str, Any]]:
     "/{customer_id}/actions/create_activity",
     response_model=ActionResult,
     summary="CRM-Aktivität anlegen (ActionRuntime)",
-    tags=["crm", "customers", "actions"], dependencies=SCHREIBEN["CRM"])
+    tags=["crm", "customers", "actions"],
+)
 async def create_activity_action(
     customer_id: str,
     body: dict[str, Any] = Body(...),

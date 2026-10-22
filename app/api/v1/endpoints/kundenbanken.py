@@ -21,7 +21,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema, IDResponse
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/kunden", tags=["CRM - Kundenbanken"])
@@ -94,7 +93,7 @@ def list_bankverbindungen(
 
 
 @router.post("/{kunden_nr}/bankverbindungen",
-             response_model=BankverbindungOut, status_code=201, summary="Bankverbindung anlegen", dependencies=SCHREIBEN["VERKAUF"])
+             response_model=BankverbindungOut, status_code=201, summary="Bankverbindung anlegen")
 def create_bankverbindung(
     kunden_nr: str,
     payload: BankverbindungCreate,
@@ -140,7 +139,8 @@ def create_bankverbindung(
 
 
 @router.patch("/{kunden_nr}/bankverbindungen/{bv_id}/standard", summary="Standard bankverbindung setzen",
-    response_model=IDResponse, dependencies=SCHREIBEN["VERKAUF"])
+    response_model=IDResponse
+)
 def set_standard_bankverbindung(
     kunden_nr: str,
     bv_id: str,
@@ -165,7 +165,8 @@ def set_standard_bankverbindung(
 
 
 @router.delete("/{kunden_nr}/bankverbindungen/{bv_id}", summary="Bankverbindung löschen",
-    response_model=None, dependencies=SCHREIBEN["VERKAUF"])
+    response_model=None
+)
 def delete_bankverbindung(
     kunden_nr: str,
     bv_id: str,

@@ -1,5 +1,7 @@
-import FlowSpineWorkspace from '@/components/workflow/FlowSpineWorkspace'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default function FlowSpineProcureToPayPage(): JSX.Element {
-  return <FlowSpineWorkspace processKey="procure-to-pay" />
+export default function Page(): JSX.Element {
+  return (
+    <NativeListPage screenId="workflow/flow-spine-procure-to-pay" testId="screen-workflow/flow-spine-procure-to-pay" />
+  )
 }

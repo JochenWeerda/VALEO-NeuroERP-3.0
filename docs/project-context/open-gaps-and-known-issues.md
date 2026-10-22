@@ -1467,8 +1467,7 @@ pytest Inventar/Gates/Katalog **60/60**.
 **Batches 11–15 (Abschluss, 2026-10-22):** Routen-Inventar **941/941 `runtime_wired`**,
 **`legacy_mask_pattern` 0**, **`hand_built` 0** (`mask_route_migration_inventory.py`).
 Registry erweitert um Batch-12-Kontrolle, Batch-13-Stamm, Batch-14-Cockpit, Batch-15-Domain
-sowie Batch-11-Listen-NativeListPage. Made-by-Studio-Gates **749** ScreenDefinitions:
-A=744, B=749, C=718, E=674, Draft-clean=749 (Report:
+sowie Batch-11-Listen-NativeListPage. Made-by-Studio-Gates **749/749** ScreenDefinitions (A/B/C/E + Draft-clean; Report:
 [`made-by-studio-gate-report.md`](../architecture/uix/made-by-studio-gate-report.md));
 Gate-E-Nachzug fuer neu verdrahtete Listen-/Cockpit-IDs in Folge-Slices. pytest
 Parent/Gates **701/701**.

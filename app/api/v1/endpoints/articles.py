@@ -28,13 +28,7 @@ from app.services.articles_service import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.articles_schemas import (
-    ArticlesOut,
-    ArtikelDokumenteOut,
-    ArtikelLieferantenOut,
-    ArtikelPreiseOut,
-)
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.api.v1.schemas.articles_schemas import ArticlesOut
 
 
 router = APIRouter()
@@ -151,7 +145,7 @@ def _steuerschluessel_pruefen(db: Session, tenant_id: str, werte: dict) -> None:
             werte["mehrwertsteuer_prozent"] = satz
 
 
-@router.post("/", response_model=Article, status_code=status.HTTP_201_CREATED, summary="Article anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.post("/", response_model=Article, status_code=status.HTTP_201_CREATED, summary="Article anlegen")
 async def create_article(
     article_data: ArticleCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -274,7 +268,7 @@ async def create_article(
     return _to_article_schema(article)
 
 
-@router.put("/{article_id}", response_model=Article, summary="Article aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.put("/{article_id}", response_model=Article, summary="Article aktualisieren")
 async def update_article(
     article_id: str,
     article_data: ArticleUpdate,
@@ -331,7 +325,8 @@ async def update_article(
     "/{article_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
-    summary="Article löschen", dependencies=SCHREIBEN["STAMMDATEN"])
+    summary="Article löschen",
+)
 async def delete_article(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -353,19 +348,18 @@ async def delete_article(
 from ....infrastructure.models import BusinessPartnerDiscountItem, BusinessPartnerPriceAgreement  # noqa: F811
 
 
-@router.get("/{article_id}/suppliers", response_model=ArtikelLieferantenOut, summary="Article suppliers abrufen")
+@router.get("/{article_id}/suppliers", response_model=ArticlesOut, summary="Article suppliers abrufen")
 async def get_article_suppliers(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get suppliers for an article."""
-    # Ueber die aufgeloeste ID: der Pfad darf auch die Artikelnummer tragen (vorher blieb das Register leer).
-    article = _get_article_or_404(db, article_id, tenant_id)
+    _get_article_or_404(db, article_id, tenant_id)
     
     # Query article suppliers
     suppliers = db.query(ArticleSupplier).filter(
-        ArticleSupplier.article_id == article.id,
+        ArticleSupplier.article_id == article_id,
         ArticleSupplier.tenant_id == tenant_id,
     ).all()
     
@@ -426,7 +420,7 @@ async def get_article_discounts(
     }
 
 
-@router.get("/{article_id}/prices", response_model=ArtikelPreiseOut, summary="Article prices abrufen")
+@router.get("/{article_id}/prices", response_model=ArticlesOut, summary="Article prices abrufen")
 async def get_article_prices(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -461,18 +455,18 @@ async def get_article_prices(
     }
 
 
-@router.get("/{article_id}/documents", response_model=ArtikelDokumenteOut, summary="Article documents abrufen")
+@router.get("/{article_id}/documents", response_model=ArticlesOut, summary="Article documents abrufen")
 async def get_article_documents(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get documents for an article."""
-    article = _get_article_or_404(db, article_id, tenant_id)
+    _get_article_or_404(db, article_id, tenant_id)
     
     # Query article documents
     documents = db.query(ArticleDocument).filter(
-        ArticleDocument.article_id == article.id,
+        ArticleDocument.article_id == article_id,
         ArticleDocument.tenant_id == tenant_id,
     ).all()
     
@@ -940,7 +934,7 @@ async def _do_enrich(article_ids: list[str], db: Session, tenant_id: str) -> Enr
     return EnrichImagesResponse(enriched=enriched, skipped=skipped, failed=failed, results=results)
 
 
-@router.post("/{article_id}/fetch-image", response_model=ImageEnrichResult, summary="Article image abrufen", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.post("/{article_id}/fetch-image", response_model=ImageEnrichResult, summary="Article image abrufen")
 async def fetch_article_image(
     article_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -960,7 +954,7 @@ async def fetch_article_image(
     return ImageEnrichResult(article_id=article_id, image_url=url, source=source)
 
 
-@router.post("/enrich-images", response_model=EnrichImagesResponse, summary="Article images anreichern", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.post("/enrich-images", response_model=EnrichImagesResponse, summary="Article images anreichern")
 async def enrich_article_images(
     article_ids: Optional[list[str]] = None,
     tenant_id: str = Depends(get_tenant_id),

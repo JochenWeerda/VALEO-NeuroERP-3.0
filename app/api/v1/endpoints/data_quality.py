@@ -5,7 +5,6 @@ Datenqualitäts-API (Gap 040): Validierung von Dubletten, Pflichtfeldern und Ref
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from app.auth.deps import require_roles
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -34,8 +33,6 @@ class DataQualityOut(BaseSchema):
 
 
 router = APIRouter(prefix="/data-quality", tags=["admin", "data-quality"])
-
-_NUR_ADMIN = [Depends(require_roles("admin"))]  # Konfiguration: wie admin_core
 
 
 class RuleOut(BaseModel):
@@ -230,7 +227,7 @@ class ValidateRequest(BaseModel):
     entity_types: list[str] | None = Field(default=None, description="Entity-Typen zu prüfen; leer = alle")
 
 
-@router.post("/validate", response_model=list[ValidationResultOut], summary="Data quality validieren", dependencies=_NUR_ADMIN)
+@router.post("/validate", response_model=list[ValidationResultOut], summary="Data quality validieren")
 async def validate_data_quality(
     body: ValidateRequest | None = None,
     db: Session = Depends(get_db),

@@ -22,7 +22,6 @@ from app.infrastructure.models import Silo, SiloLot, SiloLotMovement, SiloQualit
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class SiloOut(BaseSchema):
@@ -322,7 +321,7 @@ async def get_silo_details(
     }
 
 
-@router.post("/silos", response_model=SiloOut, status_code=201, summary="Silo anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/silos", response_model=SiloOut, status_code=201, summary="Silo anlegen")
 async def create_silo(
     payload: SiloCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -358,7 +357,7 @@ async def create_silo(
     }
 
 
-@router.put("/silos/{silo_id}", response_model=SiloOut, summary="Silo aktualisieren", dependencies=SCHREIBEN["LAGER"])
+@router.put("/silos/{silo_id}", response_model=SiloOut, summary="Silo aktualisieren")
 async def update_silo(
     silo_id: str,
     payload: SiloCreate,
@@ -384,7 +383,7 @@ async def update_silo(
     }
 
 
-@router.delete("/silos/{silo_id}", status_code=204, response_class=Response, response_model=None, summary="Silo löschen", dependencies=SCHREIBEN["LAGER"])
+@router.delete("/silos/{silo_id}", status_code=204, response_class=Response, response_model=None, summary="Silo löschen")
 async def delete_silo(
     silo_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -402,7 +401,7 @@ async def delete_silo(
     db.commit()
 
 
-@router.post("/silos/{silo_id}/lots", response_model=SiloOut, status_code=201, summary="Silo lot anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/silos/{silo_id}/lots", response_model=SiloOut, status_code=201, summary="Silo lot anlegen")
 async def create_silo_lot(
     silo_id: str,
     payload: SiloLotCreate,
@@ -474,7 +473,7 @@ async def create_silo_lot(
     }
 
 
-@router.put("/silos/{silo_id}/lots/{lot_id}", response_model=SiloOut, summary="Silo lot aktualisieren", dependencies=SCHREIBEN["LAGER"])
+@router.put("/silos/{silo_id}/lots/{lot_id}", response_model=SiloOut, summary="Silo lot aktualisieren")
 async def update_silo_lot(
     silo_id: str,
     lot_id: str,
@@ -502,7 +501,7 @@ async def update_silo_lot(
             "quantity_tons": _to_float(lot.quantity_tons)}
 
 
-@router.delete("/silos/{silo_id}/lots/{lot_id}", status_code=204, response_class=Response, response_model=None, summary="Silo lot löschen", dependencies=SCHREIBEN["LAGER"])
+@router.delete("/silos/{silo_id}/lots/{lot_id}", status_code=204, response_class=Response, response_model=None, summary="Silo lot löschen")
 async def delete_silo_lot(
     silo_id: str,
     lot_id: str,
@@ -522,7 +521,7 @@ async def delete_silo_lot(
     db.commit()
 
 
-@router.post("/silos/{silo_id}/lots/{lot_id}/movements", response_model=SiloOut, status_code=201, summary="Silo lot movement anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/silos/{silo_id}/lots/{lot_id}/movements", response_model=SiloOut, status_code=201, summary="Silo lot movement anlegen")
 async def create_silo_lot_movement(
     silo_id: str,
     lot_id: str,
@@ -609,7 +608,7 @@ def _silo_columns(db: Session) -> set[str]:
     return {r[0] for r in rows}
 
 
-@router.post("/silos/{silo_id}/leermeldung", response_model=SiloOut, status_code=201, summary="Leermeldung anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/silos/{silo_id}/leermeldung", response_model=SiloOut, status_code=201, summary="Leermeldung anlegen")
 async def create_leermeldung(
     silo_id: str,
     payload: LeermeldungCreate,

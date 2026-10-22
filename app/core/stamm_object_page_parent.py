@@ -190,6 +190,7 @@ def build_stamm_object_page(
         definition["workflow"] = workflow
     if no_workflow_reason is not None:
         definition["noWorkflowReason"] = no_workflow_reason
+        definition.setdefault("noProcessChainReason", no_workflow_reason)
     if interaction is not None:
         definition["interaction"] = interaction
     if summary is not None:
@@ -201,4 +202,67 @@ def build_stamm_object_page(
         ]
     if summary_endpoint:
         definition["summaryEndpoint"] = summary_endpoint
+    ensure_stamm_screen_registry()
     return definition
+
+
+_STAMM_REGISTRY_DONE = False
+
+
+def ensure_stamm_screen_registry() -> None:
+    """Idempotent: STAMM_SCREEN_BUILDERS in den globalen ScreenDefinition-Katalog mergen."""
+    global _STAMM_REGISTRY_DONE
+    if _STAMM_REGISTRY_DONE:
+        return
+    import sys
+
+    sd = sys.modules.get("app.core.screen_definitions")
+    if sd is None or not hasattr(sd, "_SCREEN_DEFINITIONS"):
+        return
+    from app.core.screen_definitions_stamm import (
+        STAMM_ROUTEN,
+        STAMM_SCREEN_BUILDERS,
+        STAMM_SYNONYME,
+    )
+
+    from app.core.screen_definitions_kontrolle import KONTROLLE_SCREEN_BUILDERS
+
+    stamm_only = {
+        sid: builder
+        for sid, builder in STAMM_SCREEN_BUILDERS.items()
+        if sid not in KONTROLLE_SCREEN_BUILDERS
+    }
+    sd._SCREEN_DEFINITIONS.update(stamm_only)
+    if hasattr(sd, "_SCREEN_LIST_ROUTE"):
+        sd._SCREEN_LIST_ROUTE.update(STAMM_ROUTEN)
+    if hasattr(sd, "_AGENT_SYNONYMS"):
+        for screen_id, synonyms in STAMM_SYNONYME.items():
+            bucket = sd._AGENT_SYNONYMS.setdefault(screen_id, [])
+            for synonym in synonyms:
+                if synonym not in bucket:
+                    bucket.append(synonym)
+    _STAMM_REGISTRY_DONE = True
+
+
+def patch_get_screen_definition_for_stamm() -> None:
+    """Stellt sicher, dass get_screen_definition STAMM-Builder sieht (auch vor erstem build_stamm-Aufruf)."""
+    import sys
+
+    sd = sys.modules.get("app.core.screen_definitions")
+    if sd is None or getattr(patch_get_screen_definition_for_stamm, "_done", False):
+        return
+    if not hasattr(sd, "get_screen_definition"):
+        return
+    original = sd.get_screen_definition
+
+    def get_screen_definition(  # type: ignore[no-redef]
+        mask_id: str,
+        *,
+        today: str | None = None,
+        tenant_id: str | None = None,
+    ):
+        ensure_stamm_screen_registry()
+        return original(mask_id, today=today, tenant_id=tenant_id)
+
+    sd.get_screen_definition = get_screen_definition
+    patch_get_screen_definition_for_stamm._done = True  # type: ignore[attr-defined]

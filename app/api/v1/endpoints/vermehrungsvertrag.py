@@ -28,7 +28,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/saatzucht/vermehrungsvertraege",
@@ -123,7 +122,7 @@ def get_vermehrungsvertrag(
     return VermehrungsvertragOut(**dict(row._mapping))
 
 
-@router.post("", response_model=VermehrungsvertragOut, status_code=201, summary="Vermehrungsvertrag anlegen", dependencies=SCHREIBEN["AGRAR"])
+@router.post("", response_model=VermehrungsvertragOut, status_code=201, summary="Vermehrungsvertrag anlegen")
 def create_vermehrungsvertrag(
     payload: VermehrungsvertragCreate,
     db=Depends(get_db),
@@ -161,7 +160,7 @@ def create_vermehrungsvertrag(
     return VermehrungsvertragOut(**dict(row._mapping))
 
 
-@router.put("/{vertrag_nr}", response_model=VermehrungsvertragOut, summary="Vermehrungsvertrag aktualisieren", dependencies=SCHREIBEN["AGRAR"])
+@router.put("/{vertrag_nr}", response_model=VermehrungsvertragOut, summary="Vermehrungsvertrag aktualisieren")
 def update_vermehrungsvertrag(
     vertrag_nr: str,
     payload: VermehrungsvertragCreate,
@@ -204,7 +203,7 @@ def update_vermehrungsvertrag(
     return VermehrungsvertragOut(**dict(updated._mapping))
 
 
-@router.post("/{vertrag_nr}/status", response_model=VermehrungsvertragOut, summary="Status setzen", dependencies=SCHREIBEN["AGRAR"])
+@router.post("/{vertrag_nr}/status", response_model=VermehrungsvertragOut, summary="Status setzen")
 def set_status(
     vertrag_nr: str,
     neuer_status: str,

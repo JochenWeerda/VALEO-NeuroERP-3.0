@@ -23,7 +23,6 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/kontrakt-klassen", tags=["kontrakt-klassen"])
@@ -88,7 +87,7 @@ def list_kontrakt_klassen(
         return []  # migration_hint: domain_agrar.kontrakt_klassen not yet migrated
 
 
-@router.post("", response_model=KontraktKlasseOut, status_code=201, summary="Kontrakt klasse anlegen", dependencies=SCHREIBEN["KONTRAKT"])
+@router.post("", response_model=KontraktKlasseOut, status_code=201, summary="Kontrakt klasse anlegen")
 def create_kontrakt_klasse(
     payload: KontraktKlasseCreate,
     db: Session = Depends(get_db),
@@ -128,7 +127,7 @@ def create_kontrakt_klasse(
     )
 
 
-@router.put("/{klasse_id}", response_model=KontraktKlasseOut, summary="Kontrakt klasse aktualisieren", dependencies=SCHREIBEN["KONTRAKT"])
+@router.put("/{klasse_id}", response_model=KontraktKlasseOut, summary="Kontrakt klasse aktualisieren")
 def update_kontrakt_klasse(
     klasse_id: str,
     payload: KontraktKlasseCreate,
@@ -160,7 +159,7 @@ def update_kontrakt_klasse(
     return KontraktKlasseOut(id=klasse_id, **payload.model_dump())
 
 
-@router.delete("/{klasse_id}", status_code=204, response_class=Response, response_model=None, summary="Kontrakt klasse löschen", dependencies=SCHREIBEN["KONTRAKT"])
+@router.delete("/{klasse_id}", status_code=204, response_class=Response, response_model=None, summary="Kontrakt klasse löschen")
 def delete_kontrakt_klasse(
     klasse_id: str,
     db: Session = Depends(get_db),

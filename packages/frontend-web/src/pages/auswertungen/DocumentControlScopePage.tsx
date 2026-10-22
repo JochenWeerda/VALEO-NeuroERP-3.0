@@ -1,28 +1,38 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
-import { seg, useMaskRowCommands } from '@/components/mask-builder/runtime/useMaskRowCommands'
+import { useToast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/api-client'
 
-const command = (key: string) => (row: Record<string, unknown>) =>
-  `/api/v1/document-control/exceptions/${seg(row.id)}/actions/${key}`
+export function DocumentControlScopePage({ screenId }: { screenId: string }): JSX.Element {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
 
-/**
- * Belegkontrolle und ihre gespeicherten L3-Sichten. Die Seite fragt nur die Begruendung ab; Bearbeiter,
- * Zustaendiger, Statusregeln, Audit und Wiederholungsschutz liegen beim Kommando-Endpunkt, den auch CLI
- * und MCP rufen (MASK-COMMANDS-ROLLOUT).
- */
-export function DocumentControlScopePage({ screenId, testId }: { screenId: string; testId?: string }): JSX.Element {
-  const handleAction = useMaskRowCommands({
-    screenId,
-    commands: Object.fromEntries(['assign_me', 'start_work', 'resolve', 'waive'].map(key => [key, command(key)])),
-    navigation: { open_source: row => row.source_route },
-    successTitle: 'Belegkontrolle aktualisiert',
-  })
+  async function handleAction(actionKey: string, row: Record<string, unknown>): Promise<void> {
+    if (actionKey === 'open_source') {
+      const route = String(row.source_route ?? '')
+      if (route.startsWith('/')) window.location.assign(route)
+      return
+    }
+    const caseId = String(row.id ?? '')
+    if (!caseId) return
+    const reason = window.prompt('Grund fuer die Bearbeitung (Audit):')?.trim()
+    if (!reason || reason.length < 5) return
+    try {
+      if (actionKey === 'assign_me') {
+        await apiClient.post(`/api/v1/document-control/exceptions/${encodeURIComponent(caseId)}/assign`, {
+          assigned_user: 'current-user', reason,
+        })
+      } else {
+        const target = { start_work: 'in_progress', resolve: 'resolved', waive: 'waived' }[actionKey]
+        if (!target) return
+        await apiClient.post(`/api/v1/document-control/exceptions/${encodeURIComponent(caseId)}/transition`, { target, reason })
+      }
+      await queryClient.invalidateQueries({ queryKey: [screenId] })
+      toast({ title: 'Belegkontrolle aktualisiert' })
+    } catch (error) {
+      toast({ title: 'Bearbeitung fehlgeschlagen', description: error instanceof Error ? error.message : 'Unbekannter Fehler', variant: 'destructive' })
+    }
+  }
 
-  return (
-    <UniversalNativeCockpitPage
-      screenId={screenId}
-      testId={testId ?? screenId.replace('/', '-')}
-      permissions={['document_control.write']}
-      onAction={handleAction}
-    />
-  )
+  return <UniversalNativeCockpitPage screenId={screenId} testId={screenId.replace('/', '-')} permissions={['document_control.write']} onAction={handleAction} />
 }

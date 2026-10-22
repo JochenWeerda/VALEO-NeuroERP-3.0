@@ -13,7 +13,6 @@ from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class PosPaymentOut(BaseSchema):
@@ -98,7 +97,8 @@ async def list_payment_methods(
 
 
 @router.post("/checkout/split-payment", status_code=201, summary="Payment aufteilen",
-    response_model=PosPaymentOut, dependencies=SCHREIBEN["VERKAUF"])
+    response_model=PosPaymentOut
+)
 async def split_payment(
     payload: SplitPaymentIn,
     db: Session = Depends(get_db),
@@ -143,7 +143,8 @@ async def list_promotions(
 
 
 @router.post("/promotions", status_code=201, summary="Promotion anlegen",
-    response_model=PosPaymentOut, dependencies=SCHREIBEN["VERKAUF"])
+    response_model=PosPaymentOut
+)
 async def create_promotion(
     payload: PromotionIn,
     db: Session = Depends(get_db),
@@ -170,7 +171,8 @@ async def create_promotion(
 
 
 @router.post("/promotions/check", summary="Promotion prüfen",
-    response_model=PosPaymentOut, dependencies=SCHREIBEN["VERKAUF"])
+    response_model=PosPaymentOut
+)
 async def check_promotion(
     payload: PromotionCheckIn,
     db: Session = Depends(get_db),
@@ -357,7 +359,8 @@ async def z_report(
 
 
 @router.post("/checkout/preview", summary="Preview checkout",
-    response_model=PosPaymentOut, dependencies=SCHREIBEN["VERKAUF"])
+    response_model=PosPaymentOut
+)
 async def checkout_preview(
     payload: SplitPaymentIn,
     db: Session = Depends(get_db),

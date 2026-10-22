@@ -222,7 +222,7 @@ def action_postfach_speichern(
             tenant_id,
             opened.model_dump(),
             postfach_id=postfach_id,
-            von=nutzer.get("sub"),
+            von=nutzer.get("sub") or request.headers.get("X-User-ID"),
         )
         entity_id = str(saved["id"])
         audit_id = _write_audit(

@@ -21,7 +21,6 @@ from app.api.v1.schemas.contract_spine_schemas import (
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.contract_engagement_service import ContractEngagementService, ReminderError
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/contracts", tags=["contracts", "kontrakte", "agrar"])
 
@@ -58,7 +57,7 @@ class ReminderIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/dunning", response_model=ReminderCreatedOut, summary="Kontraktmahnung erfassen (append-only)", dependencies=SCHREIBEN["KONTRAKT"])
+@router.post("/dunning", response_model=ReminderCreatedOut, summary="Kontraktmahnung erfassen (append-only)")
 def create_reminder(
     body: ReminderIn,
     db: Session = Depends(get_db),

@@ -14,7 +14,6 @@ from app.services.report_print_service import ReportPrintService
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.report_print_schemas import ReportPrintOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/report-print", tags=["report-print", "agrar", "waage"])
@@ -70,7 +69,8 @@ def get_weighing_ticket_pdf_preview(
 
 
 @router.post("/labels", status_code=201, summary="Label payload anlegen",
-    response_model=ReportPrintOut, dependencies=SCHREIBEN["VERKAUF"])
+    response_model=ReportPrintOut
+)
 def create_label_payload(
     payload: ReportPrintLabelRequest,
     db: Session = Depends(get_db),

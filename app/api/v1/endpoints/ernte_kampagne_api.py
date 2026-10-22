@@ -14,7 +14,6 @@ from app.domains.operations.models import ErnteKampagneDB
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.ernte_kampagne_api_schemas import ErnteKampagneApiOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/ernte-kampagnen", tags=["ernte-kampagnen"])
@@ -49,7 +48,8 @@ def _to_dict(row: ErnteKampagneDB) -> dict:
 
 
 @router.post("", status_code=201, summary="Kampagne anlegen",
-    response_model=ErnteKampagneApiOut, dependencies=SCHREIBEN["ERNTE"])
+    response_model=ErnteKampagneApiOut
+)
 def create_kampagne(req: ErnteKampagneCreateRequest, db: Session = Depends(get_db)):
     ErnteArt(req.ernte_art)  # validate enum value
     row = ErnteKampagneDB(
@@ -87,7 +87,7 @@ def get_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     return _to_dict(row)
 
 
-@router.delete("/{kampagne_id}", status_code=204, response_class=Response, response_model=None, summary="Kampagne löschen", dependencies=SCHREIBEN["ERNTE"])
+@router.delete("/{kampagne_id}", status_code=204, response_class=Response, response_model=None, summary="Kampagne löschen")
 def delete_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()
     if not row:
@@ -100,7 +100,8 @@ def delete_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/{kampagne_id}/start", summary="Kampagne starten",
-    response_model=ErnteKampagneApiOut, dependencies=SCHREIBEN["ERNTE"])
+    response_model=ErnteKampagneApiOut
+)
 def start_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()
     if not row:
@@ -114,7 +115,8 @@ def start_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/{kampagne_id}/abschliessen", summary="Kampagne abschliessen",
-    response_model=ErnteKampagneApiOut, dependencies=SCHREIBEN["ERNTE"])
+    response_model=ErnteKampagneApiOut
+)
 def abschliessen_kampagne(kampagne_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteKampagneDB).filter(ErnteKampagneDB.kampagne_id == kampagne_id).first()
     if not row:

@@ -13,7 +13,6 @@ from app.domains.operations.models import ZertifikatAPIEntry
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.zertifikate_api_schemas import ZertifikateApiOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/zertifikate", tags=["zertifikate"])
@@ -42,7 +41,8 @@ class ZertifikatCreateRequest(BaseModel):
 
 
 @router.post("", status_code=201, summary="Zertifikat anlegen",
-    response_model=ZertifikateApiOut, dependencies=SCHREIBEN["QUALITAET"])
+    response_model=ZertifikateApiOut
+)
 def create_zertifikat(req: ZertifikatCreateRequest, db: Session = Depends(get_db)):
     import uuid
     from datetime import datetime

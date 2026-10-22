@@ -1,37 +1,22 @@
-"""CRM Farm Profile endpoints proxied through crm-core.
+"""CRM Farm Profile endpoints proxied through crm-core."""
 
-crm-core fuehrt den Mandanten am Betriebsprofil, der Proxy wertete ihn bis 21.10.2026 nicht aus: Liste, Abruf,
-Aendern, Loeschen und Unterlisten reichten Betriebsprofile *aller* Mandanten durch. Jetzt gilt der gepruefte Kontext.
-"""
-
-from contextvars import ContextVar
 from typing import Any
 from uuid import UUID
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
+from fastapi import APIRouter, HTTPException, Path, Query, status
 from pydantic import BaseModel, Field
 
 from ....core.config import settings
-from ....core.tenant import get_tenant_id
 from ....integrations import crm_core_client
 from ..schemas.base import PaginatedResponse
 from ..schemas.crm import FarmProfile, FarmProfileCreate, FarmProfileUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.farm_profiles_schemas import FarmProfilesOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
-_MANDANT: ContextVar[str] = ContextVar("betriebsprofile_mandant")
-
-
-async def _mandant_merken(tenant_id: str = Depends(get_tenant_id)) -> None:
-    # async: der Wert muss im selben Kontext wie der Endpunkt gesetzt werden (sync liefe im Threadpool).
-    _MANDANT.set(tenant_id)
-
-
-router = APIRouter(dependencies=[Depends(_mandant_merken)])
+router = APIRouter()
 
 
 class _CertificationItem(BaseModel):
@@ -89,13 +74,10 @@ def _raise_core_error(exc: Exception, not_found_detail: str, default_detail: str
 
 async def _get_profile_or_404(profile_id: str) -> crm_core_client.CRMCoreFarmProfile:
     try:
-        profile = await crm_core_client.get_farm_profile(profile_id)
+        return await crm_core_client.get_farm_profile(profile_id)
     except Exception as exc:
         _raise_core_error(exc, "Farm profile not found", f"Failed to retrieve farm profile: {exc}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve farm profile") from exc
-    if profile.tenant_id != _MANDANT.get():
-        raise HTTPException(status_code=404, detail="Farm profile not found")
-    return profile
+    raise HTTPException(status_code=500, detail="Failed to retrieve farm profile")
 
 
 async def _replace_list_field(profile_id: str, field_name: str, items: list[Any]) -> list[Any]:
@@ -134,10 +116,7 @@ async def list_farm_profiles(
         profiles, total = [], 0
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to list farm profiles: {exc}") from exc
-    eigene = [profile for profile in profiles if profile.tenant_id == _MANDANT.get()]
-    if len(eigene) != len(profiles):
-        total = len(eigene)  # crm-core filterte nicht nach Mandant; die Seite zaehlt nur eigene
-    items = [_adapt_farm_profile(profile) for profile in eigene]
+    items = [_adapt_farm_profile(profile) for profile in profiles]
     pages = (total + limit - 1) // limit if limit else 0
     return PaginatedResponse[FarmProfile](
         items=[FarmProfile.model_validate(item) for item in items],
@@ -152,22 +131,29 @@ async def list_farm_profiles(
 
 @router.get("/{profile_id}", response_model=FarmProfile, summary="Farm profile abrufen")
 async def get_farm_profile(profile_id: str):
-    return FarmProfile.model_validate(_adapt_farm_profile(await _get_profile_or_404(profile_id)))
+    try:
+        profile = await crm_core_client.get_farm_profile(profile_id)
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 404:
+            raise HTTPException(status_code=404, detail="Farm profile not found") from exc
+        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve farm profile: {exc}") from exc
+    return FarmProfile.model_validate(_adapt_farm_profile(profile))
 
 
-@router.post("/", response_model=FarmProfile, status_code=status.HTTP_201_CREATED, summary="Farm profile anlegen", dependencies=SCHREIBEN["CRM"])
+@router.post("/", response_model=FarmProfile, status_code=status.HTTP_201_CREATED, summary="Farm profile anlegen")
 async def create_farm_profile(payload: FarmProfileCreate):
     try:
-        body = {**_map_create_payload(payload), "tenant_id": _MANDANT.get()}
+        body = _map_create_payload(payload)
         created = await crm_core_client.create_farm_profile(body)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to create farm profile: {exc}") from exc
     return FarmProfile.model_validate(_adapt_farm_profile(created))
 
 
-@router.put("/{profile_id}", response_model=FarmProfile, summary="Farm profile aktualisieren", dependencies=SCHREIBEN["CRM"])
+@router.put("/{profile_id}", response_model=FarmProfile, summary="Farm profile aktualisieren")
 async def update_farm_profile(profile_id: str, payload: FarmProfileUpdate):
-    await _get_profile_or_404(profile_id)
     try:
         body = _map_update_payload(payload)
         updated = await crm_core_client.update_farm_profile(profile_id, body)
@@ -181,9 +167,9 @@ async def update_farm_profile(profile_id: str, payload: FarmProfileUpdate):
 
 
 @router.delete("/{profile_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile löschen",
-    response_model=None, dependencies=SCHREIBEN["CRM"])
+    response_model=None
+)
 async def delete_farm_profile(profile_id: str):
-    await _get_profile_or_404(profile_id)
     try:
         await crm_core_client.delete_farm_profile(profile_id)
     except httpx.HTTPStatusError as exc:
@@ -199,7 +185,7 @@ async def list_farm_profile_crops(profile_id: str):
     return await _load_list_field(profile_id, "crops")
 
 
-@router.post("/{profile_id}/crops", response_model=FarmProfilesOut, status_code=status.HTTP_201_CREATED, summary="Farm profile crop anlegen", dependencies=SCHREIBEN["CRM"])
+@router.post("/{profile_id}/crops", response_model=FarmProfilesOut, status_code=status.HTTP_201_CREATED, summary="Farm profile crop anlegen")
 async def create_farm_profile_crop(profile_id: str, payload: dict[str, Any]):
     items = await _load_list_field(profile_id, "crops")
     items.append(payload)
@@ -207,7 +193,7 @@ async def create_farm_profile_crop(profile_id: str, payload: dict[str, Any]):
     return dict(updated[-1])
 
 
-@router.put("/{profile_id}/crops/{item_index}", response_model=FarmProfilesOut, summary="Farm profile crop replace", dependencies=SCHREIBEN["CRM"])
+@router.put("/{profile_id}/crops/{item_index}", response_model=FarmProfilesOut, summary="Farm profile crop replace")
 async def replace_farm_profile_crop(
     profile_id: str,
     item_index: int = Path(..., ge=0),
@@ -221,7 +207,8 @@ async def replace_farm_profile_crop(
 
 
 @router.delete("/{profile_id}/crops/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile crop löschen",
-    response_model=None, dependencies=SCHREIBEN["CRM"])
+    response_model=None
+)
 async def delete_farm_profile_crop(profile_id: str, item_index: int = Path(..., ge=0)):
     items = await _load_list_field(profile_id, "crops")
     _validate_item_index(items, item_index, "Crop")
@@ -234,7 +221,7 @@ async def list_farm_profile_livestock(profile_id: str):
     return await _load_list_field(profile_id, "livestock")
 
 
-@router.post("/{profile_id}/livestock", response_model=FarmProfilesOut, status_code=status.HTTP_201_CREATED, summary="Farm profile livestock anlegen", dependencies=SCHREIBEN["CRM"])
+@router.post("/{profile_id}/livestock", response_model=FarmProfilesOut, status_code=status.HTTP_201_CREATED, summary="Farm profile livestock anlegen")
 async def create_farm_profile_livestock(profile_id: str, payload: dict[str, Any]):
     items = await _load_list_field(profile_id, "livestock")
     items.append(payload)
@@ -242,7 +229,7 @@ async def create_farm_profile_livestock(profile_id: str, payload: dict[str, Any]
     return dict(updated[-1])
 
 
-@router.put("/{profile_id}/livestock/{item_index}", response_model=FarmProfilesOut, summary="Farm profile livestock replace", dependencies=SCHREIBEN["CRM"])
+@router.put("/{profile_id}/livestock/{item_index}", response_model=FarmProfilesOut, summary="Farm profile livestock replace")
 async def replace_farm_profile_livestock(
     profile_id: str,
     item_index: int = Path(..., ge=0),
@@ -256,7 +243,8 @@ async def replace_farm_profile_livestock(
 
 
 @router.delete("/{profile_id}/livestock/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile livestock löschen",
-    response_model=None, dependencies=SCHREIBEN["CRM"])
+    response_model=None
+)
 async def delete_farm_profile_livestock(profile_id: str, item_index: int = Path(..., ge=0)):
     items = await _load_list_field(profile_id, "livestock")
     _validate_item_index(items, item_index, "Livestock")
@@ -274,7 +262,8 @@ async def list_farm_profile_certifications(profile_id: str):
     "/{profile_id}/certifications",
     response_model=str,
     status_code=status.HTTP_201_CREATED,
-    summary="Farm profile certification anlegen", dependencies=SCHREIBEN["CRM"])
+    summary="Farm profile certification anlegen",
+)
 async def create_farm_profile_certification(profile_id: str, payload: _CertificationItem):
     items = [str(item) for item in await _load_list_field(profile_id, "certifications")]
     items.append(payload.value)
@@ -282,7 +271,7 @@ async def create_farm_profile_certification(profile_id: str, payload: _Certifica
     return str(updated[-1])
 
 
-@router.put("/{profile_id}/certifications/{item_index}", response_model=str, summary="Farm profile certification replace", dependencies=SCHREIBEN["CRM"])
+@router.put("/{profile_id}/certifications/{item_index}", response_model=str, summary="Farm profile certification replace")
 async def replace_farm_profile_certification(
     profile_id: str,
     payload: _CertificationItem,
@@ -296,7 +285,8 @@ async def replace_farm_profile_certification(
 
 
 @router.delete("/{profile_id}/certifications/{item_index}", status_code=status.HTTP_204_NO_CONTENT, summary="Farm profile certification löschen",
-    response_model=None, dependencies=SCHREIBEN["CRM"])
+    response_model=None
+)
 async def delete_farm_profile_certification(profile_id: str, item_index: int = Path(..., ge=0)):
     items = [str(item) for item in await _load_list_field(profile_id, "certifications")]
     _validate_item_index(items, item_index, "Certification")

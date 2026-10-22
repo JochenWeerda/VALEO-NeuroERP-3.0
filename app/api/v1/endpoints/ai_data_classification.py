@@ -8,7 +8,6 @@ from typing import Any
 
 from app.services.ai_data_classification_service import DataClass, ai_data_classification_service
 from app.api.v1.schemas.base import TypedObjectOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/ai-data-classes", tags=["ai-data-classification", "compliance"])
 
@@ -42,7 +41,7 @@ class ModelCheckRequest(BaseModel):
     model_pattern: str
 
 
-@router.post("/check-model", summary="Pruefen ob KI-Modell fuer Kategorie erlaubt", response_model=TypedObjectOut, dependencies=SCHREIBEN["PLATTFORM"])
+@router.post("/check-model", summary="Pruefen ob KI-Modell fuer Kategorie erlaubt", response_model=TypedObjectOut)
 async def check_model(req: ModelCheckRequest) -> dict[str, Any]:
     try:
         return ai_data_classification_service.check_model_allowed(req.category_id, req.model_pattern)

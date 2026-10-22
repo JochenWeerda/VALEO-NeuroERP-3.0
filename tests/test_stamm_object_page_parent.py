@@ -6,7 +6,7 @@ import pytest
 
 from app.api.v1.endpoints.mask_screen_definition import _check_readiness, _generate_agent_contract
 from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition
-from app.core.screen_definitions_stamm import build_artikel_stamm
+from app.core.screen_definitions_stamm import STAMM_SCREEN_BUILDERS, build_artikel_stamm
 from app.core.stamm_object_page_parent import build_stamm_object_page, stamm_entity_source, stamm_kopf_tab
 from app.core.studio_release import definition_hash
 from app.services import studio_native_import
@@ -45,7 +45,7 @@ IDENTITY_BY_SCREEN = {
     "einkauf/supplier": "lieferantennummer",
     "finance/debitor": "debitoren_nr",
     "finance/kreditor": "kreditoren_nr",
-    "finance/bankkonto": None,
+    "finance/bankkonto": "iban",
     "lager/article-stock": "article_number",
     "crm/opportunity": "name",
     "crm/lead": "company_name",
@@ -110,7 +110,7 @@ def test_all_stamm_children_pass_studio_gate_a_readiness_and_agent_contract(scre
 
 
 def test_registered_stamm_children_are_discoverable_as_studio_native_sources() -> None:
-    sources = studio_native_import.list_sources("default", limit=200)
+    sources = studio_native_import.list_sources("default", limit=2000)
     by_id = {item["screen_id"]: item for item in sources["items"]}
     for screen_id in STAMM_REGISTERED_SCREENS:
         assert screen_id in SCREEN_DEFINITION_BUILDERS
@@ -228,6 +228,24 @@ def test_parent_rejects_missing_workflow_and_no_workflow_reason() -> None:
             example_prompts=["a"],
             test_id="x-y",
         )
+
+
+@pytest.mark.parametrize("screen_id", sorted(STAMM_SCREEN_BUILDERS.keys()))
+def test_batch9_stamm_builders_pass_gate_a(screen_id: str) -> None:
+    builder = STAMM_SCREEN_BUILDERS[screen_id]
+    screen = builder()
+    readiness = _check_readiness(screen)
+    assert readiness["generatorReady"] is True, f"{screen_id}: {readiness['errors']}"
+    entity = next(ds for ds in screen["dataSources"] if ds["key"] == "entity")
+    assert "{entity_id}" in entity["endpoint"] or "{id}" in entity["endpoint"]
+    identity = screen.get("identityField")
+    if identity:
+        kopf = next(tab for tab in screen["tabs"] if tab["key"] == "kopf")
+        keys = {f["key"] for f in kopf.get("fields") or []}
+        assert identity in keys, f"{screen_id}: identityField {identity} fehlt im Kopf-Tab"
+    for action in screen["actions"]:
+        if action.get("kind") != "navigation":
+            assert action.get("permission"), f"{screen_id}: action {action['key']} ohne permission"
 
 
 def test_duenger_and_saatgut_keep_domain_tabs() -> None:

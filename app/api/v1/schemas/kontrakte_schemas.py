@@ -98,6 +98,7 @@ class AmendmentCreate(BaseModel):
     type: str
     reason: str
     changes: dict = {}
+    created_by: str = "system"
 
 
 class AmendmentResponse(BaseModel):

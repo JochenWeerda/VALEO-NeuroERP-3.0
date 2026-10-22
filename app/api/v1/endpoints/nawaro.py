@@ -23,7 +23,6 @@ from app.infrastructure.models import (
 )
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -242,7 +241,7 @@ async def list_print_notifications(
     return [_notification_out(item) for item in items]
 
 
-@router.post('/print-notifications', response_model=NawaroNotificationOut, status_code=201, summary="Print notification anlegen", dependencies=SCHREIBEN["AGRAR"])
+@router.post('/print-notifications', response_model=NawaroNotificationOut, status_code=201, summary="Print notification anlegen")
 async def create_print_notification(
     payload: NawaroNotificationIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -283,7 +282,7 @@ async def get_print_notification(
     return _notification_out(item)
 
 
-@router.put('/print-notifications/{item_id}', response_model=NawaroNotificationOut, summary="Print notification aktualisieren", dependencies=SCHREIBEN["AGRAR"])
+@router.put('/print-notifications/{item_id}', response_model=NawaroNotificationOut, summary="Print notification aktualisieren")
 async def update_print_notification(
     item_id: str,
     payload: NawaroNotificationIn,
@@ -313,7 +312,7 @@ async def update_print_notification(
     return _notification_out(item)
 
 
-@router.delete('/print-notifications/{item_id}', response_model=StatusResponse, summary="Print notification löschen", dependencies=SCHREIBEN["AGRAR"])
+@router.delete('/print-notifications/{item_id}', response_model=StatusResponse, summary="Print notification löschen")
 async def delete_print_notification(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -346,7 +345,7 @@ async def list_contract_sheets(
     return [_contract_sheet_out(db, item) for item in items]
 
 
-@router.post('/contract-sheets', response_model=NawaroContractSheetOut, status_code=201, summary="Contract sheet anlegen", dependencies=SCHREIBEN["AGRAR"])
+@router.post('/contract-sheets', response_model=NawaroContractSheetOut, status_code=201, summary="Contract sheet anlegen")
 async def create_contract_sheet(
     payload: NawaroContractSheetIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -403,7 +402,7 @@ async def get_contract_sheet(
     return _contract_sheet_out(db, item)
 
 
-@router.put('/contract-sheets/{sheet_id}', response_model=NawaroContractSheetOut, summary="Contract sheet aktualisieren", dependencies=SCHREIBEN["AGRAR"])
+@router.put('/contract-sheets/{sheet_id}', response_model=NawaroContractSheetOut, summary="Contract sheet aktualisieren")
 async def update_contract_sheet(
     sheet_id: str,
     payload: NawaroContractSheetIn,
@@ -452,7 +451,7 @@ async def update_contract_sheet(
     return _contract_sheet_out(db, item)
 
 
-@router.delete('/contract-sheets/{sheet_id}', response_model=StatusResponse, summary="Contract sheet löschen", dependencies=SCHREIBEN["AGRAR"])
+@router.delete('/contract-sheets/{sheet_id}', response_model=StatusResponse, summary="Contract sheet löschen")
 async def delete_contract_sheet(
     sheet_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -490,7 +489,7 @@ async def list_area_sheets(
     return [_area_sheet_out(db, item) for item in items]
 
 
-@router.post('/area-sheets', response_model=NawaroAreaSheetOut, status_code=201, summary="Area sheet anlegen", dependencies=SCHREIBEN["AGRAR"])
+@router.post('/area-sheets', response_model=NawaroAreaSheetOut, status_code=201, summary="Area sheet anlegen")
 async def create_area_sheet(
     payload: NawaroAreaSheetIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -552,7 +551,7 @@ async def get_area_sheet(
     return _area_sheet_out(db, item)
 
 
-@router.put('/area-sheets/{sheet_id}', response_model=NawaroAreaSheetOut, summary="Area sheet aktualisieren", dependencies=SCHREIBEN["AGRAR"])
+@router.put('/area-sheets/{sheet_id}', response_model=NawaroAreaSheetOut, summary="Area sheet aktualisieren")
 async def update_area_sheet(
     sheet_id: str,
     payload: NawaroAreaSheetIn,
@@ -606,7 +605,7 @@ async def update_area_sheet(
     return _area_sheet_out(db, item)
 
 
-@router.delete('/area-sheets/{sheet_id}', response_model=StatusResponse, summary="Area sheet löschen", dependencies=SCHREIBEN["AGRAR"])
+@router.delete('/area-sheets/{sheet_id}', response_model=StatusResponse, summary="Area sheet löschen")
 async def delete_area_sheet(
     sheet_id: str,
     tenant_id: str = Depends(get_tenant_id),

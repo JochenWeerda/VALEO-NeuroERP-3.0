@@ -8,7 +8,6 @@ from app.core.e2e_chain import E2EProcessChain, ChainCompletenessReport
 from app.domains.operations.models import E2EProcessChainDB
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/process/e2e", tags=["process", "e2e", "chain"])
@@ -23,7 +22,7 @@ def _db_to_chain(row: E2EProcessChainDB) -> E2EProcessChain:
 
 
 @router.post("/chains", response_model=E2EProcessChain, status_code=201,
-             summary="E2E-Prozesskette anlegen", dependencies=SCHREIBEN["FACHLICH"])
+             summary="E2E-Prozesskette anlegen")
 def create_chain(body: E2EProcessChain, db: Session = Depends(get_db)) -> E2EProcessChain:
     row = E2EProcessChainDB(
         tenant_id=body.tenant_id,
@@ -55,7 +54,7 @@ def get_completeness(tenant_id: str, db: Session = Depends(get_db)) -> ChainComp
 
 
 @router.put("/chains/{chain_id}", response_model=E2EProcessChain,
-            summary="E2E-Kette aktualisieren", dependencies=SCHREIBEN["FACHLICH"])
+            summary="E2E-Kette aktualisieren")
 def update_chain(chain_id: str, body: E2EProcessChain, db: Session = Depends(get_db)) -> E2EProcessChain:
     row = db.query(E2EProcessChainDB).filter(
         (E2EProcessChainDB.settlement_id == chain_id) |

@@ -24,7 +24,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/artikel/stoffstrom", tags=["Artikelstamm - Stoffstrom & THG"])
@@ -112,7 +111,7 @@ def get_stoffstrom_fuer_artikel(
     return [StoffstromOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=StoffstromOut, status_code=201, summary="Stoffstrom anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.post("", response_model=StoffstromOut, status_code=201, summary="Stoffstrom anlegen")
 def create_stoffstrom(
     payload: StoffstromCreate,
     db=Depends(get_db),
@@ -142,7 +141,7 @@ def create_stoffstrom(
     return StoffstromOut(**dict(row._mapping))
 
 
-@router.put("/{stoffstrom_id}", response_model=StoffstromOut, summary="Stoffstrom aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.put("/{stoffstrom_id}", response_model=StoffstromOut, summary="Stoffstrom aktualisieren")
 def update_stoffstrom(
     stoffstrom_id: str,
     payload: StoffstromCreate,
@@ -180,7 +179,8 @@ def update_stoffstrom(
 
 
 @router.delete("/{stoffstrom_id}", summary="Stoffstrom löschen",
-    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
+    response_model=None
+)
 def delete_stoffstrom(
     stoffstrom_id: str,
     db=Depends(get_db),

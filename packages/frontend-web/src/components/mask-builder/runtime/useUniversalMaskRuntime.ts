@@ -7,8 +7,6 @@ import { compileRenderPlan } from '../render-plan/schema-compiler'
 import { applyOverlay, hashOverlay, type ScreenOverlay } from '../render-plan/overlay'
 import type { DataBindingPlan, LookupBinding, TableQueryState } from './types'
 import { compileDataBindingPlan } from './compile-data-binding-plan'
-import { applyClientTableQuery } from './client-table-query'
-import { tableSourceRequest } from './table-source-request'
 import { defaultTableQueryState, toQueryParams } from './table-query-state'
 import { appendQueryParams } from './data-source-resolver'
 import { apiClient } from '@/lib/api-client'
@@ -258,18 +256,9 @@ export function useUniversalMaskRuntime({
 
   const tableResults = useQueries({
     queries: tableEntries.map(([tableKey, tb]) => ({
-      queryKey: tb.clientQuery && !tb.sourceKey
-        ? [tenantId, screenId, entityId, 'table', tableKey]
-        : [tenantId, screenId, entityId, 'table', tableKey, resolvedTableQueryStates[tableKey]],
+      queryKey: [screenId, entityId, 'table', tableKey, resolvedTableQueryStates[tableKey]],
       queryFn: async () => {
-        const shared = tableSourceRequest(screenId, entityId, tb, resolvedTableQueryStates[tableKey] ?? defaultTableQueryState(25))
-        if (shared) {
-          const res = await apiClient.get<{ data: { items: Record<string, unknown>[]; total: number } }>(shared)
-          return res.data.data
-        }
-        const params = tb.clientQuery
-          ? { limit: String(tb.fetchLimit ?? 500) }
-          : toQueryParams(resolvedTableQueryStates[tableKey] ?? defaultTableQueryState(25))
+        const params = toQueryParams(resolvedTableQueryStates[tableKey] ?? defaultTableQueryState(25))
         const url = appendQueryParams(tb.endpoint, params)
         const res = await apiClient.get<{ items?: Record<string, unknown>[]; total?: number } | Record<string, unknown>[]>(url)
         return res.data
@@ -279,29 +268,30 @@ export function useUniversalMaskRuntime({
     })),
   })
 
-  const { tableRows, tableTotals } = useMemo(() => {
-    const rows: Record<string, Record<string, unknown>[]> = {}
-    const totals: Record<string, number> = {}
-    tableEntries.forEach(([tableKey, tb], i) => {
+  const tableRows = useMemo<Record<string, Record<string, unknown>[]>>(() => {
+    const result: Record<string, Record<string, unknown>[]> = {}
+    tableEntries.forEach(([tableKey], i) => {
       const data = tableResults[i]?.data
       if (!data) return
-      const loaded = Array.isArray(data)
-        ? data as Record<string, unknown>[]
-        : Array.isArray((data as { items?: unknown }).items) ? (data as { items: Record<string, unknown>[] }).items : undefined
-      if (tb.clientQuery && !tb.sourceKey && loaded) {
-        const state = resolvedTableQueryStates[tableKey] ?? defaultTableQueryState(25)
-        const page = applyClientTableQuery(loaded, state)
-        rows[tableKey] = page.rows
-        totals[tableKey] = page.total
-        return
-      }
-      if (loaded) rows[tableKey] = loaded
-      if (!Array.isArray(data) && typeof (data as { total?: unknown }).total === 'number') {
-        totals[tableKey] = (data as { total: number }).total
+      if (Array.isArray(data)) {
+        result[tableKey] = data as Record<string, unknown>[]
+      } else if (Array.isArray((data as { items?: unknown }).items)) {
+        result[tableKey] = (data as { items: Record<string, unknown>[] }).items
       }
     })
-    return { tableRows: rows, tableTotals: totals }
-  }, [tableEntries, tableResults, resolvedTableQueryStates])
+    return result
+  }, [tableEntries, tableResults])
+
+  const tableTotals = useMemo<Record<string, number>>(() => {
+    const result: Record<string, number> = {}
+    tableEntries.forEach(([tableKey], i) => {
+      const data = tableResults[i]?.data
+      if (data && !Array.isArray(data) && typeof (data as { total?: unknown }).total === 'number') {
+        result[tableKey] = (data as { total: number }).total
+      }
+    })
+    return result
+  }, [tableEntries, tableResults])
 
   const messages: ScreenMessage[] = [
     ...(entityQuery.error ? [{

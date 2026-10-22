@@ -16,7 +16,6 @@ from app.domains.operations.models import ErnteDB
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.ernte_planung_schemas import ErntePlanungOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/agrar/ernte", tags=["agrar", "ernte", "ernteplanung"])
@@ -80,7 +79,8 @@ def get_ernte(ernte_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("", status_code=201, summary="Ernte anlegen",
-    response_model=ErntePlanungOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=ErntePlanungOut
+)
 def create_ernte(payload: ErntePayload, db: Session = Depends(get_db)):
     datum = date.fromisoformat(payload.datum) if payload.datum else date.today()
     row = ErnteDB(
@@ -99,7 +99,8 @@ def create_ernte(payload: ErntePayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/{ernte_id}", summary="Ernte aktualisieren",
-    response_model=ErntePlanungOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=ErntePlanungOut
+)
 def update_ernte(ernte_id: str, payload: ErntePatch, db: Session = Depends(get_db)):
     row = db.query(ErnteDB).filter(ErnteDB.id == ernte_id).first()
     if not row:
@@ -115,7 +116,7 @@ def update_ernte(ernte_id: str, payload: ErntePatch, db: Session = Depends(get_d
     return _to_dict(row)
 
 
-@router.delete("/{ernte_id}", status_code=204, response_class=Response, response_model=None, summary="Ernte löschen", dependencies=SCHREIBEN["AGRAR"])
+@router.delete("/{ernte_id}", status_code=204, response_class=Response, response_model=None, summary="Ernte löschen")
 def delete_ernte(ernte_id: str, db: Session = Depends(get_db)):
     row = db.query(ErnteDB).filter(ErnteDB.id == ernte_id).first()
     if not row:

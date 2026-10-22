@@ -27,7 +27,6 @@ from ....core.scheduler_recovery import build_scheduler_runtime_component
 from ....services.scheduler_service import get_scheduler_status
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.runtime_operations_schemas import RuntimeOperationsOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/runtime", tags=["runtime", "operations"])
@@ -141,7 +140,7 @@ async def list_runtime_components(
 # Replay
 # ---------------------------------------------------------------------------
 
-@router.post("/replay", response_model=RuntimeOperationsOut, status_code=202, summary="Replay request anlegen", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/replay", response_model=RuntimeOperationsOut, status_code=202, summary="Replay request anlegen")
 async def create_replay_request(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),
@@ -188,7 +187,7 @@ async def list_replay_requests(
 # Rebuild
 # ---------------------------------------------------------------------------
 
-@router.post("/rebuild", response_model=RuntimeOperationsOut, status_code=202, summary="Rebuild request anlegen", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/rebuild", response_model=RuntimeOperationsOut, status_code=202, summary="Rebuild request anlegen")
 async def create_rebuild_request(
     body: dict,
     tenant_id: str = Depends(get_tenant_id),

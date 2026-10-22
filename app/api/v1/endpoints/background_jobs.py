@@ -18,7 +18,6 @@ from app.core.background_jobs import (
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class BackgroundJobOut(BaseSchema):
@@ -83,7 +82,7 @@ def get_background_job_queue() -> dict[str, Any]:
     }
 
 
-@router.post("/enqueue", response_model=BackgroundJobOut, status_code=201, summary="Background job enqueue", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/enqueue", response_model=BackgroundJobOut, status_code=201, summary="Background job enqueue")
 def enqueue_background_job(body: BackgroundJobEnqueueIn) -> dict[str, Any]:
     registry = get_background_job_registry()
     req = JobEnqueueRequest(
@@ -102,7 +101,7 @@ def enqueue_background_job(body: BackgroundJobEnqueueIn) -> dict[str, Any]:
     }
 
 
-@router.post("/dequeue", response_model=BackgroundJobOut, summary="Background job dequeue", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/dequeue", response_model=BackgroundJobOut, summary="Background job dequeue")
 def dequeue_background_job() -> dict[str, Any]:
     registry = get_background_job_registry()
     job = registry.dequeue_next()
@@ -127,7 +126,7 @@ def get_background_job(job_id: str) -> dict[str, Any]:
     }
 
 
-@router.post("/{job_id}/complete", response_model=BackgroundJobOut, summary="Background job complete", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/{job_id}/complete", response_model=BackgroundJobOut, summary="Background job complete")
 def complete_background_job(job_id: str, body: BackgroundJobMutationIn | None = None) -> dict[str, Any]:
     registry = get_background_job_registry()
     job = registry.complete(job_id, ergebnis_summary=(body.ergebnis_summary if body else ""))
@@ -140,7 +139,7 @@ def complete_background_job(job_id: str, body: BackgroundJobMutationIn | None = 
     }
 
 
-@router.post("/{job_id}/fail", response_model=BackgroundJobOut, summary="Background job fail", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/{job_id}/fail", response_model=BackgroundJobOut, summary="Background job fail")
 def fail_background_job(job_id: str, body: BackgroundJobMutationIn | None = None) -> dict[str, Any]:
     registry = get_background_job_registry()
     job = registry.fail(job_id, fehler_meldung=(body.fehler_meldung if body else "Unspecified failure"))

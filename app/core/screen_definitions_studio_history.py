@@ -20,13 +20,13 @@ def build_studio_history(diff=False):
              "virtualized": True, "rowHeight": 44}
     table["dataSourceKey"] = key
     if not diff:
-        table["rowActions"] = [{"key": "compare", "label": "Änderungen ansehen", "localEffect": "view"}]
+        table["rowActions"] = [{"key": "compare", "label": "Änderungen ansehen"}]
     return {"schemaVersion": 1, "id": screen_id, "domain": "platform", "mode": "list",
             "title": "Änderungsvergleich" if diff else "Studio-Historie",
             "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
             "dataSources": [{"key": key, "endpoint": "/api/v1/studio/history-events/{entity_id}/diff" if diff else "/api/v1/studio/drafts/{entity_id}/history-view"}],
             "tabs": [{"key": key, "label": table["label"], "tables": [table]}],
-            "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "audit", "columnNavigation": "single"},
+            "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "audit"},
             "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True,
                             "lookupMinChars": 2, "bundleGroup": "platform"},
             "noWorkflowReason": "Unveränderliche Studio-Historie; nur lesender Vergleich, keine Belegänderung.",

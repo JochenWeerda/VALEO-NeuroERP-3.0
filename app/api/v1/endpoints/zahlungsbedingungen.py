@@ -163,11 +163,9 @@ def delete_zahlungsbedingung(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    result = db.execute(text("""
+    db.execute(text("""
         UPDATE domain_shared.zahlungsbedingungen SET aktiv = false
-        WHERE tenant_id = :tid AND zabd_nr = :nr AND aktiv = true
+        WHERE tenant_id = :tid AND zabd_nr = :nr
     """), {"tid": tenant_id, "nr": zabd_nr})
     db.commit()
-    if result.rowcount == 0:  # vorher 204 auch fuer unbekannte Bedingungen
-        raise HTTPException(404, f"Zahlungsbedingung {zabd_nr} nicht gefunden.")
     return Response(status_code=204)

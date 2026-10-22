@@ -43,7 +43,6 @@ from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.compliance_whistleblower_schemas import ComplianceWhistleblowerOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 # Eigenes Praefix, und zwar aus einem Grund: Ohne Praefix landeten diese
@@ -81,7 +80,8 @@ class NoteIn(BaseModel):
 
 
 @router.post("/reports", status_code=201, summary="Report einreichen",
-    response_model=ComplianceWhistleblowerOut, dependencies=SCHREIBEN["QUALITAET"])
+    response_model=ComplianceWhistleblowerOut
+)
 async def submit_report(
     payload: ReportIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -156,7 +156,8 @@ async def list_reports(
 
 
 @router.patch("/reports/{report_id}/update", summary="Report aktualisieren",
-    response_model=ComplianceWhistleblowerOut, dependencies=SCHREIBEN["QUALITAET"])
+    response_model=ComplianceWhistleblowerOut
+)
 async def update_report(
     report_id: str,
     payload: NoteIn,

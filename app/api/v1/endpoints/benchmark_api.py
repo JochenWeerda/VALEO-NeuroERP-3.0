@@ -22,7 +22,6 @@ from app.domains.operations.models import BetriebsKennzahlDB
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.benchmark_api_schemas import BenchmarkApiOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/benchmark", tags=["benchmark"])
@@ -37,7 +36,8 @@ class KennzahlSubmitRequest(BaseModel):
 
 
 @router.post("/kennzahlen", status_code=201, summary="Kennzahl einreichen",
-    response_model=BenchmarkApiOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=BenchmarkApiOut
+)
 def submit_kennzahl(req: KennzahlSubmitRequest, db: Session = Depends(get_db)):
     kz_id = str(uuid.uuid4())
     row = BetriebsKennzahlDB(

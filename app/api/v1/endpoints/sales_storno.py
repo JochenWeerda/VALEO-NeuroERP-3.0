@@ -12,7 +12,6 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.sales_storno_service import SalesStornoService, StornoError
 from app.api.v1.schemas.base import TypedObjectOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/sales", tags=["sales", "o2c", "storno"])
 
@@ -31,7 +30,7 @@ class StornoIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/deliveries/{delivery_no}/storno", response_model=TypedObjectOut, summary="Lieferschein stornieren (durchgängig in den Match)", dependencies=SCHREIBEN["VERKAUF"])
+@router.post("/deliveries/{delivery_no}/storno", response_model=TypedObjectOut, summary="Lieferschein stornieren (durchgängig in den Match)")
 def storno_delivery(
     delivery_no: str,
     body: StornoIn,

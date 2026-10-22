@@ -23,7 +23,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/produktion/mischfutter", tags=["Produktion - Mischfutter"])
@@ -92,7 +91,7 @@ def list_rezepturgruppen(
     return [RezepturGruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/rezepturgruppen", response_model=RezepturGruppeOut, status_code=201, summary="Rezepturgruppe anlegen", dependencies=SCHREIBEN["PRODUKTION"])
+@router.post("/rezepturgruppen", response_model=RezepturGruppeOut, status_code=201, summary="Rezepturgruppe anlegen")
 def create_rezepturgruppe(
     payload: RezepturGruppeCreate,
     db=Depends(get_db),
@@ -123,7 +122,8 @@ def create_rezepturgruppe(
 
 
 @router.delete("/rezepturgruppen/{gruppe_id}", summary="Rezepturgruppe löschen",
-    response_model=None, dependencies=SCHREIBEN["PRODUKTION"])
+    response_model=None
+)
 def delete_rezepturgruppe(
     gruppe_id: str,
     db=Depends(get_db),
@@ -153,7 +153,7 @@ def list_schnellerfassung(
     return [SchnellerfassungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/schnellerfassung", response_model=SchnellerfassungOut, status_code=201, summary="Schnellerfassung anlegen", dependencies=SCHREIBEN["PRODUKTION"])
+@router.post("/schnellerfassung", response_model=SchnellerfassungOut, status_code=201, summary="Schnellerfassung anlegen")
 def create_schnellerfassung(
     payload: SchnellerfassungCreate,
     db=Depends(get_db),
@@ -181,7 +181,8 @@ def create_schnellerfassung(
 
 
 @router.post("/schnellerfassung/{vorlage_id}/buchen", summary="Schnellerfassung buche",
-    response_model=None, dependencies=SCHREIBEN["PRODUKTION"])
+    response_model=None
+)
 def buche_schnellerfassung(
     vorlage_id: str,
     payload: SchnellerfassungBuchenPayload,

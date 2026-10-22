@@ -6,7 +6,6 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from app.auth.deps import require_roles
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -18,8 +17,6 @@ from app.api.v1.schemas.base import BaseSchema
 
 
 router = APIRouter(prefix="/admin/branches", tags=["admin", "branches"])
-
-_NUR_ADMIN = [Depends(require_roles("admin"))]  # Konfiguration: wie admin_core
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
@@ -63,7 +60,7 @@ def _get_branch_or_404(db: Session, branch_id: str, tenant_id: str) -> dict:
     return dict(row)
 
 
-@router.post("", response_model=Branch, status_code=status.HTTP_201_CREATED, summary="Branch anlegen", dependencies=_NUR_ADMIN)
+@router.post("", response_model=Branch, status_code=status.HTTP_201_CREATED, summary="Branch anlegen")
 async def create_branch(
     payload: BranchCreate,
     tenant_id: str = Query(DEFAULT_TENANT),
@@ -145,7 +142,7 @@ async def get_branch(
     return Branch(**dict(row))
 
 
-@router.put("/{branch_id}", response_model=Branch, summary="Branch aktualisieren", dependencies=_NUR_ADMIN)
+@router.put("/{branch_id}", response_model=Branch, summary="Branch aktualisieren")
 async def update_branch(
     branch_id: str,
     payload: BranchUpdate,
@@ -183,7 +180,8 @@ async def update_branch(
 
 
 @router.delete("/{branch_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Branch löschen",
-    response_model=None, dependencies=_NUR_ADMIN)
+    response_model=None
+)
 async def delete_branch(
     branch_id: str,
     tenant_id: str = Query(DEFAULT_TENANT),

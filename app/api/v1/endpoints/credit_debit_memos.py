@@ -22,7 +22,6 @@ from app.documents.router_helpers import eigener_beleg, get_repository, save_to_
 logger = logging.getLogger(__name__)
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.credit_debit_memos_schemas import CreditDebitMemosOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/einkauf", tags=["procurement", "ap", "memos"])
@@ -169,7 +168,7 @@ def get_invoice_number(invoice_id: str, db: Session, tenant_id: str) -> Optional
     return None
 
 
-@router.post("/credit-memos", response_model=CreditMemoResponse, summary="Credit memo anlegen", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/credit-memos", response_model=CreditMemoResponse, summary="Credit memo anlegen")
 async def create_credit_memo(
     memo: CreditMemoCreate,
     db: Session = Depends(get_db),
@@ -241,7 +240,7 @@ async def create_credit_memo(
         raise HTTPException(status_code=500, detail=f"Failed to create credit memo: {str(e)}")
 
 
-@router.post("/debit-memos", response_model=DebitMemoResponse, summary="Debit memo anlegen", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/debit-memos", response_model=DebitMemoResponse, summary="Debit memo anlegen")
 async def create_debit_memo(
     memo: DebitMemoCreate,
     db: Session = Depends(get_db),
@@ -441,7 +440,8 @@ async def get_debit_memo(
 
 
 @router.post("/credit-memos/{memo_id}/settle", summary="Credit memo settle",
-    response_model=CreditDebitMemosOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=CreditDebitMemosOut
+)
 async def settle_credit_memo(
     memo_id: str,
     settlement: SettlementRequest,
@@ -527,7 +527,8 @@ async def settle_credit_memo(
 
 
 @router.post("/debit-memos/{memo_id}/settle", summary="Debit memo settle",
-    response_model=CreditDebitMemosOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=CreditDebitMemosOut
+)
 async def settle_debit_memo(
     memo_id: str,
     settlement: SettlementRequest,
@@ -617,7 +618,8 @@ def _approve_memo_for_booking(
 
 
 @router.post("/credit-memos/{memo_id}/freigabe", summary="Credit memo for booking genehmigen",
-    response_model=CreditDebitMemosOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=CreditDebitMemosOut
+)
 async def approve_credit_memo_for_booking(
     memo_id: str,
     db: Session = Depends(get_db),
@@ -639,7 +641,8 @@ async def approve_credit_memo_for_booking(
 
 
 @router.post("/debit-memos/{memo_id}/freigabe", summary="Debit memo for booking genehmigen",
-    response_model=CreditDebitMemosOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=CreditDebitMemosOut
+)
 async def approve_debit_memo_for_booking(
     memo_id: str,
     db: Session = Depends(get_db),
@@ -705,7 +708,8 @@ def _book_memo_to_store(
 
 
 @router.post("/credit-memos/{memo_id}/buchung", summary="Credit memo book",
-    response_model=CreditDebitMemosOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=CreditDebitMemosOut
+)
 async def book_credit_memo(
     memo_id: str,
     db: Session = Depends(get_db),
@@ -741,7 +745,8 @@ async def book_credit_memo(
 
 
 @router.post("/debit-memos/{memo_id}/buchung", summary="Debit memo book",
-    response_model=CreditDebitMemosOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=CreditDebitMemosOut
+)
 async def book_debit_memo(
     memo_id: str,
     db: Session = Depends(get_db),

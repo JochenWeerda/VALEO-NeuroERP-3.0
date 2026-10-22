@@ -109,8 +109,6 @@ export function useActionRuntime(
 
         const body: Record<string, unknown> = {
           ...identityBudgetInput(endpoint, req.payload ?? {}),
-          ...(/^\/api\/v1\/studio\/entities\/studio_[a-z0-9_]+\/[^/]+\/actions\/(update|delete)$/.test(endpoint)
-            && typeof req.expectedVersion === 'number' ? { expected_version: req.expectedVersion } : {}),
           ...(req.mode !== 'execute' ? { _mode: req.mode } : {}),
           ...(req.auditReason ? { _auditReason: req.auditReason } : {}),
           ...(req.idempotencyKey ? { _idempotencyKey: req.idempotencyKey } : {}),

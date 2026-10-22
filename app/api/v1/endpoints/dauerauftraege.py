@@ -29,7 +29,6 @@ from app.core.business_time import business_date_after
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/dauerauftraege", tags=["Warenwirtschaft - Daueraufträge"])
@@ -173,7 +172,7 @@ def get_dauerauftrag(
     return _row_to_out(db, tenant_id, row)
 
 
-@router.post("", response_model=DauerauftragOut, status_code=201, summary="Dauerauftrag anlegen", dependencies=SCHREIBEN["VERKAUF"])
+@router.post("", response_model=DauerauftragOut, status_code=201, summary="Dauerauftrag anlegen")
 def create_dauerauftrag(
     payload: DauerauftragCreate,
     db=Depends(get_db),
@@ -224,7 +223,7 @@ def create_dauerauftrag(
     return _row_to_out(db, tenant_id, row)
 
 
-@router.post("/{da_nr}/starten", response_model=AusfuehrungOut, summary="Starten dauerauftrag", dependencies=SCHREIBEN["VERKAUF"])
+@router.post("/{da_nr}/starten", response_model=AusfuehrungOut, summary="Starten dauerauftrag")
 def dauerauftrag_starten(
     da_nr: str,
     db=Depends(get_db),
@@ -315,7 +314,8 @@ def list_ausfuehrungen(
 
 
 @router.patch("/{da_nr}/deaktivieren", summary="Deaktivieren",
-    response_model=None, dependencies=SCHREIBEN["VERKAUF"])
+    response_model=None
+)
 def deaktivieren(
     da_nr: str,
     db=Depends(get_db),

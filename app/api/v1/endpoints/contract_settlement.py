@@ -16,7 +16,6 @@ from app.api.v1.schemas.contract_spine_schemas import (
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.contract_settlement_service import ContractSettlementService, SettlementError
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/contracts", tags=["contracts", "kontrakte", "agrar"])
 
@@ -37,7 +36,7 @@ class HandoverIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/settlement", response_model=HandoverOut, summary="Bewegung(en) an die Abrechnung übergeben", dependencies=SCHREIBEN["KONTRAKT"])
+@router.post("/settlement", response_model=HandoverOut, summary="Bewegung(en) an die Abrechnung übergeben")
 def handover(
     body: HandoverIn,
     db: Session = Depends(get_db),
@@ -57,7 +56,7 @@ class StornoIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/movements/{movement_id}/storno", response_model=StornoOut, summary="Abruf-Bewegung stornieren (frei werdender Abruf)", dependencies=SCHREIBEN["KONTRAKT"])
+@router.post("/movements/{movement_id}/storno", response_model=StornoOut, summary="Abruf-Bewegung stornieren (frei werdender Abruf)")
 def storno_movement(
     movement_id: str,
     body: StornoIn,
@@ -70,7 +69,7 @@ def storno_movement(
         raise HTTPException(status_code=422, detail=str(exc))
 
 
-@router.post("/fixings/{fixing_id}/storno", response_model=StornoOut, summary="Fixierung stornieren (frei werdende Fixiermenge)", dependencies=SCHREIBEN["KONTRAKT"])
+@router.post("/fixings/{fixing_id}/storno", response_model=StornoOut, summary="Fixierung stornieren (frei werdende Fixiermenge)")
 def storno_fixing(
     fixing_id: str,
     body: StornoIn,

@@ -13,7 +13,6 @@ from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import PreparationList, PreparationListLine
 from ..schemas.base import PaginatedResponse, BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -74,7 +73,7 @@ async def get_preparation_list(list_id: str, db: Session = Depends(get_db)):
     return PrepListOut.model_validate(obj)
 
 
-@router.put("/{list_id}", response_model=PrepListOut, summary="Preparation list aktualisieren", dependencies=SCHREIBEN["LAGER"])
+@router.put("/{list_id}", response_model=PrepListOut, summary="Preparation list aktualisieren")
 async def update_preparation_list(
     list_id: str,
     payload: PrepListRemark,
@@ -92,7 +91,7 @@ async def update_preparation_list(
     return PrepListOut.model_validate(obj)
 
 
-@router.delete("/{list_id}", status_code=204, response_class=Response, response_model=None, summary="Preparation list löschen", dependencies=SCHREIBEN["LAGER"])
+@router.delete("/{list_id}", status_code=204, response_class=Response, response_model=None, summary="Preparation list löschen")
 async def delete_preparation_list(list_id: str, db: Session = Depends(get_db)):
     """DELETE Rüstliste (nur offene)"""
     obj = db.query(PreparationList).filter(PreparationList.id == list_id).first()
@@ -113,7 +112,7 @@ async def get_prep_list_lines(list_id: str, db: Session = Depends(get_db)):
     return [PrepListLineOut.model_validate(line_item) for line_item in lines]
 
 
-@router.post("/{list_id}/process", response_model=PrepListOut, summary="Preparation list verarbeiten", dependencies=SCHREIBEN["LAGER"])
+@router.post("/{list_id}/process", response_model=PrepListOut, summary="Preparation list verarbeiten")
 async def process_preparation_list(
     list_id: str, payload: PrepListProcess, db: Session = Depends(get_db),
 ):
@@ -127,7 +126,7 @@ async def process_preparation_list(
     return PrepListOut.model_validate(obj)
 
 
-@router.post("/{list_id}/remark", response_model=PrepListOut, summary="Prep list remark hinzufügen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/{list_id}/remark", response_model=PrepListOut, summary="Prep list remark hinzufügen")
 async def add_prep_list_remark(
     list_id: str, payload: PrepListRemark, db: Session = Depends(get_db),
 ):

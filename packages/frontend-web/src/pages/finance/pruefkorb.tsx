@@ -13,7 +13,6 @@ import {
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { apiClient } from '@/lib/api-client'
-import type { MaskCommandResult } from '@/components/mask-builder/runtime/useMaskRowCommands'
 import { useToast } from '@/hooks/use-toast'
 
 const SCREEN_ID = 'finance/pruefkorb'
@@ -55,12 +54,9 @@ export default function PruefkorbPage(): JSX.Element {
     if (!befund || saving || bewertung.trim().length < MIN_BEWERTUNG) return
     setSaving(true)
     try {
-      // Kommando-Weg der Maske, den auch CLI und MCP rufen; eine Ablehnung kommt mit success=false.
-      const { data } = await apiClient.post<MaskCommandResult>(
-        `/api/v1/kontrolle/befunde/${encodeURIComponent(befund.id)}/actions/pruefen`,
-        { note: bewertung.trim(), _idempotencyKey: crypto.randomUUID() },
-      )
-      if (!data?.success) throw new Error(data?.error ?? 'Die Bewertung wurde abgelehnt.')
+      await apiClient.post(`/api/v1/kontrolle/befunde/${encodeURIComponent(befund.id)}/pruefung`, {
+        note: bewertung.trim(),
+      })
       await queryClient.invalidateQueries({ queryKey: [SCREEN_ID] })
       toast({ title: 'Befund bewertet' })
       setBefund(null)

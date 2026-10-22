@@ -37,7 +37,6 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.grundfutter_analysen_schemas import GrundfutterAnalysenOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(tags=["agrar", "futtermittel", "grundfutter-analysen"])
@@ -641,7 +640,8 @@ def get_analyse(
 
 
 @router.post("/grundfutter-analysen", status_code=201, summary="Analyse anlegen",
-    response_model=GrundfutterAnalysenOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=GrundfutterAnalysenOut
+)
 def create_analyse(
     data: GrundfutterAnalyseIn,
     db: Session = Depends(get_db),
@@ -676,7 +676,8 @@ def create_analyse(
 
 
 @router.patch("/grundfutter-analysen/{analyse_id}", summary="Analyse aktualisieren",
-    response_model=GrundfutterAnalysenOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=GrundfutterAnalysenOut
+)
 def patch_analyse(
     analyse_id: str,
     data: GrundfutterAnalysePatch,
@@ -705,7 +706,7 @@ def patch_analyse(
     return _analyse_to_dict(a)
 
 
-@router.delete("/grundfutter-analysen/{analyse_id}", status_code=204, response_class=Response, response_model=None, summary="Analyse löschen", dependencies=SCHREIBEN["AGRAR"])
+@router.delete("/grundfutter-analysen/{analyse_id}", status_code=204, response_class=Response, response_model=None, summary="Analyse löschen")
 def delete_analyse(
     analyse_id: str,
     db: Session = Depends(get_db),
@@ -732,7 +733,8 @@ def delete_analyse(
 
 
 @router.post("/grundfutter-analysen/upload-pdf", summary="Pdf hochladen",
-    response_model=None, dependencies=SCHREIBEN["AGRAR"])
+    response_model=None
+)
 async def upload_pdf(
     file: UploadFile = File(...),
     save: bool = Query(default=False, description="Direkt in DB speichern"),
@@ -812,7 +814,8 @@ async def upload_pdf(
 
 
 @router.post("/grundfutter-analysen/upload-csv", summary="Csv hochladen",
-    response_model=GrundfutterAnalysenOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=GrundfutterAnalysenOut
+)
 async def upload_csv(
     file: UploadFile = File(...),
     save: bool = Query(default=False),
@@ -849,7 +852,8 @@ async def upload_csv(
 
 
 @router.post("/grundfutter-analysen/{analyse_id}/as-feed", summary="As feed promote",
-    response_model=GrundfutterAnalysenOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=GrundfutterAnalysenOut
+)
 def promote_as_feed(
     analyse_id: str,
     db: Session = Depends(get_db),

@@ -22,7 +22,6 @@ from app.services.policy_registry import (
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class NeuroEventPolicyOut(BaseSchema):
@@ -49,7 +48,8 @@ class ValidateEventRequest(BaseModel):
 
 
 @router.post("/neuro/events/validate", summary="Validate event do",
-    response_model=NeuroEventPolicyOut, dependencies=SCHREIBEN["BERECHNEN"])
+    response_model=NeuroEventPolicyOut
+)
 async def do_validate_event(request: ValidateEventRequest):
     return validate_event(request.event_type, request.payload)
 
@@ -68,7 +68,8 @@ class RegisterPolicyRequest(BaseModel):
 
 
 @router.post("/neuro/policies", summary="Register policy do",
-    response_model=NeuroEventPolicyOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=NeuroEventPolicyOut
+)
 async def do_register_policy(
     request: RegisterPolicyRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -126,7 +127,8 @@ class SelectPolicyVariantRequest(BaseModel):
 
 
 @router.post("/neuro/policies/{policy_id}/select", summary="Select policy variant do",
-    response_model=NeuroEventPolicyOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=NeuroEventPolicyOut
+)
 async def do_select_policy_variant(
     policy_id: str,
     request: SelectPolicyVariantRequest,
@@ -140,7 +142,8 @@ async def do_select_policy_variant(
 
 
 @router.post("/neuro/policies/{policy_id}/rollback", summary="Rollback policy do",
-    response_model=NeuroEventPolicyOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=NeuroEventPolicyOut
+)
 async def do_rollback_policy(
     policy_id: str,
     tenant_id: str = Depends(get_tenant_id),

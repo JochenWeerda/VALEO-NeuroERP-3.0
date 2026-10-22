@@ -26,7 +26,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/produktion/stuecklisten",
@@ -145,7 +144,7 @@ def get_stueckliste(
     return _row_to_out(db, row)
 
 
-@router.post("", response_model=StuecklisteOut, status_code=201, summary="Stueckliste anlegen", dependencies=SCHREIBEN["PRODUKTION"])
+@router.post("", response_model=StuecklisteOut, status_code=201, summary="Stueckliste anlegen")
 def create_stueckliste(
     payload: StuecklisteCreate,
     db=Depends(get_db),
@@ -191,7 +190,7 @@ def create_stueckliste(
     return _row_to_out(db, row)
 
 
-@router.put("/{stueckliste_nr}", response_model=StuecklisteOut, summary="Stueckliste aktualisieren", dependencies=SCHREIBEN["PRODUKTION"])
+@router.put("/{stueckliste_nr}", response_model=StuecklisteOut, summary="Stueckliste aktualisieren")
 def update_stueckliste(
     stueckliste_nr: str,
     payload: StuecklisteCreate,
@@ -238,7 +237,8 @@ def update_stueckliste(
 
 
 @router.delete("/{stueckliste_nr}", summary="Stueckliste löschen",
-    response_model=None, dependencies=SCHREIBEN["PRODUKTION"])
+    response_model=None
+)
 def delete_stueckliste(
     stueckliste_nr: str,
     db=Depends(get_db),

@@ -179,8 +179,6 @@ class FinanceApInvoiceOut(_MaskEntityOut):
     """Englische Belegfelder plus deutsche Masken-Aliase."""
 
     id: Optional[str] = None
-    approval_request_id: Optional[str] = None
-    approval_can_decide: bool = False
     number: Optional[str] = None
     beleg_nr: Optional[str] = None
     kreditor: Optional[str] = None

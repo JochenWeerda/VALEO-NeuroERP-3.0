@@ -22,7 +22,6 @@ from app.core.ui_density_manifest import build_ui_density_manifest
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.command_catalog_schemas import CommandCatalogOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/commands", tags=["commands", "process-kernel"])
@@ -66,7 +65,8 @@ def get_ui_density_manifest(
 
 
 @router.post("/dispatch", summary="Command dispatchen und validieren",
-    response_model=CommandCatalogOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=CommandCatalogOut
+)
 def dispatch_command(
     body: DispatchRequest,
     issuer_role: Optional[str] = Query(default=None, description="Rolle des Ausstellers"),

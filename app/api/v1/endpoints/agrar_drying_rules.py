@@ -26,7 +26,6 @@ from app.services.agrar_drying_rule_service import DryingRuleService
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.agrar_drying_rules_schemas import AgrarDryingRulesOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -278,7 +277,7 @@ async def get_drying_rule(
     return _to_drying_rule_out(rule)
 
 
-@router.post("/drying-rules", response_model=DryingRuleSetOut, status_code=201, summary="Drying rule anlegen", dependencies=SCHREIBEN["AGRAR"])
+@router.post("/drying-rules", response_model=DryingRuleSetOut, status_code=201, summary="Drying rule anlegen")
 async def create_drying_rule(
     payload: DryingRuleSetCreate,
     request: Request,
@@ -292,7 +291,7 @@ async def create_drying_rule(
     return _to_drying_rule_out(rule)
 
 
-@router.put("/drying-rules/{rule_id}", response_model=DryingRuleSetOut, summary="Drying rule aktualisieren", dependencies=SCHREIBEN["AGRAR"])
+@router.put("/drying-rules/{rule_id}", response_model=DryingRuleSetOut, summary="Drying rule aktualisieren")
 async def update_drying_rule(
     rule_id: str,
     payload: DryingRuleSetUpdate,
@@ -310,7 +309,7 @@ async def update_drying_rule(
     return _to_drying_rule_out(rule)
 
 
-@router.delete("/drying-rules/{rule_id}", status_code=204, response_class=Response, response_model=None, summary="Drying rule löschen", dependencies=SCHREIBEN["AGRAR"])
+@router.delete("/drying-rules/{rule_id}", status_code=204, response_class=Response, response_model=None, summary="Drying rule löschen")
 async def delete_drying_rule(
     rule_id: str,
     request: Request,
@@ -355,7 +354,7 @@ async def list_drying_lookup_rows(
     return [_to_lookup_row_out(r) for r in rows]
 
 
-@router.post("/drying-rules/lookup-rows", response_model=DryingLookupRowOut, status_code=201, summary="Drying lookup row anlegen", dependencies=SCHREIBEN["AGRAR"])
+@router.post("/drying-rules/lookup-rows", response_model=DryingLookupRowOut, status_code=201, summary="Drying lookup row anlegen")
 async def create_drying_lookup_row(
     payload: DryingLookupRowCreate,
     request: Request,
@@ -375,7 +374,7 @@ async def create_drying_lookup_row(
     return _to_lookup_row_out(row)
 
 
-@router.put("/drying-rules/lookup-rows/{row_id}", response_model=DryingLookupRowOut, summary="Drying lookup row aktualisieren", dependencies=SCHREIBEN["AGRAR"])
+@router.put("/drying-rules/lookup-rows/{row_id}", response_model=DryingLookupRowOut, summary="Drying lookup row aktualisieren")
 async def update_drying_lookup_row(
     row_id: str,
     payload: DryingLookupRowUpdate,
@@ -394,7 +393,7 @@ async def update_drying_lookup_row(
     return _to_lookup_row_out(row)
 
 
-@router.delete("/drying-rules/lookup-rows/{row_id}", status_code=204, response_class=Response, response_model=None, summary="Drying lookup row löschen", dependencies=SCHREIBEN["AGRAR"])
+@router.delete("/drying-rules/lookup-rows/{row_id}", status_code=204, response_class=Response, response_model=None, summary="Drying lookup row löschen")
 async def delete_drying_lookup_row(
     row_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -424,7 +423,7 @@ async def list_drying_factor_ranges(
     return [_to_factor_range_out(r) for r in ranges]
 
 
-@router.post("/drying-rules/factor-ranges", response_model=DryingFactorRangeOut, status_code=201, summary="Drying factor range anlegen", dependencies=SCHREIBEN["AGRAR"])
+@router.post("/drying-rules/factor-ranges", response_model=DryingFactorRangeOut, status_code=201, summary="Drying factor range anlegen")
 async def create_drying_factor_range(
     payload: DryingFactorRangeCreate,
     request: Request,
@@ -444,7 +443,7 @@ async def create_drying_factor_range(
     return _to_factor_range_out(range_obj)
 
 
-@router.put("/drying-rules/factor-ranges/{range_id}", response_model=DryingFactorRangeOut, summary="Drying factor range aktualisieren", dependencies=SCHREIBEN["AGRAR"])
+@router.put("/drying-rules/factor-ranges/{range_id}", response_model=DryingFactorRangeOut, summary="Drying factor range aktualisieren")
 async def update_drying_factor_range(
     range_id: str,
     payload: DryingFactorRangeUpdate,
@@ -463,7 +462,7 @@ async def update_drying_factor_range(
     return _to_factor_range_out(range_obj)
 
 
-@router.delete("/drying-rules/factor-ranges/{range_id}", status_code=204, response_class=Response, response_model=None, summary="Drying factor range löschen", dependencies=SCHREIBEN["AGRAR"])
+@router.delete("/drying-rules/factor-ranges/{range_id}", status_code=204, response_class=Response, response_model=None, summary="Drying factor range löschen")
 async def delete_drying_factor_range(
     range_id: str,
     tenant_id: str = Depends(get_tenant_id),

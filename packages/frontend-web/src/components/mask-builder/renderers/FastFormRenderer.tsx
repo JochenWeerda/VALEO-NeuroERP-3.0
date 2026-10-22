@@ -21,8 +21,6 @@ function toScreenField(field: RenderFieldPlan): ScreenFieldDefinition {
     dataSourceKey: field.dataSourceKey,
     minSearchChars: field.minSearchChars,
     renderHint: field.renderHint,
-    rowFields: field.rowFields,
-    tableEditing: field.tableEditing,
   }
 }
 
@@ -78,7 +76,7 @@ const FastFieldItem = memo(function FastFieldItem({
   }
 
   return (
-    <div data-meridian-field={field.key} className={field.componentKind === 'table' ? 'col-span-full min-w-0' : undefined}>
+    <div data-meridian-field={field.key}>
       <FieldRenderer
         field={toScreenField(field)}
         value={value}

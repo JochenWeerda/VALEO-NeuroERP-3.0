@@ -18,7 +18,6 @@ from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFa
 from app.core.tenant import get_tenant_id
 from app.services.finance_freigabe import engine_fuer
 from app.api.v1.schemas.base import TypedObjectOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -59,7 +58,7 @@ def freigaben(
 
 
 @router.post("/{subject_type}/{subject_id}", response_model=TypedObjectOut,
-             summary="Freigabe durch eine zweite Person anfragen", dependencies=SCHREIBEN["FREIGABE"])
+             summary="Freigabe durch eine zweite Person anfragen")
 def freigabe_anfragen(
     subject_type: str,
     subject_id: str,
@@ -84,7 +83,7 @@ def freigabe_anfragen(
 
 
 @router.post("/{subject_type}/{subject_id}/{approval_id}/decision", response_model=TypedObjectOut,
-             summary="Freigabe erteilen oder ablehnen", dependencies=SCHREIBEN["FREIGABE"])
+             summary="Freigabe erteilen oder ablehnen")
 def freigabe_entscheiden(
     subject_type: str,
     subject_id: str,

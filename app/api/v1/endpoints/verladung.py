@@ -15,7 +15,6 @@ from app.services.frachtbrief_service import generate_from_verladung
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.verladung_schemas import VerladungOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/verladung", tags=["Verladung"])
@@ -94,7 +93,8 @@ def get_verladung(verladung_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("", status_code=201, summary="Verladung anlegen",
-    response_model=VerladungOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=VerladungOut
+)
 def create_verladung(
     payload: VerladungPayload,
     tenant_id: str = Depends(get_tenant_id),
@@ -110,7 +110,8 @@ def create_verladung(
 
 
 @router.patch("/{verladung_id}", summary="Verladung aktualisieren",
-    response_model=VerladungOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=VerladungOut
+)
 def update_verladung(
     verladung_id: str,
     payload: VerladungPatch,
@@ -129,7 +130,7 @@ def update_verladung(
     return _to_dict(obj)
 
 
-@router.delete("/{verladung_id}", status_code=204, response_class=Response, response_model=None, summary="Verladung löschen", dependencies=SCHREIBEN["LAGER"])
+@router.delete("/{verladung_id}", status_code=204, response_class=Response, response_model=None, summary="Verladung löschen")
 def delete_verladung(verladung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Verladung).filter(Verladung.id == verladung_id).first()
     if not obj:

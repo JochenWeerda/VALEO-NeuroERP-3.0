@@ -35,7 +35,6 @@ from app.services.document_allocation_service import (
     PositionRef,
     UnitNotConvertibleError,
 )
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class AllocationOut(BaseSchema):
@@ -272,7 +271,8 @@ def document_allocation_origins(
     "/allocations",
     response_model=AllocationOut,
     status_code=201,
-    summary="Teilmenge einer Position zuordnen", dependencies=SCHREIBEN["BELEGE"])
+    summary="Teilmenge einer Position zuordnen",
+)
 def allocate(
     body: AllocateRequest,
     db: Session = Depends(get_db),
@@ -305,7 +305,8 @@ def allocate(
 @router.post(
     "/allocations/{allocation_id}/release",
     response_model=AllocationOut,
-    summary="Zuordnung loesen", dependencies=SCHREIBEN["BELEGE"])
+    summary="Zuordnung loesen",
+)
 def release(
     allocation_id: str,
     body: ReleaseRequest,

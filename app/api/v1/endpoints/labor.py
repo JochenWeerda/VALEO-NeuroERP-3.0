@@ -15,7 +15,6 @@ from app.domains.operations.models import LaborProbe, LaborAuftragEntry
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.labor_schemas import LaborOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(tags=["Labor"])
@@ -184,7 +183,7 @@ async def get_labor_auftrag(entry_id: str, db: Session = Depends(get_db)) -> dic
     return _auftrag_to_dict(row, _befund_map(db, [entry_id]).get(entry_id))
 
 
-@router.post("/labor-auftraege", response_model=LaborOut, status_code=201, summary="Labor auftrag anlegen", dependencies=SCHREIBEN["AGRAR"])
+@router.post("/labor-auftraege", response_model=LaborOut, status_code=201, summary="Labor auftrag anlegen")
 async def create_labor_auftrag(body: LaborAuftragCreate, db: Session = Depends(get_db)) -> dict:
     """Neuen Labor-Auftrag anlegen (Wizard `labor-auftrag.tsx`)."""
     _seed(db)
@@ -214,7 +213,7 @@ async def create_labor_auftrag(body: LaborAuftragCreate, db: Session = Depends(g
     return _auftrag_to_dict(entry)
 
 
-@router.post("/labor-auftraege/{entry_id}/befund", response_model=LaborOut, summary="Labor befund uebernehmen", dependencies=SCHREIBEN["AGRAR"])
+@router.post("/labor-auftraege/{entry_id}/befund", response_model=LaborOut, summary="Labor befund uebernehmen")
 async def create_labor_befund(entry_id: str, body: LaborBefundCreate, db: Session = Depends(get_db)) -> dict:
     _seed(db)
     row = db.query(LaborAuftragEntry).filter(LaborAuftragEntry.id == entry_id).first()

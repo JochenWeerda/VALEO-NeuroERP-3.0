@@ -1,6 +1,5 @@
 import { type ChangeEvent, useMemo, useRef } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
-import { TableFieldRenderer } from './TableFieldRenderer'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -86,12 +85,6 @@ export function FieldRenderer({
       element?.focus()
       element?.setSelectionRange(cursor, cursor)
     })
-  }
-
-  if (field.type === 'table' && (field.rowFields !== undefined || field.tableEditing !== undefined)) {
-    return <TableFieldRenderer field={field} value={value} onChange={isReadOnly ? undefined : onChange}
-      renderCell={(column, cellValue, change) => <FieldRenderer field={column} value={cellValue}
-        onChange={change} voiceEnabled={false} />} />
   }
 
   const commonProps = {

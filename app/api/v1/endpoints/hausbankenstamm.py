@@ -22,7 +22,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/stammdaten/hausbanken", tags=["Stammdaten - Hausbankenstamm"])
@@ -107,7 +106,7 @@ def get_hausbank(
     return HausbankOut(**dict(row._mapping))
 
 
-@router.post("", response_model=HausbankOut, status_code=201, summary="Hausbank anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.post("", response_model=HausbankOut, status_code=201, summary="Hausbank anlegen")
 def create_hausbank(
     payload: HausbankCreate,
     db=Depends(get_db),
@@ -148,7 +147,7 @@ def create_hausbank(
     return HausbankOut(**dict(row._mapping))
 
 
-@router.put("/{bank_nr}", response_model=HausbankOut, summary="Hausbank aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.put("/{bank_nr}", response_model=HausbankOut, summary="Hausbank aktualisieren")
 def update_hausbank(
     bank_nr: str,
     payload: HausbankCreate,
@@ -191,7 +190,8 @@ def update_hausbank(
 
 
 @router.delete("/{bank_nr}", summary="Hausbank löschen",
-    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
+    response_model=None
+)
 def delete_hausbank(
     bank_nr: str,
     db=Depends(get_db),

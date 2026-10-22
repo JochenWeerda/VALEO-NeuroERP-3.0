@@ -12,6 +12,7 @@ from pydantic import ConfigDict, EmailStr, Field, ValidationInfo, field_validato
 
 from .base import BaseSchema, TimestampMixin, SoftDeleteMixin
 
+_DEFAULT_TENANT_ID = UUID("00000000-0000-0000-0000-000000000001")
 
 # Customer Schemas
 class CustomerBase(BaseSchema):
@@ -53,7 +54,7 @@ class CustomerCreate(CustomerBase):
         max_length=36,
         description="Optional: Verknüpfung zum Business-Partner (Stammdaten Verkauf)",
     )
-    tenant_id: Optional[UUID] = Field(None, description="Optional; Mandant aus dem Kontext (abweichend: 403)")
+    tenant_id: UUID = Field(default=_DEFAULT_TENANT_ID, description="Tenant ID (Default: Dev-Tenant)")
     credit_limit: Optional[Decimal] = Field(None, ge=0, description="Credit limit")
     payment_terms: Optional[int] = Field(None, ge=0, description="Payment terms in days")
     tax_id: Optional[str] = Field(None, max_length=50, description="Tax identification number")

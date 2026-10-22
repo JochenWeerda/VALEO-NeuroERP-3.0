@@ -15,7 +15,6 @@ from app.repositories.blockchain_anchor_repository import BlockchainAnchorReposi
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.blockchain_runtime_schemas import BlockchainRuntimeOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/blockchain", tags=["blockchain", "audit", "integrations"])
@@ -38,7 +37,8 @@ class CreateBlockchainAnchorRequest(BaseModel):
 
 
 @router.post("/anchors", summary="Blockchain anchor anlegen",
-    response_model=BlockchainRuntimeOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=BlockchainRuntimeOut
+)
 def create_blockchain_anchor(payload: CreateBlockchainAnchorRequest, db=Depends(get_db)):
     try:
         subject_type = BlockchainObjektTyp(payload.subject_type.strip().upper())

@@ -25,7 +25,6 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.api.v1.schemas.base import TypedObjectOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/waage/mobile", tags=["waage", "mobile", "logistik"])
 
@@ -47,7 +46,7 @@ class WaagenQuittungBatch(BaseModel):
 
 
 @router.post("/quittung", response_model=TypedObjectOut, status_code=201,
-             summary="Fahrer-Quittung für Wiegeticket erfassen (WGE-MOB-001)", dependencies=SCHREIBEN["LAGER"])
+             summary="Fahrer-Quittung für Wiegeticket erfassen (WGE-MOB-001)")
 def create_quittung(
     body: WaagenQuittungIn,
     response: Response = None,
@@ -121,7 +120,7 @@ def create_quittung(
 
 
 @router.post("/sync", response_model=TypedObjectOut, status_code=200,
-             summary="Offline-Batch-Sync: mehrere Quittungen auf einmal (WGE-MOB-001)", dependencies=SCHREIBEN["LAGER"])
+             summary="Offline-Batch-Sync: mehrere Quittungen auf einmal (WGE-MOB-001)")
 def batch_sync(
     body: WaagenQuittungBatch,
     tenant_id: str = Depends(get_tenant_id),

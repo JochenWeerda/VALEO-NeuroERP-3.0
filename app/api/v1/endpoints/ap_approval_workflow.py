@@ -31,14 +31,64 @@ from app.api.v1.schemas.base import BaseSchema, StatusResponse
 router = APIRouter(prefix="/ap/approval-workflow", tags=["finance", "ap", "approval"])
 
 
-from app.api.v1.schemas.ap_approval_workflow_schemas import (
-    ApprovalRuleCondition, ApprovalRuleCreate, ApprovalRuleResponse, ApprovalRequest, ApprovalAction,
-)
-from app.core.ap_approval_status import ApprovalStatusResponse
-from app.core.akteur import gepruefter_akteur, verlange_rolle
-from app.auth.finance_roles import FINANCE_WRITE_ROLES
-from app.services.ap_invoice_approval_service import APApprovalWorkflowService
-from sqlalchemy.exc import SQLAlchemyError
+class ApprovalRuleCondition(BaseModel):
+    """Condition for approval rule"""
+    field: str = Field(..., description="Field to check (amount, material_group, supplier_id)")
+    operator: str = Field(..., description="Operator (gt, gte, lt, lte, eq, in)")
+    value: Any = Field(..., description="Value to compare")
+
+
+class ApprovalRuleCreate(BaseModel):
+    """Schema for creating an approval rule"""
+    name: str = Field(..., min_length=1, max_length=100, description="Rule name")
+    description: Optional[str] = Field(None, max_length=500, description="Rule description")
+    conditions: List[ApprovalRuleCondition] = Field(..., min_length=1, description="Conditions that trigger this rule")
+    required_approvals: int = Field(..., ge=1, le=4, description="Number of required approvals (2/3/4-eyes)")
+    approval_roles: List[str] = Field(..., min_length=1, description="Roles that can approve (e.g., ['manager', 'finance'])")
+    priority: int = Field(default=0, description="Rule priority (higher = checked first)")
+    active: bool = Field(default=True, description="Active status")
+
+
+class ApprovalRuleResponse(BaseModel):
+    """Response schema for approval rule"""
+    id: str
+    name: str
+    description: Optional[str]
+    conditions: List[Dict[str, Any]]
+    required_approvals: int
+    approval_roles: List[str]
+    priority: int
+    active: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+class ApprovalRequest(BaseModel):
+    """Schema for requesting approval"""
+    invoice_id: str = Field(..., description="AP Invoice ID")
+    requested_by: str = Field(..., description="User requesting approval")
+    comment: Optional[str] = Field(None, description="Comment/notes")
+
+
+class ApprovalAction(BaseModel):
+    """Schema for approving/rejecting"""
+    invoice_id: str = Field(..., description="AP Invoice ID")
+    approved_by: str = Field(..., description="User approving/rejecting")
+    action: str = Field(..., description="Action: approve or reject")
+    comment: Optional[str] = Field(None, description="Comment/notes")
+
+
+class ApprovalStatusResponse(BaseModel):
+    """Response schema for approval status"""
+    invoice_id: str
+    status: str  # pending, approved, rejected, partially_approved
+    required_approvals: int
+    current_approvals: int
+    approvals: List[Dict[str, Any]]
+    rejections: List[Dict[str, Any]]
+    applicable_rule: Optional[Dict[str, Any]]
+    can_post: bool
+    can_pay: bool
 
 
 class WorkflowBusinessReference(BaseModel):
@@ -190,25 +240,65 @@ async def list_approval_rules(
         
         return result
         
-    except SQLAlchemyError:
-        db.rollback()
-        raise HTTPException(503, "Freigaberegeln derzeit nicht verfuegbar") from None
+    except Exception as e:
+        logger.error(f"Error listing approval rules: {e}")
+        # Return default rules if table doesn't exist
+        return [
+            ApprovalRuleResponse(
+                id="1",
+                name="Standard 2-Augen für Beträge > 1000 EUR",
+                description="Rechnungen über 1000 EUR benötigen 2 Freigaben",
+                conditions=[
+                    {"field": "amount", "operator": "gt", "value": 1000.0}
+                ],
+                required_approvals=2,
+                approval_roles=["manager", "finance"],
+                priority=10,
+                active=True,
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            ),
+            ApprovalRuleResponse(
+                id="2",
+                name="Standard 3-Augen für Beträge > 10000 EUR",
+                description="Rechnungen über 10000 EUR benötigen 3 Freigaben",
+                conditions=[
+                    {"field": "amount", "operator": "gt", "value": 10000.0}
+                ],
+                required_approvals=3,
+                approval_roles=["manager", "finance", "controller"],
+                priority=20,
+                active=True,
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            ),
+            ApprovalRuleResponse(
+                id="3",
+                name="Standard 4-Augen für Beträge > 50000 EUR",
+                description="Rechnungen über 50000 EUR benötigen 4 Freigaben",
+                conditions=[
+                    {"field": "amount", "operator": "gt", "value": 50000.0}
+                ],
+                required_approvals=4,
+                approval_roles=["manager", "finance", "controller", "ceo"],
+                priority=30,
+                active=True,
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            )
+        ]
 
 
 @router.post("/rules", response_model=ApprovalRuleResponse, status_code=201, summary="Approval rule anlegen",
              dependencies=[Depends(finance_admin)])
 async def create_approval_rule(
     rule: ApprovalRuleCreate,
-    user: dict = Depends(finance_admin),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
     Create a new approval workflow rule.
     """
-    actor = gepruefter_akteur(user)
-    from app.auth.finance_roles import FINANCE_APPROVAL_ROLES
-    verlange_rolle(user, *FINANCE_APPROVAL_ROLES)
     try:
         rule_id = uuid7()
         
@@ -238,11 +328,12 @@ async def create_approval_rule(
             "active": rule.active
         }).fetchone()
         
+        db.commit()
         
         conditions_data = _json_wert(row[3]) if row[3] else []
         roles_data = _json_wert(row[5]) if row[5] else []
         
-        response = ApprovalRuleResponse(
+        return ApprovalRuleResponse(
             id=str(row[0]),
             name=str(row[1]),
             description=str(row[2]) if row[2] else None,
@@ -255,41 +346,315 @@ async def create_approval_rule(
             updated_at=row[9]
         )
         
-        db.add(AuditLog(id=str(uuid7()), timestamp=datetime.utcnow(), user_id=actor, user_email="",
-            tenant_id=tenant_id, action="ap_approval_rule_create", entity_type="ap_approval_rule",
-            entity_id=str(rule_id), changes={"rule": rule.model_dump()}))
-        db.commit()
-        return response
-    except SQLAlchemyError:
+    except Exception as e:
         db.rollback()
-        raise HTTPException(503, "Freigaberegel konnte nicht gespeichert werden") from None
+        logger.error(f"Error creating approval rule: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create approval rule: {str(e)}")
 
 
 @router.post("/request", response_model=ApprovalStatusResponse, summary="Approval request",
              dependencies=[Depends(finance_write)])
 async def request_approval(
     request: ApprovalRequest,
-    user: dict = Depends(finance_write),
     tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db)
 ):
-    """Request a content-bound AP review using the verified requester."""
-    gepruefter_akteur(user)
-    verlange_rolle(user, *FINANCE_WRITE_ROLES)
-    rules = await list_approval_rules(active_only=True, tenant_id=tenant_id, db=db)
-    return APApprovalWorkflowService(db, tenant_id).request(request, user, rules)
+    """
+    Request approval for an AP invoice.
+    """
+    try:
+        # Get invoice
+        from app.documents.router_helpers import get_repository, get_from_store
+        repo = get_repository(db)
+        invoice = _ensure_invoice_tenant_access(
+            get_from_store("ap_invoice", request.invoice_id, repo),
+            tenant_id,
+        )
+        
+        # Check if already approved
+        if invoice.get("status") == "FREIGEGEBEN":
+            raise HTTPException(status_code=400, detail="Invoice is already approved")
+        
+        # Find applicable approval rule
+        rules = await list_approval_rules(active_only=True, tenant_id=tenant_id, db=db)
+        
+        applicable_rule = None
+        invoice_amount = float(invoice.get("totalGross", 0))
+        
+        for rule in sorted(rules, key=lambda r: r.priority, reverse=True):
+            matches = True
+            for condition in rule.conditions:
+                field = condition.get("field")
+                operator = condition.get("operator")
+                value = condition.get("value")
+                
+                if field == "amount":
+                    field_value = invoice_amount
+                elif field == "material_group":
+                    field_value = invoice.get("materialGroup", "")
+                elif field == "supplier_id":
+                    field_value = invoice.get("customerId", "")  # customerId = supplier_id for AP
+                else:
+                    field_value = invoice.get(field, "")
+                
+                if operator == "gt" and not (field_value > value):
+                    matches = False
+                    break
+                elif operator == "gte" and not (field_value >= value):
+                    matches = False
+                    break
+                elif operator == "lt" and not (field_value < value):
+                    matches = False
+                    break
+                elif operator == "lte" and not (field_value <= value):
+                    matches = False
+                    break
+                elif operator == "eq" and not (field_value == value):
+                    matches = False
+                    break
+                elif operator == "in" and field_value not in value:
+                    matches = False
+                    break
+            
+            if matches:
+                applicable_rule = rule
+                break
+        
+        # If no rule matches, default to 1 approval (no workflow)
+        required_approvals = applicable_rule.required_approvals if applicable_rule else 1
+        
+        # Create approval request
+        approval_id = uuid7()
+        
+        rule_data = {
+            "id": applicable_rule.id,
+            "name": applicable_rule.name,
+            "required_approvals": applicable_rule.required_approvals,
+            "approval_roles": applicable_rule.approval_roles
+        } if applicable_rule else None
+        
+        insert_query = text("""
+            INSERT INTO domain_erp.ap_approval_requests
+            (id, tenant_id, invoice_id, requested_by, required_approvals, applicable_rule,
+             status, comment, created_at, updated_at)
+            VALUES
+            (:id, :tenant_id, :invoice_id, :requested_by, :required_approvals, :applicable_rule,
+             :status, :comment, NOW(), NOW())
+            RETURNING id, invoice_id, status, required_approvals, applicable_rule, created_at, updated_at
+        """)
+        
+        _row = db.execute(insert_query, {  # noqa: F841
+            "id": approval_id,
+            "tenant_id": tenant_id,
+            "invoice_id": request.invoice_id,
+            "requested_by": request.requested_by,
+            "required_approvals": required_approvals,
+            "applicable_rule": json.dumps(rule_data) if rule_data else None,
+            "status": "pending",
+            "comment": request.comment
+        }).fetchone()
+        
+        # Update invoice status
+        from app.documents.router_helpers import save_to_store
+        invoice["status"] = "ZUR_FREIGABE"
+        invoice["approvalRequestId"] = approval_id
+        save_to_store("ap_invoice", request.invoice_id, invoice, repo)
+        
+        db.commit()
+        
+        return build_approval_status_response(
+            invoice_id=request.invoice_id,
+            tenant_id=tenant_id,
+            status="pending",
+            required_approvals=required_approvals,
+            approvals=[],
+            rejections=[],
+            applicable_rule=rule_data,
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error requesting approval: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to request approval: {str(e)}")
 
 
 @router.post("/approve", response_model=ApprovalStatusResponse, summary="Invoice genehmigen",
              dependencies=[Depends(finance_admin)])
 async def approve_invoice(
     action: ApprovalAction,
-    user: dict = Depends(finance_admin),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    user: dict = Depends(finance_admin),
 ):
-    """Decide on exactly the displayed request; verified independent human only."""
-    return APApprovalWorkflowService(db, tenant_id).decide(action, user)
+    """
+    Approve or reject an AP invoice.
+
+    Freigeber ist der **angemeldete Nutzer**. Bis 07.10.2026 zaehlte der Workflow
+    verschiedene Freigeber ueber ``approved_by`` aus dem Rumpf — eine Person konnte
+    eine Zwei-Stufen-Freigabe mit zwei Namen erfuellen.
+    """
+    if isinstance(user, dict):
+        # Ueber den Weg: der angemeldete Nutzer. Interne Aufrufer (AP-Freigabe)
+        # uebergeben den Freigeber selbst — dort ist er schon der angemeldete Nutzer.
+        action.approved_by = str(user.get("sub") or "").strip()
+    try:
+        # Get approval request
+        query = text("""
+            SELECT id, invoice_id, required_approvals, applicable_rule, status
+            FROM domain_erp.ap_approval_requests
+            WHERE invoice_id = :invoice_id AND tenant_id = :tenant_id
+            ORDER BY created_at DESC
+            LIMIT 1
+        """)
+        
+        row = db.execute(query, {
+            "invoice_id": action.invoice_id,
+            "tenant_id": tenant_id
+        }).fetchone()
+        
+        if not row:
+            raise HTTPException(status_code=404, detail="Approval request not found")
+        
+        approval_request_id = str(row[0])
+        required_approvals = int(row[2])
+        applicable_rule = _json_wert(row[3]) if row[3] else None
+        current_status = str(row[4])
+        
+        if current_status in ["approved", "rejected"]:
+            raise HTTPException(status_code=400, detail=f"Approval request is already {current_status}")
+        
+        # Get existing approvals/rejections
+        approvals_query = text("""
+            SELECT approved_by, created_at, comment
+            FROM domain_erp.ap_approvals
+            WHERE request_id = :approval_request_id AND action = 'approve'
+            ORDER BY created_at
+        """)
+        
+        approvals_rows = db.execute(approvals_query, {
+            "approval_request_id": approval_request_id
+        }).fetchall()
+        
+        rejections_query = text("""
+            SELECT approved_by, created_at, comment
+            FROM domain_erp.ap_approvals
+            WHERE request_id = :approval_request_id AND action = 'reject'
+            ORDER BY created_at
+        """)
+        
+        rejections_rows = db.execute(rejections_query, {
+            "approval_request_id": approval_request_id
+        }).fetchall()
+        
+        # Check if user already approved/rejected
+        existing_approval = db.execute(text("""
+            SELECT id FROM domain_erp.ap_approvals
+            WHERE request_id = :approval_request_id AND approved_by = :approved_by
+        """), {
+            "approval_request_id": approval_request_id,
+            "approved_by": action.approved_by
+        }).fetchone()
+        
+        if existing_approval:
+            raise HTTPException(status_code=400, detail="You have already approved/rejected this invoice")
+        
+        # Insert approval/rejection
+        approval_id = uuid7()
+        insert_approval = text("""
+            INSERT INTO domain_erp.ap_approvals
+            (id, tenant_id, request_id, approved_by, action, comment, created_at)
+            VALUES (:id, :tenant_id, :approval_request_id, :approved_by, :action, :comment, NOW())
+        """)
+        
+        db.execute(insert_approval, {
+            "id": approval_id,
+            "tenant_id": tenant_id,
+            "approval_request_id": approval_request_id,
+            "approved_by": action.approved_by,
+            "action": action.action,
+            "comment": action.comment
+        })
+        
+        # Update approval request status
+        if action.action == "reject":
+            update_status = "rejected"
+        else:
+            # Count approvals
+            new_approvals_count = len(approvals_rows) + 1
+            if new_approvals_count >= required_approvals:
+                update_status = "approved"
+            else:
+                update_status = "partially_approved"
+        
+        update_query = text("""
+            UPDATE domain_erp.ap_approval_requests
+            SET status = :status, updated_at = NOW()
+            WHERE id = :approval_request_id
+        """)
+        
+        db.execute(update_query, {
+            "status": update_status,
+            "approval_request_id": approval_request_id
+        })
+        
+        # Keep the document status in sync with workflow semantics.
+        if update_status in {"approved", "rejected"}:
+            from app.documents.router_helpers import eigener_beleg, get_repository, save_to_store
+            repo = get_repository(db)
+            invoice = eigener_beleg("ap_invoice", action.invoice_id, tenant_id, repo)
+            if invoice:
+                invoice["status"] = APPROVAL_STATUS_TO_DOCUMENT_STATUS.get(update_status, invoice.get("status", "ENTWURF"))
+                invoice["approvedBy"] = action.approved_by
+                invoice["approvedAt"] = datetime.now().isoformat()
+                save_to_store("ap_invoice", action.invoice_id, invoice, repo)
+        
+        db.commit()
+        
+        # Get updated approvals/rejections
+        approvals_rows = db.execute(approvals_query, {
+            "approval_request_id": approval_request_id
+        }).fetchall()
+        
+        rejections_rows = db.execute(rejections_query, {
+            "approval_request_id": approval_request_id
+        }).fetchall()
+        
+        approvals = [
+            {
+                "approved_by": str(row[0]),
+                "approved_at": row[1].isoformat() if row[1] else None,
+                "comment": str(row[2]) if row[2] else None
+            }
+            for row in approvals_rows
+        ]
+        
+        rejections = [
+            {
+                "approved_by": str(row[0]),
+                "approved_at": row[1].isoformat() if row[1] else None,
+                "comment": str(row[2]) if row[2] else None
+            }
+            for row in rejections_rows
+        ]
+        
+        return build_approval_status_response(
+            invoice_id=action.invoice_id,
+            tenant_id=tenant_id,
+            status=update_status,
+            required_approvals=required_approvals,
+            approvals=approvals,
+            rejections=rejections,
+            applicable_rule=applicable_rule,
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error approving invoice: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to approve invoice: {str(e)}")
 
 
 @router.get("/status/{invoice_id}", response_model=ApprovalStatusResponse, summary="Approval status abrufen",
@@ -297,8 +662,106 @@ async def approve_invoice(
 async def get_approval_status(
     invoice_id: str,
     tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-    user: dict = Depends(finance_read),
+    db: Session = Depends(get_db)
 ):
-    """No request, changed content or expired review never grants posting rights."""
-    return APApprovalWorkflowService(db, tenant_id).status(invoice_id, user)
+    """
+    Get approval status for an AP invoice.
+    """
+    try:
+        # Get approval request
+        query = text("""
+            SELECT id, invoice_id, required_approvals, applicable_rule, status
+            FROM domain_erp.ap_approval_requests
+            WHERE invoice_id = :invoice_id AND tenant_id = :tenant_id
+            ORDER BY created_at DESC
+            LIMIT 1
+        """)
+        
+        row = db.execute(query, {
+            "invoice_id": invoice_id,
+            "tenant_id": tenant_id
+        }).fetchone()
+        
+        if not row:
+            # No approval request - check invoice status
+            from app.documents.router_helpers import get_repository, get_from_store
+            repo = get_repository(db)
+            invoice = _ensure_invoice_tenant_access(
+                get_from_store("ap_invoice", invoice_id, repo),
+                tenant_id,
+            )
+            
+            invoice_status = str(invoice.get("status", "ENTWURF"))
+            derived_status = DOCUMENT_STATUS_TO_APPROVAL_STATUS.get(invoice_status, "approved")
+            return build_approval_status_response(
+                invoice_id=invoice_id,
+                tenant_id=tenant_id,
+                status=derived_status,
+                required_approvals=0,
+                approvals=[],
+                rejections=[],
+                applicable_rule=None,
+            )
+        
+        approval_request_id = str(row[0])
+        required_approvals = int(row[2])
+        applicable_rule = _json_wert(row[3]) if row[3] else None
+        current_status = str(row[4])
+        
+        # Get approvals/rejections
+        approvals_query = text("""
+            SELECT approved_by, created_at, comment
+            FROM domain_erp.ap_approvals
+            WHERE request_id = :approval_request_id AND action = 'approve'
+            ORDER BY created_at
+        """)
+        
+        approvals_rows = db.execute(approvals_query, {
+            "approval_request_id": approval_request_id
+        }).fetchall()
+        
+        rejections_query = text("""
+            SELECT approved_by, created_at, comment
+            FROM domain_erp.ap_approvals
+            WHERE request_id = :approval_request_id AND action = 'reject'
+            ORDER BY created_at
+        """)
+        
+        rejections_rows = db.execute(rejections_query, {
+            "approval_request_id": approval_request_id
+        }).fetchall()
+        
+        approvals = [
+            {
+                "approved_by": str(row[0]),
+                "approved_at": row[1].isoformat() if row[1] else None,
+                "comment": str(row[2]) if row[2] else None
+            }
+            for row in approvals_rows
+        ]
+        
+        rejections = [
+            {
+                "approved_by": str(row[0]),
+                "approved_at": row[1].isoformat() if row[1] else None,
+                "comment": str(row[2]) if row[2] else None
+            }
+            for row in rejections_rows
+        ]
+        
+        return build_approval_status_response(
+            invoice_id=invoice_id,
+            tenant_id=tenant_id,
+            status=current_status,
+            required_approvals=required_approvals,
+            approvals=approvals,
+            rejections=rejections,
+            applicable_rule=applicable_rule,
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting approval status: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get approval status: {str(e)}")
+

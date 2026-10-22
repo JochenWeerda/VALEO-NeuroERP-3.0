@@ -1,5 +1,5 @@
 from __future__ import annotations
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional
 from datetime import date
@@ -7,8 +7,6 @@ import uuid
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.agrar_p0_schemas import AgrarP0Out
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
-from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 
 router = APIRouter(prefix="/agrar/p0", tags=["agrar-p0"])
@@ -36,7 +34,8 @@ class PsmProtokolleintragRequest(BaseModel):
     zulassungsnummer: Optional[str] = None
 
 @router.post("/duenge-bilanz", summary="Duenge bilanz berechne",
-    response_model=AgrarP0Out, dependencies=SCHREIBEN["AGRAR"])
+    response_model=AgrarP0Out
+)
 def berechne_duenge_bilanz(req: DuengeBilanzRequest):
     from app.core.duenge_bilanz import DuengeBilanz, DuengemittelEintrag, NaehrstoffTyp
     from datetime import date as _date
@@ -61,7 +60,8 @@ def berechne_duenge_bilanz(req: DuengeBilanzRequest):
     return bilanz.model_dump()
 
 @router.post("/psm-protokoll", status_code=201, summary="Psm protokoll erstelle",
-    response_model=AgrarP0Out, dependencies=SCHREIBEN["AGRAR"])
+    response_model=AgrarP0Out
+)
 def erstelle_psm_protokoll(req: PsmProtokolleintragRequest):
     from app.core.psm_protokoll import PsmAnwendungProtokoll
     protokoll = PsmAnwendungProtokoll(
@@ -122,7 +122,9 @@ class StornoIn(BaseModel):
     "/partien",
     response_model=AgrarP0Out,
     status_code=201,
-    summary="Partie aus Ernteannahmen aggregieren (DOM-AGRAR-004.2)", dependencies=SCHREIBEN["AGRAR"])
+    summary="Partie aus Ernteannahmen aggregieren (DOM-AGRAR-004.2)",
+
+)
 def create_partie(
     body: PartieCreateIn,
     x_tenant_id: Optional[str] = Header(None),
@@ -170,7 +172,9 @@ def get_partie(
     "/partien/{partie_id}/trocknung",
     response_model=AgrarP0Out,
     status_code=201,
-    summary="Trocknungsabrechnung berechnen (DOM-AGRAR-004.3)", dependencies=SCHREIBEN["AGRAR"])
+    summary="Trocknungsabrechnung berechnen (DOM-AGRAR-004.3)",
+
+)
 def berechne_trocknung(
     partie_id: str,
     body: TrocknungIn,
@@ -198,7 +202,9 @@ def berechne_trocknung(
 @router.post(
     "/selbstabrechnung/{rechnung_id}/issue",
     response_model=AgrarP0Out,
-    summary="Selbstabrechnung auf ISSUED setzen (DOM-AGRAR-004.4)", dependencies=SCHREIBEN["AGRAR"])
+    summary="Selbstabrechnung auf ISSUED setzen (DOM-AGRAR-004.4)",
+
+)
 def issue_selbstabrechnung(
     rechnung_id: str,
     x_tenant_id: Optional[str] = Header(None),
@@ -219,11 +225,12 @@ def issue_selbstabrechnung(
 @router.post(
     "/selbstabrechnung/{rechnung_id}/status",
     response_model=AgrarP0Out,
-    summary="Selbstabrechnung-Status wechseln (DOM-AGRAR-004.4)", dependencies=SCHREIBEN["AGRAR"])
+    summary="Selbstabrechnung-Status wechseln (DOM-AGRAR-004.4)",
+
+)
 def set_selbstabrechnung_status(
     rechnung_id: str,
     body: StatusTransitionIn,
-    request: Request,
     x_tenant_id: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -233,7 +240,7 @@ def set_selbstabrechnung_status(
     from app.services.agrar_selbstabrechnung_lifecycle_service import transition_status, SelbstabrechnungError
     try:
         return transition_status(db=db, rechnung_id=rechnung_id, tenant_id=x_tenant_id,
-                                 new_status=body.new_status, operator=gepruefter_akteur_aus_request(request),
+                                 new_status=body.new_status, operator=body.operator or "system",
                                  reason=body.reason)
     except SelbstabrechnungError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -245,11 +252,12 @@ def set_selbstabrechnung_status(
     "/selbstabrechnung/{rechnung_id}/storno",
     response_model=AgrarP0Out,
     status_code=201,
-    summary="Selbstabrechnung stornieren (idempotent) (DOM-AGRAR-004.4)", dependencies=SCHREIBEN["AGRAR"])
+    summary="Selbstabrechnung stornieren (idempotent) (DOM-AGRAR-004.4)",
+
+)
 def storno_selbstabrechnung(
     rechnung_id: str,
     body: StornoIn,
-    request: Request,
     x_tenant_id: Optional[str] = Header(None),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -259,7 +267,7 @@ def storno_selbstabrechnung(
     from app.services.agrar_selbstabrechnung_lifecycle_service import storno_selbstabrechnung as svc, SelbstabrechnungError
     try:
         return svc(db=db, rechnung_id=rechnung_id, tenant_id=x_tenant_id,
-                   grund=body.grund, operator=gepruefter_akteur_aus_request(request))
+                   grund=body.grund, operator=body.operator or "system")
     except SelbstabrechnungError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:

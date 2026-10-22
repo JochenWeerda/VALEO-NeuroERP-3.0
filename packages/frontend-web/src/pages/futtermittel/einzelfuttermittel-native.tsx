@@ -1,7 +1,7 @@
-import { useParams } from '@/app/routing/typed-router'
-import { FeedingFeedDetail } from '@/features/feed-advice/FeedingFeedDetail'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default function EinzelfuttermittelNativePage(): JSX.Element {
-  const { id } = useParams<{ id?: string }>()
-  return <FeedingFeedDetail feedId={id} />
+export default function Page(): JSX.Element {
+  return (
+    <NativeListPage screenId="futtermittel/einzelfuttermittel/:id" testId="screen-futtermittel/einzelfuttermittel/:id" />
+  )
 }

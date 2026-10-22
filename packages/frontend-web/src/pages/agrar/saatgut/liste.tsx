@@ -1,2 +1,7 @@
-/** Route /agrar/saatgut/liste: dieselbe Studio-Liste wie /agrar/saatgut (vorher erfundene Produkte bei jedem Fehler). */
-export { default } from '@/pages/agrar/saatgut-liste'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+
+export default function Page(): JSX.Element {
+  return (
+    <NativeListPage screenId="agrar/saatgut/liste" testId="screen-agrar/saatgut/liste" />
+  )
+}

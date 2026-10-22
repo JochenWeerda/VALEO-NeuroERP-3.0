@@ -24,7 +24,6 @@ from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.versandprofile_schemas import VersandprofileOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/logistik/versand",
@@ -116,7 +115,7 @@ def list_versandprofile(
     return [VersandprofilOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/profile", response_model=VersandprofilOut, status_code=201, summary="Versandprofil anlegen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.post("/profile", response_model=VersandprofilOut, status_code=201, summary="Versandprofil anlegen")
 def create_versandprofil(
     payload: VersandprofilCreate,
     db=Depends(get_db),
@@ -155,7 +154,8 @@ def create_versandprofil(
 
 
 @router.delete("/profile/{profil_nr}", summary="Versandprofil löschen",
-    response_model=None, dependencies=SCHREIBEN["LOGISTIK"])
+    response_model=None
+)
 def delete_versandprofil(
     profil_nr: str,
     db=Depends(get_db),
@@ -195,7 +195,7 @@ def list_avise(
     return [LieferavisOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/avise", response_model=LieferavisOut, status_code=201, summary="Avis anlegen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.post("/avise", response_model=LieferavisOut, status_code=201, summary="Avis anlegen")
 def create_avis(
     payload: LieferavisCreate,
     db=Depends(get_db),
@@ -231,7 +231,8 @@ def create_avis(
 
 
 @router.patch("/avise/{avis_nr}/status", summary="Status avis",
-    response_model=VersandprofileOut, dependencies=SCHREIBEN["LOGISTIK"])
+    response_model=VersandprofileOut
+)
 def avis_status(
     avis_nr: str,
     neuer_status: str = Query(...),

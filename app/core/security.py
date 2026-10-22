@@ -238,26 +238,28 @@ def _find_jwk(keys: List[Dict[str, Any]], kid: Optional[str]) -> Optional[Dict[s
 
 def get_user_id_from_request(request: Request) -> str:
     """
-    Extract user id for audit/logging from request.state.token_claims (set by the verified bearer check),
-    else 'system'. Never from a client header: until 19.10.2026 ``X-User-ID`` was the fallback.
+    Extract user id for audit/logging. Uses request.state.token_claims (set by auth),
+    else X-User-ID header, else 'system'.
     """
     if hasattr(request.state, "token_claims") and request.state.token_claims:
         claims = request.state.token_claims
         sub = claims.get("sub")
         if sub:
             return str(sub)
-    return "system"
+    uid = (request.headers.get("X-User-ID") or "").strip()
+    return uid or "system"
 
 
 def get_user_email_from_request(request: Request) -> Optional[str]:
-    """Extract email for audit from token_claims (email/preferred_username); never from a client header."""
+    """Extract email for audit. From token_claims (preferred_username/email) or X-User-Email."""
     if hasattr(request.state, "token_claims") and request.state.token_claims:
         claims = request.state.token_claims
         for key in ("email", "preferred_username"):
             val = claims.get(key)
             if val:
                 return str(val)
-    return None
+    email = (request.headers.get("X-User-Email") or "").strip()
+    return email if email else None
 
 
 def _is_path_exempt(path: str) -> bool:

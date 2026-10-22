@@ -15,7 +15,6 @@ from io import BytesIO
 from typing import Any, Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Response
-from app.auth.deps import require_roles
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -25,8 +24,6 @@ from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 router = APIRouter(prefix="/admin/vordrucke", tags=["admin", "vordrucke", "druck"])
-
-_NUR_ADMIN = [Depends(require_roles("admin"))]  # Konfiguration: wie admin_core
 
 
 VordruckKategorie = Literal[
@@ -131,7 +128,7 @@ def list_vordrucke(
     return [_row_to_out(r) for r in rows]
 
 
-@router.post("", response_model=VordruckOut, status_code=201, summary="Vordruck anlegen", dependencies=_NUR_ADMIN)
+@router.post("", response_model=VordruckOut, status_code=201, summary="Vordruck anlegen")
 def create_vordruck(
     payload: VordruckCreate,
     db: Session = Depends(get_db),
@@ -168,7 +165,7 @@ def get_vordruck(
     return _row_to_out(_get_or_404(db, vordruck_id, tenant_id))
 
 
-@router.put("/{vordruck_id}", response_model=VordruckOut, summary="Vordruck aktualisieren", dependencies=_NUR_ADMIN)
+@router.put("/{vordruck_id}", response_model=VordruckOut, summary="Vordruck aktualisieren")
 def update_vordruck(
     vordruck_id: str,
     payload: VordruckCreate,
@@ -196,7 +193,7 @@ def update_vordruck(
     return _row_to_out(_get_or_404(db, vordruck_id, tenant_id))
 
 
-@router.delete("/{vordruck_id}", status_code=204, response_class=Response, summary="Vordruck löschen", dependencies=_NUR_ADMIN)
+@router.delete("/{vordruck_id}", status_code=204, response_class=Response, summary="Vordruck löschen")
 def delete_vordruck(
     vordruck_id: str,
     db: Session = Depends(get_db),
@@ -211,7 +208,7 @@ def delete_vordruck(
     return Response(status_code=204)
 
 
-@router.post("/{vordruck_id}/duplizieren", response_model=VordruckOut, status_code=201, summary="Vordruck duplizieren", dependencies=_NUR_ADMIN)
+@router.post("/{vordruck_id}/duplizieren", response_model=VordruckOut, status_code=201, summary="Vordruck duplizieren")
 def duplicate_vordruck(
     vordruck_id: str,
     db: Session = Depends(get_db),
@@ -307,7 +304,7 @@ def _render_pdf(vordruck: VordruckOut, daten: dict[str, Any]) -> bytes:
     return buf.getvalue()
 
 
-@router.post("/{vordruck_id}/render", response_class=Response, summary="Vordruck als PDF rendern", dependencies=_NUR_ADMIN)
+@router.post("/{vordruck_id}/render", response_class=Response, summary="Vordruck als PDF rendern")
 def render_vordruck(
     vordruck_id: str,
     payload: RenderRequest,
@@ -505,7 +502,7 @@ def _standard_vorlagen() -> list[VordruckCreate]:
 
 
 @router.post("/seed-standard", response_model=list[VordruckOut], status_code=201,
-             summary="Standard-Vorlagen anlegen (idempotent je Name)", dependencies=_NUR_ADMIN)
+             summary="Standard-Vorlagen anlegen (idempotent je Name)")
 def seed_standard_vorlagen(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

@@ -24,7 +24,6 @@ from modules.agrar.services.weighing_domain import (
 from app.services.agrar_contract_service import _compute_status
 from ..schemas.base import PaginatedResponse, BaseSchema
 from app.core.uuid7 import uuid7
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -198,7 +197,7 @@ async def list_article_groups(
     return [ArticleGroupOut(warengruppe=r[0], count=r[1]) for r in rows]
 
 
-@router.post("/", response_model=WeighingTicketOut, status_code=201, summary="Weighing ticket anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/", response_model=WeighingTicketOut, status_code=201, summary="Weighing ticket anlegen")
 async def create_weighing_ticket(
     payload: WeighingTicketCreate,
     tenant_id: Optional[str] = Query(None),
@@ -255,7 +254,7 @@ async def create_weighing_ticket(
     return WeighingTicketOut.model_validate(ticket)
 
 
-@router.put("/{ticket_id}", response_model=WeighingTicketOut, summary="Weighing ticket aktualisieren", dependencies=SCHREIBEN["LAGER"])
+@router.put("/{ticket_id}", response_model=WeighingTicketOut, summary="Weighing ticket aktualisieren")
 async def update_weighing_ticket(
     ticket_id: str,
     payload: WeighingTicketUpdate,
@@ -298,7 +297,7 @@ async def update_weighing_ticket(
     return WeighingTicketOut.model_validate(ticket)
 
 
-@router.post("/{ticket_id}/allocate-contract", response_model=WeighingTicketContractAllocationOut, status_code=201, summary="Ticket to contract zuweisen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/{ticket_id}/allocate-contract", response_model=WeighingTicketContractAllocationOut, status_code=201, summary="Ticket to contract zuweisen")
 async def allocate_ticket_to_contract(
     ticket_id: str,
     payload: WeighingTicketContractAllocationRequest,

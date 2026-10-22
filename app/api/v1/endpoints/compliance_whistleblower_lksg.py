@@ -15,7 +15,6 @@ from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema, IDResponse
 from app.api.v1.schemas.compliance_whistleblower_lksg_schemas import ComplianceWhistleblowerLksgOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/compliance", tags=["compliance", "whistleblower", "lksg"])
@@ -67,7 +66,8 @@ def _risk_level(score: int) -> str:
 
 
 @router.post("/whistleblower/reports", status_code=201, summary="Whistleblower report anlegen",
-    response_model=IDResponse, dependencies=SCHREIBEN["QUALITAET"])
+    response_model=IDResponse
+)
 async def create_whistleblower_report(
     payload: WhistleblowerReportIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -129,7 +129,8 @@ async def list_whistleblower_reports(
 
 
 @router.patch("/whistleblower/reports/{report_id}/status", summary="Whistleblower status aktualisieren",
-    response_model=IDResponse, dependencies=SCHREIBEN["QUALITAET"])
+    response_model=IDResponse
+)
 async def update_whistleblower_status(
     report_id: str,
     payload: WhistleblowerStatusIn,
@@ -157,7 +158,8 @@ async def update_whistleblower_status(
 
 
 @router.post("/lksg/supplier-risk-assessments", status_code=201, summary="Lksg supplier risk assessment anlegen",
-    response_model=IDResponse, dependencies=SCHREIBEN["QUALITAET"])
+    response_model=IDResponse
+)
 async def create_lksg_supplier_risk_assessment(
     payload: LksgRiskAssessmentIn,
     tenant_id: str = Depends(get_tenant_id),

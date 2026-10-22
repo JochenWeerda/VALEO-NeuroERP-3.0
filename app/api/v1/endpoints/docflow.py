@@ -37,7 +37,6 @@ from app.api.v1.schemas.docflow_schemas import (
     DocflowApprovalRequest,
     DocflowApprovalDecision,
 )
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -190,7 +189,8 @@ async def get_document(
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
     response_model=None,
-    summary="Ungebuchten Docflow-Entwurf loeschen", dependencies=SCHREIBEN["BELEGE"])
+    summary="Ungebuchten Docflow-Entwurf loeschen",
+)
 async def delete_draft_document(
     doc_id: str,
     tenant_id: str = Depends(_docflow_tenant),
@@ -242,7 +242,7 @@ async def get_pos_compliance(
     return payload
 
 
-@router.post("/", response_model=DocflowHeaderOut, summary="Document anlegen", dependencies=SCHREIBEN["BELEGE"])
+@router.post("/", response_model=DocflowHeaderOut, summary="Document anlegen")
 async def create_document(
     payload: DocflowCreateRequest,
     tenant_id: str = Depends(_docflow_tenant),
@@ -271,7 +271,7 @@ async def create_document(
     return _row_to_header_out(svc, doc_id, snapshot)
 
 
-@router.put("/{doc_id}", response_model=DocflowHeaderOut, summary="Document aktualisieren", dependencies=SCHREIBEN["BELEGE"])
+@router.put("/{doc_id}", response_model=DocflowHeaderOut, summary="Document aktualisieren")
 async def update_document(
     doc_id: str,
     payload: DocflowUpdateRequest,
@@ -324,7 +324,7 @@ def list_approvals(
     return DocflowFreigabe(db, tenant_id).liste(doc_id)
 
 
-@router.post("/{doc_id}/approvals", response_model=TypedObjectOut, summary="Freigabe durch eine zweite Person anfragen", dependencies=SCHREIBEN["BELEGE"])
+@router.post("/{doc_id}/approvals", response_model=TypedObjectOut, summary="Freigabe durch eine zweite Person anfragen")
 def request_approval(
     doc_id: str,
     payload: DocflowApprovalRequest,
@@ -348,7 +348,7 @@ def request_approval(
 
 
 @router.post("/{doc_id}/approvals/{approval_id}/decision", response_model=TypedObjectOut,
-             summary="Freigabe erteilen oder ablehnen", dependencies=SCHREIBEN["FREIGABE"])
+             summary="Freigabe erteilen oder ablehnen")
 def decide_approval(
     doc_id: str,
     approval_id: str,
@@ -371,7 +371,7 @@ def decide_approval(
         raise HTTPException(status_code=403, detail=exc.detail)
 
 
-@router.post("/{doc_id}/release", response_model=DocflowCommandResult, summary="Document freigeben", dependencies=SCHREIBEN["BELEGE"])
+@router.post("/{doc_id}/release", response_model=DocflowCommandResult, summary="Document freigeben")
 async def release_document(
     doc_id: str,
     payload: DocflowReleaseRequest,
@@ -398,7 +398,7 @@ async def release_document(
     return DocflowCommandResult(**result)
 
 
-@router.post("/{doc_id}/record-print", response_model=DocflowHeaderOut, summary="Print record", dependencies=SCHREIBEN["BELEGE"])
+@router.post("/{doc_id}/record-print", response_model=DocflowHeaderOut, summary="Print record")
 async def record_print(
     doc_id: str,
     payload: DocflowRecordPrintRequest,
@@ -419,7 +419,7 @@ async def record_print(
     return _row_to_header_out(svc, doc_id)
 
 
-@router.post("/{doc_id}/record-export", response_model=DocflowHeaderOut, summary="Export record", dependencies=SCHREIBEN["BELEGE"])
+@router.post("/{doc_id}/record-export", response_model=DocflowHeaderOut, summary="Export record")
 async def record_export(
     doc_id: str,
     payload: DocflowRecordExportRequest,
@@ -440,7 +440,7 @@ async def record_export(
     return _row_to_header_out(svc, doc_id)
 
 
-@router.post("/{doc_id}/convert", response_model=DocflowCommandResult, summary="Document umwandeln", dependencies=SCHREIBEN["BELEGE"])
+@router.post("/{doc_id}/convert", response_model=DocflowCommandResult, summary="Document umwandeln")
 async def convert_document(
     doc_id: str,
     payload: DocflowConvertRequest,
@@ -471,7 +471,7 @@ async def convert_document(
     return DocflowCommandResult(**result)
 
 
-@router.post("/{doc_id}/post", response_model=DocflowCommandResult, summary="Document erstellen", dependencies=SCHREIBEN["BELEGE"])
+@router.post("/{doc_id}/post", response_model=DocflowCommandResult, summary="Document erstellen")
 async def post_document(
     doc_id: str,
     payload: DocflowPostRequest,
@@ -498,7 +498,7 @@ async def post_document(
     return DocflowCommandResult(**result)
 
 
-@router.post("/{doc_id}/reverse", response_model=DocflowCommandResult, summary="Document reverse", dependencies=SCHREIBEN["BELEGE"])
+@router.post("/{doc_id}/reverse", response_model=DocflowCommandResult, summary="Document reverse")
 async def reverse_document(
     doc_id: str,
     payload: DocflowReverseRequest,
@@ -529,7 +529,7 @@ async def reverse_document(
 from app.services.docflow_source_proposals import DocflowSourceProposalService, SourceProposalRequest
 
 
-@router.post("/source-proposals", response_model=DocflowOut, summary="Kontrakt- und Fremdlagerquellen vorschlagen", dependencies=SCHREIBEN["BELEGE"])
+@router.post("/source-proposals", response_model=DocflowOut, summary="Kontrakt- und Fremdlagerquellen vorschlagen")
 def source_proposals(
     body: SourceProposalRequest,
     db: Session = Depends(get_db),

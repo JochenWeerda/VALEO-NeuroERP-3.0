@@ -12,7 +12,6 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -163,13 +162,13 @@ def _parse_gs1(barcode: str, fmt: str) -> GS1ParseResult:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("/parse", response_model=GS1ParseResult, tags=["gs1", "barcode"], summary="Gs1 parse", dependencies=SCHREIBEN["LAGER"])
+@router.post("/parse", response_model=GS1ParseResult, tags=["gs1", "barcode"], summary="Gs1 parse")
 def parse_gs1(payload: GS1ParseInput) -> GS1ParseResult:
     """Parse a single GS1 barcode string and return structured AI fields."""
     return _parse_gs1(payload.barcode_string, payload.format)
 
 
-@router.post("/batch-parse", response_model=list[GS1ParseResult], tags=["gs1", "barcode"], summary="Parse gs1 Batch", dependencies=SCHREIBEN["LAGER"])
+@router.post("/batch-parse", response_model=list[GS1ParseResult], tags=["gs1", "barcode"], summary="Parse gs1 Batch")
 def batch_parse_gs1(payloads: list[GS1ParseInput]) -> list[GS1ParseResult]:
     """Parse up to 100 GS1 barcodes in one call."""
     if len(payloads) > 100:
@@ -231,7 +230,7 @@ def _gs1_mod10_check_digit(digits: str) -> int:
 # SSCC / Label Endpoints
 # ---------------------------------------------------------------------------
 
-@router.post("/sscc/generate", response_model=SSCCGenerateResult, tags=["gs1", "sscc"], summary="Sscc generieren", dependencies=SCHREIBEN["LAGER"])
+@router.post("/sscc/generate", response_model=SSCCGenerateResult, tags=["gs1", "sscc"], summary="Sscc generieren")
 def generate_sscc(payload: SSCCGenerateInput) -> SSCCGenerateResult:
     """Generate a new SSCC-18 barcode from company prefix + serial reference."""
     base = "0" + payload.company_prefix + payload.serial_ref
@@ -265,7 +264,7 @@ def validate_sscc(sscc: str) -> SSCCValidateResult:
     )
 
 
-@router.post("/labels/generate", response_model=LabelGenerateResult, tags=["gs1", "label"], summary="Label generieren", dependencies=SCHREIBEN["LAGER"])
+@router.post("/labels/generate", response_model=LabelGenerateResult, tags=["gs1", "label"], summary="Label generieren")
 def generate_label(payload: LabelGenerateInput) -> LabelGenerateResult:
     """Generate GS1-128 label data dict for printing."""
     # Convert YYYY-MM-DD → YYMMDD

@@ -17,7 +17,6 @@ from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 from ....services.customer_sales_eligibility import assert_customer_allowed_for_sales_order
 from ..schemas.base import PaginatedResponse
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -251,7 +250,7 @@ async def get_sales_offer(
     return _row_to_offer(row, _fetch_items(db, offer_id, tenant_id))
 
 
-@router.post("/", response_model=SalesOffer, status_code=status.HTTP_201_CREATED, summary="Sales offer anlegen", dependencies=SCHREIBEN["VERKAUF"])
+@router.post("/", response_model=SalesOffer, status_code=status.HTTP_201_CREATED, summary="Sales offer anlegen")
 async def create_sales_offer(
     payload: SalesOfferCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -374,7 +373,7 @@ async def create_sales_offer(
     )
 
 
-@router.patch("/{offer_id}", response_model=SalesOffer, summary="Sales offer aktualisieren", dependencies=SCHREIBEN["VERKAUF"])
+@router.patch("/{offer_id}", response_model=SalesOffer, summary="Sales offer aktualisieren")
 async def update_sales_offer(
     offer_id: str,
     payload: SalesOfferUpdate,
@@ -461,7 +460,8 @@ async def update_sales_offer(
 
 
 @router.delete("/{offer_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Sales offer löschen",
-    response_model=None, dependencies=SCHREIBEN["VERKAUF"])
+    response_model=None
+)
 async def delete_sales_offer(
     offer_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -484,7 +484,8 @@ async def delete_sales_offer(
 
 
 @router.post("/{offer_id}/convert-to-order", status_code=status.HTTP_200_OK, summary="Offer to order umwandeln",
-    response_model=SalesOfferConversionOut, dependencies=SCHREIBEN["VERKAUF"])
+    response_model=SalesOfferConversionOut
+)
 async def convert_offer_to_order(
     offer_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -581,7 +582,8 @@ class SalesOfferPrintOut(BaseSchema):
 @router.post(
     "/{offer_id}/print",
     response_model=SalesOfferPrintOut,
-    summary="Sales offer drucken", dependencies=SCHREIBEN["VERKAUF"])
+    summary="Sales offer drucken",
+)
 async def print_sales_offer(
     offer_id: str,
     template: Optional[str] = Query(default=None, max_length=60, description="Formatvorlage"),
@@ -638,7 +640,8 @@ async def print_sales_offer(
 @router.post(
     "/{offer_id}/post",
     response_model=SalesOffer,
-    summary="Sales offer buchen", dependencies=SCHREIBEN["VERKAUF"])
+    summary="Sales offer buchen",
+)
 async def post_sales_offer(
     offer_id: str,
     tenant_id: str = Depends(get_tenant_id),

@@ -13,7 +13,6 @@ from app.domains.operations.models import WartungAnlage, WartungsProtokoll, Wart
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.wartung_schemas import WartungOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/wartung", tags=["Wartung"])
@@ -90,7 +89,8 @@ def get_anlage(anlage_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/anlagen", status_code=201, summary="Anlage anlegen",
-    response_model=WartungOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=WartungOut
+)
 def create_anlage(payload: AnlagePayload, db: Session = Depends(get_db)):
     obj = WartungAnlage(**payload.model_dump())
     db.add(obj)
@@ -100,7 +100,8 @@ def create_anlage(payload: AnlagePayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/anlagen/{anlage_id}", summary="Anlage aktualisieren",
-    response_model=WartungOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=WartungOut
+)
 def update_anlage(anlage_id: str, payload: AnlagePatch, db: Session = Depends(get_db)):
     obj = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
     if not obj:
@@ -113,7 +114,7 @@ def update_anlage(anlage_id: str, payload: AnlagePatch, db: Session = Depends(ge
     return _to_dict(obj)
 
 
-@router.delete("/anlagen/{anlage_id}", status_code=204, response_class=Response, response_model=None, summary="Anlage löschen", dependencies=SCHREIBEN["FACHLICH"])
+@router.delete("/anlagen/{anlage_id}", status_code=204, response_class=Response, response_model=None, summary="Anlage löschen")
 def delete_anlage(anlage_id: str, db: Session = Depends(get_db)):
     obj = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
     if not obj:
@@ -148,7 +149,8 @@ def list_protokolle(anlage_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/anlagen/{anlage_id}/protokolle", status_code=201, summary="Protokoll anlegen",
-    response_model=WartungOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=WartungOut
+)
 def create_protokoll(anlage_id: str, payload: ProtokollPayload, db: Session = Depends(get_db)):
     anlage = db.query(WartungAnlage).filter(WartungAnlage.id == anlage_id).first()
     if not anlage:

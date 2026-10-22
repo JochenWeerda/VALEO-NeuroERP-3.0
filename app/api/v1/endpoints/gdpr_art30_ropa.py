@@ -40,7 +40,6 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.gdpr_art30_ropa_schemas import GdprArt30RopaOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/gdpr/art30", tags=["gdpr", "compliance", "art30"])
@@ -299,7 +298,7 @@ def list_activities(
     return rows
 
 
-@router.post("/activities", response_model=ProcessingActivityOut, status_code=201, summary="Verarbeitungstätigkeit anlegen", dependencies=SCHREIBEN["QUALITAET"])
+@router.post("/activities", response_model=ProcessingActivityOut, status_code=201, summary="Verarbeitungstätigkeit anlegen")
 def create_activity(
     payload: ProcessingActivityIn,
     db: Session = Depends(get_db),
@@ -342,7 +341,7 @@ def get_activity(
     return row
 
 
-@router.put("/activities/{activity_id}", response_model=ProcessingActivityOut, summary="Verarbeitungstätigkeit aktualisieren", dependencies=SCHREIBEN["QUALITAET"])
+@router.put("/activities/{activity_id}", response_model=ProcessingActivityOut, summary="Verarbeitungstätigkeit aktualisieren")
 def update_activity(
     activity_id: str,
     payload: ProcessingActivityIn,
@@ -373,7 +372,8 @@ def update_activity(
 
 
 @router.delete("/activities/{activity_id}", status_code=204, summary="Verarbeitungstätigkeit löschen",
-    response_class=Response, response_model=None, dependencies=SCHREIBEN["QUALITAET"])
+    response_class=Response, response_model=None
+)
 def delete_activity(
     activity_id: str,
     db: Session = Depends(get_db),

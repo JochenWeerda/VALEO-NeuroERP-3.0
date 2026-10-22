@@ -13,7 +13,6 @@ from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class ChannelOut(BaseSchema):
@@ -64,7 +63,8 @@ async def whatsapp_verify(request: Request):
 
 
 @router.post("/whatsapp/webhook", summary="Webhook whatsapp",
-    response_model=ChannelOut, dependencies=SCHREIBEN["GERAET"])
+    response_model=ChannelOut
+)
 async def whatsapp_webhook(
     request: Request,
     tenant_id: str = Depends(get_tenant_id),
@@ -89,7 +89,8 @@ async def whatsapp_webhook(
 
 
 @router.post("/email/ingest", summary="Ingest email",
-    response_model=ChannelOut, dependencies=SCHREIBEN["GERAET"])
+    response_model=ChannelOut
+)
 async def email_ingest(
     request: EmailIngressRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -112,7 +113,8 @@ async def email_ingest(
 
 
 @router.post("/route", summary="Generic route",
-    response_model=ChannelOut, dependencies=SCHREIBEN["GERAET"])
+    response_model=ChannelOut
+)
 async def route_generic(
     request: GenericMessageRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -150,7 +152,8 @@ class ChatMessageRequest(BaseModel):
 
 
 @router.post("/livechat/start", summary="Start livechat",
-    response_model=ChannelOut, dependencies=SCHREIBEN["GERAET"])
+    response_model=ChannelOut
+)
 async def livechat_start(
     request: ChatStartRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -162,7 +165,8 @@ async def livechat_start(
 
 
 @router.post("/livechat/{session_id}/message", summary="Message livechat",
-    response_model=ChannelOut, dependencies=SCHREIBEN["GERAET"])
+    response_model=ChannelOut
+)
 async def livechat_message(
     session_id: str,
     request: ChatMessageRequest,
@@ -184,7 +188,8 @@ async def livechat_history(session_id: str, limit: int = 50):
 
 
 @router.post("/livechat/{session_id}/close", summary="Close livechat",
-    response_model=ChannelOut, dependencies=SCHREIBEN["GERAET"])
+    response_model=ChannelOut
+)
 async def livechat_close(session_id: str):
     """Live-Chat-Session schliessen."""
     from app.channels.livechat_channel import close_session

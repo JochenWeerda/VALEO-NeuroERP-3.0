@@ -15,7 +15,6 @@ from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.saatzucht_schemas import SaatzuchtOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/saatzucht", tags=["saatzucht", "agrar", "saatgut"])
@@ -126,7 +125,7 @@ def list_partien(
         return [SaatgutPartieOut(**i) for i in items]
 
 
-@router.post("/partien", response_model=SaatgutPartieOut, status_code=201, summary="Partie anlegen", dependencies=SCHREIBEN["AGRAR"])
+@router.post("/partien", response_model=SaatgutPartieOut, status_code=201, summary="Partie anlegen")
 def create_partie(
     payload: SaatgutPartieCreate,
     db: Session = Depends(get_db),
@@ -221,7 +220,7 @@ def get_partie(
     raise HTTPException(status_code=404, detail="Partie nicht gefunden")
 
 
-@router.patch("/partien/{id}", response_model=SaatgutPartieOut, summary="Partie aktualisieren", dependencies=SCHREIBEN["AGRAR"])
+@router.patch("/partien/{id}", response_model=SaatgutPartieOut, summary="Partie aktualisieren")
 def update_partie(
     id: str,
     payload: dict,
@@ -250,7 +249,7 @@ def update_partie(
     return get_partie(id, db, tenant_id)
 
 
-@router.post("/partien/{id}/anerkennung", response_model=SaatgutPartieOut, summary="Anerkennung", dependencies=SCHREIBEN["AGRAR"])
+@router.post("/partien/{id}/anerkennung", response_model=SaatgutPartieOut, summary="Anerkennung")
 def anerkennung(
     id: str,
     body: dict,
@@ -279,7 +278,7 @@ def anerkennung(
     return get_partie(id, db, tenant_id)
 
 
-@router.post("/partien/{id}/etikett", response_model=SaatgutEtikett, summary="Etikett", dependencies=SCHREIBEN["AGRAR"])
+@router.post("/partien/{id}/etikett", response_model=SaatgutEtikett, summary="Etikett")
 def etikett(
     id: str,
     db: Session = Depends(get_db),

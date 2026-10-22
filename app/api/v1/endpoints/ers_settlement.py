@@ -24,7 +24,6 @@ from app.core.business_time import business_date_after, business_today
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.ers_settlement_schemas import ErsSettlementOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/einkauf/ers", tags=["einkauf", "ers"])
@@ -129,7 +128,8 @@ def list_ers_suppliers(
 
 
 @router.post("/suppliers/{supplier_id}/qualify", summary="Supplier qualify",
-    response_model=ErsSettlementOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=ErsSettlementOut
+)
 def qualify_supplier(
     supplier_id: str,
     body: QualifyRequest,
@@ -166,7 +166,8 @@ def qualify_supplier(
 
 
 @router.post("/trigger", summary="Ers auslösen",
-    response_model=ErsSettlementOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=ErsSettlementOut
+)
 def trigger_ers(
     body: ErsRunRequest,
     db: Session = Depends(get_db),

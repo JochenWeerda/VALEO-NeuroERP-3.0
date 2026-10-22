@@ -13,7 +13,6 @@ from app.domains.operations.models import SiloBewegungDB, SiloZelleDB
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.silo_operations_api_schemas import SiloOperationsApiOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/silo", tags=["silo-operations"])
@@ -53,7 +52,8 @@ def _zelle_to_dict(row: SiloZelleDB) -> dict:
 
 
 @router.post("/zellen", status_code=201, summary="Silo zelle anlegen",
-    response_model=SiloOperationsApiOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=SiloOperationsApiOut
+)
 def create_silo_zelle(req: SiloZelleCreateRequest, db: Session = Depends(get_db)):
     row = SiloZelleDB(
         silo_id=str(uuid.uuid4()),
@@ -87,7 +87,8 @@ def list_zellen(tenant_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/einlagern", status_code=201, summary="Einlagern",
-    response_model=SiloOperationsApiOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=SiloOperationsApiOut
+)
 def einlagern(req: EinlagerungRequest, db: Session = Depends(get_db)):
     zelle = db.query(SiloZelleDB).filter(
         SiloZelleDB.silo_id == req.silo_id,
@@ -116,7 +117,8 @@ def einlagern(req: EinlagerungRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/auslagern", status_code=201, summary="Auslagern",
-    response_model=SiloOperationsApiOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=SiloOperationsApiOut
+)
 def auslagern(req: AuslagerungRequest, db: Session = Depends(get_db)):
     zelle = db.query(SiloZelleDB).filter(
         SiloZelleDB.silo_id == req.silo_id,

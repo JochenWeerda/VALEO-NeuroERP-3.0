@@ -548,10 +548,7 @@ function NativeExistingDetailPage({
                   ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
                   : ''
               }
-              onClick={(event) => {
-                // The action advances the controlled flow. Radix must not close it
-                // afterwards and reset the newly opened preview or audit stage.
-                event.preventDefault()
+              onClick={() => {
                 if (pendingAction) void advanceFromConfirm(pendingAction)
               }}
             >

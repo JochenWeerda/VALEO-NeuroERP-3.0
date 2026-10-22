@@ -26,7 +26,6 @@ from app.infrastructure.models.agrar_models import AgrarMaschine
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class AgrarMaschinenOut(BaseSchema):
@@ -161,7 +160,8 @@ def list_maschinen(
 
 
 @router.post("/maschinen", status_code=201, summary="Maschine anlegen",
-    response_model=AgrarMaschinenOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=AgrarMaschinenOut
+)
 def create_maschine(
     body: MaschineCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -197,7 +197,8 @@ def get_maschine(
 
 
 @router.patch("/maschinen/{maschine_id}", summary="Maschine aktualisieren",
-    response_model=AgrarMaschinenOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=AgrarMaschinenOut
+)
 def update_maschine(
     maschine_id: str,
     body: MaschineUpdate,
@@ -220,7 +221,7 @@ def update_maschine(
     return _to_dict(m)
 
 
-@router.delete("/maschinen/{maschine_id}", response_class=Response, summary="Maschine löschen", dependencies=SCHREIBEN["AGRAR"])
+@router.delete("/maschinen/{maschine_id}", response_class=Response, summary="Maschine löschen")
 def delete_maschine(
     maschine_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -239,7 +240,8 @@ def delete_maschine(
 
 
 @router.patch("/maschinen/{maschine_id}/stunden", summary="Betriebsstunden buch",
-    response_model=None, dependencies=SCHREIBEN["AGRAR"])
+    response_model=None
+)
 def buch_betriebsstunden(
     maschine_id: str,
     body: StundenBuchung,
@@ -261,7 +263,8 @@ def buch_betriebsstunden(
 
 
 @router.patch("/maschinen/{maschine_id}/status", summary="Maschine status setzen",
-    response_model=AgrarMaschinenOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=AgrarMaschinenOut
+)
 def set_maschine_status(
     maschine_id: str,
     body: StatusWechsel,

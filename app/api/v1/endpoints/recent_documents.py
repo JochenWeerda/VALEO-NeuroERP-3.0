@@ -14,7 +14,6 @@ from app.services.recent_documents_service import (
     RecentDocumentsService,
 )
 from app.api.v1.schemas.base import TypedObjectOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/recent-documents", tags=["workspace", "l3-parity"])
 
@@ -43,7 +42,7 @@ def guarded(call):  # noqa: ANN001, ANN201
         raise HTTPException(status_code=403, detail=str(exc)) from exc
 
 
-@router.post("/touch", response_model=TypedObjectOut, status_code=status.HTTP_202_ACCEPTED, summary="Beleg als zuletzt geoeffnet vermerken", dependencies=SCHREIBEN["EIGENE_DATEN"])
+@router.post("/touch", response_model=TypedObjectOut, status_code=status.HTTP_202_ACCEPTED, summary="Beleg als zuletzt geoeffnet vermerken")
 def touch(
     body: RecentDocumentTouch,
     db: Session = Depends(get_db),
@@ -69,7 +68,7 @@ def list_recent(
     )
 
 
-@router.delete("/{recent_id}", response_model=TypedObjectOut, summary="Eintrag aus der Belegliste entfernen", dependencies=SCHREIBEN["EIGENE_DATEN"])
+@router.delete("/{recent_id}", response_model=TypedObjectOut, summary="Eintrag aus der Belegliste entfernen")
 def remove_one(
     recent_id: str,
     db: Session = Depends(get_db),
@@ -79,7 +78,7 @@ def remove_one(
     return {"deleted": service(db, tenant_id, user).remove(recent_id)}
 
 
-@router.delete("", response_model=TypedObjectOut, summary="Belegliste leeren", dependencies=SCHREIBEN["EIGENE_DATEN"])
+@router.delete("", response_model=TypedObjectOut, summary="Belegliste leeren")
 def clear_all(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),

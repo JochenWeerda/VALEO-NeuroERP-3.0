@@ -11,7 +11,6 @@ from app.domains.operations.models import FoerderAntrag
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.foerderung_schemas import FoerderungOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/foerderung", tags=["Foerderung"])
@@ -111,7 +110,7 @@ class FoerderAntragUpdate(BaseModel):
 from fastapi import HTTPException
 
 
-@router.post("/antraege", response_model=FoerderungOut, status_code=201, summary="Antrag anlegen", dependencies=SCHREIBEN["AGRAR"])
+@router.post("/antraege", response_model=FoerderungOut, status_code=201, summary="Antrag anlegen")
 async def create_antrag(
     body: FoerderAntragCreate,
     db: Session = Depends(get_db),
@@ -156,7 +155,7 @@ async def get_antrag(antrag_id: str, db: Session = Depends(get_db)) -> dict:
     }
 
 
-@router.delete("/antraege/{antrag_id}", status_code=204, response_class=Response, response_model=None, summary="Antrag löschen", dependencies=SCHREIBEN["AGRAR"])
+@router.delete("/antraege/{antrag_id}", status_code=204, response_class=Response, response_model=None, summary="Antrag löschen")
 async def delete_antrag(antrag_id: str, db: Session = Depends(get_db)) -> None:
     """Förderantrag löschen (nur im Entwurfsstatus)."""
     antrag = db.query(FoerderAntrag).filter(FoerderAntrag.id == antrag_id).first()
@@ -168,7 +167,7 @@ async def delete_antrag(antrag_id: str, db: Session = Depends(get_db)) -> None:
     db.commit()
 
 
-@router.put("/antraege/{antrag_id}", response_model=FoerderungOut, summary="Antrag aktualisieren", dependencies=SCHREIBEN["AGRAR"])
+@router.put("/antraege/{antrag_id}", response_model=FoerderungOut, summary="Antrag aktualisieren")
 async def update_antrag(
     antrag_id: int,
     body: FoerderAntragUpdate,

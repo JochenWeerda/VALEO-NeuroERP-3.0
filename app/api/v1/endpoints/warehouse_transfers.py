@@ -19,7 +19,6 @@ from ....infrastructure.models import (
     WarehouseTransferLine,
 )
 from ..schemas.base import BaseSchema, PaginatedResponse
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 
@@ -197,7 +196,7 @@ async def get_transfer_lines(
     return [TransferLineOut.model_validate(line_item) for line_item in lines]
 
 
-@router.post("/", response_model=TransferOut, status_code=201, summary="Transfer anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/", response_model=TransferOut, status_code=201, summary="Transfer anlegen")
 async def create_transfer(
     payload: TransferCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -219,7 +218,7 @@ async def create_transfer(
     return TransferOut.model_validate(obj)
 
 
-@router.put("/{transfer_id}", response_model=TransferOut, summary="Transfer aktualisieren", dependencies=SCHREIBEN["LAGER"])
+@router.put("/{transfer_id}", response_model=TransferOut, summary="Transfer aktualisieren")
 async def update_transfer(
     transfer_id: str,
     payload: TransferCreate,
@@ -234,7 +233,7 @@ async def update_transfer(
     return TransferOut.model_validate(obj)
 
 
-@router.post("/{transfer_id}/post", response_model=TransferOut, summary="Transfer erstellen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/{transfer_id}/post", response_model=TransferOut, summary="Transfer erstellen")
 async def post_transfer(
     transfer_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -316,7 +315,7 @@ async def post_transfer(
     return {"success": True, "movements_created": movements_created, "transfer_id": transfer_id}
 
 
-@router.delete("/{transfer_id}", status_code=204, response_class=Response, response_model=None, summary="Transfer löschen", dependencies=SCHREIBEN["LAGER"])
+@router.delete("/{transfer_id}", status_code=204, response_class=Response, response_model=None, summary="Transfer löschen")
 async def delete_transfer(
     transfer_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -327,7 +326,7 @@ async def delete_transfer(
     db.commit()
 
 
-@router.post("/{transfer_id}/lines", response_model=TransferLineOut, status_code=201, summary="Transfer line anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/{transfer_id}/lines", response_model=TransferLineOut, status_code=201, summary="Transfer line anlegen")
 async def create_transfer_line(
     transfer_id: str,
     payload: TransferLineCreate,
@@ -351,7 +350,7 @@ async def create_transfer_line(
     return TransferLineOut.model_validate(line)
 
 
-@router.put("/{transfer_id}/lines/{line_id}", response_model=TransferLineOut, summary="Transfer line aktualisieren", dependencies=SCHREIBEN["LAGER"])
+@router.put("/{transfer_id}/lines/{line_id}", response_model=TransferLineOut, summary="Transfer line aktualisieren")
 async def update_transfer_line(
     transfer_id: str,
     line_id: str,
@@ -368,7 +367,7 @@ async def update_transfer_line(
     return TransferLineOut.model_validate(line)
 
 
-@router.delete("/{transfer_id}/lines/{line_id}", status_code=204, response_class=Response, response_model=None, summary="Transfer line löschen", dependencies=SCHREIBEN["LAGER"])
+@router.delete("/{transfer_id}/lines/{line_id}", status_code=204, response_class=Response, response_model=None, summary="Transfer line löschen")
 async def delete_transfer_line(
     transfer_id: str,
     line_id: str,
@@ -418,7 +417,7 @@ async def get_correction_lines(
     return [CorrectionLineOut.model_validate(line_item) for line_item in lines]
 
 
-@router.post("/corrections", response_model=CorrectionOut, status_code=201, summary="Correction anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/corrections", response_model=CorrectionOut, status_code=201, summary="Correction anlegen")
 async def create_correction(
     payload: CorrectionCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -439,7 +438,7 @@ async def create_correction(
     return CorrectionOut.model_validate(obj)
 
 
-@router.post("/corrections/{corr_id}/lines", response_model=CorrectionLineOut, status_code=201, summary="Correction line anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/corrections/{corr_id}/lines", response_model=CorrectionLineOut, status_code=201, summary="Correction line anlegen")
 async def create_correction_line(
     corr_id: str,
     payload: CorrectionLineCreate,
@@ -464,7 +463,7 @@ async def create_correction_line(
     return CorrectionLineOut.model_validate(line)
 
 
-@router.put("/corrections/{corr_id}", response_model=CorrectionOut, summary="Correction aktualisieren", dependencies=SCHREIBEN["LAGER"])
+@router.put("/corrections/{corr_id}", response_model=CorrectionOut, summary="Correction aktualisieren")
 async def update_correction(
     corr_id: str,
     payload: CorrectionCreate,
@@ -479,7 +478,7 @@ async def update_correction(
     return CorrectionOut.model_validate(obj)
 
 
-@router.delete("/corrections/{corr_id}", status_code=204, response_class=Response, response_model=None, summary="Correction löschen", dependencies=SCHREIBEN["LAGER"])
+@router.delete("/corrections/{corr_id}", status_code=204, response_class=Response, response_model=None, summary="Correction löschen")
 async def delete_correction(
     corr_id: str,
     tenant_id: str = Depends(get_tenant_id),

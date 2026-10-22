@@ -18,7 +18,6 @@ from app.core.tenant import get_tenant_id
 
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/kasse/tagesabschluss", tags=["Kasse - Tagesabschluss"])
@@ -112,7 +111,7 @@ async def get_aktuell(
     )
 
 
-@router.post("", response_model=TagesabschlussSubmitOut, status_code=201, summary="Tagesabschluss einreichen", dependencies=SCHREIBEN["VERKAUF"])
+@router.post("", response_model=TagesabschlussSubmitOut, status_code=201, summary="Tagesabschluss einreichen")
 async def submit_tagesabschluss(
     payload: TagesabschlussSubmitIn,
     tenant_id: str = Depends(get_tenant_id),

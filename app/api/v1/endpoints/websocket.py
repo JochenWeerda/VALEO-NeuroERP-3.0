@@ -80,18 +80,16 @@ async def pos_websocket(
                         active_terminals[key].discard(client)
     
     except WebSocketDisconnect:
+        # Remove connection
+        active_terminals[key].discard(websocket)
+        if not active_terminals[key]:
+            del active_terminals[key]
+        
         logger.info("POS WebSocket disconnected: tenant=%s terminal=%s", auth_context["tenant_id"], terminal_id)
     
     except Exception as e:
         logger.error(f"POS WebSocket error: {e}", exc_info=True)
-    finally:
-        # Cancellation also ends a connection. Remove only this socket and
-        # preserve every other terminal participant and verified tenant.
-        connections = active_terminals.get(key)
-        if connections is not None:
-            connections.discard(websocket)
-            if not connections:
-                active_terminals.pop(key, None)
+        active_terminals[key].discard(websocket)
 
 
 @router.websocket("/ws/workflow/{workflow_id}")

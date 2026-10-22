@@ -13,7 +13,8 @@
         "LAGER_ADMIN",
         "LAGER_BEARBEITEN",
         "LAGER_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.preise": [
         "EINKAUF_ADMIN",
@@ -22,35 +23,40 @@
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "FINANCE_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.bearbeiten": [
         "EINKAUF_ADMIN",
         "EINKAUF_BEARBEITEN",
         "LAGER_ADMIN",
         "LAGER_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.ausstellen": [
         "EINKAUF_ADMIN",
         "EINKAUF_BEARBEITEN",
         "LAGER_ADMIN",
         "LAGER_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.buchen": [
         "EINKAUF_ADMIN",
         "EINKAUF_BEARBEITEN",
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.stornieren": [
         "EINKAUF_ADMIN",
         "EINKAUF_BEARBEITEN",
         "LAGER_ADMIN",
         "LAGER_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.freigeben": [
         "CONTROLLING",
@@ -58,7 +64,8 @@
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "admin",
-        "controller"
+        "controller",
+        "manager"
       ],
       "belege.freigeben_erhoeht": [
         "CONTROLLING",
@@ -79,7 +86,8 @@
         "LAGER_ADMIN",
         "LAGER_BEARBEITEN",
         "LAGER_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.preise": [
         "EINKAUF_ADMIN",
@@ -88,24 +96,28 @@
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "FINANCE_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.bearbeiten": [
         "EINKAUF_ADMIN",
         "EINKAUF_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.ausstellen": [
         "EINKAUF_ADMIN",
         "EINKAUF_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.buchen": [
         "EINKAUF_ADMIN",
         "EINKAUF_BEARBEITEN",
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.stornieren": [
         "EINKAUF_ADMIN",
@@ -119,7 +131,8 @@
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "admin",
-        "controller"
+        "controller",
+        "manager"
       ],
       "belege.freigeben_erhoeht": [
         "CONTROLLING",
@@ -140,7 +153,8 @@
         "LAGER_ADMIN",
         "LAGER_BEARBEITEN",
         "LAGER_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.preise": [
         "EINKAUF_ADMIN",
@@ -149,24 +163,28 @@
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "FINANCE_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.bearbeiten": [
         "EINKAUF_ADMIN",
         "EINKAUF_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.ausstellen": [
         "EINKAUF_ADMIN",
         "EINKAUF_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.buchen": [
         "EINKAUF_ADMIN",
         "EINKAUF_BEARBEITEN",
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.stornieren": [
         "EINKAUF_ADMIN",
@@ -180,7 +198,8 @@
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "admin",
-        "controller"
+        "controller",
+        "manager"
       ],
       "belege.freigeben_erhoeht": [
         "CONTROLLING",
@@ -201,7 +220,8 @@
         "LAGER_ADMIN",
         "LAGER_BEARBEITEN",
         "LAGER_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.preise": [
         "EINKAUF_ADMIN",
@@ -210,29 +230,34 @@
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "FINANCE_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.bearbeiten": [
         "EINKAUF_ADMIN",
         "EINKAUF_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.ausstellen": [
         "EINKAUF_ADMIN",
         "EINKAUF_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.buchen": [
         "EINKAUF_ADMIN",
         "EINKAUF_BEARBEITEN",
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.stornieren": [
         "EINKAUF_ADMIN",
         "EINKAUF_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.freigeben": [
         "CONTROLLING",
@@ -240,7 +265,8 @@
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "admin",
-        "controller"
+        "controller",
+        "manager"
       ],
       "belege.freigeben_erhoeht": [
         "CONTROLLING",
@@ -264,7 +290,8 @@
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
         "SALES_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.preise": [
         "CRM_ADMIN",
@@ -276,24 +303,28 @@
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
         "SALES_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.bearbeiten": [
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.ausstellen": [
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.buchen": [
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.stornieren": [
         "FINANCE_ADMIN",
@@ -307,7 +338,8 @@
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "admin",
-        "controller"
+        "controller",
+        "manager"
       ],
       "belege.freigeben_erhoeht": [
         "CONTROLLING",
@@ -331,7 +363,8 @@
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
         "SALES_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.preise": [
         "CRM_ADMIN",
@@ -343,35 +376,40 @@
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
         "SALES_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.bearbeiten": [
         "LAGER_ADMIN",
         "LAGER_BEARBEITEN",
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.ausstellen": [
         "LAGER_ADMIN",
         "LAGER_BEARBEITEN",
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.buchen": [
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.stornieren": [
         "LAGER_ADMIN",
         "LAGER_BEARBEITEN",
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.freigeben": [
         "CONTROLLING",
@@ -379,7 +417,8 @@
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "admin",
-        "controller"
+        "controller",
+        "manager"
       ],
       "belege.freigeben_erhoeht": [
         "CONTROLLING",
@@ -403,7 +442,8 @@
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
         "SALES_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.preise": [
         "CRM_ADMIN",
@@ -415,24 +455,28 @@
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
         "SALES_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.bearbeiten": [
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.ausstellen": [
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.buchen": [
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.stornieren": [
         "FINANCE_ADMIN",
@@ -446,7 +490,8 @@
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "admin",
-        "controller"
+        "controller",
+        "manager"
       ],
       "belege.freigeben_erhoeht": [
         "CONTROLLING",
@@ -470,7 +515,8 @@
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
         "SALES_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.preise": [
         "CRM_ADMIN",
@@ -482,29 +528,34 @@
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
         "SALES_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.bearbeiten": [
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.ausstellen": [
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.buchen": [
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.stornieren": [
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.freigeben": [
         "CONTROLLING",
@@ -512,7 +563,8 @@
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "admin",
-        "controller"
+        "controller",
+        "manager"
       ],
       "belege.freigeben_erhoeht": [
         "CONTROLLING",
@@ -536,7 +588,8 @@
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
         "SALES_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.preise": [
         "CRM_ADMIN",
@@ -548,29 +601,34 @@
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
         "SALES_LESEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.bearbeiten": [
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.ausstellen": [
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.buchen": [
         "FINANCE_ADMIN",
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.stornieren": [
         "SALES_ADMIN",
         "SALES_BEARBEITEN",
-        "admin"
+        "admin",
+        "manager"
       ],
       "belege.freigeben": [
         "CONTROLLING",
@@ -578,7 +636,8 @@
         "FINANCE_BEARBEITEN",
         "SALES_ADMIN",
         "admin",
-        "controller"
+        "controller",
+        "manager"
       ],
       "belege.freigeben_erhoeht": [
         "CONTROLLING",

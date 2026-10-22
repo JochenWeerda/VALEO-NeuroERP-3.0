@@ -24,7 +24,6 @@ from app.services.operator_agent_service import (
     OperatorAgentService,
     ProposalNotFoundError,
 )
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/agent/operator", tags=["agent", "operator"])
 
@@ -65,7 +64,7 @@ class ExecuteRequest(BaseModel):
     executed_by: str
 
 
-@router.post("/context", summary="Kontext fuer Agent-Aktion lesen", response_model=AgentContextOut, dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/context", summary="Kontext fuer Agent-Aktion lesen", response_model=AgentContextOut)
 async def read_context(
     req: ContextRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -83,7 +82,7 @@ async def read_context(
         raise HTTPException(status_code=403, detail=str(exc)) from exc
 
 
-@router.post("/proposals", summary="Agent-Proposal erstellen", response_model=AgentProposalOut, dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/proposals", summary="Agent-Proposal erstellen", response_model=AgentProposalOut)
 async def create_proposal(
     req: ProposalRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -151,7 +150,8 @@ async def get_proposal(
 @router.post(
     "/proposals/{proposal_id}/approve",
     response_model=AgentProposalOut,
-    summary="Agent-Proposal freigeben (Human Approval)", dependencies=SCHREIBEN["FACHLICH"])
+    summary="Agent-Proposal freigeben (Human Approval)",
+)
 async def approve_proposal(
     proposal_id: str,
     req: ApproveRequest,
@@ -177,7 +177,8 @@ async def approve_proposal(
 @router.post(
     "/proposals/{proposal_id}/reject",
     summary="Agent-Proposal ablehnen",
-    response_model=AgentProposalOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=AgentProposalOut,
+)
 async def reject_proposal(
     proposal_id: str,
     req: RejectRequest,
@@ -204,7 +205,8 @@ async def reject_proposal(
 @router.post(
     "/proposals/{proposal_id}/execute",
     summary="Genehmigte LOW-Risiko-Aktion direkt ausfuehren",
-    response_model=AgentExecutionOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=AgentExecutionOut,
+)
 async def execute_proposal(
     proposal_id: str,
     req: ExecuteRequest,

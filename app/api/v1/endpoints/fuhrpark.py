@@ -28,7 +28,6 @@ from app.api.v1.schemas.fuhrpark import (
 )
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class FuhrparkOut(BaseSchema):
@@ -83,7 +82,7 @@ async def get_fahrzeug(
     return _to_dict(fahrzeug)
 
 
-@router.post("/fahrzeuge", response_model=FuhrparkOut, status_code=201, summary="Fahrzeug anlegen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.post("/fahrzeuge", response_model=FuhrparkOut, status_code=201, summary="Fahrzeug anlegen")
 async def create_fahrzeug(
     payload: FuhrparkFahrzeugPayload,
     db: Session = Depends(get_db),
@@ -97,7 +96,7 @@ async def create_fahrzeug(
     return _to_dict(fahrzeug)
 
 
-@router.patch("/fahrzeuge/{fahrzeug_id}", response_model=FuhrparkOut, summary="Fahrzeug aktualisieren", dependencies=SCHREIBEN["LOGISTIK"])
+@router.patch("/fahrzeuge/{fahrzeug_id}", response_model=FuhrparkOut, summary="Fahrzeug aktualisieren")
 async def update_fahrzeug(
     fahrzeug_id: str,
     payload: FuhrparkFahrzeugPayload,
@@ -116,7 +115,7 @@ async def update_fahrzeug(
     return _to_dict(fahrzeug)
 
 
-@router.delete("/fahrzeuge/{fahrzeug_id}", status_code=204, response_class=Response, response_model=None, summary="Fahrzeug löschen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.delete("/fahrzeuge/{fahrzeug_id}", status_code=204, response_class=Response, response_model=None, summary="Fahrzeug löschen")
 async def delete_fahrzeug(
     fahrzeug_id: str,
     db: Session = Depends(get_db),
@@ -127,7 +126,7 @@ async def delete_fahrzeug(
         raise HTTPException(status_code=404, detail=f"Fahrzeug {fahrzeug_id} not found")
 
 
-@router.post("/fahrzeuge/{fahrzeug_id}/drucker-einrichten", response_model=FuhrparkOut, summary="Fahrzeug printer setup", dependencies=SCHREIBEN["LOGISTIK"])
+@router.post("/fahrzeuge/{fahrzeug_id}/drucker-einrichten", response_model=FuhrparkOut, summary="Fahrzeug printer setup")
 async def setup_fahrzeug_printer(
     fahrzeug_id: str,
     payload: DruckerSetupPayload,
@@ -141,7 +140,7 @@ async def setup_fahrzeug_printer(
     return {"ok": True, "fahrzeug_id": fahrzeug_id, "drucker_name": payload.drucker_name}
 
 
-@router.post("/fahrzeuge/{fahrzeug_id}/drucken", response_model=FuhrparkOut, summary="Fahrzeugakte drucken", dependencies=SCHREIBEN["LOGISTIK"])
+@router.post("/fahrzeuge/{fahrzeug_id}/drucken", response_model=FuhrparkOut, summary="Fahrzeugakte drucken")
 async def print_fahrzeugakte(
     fahrzeug_id: str,
     db: Session = Depends(get_db),
@@ -154,7 +153,7 @@ async def print_fahrzeugakte(
     return {"ok": True, "fahrzeug_id": fahrzeug_id, "aktion": "fahrzeugakte_gedruckt"}
 
 
-@router.post("/fahrzeuge/{fahrzeug_id}/unfall-anzeige", response_model=FuhrparkOut, summary="Unfall anzeige anlegen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.post("/fahrzeuge/{fahrzeug_id}/unfall-anzeige", response_model=FuhrparkOut, summary="Unfall anzeige anlegen")
 async def create_unfall_anzeige(
     fahrzeug_id: str,
     payload: UnfallAnzeigePayload,
@@ -183,7 +182,7 @@ async def list_terminarten(
     return [_to_dict(row) for row in repo.get_all(tenant_id)]
 
 
-@router.post("/terminarten", response_model=FuhrparkOut, status_code=201, summary="Terminart anlegen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.post("/terminarten", response_model=FuhrparkOut, status_code=201, summary="Terminart anlegen")
 async def create_terminart(
     payload: FuhrparkTerminartPayload,
     db: Session = Depends(get_db),
@@ -197,7 +196,7 @@ async def create_terminart(
     return _to_dict(row)
 
 
-@router.patch("/terminarten/{terminart_id}", response_model=FuhrparkOut, summary="Terminart aktualisieren", dependencies=SCHREIBEN["LOGISTIK"])
+@router.patch("/terminarten/{terminart_id}", response_model=FuhrparkOut, summary="Terminart aktualisieren")
 async def update_terminart(
     terminart_id: str,
     payload: FuhrparkTerminartPayload,
@@ -216,7 +215,7 @@ async def update_terminart(
     return _to_dict(updated)
 
 
-@router.delete("/terminarten/{terminart_id}", status_code=204, response_class=Response, response_model=None, summary="Terminart löschen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.delete("/terminarten/{terminart_id}", status_code=204, response_class=Response, response_model=None, summary="Terminart löschen")
 async def delete_terminart(
     terminart_id: str,
     db: Session = Depends(get_db),
@@ -238,7 +237,7 @@ async def list_rechnungen(
     return [_to_dict(row) for row in repo.get_all(tenant_id, skip=skip, limit=limit)]
 
 
-@router.post("/rechnungen", response_model=FuhrparkOut, status_code=201, summary="Rechnung anlegen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.post("/rechnungen", response_model=FuhrparkOut, status_code=201, summary="Rechnung anlegen")
 async def create_rechnung(
     payload: FuhrparkRechnungPayload,
     db: Session = Depends(get_db),
@@ -252,7 +251,7 @@ async def create_rechnung(
     return _to_dict(row)
 
 
-@router.patch("/rechnungen/{rechnung_id}", response_model=FuhrparkOut, summary="Rechnung aktualisieren", dependencies=SCHREIBEN["LOGISTIK"])
+@router.patch("/rechnungen/{rechnung_id}", response_model=FuhrparkOut, summary="Rechnung aktualisieren")
 async def update_rechnung(
     rechnung_id: str,
     payload: FuhrparkRechnungPayload,
@@ -271,7 +270,7 @@ async def update_rechnung(
     return _to_dict(updated)
 
 
-@router.delete("/rechnungen/{rechnung_id}", status_code=204, response_class=Response, response_model=None, summary="Rechnung löschen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.delete("/rechnungen/{rechnung_id}", status_code=204, response_class=Response, response_model=None, summary="Rechnung löschen")
 async def delete_rechnung(
     rechnung_id: str,
     db: Session = Depends(get_db),
@@ -293,7 +292,7 @@ async def list_ausgehende_dokumente(
     return [_to_dict(row) for row in repo.get_all(tenant_id, skip=skip, limit=limit)]
 
 
-@router.post("/ausgehende-dokumente", response_model=FuhrparkOut, status_code=201, summary="Ausgehendes dokument anlegen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.post("/ausgehende-dokumente", response_model=FuhrparkOut, status_code=201, summary="Ausgehendes dokument anlegen")
 async def create_ausgehendes_dokument(
     payload: FuhrparkAusgehendesDokumentPayload,
     db: Session = Depends(get_db),
@@ -304,7 +303,7 @@ async def create_ausgehendes_dokument(
     return _to_dict(row)
 
 
-@router.patch("/ausgehende-dokumente/{dokument_id}", response_model=FuhrparkOut, summary="Ausgehendes dokument aktualisieren", dependencies=SCHREIBEN["LOGISTIK"])
+@router.patch("/ausgehende-dokumente/{dokument_id}", response_model=FuhrparkOut, summary="Ausgehendes dokument aktualisieren")
 async def update_ausgehendes_dokument(
     dokument_id: str,
     payload: FuhrparkAusgehendesDokumentPayload,
@@ -319,7 +318,7 @@ async def update_ausgehendes_dokument(
     return _to_dict(updated)
 
 
-@router.delete("/ausgehende-dokumente/{dokument_id}", status_code=204, response_class=Response, response_model=None, summary="Ausgehendes dokument löschen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.delete("/ausgehende-dokumente/{dokument_id}", status_code=204, response_class=Response, response_model=None, summary="Ausgehendes dokument löschen")
 async def delete_ausgehendes_dokument(
     dokument_id: str,
     db: Session = Depends(get_db),
@@ -356,7 +355,8 @@ def _ensure_fahrzeug(fahrzeug_id: str, db: Session, tenant_id: str):
     "/fahrzeuge/{fahrzeug_id}/status",
     response_model=FuhrparkOut,
     status_code=201,
-    summary="Fahrzeug-Status wechseln und in Historie schreiben", dependencies=SCHREIBEN["LOGISTIK"])
+    summary="Fahrzeug-Status wechseln und in Historie schreiben",
+)
 async def change_fahrzeug_status(
     fahrzeug_id: str,
     payload: StatusWechselPayload,
@@ -452,7 +452,8 @@ async def list_schaeden(
     "/fahrzeuge/{fahrzeug_id}/schaeden",
     response_model=FuhrparkOut,
     status_code=201,
-    summary="Schadensfall anlegen", dependencies=SCHREIBEN["LOGISTIK"])
+    summary="Schadensfall anlegen",
+)
 async def create_schaden(
     fahrzeug_id: str,
     payload: SchadenPayload,
@@ -497,7 +498,8 @@ async def create_schaden(
 @router.patch(
     "/fahrzeuge/{fahrzeug_id}/schaeden/{schaden_id}",
     response_model=FuhrparkOut,
-    summary="Schadensfall aktualisieren", dependencies=SCHREIBEN["LOGISTIK"])
+    summary="Schadensfall aktualisieren",
+)
 async def update_schaden(
     fahrzeug_id: str,
     schaden_id: str,
@@ -559,7 +561,8 @@ async def list_bussgeld(
     "/fahrzeuge/{fahrzeug_id}/bussgeld",
     response_model=FuhrparkOut,
     status_code=201,
-    summary="Bußgeld/Verwarnung anlegen", dependencies=SCHREIBEN["LOGISTIK"])
+    summary="Bußgeld/Verwarnung anlegen",
+)
 async def create_bussgeld(
     fahrzeug_id: str,
     payload: BussgeldPayload,
@@ -601,7 +604,8 @@ async def create_bussgeld(
 @router.patch(
     "/fahrzeuge/{fahrzeug_id}/bussgeld/{bg_id}",
     response_model=FuhrparkOut,
-    summary="Bußgeld/Verwarnung aktualisieren (bezahlt, Einspruch, …)", dependencies=SCHREIBEN["LOGISTIK"])
+    summary="Bußgeld/Verwarnung aktualisieren (bezahlt, Einspruch, …)",
+)
 async def update_bussgeld(
     fahrzeug_id: str,
     bg_id: str,
@@ -711,7 +715,8 @@ async def get_wartung_vorhersage(
 @router.post(
     "/fahrzeuge/{fahrzeug_id}/leasing-rueckgabe",
     response_model=FuhrparkOut,
-    summary="Leasing-Rückgabe einleiten (Status → ausgeschieden + KM-Protokoll)", dependencies=SCHREIBEN["LOGISTIK"])
+    summary="Leasing-Rückgabe einleiten (Status → ausgeschieden + KM-Protokoll)",
+)
 async def leasing_rueckgabe(
     fahrzeug_id: str,
     payload: LeasingRueckgabePayload,
@@ -793,7 +798,8 @@ def upsert_ausgehendes_dokument(
 @router.post(
     "/fahrzeuge/actions/speichern",
     response_model=MaskActionResult,
-    summary="Fahrzeug speichern als Masken-CommandEndpoint", dependencies=SCHREIBEN["LOGISTIK"])
+    summary="Fahrzeug speichern als Masken-CommandEndpoint",
+)
 def action_fahrzeug_speichern(
     request: Request,
     body: dict[str, Any] = Body(default_factory=dict),
@@ -807,7 +813,8 @@ def action_fahrzeug_speichern(
 @router.post(
     "/fahrzeuge/{entity_id}/actions/loeschen",
     response_model=MaskActionResult,
-    summary="Fahrzeug loeschen als Masken-CommandEndpoint", dependencies=SCHREIBEN["LOGISTIK"])
+    summary="Fahrzeug loeschen als Masken-CommandEndpoint",
+)
 def action_fahrzeug_loeschen(
     entity_id: str,
     request: Request,
@@ -822,7 +829,8 @@ def action_fahrzeug_loeschen(
 @router.post(
     "/terminarten/actions/speichern",
     response_model=MaskActionResult,
-    summary="Terminart speichern als Masken-CommandEndpoint", dependencies=SCHREIBEN["LOGISTIK"])
+    summary="Terminart speichern als Masken-CommandEndpoint",
+)
 def action_terminart_speichern(
     request: Request,
     body: dict[str, Any] = Body(default_factory=dict),
@@ -836,7 +844,8 @@ def action_terminart_speichern(
 @router.post(
     "/rechnungen/actions/speichern",
     response_model=MaskActionResult,
-    summary="Fuhrpark-Rechnung speichern als Masken-CommandEndpoint", dependencies=SCHREIBEN["LOGISTIK"])
+    summary="Fuhrpark-Rechnung speichern als Masken-CommandEndpoint",
+)
 def action_rechnung_speichern(
     request: Request,
     body: dict[str, Any] = Body(default_factory=dict),
@@ -850,7 +859,8 @@ def action_rechnung_speichern(
 @router.post(
     "/ausgehende-dokumente/actions/speichern",
     response_model=MaskActionResult,
-    summary="Ausgehendes Dokument speichern als Masken-CommandEndpoint", dependencies=SCHREIBEN["LOGISTIK"])
+    summary="Ausgehendes Dokument speichern als Masken-CommandEndpoint",
+)
 def action_dokument_speichern(
     request: Request,
     body: dict[str, Any] = Body(default_factory=dict),

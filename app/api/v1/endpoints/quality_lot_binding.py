@@ -20,7 +20,6 @@ from ....core.quality_lot_binding import (
     QualityReleaseDecision,
 )
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/agrar/quality-lots", tags=["agrar", "quality"])
 
@@ -95,7 +94,7 @@ async def list_lots(
     return [_row_to_profile(r) for r in rows]
 
 
-@router.post("", response_model=LotQualityProfile, status_code=201, summary="Lot anlegen", dependencies=SCHREIBEN["AGRAR"])
+@router.post("", response_model=LotQualityProfile, status_code=201, summary="Lot anlegen")
 async def create_lot(
     profile: LotQualityProfile,
     tenant_id: str = Depends(get_tenant_id),
@@ -162,7 +161,8 @@ async def get_lot(
     "/{lot_id}/release-decision",
     response_model=QualityReleaseDecision,
     status_code=201,
-    summary="Freigabeentscheidung anlegen", dependencies=SCHREIBEN["AGRAR"])
+    summary="Freigabeentscheidung anlegen",
+)
 async def create_release_decision(
     lot_id: str,
     decision: QualityReleaseDecision,

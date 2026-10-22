@@ -14,8 +14,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.auth.deps import anmeldename, get_current_user, require_roles
-from app.core.akteur import gepruefter_akteur
+from app.auth.deps import anmeldename, get_current_user
 from app.core.database import get_db
 from app.core.business_time import business_today
 from app.core.exceptions import ConflictError, EntityNotFoundError
@@ -51,7 +50,6 @@ from app.api.v1.schemas.personal_schemas import (
 
 
 from app.services import personal_organisation_service as orga
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
@@ -1793,7 +1791,7 @@ async def get_hrm_operations_go_live_policy(
     )
 
 
-@router.post("/hrm-operations-gates/{gate_id}/evidence", response_model=HrmOperationsGateEvidenceOut, status_code=201, summary="Hrm operations gate evidence anlegen", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/hrm-operations-gates/{gate_id}/evidence", response_model=HrmOperationsGateEvidenceOut, status_code=201, summary="Hrm operations gate evidence anlegen")
 async def create_hrm_operations_gate_evidence(
     gate_id: str,
     payload: HrmOperationsGateEvidenceIn,
@@ -1818,7 +1816,7 @@ async def create_hrm_operations_gate_evidence(
     return svc.gate_evidence_out(row)
 
 
-@router.post("/hrm-operations-gates/{gate_id}/decision", response_model=HrmOperationsGateActionOut, summary="Hrm operations gate decide", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/hrm-operations-gates/{gate_id}/decision", response_model=HrmOperationsGateActionOut, summary="Hrm operations gate decide")
 async def decide_hrm_operations_gate(
     gate_id: str,
     payload: HrmOperationsGateDecisionIn,
@@ -1846,7 +1844,7 @@ async def decide_hrm_operations_gate(
     return HrmOperationsGateActionOut(ok=True, gate=gate)
 
 
-@router.post("/hrm-operations-gates/{gate_id}/probe", response_model=HrmOperationsGateProbeOut, status_code=201, summary="Hrm operations gate probe record", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/hrm-operations-gates/{gate_id}/probe", response_model=HrmOperationsGateProbeOut, status_code=201, summary="Hrm operations gate probe record")
 async def record_hrm_operations_gate_probe(
     gate_id: str,
     payload: HrmOperationsGateProbeIn,
@@ -1874,36 +1872,37 @@ async def record_hrm_operations_gate_probe(
 @router.get("/employee-files/{employee_ref}", response_model=EmployeeFileOut, summary="Employee file abrufen")
 async def get_employee_file(
     employee_ref: str,
-    actor_role: str | None = Query(default="hr", alias="actorRole", description="Ansichtsfilter nach Personal-Berechtigung; vergibt keine Rolle"),
-    user: dict = Depends(require_roles("PERSONAL_LESEN", "PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin")),
+    actor_role: str | None = Query(default="hr", alias="actorRole"),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     role = PersonalService.normalize_actor_role(actor_role)
-    try:
-        return PersonalService(db, tenant_id).get_employee_file(employee_ref, role)
-    except SQLAlchemyError:
-        db.rollback()
-        raise HTTPException(503, "Personalakten sind derzeit nicht verfuegbar") from None
+    return PersonalService(db, tenant_id).get_employee_file(employee_ref, role)
 
 
-@router.post("/employee-files/{employee_ref}/documents", response_model=EmployeeFileDocumentOut, status_code=201, summary="Employee file document anlegen", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/employee-files/{employee_ref}/documents", response_model=EmployeeFileDocumentOut, status_code=201, summary="Employee file document anlegen")
 async def create_employee_file_document(
     employee_ref: str,
     payload: EmployeeFileDocumentCreateIn,
-    user: dict = Depends(require_roles("PERSONAL_BEARBEITEN", "PERSONAL_ADMIN", "admin")),
+    actor_role: str | None = Query(default="hr", alias="actorRole"),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
+    role = PersonalService.normalize_actor_role(actor_role)
+    if role not in {"admin", "hr", "payroll"}:
+        raise HTTPException(status_code=403, detail="Personalakten-Dokumente duerfen nur HR, Payroll oder Admin anlegen.")
     try:
-        PersonalService.get_document_class(payload.documentType)
-        return PersonalService(db, tenant_id).create_employee_file_document(
-            employee_ref, {**payload.model_dump(), "createdBy": gepruefter_akteur(user)}, "hr")
-    except ValueError:
-        raise HTTPException(422, "Unbekannte Personalakten-Dokumentklasse") from None
-    except SQLAlchemyError:
-        db.rollback()
-        raise HTTPException(503, "Personalakten-Dokument wurde nicht gespeichert") from None
+        doc_class = PersonalService.get_document_class(payload.documentType)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    visibility = payload.visibility or str(doc_class["default_visibility"])
+    if visibility == "payroll" and role not in {"admin", "payroll", "hr"}:
+        raise HTTPException(status_code=403, detail="Payroll-Dokumente duerfen nur HR/Payroll/Admin anlegen.")
+    return PersonalService(db, tenant_id).create_employee_file_document(
+        employee_ref,
+        payload.model_dump(),
+        role,
+    )
 
 
 @router.get("/time-profiles", response_model=EmployeeTimeProfileCatalogOut, summary="Time profiles auflisten")
@@ -2000,7 +1999,7 @@ async def get_mitarbeiter(
         raise HTTPException(status_code=404, detail="Mitarbeiter nicht gefunden")
 
 
-@router.post("/mitarbeiter", response_model=MitarbeiterOut, status_code=201, summary="Mitarbeiter anlegen", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/mitarbeiter", response_model=MitarbeiterOut, status_code=201, summary="Mitarbeiter anlegen")
 async def create_mitarbeiter(
     payload: MitarbeiterIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2014,7 +2013,7 @@ async def create_mitarbeiter(
     return await get_mitarbeiter(user_id=user_id, tenant_id=tenant_id, db=db)
 
 
-@router.put("/mitarbeiter/{user_id}", response_model=MitarbeiterOut, summary="Mitarbeiter aktualisieren", dependencies=SCHREIBEN["PERSONAL"])
+@router.put("/mitarbeiter/{user_id}", response_model=MitarbeiterOut, summary="Mitarbeiter aktualisieren")
 async def update_mitarbeiter(
     user_id: str,
     payload: MitarbeiterIn,
@@ -2049,7 +2048,7 @@ async def list_zeiterfassung(
     ]
 
 
-@router.post("/time-entries", response_model=TimeEntryBookingOut, status_code=201, summary="Time entry anlegen", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/time-entries", response_model=TimeEntryBookingOut, status_code=201, summary="Time entry anlegen")
 async def create_time_entry(
     payload: TimeEntryBookingCreateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2060,7 +2059,7 @@ async def create_time_entry(
     return TimeEntryBookingOut(**data)
 
 
-@router.post("/time-entries/{entry_id}/submit", response_model=TimeEntryActionOut, summary="Time entry einreichen", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/time-entries/{entry_id}/submit", response_model=TimeEntryActionOut, summary="Time entry einreichen")
 async def submit_time_entry(
     entry_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -2074,7 +2073,7 @@ async def submit_time_entry(
         raise HTTPException(status_code=409, detail=exc.detail)
 
 
-@router.post("/time-entries/{entry_id}/approve", response_model=TimeEntryActionOut, summary="Time entry genehmigen", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/time-entries/{entry_id}/approve", response_model=TimeEntryActionOut, summary="Time entry genehmigen")
 async def approve_time_entry(
     entry_id: str,
     payload: TimeEntryApproveIn,
@@ -2089,7 +2088,7 @@ async def approve_time_entry(
         raise HTTPException(status_code=409, detail=exc.detail)
 
 
-@router.post("/time-entries/{entry_id}/correct", response_model=TimeEntryActionOut, summary="Time entry correct", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/time-entries/{entry_id}/correct", response_model=TimeEntryActionOut, summary="Time entry correct")
 async def correct_time_entry(
     entry_id: str,
     payload: TimeEntryBookingCorrectionIn,
@@ -2120,7 +2119,7 @@ async def list_absences(
     return [AbsenceOut(**r) for r in rows]
 
 
-@router.post("/absences/import", response_model=AbsenceImportOut, status_code=201, summary="Absence importieren", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/absences/import", response_model=AbsenceImportOut, status_code=201, summary="Absence importieren")
 async def import_absence(
     payload: AbsenceImportIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2148,7 +2147,7 @@ async def list_shifts(
     return [_shift_from_row(row) for row in rows]
 
 
-@router.post("/shifts", response_model=ShiftOut, status_code=201, summary="Shift anlegen", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/shifts", response_model=ShiftOut, status_code=201, summary="Shift anlegen")
 async def create_shift(
     payload: ShiftCreateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2197,7 +2196,7 @@ async def list_calendar_events(
     return [_calendar_event_from_row(row) for row in rows]
 
 
-@router.post("/calendar-events", response_model=CalendarEventOut, status_code=201, summary="Calendar event anlegen", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/calendar-events", response_model=CalendarEventOut, status_code=201, summary="Calendar event anlegen")
 async def create_calendar_event(
     payload: CalendarEventIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2238,7 +2237,7 @@ async def list_payroll_exports(
     return [_payroll_export_from_row(row) for row in rows]
 
 
-@router.post("/payroll-exports", response_model=PayrollExportOut, status_code=201, summary="Payroll export anlegen", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/payroll-exports", response_model=PayrollExportOut, status_code=201, summary="Payroll export anlegen")
 async def create_payroll_export(
     payload: PayrollExportCreateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2274,7 +2273,7 @@ async def list_campaign_capacity(
     return [_campaign_capacity_from_row(row) for row in rows]
 
 
-@router.post("/campaign-capacity", response_model=CampaignCapacityOut, status_code=201, summary="Campaign capacity anlegen", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/campaign-capacity", response_model=CampaignCapacityOut, status_code=201, summary="Campaign capacity anlegen")
 async def create_campaign_capacity(
     payload: CampaignCapacityCreateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2314,7 +2313,7 @@ async def list_field_service_plan(
     return [_field_service_from_row(row) for row in rows]
 
 
-@router.post("/field-service-plan", response_model=FieldServicePlanOut, status_code=201, summary="Field service plan anlegen", dependencies=SCHREIBEN["PERSONAL"])
+@router.post("/field-service-plan", response_model=FieldServicePlanOut, status_code=201, summary="Field service plan anlegen")
 async def create_field_service_plan(
     payload: FieldServicePlanCreateIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2544,7 +2543,8 @@ async def get_time_cockpit(
 
 
 @router.post("/stundenzettel", summary="Stundenzettel anlegen",
-    response_model=PersonalOut, dependencies=SCHREIBEN["PERSONAL"])
+    response_model=PersonalOut
+)
 async def create_stundenzettel(
     payload: StundenzettelIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2623,7 +2623,7 @@ async def list_stundenzettel(
     return out
 
 
-@router.delete("/mitarbeiter/{user_id}", status_code=204, response_class=Response, response_model=None, summary="Mitarbeiter löschen", dependencies=SCHREIBEN["PERSONAL"])
+@router.delete("/mitarbeiter/{user_id}", status_code=204, response_class=Response, response_model=None, summary="Mitarbeiter löschen")
 async def delete_mitarbeiter(
     user_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -2636,7 +2636,7 @@ async def delete_mitarbeiter(
         raise HTTPException(status_code=404, detail="Mitarbeiter nicht gefunden")
 
 
-@router.delete("/absences/{absence_id}", status_code=204, response_class=Response, response_model=None, summary="Absence löschen", dependencies=SCHREIBEN["PERSONAL"])
+@router.delete("/absences/{absence_id}", status_code=204, response_class=Response, response_model=None, summary="Absence löschen")
 async def delete_absence(
     absence_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -2652,7 +2652,7 @@ async def delete_absence(
         raise HTTPException(status_code=400, detail=exc.detail)
 
 
-@router.delete("/shifts/{shift_id}", status_code=204, response_class=Response, response_model=None, summary="Shift löschen", dependencies=SCHREIBEN["PERSONAL"])
+@router.delete("/shifts/{shift_id}", status_code=204, response_class=Response, response_model=None, summary="Shift löschen")
 async def delete_shift(
     shift_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -2671,7 +2671,8 @@ async def delete_shift(
 
 
 @router.post("/driver-time/events", status_code=201, summary="Driver time event anlegen",
-    response_model=IDResponse, dependencies=SCHREIBEN["GERAET"])
+    response_model=IDResponse
+)
 async def create_driver_time_event(
     payload: DriverTimeEventIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2793,7 +2794,8 @@ async def get_driver_time_event(
 
 
 @router.patch("/driver-time/events/{event_id}", summary="Driver time event aktualisieren",
-    response_model=PersonalOut, dependencies=SCHREIBEN["PERSONAL"])
+    response_model=PersonalOut
+)
 async def update_driver_time_event(
     event_id: str,
     payload: DriverTimeEventPatch,
@@ -2815,7 +2817,7 @@ async def update_driver_time_event(
     return {"id": event_id, "status": "updated"}
 
 
-@router.delete("/driver-time/events/{event_id}", status_code=204, response_class=Response, response_model=None, summary="Driver time event löschen", dependencies=SCHREIBEN["PERSONAL"])
+@router.delete("/driver-time/events/{event_id}", status_code=204, response_class=Response, response_model=None, summary="Driver time event löschen")
 async def delete_driver_time_event(
     event_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -2903,7 +2905,7 @@ async def get_org_subtree(
 
 
 @router.post("/org-units", status_code=201, summary="Organisationseinheit anlegen",
-             response_model=PersonalOut, dependencies=SCHREIBEN["PERSONAL"])
+             response_model=PersonalOut)
 async def create_org_unit(
     payload: OrgUnitIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2949,7 +2951,7 @@ async def create_org_unit(
 
 
 @router.patch("/org-units/{unit_id}", summary="Organisationseinheit aendern",
-              response_model=PersonalOut, dependencies=SCHREIBEN["PERSONAL"])
+              response_model=PersonalOut)
 async def patch_org_unit(
     unit_id: str,
     payload: OrgUnitPatch,
@@ -3043,7 +3045,7 @@ async def get_time_account(
 
 
 @router.post("/time-accounts/{employee_ref}/adjust", status_code=201,
-             summary="Zeitkonto korrigieren", response_model=PersonalOut, dependencies=SCHREIBEN["PERSONAL"])
+             summary="Zeitkonto korrigieren", response_model=PersonalOut)
 async def adjust_time_account(
     employee_ref: str, payload: TimeAccountAdjustIn, nutzer: dict = Depends(get_current_user),
     tenant_id: str = Depends(get_tenant_id),

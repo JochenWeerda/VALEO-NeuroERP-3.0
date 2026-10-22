@@ -11,7 +11,6 @@ from app.domains.operations.models import DispositionPosition
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.disposition_schemas import DispositionOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/disposition", tags=["Disposition"])
@@ -140,7 +139,7 @@ from fastapi import HTTPException
 from starlette.responses import Response
 
 
-@router.post("", response_model=DispositionOut, status_code=201, summary="Disposition position anlegen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.post("", response_model=DispositionOut, status_code=201, summary="Disposition position anlegen")
 async def create_disposition_position(
     body: DispositionPositionCreate,
     db: Session = Depends(get_db),
@@ -170,7 +169,7 @@ async def create_disposition_position(
     }
 
 
-@router.put("/{position_id}", response_model=DispositionOut, summary="Disposition position aktualisieren", dependencies=SCHREIBEN["LOGISTIK"])
+@router.put("/{position_id}", response_model=DispositionOut, summary="Disposition position aktualisieren")
 async def update_disposition_position(
     position_id: str,
     body: DispositionPositionUpdate,
@@ -196,7 +195,7 @@ async def update_disposition_position(
     }
 
 
-@router.delete("/{position_id}", response_class=Response, status_code=204, response_model=None, summary="Disposition position löschen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.delete("/{position_id}", response_class=Response, status_code=204, response_model=None, summary="Disposition position löschen")
 async def delete_disposition_position(
     position_id: str,
     db: Session = Depends(get_db),

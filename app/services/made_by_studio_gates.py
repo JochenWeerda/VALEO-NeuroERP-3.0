@@ -46,19 +46,106 @@ _RUNTIME_LIST_WIRE_ALIASES: dict[str, str] = {
     "waage/liste": "waage/waagen-liste",
     "dashboard/verkauf": "dashboard/sales-dashboard",
     "strecke/vorlaeufig": "strecke/vorlaeufige-streckengeschaefte",
+    "start-dashboard": "workspace/start-dashboard",
+    "finance/offene-posten": "finance/offene-posten-cockpit",
+    "logistik/frachtbrief": "logistik/frachtbriefe",
+    "workflow/process-mining": "workflow/process-mining-analytics",
+    "crm/campaign-performance": "crm/campaign-performance-dashboard",
+    "fuhrpark/auswertungen-menu": "fuhrpark/fuhrpark-auswertungen-menu",
+    "fuhrpark/auswertung-kosten": "fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug",
+    "lager/leitstand": "lager/materialfluss-visualisierung",
+    "lager/lagerbewegungen-liste": "lager/stock-movement",
+    "sales/invoices": "sales/invoice",
+    "fibu/kostenstellenrechnung": "fibu/kostenstellen-liste",
+    "finance/bookings/new": "fibu/buchungsjournal-liste",
+    "transporte/fahrer/neu": "transporte/fahrer",
+    "kontrakte/liste": "kontrakte/LstKontraktUebersicht",
+    "agrar/feldbuch-massnahmen-liste": "agrar/feldbuch/massnahmen",
+    "agrar/saatzucht-partien-liste": "agrar/saatzucht",
+    "finance/ap/invoices": "finance/ap-invoices-liste",
+    "finance/payments": "finance/payment-matching-liste",
 }
 
 
+def _screen_id_path_variants(screen_id: str) -> set[str]:
+    """Listen-Registry (-liste) vs. Frontend-Routen (/liste) und Kurzformen."""
+    variants = {screen_id}
+    if screen_id.endswith("-liste"):
+        base = screen_id[: -len("-liste")]
+        variants.add(base)
+        variants.add(f"{base}/liste")
+    elif screen_id.endswith("/liste"):
+        parent = screen_id[: -len("/liste")]
+        variants.add(parent)
+        variants.add(f"{parent}-liste")
+    else:
+        variants.add(f"{screen_id}-liste")
+        if "/" in screen_id:
+            variants.add(f"{screen_id}/liste")
+    return variants
+
+
+@lru_cache(maxsize=1)
+def _route_path_to_screen_ids() -> dict[str, set[str]]:
+    path_map: dict[str, set[str]] = {}
+    try:
+        from app.core.screen_definitions_listen import LISTEN_ROUTEN
+    except ImportError:
+        LISTEN_ROUTEN = {}
+    for sid, route in (LISTEN_ROUTEN or {}).items():
+        if isinstance(route, str) and route.strip():
+            path_map.setdefault(route.lstrip("/"), set()).add(sid)
+    try:
+        from app.core import screen_definitions as sd_mod
+
+        for attr in ("_SCREEN_LIST_ROUTE", "_AGENT_NAV"):
+            routes = getattr(sd_mod, attr, {}) or {}
+            for sid, route in routes.items():
+                if isinstance(route, str) and route.strip():
+                    path_map.setdefault(route.lstrip("/"), set()).add(sid)
+    except Exception:
+        pass
+    return path_map
+
+
+def _source_has_runtime_marker(text: str) -> bool:
+    return bool(_RUNTIME_MARKERS.search(text) or _RUNTIME_WRAPPER.search(text))
+
+
+def _screen_ids_from_runtime_routes() -> set[str]:
+    """Screen-IDs deren Routenmodul runtime-markiert ist (NativeListPage, Cockpit, …)."""
+    inv_path = ROOT / "packages" / "frontend-web" / "src" / "app" / "routing" / "route-inventory.gen.json"
+    if not inv_path.is_file():
+        return set()
+    inv = json.loads(inv_path.read_text(encoding="utf-8"))
+    path_to_sids = _route_path_to_screen_ids()
+    wired: set[str] = set()
+    for route in inv.get("routes") or []:
+        module = route.get("module", "")
+        src = _resolve_page_module(module)
+        if src is None or not src.is_file():
+            continue
+        text = src.read_text(encoding="utf-8", errors="replace")
+        if not _source_has_runtime_marker(text):
+            continue
+        wired |= _screen_ids_from_source(text)
+        path = str(route.get("path", "")).lstrip("/")
+        wired |= path_to_sids.get(path, set())
+        for sid in list(wired):
+            wired |= _screen_id_path_variants(sid)
+    return wired
+
+
 def _gate_e_runtime_candidates(screen_id: str) -> set[str]:
-    candidates = {screen_id}
-    if not screen_id.endswith("-liste"):
-        candidates.add(f"{screen_id}-liste")
+    candidates = _screen_id_path_variants(screen_id)
     mapped = _RUNTIME_LIST_WIRE_ALIASES.get(screen_id)
     if mapped:
         candidates.add(mapped)
+        candidates |= _screen_id_path_variants(mapped)
     for legacy_id, wired_list_id in _RUNTIME_LIST_WIRE_ALIASES.items():
         if wired_list_id == screen_id:
             candidates.add(legacy_id)
+            candidates |= _screen_id_path_variants(legacy_id)
     return candidates
 
 
@@ -266,7 +353,14 @@ def _openapi_endpoint_candidates(endpoint: str) -> list[str]:
 def _endpoint_in_openapi(endpoint: str, routes: set[str]) -> bool:
     if not routes:
         return True
-    return any(key in routes for key in _openapi_endpoint_candidates(endpoint))
+    if any(key in routes for key in _openapi_endpoint_candidates(endpoint)):
+        return True
+    keyed = _route_key(endpoint)
+    if "/{}" in keyed:
+        collection = keyed.rsplit("/{}", 1)[0]
+        if collection in routes:
+            return True
+    return False
 
 
 def _entity_source(definition: dict[str, Any]) -> dict[str, Any] | None:
@@ -409,10 +503,15 @@ def runtime_wired_screen_ids() -> frozenset[str]:
     wired: set[str] = set()
     for src in _iter_runtime_source_files():
         text = src.read_text(encoding="utf-8", errors="replace")
-        if not _RUNTIME_MARKERS.search(text) and not _RUNTIME_WRAPPER.search(text):
+        if not _source_has_runtime_marker(text):
             continue
         wired |= _screen_ids_from_source(text)
-    return frozenset(wired)
+    wired |= _screen_ids_from_runtime_routes()
+    expanded: set[str] = set()
+    for sid in wired:
+        expanded |= _screen_id_path_variants(sid)
+        expanded.add(sid)
+    return frozenset(expanded)
 
 
 def check_gate_e(screen_id: str) -> GateResult:

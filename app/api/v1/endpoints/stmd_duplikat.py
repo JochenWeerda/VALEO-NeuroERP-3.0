@@ -17,7 +17,6 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.api.v1.schemas.base import TypedObjectOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/stammdaten/duplikate", tags=["stammdaten", "qualitaet"])
 
@@ -189,7 +188,8 @@ def check_artikel_dubletten(
 @router.post(
     "/zusammenfuehren", response_model=TypedObjectOut,
     summary="Dubletten zusammenführen (Master bleibt, Duplikat wird deaktiviert)",
-    status_code=200, dependencies=SCHREIBEN["STAMMDATEN"])
+    status_code=200,
+)
 def zusammenfuehren(
     master_id: str = Query(..., description="ID des Master-Datensatzes (bleibt erhalten)"),
     duplikat_id: str = Query(..., description="ID des Duplikats (wird deaktiviert)"),

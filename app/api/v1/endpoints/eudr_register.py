@@ -39,7 +39,6 @@ from app.api.v1.schemas.eudr_register_schemas import (
     VorgelagerteErklaerungIn,
     VorgelagerteErklaerungOut,
 )
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 #: Obergrenze fuer die Kindlisten einer Erklaerung. Wird sie erreicht, ist die
 #: Antwort ein 503 und keine stillschweigend gekuerzte Liste.
@@ -56,7 +55,8 @@ logger = logging.getLogger(__name__)
     "",
     response_model=SorgfaltserklaerungDetailOut,
     status_code=http_status.HTTP_201_CREATED,
-    summary="Sorgfaltserklärung anlegen (Entwurf)", dependencies=SCHREIBEN["AGRAR"])
+    summary="Sorgfaltserklärung anlegen (Entwurf)",
+)
 def anlegen(
     payload: SorgfaltserklaerungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -379,7 +379,8 @@ def abrufen(
     "/{erklaerung_id}/geolokationen",
     response_model=GeolokationOut,
     status_code=http_status.HTTP_201_CREATED,
-    summary="Flurstück nachtragen", dependencies=SCHREIBEN["AGRAR"])
+    summary="Flurstück nachtragen",
+)
 def geolokation_nachtragen(
     erklaerung_id: str,
     payload: GeolokationIn,
@@ -420,7 +421,8 @@ def geolokation_nachtragen(
 @router.post(
     "/{erklaerung_id}/risikobewertung",
     response_model=SorgfaltserklaerungOut,
-    summary="Risikobewertung festhalten (Art. 10/11)", dependencies=SCHREIBEN["AGRAR"])
+    summary="Risikobewertung festhalten (Art. 10/11)",
+)
 def risiko_bewerten(
     erklaerung_id: str,
     payload: RisikobewertungIn,
@@ -480,7 +482,8 @@ def risiko_bewerten(
 @router.post(
     "/{erklaerung_id}/einreichen",
     response_model=SorgfaltserklaerungOut,
-    summary="Sorgfaltserklärung einreichen (Art. 33)", dependencies=SCHREIBEN["AGRAR"])
+    summary="Sorgfaltserklärung einreichen (Art. 33)",
+)
 def einreichen(
     erklaerung_id: str,
     payload: EinreichungIn,

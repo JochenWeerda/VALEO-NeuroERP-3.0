@@ -78,7 +78,6 @@ export const FastTabRenderer = memo(function FastTabRenderer({
           <div key={tableKey}>
             <FastTableRenderer
               table={tablePlan}
-              suppressHeading={repeatsCaption(tablePlan.label, plan.shell.title)}
               rows={rows}
               page={tableQueryStates?.[tableKey]?.page}
               sort={tableQueryStates?.[tableKey]?.sort}
@@ -94,6 +93,7 @@ export const FastTabRenderer = memo(function FastTabRenderer({
               selectedRowKey={selection?.selectedRowKey}
               onRowSelect={selection?.onRowSelect}
               onRowAction={onRowAction}
+              suppressHeading={repeatsCaption(tablePlan.label, plan.shell.title)}
             />
             {detailRow ? (
               <RowDetailBand

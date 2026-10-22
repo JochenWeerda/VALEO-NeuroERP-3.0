@@ -16,8 +16,6 @@ from app.services.calendar_projection_service import (
     CALENDAR_LAYERS,
     CalendarProjectionService,
 )
-from app.core.akteur import akteur_aus_request
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/planung/kalender", tags=["planung", "kalender"])
 
@@ -140,7 +138,7 @@ async def list_calendar_items(
     if to_ts <= from_ts:
         raise HTTPException(status_code=422, detail="to must be after from")
     try:
-        user_ref = akteur_aus_request(request, "default")
+        user_ref = request.headers.get("X-User-ID") or "default"
         permissions = {
             item.strip()
             for item in request.headers.get("X-Permissions", "").split(",")
@@ -171,7 +169,8 @@ async def list_calendar_items(
 @router.post(
     "/reproject",
     response_model=ReprojectOut,
-    summary="Planungskalender neu projizieren", dependencies=SCHREIBEN["FACHLICH"])
+    summary="Planungskalender neu projizieren",
+)
 async def reproject_calendar(
     horizon_days: int = Query(default=120, ge=1, le=366),
     tenant_id: str = Depends(get_tenant_id),
@@ -192,7 +191,8 @@ async def reproject_calendar(
 @router.post(
     "/items/{item_id}/confirm",
     response_model=CalendarItemOut,
-    summary="Kalender-Vorschlag bestaetigen", dependencies=SCHREIBEN["FACHLICH"])
+    summary="Kalender-Vorschlag bestaetigen",
+)
 async def confirm_calendar_item(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -211,7 +211,8 @@ async def confirm_calendar_item(
 @router.post(
     "/items/{item_id}/dismiss",
     response_model=CalendarItemOut,
-    summary="Kalender-Vorschlag verwerfen", dependencies=SCHREIBEN["FACHLICH"])
+    summary="Kalender-Vorschlag verwerfen",
+)
 async def dismiss_calendar_item(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -242,7 +243,8 @@ async def issue_ics_token(
 
 
 @router.post(
-    "/ics-token/rotate", response_model=IcsTokenOut, summary="ICS Feed Token rotieren", dependencies=SCHREIBEN["FACHLICH"])
+    "/ics-token/rotate", response_model=IcsTokenOut, summary="ICS Feed Token rotieren"
+)
 async def rotate_ics_token(
     user_ref: str = Query(default="default", max_length=128),
     tenant_id: str = Depends(get_tenant_id),

@@ -34,7 +34,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/rohware/gruppen",
@@ -227,7 +226,7 @@ def list_rohwarengruppen(
     return [RohwarengruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=RohwarengruppeOut, status_code=201, summary="Rohwarengruppe anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("", response_model=RohwarengruppeOut, status_code=201, summary="Rohwarengruppe anlegen")
 def create_rohwarengruppe(
     payload: RohwarengruppeCreate,
     db=Depends(get_db),
@@ -259,7 +258,8 @@ def create_rohwarengruppe(
 
 
 @router.delete("/{gruppe_nr}", summary="Rohwarengruppe löschen",
-    response_model=None, dependencies=SCHREIBEN["LAGER"])
+    response_model=None
+)
 def delete_rohwarengruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -291,7 +291,7 @@ def list_schemata(
     return [AbrechnungsschemaOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/schemata", response_model=AbrechnungsschemaOut, status_code=201, summary="Schema anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/schemata", response_model=AbrechnungsschemaOut, status_code=201, summary="Schema anlegen")
 def create_schema(
     payload: AbrechnungsschemaCreate,
     db=Depends(get_db),
@@ -349,7 +349,7 @@ def list_qualitaeten(
     return [RohwareQualitaetOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/qualitaeten", response_model=RohwareQualitaetOut, status_code=201, summary="Qualitaet anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/qualitaeten", response_model=RohwareQualitaetOut, status_code=201, summary="Qualitaet anlegen")
 def create_qualitaet(
     payload: RohwareQualitaetCreate,
     db=Depends(get_db),
@@ -407,7 +407,7 @@ def list_staffeln(
     return result
 
 
-@router.post("/staffeln", response_model=ZaStaffelOut, status_code=201, summary="Staffel anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/staffeln", response_model=ZaStaffelOut, status_code=201, summary="Staffel anlegen")
 def create_staffel(
     payload: ZaStaffelCreate,
     db=Depends(get_db),
@@ -452,7 +452,7 @@ def create_staffel(
     return ZaStaffelOut(**d)
 
 
-@router.post("/staffeln/{staffel_nr}/berechnen", response_model=StaffelBerechnungResult, summary="Berechnen staffel", dependencies=SCHREIBEN["LAGER"])
+@router.post("/staffeln/{staffel_nr}/berechnen", response_model=StaffelBerechnungResult, summary="Berechnen staffel")
 def staffel_berechnen(
     staffel_nr: str,
     analysewert: Decimal,

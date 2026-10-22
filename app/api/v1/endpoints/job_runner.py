@@ -22,7 +22,6 @@ from app.core.background_jobs import (
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -89,7 +88,7 @@ class JobCatalogOut(BaseModel):
 
 # ── Endpoints ───────────────────────────────────────────────────────────────────
 
-@router.post("/run", response_model=JobOut, status_code=201, summary="Job ausführen", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/run", response_model=JobOut, status_code=201, summary="Job ausführen")
 async def run_job(
     payload: JobRunIn,
     db: Session = Depends(get_db),

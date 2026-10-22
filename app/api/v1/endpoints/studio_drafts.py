@@ -19,12 +19,8 @@ from app.services.studio_draft_store import StudioStorageUnavailable, list_histo
 from app.services.studio_propose import propose_studio_draft
 from app.services.studio_validation import load_studio_catalog, validate_studio_draft
 from app.services.studio_semantic import DialogueTurn, HarvestPreviewIn, HarvestPreviewOut, StudioDialogueIn, StudioDialogueOut, dialogue, preview, semantic_catalog
-from app.api.v1.schemas.studio_migration import StudioMigrationIn, StudioMigrationOut, StudioSavedMigrationIn, StudioSavedMigrationOut
-from app.services.studio_migration import plan_migration
 from app.core.database import get_db
 from sqlalchemy.orm import Session
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
-from app.services.studio_entity_contracts import EntitySpec, EntityBundleOut
 
 router = APIRouter(prefix="/studio", tags=["ui", "studio", "screen-definition"])
 
@@ -196,29 +192,16 @@ def studio_catalog(user: dict = Depends(get_current_user)) -> dict[str, Any]:
         "dataSources": catalog["data_sources"],
         "actions": catalog["command_actions"],
         "semantic": semantic_catalog(),
-        "migration": {"planVersion": 1, "endpoint": "/api/v1/studio/migration-plan",
-                      "operations": ["catalog_wiring", "create_table", "add_columns"],
-                      "directSchemaExecution": False},
         "permissions": {"canDesign": _may_design(user), "canPublish": _may_publish(user)},
     }
 
 
-@router.post("/migration-plan", response_model=StudioMigrationOut,
-             summary="Funktionen kataloggebunden verdrahten und additive Schemaartefakte planen")
-def studio_migration_plan(body: StudioMigrationIn, tenant_id: str = Depends(get_tenant_id),
-                          user: dict = Depends(beleg_write)) -> StudioMigrationOut:
-    try:
-        return plan_migration(body, tenant_id, _actor(user))
-    except ValueError as error:
-        raise HTTPException(409, str(error)) from error
-
-
-@router.post("/validate", summary="Studio-ScreenDefinition gegen Katalog und Gates prüfen", dependencies=SCHREIBEN["BERECHNEN"])
+@router.post("/validate", summary="Studio-ScreenDefinition gegen Katalog und Gates prüfen")
 def studio_validate(body: StudioDefinitionIn, user: dict = Depends(get_current_user)) -> dict[str, Any]:
     return _report(body.definition)
 
 
-@router.post("/propose", summary="Studio-ScreenDefinition aus einer Absicht vorschlagen", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/propose", summary="Studio-ScreenDefinition aus einer Absicht vorschlagen")
 def studio_propose(body: StudioProposeIn, user: dict = Depends(get_current_user)) -> dict[str, Any]:
     definition = propose_studio_draft(body.intent)
     return _report(definition)
@@ -337,7 +320,7 @@ def studio_submit_review(
     return _transition(draft_id, tenant_id, _actor(user), "review", body.expected_revision, str(body.idempotency_key))
 
 
-@router.post("/drafts/{draft_id}/publish", summary="Studio-Entwurf als published_temp freigeben", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/drafts/{draft_id}/publish", summary="Studio-Entwurf als published_temp freigeben")
 def studio_publish(
     draft_id: str,
     body: StudioRevisionIn,
@@ -369,7 +352,7 @@ def studio_publish(
     return {**record, **report, "canPublish": True, "route": studio_run_route(screen_id) if screen_id else None}
 
 
-@router.post("/drafts/{draft_id}/retire", summary="Freigegebene Studio-Maske zurückziehen", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/drafts/{draft_id}/retire", summary="Freigegebene Studio-Maske zurückziehen")
 def studio_retire(
     draft_id: str,
     body: StudioRevisionIn,
@@ -461,65 +444,3 @@ def studio_simulate(draft_id: str, body: StudioRevisionIn,
 
 from app.api.v1.endpoints.studio_native_import import router as native_import_router
 router.include_router(native_import_router)
-
-
-@router.post("/drafts/{draft_id}/migration-plan", response_model=StudioSavedMigrationOut,
-             summary="Migrationsplan fuer gespeicherte Studio-Revision unveraenderbar protokollieren")
-def studio_save_migration_plan(draft_id: str, body: StudioSavedMigrationIn,
-                               tenant_id: str = Depends(get_tenant_id),
-                               user: dict = Depends(beleg_write)) -> dict[str, Any]:
-    from app.services.studio_migration_store import save_migration_plan
-    try:
-        return _storage_call(save_migration_plan, tenant_id, draft_id, _actor(user), body)
-    except KeyError as error:
-        raise HTTPException(404, "draft_nicht_gefunden") from error
-    except ValueError as error:
-        raise HTTPException(409, str(error)) from error
-
-
-@router.post('/entity-bundle', response_model=EntityBundleOut,
-             summary='Stammdatenvertrag in pruefbare Schema-, Command- und Maskenartefakte uebersetzen')
-def studio_entity_bundle(body: EntitySpec, tenant_id: str = Depends(get_tenant_id),
-                         user: dict = Depends(beleg_write)) -> dict[str, Any]:
-    from app.services.studio_entity_compiler import compile_entity
-    _actor(user)
-    try:
-        return compile_entity(body)
-    except ValueError as error:
-        raise HTTPException(409, str(error)) from error
-
-
-from app.services.studio_entity_router import install_registered_entities
-install_registered_entities(router)
-
-
-from app.services.studio_entity_contracts import EntityExtensionIn, EntityExtensionOut
-
-
-@router.post('/entity-extension-bundle', response_model=EntityExtensionOut,
-             summary='Registrierte Studio-Stammdaten additiv erweitern, ohne Bereitstellung')
-def studio_entity_extension(body: EntityExtensionIn, tenant_id: str = Depends(get_tenant_id),
-                            user: dict = Depends(beleg_write)):
-    from app.services.studio_entity_evolution import compile_extension
-    _actor(user)
-    try:
-        return compile_extension(body)
-    except ValueError as error:
-        raise HTTPException(422, str(error)) from error
-
-
-from app.services.studio_entity_contracts import EntityRegisteredDefinitionOut
-
-
-@router.get('/entity-definitions/{name}', response_model=EntityRegisteredDefinitionOut,
-            summary='Registrierte Studio-Stammdatenmaske fuer einen Entwurf abrufen')
-def studio_registered_entity_definition(name: str, tenant_id: str = Depends(get_tenant_id),
-                                        user: dict = Depends(beleg_write)):
-    from app.services.studio_entity_contracts import registration_for, contract_hash
-    from app.services.studio_entity_compiler import registered_definition
-    _actor(user)
-    entry=registration_for(name)
-    if entry is None:
-        raise HTTPException(404,'registered_studio_entity_not_found')
-    return {'name':entry.spec.name,'contract_hash':contract_hash(entry.spec),
-            'writes_enabled':entry.writes_enabled,'definition':registered_definition(entry)}

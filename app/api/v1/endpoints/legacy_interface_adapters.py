@@ -1,8 +1,8 @@
 """Governed L3 Standard and Unimet adapter API."""
 
-from typing import Any, Literal
+from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -14,12 +14,8 @@ from app.api.v1.schemas.legacy_interface_adapters_schemas import (
     AdapterProfileListOut,
 )
 from app.auth.deps import require_roles
-from app.auth.deps import get_current_user
-from app.core.akteur import gepruefter_akteur
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-from app.services.mask_action_runtime_service import MaskActionResult as MaskActionResultOut
-from app.services.mask_commands import begruendung, statusaktion
 from app.services.legacy_interface_adapter_service import (
     LegacyAdapterError,
     LegacyInterfaceAdapterService,
@@ -51,9 +47,8 @@ class IntakeIn(BaseModel):
     payload: dict[str, Any]
 
 
-def actor(user: dict) -> str:
-    """Urheber aus dem geprueften Token (bis 19.10.2026: Client-Header ``X-User-ID``)."""
-    return gepruefter_akteur(user)
+def actor(request: Request) -> str:
+    return request.headers.get("X-User-ID") or "interface-operator"
 
 
 def guarded(call):  # noqa: ANN001, ANN201
@@ -75,7 +70,7 @@ def profiles(
 def configure(
     profile_key: str,
     body: ProfileIn,
-    user: dict = Depends(get_current_user),
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
@@ -83,7 +78,7 @@ def configure(
         lambda: LegacyInterfaceAdapterService(db, tenant_id).configure(
             profile_key,
             body.model_dump(exclude={"reason"}),
-            actor=actor(user),
+            actor=actor(request),
             reason=body.reason,
         )
     )
@@ -95,13 +90,13 @@ def configure(
 def intake(
     profile_key: str,
     body: IntakeIn,
-    user: dict = Depends(get_current_user),
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     return guarded(
         lambda: LegacyInterfaceAdapterService(db, tenant_id).intake(
-            profile_key, body.external_id, body.payload, actor=actor(user)
+            profile_key, body.external_id, body.payload, actor=actor(request)
         )
     )
 
@@ -125,13 +120,13 @@ def monitor(
 def stage(
     batch_id: str,
     body: ReasonIn,
-    user: dict = Depends(get_current_user),
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     return guarded(
         lambda: LegacyInterfaceAdapterService(db, tenant_id).stage(
-            batch_id, actor=actor(user), reason=body.reason
+            batch_id, actor=actor(request), reason=body.reason
         )
     )
 
@@ -140,13 +135,13 @@ def stage(
 def reconcile(
     batch_id: str,
     body: ReasonIn,
-    user: dict = Depends(get_current_user),
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     return guarded(
         lambda: LegacyInterfaceAdapterService(db, tenant_id).reconcile(
-            batch_id, actor=actor(user), reason=body.reason
+            batch_id, actor=actor(request), reason=body.reason
         )
     )
 
@@ -155,45 +150,12 @@ def reconcile(
 def approve(
     batch_id: str,
     body: ReasonIn,
-    user: dict = Depends(get_current_user),
+    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     return guarded(
         lambda: LegacyInterfaceAdapterService(db, tenant_id).approve(
-            batch_id, actor=actor(user), reason=body.reason
+            batch_id, actor=actor(request), reason=body.reason
         )
     )
-
-
-_BATCH_ACTIONS = {"stage": {"received", "quarantine"}, "reconcile": {"staged", "quarantine"}, "approve": {"reconciled"}}
-
-
-@router.post(
-    "/batches/{entity_id}/actions/{action_key}",
-    response_model=MaskActionResultOut,
-    summary="Altsystem-Adapter: Maskenaktion (Staging, Abstimmung, Freigabe)",
-)
-async def run_batch_action(
-    entity_id: str,
-    action_key: Literal["stage", "reconcile", "approve"] = Path(...),
-    body: dict[str, Any] = Body(default_factory=dict),
-    user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> dict[str, Any]:
-    """Dieselben Fachwege wie die Einzelwege; Rolle prueft der Router (Leitung Finanzen/Lager)."""
-    bearbeiter = actor(user)
-
-    def ausfuehren(db_: Session, _payload: dict[str, Any]) -> str:
-        result = getattr(LegacyInterfaceAdapterService(db_, tenant_id), action_key)(
-            entity_id, actor=bearbeiter, reason=begruendung(body))
-        return f"Lieferstapel: Status {result.get('status', action_key)}. Produktivbuchung bleibt gesperrt."
-
-    result = await statusaktion(
-        db, action_key=action_key, entity_type="legacy_adapter_batch", entity_id=entity_id, tenant_id=tenant_id,
-        body=body, erlaubt=_BATCH_ACTIONS[action_key], ausfuehren=ausfuehren,
-        status_sql="SELECT status FROM domain_integration.legacy_adapter_batches WHERE id=:id AND tenant_id=:tid",
-        event_type=f"integration.legacy_adapter_batch.{action_key}",
-    )
-    return result.model_dump()

@@ -17,7 +17,6 @@ from app.api.v1.schemas.base import BaseSchema
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.business_time import business_date_after, business_today
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class RohwareSammelabrechnungOut(BaseSchema):
@@ -250,7 +249,8 @@ def list_sammelabrechnungen(
     "",
     response_model=SammelabrechnungOut,
     status_code=status.HTTP_201_CREATED,
-    summary="Sammelabrechnung anlegen", dependencies=SCHREIBEN["AGRAR"])
+    summary="Sammelabrechnung anlegen",
+)
 def create_sammelabrechnung(
     payload: SammelabrechnungCreate,
     db: Session = Depends(get_db),
@@ -301,7 +301,7 @@ def create_sammelabrechnung(
     return _to_out(_load_header(db, new_id, tenant_id))
 
 
-@router.post("/{sammelabrechnung_id}/berechnen", response_model=SammelabrechnungOut, summary="Berechnen", dependencies=SCHREIBEN["AGRAR"])
+@router.post("/{sammelabrechnung_id}/berechnen", response_model=SammelabrechnungOut, summary="Berechnen")
 def berechnen(
     sammelabrechnung_id: str,
     db: Session = Depends(get_db),
@@ -391,7 +391,8 @@ def berechnen(
 @router.post(
     "/{sammelabrechnung_id}/buchen",
     summary="Buchen",
-    response_model=RohwareSammelabrechnungOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=RohwareSammelabrechnungOut,
+)
 def buchen(
     sammelabrechnung_id: str,
     db: Session = Depends(get_db),
@@ -489,7 +490,8 @@ def buchen(
     "/{sammelabrechnung_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
-    summary="Sammelabrechnung löschen", dependencies=SCHREIBEN["AGRAR"])
+    summary="Sammelabrechnung löschen",
+)
 def delete_sammelabrechnung(
     sammelabrechnung_id: str,
     db: Session = Depends(get_db),

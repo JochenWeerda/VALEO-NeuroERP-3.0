@@ -16,7 +16,6 @@ from sqlalchemy.orm import Session
 from app.api.v1.schemas.base import BaseSchema
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(tags=["logistik", "frachtbriefe"])
 
@@ -104,7 +103,8 @@ def list_frachtbriefe(
     "/frachtbriefe",
     response_model=FrachtbriefOut,
     status_code=status.HTTP_201_CREATED,
-    summary="Frachtbrief anlegen", dependencies=SCHREIBEN["LOGISTIK"])
+    summary="Frachtbrief anlegen",
+)
 def create_frachtbrief(
     payload: FrachtbriefCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -153,7 +153,8 @@ def create_frachtbrief(
 @router.patch(
     "/frachtbriefe/{fb_id}/status",
     response_model=FrachtbriefOut,
-    summary="Frachtbrief-Status aktualisieren", dependencies=SCHREIBEN["LOGISTIK"])
+    summary="Frachtbrief-Status aktualisieren",
+)
 def update_frachtbrief_status(
     fb_id: str,
     new_status: str = Query(..., alias="status", pattern="^(erstellt|unterwegs|zugestellt|storniert)$"),

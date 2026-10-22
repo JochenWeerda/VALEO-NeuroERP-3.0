@@ -11,7 +11,7 @@ from datetime import date, datetime, timezone
 from typing import Any, Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import text
@@ -22,8 +22,6 @@ from app.core.database import get_db
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.gobd_archiv_schemas import GobdArchivOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
-from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 
 router = APIRouter(prefix="/gobd", tags=["GoBD", "Archiv"])
@@ -39,6 +37,7 @@ class DocumentArtifactCreate(BaseModel):
     content_hash_sha256: str = Field(..., min_length=64, max_length=64)
     storage_key: str = Field(..., min_length=1, max_length=500)
     file_name: Optional[str] = Field(default=None, max_length=255)
+    created_by: Optional[str] = Field(default=None, max_length=100)
 
 
 class DocumentArtifactOut(BaseModel):
@@ -53,10 +52,9 @@ class DocumentArtifactOut(BaseModel):
     created_by: Optional[str]
 
 
-@router.post("/artifacts", response_model=DocumentArtifactOut, summary="Document artifact registrieren", dependencies=SCHREIBEN["FINANZ"])
+@router.post("/artifacts", response_model=DocumentArtifactOut, summary="Document artifact registrieren")
 async def register_document_artifact(
     payload: DocumentArtifactCreate,
-    request: Request,
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
@@ -83,7 +81,7 @@ async def register_document_artifact(
             "content_hash_sha256": payload.content_hash_sha256,
             "storage_key": payload.storage_key,
             "file_name": payload.file_name,
-            "created_by": gepruefter_akteur_aus_request(request),
+            "created_by": payload.created_by,
         },
     )
     db.commit()
@@ -115,7 +113,7 @@ async def register_document_artifact(
         content_hash_sha256=payload.content_hash_sha256,
         storage_key=payload.storage_key,
         file_name=payload.file_name,
-        created_by=gepruefter_akteur_aus_request(request),
+        created_by=payload.created_by,
     ).as_dict()
     return JSONResponse(content=body)
 
@@ -208,6 +206,7 @@ class InvoiceXmlCreate(BaseModel):
     content_hash_sha256: str = Field(..., min_length=64, max_length=64)
     storage_key: str = Field(..., min_length=1, max_length=500)
     format_type: str = Field(default="XRechnung", max_length=40)
+    created_by: Optional[str] = Field(default=None, max_length=100)
 
 
 class InvoiceXmlOut(BaseModel):
@@ -223,10 +222,9 @@ class InvoiceXmlOut(BaseModel):
     created_by: Optional[str]
 
 
-@router.post("/e-invoice-xml", response_model=InvoiceXmlOut, summary="Invoice xml store", dependencies=SCHREIBEN["FINANZ"])
+@router.post("/e-invoice-xml", response_model=InvoiceXmlOut, summary="Invoice xml store")
 async def store_invoice_xml(
     payload: InvoiceXmlCreate,
-    request: Request,
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
@@ -251,7 +249,7 @@ async def store_invoice_xml(
             "content_hash_sha256": payload.content_hash_sha256,
             "storage_key": payload.storage_key,
             "format_type": payload.format_type,
-            "created_by": gepruefter_akteur_aus_request(request),
+            "created_by": payload.created_by,
         },
     )
     db.commit()
@@ -693,7 +691,7 @@ class InvoiceXmlValidateIn(BaseModel):
     validation_errors: Optional[dict[str, Any]] = None
 
 
-@router.patch("/e-invoice-xml/{header_id}/validate", response_model=InvoiceXmlOut, summary="Invoice xml validation setzen", dependencies=SCHREIBEN["FINANZ"])
+@router.patch("/e-invoice-xml/{header_id}/validate", response_model=InvoiceXmlOut, summary="Invoice xml validation setzen")
 async def set_invoice_xml_validation(
     header_id: str,
     payload: InvoiceXmlValidateIn,

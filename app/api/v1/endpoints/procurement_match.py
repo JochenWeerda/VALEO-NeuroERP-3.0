@@ -9,7 +9,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -30,8 +30,6 @@ from app.api.v1.schemas.procurement_match_schemas import (
 )
 from app.services.procurement_match_service import ProcurementMatchService
 from app.api.v1.schemas.base import TypedObjectOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
-from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 router = APIRouter(prefix="/procurement", tags=["procurement", "einkauf"])
 
@@ -88,10 +86,9 @@ def list_follow_ups(
     }
 
 
-@router.post("/match/follow-up", response_model=FollowUpOut, summary="Folgeaktion erfassen (append-only)", status_code=201, dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/match/follow-up", response_model=FollowUpOut, summary="Folgeaktion erfassen (append-only)", status_code=201)
 def create_follow_up(
     body: FollowUpIn,
-    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
@@ -102,7 +99,7 @@ def create_follow_up(
             action_type=body.action_type,
             grund=body.grund,
             ausnahme_code=body.ausnahme_code,
-            created_by=gepruefter_akteur_aus_request(request),
+            created_by=body.created_by,
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -156,7 +153,7 @@ def _max_abs_position_delta_pct(positionen: list[dict[str, Any]]) -> Decimal:
     return max(deltas, default=Decimal("0"))
 
 
-@router.post("/match/auto", response_model=AutoMatchOut, summary="PROC-3WM-001: 3-Wege-Match ausführen und Ergebnis persistieren", status_code=201, dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/match/auto", response_model=AutoMatchOut, summary="PROC-3WM-001: 3-Wege-Match ausführen und Ergebnis persistieren", status_code=201)
 def auto_match_and_persist(
     body: AutoMatchIn,
     db: Session = Depends(get_db),
@@ -283,10 +280,9 @@ def list_match_results(
     return {"items": [dict(r) for r in rows]}
 
 
-@router.post("/match/ers", response_model=ErsCreditOut, summary="ERS-Gutschrift aus Match-Abweichung erzeugen", status_code=201, dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/match/ers", response_model=ErsCreditOut, summary="ERS-Gutschrift aus Match-Abweichung erzeugen", status_code=201)
 def create_ers_credit(
     body: ErsCreditIn,
-    request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
@@ -295,7 +291,7 @@ def create_ers_credit(
         return service.create_ers_credit(
             bestellnummer=body.bestellnummer,
             grund=body.grund,
-            created_by=gepruefter_akteur_aus_request(request),
+            created_by=body.created_by,
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -353,11 +349,10 @@ class RechnungsFreigabeIn(_BM):
 # extra="allow" aber jedes zusaetzliche Feld unveraendert durch. Ein
 # domaenenspezifisches Schema kann folgen, sobald die Tabelle ein verbindliches
 # Schema hat.
-@router.post("/bestellungen/{bestellung_id}/transition", response_model=TypedObjectOut, summary="Bestellungs-Status wechseln", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/bestellungen/{bestellung_id}/transition", response_model=TypedObjectOut, summary="Bestellungs-Status wechseln")
 def bestellung_transition_endpoint(
     bestellung_id: str,
     body: BestellungTransitionIn,
-    request: Request,
     x_tenant_id: _Opt[str] = Header(None),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -365,16 +360,15 @@ def bestellung_transition_endpoint(
     tenant_id = x_tenant_id or "default"
     try:
         return transition_bestellung_status(db, bestellung_id, tenant_id, body.new_status,
-                                             gepruefter_akteur_aus_request(request), body.reason)
+                                             body.operator or "system", body.reason)
     except BestellungLifecycleError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/bestellungen/{bestellung_id}/wareneingang", response_model=WareneingangOut, status_code=201, summary="Wareneingang buchen", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/bestellungen/{bestellung_id}/wareneingang", response_model=WareneingangOut, status_code=201, summary="Wareneingang buchen")
 def buche_wareneingang_endpoint(
     bestellung_id: str,
     body: WareneingangIn,
-    request: Request,
     x_tenant_id: _Opt[str] = Header(None),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -382,29 +376,28 @@ def buche_wareneingang_endpoint(
     tenant_id = x_tenant_id or "default"
     try:
         return buche_wareneingang(db, bestellung_id, tenant_id, body.menge_erhalten,
-                                   body.einheit, body.lager_id, gepruefter_akteur_aus_request(request),
+                                   body.einheit, body.lager_id, body.operator or "system",
                                    body.qs_status or "AUSSTEHEND")
     except WareneingangError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/wareneingaenge/{we_id}/qs", response_model=WareneingangOut, summary="QS-Status eines Wareneingangs aktualisieren", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/wareneingaenge/{we_id}/qs", response_model=WareneingangOut, summary="QS-Status eines Wareneingangs aktualisieren")
 def update_we_qs_endpoint(
     we_id: str,
     body: QSUpdateIn,
-    request: Request,
     x_tenant_id: _Opt[str] = Header(None),
     db: Session = Depends(get_db),
 ) -> dict:
     from app.services.proc_wareneingang_service import update_qs_status, WareneingangError
     tenant_id = x_tenant_id or "default"
     try:
-        return update_qs_status(db, we_id, tenant_id, body.qs_status, gepruefter_akteur_aus_request(request))
+        return update_qs_status(db, we_id, tenant_id, body.qs_status, body.operator or "system")
     except WareneingangError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/bestellungen/{bestellung_id}/rechnungspruefung", response_model=RechnungspruefungOut, status_code=201, summary="Rechnungsprüfung (3-Wege-Match)", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/bestellungen/{bestellung_id}/rechnungspruefung", response_model=RechnungspruefungOut, status_code=201, summary="Rechnungsprüfung (3-Wege-Match)")
 def rechnungspruefung_endpoint(
     bestellung_id: str,
     body: RechnungspruefungIn,
@@ -421,11 +414,10 @@ def rechnungspruefung_endpoint(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.post("/rechnungspruefungen/{pruefung_id}/freigabe", response_model=RechnungspruefungOut, summary="Rechnungsprüfung manuell freigeben", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/rechnungspruefungen/{pruefung_id}/freigabe", response_model=RechnungspruefungOut, summary="Rechnungsprüfung manuell freigeben")
 def rechnungsfreigabe_endpoint(
     pruefung_id: str,
     body: RechnungsFreigabeIn,
-    request: Request,
     x_tenant_id: _Opt[str] = Header(None),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -433,6 +425,6 @@ def rechnungsfreigabe_endpoint(
     tenant_id = x_tenant_id or "default"
     try:
         return freigabe_rechnungspruefung(db, pruefung_id, tenant_id, body.entscheidung,
-                                           gepruefter_akteur_aus_request(request), body.grund)
+                                           body.operator, body.grund)
     except RechnungspruefungError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc

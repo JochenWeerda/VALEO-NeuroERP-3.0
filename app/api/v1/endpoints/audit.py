@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.audit_schemas import AuditOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -53,7 +52,7 @@ class AuditLogCreate(BaseModel):
     user_agent: Optional[str] = None
 
 
-@router.post("/log", response_model=AuditLogEntry, summary="Audit log anlegen", dependencies=SCHREIBEN["QUALITAET"])
+@router.post("/log", response_model=AuditLogEntry, summary="Audit log anlegen")
 async def create_audit_log(
     entry: AuditLogCreate,
     db: Session = Depends(get_db)

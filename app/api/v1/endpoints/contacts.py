@@ -6,51 +6,16 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import text
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, Query, status
 
-from ....core.database import get_db
-from ....core.tenant import get_tenant_id
 from ....integrations import crm_core_client
 from ..schemas.crm import ContactCreate, ContactUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.contacts_schemas import ContactsOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
-
-
-def _kunden_des_mandanten(db: Session, tenant_id: str, kunden: set[str]) -> set[str]:
-    """Die Kunden aus ``kunden``, die zum Mandanten gehoeren (``id`` oder ``business_partner_id``).
-
-    crm-core fuehrt an Kontakten keinen Mandanten. Bis 20.10.2026 lieferten Liste, Abruf, Aendern und Loeschen
-    deshalb Kontakte *aller* Mandanten; jetzt gilt ein Kontakt nur ueber seinen Kunden als eigener (sonst 404).
-    """
-    if not kunden:
-        return set()
-    zeilen = db.execute(
-        text("SELECT id::text AS id, business_partner_id::text AS bp FROM domain_crm.customers "
-             "WHERE tenant_id = :tid AND (id::text = ANY(:k) OR business_partner_id::text = ANY(:k)) "
-             "LIMIT :grenze"),
-        # Hoechstens zwei Treffer je gesuchter Kennung (ueber id und business_partner_id).
-        {"tid": tenant_id, "k": sorted(kunden), "grenze": 2 * len(kunden)},
-    ).mappings().fetchmany(2 * len(kunden))
-    return {wert for zeile in zeilen for wert in (zeile["id"], zeile["bp"]) if wert} & kunden
-
-
-async def _eigener_kontakt(db: Session, tenant_id: str, contact_id: str) -> crm_core_client.CRMCoreContact:
-    try:
-        kontakt = await crm_core_client.get_contact(contact_id)
-    except httpx.HTTPStatusError as exc:  # type: ignore[name-defined]
-        if exc.response.status_code in (404, 422):
-            raise HTTPException(status_code=404, detail="Contact not found") from exc
-        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
-    if not _kunden_des_mandanten(db, tenant_id, {str(kontakt.customer_id)}):
-        raise HTTPException(status_code=404, detail="Contact not found")
-    return kontakt
 
 
 def _adapt_contact(core_contact: crm_core_client.CRMCoreContact) -> Dict[str, Any]:
@@ -114,8 +79,6 @@ async def list_contacts(
     search: Optional[str] = Query(None, description="Client-side search term"),
     skip: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of items to return"),
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
 ):
     try:
         core_contacts, total = await crm_core_client.list_contacts(
@@ -128,10 +91,6 @@ async def list_contacts(
         # crm-core nicht erreichbar (Kategorie D): leere Liste statt 500,
         # konsistent zu cases/activities.
         core_contacts, total = [], 0
-    eigene = _kunden_des_mandanten(db, tenant_id, {str(c.customer_id) for c in core_contacts})
-    fremd = sum(1 for c in core_contacts if str(c.customer_id) not in eigene)
-    core_contacts = [c for c in core_contacts if str(c.customer_id) in eigene]
-    total = max(0, total - fremd)
     try:
         data = [_adapt_contact(contact) for contact in core_contacts]
         if search:
@@ -154,22 +113,22 @@ async def list_contacts(
 @router.get("/{contact_id}", summary="Contact abrufen",
     response_model=ContactsOut
 )
-async def get_contact(contact_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+async def get_contact(contact_id: str):
     try:
-        contact = await _eigener_kontakt(db, tenant_id, contact_id)
-    except HTTPException:
-        raise
+        contact = await crm_core_client.get_contact(contact_id)
+    except httpx.HTTPStatusError as exc:  # type: ignore[name-defined]
+        if exc.response.status_code in (404, 422):
+            raise HTTPException(status_code=404, detail="Contact not found") from exc
+        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve contact: {exc}") from exc
     return {"data": _adapt_contact(contact)}
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, summary="Contact anlegen",
-    response_model=ContactsOut, dependencies=SCHREIBEN["CRM"])
-async def create_contact(contact_data: ContactCreate, db: Session = Depends(get_db),
-                         tenant_id: str = Depends(get_tenant_id)):
-    if not _kunden_des_mandanten(db, tenant_id, {str(contact_data.customer_id)}):
-        raise HTTPException(status_code=404, detail="Customer not found")
+    response_model=ContactsOut
+)
+async def create_contact(contact_data: ContactCreate):
     try:
         payload = _map_create_payload(contact_data)
         created = await crm_core_client.create_contact(payload)
@@ -179,10 +138,9 @@ async def create_contact(contact_data: ContactCreate, db: Session = Depends(get_
 
 
 @router.put("/{contact_id}", summary="Contact aktualisieren",
-    response_model=ContactsOut, dependencies=SCHREIBEN["CRM"])
-async def update_contact(contact_id: str, contact_data: ContactUpdate, db: Session = Depends(get_db),
-                         tenant_id: str = Depends(get_tenant_id)):
-    await _eigener_kontakt(db, tenant_id, contact_id)
+    response_model=ContactsOut
+)
+async def update_contact(contact_id: str, contact_data: ContactUpdate):
     try:
         payload = _map_update_payload(contact_data)
         updated = await crm_core_client.update_contact(contact_id, payload)
@@ -196,9 +154,9 @@ async def update_contact(contact_id: str, contact_data: ContactUpdate, db: Sessi
 
 
 @router.delete("/{contact_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Contact löschen",
-    response_model=None, dependencies=SCHREIBEN["CRM"])
-async def delete_contact(contact_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
-    await _eigener_kontakt(db, tenant_id, contact_id)
+    response_model=None
+)
+async def delete_contact(contact_id: str):
     try:
         await crm_core_client.delete_contact(contact_id)
     except httpx.HTTPStatusError as exc:  # type: ignore[name-defined]

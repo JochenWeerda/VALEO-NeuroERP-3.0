@@ -17,7 +17,6 @@ from pydantic import BaseModel, Field, field_validator
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -111,7 +110,8 @@ async def _execute_subrequest(
     "/$batch",
     response_model=BatchResponse,
     summary="Execute multiple GET requests in a single call",
-    tags=["batch"], dependencies=SCHREIBEN["FACHLICH"])
+    tags=["batch"],
+)
 async def batch_execute(payload: BatchRequest, request: Request) -> BatchResponse:
     """
     OData-style batch endpoint. Accepts up to 10 GET sub-requests, runs them

@@ -22,7 +22,6 @@ from app.core.workflow_runtime import (
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class WorkflowRuntimeOut(BaseSchema):
@@ -90,7 +89,8 @@ async def list_instances(
 
 
 @router.post("/instances", summary="Instance anlegen",
-    response_model=WorkflowRuntimeOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=WorkflowRuntimeOut
+)
 async def create_instance(
     request: CreateInstanceRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -132,7 +132,8 @@ async def get_instance(
 
 
 @router.post("/instances/{instance_id}/checkpoint", summary="Checkpoint hinzufügen",
-    response_model=WorkflowRuntimeOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=WorkflowRuntimeOut
+)
 async def add_checkpoint(
     instance_id: str,
     request: CheckpointRequest,
@@ -158,7 +159,8 @@ async def add_checkpoint(
 
 
 @router.post("/instances/{instance_id}/resume", summary="Instance fortsetzen",
-    response_model=WorkflowRuntimeOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=WorkflowRuntimeOut
+)
 async def resume_instance(
     instance_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -182,7 +184,8 @@ async def resume_instance(
 
 
 @router.post("/instances/{instance_id}/cancel", summary="Instance stornieren",
-    response_model=WorkflowRuntimeOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=WorkflowRuntimeOut
+)
 async def cancel_instance(
     instance_id: str,
     tenant_id: str = Depends(get_tenant_id),

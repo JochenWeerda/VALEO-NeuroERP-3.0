@@ -1,5 +1,3 @@
-import { ScreenStudioPage } from '@/features/screen-studio/ScreenStudioPage'
+import { createLegacyMaskPage } from '@/components/mask-builder'
 
-export default function AdminScreenStudioRoute(): JSX.Element {
-  return <ScreenStudioPage />
-}
+export default createLegacyMaskPage(() => import('./screen-studio-legacy'))

@@ -43,7 +43,6 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.services import genossenschaft_service as dienst
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +96,7 @@ def list_mitglieder(
 
 
 @router.post("/mitglieder", status_code=201, response_model=MitgliedAngelegt,
-             summary="Mitglied aufnehmen (§ 15 GenG)", dependencies=SCHREIBEN["AGRAR"])
+             summary="Mitglied aufnehmen (§ 15 GenG)")
 def create_mitglied(
     payload: MitgliedCreate,
     nutzer: dict = Depends(get_current_user),
@@ -207,7 +206,7 @@ def get_mitglied(
 
 
 @router.patch("/mitglieder/{mitglied_id}", response_model=MitgliedGeaendert,
-              summary="Mitgliedsstammdaten aendern", dependencies=SCHREIBEN["AGRAR"])
+              summary="Mitgliedsstammdaten aendern")
 def patch_mitglied(
     mitglied_id: str,
     payload: MitgliedPatch,
@@ -370,7 +369,7 @@ def _hauptbuch_buchen(
 
 
 @router.post("/mitglieder/{mitglied_id}/anteilsbewegung", status_code=201,
-             response_model=AnteilsbewegungGebucht, summary="Anteilsbewegung buchen", dependencies=SCHREIBEN["AGRAR"])
+             response_model=AnteilsbewegungGebucht, summary="Anteilsbewegung buchen")
 def create_anteilsbewegung(
     mitglied_id: str,
     payload: AnteilsbewegungCreate,

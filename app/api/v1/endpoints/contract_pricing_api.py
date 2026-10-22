@@ -5,7 +5,6 @@ import uuid
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.contract_pricing_api_schemas import ContractPricingApiOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/contract-pricing", tags=["contract-pricing"])
@@ -27,7 +26,8 @@ class LotCreateRequest(BaseModel):
     lieferdatum_soll: str
 
 @router.post("/price-matrix", status_code=201, summary="Price matrix anlegen",
-    response_model=ContractPricingApiOut, dependencies=SCHREIBEN["KONTRAKT"])
+    response_model=ContractPricingApiOut
+)
 def create_price_matrix(req: PriceMatrixCreateRequest):
     from app.core.contract_pricing import PriceMatrix, PriceMatrixEintrag, PreisTyp
     from datetime import date as _date
@@ -50,7 +50,8 @@ def create_price_matrix(req: PriceMatrixCreateRequest):
     return matrix.model_dump()
 
 @router.post("/lots", status_code=201, summary="Lot anlegen",
-    response_model=ContractPricingApiOut, dependencies=SCHREIBEN["KONTRAKT"])
+    response_model=ContractPricingApiOut
+)
 def create_lot(req: LotCreateRequest):
     from app.core.contract_pricing import KonContractLot, PreisTyp
     from datetime import date as _date

@@ -34,7 +34,6 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.futtermittel_rohwaren_schemas import FuttermittelRohwarenOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/futtermittel/rohwaren", tags=["futtermittel", "rohwaren"])
@@ -177,7 +176,8 @@ async def list_rohwaren(
 
 
 @router.post("", status_code=201, summary="Rohware anlegen",
-    response_model=FuttermittelRohwarenOut, dependencies=SCHREIBEN["FUTTERMITTEL"])
+    response_model=FuttermittelRohwarenOut
+)
 async def create_rohware(
     payload: RohwareIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -287,7 +287,8 @@ async def get_rohware(
 
 
 @router.patch("/{rohware_id}", summary="Rohware aktualisieren",
-    response_model=FuttermittelRohwarenOut, dependencies=SCHREIBEN["FUTTERMITTEL"])
+    response_model=FuttermittelRohwarenOut
+)
 async def update_rohware(
     rohware_id: str,
     payload: RohwarePatch,
@@ -343,7 +344,8 @@ async def list_analysen(
 
 
 @router.post("/{rohware_id}/analysen", status_code=201, summary="Analyse anlegen",
-    response_model=FuttermittelRohwarenOut, dependencies=SCHREIBEN["FUTTERMITTEL"])
+    response_model=FuttermittelRohwarenOut
+)
 async def create_analyse(
     rohware_id: str,
     payload: AnalyseIn,

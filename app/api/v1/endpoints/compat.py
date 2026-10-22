@@ -6,12 +6,11 @@ from app.auth.finance_roles import finance_admin
 import json
 import os
 from datetime import date, datetime, timezone
-from pathlib import Path
 from typing import Any, List, Optional
 from uuid import uuid4
+
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import Response
-from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -25,7 +24,9 @@ from app.core.data_quality_enforcement import (
 from app.core.database import get_db
 from app.core.uuid7 import uuid7
 from app.core.logging import get_correlation_id
-from app.auth.deps import get_current_user
+from app.api.v1.endpoints.futter_read import router as futter_read_router
+from app.agrar.rations.authz import WRITE_ROLES, require_roles
+from app.auth.deps import User, get_current_user
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import AuditLog, LkwAnnahmeQueue
 from app.documents.router_helpers import get_repository, list_from_store, get_from_store
@@ -63,7 +64,6 @@ from app.api.v1.schemas.mask_entity_contracts import (
     EinkaufAnlieferavisOut,
     EinkaufAuftragsbestaetigungOut,
 )
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 # ---------------------------------------------------------------------------
@@ -546,12 +546,12 @@ def _altbeleg_schreibgeschuetzt(po_id: str) -> HTTPException:
     )
 
 
-@router.post("/purchase-orders", response_model=PurchaseOrderOut, status_code=201, summary="Create po", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/purchase-orders", response_model=PurchaseOrderOut, status_code=201, summary="Create po")
 async def po_create(payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     return await _create_compat_purchase_order(db, tenant_id=tenant_id, payload=payload)
 
 
-@router.patch("/purchase-orders/{po_id}", response_model=PurchaseOrderOut, summary="Patch po", dependencies=SCHREIBEN["EINKAUF"])
+@router.patch("/purchase-orders/{po_id}", response_model=PurchaseOrderOut, summary="Patch po")
 async def po_patch(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     from app.services.procurement_service import ProcurementService
 
@@ -578,7 +578,7 @@ async def po_patch(po_id: str, payload: dict[str, Any], tenant_id: str = Depends
     raise _altbeleg_schreibgeschuetzt(po_id)
 
 
-@router.post("/purchase-orders/{po_id}/approve", response_model=PurchaseOrderOut, summary="Approve po", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/purchase-orders/{po_id}/approve", response_model=PurchaseOrderOut, summary="Approve po")
 async def po_approve(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     from app.core.exceptions import ValidationFailedError
     from app.services.procurement_service import ProcurementService
@@ -596,7 +596,7 @@ async def po_approve(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Se
     raise _altbeleg_schreibgeschuetzt(po_id)
 
 
-@router.post("/purchase-orders/{po_id}/cancel-with-reason", response_model=PurchaseOrderOut, summary="Cancel po", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/purchase-orders/{po_id}/cancel-with-reason", response_model=PurchaseOrderOut, summary="Cancel po")
 async def po_cancel(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     from app.core.exceptions import ValidationFailedError
     from app.services.procurement_service import ProcurementService
@@ -655,7 +655,7 @@ async def einkauf_goods_receipts(
     return EinkaufCompatService(db, tenant_id).list_goods_receipts()
 
 
-@router.post("/einkauf/goods-receipts", response_model=EinkaufDocOut, status_code=201, summary="Goods receipts create einkauf", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/einkauf/goods-receipts", response_model=EinkaufDocOut, status_code=201, summary="Goods receipts create einkauf")
 async def einkauf_goods_receipts_create(
     payload: dict[str, Any],
     tenant_id: str = Depends(get_tenant_id),
@@ -729,7 +729,7 @@ async def einkauf_anfrage_get(
     return result
 
 
-@router.post("/einkauf/anfragen/{anfrage_id}/convert-to-order", response_model=EinkaufDocOut, summary="Anfrage convert to order einkauf", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/einkauf/anfragen/{anfrage_id}/convert-to-order", response_model=EinkaufDocOut, summary="Anfrage convert to order einkauf")
 async def einkauf_anfrage_convert_to_order(
     anfrage_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -775,7 +775,7 @@ async def einkauf_angebot_get(
     return result
 
 
-@router.post("/einkauf/angebote/{angebot_id}/review", response_model=EinkaufDocOut, summary="Angebot review einkauf", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/einkauf/angebote/{angebot_id}/review", response_model=EinkaufDocOut, summary="Angebot review einkauf")
 async def einkauf_angebot_review(
     angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -785,7 +785,7 @@ async def einkauf_angebot_review(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/einkauf/angebote/{angebot_id}/approve", response_model=EinkaufDocOut, summary="Angebot approve einkauf", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/einkauf/angebote/{angebot_id}/approve", response_model=EinkaufDocOut, summary="Angebot approve einkauf")
 async def einkauf_angebot_approve(
     angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -795,7 +795,7 @@ async def einkauf_angebot_approve(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/einkauf/angebote/{angebot_id}/reject", response_model=EinkaufDocOut, summary="Angebot reject einkauf", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/einkauf/angebote/{angebot_id}/reject", response_model=EinkaufDocOut, summary="Angebot reject einkauf")
 async def einkauf_angebot_reject(
     angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -805,7 +805,7 @@ async def einkauf_angebot_reject(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.post("/einkauf/angebote/{angebot_id}/convert-to-order", response_model=EinkaufDocOut, summary="Angebot convert to order einkauf", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/einkauf/angebote/{angebot_id}/convert-to-order", response_model=EinkaufDocOut, summary="Angebot convert to order einkauf")
 async def einkauf_angebot_convert_to_order(
     angebot_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -840,7 +840,7 @@ async def einkauf_anlieferavis_get(
     return result
 
 
-@router.post("/einkauf/anlieferavis/{avis_id}/{action}", response_model=EinkaufDocOut, summary="Anlieferavis transition einkauf", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/einkauf/anlieferavis/{avis_id}/{action}", response_model=EinkaufDocOut, summary="Anlieferavis transition einkauf")
 async def einkauf_anlieferavis_transition(
     avis_id: str, action: str,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
@@ -882,7 +882,7 @@ async def einkauf_auftragsbestaetigung_get(
     return result
 
 
-@router.post("/einkauf/auftragsbestaetigungen/{bestaetigung_id}/{action}", response_model=EinkaufDocOut, summary="Auftragsbestaetigung transition einkauf", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/einkauf/auftragsbestaetigungen/{bestaetigung_id}/{action}", response_model=EinkaufDocOut, summary="Auftragsbestaetigung transition einkauf")
 async def einkauf_auftragsbestaetigung_transition(
     bestaetigung_id: str, action: str,
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
@@ -903,7 +903,8 @@ async def einkauf_rechnungseingaenge_list(
 
 
 @router.post("/einkauf/rechnungseingaenge/{rechnung_id}/pruefen", summary="Rechnungseingang pruefen einkauf",
-    response_model=EinkaufDocOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=EinkaufDocOut
+)
 async def einkauf_rechnungseingang_pruefen(
     rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -916,7 +917,8 @@ async def einkauf_rechnungseingang_pruefen(
 
 
 @router.post("/einkauf/rechnungseingaenge/{rechnung_id}/freigeben", summary="Rechnungseingang freigeben einkauf",
-    response_model=EinkaufDocOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=EinkaufDocOut
+)
 async def einkauf_rechnungseingang_freigeben(
     rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -929,7 +931,8 @@ async def einkauf_rechnungseingang_freigeben(
 
 
 @router.post("/einkauf/rechnungseingaenge/{rechnung_id}/verbuchen", summary="Rechnungseingang verbuchen einkauf",
-    response_model=EinkaufDocOut, dependencies=SCHREIBEN["EINKAUF"])
+    response_model=EinkaufDocOut
+)
 async def einkauf_rechnungseingang_verbuchen(
     rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict[str, Any]:
@@ -947,15 +950,13 @@ async def einkauf_reports(tenant_id: str = Depends(get_tenant_id), db: Session =
     cached = cache_get_json(cache_key)
     if cached is not None:
         return cached
-    from decimal import Decimal
-    totals: dict[str, Decimal] = {}
-    for order in _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id):
-        category = str(order.get("category") or "Sonstige")
-        amount = Decimal(str(order.get("subtotal") or 0))
-        if not amount.is_finite():
-            raise ValueError("Invalid purchase-order subtotal")
-        totals[category] = totals.get(category, Decimal(0)) + amount
-    spend = [{"kategorie": category, "anteil": 0, "betrag": float(amount)} for category, amount in sorted(totals.items())]
+    try:
+        rows = db.execute(
+            text("SELECT category, SUM(total_net) AS betrag FROM einkauf_bestellungen GROUP BY category")
+        ).fetchall()
+        spend = [{"kategorie": r._mapping.get("category") or "Sonstige", "anteil": 0, "betrag": float(r._mapping.get("betrag") or 0)} for r in rows]
+    except Exception:
+        spend = []
     total = sum(float(i.get("betrag") or 0) for i in spend) or 1
     for i in spend:
         i["anteil"] = round(float(i["betrag"]) / total * 100, 2)
@@ -1014,7 +1015,7 @@ async def einkauf_retouren(
     return EinkaufCompatService(db, tenant_id).list_retouren()
 
 
-@router.post("/einkauf/retouren", response_model=EinkaufDocOut, status_code=201, summary="Retouren create einkauf", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/einkauf/retouren", response_model=EinkaufDocOut, status_code=201, summary="Retouren create einkauf")
 async def einkauf_retouren_create(
     payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -1024,10 +1025,69 @@ async def einkauf_retouren_create(
 
 
 # Futter -------------------------------------------------------------------
-# Liste und Loeschen der Einzel-/Mischfuttermittel stehen in futter_stamm (Futterkatalog bzw.
-# domain_shared.futtermittel_mischfutter). Bis 20.10.2026 verdeckten Wege hier beide mit einer Projektion
-# aller aktiven Artikel: Die Liste zeigte auch Duenger und Saatgut, ihre Kennungen oeffneten keine Einzelansicht,
-# und "Loeschen" deaktivierte beliebige Artikel.
+
+
+class FutterBulkDeleteIn(BaseModel):
+    ids: list[str] = Field(default_factory=list, min_length=1, max_length=100)
+
+
+class FutterBulkDeleteErrorOut(BaseModel):
+    id: str
+    detail: str
+
+
+class FutterBulkDeleteOut(BaseModel):
+    requested: int
+    deleted: int
+    missing_ids: list[str] = Field(default_factory=list)
+    errors: list[FutterBulkDeleteErrorOut] = Field(default_factory=list)
+
+
+router.include_router(futter_read_router)
+
+
+@router.delete("/futter/einzelfuttermittel/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Futter einzel item lÃ¶schen")
+async def delete_futter_einzel_item(
+    item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> Response:
+    require_roles(user, WRITE_ROLES)
+    result = FutterCompatService(db, tenant_id).soft_delete_artikel([item_id])
+    if result["deleted"] == 0:
+        raise HTTPException(status_code=404, detail="Einzelfuttermittel nicht gefunden")
+    return Response(status_code=204)
+
+
+@router.post("/futter/einzelfuttermittel/bulk-delete", response_model=FutterBulkDeleteOut, summary="Delete futter einzel Bulk")
+async def bulk_delete_futter_einzel(
+    payload: FutterBulkDeleteIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> FutterBulkDeleteOut:
+    require_roles(user, WRITE_ROLES)
+    result = FutterCompatService(db, tenant_id).soft_delete_artikel(payload.ids)
+    return FutterBulkDeleteOut(**result)
+
+
+@router.delete("/futter/mischfuttermittel/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Futter misch item lÃ¶schen")
+async def delete_futter_misch_item(
+    item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> Response:
+    require_roles(user, WRITE_ROLES)
+    result = FutterCompatService(db, tenant_id).soft_delete_artikel([item_id])
+    if result["deleted"] == 0:
+        raise HTTPException(status_code=404, detail="Mischfuttermittel nicht gefunden")
+    return Response(status_code=204)
+
+
+@router.post("/futter/mischfuttermittel/bulk-delete", response_model=FutterBulkDeleteOut, summary="Delete futter misch Bulk")
+async def bulk_delete_futter_misch(
+    payload: FutterBulkDeleteIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> FutterBulkDeleteOut:
+    require_roles(user, WRITE_ROLES)
+    result = FutterCompatService(db, tenant_id).soft_delete_artikel(payload.ids)
+    return FutterBulkDeleteOut(**result)
 
 
 @router.get("/futter/chargen", response_model=list[CompatBridgeOut], summary="Chargen futter")
@@ -1090,7 +1150,7 @@ class NaehrwertBerechnungResult(BaseModel):
     modus: str
 
 
-@router.post("/futter/mischfuttermittel/naehrwerte/berechnen", response_model=NaehrwertBerechnungResult, summary="Naehrwerte berechne", dependencies=SCHREIBEN["FUTTERMITTEL"])
+@router.post("/futter/mischfuttermittel/naehrwerte/berechnen", response_model=NaehrwertBerechnungResult, summary="Naehrwerte berechne")
 async def berechne_naehrwerte(
     body: NaehrwertBerechnungRequest,
     db: Session = Depends(get_db),
@@ -1197,7 +1257,7 @@ class SanktionsPruefungRequest(BaseModel):
     land: str = Field(default="DE")
 
 
-@router.post("/crm/sanktionspruefung", response_model=SanktionsPruefungOut, summary="Sanktionspruefung", dependencies=SCHREIBEN["CRM"])
+@router.post("/crm/sanktionspruefung", response_model=SanktionsPruefungOut, summary="Sanktionspruefung")
 async def sanktionspruefung(body: SanktionsPruefungRequest) -> dict:
     """
     PrÃ¼ft eine Person/Firma auf EU-, UN- und US-OFAC-Sanktionslisten.
@@ -1237,7 +1297,7 @@ class NewsletterRequest(BaseModel):
     text: Optional[str] = None
 
 
-@router.post("/crm/kommunikation/newsletter", response_model=NewsletterOut, summary="Newsletter crm", dependencies=SCHREIBEN["CRM"])
+@router.post("/crm/kommunikation/newsletter", response_model=NewsletterOut, summary="Newsletter crm")
 async def crm_newsletter(body: NewsletterRequest, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db), nutzer: dict = Depends(get_current_user)) -> dict:
     """Newsletter per SMTP an jeden gueltigen Empfaenger. Bis 08.10.2026 meldete dieser Weg
     "in_queue" ohne Warteschlange und versandte nichts; jetzt zaehlt, was der Server annahm."""
@@ -1271,7 +1331,7 @@ async def crm_newsletter(body: NewsletterRequest, tenant_id: str = Depends(get_t
             "hinweis": f"{versendet} von {len(valid)} Empfängern vom SMTP-Server angenommen."}
 
 
-@router.patch("/crm/lieferanten/{lieferant_id}", response_model=CrmOut, summary="Lieferant aktualisieren", dependencies=SCHREIBEN["CRM"])
+@router.patch("/crm/lieferanten/{lieferant_id}", response_model=CrmOut, summary="Lieferant aktualisieren")
 async def patch_lieferant(lieferant_id: str, body: dict = Body(default={}), db: Session = Depends(get_db)) -> dict:
     """Partielle Aktualisierung eines Lieferanten (z.B. Status sperren)."""
     q = text("""
@@ -1291,7 +1351,7 @@ async def patch_lieferant(lieferant_id: str, body: dict = Body(default={}), db: 
     return {"id": lieferant_id, "status": body.get("status", "aktiv"), "updated": True}
 
 
-@router.patch("/crm/kunden/{kunden_id}", response_model=CrmOut, summary="Kunde aktualisieren", dependencies=SCHREIBEN["CRM"])
+@router.patch("/crm/kunden/{kunden_id}", response_model=CrmOut, summary="Kunde aktualisieren")
 async def patch_kunde(
     kunden_id: str,
     body: dict = Body(default={}),
@@ -1529,7 +1589,7 @@ def _validate_csv_article_row(norm: dict[str, str]) -> str | None:
     return "; ".join(v.meldung for v in result.verletzungen if v.severity == "FEHLER")
 
 
-@router.post("/crm/import/kunden", response_model=CsvImportResponse, summary="Kunden csv importieren", dependencies=SCHREIBEN["CRM"])
+@router.post("/crm/import/kunden", response_model=CsvImportResponse, summary="Kunden csv importieren")
 async def import_kunden_csv(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -1697,7 +1757,7 @@ async def import_debitoren_csv(
     return {"created": created, "updated": updated, "errors": errors}
 
 
-@router.post("/futter/import/einzelfuttermittel", response_model=CsvImportResponse, summary="Einzelfuttermittel csv importieren", dependencies=SCHREIBEN["FUTTERMITTEL"])
+@router.post("/futter/import/einzelfuttermittel", response_model=CsvImportResponse, summary="Einzelfuttermittel csv importieren")
 async def import_einzelfuttermittel_csv(
     file: UploadFile = File(...), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -1717,7 +1777,7 @@ async def import_einzelfuttermittel_csv(
     return result
 
 
-@router.post("/futter/import/mischfuttermittel", response_model=CsvImportResponse, summary="Mischfuttermittel csv importieren", dependencies=SCHREIBEN["FUTTERMITTEL"])
+@router.post("/futter/import/mischfuttermittel", response_model=CsvImportResponse, summary="Mischfuttermittel csv importieren")
 async def import_mischfuttermittel_csv(
     file: UploadFile = File(...), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -1736,7 +1796,7 @@ async def import_mischfuttermittel_csv(
     return result
 
 
-@router.post("/futter/import/chargen", response_model=CsvImportResponse, summary="Chargen csv importieren", dependencies=SCHREIBEN["FUTTERMITTEL"])
+@router.post("/futter/import/chargen", response_model=CsvImportResponse, summary="Chargen csv importieren")
 async def import_chargen_csv(
     file: UploadFile = File(...), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -1755,14 +1815,14 @@ async def inventory_inventur(
     return InventoryCompatService(db, tenant_id).list_inventur_counts()
 
 
-@router.post("/inventory/inventur/complete", response_model=InventoryOut, summary="Inventur complete inventory", dependencies=SCHREIBEN["LAGER"])
+@router.post("/inventory/inventur/complete", response_model=InventoryOut, summary="Inventur complete inventory")
 async def inventory_inventur_complete(
     payload: dict[str, list[str]], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
     return InventoryCompatService(db, tenant_id).complete_inventur_counts(payload.get("ids", []))
 
 
-@router.delete("/inventory/inventur/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Inventur stornieren inventory", dependencies=SCHREIBEN["LAGER"])
+@router.delete("/inventory/inventur/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Inventur stornieren inventory")
 async def inventory_inventur_stornieren(
     item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ):
@@ -1933,7 +1993,7 @@ class AnnahmeStatusUpdate(BaseModel):
     klaerung: Optional[dict[str, Any]] = Field(default=None, description="Klaerungsdaten fuer gesperrte Ware")
 
 
-@router.patch("/annahme/warteschlange/{reg_id}", response_model=AnnahmeEntryOut, summary="Warteschlange patch annahme", dependencies=SCHREIBEN["ERNTE"])
+@router.patch("/annahme/warteschlange/{reg_id}", response_model=AnnahmeEntryOut, summary="Warteschlange patch annahme")
 async def annahme_warteschlange_patch(
     reg_id: str,
     body: AnnahmeStatusUpdate,
@@ -1948,7 +2008,7 @@ async def annahme_warteschlange_patch(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@router.post("/annahme/warteschlange/{reg_id}/repair-article", response_model=AnnahmeEntryOut, summary="Warteschlange repair article annahme", dependencies=SCHREIBEN["ERNTE"])
+@router.post("/annahme/warteschlange/{reg_id}/repair-article", response_model=AnnahmeEntryOut, summary="Warteschlange repair article annahme")
 async def annahme_warteschlange_repair_article(
     reg_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> dict:
@@ -1982,7 +2042,7 @@ class AnnahmeUploadOut(BaseModel):
     filename: str
 
 
-@router.post("/annahme/upload", response_model=AnnahmeUploadOut, status_code=201, tags=["annahme"], summary="Upload annahme", dependencies=SCHREIBEN["ERNTE"])
+@router.post("/annahme/upload", response_model=AnnahmeUploadOut, status_code=201, tags=["annahme"], summary="Upload annahme")
 async def annahme_upload(
     file: UploadFile = File(..., description="Foto/Scan Kennzeichen oder Lieferschein/Barcode"),
     tenant_id: str = Depends(get_tenant_id),
@@ -2004,12 +2064,13 @@ async def annahme_upload(
     path = os.path.realpath(os.path.join(base_dir, safe_name))
     if not path.startswith(base_dir + os.sep) and path != base_dir:
         raise HTTPException(status_code=400, detail="Ungueltiger Dateipfad")
-    await run_in_threadpool(Path(path).write_bytes, content)  # Dateischreiben nicht in der Ereignisschleife
+    with open(path, "wb") as f:
+        f.write(content)
     cache_set_json(f"annahme:upload:{upload_id}", {"id": upload_id, "filename": file.filename, "path": path}, ttl_seconds=86400 * 7)
     return AnnahmeUploadOut(id=upload_id, filename=file.filename or safe_name)
 
 
-@router.post("/annahme/lkw-registrierung", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"], summary="Lkw registrierung anlegen", dependencies=SCHREIBEN["ERNTE"])
+@router.post("/annahme/lkw-registrierung", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"], summary="Lkw registrierung anlegen")
 async def create_lkw_registrierung(
     payload: LKWRegistrierungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2019,7 +2080,7 @@ async def create_lkw_registrierung(
     return LKWRegistrierungOut(**result)
 
 
-@router.post("/annahme/warteschlange", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"], summary="Lkw warteschlange alias anlegen", dependencies=SCHREIBEN["ERNTE"])
+@router.post("/annahme/warteschlange", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"], summary="Lkw warteschlange alias anlegen")
 async def create_lkw_warteschlange_alias(
     payload: LKWRegistrierungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2078,7 +2139,7 @@ async def supplier_ratings(tenant_id: str = Depends(get_tenant_id), db: Session 
     return payload
 
 
-@router.post("/einkauf/supplier-ratings/{supplier_id}", response_model=EinkaufDocOut, summary="Supplier rating upsert", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/einkauf/supplier-ratings/{supplier_id}", response_model=EinkaufDocOut, summary="Supplier rating upsert")
 async def upsert_supplier_rating(
     supplier_id: str,
     payload: dict[str, Any],
@@ -2110,7 +2171,7 @@ async def supplier_documents(supplier_id: str, db: Session = Depends(get_db)) ->
     ]
 
 
-@router.post("/einkauf/suppliers/{supplier_id}/documents", response_model=EinkaufDocOut, status_code=201, summary="Supplier document anlegen", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/einkauf/suppliers/{supplier_id}/documents", response_model=EinkaufDocOut, status_code=201, summary="Supplier document anlegen")
 async def create_supplier_document(supplier_id: str, payload: dict[str, Any], db: Session = Depends(get_db)) -> dict:
     doc = Dokument(
         name=str(payload.get("name") or f"Lieferanten-Dokument {supplier_id}"),
@@ -2128,7 +2189,7 @@ async def create_supplier_document(supplier_id: str, payload: dict[str, Any], db
     return {"id": doc.id, "message": "Supplier document created"}
 
 
-@router.delete("/einkauf/suppliers/{supplier_id}/documents/{doc_id}", response_model=EinkaufDocOut, summary="Supplier document lÃ¶schen", dependencies=SCHREIBEN["EINKAUF"])
+@router.delete("/einkauf/suppliers/{supplier_id}/documents/{doc_id}", response_model=EinkaufDocOut, summary="Supplier document lÃ¶schen")
 async def delete_supplier_document(supplier_id: str, doc_id: str, db: Session = Depends(get_db)) -> dict:
     doc = (
         db.query(Dokument)
@@ -2188,17 +2249,17 @@ async def _po_kommunikation(po_id: str, payload: dict[str, Any], tenant_id: str,
     return item
 
 
-@router.post("/purchase-orders/{po_id}/communications", response_model=EinkaufDocOut, status_code=201, summary="Add communication po", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/purchase-orders/{po_id}/communications", response_model=EinkaufDocOut, status_code=201, summary="Add communication po")
 async def po_add_communication(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     return await _po_kommunikation(po_id, payload, tenant_id, db, "erfassen")
 
 
-@router.post("/purchase-orders/{po_id}/communications/email", response_model=EinkaufDocOut, status_code=201, summary="Send email po", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/purchase-orders/{po_id}/communications/email", response_model=EinkaufDocOut, status_code=201, summary="Send email po")
 async def po_send_email(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db), nutzer: dict = Depends(get_current_user)) -> dict:
     return await _po_kommunikation(po_id, payload, tenant_id, db, "per_mail_senden", nutzer)
 
 
-@router.post("/purchase-orders/{po_id}/communications/portal", response_model=EinkaufDocOut, status_code=201, summary="Send portal po", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/purchase-orders/{po_id}/communications/portal", response_model=EinkaufDocOut, status_code=201, summary="Send portal po")
 async def po_send_portal(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     return await _po_kommunikation(po_id, payload, tenant_id, db, "im_portal_veroeffentlichen")
 
@@ -2213,7 +2274,7 @@ async def einkauf_retoure_get(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-@router.patch("/einkauf/retouren/{retour_id}", response_model=EinkaufDocOut, summary="Retoure patch einkauf", dependencies=SCHREIBEN["EINKAUF"])
+@router.patch("/einkauf/retouren/{retour_id}", response_model=EinkaufDocOut, summary="Retoure patch einkauf")
 async def einkauf_retoure_patch(
     retour_id: str, payload: dict[str, Any],
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
@@ -2232,7 +2293,7 @@ async def list_service_entry_sheets(
     return EinkaufCompatService(db, tenant_id).list_service_entry_sheets(status=status)
 
 
-@router.post("/einkauf/service-entry-sheets", response_model=EinkaufDocOut, status_code=201, summary="Service entry sheet anlegen", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/einkauf/service-entry-sheets", response_model=EinkaufDocOut, status_code=201, summary="Service entry sheet anlegen")
 async def create_service_entry_sheet(
     payload: dict[str, Any],
     tenant_id: str = Depends(get_tenant_id),
@@ -2244,7 +2305,7 @@ async def create_service_entry_sheet(
     return result
 
 
-@router.patch("/einkauf/service-entry-sheets/{ses_id}", response_model=EinkaufDocOut, summary="Service entry sheet aktualisieren", dependencies=SCHREIBEN["EINKAUF"])
+@router.patch("/einkauf/service-entry-sheets/{ses_id}", response_model=EinkaufDocOut, summary="Service entry sheet aktualisieren")
 async def update_service_entry_sheet(
     ses_id: str,
     payload: dict[str, Any],
@@ -2304,7 +2365,7 @@ async def edi_messages(tenant_id: str = Depends(get_tenant_id), db: Session = De
     return EinkaufCompatService(db, tenant_id).list_edi_messages()
 
 
-@router.post("/einkauf/edi/messages", response_model=EinkaufDocOut, status_code=201, summary="Edi message anlegen", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/einkauf/edi/messages", response_model=EinkaufDocOut, status_code=201, summary="Edi message anlegen")
 async def create_edi_message(
     payload: dict[str, Any],
     tenant_id: str = Depends(get_tenant_id),
@@ -2315,7 +2376,7 @@ async def create_edi_message(
     return result
 
 
-@router.post("/einkauf/edi/messages/{msg_id}/ack", response_model=EinkaufDocOut, summary="Edi message ack", dependencies=SCHREIBEN["EINKAUF"])
+@router.post("/einkauf/edi/messages/{msg_id}/ack", response_model=EinkaufDocOut, summary="Edi message ack")
 async def ack_edi_message(msg_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     try:
         result = await EinkaufCompatService(db, tenant_id).ack_edi_message(msg_id)
@@ -2416,7 +2477,7 @@ class EinlagerungOut(BaseModel):
     status: str
 
 
-@router.post("/lager/einlagerung", response_model=EinlagerungOut, status_code=201, tags=["lager"], summary="Einlagerung anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/lager/einlagerung", response_model=EinlagerungOut, status_code=201, tags=["lager"], summary="Einlagerung anlegen")
 async def create_einlagerung(
     payload: EinlagerungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2504,7 +2565,7 @@ class AuslagerungOut(BaseModel):
     status: str
 
 
-@router.post("/lager/auslagerung", response_model=AuslagerungOut, status_code=201, tags=["lager"], summary="Auslagerung anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/lager/auslagerung", response_model=AuslagerungOut, status_code=201, tags=["lager"], summary="Auslagerung anlegen")
 async def create_auslagerung(
     payload: AuslagerungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2530,7 +2591,7 @@ async def create_auslagerung(
         if row:
             warehouse_id = row[0]
     elif payload.strategie in ("fifo", "fefo"):
-        order_col = "created_at ASC" if payload.strategie == "fifo" else "expiry_date ASC NULLS LAST, created_at ASC"  # FEFO
+        order_col = "created_at ASC" if payload.strategie == "fifo" else "created_at ASC"
         row = db.execute(
             text(f"""
                 SELECT batch_number, warehouse_id FROM domain_inventory.article_batches
@@ -2617,7 +2678,7 @@ async def list_suspended_sales(
         return []
 
 
-@router.delete("/pos/suspended-sales/{sale_id}", status_code=204, tags=["pos"], response_class=Response, response_model=None, summary="Suspended sale lÃ¶schen", dependencies=SCHREIBEN["VERKAUF"])
+@router.delete("/pos/suspended-sales/{sale_id}", status_code=204, tags=["pos"], response_class=Response, response_model=None, summary="Suspended sale lÃ¶schen")
 async def delete_suspended_sale(
     sale_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -2700,7 +2761,7 @@ def _ensure_chart_account(
     return acc_id
 
 
-@router.post("/pos/tagesabschluss", response_model=TagesabschlussOut, status_code=201, tags=["pos"], summary="Tagesabschluss anlegen", dependencies=SCHREIBEN["VERKAUF"])
+@router.post("/pos/tagesabschluss", response_model=TagesabschlussOut, status_code=201, tags=["pos"], summary="Tagesabschluss anlegen")
 async def create_tagesabschluss(
     payload: TagesabschlussIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -2915,7 +2976,7 @@ async def get_firma(
     return {}
 
 
-@router.put("/setup/firma", response_model=SetupFirmaOut, tags=["setup"], summary="Firma save", dependencies=SCHREIBEN["PLATTFORM"])
+@router.put("/setup/firma", response_model=SetupFirmaOut, tags=["setup"], summary="Firma save")
 async def save_firma(
     payload: dict = Body(...),
     tenant_id: str = Depends(get_tenant_id),
@@ -3191,7 +3252,8 @@ class FieldServiceTaskCreateBody(BaseModel):
 
 
 @router.post("/agribusiness/field-service-tasks", summary="Field service task anlegen",
-    response_model=FieldServiceTaskOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=FieldServiceTaskOut
+)
 async def create_field_service_task(
     body: FieldServiceTaskCreateBody,
     tenant_id: str = Depends(get_tenant_id),
@@ -3233,7 +3295,8 @@ class FieldServiceTaskUpdateBody(BaseModel):
 
 
 @router.put("/agribusiness/field-service-tasks/{task_id}", summary="Field service task aktualisieren",
-    response_model=FieldServiceTaskOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=FieldServiceTaskOut
+)
 async def update_field_service_task(task_id: str, body: FieldServiceTaskUpdateBody) -> dict[str, Any]:
     """Aufgabe aktualisieren (CRM update_case oder Demo-Liste)."""
     if task_id.startswith("fst-seed-"):
@@ -3276,7 +3339,8 @@ class FieldServiceTaskDeleteBody(BaseModel):
 
 
 @router.delete("/agribusiness/field-service-tasks/{task_id}", summary="Field service task lÃ¶schen",
-    response_model=FieldServiceTaskOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=FieldServiceTaskOut
+)
 async def delete_field_service_task(
     task_id: str,
     body: FieldServiceTaskDeleteBody | None = Body(None),
@@ -3295,7 +3359,8 @@ class FieldServiceTaskCancelBody(BaseModel):
 
 
 @router.post("/agribusiness/field-service-tasks/{task_id}/cancel", summary="Field service task stornieren",
-    response_model=FieldServiceTaskOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=FieldServiceTaskOut
+)
 async def cancel_field_service_task(
     task_id: str,
     body: FieldServiceTaskCancelBody | None = None,

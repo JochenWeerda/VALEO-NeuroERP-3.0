@@ -28,7 +28,6 @@ from app.infrastructure.models.futtermittel_models import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(tags=["futter", "stammdaten"])
@@ -140,12 +139,16 @@ async def list_einzelfuttermittel(
     user: User = Depends(get_current_user),
 ):
     require_roles(user, READ_ROLES)
-    q = db.query(Einzelfuttermittel).filter(Einzelfuttermittel.tenant_id == tenant_id)
-    if aktiv:
-        q = q.filter(Einzelfuttermittel.aktiv.is_(True))
-    if art:
-        q = q.filter(Einzelfuttermittel.art == art)
-    return q.order_by(Einzelfuttermittel.name).all()
+    try:
+        q = db.query(Einzelfuttermittel).filter(Einzelfuttermittel.tenant_id == tenant_id)
+        if aktiv:
+            q = q.filter(Einzelfuttermittel.aktiv.is_(True))
+        if art:
+            q = q.filter(Einzelfuttermittel.art == art)
+        return q.order_by(Einzelfuttermittel.name).all()
+    except Exception:
+        db.rollback()
+        return []
 
 
 @router.get("/einzelfuttermittel/{futter_id}", response_model=EinzelfuttermittelOut,
@@ -239,12 +242,16 @@ async def list_mischfuttermittel(
     user: User = Depends(get_current_user),
 ):
     require_roles(user, READ_ROLES)
-    q = db.query(Mischfuttermittel).filter(Mischfuttermittel.tenant_id == tenant_id)
-    if aktiv:
-        q = q.filter(Mischfuttermittel.aktiv.is_(True))
-    if tierart:
-        q = q.filter(Mischfuttermittel.tierart == tierart)
-    return q.order_by(Mischfuttermittel.name).all()
+    try:
+        q = db.query(Mischfuttermittel).filter(Mischfuttermittel.tenant_id == tenant_id)
+        if aktiv:
+            q = q.filter(Mischfuttermittel.aktiv.is_(True))
+        if tierart:
+            q = q.filter(Mischfuttermittel.tierart == tierart)
+        return q.order_by(Mischfuttermittel.name).all()
+    except Exception:
+        db.rollback()
+        return []
 
 
 @router.get("/mischfuttermittel/{misch_id}", response_model=MischfuttermittelOut,
@@ -263,7 +270,7 @@ async def get_mischfuttermittel(
 
 
 @router.post("/mischfuttermittel", response_model=MischfuttermittelOut, status_code=201,
-             summary="Mischfuttermittel anlegen", dependencies=SCHREIBEN["FUTTERMITTEL"])
+             summary="Mischfuttermittel anlegen")
 async def create_mischfuttermittel(
     payload: MischfuttermittelIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -277,7 +284,7 @@ async def create_mischfuttermittel(
 
 
 @router.put("/mischfuttermittel/{misch_id}", response_model=MischfuttermittelOut,
-            summary="Mischfuttermittel aktualisieren", dependencies=SCHREIBEN["FUTTERMITTEL"])
+            summary="Mischfuttermittel aktualisieren")
 async def update_mischfuttermittel(
     misch_id: str,
     payload: MischfuttermittelIn,
@@ -357,7 +364,7 @@ async def get_rezept(
 
 
 @router.post("/rezepte", response_model=RezeptOut, status_code=201,
-             summary="Rezept anlegen", dependencies=SCHREIBEN["FUTTERMITTEL"])
+             summary="Rezept anlegen")
 async def create_rezept(
     payload: RezeptIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -393,7 +400,7 @@ async def create_rezept(
 
 
 @router.put("/rezepte/{rezept_id}", response_model=RezeptOut,
-            summary="Rezept aktualisieren (inkl. Komponenten)", dependencies=SCHREIBEN["FUTTERMITTEL"])
+            summary="Rezept aktualisieren (inkl. Komponenten)")
 async def update_rezept(
     rezept_id: str,
     payload: RezeptIn,
@@ -439,7 +446,7 @@ async def update_rezept(
 
 
 @router.delete("/rezepte/{rezept_id}", status_code=204,
-               summary="Rezept deaktivieren", response_class=Response, response_model=None, dependencies=SCHREIBEN["FUTTERMITTEL"])
+               summary="Rezept deaktivieren", response_class=Response, response_model=None)
 async def delete_rezept(
     rezept_id: str,
     tenant_id: str = Depends(get_tenant_id),

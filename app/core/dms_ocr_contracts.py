@@ -9,7 +9,6 @@ Schichtregeln:
 """
 from __future__ import annotations
 
-import math
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -136,7 +135,7 @@ class OCRExtraktionsErgebnis:
     hinweise: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
-        if self.felder and math.isclose(self.durchschnittliche_confidence, 0.0, abs_tol=1e-9):
+        if self.felder and self.durchschnittliche_confidence == 0.0:
             self.durchschnittliche_confidence = sum(
                 f.confidence for f in self.felder
             ) / len(self.felder)

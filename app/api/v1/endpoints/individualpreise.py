@@ -31,7 +31,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/preise/individualpreise",
@@ -110,7 +109,7 @@ def list_individualpreise(
     return [IndividualpreisOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=IndividualpreisOut, status_code=201, summary="Individualpreis anlegen", dependencies=SCHREIBEN["VERKAUF"])
+@router.post("", response_model=IndividualpreisOut, status_code=201, summary="Individualpreis anlegen")
 def create_individualpreis(
     payload: IndividualpreisCreate,
     db=Depends(get_db),
@@ -155,7 +154,8 @@ def create_individualpreis(
 
 
 @router.delete("/{preis_id}", summary="Individualpreis löschen",
-    response_model=None, dependencies=SCHREIBEN["VERKAUF"])
+    response_model=None
+)
 def delete_individualpreis(
     preis_id: str,
     db=Depends(get_db),

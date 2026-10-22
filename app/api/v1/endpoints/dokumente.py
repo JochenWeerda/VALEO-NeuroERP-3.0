@@ -11,7 +11,6 @@ from app.domains.operations.repository import DokumentRepository, DokumentVersio
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.dokumente_schemas import DokumenteOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/dokumente", tags=["Dokumente"])
@@ -71,7 +70,7 @@ async def get_dokument(dokument_id: str, db: Session = Depends(get_db)):
     return dokument
 
 
-@router.post("", response_model=DokumenteOut, status_code=201, summary="Dokument anlegen", dependencies=SCHREIBEN["BELEGE"])
+@router.post("", response_model=DokumenteOut, status_code=201, summary="Dokument anlegen")
 async def create_dokument(
     dokument_data: dict,
     db: Session = Depends(get_db)
@@ -85,7 +84,7 @@ async def create_dokument(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.patch("/{dokument_id}", response_model=DokumenteOut, summary="Dokument aktualisieren", dependencies=SCHREIBEN["BELEGE"])
+@router.patch("/{dokument_id}", response_model=DokumenteOut, summary="Dokument aktualisieren")
 async def update_dokument(
     dokument_id: str,
     dokument_data: dict,
@@ -99,7 +98,7 @@ async def update_dokument(
     return dokument
 
 
-@router.delete("/{dokument_id}", status_code=204, response_class=Response, response_model=None, summary="Dokument löschen", dependencies=SCHREIBEN["BELEGE"])
+@router.delete("/{dokument_id}", status_code=204, response_class=Response, response_model=None, summary="Dokument löschen")
 async def delete_dokument(
     dokument_id: str,
     hard_delete: bool = Query(False, description="Hard delete vs soft delete"),
@@ -133,7 +132,7 @@ async def list_versionen(
     return repo.get_all(dokument_id)
 
 
-@router.post("/{dokument_id}/versionen", response_model=DokumenteOut, status_code=201, summary="Version anlegen", dependencies=SCHREIBEN["BELEGE"])
+@router.post("/{dokument_id}/versionen", response_model=DokumenteOut, status_code=201, summary="Version anlegen")
 async def create_version(
     dokument_id: str,
     version_data: dict,

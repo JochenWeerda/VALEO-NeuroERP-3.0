@@ -22,7 +22,6 @@ from ..schemas.inventory import Warehouse, WarehouseCreate, WarehouseUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.warehouses_schemas import WarehousesOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -96,7 +95,7 @@ async def get_warehouse(
     return Warehouse.model_validate(warehouse)
 
 
-@router.post("/", response_model=Warehouse, status_code=201, summary="Warehouse anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/", response_model=Warehouse, status_code=201, summary="Warehouse anlegen")
 async def create_warehouse(
     payload: WarehouseCreate,
     db: Session = Depends(get_db),
@@ -131,7 +130,7 @@ async def create_warehouse(
     return Warehouse.model_validate(wh)
 
 
-@router.put("/{warehouse_id}", response_model=Warehouse, summary="Warehouse aktualisieren", dependencies=SCHREIBEN["LAGER"])
+@router.put("/{warehouse_id}", response_model=Warehouse, summary="Warehouse aktualisieren")
 async def update_warehouse(
     warehouse_id: str,
     payload: WarehouseUpdate,
@@ -152,7 +151,7 @@ async def update_warehouse(
     return Warehouse.model_validate(wh)
 
 
-@router.delete("/{warehouse_id}", status_code=204, response_class=Response, response_model=None, summary="Warehouse löschen", dependencies=SCHREIBEN["LAGER"])
+@router.delete("/{warehouse_id}", status_code=204, response_class=Response, response_model=None, summary="Warehouse löschen")
 async def delete_warehouse(
     warehouse_id: str,
     db: Session = Depends(get_db),

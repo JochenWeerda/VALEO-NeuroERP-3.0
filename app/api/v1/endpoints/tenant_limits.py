@@ -14,7 +14,6 @@ from app.core.tenant_rate_limits import (
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.tenant_limits_schemas import TenantLimitsOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/process/tenant-limits", tags=["process-kernel", "limits"])
@@ -68,7 +67,7 @@ def list_rate_limits(domain: str = "") -> dict[str, Any]:
     }
 
 
-@router.post("/rate-limits/check", response_model=TenantLimitsOut, summary="Rate limit prüfen", dependencies=SCHREIBEN["BERECHNEN"])
+@router.post("/rate-limits/check", response_model=TenantLimitsOut, summary="Rate limit prüfen")
 def check_rate_limit(body: TenantRateLimitCheckIn) -> dict[str, Any]:
     registry = get_tenant_isolation_registry()
     request = RateLimitRequest(

@@ -23,7 +23,6 @@ from app.core.database import get_db
 from app.core.exceptions import EntityNotFoundError
 from app.core.tenant import get_tenant_id
 from app.services.crm_lead_gen_service import CrmLeadGenService
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/crm/lead-generierung", tags=["crm", "prospecting"])
 
@@ -82,7 +81,7 @@ def leads_count(db: Session = Depends(get_db), tenant_id: str = Depends(get_tena
     return {"count": CrmLeadGenService(db, tenant_id).leads_count()}
 
 
-@router.post("/uebernehmen", response_model=LeadUebernahmeOut, summary="Kandidaten als CRM-Leads übernehmen", dependencies=SCHREIBEN["CRM"])
+@router.post("/uebernehmen", response_model=LeadUebernahmeOut, summary="Kandidaten als CRM-Leads übernehmen")
 def uebernehmen(
     body: UebernehmenBody,
     db: Session = Depends(get_db),
@@ -91,7 +90,7 @@ def uebernehmen(
     return CrmLeadGenService(db, tenant_id).create_leads([k.model_dump() for k in body.kandidaten])
 
 
-@router.post("/leads/{lead_id}/convert", response_model=LeadConvertOut, summary="Lead in Kunden konvertieren", dependencies=SCHREIBEN["CRM"])
+@router.post("/leads/{lead_id}/convert", response_model=LeadConvertOut, summary="Lead in Kunden konvertieren")
 def convert_lead(
     lead_id: str,
     db: Session = Depends(get_db),

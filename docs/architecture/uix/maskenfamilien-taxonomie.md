@@ -29,10 +29,10 @@ Meridian-Regel: Qualität über `ScreenDefinition → RenderPlan → useUniversa
 
 | Metrik | Zahl | Bedeutung für Familien |
 |---|---:|---|
-| Routen gesamt | **941** | Migrationsraum |
-| `runtime_wired` | **61** | bereits Runtime-Pfad (Familie kann hier „andocken“) |
-| `legacy_mask_pattern` (ObjectPage/ListReport) | **~115–122** | oft schon familienfähig, noch nicht Runtime |
-| `hand_built` | **~757–764** | größter Block; nur Clusterweise angehen |
+| Routen gesamt | **941** | Migrationsraum (abgeschlossen Batch 11–15) |
+| `runtime_wired` | **941** | alle Page-Routen Universal-Mask-Runtime-Pfad |
+| `legacy_mask_pattern` (ObjectPage/ListReport) | **0** | Create-only `-legacy.tsx` ausgenommen |
+| `hand_built` | **0** | Rest via NativeList/Detail/Cockpit/Legacy-Split |
 | Seiten TSX | **700** | davon ~54 `*-liste`, ~31 `*-stamm`, ~31 `*-native`, ~19 Dashboard/Cockpit |
 | ScreenDefinition-Builder | **102** | Authoring-Kern; viele Near-Duplicates = Familienkandidaten |
 
@@ -279,7 +279,7 @@ Abhängig von Inventar: Hebel = (Anzahl Children × Dual-Pfad-Schmerz) / Claim-K
 | Cluster | Abhängigkeit Inventar | Abnahmekriterien |
 |---|---|---|
 | **BelegMaskeParent** (bestehender Slice) | ~9 Varianten + ~14 Alt-Einstiege; Teilmenge der 61 runtime_wired | siehe beleg-maskenfamilie-vererbung.md §4.2; ProcessBand≠Ribbon; Studio≠Runtime |
-| **Taxonomie + Handshake** (dieser Slice) | 941/61/~120/~760 als Baseline | Doku + Workboard offen; keine Page-Migration |
+| **Taxonomie + Handshake** (dieser Slice) | 941/941 `runtime_wired` (Batch 11–15 abgeschlossen) | Doku + Workboard; Parent-Familien fuer Listen/Kontrolle/Stamm/Cockpit |
 
 ### P1 — Höchster Hebel nach Beleg
 

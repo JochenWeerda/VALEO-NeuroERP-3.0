@@ -30,7 +30,6 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.services import etikettendruck_service as dienst
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +127,7 @@ async def list_drucker(
         raise dienst.nicht_lesbar(db, fehler, "Drucker", tenant_id) from fehler
 
 
-@router.post("/drucker", status_code=201, response_model=DruckerOut, summary="Drucker anlegen", dependencies=SCHREIBEN["LAGER"])
+@router.post("/drucker", status_code=201, response_model=DruckerOut, summary="Drucker anlegen")
 async def create_drucker(
     payload: DruckerIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -173,7 +172,7 @@ async def list_druckauftraege(
 
 
 @router.post("/druckauftrag", response_model=DruckauftragOut, status_code=201,
-             summary="Druckauftrag anlegen", dependencies=SCHREIBEN["LAGER"])
+             summary="Druckauftrag anlegen")
 async def create_druckauftrag(
     payload: DruckauftragIn,
     nutzer: dict = Depends(get_current_user),
@@ -212,7 +211,7 @@ async def create_druckauftrag(
 
 
 @router.delete("/druckauftrag/{auftrag_id}", response_model=DruckauftragOut,
-               summary="Druckauftrag abbrechen", dependencies=SCHREIBEN["LAGER"])
+               summary="Druckauftrag abbrechen")
 async def cancel_druckauftrag(
     auftrag_id: str,
     grund: str = Body(..., embed=True, min_length=1),

@@ -24,7 +24,6 @@ from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.export_service_schemas import ExportServiceOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -398,7 +397,8 @@ def _filename(entity: str, fmt: str) -> str:
 
 
 @router.post("/list", response_class=StreamingResponse, summary="List exportieren",
-    response_model=ExportServiceOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=ExportServiceOut
+)
 async def export_list(
     body: ExportListRequest,
     tenant_id: str = Depends(get_tenant_id),

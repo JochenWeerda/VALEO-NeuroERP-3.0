@@ -1,0 +1,651 @@
+/**
+ * Innendienst — Kundenschlagkartei
+ *
+ * Zeigt alle Schläge und Maßnahmen eines bestimmten Kunden.
+ * Buttons verdrahtet:
+ *  - Lohnspritz-Auftrag anlegen  → POST /portal/lohndienste (typ=lohn_spritz)
+ *  - Mahl+Misch-Termin anfragen  → POST /portal/lohndienste (typ=mahl_misch)
+ *  - Ankaufsangebot erstellen    → POST /portal/empfehlungen/generieren/schlagkartei
+ */
+
+import { useRef, useState } from 'react'
+import { useNavigate } from '@/app/routing/typed-router'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { NativeSelect } from '@/components/ui/native-select'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
+import { usePortalKonto, type PortalKundenkonto } from '@/lib/portal-konto'
+import { PortalKontoGate, PortalKontoWahl } from '@/components/portal/PortalKontoWahl'
+import { useToast } from '@/hooks/use-toast'
+import { useTouchDevice } from '@/hooks/useTouchDevice'
+import {
+  Map,
+  Droplets,
+  Leaf,
+  FileText,
+  Users,
+  CheckCircle2,
+  Sparkles,
+} from 'lucide-react'
+
+type Schlag = {
+  id: string
+  name: string
+  flik?: string
+  flaeche: number
+  kultur: string
+  vorkultur?: string
+  gemeinde: string
+  status: string
+}
+
+type Massnahme = {
+  id: string
+  datum: string
+  typ: string
+  schlag_name: string
+  mittel?: string
+  menge?: number
+  einheit?: string
+  bemerkung?: string
+}
+
+// Der Kunde kommt aus der Kontowahl (PORTAL-CONTEXT-001): genau eine Zuordnung wird automatisch gewaehlt, bei
+// mehreren wird gewaehlt, der Innendienst waehlt einen Kunden des Mandanten. Ohne Wahl kein Auftrag.
+
+// ─── Lohndienst-Dialog (Lohnspritz + Mahl+Misch) ─────────────────────────────
+
+type LohndienstDialogProps = {
+  open: boolean
+  onClose: () => void
+  typ: 'lohn_spritz' | 'mahl_misch'
+  kundenNr: string
+  schlaege: Schlag[]
+  gesamtFlaeche: number
+  kulturen: string[]
+}
+
+function LohndienstDialog({
+  open, onClose, typ, kundenNr, schlaege, gesamtFlaeche, kulturen,
+}: LohndienstDialogProps) {
+  const { toast } = useToast()
+  const qc = useQueryClient()
+
+  const [schlagId, setSchlagId] = useState<string>('')
+  const [flaeche, setFlaeche] = useState<string>(gesamtFlaeche.toFixed(1))
+  const [wunschDatum, setWunschDatum] = useState<string>('')
+  const [kultur, setKultur] = useState<string>(kulturen[0] ?? '')
+  const [tierart, setTierart] = useState<string>('')
+  const [tiereAnzahl, setTiereAnzahl] = useState<string>('')
+  const [getreideArt, setGetreideArt] = useState<string>(kulturen[0] ?? '')
+  const [mengeDt, setMengeDt] = useState<string>('')
+  const [anmerkung, setAnmerkung] = useState<string>('')
+
+  // Ein Schluessel je Auftrag: ein erneuter Versuch legt keinen zweiten an; neu erst nach Erfolg.
+  const anfrageSchluessel = useRef<string>(crypto.randomUUID())
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const schlagObj = schlaege.find((s) => s.id === schlagId)
+      await apiClient.post('/portal/lohndienste', {
+        typ,
+        schlag_ids: schlagId ? [schlagId] : [],
+        schlag_beschreibung: schlagObj?.name ?? (schlaege.map((s) => s.name).join(', ')),
+        flaeche_ha: flaeche ? parseFloat(flaeche) : null,
+        wunsch_datum: wunschDatum || null,
+        kultur: typ === 'lohn_spritz' ? (kultur || null) : null,
+        tierart: typ === 'mahl_misch' ? (tierart || null) : null,
+        tiere_anzahl: typ === 'mahl_misch' && tiereAnzahl ? parseInt(tiereAnzahl) : null,
+        getreide_art: typ === 'mahl_misch' ? (getreideArt || null) : null,
+        menge_dt: mengeDt ? parseFloat(mengeDt) : null,
+        anmerkung: anmerkung || null,
+      }, { headers: { 'X-Idempotency-Key': anfrageSchluessel.current } })
+    },
+    onSuccess: () => {
+      anfrageSchluessel.current = crypto.randomUUID()
+      toast({
+        title: typ === 'lohn_spritz' ? 'Lohnspritz-Auftrag angelegt' : 'Mahl+Misch-Termin angefragt',
+        description: `Auftrag für Kunde ${kundenNr} wurde erfolgreich übermittelt.`,
+      })
+      qc.invalidateQueries({ queryKey: ['portal-lohndienste'] })
+      onClose()
+    },
+    onError: () => {
+      toast({
+        title: 'Fehler',
+        description: 'Auftrag konnte nicht angelegt werden.',
+        variant: 'destructive',
+      })
+    },
+  })
+
+  const isSpritze = typ === 'lohn_spritz'
+  const titel = isSpritze ? 'Lohnspritz-Auftrag anlegen' : 'Mahl+Misch-Termin anfragen'
+  const beschreibung = isSpritze
+    ? `Pflanzenschutz-Applikation für Kunde ${kundenNr} — aus Schlagkartei vorausgefüllt.`
+    : `Mahl- und Mischwagen (TMR) für Kunde ${kundenNr} — Schrot/Mehl aus eigenem Getreide.`
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose() }}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{titel}</DialogTitle>
+          <DialogDescription>{beschreibung}</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Schlag-Auswahl */}
+          {schlaege.length > 0 && (
+            <div>
+              <Label>Schlag auswählen</Label>
+              <NativeSelect ariaLabel="Schlag auswählen" value={schlagId} onChange={(e) => {
+                setSchlagId(e.target.value)
+                const s = schlaege.find((x) => x.id === e.target.value)
+                if (s) {
+                  setFlaeche(s.flaeche.toFixed(1))
+                  setKultur(s.kultur ?? '')
+                  setGetreideArt(s.kultur ?? '')
+                }
+              }}>
+                <option value="">— Alle Schläge ({gesamtFlaeche.toFixed(1)} ha gesamt) —</option>
+                {schlaege.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} — {s.kultur} ({s.flaeche?.toFixed(1)} ha)
+                  </option>
+                ))}
+              </NativeSelect>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <Label>Fläche (ha)</Label>
+              <Input
+                type="number"
+                step="0.1"
+                value={flaeche}
+                onChange={(e) => setFlaeche(e.target.value)}
+                className="min-h-touch"
+              />
+            </div>
+            <div>
+              <Label>Wunschdatum</Label>
+              <Input
+                type="date"
+                value={wunschDatum}
+                onChange={(e) => setWunschDatum(e.target.value)}
+                className="min-h-touch"
+              />
+            </div>
+          </div>
+
+          {isSpritze && (
+            <div>
+              <Label>Kultur</Label>
+              <NativeSelect ariaLabel="Kultur" value={kultur} onChange={(e) => setKultur(e.target.value)}>
+                {kulturen.map((k) => <option key={k} value={k}>{k}</option>)}
+                <option value="">— Sonstige —</option>
+              </NativeSelect>
+            </div>
+          )}
+
+          {!isSpritze && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Tierart</Label>
+                  <Input
+                    placeholder="z.B. Milchkühe"
+                    value={tierart}
+                    onChange={(e) => setTierart(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label>Anzahl Tiere</Label>
+                  <Input
+                    type="number"
+                    placeholder="z.B. 80"
+                    value={tiereAnzahl}
+                    onChange={(e) => setTiereAnzahl(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Getreide (eigenes)</Label>
+                  <NativeSelect value={getreideArt} onChange={(e) => setGetreideArt(e.target.value)}>
+                    {kulturen.map((k) => <option key={k} value={k}>{k}</option>)}
+                    <option value="">— Sonstige —</option>
+                  </NativeSelect>
+                </div>
+                <div>
+                  <Label>Menge (dt)</Label>
+                  <Input
+                    type="number"
+                    placeholder="z.B. 80"
+                    value={mengeDt}
+                    onChange={(e) => setMengeDt(e.target.value)}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          <div>
+            <Label>Anmerkung für Innendienst</Label>
+            <Textarea
+              rows={2}
+              placeholder="Besonderheiten, Zufahrt, Druckluft-Bedarf..."
+              value={anmerkung}
+              onChange={(e) => setAnmerkung(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" className="min-h-touch touch-manipulation" onClick={onClose} disabled={mutation.isPending}>
+            Abbrechen
+          </Button>
+          <Button
+            className="min-h-touch touch-manipulation"
+            onClick={() => {
+              if (mutation.isPending) return
+              mutation.mutate()
+            }}
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? 'Wird angelegt...' : 'Auftrag anlegen'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ─── Ankaufsangebot-Dialog ────────────────────────────────────────────────────
+
+type AnkaufsangebotDialogProps = {
+  open: boolean
+  onClose: () => void
+  kundenNr: string
+  kulturen: string[]
+  gesamtFlaeche: number
+}
+
+function AnkaufsangebotDialog({
+  open, onClose, kundenNr, kulturen, gesamtFlaeche,
+}: AnkaufsangebotDialogProps) {
+  const { toast } = useToast()
+  const [ernte_jahr, setErnteJahr] = useState<string>(String(new Date().getFullYear()))
+  const [result, setResult] = useState<{ count: number } | null>(null)
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiClient.post<{ count: number }>('/portal/empfehlungen/generieren/schlagkartei', {
+        kunden_nr: kundenNr,
+        kulturen,
+        flaeche_ha: gesamtFlaeche,
+        ernte_jahr: parseInt(ernte_jahr),
+      })
+      return res.data
+    },
+    onSuccess: (data) => {
+      setResult(data)
+      toast({
+        title: 'Ankaufsangebote erstellt',
+        description: `${data.count} Empfehlung${data.count !== 1 ? 'en' : ''} für Kunde ${kundenNr} generiert.`,
+      })
+    },
+    onError: () => {
+      toast({
+        title: 'Fehler',
+        description: 'Ankaufsangebote konnten nicht erstellt werden.',
+        variant: 'destructive',
+      })
+    },
+  })
+
+  const handleClose = () => {
+    setResult(null)
+    onClose()
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) handleClose() }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-status-warning" />
+            Ankaufsangebote erstellen
+          </DialogTitle>
+          <DialogDescription>
+            Generiert personalisierte Ankaufs- und Kontraktangebote für Kunde {kundenNr}
+            basierend auf den angebauten Kulturen — sichtbar beim nächsten Portal-Login.
+          </DialogDescription>
+        </DialogHeader>
+
+        {result ? (
+          <div className="py-4 text-center space-y-3">
+            <CheckCircle2 className="h-12 w-12 text-status-success mx-auto" />
+            <p className="font-semibold text-gray-900">
+              {result.count} Empfehlung{result.count !== 1 ? 'en' : ''} erstellt
+            </p>
+            <p className="text-sm text-gray-500">
+              Der Kunde sieht die Angebote beim nächsten Portal-Besuch im Empfehlungs-Banner.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="rounded-lg bg-gray-50 p-3 space-y-1">
+              <p className="text-sm font-medium text-gray-700">Angebaute Kulturen ({kulturen.length}):</p>
+              <div className="flex flex-wrap gap-1">
+                {kulturen.map((k) => (
+                  <Badge variant="success" key={k}>{k}</Badge>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Gesamtfläche: {gesamtFlaeche.toFixed(1)} ha
+              </p>
+            </div>
+            <div>
+              <Label>Erntejahr</Label>
+              <NativeSelect value={ernte_jahr} onChange={(e) => setErnteJahr(e.target.value)}>
+                {[0, 1, 2].map((offset) => {
+                  const y = new Date().getFullYear() + offset
+                  return <option key={y} value={String(y)}>{y}</option>
+                })}
+              </NativeSelect>
+            </div>
+            <Alert variant="warning">
+              <AlertDescription className="text-status-warning text-sm">
+                Für jede Kultur wird ein Ankaufsangebot + Lohnspritz-Empfehlung generiert.
+                Bereits vorhandene Angebote werden nicht dupliziert.
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
+
+        <DialogFooter>
+          {result ? (
+            <Button onClick={handleClose}>Schließen</Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={handleClose} disabled={mutation.isPending}>
+                Abbrechen
+              </Button>
+              <Button
+                onClick={() => mutation.mutate()}
+                disabled={mutation.isPending || kulturen.length === 0}
+              >
+                {mutation.isPending ? 'Erstelle...' : 'Angebote generieren'}
+              </Button>
+            </>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ─── Hauptseite ───────────────────────────────────────────────────────────────
+
+export default function KundenSchlagkarteiPage() {
+  const konto = usePortalKonto((state) => state.aktiv)
+  return (
+    <div className="mx-auto max-w-5xl p-3 md:p-6">
+      <PortalKontoGate intern>{konto && <SchlagkarteiFuerKunde kunde={konto} />}</PortalKontoGate>
+    </div>
+  )
+}
+
+function SchlagkarteiFuerKunde({ kunde }: { kunde: PortalKundenkonto }) {
+  const navigate = useNavigate()
+  const isTouch = useTouchDevice()
+  const kundenId = kunde.customer_id
+  const kundenNr = kunde.customer_number ?? kunde.customer_id
+  const [massnahmeTypFilter, setMassnahmeTypFilter] = useState<string>('')
+  const [dialog, setDialog] = useState<'lohn_spritz' | 'mahl_misch' | 'ankauf' | null>(null)
+
+  const { data: schlaege, isLoading: loadingS } = useQuery<{ schlaege: Schlag[]; count: number }>({
+    queryKey: ['innendienst-schlaege', kundenId],
+    queryFn: async () => {
+      const res = await apiClient.get<{ schlaege: Schlag[]; count: number }>(
+        `/innendienst/kunden/${encodeURIComponent(kundenId)}/schlaege`,
+      )
+      return res.data
+    },
+  })
+
+  const { data: massnahmen, isLoading: loadingM } = useQuery<{ massnahmen: Massnahme[]; count: number }>({
+    queryKey: ['innendienst-massnahmen', kundenId, massnahmeTypFilter],
+    queryFn: async () => {
+      const params = massnahmeTypFilter ? `?massnahme_typ=${massnahmeTypFilter}` : ''
+      const res = await apiClient.get<{ massnahmen: Massnahme[]; count: number }>(
+        `/innendienst/kunden/${encodeURIComponent(kundenId)}/massnahmen${params}`,
+      )
+      return res.data
+    },
+  })
+
+  const alleSchlaege = schlaege?.schlaege ?? []
+  const gesamtFlaeche = alleSchlaege.reduce((s, x) => s + (x.flaeche ?? 0), 0)
+  const kulturen = [...new Set(alleSchlaege.map((s) => s.kultur).filter(Boolean))]
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+        <Button variant="outline" className="min-h-touch touch-manipulation" onClick={() => navigate(-1)}>
+          Zurück
+        </Button>
+        <div>
+          <h1 className="flex items-center gap-2 text-2xl font-bold">
+            <Map className="h-6 w-6 text-status-success" />
+            Schlagkartei — Kunde {kundenNr}
+          </h1>
+          <p className="text-sm text-muted-foreground">Lohnspritz, Mahl+Misch und Ankauf vorbereiten</p>
+        </div>
+        <div className="sm:ml-auto">
+          <PortalKontoWahl />
+        </div>
+      </div>
+
+      {/* KPI-Leiste */}
+      {!isTouch ? (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Card>
+          <CardContent className="pt-4 text-center">
+            <div className="text-3xl font-bold text-status-success">{schlaege?.count ?? '—'}</div>
+            <div className="text-sm text-muted-foreground">Schläge</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4 text-center">
+            <div className="text-3xl font-bold">{gesamtFlaeche.toFixed(1)} ha</div>
+            <div className="text-sm text-muted-foreground">Gesamtfläche</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4 text-center">
+            <div className="text-3xl font-bold text-status-warning">{kulturen.length}</div>
+            <div className="text-sm text-muted-foreground">Kulturen</div>
+          </CardContent>
+        </Card>
+      </div>
+      ) : null}
+
+      {kulturen.length > 0 && (
+        <div className="flex gap-2 flex-wrap">
+          <span className="self-center text-sm text-muted-foreground">Angebaute Kulturen:</span>
+          {kulturen.map((k) => (
+            <Badge variant="success" key={k}>{k}</Badge>
+          ))}
+        </div>
+      )}
+
+      {/* Lohndienst-Schnellaktionen — jetzt verdrahtet */}
+      <Card className="border-status-warning/40 bg-status-warning/10">
+        <CardContent className="pt-4">
+          <div className="mb-3 flex items-center gap-2">
+            <Users className="h-5 w-5 text-status-warning" />
+            <span className="font-medium text-status-warning">Auftrag direkt aus der Schlagkartei anlegen</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              className="min-h-touch touch-manipulation"
+              disabled={alleSchlaege.length === 0}
+              onClick={() => setDialog('lohn_spritz')}
+            >
+              <Droplets className="mr-1 h-4 w-4" />
+              Lohnspritz-Auftrag anlegen
+            </Button>
+            <Button
+              variant="outline"
+              className="min-h-touch touch-manipulation"
+              disabled={alleSchlaege.length === 0}
+              onClick={() => setDialog('mahl_misch')}
+            >
+              <Leaf className="mr-1 h-4 w-4" />
+              Mahl+Misch-Termin anfragen
+            </Button>
+            <Button
+              variant="outline"
+              className="min-h-touch touch-manipulation"
+              disabled={kulturen.length === 0}
+              onClick={() => setDialog('ankauf')}
+            >
+              <FileText className="mr-1 h-4 w-4" />
+              Ankaufsangebot erstellen
+            </Button>
+          </div>
+          {alleSchlaege.length === 0 && !loadingS && (
+            <p className="text-xs text-status-warning mt-2">
+              Buttons aktiv sobald Schläge geladen sind.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Tabs: Schläge / Maßnahmen */}
+      <Tabs defaultValue="schlaege">
+        <TabsList className="h-auto min-h-11 w-full flex-wrap justify-start">
+          <TabsTrigger value="schlaege" className="min-h-11">Schläge ({schlaege?.count ?? 0})</TabsTrigger>
+          <TabsTrigger value="massnahmen" className="min-h-11">Maßnahmen ({massnahmen?.count ?? 0})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="schlaege" className="mt-4">
+          {loadingS ? (
+            <div className="space-y-2">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-14" />)}</div>
+          ) : alleSchlaege.length === 0 ? (
+            <Alert><AlertDescription>Keine Schläge für diesen Kunden erfasst.</AlertDescription></Alert>
+          ) : (
+            <div className="rounded-lg border overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-muted">
+                  <tr>
+                    {['Name', 'Fläche (ha)', 'Kultur', 'Vorkultur', 'Gemeinde', 'Status', ''].map((h) => (
+                      <th key={h} className="px-3 py-2 text-left font-medium text-muted-foreground">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {alleSchlaege.map((s) => (
+                    <tr key={s.id} className="border-t">
+                      <td className="px-3 py-2 font-medium">{s.name}</td>
+                      <td className="px-3 py-2">{s.flaeche?.toFixed(2)}</td>
+                      <td className="px-3 py-2">{s.kultur}</td>
+                      <td className="px-3 py-2 text-muted-foreground">{s.vorkultur ?? '—'}</td>
+                      <td className="px-3 py-2">{s.gemeinde}</td>
+                      <td className="px-3 py-2">
+                        <Badge variant="outline">{s.status}</Badge>
+                      </td>
+                      <td className="px-3 py-2">
+                        <Button
+                          variant="outline"
+                          className="min-h-touch touch-manipulation"
+                          onClick={() => setDialog('lohn_spritz')}
+                        >
+                          Lohnspritz
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="massnahmen" className="mt-4">
+          {loadingM ? (
+            <div className="space-y-2">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-14" />)}</div>
+          ) : (massnahmen?.massnahmen ?? []).length === 0 ? (
+            <Alert><AlertDescription>Keine Maßnahmen für diesen Kunden erfasst.</AlertDescription></Alert>
+          ) : (
+            <div className="rounded-lg border overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-muted">
+                  <tr>
+                    {['Datum', 'Typ', 'Schlag', 'Mittel', 'Menge', 'Bemerkung'].map((h) => (
+                      <th key={h} className="px-3 py-2 text-left font-medium text-muted-foreground">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(massnahmen?.massnahmen ?? []).map((m) => (
+                    <tr key={m.id} className="border-t">
+                      <td className="px-3 py-2">{m.datum}</td>
+                      <td className="px-3 py-2"><Badge variant="outline">{m.typ}</Badge></td>
+                      <td className="px-3 py-2">{m.schlag_name}</td>
+                      <td className="px-3 py-2">{m.mittel ?? '—'}</td>
+                      <td className="px-3 py-2">{m.menge ? `${m.menge} ${m.einheit ?? ''}` : '—'}</td>
+                      <td className="px-3 py-2 text-muted-foreground">{m.bemerkung ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {/* Dialoge */}
+      {(dialog === 'lohn_spritz' || dialog === 'mahl_misch') && (
+        <LohndienstDialog
+          open
+          onClose={() => setDialog(null)}
+          typ={dialog}
+          kundenNr={kundenNr}
+          schlaege={alleSchlaege}
+          gesamtFlaeche={gesamtFlaeche}
+          kulturen={kulturen}
+        />
+      )}
+      {dialog === 'ankauf' && (
+        <AnkaufsangebotDialog
+          open
+          onClose={() => setDialog(null)}
+          kundenNr={kundenNr}
+          kulturen={kulturen}
+          gesamtFlaeche={gesamtFlaeche}
+        />
+      )}
+    </div>
+  )
+}

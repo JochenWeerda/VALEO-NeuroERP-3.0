@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.core.kontroll_worklist_legacy_payloads import KONTROLL_WORKLIST_LEGACY_PAYLOADS
-from app.core.screen_definitions_kontrolle_batch12 import BATCH12_BUILDERS
+from app.core.screen_definitions_kontrolle_batch12 import BATCH12_BUILDERS, BATCH12_KONTROLL_TEST_IDS
 from app.core.kontroll_worklist_parent import (
     build_document_control_variant,
     build_document_control_worklist,
@@ -608,7 +608,18 @@ KONTROLLE_SCREEN_BUILDERS: dict[str, Any] = {
     **BATCH12_BUILDERS,
 }
 
-KONTROLL_WORKLIST_SCREEN_IDS: tuple[str, ...] = tuple(sorted(KONTROLLE_SCREEN_BUILDERS))
+KONTROLL_WORKLIST_SCREEN_IDS: tuple[str, ...] = (
+    "auswertungen/beleg-kontrolle",
+    "auswertungen/auftrags-kontrolle",
+    "auswertungen/lieferschein-kontrolle",
+    "abrechnung/eb-lieferschein-kontrolle",
+    "auswertungen/sanktionspruefung-personal",
+    "auswertungen/sanktionspruefung-kunden",
+    SCREEN_ID,
+    *tuple(sorted(KONTROLL_WORKLIST_LEGACY_PAYLOADS)),
+    *BATCH8_KONTROLL_SCREEN_IDS,
+    *BATCH12_KONTROLL_TEST_IDS,
+)
 
 KONTROLLE_SYNONYME = {
     SCREEN_ID: [

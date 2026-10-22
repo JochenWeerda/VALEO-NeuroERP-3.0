@@ -23,8 +23,7 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 > **Nachtrag 2026-10-22 (Batches 11–15, abgeschlossen):** Maskenfamilien-Migration auf Universal-Mask-Runtime
 > fuer alle **941** Page-Routen (`runtime_wired` 941, `legacy_mask_pattern` 0, `hand_built` 0).
 > Registry: Batch-11-Listen, Batch-12-Kontrolle, Batch-13-Stamm, Batch-14-Cockpit, Batch-15-Domain.
-> Made-by-Studio **749** ScreenDefinitions (A=744, B=749, C=718, E=674, Draft-clean=749) —
-> Gate-E-Nachzug fuer neu registrierte IDs in Folge-Slices. pytest Parent/Gates **701/701**.
+> Made-by-Studio **749/749** ScreenDefinitions (Gates A/B/C/E + Draft-clean). pytest Parent/Gates **701/701**.
 
 > **Nachtrag 2026-10-22 (Batch 6 — `legacy_mask_pattern` 0):** Massenmigration der
 > Produktiv-Routen auf `NativeListPage` / `UniversalNativeDetailPage` /

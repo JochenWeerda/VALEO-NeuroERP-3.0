@@ -16,7 +16,6 @@ from app.services.controlling_service import ControllingService, ControllingSche
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class ControllingOut(BaseSchema):
@@ -47,7 +46,7 @@ def list_kpis(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get
     return _svc(db, tenant_id).list_kpis()
 
 
-@router.post("/kpis", response_model=ControllingOut, status_code=201, summary="Kpi anlegen", dependencies=SCHREIBEN["CONTROLLING"])
+@router.post("/kpis", response_model=ControllingOut, status_code=201, summary="Kpi anlegen")
 async def create_kpi(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     if not d.get("kpi_code") or not d.get("name"):
@@ -60,7 +59,7 @@ async def create_kpi(payload: Payload, tenant_id: str = Depends(get_tenant_id), 
         raise HTTPException(status_code=409, detail=exc.detail)
 
 
-@router.put("/kpis/{item_id}", response_model=ControllingOut, summary="Kpi aktualisieren", dependencies=SCHREIBEN["CONTROLLING"])
+@router.put("/kpis/{item_id}", response_model=ControllingOut, summary="Kpi aktualisieren")
 async def update_kpi(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     if not d.get("kpi_code") or not d.get("name"):
@@ -73,7 +72,7 @@ async def update_kpi(item_id: str, payload: Payload, tenant_id: str = Depends(ge
         raise HTTPException(status_code=404, detail="KPI not found")
 
 
-@router.delete("/kpis/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Kpi löschen", dependencies=SCHREIBEN["CONTROLLING"])
+@router.delete("/kpis/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Kpi löschen")
 async def delete_kpi(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         _svc(db, tenant_id).delete_kpi(item_id)
@@ -91,7 +90,7 @@ def list_dashboards(tenant_id: str = Depends(get_tenant_id), db: Session = Depen
     return _svc(db, tenant_id).list_dashboards()
 
 
-@router.post("/dashboards", response_model=ControllingOut, status_code=201, summary="Dashboard anlegen", dependencies=SCHREIBEN["CONTROLLING"])
+@router.post("/dashboards", response_model=ControllingOut, status_code=201, summary="Dashboard anlegen")
 async def create_dashboard(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     if not d.get("dashboard_code") or not d.get("name"):
@@ -104,7 +103,7 @@ async def create_dashboard(payload: Payload, tenant_id: str = Depends(get_tenant
         raise HTTPException(status_code=409, detail=exc.detail)
 
 
-@router.put("/dashboards/{item_id}", response_model=ControllingOut, summary="Dashboard aktualisieren", dependencies=SCHREIBEN["CONTROLLING"])
+@router.put("/dashboards/{item_id}", response_model=ControllingOut, summary="Dashboard aktualisieren")
 async def update_dashboard(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     if not d.get("dashboard_code") or not d.get("name"):
@@ -117,7 +116,7 @@ async def update_dashboard(item_id: str, payload: Payload, tenant_id: str = Depe
         raise HTTPException(status_code=404, detail="Dashboard not found")
 
 
-@router.delete("/dashboards/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Dashboard löschen", dependencies=SCHREIBEN["CONTROLLING"])
+@router.delete("/dashboards/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Dashboard löschen")
 async def delete_dashboard(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         _svc(db, tenant_id).delete_dashboard(item_id)
@@ -134,7 +133,7 @@ async def list_widgets(dashboard_id: str, tenant_id: str = Depends(get_tenant_id
     return _svc(db, tenant_id).list_widgets(dashboard_id)
 
 
-@router.post("/dashboards/{dashboard_id}/widgets", response_model=ControllingOut, status_code=201, summary="Widget anlegen", dependencies=SCHREIBEN["CONTROLLING"])
+@router.post("/dashboards/{dashboard_id}/widgets", response_model=ControllingOut, status_code=201, summary="Widget anlegen")
 async def create_widget(dashboard_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     if not d.get("widget_type") or not d.get("title"):
@@ -145,7 +144,7 @@ async def create_widget(dashboard_id: str, payload: Payload, tenant_id: str = De
         raise _schema_error()
 
 
-@router.put("/widgets/{item_id}", response_model=ControllingOut, summary="Widget aktualisieren", dependencies=SCHREIBEN["CONTROLLING"])
+@router.put("/widgets/{item_id}", response_model=ControllingOut, summary="Widget aktualisieren")
 async def update_widget(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     if not d.get("widget_type") or not d.get("title"):
@@ -158,7 +157,7 @@ async def update_widget(item_id: str, payload: Payload, tenant_id: str = Depends
         raise HTTPException(status_code=404, detail="Widget not found")
 
 
-@router.delete("/widgets/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Widget löschen", dependencies=SCHREIBEN["CONTROLLING"])
+@router.delete("/widgets/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Widget löschen")
 async def delete_widget(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         _svc(db, tenant_id).delete_widget(item_id)
@@ -176,7 +175,7 @@ def list_timeseries(kpi_id: Optional[str] = Query(default=None), tenant_id: str 
     return _svc(db, tenant_id).list_timeseries(kpi_id)
 
 
-@router.post("/timeseries", response_model=ControllingOut, status_code=201, summary="Timeseries anlegen", dependencies=SCHREIBEN["CONTROLLING"])
+@router.post("/timeseries", response_model=ControllingOut, status_code=201, summary="Timeseries anlegen")
 async def create_timeseries(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     for k in ("kpi_id", "period_start", "period_end", "value"):
@@ -188,7 +187,7 @@ async def create_timeseries(payload: Payload, tenant_id: str = Depends(get_tenan
         raise _schema_error()
 
 
-@router.delete("/timeseries/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Timeseries löschen", dependencies=SCHREIBEN["CONTROLLING"])
+@router.delete("/timeseries/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Timeseries löschen")
 async def delete_timeseries(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         _svc(db, tenant_id).delete_timeseries(item_id)
@@ -206,7 +205,7 @@ def list_actions(status: Optional[str] = Query(default=None), tenant_id: str = D
     return _svc(db, tenant_id).list_actions(status)
 
 
-@router.post("/actions", response_model=ControllingOut, status_code=201, summary="Action anlegen", dependencies=SCHREIBEN["CONTROLLING"])
+@router.post("/actions", response_model=ControllingOut, status_code=201, summary="Action anlegen")
 async def create_action(payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     if not d.get("title"):
@@ -217,7 +216,7 @@ async def create_action(payload: Payload, tenant_id: str = Depends(get_tenant_id
         raise _schema_error()
 
 
-@router.put("/actions/{item_id}", response_model=ControllingOut, summary="Action aktualisieren", dependencies=SCHREIBEN["CONTROLLING"])
+@router.put("/actions/{item_id}", response_model=ControllingOut, summary="Action aktualisieren")
 async def update_action(item_id: str, payload: Payload, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     d = payload.data
     if not d.get("title"):
@@ -230,7 +229,7 @@ async def update_action(item_id: str, payload: Payload, tenant_id: str = Depends
         raise HTTPException(status_code=404, detail="Action not found")
 
 
-@router.delete("/actions/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Action löschen", dependencies=SCHREIBEN["CONTROLLING"])
+@router.delete("/actions/{item_id}", status_code=204, response_class=Response, response_model=None, summary="Action löschen")
 async def delete_action(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     try:
         _svc(db, tenant_id).delete_action(item_id)

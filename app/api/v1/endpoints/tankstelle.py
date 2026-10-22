@@ -13,7 +13,6 @@ from app.domains.operations.models import Zapfung, TankBestand
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.tankstelle_schemas import TankstelleOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/tankstelle", tags=["Tankstelle"])
@@ -80,7 +79,8 @@ def get_zapfung(zapfung_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/zapfungen", status_code=201, summary="Zapfung anlegen",
-    response_model=TankstelleOut, dependencies=SCHREIBEN["LOGISTIK"])
+    response_model=TankstelleOut
+)
 def create_zapfung(payload: ZapfungPayload, db: Session = Depends(get_db)):
     obj = Zapfung(**payload.model_dump())
     db.add(obj)
@@ -93,7 +93,7 @@ def create_zapfung(payload: ZapfungPayload, db: Session = Depends(get_db)):
     return _to_dict(obj)
 
 
-@router.delete("/zapfungen/{zapfung_id}", status_code=204, response_class=Response, response_model=None, summary="Zapfung löschen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.delete("/zapfungen/{zapfung_id}", status_code=204, response_class=Response, response_model=None, summary="Zapfung löschen")
 def delete_zapfung(zapfung_id: str, db: Session = Depends(get_db)):
     obj = db.query(Zapfung).filter(Zapfung.id == zapfung_id).first()
     if not obj:
@@ -118,7 +118,8 @@ def list_bestand(db: Session = Depends(get_db)):
 
 
 @router.patch("/bestand/{artikel}", summary="Bestand aktualisieren",
-    response_model=TankstelleOut, dependencies=SCHREIBEN["LOGISTIK"])
+    response_model=TankstelleOut
+)
 def update_bestand(artikel: str, payload: TankBestandPatch, db: Session = Depends(get_db)):
     obj = db.query(TankBestand).filter(TankBestand.artikel == artikel).first()
     if not obj:

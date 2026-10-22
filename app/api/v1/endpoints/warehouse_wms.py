@@ -1,7 +1,7 @@
 from __future__ import annotations
 from decimal import Decimal
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -11,8 +11,6 @@ from app.services.warehouse_service import WarehouseService
 
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
-from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 
 class WarehouseWmsOut(BaseSchema):
@@ -90,6 +88,7 @@ class PickListIn(BaseModel):
     source_doc_ref: Optional[str] = None
     source_doc_type: str = "MANUAL"
     strategy: str = "FEFO"
+    created_by: Optional[str] = None
 
 
 class PickConfirmLine(BaseModel):
@@ -123,7 +122,8 @@ def list_zones(
 
 
 @router.post("/zones", status_code=status.HTTP_201_CREATED, summary="Zone anlegen",
-    response_model=WarehouseWmsOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=WarehouseWmsOut
+)
 def create_zone(
     warehouse_id: str = Query(...),
     payload: ZoneIn = ...,
@@ -145,7 +145,8 @@ def list_aisles(
 
 
 @router.post("/aisles", status_code=status.HTTP_201_CREATED, summary="Gang in Zone anlegen",
-    response_model=WarehouseWmsOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=WarehouseWmsOut
+)
 def create_aisle(
     zone_id: str = Query(...),
     payload: AisleIn = ...,
@@ -173,7 +174,8 @@ def list_bins(
 
 
 @router.post("/bins", status_code=status.HTTP_201_CREATED, summary="Bin anlegen",
-    response_model=WarehouseWmsOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=WarehouseWmsOut
+)
 def create_bin(
     zone_id: str = Query(...),
     warehouse_id: str = Query(...),
@@ -197,7 +199,8 @@ def get_bin_detail(bin_id: str, svc: WarehouseService = Depends(_svc)):
 
 
 @router.patch("/bins/{bin_id}", summary="Bin aktualisieren",
-    response_model=WarehouseWmsOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=WarehouseWmsOut
+)
 def patch_bin(
     bin_id: str,
     payload: BinPatch = ...,
@@ -222,7 +225,8 @@ def get_bin_stock(bin_id: str, svc: WarehouseService = Depends(_svc)):
 @router.patch(
     "/bins/{bin_id}/stock-lines/{stock_line_id}",
     response_model=WarehouseWmsOut,
-    summary="Bestandszeile (bin_stock) absolute Menge setzen", dependencies=SCHREIBEN["LAGER"])
+    summary="Bestandszeile (bin_stock) absolute Menge setzen",
+)
 def patch_bin_stock_line(
     bin_id: str,
     stock_line_id: str,
@@ -241,7 +245,8 @@ def patch_bin_stock_line(
 # ── Stock Movements ────────────────────────────────────────────────────────
 
 @router.post("/stock-movements", status_code=status.HTTP_201_CREATED, summary="Stock movement book",
-    response_model=WarehouseWmsOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=WarehouseWmsOut
+)
 def book_stock_movement(payload: StockMovementIn, svc: WarehouseService = Depends(_svc)):
     from datetime import date as date_type
     bbd = date_type.fromisoformat(payload.best_before_date) if payload.best_before_date else None
@@ -262,7 +267,8 @@ def book_stock_movement(payload: StockMovementIn, svc: WarehouseService = Depend
 
 
 @router.post("/stock-movements/fefo-suggestion", summary="Suggestion fefo",
-    response_model=WarehouseWmsOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=WarehouseWmsOut
+)
 def fefo_suggestion(payload: FefoSuggestionIn, svc: WarehouseService = Depends(_svc)):
     result = svc.fefo_pick_suggestion(payload.warehouse_id, payload.article_id, payload.quantity_needed)
     total_available = sum(r["pick_kg"] for r in result)
@@ -277,8 +283,9 @@ def fefo_suggestion(payload: FefoSuggestionIn, svc: WarehouseService = Depends(_
 # ── Pick Lists ─────────────────────────────────────────────────────────────
 
 @router.post("/pick-lists", status_code=status.HTTP_201_CREATED, summary="Pick list anlegen",
-    response_model=WarehouseWmsOut, dependencies=SCHREIBEN["LAGER"])
-def create_pick_list(payload: PickListIn, request: Request, svc: WarehouseService = Depends(_svc)):
+    response_model=WarehouseWmsOut
+)
+def create_pick_list(payload: PickListIn, svc: WarehouseService = Depends(_svc)):
     items = [item.model_dump() for item in payload.items]
     return svc.create_pick_list(
         warehouse_id=payload.warehouse_id,
@@ -286,7 +293,7 @@ def create_pick_list(payload: PickListIn, request: Request, svc: WarehouseServic
         source_doc_ref=payload.source_doc_ref,
         source_doc_type=payload.source_doc_type,
         strategy=payload.strategy,
-        created_by=gepruefter_akteur_aus_request(request),
+        created_by=payload.created_by,
     )
 
 
@@ -336,17 +343,18 @@ def get_pick_list(pick_list_id: str, svc: WarehouseService = Depends(_svc)):
 class PickListFromDeliveryNoteIn(BaseModel):
     warehouse_id: Optional[str] = None
     strategy: str = "FEFO"
+    created_by: Optional[str] = None
 
 
 @router.post(
     "/pick-lists/from-delivery-note/{ls_id}",
     status_code=status.HTTP_201_CREATED,
     response_model=WarehouseWmsOut,
-    summary="Kommissionierliste aus Lieferschein (WMS-PICK-LINK-001)", dependencies=SCHREIBEN["LAGER"])
+    summary="Kommissionierliste aus Lieferschein (WMS-PICK-LINK-001)",
+)
 def create_pick_list_from_delivery_note(
     ls_id: str,
     payload: PickListFromDeliveryNoteIn,
-    request: Request,
     svc: WarehouseService = Depends(_svc),
 ):
     """Erstellt eine WMS-Kommissionierliste (Pick-Liste) aus einem gebuchten Lieferschein.
@@ -360,14 +368,15 @@ def create_pick_list_from_delivery_note(
             ls_id=ls_id,
             warehouse_id=payload.warehouse_id,
             strategy=payload.strategy,
-            created_by=gepruefter_akteur_aus_request(request),
+            created_by=payload.created_by,
         )
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
 
 @router.post("/pick-lists/{pick_list_id}/confirm", summary="Pick list bestätigen",
-    response_model=WarehouseWmsOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=WarehouseWmsOut
+)
 def confirm_pick_list(
     pick_list_id: str,
     payload: PickConfirmIn,
@@ -382,7 +391,8 @@ def confirm_pick_list(
 # ── Transfers ──────────────────────────────────────────────────────────────
 
 @router.post("/bin-transfers", status_code=status.HTTP_201_CREATED, summary="Transfer bin",
-    response_model=WarehouseWmsOut, dependencies=SCHREIBEN["LAGER"])
+    response_model=WarehouseWmsOut
+)
 def bin_transfer(payload: BinTransferIn, svc: WarehouseService = Depends(_svc)):
     from datetime import date as date_type
     bbd = date_type.fromisoformat(payload.best_before_date) if payload.best_before_date else None
@@ -434,7 +444,7 @@ class PutawayRequest(BaseModel):
     strategy: str = "CAPACITY"
 
 
-@router.post("/warehouses/{warehouse_id}/suggest-putaway", response_model=TypedObjectOut, summary="Einlagerungsvorschlag (Putaway)", dependencies=SCHREIBEN["LAGER"])
+@router.post("/warehouses/{warehouse_id}/suggest-putaway", response_model=TypedObjectOut, summary="Einlagerungsvorschlag (Putaway)")
 def suggest_putaway(
     warehouse_id: str,
     payload: PutawayRequest,

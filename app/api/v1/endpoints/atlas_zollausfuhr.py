@@ -16,7 +16,6 @@ from app.services.atlas_customs_service import ATLASCustomsService
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.atlas_zollausfuhr_schemas import AtlasZollausfuhrOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/zoll", tags=["zoll", "atlas", "customs"])
@@ -120,7 +119,7 @@ def list_anmeldungen(
         return list(_store.values())
 
 
-@router.post("/ausfuhranmeldungen", response_model=ZollausfuhrAnmeldungOut, status_code=201, summary="Anmeldung anlegen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.post("/ausfuhranmeldungen", response_model=ZollausfuhrAnmeldungOut, status_code=201, summary="Anmeldung anlegen")
 def create_anmeldung(
     payload: ZollausfuhrAnmeldungCreate,
     db: Session = Depends(get_db),
@@ -192,7 +191,7 @@ def get_anmeldung(
     raise HTTPException(status_code=404, detail="Anmeldung nicht gefunden")
 
 
-@router.put("/ausfuhranmeldungen/{id}", response_model=ZollausfuhrAnmeldungOut, summary="Anmeldung aktualisieren", dependencies=SCHREIBEN["LOGISTIK"])
+@router.put("/ausfuhranmeldungen/{id}", response_model=ZollausfuhrAnmeldungOut, summary="Anmeldung aktualisieren")
 def update_anmeldung(
     id: str,
     payload: ZollausfuhrAnmeldungCreate,
@@ -231,7 +230,7 @@ def update_anmeldung(
     return get_anmeldung(id, db, tenant_id)
 
 
-@router.delete("/ausfuhranmeldungen/{id}", status_code=204, response_class=Response, response_model=None, summary="Anmeldung löschen", dependencies=SCHREIBEN["LOGISTIK"])
+@router.delete("/ausfuhranmeldungen/{id}", status_code=204, response_class=Response, response_model=None, summary="Anmeldung löschen")
 def delete_anmeldung(
     id: str,
     db: Session = Depends(get_db),
@@ -255,7 +254,8 @@ def delete_anmeldung(
 
 
 @router.post("/ausfuhranmeldungen/{id}/uebermitteln", summary="Uebermitteln",
-    response_model=None, dependencies=SCHREIBEN["LOGISTIK"])
+    response_model=None
+)
 def uebermitteln(
     id: str,
     db: Session = Depends(get_db),
@@ -269,9 +269,6 @@ def uebermitteln(
         return svc.submit_to_atlas(anmeldung_id=id, db=db)
     except Exception as exc:
         from app.core.exceptions import EntityNotFoundError, ValidationFailedError
-        from app.services.atlas_customs_service import AtlasNichtEingerichtet
-        if isinstance(exc, AtlasNichtEingerichtet):
-            raise HTTPException(status_code=503, detail=str(exc))
         if isinstance(exc, EntityNotFoundError):
             raise HTTPException(status_code=404, detail=str(exc))
         if isinstance(exc, ValidationFailedError):
@@ -280,7 +277,8 @@ def uebermitteln(
 
 
 @router.post("/ausfuhranmeldungen/{id}/vorab-validieren", summary="Validieren vorab",
-    response_model=AtlasZollausfuhrOut, dependencies=SCHREIBEN["LOGISTIK"])
+    response_model=AtlasZollausfuhrOut
+)
 def vorab_validieren(
     id: str,
     db: Session = Depends(get_db),
@@ -304,18 +302,14 @@ def ausfuhrnachricht(
     tenant_id: str = Depends(get_tenant_id),
 ):
     """Ruft Ausfuhrnachricht (IE529/IE518) für eine MRN ab."""
-    from app.services.atlas_customs_service import AtlasNichtEingerichtet
-
     svc = ATLASCustomsService(db=db, tenant_id=tenant_id)
     svc._fallback_store = _store  # type: ignore[attr-defined]
-    try:
-        return svc.get_ausfuhrnachricht(mrn=mrn, db=db)
-    except AtlasNichtEingerichtet as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return svc.get_ausfuhrnachricht(mrn=mrn, db=db)
 
 
 @router.post("/atlas-callback", summary="Callback atlas",
-    response_model=AtlasZollausfuhrOut, dependencies=SCHREIBEN["GERAET"])
+    response_model=AtlasZollausfuhrOut
+)
 def atlas_callback(
     body: ZollausfuhrStatusUpdate,
     db: Session = Depends(get_db),

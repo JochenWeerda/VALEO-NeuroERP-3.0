@@ -24,7 +24,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/stammdaten/warengruppen",
@@ -96,7 +95,7 @@ def list_hauptwarengruppen(
     return [HauptwarengruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/haupt", response_model=HauptwarengruppeOut, status_code=201, summary="Hauptwarengruppe anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.post("/haupt", response_model=HauptwarengruppeOut, status_code=201, summary="Hauptwarengruppe anlegen")
 def create_hauptwarengruppe(
     payload: HauptwarengruppeCreate,
     db=Depends(get_db),
@@ -119,7 +118,7 @@ def create_hauptwarengruppe(
     return HauptwarengruppeOut(**dict(row._mapping))
 
 
-@router.put("/haupt/{gruppe_nr}", response_model=HauptwarengruppeOut, summary="Hauptwarengruppe aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.put("/haupt/{gruppe_nr}", response_model=HauptwarengruppeOut, summary="Hauptwarengruppe aktualisieren")
 def update_hauptwarengruppe(
     gruppe_nr: str,
     payload: HauptwarengruppeCreate,
@@ -140,7 +139,8 @@ def update_hauptwarengruppe(
 
 
 @router.delete("/haupt/{gruppe_nr}", summary="Hauptwarengruppe löschen",
-    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
+    response_model=None
+)
 def delete_hauptwarengruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -172,7 +172,7 @@ def list_oberwarengruppen(
     return [OberwarengruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/ober", response_model=OberwarengruppeOut, status_code=201, summary="Oberwarengruppe anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.post("/ober", response_model=OberwarengruppeOut, status_code=201, summary="Oberwarengruppe anlegen")
 def create_oberwarengruppe(
     payload: OberwarengruppeCreate,
     db=Depends(get_db),
@@ -201,7 +201,7 @@ def create_oberwarengruppe(
     return OberwarengruppeOut(**dict(row._mapping))
 
 
-@router.put("/ober/{gruppe_nr}", response_model=OberwarengruppeOut, summary="Oberwarengruppe aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.put("/ober/{gruppe_nr}", response_model=OberwarengruppeOut, summary="Oberwarengruppe aktualisieren")
 def update_oberwarengruppe(
     gruppe_nr: str,
     payload: OberwarengruppeCreate,
@@ -222,7 +222,8 @@ def update_oberwarengruppe(
 
 
 @router.delete("/ober/{gruppe_nr}", summary="Oberwarengruppe löschen",
-    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
+    response_model=None
+)
 def delete_oberwarengruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -254,7 +255,7 @@ def list_warengruppen(
     return [WarengruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=WarengruppeOut, status_code=201, summary="Warengruppe anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.post("", response_model=WarengruppeOut, status_code=201, summary="Warengruppe anlegen")
 def create_warengruppe(
     payload: WarengruppeCreate,
     db=Depends(get_db),
@@ -283,18 +284,13 @@ def create_warengruppe(
     return WarengruppeOut(**dict(row._mapping))
 
 
-@router.put("/{gruppe_nr}", response_model=WarengruppeOut, summary="Warengruppe aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.put("/{gruppe_nr}", response_model=WarengruppeOut, summary="Warengruppe aktualisieren")
 def update_warengruppe(
     gruppe_nr: str,
     payload: WarengruppeCreate,
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    # Die Oberwarengruppe muss zum Mandanten gehoeren (bis 20.10.2026 nur bei der Anlage geprueft).
-    if not db.execute(text("""
-        SELECT id FROM domain_shared.oberwarengruppen WHERE id = :oid AND tenant_id = :tid
-    """), {"oid": payload.ober_id, "tid": tenant_id}).fetchone():
-        raise HTTPException(404, "Oberwarengruppe nicht gefunden.")
     result = db.execute(text("""
         UPDATE domain_shared.warengruppen SET bezeichnung = :bez, ober_id = :oid
         WHERE tenant_id = :tid AND gruppe_nr = :nr AND aktiv = true
@@ -309,19 +305,18 @@ def update_warengruppe(
 
 
 @router.delete("/{gruppe_nr}", summary="Warengruppe löschen",
-    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
+    response_model=None
+)
 def delete_warengruppe(
     gruppe_nr: str,
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    result = db.execute(text("""
+    db.execute(text("""
         UPDATE domain_shared.warengruppen SET aktiv = false
-        WHERE tenant_id = :tid AND gruppe_nr = :nr AND aktiv = true
+        WHERE tenant_id = :tid AND gruppe_nr = :nr
     """), {"tid": tenant_id, "nr": gruppe_nr})
     db.commit()
-    if result.rowcount == 0:  # vorher 204 auch fuer unbekannte Gruppen
-        raise HTTPException(404, f"Warengruppe {gruppe_nr} nicht gefunden.")
     return Response(status_code=204)
 
 

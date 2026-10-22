@@ -5,7 +5,6 @@ import logging
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from app.auth.deps import require_roles
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -21,8 +20,6 @@ from app.api.v1.schemas.number_ranges_schemas import NumberRangesOut
 
 
 router = APIRouter(tags=["admin", "number-ranges"])
-
-_NUR_ADMIN = [Depends(require_roles("admin"))]  # Konfiguration: wie admin_core
 
 
 class NumberRangeOut(BaseModel):
@@ -74,7 +71,8 @@ def list_number_ranges(
 
 
 @router.post("/", status_code=201, summary="Number range configure",
-    response_model=NumberRangesOut, dependencies=_NUR_ADMIN)
+    response_model=NumberRangesOut
+)
 def configure_number_range(
     body: NumberRangeConfigRequest,
     db: Session = Depends(get_db),
@@ -111,7 +109,8 @@ def get_number_range(range_type: str, db: Session = Depends(get_db)) -> dict[str
 
 
 @router.put("/{range_type}", summary="Number range aktualisieren",
-    response_model=NumberRangesOut, dependencies=_NUR_ADMIN)
+    response_model=NumberRangesOut
+)
 def update_number_range(
     range_type: str,
     body: NumberRangeConfigRequest,
@@ -135,7 +134,7 @@ def update_number_range(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
-@router.delete("/{range_type}", status_code=204, response_class=Response, response_model=None, summary="Number range löschen", dependencies=_NUR_ADMIN)
+@router.delete("/{range_type}", status_code=204, response_class=Response, response_model=None, summary="Number range löschen")
 def delete_number_range(range_type: str, db: Session = Depends(get_db)) -> Response:
     tenant_id = get_current_tenant_id()
     svc = NumberRangeService(db)

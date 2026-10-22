@@ -15,7 +15,6 @@ from app.services.interaction_state_manager import (
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.neuro_interactions_schemas import NeuroInteractionsOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/neuro/interactions", tags=["neuro-core", "interactions"])
@@ -31,7 +30,8 @@ class TransitionRequest(BaseModel):
 
 
 @router.post("", summary="Anlegen",
-    response_model=NeuroInteractionsOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=NeuroInteractionsOut
+)
 async def create(
     request: CreateInteractionRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -41,7 +41,8 @@ async def create(
 
 
 @router.put("/{interaction_id}/transition", summary="Transition",
-    response_model=NeuroInteractionsOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=NeuroInteractionsOut
+)
 async def transition(
     interaction_id: str,
     request: TransitionRequest,

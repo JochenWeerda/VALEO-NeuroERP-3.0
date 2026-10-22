@@ -44,7 +44,6 @@ from app.api.v1.schemas.sales_credit_notes_schemas import (
     CreditNoteDetailOut,
 )
 from app.documents.router_helpers import eigener_beleg, get_repository, save_to_store
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/sales", tags=["sales", "credit-notes", "returns"])
@@ -799,7 +798,7 @@ class ReturnOut(ReturnBase):
     updated_at: Optional[datetime] = None
 
 
-@router.post("/returns", response_model=ReturnOut, status_code=201, summary="Return anlegen", dependencies=SCHREIBEN["VERKAUF"])
+@router.post("/returns", response_model=ReturnOut, status_code=201, summary="Return anlegen")
 async def create_return(
     payload: ReturnCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -895,7 +894,7 @@ async def list_returns(
     ]
 
 
-@router.delete("/returns/{return_id}", status_code=204, response_class=Response, response_model=None, summary="Return löschen", dependencies=SCHREIBEN["VERKAUF"])
+@router.delete("/returns/{return_id}", status_code=204, response_class=Response, response_model=None, summary="Return löschen")
 async def delete_return(
     return_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -916,7 +915,7 @@ async def delete_return(
     db.commit()
 
 
-@router.patch("/returns/{return_id}/status", response_model=StatusResponse, summary="Return status aktualisieren", dependencies=SCHREIBEN["VERKAUF"])
+@router.patch("/returns/{return_id}/status", response_model=StatusResponse, summary="Return status aktualisieren")
 async def update_return_status(
     return_id: str,
     new_status: str = Query(..., description="New status: open, processing, completed, cancelled"),

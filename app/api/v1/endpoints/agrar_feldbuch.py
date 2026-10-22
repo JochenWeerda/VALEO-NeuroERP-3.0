@@ -33,7 +33,6 @@ from modules.agrar.services.feldbuch_service import (
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class AgrarFeldbuchOut(BaseSchema):
@@ -228,7 +227,8 @@ async def list_schlaege(
 
 
 @router.post("/schlaege", status_code=201, summary="Schlag anlegen",
-    response_model=AgrarFeldbuchOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=AgrarFeldbuchOut
+)
 async def create_schlag(
     data: SchlagCreate,
     db: Session = Depends(get_db),
@@ -264,7 +264,8 @@ async def get_schlag(
 
 
 @router.put("/schlaege/{schlag_id}", summary="Schlag aktualisieren",
-    response_model=AgrarFeldbuchOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=AgrarFeldbuchOut
+)
 async def update_schlag(
     schlag_id: str,
     data: SchlagUpdate,
@@ -285,7 +286,7 @@ async def update_schlag(
     return _schlag_to_dict(schlag)
 
 
-@router.delete("/schlaege/{schlag_id}", status_code=204, response_class=Response, response_model=None, summary="Schlag deaktivieren", dependencies=SCHREIBEN["AGRAR"])
+@router.delete("/schlaege/{schlag_id}", status_code=204, response_class=Response, response_model=None, summary="Schlag deaktivieren")
 async def deactivate_schlag(
     schlag_id: str,
     db: Session = Depends(get_db),
@@ -344,7 +345,8 @@ async def get_schlag_geometry(
 
 
 @router.put("/schlaege/{schlag_id}/geometry", summary="GeoJSON Polygon eines Schlags speichern",
-    response_model=AgrarFeldbuchOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=AgrarFeldbuchOut
+)
 async def put_schlag_geometry(
     schlag_id: str,
     data: GeometryUpdate,
@@ -445,7 +447,8 @@ async def list_massnahmen(
 
 
 @router.post("/feldbuch/massnahmen", status_code=201, summary="Massnahme anlegen",
-    response_model=AgrarFeldbuchOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=AgrarFeldbuchOut
+)
 async def create_massnahme(
     data: MassnahmeCreate,
     db: Session = Depends(get_db),
@@ -482,7 +485,8 @@ async def create_massnahme(
 
 
 @router.put("/feldbuch/massnahmen/{massnahme_id}", summary="Massnahme aktualisieren",
-    response_model=AgrarFeldbuchOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=AgrarFeldbuchOut
+)
 async def update_massnahme(
     massnahme_id: str,
     data: MassnahmeUpdate,
@@ -526,7 +530,7 @@ async def update_massnahme(
     return result
 
 
-@router.delete("/feldbuch/massnahmen/{massnahme_id}", status_code=204, response_class=Response, response_model=None, summary="Massnahme löschen", dependencies=SCHREIBEN["AGRAR"])
+@router.delete("/feldbuch/massnahmen/{massnahme_id}", status_code=204, response_class=Response, response_model=None, summary="Massnahme löschen")
 async def delete_massnahme(
     massnahme_id: str,
     db: Session = Depends(get_db),
@@ -544,7 +548,7 @@ async def delete_massnahme(
     return Response(status_code=204)
 
 
-@router.post("/feldbuch/massnahmen/bulk-delete", response_model=MassnahmeBulkDeleteOut, summary="Delete massnahmen Bulk", dependencies=SCHREIBEN["AGRAR"])
+@router.post("/feldbuch/massnahmen/bulk-delete", response_model=MassnahmeBulkDeleteOut, summary="Delete massnahmen Bulk")
 async def bulk_delete_massnahmen(
     payload: MassnahmeBulkDeleteIn,
     db: Session = Depends(get_db),
@@ -588,7 +592,8 @@ async def bulk_delete_massnahmen(
 
 
 @router.post("/feldbuch/massnahmen/from-lieferschein", status_code=201, summary="From lieferschein massnahme",
-    response_model=AgrarFeldbuchOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=AgrarFeldbuchOut
+)
 async def massnahme_from_lieferschein(
     data: FromLieferscheinCreate,
     db: Session = Depends(get_db),
@@ -1014,7 +1019,8 @@ async def get_feldblockfinder_config() -> dict[str, Any]:
 
 
 @router.post("/compliance/qs-export", summary="Export qs",
-    response_model=AgrarFeldbuchOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=AgrarFeldbuchOut
+)
 async def qs_export(
     jahr: int = Query(default=datetime.now().year),
     format: str = Query("json", description="json | csv"),
@@ -1037,7 +1043,8 @@ async def qs_export(
 
 
 @router.post("/compliance/lea-export", summary="Export lea",
-    response_model=AgrarFeldbuchOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=AgrarFeldbuchOut
+)
 async def lea_export(
     jahr: int = Query(default=datetime.now().year),
     db: Session = Depends(get_db),

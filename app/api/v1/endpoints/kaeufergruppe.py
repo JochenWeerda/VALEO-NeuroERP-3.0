@@ -20,7 +20,6 @@ from app.services.kaeufer_klassifikator import klassifiziere_mit
 from app.services.kaeufer_signal_service import KaeuferSignalService
 from app.services.bedarfsdeckung_service import BedarfsdeckungService
 from app.api.v1.schemas.base import TypedObjectOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/crm/kaeufergruppe", tags=["crm", "kaeufergruppe"])
 
@@ -97,17 +96,17 @@ def _reklassifiziere(db: Session, tenant_id: str, kunden_nr: str, prefer_ai: boo
     return get_profil(kunden_nr, db, tenant_id)
 
 
-@router.post("/{kunden_nr}/neu-klassifizieren", response_model=TypedObjectOut, summary="Regelbasiert neu klassifizieren (aus echten Belegsignalen)", dependencies=SCHREIBEN["CRM"])
+@router.post("/{kunden_nr}/neu-klassifizieren", response_model=TypedObjectOut, summary="Regelbasiert neu klassifizieren (aus echten Belegsignalen)")
 def neu_klassifizieren(kunden_nr: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     return _reklassifiziere(db, tenant_id, kunden_nr, prefer_ai=False)
 
 
-@router.post("/{kunden_nr}/ki-klassifizieren", response_model=TypedObjectOut, summary="KI-gestützt einschätzen (Claude, Fallback regelbasiert)", dependencies=SCHREIBEN["CRM"])
+@router.post("/{kunden_nr}/ki-klassifizieren", response_model=TypedObjectOut, summary="KI-gestützt einschätzen (Claude, Fallback regelbasiert)")
 def ki_klassifizieren(kunden_nr: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     return _reklassifiziere(db, tenant_id, kunden_nr, prefer_ai=True)
 
 
-@router.post("/{kunden_nr}/produktgruppen-klassifizieren", response_model=TypedObjectOut, summary="Käufergruppe je Produktgruppe ableiten", dependencies=SCHREIBEN["CRM"])
+@router.post("/{kunden_nr}/produktgruppen-klassifizieren", response_model=TypedObjectOut, summary="Käufergruppe je Produktgruppe ableiten")
 def produktgruppen_klassifizieren(kunden_nr: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     """Leitet je Produktgruppe eine eigene Käufergruppe aus deren Deckung/Bezug ab
     (ein Betrieb kann je Gruppe unterschiedlich ticken)."""
@@ -133,7 +132,7 @@ def produktgruppen_klassifizieren(kunden_nr: str, db: Session = Depends(get_db),
     return {"kunden_nr": kunden_nr, "klassifiziert": n}
 
 
-@router.post("/{kunden_nr}/setzen", response_model=TypedObjectOut, summary="Käufergruppe bestätigen/überschreiben (mit Audit)", dependencies=SCHREIBEN["CRM"])
+@router.post("/{kunden_nr}/setzen", response_model=TypedObjectOut, summary="Käufergruppe bestätigen/überschreiben (mit Audit)")
 def setzen(kunden_nr: str, body: SetGroupIn, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     if body.group not in {g.value for g in BuyingGroup}:
         raise HTTPException(status_code=422, detail="Unbekannte Käufergruppe")

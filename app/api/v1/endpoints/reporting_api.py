@@ -24,7 +24,6 @@ from app.core.tenant_isolation_guard import IsolationDecision, TenantIsolationGu
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.reporting_api_schemas import ReportingApiOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/reporting", tags=["reporting"])
@@ -74,7 +73,7 @@ def get_data_products(
     return {"items": products, "count": len(products), "schema_version": 1}
 
 
-@router.post("/run", response_model=ReportResult, summary="Run report erstellen", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/run", response_model=ReportResult, summary="Run report erstellen")
 def post_run_report(
     request: RunReportRequest,
     store: ReadModelSnapshotStore = Depends(_get_store),
@@ -105,7 +104,7 @@ def post_run_report(
     )
 
 
-@router.post("/process-mining/report", response_model=ProcessMiningReport, summary="Process mining report erstellen", dependencies=SCHREIBEN["FACHLICH"])
+@router.post("/process-mining/report", response_model=ProcessMiningReport, summary="Process mining report erstellen")
 def post_process_mining_report(
     request: ProcessMiningReportRequest,
     db: Session = Depends(get_db),

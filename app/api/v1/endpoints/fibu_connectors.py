@@ -28,15 +28,15 @@ from app.api.v1.schemas.fibu_connectors import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
-from app.core.akteur import akteur_aus_request
 
 
 router = APIRouter(prefix="/connectors", tags=["finance", "fibu-connectors"])
 
 
 def _user_from_request(request: Optional[Request]) -> Optional[str]:
-    """Urheber aus dem geprueften Token (bis 19.10.2026 zuerst aus dem Client-Header ``X-User-ID``)."""
-    return akteur_aus_request(request)
+    if not request:
+        return None
+    return request.headers.get("X-User-ID") or request.headers.get("X-User-Email")
 
 
 # ---------- Profiles ----------

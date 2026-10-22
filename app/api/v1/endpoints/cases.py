@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from contextvars import ContextVar
 from datetime import datetime, timezone
 from math import ceil
 from typing import Any, Optional
@@ -13,9 +12,6 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ....core.database import get_db
-from ....core.tenant import get_tenant_id
-from app.auth.deps import get_current_user
-from app.core.akteur import gepruefter_akteur
 from ....integrations.crm_core_client import (
     create_case as crm_create_case,
     delete_case as crm_delete_case,
@@ -29,35 +25,9 @@ from ..schemas.crm import Case, CaseCreate, CaseUpdate
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.cases_schemas import CasesOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
-_MANDANT: ContextVar[str] = ContextVar("faelle_mandant")
-
-
-async def _mandant_merken(tenant_id: str = Depends(get_tenant_id)) -> None:
-    # async: der Wert muss im selben Kontext wie der Endpunkt gesetzt werden (sync liefe im Threadpool).
-    _MANDANT.set(tenant_id)
-
-
-# Bis 21.10.2026 lasen und aenderten Abruf, Aendern, Loeschen, Eskalieren und SLA-Status Faelle *aller* Mandanten
-# (crm-service und lokale Tabelle ohne Mandant); Liste und Dashboard filterten nur auf Wunsch. Jetzt Kontextmandant.
-router = APIRouter(dependencies=[Depends(_mandant_merken)])
-
-
-def _eigener_fall(case: dict) -> dict:
-    if str((case or {}).get("tenant_id") or "") != _MANDANT.get():
-        raise HTTPException(status_code=404, detail="Case not found")
-    return case
-
-
-async def _fall_oder_404(case_id: str) -> dict:
-    try:
-        return _eigener_fall(await crm_get_case(case_id))
-    except httpx.HTTPStatusError as exc:
-        if exc.response.status_code == 404:
-            raise HTTPException(status_code=404, detail="Case not found") from exc
-        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
+router = APIRouter()
 
 # ---------------------------------------------------------------------------
 # SLA defaults (hours): {priority: (first_response_h, resolution_h)}
@@ -117,11 +87,11 @@ def _compute_sla(
     }
 
 
-@router.post("/", response_model=Case, status_code=status.HTTP_201_CREATED, summary="Case anlegen", dependencies=SCHREIBEN["CRM"])
+@router.post("/", response_model=Case, status_code=status.HTTP_201_CREATED, summary="Case anlegen")
 async def create_case(case_data: CaseCreate):
     """Create a new support case via crm-service."""
     try:
-        created = await crm_create_case({**case_data.model_dump(), "tenant_id": _MANDANT.get()})
+        created = await crm_create_case(case_data.model_dump())
     except httpx.HTTPStatusError as exc:
         raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
     except Exception as exc:
@@ -140,10 +110,9 @@ async def list_cases(
     limit: int = Query(50, ge=1, le=200, description="Maximum number of items to return"),
 ):
     """List support cases from crm-service with pagination."""
-    verified_tenant = _MANDANT.get()  # Queryparameter bleibt nur fuer API-Kompatibilitaet.
     try:
         cases, total = await crm_list_cases(
-            tenant_id=verified_tenant,
+            tenant_id=tenant_id,
             status=status,
             priority=priority,
             assigned_to=assigned_to,
@@ -189,7 +158,7 @@ async def get_sla_dashboard(
             WHERE :tid IS NULL OR tenant_id = :tid
             """
         )
-        rows = db.execute(sql, {"tid": _MANDANT.get()}).fetchall()
+        rows = db.execute(sql, {"tid": tenant_id}).fetchall()
     except Exception:
         db.rollback()
         rows = []
@@ -240,18 +209,19 @@ async def get_sla_dashboard(
 async def get_case(case_id: str):
     """Get a specific support case by ID."""
     try:
-        case = await _fall_oder_404(case_id)
-    except HTTPException:
-        raise
+        case = await crm_get_case(case_id)
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == 404:
+            raise HTTPException(status_code=404, detail="Case not found") from exc
+        raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve case: {exc}") from exc
     return Case.model_validate(case)
 
 
-@router.put("/{case_id}", response_model=Case, summary="Case aktualisieren", dependencies=SCHREIBEN["CRM"])
+@router.put("/{case_id}", response_model=Case, summary="Case aktualisieren")
 async def update_case(case_id: str, case_data: CaseUpdate):
     """Update a support case via crm-service."""
-    await _fall_oder_404(case_id)
     try:
         updated = await crm_update_case(case_id, case_data.model_dump(exclude_unset=True))
     except httpx.HTTPStatusError as exc:
@@ -264,10 +234,10 @@ async def update_case(case_id: str, case_data: CaseUpdate):
 
 
 @router.delete("/{case_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Case löschen",
-    response_model=None, dependencies=SCHREIBEN["CRM"])
+    response_model=None
+)
 async def delete_case(case_id: str):
     """Delete a support case via crm-service."""
-    await _fall_oder_404(case_id)
     try:
         await crm_delete_case(case_id)
     except httpx.HTTPStatusError as exc:
@@ -278,22 +248,19 @@ async def delete_case(case_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to delete case: {exc}") from exc
 
 
-@router.post("/{case_id}/escalate", response_model=CasesOut, summary="Case escalate", dependencies=SCHREIBEN["CRM"])
+@router.post("/{case_id}/escalate", response_model=CasesOut, summary="Case escalate")
 async def escalate_case(
     case_id: str,
     reason: str = Query(..., description="Reason for escalation"),
+    escalated_by: str = Query(..., description="User performing escalation"),
     db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user),
 ):
-    """Eskalation eines Service-Cases mit Priorität auf CRITICAL.
-
-    Der Eskalierende kommt aus dem geprueften Token (bis 21.10.2026 aus einem frei setzbaren Anfrageparameter)."""
-    escalated_by = gepruefter_akteur(user)
+    """Eskalation eines Service-Cases mit Priorität auf CRITICAL."""
     # Try DB update first
     try:
         row = db.execute(
-            text("SELECT id, priority, status FROM cases WHERE id = :cid AND tenant_id = :tid"),
-            {"cid": case_id, "tid": _MANDANT.get()},
+            text("SELECT id, priority, status FROM cases WHERE id = :cid"),
+            {"cid": case_id},
         ).fetchone()
         if row:
             db.execute(
@@ -306,10 +273,10 @@ async def escalate_case(
                         escalated_by = :by,
                         escalated_at = NOW(),
                         updated_at = NOW()
-                    WHERE id = :cid AND tenant_id = :tid
+                    WHERE id = :cid
                     """
                 ),
-                {"reason": reason, "by": escalated_by, "cid": case_id, "tid": _MANDANT.get()},
+                {"reason": reason, "by": escalated_by, "cid": case_id},
             )
             db.commit()
             return {
@@ -324,7 +291,6 @@ async def escalate_case(
         db.rollback()
 
     # Fallback to CRM integration
-    await _fall_oder_404(case_id)
     try:
         result = await crm_escalate_case(case_id, reason, escalated_by)
     except httpx.HTTPStatusError as exc:
@@ -352,10 +318,10 @@ async def get_case_sla_status(
             text(
                 """
                 SELECT id, priority, status, created_at, first_response_at, resolved_at
-                FROM cases WHERE id = :cid AND tenant_id = :tid
+                FROM cases WHERE id = :cid
                 """
             ),
-            {"cid": case_id, "tid": _MANDANT.get()},
+            {"cid": case_id},
         ).fetchone()
     except Exception:
         db.rollback()
@@ -364,9 +330,7 @@ async def get_case_sla_status(
     if not row:
         # Fallback to CRM service
         try:
-            case_data = _eigener_fall(await crm_get_case(case_id))
-        except HTTPException:
-            raise
+            case_data = await crm_get_case(case_id)
         except httpx.HTTPStatusError as exc:
             if exc.response.status_code == 404:
                 raise HTTPException(status_code=404, detail="Case nicht gefunden") from exc

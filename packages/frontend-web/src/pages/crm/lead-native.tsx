@@ -1,14 +1,7 @@
-import { useParams, useSearchParams } from '@/app/routing/typed-router'
-import PartyNativePage, { readQueryParam, resolvePartySectionKey } from '@/pages/crm/party-native'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default function LeadNativePage(): JSX.Element {
-  const { id } = useParams<{ id?: string }>()
-  const [searchParams] = useSearchParams()
+export default function Page(): JSX.Element {
   return (
-    <PartyNativePage
-      kind="lead"
-      entityId={id ?? readQueryParam(searchParams, 'id') ?? undefined}
-      requestedSectionKey={resolvePartySectionKey(readQueryParam(searchParams, 'tab'))}
-    />
+    <NativeListPage screenId="crm/lead/:id" testId="screen-crm/lead/:id" />
   )
 }

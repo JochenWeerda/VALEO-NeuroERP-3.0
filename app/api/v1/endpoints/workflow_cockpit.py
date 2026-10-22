@@ -22,7 +22,6 @@ from app.services.workflow_cockpit_service import (
     WorkflowReplayPermissionError,
     workflow_cockpit_service,
 )
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/workflow/cockpit", tags=["workflow", "cockpit"])
@@ -166,7 +165,8 @@ async def list_processes(
 @router.post(
     "/processes",
     summary="Workflow-Prozesssnapshot fuer Cockpit melden",
-    response_model=WorkflowCockpitProcessOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=WorkflowCockpitProcessOut,
+)
 async def upsert_process(
     request: WorkflowCockpitSnapshotIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -230,7 +230,8 @@ async def get_process(
 @router.post(
     "/processes/{process_instance_id}/replay-requests",
     summary="Replay-Anforderung fuer Workflow-Prozessinstanz auditieren",
-    response_model=WorkflowCockpitEventOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=WorkflowCockpitEventOut,
+)
 async def request_replay(
     process_instance_id: str,
     request: WorkflowReplayRequestIn,

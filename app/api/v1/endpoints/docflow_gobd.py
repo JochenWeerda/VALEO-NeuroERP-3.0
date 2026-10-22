@@ -12,7 +12,6 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.docflow_gobd_service import DocflowGobdService
 from app.api.v1.schemas.base import TypedObjectOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/docflow/evidence", tags=["docflow", "dms", "gobd"])
 
@@ -30,7 +29,7 @@ class GobdExportIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/gobd-export", response_model=TypedObjectOut, summary="GoBD-Exportpaket je Vorgang erzeugen (+ Export vermerken)", dependencies=SCHREIBEN["BELEGE"])
+@router.post("/gobd-export", response_model=TypedObjectOut, summary="GoBD-Exportpaket je Vorgang erzeugen (+ Export vermerken)")
 def gobd_export(
     body: GobdExportIn,
     db: Session = Depends(get_db),

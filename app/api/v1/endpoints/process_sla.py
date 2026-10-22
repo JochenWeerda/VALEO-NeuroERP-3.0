@@ -24,7 +24,6 @@ from app.core.process_sla import (
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.process_sla_schemas import ProcessSlaOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/process/sla", tags=["process", "sla"])
@@ -68,7 +67,8 @@ async def list_sla_policies(
 
 
 @router.post("/evaluate", summary="Sla endpoint evaluate",
-    response_model=ProcessSlaOut, dependencies=SCHREIBEN["BERECHNEN"])
+    response_model=ProcessSlaOut
+)
 async def evaluate_sla_endpoint(
     request: EvaluateSLARequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -125,7 +125,8 @@ async def list_violations(
 
 
 @router.post("/violations/{violation_id}/acknowledge", summary="Violation acknowledge",
-    response_model=ProcessSlaOut, dependencies=SCHREIBEN["FACHLICH"])
+    response_model=ProcessSlaOut
+)
 async def acknowledge_violation(
     violation_id: str,
     tenant_id: str = Depends(get_tenant_id),

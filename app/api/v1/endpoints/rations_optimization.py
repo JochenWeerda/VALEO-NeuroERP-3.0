@@ -47,7 +47,6 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
 from pydantic import ConfigDict as _ConfigDict
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class RationsOptimizationOut(BaseSchema):
@@ -6705,7 +6704,7 @@ def _optimize_internal(
     inject_buffer = bool(seasonal.get("inject_buffer", 0.0))
     buffer_min_kg = float(seasonal.get("buffer_min_kg", 0.0))
 
-    if abs(dmi_factor - 1.0) > 1e-9:
+    if dmi_factor != 1.0:
         req = _CowReq(
             me_mj=req.me_mj,
             sidp_g=req.sidp_g,
@@ -6721,7 +6720,7 @@ def _optimize_internal(
             mg_min_g=req.mg_min_g,
             k_max_g=req.k_max_g * dmi_factor,
         )
-    elif abs(na_boost - 1.0) > 1e-9:
+    elif na_boost != 1.0:
         req = _CowReq(**{**req.model_dump(), "na_min_g": req.na_min_g * na_boost})
 
     if inject_buffer:
@@ -8062,7 +8061,8 @@ async def get_feed(
 @router.post(
     "/optimize/from-profile",
     summary="From profile optimize",
-    response_model=RationsOptimizationOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=RationsOptimizationOut,
+)
 async def optimize_from_profile(
     body: _OptimizeFromProfileBody,
     request: Request,
@@ -8298,7 +8298,8 @@ def _build_demo_result() -> Dict[str, Any]:
 
 
 @router.post(
-    "/optimize/demo", summary="Demo optimize", response_model=RationsOptimizationOut, dependencies=SCHREIBEN["AGRAR"])
+    "/optimize/demo", summary="Demo optimize", response_model=RationsOptimizationOut
+)
 async def optimize_demo(
     request: Request,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
@@ -8315,7 +8316,7 @@ async def optimize_demo(
         ) from exc
 
 
-@router.post("/optimize", summary="Optimize", response_model=RationsOptimizationOut, dependencies=SCHREIBEN["AGRAR"])
+@router.post("/optimize", summary="Optimize", response_model=RationsOptimizationOut)
 async def optimize(
     request: Request,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
@@ -8339,7 +8340,8 @@ async def optimize(
 @router.post(
     "/sensitivity",
     summary="Sensitivitaet (parametrischer Sweep)",
-    response_model=RationsOptimizationOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=RationsOptimizationOut,
+)
 async def sensitivity(
     body: _SensitivityBody,
     request: Request,
@@ -8370,7 +8372,8 @@ async def sensitivity(
 @router.post(
     "/requirements/calculate",
     summary="Requirements berechnen",
-    response_model=RationsOptimizationOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=RationsOptimizationOut,
+)
 async def calculate_requirements(
     request: Request,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
@@ -8441,7 +8444,8 @@ class _FeedingControlIn(BaseModel):
 @router.post(
     "/feeding-control/evaluate",
     response_model=None,
-    summary="Fuetterungscontrolling: SOLL/IST-Kontrolle", dependencies=SCHREIBEN["AGRAR"])
+    summary="Fuetterungscontrolling: SOLL/IST-Kontrolle",
+)
 async def evaluate_feeding_control(payload: _FeedingControlIn):
     """Verrechnet ein Fuetterungsprotokoll zu Kontroll-Kennzahlen (DLG 01|2025, Kap. 11/12):
     TM-Verzehr je Kuh, Mischgenauigkeit (Toleranz < 5 %) und IOFC.
@@ -8481,7 +8485,8 @@ async def evaluate_feeding_control(payload: _FeedingControlIn):
 @router.post(
     "/feeding-control/logs",
     response_model=TypedObjectOut,
-    summary="Fuetterungsprotokoll speichern", dependencies=SCHREIBEN["AGRAR"])
+    summary="Fuetterungsprotokoll speichern",
+)
 async def save_feeding_control_log(
     payload: _FeedingControlIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -8551,7 +8556,8 @@ async def list_feeding_control_logs(
 @router.post(
     "/requirements/maintenance",
     summary="Requirements maintenance",
-    response_model=RationsOptimizationOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=RationsOptimizationOut,
+)
 async def maintenance_requirements(
     request: Request,
     body_weight_kg: float = Query(...),
@@ -8579,7 +8585,8 @@ async def maintenance_requirements(
 
 
 @router.post(
-    "/feeds/validate", summary="Feeds validieren", response_model=RationsOptimizationOut, dependencies=SCHREIBEN["AGRAR"])
+    "/feeds/validate", summary="Feeds validieren", response_model=RationsOptimizationOut
+)
 async def validate_feeds(
     request: Request,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
@@ -8596,7 +8603,8 @@ async def validate_feeds(
 @router.post(
     "/dlg/strukturindex",
     summary="Strukturindex berechnen",
-    response_model=RationsOptimizationOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=RationsOptimizationOut,
+)
 async def calculate_strukturindex(request: Request):
     """
     Berechne Strukturindex nach DLG 01|2023 (Rutzmoser et al. 2011).
@@ -8680,7 +8688,8 @@ async def dlg_info():
 
 
 @router.post(
-    "/dlg/refresh", summary="Refresh dlg", response_model=RationsOptimizationOut, dependencies=SCHREIBEN["AGRAR"])
+    "/dlg/refresh", summary="Refresh dlg", response_model=RationsOptimizationOut
+)
 async def dlg_refresh():
     """
     Leert den Feed-Cache und prüft ob neue DLG-Daten vorliegen.
@@ -8702,7 +8711,8 @@ async def dlg_refresh():
 @router.post(
     "/compound-feed/upload",
     summary="Compound feed document hochladen",
-    response_model=RationsOptimizationOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=RationsOptimizationOut,
+)
 async def upload_compound_feed_document(file: UploadFile = File(...)):
     if not file.filename:
         raise HTTPException(400, "Dateiname fehlt")
@@ -8724,7 +8734,8 @@ async def upload_compound_feed_document(file: UploadFile = File(...)):
 @router.post(
     "/feeds/from-grundfutter",
     summary="From grundfutter feed",
-    response_model=RationsOptimizationOut, dependencies=SCHREIBEN["AGRAR"])
+    response_model=RationsOptimizationOut,
+)
 async def feed_from_grundfutter(request: Request):
     """
     Konvertiert eine GrundfutterAnalyse in ein LP-kompatibles Futtermittel-Dict.

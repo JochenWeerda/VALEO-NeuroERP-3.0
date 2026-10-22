@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
@@ -12,8 +12,6 @@ from app.api.v1.schemas.base import BaseSchema
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.agri_qs_workflow_service import AgriQsWorkflowError, AgriQsWorkflowService
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
-from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 
 class AgriQsOut(BaseSchema):
@@ -39,11 +37,10 @@ def _svc(db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id))
     return AgriQsWorkflowService(db, tenant_id)
 
 
-@router.post("/lots/{lot_id}/qs-transition", response_model=AgriQsOut, summary="Silo-Lot QS-Status wechseln", dependencies=SCHREIBEN["LOGISTIK"])
+@router.post("/lots/{lot_id}/qs-transition", response_model=AgriQsOut, summary="Silo-Lot QS-Status wechseln")
 def change_lot_qs_status(
     lot_id: str,
     body: LotQsTransitionIn,
-    request: Request,
     svc: AgriQsWorkflowService = Depends(_svc),
 ) -> Any:
     try:
@@ -51,7 +48,7 @@ def change_lot_qs_status(
             lot_id=lot_id,
             target_status=body.targetStatus,
             reason=body.reason,
-            operator=gepruefter_akteur_aus_request(request),
+            operator=body.operator,
             sample_id=body.sampleId,
             analysis_id=body.analysisId,
             lab_document_id=body.labDocumentId,

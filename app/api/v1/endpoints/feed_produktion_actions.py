@@ -4,13 +4,11 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.api.v1.schemas.base import TypedObjectOut
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
-from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 router = APIRouter(prefix="/futtermittel/produktion", tags=["feed-produktion"])
 logger = logging.getLogger(__name__)
@@ -21,12 +19,14 @@ class ProduktionsauftragCreateRequest(BaseModel):
     soll_menge_kg: float
     geplant_datum: str
     charge_nr: str
+    operator: str = "system"
 
 
 class ProduktionsTransitionRequest(BaseModel):
     new_status: str
     ist_menge_kg: Optional[float] = None
     qs_befund: str = ""
+    operator: str = "system"
 
 
 class RezepturPosition(BaseModel):
@@ -39,16 +39,17 @@ class RezepturCreateRequest(BaseModel):
     artikel_id: str
     bezeichnung: str
     positionen: List[RezepturPosition]
+    operator: str = "system"
 
 
 class RezepturTransitionRequest(BaseModel):
     new_status: str
+    operator: str = "system"
 
 
-@router.post("/auftraege", response_model=TypedObjectOut, summary="Futtermittel-Produktionsauftrag anlegen", dependencies=SCHREIBEN["FUTTERMITTEL"])
+@router.post("/auftraege", response_model=TypedObjectOut, summary="Futtermittel-Produktionsauftrag anlegen")
 def create_produktionsauftrag(
     req: ProduktionsauftragCreateRequest,
-    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -64,7 +65,7 @@ def create_produktionsauftrag(
             soll_menge_kg=req.soll_menge_kg,
             geplant_datum=req.geplant_datum,
             charge_nr=req.charge_nr,
-            operator=gepruefter_akteur_aus_request(request),
+            operator=req.operator,
         )
     except FeedProduktionError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -73,11 +74,11 @@ def create_produktionsauftrag(
 @router.post(
     "/auftraege/{auftrag_id}/transition",
     response_model=TypedObjectOut,
-    summary="Futtermittel-Produktionsauftragstatus wechseln", dependencies=SCHREIBEN["FUTTERMITTEL"])
+    summary="Futtermittel-Produktionsauftragstatus wechseln",
+)
 def transition_auftrag(
     auftrag_id: str,
     req: ProduktionsTransitionRequest,
-    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -92,17 +93,16 @@ def transition_auftrag(
             new_status=req.new_status,
             tenant_id=x_tenant_id,
             ist_menge_kg=req.ist_menge_kg,
-            operator=gepruefter_akteur_aus_request(request),
+            operator=req.operator,
             qs_befund=req.qs_befund,
         )
     except FeedProduktionError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/rezepturen", response_model=TypedObjectOut, summary="Futtermittel-Rezeptur anlegen", dependencies=SCHREIBEN["FUTTERMITTEL"])
+@router.post("/rezepturen", response_model=TypedObjectOut, summary="Futtermittel-Rezeptur anlegen")
 def create_rezeptur(
     req: RezepturCreateRequest,
-    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -115,7 +115,7 @@ def create_rezeptur(
             artikel_id=req.artikel_id,
             bezeichnung=req.bezeichnung,
             positionen=[p.model_dump() for p in req.positionen],
-            operator=gepruefter_akteur_aus_request(request),
+            operator=req.operator,
         )
     except RezepturError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -124,11 +124,11 @@ def create_rezeptur(
 @router.post(
     "/rezepturen/{rezeptur_id}/transition",
     response_model=TypedObjectOut,
-    summary="Futtermittel-Rezepturstatus wechseln", dependencies=SCHREIBEN["FUTTERMITTEL"])
+    summary="Futtermittel-Rezepturstatus wechseln",
+)
 def transition_rezeptur(
     rezeptur_id: str,
     req: RezepturTransitionRequest,
-    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -139,7 +139,7 @@ def transition_rezeptur(
             rezeptur_id=rezeptur_id,
             new_status=req.new_status,
             tenant_id=x_tenant_id,
-            operator=gepruefter_akteur_aus_request(request),
+            operator=req.operator,
         )
     except RezepturError as e:
         raise HTTPException(status_code=400, detail=str(e))

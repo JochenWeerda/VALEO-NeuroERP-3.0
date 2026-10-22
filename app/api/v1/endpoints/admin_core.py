@@ -43,8 +43,6 @@ from app.services.admin_core_service import AdminCoreService
 
 router = APIRouter()
 
-
-
 # Bis 08.10.2026 ohne jede Rollenpruefung: jeder angemeldete Nutzer konnte Benutzer
 # anlegen, sich Rollen geben und API-Schluessel erzeugen. Schreiben nur ``admin``;
 # Benutzer, Rollen, Audit-Log und Schluessel lesen ``admin``/``manager``.
@@ -285,7 +283,7 @@ async def create_erntefenster_from_template(
 # ── Workflow-Sandbox (Gap 012) ────────────────────────────────────────────────
 
 
-@router.post("/workflow-sandbox/preview", response_model=WorkflowSandboxPreviewOut, summary="Workflow sandbox vorschauen", dependencies=_NUR_ADMIN)
+@router.post("/workflow-sandbox/preview", response_model=WorkflowSandboxPreviewOut, summary="Workflow sandbox vorschauen")
 async def preview_workflow_sandbox(
     payload: WorkflowSandboxPreviewIn,
     tenant_id: str = Depends(get_tenant_id),

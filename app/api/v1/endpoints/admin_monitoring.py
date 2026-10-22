@@ -8,7 +8,6 @@ from typing import Literal
 from uuid import uuid4
 
 from fastapi import Response, APIRouter, Depends, HTTPException
-from app.auth.deps import require_roles
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -21,8 +20,6 @@ from app.api.v1.schemas.base import BaseSchema
 
 
 router = APIRouter()
-
-_NUR_ADMIN = [Depends(require_roles("admin"))]  # Konfiguration: wie admin_core
 
 
 class AdminAlert(BaseModel):
@@ -316,7 +313,7 @@ def list_monitoring_rules(tenant_id: str = Depends(get_tenant_id), db: Session =
     return [MonitoringRuleOut(**item) for item in cfg["rules"] if isinstance(item, dict)]
 
 
-@router.post("/rules", response_model=MonitoringRuleOut, status_code=201, summary="Monitoring rule anlegen", dependencies=_NUR_ADMIN)
+@router.post("/rules", response_model=MonitoringRuleOut, status_code=201, summary="Monitoring rule anlegen")
 def create_monitoring_rule(payload: MonitoringRuleIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     settings = _load_tenant_settings(db, tenant_id)
     cfg = _monitoring_cfg(settings)
@@ -328,7 +325,7 @@ def create_monitoring_rule(payload: MonitoringRuleIn, tenant_id: str = Depends(g
     return MonitoringRuleOut(**item)
 
 
-@router.put("/rules/{rule_id}", response_model=MonitoringRuleOut, summary="Monitoring rule aktualisieren", dependencies=_NUR_ADMIN)
+@router.put("/rules/{rule_id}", response_model=MonitoringRuleOut, summary="Monitoring rule aktualisieren")
 def update_monitoring_rule(rule_id: str, payload: MonitoringRuleIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     settings = _load_tenant_settings(db, tenant_id)
     cfg = _monitoring_cfg(settings)
@@ -343,7 +340,7 @@ def update_monitoring_rule(rule_id: str, payload: MonitoringRuleIn, tenant_id: s
     return MonitoringRuleOut(**item)
 
 
-@router.delete("/rules/{rule_id}", status_code=204, response_class=Response, response_model=None, summary="Monitoring rule löschen", dependencies=_NUR_ADMIN)
+@router.delete("/rules/{rule_id}", status_code=204, response_class=Response, response_model=None, summary="Monitoring rule löschen")
 def delete_monitoring_rule(rule_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     settings = _load_tenant_settings(db, tenant_id)
     cfg = _monitoring_cfg(settings)
@@ -363,7 +360,7 @@ def list_monitoring_channels(tenant_id: str = Depends(get_tenant_id), db: Sessio
     return [MonitoringChannelOut(**item) for item in cfg["channels"] if isinstance(item, dict)]
 
 
-@router.post("/channels", response_model=MonitoringChannelOut, status_code=201, summary="Monitoring channel anlegen", dependencies=_NUR_ADMIN)
+@router.post("/channels", response_model=MonitoringChannelOut, status_code=201, summary="Monitoring channel anlegen")
 def create_monitoring_channel(payload: MonitoringChannelIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     settings = _load_tenant_settings(db, tenant_id)
     cfg = _monitoring_cfg(settings)
@@ -375,7 +372,7 @@ def create_monitoring_channel(payload: MonitoringChannelIn, tenant_id: str = Dep
     return MonitoringChannelOut(**item)
 
 
-@router.put("/channels/{channel_id}", response_model=MonitoringChannelOut, summary="Monitoring channel aktualisieren", dependencies=_NUR_ADMIN)
+@router.put("/channels/{channel_id}", response_model=MonitoringChannelOut, summary="Monitoring channel aktualisieren")
 def update_monitoring_channel(channel_id: str, payload: MonitoringChannelIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     settings = _load_tenant_settings(db, tenant_id)
     cfg = _monitoring_cfg(settings)
@@ -390,7 +387,7 @@ def update_monitoring_channel(channel_id: str, payload: MonitoringChannelIn, ten
     return MonitoringChannelOut(**item)
 
 
-@router.delete("/channels/{channel_id}", status_code=204, response_class=Response, response_model=None, summary="Monitoring channel löschen", dependencies=_NUR_ADMIN)
+@router.delete("/channels/{channel_id}", status_code=204, response_class=Response, response_model=None, summary="Monitoring channel löschen")
 def delete_monitoring_channel(channel_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     settings = _load_tenant_settings(db, tenant_id)
     cfg = _monitoring_cfg(settings)
@@ -410,7 +407,7 @@ def list_scheduler_jobs(tenant_id: str = Depends(get_tenant_id), db: Session = D
     return [SchedulerJobOut(**item) for item in cfg["scheduler_jobs"] if isinstance(item, dict)]
 
 
-@router.post("/scheduler-jobs", response_model=SchedulerJobOut, status_code=201, summary="Scheduler job anlegen", dependencies=_NUR_ADMIN)
+@router.post("/scheduler-jobs", response_model=SchedulerJobOut, status_code=201, summary="Scheduler job anlegen")
 def create_scheduler_job(payload: SchedulerJobIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     settings = _load_tenant_settings(db, tenant_id)
     cfg = _monitoring_cfg(settings)
@@ -422,7 +419,7 @@ def create_scheduler_job(payload: SchedulerJobIn, tenant_id: str = Depends(get_t
     return SchedulerJobOut(**item)
 
 
-@router.put("/scheduler-jobs/{job_id}", response_model=SchedulerJobOut, summary="Scheduler job aktualisieren", dependencies=_NUR_ADMIN)
+@router.put("/scheduler-jobs/{job_id}", response_model=SchedulerJobOut, summary="Scheduler job aktualisieren")
 def update_scheduler_job(job_id: str, payload: SchedulerJobIn, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     settings = _load_tenant_settings(db, tenant_id)
     cfg = _monitoring_cfg(settings)
@@ -437,7 +434,7 @@ def update_scheduler_job(job_id: str, payload: SchedulerJobIn, tenant_id: str = 
     return SchedulerJobOut(**item)
 
 
-@router.delete("/scheduler-jobs/{job_id}", status_code=204, response_class=Response, response_model=None, summary="Scheduler job löschen", dependencies=_NUR_ADMIN)
+@router.delete("/scheduler-jobs/{job_id}", status_code=204, response_class=Response, response_model=None, summary="Scheduler job löschen")
 def delete_scheduler_job(job_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     settings = _load_tenant_settings(db, tenant_id)
     cfg = _monitoring_cfg(settings)

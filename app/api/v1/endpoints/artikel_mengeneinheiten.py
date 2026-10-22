@@ -24,7 +24,6 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/artikel/mengeneinheiten",
@@ -88,7 +87,7 @@ def list_mengeneinheiten(
     return [MengeneinheitOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/stamm", response_model=MengeneinheitOut, status_code=201, summary="Mengeneinheit anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.post("/stamm", response_model=MengeneinheitOut, status_code=201, summary="Mengeneinheit anlegen")
 def create_mengeneinheit(
     payload: MengeneinheitCreate,
     db=Depends(get_db),
@@ -119,7 +118,7 @@ def create_mengeneinheit(
     return MengeneinheitOut(**dict(row._mapping))
 
 
-@router.put("/stamm/{einheit_kuerzel}", response_model=MengeneinheitOut, summary="Mengeneinheit aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.put("/stamm/{einheit_kuerzel}", response_model=MengeneinheitOut, summary="Mengeneinheit aktualisieren")
 def update_mengeneinheit(
     einheit_kuerzel: str,
     payload: MengeneinheitCreate,
@@ -152,7 +151,8 @@ def update_mengeneinheit(
 
 
 @router.delete("/stamm/{einheit_kuerzel}", summary="Mengeneinheit löschen",
-    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
+    response_model=None
+)
 def delete_mengeneinheit(
     einheit_kuerzel: str,
     db=Depends(get_db),
@@ -232,7 +232,7 @@ def get_mengeneinheitengruppe(
     return MengeneinheitengruppeOut(**dict(row._mapping))
 
 
-@router.post("/gruppen", response_model=MengeneinheitengruppeOut, status_code=201, summary="Mengeneinheitengruppe anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.post("/gruppen", response_model=MengeneinheitengruppeOut, status_code=201, summary="Mengeneinheitengruppe anlegen")
 def create_mengeneinheitengruppe(
     payload: MengeneinheitengruppeCreate,
     db=Depends(get_db),
@@ -264,7 +264,7 @@ def create_mengeneinheitengruppe(
     return MengeneinheitengruppeOut(**dict(row._mapping))
 
 
-@router.put("/gruppen/{gruppe_nr}", response_model=MengeneinheitengruppeOut, summary="Mengeneinheitengruppe aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
+@router.put("/gruppen/{gruppe_nr}", response_model=MengeneinheitengruppeOut, summary="Mengeneinheitengruppe aktualisieren")
 def update_mengeneinheitengruppe(
     gruppe_nr: str,
     payload: MengeneinheitengruppeCreate,
@@ -297,7 +297,8 @@ def update_mengeneinheitengruppe(
 
 
 @router.delete("/gruppen/{gruppe_nr}", summary="Mengeneinheitengruppe löschen",
-    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
+    response_model=None
+)
 def delete_mengeneinheitengruppe(
     gruppe_nr: str,
     db=Depends(get_db),

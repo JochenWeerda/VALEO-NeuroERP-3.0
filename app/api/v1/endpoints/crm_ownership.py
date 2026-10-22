@@ -17,7 +17,6 @@ from app.api.v1.schemas.crm_bundle_schemas import (
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_ownership_service import CrmOwnershipService
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/crm", tags=["crm", "ownership"])
 
@@ -56,7 +55,7 @@ def get_ownership(
     return CrmOwnershipService(db, tenant_id).get(kunden_nr)
 
 
-@router.put("/{kunden_nr}/ownership", response_model=OwnershipOut, summary="Ownership setzen/übergeben", dependencies=SCHREIBEN["CRM"])
+@router.put("/{kunden_nr}/ownership", response_model=OwnershipOut, summary="Ownership setzen/übergeben")
 def set_ownership(
     kunden_nr: str,
     body: OwnershipIn,
