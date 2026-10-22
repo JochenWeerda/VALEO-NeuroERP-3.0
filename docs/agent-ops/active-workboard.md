@@ -19527,6 +19527,8 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 
 **Owner:** Codex. **Befund:** vorhandene KI-Service-Fachtests liegen ausserhalb tests und werden im Root-Qualitaetslauf nicht ausgefuehrt; die reine Erfassung services ersetzt ihre Ausfuehrung nicht. **Ziel:** vorhandene isolierte Servicevertraege ausfuehren und deren echte Coverage verlustfrei mit dem bestaetigten Backendreport vereinigen. **Besitz:** neuer begrenzter scripts/run_ki_service_coverage.py und seine gezielten Runnervertraege; quality-gate.yml ausschliesslich zusaetzlicher Service-/Coverage-Schritt vor kritischer Coverage und Seal; QA/Workboard. Vorhandene Hauptsuite/Schwellen/Sonar-Scope unveraendert; keine neue DB/Container, keine schweren optionalen STT/TTS-Pakete. Testfehler blockieren.
 
-## MATERIAL-FLOW-SQL-20261022 - offen, Codex Lead
+## MATERIAL-FLOW-SQL-20261022 - reserviert, Codex
 
 **Nachzupruefender Befund:** reale Pruefschema-Inspektion zeigt previous_stock/new_stock verpflichtend und ownership_type nur owned/consigned; alte Transfer-/Spuel-/Lot-Link-SQLs senden keine Bestands-Snapshots, Spuelcharge sendet flush als Eigentumsart. Dazu fehlen Lagerbindung/Zeilensperren beim Transfer und validate_route commitet im aufrufenden Buchungsablauf. Reale positive SQL-Abnahme ist vor einer Gesamtfreigabe erforderlich; bisherige Mockvertraege sind dafuer kein Ersatz. Noch keine Fachregel-/Schemaaenderung oder Produktionsbuchung vorgenommen.
+
+**Dateibesitz/Fachentscheid:** Spuelcharge im Materialflussservice und neuer interner SQL-Buchungshelfer, eigene reale SQL-Vertraege und QA. Nutzerentscheid: echte Umlagerung Quelle minus Menge/Ziel plus Menge. Geordnete Zellensperren, Lager-/Mandantenbindung, Bestands-Snapshots, Kapazitaet und atomarer Abschluss; keine neue Datenbank/Container/Migration. Andere Transfer-/Lot-Link-Befunde bleiben explizit offen bis eigener Abnahme.
