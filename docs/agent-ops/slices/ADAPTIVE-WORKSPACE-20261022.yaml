@@ -1,0 +1,91 @@
+---
+slice_id: ADAPTIVE-WORKSPACE-20261022
+id: ADAPTIVE-WORKSPACE-20261022
+title: Adaptive Workspace Framework Phase 1 (Launcher-Registry)
+status: reserviert
+owner: Cursor Grok
+priority: high
+created: 2026-10-22
+created_at: 2026-10-22
+type: architecture-implementation
+coordination: >
+  Phase-1-Lead nur fuer Launcher-Registry, Command-Center-Mapping und
+  deterministische Priorisierung. Geschwister-Agenten besitzen Inbox,
+  Dispo, MCP/Events und erpclow-Lessons. Kein Codex-Dateibesitz.
+  Kein Feature-Commit in dieser Session (nur dieser Workboard-Claim).
+goal: >
+  Adaptive Workspace INNERHALB von VALEO: zentrale Registry fuer Module,
+  Views, typisierte Fachaktionen und User-Context. Command Center (Strg+K)
+  verdrahtet berechtigte typisierte Fachaktionen. Priorisierung regelbasiert
+  und testbar; KI nur optionaler leerer Hook. Pin/Fixieren der Startseite
+  bleibt und wird im Overlay ergaenzt. Pipeline ScreenDefinition → RenderPlan
+  → useUniversalMaskRuntime → UniversalMaskRenderer bleibt unangetastet.
+file_ownership:
+  - packages/frontend-web/src/workspace/**
+  - packages/frontend-web/src/app/navigation/**
+  - packages/frontend-web/src/components/navigation/command-palette-model.ts
+  - packages/frontend-web/src/components/navigation/CommandPalette.tsx
+  - packages/frontend-web/src/__tests__/workspace/**
+  - packages/frontend-web/src/__tests__/app/navigation/launchpad-personalization.test.ts
+  - packages/frontend-web/src/__tests__/components/navigation/command-palette-model.test.ts
+  - docs/architecture/adaptive-workspace-framework.md
+  - docs/agent-ops/slices/ADAPTIVE-WORKSPACE-20261022.yaml
+  - docs/agent-ops/active-workboard.md
+nicht_anfassen:
+  - app/documents/**
+  - CaptureScreenHost / Beleg-Inbox-Seiten
+  - Tourenplanung / Disposition / Fuhrpark-Godfiles
+  - app/services/mcp_execution_service.py
+  - app/services/mask_action_runtime_service.py
+  - NATS-Core
+  - docs/architecture/adaptive-workspace-inbox.md
+  - docs/architecture/adaptive-workspace-disposition.md
+  - docs/architecture/adaptive-workspace-events-mcp.md
+  - docs/architecture/adaptive-workspace-erpclow-lessons.md
+  - STUDIO-* / Touren / Training / Bestellvorschlag
+acceptance:
+  - Registry listet Module, Views, typisierte Fachaktionen, User-Context-Contract
+  - Command Center mappt nur berechtigte typisierte Fachaktionen (Navigation + prepare-command)
+  - Priorisierung deterministisch, mit Reason-Codes, ohne LLM-Pflicht
+  - Pin/Fixieren im Launchpad-Overlay erhalten oder ergaenzt
+  - Unit-Tests fuer Registry, Priorisierung, Command-Mapping gruen
+  - Keine Fake-100%-Claims fuer Phase 2-5
+tests:
+  - packages/frontend-web/src/__tests__/workspace/registry.test.ts
+  - packages/frontend-web/src/__tests__/workspace/prioritization.test.ts
+  - packages/frontend-web/src/__tests__/workspace/command-mapping.test.ts
+  - packages/frontend-web/src/__tests__/app/navigation/launchpad-personalization.test.ts
+risks:
+  - LaunchpadBoard ist von start-dashboard (Cockpit-Runtime) entkoppelt; Home-UI
+    bleibt Geschwister-/Folgeschnitt, Registry liefert den Vertrag
+  - command-palette-model.ts stand historisch in HOME-UIX-ANWENDER; aktueller
+    Parent-Auftrag weist Command Center Phase 1 diesem Slice zu
+  - Parallele Agenten an Geschwister-Docs; Master-Doc nur verweisen
+ai_harness:
+  fachlicher_vertrag: >
+    Der Benutzer sucht nicht die App; das System stellt Aufgaben, Infos und
+    Aktionen kontextbezogen bereit. Vier Ebenen: persoenlich, situativ,
+    proaktiv, Dialog (Strg+K). Fachaktionen sind typisiert und berechtigt,
+    keine beliebigen API/DB-Calls.
+  architektur_vertrag: >
+    Kein zweites Frontend, kein Frappe-Port. Meridian-Pipeline bleibt.
+    Spezialkomponenten nur als Metadaten-IDs in der Registry (Phase 2).
+    MCP-WRITE-001-015 gilt; Phase 1 schreibt nicht ueber MCP.
+  daten_vertrag: >
+    Overlay lokal (valeo.launchpad.overlay) um Pin/Fixieren ergaenzt.
+    Keine neue Tabelle, keine Migration, kein Mandantenrecht aus dem Client.
+  test_vertrag: >
+    Pure Unit-Tests ohne DB/HTTP/MagicMock. Konkrete Reason-Codes und
+    Mapping-Shapes. Keine Statuscode-in-(200,400,404)-Tests.
+  security_vertrag: >
+    Client-Filter ist UX; Rechte bleiben serverseitig. Command Center erzeugt
+    nur Navigation oder prepare-command auf deklarierte Fachaktionen.
+  betriebs_vertrag: >
+    Keine Feature-Flags zwingend. Rollback = Overlay-Felder ignorieren und
+    Workspace-Ordner entfernen. Kein Docker, keine neue Testdatenbank.
+  dokumentations_vertrag: >
+    Master-Doc adaptive-workspace-framework.md; Geschwister-Docs nur verweisen.
+    Workboard nachziehen. Kein Feature-Commit.
+external_gates:
+  - not_applicable
+---
