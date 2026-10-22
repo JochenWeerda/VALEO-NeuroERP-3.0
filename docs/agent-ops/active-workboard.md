@@ -19513,3 +19513,8 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 ## AGRI-FLOW-VERIFIED-ACTOR-20261022 - reserviert, Codex
 
 **Owner:** Codex. **Befund:** vier Lagerbuchungswege (Transfer, Spuelcharge, Lot-Verknuepfung und automatische Lotbuchung) verwenden booked_by aus dem Request oder system; trotz gepruefter Bereichsrolle kann der Aufrufer den dauerhaften Buchungsurheber faelschen. **Besitz:** endpoints/agri_silo_material_flow.py und agri_lot_link_booking.py nur gepruefte Auth-Abhaengigkeit/Urheberprojektion; neue signierte HTTP-Negativvertraege und QA/Workboard. Vorhandene Domainservices/Transaktionen, Mandantenpruefung, Rollen, Requestkompatibilitaet unveraendert. Legacy booked_by wird ignoriert, Token-sub entscheidet. Keine neue DB/Container/Migration. **Abnahme:** echte RSA/JWKS-Verifikation; gefaelschter Rumpf/Header, fehlender Rumpfwert, Rollen-/Mandanten-/Signaturfehler, kein Folgeaufruf bei Ablehnung. Bestehende Fachtests erhalten.
+
+
+## DOCFLOW-EDIT-ASYNC-CI-20261022 - reserviert, Codex
+
+**Owner:** Codex. **Befund:** Quality39737807365 genau ein roter UI-Vertrag in native-docflow-edit.test.tsx: Test wartet auf Dialoghuelle, greift dann synchron auf noch nicht initialisierte Tabellenzeile zu. **Besitz:** ausschliesslich diese Testdatei fuer feld-/fehlergebundene async-Abnahme, eigene QA/Workboard. Produktvertraege und alle Wiederholungs-/Metadatenbehauptungen unveraendert; keine Sleeps/Timeoutaufweitung.
