@@ -1,0 +1,51 @@
+id: UIX-MASKENFAMILIEN-TAXONOMIE-20261022
+title: Systemweite Maskenfamilien-Taxonomie und Cluster-Roadmap (Plan)
+status: offen
+owner: null
+priority: high
+created: 2026-10-22
+type: architecture-plan
+
+goal: >
+  Das Beleg-Vererbungsprinzip systemweit auf Ein-/Ausgabemasken übertragen:
+  Kategorien Beleg/Stamm/Liste/Worklist/Ausnahme, Parent-Verträge, reale
+  Child-Cluster aus Inventar und ScreenDefinitions, priorisierte Roadmap P0–P3.
+  Keine Groß-Migration von Pages in diesem Slice.
+
+artefakt: docs/architecture/uix/maskenfamilien-taxonomie.md
+
+dateibesitz:
+  erlaubt:
+    - docs/architecture/uix/maskenfamilien-taxonomie.md
+    - docs/architecture/uix/beleg-maskenfamilie-vererbung.md  # nur Querverweis
+    - docs/architecture/uix/universal-mask-runtime-status.md  # Nachtrag-Verweis
+    - docs/project-context/open-gaps-and-known-issues.md      # UIX-RUNTIME Nachtrag
+    - docs/agent-ops/slices/UIX-MASKENFAMILIEN-TAXONOMIE-20261022.yaml
+    - docs/agent-ops/active-workboard.md
+    - docs/agent-ops/handshakes/maskenfamilien-taxonomie-20261022.md
+  nicht_anfassen_ohne_handshake:
+    - app/core/screen_definitions_beleg.py
+    - app/core/screen_definitions.py  # Massenrefactor erst Implementierungs-Slice
+    - config/document_screen_versions.json
+    - packages/frontend-web/src/pages/**  # keine Page-Migration hier
+    - STUDIO-BELEG-THEME / STUDIO-MODEL / CI-GRUEN
+    - Tourenplanung / Training / Bestellvorschlag Godfiles
+    - docs/agent-ops/slices/UIX-BELEG-FAMILIE-VERERBUNG-20261022.yaml  # nicht überschreiben
+
+abnahme:
+  - Taxonomie-Dokument mit Kategorien, Parent-Verträgen, Child-Beispielen, Anti-Patterns
+  - Priorisierte Roadmap P0–P3 mit Inventar-Bezug (941 / ~61 runtime / ~120 legacy / ~760 hand_built)
+  - Beleg-Slice und Codex-Claims unangetastet; Handshake dokumentiert
+  - Keine Implementierungspflicht / keine Page-Migration
+
+related:
+  - docs/architecture/uix/beleg-maskenfamilie-vererbung.md
+  - docs/architecture/uix/mask-route-migration-inventory.md
+  - docs/MASKEN.md
+  - docs/agent-ops/slices/UIX-BELEG-FAMILIE-VERERBUNG-20261022.yaml
+
+naechste_implementierung_getrennt:
+  - StammObjectPageParent Factory (Pilot Duenger/Saatgut/Supplier)
+  - KontrollWorklistParent Ausbau
+  - StammListenParent Dual-Pfad Rest
+  - Beleg ProcessBand/Ribbon (im Beleg-Slice)

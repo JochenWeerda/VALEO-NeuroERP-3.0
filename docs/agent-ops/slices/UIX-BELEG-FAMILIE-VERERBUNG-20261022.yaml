@@ -1,0 +1,45 @@
+id: UIX-BELEG-FAMILIE-VERERBUNG-20261022
+title: Belegmaskenfamilie Parent/Child-Vererbung (Plan)
+status: offen
+owner: null
+priority: medium
+created: 2026-10-22
+type: architecture-plan
+
+goal: >
+  Eingehende und ausgehende Belegfolgen als Variationen einer Maskenfamilie
+  (Parent-Schablone + Child-Overrides) verbindlich planen; Mapping der Alt-Einstiege,
+  Migrationsreihenfolge und Abgrenzung Studio-Import vs. Runtime-Verdrahtung.
+
+artefakt: docs/architecture/uix/beleg-maskenfamilie-vererbung.md
+
+dateibesitz:
+  erlaubt:
+    - docs/architecture/uix/beleg-maskenfamilie-vererbung.md
+    - docs/design/beleg-studio-variantenmatrix.md  # nur Querverweis
+    - docs/agent-ops/slices/UIX-BELEG-FAMILIE-VERERBUNG-20261022.yaml
+    - docs/agent-ops/active-workboard.md  # eigener Slice-Absatz
+  nicht_anfassen_ohne_handshake:
+    - app/core/screen_definitions_beleg.py
+    - config/document_screen_versions.json
+    - packages/frontend-web/src/components/mask-builder/**  # STUDIO-BELEG-THEME / Compiler
+    - packages/frontend-web/src/pages/einkauf/bestellungen-liste.tsx
+    - packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx
+    - STUDIO-BELEG-THEME / STUDIO-MODEL / CI-GRUEN Claims
+
+abnahme:
+  - Planartefakt beschreibt Familienbaum, Vererbung, Mapping, Migration, § Studio vs Runtime
+  - Keine Kollision mit Codex STUDIO-BELEG-THEME Dateibesitz
+  - Keine Nav-/SD-Implementierung in diesem Slice
+
+naechste_implementierung_getrennt:
+  - Parent ProcessBand/Ribbon-Vertrag
+  - purchase_order Paritaet (Handshake nach MASK-BESTELLUNG-NAV)
+  - Invoice-Children FormBuilder-Ablose
+  - RFQ/Einkaufsangebot als neue Belegvariante nur nach Vertrag
+
+related:
+  - docs/design/beleg-studio-variantenmatrix.md
+  - docs/design/belegmaske-varianten-masterplan.md
+  - docs/architecture/studio-native-migration.md
+  - docs/MASKEN.md

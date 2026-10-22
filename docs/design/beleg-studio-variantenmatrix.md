@@ -1,6 +1,8 @@
 # Eine Studio-Belegmaske mit versionierten Standardvarianten
 
-Stand: 17.10.2026. Verbindliches Ziel des Auftraggebers: eine gemeinsame Maskenfamilie, keine getrennten Maskenimplementierungen je Belegfall. Die aktuelle kanonische Familie hat neun Varianten; die rund 14 bisherigen Einstiege sind keine 14 eigenstaendigen Fachmodelle.
+Stand: 17.10.2026 (Querverweis 22.10.2026). Verbindliches Ziel des Auftraggebers: eine gemeinsame Maskenfamilie, keine getrennten Maskenimplementierungen je Belegfall. Die aktuelle kanonische Familie hat neun Varianten; die rund 14 bisherigen Einstiege sind keine 14 eigenstaendigen Fachmodelle.
+
+**Vererbung / Parent-Child / Migrationsreihenfolge:** [beleg-maskenfamilie-vererbung.md](../architecture/uix/beleg-maskenfamilie-vererbung.md) — OOP-Analog, ProcessBand vs ProcessRibbon, Runtime vs Studio-Import, Slice `UIX-BELEG-FAMILIE-VERERBUNG-20261022`.
 
 ## Kanonische Varianten
 
