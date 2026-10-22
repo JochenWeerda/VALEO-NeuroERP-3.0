@@ -33,16 +33,18 @@ def build_router(spec: EntitySpec, *, writes_enabled=False, agent_roles=()):
         return subject
 
     @router.get('', response_model=PageOut, summary='Generierte Stammdaten mandantengenau lesen')
-    def collection(limit: int = Query(50, ge=1, le=100), skip: int = Query(0, ge=0, le=1000000),
+    def collection(limit: int = Query(50, ge=1, le=100), skip: int | None = Query(None, ge=0, le=1000000),
+                   page: int | None = Query(None, ge=1, le=1000001), q: str | None = Query(None, max_length=200),
                    tenant: str = Depends(get_tenant_id), user: dict = Depends(reader), db: Session = Depends(get_db)):
         actor(user)
+        offset = (page - 1) * limit if page is not None else skip or 0
+        if offset > 1000000 or (page is not None and skip is not None and skip != offset):
+            from fastapi import HTTPException
+            raise HTTPException(422, 'invalid_or_conflicting_pagination')
         deployment(db)
-        import sqlalchemy as sa
-        from app.services.studio_entity_commands import tables
-        rows, _ = tables(spec)
-        total = db.scalar(sa.select(sa.func.count()).select_from(rows).where(
-            rows.c.tenant_id == tenant, rows.c.deleted.is_(False)))
-        return {'items': read(db, spec, tenant, limit=limit, offset=skip), 'total': total, 'limit': limit, 'skip': skip}
+        from app.services.studio_entity_commands import count_visible
+        return {'items': read(db, spec, tenant, limit=limit, offset=offset, search=q),
+                'total': count_visible(db, spec, tenant, search=q), 'limit': limit, 'skip': offset}
 
     @router.get('/{entity_id}', response_model=RowOut, summary='Generierten Stammdatensatz lesen')
     def detail(entity_id: UUID, tenant: str = Depends(get_tenant_id),
@@ -55,12 +57,16 @@ def build_router(spec: EntitySpec, *, writes_enabled=False, agent_roles=()):
         if not writes_enabled:
             from fastapi import HTTPException
             raise HTTPException(403, 'generated_capability_not_enabled')
-        if (user.get('raw') or {}).get('identity_type') == 'agent':
+        identity_type = (user.get('raw') or {}).get('identity_type')
+        if identity_type not in {'human', 'agent', 'service'}:
+            from fastapi import HTTPException
+            raise HTTPException(403, 'declared_identity_type_required')
+        if identity_type != 'human':
             if not set(user.get('roles') or []) & set(agent_roles):
                 from fastapi import HTTPException
                 raise HTTPException(403, 'agent_capability_not_enabled_for_role')
         deployment(db)
-        kind = 'agent' if (user.get('raw') or {}).get('identity_type') == 'agent' else 'human'
+        kind = 'human' if identity_type == 'human' else 'agent'
         result = execute(db, spec, operation, tenant, actor(user), normalized_command(body), entity_id, actor_kind=kind)
         db.commit()
         return {'success': True, 'actionKey': f'{spec.name}_{operation}', 'mode': body.mode, 'result': result}

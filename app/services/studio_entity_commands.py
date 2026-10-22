@@ -109,12 +109,29 @@ def execute(session, spec, operation, tenant, actor, body: EntityCommand, entity
         return result
 
 
-def read(session, spec, tenant, entity_id=None, *, limit=50, offset=0):
+def visible_rows(spec, tenant, search=None):
     if not tenant: raise HTTPException(401, 'verified_tenant_required')
+    if search is not None and (not isinstance(search, str) or len(search) > 200):
+        raise HTTPException(422, 'invalid_search')
+    rows, _ = tables(spec)
+    conditions = [rows.c.tenant_id == tenant, rows.c.deleted.is_(False)]
+    if search and search.strip():
+        columns = [rows.c[column.name] for column in spec.columns if column.type == 'text']
+        conditions.append(sa.or_(*(column.icontains(search.strip(), autoescape=True) for column in columns))
+                          if columns else sa.false())
+    return rows, sa.and_(*conditions)
+
+
+def count_visible(session, spec, tenant, *, search=None):
+    rows, condition = visible_rows(spec, tenant, search)
+    return session.scalar(sa.select(sa.func.count()).select_from(rows).where(condition))
+
+
+def read(session, spec, tenant, entity_id=None, *, limit=50, offset=0, search=None):
     if not 1 <= limit <= 100 or not 0 <= offset <= 1000000:
         raise HTTPException(422, 'invalid_pagination')
-    rows, _ = tables(spec)
-    query = sa.select(rows).where(rows.c.tenant_id == tenant, rows.c.deleted.is_(False))
+    rows, condition = visible_rows(spec, tenant, search)
+    query = sa.select(rows).where(condition)
     if entity_id is not None:
         row = session.execute(query.where(rows.c.id == UUID(str(entity_id)))).mappings().first()
         if row is None: raise HTTPException(404, 'entity_not_found')

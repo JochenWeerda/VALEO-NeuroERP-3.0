@@ -463,3 +463,26 @@ it('recompiles Studio field, table and layout edits under the same screen revisi
   const table = compileRenderPlanFromScreenDefinition({ ...schema, tables: [{ key: 'probe', label: 'Probe', columns: [{ key: 'summe', label: 'Summe', numeric: true }] }] })
   expect(table.tablesByKey.probe).toBeDefined()
 })
+
+
+it('keeps action targets inside dense rows while retaining compact read-only rows', () => {
+  const definition = {
+    ...crmSchema(), layout: { density: 'expertDense' as const, tableProfile: 'audit' as const },
+    tables: [{ key: 'history', label: 'History', rowHeight: 36,
+      columns: [{ key: 'actor', label: 'Actor' }],
+      rowActions: [{ key: 'compare', label: 'Compare', permission: 'history.read' }] }],
+  }
+  const withActions = compileRenderPlanFromScreenDefinition(definition, { permissions: ['history.read'] })
+  const reader = compileRenderPlanFromScreenDefinition(definition, { permissions: [] })
+  expect(withActions.tablesByKey.history.rowHeight).toBeGreaterThanOrEqual(52)
+  expect(reader.tablesByKey.history.rowHeight).toBe(36)
+  expect(reader.tablesByKey.history.rowActions).toEqual([])
+})
+
+it('defaults audit tables to one work area and respects explicit column choices', () => {
+  const definition = { ...crmSchema(), layout: { floorplan: 'worklist' as const, tableProfile: 'audit' as const } }
+  expect(compileRenderPlanFromScreenDefinition(definition).shell.columnNavigation).toBe('single')
+  expect(compileRenderPlanFromScreenDefinition({ ...definition, layout: {
+    ...definition.layout, columnNavigation: 'listDetail' as const,
+  } }).shell.columnNavigation).toBe('listDetail')
+})

@@ -19438,7 +19438,7 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 **STUDIO-ENTITY-RELEASE reale Sichtpruefung:** Frontend3001 aus gepruefter Fassung bereitgestellt, fehlende lokale PostCSS-/Public-Dateien aus HEAD ergaenzt. Synthetische SSO-Anmeldung bis Arbeitsplatz und Screen-Studio erfolgreich; Themewechsel hell/dunkel sichtbar, Studio uebernimmt Dark Mode. Keine Rollenaenderung/Publikation. Vorhandener temporary-Adapter bleibt korrekt gesperrt; neue Entity-Live-Freigabekette und allgemeine Kontrastabnahme nicht damit erledigt. Screenshot lokal artifacts/studio-dark-browser-20261021.png; QA studio-entity-release-20261021.md. Testfehlerreparatur1f449c8d0 gepusht; CI-Nachlauf offen.
 
 
-## STUDIO-LIVE-PROBE-20261021 - reserviert, Codex
+## STUDIO-LIVE-PROBE-20261021 - abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** echte lokale CLI-/Browserfreigabekette aus kanonischer Quellfassung am bestehenden valeo_probe, ohne neue Datenbank/Container und ohne Fachwrites auf Entwicklung. **Besitz:** studio_process_simulation.py ausschliesslich deklarierter APP_ENV=test-Probevertrag und eigener Test test_studio_probe_configuration.py; eigene lokale Laufzeit-/Abnahmeartefakte; QA und Workboard. **Annahme:** im ausdruecklichen Testbetrieb darf die App selbst am bereits konfigurierten valeo_probe arbeiten; Simulation bleibt getrennte Verbindung mit Rollback, Sperre und Nachkontrolle. Produktion/Entwicklung duerfen ihren Anwendungsbestand weiterhin nicht simulieren. Keine CI-Vortaeuschung, kein Authoverride; echte Keycloak-Identitaeten, Bereichsrollen und Vier-Augen-Pruefung. Eigener begrenzter synthetischer Entity-Vertrag, nur dessen Tabellenmigration nach Fremdnutzungspruefung. Vorhandene Container und geteilte Fremddaten bleiben unveraendert. **Abnahme:** negative Konfigurationsvertraege; signierte reale HTTP-/CLI-Kette mit Prozess-/Historiendaten, Browser-Darstellung in hell/dunkel, eigene temporare Berechtigungen zuruecknehmen.
 
@@ -19461,7 +19461,7 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 **STUDIO-LIVE-PROBE visuelle Zentralreparatur:** Reale Historien-Sichtpruefung bei1440x900 zeigt abgeschnittene Aktionsbuttons: Compiler erzwingt36px expertDense auch bei44px Touch-Zielen. Besitz zusaetzlich zentraler render-plan/schema-compiler.ts und dessen bestehende Vertraege; Zeilen mit sichtbaren Aktionen erhalten ausreichende Hoehe, reine Datenzeilen bleiben dicht. History-ScreenDefinition erhaelt ausdruecklich einspaltige Auditliste statt automatisch schmaler Mehrspaltenansicht. Keine individuelle React-Maske.
 
 
-## IDENTITY-SELF-LOGOUT-20261021 - reserviert, Codex
+## IDENTITY-SELF-LOGOUT-20261021 - abgeschlossen, Codex
 
 **Owner:** Codex. **Befund:** eigener Sitzungslogout erhielt beim breiten Schreibrollen-Rollout dependencies=SCHREIBEN[PLATTFORM] (nuradmin). Normale Mitarbeitende koennen damit die eigene Serversitzung nicht widerrufen; bestehender signierter Test verwendet FINANCE_BEARBEITEN. **Besitz:** identity_management.py ausschliesslich eigener session/logout; check_write_routes_roles.py exakter begruendeter Delegationsvertrag; test_identity_sessions.py signierte rollenlose/Leser-/Fremdselector-/Widerrufstests. **Entscheidung:** jede authentifizierte Person darf ausschliesslich die aus ihrem Token bestimmte eigene Sitzung beenden, ohne Fachrolle. Kein Eingabefeld fuer Zielidentitaet. subjects/revoke bleibtadmin. Keine pauschale Identity-Prefix-Ausnahme oder Baselineerhoehung. Vorhandenes Redis und valeo_probe, keine neuen Ressourcen. **Abnahme:** alte Route reproduzierbar403; korrigierte Route204, erneute Tokenverwendung401; fremde Sitzungen unveraendert.
 
@@ -19474,3 +19474,6 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 
 
 **PHP-SECURITY Ergebnis:** offizielles Advisory bestaetigt;25 laufende Container ohne PHP, einziger gestoppter Container Java-Keycloak. Windows-Suchpfad, bekannte Installationsorte, laufende Webserver und registrierte Installationen ohne PHP-Treffer. Projekt-/Compose-/Dockerdefinitionen ohne PHP. Kein lokales Updateziel gefunden, deshalb kein Installationsnachweis erfunden. Portable Fremdinstallationen/externe Server nicht abgedeckt. QA php-security-20261022.md.
+
+
+**STUDIO-LIVE-PROBE / IDENTITY-SELF-LOGOUT Ergebnis22.10.:** reale CLI-/SSO-/Vier-Augen-/Simulations-/CRUD-Kette abgeschlossen, gefundene zentrale Runtime-/Paging-/Identitaets-/Wiederholungs-/Logoutfehler repariert.4 eigene Saetze deaktiviert,11 Receipts/11 Outbox, Freigaben retired, temporaere Rollen entzogen/Pruefer gesperrt, Registrybaseline wiederhergestellt.48 SQL-,76 CLI-,69 UI-,17 Redisfaelle gruen; letzte Nachtraege54 Backend/23 UI und TypeScript gruen. Handbuch mit6 Screenshots; QA studio-entity-release-20261021.md. Globale Maskenmigration und Sonar-Coverage63,6/80 bleiben offen; kein Gesamtabschluss behauptet.

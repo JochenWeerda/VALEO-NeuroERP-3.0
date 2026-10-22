@@ -20,7 +20,9 @@ def test_deterministic_bundle_uses_central_renderer_and_explicit_disabled_writes
     definition=json.loads(bundle['files']['screen.json'])
     assert definition['tables'][0]['dataSourceKey']==spec().name
     assert definition['layout']['floorplan']=='worklist'
-    assert definition['fields'][0]['label']=='Bezeichnung'
+    assert definition['fields']==[]
+    assert definition['actions'][0]['inputFields'][0]['label']=='Bezeichnung'
+    assert definition['layout']['columnNavigation']=='single'
     assert all(action['disabled'] and action['forbiddenForAgents'] for action in definition['agentContract']['availableActions'])
     for name in ('migration.py','router.py'):compile(bundle['files'][name],name,'exec')
     assert 'FOREIGN KEY(tenant_id)' in bundle['files']['migration.py']

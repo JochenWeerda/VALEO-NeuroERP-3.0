@@ -26,7 +26,7 @@ def build_studio_history(diff=False):
             "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
             "dataSources": [{"key": key, "endpoint": "/api/v1/studio/history-events/{entity_id}/diff" if diff else "/api/v1/studio/drafts/{entity_id}/history-view"}],
             "tabs": [{"key": key, "label": table["label"], "tables": [table]}],
-            "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "audit"},
+            "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "audit", "columnNavigation": "single"},
             "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True,
                             "lookupMinChars": 2, "bundleGroup": "platform"},
             "noWorkflowReason": "Unveränderliche Studio-Historie; nur lesender Vergleich, keine Belegänderung.",

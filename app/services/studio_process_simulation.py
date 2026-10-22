@@ -74,7 +74,10 @@ def _configured_probe():
     parsed = make_url(url)
     development = make_url(str(settings.DATABASE_URL))
     ci = os.environ.get("CI", "").lower() == "true"
-    if not ci and (parsed.database != "valeo_probe" or parsed.database == development.database):
+    # Explicit local test deployments reuse the one shared probe for the app
+    # and rollback-only simulation; matching names on another server are not enough.
+    shared_test = settings.APP_ENV == "test" and parsed == development
+    if not ci and (parsed.database != "valeo_probe" or (parsed.database == development.database and not shared_test)):
         raise RuntimeError("simulation_database_not_authorized")
     if ci and parsed != make_url(os.environ.get("DATABASE_URL", "")):
         raise RuntimeError("simulation_ci_database_not_authorized")

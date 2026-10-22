@@ -26,7 +26,7 @@ def current_session(request: Request,user: dict=Depends(get_current_user)) -> Se
         absolute_seconds=identity_session.settings.IDENTITY_SESSION_MAX_SECONDS)
 
 
-@router.post('/session/logout',status_code=204,response_class=Response,response_model=None,summary='Aktuelle Sitzung serverseitig widerrufen', dependencies=SCHREIBEN["PLATTFORM"])
+@router.post('/session/logout',status_code=204,response_class=Response,response_model=None,summary='Aktuelle eigene verifizierte Sitzung serverseitig widerrufen')
 def logout(request: Request,user: dict=Depends(get_current_user)) -> Response:
     identity_session.revoke_session(request.state.token_claims,request.state.authenticated_token)
     return Response(status_code=204)

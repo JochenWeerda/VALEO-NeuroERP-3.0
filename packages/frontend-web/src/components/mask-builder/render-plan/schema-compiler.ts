@@ -70,11 +70,14 @@ function compileTable(
 ): RenderTablePlan {
   const pageSize = Math.min(table.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
   const declaredRowHeight = table.rowHeight ?? (density === 'expertDense' ? 36 : density === 'compact' ? 44 : 52)
-  const rowHeight = density === 'expertDense'
+  const denseRowHeight = density === 'expertDense'
     ? Math.min(declaredRowHeight, 36)
     : density === 'compact'
       ? Math.min(declaredRowHeight, 44)
       : Math.max(declaredRowHeight, 52)
+  const rowActions = table.rowActions?.filter((action) => !action.permission || permissions.includes(action.permission))
+  // A 44px action target plus cell padding must fit inside its virtual row.
+  const rowHeight = rowActions?.length ? Math.max(denseRowHeight, 52) : denseRowHeight
   return {
     key: table.key,
     label: table.label,
@@ -98,7 +101,7 @@ function compileTable(
     tableProfile,
     rowRouteTemplate: table.rowRouteTemplate,
     // Zeilenaktionen wie Kopfaktionen nur mit Recht (Rollen-Projektion der Kommandowege).
-    rowActions: table.rowActions?.filter((action) => !action.permission || permissions.includes(action.permission)),
+    rowActions,
     bulkActions: table.bulkActions,
     rowDetail: compileRowDetail(table, onePage),
   }
@@ -282,7 +285,8 @@ export function compileRenderPlan(
   }
 
   const hasTables = (schema.tables?.length ?? 0) > 0 || (schema.tabs ?? []).some((tab) => (tab.tables?.length ?? 0) > 0)
-  const columnNavigation = defaultColumnNavigation(floorplan, hasTables, schema.layout?.columnNavigation)
+  const columnNavigation = defaultColumnNavigation(floorplan, hasTables,
+    schema.layout?.columnNavigation ?? (schema.layout?.tableProfile === 'audit' ? 'single' : undefined))
   const sectionNavigation = resolveSectionNavigation(floorplan, columnNavigation, schema.layout?.sectionNavigation)
   const onePage = sectionNavigation === 'anchors'
 

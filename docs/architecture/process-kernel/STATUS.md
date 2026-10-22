@@ -889,3 +889,8 @@ signierter CLI-Lebenszyklus bis unabhaengiger Publikation und Ruecknahme
 nachgewiesen. Readiness/Rechteprojektion an vorhandene Backend-Rollen gebunden.
 Ein neuer lesender Metadatenpfad, bestehende API-Pfade unveraendert.
 Reale Browser-/Imageabnahme und komplette Maskenmigration bleiben offen.
+
+
+## Studio-Live-Abnahme 22.10.2026
+
+Generierte Stammdatenmaske real ueber CLI, SSO, unabhaengige Freigabe, rollbackgesicherte Simulation und Browser-Anlage/Aenderung/Deaktivierung geprueft. Zentrale Runtime-/Versions-/Idempotenz-/Mandanten-/Identitaetsgrenzen und eigene Sitzungsabmeldung nachgebessert. Temporaere Freigaben/Rechte zurueckgenommen, eigene Testdaten deaktiviert, unveraenderliche Historie erhalten. QA: [Studio-Entity-Release](../../quality-assurance/studio-entity-release-20261021.md); [Bedienhandbuch](../../benutzerhandbuch/studio-generierte-stammdaten.md). Lokale PHP-Pruefung ohne gefundene betroffene Runtime: [Sicherheitsnachweis](../../quality-assurance/php-security-20261022.md). Gesamte Altmaskenmigration und Sonar-Coverage80 bleiben offen.

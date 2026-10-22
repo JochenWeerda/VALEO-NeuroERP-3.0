@@ -45,6 +45,9 @@ AUSGENOMMEN = re.compile(r"^/api/v1/(auth|session|sessions|me|users/me|portal)(/
 #: Delegierte Wege, die ihr Recht tiefer im Aufruf pruefen (Nutzerentscheid 19.10.2026: "delegierte Commands
 #: [koennen] ihre Rechte auch tiefer im Aufruf pruefen"). Jeder Eintrag nennt, wo und was geprueft wird.
 DELEGIERT = {
+    "POST /api/v1/identity/session/logout": "identity_management.logout: ausschliesslich eigene Sitzung aus "
+        "verifizierten request.state.token_claims/authenticated_token, kein Ziel aus Nutzereingabe. "
+        "Keine Fachrolle fuer Selbstabmeldung; subjects/revoke bleibt admin. Signiert geprueft in test_identity_sessions.py.",
     "POST /api/v1/mcp/tools/call": "app.services.mcp_execution_service.execute_mcp_tool: Werkzeug-Scope aus dem "
                                    "Token, Mandanten-Claim, Sperre fuer reine Mensch-Aktionen; der Zielweg laeuft mit "
                                    "dem Token des Aufrufers und prueft seine Bereichsrolle selbst. Eine Fachrolle "

@@ -23,6 +23,7 @@ import {
 import { StudioVariantPresentation } from './StudioVariantPresentation'
 import { StudioMigrationPlan } from './StudioMigrationPlan'
 import { StudioHistoryPanel } from './StudioHistoryPanel'
+import { StudioGateSummary } from './StudioGateSummary'
 import { emptyStudioDraft } from './studio-defaults'
 import { studioReducer } from './studio-reducer'
 import { StudioDialogue } from './StudioDialogue'
@@ -52,7 +53,8 @@ export function ScreenStudioPage(): JSX.Element {
   const [feedback, setFeedback] = useState<string | null>(null)
   const [previewGeneration, setPreviewGeneration] = useState(0)
   const queryClient = useQueryClient()
-  const refreshHistory = (id: string) => { void queryClient.invalidateQueries({ queryKey: ['platform/studio-history', id] }) }
+  const refreshHistory = (id: string) => { void queryClient.invalidateQueries({ predicate: query =>
+    query.queryKey.includes(id) && (query.queryKey[0] === 'platform/studio-history' || query.queryKey[1] === 'platform/studio-history') }) }
   const catalog = useQuery({ queryKey: ['studio-catalog'], queryFn: fetchStudioCatalog })
   const drafts = useQuery({ queryKey: ['studio-drafts'], queryFn: fetchStudioDrafts })
   const dirty = savedSignature !== JSON.stringify(definition)
@@ -277,16 +279,10 @@ export function ScreenStudioPage(): JSX.Element {
 
       <aside className="space-y-3" data-testid="studio-gates">
         <h2 className="text-sm font-semibold uppercase tracking-wide">Gates</h2>
-        {report?.violations.length ? (
-          <ul className="list-disc pl-4 text-sm text-destructive">
-            {report.violations.map((item) => <li key={item}>{item}</li>)}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted-foreground">Keine Studio-Verletzungen.</p>
-        )}
-        <p className="text-sm">{report?.definitionReady && catalog.data?.permissions?.canPublish && simulation?.passed && simulation.candidate_revision === savedRevision && migrationReady && !dirty ? 'Freigabe nach menschlicher Prüfung möglich.' : 'Freigabe gesperrt, bis Vertragsprüfung und Prozesssimulation bestanden sind.'}</p>
-        {semanticPreview ? <p className="text-sm text-destructive">Diese Kalkulationsprobe besitzt noch keine freigegebene produktive Datenbindung und Prozessvariante.</p>
-          : (report?.readiness.errors ?? []).map((item) => <p key={item} className="text-sm text-destructive">{item}</p>)}
+        <StudioGateSummary report={report} semanticPreview={semanticPreview}
+          publishedUnchanged={savedStatus === 'published_temp' && !dirty}
+          readyToPublish={Boolean(report?.definitionReady && catalog.data?.permissions?.canPublish && simulation?.passed
+            && simulation.candidate_revision === savedRevision && migrationReady && !dirty)} />
       </aside>
       <StudioMigrationPlan key={`plan:${draftId ?? 'new'}:${savedRevision ?? 'unsaved'}`} draftId={draftId} revision={savedRevision}
         disabled={dirty || Boolean(pending) || !catalog.data?.permissions?.canDesign || !['draft', 'review'].includes(savedStatus ?? '')}

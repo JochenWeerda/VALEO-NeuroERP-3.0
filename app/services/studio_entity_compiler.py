@@ -48,7 +48,7 @@ def compile_entity(spec: EntitySpec, *, catalog_only=False):
     definition = {'schemaVersion': 1, 'id': screen_id, 'domain': spec.domain, 'mode': 'list', 'title': spec.label,
         'processSimulation': {'profile':'studio.entity.v1','entity':spec.name,'contractHash':spec_hash},
         'adapter': {'type': 'native', 'sourceId': screen_id, 'temporary': True},
-        'layout': {'floorplan': 'worklist', 'density': 'compact', 'contextRail': 'audit',
+        'layout': {'floorplan': 'worklist', 'density': 'compact', 'contextRail': 'audit', 'columnNavigation': 'single',
                    'tableProfile': 'inventory' if spec.domain == 'inventory' else 'standard'},
         'dataSources': [{'key': spec.name, 'endpoint': endpoint, 'pageSize': 50}],
         'tables': [{'key': 'list', 'label': spec.label, 'dataSourceKey': spec.name, 'serverPagination': True,
@@ -59,8 +59,8 @@ def compile_entity(spec: EntitySpec, *, catalog_only=False):
                         {'key':'version','label':'Version','sortable':False,'filterable':False},
                         {'key':'created_at','label':'Erstellt am','renderKind':'datetime','sortable':False,'filterable':False}],
                     'rowActions': actions[1:]}],
-        'fields': [{'key': c.name, 'label': c.label or c.name, 'type': 'number' if c.type in {'integer','decimal'} else 'text' if c.type == 'uuid' else c.type,
-                    'required': not c.nullable} for c in spec.columns], 'actions': actions[:1],
+        # Editing belongs to declared action dialogs; the list has no inert form.
+        'fields': [], 'actions': actions[:1],
         'agentContract': {'schemaVersion': 1, 'domain': spec.domain, 'availableActions': actions,
                           'editableFields': [c.name for c in spec.columns]}}
     module = ('"""Generated entity router; include only after migration and acceptance."""\n'

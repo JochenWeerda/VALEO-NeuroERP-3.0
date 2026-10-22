@@ -4,10 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { TopBar } from '@/components/navigation/TopBar'
 
 const fixture = vi.hoisted(() => ({
-  user: null as { name: string; email: string } | null, logout: vi.fn(),
+  authenticated: true, user: null as { name: string; email: string } | null, logout: vi.fn(),
 }))
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({
-  user: fixture.user, logout: fixture.logout, isAuthenticated: fixture.user !== null,
+  user: fixture.user, logout: fixture.logout, isAuthenticated: fixture.user !== null && fixture.authenticated,
 }) }))
 vi.mock('@/hooks/useFeature', () => ({ useFeature: () => false }))
 vi.mock('@/hooks/useTheme', () => ({ useTheme: () => ({ isDark: false, toggleTheme: vi.fn() }) }))
@@ -22,6 +22,7 @@ vi.mock('@/app/routing/typed-router', () => ({
 
 beforeEach(() => {
   fixture.user = { name: 'Synthetic Login Test', email: 'login-test@example.invalid' }
+  fixture.authenticated = true
   fixture.logout.mockReset()
 })
 afterEach(cleanup)
@@ -41,6 +42,17 @@ describe('canonical topbar identity and logout', () => {
     await act(async () => {})
     fireEvent.click(view.getByRole('button', { name: 'Benutzermenü' }))
     fireEvent.click(view.getByRole('button', { name: 'Abmelden' }))
+    expect(fixture.logout).toHaveBeenCalledTimes(1)
+  })
+
+  it('allows clearing a cached identity after the server session expires', async () => {
+    fixture.authenticated = false
+    const view = render(<TopBar />)
+    await act(async () => {})
+    fireEvent.click(view.getByRole('button', { name: 'Benutzermenü' }))
+    const logout = view.getByRole('button', { name: 'Abmelden' }) as HTMLButtonElement
+    expect(logout.disabled).toBe(false)
+    fireEvent.click(logout)
     expect(fixture.logout).toHaveBeenCalledTimes(1)
   })
 

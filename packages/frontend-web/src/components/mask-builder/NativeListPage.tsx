@@ -63,6 +63,7 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
   const schema = useScreenDefinition(screenId).data
   const permissions = useScreenPermissions(schema)
   const laufend = useRef(new Set<string>())
+  const absicht = useRef<{ inhalt: string; id: string } | null>(null)
   const [auftrag, setAuftrag] = useState<{ aktion: Aktion; row: Row; werte: Row } | null>(null)
   const [stufe, setStufe] = useState<'eingabe' | 'bestaetigung' | null>(null)
   const [grund, setGrund] = useState('')
@@ -82,16 +83,26 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
     try {
       // Jeder Platzhalter aus der Zeile ({entity_id} = id, sonst gleichnamiges Feld), wie bei Navigationsrouten.
       const pfad = zielRoute(aktion.commandEndpoint, row)
+      const versioniert = /^\/api\/v1\/studio\/entities\/studio_[a-z0-9_]+\/[^/]+\/actions\/(update|delete)$/.test(pfad)
+      if (versioniert && (!Number.isInteger(row.version) || Number(row.version) < 1)) {
+        throw new Error('Die angezeigte Version fehlt. Bitte die Liste neu laden.')
+      }
+      const inhalt = JSON.stringify([screenId, pfad, row.version, werte, begruendung])
+      if (absicht.current?.inhalt !== inhalt) absicht.current = { inhalt, id: crypto.randomUUID() }
       const { data } = await apiClient.request<MaskCommandResult>({
         url: pfad,
         method: aktion.method ?? 'POST',
-        data: { ...werte, ...(begruendung ? { _auditReason: begruendung } : {}), _idempotencyKey: crypto.randomUUID() },
+        data: { ...werte, ...(versioniert ? { expected_version: row.version } : {}),
+          ...(begruendung ? { _auditReason: begruendung } : {}), _idempotencyKey: absicht.current.id },
       })
       if (data && typeof data === 'object' && data.success === false) {
         throw new Error(data.error ?? 'Die Aktion wurde abgelehnt.')
       }
-      await queryClient.invalidateQueries({ queryKey: [screenId] })
+      // Entity queries start with screenId; tenant-isolated table queries with tenantId.
+      await queryClient.invalidateQueries({ predicate: query =>
+        query.queryKey[0] === screenId || query.queryKey[1] === screenId })
       toast({ title: aktion.label, description: data?.summary ?? 'Ausgefuehrt.' })
+      absicht.current = null
       schliessen()
     } catch (error) {
       toast({ title: `${aktion.label} fehlgeschlagen`, description: getAxiosErrorMessage(error), variant: 'destructive' })

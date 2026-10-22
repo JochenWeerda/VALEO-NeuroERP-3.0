@@ -67,3 +67,8 @@ angenommenen Audit-Enum-Referenzwert auf; beides im finalen Lauf geklaert.
 Ein lokaler Plugin-Registrierungsfehler wurde im Runner korrigiert.
 Keine Produktlogik, produktive Rechte, Datenbanken oder Container geaendert.
 Sonar-Rescan der Testreparatur und echte Coverage-Erweiterung bleiben offen.
+
+
+## Bestaetigter Nachlauf22.10.
+
+Quality39642251908 (4ef827e08): alle12 Vorjobs gruen, Sonar-ZuverlaessigkeitA und keine neuen BUG-Befunde. Die sieben Testfehler sind damit geschlossen. Security/Hotspots/Duplizierung gruen; allein neue Coverage63,6 unter80. Echte Coverage-Erweiterung bleibt erforderlich; keine Ausschluss-/Schwellenaenderung. Neuer Studio-Meilenstein benoetigt eigenen Nachlauf.

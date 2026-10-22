@@ -162,7 +162,7 @@ export function TopBar({
   const isTouchChrome = useTouchDevice()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
-  const { user, logout, isAuthenticated } = useAuth()
+  const { user, logout } = useAuth()
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent): void => {
@@ -395,7 +395,7 @@ export function TopBar({
             </button>
             <div className="my-1 h-px bg-border" />
             <button type="button" className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-left text-sm text-destructive hover:bg-accent"
-              disabled={!isAuthenticated} onClick={() => { setUserMenuOpen(false); logout() }}>
+              disabled={!user} onClick={() => { setUserMenuOpen(false); logout() }}>
               <LogOut className="h-4 w-4" />
               <span>Abmelden</span>
             </button>

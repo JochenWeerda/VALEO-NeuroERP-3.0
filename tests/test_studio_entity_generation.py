@@ -51,7 +51,7 @@ def entity(subject_data):
 
 def auth(entity, role='CRM_BEARBEITEN', tenant=None):
     return {'Authorization':'Bearer '+entity[2].token(tenant or entity[3],
-        changes={'sub':'synthetic-editor','roles':[role] if role else []})}
+        changes={'sub':'synthetic-editor','roles':[role] if role else [], 'identity_type':'human'})}
 
 
 def path(entity): return '/api/v1/studio/entities/'+entity[5].name

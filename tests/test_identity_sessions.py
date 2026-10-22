@@ -84,12 +84,13 @@ def test_session_store_failure_never_falls_back_to_memory(session,monkeypatch):
     assert error.value.status_code == 503
 
 
-def test_actual_signed_http_logout_denies_reuse(probe,session,monkeypatch):
+@pytest.mark.parametrize('roles', [[], ['FINANCE_LESEN'], ['FINANCE_BEARBEITEN']])
+def test_actual_signed_http_logout_denies_reuse(probe,session,monkeypatch,roles):
     from main import app
     from fastapi.testclient import TestClient
     monkeypatch.setattr(sessions,'validate',ORIGINAL_VALIDATE)
     client=TestClient(app)
-    headers=probe.headers()
+    headers={'Authorization':'Bearer '+probe.token(changes={'roles':roles})}
     assert client.get('/api/v1/identity/session',headers=headers).status_code==200
     assert client.post('/api/v1/identity/session/logout',headers=headers).status_code==204
     assert client.get('/api/v1/identity/session',headers=headers).status_code==401
@@ -98,6 +99,24 @@ def test_actual_signed_http_logout_denies_reuse(probe,session,monkeypatch):
     assert entries[0][1]['actor']=='human-a'
     assert entries[0][1]['event']=='session_revoked'
     assert headers['Authorization'] not in str(entries)
+
+
+def test_self_logout_cannot_target_another_session_or_tenant(probe, session, monkeypatch):
+    from main import app
+    from fastapi.testclient import TestClient
+    monkeypatch.setattr(sessions, 'validate', ORIGINAL_VALIDATE)
+    client = TestClient(app)
+    own = {'Authorization': 'Bearer ' + probe.token(changes={'roles': []})}
+    other = {'Authorization': 'Bearer ' + probe.token(changes={'sub': 'other-person', 'roles': []})}
+    assert client.get('/api/v1/identity/session', headers=own).status_code == 200
+    assert client.get('/api/v1/identity/session', headers=other).status_code == 200
+    assert client.post('/api/v1/identity/subjects/revoke', headers=own, json={'subject': 'other-person'}).status_code == 403
+    assert client.post('/api/v1/identity/session/logout', headers={**own, 'X-Tenant-ID': 'tenant-b'}).status_code == 403
+    assert client.get('/api/v1/identity/session', headers=own).status_code == 200
+    assert client.post('/api/v1/identity/session/logout', headers=own, json={'subject': 'other-person'}).status_code == 204
+    assert client.get('/api/v1/identity/session', headers=own).status_code == 401
+    assert client.get('/api/v1/identity/session', headers=other).status_code == 200
+    assert client.post('/api/v1/identity/session/logout').status_code == 401
 
 
 def test_idle_websocket_closes_after_shared_revocation(probe,session,monkeypatch):

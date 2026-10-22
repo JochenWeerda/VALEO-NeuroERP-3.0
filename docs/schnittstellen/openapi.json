@@ -323422,7 +323422,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Aktuelle Sitzung serverseitig widerrufen",
+        "summary": "Aktuelle eigene verifizierte Sitzung serverseitig widerrufen",
         "tags": [
           "identity"
         ]

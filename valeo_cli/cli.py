@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 import uuid
@@ -191,10 +192,22 @@ def cmd_ausfuehren(args, http, token, out, ask: Callable[[str], str], stdin) -> 
         if "idempotency_key" in body:
             result["idempotenz"] = key
     else:
+        generated = bool(re.fullmatch(r'/api/v1/studio/entities/studio_[a-z0-9_]+/(?:\{entity_id\}/)?actions/(?:create|update|delete)', action.get('commandEndpoint', '')))
+        if generated and action['commandEndpoint'].endswith(('/update', '/delete')):
+            version = args.version if args.version is not None else payload.get('expected_version')
+            if type(version) is not int or version < 1:
+                raise UsageError('Diese Aktion braucht die gelesene Version (--version).')
+            if 'expected_version' in payload and payload['expected_version'] != version:
+                raise UsageError('Widerspruechliche Versionsangaben.')
+            payload = {**payload, 'expected_version': version}
+        key = args.idempotenz or (str(uuid.uuid4()) if generated else None)
         method, path, body = support.build_request(
             action, screen_id=args.maske, entity_id=args.id, payload=payload, mode=args.modus,
-            audit_reason=args.grund, idempotency_key=args.idempotenz)
-        result = _request(http, token, method, path, body)
+            audit_reason=args.grund, idempotency_key=key)
+        result = (_send_retryable(http, token, method, path, body, key, out) if key
+                  else _request(http, token, method, path, body))
+        if generated and not args.idempotenz and isinstance(result, dict):
+            result = {**result, 'idempotenz': key}
     if args.json:
         out(json.dumps(result, ensure_ascii=False, indent=2))
     else:
