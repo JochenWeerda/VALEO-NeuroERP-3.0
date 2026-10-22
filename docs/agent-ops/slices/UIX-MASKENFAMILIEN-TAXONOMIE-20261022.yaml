@@ -45,7 +45,8 @@ related:
   - docs/agent-ops/slices/UIX-BELEG-FAMILIE-VERERBUNG-20261022.yaml
 
 naechste_implementierung_getrennt:
-  - StammObjectPageParent Factory (Pilot Duenger/Saatgut/Supplier)
+  - StammObjectPageParent Factory (Pilot) — geliefert UIX-STAMM-OBJECTPAGE-PARENT-20261022
+  - Weitere Stamm-Children an Parent (Bankkonto, Artikelbestand, …)
   - KontrollWorklistParent Ausbau
   - StammListenParent Dual-Pfad Rest
   - Beleg ProcessBand/Ribbon (im Beleg-Slice)

@@ -11,9 +11,9 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## UIX-STAMM-OBJECTPAGE-PARENT-20261022 — reserviert, Cursor Composer
+## UIX-STAMM-OBJECTPAGE-PARENT-20261022 — abgeschlossen, Cursor Composer
 
-**Owner:** Cursor Composer. **Stand:** reserviert 2026-10-22. **Ziel:** P1 aus Taxonomie — gemeinsamer `StammObjectPageParent`-Builder (Meridian-Layout einmal); Pilot-Children Duenger/Saatgut/Supplier/Debitor/Kreditor aus Parent+Patch; Create bleibt Legacy (UIX-057). **Dateibesitz:** `app/core/stamm_object_page_parent.py` (neu); duenne Builder in `app/core/screen_definitions.py` nur fuer die fuenf Pilot-IDs; eigener Vertragstest; QA/Slice/Taxonomie-Nachtrag/UMR/Open-Gaps/Workboard. **Nicht anfassen:** STUDIO-ENTITY-RELEASE / GENERATED-ENTITIES / BELEG-THEME / MODEL / SEMANTIC / CI-GRUEN (Codex Gate D); `screen_definitions_beleg.py` / `document_screen_versions.json`; Touren/Training/Bestellvorschlag; keine Page-Migration, kein pruefstand Reset. **Abnahme:** Parent-Factory liefert floorplan `objectPage` + density + anchors; fuenf Children teilen Shell, fachliche Felder/Tabs bleiben Overrides; Vitest/pytest gruen; Inventar-Delta 0 (keine neuen Routen).
+**Owner:** Cursor Composer. **Stand:** abgeschlossen 2026-10-22. **Ziel:** P1 Taxonomie — `StammObjectPageParent`-Factory; Pilot Duenger/Saatgut/Supplier/Debitor/Kreditor. **Ergebnis:** `app/core/stamm_object_page_parent.py`; fuenf Builder auf Parent+Patch (Meridian objectPage/anchors; Finance audit-rail; Supplier extra Bestellung); pytest 10/10 + meridian-party 5/5; QA `docs/quality-assurance/stamm-objectpage-parent-20261022.md`. Create Legacy. Codex Gate D unangetastet. **Folge:** Rest-Stamm-Children an Parent; CLI-Siegel einer Pilot-Maske nach Entity-Release Image/CI.
 
 ## STUDIO-SYNC-CURSOR-20261022 — Sync/Nachweis, Cursor Composer
 
@@ -29,7 +29,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 **Qualitaetsversprechen:** docs/architecture/uix/made-by-studio-qualitaetsversprechen.md — CLI+Freigabe+Runtime+Browser; Draft-Count reicht nicht.
 
-**Naechster Blocker / Slice:** Image-/CI-Nachlauf + Siegelnachweis fuer eine Stamm-Parent-Maske (CLI-Lebenszyklus gegen Live); Beleg-Theme/Storno bleiben Codex. Keine Massenmigration 757 Routen.
+**Naechster Blocker / Slice:** Codex Gate D (Image/CI + Browser publiziert); danach CLI-Siegel einer Pilot-Stamm-Maske aus StammObjectPageParent (Factory geliefert `UIX-STAMM-OBJECTPAGE-PARENT`). Beleg-Theme/Storno bleiben Codex. Keine Massenmigration 757 Routen.
 
 **Nicht anfassen:** Touren/Training/Bestellvorschlag; screen_definitions_beleg.py / document_screen_versions.json ohne Handshake; pruefstand_db Reset.
 

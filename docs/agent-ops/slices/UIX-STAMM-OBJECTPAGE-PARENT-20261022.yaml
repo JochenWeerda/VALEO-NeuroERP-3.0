@@ -1,8 +1,12 @@
 slice_id: UIX-STAMM-OBJECTPAGE-PARENT-20261022
 title: StammObjectPageParent Factory (Pilot Duenger/Saatgut/Supplier/Debitor/Kreditor)
 owner: Cursor Composer
-status: reserved
+status: completed
 created_at: 2026-10-22
+completed_at: 2026-10-22
+result: >
+  Factory stamm_object_page_parent.py; fuenf Pilot-Children; pytest 10 + meridian-party 5;
+  QA stamm-objectpage-parent-20261022.md. Create Legacy; Gate D bleibt Codex.
 goal: >
   Taxonomie-P1 umsetzen: gemeinsamer Parent-Builder fuer Stamm-ObjectPages
   (Meridian floorplan/density/anchors einmal), Pilot-Children aus Parent+Patch.

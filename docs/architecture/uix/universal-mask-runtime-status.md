@@ -11,6 +11,13 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 # Universal Mask Runtime — Plattformstatus
 
+> **Nachtrag 2026-10-22 (`UIX-STAMM-OBJECTPAGE-PARENT`):** P1-Pilot
+> StammObjectPageParent — Factory `stamm_object_page_parent.py`; Children
+> Duenger/Saatgut/Supplier/Debitor/Kreditor teilen Meridian-Shell (objectPage,
+> anchors). Create Legacy. QA:
+> [`stamm-objectpage-parent-20261022.md`](../../quality-assurance/stamm-objectpage-parent-20261022.md).
+> Gate D / CLI-Siegel weiter Codex Entity-Release.
+
 > **Nachtrag 2026-10-22 (`STUDIO-MADE-BY-EVIDENCE`):** Qualitätsversprechen
 > „made by studio“ = Freigabe+CLI+Runtime+Browser, nicht Draft-Count. Katalog:
 > [`made-by-studio-qualitaetsversprechen.md`](made-by-studio-qualitaetsversprechen.md).

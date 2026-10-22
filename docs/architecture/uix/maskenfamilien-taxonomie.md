@@ -109,7 +109,10 @@ Priorität in §4.
 
 ### 2.2 StammObjectPageParent — Kategorie Stamm
 
-**Befund:** Near-Duplicate-Builder in `screen_definitions.py` — gleiches Gerüst `mode: detail`, Tab `kopf` + Lazy-Tabs, `noWorkflowReason` bei reinen Referenzdaten, Action `edit`.
+**Implementierung (Pilot 2026-10-22):** `app/core/stamm_object_page_parent.py`
+(`build_stamm_object_page`); Children Duenger/Saatgut/Supplier/Debitor/Kreditor.
+
+**Befund (vor Pilot):** Near-Duplicate-Builder in `screen_definitions.py` — gleiches Gerüst `mode: detail`, Tab `kopf` + Lazy-Tabs, `noWorkflowReason` bei reinen Referenzdaten, Action `edit`.
 
 | Erbt vom Parent | Child-Override |
 |---|---|
@@ -282,7 +285,7 @@ Abhängig von Inventar: Hebel = (Anzahl Children × Dual-Pfad-Schmerz) / Claim-K
 
 | Cluster | Abhängigkeit Inventar | Abnahmekriterien |
 |---|---|---|
-| **StammObjectPageParent** | ≥8 native Stamm-SDs; Dutzend Legacy-`*-stamm` / ObjectPage; Listen bereits teils auf native Detail | Ein Parent-Builder oder shared factory; Duenger/Saatgut/Supplier/Debitor/Kreditor aus Parent+Patch; Layout/Meridian-Felder einmal; Create weiter Legacy bis Parität; Vitest je Child-Smoke |
+| **StammObjectPageParent** | ≥8 native Stamm-SDs; Dutzend Legacy-`*-stamm` / ObjectPage; Listen bereits teils auf native Detail | **Pilot geliefert 2026-10-22** (`UIX-STAMM-OBJECTPAGE-PARENT`): Factory `app/core/stamm_object_page_parent.py`; Duenger/Saatgut/Supplier/Debitor/Kreditor aus Parent+Patch; Meridian objectPage/anchors einmal; Create Legacy; pytest `test_stamm_object_page_parent.py`. Rest-Children (Bankkonto, Artikelbestand, …) folgen |
 | **KontrollWorklistParent ausweiten** | 4 Varianten schon vererbt; weitere hand_built Kontroll-/Inbox-Seiten | Neue Kontroll-Views nur über `_build_*_variant`; keine Full-SD-Kopien; Inventar: betroffene Routen → runtime_wired oder bewusst geparkt |
 | **StammListenParent (Nav-Parität)** | ~54 Listen-Seiten; Dual-Pfad-Rest | Zeilenklick → native Detail-Screen-ID; Inventar-Delta dokumentiert; kein Create-Switch ohne Parität |
 
