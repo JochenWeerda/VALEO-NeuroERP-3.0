@@ -345,6 +345,9 @@ jobs:
       - name: Run tests
         run: pytest -q
 
+      - name: Run isolated KI service contracts and merge real coverage
+        run: python scripts/run_ki_service_coverage.py
+
       - name: Check critical backend coverage
         run: python scripts/check_critical_backend_coverage.py
 

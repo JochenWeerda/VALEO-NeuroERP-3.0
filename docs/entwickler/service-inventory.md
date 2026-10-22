@@ -28,6 +28,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `agrar_selbstabrechnung_lifecycle_service` | DOM-AGRAR-004.4 — Selbstabrechnung-Lifecycle-Service (Status-Maschine + Storno). |
 | `agrar_settlement_service` | Service layer for Agrar self-billing settlements (AGRAR-SET-01). |
 | `agrar_trocknung_abrechnung_service` | DOM-AGRAR-004.3 — Trocknungsabrechnung-Service. |
+| `agri_flush_booking` | Physical flush transfer, sharing the caller's transaction and trusted tenant. |
 | `agri_lot_link_booking_service` | WM-AGRI-LOT-LINK-001: Waage/WE-Lot in Materialfluss-Silozelle buchen. |
 | `agri_material_flow_trace_integration` | WM-AGRI-CHAIN-002 — Materialfluss ↔ Lieferketten-Log + Outbox. |
 | `agri_qs_workflow_service` | WM-AGRI-QS-003: QS-Workflow fuer Silo-Lots mit Audit-Rueckkopplung. |

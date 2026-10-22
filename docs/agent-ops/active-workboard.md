@@ -19523,7 +19523,7 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 **Ergebnisse22.10. (Fortsetzung):** Service Security39737807058 vollstaendig gruen, Backend39737807365 mit app/modules/services-Coverage gruen. Einzelner alter DocFlow-UI-Test an Feld-/Fehlerinitialisierung gebunden;12 DocFlow-/Materialflussfaelle und Typpruefung gruen. Vier Buchungsurheber gegen Token gebunden;24 signierte Negativ-/Positivvertraege, gemeinsam63 bestehende Fach-/Authentifizierungsfaelle gruen. OpenAPI nur4 Legacyfeldbeschreibungen, alle3246 Pfade erhalten; Rollen0 und Godfile gruen. QA agri-flow-actor-20261022.md. Keine reale Lagerbuchung mit diesen Spies behauptet; vollstaendige Lager-Transaktions-/Fachkettenabnahme und allgemeine Altmaskenmigration bleiben gesondert.
 
 
-## KI-SERVICE-COVERAGE-20261022 - reserviert, Codex
+## KI-SERVICE-COVERAGE-20261022 - abgeschlossen, Codex
 
 **Owner:** Codex. **Befund:** vorhandene KI-Service-Fachtests liegen ausserhalb tests und werden im Root-Qualitaetslauf nicht ausgefuehrt; die reine Erfassung services ersetzt ihre Ausfuehrung nicht. **Ziel:** vorhandene isolierte Servicevertraege ausfuehren und deren echte Coverage verlustfrei mit dem bestaetigten Backendreport vereinigen. **Besitz:** neuer begrenzter scripts/run_ki_service_coverage.py und seine gezielten Runnervertraege; quality-gate.yml ausschliesslich zusaetzlicher Service-/Coverage-Schritt vor kritischer Coverage und Seal; QA/Workboard. Vorhandene Hauptsuite/Schwellen/Sonar-Scope unveraendert; keine neue DB/Container, keine schweren optionalen STT/TTS-Pakete. Testfehler blockieren.
 
@@ -19532,3 +19532,7 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 **Nachzupruefender Befund:** reale Pruefschema-Inspektion zeigt previous_stock/new_stock verpflichtend und ownership_type nur owned/consigned; alte Transfer-/Spuel-/Lot-Link-SQLs senden keine Bestands-Snapshots, Spuelcharge sendet flush als Eigentumsart. Dazu fehlen Lagerbindung/Zeilensperren beim Transfer und validate_route commitet im aufrufenden Buchungsablauf. Reale positive SQL-Abnahme ist vor einer Gesamtfreigabe erforderlich; bisherige Mockvertraege sind dafuer kein Ersatz. Noch keine Fachregel-/Schemaaenderung oder Produktionsbuchung vorgenommen.
 
 **Dateibesitz/Fachentscheid:** Spuelcharge im Materialflussservice und neuer interner SQL-Buchungshelfer, eigene reale SQL-Vertraege und QA. Nutzerentscheid: echte Umlagerung Quelle minus Menge/Ziel plus Menge. Geordnete Zellensperren, Lager-/Mandantenbindung, Bestands-Snapshots, Kapazitaet und atomarer Abschluss; keine neue Datenbank/Container/Migration. Andere Transfer-/Lot-Link-Befunde bleiben explizit offen bis eigener Abnahme.
+
+**KI-Service Ergebnis:**142 bestehende Servicefaelle isoliert gruen;8 echte Runnerfaelle inklusive Branch-/Scope-/Fehlererhalt. CI-Schritt vor kritischer Coverage/Seal, Schwellen unveraendert. QA ki-service-coverage-20261022.md.
+
+**MATERIAL-FLOW-SQL Teilabnahme:** Nutzerentscheid physische Spuelumlagerung umgesetzt;11 reale SQL-Faelle und bestehende Materialfluss-/Runnerfamilie zusammen40 gruen. QA agri-flush-physical-20261022.md. Claim bleibt fuer Transfer-/Lot-Link-SQL, Idempotenz und Outbox offen/in Arbeit; keine Gesamtfreigabe.

@@ -902,3 +902,7 @@ Alle154 aktuell registrierten nativen Quellen im bestehenden Pruefmandanten uebe
 
 
 Materialflussfortsetzung22.10.: vier Lagerbuchungswege speichern die gepruefte Providerkennung statt beliebiger booked_by-Rumpfwerte;63 Fach-/Signaturvertraege,12 DocFlow-/Materialfluss-UI-Vertraege und Typpruefung gruen. Alle3246 API-Pfade erhalten. Service-Security-Nachlauf vollstaendig gruen, kompletter Backendlauf mit drei Produktwurzeln gruen. [Abnahme und Grenzen](../../quality-assurance/agri-flow-actor-20261022.md). Finale Frontend-/Sonar- und reale Lagerkettenabnahme nicht dadurch ersetzt.
+
+## Teilabnahme 22.10.: KI-Messung und physische Spuelcharge
+
+142 vorhandene KI-Servicevertraege isoliert ausgefuehrt; verlustfreier Coverage-Zusammenlauf durch acht echte Unterprozessvertraege abgesichert und im Quality-Job vor Seal eingebunden. Spuelcharge gemaess Nutzerentscheid als echte Umlagerung, elf PostgreSQL-Faelle fuer Bestaende, Mandant/Lager, Route und Rueckrollen; gemeinsam40 Vertraege gruen. QA ki-service-coverage-20261022.md und agri-flush-physical-20261022.md. Transfer/Lot-Link-SQL, dauerhafte Idempotenz und allgemeine Outboxzustellung bleiben offen; Gesamt-Sonar und Altmaskenmigration weiterhin unabgenommen.

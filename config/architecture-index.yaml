@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-10-22
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-10-22T06:03:03Z'
+generated_at: '2026-10-22T08:01:08Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -288,6 +288,7 @@ domains:
     - agrar_selbstabrechnung_lifecycle_service
     - agrar_settlement_service
     - agrar_trocknung_abrechnung_service
+    - agri_flush_booking
     - agri_lot_link_booking_service
     - agri_material_flow_trace_integration
     - agri_qs_workflow_service
@@ -2129,8 +2130,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 931
   frontend_routes_mapped: 931
-  backend_services_total: 315
-  backend_services_mapped: 315
+  backend_services_total: 316
+  backend_services_mapped: 316
   backend_endpoints_total: 472
   backend_endpoints_mapped: 472
 unmapped:
