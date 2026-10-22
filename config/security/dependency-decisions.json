@@ -9,9 +9,9 @@
       "decision": "not_affected",
       "exploitability": "unreachable",
       "owner": "Codex (assessment under user policy 2026-09-15)",
-      "reviewed_on": "2026-10-20",
+      "reviewed_on": "2026-10-22",
       "review_by": "2026-10-23",
-      "reason": "Re-reviewed both unchanged embedded consumers and all 98 committed evidence files on 2026-10-19. The only changed file is docker-compose.yml: backend probe URL and read-only runtime config mount; no Chroma HTTP server, remote client, server RBAC provider or trust_remote_code path. Primary advisories still list no patched version. Existing expiry 2026-10-23 unchanged; source/deployment drift and new findings block. Raw scanner findings remain visible.",
+      "reason": "Re-reviewed all 98 committed evidence files on 2026-10-22. Only docker-compose.yml changed: commit 431cd5f66 adds a read-only Studio table-catalog mount to the ERP backend; no Chroma server, remote client, server RBAC provider or remote model execution is introduced. Both existing Chroma consumers still use embedded clients. Primary advisories and current scanner report list no patched version. Existing expiry 2026-10-23 is unchanged. Raw findings remain visible; source/deployment drift, reachable paths and new findings still block.",
       "sources": [
         "https://github.com/advisories/GHSA-36p7-vc44-83pf"
       ],
@@ -30,7 +30,7 @@
         "docker-compose.staging.yml": "1caa8f36c15bc0744547d3b3a7ac317b0d33375c2a18e9fe47ee243981b6652d",
         "docker-compose.test.yml": "c864d86ba1f7e4de525560325dd9d03714ff806a60bbbb9c244f88f055889040",
         "docker-compose.voice.yml": "4244d270984111030105877eea514f260fbc438833e742edd4de98982d4a89f7",
-        "docker-compose.yml": "adcf089e03c3befa2b4761380ba472e9975697387efc78466c699010a1845815",
+        "docker-compose.yml": "81d0eef8252d11558516e49e7bae4fce173fd2eed5131d8639fab4a8a00aa24b",
         "k8s/argocd/apps/kustomization.yaml": "49a4cb506ee3b5393c2de0e5f2afc9c1d0c92632ebad7bcd8b68986efa5cae76",
         "k8s/argocd/apps/superglue-platform.yaml": "7982d0c629515488ad0e02c9672c6a23a2d88996479924f605d9eab73a4bdb13",
         "k8s/argocd/apps/valeo-platform.yaml": "6f1f25970cd447ce0293a28b8f2dd61400791bcb020ecc6bbeb5bd55289242c9",
@@ -125,9 +125,9 @@
       "decision": "not_affected",
       "exploitability": "unreachable",
       "owner": "Codex (assessment under user policy 2026-09-15)",
-      "reviewed_on": "2026-10-20",
+      "reviewed_on": "2026-10-22",
       "review_by": "2026-10-23",
-      "reason": "Re-reviewed both unchanged embedded consumers and all 98 committed evidence files on 2026-10-19. The only changed file is docker-compose.yml: backend probe URL and read-only runtime config mount; no Chroma HTTP server, remote client, server RBAC provider or trust_remote_code path. Primary advisories still list no patched version. Existing expiry 2026-10-23 unchanged; source/deployment drift and new findings block. Raw scanner findings remain visible.",
+      "reason": "Re-reviewed all 98 committed evidence files on 2026-10-22. Only docker-compose.yml changed: commit 431cd5f66 adds a read-only Studio table-catalog mount to the ERP backend; no Chroma server, remote client, server RBAC provider or remote model execution is introduced. Both existing Chroma consumers still use embedded clients. Primary advisories and current scanner report list no patched version. Existing expiry 2026-10-23 is unchanged. Raw findings remain visible; source/deployment drift, reachable paths and new findings still block.",
       "sources": [
         "https://github.com/advisories/GHSA-2wm9-hf6c-p5cr"
       ],
@@ -146,7 +146,7 @@
         "docker-compose.staging.yml": "1caa8f36c15bc0744547d3b3a7ac317b0d33375c2a18e9fe47ee243981b6652d",
         "docker-compose.test.yml": "c864d86ba1f7e4de525560325dd9d03714ff806a60bbbb9c244f88f055889040",
         "docker-compose.voice.yml": "4244d270984111030105877eea514f260fbc438833e742edd4de98982d4a89f7",
-        "docker-compose.yml": "adcf089e03c3befa2b4761380ba472e9975697387efc78466c699010a1845815",
+        "docker-compose.yml": "81d0eef8252d11558516e49e7bae4fce173fd2eed5131d8639fab4a8a00aa24b",
         "k8s/argocd/apps/kustomization.yaml": "49a4cb506ee3b5393c2de0e5f2afc9c1d0c92632ebad7bcd8b68986efa5cae76",
         "k8s/argocd/apps/superglue-platform.yaml": "7982d0c629515488ad0e02c9672c6a23a2d88996479924f605d9eab73a4bdb13",
         "k8s/argocd/apps/valeo-platform.yaml": "6f1f25970cd447ce0293a28b8f2dd61400791bcb020ecc6bbeb5bd55289242c9",
@@ -241,9 +241,9 @@
       "decision": "not_affected",
       "exploitability": "unreachable",
       "owner": "Codex (assessment under user policy 2026-09-15)",
-      "reviewed_on": "2026-10-20",
+      "reviewed_on": "2026-10-22",
       "review_by": "2026-10-23",
-      "reason": "Re-reviewed both unchanged embedded consumers and all 98 committed evidence files on 2026-10-19. The only changed file is docker-compose.yml: backend probe URL and read-only runtime config mount; no Chroma HTTP server, remote client, server RBAC provider or trust_remote_code path. Primary advisories still list no patched version. Existing expiry 2026-10-23 unchanged; source/deployment drift and new findings block. Raw scanner findings remain visible.",
+      "reason": "Re-reviewed all 98 committed evidence files on 2026-10-22. Only docker-compose.yml changed: commit 431cd5f66 adds a read-only Studio table-catalog mount to the ERP backend; no Chroma server, remote client, server RBAC provider or remote model execution is introduced. Both existing Chroma consumers still use embedded clients. Primary advisories and current scanner report list no patched version. Existing expiry 2026-10-23 is unchanged. Raw findings remain visible; source/deployment drift, reachable paths and new findings still block.",
       "sources": [
         "https://github.com/advisories/GHSA-xph7-9rjv-w5fr"
       ],
@@ -262,7 +262,7 @@
         "docker-compose.staging.yml": "1caa8f36c15bc0744547d3b3a7ac317b0d33375c2a18e9fe47ee243981b6652d",
         "docker-compose.test.yml": "c864d86ba1f7e4de525560325dd9d03714ff806a60bbbb9c244f88f055889040",
         "docker-compose.voice.yml": "4244d270984111030105877eea514f260fbc438833e742edd4de98982d4a89f7",
-        "docker-compose.yml": "adcf089e03c3befa2b4761380ba472e9975697387efc78466c699010a1845815",
+        "docker-compose.yml": "81d0eef8252d11558516e49e7bae4fce173fd2eed5131d8639fab4a8a00aa24b",
         "k8s/argocd/apps/kustomization.yaml": "49a4cb506ee3b5393c2de0e5f2afc9c1d0c92632ebad7bcd8b68986efa5cae76",
         "k8s/argocd/apps/superglue-platform.yaml": "7982d0c629515488ad0e02c9672c6a23a2d88996479924f605d9eab73a4bdb13",
         "k8s/argocd/apps/valeo-platform.yaml": "6f1f25970cd447ce0293a28b8f2dd61400791bcb020ecc6bbeb5bd55289242c9",

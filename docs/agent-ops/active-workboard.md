@@ -19479,7 +19479,7 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 **STUDIO-LIVE-PROBE / IDENTITY-SELF-LOGOUT Ergebnis22.10.:** reale CLI-/SSO-/Vier-Augen-/Simulations-/CRUD-Kette abgeschlossen, gefundene zentrale Runtime-/Paging-/Identitaets-/Wiederholungs-/Logoutfehler repariert.4 eigene Saetze deaktiviert,11 Receipts/11 Outbox, Freigaben retired, temporaere Rollen entzogen/Pruefer gesperrt, Registrybaseline wiederhergestellt.48 SQL-,76 CLI-,69 UI-,17 Redisfaelle gruen; letzte Nachtraege54 Backend/23 UI und TypeScript gruen. Handbuch mit6 Screenshots; QA studio-entity-release-20261021.md. Globale Maskenmigration und Sonar-Coverage63,6/80 bleiben offen; kein Gesamtabschluss behauptet.
 
 
-## SECURITY-CI-EVIDENCE-20261022 - reserviert, Codex
+## SECURITY-CI-EVIDENCE-20261022 - lokal abgenommen, CI offen, Codex
 
 **Owner:** Codex. **Ziel:** Service-Security39732227258 ohne Ausnahmeausweitung schliessen. **Befund:** alle22 anderen Serviceaudits gruen; AI blockiert exakt drei bereits bewertete Chroma-Befunde wegen geaendertem docker-compose.yml. Gepruefter Diff431cd5f66 fuegt ausschliesslich read-only Studio-Schemakatalogmount hinzu. **Besitz:** config/security/dependency-decisions.json nur nachgewiesene Evidenz und Reviewbegruendung, QA/Workboard; vorhandene Negativtests. Keine Fristverlaengerung, kein neues accepted_risk, keine Abschwaechung der Kontrollen. Alle98 Evidenzdateien gegen Git-Stand abgleichen und eingebetteten Betrieb erneut pruefen.
 
@@ -19494,8 +19494,17 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 **COVERAGE-FACHOBERFLAECHEN weiterer nachgewiesener Rationsbefund:** Einreich-Snapshot verwendet serverseitige Gruppenanzahl, berechnet Gesamtfuttermengen aber mit alter Wizardanzahl; abweichende bestaetigte Anzahl erzeugt widerspruechliche Daten. Besitz derselben Mutation fuer konsistente bestaetigte Gruppenmenge und positive sichere Anzahl. Review benoetigt sichtbaren Einreichfehler (Parent setzt error bislang nur fuer nicht sichtbare Workbench). Besitz Review-Fehleranzeige/Mutationsbeginn, zugehoerige negative/positive Bedienvertraege.
 
 
-## STUDIO-PROBE-BASELINES-20261022 - reserviert, Codex
+## STUDIO-PROBE-BASELINES-20261022 - abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** alle aktuell tatsaechlich registrierten nativen Quellen ueber den bestehenden CLI-Stapelweg im vorhandenen valeo_probe/Mandanten51 versionieren. Bestehende synthetische Anmeldung mit unveraenderten Rechten, PKCE, keine neuen Identitaeten/Rollen. Vorhandene bearbeitete Fassungen erhalten; identischer Plan bei Wiederholung ohne weitere Fassung/Historie. Kein Publish, keine Routingumschaltung, kein Geschaeftscommand. Besitz eigene QA/Workboard/Protokolle ohne Zugangsdaten. Ausgangsfassung ist kein Qualitaetszertifikat fuer alte handgebaute Seiten.
 
 **COVERAGE-FACHOBERFLAECHEN Erfassungsbefund/Besitz:** Sonar prueft app/modules/services, pytest.ini erfasst ausschliesslich app. Damit fehlen trotz vorhandener Fachtests die Python-Nachweise fuer modules/services. Besitz pytest.ini ausschliesslich Erfassung dieser vorhandenen Produktivwurzeln und neuer Konfigurationsvertrag; keine Quellen-/Coverage-Ausnahmen oder Schwellenabsenkung. Full-CI mit derselben Testsuite und unveraendertem60-Prozent-Gesamtminimum, Sonar80 bleibt verbindlich.
+
+
+**Nachweise22.10.:**154 native Ausgangsfassungen per realer signierter CLI angelegt; Wiederholung ohne Aenderung, SQL154 Entwuerfe/154 Historien. PKCE-Sitzung abgemeldet, keine neuen Rechte/DB/Container/Aktivierungen. QA studio-probe-baselines-20261022.md. Service-Security:98 Dateien abgeglichen, nur read-only Studio-Mount aktualisiert;12 Tests/9 Subtests und echter CI-Bericht0blocked, Ablauf23.10. unveraendert. Node-Patchlaufzeiten22/22, Originalkontrolle9 Angriffsausfaelle; Rohmeldungen sichtbar. Rationsberatung10 neue UI-Vertraege gruen; Demo-Einreichung, Mengenwiderspruch und unsichtbarer Speicherfehler behoben. QA rations-bedienvertrag-20261022.md. Coverage-Erfassung ueber drei Produktwurzeln korrigiert;60/80 unveraendert, neuer Voll-CI erforderlich. Globale Altmaskenablaese bleibt offen.
+
+
+**COVERAGE-FACHOBERFLAECHEN Demo-Uebergang:** zusaetzlicher roter Bedienvertrag: Neue Ration laesst altes Ergebnis aktiv, obwohl neue Eingaben beginnen; Demoindikator bleibt zudem gesetzt. Derselbe Besitz erweitert auf openWizardFresh und dessen Navigation: neue Beratung verwirft alte Ergebnis-/Vorschaubindung und beendet Demo, Nachoptimierung behaelt bestehenden Kontext. Kein Einreichen eines alten Demoergebnisses durch Umbenennen des Modus.
+
+
+**COVERAGE-FACHOBERFLAECHEN Abnahme:**11 neue echte UI-Bedienvertraege plus10 bestehende Mengen-/Patchfaelle gemeinsam21 gruen. Vollstaendige Frontend-Coverage1487/293 gruen vor letztem Demo-Neustartnachtrag; letzter gezielter Regressionsteil danach21 gruen. Erfassung app/modules/services gleicht Sonar an, reporter und60/80 unveraendert. Globaler Sonar-Nachweis und Altmaskenabwaertsablaese bleiben offen; keine Erfuellung durch Baselineimporte behauptet.

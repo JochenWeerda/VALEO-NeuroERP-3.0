@@ -4937,6 +4937,8 @@ function Review({
   onApplySuggestionPatch,
   onReoptimize,
   isFinalizing,
+  canSubmit,
+  submissionError,
 }: {
   wizardData: WizardData | null
   result: OptimizationResult | null
@@ -4947,6 +4949,8 @@ function Review({
   onApplySuggestionPatch: (patch: RationAdjustmentApplyPatch) => void
   onReoptimize: () => void
   isFinalizing: boolean
+  canSubmit: boolean
+  submissionError: string | null
 }) {
   const comparison = result
     ? [
@@ -5184,6 +5188,8 @@ function Review({
       </div>
 
 
+      {submissionError && <p role="alert" className="text-destructive">{submissionError}</p>}
+      {!canSubmit && <p role="status">Demoergebnisse und nicht optimale Rationen können nicht eingereicht werden. Beginnen Sie eine eigene Beratung und berechnen Sie eine gültige Ration.</p>}
       {/* Footer */}
       <div className="flex items-center justify-between pt-8 border-t" style={{ borderColor: C.border }}>
         <button
@@ -5199,7 +5205,7 @@ function Review({
           </button>
           <button
             onClick={() => { void onFinalize() }}
-            disabled={isFinalizing}
+            disabled={isFinalizing || !canSubmit}
             className="px-10 py-3 font-bold rounded-xl text-white shadow-xl flex items-center gap-2 transition-opacity hover:opacity-90"
             style={{ background: C.accent }}
           >
@@ -5881,8 +5887,10 @@ export default function Rationsoptimierung() {
   const [error, setError] = useState<string | null>(null)
 
   const lifecycleMutation = useMutation({
+    onMutate: () => setError(null),
     mutationFn: async () => {
-      if (!result || !wizardData) throw new Error('Keine berechnete Ration vorhanden.')
+      if (demoMode) throw new Error('Demoergebnisse dürfen nicht eingereicht werden.')
+      if (!result || !wizardData || result.status !== 'optimal') throw new Error('Keine gültige berechnete Ration vorhanden.')
       const group = await ensureFeedingGroup({
         external_ref: wizardData.group.id,
         name: wizardData.group.name,
@@ -5894,11 +5902,14 @@ export default function Rationsoptimierung() {
         feeding_system: wizardData.feedingType,
         location: wizardData.group.location,
       })
+      if (!Number.isSafeInteger(group.animal_count) || group.animal_count <= 0) {
+        throw new Error('Die bestätigte Tiergruppe besitzt keine gültige Tieranzahl.')
+      }
       const protocolItems = result.mixing_protocol?.steps?.filter((item) => item.feed_id) ?? []
       const components = (protocolItems.length ? protocolItems : result.ration_items).map((item) => ({
         feed_id: item.feed_id as string,
         name: item.name,
-        soll_kg: Number(('kgfm' in item ? item.kgfm : 0) ?? 0) * wizardData.group.count,
+        soll_kg: Number(('kgfm' in item ? item.kgfm : 0) ?? 0) * group.animal_count,
       })).filter((item) => item.soll_kg > 0)
       const mobile = {
         version: 1,
@@ -5999,6 +6010,16 @@ export default function Rationsoptimierung() {
   })
 
   const openWizardFresh = useCallback(() => {
+    setDemoMode(false)
+    setDemoOverlay(false)
+    setTourStep(null)
+    setDemoChatSeed([])
+    setResult(null)
+    setWizardData(null)
+    setError(null)
+    setPreviewResult(null)
+    setPreviewIntent(null)
+    previewWizardRef.current = null
     setWizardBoot((b) => ({ key: b.key + 1, resumeFrom: null, initialStep: 1 }))
     setView('wizard')
   }, [])
@@ -6222,7 +6243,8 @@ export default function Rationsoptimierung() {
               if (tab.id === 'diagnose' && !result) return
               if (tab.id === 'review' && !result) return
               if (tab.id === 'wizard') {
-                setWizardBoot((b) => ({ key: b.key + 1, resumeFrom: null, initialStep: 1 }))
+                openWizardFresh()
+                return
               }
               setView(tab.id)
             }}
@@ -6311,6 +6333,8 @@ export default function Rationsoptimierung() {
               lifecycleMutation.mutate()
             }}
             isFinalizing={lifecycleMutation.isPending}
+            canSubmit={!demoMode && result?.status === 'optimal'}
+            submissionError={error}
             isOptimizing={isOptimizing}
             onGoWizard={() => (wizardData ? openWizardReoptimize(wizardData) : openWizardFresh())}
             onApplySuggestionPatch={handleApplySuggestionPatch}

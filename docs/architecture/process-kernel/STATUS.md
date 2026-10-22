@@ -894,3 +894,8 @@ Reale Browser-/Imageabnahme und komplette Maskenmigration bleiben offen.
 ## Studio-Live-Abnahme 22.10.2026
 
 Generierte Stammdatenmaske real ueber CLI, SSO, unabhaengige Freigabe, rollbackgesicherte Simulation und Browser-Anlage/Aenderung/Deaktivierung geprueft. Zentrale Runtime-/Versions-/Idempotenz-/Mandanten-/Identitaetsgrenzen und eigene Sitzungsabmeldung nachgebessert. Temporaere Freigaben/Rechte zurueckgenommen, eigene Testdaten deaktiviert, unveraenderliche Historie erhalten. QA: [Studio-Entity-Release](../../quality-assurance/studio-entity-release-20261021.md); [Bedienhandbuch](../../benutzerhandbuch/studio-generierte-stammdaten.md). Lokale PHP-Pruefung ohne gefundene betroffene Runtime: [Sicherheitsnachweis](../../quality-assurance/php-security-20261022.md). Gesamte Altmaskenmigration und Sonar-Coverage80 bleiben offen.
+
+
+## Studio-/Sicherheitsfortsetzung22.10.2026
+
+Alle154 aktuell registrierten nativen Quellen im bestehenden Pruefmandanten ueber echte CLI versioniert, Wiederholung und SQL-Historie ohne Dublette bestaetigt. Keine vorweggenommene Freigabe oder globale Altmaskenablaese. [Nachweis](../../quality-assurance/studio-probe-baselines-20261022.md). Rations-Demo-/Einreichkonsistenz mit echten Bedienvertraegen repariert, Coverage-Erfassung auf bestehende Sonar-Pythonwurzeln abgestimmt; [Nachweis](../../quality-assurance/rations-bedienvertrag-20261022.md). Einzelner Service-Security-Drift nach vollstaendiger98-Dateien-Nachpruefung repariert, Ablaufdatum23.10. unveraendert. Neuer CI-Nachlauf erforderlich, Sonar80 und alte Maskenabnahmen bleiben verbindlich.
