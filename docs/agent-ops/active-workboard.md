@@ -19489,3 +19489,6 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 
 
 **COVERAGE-FACHOBERFLAECHEN Produktbefund/Besitz:** neuer echter React-Demoablauf zeigt: Demoergebnis kann im Review normal in den Rationslebenszyklus eingereicht werden (Button aktiv). Besitz zusaetzlich pages/futtermittel/rationsoptimierung.tsx ausschliesslich Einreichgrenze fuer Demo/nicht optimale Ergebnisse, erkennbare Begruendung und Mutationsguard; normale Beratung bleibt bedienbar. Eigene neue Bedienvertragsdatei. Keine Backend-/Rollen-/Datenbankaenderung.
+
+
+**COVERAGE-FACHOBERFLAECHEN weiterer nachgewiesener Rationsbefund:** Einreich-Snapshot verwendet serverseitige Gruppenanzahl, berechnet Gesamtfuttermengen aber mit alter Wizardanzahl; abweichende bestaetigte Anzahl erzeugt widerspruechliche Daten. Besitz derselben Mutation fuer konsistente bestaetigte Gruppenmenge und positive sichere Anzahl. Review benoetigt sichtbaren Einreichfehler (Parent setzt error bislang nur fuer nicht sichtbare Workbench). Besitz Review-Fehleranzeige/Mutationsbeginn, zugehoerige negative/positive Bedienvertraege.
