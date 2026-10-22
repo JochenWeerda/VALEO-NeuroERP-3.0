@@ -71,15 +71,21 @@ Tenant, CE-Payload-Strip, Adapter-SQL Token-scoped; Positions-SELECT bei
 Reads+Writes in `tests/test_mcp_tenant_isolation_all.py`.
 [QA](../quality-assurance/mcp-tenant-isolation-read-write-20261009.md).
 
+## Fuhrpark Tenant CE abgeschlossen (2026-10-09)
+
+Additive `tenant_id` + Mandanten-SQL + 5× CE/MCP fuer ehemals
+`blocked_missing_tenant`. Map: mapped **41** / blocked_missing_tenant **0** /
+blocked_no_endpoint **0** / local_ui **13**; Registry **56**.
+Probe Revision `fuhrpark_tenant_ce_20261009`.
+[QA](../quality-assurance/fuhrpark-tenant-ce-20261009.md).
+**Weiter offen:** FIN-CLOSE ADR-076; Zahlauf open_high; Stufe-2-SUS live.
+
 ## MCP Mask-CE Batch4 abgeschlossen (2026-10-09)
 
-Onboarding/Qualifikation/Schulung CE+MCP (Training+Mandant). Fuhrpark neu
-`blocked_missing_tenant` (5) — Gap: additive `tenant_id` + Mandanten-SQL, dann CE
-(Folge-Claim, keine Migration in Batch4). Map: mapped **36** /
-blocked_missing_tenant **5** / blocked_no_endpoint **0** / local_ui **13**;
-Registry **51**. [QA Batch4](../quality-assurance/mcp-mask-ce-batch4-20261009.md).
-**Weiter offen:** FIN-CLOSE ADR-076; Zahlauf open_high; Fuhrpark-Tenant-Claim;
-Stufe-2-SUS live.
+Onboarding/Qualifikation/Schulung CE+MCP (Training+Mandant). Fuhrpark damals
+`blocked_missing_tenant` (5) — inzwischen geschlossen durch
+`FUHRPARK-TENANT-CE-20261009`. Historisch mapped **36** / Registry **51**.
+[QA Batch4](../quality-assurance/mcp-mask-ce-batch4-20261009.md).
 
 ## MCP Mask-CE Batch3 abgeschlossen (2026-10-09)
 
@@ -336,12 +342,14 @@ Registry **45**. [QA](../quality-assurance/mcp-mask-ce-batch2-20261009.md).
 CE+MCP; Fuhrpark Isolation-Blocker; Map blocked **8**, mapped **33**, local_ui **13**,
 Registry **48**. [QA](../quality-assurance/mcp-mask-ce-batch3-20261009.md).
 **Geschlossen (MCP-MASK-CE-BATCH4-20261009):** Personal Training CE+MCP;
-Fuhrpark `blocked_missing_tenant` ×5; Map mapped **36**, blocked_no_endpoint **0**,
-Registry **51**. [QA](../quality-assurance/mcp-mask-ce-batch4-20261009.md).
+Fuhrpark damals `blocked_missing_tenant` ×5; Map mapped **36**, Registry **51**.
+[QA](../quality-assurance/mcp-mask-ce-batch4-20261009.md).
+**Geschlossen (FUHRPARK-TENANT-CE-20261009):** Fuhrpark tenant_id+CE+MCP;
+Map mapped **41**, blocked_missing_tenant **0**, Registry **56**.
+[QA](../quality-assurance/fuhrpark-tenant-ce-20261009.md).
 **Weiter offen:** FIN-CLOSE/agentic Finance (P0, ADR-076 — kein Scheinabschluss;
 Claim frei nur fuer Doku/Pruefung); 1× Mask `open_high` (Zahlauf-Freigabe
-forbiddenForAgents/ADR-076-nah — nicht verdrahten); 5× `blocked_missing_tenant`
-(Fuhrpark tenant_id Folge-Claim); Stufe-2-SUS live.
+forbiddenForAgents/ADR-076-nah — nicht verdrahten); Stufe-2-SUS live.
 
 ## GAP-HUB — Archiv 2025 ersetzt (2026-10-07)
 
@@ -1446,6 +1454,16 @@ Status: **geschlossen**. `domain_shared.screen_definition_drafts` persistiert St
 `published_temp` hängt in `get_screen_definition` / Omnibox / `/studio/run/:screenId`.
 Native Screen-IDs bleiben unbeschattet. JSON-Schema-Drift bleibt bei UIX-090.
 
+## UIX-RUNTIME — Masken-Routen-Migration (Nachtrag 2026-10-22)
+
+Messung `scripts/mask_route_migration_inventory.py` / `mask-route-migration-inventory.md`:
+**941** Routen — **61** UniversalMaskRuntime-Pfad, **122** ObjectPage/ListReport ohne
+Runtime, **757** sonst handgebaut. Frueherer Stand 442/80/154 (Studio-Entwuerfe) ist
+kein 1:1-Vergleich (andere Basis) und **kein** Ablösenachweis. Slice
+`MASK-PRIMARY-NAV-NATIVE-20261022`: Listen Saatgut/Duenger/Lieferant → native
+Detailrouten; Create Legacy. Offen: Bestellung-Plural-Pfad, Beleg-Alt-Einstiege
+(Sonderfeldparitaet), Studio-Draft-Zaehlung gegen Live-DB, restliche Dual-Pfade.
+
 ## UIX-RUNTIME-022…030 — Universal Mask Runtime Platform (2026-06-29)
 
 Status: **abgeschlossen** — alle Phasen implementiert, getestet und gepusht (`81d706da8` bis `e6cabb380`).
@@ -2121,24 +2139,16 @@ Formale Projekt- und Lieferstaende liegen weiterhin in:
 - [Process Kernel Status](../architecture/process-kernel/STATUS.md)
 - `docs/project-context/operational-rollout-scope-2026-04-09.md`
 
+
 ## STUDIO-SEMANTIC-001 — Restumfang nach manueller Referenzmaske (2026-10-15)
 
 Fachkatalog, kataloggefuehrter Dialog, optionale kontingentierte Modellinterpretation und isolierte Domain-Kalkulation sind implementiert und gezielt geprueft. Offen: reale Modellabnahme mit vorhandenem eigenem Kontingent; Betriebsabstimmung bei unbekanntem Providerabschluss/Overrun; fachliche Lieferanten-/Kontrakt-/Waagenbindung, Controllerbenachrichtigung und konfigurierte Trocknungsregeln mit eigenen Prozessvarianten. Die manuelle Vorschau bleibt im Release-Gate gesperrt, bis ihre vollstaendige Variante nachgewiesen ist. Bestehender grain.v1-Nachweis ersetzt diese Abnahme nicht. [QA und konkrete Grenzen](../quality-assurance/studio-semantic-20261015.md). Bekannte fremde CI-/Security- und develop-Identitaetsbefunde bleiben bestehen.
 
 **Praezisierung Wind/Besatz:** Qualitaetsgrenze und explizite Freigrenze bleiben getrennt. Der implizite Standard ist entfernt; der operative HarvestAcceptanceService verwendet die persistente mandantengebundene Regelaufloesung mit Genehmigungs- und Messnachweisen. Kein automatischer zusaetzlicher Windabzug wird aus ungeklaerten Fraktionen abgeleitet. Abnahmeumfang siehe HARVEST-RULE-STORE-20261015. [HARVEST-DEDUCTION-001](../architecture/harvest-deduction-contract-standard.md).
 
+
 ## HARVEST-DEDUCTION-001 — Persistenter Versionsspeicher und verbleibende Abnahme (2026-10-15)
 
 Der implizite Zwei-Prozent-Standard ist entfernt. Persistenter append-only Versionsspeicher, getrennte menschliche Genehmigung, Messprovenienz, Berechnungsnachweis und finanzielle Freigabebindung sind im Produktionsrouter integriert. Fehlende, manipulierte, widerrufene oder veraltete Nachweise sperren; Altbetraege umgehen die Grenze nicht. Nichtfinanzielle Warenannahme bleibt getrennt. 31 Backend-, 47 Frontend- und vier reale SQL-Prozessfaelle bestanden; lokale additive Migration integriert.
 
 Offen bleiben finanzielle Browserabnahme, begrenzter Modellaufruf, Liefer-/CI-Nachlauf und vollstaendige operative Abnahme. Hash/Formeltext oder eine vom Aufrufer gelieferte Behauptung sind kein Genehmigungsnachweis. Slice HARVEST-RULE-STORE-20261015 bleibt in Arbeit. Nicht unterstuetzte alternative Abzugsmodelle bleiben bewusst deaktiviert. [Standard](../architecture/harvest-deduction-contract-standard.md), [aktueller QA-Stand](../quality-assurance/harvest-rule-store-20261015.md).
-
-## AP-WORKFLOW-SECURITY-20261020 — verbindliche Sicherheitsgrenze
-
-AP-Antraege/Entscheidungen sind an gepruefte Urheber, Mandant, Inhalt, Antrags-ID,
-Funktionstrennung und bestehende Finanzrollen gebunden. HTTP, native Maske und reale
-Kernel-Kommandos verwenden dieselbe Fachgrenze; der obsolete direkte MCP-Freigabeadapter
-ist entfernt. Buchung umfasst Journal/OP/Dokument/Audit/Outbox in einer Transaktion.
-[Nachweise und verbleibende Betriebsgrenzen](../quality-assurance/ap-workflow-security-20261020.md).
-Dies ersetzt weder lokale Auslieferung noch Browserabnahme oder die separat offenen
-Studio-/Tabellen-/Providerbefunde.

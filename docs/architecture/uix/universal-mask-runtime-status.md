@@ -11,6 +11,14 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 # Universal Mask Runtime — Plattformstatus
 
+> **Nachtrag 2026-10-22 (`MASK-PRIMARY-NAV-NATIVE`):** Routen-Inventur gegen
+> `route-inventory.gen.json`: 941 Routen — 61 runtime_wired, 122 Legacy-
+> ObjectPage/ListReport, 757 handgebaut. Studio-Entwuerfe ≠ Produktivablösung.
+> Listen Saatgut/Duenger/Lieferant oeffnen bestehende Saetze auf den nativen
+> UIX-057-Detailrouten; Neuanlage bleibt Legacy. Inventar:
+> [`mask-route-migration-inventory.md`](mask-route-migration-inventory.md),
+> QA [`mask-primary-nav-native-20261022.md`](../../quality-assurance/mask-primary-nav-native-20261022.md).
+
 > **Nachtrag 2026-09-17 (`MASK-L3-HABIT-DECLARE`):** L3-Gewohnheit Zeilenklick
 > ohne Pixelkopie: Registertabellen feuern `rowActions` ueber `FastTabRenderer`,
 > Artikelstamm-Bewegungen springen nach `/lager/stock-movement/{movement_id}`,
