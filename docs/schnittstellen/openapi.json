@@ -17889,6 +17889,8 @@
                 "type": "null"
               }
             ],
+            "deprecated": true,
+            "description": "Ignored legacy input. The verified token subject is always recorded.",
             "title": "Booked By"
           },
           "lot_id": {
@@ -72072,6 +72074,8 @@
                 "type": "null"
               }
             ],
+            "deprecated": true,
+            "description": "Ignored legacy input. The verified token subject is always recorded.",
             "title": "Booked By"
           },
           "flush_material_id": {
@@ -102096,6 +102100,8 @@
                 "type": "null"
               }
             ],
+            "deprecated": true,
+            "description": "Ignored legacy input. The verified token subject is always recorded.",
             "title": "Booked By"
           },
           "lot_id": {
@@ -106642,6 +106648,8 @@
                 "type": "null"
               }
             ],
+            "deprecated": true,
+            "description": "Ignored legacy input. The verified token subject is always recorded.",
             "title": "Booked By"
           },
           "from_cell_id": {

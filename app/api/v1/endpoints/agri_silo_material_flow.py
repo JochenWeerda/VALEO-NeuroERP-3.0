@@ -6,7 +6,7 @@ from decimal import Decimal
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.base import BaseSchema
@@ -16,6 +16,7 @@ from app.api.v1.schemas.silo_material_flow_schemas import (
     SiloCellOut,
     SiloSystemOut,
 )
+from app.auth.deps import get_current_user
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.agri_silo_material_flow_service import AgriSiloMaterialFlowService
@@ -305,7 +306,8 @@ class MaterialTransferIn(BaseModel):
     quantity_kg: Decimal
     article_id: str
     lot_id: Optional[str] = None
-    booked_by: Optional[str] = None
+    booked_by: Optional[str] = Field(default=None, deprecated=True,
+        description="Ignored legacy input. The verified token subject is always recorded.")
     reference: Optional[str] = None
 
 
@@ -315,7 +317,8 @@ class FlushChargeIn(BaseModel):
     to_cell_id: str
     flush_material_id: str
     flush_quantity_kg: Decimal
-    booked_by: Optional[str] = None
+    booked_by: Optional[str] = Field(default=None, deprecated=True,
+        description="Ignored legacy input. The verified token subject is always recorded.")
     reference: Optional[str] = None
 
 
@@ -327,6 +330,7 @@ class FlushChargeIn(BaseModel):
 def book_flush_charge(
     payload: FlushChargeIn,
     svc: AgriSiloMaterialFlowService = Depends(_svc),
+    user: dict = Depends(get_current_user),
 ) -> Any:
     """WM-AGRI-FLUSH-006: Spülcharge buchen — Reinigungslauf vor Materialwechsel."""
     try:
@@ -336,7 +340,7 @@ def book_flush_charge(
             to_cell_id=payload.to_cell_id,
             flush_material_id=payload.flush_material_id,
             flush_quantity_kg=payload.flush_quantity_kg,
-            booked_by=payload.booked_by or "system",
+            booked_by=user["sub"],
             reference=payload.reference,
         )
     except ValueError as e:
@@ -347,6 +351,7 @@ def book_flush_charge(
 def book_material_transfer(
     payload: MaterialTransferIn,
     svc: AgriSiloMaterialFlowService = Depends(_svc),
+    user: dict = Depends(get_current_user),
 ) -> Any:
     """WMS-FLOW-001: Materialtransfer zwischen Silozellen mit Lagerbuchung."""
     try:
@@ -357,7 +362,7 @@ def book_material_transfer(
             quantity_kg=payload.quantity_kg,
             article_id=payload.article_id,
             lot_id=payload.lot_id,
-            booked_by=payload.booked_by or "system",
+            booked_by=user["sub"],
             reference=payload.reference,
         )
     except ValueError as e:

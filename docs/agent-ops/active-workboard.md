@@ -19479,7 +19479,7 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 **STUDIO-LIVE-PROBE / IDENTITY-SELF-LOGOUT Ergebnis22.10.:** reale CLI-/SSO-/Vier-Augen-/Simulations-/CRUD-Kette abgeschlossen, gefundene zentrale Runtime-/Paging-/Identitaets-/Wiederholungs-/Logoutfehler repariert.4 eigene Saetze deaktiviert,11 Receipts/11 Outbox, Freigaben retired, temporaere Rollen entzogen/Pruefer gesperrt, Registrybaseline wiederhergestellt.48 SQL-,76 CLI-,69 UI-,17 Redisfaelle gruen; letzte Nachtraege54 Backend/23 UI und TypeScript gruen. Handbuch mit6 Screenshots; QA studio-entity-release-20261021.md. Globale Maskenmigration und Sonar-Coverage63,6/80 bleiben offen; kein Gesamtabschluss behauptet.
 
 
-## SECURITY-CI-EVIDENCE-20261022 - lokal abgenommen, CI offen, Codex
+## SECURITY-CI-EVIDENCE-20261022 - abgeschlossen, CI gruen, Codex
 
 **Owner:** Codex. **Ziel:** Service-Security39732227258 ohne Ausnahmeausweitung schliessen. **Befund:** alle22 anderen Serviceaudits gruen; AI blockiert exakt drei bereits bewertete Chroma-Befunde wegen geaendertem docker-compose.yml. Gepruefter Diff431cd5f66 fuegt ausschliesslich read-only Studio-Schemakatalogmount hinzu. **Besitz:** config/security/dependency-decisions.json nur nachgewiesene Evidenz und Reviewbegruendung, QA/Workboard; vorhandene Negativtests. Keine Fristverlaengerung, kein neues accepted_risk, keine Abschwaechung der Kontrollen. Alle98 Evidenzdateien gegen Git-Stand abgleichen und eingebetteten Betrieb erneut pruefen.
 
@@ -19510,11 +19510,14 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 **COVERAGE-FACHOBERFLAECHEN Abnahme:**11 neue echte UI-Bedienvertraege plus10 bestehende Mengen-/Patchfaelle gemeinsam21 gruen. Vollstaendige Frontend-Coverage1487/293 gruen vor letztem Demo-Neustartnachtrag; letzter gezielter Regressionsteil danach21 gruen. Erfassung app/modules/services gleicht Sonar an, reporter und60/80 unveraendert. Globaler Sonar-Nachweis und Altmaskenabwaertsablaese bleiben offen; keine Erfuellung durch Baselineimporte behauptet.
 
 
-## AGRI-FLOW-VERIFIED-ACTOR-20261022 - reserviert, Codex
+## AGRI-FLOW-VERIFIED-ACTOR-20261022 - abgeschlossen, Codex
 
 **Owner:** Codex. **Befund:** vier Lagerbuchungswege (Transfer, Spuelcharge, Lot-Verknuepfung und automatische Lotbuchung) verwenden booked_by aus dem Request oder system; trotz gepruefter Bereichsrolle kann der Aufrufer den dauerhaften Buchungsurheber faelschen. **Besitz:** endpoints/agri_silo_material_flow.py und agri_lot_link_booking.py nur gepruefte Auth-Abhaengigkeit/Urheberprojektion; neue signierte HTTP-Negativvertraege und QA/Workboard. Vorhandene Domainservices/Transaktionen, Mandantenpruefung, Rollen, Requestkompatibilitaet unveraendert. Legacy booked_by wird ignoriert, Token-sub entscheidet. Keine neue DB/Container/Migration. **Abnahme:** echte RSA/JWKS-Verifikation; gefaelschter Rumpf/Header, fehlender Rumpfwert, Rollen-/Mandanten-/Signaturfehler, kein Folgeaufruf bei Ablehnung. Bestehende Fachtests erhalten.
 
 
-## DOCFLOW-EDIT-ASYNC-CI-20261022 - reserviert, Codex
+## DOCFLOW-EDIT-ASYNC-CI-20261022 - abgeschlossen, Codex
 
 **Owner:** Codex. **Befund:** Quality39737807365 genau ein roter UI-Vertrag in native-docflow-edit.test.tsx: Test wartet auf Dialoghuelle, greift dann synchron auf noch nicht initialisierte Tabellenzeile zu. **Besitz:** ausschliesslich diese Testdatei fuer feld-/fehlergebundene async-Abnahme, eigene QA/Workboard. Produktvertraege und alle Wiederholungs-/Metadatenbehauptungen unveraendert; keine Sleeps/Timeoutaufweitung.
+
+
+**Ergebnisse22.10. (Fortsetzung):** Service Security39737807058 vollstaendig gruen, Backend39737807365 mit app/modules/services-Coverage gruen. Einzelner alter DocFlow-UI-Test an Feld-/Fehlerinitialisierung gebunden;12 DocFlow-/Materialflussfaelle und Typpruefung gruen. Vier Buchungsurheber gegen Token gebunden;24 signierte Negativ-/Positivvertraege, gemeinsam63 bestehende Fach-/Authentifizierungsfaelle gruen. OpenAPI nur4 Legacyfeldbeschreibungen, alle3246 Pfade erhalten; Rollen0 und Godfile gruen. QA agri-flow-actor-20261022.md. Keine reale Lagerbuchung mit diesen Spies behauptet; vollstaendige Lager-Transaktions-/Fachkettenabnahme und allgemeine Altmaskenmigration bleiben gesondert.

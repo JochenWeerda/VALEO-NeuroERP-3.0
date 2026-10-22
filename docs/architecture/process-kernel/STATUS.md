@@ -899,3 +899,6 @@ Generierte Stammdatenmaske real ueber CLI, SSO, unabhaengige Freigabe, rollbackg
 ## Studio-/Sicherheitsfortsetzung22.10.2026
 
 Alle154 aktuell registrierten nativen Quellen im bestehenden Pruefmandanten ueber echte CLI versioniert, Wiederholung und SQL-Historie ohne Dublette bestaetigt. Keine vorweggenommene Freigabe oder globale Altmaskenablaese. [Nachweis](../../quality-assurance/studio-probe-baselines-20261022.md). Rations-Demo-/Einreichkonsistenz mit echten Bedienvertraegen repariert, Coverage-Erfassung auf bestehende Sonar-Pythonwurzeln abgestimmt; [Nachweis](../../quality-assurance/rations-bedienvertrag-20261022.md). Einzelner Service-Security-Drift nach vollstaendiger98-Dateien-Nachpruefung repariert, Ablaufdatum23.10. unveraendert. Neuer CI-Nachlauf erforderlich, Sonar80 und alte Maskenabnahmen bleiben verbindlich.
+
+
+Materialflussfortsetzung22.10.: vier Lagerbuchungswege speichern die gepruefte Providerkennung statt beliebiger booked_by-Rumpfwerte;63 Fach-/Signaturvertraege,12 DocFlow-/Materialfluss-UI-Vertraege und Typpruefung gruen. Alle3246 API-Pfade erhalten. Service-Security-Nachlauf vollstaendig gruen, kompletter Backendlauf mit drei Produktwurzeln gruen. [Abnahme und Grenzen](../../quality-assurance/agri-flow-actor-20261022.md). Finale Frontend-/Sonar- und reale Lagerkettenabnahme nicht dadurch ersetzt.
