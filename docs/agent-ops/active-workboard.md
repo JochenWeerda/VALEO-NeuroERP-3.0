@@ -19464,3 +19464,10 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 ## IDENTITY-SELF-LOGOUT-20261021 - reserviert, Codex
 
 **Owner:** Codex. **Befund:** eigener Sitzungslogout erhielt beim breiten Schreibrollen-Rollout dependencies=SCHREIBEN[PLATTFORM] (nuradmin). Normale Mitarbeitende koennen damit die eigene Serversitzung nicht widerrufen; bestehender signierter Test verwendet FINANCE_BEARBEITEN. **Besitz:** identity_management.py ausschliesslich eigener session/logout; check_write_routes_roles.py exakter begruendeter Delegationsvertrag; test_identity_sessions.py signierte rollenlose/Leser-/Fremdselector-/Widerrufstests. **Entscheidung:** jede authentifizierte Person darf ausschliesslich die aus ihrem Token bestimmte eigene Sitzung beenden, ohne Fachrolle. Kein Eingabefeld fuer Zielidentitaet. subjects/revoke bleibtadmin. Keine pauschale Identity-Prefix-Ausnahme oder Baselineerhoehung. Vorhandenes Redis und valeo_probe, keine neuen Ressourcen. **Abnahme:** alte Route reproduzierbar403; korrigierte Route204, erneute Tokenverwendung401; fremde Sitzungen unveraendert.
+
+
+**IDENTITY-SELF-LOGOUT Besitznachtrag 22.10.:** TopBar.tsx und auth/topbar-identity.test.tsx: lokale Abmeldung muss auch bei abgelaufener Sitzung mit zwischengespeicherter Identitaet bedienbar bleiben; anonyme Anzeige bleibt ohne Abmeldeaktion.
+
+## PHP-SECURITY-20261022 - reserviert, Codex
+
+**Owner:** Codex. **Ziel:** PHP-Sicherheitsmeldung vom21.10. gegen tatsaechliche lokale Laufzeiten pruefen, vorhandene betroffene Installation aktualisieren. **Besitz:** eigene QA php-security-20261022.md und Workboard; kein blindes Hinzufuegen einer PHP-Abhaengigkeit. **Abnahme:** offizielles Advisory, bestehende Container/Host/Projekt pruefen; gefundene Runtime versionsgerecht patchen und nachpruefen. Keine neuen Container/Datenbanken, kein pauschales Prune.
