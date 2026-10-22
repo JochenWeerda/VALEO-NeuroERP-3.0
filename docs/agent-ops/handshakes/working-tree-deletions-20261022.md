@@ -45,8 +45,15 @@ Services, Mask-Builder, Alembic, Scripts — nicht fokussierte Slice-Arbeit.
 | offen/klären | 0 |
 
 Hinweis: LFS meldete bei drei Beleg-Storno-Screenshots „should have been pointers“;
-Dateien sind wieder im Tree. `app/api/v1/api.py` behält weiterhin lokale Import-Entfernungen
-der Kommandos-Router (unrelated modification — nicht Teil dieses Restores/Commits).
+Dateien sind wieder im Tree.
+
+### Nachtrag `api.py` (2026-10-22, Cursor Composer)
+
+Lokaler Diff `app/api/v1/api.py` war **+1/−44** (kein Studio-Router-Entfernen, aber
+`_Sammelrouter` + Kommandos-/Bridge-Includes weg: `sales_order_commands`,
+`docflow_return.command_router`, `stammdaten_bearbeiten`, Einkauf-/Agrar-/Finance-/CRM-
+Kommandos, `preis_kalkulation_bridge`). Kein dokumentierter aktiver Slice für die
+Entfernungen; Muster wie Massen-WIP. **Restored** auf HEAD — Datei wieder clean.
 
 ## Nicht angefasst (Claims)
 
