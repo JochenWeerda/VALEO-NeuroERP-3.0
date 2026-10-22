@@ -19477,3 +19477,12 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 
 
 **STUDIO-LIVE-PROBE / IDENTITY-SELF-LOGOUT Ergebnis22.10.:** reale CLI-/SSO-/Vier-Augen-/Simulations-/CRUD-Kette abgeschlossen, gefundene zentrale Runtime-/Paging-/Identitaets-/Wiederholungs-/Logoutfehler repariert.4 eigene Saetze deaktiviert,11 Receipts/11 Outbox, Freigaben retired, temporaere Rollen entzogen/Pruefer gesperrt, Registrybaseline wiederhergestellt.48 SQL-,76 CLI-,69 UI-,17 Redisfaelle gruen; letzte Nachtraege54 Backend/23 UI und TypeScript gruen. Handbuch mit6 Screenshots; QA studio-entity-release-20261021.md. Globale Maskenmigration und Sonar-Coverage63,6/80 bleiben offen; kein Gesamtabschluss behauptet.
+
+
+## SECURITY-CI-EVIDENCE-20261022 - reserviert, Codex
+
+**Owner:** Codex. **Ziel:** Service-Security39732227258 ohne Ausnahmeausweitung schliessen. **Befund:** alle22 anderen Serviceaudits gruen; AI blockiert exakt drei bereits bewertete Chroma-Befunde wegen geaendertem docker-compose.yml. Gepruefter Diff431cd5f66 fuegt ausschliesslich read-only Studio-Schemakatalogmount hinzu. **Besitz:** config/security/dependency-decisions.json nur nachgewiesene Evidenz und Reviewbegruendung, QA/Workboard; vorhandene Negativtests. Keine Fristverlaengerung, kein neues accepted_risk, keine Abschwaechung der Kontrollen. Alle98 Evidenzdateien gegen Git-Stand abgleichen und eingebetteten Betrieb erneut pruefen.
+
+## COVERAGE-FACHOBERFLAECHEN-20261022 - reserviert, Codex
+
+**Owner:** Codex. **Ziel:** echte Funktions-/Negativabnahme bisher unzureichend gepruefter Fachoberflaechen, Coverage80 ohne Scope-/Schwellenaenderung erreichen. **Besitz:** neue gezielte Frontend-Vertraege fuer vorhandene zentrale Fachoberflaechen und eigene QA/Workboard; Produktdateien erst nach gesondertem Befund/Besitznachtrag. Kein bloesser Render-Snapshot oder Implementierungsspiegel; Eingaben, resultierende Auftraege, Fehler und Berechtigungen pruefen. Keine neuen Datenbanken/Container.
