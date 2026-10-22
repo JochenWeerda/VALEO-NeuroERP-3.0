@@ -1467,6 +1467,15 @@ CaseBand/Allokation/Freigabe-Detail/Komm-Senden dokumentiert. Offen: Beleg-Alt-E
 (Sonderfeldparitaet), Studio-Draft-Zaehlung gegen Live-DB, restliche Dual-Pfade,
 Bestellung-Detail-Paritaet (Actions/CaseBand).
 
+**Familien-Taxonomie (Plan 2026-10-22):** Systemweite Parent/Child-Ordnung
+Beleg/Stamm/Liste/Worklist/Ausnahme und Cluster-Roadmap P0–P3 in
+[`maskenfamilien-taxonomie.md`](../architecture/uix/maskenfamilien-taxonomie.md);
+Beleg-Spezialfall [`beleg-maskenfamilie-vererbung.md`](../architecture/uix/beleg-maskenfamilie-vererbung.md).
+Slices `UIX-MASKENFAMILIEN-TAXONOMIE-20261022` und `UIX-BELEG-FAMILIE-VERERBUNG-20261022`
+beide **offen** (Plan, nicht reserviert). Naechste Implementierungscluster laut Taxonomie:
+StammObjectPageParent, KontrollWorklist-Ausbau, Listen Dual-Pfad — getrennt claimen;
+Codex STUDIO-BELEG-THEME / Touren/Training/Bestellvorschlag unangetastet.
+
 ## UIX-RUNTIME-022…030 — Universal Mask Runtime Platform (2026-06-29)
 
 Status: **abgeschlossen** — alle Phasen implementiert, getestet und gepusht (`81d706da8` bis `e6cabb380`).

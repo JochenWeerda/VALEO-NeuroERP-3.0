@@ -11,9 +11,13 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-MASKENFAMILIEN-TAXONOMIE-20261022 — offen (Plan), Cursor Composer
+
+**Owner:** — (Status `offen`, nicht reserviert). **Stand:** Planartefakt 2026-10-22. **Ziel:** Beleg-Vererbungsprinzip systemweit auf Ein-/Ausgabemasken: Kategorien Beleg/Stamm/Liste/Worklist/Ausnahme, Parent-Vertraege, reale Cluster aus Inventar (941 Routen / ~61 runtime_wired / ~120 legacy / ~760 hand_built) und ScreenDefinitions, Roadmap P0–P3. **Artefakt:** `docs/architecture/uix/maskenfamilien-taxonomie.md`; Slice-YAML `docs/agent-ops/slices/UIX-MASKENFAMILIEN-TAXONOMIE-20261022.yaml`; Handshake `docs/agent-ops/handshakes/maskenfamilien-taxonomie-20261022.md`. **Nicht anfassen:** Beleg-Slice `UIX-BELEG-FAMILIE-VERERBUNG-20261022` (bleibt separat offen); STUDIO-BELEG-THEME / STUDIO-MODEL / CI-GRUEN; Touren/Training/Bestellvorschlag; keine Page-Migration. **Abnahme:** Taxonomie + Roadmap + Handshake; keine Implementierungspflicht.
+
 ## UIX-BELEG-FAMILIE-VERERBUNG-20261022 — offen (Plan), Cursor Composer
 
-**Owner:** — (Status \offen\, nicht reserviert). **Stand:** Planartefakt 2026-10-22. **Ziel:** Eingehende/ausgehende Belegfolgen als Parent/Child-Familie einer Maske planen (Taxonomie, Vererbungsmodell ScreenDefinition/Studio, Mapping ~9–14 Einstiege, Migrationsreihenfolge, Abgrenzung Studio-Import vs Runtime). **Artefakt:** \docs/architecture/uix/beleg-maskenfamilie-vererbung.md\; Slice-YAML \docs/agent-ops/slices/UIX-BELEG-FAMILIE-VERERBUNG-20261022.yaml\; Querverweis in \docs/design/beleg-studio-variantenmatrix.md\. **Nicht anfassen:** STUDIO-BELEG-THEME / STUDIO-MODEL / \screen_definitions_beleg.py\ / \document_screen_versions.json\ ohne Codex-Handshake; Bestellung-Create/Listen-WIP nicht ueberschreiben. **Abnahme dieses Plan-Slices:** Doku vollstaendig; keine Implementierungspflicht.
+**Owner:** — (Status `offen`, nicht reserviert). **Stand:** Planartefakt 2026-10-22. **Ziel:** Eingehende/ausgehende Belegfolgen als Parent/Child-Familie einer Maske planen (Taxonomie, Vererbungsmodell ScreenDefinition/Studio, Mapping ~9–14 Einstiege, Migrationsreihenfolge, Abgrenzung Studio-Import vs Runtime). **Artefakt:** `docs/architecture/uix/beleg-maskenfamilie-vererbung.md`; Slice-YAML `docs/agent-ops/slices/UIX-BELEG-FAMILIE-VERERBUNG-20261022.yaml`; Querverweis in `docs/design/beleg-studio-variantenmatrix.md`. Systemweite Erweiterung: `docs/architecture/uix/maskenfamilien-taxonomie.md`. **Nicht anfassen:** STUDIO-BELEG-THEME / STUDIO-MODEL / `screen_definitions_beleg.py` / `document_screen_versions.json` ohne Codex-Handshake; Bestellung-Create/Listen-WIP nicht ueberschreiben. **Abnahme dieses Plan-Slices:** Doku vollstaendig; keine Implementierungspflicht.
 
 ## MASK-BESTELLUNG-NAV-NATIVE-20261022 — abgeschlossen, Cursor Composer
 

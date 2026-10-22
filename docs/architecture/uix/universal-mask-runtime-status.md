@@ -11,6 +11,13 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 # Universal Mask Runtime — Plattformstatus
 
+> **Nachtrag 2026-10-22 (`UIX-MASKENFAMILIEN-TAXONOMIE`):** Systemweite
+> Parent/Child-Taxonomie (Beleg/Stamm/Liste/Worklist/Ausnahme) und priorisierte
+> Cluster-Roadmap P0–P3 — Plan only, keine Page-Migration. Artefakt:
+> [`maskenfamilien-taxonomie.md`](maskenfamilien-taxonomie.md); Beleg-Spezialfall
+> bleibt [`beleg-maskenfamilie-vererbung.md`](beleg-maskenfamilie-vererbung.md).
+> Slice `UIX-MASKENFAMILIEN-TAXONOMIE-20261022` offen (nicht reserviert).
+
 > **Nachtrag 2026-10-22 (`MASK-BESTELLUNG-NAV-NATIVE`):** Bestellungen-Liste und
 > Folgebeleg-Einstiege oeffnen bestehende Saetze auf `/einkauf/bestellung/:id`
 > (SD `einkauf/purchase-order`); Neuanlage bleibt `/einkauf/bestellungen/neu`.
