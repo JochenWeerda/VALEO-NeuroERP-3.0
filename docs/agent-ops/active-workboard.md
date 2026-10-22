@@ -19468,6 +19468,9 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 
 **IDENTITY-SELF-LOGOUT Besitznachtrag 22.10.:** TopBar.tsx und auth/topbar-identity.test.tsx: lokale Abmeldung muss auch bei abgelaufener Sitzung mit zwischengespeicherter Identitaet bedienbar bleiben; anonyme Anzeige bleibt ohne Abmeldeaktion.
 
-## PHP-SECURITY-20261022 - reserviert, Codex
+## PHP-SECURITY-20261022 - abgeschlossen (lokaler Projektumfang), Codex
 
 **Owner:** Codex. **Ziel:** PHP-Sicherheitsmeldung vom21.10. gegen tatsaechliche lokale Laufzeiten pruefen, vorhandene betroffene Installation aktualisieren. **Besitz:** eigene QA php-security-20261022.md und Workboard; kein blindes Hinzufuegen einer PHP-Abhaengigkeit. **Abnahme:** offizielles Advisory, bestehende Container/Host/Projekt pruefen; gefundene Runtime versionsgerecht patchen und nachpruefen. Keine neuen Container/Datenbanken, kein pauschales Prune.
+
+
+**PHP-SECURITY Ergebnis:** offizielles Advisory bestaetigt;25 laufende Container ohne PHP, einziger gestoppter Container Java-Keycloak. Windows-Suchpfad, bekannte Installationsorte, laufende Webserver und registrierte Installationen ohne PHP-Treffer. Projekt-/Compose-/Dockerdefinitionen ohne PHP. Kein lokales Updateziel gefunden, deshalb kein Installationsnachweis erfunden. Portable Fremdinstallationen/externe Server nicht abgedeckt. QA php-security-20261022.md.
