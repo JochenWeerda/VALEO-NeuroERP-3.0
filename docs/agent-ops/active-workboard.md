@@ -19508,3 +19508,8 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 
 
 **COVERAGE-FACHOBERFLAECHEN Abnahme:**11 neue echte UI-Bedienvertraege plus10 bestehende Mengen-/Patchfaelle gemeinsam21 gruen. Vollstaendige Frontend-Coverage1487/293 gruen vor letztem Demo-Neustartnachtrag; letzter gezielter Regressionsteil danach21 gruen. Erfassung app/modules/services gleicht Sonar an, reporter und60/80 unveraendert. Globaler Sonar-Nachweis und Altmaskenabwaertsablaese bleiben offen; keine Erfuellung durch Baselineimporte behauptet.
+
+
+## AGRI-FLOW-VERIFIED-ACTOR-20261022 - reserviert, Codex
+
+**Owner:** Codex. **Befund:** vier Lagerbuchungswege (Transfer, Spuelcharge, Lot-Verknuepfung und automatische Lotbuchung) verwenden booked_by aus dem Request oder system; trotz gepruefter Bereichsrolle kann der Aufrufer den dauerhaften Buchungsurheber faelschen. **Besitz:** endpoints/agri_silo_material_flow.py und agri_lot_link_booking.py nur gepruefte Auth-Abhaengigkeit/Urheberprojektion; neue signierte HTTP-Negativvertraege und QA/Workboard. Vorhandene Domainservices/Transaktionen, Mandantenpruefung, Rollen, Requestkompatibilitaet unveraendert. Legacy booked_by wird ignoriert, Token-sub entscheidet. Keine neue DB/Container/Migration. **Abnahme:** echte RSA/JWKS-Verifikation; gefaelschter Rumpf/Header, fehlender Rumpfwert, Rollen-/Mandanten-/Signaturfehler, kein Folgeaufruf bei Ablehnung. Bestehende Fachtests erhalten.
