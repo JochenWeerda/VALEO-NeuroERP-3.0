@@ -19486,3 +19486,6 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 ## COVERAGE-FACHOBERFLAECHEN-20261022 - reserviert, Codex
 
 **Owner:** Codex. **Ziel:** echte Funktions-/Negativabnahme bisher unzureichend gepruefter Fachoberflaechen, Coverage80 ohne Scope-/Schwellenaenderung erreichen. **Besitz:** neue gezielte Frontend-Vertraege fuer vorhandene zentrale Fachoberflaechen und eigene QA/Workboard; Produktdateien erst nach gesondertem Befund/Besitznachtrag. Kein bloesser Render-Snapshot oder Implementierungsspiegel; Eingaben, resultierende Auftraege, Fehler und Berechtigungen pruefen. Keine neuen Datenbanken/Container.
+
+
+**COVERAGE-FACHOBERFLAECHEN Produktbefund/Besitz:** neuer echter React-Demoablauf zeigt: Demoergebnis kann im Review normal in den Rationslebenszyklus eingereicht werden (Button aktiv). Besitz zusaetzlich pages/futtermittel/rationsoptimierung.tsx ausschliesslich Einreichgrenze fuer Demo/nicht optimale Ergebnisse, erkennbare Begruendung und Mutationsguard; normale Beratung bleibt bedienbar. Eigene neue Bedienvertragsdatei. Keine Backend-/Rollen-/Datenbankaenderung.
