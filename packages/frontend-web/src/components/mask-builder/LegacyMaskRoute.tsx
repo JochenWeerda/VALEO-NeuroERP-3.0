@@ -1,18 +1,16 @@
-/**
- * Prozess- und CRM-Masken ohne native ScreenDefinition: Implementierung bleibt in *-legacy.tsx,
- * die Routendatei enthaelt kein ObjectPage/ListReport (Masken-Inventar legacy_mask_pattern = 0).
- */
+/** Transitional lazy loader. It preserves component props and is never migration evidence. */
 
-import { Suspense, lazy, type ComponentType, type LazyExoticComponent } from 'react'
+import { Suspense, lazy, type ComponentType } from 'react'
 
-export function createLegacyMaskPage(
-  legacyImport: () => Promise<{ default: ComponentType }>,
-): ComponentType {
-  const Legacy: LazyExoticComponent<ComponentType> = lazy(legacyImport)
-  return function LegacyMaskPage(): JSX.Element {
+export function createLegacyMaskPage<Props extends object>(
+  legacyImport: () => Promise<{ default: ComponentType<Props> }>,
+): ComponentType<Props> {
+  // React.lazy wraps ref types; the loader preserves the exact declared Props contract.
+  const Legacy = lazy(legacyImport) as unknown as ComponentType<Props>
+  return function LegacyMaskPage(props: Props): JSX.Element {
     return (
       <Suspense fallback={null}>
-        <Legacy />
+        <Legacy {...props} />
       </Suspense>
     )
   }

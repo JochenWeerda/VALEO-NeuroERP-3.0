@@ -10,7 +10,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/agenten-integration": {
@@ -21,7 +21,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/ai-approvals": {
@@ -32,7 +32,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/api-keys": {
@@ -43,7 +43,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/audit-log": {
@@ -54,7 +54,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/audit-log-liste": {
@@ -62,9 +62,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/backup-restore": {
@@ -75,7 +76,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/belegfolgekonfig": {
@@ -86,7 +87,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/benutzer-liste": {
@@ -97,7 +98,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/berechtigungen-matrix": {
@@ -108,7 +109,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/branches": {
@@ -119,7 +120,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/command-monitor": {
@@ -130,7 +131,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/compliance-dashboard": {
@@ -141,7 +142,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/control-center": {
@@ -149,10 +150,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/control-center/ai-approvals": {
@@ -163,7 +163,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/control-center/incident-response": {
@@ -174,7 +174,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/control-center/operations": {
@@ -185,7 +185,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/control-center/security": {
@@ -196,7 +196,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/core/audit-governance": {
@@ -207,7 +207,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/data-quality": {
@@ -218,7 +218,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/devices": {
@@ -229,7 +229,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/dms-integration": {
@@ -240,7 +240,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/erntepeak-stabilitaet": {
@@ -251,7 +251,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/forst/kalkulation": {
@@ -262,7 +262,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/identity-budgets": {
@@ -273,7 +273,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/integrationen-quarantaene": {
@@ -284,7 +284,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/monitoring/alerting": {
@@ -295,7 +295,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/monitoring/historie": {
@@ -306,7 +306,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/monitoring/regeln": {
@@ -317,7 +317,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/omnichannel-handelskonflikt": {
@@ -328,7 +328,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/postfaecher": {
@@ -339,7 +339,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/qualitaets-cockpit": {
@@ -347,9 +347,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/system-einstellungen": {
@@ -360,7 +361,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/tankstelle-evb": {
@@ -371,7 +372,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/tenants": {
@@ -382,7 +383,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/token-consumption": {
@@ -393,7 +394,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/users": {
@@ -404,7 +405,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/webhooks-liste": {
@@ -414,7 +415,7 @@
         "B",
         "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/workflow-editor": {
@@ -425,7 +426,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "admin/zeitachsen-editor": {
@@ -436,7 +437,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/annahme-abrechnung": {
@@ -447,7 +448,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/biostimulanzien-liste": {
@@ -458,7 +459,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/bodenproben-liste": {
@@ -469,7 +470,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/daily-prices": {
@@ -480,7 +481,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/duenger": {
@@ -491,7 +492,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/duenger-liste": {
@@ -502,7 +503,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/duenger-rechner": {
@@ -513,7 +514,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/ernte-annahme-abrechnung": {
@@ -524,7 +525,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/ernte-annahme-energiemais-liste": {
@@ -535,7 +536,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/ernte-kampagne-erfassung": {
@@ -546,7 +547,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/ernte-liste": {
@@ -554,9 +555,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/ernte-qualitaetsfreigabe": {
@@ -567,7 +569,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/ernte/kampagnenabschluss": {
@@ -578,7 +580,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/feed-advice": {
@@ -586,20 +588,21 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
     "agrar/feed-controlling": {
-      "definition_hash": "a28ae4bfc8263fcba54b8d36108c2fc5200f5615a5c833ad91a1b85ecf16c89e",
+      "definition_hash": "6a1cd9d80633a86b01151633786adda602e143a2364b1bfee93f7b21bb411c80",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/feed-readiness": {
@@ -610,7 +613,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/feeding-actuals": {
@@ -621,40 +624,40 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/feeding-business": {
-      "definition_hash": "74fef33e2f6780ebf6eb529d03fee21374aabd4005bfa1042fd22048fa241417",
+      "definition_hash": "278e894b5ab30435637e0e45cdc2eab449b2c07a41c5531d4252162262d67ce4",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/feeding-businesses": {
-      "definition_hash": "a6e464bce4a5cf422227970f8f7072018debb6ec68435c52cee779171cad279e",
+      "definition_hash": "2ec7c6144efbaa2766d85d675f6aa04a7ed701574d1737aa13e20f29c9bc4bf1",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/feeding-group": {
-      "definition_hash": "4b1c8d40a8357c9a8d979c9c0e701f55f2587f7272f4ea1520ffe62eb6a01927",
+      "definition_hash": "9d7e6690cb3540acf99d8c9eb45fc022b9de9bbb858b58e499dbf644ce0c419e",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/feeding-plan": {
@@ -665,7 +668,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/feeding-reference-data": {
@@ -676,7 +679,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/feldbuch-flurstueck-kataster-liste": {
@@ -687,7 +690,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/feldbuch-massnahmen-liste": {
@@ -695,9 +698,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/feldbuch-schlagkartei-liste": {
@@ -708,7 +712,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/futter/mischfutter-optimierung": {
@@ -719,7 +723,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/harvest-controls": {
@@ -727,10 +731,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/harvest-settlement": {
@@ -741,7 +744,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/kalkulation/deckungsbeitrag": {
@@ -752,7 +755,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/kontrakt-detail": {
@@ -760,20 +763,21 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/kontrakte": {
-      "definition_hash": "fd3080c62145f87cc407d444d0611b01dcf819a1fd7f72f41221d2e6127b4dd5",
+      "definition_hash": "a8495936f3b161bd035da2b314e8dcc2d0907566f87cd42bad994f3e3c1555bc",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/kontrakte/formular": {
@@ -784,7 +788,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/kultur-stamm-liste": {
@@ -795,7 +799,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/kulturpflanzen-liste": {
@@ -803,9 +807,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/lieferschein-erstellen": {
@@ -816,7 +821,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/maschinen-auslastung-liste": {
@@ -827,7 +832,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/maschinen/formular": {
@@ -838,7 +843,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/maschinen/wartung": {
@@ -849,7 +854,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/nachhaltigkeit-eudr-liste": {
@@ -860,7 +865,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/nawaro-erntemeldung": {
@@ -871,7 +876,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/nawaro-kaskade": {
@@ -882,7 +887,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/nawaro-vertraege": {
@@ -893,7 +898,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/partie-historie": {
@@ -904,7 +909,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/pflanzenschutz-applikationen-liste": {
@@ -915,7 +920,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/pflanzenschutz-liste": {
@@ -926,7 +931,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/pflanzenschutz-rechner": {
@@ -937,7 +942,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/planung/duengeplanung": {
@@ -948,7 +953,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/planung/fruchtfolge": {
@@ -959,7 +964,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/probenehmer-stamm": {
@@ -970,7 +975,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/psm": {
@@ -978,9 +983,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/psm-abgabedokumentation-liste": {
@@ -991,7 +997,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/psm-beratung-liste": {
@@ -1002,7 +1008,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/psm-liste": {
@@ -1010,9 +1016,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/psm-sachkunde-register-liste": {
@@ -1023,7 +1030,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/psm-wasserschutz-liste": {
@@ -1034,7 +1041,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/psm/anwendungsprotokoll": {
@@ -1045,7 +1052,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/psm/tankmischung": {
@@ -1056,7 +1063,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/qualitaet/ausnahmen": {
@@ -1067,7 +1074,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/qualitaet/laborwerte": {
@@ -1078,7 +1085,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/qualitaet/mykotoxine": {
@@ -1089,7 +1096,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/ration": {
@@ -1100,18 +1107,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/rations-lifecycle": {
-      "definition_hash": "4e53c52b6284224ec1257116ea1cd8f0f53f1d00a05d7f6a1607e51c1384e198",
+      "definition_hash": "7b88da6b699ffe62b13cdfbb2699abd0b32b3014f3eb6b6f5bc147bded7cbad5",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/rechnungen-erstellen": {
@@ -1122,7 +1129,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/saatgut": {
@@ -1133,7 +1140,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/saatgut-bestellungen-liste": {
@@ -1144,7 +1151,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/saatgut-liste": {
@@ -1155,7 +1162,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/saatgut-sortenregister-liste": {
@@ -1166,7 +1173,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/saatgut/abrechnung": {
@@ -1177,7 +1184,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/saatgut/formular": {
@@ -1188,7 +1195,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/saatgut/prognose": {
@@ -1199,7 +1206,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/saatgut/royalties": {
@@ -1210,7 +1217,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/saatgut/vermehrung": {
@@ -1221,7 +1228,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/saatzucht-partien-liste": {
@@ -1229,19 +1236,21 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/schlaege-karte-liste": {
-      "definition_hash": "ad2c5172fea7375272db380adaaa56538e9e442a3bc15f2f33e310bc57ba2822",
+      "definition_hash": "4d741a93e20060e81af9c62e1c71348b30d17a1eec4df53f8beae0f3dce0391d",
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/schlaege-kulturhistorie-liste": {
@@ -1252,7 +1261,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/schlaege-liste": {
@@ -1263,7 +1272,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/schlaege/bodenprobe": {
@@ -1274,7 +1283,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/schlaege/duengung": {
@@ -1285,7 +1294,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/schlaege/ernte": {
@@ -1296,7 +1305,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/schlaege/formular": {
@@ -1307,7 +1316,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/schlaege/pflanzenschutz": {
@@ -1318,7 +1327,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/schlaege/saat": {
@@ -1329,7 +1338,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/sektion-auswahl": {
@@ -1340,7 +1349,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/self-billing": {
@@ -1351,7 +1360,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/silo-belegung": {
@@ -1362,7 +1371,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/silo-qualitaet": {
@@ -1373,7 +1382,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/silo-trocknung": {
@@ -1384,7 +1393,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/soil-samples": {
@@ -1395,7 +1404,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/sorten": {
@@ -1406,7 +1415,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/sorten-vermehrung": {
@@ -1417,7 +1426,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/trocknungsregeln": {
@@ -1428,7 +1437,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/umwelt/nitrat": {
@@ -1439,7 +1448,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/vermehrungsvertraege-liste": {
@@ -1450,7 +1459,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/vertraege/formular": {
@@ -1461,7 +1470,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/vertrag-kontingente-liste": {
@@ -1472,7 +1481,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/wetter": {
@@ -1483,7 +1492,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "agrar/wiegeschein-detail": {
@@ -1494,7 +1503,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "aktien/dividenden": {
@@ -1505,7 +1514,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "aktien/hauptversammlung": {
@@ -1516,7 +1525,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "aktien/mitglieder": {
@@ -1527,7 +1536,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "aktien/stimmrechte": {
@@ -1538,7 +1547,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "aktien/zeichnungen": {
@@ -1549,7 +1558,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "analysis/what-if-simulator": {
@@ -1560,7 +1569,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "annahme/erfassung": {
@@ -1571,7 +1580,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "annahme/labor": {
@@ -1582,7 +1591,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "annahme/lkw-registrierung": {
@@ -1590,10 +1599,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "annahme/muster": {
@@ -1604,7 +1612,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "annahme/qualitaets-check": {
@@ -1612,10 +1620,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "annahme/rohwaren-annahme": {
@@ -1626,7 +1633,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "annahme/silo-zuweisung": {
@@ -1637,7 +1644,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "annahme/trocknung": {
@@ -1648,7 +1655,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "annahme/voranmeldung": {
@@ -1659,7 +1666,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "annahme/waage-1": {
@@ -1670,7 +1677,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "annahme/waage-2": {
@@ -1681,7 +1688,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "annahme/warteschlange": {
@@ -1689,10 +1696,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "annahme/wartezeit": {
@@ -1703,7 +1709,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "annahme/wiegeschein": {
@@ -1714,7 +1720,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/bestandsuebersicht": {
@@ -1725,7 +1731,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/chargen-pflicht": {
@@ -1736,7 +1742,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/ersatzteile": {
@@ -1747,7 +1753,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/gebinde": {
@@ -1758,7 +1764,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/gefahrgut": {
@@ -1769,7 +1775,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/herkunft": {
@@ -1780,7 +1786,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/kategorien": {
@@ -1791,7 +1797,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/konditionen": {
@@ -1802,7 +1808,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/lieferanten-artikel": {
@@ -1813,7 +1819,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/liste": {
@@ -1824,7 +1830,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/preisstaffeln": {
@@ -1835,7 +1841,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/qualitaetsmerkmale": {
@@ -1846,7 +1852,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/rabattgruppen": {
@@ -1857,7 +1863,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/stamm": {
@@ -1868,7 +1874,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/stuecklisten": {
@@ -1879,7 +1885,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/texte-medien": {
@@ -1890,7 +1896,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/umrechnungen": {
@@ -1901,7 +1907,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/verpackungen": {
@@ -1912,7 +1918,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "artikel/zoll-intrastat": {
@@ -1920,21 +1926,20 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/abfrage-center": {
-      "definition_hash": "db030fdfba1d3313d212afacde1cbf3fd5964b7eb06c86bf5dbc229d484b5c3f",
+      "definition_hash": "b9a9f1c6cb3ee14d44ab03b77f772374a691236b455322b830b0786227e001e0",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/abfrage-generator": {
@@ -1945,18 +1950,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/aenderungshistorie": {
-      "definition_hash": "2069a95721bfdb5ef33f638759042b5a8bd3fbd79a9e4dc1f6edfd116b767451",
+      "definition_hash": "3a989af8e6b2aaaddc09cd7134bb6718631bfba764aaf465289668ad3a494413",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/agrarmarkt-bericht": {
@@ -1967,7 +1972,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/auftrags-kontrolle": {
@@ -1978,7 +1983,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/beleg-kontrolle": {
@@ -1989,18 +1994,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/bonus-berechnung": {
-      "definition_hash": "29c25e8359ce5dad734eec5ab1f530b88e7e1c9d08418d634d4caf443ab9c598",
+      "definition_hash": "ee7d14675805fc501c0f17a4d7c2536b3914e43a174f165ce41701e018b0593f",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/deckungsbeitraege": {
@@ -2011,29 +2016,29 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/dms-volltext": {
-      "definition_hash": "fbe392e90f538ff20420658fd25d7e93c42450872612b325b8b931c84bc374ad",
+      "definition_hash": "d92b825891a682e47ea92712ce96b3a1e12eb6425601f0ea45b78bb0cbdc46bb",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/duengemittelmengen": {
-      "definition_hash": "69b799b5c4e9d20f583e552a5846163706658869817953c3b2506e414d455659",
+      "definition_hash": "5aa1924908417bcdec5ecf0a873a1479c80c2b0cafc81c18cdcd390faa218fe2",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/erntebilanz": {
@@ -2044,7 +2049,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/kundenumsatz": {
@@ -2055,18 +2060,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/l3-berichtskatalog": {
-      "definition_hash": "82600c61a0af268f1c89b026d3cd0fd74bf014fdd84a7fa94e70d7ce5ce0cc5c",
+      "definition_hash": "c3247cac34827416dbbacff0f1161e7d2e2c3ca6ffff19df5832139c81ac8f2b",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/lagerumschlag": {
@@ -2077,7 +2082,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/lieferantenbewertung": {
@@ -2088,7 +2093,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/lieferschein-kontrolle": {
@@ -2099,7 +2104,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/rohertrag": {
@@ -2110,7 +2115,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/sanktionspruefung-kunden": {
@@ -2121,7 +2126,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/sanktionspruefung-personal": {
@@ -2132,7 +2137,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/umsatzstatistik": {
@@ -2143,7 +2148,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/vertriebstrichter": {
@@ -2154,7 +2159,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auswertungen/warengruppen-analyse": {
@@ -2165,7 +2170,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auth/callback": {
@@ -2173,10 +2178,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "auth/login": {
@@ -2184,10 +2188,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "banken/konten-liste": {
@@ -2195,9 +2198,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "banken/konten-stamm": {
@@ -2208,7 +2212,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "banken/lastschriften": {
@@ -2219,7 +2223,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "banken/sepa-export": {
@@ -2230,7 +2234,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "banken/ueberweisungen": {
@@ -2241,7 +2245,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "banken/zahlungsavise": {
@@ -2252,7 +2256,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "banken/zahlungsvorschlaege": {
@@ -2263,7 +2267,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "belege/belegfolge": {
@@ -2274,7 +2278,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "benachrichtigungen/liste": {
@@ -2285,7 +2289,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "betrieb/gefahrstoff-betriebsanweisung": {
@@ -2296,7 +2300,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "betrieb/gefahrstoff-kataster": {
@@ -2307,7 +2311,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "betrieb/maschinen-stamm": {
@@ -2318,7 +2322,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "betrieb/prueffristen": {
@@ -2329,7 +2333,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "betrieb/schadensmeldung": {
@@ -2340,7 +2344,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "betrieb/standorte": {
@@ -2351,7 +2355,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "betrieb/unterweisungen": {
@@ -2362,7 +2366,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "betrieb/wartungsplan": {
@@ -2373,7 +2377,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "charge/chargen-verfolgung": {
@@ -2384,7 +2388,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "charge/etiketten": {
@@ -2395,7 +2399,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "charge/liste": {
@@ -2406,7 +2410,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "charge/mischung": {
@@ -2417,7 +2421,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "charge/probenahme": {
@@ -2428,7 +2432,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "charge/qualitaets-freigabe": {
@@ -2439,7 +2443,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "charge/rueckruf": {
@@ -2450,7 +2454,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "charge/sperrlager": {
@@ -2461,7 +2465,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "charge/stamm": {
@@ -2472,7 +2476,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "charge/teilung": {
@@ -2483,7 +2487,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "charge/wareneingang-liste": {
@@ -2494,7 +2498,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "charge/zusammenfuehrung": {
@@ -2505,7 +2509,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/audit-trail": {
@@ -2516,7 +2520,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/bvl-umsatzmeldung-liste": {
@@ -2527,7 +2531,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/cross-compliance": {
@@ -2538,7 +2542,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/cross-compliance-liste": {
@@ -2549,7 +2553,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/duenge-bilanz": {
@@ -2560,7 +2564,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/enni-meldungen-liste": {
@@ -2568,9 +2572,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/eudr-compliance-liste": {
@@ -2581,7 +2586,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/eudr-meldungen": {
@@ -2592,7 +2597,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/export-pruefprotokoll": {
@@ -2603,7 +2608,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/export-pruefung-liste": {
@@ -2614,7 +2619,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/gefahrstoff-doku-liste": {
@@ -2625,7 +2630,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/gefahrstoff-verzeichnis": {
@@ -2636,7 +2641,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/gelangensbestaetigung-liste": {
@@ -2644,9 +2649,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/intrastat-liste": {
@@ -2654,9 +2660,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/lksg-lieferkette": {
@@ -2667,7 +2674,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/lksg-liste": {
@@ -2675,9 +2682,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/meldewesen-konsole": {
@@ -2688,7 +2696,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/pcn-liste": {
@@ -2699,7 +2707,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/pcn-ufi": {
@@ -2710,7 +2718,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/pflanzenschutz-nachweis": {
@@ -2721,7 +2729,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/qs-audits": {
@@ -2732,7 +2740,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/qs-checkliste-liste": {
@@ -2743,7 +2751,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/saatgut-nachbau-liste": {
@@ -2751,9 +2759,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/sachkunde-liste": {
@@ -2764,7 +2773,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/sanktionspruefung": {
@@ -2775,7 +2784,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/schadstoff-monitoring": {
@@ -2786,7 +2795,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/stichtagsmeldung-bestaende": {
@@ -2797,7 +2806,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/tierwohl-dokumentation": {
@@ -2808,7 +2817,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/usp-konformitaet": {
@@ -2819,7 +2828,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/vvvo-liste": {
@@ -2830,7 +2839,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/wasserschutz-auflagen": {
@@ -2841,7 +2850,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/zertifikate": {
@@ -2852,7 +2861,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "compliance/zulassungen-liste": {
@@ -2863,7 +2872,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "contracts-v2": {
@@ -2874,7 +2883,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "contracts/contract": {
@@ -2885,7 +2894,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/abweichungsanalyse": {
@@ -2896,7 +2905,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/agrarkalkulation": {
@@ -2907,7 +2916,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/benchmark-cockpit": {
@@ -2918,7 +2927,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/berichtswesen": {
@@ -2929,7 +2938,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/bwa": {
@@ -2940,7 +2949,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/cashflow-prognose": {
@@ -2951,7 +2960,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/dashboard-verwaltung": {
@@ -2962,7 +2971,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/deckungsbeitragsrechnung": {
@@ -2973,7 +2982,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/investitionsrechnung": {
@@ -2984,7 +2993,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/kampagnen-controlling": {
@@ -2995,7 +3004,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/kennzahlen": {
@@ -3006,7 +3015,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/kostentraegerrechnung": {
@@ -3017,7 +3026,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/kpi-verwaltung": {
@@ -3028,7 +3037,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/liquiditaetsplanung": {
@@ -3039,7 +3048,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/massnahmen": {
@@ -3050,7 +3059,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/plan-ist": {
@@ -3061,7 +3070,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/plan-ist-liste": {
@@ -3072,7 +3081,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/standort-vergleich": {
@@ -3083,7 +3092,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/timeseries-erfassung": {
@@ -3094,7 +3103,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/unternehmensplanung": {
@@ -3105,7 +3114,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "controlling/widget-verwaltung": {
@@ -3116,7 +3125,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/activities": {
@@ -3127,7 +3136,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/activity-detail": {
@@ -3138,7 +3147,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/aktivitaet": {
@@ -3149,7 +3158,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/aktivitaeten-liste": {
@@ -3159,7 +3168,7 @@
         "B",
         "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/angebot-erstellen": {
@@ -3170,7 +3179,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/anruf-protokoll": {
@@ -3181,7 +3190,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/bedarfsdeckung-cockpit": {
@@ -3192,7 +3201,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/bestell-inbox": {
@@ -3203,7 +3212,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/besuchsberichte": {
@@ -3214,7 +3223,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/betreuungsgebiet": {
@@ -3225,7 +3234,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/betriebsprofil": {
@@ -3236,7 +3245,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/betriebsprofile-liste": {
@@ -3247,7 +3256,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/bonus-vereinbarungen": {
@@ -3258,7 +3267,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/campaign": {
@@ -3268,7 +3277,7 @@
         "B",
         "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/campaign-performance": {
@@ -3276,9 +3285,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/campaign-template": {
@@ -3288,7 +3298,7 @@
         "B",
         "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/churn-risiko": {
@@ -3299,7 +3309,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/consent": {
@@ -3309,7 +3319,7 @@
         "B",
         "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/contact-detail-liste": {
@@ -3320,7 +3330,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/crm-dashboard": {
@@ -3331,7 +3341,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/cross-selling": {
@@ -3342,18 +3352,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/customer-360": {
-      "definition_hash": "73e6a6f3d552ca3a8c9c04ffd509da835fc1484df012296d5e91c9aa91df2fae",
+      "definition_hash": "cd6228aaa31f4407f05524383ac2f3fd436e4da20db1b2d9f7fb433794a22323",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/dokumente-kunden": {
@@ -3364,7 +3374,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/dsgvo-anfragen-liste": {
@@ -3372,9 +3382,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/dubletten-pruefung": {
@@ -3385,7 +3396,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/einwilligungen-liste": {
@@ -3393,9 +3404,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/events-messen": {
@@ -3406,7 +3418,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/gdpr-request": {
@@ -3416,7 +3428,7 @@
         "B",
         "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/gebietsschutz": {
@@ -3427,7 +3439,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/geschenke-liste": {
@@ -3438,7 +3450,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/interaktions-historie": {
@@ -3449,7 +3461,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/kampagne-detail": {
@@ -3460,7 +3472,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/kampagne-erstellen": {
@@ -3471,7 +3483,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/kampagnen-liste": {
@@ -3479,9 +3491,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/kampagnenvorlagen-liste": {
@@ -3489,9 +3502,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/kaufverhalten": {
@@ -3502,7 +3516,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/klaerfall-inbox": {
@@ -3513,7 +3527,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/kommunikation-center": {
@@ -3524,7 +3538,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/kontakt": {
@@ -3535,7 +3549,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/kontakt-management-liste": {
@@ -3546,7 +3560,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/kontakte-liste": {
@@ -3557,7 +3571,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/kunden-cockpit": {
@@ -3568,7 +3582,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/kunden-liste": {
@@ -3579,18 +3593,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/lead": {
-      "definition_hash": "3dc6df7758833a15cc39ee604b9fe511797352cad3e8c3e20439bff2ed196134",
+      "definition_hash": "6d4b2ee07b481f25094db3379605d5bf20c2bdf1f95788b224884db7a7f9abd4",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/leads-liste": {
@@ -3601,7 +3615,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/lieferant": {
@@ -3609,9 +3623,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/lieferanten-liste": {
@@ -3622,18 +3637,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/mail-arbeitsplatz": {
-      "definition_hash": "df5d569a85533eaa66a2abcd962e2484aaf65b647d98ee1618bdd2a038bbfe1b",
+      "definition_hash": "7790d8d9669cc11797fc33fba6823307eb604561a5f358524cf0897d33a07f3d",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/opportunities-liste": {
@@ -3644,18 +3659,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/opportunity": {
-      "definition_hash": "8e6ddebe0fdb89ce68f3925375772b694afe4e9223358ae9a00ce94fa672fce1",
+      "definition_hash": "86edba8e989a72b9f07410fab98451a125f4aeffe8976cda74de98a880cf8da6",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/segment": {
@@ -3665,7 +3680,7 @@
         "B",
         "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/segmente-liste": {
@@ -3673,9 +3688,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/vertreter": {
@@ -3683,9 +3699,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/wettbewerber": {
@@ -3696,7 +3713,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/wiedervorlagen": {
@@ -3707,7 +3724,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "crm/zielgruppen": {
@@ -3718,7 +3735,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dashboard/customizable": {
@@ -3729,7 +3746,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dashboard/customizable-dashboard": {
@@ -3740,7 +3757,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dashboard/einkauf": {
@@ -3751,7 +3768,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dashboard/sales-dashboard": {
@@ -3762,7 +3779,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dashboard/verkauf": {
@@ -3773,7 +3790,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dashboards/geschaeftsfuehrung": {
@@ -3784,7 +3801,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "disposition/bestell-vorschlag": {
@@ -3795,7 +3812,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "disposition/engpass-monitor": {
@@ -3806,7 +3823,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "disposition/kontrakt-abruf": {
@@ -3817,7 +3834,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "disposition/lager-reichweite": {
@@ -3828,7 +3845,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "disposition/liste": {
@@ -3839,7 +3856,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "disposition/saison-planung": {
@@ -3850,7 +3867,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "disposition/strecken-disposition": {
@@ -3861,7 +3878,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "disposition/touren-disposition": {
@@ -3872,7 +3889,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "disposition/umlagerungs-vorschlag": {
@@ -3883,7 +3900,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dms/archiv-suche": {
@@ -3894,7 +3911,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dms/beleg-erkennung": {
@@ -3905,7 +3922,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dms/dokument-detail": {
@@ -3916,7 +3933,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dms/dokument-upload": {
@@ -3927,7 +3944,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dms/freigabe-workflow": {
@@ -3938,7 +3955,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dms/inbox": {
@@ -3946,9 +3963,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dms/posteingang": {
@@ -3959,7 +3977,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dms/verschlagwortung": {
@@ -3970,7 +3988,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dms/vorlagen-verwaltung": {
@@ -3981,7 +3999,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "docflow/artefakt-freigabe": {
@@ -3992,18 +4010,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "docflow/dokumenten-ruecklauf": {
-      "definition_hash": "2794cbf61002bfe0750f883a954b9e1709ef4c413301265978944a865ad5c468",
+      "definition_hash": "3fa5d71cf51003f3e3e995f9bfc67e19ca646c3e97c1be7455ac3c9281bac7ff",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "docflow/gobd-export": {
@@ -4014,7 +4032,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "docflow/nachweisraum": {
@@ -4025,7 +4043,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "docflow/wiedervorlagen": {
@@ -4036,7 +4054,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dokumente/ablage-liste": {
@@ -4047,7 +4065,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dokumente/archiv": {
@@ -4058,7 +4076,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dokumente/eingang": {
@@ -4069,7 +4087,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dokumente/suche": {
@@ -4080,7 +4098,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "dokumente/vorlagen": {
@@ -4091,18 +4109,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/anfrage": {
-      "definition_hash": "e2de5b34e2b0d6c37589a514a0d2fbe3575cd22c2a154070d030802d41f0aad3",
+      "definition_hash": "a0100c198e1aa5e1e0d2e5f22833768d1a779aa0cb2fcab17c5a322fe306263d",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/anfrage-erstellen": {
@@ -4113,7 +4131,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/anfragen": {
@@ -4124,7 +4142,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/anfragen-create-liste": {
@@ -4135,7 +4153,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/angebot": {
@@ -4146,7 +4164,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/angebot-erfassen": {
@@ -4157,7 +4175,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/angebote": {
@@ -4168,7 +4186,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/angebote-vergleich-liste": {
@@ -4179,7 +4197,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/anlieferavis": {
@@ -4190,7 +4208,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/anlieferavis-erfassen": {
@@ -4201,7 +4219,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/anlieferavis-liste": {
@@ -4212,18 +4230,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/auftragsbestaetigung": {
-      "definition_hash": "cbc387980da1e12a3d242a33998d4e7b0f561e654de397079d25963b6d64c42d",
+      "definition_hash": "f47e964879d690d4a3c5f0c43efba9e0b1c1d3240c2827ae081bf03d3861ef60",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/auftragsbestaetigung-erfassen": {
@@ -4234,7 +4252,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/auftragsbestaetigungen": {
@@ -4245,7 +4263,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/bestellung-freigabe": {
@@ -4256,7 +4274,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/bestellungen": {
@@ -4267,7 +4285,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/bestellvorschlaege-liste": {
@@ -4278,7 +4296,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/bestellvorschlag-kontrakt": {
@@ -4289,7 +4307,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/bestellvorschlag-lager": {
@@ -4300,7 +4318,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/bestellvorschlag-verbrauch": {
@@ -4311,7 +4329,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/dienstleistungen-haltung-liste": {
@@ -4322,7 +4340,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/einkauf-vorgang-liste": {
@@ -4333,7 +4351,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/frachtauftraege-liste": {
@@ -4341,9 +4359,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/gutschrift-belastung": {
@@ -4354,7 +4373,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/kontrakt-anlage": {
@@ -4365,7 +4384,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/kontrakte-service-liste": {
@@ -4376,7 +4395,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/lieferanten": {
@@ -4387,7 +4406,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/lieferanten-angebote": {
@@ -4398,7 +4417,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/lieferanten-dokumente": {
@@ -4409,7 +4428,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/lieferanten-konditionen": {
@@ -4420,7 +4439,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/lieferanten-reklamationen": {
@@ -4431,7 +4450,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/lieferschein-erfassen": {
@@ -4442,7 +4461,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/mahnwesen-lieferanten": {
@@ -4453,7 +4472,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/purchase-order": {
@@ -4464,7 +4483,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/rechnung-abgleich": {
@@ -4475,7 +4494,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/rechnung-abgleich-liste": {
@@ -4486,7 +4505,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/rechnung-eingang-erfassung": {
@@ -4497,7 +4516,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/rechnungseingaenge-liste": {
@@ -4508,7 +4527,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/rechnungseingang/neu": {
@@ -4519,17 +4538,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/reports": {
-      "definition_hash": "4307c0ec38029d185ea9f114d5fee4b6175b93b0a5408eff75ee12d2e1bc665d",
+      "definition_hash": "0769101663e21d4472047e5529d61a7246c82d2df6310ece93c73fa0e93c12c9",
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/retouren": {
@@ -4540,7 +4560,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/retouren-liste": {
@@ -4551,7 +4571,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/rfq-bids": {
@@ -4562,7 +4582,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/service-entry-sheets": {
@@ -4573,18 +4593,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/supplier": {
-      "definition_hash": "339fdf764cf28285b136a87e62c1ccc10c095e77b47098c6be9ce02cd1a1f355",
+      "definition_hash": "078917180991c6e99473a2d634711ea2ef235f5c2f7fad8fb30142d228ac9efc",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/wareneingang": {
@@ -4595,7 +4615,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/wareneingangsabgleich": {
@@ -4606,7 +4626,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/warengruppen": {
@@ -4617,7 +4637,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "einkauf/zahlungsbedingungen": {
@@ -4628,7 +4648,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "etiketten/druck-liste": {
@@ -4639,7 +4659,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "etiketten/drucken": {
@@ -4650,7 +4670,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "export/intrastat-meldung-liste": {
@@ -4661,7 +4681,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "export/umsatzsteuer-voranmeldung-liste": {
@@ -4672,7 +4692,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "export/ustva": {
@@ -4683,7 +4703,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/abschluss-checklist": {
@@ -4694,17 +4714,17 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/abschluss-checklist-detail": {
-      "definition_hash": "69b1a7ce427f39208b6e40870ca4ce2de62f9204bccd904150d1cfa0c22927a9",
+      "definition_hash": "fbfcf15674563950a11eb5deeb0ccf72a46a7b4174172af45fd41360796dd183",
       "gates_passed": [
         "A",
         "B",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/abschluss-cockpit": {
@@ -4715,7 +4735,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/anlage": {
@@ -4724,7 +4744,7 @@
         "A",
         "B"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/anlagen": {
@@ -4735,7 +4755,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/anlagen-liste": {
@@ -4746,7 +4766,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/anlagen-suite": {
@@ -4757,7 +4777,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/atlas": {
@@ -4768,7 +4788,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/bilanz": {
@@ -4779,17 +4799,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/buchhaltungsuebersicht": {
-      "definition_hash": "ed1198d0077777340f72c3b29fee1890c2ed44485ea5ab4e2c6c3c76c912c7f7",
+      "definition_hash": "a7e3ca7ed061bafab849b8a151462e0d04942317aa34ef87b14761cceb00d94a",
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/buchungsjournal-liste": {
@@ -4800,7 +4821,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/buchungsuebernahme-connectors": {
@@ -4811,7 +4832,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/bwa": {
@@ -4822,7 +4843,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/debitoren": {
@@ -4830,10 +4851,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/debitoren-api": {
@@ -4844,7 +4864,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/debitoren-liste": {
@@ -4852,10 +4872,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/elster-online": {
@@ -4866,7 +4885,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/erloeskennziffern": {
@@ -4877,7 +4896,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/erloeskontenzuordnung": {
@@ -4888,7 +4907,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/forderungsgruppen": {
@@ -4899,17 +4918,17 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/geschaeftsjahre": {
-      "definition_hash": "22355f480a253167996a9957dbbc59c061928927c786acdc641cbd09dcd4331b",
+      "definition_hash": "bf48cb69bcf3ba461bb50ed6eb009436863b8b08a35d16fa121387f0c571f00b",
       "gates_passed": [
         "A",
         "B",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/guv": {
@@ -4920,7 +4939,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/hauptbuch": {
@@ -4931,7 +4950,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/hauptbuch-liste": {
@@ -4942,7 +4961,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/kassenbuch-liste": {
@@ -4953,7 +4972,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/kontenplan": {
@@ -4964,7 +4983,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/kontenplan-liste": {
@@ -4972,9 +4991,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/kostenstellen-liste": {
@@ -4985,7 +5005,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/kostenstellenrechnung": {
@@ -4993,9 +5013,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/kreditlinien": {
@@ -5006,7 +5027,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/kreditoren": {
@@ -5017,7 +5038,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/kreditoren-liste": {
@@ -5028,7 +5049,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/lohn-connector": {
@@ -5039,7 +5060,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/monatswerte": {
@@ -5050,7 +5071,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/offene-posten-liste": {
@@ -5061,17 +5082,17 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/op-skonto-auszifferung": {
-      "definition_hash": "de5f0ed9d35ea8c3f3e5ec3acfa4d0c8a088377ae41b06fafd381206ffcf359c",
+      "definition_hash": "15cdd53e8c919fa5d9eaa43ee9d06ed73f49efd628a198548c233a4b9dd2e161",
       "gates_passed": [
         "A",
         "B",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/op-verwaltung": {
@@ -5082,7 +5103,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/periodische-buchungen": {
@@ -5093,7 +5114,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/quadriga-connector": {
@@ -5104,7 +5125,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/sachkonto": {
@@ -5115,7 +5136,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/schnittstelle-fibu": {
@@ -5126,7 +5147,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/schnittstelle-fibu-liste": {
@@ -5137,7 +5158,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/schnittstellen-center": {
@@ -5148,7 +5169,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/sicherheiten": {
@@ -5159,17 +5180,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/stammdaten": {
-      "definition_hash": "8d95d0d5d5e4458a56dda919acd50acf8e43d4e0d75dcbf0a242d2ef8bb6f44c",
+      "definition_hash": "4b3351c8cdfce0df9f316698e20e832866b7086f97bee317e6ea1511da569a85",
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/verbindlichkeiten": {
@@ -5180,7 +5202,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/verbindlichkeiten-liste": {
@@ -5191,7 +5213,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/zahlungseingaenge": {
@@ -5202,7 +5224,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/zahlungseingaenge-liste": {
@@ -5210,9 +5232,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/zahlungslaeufe": {
@@ -5223,7 +5246,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/zahlungslaeufe-liste": {
@@ -5234,17 +5257,17 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/zahlungsmeldungen": {
-      "definition_hash": "8a75070e154bb93797a9096379cf8634f395988a805cd6a62a677ea8eb044691",
+      "definition_hash": "be492c1866544c5c77d9a713b62cf16de3f309ac93d7597fa6b035955a70a32c",
       "gates_passed": [
         "A",
         "B",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fibu/zahlungsvorschlaege": {
@@ -5255,7 +5278,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/abschluss": {
@@ -5266,18 +5289,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/ap-invoice": {
-      "definition_hash": "be3f136c0abdb850714d52af8252c6a5fcf0e22e21fd05335528c585f11b6c0c",
+      "definition_hash": "66a4ca49e40e7a2cc74b4a9af0f1f9416481829afab867708f204d786f301e93",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/ap-invoices-liste": {
@@ -5285,9 +5308,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/ap/invoices": {
@@ -5298,7 +5322,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/ap/invoices/new": {
@@ -5309,18 +5333,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/ar-open-item": {
-      "definition_hash": "94f583d799d2f5ea5c24981d4a791b438fc7639a008b05bee0964688b256fbe5",
+      "definition_hash": "4d0359cbee807884af0ce72b81d71cbadde0c8e858cf898ae6b0d1a6c3cf31bb",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/audit-trail": {
@@ -5331,7 +5355,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/audit-trail-liste": {
@@ -5339,9 +5363,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/bank-abgleich": {
@@ -5349,10 +5374,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/bank-account": {
@@ -5363,7 +5387,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/bank-stamm": {
@@ -5374,7 +5398,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/bankkonten-stamm": {
@@ -5385,18 +5409,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/bankkonto": {
-      "definition_hash": "a289dfa6b12f6482e5859ff1e491da22bbdb3a905e7db05a751668d89e6b5f4b",
+      "definition_hash": "f810297467c78963543c9541a3749a8a91946bbc77a2fb9ac7091019d09af55b",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/bookings/new": {
@@ -5404,9 +5428,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/buchungserfassung": {
@@ -5417,7 +5442,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/buchungsimport": {
@@ -5428,7 +5453,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/buchungsvorlagen": {
@@ -5439,29 +5464,29 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/datev-export": {
-      "definition_hash": "2cd293380e9285e32e964fb89a193c951a0185180fc01a775913f3250df25997",
+      "definition_hash": "4ba5fccabacbd386e2d0ba93e16877389f9e31ca1bdc031b219e46b6689a189b",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/debitor": {
-      "definition_hash": "dab56cf1f96bc23da2a1bf39c091589713d9b498edb76d565354940cf8f52837",
+      "definition_hash": "388bf409c52e0bf80a03aac7d340e4ae7e079e6a43e092f0a782119017ddd692",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/debitoren-liste": {
@@ -5472,7 +5497,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/debitoren/new": {
@@ -5483,7 +5508,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/dunning-editor": {
@@ -5494,7 +5519,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/invoices-list": {
@@ -5505,7 +5530,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/invoices/new": {
@@ -5513,10 +5538,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/kasse": {
@@ -5527,7 +5551,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/kontenplan": {
@@ -5538,18 +5562,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/kreditor": {
-      "definition_hash": "8a0c8e487bc194b79fe42c58f8afaf03075d2ee650eed8c6ca77c4bc0c16f3fc",
+      "definition_hash": "5cd67ef2a678016fb8d6476d15911294fc0985d403c5af3e4702bd1a66186bf8",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/kreditoren": {
@@ -5560,7 +5584,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/kreditoren-liste": {
@@ -5571,7 +5595,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/kreditoren-stamm": {
@@ -5582,7 +5606,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/lastschriften-debitoren": {
@@ -5593,7 +5617,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/nebenbuch-abstimmung": {
@@ -5604,7 +5628,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/offene-posten": {
@@ -5612,9 +5636,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/offene-posten-cockpit": {
@@ -5625,7 +5650,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/op-debitoren": {
@@ -5636,7 +5661,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/op-kreditoren": {
@@ -5647,7 +5672,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/payment-matching-liste": {
@@ -5655,9 +5680,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/payment-run": {
@@ -5668,7 +5694,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/payments": {
@@ -5679,7 +5705,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/periodenabschluss": {
@@ -5690,7 +5716,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/periods": {
@@ -5701,7 +5727,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/periods-liste": {
@@ -5709,9 +5735,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/pruefkorb": {
@@ -5722,18 +5749,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/rechnungstapel": {
-      "definition_hash": "657d4f5480efc811b1eabacd1443fae359229cdc247a86687049c0eb525db728",
+      "definition_hash": "c5d79ecbbfb02f675f41c844d300ca98e291333923f9621e829544082240fa33",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/skonto-optimizer": {
@@ -5744,7 +5771,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/skonto-optimizer-liste": {
@@ -5752,9 +5779,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/steuerschluessel": {
@@ -5765,16 +5793,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/umsatz": {
-      "definition_hash": "70f105d8da73de11a9cbc59f98062ed44f35850f1bf7694e558950ae861bed42",
+      "definition_hash": "5cdb9561d0c94d8340d0c2864b309e700f157a1faa7000e1705ab3582c2f6f26",
       "gates_passed": [
+        "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/ustva": {
@@ -5785,7 +5815,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/wechselkurse": {
@@ -5796,7 +5826,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/zahlungseingang": {
@@ -5807,7 +5837,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finance/zahlungslauf-kreditoren": {
@@ -5818,7 +5848,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "finanzplanung/liquiditaet": {
@@ -5829,7 +5859,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "foerderung/antrag": {
@@ -5840,7 +5870,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "foerderung/liste": {
@@ -5851,7 +5881,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/ausgehende-belege-dokumente": {
@@ -5862,7 +5892,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/ausgehende-dokumente": {
@@ -5870,9 +5900,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/auswertung-kosten": {
@@ -5880,9 +5911,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/auswertungen-menu": {
@@ -5890,9 +5922,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/fahrzeug-stamm": {
@@ -5903,7 +5936,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/fahrzeug/neu": {
@@ -5914,7 +5947,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/fahrzeuge": {
@@ -5925,7 +5958,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/fahrzeuge-liste": {
@@ -5936,7 +5969,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug": {
@@ -5947,7 +5980,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/fuhrpark-auswertungen-menu": {
@@ -5958,7 +5991,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/fuhrpark-klassisch": {
@@ -5969,7 +6002,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/fuhrpark-menue": {
@@ -5980,7 +6013,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/fuhrpark-rechnungen": {
@@ -5991,7 +6024,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/fuhrpark-stammdaten": {
@@ -6002,7 +6035,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/rechnungen": {
@@ -6010,9 +6043,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/rechnungen-liste": {
@@ -6020,9 +6054,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/terminarten": {
@@ -6030,9 +6065,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "fuhrpark/uebersicht": {
@@ -6050,9 +6086,10 @@
       "definition_hash": "739284956b9e933f2d573203bcd24685e07b9d728a16db70cabefb5b0aff1614",
       "gates_passed": [
         "A",
-        "B"
+        "B",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futter/einzel/liste": {
@@ -6063,7 +6100,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futter/einzel/stamm/neu": {
@@ -6074,16 +6111,17 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futter/misch": {
       "definition_hash": "332dce8ec9fdaffea8090aa9066761b37bb6abf9b473be7c638fc49fa5673b83",
       "gates_passed": [
         "A",
-        "B"
+        "B",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futter/misch/liste": {
@@ -6094,7 +6132,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futter/misch/stamm/neu": {
@@ -6105,29 +6143,29 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/analyse": {
-      "definition_hash": "71599e803c00ba7a936ae547f14f8a69f8eedfcb2abf0e8510b176a9fbe41f81",
+      "definition_hash": "1b130ffae4b5c29c345e1bd7a48e925113623f619b93a632b3126da9bfab74ee",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/analysen": {
-      "definition_hash": "44b95b386ed17e477e35bfecf825f622da810da183d8884b4d18f35b89b61601",
+      "definition_hash": "283ff0f10a24af127d7623769a052062f5073c3708f849fbb4cceed5bf95f90a",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/beratung": {
@@ -6138,7 +6176,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/chargen/neu": {
@@ -6149,7 +6187,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/einzelfuttermittel": {
@@ -6160,7 +6198,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/einzelfuttermittel-liste": {
@@ -6168,9 +6206,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/einzelfuttermittel/liste": {
@@ -6181,7 +6220,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/einzelfuttermittel/stamm/new": {
@@ -6192,7 +6231,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/fuetterungsdokumentation-mobil": {
@@ -6200,10 +6239,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/futtermittel-bestellung": {
@@ -6214,7 +6252,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/futtermittel-qualitaetskontrolle": {
@@ -6225,7 +6263,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/futtermittel-statistik": {
@@ -6236,7 +6274,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/grundfutteranalysen": {
@@ -6247,7 +6285,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/integrationsmonitor": {
@@ -6258,18 +6296,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/mischfuttermittel": {
-      "definition_hash": "dbc7b417dc701dab000cfe01032add679623dc0c3470f498002cc4e83903e4f6",
+      "definition_hash": "bc3d52d4beead895971fa1efaa64f0e69297e97d04bd37c5180ff940fa6910f2",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/mischfuttermittel-liste": {
@@ -6277,9 +6315,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/mischfuttermittel/liste": {
@@ -6290,7 +6329,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/mischfuttermittel/stamm/new": {
@@ -6301,7 +6340,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/rations-schnittstellen-import": {
@@ -6312,7 +6351,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/rations-zugang": {
@@ -6323,7 +6362,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/rationseditor": {
@@ -6331,20 +6370,19 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/rationsoptimierung": {
-      "definition_hash": "6f76ebbdcb115ab4e2c4f98240b00e32cf59453260c621d4c297e9a66fe0f875",
+      "definition_hash": "0e369e3bab075fd9f55fa0f36ea67a017681905dc548bc4df214fb41626890ff",
       "gates_passed": [
         "A",
         "B",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/rationsvergleich": {
@@ -6355,7 +6393,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "futtermittel/wareneingang": {
@@ -6366,7 +6404,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "genossenschaft/mitglieder": {
@@ -6377,7 +6415,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "genossenschaft/mitglieder-liste": {
@@ -6385,9 +6423,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "inbox": {
@@ -6398,16 +6437,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "inventory-reports": {
-      "definition_hash": "8d40045f93969994b044cc352a8952b674e398afafadaf36654450a5ff943030",
+      "definition_hash": "3f32b4c70c5275fd05248201bdcb28bdb00dd5c752da675b4e2c1552c2b62497",
       "gates_passed": [
+        "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "inventory/epcis": {
@@ -6418,7 +6459,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "kasse/tagesabschluss": {
@@ -6429,7 +6470,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "kontrakte/FrmKontraktProtokoll": {
@@ -6437,30 +6478,31 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "kontrakte/KontraktAlarmDashboard": {
-      "definition_hash": "e9f3e6920f1ec738537a7c44b108648fb6f7a5568f9e29a40ef0d1ef4cf8be31",
+      "definition_hash": "523edbcb2e4144355e623ecb19260709f895ea4aecf8bcfb8060bb7d6e51ee1c",
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "kontrakte/LstKontraktUebersicht": {
-      "definition_hash": "eae925509e997bd27c9d179c2792b99530f9f16878fd134109302dc740e6ce6a",
+      "definition_hash": "5e9a6963e121d6732a1ebaecd84c36d281d838ccd5089562d1fee5ce6ef2eeec",
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "kontrakte/kontraktklassen": {
@@ -6471,7 +6513,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "kontrakte/kontraktklassen-liste": {
@@ -6479,9 +6521,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "kontrakte/liste": {
@@ -6489,9 +6532,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "kontrakte/mengenzeitraeume": {
@@ -6502,7 +6546,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "kontrakte/positionen": {
@@ -6513,7 +6557,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "labor/proben-liste": {
@@ -6524,7 +6568,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/article-stock": {
@@ -6535,7 +6579,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/auslagerung": {
@@ -6546,7 +6590,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/bestandsbewertung": {
@@ -6557,7 +6601,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/bestandskorrektur": {
@@ -6568,7 +6612,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/charge": {
@@ -6576,9 +6620,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/einlagerung": {
@@ -6589,7 +6634,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/foreign-goods-queue": {
@@ -6597,20 +6642,21 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/fremdware": {
-      "definition_hash": "727b4ee8d549502ae73230773153d3ecebd58e097e7fed4889030e3162037c00",
+      "definition_hash": "7f6757328361d5cdf07f46e0d3844e5d3e3aa9fc4ff9e4abb0442327196bda0a",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/gs1-scanner": {
@@ -6621,7 +6667,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/inventory-dashboard": {
@@ -6632,7 +6678,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/inventur": {
@@ -6643,7 +6689,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/inventur-liste": {
@@ -6651,20 +6697,21 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/inventur-nebenlaeufe": {
-      "definition_hash": "b24be0a88becb357082d91fbd15ecb480caefb5dc856c680a18c92bd9d298ab3",
+      "definition_hash": "0c766e60341295b859532dd5a16b39536faebce2ecd8f46ee4e0e437a0903341",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/kommissionierung": {
@@ -6675,7 +6722,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/lagerbewegungen-liste": {
@@ -6683,9 +6730,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/lagerplaetze": {
@@ -6696,7 +6744,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/leitstand": {
@@ -6704,9 +6752,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/massebilanz": {
@@ -6716,7 +6765,7 @@
         "B",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/materialfluss": {
@@ -6724,10 +6773,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/materialfluss-visualisierung": {
@@ -6738,7 +6786,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/partiestamm": {
@@ -6749,7 +6797,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/partiestamm-liste": {
@@ -6757,9 +6805,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/permanente-inventur": {
@@ -6769,7 +6818,7 @@
         "B",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/qs-leitstand": {
@@ -6780,7 +6829,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/rueckverfolgbarkeit": {
@@ -6791,7 +6840,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/silo-mobil": {
@@ -6802,16 +6851,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/silo-uebersicht": {
-      "definition_hash": "21c0b8c89ee8a96b9c1aee7942f045de9c965d485b8ff59a1f1d26e649a8a61e",
+      "definition_hash": "fdc5bb8c97627911d3e3ca00d5f5edb4ee61647b0cc7e9269b3ed7aae0aca656",
       "gates_passed": [
+        "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/silo-uebersicht-liste": {
@@ -6819,9 +6870,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/stock-movement": {
@@ -6832,7 +6884,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/terminal": {
@@ -6843,7 +6895,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "lager/umlagerung": {
@@ -6854,7 +6906,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "logistik/frachtbrief": {
@@ -6862,9 +6914,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "logistik/frachtbriefe": {
@@ -6875,7 +6928,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "logistik/frachttabellen": {
@@ -6886,7 +6939,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "logistik/tour-fracht-arbeitsraum": {
@@ -6897,7 +6950,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "logistik/tourenplanung": {
@@ -6908,7 +6961,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "logistik/verladung": {
@@ -6919,7 +6972,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "logistik/versandprofile": {
@@ -6930,7 +6983,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "mahnwesen/mahnlauf": {
@@ -6938,10 +6991,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "management/executive-dashboard": {
@@ -6952,7 +7004,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "marketing/kampagnen": {
@@ -6963,7 +7015,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "marketing/kampagnen-liste": {
@@ -6971,9 +7023,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "mobile/scanner": {
@@ -6984,7 +7037,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "nachhaltigkeit/eudr-compliance": {
@@ -6995,7 +7048,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/bewerbung-einwilligung": {
@@ -7006,7 +7059,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/bewerbungen": {
@@ -7017,7 +7070,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/einwilligungserklaerungen": {
@@ -7028,7 +7081,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/hrm-operations-gates": {
@@ -7039,7 +7092,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/mitarbeiter": {
@@ -7050,7 +7103,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/mitarbeiter-liste": {
@@ -7061,7 +7114,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/mitarbeiter/neu": {
@@ -7072,7 +7125,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/onboarding": {
@@ -7083,7 +7136,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/organigramm": {
@@ -7094,7 +7147,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/qualifikationen": {
@@ -7105,7 +7158,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/schulung-neu": {
@@ -7116,7 +7169,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/schulungen": {
@@ -7127,7 +7180,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/stundenzettel": {
@@ -7138,7 +7191,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/stundenzettel-liste": {
@@ -7149,7 +7202,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/zeiterfassung": {
@@ -7160,7 +7213,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "personal/zeiterfassung-liste": {
@@ -7168,9 +7221,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "planung/kalender": {
@@ -7181,7 +7235,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "platform/analytics": {
@@ -7189,9 +7243,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "platform/studio-history": {
@@ -7199,10 +7254,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "platform/studio-history-diff": {
@@ -7210,10 +7264,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/anfragen": {
@@ -7224,7 +7277,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/bestellungen": {
@@ -7235,7 +7288,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/dokumente": {
@@ -7246,7 +7299,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/empfehlungen": {
@@ -7257,7 +7310,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/feldbuch": {
@@ -7268,7 +7321,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/feldbuch-auswertungen": {
@@ -7279,7 +7332,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/lohndienste/neu": {
@@ -7290,17 +7343,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/naehrstoffbilanzen": {
-      "definition_hash": "a1fca9330b3522186f8da690aa760634c735448d9c334b6a49fa9ae5e290780e",
+      "definition_hash": "47fd874e7ba594b7fe381ac704dfb62bb462b5b75a3a1c622f350cfc40d71fc1",
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/onboarding": {
@@ -7311,7 +7365,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/preisspiegel": {
@@ -7322,7 +7376,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/rationsoptimierung": {
@@ -7330,10 +7384,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/rechnungen": {
@@ -7344,7 +7397,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/shop": {
@@ -7355,7 +7408,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/vertraege": {
@@ -7366,7 +7419,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/whatsapp-simulator": {
@@ -7377,16 +7430,17 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/zertifikat": {
       "definition_hash": "94badd84eda557425c3c534eb5fa46f8930757ac8b7ad75f6b9d73f6366b0ab5",
       "gates_passed": [
         "A",
-        "B"
+        "B",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "portal/zertifikate": {
@@ -7397,7 +7451,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "pos/customer-display": {
@@ -7408,7 +7462,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "pos/gift-cards": {
@@ -7419,7 +7473,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "pos/promotionen": {
@@ -7430,7 +7484,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "pos/rabatte": {
@@ -7441,7 +7495,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "pos/retoure": {
@@ -7452,7 +7506,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "pos/suspended-sales": {
@@ -7463,7 +7517,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "pos/tagesabschluss-enhanced": {
@@ -7474,7 +7528,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "pos/terminal": {
@@ -7485,16 +7539,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "pos/tse-journal": {
-      "definition_hash": "46fd2c0a7e4fda1d9b4bf8182e68165e1d0c10bd37483886143c33eacd798532",
+      "definition_hash": "31ef41b594c8a8a38430f02f5e46045d7ae5e6d4d6ef285b209b278ce5da5dd1",
       "gates_passed": [
+        "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "pos/uebernahme-kasse": {
@@ -7505,7 +7561,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "preise/historie": {
@@ -7516,7 +7572,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "preise/individualpreise": {
@@ -7526,7 +7582,7 @@
         "B",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "preise/konditionen": {
@@ -7537,7 +7593,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "preise/rabattgruppen": {
@@ -7547,7 +7603,7 @@
         "B",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "preise/zu-abschlaggruppen": {
@@ -7557,7 +7613,7 @@
         "B",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "process/approval-density": {
@@ -7565,9 +7621,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "process/background-jobs": {
@@ -7575,20 +7632,21 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "produktion/chargen-bearbeiten": {
-      "definition_hash": "f9067119b33f4e40da56e97885cda13b4c43c066b7b0499cb054da87fa0146ff",
+      "definition_hash": "761ea4766cc5fd12aefaae18e175e4449e88d485bb28e47dbbd0df6a339695fd",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "produktion/mischfutter-produktion": {
@@ -7599,7 +7657,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "produktion/produktions-dokumente-drucken": {
@@ -7610,27 +7668,28 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "produktion/produktionsleitstand": {
-      "definition_hash": "b18b78e8c35a0a62c1a99ae7d7ebbf29d46463dde834693c674726f9a2f9465b",
+      "definition_hash": "0d842497dadba303d4643b6899f03a18e1b0bd40ee317a5357648b374b580326",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "produktion/rezepturgruppe": {
       "definition_hash": "6a3405722862128d5dc58d1362c7d6ccba233ec3f832a5cc6629231c9d8cf591",
       "gates_passed": [
         "A",
-        "B"
+        "B",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "produktion/rezepturgruppen": {
@@ -7640,7 +7699,7 @@
         "B",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "projekte/liste": {
@@ -7651,7 +7710,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "prospecting/leads": {
@@ -7662,7 +7721,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "qualitaet/ausnahmen": {
@@ -7673,7 +7732,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "qualitaet/ausnahmen-liste": {
@@ -7681,20 +7740,21 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "qualitaet/labor-auftrag": {
-      "definition_hash": "8c9841a3c0f9e0ae1e8804fdace6ffb3c30f2ccd5bf0ca99ce18c058f5afca8e",
+      "definition_hash": "cf60cadf220688f98f693cca58736e966456563769274b851f4f62a250a5ea13",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "qualitaet/labor-detail": {
@@ -7705,7 +7765,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "qualitaet/labor-liste": {
@@ -7716,18 +7776,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "qualitaet/reklamation": {
-      "definition_hash": "855bd82571b227f4b09f29e519bfbb567fe80756b97e8f7f22dc311ac3253040",
+      "definition_hash": "05b8bd3c30adb4981853b238803cf34ba76dc3fa34a9927477fd88685f2b061f",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "qualitaet/reklamation-detail": {
@@ -7738,7 +7798,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "qualitaet/reklamationen": {
@@ -7746,10 +7806,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "qualitaet/reklamationen-liste": {
@@ -7759,27 +7818,29 @@
         "B",
         "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "reports": {
-      "definition_hash": "21042233fe989a3807a5f19223756deb69e63c40554b7388a82a21f333bd18ab",
+      "definition_hash": "56f5166428905d1b27be784ebff7e81334ff2b4a6c8cbe78fc1406a74aee6997",
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "reports/ReportsDashboardCharts": {
-      "definition_hash": "2f0349d5571827d2017c6ec63e9f3cd2593cf957a2c8fbd247c17bf7a32317d5",
+      "definition_hash": "0ffa5b20af958d48092ebcee7aa0124fbeaf8682713ac5b91398aedec971a187",
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "reports/deckungsbeitrag": {
@@ -7790,7 +7851,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "reports/lagerbestand": {
@@ -7801,7 +7862,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "reports/umsatz": {
@@ -7812,7 +7873,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "rezepte/editor": {
@@ -7823,7 +7884,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "rezepte/rezept": {
@@ -7831,9 +7892,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/angebote-liste": {
@@ -7841,10 +7903,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/angebote/neu": {
@@ -7855,7 +7916,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/auftraege-liste": {
@@ -7863,9 +7924,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/auftrag-lieferschein-abgleich": {
@@ -7876,7 +7938,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/auftragskette": {
@@ -7887,7 +7949,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/credit-notes": {
@@ -7895,10 +7957,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/delivery-editor": {
@@ -7909,7 +7970,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/delivery-editor-new": {
@@ -7920,7 +7981,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/delivery-note": {
@@ -7931,7 +7992,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/gutschrift": {
@@ -7939,9 +8000,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/invoice": {
@@ -7952,7 +8014,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/invoices": {
@@ -7960,9 +8022,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/kalkulationen/neu": {
@@ -7973,7 +8036,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/kreditlimit-pruefung": {
@@ -7984,7 +8047,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/lieferung-storno": {
@@ -7995,7 +8058,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/lieferungen-liste": {
@@ -8005,7 +8068,7 @@
         "B",
         "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/lieferungen/neu": {
@@ -8013,10 +8076,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/orders-modern": {
@@ -8027,7 +8089,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/rechnungen-liste": {
@@ -8038,18 +8100,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "sales/sales-order": {
-      "definition_hash": "bd320b710cb123203331d15a3233325cc643602fb71d02652470affe2c97017d",
+      "definition_hash": "82ef89e429ac2263ac17bb9fdb7b651910db32a94eb916338dd8179166db9bca",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "schaeden/liste": {
@@ -8060,7 +8122,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "schaeden/meldung": {
@@ -8071,29 +8133,29 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "schnittstelle/legacy-adapter-monitor": {
-      "definition_hash": "94d2bfb02af36c603101fd69bb5436bf8980d7d907f7976cae5264bfa96ee852",
+      "definition_hash": "609c4a9977e254a9fb77397916f830789d931a029ad13b806626292203134b6e",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "schnittstelle/mde-inbox": {
-      "definition_hash": "09955fc638b412222dfc6e5be648920c180098562a4d105aa94b4c87c11df534",
+      "definition_hash": "10fdee90e98e71d2f567f11b99adc6b37e6a23703f3351f688a7e017e20bad0b",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "service/abschluss": {
@@ -8104,7 +8166,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "service/anfrage": {
@@ -8115,7 +8177,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "service/anfrage-detail": {
@@ -8126,7 +8188,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "service/anfrage/neu": {
@@ -8137,7 +8199,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "service/anfragen": {
@@ -8148,7 +8210,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "service/anfragen-liste": {
@@ -8156,9 +8218,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "service/rueckmeldung": {
@@ -8169,7 +8232,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "setup/firma": {
@@ -8180,7 +8243,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "silo/kapazitaeten": {
@@ -8191,7 +8254,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "silo/silo": {
@@ -8199,9 +8262,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "stammdaten/artikel-stoffstrom": {
@@ -8212,7 +8276,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "stammdaten/artikelbestandteile": {
@@ -8223,7 +8287,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "stammdaten/artikelverpackung": {
@@ -8234,7 +8298,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "stammdaten/betriebsstaetten": {
@@ -8245,16 +8309,17 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "stammdaten/hausbank": {
       "definition_hash": "9404a5aaf0ba801ad2753b63c0f573ad3888c051d57b8c9df101458630435f29",
       "gates_passed": [
         "A",
-        "B"
+        "B",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "stammdaten/hausbanken": {
@@ -8265,16 +8330,17 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "stammdaten/individuelle-artikelnummer": {
       "definition_hash": "96c99620712b141d197656fe527a5dc1ce183f99b3db13499f6b6777fb3ad8e9",
       "gates_passed": [
         "A",
-        "B"
+        "B",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "stammdaten/individuelle-artikelnummern": {
@@ -8285,16 +8351,17 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "stammdaten/mengeneinheit": {
       "definition_hash": "975f3a2729058a2db9d0eb3c777e36eec734a48b9ca1d940db2656b12b8c66db",
       "gates_passed": [
         "A",
-        "B"
+        "B",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "stammdaten/mengeneinheiten": {
@@ -8305,17 +8372,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "start-dashboard": {
-      "definition_hash": "b8936f1ff5eb7a4217e94ebb17933278816ba6d0a0855726fa902ca370366171",
+      "definition_hash": "78ab500e37d6907256ec3e6b4bc52b33dc06d62893d463c85e70bdbffb08ecda",
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "strecke/disposition": {
@@ -8326,7 +8394,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "strecke/dokumente-drucken": {
@@ -8348,7 +8416,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "strecke/nawaro-ernterklaerung-drucken": {
@@ -8370,27 +8438,29 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "strecke/nawaro-uebersicht": {
-      "definition_hash": "c8785f0ffff39c6f94df1a5608ac930043a6af69b49b04594de096ef1ceeb264",
+      "definition_hash": "f9955ac39911ccfda56535cec86065493d3b914485f19182b4d722932f2aec83",
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "strecke/nawaro-uebersicht-drucken": {
-      "definition_hash": "62eabef9934dd6c67ec7e9919e1565177fc2ccf0a217250b99bfb2f5ca4416a5",
+      "definition_hash": "598ac80eee7b0aed91491f45001c2cf1d2fc17a261b89d6d867284a1d96b4674",
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "strecke/nawaro-vertraege-pruefen": {
@@ -8401,7 +8471,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "strecke/qualitaets-abweichung": {
@@ -8423,7 +8493,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "strecke/streckengeschaeft": {
@@ -8434,7 +8504,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "strecke/vorlaeufig": {
@@ -8445,7 +8515,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "strecke/vorlaeufige-streckengeschaefte": {
@@ -8456,7 +8526,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "subventionen/dashboard": {
@@ -8467,7 +8537,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "system/live-monitor": {
@@ -8478,18 +8548,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "tankstelle/adapter-inbox": {
-      "definition_hash": "b8468e0cb1ae888a7548295e84fdb8f287573449adc0e9846ba15721598f1be4",
+      "definition_hash": "e1a6300523c3ce81c0eb0ac923b384d72034e01e7f6786b2341de19485ebb76b",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "tankstelle/zapfungen": {
@@ -8500,7 +8570,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "tankstelle/zapfungen-liste": {
@@ -8508,9 +8578,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "transporte/fahrer-liste": {
@@ -8521,7 +8592,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "transporte/fahrer/neu": {
@@ -8529,9 +8600,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/auftraege": {
@@ -8542,7 +8614,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/auftraege/neu": {
@@ -8550,10 +8622,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/betriebs-auftraege": {
@@ -8564,7 +8635,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/betriebsauftrag": {
@@ -8572,9 +8643,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/dauerauftraege": {
@@ -8585,7 +8657,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/kommissions-auftraege": {
@@ -8596,7 +8668,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/kunde": {
@@ -8606,7 +8678,7 @@
         "B",
         "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/kunde-neu": {
@@ -8617,7 +8689,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/kunden-liste": {
@@ -8628,7 +8700,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/kunden-stamm": {
@@ -8639,7 +8711,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/kunden-stamm-enhanced": {
@@ -8650,7 +8722,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/lieferschein-erfassung": {
@@ -8661,7 +8733,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/rechnungen": {
@@ -8669,10 +8741,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/rechnungen/neu": {
@@ -8683,7 +8754,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verkauf/unerledigte-auftrags-positionen": {
@@ -8694,7 +8765,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verladung/liste": {
@@ -8705,7 +8776,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "verladung/lkw-beladung": {
@@ -8716,7 +8787,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "versand/versand-avis": {
@@ -8727,7 +8798,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "versicherungen/liste": {
@@ -8738,17 +8809,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "vertrag/neu": {
-      "definition_hash": "2820aa13d8d7fec16bd20b187b378fadaccfd624a21318ee4b89f0da4077288a",
+      "definition_hash": "436f2e25b1b00efb1c8d4951626d3ea6eeb0c73c79393242d55e2f552f6b4a9b",
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "vertrag/rahmenvertraege": {
@@ -8759,7 +8831,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "vertrag/rahmenvertraege-liste": {
@@ -8767,9 +8839,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "vertrieb/kundenumsatz": {
@@ -8780,7 +8853,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "waage/hofliste": {
@@ -8791,7 +8864,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "waage/liste": {
@@ -8801,7 +8874,7 @@
         "B",
         "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "waage/neu": {
@@ -8809,10 +8882,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "waage/vorlagen": {
@@ -8823,7 +8895,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "waage/waagen-liste": {
@@ -8833,7 +8905,7 @@
         "B",
         "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "waage/wiegeschein": {
@@ -8843,7 +8915,7 @@
         "B",
         "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "waage/wiegeschein-detail": {
@@ -8854,7 +8926,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "waage/wiegungen": {
@@ -8862,10 +8934,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "waage/wiegungen-liste": {
@@ -8875,7 +8946,7 @@
         "B",
         "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "wartung/anlagen-liste": {
@@ -8886,7 +8957,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/flow-spine-complaint-to-resolution": {
@@ -8894,20 +8965,19 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/flow-spine-compliance-to-report": {
-      "definition_hash": "75151853a473156b91f6792b5a7763a0c0a264660893dfdd135afeb34869973c",
+      "definition_hash": "1d248e0971409af9999a006a8767c8d8f9b04bd14465b77d162824aadfe84ad0",
       "gates_passed": [
         "A",
         "B",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/flow-spine-contract-to-settlement": {
@@ -8915,10 +8985,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/flow-spine-finance-to-close": {
@@ -8926,10 +8995,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/flow-spine-harvest-to-settlement": {
@@ -8937,19 +9005,19 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/flow-spine-inventory-to-settlement": {
-      "definition_hash": "85dc3301ef38ab8b06e677c27d1210dbe9a6a6a4c039c69800f449b64218beed",
+      "definition_hash": "6f30e025de7e4084bc26e078e63e439944e00a67a9de5f7f7621d98627616a32",
       "gates_passed": [
+        "A",
         "B",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/flow-spine-order-to-cash": {
@@ -8957,10 +9025,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/flow-spine-procure-to-pay": {
@@ -8968,10 +9035,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/flow-spine-service-to-customer": {
@@ -8979,10 +9045,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/flow-spine-studio": {
@@ -8990,10 +9055,9 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/leitstand": {
@@ -9004,7 +9068,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/process-mining": {
@@ -9012,19 +9076,21 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/process-mining-analytics": {
-      "definition_hash": "611601524fef67446399471befbada14e36e953523fee7858f207e38d2dfe364",
+      "definition_hash": "5aa6488597311b8f9fed0338704fcca842cbfb22bde670ca85a399808970bb56",
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/workflow-monitoring": {
@@ -9032,9 +9098,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/workflow-regeln": {
@@ -9045,7 +9112,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflow/workflow-sandbox": {
@@ -9056,7 +9123,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflows/history": {
@@ -9067,7 +9134,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workflows/supervisor": {
@@ -9078,7 +9145,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workspace/einkauf": {
@@ -9089,7 +9156,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workspace/fibu": {
@@ -9100,7 +9167,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workspace/lager": {
@@ -9111,7 +9178,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workspace/leitung": {
@@ -9122,18 +9189,18 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workspace/letzte-dokumente": {
-      "definition_hash": "a2b5800fcf0b070521c780d3874d456344f1b4a356a7aa2bda28d277f8addbee",
+      "definition_hash": "b41ca1212f6569cab42824ffa58ecfc96121bec83799316ba7210e4dc2912a42",
       "gates_passed": [
         "A",
         "B",
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workspace/start-dashboard": {
@@ -9141,9 +9208,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "workspace/verkauf": {
@@ -9154,7 +9222,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "zertifikate/liste": {
@@ -9162,9 +9230,10 @@
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     },
     "zertifikate/neu": {
@@ -9175,7 +9244,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": true,
+      "studio_draft_clean": false,
       "version": "1.0.0"
     }
   }

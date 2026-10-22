@@ -26,6 +26,7 @@ from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.individuelle_artikelnummern_schemas import IndividuelleArtikelNrOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/artikel/individuelle-nummern",
@@ -83,7 +84,7 @@ def list_individuelle_nummern(
     return [IndivArtikelNrOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=IndivArtikelNrOut, status_code=201, summary="Individuelle nummer anlegen")
+@router.post("", response_model=IndivArtikelNrOut, status_code=201, summary="Individuelle nummer anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 def create_individuelle_nummer(
     payload: IndivArtikelNrCreate,
     db=Depends(get_db),
@@ -144,8 +145,7 @@ def lookup_interne_nummer(
 
 
 @router.delete("/{indiv_id}", summary="Individuelle nummer löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
 def delete_individuelle_nummer(
     indiv_id: str,
     db=Depends(get_db),

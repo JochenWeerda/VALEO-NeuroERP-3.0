@@ -20,6 +20,7 @@ from app.services.hrm_abwesenheit_service import (
     UngueltigerStatusUebergangError,
     get_abwesenheit_service,
 )
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/personal/abwesenheit", tags=["hrm", "abwesenheit"])
 
@@ -58,8 +59,7 @@ class ZurueckziehenBody(BaseModel):
     "/antraege",
     response_model=AbwesenheitsantragOut,
     status_code=201,
-    summary="Abwesenheitsantrag stellen",
-)
+    summary="Abwesenheitsantrag stellen", dependencies=SCHREIBEN["PERSONAL"])
 def antrag_stellen(body: AntragCreate, x_tenant_id: Annotated[str | None, Header()] = None) -> dict[str, Any]:
     tid = _tenant(x_tenant_id)
     svc = get_abwesenheit_service(tid)
@@ -120,8 +120,7 @@ def get_antrag(antrag_id: str, x_tenant_id: Annotated[str | None, Header()] = No
 @router.post(
     "/antraege/{antrag_id}/genehmigen",
     response_model=AbwesenheitsantragOut,
-    summary="Abwesenheitsantrag genehmigen",
-)
+    summary="Abwesenheitsantrag genehmigen", dependencies=SCHREIBEN["PERSONAL"])
 def genehmigen(
     antrag_id: str, body: GenehmigenBody, x_tenant_id: Annotated[str | None, Header()] = None
 ) -> dict[str, Any]:
@@ -138,8 +137,7 @@ def genehmigen(
 @router.post(
     "/antraege/{antrag_id}/ablehnen",
     response_model=AbwesenheitsantragOut,
-    summary="Abwesenheitsantrag ablehnen",
-)
+    summary="Abwesenheitsantrag ablehnen", dependencies=SCHREIBEN["PERSONAL"])
 def ablehnen(
     antrag_id: str, body: AblehnenBody, x_tenant_id: Annotated[str | None, Header()] = None
 ) -> dict[str, Any]:
@@ -156,8 +154,7 @@ def ablehnen(
 @router.post(
     "/antraege/{antrag_id}/zurueckziehen",
     response_model=AbwesenheitsantragOut,
-    summary="Abwesenheitsantrag zurueckziehen",
-)
+    summary="Abwesenheitsantrag zurueckziehen", dependencies=SCHREIBEN["PERSONAL"])
 def zurueckziehen(
     antrag_id: str, body: ZurueckziehenBody, x_tenant_id: Annotated[str | None, Header()] = None
 ) -> dict[str, Any]:

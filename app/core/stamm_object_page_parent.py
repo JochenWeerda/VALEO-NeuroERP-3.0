@@ -232,7 +232,8 @@ def ensure_stamm_screen_registry() -> None:
         for sid, builder in STAMM_SCREEN_BUILDERS.items()
         if sid not in KONTROLLE_SCREEN_BUILDERS
     }
-    sd._SCREEN_DEFINITIONS.update(stamm_only)
+    for screen_id, builder in stamm_only.items():
+        sd._SCREEN_DEFINITIONS.setdefault(screen_id, builder)
     if hasattr(sd, "_SCREEN_LIST_ROUTE"):
         sd._SCREEN_LIST_ROUTE.update(STAMM_ROUTEN)
     if hasattr(sd, "_AGENT_SYNONYMS"):

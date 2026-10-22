@@ -73,10 +73,17 @@ def test_all_stamm_children_share_stamm_object_page_shell(screen_id: str) -> Non
     assert screen["tabs"][0]["key"] == "kopf"
     assert screen["tabs"][0]["lazy"] is False
     assert any(ds["key"] == "entity" for ds in screen["dataSources"])
-    primary_key = "bearbeiten" if screen_id == "artikel/stamm" else "edit"
+    primary_actions = [action for action in screen["actions"] if action.get("kind") == "primary"]
+    assert len(primary_actions) == 1
+    primary_key = primary_actions[0]["key"]
     edit = next(action for action in screen["actions"] if action["key"] == primary_key)
     assert edit["kind"] == "primary"
-    assert edit["dangerLevel"] == "safe"
+    if screen_id in {"finance/debitor", "finance/kreditor", "finance/bankkonto"}:
+        assert edit["dangerLevel"] == "moderate"
+        assert edit["auditReasonRequired"] is True
+        assert edit.get("commandEndpoint")
+    else:
+        assert edit["dangerLevel"] == "safe"
     assert "permission" in edit
     layout = screen["layout"]
     for key, value in SHARED_LAYOUT_KEYS.items():
@@ -123,7 +130,7 @@ def test_supplier_keeps_secondary_bestellung_action() -> None:
     screen = get_screen_definition("einkauf/supplier")
     assert screen is not None
     keys = [action["key"] for action in screen["actions"]]
-    assert keys[0] == "edit"
+    assert keys[0] == "bearbeiten"
     assert "neue_bestellung" in keys
     assert screen["layout"]["density"] == "expertDense"
     assert screen["layout"]["contextRail"] == "combined"

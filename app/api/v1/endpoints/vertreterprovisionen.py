@@ -25,6 +25,7 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/crm/vertreter/provisionen",
@@ -112,7 +113,7 @@ def list_provisionsgruppen(
     return [ProvisionsGruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/gruppen", response_model=ProvisionsGruppeOut, status_code=201, summary="Provisionsgruppe anlegen")
+@router.post("/gruppen", response_model=ProvisionsGruppeOut, status_code=201, summary="Provisionsgruppe anlegen", dependencies=SCHREIBEN["CRM"])
 def create_provisionsgruppe(
     payload: ProvisionsGruppeCreate,
     db=Depends(get_db),
@@ -140,8 +141,7 @@ def create_provisionsgruppe(
 
 
 @router.delete("/gruppen/{gruppe_nr}", summary="Provisionsgruppe löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["CRM"])
 def delete_provisionsgruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -186,7 +186,7 @@ def list_provisionsstaffeln(
     return result
 
 
-@router.post("/staffeln", response_model=ProvisionsStaffelOut, status_code=201, summary="Provisionsstaffel anlegen")
+@router.post("/staffeln", response_model=ProvisionsStaffelOut, status_code=201, summary="Provisionsstaffel anlegen", dependencies=SCHREIBEN["CRM"])
 def create_provisionsstaffel(
     payload: ProvisionsStaffelCreate,
     db=Depends(get_db),

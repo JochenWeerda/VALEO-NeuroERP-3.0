@@ -29,6 +29,7 @@ from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.artikel_stamm_ext_schemas import ArtikelStammExtOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/artikel", tags=["Artikelstamm - Erweiterungen"])
@@ -148,7 +149,7 @@ def get_aktueller_folgeartikel(
     }
 
 
-@router.post("/folgeartikel", response_model=FolgeartikelOut, status_code=201, summary="Folgeartikel anlegen")
+@router.post("/folgeartikel", response_model=FolgeartikelOut, status_code=201, summary="Folgeartikel anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 def create_folgeartikel(
     payload: FolgeartikelCreate,
     db=Depends(get_db),
@@ -177,8 +178,7 @@ def create_folgeartikel(
 
 
 @router.delete("/folgeartikel/{folgeartikel_id}", summary="Folgeartikel löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
 def delete_folgeartikel(
     folgeartikel_id: str,
     db=Depends(get_db),
@@ -207,7 +207,7 @@ def list_inventurgruppen(
     return [InventurgruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/inventurgruppen", response_model=InventurgruppeOut, status_code=201, summary="Inventurgruppe anlegen")
+@router.post("/inventurgruppen", response_model=InventurgruppeOut, status_code=201, summary="Inventurgruppe anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 def create_inventurgruppe(
     payload: InventurgruppeCreate,
     db=Depends(get_db),
@@ -239,8 +239,7 @@ def create_inventurgruppe(
 
 
 @router.delete("/inventurgruppen/{gruppe_id}", summary="Inventurgruppe löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["STAMMDATEN"])
 def delete_inventurgruppe(
     gruppe_id: str,
     db=Depends(get_db),
@@ -279,7 +278,7 @@ def list_wiegungsgruppen(
     return [WiegungsgruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/wiegungsgruppen", response_model=WiegungsgruppeOut, status_code=201, summary="Wiegungsgruppe anlegen")
+@router.post("/wiegungsgruppen", response_model=WiegungsgruppeOut, status_code=201, summary="Wiegungsgruppe anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 def create_wiegungsgruppe(
     payload: WiegungsgruppeCreate,
     db=Depends(get_db),

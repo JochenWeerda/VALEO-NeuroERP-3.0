@@ -8,6 +8,7 @@ from ....core.config import settings
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class PosRetourOut(BaseSchema):
@@ -45,7 +46,7 @@ class RetourResponse(BaseModel):
     message: str
 
 
-@router.post("/retoure", response_model=RetourResponse, summary="Retoure anlegen")
+@router.post("/retoure", response_model=RetourResponse, summary="Retoure anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_retoure(
     data: RetourRequest,
     db: Session = Depends(get_db),
@@ -141,8 +142,7 @@ async def create_retoure(
 
 
 @router.post("/checkout", summary="Checkout pos",
-    response_model=PosRetourOut
-)
+    response_model=PosRetourOut, dependencies=SCHREIBEN["VERKAUF"])
 async def pos_checkout(
     data: dict,
     db: Session = Depends(get_db),

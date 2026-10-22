@@ -17,6 +17,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.crm_capture_inbox_service import CrmCaptureInboxService
 from app.api.v1.schemas.base import TypedObjectOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/crm/kim", tags=["crm", "kim", "360"])
 
@@ -41,7 +42,7 @@ def list_inbox(
     return {"items": svc.list(status=status, limit=limit), "open": svc.count_open()}
 
 
-@router.post("/capture-inbox/{inbox_id}/assign", response_model=TypedObjectOut, summary="Klärfall einem Kunden zuordnen")
+@router.post("/capture-inbox/{inbox_id}/assign", response_model=TypedObjectOut, summary="Klärfall einem Kunden zuordnen", dependencies=SCHREIBEN["CRM"])
 def assign_inbox(
     inbox_id: str,
     body: AssignIn,
@@ -53,7 +54,7 @@ def assign_inbox(
     )
 
 
-@router.post("/capture-inbox/{inbox_id}/dismiss", response_model=TypedObjectOut, summary="Klärfall verwerfen")
+@router.post("/capture-inbox/{inbox_id}/dismiss", response_model=TypedObjectOut, summary="Klärfall verwerfen", dependencies=SCHREIBEN["CRM"])
 def dismiss_inbox(
     inbox_id: str,
     body: DismissIn,

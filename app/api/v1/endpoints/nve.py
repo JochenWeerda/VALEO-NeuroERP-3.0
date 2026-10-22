@@ -13,6 +13,7 @@ from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import ShippingUnit
 from ..schemas.base import PaginatedResponse, BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -56,7 +57,7 @@ async def list_nves(
     )
 
 
-@router.post("/", response_model=NVEOut, status_code=201, summary="Nve anlegen")
+@router.post("/", response_model=NVEOut, status_code=201, summary="Nve anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_nve(
     payload: NVECreate,
     tenant_id: Optional[str] = Query(None),

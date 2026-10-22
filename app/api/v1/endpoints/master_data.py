@@ -13,6 +13,7 @@ from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import MasterDataEntry, Dispatcher
 from ..schemas.base import PaginatedResponse, BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -81,7 +82,7 @@ async def list_master_data(
     )
 
 
-@router.post("/", response_model=MasterDataOut, status_code=201, summary="Master data anlegen")
+@router.post("/", response_model=MasterDataOut, status_code=201, summary="Master data anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def create_master_data(
     payload: MasterDataCreate,
     tenant_id: Optional[str] = Query(None),
@@ -178,7 +179,7 @@ async def list_contact_types(tenant_id: Optional[str] = Query(None), db: Session
     return [MasterDataOut.model_validate(i) for i in items]
 
 
-@router.post("/contact-types", response_model=MasterDataOut, status_code=201, summary="Contact type anlegen")
+@router.post("/contact-types", response_model=MasterDataOut, status_code=201, summary="Contact type anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def create_contact_type(
     payload: MasterDataCreate,
     tenant_id: Optional[str] = Query(None),
@@ -201,7 +202,7 @@ async def create_contact_type(
     return MasterDataOut.model_validate(obj)
 
 
-@router.delete("/contact-types/{ct_id}", status_code=204, response_class=Response, response_model=None, summary="Contact type löschen")
+@router.delete("/contact-types/{ct_id}", status_code=204, response_class=Response, response_model=None, summary="Contact type löschen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def delete_contact_type(ct_id: str, db: Session = Depends(get_db)):
     """DEL Kontaktart Löschen"""
     obj = db.query(MasterDataEntry).filter(MasterDataEntry.id == ct_id).first()
@@ -224,7 +225,7 @@ async def list_dispatchers(tenant_id: Optional[str] = Query(None), db: Session =
     return [DispatcherOut.model_validate(i) for i in items]
 
 
-@router.post("/dispatchers", response_model=DispatcherOut, status_code=201, summary="Dispatcher anlegen")
+@router.post("/dispatchers", response_model=DispatcherOut, status_code=201, summary="Dispatcher anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def create_dispatcher(
     payload: DispatcherCreate,
     tenant_id: Optional[str] = Query(None),
@@ -247,7 +248,7 @@ async def create_dispatcher(
     return DispatcherOut.model_validate(obj)
 
 
-@router.put("/dispatchers/{disp_id}", response_model=DispatcherOut, summary="Dispatcher aktualisieren")
+@router.put("/dispatchers/{disp_id}", response_model=DispatcherOut, summary="Dispatcher aktualisieren", dependencies=SCHREIBEN["STAMMDATEN"])
 async def update_dispatcher(
     disp_id: str, payload: DispatcherCreate, db: Session = Depends(get_db),
 ):
@@ -262,7 +263,7 @@ async def update_dispatcher(
     return DispatcherOut.model_validate(obj)
 
 
-@router.delete("/dispatchers/{disp_id}", status_code=204, response_class=Response, response_model=None, summary="Dispatcher löschen")
+@router.delete("/dispatchers/{disp_id}", status_code=204, response_class=Response, response_model=None, summary="Dispatcher löschen", dependencies=SCHREIBEN["STAMMDATEN"])
 async def delete_dispatcher(disp_id: str, db: Session = Depends(get_db)):
     """DEL Disponent löschen"""
     obj = db.query(Dispatcher).filter(Dispatcher.id == disp_id).first()

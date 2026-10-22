@@ -158,7 +158,7 @@ function renderLegacyFields(
           {
             key: field.key,
             label: field.label,
-            componentKind: field.type === 'table' ? 'text' : field.type,
+            componentKind: field.type === 'table' && field.rowFields === undefined && field.tableEditing === undefined ? 'text' : field.type,
             dataPath: field.key,
             order: index,
             required: field.required ?? false,
@@ -170,6 +170,8 @@ function renderLegacyFields(
             dataSourceKey: field.dataSourceKey,
             minSearchChars: field.minSearchChars ?? 2,
             renderHint: field.renderHint,
+            rowFields: field.rowFields,
+            tableEditing: field.tableEditing,
           },
         ]),
       )}

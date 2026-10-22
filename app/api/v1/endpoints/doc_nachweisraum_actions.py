@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel
 
 from app.api.v1.schemas.docflow_bundle_schemas import (
@@ -12,6 +12,8 @@ from app.api.v1.schemas.docflow_bundle_schemas import (
     NachweisDokumentOut,
 )
 from app.core.database import get_db
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
+from app.core.akteur import gepruefter_akteur_aus_request  # Bearbeiter aus dem Token
 
 router = APIRouter(prefix="/nachweisraum", tags=["nachweisraum"])
 logger = logging.getLogger(__name__)
@@ -23,12 +25,10 @@ class DokumentCreateRequest(BaseModel):
     referenz_id: str
     referenz_typ: str
     datei_pfad: str
-    operator: str = "system"
 
 
 class DokumentTransitionRequest(BaseModel):
     new_status: str
-    operator: str = "system"
     kommentar: str = ""
     wiedervorlage_datum: Optional[str] = None
 
@@ -36,19 +36,18 @@ class DokumentTransitionRequest(BaseModel):
 class GoBDExportCreateRequest(BaseModel):
     periode: str
     referenz_ids: List[str]
-    operator: str = "system"
 
 
 class GoBDExportTransitionRequest(BaseModel):
     new_status: str
-    operator: str = "system"
     export_pfad: Optional[str] = None
     fehler: Optional[str] = None
 
 
-@router.post("/dokumente", response_model=NachweisDokumentOut, summary="Nachweisraum-Dokument anlegen")
+@router.post("/dokumente", response_model=NachweisDokumentOut, summary="Nachweisraum-Dokument anlegen", dependencies=SCHREIBEN["QUALITAET"])
 def create_dokument(
     req: DokumentCreateRequest,
+    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -65,7 +64,7 @@ def create_dokument(
             referenz_id=req.referenz_id,
             referenz_typ=req.referenz_typ,
             datei_pfad=req.datei_pfad,
-            operator=req.operator,
+            operator=gepruefter_akteur_aus_request(request),
         )
     except NachweisraumError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -74,11 +73,11 @@ def create_dokument(
 @router.post(
     "/dokumente/{dokument_id}/transition",
     response_model=NachweisDokumentOut,
-    summary="Nachweisraum-Dokumentstatus wechseln",
-)
+    summary="Nachweisraum-Dokumentstatus wechseln", dependencies=SCHREIBEN["QUALITAET"])
 def transition_dokument(
     dokument_id: str,
     req: DokumentTransitionRequest,
+    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -92,7 +91,7 @@ def transition_dokument(
             dokument_id=dokument_id,
             new_status=req.new_status,
             tenant_id=x_tenant_id,
-            operator=req.operator,
+            operator=gepruefter_akteur_aus_request(request),
             kommentar=req.kommentar,
             wiedervorlage_datum=req.wiedervorlage_datum,
         )
@@ -100,9 +99,10 @@ def transition_dokument(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/gobd-exporte", response_model=GobdExportOut, summary="GoBD-Export anlegen")
+@router.post("/gobd-exporte", response_model=GobdExportOut, summary="GoBD-Export anlegen", dependencies=SCHREIBEN["QUALITAET"])
 def create_gobd_export(
     req: GoBDExportCreateRequest,
+    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -116,7 +116,7 @@ def create_gobd_export(
             tenant_id=x_tenant_id,
             periode=req.periode,
             referenz_ids=req.referenz_ids,
-            operator=req.operator,
+            operator=gepruefter_akteur_aus_request(request),
         )
     except NachweisraumError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -125,11 +125,11 @@ def create_gobd_export(
 @router.post(
     "/gobd-exporte/{export_id}/transition",
     response_model=GobdExportOut,
-    summary="GoBD-Exportstatus wechseln",
-)
+    summary="GoBD-Exportstatus wechseln", dependencies=SCHREIBEN["QUALITAET"])
 def transition_gobd_export(
     export_id: str,
     req: GoBDExportTransitionRequest,
+    request: Request,
     x_tenant_id: str = Header(...),
     db=Depends(get_db),
 ):
@@ -143,7 +143,7 @@ def transition_gobd_export(
             export_id=export_id,
             new_status=req.new_status,
             tenant_id=x_tenant_id,
-            operator=req.operator,
+            operator=gepruefter_akteur_aus_request(request),
             export_pfad=req.export_pfad,
             fehler=req.fehler,
         )

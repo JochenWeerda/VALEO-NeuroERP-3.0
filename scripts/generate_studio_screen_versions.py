@@ -4,8 +4,8 @@
     python scripts/generate_studio_screen_versions.py --check
     python scripts/generate_studio_screen_versions.py --release-version 1.0.0
 
-Only ScreenDefinitions that pass Made-by-Studio Gates A/B/C/E with a clean Studio-Draft projection
-are written. Beleg varianten remain in config/document_screen_versions.json.
+Records canonical native definitions and their structural gate results; this source catalog
+is not a live Studio approval or Browser/Image acceptance. Beleg variants retain their own registry.
 """
 from __future__ import annotations
 
@@ -68,11 +68,7 @@ def write_release(path: Path, version: str) -> dict:
     try:
         handle = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     except FileExistsError as error:
-        lock.unlink(missing_ok=True)
-        try:
-            handle = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
-        except FileExistsError as retry_error:
-            raise ValueError("studio_screen_release_busy") from retry_error
+        raise ValueError("studio_screen_release_busy") from error
     pending = None
     try:
         payload = _release_payload(version)
@@ -92,14 +88,10 @@ def write_release(path: Path, version: str) -> dict:
             target.write("\n")
             target.flush()
             os.fsync(target.fileno())
-        try:
-            os.replace(pending, path)
-        except PermissionError:
-            path.write_text(pending.read_text(encoding="utf-8"), encoding="utf-8")
-            pending.unlink(missing_ok=True)
+        os.replace(pending, path)
         pending = None
         print(f"Studio screen catalog {version}: {len(payload['screens'])} screens "
-              f"({ready} release-ready with gates A/B/C/E and clean draft)")
+              f"({ready} structurally ready; live release and Browser/Image not measured)")
         return payload
     finally:
         if pending is not None:
@@ -120,7 +112,9 @@ def main() -> int:
         if not REGISTRY_PATH.is_file():
             parser.exit(1, "Studio screen catalog missing.\n")
         registry = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
-        if not current_matches(registry, definitions):
+        expected = _release_payload(registry.get("releaseVersion") or "1.0.0")
+        expected.pop("_release_ready_count", None)
+        if not current_matches(registry, definitions) or registry != expected:
             parser.exit(1, "Studio screen catalog differs from canonical builders or gate evidence.\n")
         print(f"Studio screen catalog synchronized: {len(registry.get('screens', {}))} screens")
         return 0

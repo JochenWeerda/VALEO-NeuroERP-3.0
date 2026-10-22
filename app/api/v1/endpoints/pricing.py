@@ -16,6 +16,7 @@ from app.core.tenant import get_tenant_id
 from app.services import preisfindung_service as preis
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/pricing", tags=["pricing"])
@@ -348,8 +349,7 @@ async def list_staffelrabatte(
     "/staffelrabatte",
     response_model=StaffelrabattOut,
     status_code=201,
-    summary="Staffelrabatt anlegen",
-)
+    summary="Staffelrabatt anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_staffelrabatt(
     payload: StaffelrabattIn,
     tenant_id: str = Depends(get_tenant_id),

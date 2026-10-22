@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class KnowledgeOut(BaseSchema):
@@ -259,7 +260,7 @@ def list_knowledge(
         return []
 
 
-@router.post("/", response_model=KnowledgeObjectResponse, status_code=201, summary="Knowledge anlegen")
+@router.post("/", response_model=KnowledgeObjectResponse, status_code=201, summary="Knowledge anlegen", dependencies=SCHREIBEN["FACHLICH"])
 def create_knowledge(
     payload: KnowledgeObjectCreate,
     db: Session = Depends(get_db),
@@ -305,7 +306,7 @@ def get_knowledge(
     return _record_to_response(record)
 
 
-@router.put("/{knowledge_id}", response_model=KnowledgeObjectResponse, summary="Knowledge aktualisieren")
+@router.put("/{knowledge_id}", response_model=KnowledgeObjectResponse, summary="Knowledge aktualisieren", dependencies=SCHREIBEN["FACHLICH"])
 def update_knowledge(
     knowledge_id: str,
     payload: KnowledgeObjectUpdate,
@@ -339,7 +340,7 @@ def update_knowledge(
     return _record_to_response(record)
 
 
-@router.delete("/{knowledge_id}", status_code=204, response_class=Response, response_model=None, summary="Knowledge archivieren")
+@router.delete("/{knowledge_id}", status_code=204, response_class=Response, response_model=None, summary="Knowledge archivieren", dependencies=SCHREIBEN["FACHLICH"])
 def archive_knowledge(
     knowledge_id: str,
     db: Session = Depends(get_db),
@@ -358,7 +359,7 @@ def archive_knowledge(
     return Response(status_code=204)
 
 
-@router.post("/{knowledge_id}/versionen", response_model=KnowledgeObjectResponse, status_code=201, summary="Version hinzufügen")
+@router.post("/{knowledge_id}/versionen", response_model=KnowledgeObjectResponse, status_code=201, summary="Version hinzufügen", dependencies=SCHREIBEN["FACHLICH"])
 def add_version(
     knowledge_id: str,
     payload: KnowledgeVersionCreate,

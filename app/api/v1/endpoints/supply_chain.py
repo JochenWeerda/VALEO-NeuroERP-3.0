@@ -26,6 +26,7 @@ from app.core.tenant import get_tenant_id
 from app.services.supply_chain_event_service import SupplyChainEventService
 from app.services.supply_chain_lot_service import LotActionError, SupplyChainLotService
 from app.services.supply_chain_trace_service import SupplyChainTraceService
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/supply-chain", tags=["supply-chain", "agrar", "lager"])
 
@@ -65,7 +66,7 @@ class ChainEventIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/traceability/sync", response_model=ChainSyncOut, summary="Ereignis-Log aus Ist-Zustand befüllen (Backfill, idempotent)")
+@router.post("/traceability/sync", response_model=ChainSyncOut, summary="Ereignis-Log aus Ist-Zustand befüllen (Backfill, idempotent)", dependencies=SCHREIBEN["LOGISTIK"])
 def sync_events(
     ticket: str = Query(..., description="Wiegeschein-Nr oder -ID"),
     db: Session = Depends(get_db),
@@ -74,7 +75,7 @@ def sync_events(
     return SupplyChainEventService(db, tenant_id).sync_from_state(ticket)
 
 
-@router.post("/events", response_model=ChainEventAckOut, summary="Ketten-Ereignis erfassen (Korrektur/Abweichung/Notiz/Storno)")
+@router.post("/events", response_model=ChainEventAckOut, summary="Ketten-Ereignis erfassen (Korrektur/Abweichung/Notiz/Storno)", dependencies=SCHREIBEN["GERAET"])
 def add_event(
     body: ChainEventIn,
     db: Session = Depends(get_db),
@@ -113,7 +114,7 @@ class LotShrinkageIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/lots/{lot_id}/block", response_model=LotActionOut, summary="Silo-Lot sperren (Sperrbestand)")
+@router.post("/lots/{lot_id}/block", response_model=LotActionOut, summary="Silo-Lot sperren (Sperrbestand)", dependencies=SCHREIBEN["LOGISTIK"])
 def block_lot(
     lot_id: str,
     body: LotReasonIn,
@@ -126,7 +127,7 @@ def block_lot(
         raise HTTPException(status_code=422, detail=str(exc))
 
 
-@router.post("/lots/{lot_id}/release", response_model=LotActionOut, summary="Silo-Lot QS-freigeben")
+@router.post("/lots/{lot_id}/release", response_model=LotActionOut, summary="Silo-Lot QS-freigeben", dependencies=SCHREIBEN["LOGISTIK"])
 def release_lot(
     lot_id: str,
     body: LotReasonIn,
@@ -139,7 +140,7 @@ def release_lot(
         raise HTTPException(status_code=422, detail=str(exc))
 
 
-@router.post("/lots/{lot_id}/shrinkage", response_model=LotActionOut, summary="Schwund auf Silo-Lot buchen")
+@router.post("/lots/{lot_id}/shrinkage", response_model=LotActionOut, summary="Schwund auf Silo-Lot buchen", dependencies=SCHREIBEN["LOGISTIK"])
 def shrinkage_lot(
     lot_id: str,
     body: LotShrinkageIn,
@@ -152,7 +153,7 @@ def shrinkage_lot(
         raise HTTPException(status_code=422, detail=str(exc))
 
 
-@router.post("/traceability/cancel", response_model=ChainCancelOut, summary="Lieferkette stornieren (durchgängig)")
+@router.post("/traceability/cancel", response_model=ChainCancelOut, summary="Lieferkette stornieren (durchgängig)", dependencies=SCHREIBEN["LOGISTIK"])
 def cancel_chain(
     ticket: str = Query(..., description="Wiegeschein-Nr oder -ID"),
     body: LotReasonIn = ...,

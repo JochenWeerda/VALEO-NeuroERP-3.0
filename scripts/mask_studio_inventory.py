@@ -177,11 +177,13 @@ def _studio_versioned_ids() -> frozenset[str]:
     """Alle Screen-IDs im Studio-Katalog (Hash-Nachweis gegen Builder)."""
     if not STUDIO_VERSIONS.is_file():
         return frozenset()
-    data = json.loads(STUDIO_VERSIONS.read_text(encoding="utf-8"))
-    screens = data.get("screens")
-    if not isinstance(screens, dict):
-        return frozenset()
-    return frozenset(screens)
+    from app.core.studio_screen_versions import load_registry, released_screen_ids
+    from app.core.studio_release import definition_hash
+    from app.services.made_by_studio_gates import load_registered_definitions
+    entries = load_registry().get("screens", {})
+    definitions = load_registered_definitions()
+    return frozenset(sid for sid in released_screen_ids() if sid in definitions
+                     and definition_hash(definitions[sid]) == entries[sid].get("definition_hash"))
 
 
 def _expand_screen_ids(screen_ids: list[str]) -> set[str]:
@@ -235,10 +237,13 @@ def classify_page(entry: Path, *, beleg_prefix: str, studio_ids: frozenset[str],
     sources = _page_sources(entry)
     texts = {p: p.read_text(encoding="utf-8", errors="replace") for p in sources}
     screen_ids = sorted({sid for t in texts.values() for sid in _screen_ids_from_text(t)})
-    builder = any(_BUILDER.search(t) for t in texts.values())
+    from app.core.mask_runtime_evidence import has_visible_runtime
+    builder = any(has_visible_runtime(t) for t in texts.values())
     altmuster = any(_ALTMUSTER.search(t) for t in texts.values())
     entry_text = texts[entry]
-    if builder and _page_is_studio_versioned(
+    if "createLegacyMaskPage" in entry_text:
+        stufe = "builder_altmuster"
+    elif builder and _page_is_studio_versioned(
         screen_ids, beleg_prefix=beleg_prefix, studio_ids=studio_ids, route=route
     ):
         stufe = "studio_versioniert"
@@ -251,6 +256,7 @@ def classify_page(entry: Path, *, beleg_prefix: str, studio_ids: frozenset[str],
     else:
         stufe = "handgebaut"
     return {"stufe": stufe, "screen_ids": screen_ids,
+            "legacy_creation": "createStammNativeDetailPage" in entry_text,
             "dateien": [p.relative_to(ROOT).as_posix() for p in sources]}
 
 
@@ -413,7 +419,8 @@ def inventory() -> dict:
         native_studio = {
             "releaseVersion": registry.get("releaseVersion"),
             "count": len(registry.get("screens") or {}),
-            "releaseReady": len(studio_ids),
+            "structuralReady": len(studio_ids),
+            "liveReleaseEvidence": "not_measured",
         }
     return {
         "stand": date.today().isoformat(),
@@ -503,7 +510,7 @@ def markdown(inv: dict) -> str:
         if family == "native_studio" and isinstance(variants, dict):
             lines.append(
                 f"- `native_studio`: Release {variants.get('releaseVersion', '?')}, "
-                f"{variants.get('count', 0)} Screens ({variants.get('releaseReady', 0)} release-ready)"
+                f"{variants.get('count', 0)} Screens ({variants.get('structuralReady', 0)} statisch geprueft; Browser-/Freigabenachweis nicht gemessen)"
             )
             continue
         if isinstance(variants, dict):

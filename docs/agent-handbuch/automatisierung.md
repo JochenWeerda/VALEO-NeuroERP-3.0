@@ -59,7 +59,6 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `einkauf.bestellung.versenden` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
-| `finance.ap_invoice.freigeben` | finance | `finance:write` | ja | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `finance.ap_invoice.propose` | finance | `finance:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `hr.bewerbung.speichern` | hr | `hr:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `hr.einwilligung.anlegen` | hr | `hr:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
@@ -79,6 +78,7 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `logistik.tour.anlegen` | logistics | `logistics:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `mask.action.execute` | masks | `masks:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `mask.actions.list` | masks | `masks:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `mask.data.read` | masks | `masks:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `mobile.sync.process_pending` | mobile | `mobile:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `planung.calendar.reproject` | planung | `planung:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `produktion.control.sync` | produktion | `ops:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
@@ -91,6 +91,7 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `sales.invoice.post` | sales | `sales:write` | ja | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `sales.invoice.propose` | sales | `sales:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
 | `sales.order.status` | sales | `sales:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
+| `studio.migration.plan` | studio | `belege:write` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `wms.cell.status` | inventory | `inventory:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `wms.lot.trace` | inventory | `inventory:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 
@@ -123,6 +124,8 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `crm.customer.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `crm.lead.qualified` | outbox | `app/api/v1/endpoints/leads.py` |
 | `crm.lead.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `crm.mail_workspace.attachment_transfer` | outbox | `app/api/v1/endpoints/mail_workspace.py` |
+| `crm.mail_workspace.queue` | outbox | `app/api/v1/endpoints/mail_workspace.py` |
 | `crm.opportunity.activity_created` | outbox | `app/api/v1/endpoints/mask_actions.py` |
 | `crm.opportunity.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `crm_case.created` | outbox | `app/services/crm_compat_service.py` |
@@ -217,9 +220,11 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `einkauf.lieferant.entsperrt` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.lieferant.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.wareneingang.gebucht` | outbox | `app/api/v1/endpoints/mask_actions.py` |
-| `finance.ap_invoice.approved` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
+| `finance.ap_invoice.approval_decided` | outbox | `app/api/v1/endpoints/ap_invoices.py` |
 | `finance.ar_open_item.dunning_created` | outbox | `app/api/v1/endpoints/open_items.py` |
 | `finance.bankkonto.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
+| `finance.billing_batch_line.retry` | outbox | `app/api/v1/endpoints/billing_batch.py` |
+| `finance.control_finding.reviewed` | outbox | `app/api/v1/endpoints/kontrolle.py` |
 | `finance.debitor.entsperrt` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
 | `finance.debitor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.kreditor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
@@ -233,9 +238,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `fuhrpark.fahrzeug.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.rechnung.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.terminart.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| `futtermittel.einzelfutter.stillgelegt` | outbox | `app/api/v1/endpoints/agrar_stammdaten_kommandos.py` |
-| `futtermittel.mischfutter.deaktiviert` | outbox | `app/api/v1/endpoints/agrar_stammdaten_kommandos.py` |
-| … | | 25 weitere |
+| … | | 28 weitere |
 
 ### System
 

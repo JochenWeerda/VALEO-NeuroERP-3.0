@@ -18,6 +18,7 @@ from app.api.v1.schemas.docflow_bundle_schemas import (
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.docflow_followup_service import DocflowFollowupService, FollowupError
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/docflow/evidence", tags=["docflow", "dms", "gobd"])
 
@@ -49,7 +50,7 @@ class FollowupIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/followups", response_model=FollowupCreatedOut, summary="Bescheid/Rückmeldung/Wiedervorlage erfassen")
+@router.post("/followups", response_model=FollowupCreatedOut, summary="Bescheid/Rückmeldung/Wiedervorlage erfassen", dependencies=SCHREIBEN["BELEGE"])
 def create_followup(
     body: FollowupIn,
     db: Session = Depends(get_db),
@@ -74,7 +75,7 @@ class CompleteIn(BaseModel):
     bediener: Optional[str] = None
 
 
-@router.post("/followups/{followup_id}/complete", response_model=FollowupCompletedOut, summary="Followup erledigen")
+@router.post("/followups/{followup_id}/complete", response_model=FollowupCompletedOut, summary="Followup erledigen", dependencies=SCHREIBEN["BELEGE"])
 def complete_followup(
     followup_id: str,
     body: CompleteIn,

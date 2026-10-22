@@ -9,6 +9,7 @@ Gap 026: Inline-Validierung — KPI: 35% weniger Eingabefehler
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
@@ -204,7 +205,7 @@ def validate_menge(
             )],
         )
 
-    if not allow_zero and zahl == 0.0:
+    if not allow_zero and math.isclose(zahl, 0.0, abs_tol=1e-9):
         return DomainValidationResult(
             field_name=field_name,
             value=value,
@@ -396,7 +397,7 @@ def validate_preis(
             )],
         )
 
-    if zahl == 0.0 and min_preis > 0:
+    if math.isclose(zahl, 0.0, abs_tol=1e-9) and min_preis > 0:
         return DomainValidationResult(
             field_name=field_name,
             value=value,

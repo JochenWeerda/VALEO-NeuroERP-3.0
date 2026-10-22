@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.customers_schemas import CustomersOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter()
@@ -96,14 +97,20 @@ def _to_http_exception(error: httpx.HTTPStatusError) -> HTTPException:
 
 
 
-@router.post("/", response_model=Customer, status_code=status.HTTP_201_CREATED, summary="Customer anlegen")
+@router.post("/", response_model=Customer, status_code=status.HTTP_201_CREATED, summary="Customer anlegen", dependencies=SCHREIBEN["CRM"])
 async def create_customer(
     customer_data: CustomerCreate,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> Customer:
-    """Create a new customer via crm-core, or in PostgreSQL if crm-core is unreachable."""
+    """Create a new customer via crm-core, or in PostgreSQL if crm-core is unreachable.
+
+    Mandant aus dem geprueften Kontext. Bis 20.10.2026 kam er aus dem Body (Standard: Dev-Mandant) — jede
+    CRM-Rolle konnte Kunden in fremden Mandanten anlegen, ohne Angabe landeten sie im Dev-Mandanten."""
+    if customer_data.tenant_id is not None and str(customer_data.tenant_id) != tenant_id:
+        raise HTTPException(status_code=403, detail="Customer payload belongs to a different tenant")
     try:
-        d = await _svc(db, str(customer_data.tenant_id)).create_customer(customer_data)  # type: ignore[arg-type]
+        d = await _svc(db, tenant_id).create_customer(customer_data)  # type: ignore[arg-type]
     except ValidationFailedError as exc:
         raise HTTPException(status_code=422, detail=exc.detail)
     except ConflictError as exc:
@@ -345,7 +352,7 @@ async def get_customer(
     return Customer.model_validate(d)
 
 
-@router.put("/{customer_id}", response_model=Customer, summary="Customer aktualisieren")
+@router.put("/{customer_id}", response_model=Customer, summary="Customer aktualisieren", dependencies=SCHREIBEN["CRM"])
 async def update_customer(
     customer_id: str,
     customer_data: CustomerUpdate,
@@ -367,8 +374,7 @@ async def update_customer(
     "/{customer_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
-    summary="Customer löschen",
-)
+    summary="Customer löschen", dependencies=SCHREIBEN["CRM"])
 async def delete_customer(
     customer_id: str,
     db: Session = Depends(get_db),
@@ -376,6 +382,8 @@ async def delete_customer(
 ) -> Response:
     try:
         await _svc(db, tenant_id).delete_customer(customer_id)
+    except EntityNotFoundError:
+        raise HTTPException(404, "Customer not found")
     except httpx.HTTPStatusError as exc:
         raise _to_http_exception(exc) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -425,8 +433,7 @@ class UmkreissucheErgebnis(_BaseModel):
 
 
 @router.post("/umkreissuche", summary="Umkreissuche",
-    response_model=CustomersOut
-)
+    response_model=CustomersOut, dependencies=SCHREIBEN["CRM"])
 def umkreissuche(
     payload: UmkreissucheInput,
     db: Session = Depends(get_db),
@@ -472,8 +479,7 @@ class KonvertierungResult(_BaseModel):
 
 
 @router.post("/interessenten", status_code=201, summary="Interessent anlegen",
-    response_model=InteressentOut
-)
+    response_model=InteressentOut, dependencies=SCHREIBEN["CRM"])
 def create_interessent(
     payload: InteressentCreate,
     db: Session = Depends(get_db),
@@ -505,7 +511,7 @@ def create_interessent(
     return ergebnis
 
 
-@router.post("/interessenten/{interessent_id}/konvertieren", response_model=KonvertierungResult, summary="Konvertieren")
+@router.post("/interessenten/{interessent_id}/konvertieren", response_model=KonvertierungResult, summary="Konvertieren", dependencies=SCHREIBEN["CRM"])
 def konvertieren(
     interessent_id: str,
     db: Session = Depends(get_db),

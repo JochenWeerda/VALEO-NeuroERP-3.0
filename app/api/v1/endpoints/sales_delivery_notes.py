@@ -39,28 +39,17 @@ from app.documents.router_helpers import get_repository, save_to_store
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.sales_delivery_notes_schemas import SalesDeliveryNotesOut
+from app.core.akteur import akteur_aus_request, bekannter_nutzer
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/sales/delivery-notes", tags=["sales", "delivery-notes"])
 
 
 def _get_user_id_from_request(request: Request | None) -> str | None:
-    if request is None:
-        return None
-    uid = request.headers.get("X-User-ID")
-    if uid:
-        return uid
-    auth = request.headers.get("Authorization", "")
-    if auth.startswith("Bearer "):
-        try:
-            import base64 as _b64
-            import json as _json
-            payload = auth[7:].split(".")[1]
-            payload += "=" * (4 - len(payload) % 4)
-            return _json.loads(_b64.urlsafe_b64decode(payload)).get("sub")
-        except Exception:  # noqa: BLE001 — JWT decode failed; caller handles None return
-            pass
-    return None
+    """Urheber aus dem geprueften Token (bis 19.10.2026 zuerst aus dem Client-Header ``X-User-ID``)."""
+    return akteur_aus_request(request)
+
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
@@ -268,7 +257,7 @@ def _register_allocation_sources(
         raise HTTPException(status_code=422, detail=str(fehler)) from fehler
 
 
-@router.post("", response_model=DeliveryNote, status_code=status.HTTP_201_CREATED, summary="Delivery note anlegen")
+@router.post("", response_model=DeliveryNote, status_code=status.HTTP_201_CREATED, summary="Delivery note anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_delivery_note(
     payload: DeliveryNoteCreate,
     request: Request,
@@ -428,7 +417,7 @@ async def get_delivery_note(
     )
 
 
-@router.put("/{ls_id}", response_model=DeliveryNote, summary="Delivery note aktualisieren")
+@router.put("/{ls_id}", response_model=DeliveryNote, summary="Delivery note aktualisieren", dependencies=SCHREIBEN["VERKAUF"])
 async def update_delivery_note(
     ls_id: str,
     payload: DeliveryNoteUpdate,
@@ -533,7 +522,7 @@ async def update_delivery_note(
     )
 
 
-@router.delete("/{ls_id}", status_code=204, response_class=Response, response_model=None, summary="Delivery note löschen")
+@router.delete("/{ls_id}", status_code=204, response_class=Response, response_model=None, summary="Delivery note löschen", dependencies=SCHREIBEN["VERKAUF"])
 async def delete_delivery_note(
     ls_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -560,7 +549,7 @@ async def delete_delivery_note(
     db.commit()
 
 
-@router.post("/{ls_id}/post", response_model=DeliveryNote, summary="Delivery note erstellen")
+@router.post("/{ls_id}/post", response_model=DeliveryNote, summary="Delivery note erstellen", dependencies=SCHREIBEN["VERKAUF"])
 async def post_delivery_note(
     ls_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -606,8 +595,7 @@ async def post_delivery_note(
 
 
 @router.post("/{ls_id}/print", summary="Delivery note drucken",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["VERKAUF"])
 async def print_delivery_note(
     ls_id: str,
     attestation: Optional[str] = Query(None, description="Reason for printing (required if already posted)"),
@@ -631,9 +619,9 @@ async def print_delivery_note(
         db.execute(
             text("""
                 INSERT INTO domain_audit.attestations (
-                    id, tenant_id, entity_type, entity_id, action, reason, created_by, created_at
+                    id, tenant_id, entity_type, entity_id, action, reason, changes, created_by, created_at
                 ) VALUES (
-                    :id, :tenant_id, 'delivery_note', :entity_id, 'print', :reason, :created_by, NOW()
+                    :id, :tenant_id, 'delivery_note', :entity_id, 'print', :reason, CAST(:changes AS jsonb), :created_by, NOW()
                 )
             """),
             {
@@ -641,7 +629,12 @@ async def print_delivery_note(
                 "tenant_id": tenant_id,
                 "entity_id": ls_id,
                 "reason": attestation,
-                "created_by": _get_user_id_from_request(request) or "system",
+                "created_by": bekannter_nutzer(db, _get_user_id_from_request(request), tenant_id=tenant_id),
+                "changes": json.dumps({"actor": {
+                    "subject": _get_user_id_from_request(request),
+                    "issuer": request.state.token_claims["iss"],
+                    "tenant_id": tenant_id,
+                }}),
             }
         )
     
@@ -659,7 +652,7 @@ async def print_delivery_note(
     return {"ok": True, "message": "Delivery note printed"}
 
 
-@router.post("/{ls_id}/ship", response_model=DeliveryNote, summary="Delivery note ship")
+@router.post("/{ls_id}/ship", response_model=DeliveryNote, summary="Delivery note ship", dependencies=SCHREIBEN["VERKAUF"])
 async def ship_delivery_note(
     ls_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -679,7 +672,7 @@ async def ship_delivery_note(
     return DeliveryNote(**dict(row), positionen=[DeliveryNotePosition(**dict(p)) for p in positions])
 
 
-@router.post("/{ls_id}/deliver", response_model=DeliveryNote, summary="Delivery note deliver")
+@router.post("/{ls_id}/deliver", response_model=DeliveryNote, summary="Delivery note deliver", dependencies=SCHREIBEN["VERKAUF"])
 async def deliver_delivery_note(
     ls_id: str,
     tenant_id: str = Depends(get_tenant_id),
@@ -829,7 +822,7 @@ def _invoice_sources(ls_id: str, positions: list) -> list[SourceLine]:
     return quellen
 
 
-@router.post("/{ls_id}/create-invoice", response_model=SalesDeliveryNotesOut, status_code=201, summary="Invoice from delivery anlegen")
+@router.post("/{ls_id}/create-invoice", response_model=SalesDeliveryNotesOut, status_code=201, summary="Invoice from delivery anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_invoice_from_delivery(
     ls_id: str,
     tenant_id: str = Depends(get_tenant_id),

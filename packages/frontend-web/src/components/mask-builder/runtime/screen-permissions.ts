@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import documentPermissions from './beleg-permissions.generated.json'
+import actionPermissions from './action-permissions.generated.json'
 import { useAuth } from '@/hooks/useAuth'
 import type { User } from '@/lib/auth'
 import type { ScreenDefinition } from '../schema'
@@ -9,13 +10,21 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
   if (!screen || !user) return []
   const scopes = new Set(user.scopes ?? [])
   const roles = new Set(user.roles ?? [])
-  const declared = new Set((screen.actions ?? []).flatMap(action => action.permission ? [action.permission] : []))
+  const rows = [...(screen.tables ?? []), ...(screen.tabs ?? []).flatMap(tab => tab.tables ?? [])]
+    .flatMap(table => table.rowActions ?? [])
+  const declared = new Set([...(screen.actions ?? []), ...rows].flatMap(action => action.permission ? [action.permission] : []))
   if (screen.creation) declared.add(screen.creation.permission)
   return [...declared].filter(permission => {
     if (permission.startsWith('belege.')) {
       const screens = documentPermissions.screens as Record<string, Record<string, string[]>>
       return (screens[screen.id]?.[permission] ?? []).some(role => roles.has(role))
     }
+    if (permission.startsWith('studio.entity.')) {
+      const groups = (actionPermissions.generatedEntities as Record<string, string[][]>)[permission]
+      return Boolean(groups?.length && groups.every(group => group.some(role => roles.has(role))))
+    }
+    const projected = (actionPermissions.screens as Record<string, Record<string, string[][]>>)[screen.id]?.[permission]
+    if (projected) return projected.length > 0 && projected.every(group => group.some(role => roles.has(role)))
     if (permission.startsWith('platform:')) return scopes.has(permission)
     if (permission === 'identity:quota:read') return true // Server returns only own allocations.
     if (scopes.has('admin:all') || roles.has('admin')) return true

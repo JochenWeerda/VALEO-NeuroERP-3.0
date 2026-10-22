@@ -3,10 +3,12 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 FE = ROOT / "packages" / "frontend-web"
 PAGES = FE / "src" / "pages"
 INV = FE / "src" / "app" / "routing" / "route-inventory.gen.json"
@@ -14,28 +16,17 @@ OUT = ROOT / "docs" / "architecture" / "uix" / "mask-route-migration-inventory.m
 
 
 def classify_source(text: str, *, filename: str = "") -> str:
-    # Create-only Legacy-Split (UIX-057): nicht als pages_legacy zaehlen.
-    if filename.endswith("-legacy.tsx"):
-        return "legacy_create_only"
-    if filename in ("FibuSuiteRuntime.tsx", "NotFound.tsx"):
+    from app.core.mask_runtime_evidence import has_visible_runtime
+    # A lazy wrapper still runs the previous page; its name proves no migration.
+    if "createLegacyMaskPage" in text:
+        return "legacy_wrapper"
+    if filename in ("NotFound.tsx", "Login.tsx", "Callback.tsx"):
+        return "technical_page"
+    if filename == "FibuSuiteRuntime.tsx":
         return "runtime_wired"
     if filename == "MaskRolloutRoute.tsx" and "UniversalMaskRolloutPilotPage" in text:
         return "runtime_wired"
-    if (
-        "useUniversalMaskRuntime" in text
-        or "UniversalMaskRenderer" in text
-        or "UniversalNativeDetailPage" in text
-        or "NativeListPage" in text
-        or "UniversalNativeCockpitPage" in text
-        or "createStammNativeDetailPage" in text
-        or "createLegacyMaskPage" in text
-        or "MadeByStudioListRuntimeWire" in text
-        or "MadeByStudioDetailRuntimeWire" in text
-        or "MadeByStudioCockpitRuntimeWire" in text
-        or "DocumentControlScopePage" in text
-        or "SanktionsScopePage" in text
-        or "CaptureScreenHost" in text
-    ):
+    if has_visible_runtime(text):
         return "runtime_wired"
     if re.search(r"\bObjectPage\b", text) or re.search(r"\bListReport\b", text):
         return "legacy_mask_pattern"
@@ -144,6 +135,8 @@ def main() -> None:
         f"| Gesamt Routen | {len(routes)} |",
         f"| runtime_wired (UniversalMaskRuntime-Pfad) | {by_class['runtime_wired']} |",
         f"| legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | {by_class['legacy_mask_pattern']} |",
+        f"| legacy_wrapper (laedt weiter die Altoberflaeche) | {by_class['legacy_wrapper']} |",
+        f"| technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | {by_class['technical_page']} |",
         f"| hand_built (weder Runtime noch ObjectPage/ListReport) | {by_class['hand_built']} |",
         f"| non_page_module (Layout/Redirect/sonstiges) | {by_class['non_page_module']} |",
         "",
@@ -205,6 +198,8 @@ def main() -> None:
         "pages_total": len(page_files),
         "pages_runtime": page_by["runtime_wired"],
         "pages_legacy": page_by["legacy_mask_pattern"],
+        "legacy_wrapper": by_class["legacy_wrapper"],
+        "pages_legacy_wrapper": page_by["legacy_wrapper"],
         "pages_hand": page_by["hand_built"],
         "screen_ids": len(sd_ids),
         "capture_screens": capture_screens,

@@ -1107,22 +1107,8 @@ def build_finance_buchungsimport_screen_definition() -> dict[str, Any]:
 
 
 def build_finance_datev_export_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
-    return build_stamm_list_screen(
-        screen_id="finance/datev-export",
-        domain="finance",
-        title="Datev export",
-        subtitle="finance",
-        endpoint="/api/v1/finance/abstimmung/nebenbuch",
-        row_route=None,
-        columns=columns,
-        actions=[stamm_list_export_action()],
-        row_actions=[],
-        purpose="Datev export im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Datev export.", "Filtere die Liste."],
-        bundle="finance",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-    )
+    from app.core.screen_definition_datev_export import build_datev_export
+    return build_datev_export()
 
 
 def build_finance_debitoren_new_screen_definition() -> dict[str, Any]:

@@ -1,7 +1,22 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { lazy, Suspense } from 'react'
+import { useParams } from '@/app/routing/typed-router'
+import { ENABLE_UNIVERSAL_MASK_AGRAR_KONTRAKT } from '@/features/agrar-masks/kontrakt-mask-support'
 
-export default function Page(): JSX.Element {
+const FrmKontraktDetail = lazy(() => import('./FrmKontraktDetail'))
+const KontraktNativePage = lazy(() => import('@/pages/agrar/kontrakt-native'))
+
+export default function KontraktDetailRoute(): JSX.Element {
+  const { id } = useParams<{ id?: string }>()
+  const isExistingContract = Boolean(id && id !== 'neu')
+
+  const PageComponent =
+    isExistingContract && ENABLE_UNIVERSAL_MASK_AGRAR_KONTRAKT
+      ? KontraktNativePage
+      : FrmKontraktDetail
+
   return (
-    <NativeListPage screenId="kontrakte/:id" testId="screen-kontrakte/:id" />
+    <Suspense fallback={null}>
+      <PageComponent />
+    </Suspense>
   )
 }

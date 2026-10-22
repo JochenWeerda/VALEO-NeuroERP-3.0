@@ -1,10 +1,27 @@
-import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
+import type { JSX } from 'react'
+import { SimpleDonutChart } from '@/components/charts/SimpleDonutChart'
 
-export default function Page(): JSX.Element {
+interface BalanceShare {
+  name: string
+  value: number
+}
+
+interface AnalyticsBalanceShareChartProps {
+  balanceShares: BalanceShare[]
+  donutColors: string[]
+  currencyFormatter: Intl.NumberFormat
+}
+
+export default function AnalyticsBalanceShareChart({ balanceShares, donutColors, currencyFormatter }: AnalyticsBalanceShareChartProps): JSX.Element {
   return (
-    <UniversalNativeCockpitPage
-      screenId="finance/reports/charts/AnalyticsBalanceShareChart"
-      testId="finance-reports-charts-AnalyticsBalanceShareChart"
-    />
+    <div className="flex h-full items-center justify-center">
+      <SimpleDonutChart
+        data={balanceShares.map((item, index) => ({
+          ...item,
+          color: donutColors[index % donutColors.length],
+        }))}
+        valueFormatter={(value) => currencyFormatter.format(value)}
+      />
+    </div>
   )
 }

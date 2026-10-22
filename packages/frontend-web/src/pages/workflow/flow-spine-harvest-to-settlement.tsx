@@ -1,7 +1,5 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import FlowSpineWorkspace from '@/components/workflow/FlowSpineWorkspace'
 
-export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="workflow/flow-spine-harvest-to-settlement" testId="screen-workflow/flow-spine-harvest-to-settlement" />
-  )
+export default function FlowSpineHarvestToSettlementPage(): JSX.Element {
+  return <FlowSpineWorkspace processKey="harvest-to-settlement" />
 }

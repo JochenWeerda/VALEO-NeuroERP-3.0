@@ -22,6 +22,7 @@ from app.services.admin_core_service import AdminCoreService
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class AgrarSettlementOut(BaseSchema):
@@ -261,12 +262,12 @@ def _to_out(settlement: AgrarSettlement, deductions: list[AgrarSettlementDeducti
     )
 
 
-@router.post("/billing-weight/preview", response_model=AgrarSettlementOut, summary="Billing weight vorschauen")
+@router.post("/billing-weight/preview", response_model=AgrarSettlementOut, summary="Billing weight vorschauen", dependencies=SCHREIBEN["AGRAR"])
 async def preview_billing_weight(payload: BillingWeightPreviewRequest) -> dict:
     return AgrarSettlementService.preview_billing_weight(payload)
 
 
-@router.post("/drying/compute", response_model=DryingComputeResponse, summary="Drying settlement compute")
+@router.post("/drying/compute", response_model=DryingComputeResponse, summary="Drying settlement compute", dependencies=SCHREIBEN["AGRAR"])
 async def compute_drying_settlement(
     payload: DryingComputeRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -279,7 +280,7 @@ async def compute_drying_settlement(
     return DryingComputeResponse(**data)
 
 
-@router.post("/preview", response_model=AgrarSettlementOut, summary="Settlement vorschauen")
+@router.post("/preview", response_model=AgrarSettlementOut, summary="Settlement vorschauen", dependencies=SCHREIBEN["AGRAR"])
 async def preview_settlement(payload: SettlementCreate):
     try:
         return AgrarSettlementService.preview_settlement(payload)
@@ -287,7 +288,7 @@ async def preview_settlement(payload: SettlementCreate):
         raise HTTPException(status_code=400, detail=exc.detail) from exc
 
 
-@router.post("/", response_model=SettlementOut, status_code=201, summary="Settlement anlegen")
+@router.post("/", response_model=SettlementOut, status_code=201, summary="Settlement anlegen", dependencies=SCHREIBEN["AGRAR"])
 async def create_settlement(
     payload: SettlementCreate,
     tenant_id: str = Depends(get_tenant_id),
@@ -323,7 +324,7 @@ async def list_settlements(
     return [_to_out(s, d) for s, d in pairs]
 
 
-@router.post("/campaign-reference/backfill", response_model=SettlementCampaignBackfillResponse, summary="Settlement campaign reference backfill")
+@router.post("/campaign-reference/backfill", response_model=SettlementCampaignBackfillResponse, summary="Settlement campaign reference backfill", dependencies=SCHREIBEN["AGRAR"])
 async def backfill_settlement_campaign_reference(
     payload: SettlementCampaignBackfillRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -369,7 +370,7 @@ async def get_settlement(
     })
 
 
-@router.post("/{settlement_id}/post-fibu", response_model=AgrarSettlementOut, summary="Settlement to fibu erstellen")
+@router.post("/{settlement_id}/post-fibu", response_model=AgrarSettlementOut, summary="Settlement to fibu erstellen", dependencies=SCHREIBEN["AGRAR"])
 async def post_settlement_to_fibu(
     settlement_id: str,
     payload: SettlementPostRequest,
@@ -443,7 +444,7 @@ async def get_settlement_completion_status(
     return SettlementCompletionStatusOut(**data)
 
 
-@router.post("/{settlement_id}/cancel", response_model=AgrarSettlementOut, summary="Settlement stornieren")
+@router.post("/{settlement_id}/cancel", response_model=AgrarSettlementOut, summary="Settlement stornieren", dependencies=SCHREIBEN["AGRAR"])
 async def cancel_settlement(
     settlement_id: str,
     expected_row_version: Optional[int] = Query(
@@ -534,7 +535,7 @@ class TrocknungsAbrechnungPreviewRequest(BaseModel):
     max_abzug_pct: Optional[float] = Field(default=None, ge=0, le=100)
 
 
-@router.post("/trocknungs-abrechnung/preview", response_model=AgrarSettlementOut, tags=["agrar", "trocknung"], summary="Trocknungs abrechnung vorschauen")
+@router.post("/trocknungs-abrechnung/preview", response_model=AgrarSettlementOut, tags=["agrar", "trocknung"], summary="Trocknungs abrechnung vorschauen", dependencies=SCHREIBEN["AGRAR"])
 async def preview_trocknungs_abrechnung(payload: TrocknungsAbrechnungPreviewRequest):
     """
     Trocknungsabrechnung preview mit GoBD-konformem SHA-256 Audit-Hash.
@@ -579,7 +580,7 @@ class SettlementFreigabeRequest(BaseModel):
     )
 
 
-@router.post("/freigabe/evaluate", response_model=AgrarSettlementOut, tags=["agrar", "settlement", "freigabe"], summary="Settlement freigabe stateless evaluate")
+@router.post("/freigabe/evaluate", response_model=AgrarSettlementOut, tags=["agrar", "settlement", "freigabe"], summary="Settlement freigabe stateless evaluate", dependencies=SCHREIBEN["AGRAR"])
 async def evaluate_settlement_freigabe_stateless(payload: SettlementFreigabeRequest):
     """
     Stateless Freigabe-Evaluation: Prüft ob ein Status-Übergang zulässig ist.
@@ -593,7 +594,7 @@ async def evaluate_settlement_freigabe_stateless(payload: SettlementFreigabeRequ
         raise HTTPException(status_code=422, detail=exc.detail) from exc
 
 
-@router.post("/{settlement_id}/freigabe", response_model=AgrarSettlementOut, tags=["agrar", "settlement", "freigabe"], summary="Freigabe settlement")
+@router.post("/{settlement_id}/freigabe", response_model=AgrarSettlementOut, tags=["agrar", "settlement", "freigabe"], summary="Freigabe settlement", dependencies=SCHREIBEN["AGRAR"])
 async def settlement_freigabe(
     settlement_id: str,
     payload: SettlementFreigabeRequest,
@@ -623,7 +624,7 @@ async def settlement_freigabe(
     return result
 
 
-@router.post("/{settlement_id}/reject", response_model=AgrarSettlementOut, tags=["agrar", "settlement", "freigabe"], summary="Settlement ablehnen")
+@router.post("/{settlement_id}/reject", response_model=AgrarSettlementOut, tags=["agrar", "settlement", "freigabe"], summary="Settlement ablehnen", dependencies=SCHREIBEN["AGRAR"])
 async def reject_settlement(
     settlement_id: str,
     actor_id: str = Query(..., description="Benutzer-ID des Ablehnenden"),

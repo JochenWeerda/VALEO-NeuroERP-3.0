@@ -11,6 +11,10 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+## UIX-RUNTIME: Migrationsnachweise und Fachparitaet (2026-10-22)
+
+Die behauptete Vollmigration ist nicht abgenommen. Lazy-Wrapper/unsichtbare Runtime und rein statische Katalogeintraege reichen nicht. Verlorene bestehende API-, Rollen-, Renderer- und Bedienvertraege werden im Slice MIGRATION-PARITY-REPAIR wiederhergestellt; neue Parent-Builder bleiben erhalten. Offene echte Endpunkte, volle native Fachparitaet, Browser-/Bildabnahme und GitHub-Nachlauf bleiben sichtbar. Siehe [Reparaturnachweis](../quality-assurance/migration-parity-repair-20261022.md).
+
 ## Fuhrpark und MCP Mandantengrenzen geschlossen (2026-10-09)
 
 Fuenf Fuhrpark-Commands jetzt mit kanonischer Mandantentrennung integriert:

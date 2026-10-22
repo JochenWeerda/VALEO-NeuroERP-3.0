@@ -23,6 +23,7 @@ from app.core.tenant import get_tenant_id
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema, IDResponse
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/gelangensbestaetigung", tags=["Gelangensbestätigung", "UStDV"])
@@ -206,8 +207,7 @@ def list_gelangensbestaetigung(
 
 
 @router.post("", status_code=201, summary="Gelangensbestätigung erstellen",
-    response_model=GelangensbestaetigungCreateOut
-)
+    response_model=GelangensbestaetigungCreateOut, dependencies=SCHREIBEN["LOGISTIK"])
 def create_gelangensbestaetigung(
     payload: GelangensbestaetigungCreate,
     db: Session = Depends(get_db),
@@ -271,8 +271,7 @@ def create_gelangensbestaetigung(
 
 
 @router.post("/{entry_id}/bestaetigen", summary="Gelangensbestätigung durch Empfänger bestätigen",
-    response_model=IDResponse
-)
+    response_model=IDResponse, dependencies=SCHREIBEN["LOGISTIK"])
 def bestaetigen(
     entry_id: str,
     db: Session = Depends(get_db),
@@ -346,8 +345,7 @@ VERSAND_UNKONFIGURIERT = "NICHT_KONFIGURIERT"
 @router.post(
     "/{entry_id}/mahnung",
     response_model=MahnungOut,
-    summary="Erinnerung vermerken",
-)
+    summary="Erinnerung vermerken", dependencies=SCHREIBEN["LOGISTIK"])
 def mahnung_senden(
     entry_id: str,
     angefordert_durch: Optional[str] = Body(default=None, embed=True),

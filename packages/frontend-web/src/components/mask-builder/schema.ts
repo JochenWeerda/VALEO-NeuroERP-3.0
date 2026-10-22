@@ -119,11 +119,26 @@ export interface ScreenTableDefinition {
     key: string
     label: string
     command?: string
+    /** Recht wie bei Kopfaktionen; ohne Recht blendet der Plan die Aktion aus. */
+    permission?: string
     dangerLevel?: ActionDangerLevel
     requiresConfirmation?: boolean
     enabledWhen?: ScreenCondition
     visibleWhen?: { field: string; values: Array<string | number | boolean> }
     disabledWhen?: { field: string; values: Array<string | number | boolean> }
+    /** Kommando-Weg der Zeile ({entity_id} = Zeilenkennung); dieselben Wege rufen CLI und MCP. */
+    commandEndpoint?: string
+    method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+    auditReasonRequired?: boolean
+    humanApprovalRequired?: boolean
+    forbiddenForAgents?: boolean
+    /** Formular der Seite mit Sendeweg; nie automatisch abgeschickt (wie bei Kopfaktionen). */
+    inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
+    localEffect?: ScreenActionDefinition['localEffect']
+    /** Deklarierte Eingaben vor dem Kommando (Dialog der Maske, nie automatisch abgeschickt). */
+    inputFields?: ScreenActionInputField[]
+    /** Reine Navigation; Platzhalter wie {id} kommen aus der Zeile. */
+    navigationRoute?: string
   }>
   /** Selection-based actions; payload contains selectedRows and selectedIds. */
   bulkActions?: Array<{
@@ -204,8 +219,14 @@ export interface ScreenActionDefinition {
   /** Opens an existing human input flow; submitEndpoint is documentation, never auto-dispatched. */
   inputFlow?: { kind: 'humanForm'; submitEndpoint: string; method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' }
   stubReason?: string
-  /** Wirkt nur in der Maske (kein Fachbefehl): Eingabe leeren oder woandershin fuehren. */
-  localEffect?: 'form_reset' | 'navigation'
+  /**
+   * Wirkt nur in der Maske (kein Fachbefehl, keine Serveraenderung): Eingabe leeren, woandershin fuehren,
+   * drucken, herunterladen (lesend), in den Bearbeitungsmodus wechseln, neu laden oder eine Ansicht oeffnen.
+   * CLI und MCP lesen dieselben Daten ueber die Datenquellen der Maske.
+   */
+  localEffect?: 'form_reset' | 'navigation' | 'print' | 'download' | 'edit_mode' | 'refresh' | 'view'
+  /** Read-only server-produced file; never a domain write command. */
+  download?: { endpoint: string; contentField: string; filenameField: string; mediaType: 'text/csv;charset=utf-8' }
   method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   requiresConfirmation?: boolean
   dangerLevel?: ActionDangerLevel

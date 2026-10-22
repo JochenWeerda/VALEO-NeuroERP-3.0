@@ -74,7 +74,7 @@ def _human_input_flow(endpoint: str) -> dict[str, Any]:
 def build_crm_customer_360_screen_definition() -> dict[str, Any]:
     """Canonical ScreenDefinition for crm/customer-360 (Wave 29)."""
 
-    return {
+    definition = {
         "schemaVersion": 1,
         "id": "crm/customer-360",
         "domain": "crm",
@@ -494,10 +494,66 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
             "bundleGroup": "crm",
         },
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'bearbeiten',
+      'label': 'Bearbeiten',
+      'kind': 'primary',
+      'dangerLevel': 'safe',
+      'permission': 'crm.customer.update',
+      'zone': 'commit',
+      'commandEndpoint': '/api/v1/crm/customers/{entity_id}/actions/bearbeiten',
+      'method': 'POST',
+      'inputFields': [{'key': 'firma', 'label': 'Firma', 'type': 'text'},
+                      {'key': 'strasse', 'label': 'Strasse', 'type': 'text'},
+                      {'key': 'plz', 'label': 'PLZ', 'type': 'text'},
+                      {'key': 'ort', 'label': 'Ort', 'type': 'text'},
+                      {'key': 'land', 'label': 'Land', 'type': 'text'},
+                      {'key': 'telefon', 'label': 'Telefon', 'type': 'text'},
+                      {'key': 'email', 'label': 'E-Mail', 'type': 'email'},
+                      {'key': 'branche', 'label': 'Branche', 'type': 'text'}]},
+     {'key': 'edit',
+      'label': 'Erweiterte Pflege',
+      'kind': 'secondary',
+      'dangerLevel': 'safe',
+      'permission': 'crm.customer.update',
+      'zone': 'commit',
+      'navigationRoute': '/verkauf/kunden-stamm/{business_partner_id}?pflege=1'},
+     {'key': 'create_activity',
+      'label': 'Aktivitaet anlegen',
+      'kind': 'secondary',
+      'dangerLevel': 'safe',
+      'permission': 'crm.activity.create',
+      'commandEndpoint': '/api/v1/crm/customers/{entity_id}/actions/create_activity',
+      'method': 'POST',
+      'requiresConfirmation': False,
+      'humanApprovalRequired': False,
+      'auditReasonRequired': False,
+      'forbiddenForAgents': False,
+      'zone': 'footer'}]
+    definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    definition["creation"] = {'endpoint': '/api/v1/crm/customers/',
+     'permission': 'crm.customer.create',
+     'detailRoute': '/crm/kunden/{entity_id}',
+     'defaults': {'country': 'DE'},
+     'fields': [{'key': 'customer_number', 'label': 'Kunden-Nr.', 'type': 'text', 'required': True},
+                {'key': 'company_name', 'label': 'Firma', 'type': 'text', 'required': True},
+                {'key': 'contact_person', 'label': 'Ansprechpartner', 'type': 'text'},
+                {'key': 'address', 'label': 'Strasse', 'type': 'text'},
+                {'key': 'postal_code', 'label': 'PLZ', 'type': 'text'},
+                {'key': 'city', 'label': 'Ort', 'type': 'text'},
+                {'key': 'country', 'label': 'Land', 'type': 'text'},
+                {'key': 'phone', 'label': 'Telefon', 'type': 'text'},
+                {'key': 'email', 'label': 'E-Mail', 'type': 'email'},
+                {'key': 'industry', 'label': 'Branche', 'type': 'text'}]}
+    if not any(action.get("kind") == "primary" for action in definition["actions"]):
+        edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
+        edit["kind"] = "primary"
+        definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    return definition
 
 
 def build_sales_order_screen_definition() -> dict[str, Any]:
-    return {
+    definition = {
         "schemaVersion": 1,
         "id": "sales/sales-order",
         "domain": "sales",
@@ -619,10 +675,30 @@ def build_sales_order_screen_definition() -> dict[str, Any]:
             "bundleGroup": "sales",
         },
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'bearbeiten',
+      'label': 'Bearbeiten',
+      'kind': 'secondary',
+      'dangerLevel': 'safe',
+      'permission': 'sales.order.update',
+      'commandEndpoint': '/api/v1/sales/orders/{entity_id}/actions/bearbeiten',
+      'method': 'POST',
+      'inputFields': [{'key': 'subject', 'label': 'Betreff', 'type': 'text'},
+                      {'key': 'delivery_date', 'label': 'Liefertermin', 'type': 'date'},
+                      {'key': 'contact_person', 'label': 'Ansprechpartner', 'type': 'text'},
+                      {'key': 'shipping_method', 'label': 'Versandart', 'type': 'text'},
+                      {'key': 'payment_terms', 'label': 'Zahlungsbedingung', 'type': 'text'},
+                      {'key': 'delivery_address', 'label': 'Lieferanschrift', 'type': 'textarea'},
+                      {'key': 'notes', 'label': 'Notizen', 'type': 'textarea'}]}]
+    if not any(action.get("kind") == "primary" for action in definition["actions"]):
+        edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
+        edit["kind"] = "primary"
+        definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    return definition
 
 
 def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
-    return {
+    definition = {
         "schemaVersion": 1,
         "id": "agrar/kontrakte",
         "domain": "agrar",
@@ -716,11 +792,34 @@ def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
             "bundleGroup": "agrar",
         },
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'bearbeiten',
+      'label': 'Bearbeiten',
+      'kind': 'secondary',
+      'dangerLevel': 'moderate',
+      'permission': 'kontrakt.update',
+      'commandEndpoint': '/api/v1/kontrakte/{entity_id}/actions/bearbeiten',
+      'method': 'POST',
+      'auditReasonRequired': True,
+      'requiresConfirmation': True,
+      'forbiddenForAgents': True,
+      'inputFields': [{'key': 'contract_date', 'label': 'Kontraktdatum', 'type': 'date'},
+                      {'key': 'valid_from', 'label': 'Gueltig ab', 'type': 'date'},
+                      {'key': 'valid_to', 'label': 'Gueltig bis', 'type': 'date'},
+                      {'key': 'total_quantity', 'label': 'Gesamtmenge', 'type': 'number'},
+                      {'key': 'unit', 'label': 'Einheit', 'type': 'text'},
+                      {'key': 'payment_terms', 'label': 'Zahlungsbedingung', 'type': 'text'},
+                      {'key': 'notes', 'label': 'Notizen', 'type': 'textarea'}]}]
+    if not any(action.get("kind") == "primary" for action in definition["actions"]):
+        edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
+        edit["kind"] = "primary"
+        definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    return definition
 
 
 def build_supplier_screen_definition() -> dict[str, Any]:
     """Native ScreenDefinition fuer einkauf/supplier (UIX-038) — StammObjectPageParent."""
-    return build_stamm_object_page(
+    definition = build_stamm_object_page(
         screen_id="einkauf/supplier",
         domain="einkauf",
         title="Lieferant",
@@ -810,11 +909,75 @@ def build_supplier_screen_definition() -> dict[str, Any]:
         payload_budget_kb=48,
         requires_virtual_tables=True,
     )
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'bearbeiten',
+      'label': 'Bearbeiten',
+      'kind': 'primary',
+      'dangerLevel': 'safe',
+      'permission': 'einkauf.lieferant.update',
+      'commandEndpoint': '/api/v1/einkauf/lieferanten/{entity_id}/actions/bearbeiten',
+      'method': 'POST',
+      'inputFields': [{'key': 'firmenname', 'label': 'Firma', 'type': 'text'},
+                      {'key': 'strasse', 'label': 'Strasse', 'type': 'text'},
+                      {'key': 'plz', 'label': 'PLZ', 'type': 'text'},
+                      {'key': 'ort', 'label': 'Ort', 'type': 'text'},
+                      {'key': 'land', 'label': 'Land', 'type': 'text'},
+                      {'key': 'telefon', 'label': 'Telefon', 'type': 'text'},
+                      {'key': 'email', 'label': 'E-Mail', 'type': 'email'},
+                      {'key': 'zahlungsbedingungen', 'label': 'Zahlungsbedingungen', 'type': 'text'},
+                      {'key': 'lieferzeit_tage', 'label': 'Lieferzeit (Tage)', 'type': 'number'}]},
+     {'key': 'neue_bestellung',
+      'label': 'Bestellung anlegen',
+      'kind': 'secondary',
+      'dangerLevel': 'safe',
+      'permission': 'einkauf.bestellung.create',
+      'navigationRoute': '/einkauf/bestellungen/neu'},
+     {'key': 'sperren',
+      'label': 'Sperren',
+      'kind': 'secondary',
+      'dangerLevel': 'high',
+      'permission': 'einkauf.lieferant.update',
+      'requiresConfirmation': True,
+      'auditReasonRequired': True,
+      'commandEndpoint': '/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren',
+      'method': 'POST'},
+     {'key': 'entsperren',
+      'label': 'Entsperren',
+      'kind': 'secondary',
+      'dangerLevel': 'high',
+      'permission': 'einkauf.lieferant.update',
+      'requiresConfirmation': True,
+      'auditReasonRequired': True,
+      'commandEndpoint': '/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren',
+      'method': 'POST'}]
+    definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    definition["creation"] = {'endpoint': '/api/v1/einkauf/lieferanten',
+     'permission': 'einkauf.lieferant.create',
+     'detailRoute': '/einkauf/lieferanten/{entity_id}',
+     'defaults': {'land': 'Deutschland'},
+     'fields': [{'key': 'lieferantennummer', 'label': 'Lieferanten-Nr.', 'type': 'text', 'required': True},
+                {'key': 'firmenname', 'label': 'Firma', 'type': 'text', 'required': True},
+                {'key': 'ansprechpartner', 'label': 'Ansprechpartner', 'type': 'text'},
+                {'key': 'strasse', 'label': 'Strasse', 'type': 'text'},
+                {'key': 'plz', 'label': 'PLZ', 'type': 'text'},
+                {'key': 'ort', 'label': 'Ort', 'type': 'text'},
+                {'key': 'land', 'label': 'Land', 'type': 'text'},
+                {'key': 'telefon', 'label': 'Telefon', 'type': 'text'},
+                {'key': 'email', 'label': 'E-Mail', 'type': 'email'},
+                {'key': 'ust_id', 'label': 'USt-IdNr.', 'type': 'text'},
+                {'key': 'zahlungsbedingungen', 'label': 'Zahlungsbedingungen', 'type': 'text'},
+                {'key': 'zahlungsziel_tage', 'label': 'Zahlungsziel (Tage)', 'type': 'number'},
+                {'key': 'lieferzeit_tage', 'label': 'Lieferzeit (Tage)', 'type': 'number'}]}
+    if not any(action.get("kind") == "primary" for action in definition["actions"]):
+        edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
+        edit["kind"] = "primary"
+        definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    return definition
 
 
 def build_crm_opportunity_screen_definition() -> dict[str, Any]:
     """Native ScreenDefinition fuer crm/opportunity (UIX-039) — StammObjectPageParent."""
-    return build_stamm_object_page(
+    definition = build_stamm_object_page(
         screen_id="crm/opportunity",
         domain="crm",
         title="Opportunity",
@@ -911,6 +1074,43 @@ def build_crm_opportunity_screen_definition() -> dict[str, Any]:
         requires_virtual_tables=True,
         bundle_group="crm",
     )
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'bearbeiten',
+      'label': 'Bearbeiten',
+      'kind': 'secondary',
+      'dangerLevel': 'safe',
+      'permission': 'crm.opportunity.update',
+      'commandEndpoint': '/api/v1/crm/opportunities/{entity_id}/actions/bearbeiten',
+      'method': 'POST',
+      'inputFields': [{'key': 'name', 'label': 'Bezeichnung', 'type': 'text'},
+                      {'key': 'assigned_to', 'label': 'Zustaendig', 'type': 'text'},
+                      {'key': 'stage', 'label': 'Phase', 'type': 'text'},
+                      {'key': 'amount', 'label': 'Wert', 'type': 'number'},
+                      {'key': 'probability', 'label': 'Wahrscheinlichkeit %', 'type': 'number'},
+                      {'key': 'expected_close_date', 'label': 'Erwarteter Abschluss', 'type': 'date'},
+                      {'key': 'lead_source', 'label': 'Quelle', 'type': 'text'}]},
+     {'key': 'create_activity',
+      'label': 'Aktivitaet anlegen',
+      'kind': 'secondary',
+      'dangerLevel': 'safe',
+      'permission': 'crm.activity.create',
+      'commandEndpoint': '/api/v1/crm/opportunities/{entity_id}/actions/create_activity',
+      'method': 'POST',
+      'inputFields': [{'key': 'subject', 'label': 'Betreff', 'type': 'text', 'required': True},
+                      {'key': 'activity_type',
+                       'label': 'Typ',
+                       'type': 'select',
+                       'required': True,
+                       'options': [{'value': 'CALL', 'label': 'Anruf'},
+                                   {'value': 'EMAIL', 'label': 'E-Mail'},
+                                   {'value': 'MEETING', 'label': 'Termin'},
+                                   {'value': 'NOTE', 'label': 'Notiz'}]},
+                      {'key': 'notes', 'label': 'Notiz', 'type': 'textarea'}]}]
+    if not any(action.get("kind") == "primary" for action in definition["actions"]):
+        edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
+        edit["kind"] = "primary"
+        definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    return definition
 
 
 def build_lager_article_stock_screen_definition() -> dict[str, Any]:
@@ -1517,7 +1717,7 @@ def build_einkauf_purchase_order_screen_definition() -> dict[str, Any]:
 
 def build_finance_ap_invoice_screen_definition() -> dict[str, Any]:
     """Native ScreenDefinition fuer finance/ap-invoice (UIX-041)."""
-    return {
+    definition = {
         "schemaVersion": 1,
         "id": "finance/ap-invoice",
         "domain": "finance",
@@ -1581,11 +1781,25 @@ def build_finance_ap_invoice_screen_definition() -> dict[str, Any]:
         "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
         "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "finance"},
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'freigeben',
+      'label': 'Freigeben',
+      'kind': 'primary',
+      'dangerLevel': 'moderate',
+      'permission': 'finance.ap.freigabe',
+      'enabledWhen': 'approval_can_decide',
+      'humanApprovalRequired': True,
+      'forbiddenForAgents': True,
+      'requiresConfirmation': True,
+      'commandEndpoint': '/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben',
+      'method': 'POST'}]
+    definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-freigeben']"
+    return definition
 
 
 def build_finance_ar_open_item_screen_definition() -> dict[str, Any]:
     """Native ScreenDefinition fuer finance/ar-open-item (UIX-041)."""
-    return {
+    definition = {
         "schemaVersion": 1,
         "id": "finance/ar-open-item",
         "domain": "finance",
@@ -1644,6 +1858,18 @@ def build_finance_ar_open_item_screen_definition() -> dict[str, Any]:
         "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
         "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "finance"},
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'mahnen',
+      'label': 'Mahnung erstellen',
+      'kind': 'primary',
+      'dangerLevel': 'moderate',
+      'permission': 'finance.ar.mahnung',
+      'requiresConfirmation': True,
+      'commandEndpoint': '/api/v1/finance/open-items/{entity_id}/actions/mahnen',
+      'method': 'POST',
+      'forbiddenForAgents': True}]
+    definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-mahnen']"
+    return definition
 
 
 def build_lager_stock_movement_screen_definition() -> dict[str, Any]:
@@ -2005,7 +2231,7 @@ def build_agrar_saatgut_screen_definition() -> dict[str, Any]:
 
 def build_finance_debitor_screen_definition() -> dict[str, Any]:
     """Native SD fuer finance/debitor — StammObjectPageParent."""
-    return build_stamm_object_page(
+    definition = build_stamm_object_page(
         screen_id="finance/debitor",
         domain="finance",
         title="Debitor",
@@ -2066,11 +2292,29 @@ def build_finance_debitor_screen_definition() -> dict[str, Any]:
         payload_budget_kb=40,
         requires_virtual_tables=True,
     )
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'bearbeiten',
+      'label': 'Bearbeiten',
+      'kind': 'secondary',
+      'dangerLevel': 'moderate',
+      'permission': 'finance.debitor.update',
+      'commandEndpoint': '/api/v1/finance/debitoren/{entity_id}/actions/bearbeiten',
+      'method': 'POST',
+      'auditReasonRequired': True,
+      'requiresConfirmation': True,
+      'forbiddenForAgents': True,
+      'inputFields': [{'key': 'credit_limit', 'label': 'Kreditlimit', 'type': 'number'},
+                      {'key': 'is_active', 'label': 'Aktiv (nicht gesperrt)', 'type': 'boolean'}]}]
+    if not any(action.get("kind") == "primary" for action in definition["actions"]):
+        edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
+        edit["kind"] = "primary"
+        definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    return definition
 
 
 def build_finance_kreditor_screen_definition() -> dict[str, Any]:
     """Native SD fuer finance/kreditor — StammObjectPageParent."""
-    return build_stamm_object_page(
+    definition = build_stamm_object_page(
         screen_id="finance/kreditor",
         domain="finance",
         title="Kreditor",
@@ -2134,11 +2378,40 @@ def build_finance_kreditor_screen_definition() -> dict[str, Any]:
         payload_budget_kb=40,
         requires_virtual_tables=True,
     )
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'bearbeiten',
+      'label': 'Bearbeiten',
+      'kind': 'secondary',
+      'dangerLevel': 'moderate',
+      'permission': 'finance.kreditor.update',
+      'commandEndpoint': '/api/v1/finance/kreditoren/{entity_id}/actions/bearbeiten',
+      'method': 'POST',
+      'auditReasonRequired': True,
+      'requiresConfirmation': True,
+      'forbiddenForAgents': True,
+      'inputFields': [{'key': 'company_name', 'label': 'Firma', 'type': 'text'},
+                      {'key': 'contact_person', 'label': 'Ansprechpartner', 'type': 'text'},
+                      {'key': 'street', 'label': 'Strasse', 'type': 'text'},
+                      {'key': 'postal_code', 'label': 'PLZ', 'type': 'text'},
+                      {'key': 'city', 'label': 'Ort', 'type': 'text'},
+                      {'key': 'country', 'label': 'Land', 'type': 'text'},
+                      {'key': 'phone', 'label': 'Telefon', 'type': 'text'},
+                      {'key': 'email', 'label': 'E-Mail', 'type': 'email'},
+                      {'key': 'vat_id', 'label': 'USt-IdNr.', 'type': 'text'},
+                      {'key': 'tax_number', 'label': 'Steuernummer', 'type': 'text'},
+                      {'key': 'payment_terms_days', 'label': 'Zahlungsziel (Tage)', 'type': 'number'},
+                      {'key': 'is_active', 'label': 'Aktiv', 'type': 'boolean'},
+                      {'key': 'notes', 'label': 'Notiz', 'type': 'textarea'}]}]
+    if not any(action.get("kind") == "primary" for action in definition["actions"]):
+        edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
+        edit["kind"] = "primary"
+        definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    return definition
 
 
 def build_finance_bankkonto_screen_definition() -> dict[str, Any]:
     """Native SD fuer finance/bankkonto (Bankkonten-Stammdaten) — StammObjectPageParent."""
-    return build_stamm_object_page(
+    definition = build_stamm_object_page(
         screen_id="finance/bankkonto",
         domain="finance",
         title="Bankkonto",
@@ -2189,11 +2462,30 @@ def build_finance_bankkonto_screen_definition() -> dict[str, Any]:
         requires_virtual_tables=True,
         bundle_group="finance",
     )
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'bearbeiten',
+      'label': 'Bearbeiten',
+      'kind': 'secondary',
+      'dangerLevel': 'moderate',
+      'permission': 'finance.bankkonto.update',
+      'commandEndpoint': '/api/v1/banken/konten/{entity_id}/actions/bearbeiten',
+      'method': 'POST',
+      'auditReasonRequired': True,
+      'requiresConfirmation': True,
+      'forbiddenForAgents': True,
+      'inputFields': [{'key': 'bank', 'label': 'Bank', 'type': 'text'},
+                      {'key': 'kontoart', 'label': 'Kontoart', 'type': 'text'},
+                      {'key': 'ist_aktiv', 'label': 'Aktiv', 'type': 'boolean'}]}]
+    if not any(action.get("kind") == "primary" for action in definition["actions"]):
+        edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
+        edit["kind"] = "primary"
+        definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    return definition
 
 
 def build_einkauf_anfrage_screen_definition() -> dict[str, Any]:
     """Native SD fuer einkauf/anfrage (Einkaufsanfrage)."""
-    return {
+    definition = {
         "schemaVersion": 1, "id": "einkauf/anfrage", "domain": "einkauf", "mode": "detail",
         "title": "Einkaufsanfrage", "subtitle": "Einkauf / Anfrage",
         "adapter": {"type": "native", "sourceId": "einkauf/anfrage", "temporary": False},
@@ -2232,6 +2524,27 @@ def build_einkauf_anfrage_screen_definition() -> dict[str, Any]:
         "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
         "performance": {"initialPayloadBudgetKb": 32, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "einkauf"},
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'bearbeiten',
+      'label': 'Bearbeiten',
+      'kind': 'secondary',
+      'dangerLevel': 'safe',
+      'permission': 'einkauf.anfrage.update',
+      'commandEndpoint': '/api/v1/einkauf/anfragen/{entity_id}/actions/bearbeiten',
+      'method': 'POST',
+      'inputFields': [{'key': 'anforderer', 'label': 'Anforderer', 'type': 'text'},
+                      {'key': 'abteilung', 'label': 'Abteilung', 'type': 'text'},
+                      {'key': 'prioritaet', 'label': 'Prioritaet', 'type': 'text'},
+                      {'key': 'artikel', 'label': 'Artikel', 'type': 'text'},
+                      {'key': 'menge', 'label': 'Menge', 'type': 'number'},
+                      {'key': 'einheit', 'label': 'Einheit', 'type': 'text'},
+                      {'key': 'begruendung', 'label': 'Begruendung', 'type': 'textarea'},
+                      {'key': 'notizen', 'label': 'Notizen', 'type': 'textarea'}]}]
+    if not any(action.get("kind") == "primary" for action in definition["actions"]):
+        edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
+        edit["kind"] = "primary"
+        definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    return definition
 
 
 def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
@@ -2329,7 +2642,7 @@ def build_einkauf_anlieferavis_screen_definition() -> dict[str, Any]:
 
 def build_einkauf_auftragsbestaetigung_screen_definition() -> dict[str, Any]:
     """Native SD fuer einkauf/auftragsbestaetigung."""
-    return {
+    definition = {
         "schemaVersion": 1, "id": "einkauf/auftragsbestaetigung", "domain": "einkauf", "mode": "detail",
         "title": "Auftragsbestaetigung", "subtitle": "Einkauf / Lieferanten-AB",
         "adapter": {"type": "native", "sourceId": "einkauf/auftragsbestaetigung", "temporary": False},
@@ -2368,11 +2681,37 @@ def build_einkauf_auftragsbestaetigung_screen_definition() -> dict[str, Any]:
         "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
         "performance": {"initialPayloadBudgetKb": 32, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "einkauf"},
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'pruefen',
+      'label': 'Pruefen',
+      'kind': 'secondary',
+      'dangerLevel': 'safe',
+      'permission': 'einkauf.auftragsbestaetigung.review',
+      'commandEndpoint': '/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/pruefen',
+      'method': 'POST'},
+     {'key': 'bestaetigen',
+      'label': 'Bestaetigen',
+      'kind': 'secondary',
+      'dangerLevel': 'moderate',
+      'permission': 'einkauf.auftragsbestaetigung.confirm',
+      'commandEndpoint': '/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/bestaetigen',
+      'method': 'POST'}]
+    definition["creation"] = {'endpoint': '/api/v1/einkauf/auftragsbestaetigungen',
+     'permission': 'einkauf.auftragsbestaetigung.create',
+     'detailRoute': '/einkauf/auftragsbestaetigung/{entity_id}',
+     'fields': [{'key': 'bestellung', 'label': 'Bestellung (Nummer)', 'type': 'text', 'required': True},
+                {'key': 'ab_nummer', 'label': 'AB-Nummer des Lieferanten', 'type': 'text', 'required': True},
+                {'key': 'datum', 'label': 'AB-Datum', 'type': 'date'},
+                {'key': 'lieferdatum', 'label': 'Bestaetigter Liefertermin', 'type': 'date'},
+                {'key': 'gesamtbetrag', 'label': 'Gesamtbetrag', 'type': 'number'},
+                {'key': 'abweichungen', 'label': 'Abweichungen zur Bestellung', 'type': 'textarea'},
+                {'key': 'notizen', 'label': 'Notizen', 'type': 'textarea'}]}
+    return definition
 
 
 def build_qualitaet_reklamation_screen_definition() -> dict[str, Any]:
     """Native SD fuer qualitaet/reklamation."""
-    return {
+    definition = {
         "schemaVersion": 1, "id": "qualitaet/reklamation", "domain": "qualitaet", "mode": "detail",
         "title": "Reklamation", "subtitle": "Qualitaet / Reklamationsbearbeitung",
         "adapter": {"type": "native", "sourceId": "qualitaet/reklamation", "temporary": False},
@@ -2429,6 +2768,29 @@ def build_qualitaet_reklamation_screen_definition() -> dict[str, Any]:
         "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
         "performance": {"initialPayloadBudgetKb": 36, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "qualitaet"},
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'bearbeiten',
+      'label': 'Zustaendigkeit/Frist',
+      'kind': 'secondary',
+      'dangerLevel': 'safe',
+      'permission': 'qualitaet.reklamation.update',
+      'commandEndpoint': '/api/v1/reklamationen/{entity_id}/actions/bearbeiten',
+      'method': 'POST',
+      'inputFields': [{'key': 'zustaendiger', 'label': 'Zustaendig', 'type': 'text'},
+                      {'key': 'frist_datum', 'label': 'Frist', 'type': 'date'}]},
+     {'key': 'abschliessen',
+      'label': 'Abschliessen',
+      'kind': 'secondary',
+      'dangerLevel': 'moderate',
+      'permission': 'qualitaet.reklamation.close',
+      'requiresConfirmation': True,
+      'commandEndpoint': '/api/v1/reklamationen/{entity_id}/actions/abschliessen',
+      'method': 'POST'}]
+    if not any(action.get("kind") == "primary" for action in definition["actions"]):
+        edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
+        edit["kind"] = "primary"
+        definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    return definition
 
 
 def build_futtermittel_einzelfuttermittel_screen_definition() -> dict[str, Any]:
@@ -2516,7 +2878,7 @@ def build_futtermittel_einzelfuttermittel_screen_definition() -> dict[str, Any]:
 
 def build_futtermittel_analysen_screen_definition() -> dict[str, Any]:
     """Native Analyse-Worklist; Import/Freigabe stay explicit domain commands."""
-    return {
+    definition = {
         "schemaVersion": 1, "id": "futtermittel/analysen", "domain": "futtermittel", "mode": "list",
         "title": "Futteranalysen", "subtitle": "Laborwerte, Provenienz und Freigabe",
         "adapter": {"type": "native", "sourceId": "futtermittel/analysen", "temporary": False},
@@ -2554,12 +2916,24 @@ def build_futtermittel_analysen_screen_definition() -> dict[str, Any]:
                    "mobileMode": "mobileStack", "touchTargetPx": 44},
         "performance": {"initialPayloadBudgetKb": 40, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "futtermittel"},
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'import_analysis',
+      'label': 'Analyse erfassen',
+      'kind': 'primary',
+      'dangerLevel': 'safe',
+      'permission': 'futtermittel.analyse.create',
+      'inputFlow': {'kind': 'humanForm',
+                    'submitEndpoint': '/api/v1/agrar/rations-optimization/feed-analyses',
+                    'method': 'POST'},
+      'forbiddenForAgents': True}]
+    definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-import_analysis']"
+    return definition
 
 
 def build_futtermittel_analyse_screen_definition() -> dict[str, Any]:
     """Native analysis ObjectPage with provenance, findings and immutable history."""
     base = "/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}"
-    return {
+    definition = {
         "schemaVersion": 1, "id": "futtermittel/analyse", "domain": "futtermittel", "mode": "detail",
         "title": "Futteranalyse", "subtitle": "Pruefung, Provenienz und aktive Version",
         "adapter": {"type": "native", "sourceId": "futtermittel/analyse", "temporary": False},
@@ -2643,11 +3017,40 @@ def build_futtermittel_analyse_screen_definition() -> dict[str, Any]:
                    "mobileMode": "mobileStack", "touchTargetPx": 44},
         "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "futtermittel"},
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'validate',
+      'label': 'Plausibilitaet pruefen',
+      'kind': 'primary',
+      'dangerLevel': 'safe',
+      'permission': 'futtermittel.analyse.validate',
+      'commandEndpoint': '/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/validate',
+      'method': 'POST'},
+     {'key': 'release',
+      'label': 'Analyse freigeben',
+      'kind': 'primary',
+      'dangerLevel': 'high',
+      'permission': 'futtermittel.analyse.release',
+      'requiresConfirmation': True,
+      'humanApprovalRequired': True,
+      'auditReasonRequired': True,
+      'commandEndpoint': '/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/release',
+      'method': 'POST'},
+     {'key': 'reject',
+      'label': 'Zurueckweisen',
+      'kind': 'secondary',
+      'dangerLevel': 'moderate',
+      'permission': 'futtermittel.analyse.reject',
+      'requiresConfirmation': True,
+      'auditReasonRequired': True,
+      'commandEndpoint': '/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/reject',
+      'method': 'POST'}]
+    definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-validate']"
+    return definition
 
 
 def build_futtermittel_mischfuttermittel_screen_definition() -> dict[str, Any]:
     """Native SD fuer futtermittel/mischfuttermittel — StammObjectPageParent."""
-    return build_stamm_object_page(
+    definition = build_stamm_object_page(
         screen_id="futtermittel/mischfuttermittel",
         domain="futtermittel",
         title="Mischfuttermittel",
@@ -2706,11 +3109,30 @@ def build_futtermittel_mischfuttermittel_screen_definition() -> dict[str, Any]:
         requires_virtual_tables=True,
         bundle_group="futtermittel",
     )
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'bearbeiten',
+      'label': 'Bearbeiten',
+      'kind': 'secondary',
+      'dangerLevel': 'safe',
+      'permission': 'futtermittel.mischfutter.update',
+      'commandEndpoint': '/api/v1/futter/mischfuttermittel/{entity_id}/actions/bearbeiten',
+      'method': 'POST',
+      'inputFields': [{'key': 'name', 'label': 'Bezeichnung', 'type': 'text'},
+                      {'key': 'tierart', 'label': 'Tierart', 'type': 'text'},
+                      {'key': 'leistungsstufe', 'label': 'Leistungsstufe', 'type': 'text'},
+                      {'key': 'protein', 'label': 'Rohprotein %', 'type': 'number'},
+                      {'key': 'energie', 'label': 'Energie (MJ)', 'type': 'number'},
+                      {'key': 'beschreibung', 'label': 'Beschreibung', 'type': 'textarea'}]}]
+    if not any(action.get("kind") == "primary" for action in definition["actions"]):
+        edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
+        edit["kind"] = "primary"
+        definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    return definition
 
 
 def build_crm_lead_screen_definition() -> dict[str, Any]:
     """Native SD fuer crm/lead — StammObjectPageParent."""
-    return build_stamm_object_page(
+    definition = build_stamm_object_page(
         screen_id="crm/lead",
         domain="crm",
         title="Kundenakte",
@@ -2815,6 +3237,41 @@ def build_crm_lead_screen_definition() -> dict[str, Any]:
         requires_virtual_tables=False,
         bundle_group="crm",
     )
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'bearbeiten',
+      'label': 'Bearbeiten',
+      'kind': 'secondary',
+      'dangerLevel': 'safe',
+      'permission': 'crm.lead.update',
+      'commandEndpoint': '/api/v1/crm/leads/{entity_id}/actions/bearbeiten',
+      'method': 'POST',
+      'inputFields': [{'key': 'company_name', 'label': 'Unternehmen', 'type': 'text'},
+                      {'key': 'contact_person', 'label': 'Ansprechpartner', 'type': 'text'},
+                      {'key': 'email', 'label': 'E-Mail', 'type': 'email'},
+                      {'key': 'phone', 'label': 'Telefon', 'type': 'text'},
+                      {'key': 'source', 'label': 'Quelle', 'type': 'text'},
+                      {'key': 'estimated_value', 'label': 'Geschaetzter Wert', 'type': 'number'},
+                      {'key': 'priority', 'label': 'Prioritaet', 'type': 'text'},
+                      {'key': 'assigned_to', 'label': 'Zustaendig', 'type': 'text'}]},
+     {'key': 'qualifizieren',
+      'label': 'Als Opportunity qualifizieren',
+      'kind': 'secondary',
+      'dangerLevel': 'safe',
+      'permission': 'crm.lead.qualify',
+      'commandEndpoint': '/api/v1/crm/leads/{entity_id}/actions/qualifizieren',
+      'method': 'POST',
+      'inputFields': [{'key': 'customer_id',
+                       'label': 'Kunde',
+                       'type': 'select',
+                       'required': True,
+                       'optionsSource': {'endpoint': '/api/v1/crm/customers/',
+                                         'valueKey': 'id',
+                                         'labelKey': 'company_name'}}]}]
+    if not any(action.get("kind") == "primary" for action in definition["actions"]):
+        edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
+        edit["kind"] = "primary"
+        definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    return definition
 
 
 # ── Rollen-Workspaces (UIX-061) ──────────────────────────────────────────────
@@ -3064,7 +3521,7 @@ def build_agrar_feed_advice_screen_definition() -> dict[str, Any]:
 
 def build_agrar_rations_lifecycle_screen_definition() -> dict[str, Any]:
     """Native worklist for persistent ration versions."""
-    return {
+    definition = {
         "schemaVersion": 1,
         "id": "agrar/rations-lifecycle",
         "domain": "agrar",
@@ -3140,11 +3597,29 @@ def build_agrar_rations_lifecycle_screen_definition() -> dict[str, Any]:
             "testSelectors": {"screenRoot": "[data-testid='screen-agrar/rations-lifecycle']", "primaryAction": "[data-action-kind='primary']"},
         },
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'plan_ration',
+      'label': 'Neue Ration planen',
+      'kind': 'primary',
+      'dangerLevel': 'safe',
+      'permission': 'futtermittel.rations.update',
+      'navigationRoute': '/portal/rationsoptimierung?mode=expert'},
+     {'key': 'create_group',
+      'label': 'Tiergruppe anlegen',
+      'kind': 'secondary',
+      'dangerLevel': 'safe',
+      'permission': 'futtermittel.rations.update',
+      'inputFlow': {'kind': 'humanForm',
+                    'submitEndpoint': '/api/v1/agrar/rations-optimization/lifecycle/groups',
+                    'method': 'POST'},
+      'forbiddenForAgents': True}]
+    definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-plan_ration']"
+    return definition
 
 
 def build_agrar_feeding_businesses_screen_definition() -> dict[str, Any]:
     """Native worklist for grant-aware feeding businesses (FEED-CORE-015)."""
-    return {
+    definition = {
         "schemaVersion": 1,
         "id": "agrar/feeding-businesses",
         "domain": "agrar",
@@ -3211,12 +3686,24 @@ def build_agrar_feeding_businesses_screen_definition() -> dict[str, Any]:
             },
         },
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'create_business',
+      'label': 'Betrieb anlegen',
+      'kind': 'primary',
+      'dangerLevel': 'safe',
+      'permission': 'futtermittel.rations.update',
+      'inputFlow': {'kind': 'humanForm',
+                    'submitEndpoint': '/api/v1/agrar/rations-optimization/feeding/businesses',
+                    'method': 'POST'},
+      'forbiddenForAgents': True}]
+    definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-create_business']"
+    return definition
 
 
 def build_agrar_feeding_business_screen_definition() -> dict[str, Any]:
     """Prioritized feeding-business file over existing aggregates (FEED-EDITOR-025)."""
     base = "/api/v1/agrar/rations-optimization/feeding/businesses/{entity_id}"
-    return {
+    definition = {
         "schemaVersion": 1,
         "id": "agrar/feeding-business",
         "domain": "agrar",
@@ -3331,11 +3818,32 @@ def build_agrar_feeding_business_screen_definition() -> dict[str, Any]:
             "testSelectors": {"screenRoot": "[data-testid='screen-agrar/feeding-business']", "primaryAction": "[data-action-kind='primary']"},
         },
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'create_template',
+      'label': 'Vorlage anlegen',
+      'kind': 'primary',
+      'dangerLevel': 'safe',
+      'permission': 'futtermittel.rations.update',
+      'inputFlow': {'kind': 'humanForm',
+                    'submitEndpoint': '/api/v1/agrar/rations-optimization/feeding/ration-templates',
+                    'method': 'POST'},
+      'forbiddenForAgents': True},
+     {'key': 'apply_template',
+      'label': 'Vorlage anwenden',
+      'kind': 'secondary',
+      'dangerLevel': 'safe',
+      'permission': 'futtermittel.rations.update',
+      'inputFlow': {'kind': 'humanForm',
+                    'submitEndpoint': '/api/v1/agrar/rations-optimization/feeding/ration-templates/actions/apply_template',
+                    'method': 'POST'},
+      'forbiddenForAgents': True}]
+    definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-create_template']"
+    return definition
 
 
 def build_agrar_feeding_group_screen_definition() -> dict[str, Any]:
     """Native object page for versioned feeding-group parameters (FEED-CORE-016)."""
-    return {
+    definition = {
         "schemaVersion": 1,
         "id": "agrar/feeding-group",
         "domain": "agrar",
@@ -3414,6 +3922,18 @@ def build_agrar_feeding_group_screen_definition() -> dict[str, Any]:
             },
         },
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'edit_group',
+      'label': 'Tiergruppe bearbeiten',
+      'kind': 'primary',
+      'dangerLevel': 'safe',
+      'permission': 'futtermittel.rations.update',
+      'inputFlow': {'kind': 'humanForm',
+                    'submitEndpoint': '/api/v1/agrar/rations-optimization/lifecycle/groups/{entity_id}',
+                    'method': 'PATCH'},
+      'forbiddenForAgents': True}]
+    definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-edit_group']"
+    return definition
 
 
 def build_agrar_feeding_plan_screen_definition() -> dict[str, Any]:
@@ -3608,7 +4128,7 @@ def build_agrar_feed_readiness_screen_definition() -> dict[str, Any]:
 
 def build_agrar_feed_controlling_screen_definition() -> dict[str, Any]:
     """Native daily target/actual feeding-control worklist."""
-    return {
+    definition = {
         "schemaVersion": 1, "id": "agrar/feed-controlling", "domain": "agrar", "mode": "list",
         "title": "Fuetterungscontrolling", "subtitle": "Soll-Ist-Trends je Tiergruppe und aktiver Rationsversion",
         "adapter": {"type": "native", "sourceId": "agrar/feed-controlling", "temporary": False},
@@ -3634,6 +4154,18 @@ def build_agrar_feed_controlling_screen_definition() -> dict[str, Any]:
         "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar-feed-advice"},
         "agentContract": {"businessPurpose": "Aufnahme, Kosten, Milch/ECM, Stickstoff und Methan je Tiergruppe im Zeitverlauf vergleichen.", "examplePrompts": ["Welche Gruppe weicht bei der Aufnahme ab?", "Wie entwickeln sich ECM und Futterkosten?"], "sensitiveFields": ["actual_cost_eur_cow"], "testSelectors": {"screenRoot": "[data-testid='screen-agrar/feed-controlling']"}},
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'record_observation',
+      'label': 'Tageswerte erfassen',
+      'kind': 'primary',
+      'dangerLevel': 'safe',
+      'permission': 'futtermittel.rations.update',
+      'inputFlow': {'kind': 'humanForm',
+                    'submitEndpoint': '/api/v1/agrar/rations-optimization/controlling/observations',
+                    'method': 'POST'},
+      'forbiddenForAgents': True}]
+    definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-record_observation']"
+    return definition
 
 
 def build_agrar_feeding_actuals_screen_definition() -> dict[str, Any]:
@@ -4157,7 +4689,7 @@ def build_production_control_screen_definition() -> dict[str, Any]:
 
 def build_inventory_auxiliary_screen_definition() -> dict[str, Any]:
     """Native governed inventory auxiliary-run worklist."""
-    return {
+    definition = {
         "schemaVersion": 1, "id": "lager/inventur-nebenlaeufe", "domain": "inventory", "mode": "list",
         "title": "Inventur-Nebenlaeufe", "subtitle": "Zaehlliste, Import, Kontrolle, Bewertung und Bestandsvortrag",
         "adapter": {"type": "native", "sourceId": "lager/inventur-nebenlaeufe", "temporary": False},
@@ -4207,6 +4739,43 @@ def build_inventory_auxiliary_screen_definition() -> dict[str, Any]:
             "forbiddenAgentTasks": ["Bestandsvortrag ohne unabhaengigen Pruefer uebernehmen"],
             "testSelectors": {"screenRoot": "[data-testid='inventur-nebenlaeufe']"}},
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'create_count_sheet',
+      'label': 'Zaehlliste',
+      'kind': 'secondary',
+      'permission': 'inventory.aux.write',
+      'dangerLevel': 'low',
+      'commandEndpoint': '/api/v1/inventory/auxiliary/actions/create_count_sheet',
+      'method': 'POST',
+      'auditReasonRequired': True},
+     {'key': 'create_control',
+      'label': 'Kontrolllauf',
+      'kind': 'secondary',
+      'permission': 'inventory.aux.write',
+      'dangerLevel': 'low',
+      'commandEndpoint': '/api/v1/inventory/auxiliary/actions/create_control',
+      'method': 'POST',
+      'auditReasonRequired': True},
+     {'key': 'create_valuation',
+      'label': 'Vorlaeufig bewerten',
+      'kind': 'secondary',
+      'permission': 'inventory.aux.write',
+      'dangerLevel': 'low',
+      'commandEndpoint': '/api/v1/inventory/auxiliary/actions/create_valuation',
+      'method': 'POST',
+      'auditReasonRequired': True},
+     {'key': 'create_opening',
+      'label': 'Bestandsvortrag',
+      'inputFlow': {'kind': 'humanForm',
+                    'submitEndpoint': '/api/v1/inventory/auxiliary/batches',
+                    'method': 'POST'},
+      'forbiddenForAgents': True,
+      'kind': 'primary',
+      'permission': 'inventory.aux.write',
+      'dangerLevel': 'high',
+      'requiresConfirmation': True}]
+    definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-create_opening']"
+    return definition
 
 
 def build_billing_batch_screen_definition() -> dict[str, Any]:
@@ -4268,7 +4837,7 @@ def build_billing_batch_screen_definition() -> dict[str, Any]:
 
 def build_mail_workspace_screen_definition() -> dict[str, Any]:
     """Native role-scoped ERP mail worklist."""
-    return {
+    definition = {
         "schemaVersion": 1, "id": "crm/mail-arbeitsplatz", "domain": "crm", "mode": "list",
         "title": "Mail-Arbeitsplatz", "subtitle": "Rollenpostfach, Zuordnung, Anlagen und Versandnachweis",
         "adapter": {"type": "native", "sourceId": "crm/mail-arbeitsplatz", "temporary": False},
@@ -4290,6 +4859,16 @@ def build_mail_workspace_screen_definition() -> dict[str, Any]:
         "performance": {"initialPayloadBudgetKb": 64, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "crm"},
         "agentContract": {"businessPurpose": "Rollenpostfaecher revisionssicher mit Kontakten und Belegen verbinden.", "examplePrompts": ["Zeige unzugeordnete CRM-Mails.", "Welche Anlagen warten auf DMS-Uebernahme?"], "sensitiveFields": ["from_address", "to_addresses", "subject", "body_text", "contact_id"], "forbiddenAgentTasks": ["Mail ohne menschlichen Audit-Grund senden oder Anlagen ungeprueft uebernehmen"], "testSelectors": {"screenRoot": "[data-testid='mail-arbeitsplatz']"}},
     }
+    # Preserve the existing domain transports and policies inside the new parent shell.
+    definition["actions"] = [{'key': 'draft',
+      'label': 'Neue Mail',
+      'kind': 'primary',
+      'permission': 'crm.mail.write',
+      'dangerLevel': 'low',
+      'inputFlow': {'kind': 'humanForm', 'submitEndpoint': '/api/v1/mail-workspace/drafts', 'method': 'POST'},
+      'forbiddenForAgents': True}]
+    definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-draft']"
+    return definition
 
 
 def build_foreign_goods_screen_definition() -> dict[str, Any]:
@@ -4365,6 +4944,12 @@ def _build_sanctions_scope_screen_definition(
 
 
 _SCREEN_DEFINITIONS: dict[str, Any] = {
+    # Existing domain contracts take precedence over generated family defaults.
+    **KONTROLLE_SCREEN_BUILDERS,
+    **LISTEN_SCREEN_BUILDERS,
+    **COCKPIT_SCREEN_BUILDERS,
+    **BATCH15_SCREEN_BUILDERS,
+
     **IDENTITY_SCREEN_BUILDERS,
     **STUDIO_HISTORY_BUILDERS,
     **HARVEST_CONTROL_BUILDERS,
@@ -4739,9 +5324,6 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "futtermittel/analyse": build_futtermittel_analyse_screen_definition,
     "futtermittel/mischfuttermittel": build_futtermittel_mischfuttermittel_screen_definition,
     "crm/lead": build_crm_lead_screen_definition,
-    **KONTROLLE_SCREEN_BUILDERS,
-    **LISTEN_SCREEN_BUILDERS,
-    **COCKPIT_SCREEN_BUILDERS,
     **BATCH15_SCREEN_BUILDERS,
 }
 

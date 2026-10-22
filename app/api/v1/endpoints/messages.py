@@ -13,6 +13,7 @@ from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import InternalMessage
 from ..schemas.base import PaginatedResponse, BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
@@ -58,7 +59,7 @@ async def list_messages(
     )
 
 
-@router.post("/", response_model=MessageOut, status_code=201, summary="Message senden")
+@router.post("/", response_model=MessageOut, status_code=201, summary="Message senden", dependencies=SCHREIBEN["CRM"])
 async def send_message(
     payload: MessageCreate,
     tenant_id: Optional[str] = Query(None),

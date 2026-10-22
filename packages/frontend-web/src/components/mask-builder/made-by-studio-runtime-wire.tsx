@@ -1,8 +1,10 @@
+import { useParams } from '@/app/routing/typed-router'
 import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
 
 type WireProps = {
+  entityId?: string
   screenId: string
   testId?: string
 }
@@ -18,6 +20,9 @@ export function MadeByStudioCockpitRuntimeWire({ screenId, testId }: WireProps):
 }
 
 /** Statische Gate-E-Zuordnung für Detail-ScreenDefinitions. */
-export function MadeByStudioDetailRuntimeWire({ screenId, testId }: WireProps): JSX.Element {
-  return <UniversalNativeDetailPage screenId={screenId} testId={testId ?? screenId.replace('/', '-')} />
+export function MadeByStudioDetailRuntimeWire({ screenId, testId, entityId }: WireProps): JSX.Element {
+  const params = useParams<{ id: string; entityId: string }>()
+  const resolved = entityId ?? params.entityId ?? params.id
+  if (!resolved) return <p role="status">Bitte einen Datensatz auswählen.</p>
+  return <UniversalNativeDetailPage entityId={resolved} screenId={screenId} testId={testId ?? screenId.replace('/', '-')} />
 }

@@ -1,7 +1,5 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import FlowSpineWorkspace from '@/components/workflow/FlowSpineWorkspace'
 
-export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="workflow/flow-spine-complaint-to-resolution" testId="screen-workflow/flow-spine-complaint-to-resolution" />
-  )
+export default function FlowSpineComplaintToResolutionPage(): JSX.Element {
+  return <FlowSpineWorkspace processKey="complaint-to-resolution" />
 }

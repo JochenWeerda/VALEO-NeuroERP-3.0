@@ -23,6 +23,7 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/waage/hofliste", tags=["Waage - Hofliste"])
@@ -96,7 +97,7 @@ def get_hofliste(
     return [HoflisteOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("", response_model=HoflisteOut, status_code=201, summary="Anmelden")
+@router.post("", response_model=HoflisteOut, status_code=201, summary="Anmelden", dependencies=SCHREIBEN["LAGER"])
 def anmelden(
     payload: HoflisteCreate,
     db=Depends(get_db),
@@ -132,8 +133,7 @@ def anmelden(
 
 
 @router.post("/{eintrag_id}/status", summary="Aendern status",
-    response_model=HoflisteOut
-)
+    response_model=HoflisteOut, dependencies=SCHREIBEN["LAGER"])
 def status_aendern(
     eintrag_id: str,
     neuer_status: str,
@@ -177,8 +177,7 @@ def status_aendern(
 
 
 @router.delete("/{eintrag_id}", summary="Abmelden",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["LAGER"])
 def abmelden(
     eintrag_id: str,
     db=Depends(get_db),

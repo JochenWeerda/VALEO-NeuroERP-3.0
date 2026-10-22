@@ -21,6 +21,7 @@ from app.services.knowledge_store import (
 
 from app.api.v1.schemas.base import BaseSchema, StatusResponse
 from app.api.v1.schemas.neuro_knowledge_schemas import NeuroKnowledgeOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/neuro/knowledge", tags=["neuro-core", "knowledge"])
@@ -43,8 +44,7 @@ class SearchRequest(BaseModel):
 
 
 @router.post("/", summary="Store",
-    response_model=NeuroKnowledgeOut
-)
+    response_model=NeuroKnowledgeOut, dependencies=SCHREIBEN["FACHLICH"])
 async def store(
     request: StoreRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -80,8 +80,7 @@ async def get_entry(
 
 
 @router.post("/search", summary="Suchen",
-    response_model=NeuroKnowledgeOut
-)
+    response_model=NeuroKnowledgeOut, dependencies=SCHREIBEN["BERECHNEN"])
 async def search(
     request: SearchRequest,
     tenant_id: str = Depends(get_tenant_id),
@@ -94,8 +93,7 @@ async def search(
 
 
 @router.delete("/{domain}/{key}", summary="Entfernen",
-    response_model=NeuroKnowledgeOut
-)
+    response_model=NeuroKnowledgeOut, dependencies=SCHREIBEN["FACHLICH"])
 async def remove(
     domain: str,
     key: str,

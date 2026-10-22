@@ -34,6 +34,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.services import schaden_service as dienst
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 logger = logging.getLogger(__name__)
 
@@ -157,7 +158,7 @@ async def list_versicherungen(
 
 
 @router.post("/versicherungen", status_code=201, response_model=VersicherungOut,
-             summary="Versicherungsvertrag anlegen")
+             summary="Versicherungsvertrag anlegen", dependencies=SCHREIBEN["LOGISTIK"])
 async def create_versicherung(
     payload: VersicherungIn,
     tenant_id: str = Depends(get_tenant_id),
@@ -208,7 +209,7 @@ async def list_schadenmeldungen(
 
 
 @router.post("/meldungen", status_code=201, response_model=SchadenMeldungOut,
-             summary="Schadenmeldung erfassen (Entwurf)")
+             summary="Schadenmeldung erfassen (Entwurf)", dependencies=SCHREIBEN["LOGISTIK"])
 async def create_schadenmeldung(
     payload: SchadenMeldungIn,
     nutzer: dict = Depends(get_current_user),
@@ -261,7 +262,7 @@ async def get_schadenmeldung(
 
 
 @router.post("/meldungen/{meldung_id}/melden", response_model=SchadenMeldungOut,
-             summary="Meldung an den Versicherer festhalten")
+             summary="Meldung an den Versicherer festhalten", dependencies=SCHREIBEN["LOGISTIK"])
 async def melden(
     meldung_id: str,
     payload: MeldungMelden,
@@ -292,7 +293,7 @@ async def melden(
 
 
 @router.patch("/meldungen/{meldung_id}", response_model=SchadenMeldungOut,
-              summary="Bearbeitungsstand setzen")
+              summary="Bearbeitungsstand setzen", dependencies=SCHREIBEN["LOGISTIK"])
 async def set_stand(
     meldung_id: str,
     payload: MeldungStand,

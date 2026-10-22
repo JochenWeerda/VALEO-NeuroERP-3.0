@@ -23,6 +23,7 @@ from app.core.uuid7 import uuid7
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/price-lists", tags=["sales", "pricing"])
@@ -83,7 +84,7 @@ def _ensure_schema(db: Session) -> None:
     db.execute(text("CREATE SCHEMA IF NOT EXISTS domain_pricing"))
 
 
-@router.post("/", response_model=PriceList, status_code=201, summary="Price list anlegen")
+@router.post("/", response_model=PriceList, status_code=201, summary="Price list anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_price_list(
     payload: PriceListCreate,
     tenant_id: str = Query(DEFAULT_TENANT),
@@ -227,7 +228,7 @@ async def get_price_list(
     )
 
 
-@router.put("/{pl_id}", response_model=PriceList, summary="Price list aktualisieren")
+@router.put("/{pl_id}", response_model=PriceList, summary="Price list aktualisieren", dependencies=SCHREIBEN["VERKAUF"])
 async def update_price_list(
     pl_id: str,
     payload: PriceListUpdate,
@@ -281,7 +282,7 @@ async def update_price_list(
     return await get_price_list(pl_id, db)
 
 
-@router.delete("/{pl_id}", status_code=204, response_class=Response, response_model=None, summary="Price list löschen")
+@router.delete("/{pl_id}", status_code=204, response_class=Response, response_model=None, summary="Price list löschen", dependencies=SCHREIBEN["VERKAUF"])
 async def delete_price_list(pl_id: str, db: Session = Depends(get_db)):
     """Delete price list and its items."""
     existing = db.execute(

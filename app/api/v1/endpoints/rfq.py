@@ -25,6 +25,7 @@ from app.core.database import get_db
 from app.core.exceptions import DomainError
 from app.core.tenant import get_tenant_id
 from app.services.rfq_service import RfqService
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter(prefix="/einkauf/rfq", tags=["einkauf", "rfq"])
 
@@ -66,7 +67,7 @@ def list_rfq(
         raise HTTPException(status_code=503, detail=f"Datenbankfehler: {exc}") from exc
 
 
-@router.post("", summary="Rfq anlegen", response_model=RfqOut, status_code=201)
+@router.post("", summary="Rfq anlegen", response_model=RfqOut, status_code=201, dependencies=SCHREIBEN["EINKAUF"])
 def create_rfq(
     body: RfqCreate,
     db: Session = Depends(get_db),
@@ -99,7 +100,7 @@ def get_rfq(
     return rfq
 
 
-@router.post("/{rfq_id}/send", summary="Rfq senden", response_model=RfqOut)
+@router.post("/{rfq_id}/send", summary="Rfq senden", response_model=RfqOut, dependencies=SCHREIBEN["EINKAUF"])
 def send_rfq(
     rfq_id: int,
     body: SendRequest,
@@ -119,7 +120,7 @@ def send_rfq(
         raise HTTPException(status_code=503, detail=f"Datenbankfehler: {exc}") from exc
 
 
-@router.post("/{rfq_id}/quotes", summary="Quote hinzufügen", response_model=RfqOut, status_code=201)
+@router.post("/{rfq_id}/quotes", summary="Quote hinzufügen", response_model=RfqOut, status_code=201, dependencies=SCHREIBEN["EINKAUF"])
 def add_quote(
     rfq_id: int,
     body: QuoteCreate,
@@ -155,7 +156,7 @@ def compare_quotes(
         raise HTTPException(status_code=503, detail=f"Datenbankfehler: {exc}") from exc
 
 
-@router.post("/{rfq_id}/accept/{quote_id}", summary="Quote akzeptieren", response_model=RfqOut)
+@router.post("/{rfq_id}/accept/{quote_id}", summary="Quote akzeptieren", response_model=RfqOut, dependencies=SCHREIBEN["EINKAUF"])
 def accept_quote(
     rfq_id: int,
     quote_id: int,

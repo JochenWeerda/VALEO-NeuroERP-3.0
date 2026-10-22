@@ -7,6 +7,7 @@ import type {
   ScreenContextRailSection,
   ScreenDensity,
   ScreenFieldType,
+  ScreenFieldDefinition,
   ScreenFloorplan,
   ScreenLayoutMode,
   ScreenMode,
@@ -21,6 +22,7 @@ import type {
 } from '../schema'
 
 export type RenderComponentKind =
+  | 'table'
   | 'text'
   | 'number'
   | 'date'
@@ -159,6 +161,8 @@ export interface RenderFieldPlan {
   options?: Array<{ value: string | number; label: string }>
   dataSourceKey?: string
   minSearchChars: number
+  rowFields?: ScreenFieldDefinition[]
+  tableEditing?: ScreenFieldDefinition['tableEditing']
   renderHint?: 'singleLine' | 'multiLine' | 'compact' | 'touch'
 }
 
@@ -299,7 +303,7 @@ export interface RenderPlan {
   overlayInvalidPaths?: string[]
 }
 
-export function fieldTypeToComponentKind(type: ScreenFieldType): RenderComponentKind {
-  if (type === 'table') return 'text'
+export function fieldTypeToComponentKind(type: ScreenFieldType, structuredTable = false): RenderComponentKind {
+  if (type === 'table' && !structuredTable) return 'text'
   return type
 }

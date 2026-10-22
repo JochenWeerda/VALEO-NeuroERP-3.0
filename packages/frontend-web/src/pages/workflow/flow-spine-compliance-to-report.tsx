@@ -1,10 +1,5 @@
-import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
+import FlowSpineWorkspace from '@/components/workflow/FlowSpineWorkspace'
 
-export default function Page(): JSX.Element {
-  return (
-    <UniversalNativeCockpitPage
-      screenId="workflow/flow-spine-compliance-to-report"
-      testId="workflow-flow-spine-compliance-to-report"
-    />
-  )
+export default function FlowSpineComplianceToReportPage(): JSX.Element {
+  return <FlowSpineWorkspace processKey="compliance-to-report" />
 }

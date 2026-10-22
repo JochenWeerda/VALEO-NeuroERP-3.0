@@ -11,6 +11,9 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 # Universal Mask Runtime — Plattformstatus
 
+> **Korrektur 2026-10-22 — MIGRATION-PARITY-REPAIR:** Die bisherigen Vollmigrations-/Release-ready-Zahlen waren durch generische Legacy-Wrapper, versteckte Runtime-Aufrufe und fehlende Fachparitaet ueberhoeht. Neue Parent-Builder bleiben erhalten; funktionierende bestehende Einstiege bleiben bis echter Paritaet fuehrend. Katalogbindung belegt ausschliesslich strukturelle Evidenz, keine Live-Freigabe. Massgeblich sind die neu erzeugten Inventare und [Reparaturnachweis](../../quality-assurance/migration-parity-repair-20261022.md).
+
+
 > **Nachtrag 2026-10-22 (`studio_screen_versions` Sync):** Append-only Katalog
 > `config/studio_screen_versions.json` (Release **1.0.0**, **847** native Screens,
 > **719** release-ready mit Gates A/B/C/E + sauberer Draft-Projektion). Generator:

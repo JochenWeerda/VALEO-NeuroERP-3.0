@@ -3,5 +3,5 @@ import { createStammNativeDetailPage } from '@/components/mask-builder'
 export default createStammNativeDetailPage(
   'kontrakte/mengenzeitraeume',
   'kontrakte-mengenzeitraeume',
-  () => import('./kontrakte/mengenzeitraeume-legacy'),
+  () => import('./mengenzeitraeume-legacy'),
 )

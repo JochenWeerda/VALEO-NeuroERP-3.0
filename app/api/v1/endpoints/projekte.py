@@ -13,6 +13,7 @@ from app.domains.operations.models import Projekt, ProjektAufgabe, ProjektStatus
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.projekte_schemas import ProjekteOut
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/projekte", tags=["Projekte"])
@@ -93,8 +94,7 @@ def get_projekt(projekt_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("", status_code=201, summary="Projekt anlegen",
-    response_model=ProjekteOut
-)
+    response_model=ProjekteOut, dependencies=SCHREIBEN["FACHLICH"])
 def create_projekt(payload: ProjektPayload, db: Session = Depends(get_db)):
     obj = Projekt(**payload.model_dump())
     db.add(obj)
@@ -104,8 +104,7 @@ def create_projekt(payload: ProjektPayload, db: Session = Depends(get_db)):
 
 
 @router.patch("/{projekt_id}", summary="Projekt aktualisieren",
-    response_model=ProjekteOut
-)
+    response_model=ProjekteOut, dependencies=SCHREIBEN["FACHLICH"])
 def update_projekt(projekt_id: str, payload: ProjektPatch, db: Session = Depends(get_db)):
     obj = db.query(Projekt).filter(Projekt.id == projekt_id).first()
     if not obj:
@@ -118,7 +117,7 @@ def update_projekt(projekt_id: str, payload: ProjektPatch, db: Session = Depends
     return _to_dict(obj)
 
 
-@router.delete("/{projekt_id}", status_code=204, response_class=Response, response_model=None, summary="Projekt löschen")
+@router.delete("/{projekt_id}", status_code=204, response_class=Response, response_model=None, summary="Projekt löschen", dependencies=SCHREIBEN["FACHLICH"])
 def delete_projekt(projekt_id: str, db: Session = Depends(get_db)):
     obj = db.query(Projekt).filter(Projekt.id == projekt_id).first()
     if not obj:
@@ -161,8 +160,7 @@ def list_aufgaben(projekt_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/{projekt_id}/aufgaben", status_code=201, summary="Aufgabe anlegen",
-    response_model=ProjekteOut
-)
+    response_model=ProjekteOut, dependencies=SCHREIBEN["FACHLICH"])
 def create_aufgabe(projekt_id: str, payload: AufgabePayload, db: Session = Depends(get_db)):
     projekt = db.query(Projekt).filter(Projekt.id == projekt_id).first()
     if not projekt:
@@ -175,8 +173,7 @@ def create_aufgabe(projekt_id: str, payload: AufgabePayload, db: Session = Depen
 
 
 @router.patch("/{projekt_id}/aufgaben/{aufgabe_id}", summary="Aufgabe aktualisieren",
-    response_model=ProjekteOut
-)
+    response_model=ProjekteOut, dependencies=SCHREIBEN["FACHLICH"])
 def update_aufgabe(projekt_id: str, aufgabe_id: str, payload: AufgabePatch, db: Session = Depends(get_db)):
     obj = db.query(ProjektAufgabe).filter(
         ProjektAufgabe.id == aufgabe_id,
@@ -191,7 +188,7 @@ def update_aufgabe(projekt_id: str, aufgabe_id: str, payload: AufgabePatch, db: 
     return _to_dict(obj)
 
 
-@router.delete("/{projekt_id}/aufgaben/{aufgabe_id}", status_code=204, response_class=Response, response_model=None, summary="Aufgabe löschen")
+@router.delete("/{projekt_id}/aufgaben/{aufgabe_id}", status_code=204, response_class=Response, response_model=None, summary="Aufgabe löschen", dependencies=SCHREIBEN["FACHLICH"])
 def delete_aufgabe(projekt_id: str, aufgabe_id: str, db: Session = Depends(get_db)):
     obj = db.query(ProjektAufgabe).filter(
         ProjektAufgabe.id == aufgabe_id,

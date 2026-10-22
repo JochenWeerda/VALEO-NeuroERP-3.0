@@ -31,7 +31,7 @@ function compileField(
   return {
     key: field.key,
     label: field.label,
-    componentKind: fieldTypeToComponentKind(field.type),
+    componentKind: fieldTypeToComponentKind(field.type, field.rowFields !== undefined || field.tableEditing !== undefined),
     dataPath: field.key,
     tabKey,
     order,
@@ -44,6 +44,8 @@ function compileField(
     dataSourceKey: field.dataSourceKey,
     minSearchChars: field.minSearchChars ?? performanceLookupMinChars,
     renderHint: field.renderHint,
+    rowFields: field.rowFields,
+    tableEditing: field.tableEditing,
   }
 }
 
@@ -63,15 +65,19 @@ function compileTable(
   tableProfile: ScreenTableProfile,
   density: ScreenDensity,
   onePage: boolean,
+  permissions: string[],
   tabKey?: string,
 ): RenderTablePlan {
   const pageSize = Math.min(table.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE)
   const declaredRowHeight = table.rowHeight ?? (density === 'expertDense' ? 36 : density === 'compact' ? 44 : 52)
-  const rowHeight = density === 'expertDense'
+  const denseRowHeight = density === 'expertDense'
     ? Math.min(declaredRowHeight, 36)
     : density === 'compact'
       ? Math.min(declaredRowHeight, 44)
       : Math.max(declaredRowHeight, 52)
+  const rowActions = table.rowActions?.filter((action) => !action.permission || permissions.includes(action.permission))
+  // A 44px action target plus cell padding must fit inside its virtual row.
+  const rowHeight = rowActions?.length ? Math.max(denseRowHeight, 52) : denseRowHeight
   return {
     key: table.key,
     label: table.label,
@@ -94,7 +100,8 @@ function compileTable(
     serverPagination: table.serverPagination ?? true,
     tableProfile,
     rowRouteTemplate: table.rowRouteTemplate,
-    rowActions: table.rowActions,
+    // Zeilenaktionen wie Kopfaktionen nur mit Recht (Rollen-Projektion der Kommandowege).
+    rowActions,
     bulkActions: table.bulkActions,
     rowDetail: compileRowDetail(table, onePage),
   }
@@ -213,7 +220,7 @@ export function compileTwin(schema: ScreenDefinition): RenderTwinPlan | undefine
 function schemaVolatility(schema: ScreenDefinition): string {
   // Studio edits retain the same screen ID/version until they are saved. All
   // editable field/table/tab/layout contracts must participate in this cache.
-  const structure = JSON.stringify({ documentVariant: schema.documentVariant, fields: schema.fields, tables: schema.tables, tabs: schema.tabs, layout: schema.layout, dataSources: schema.dataSources })
+  const structure = JSON.stringify({ actions: schema.actions, documentVariant: schema.documentVariant, fields: schema.fields, tables: schema.tables, tabs: schema.tabs, layout: schema.layout, dataSources: schema.dataSources })
   const summary = (schema.summary ?? []).map((item) => `${item.key}:${String(item.value)}`).join(',')
   const options = (schema.fields ?? []).map((field) => (
     // Auch die Beschriftung: Eine Auswahl kann bei gleichen Werten neu beschriftet werden (Vorschlagshinweis).
@@ -278,11 +285,12 @@ export function compileRenderPlan(
   }
 
   const hasTables = (schema.tables?.length ?? 0) > 0 || (schema.tabs ?? []).some((tab) => (tab.tables?.length ?? 0) > 0)
-  const columnNavigation = defaultColumnNavigation(floorplan, hasTables, schema.layout?.columnNavigation)
+  const columnNavigation = defaultColumnNavigation(floorplan, hasTables,
+    schema.layout?.columnNavigation ?? (schema.layout?.tableProfile === 'audit' ? 'single' : undefined))
   const sectionNavigation = resolveSectionNavigation(floorplan, columnNavigation, schema.layout?.sectionNavigation)
   const onePage = sectionNavigation === 'anchors'
 
-  const rootTables = (schema.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage))
+  const rootTables = (schema.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage, context.auth.permissions))
   for (const table of rootTables) {
     tablesByKey[table.key] = table
   }
@@ -305,7 +313,7 @@ export function compileRenderPlan(
       fieldsByKey[field.key] = field
     }
 
-    const tabTables = (tab.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage, tab.key))
+    const tabTables = (tab.tables ?? []).map((table) => compileTable(table, tableProfile, density, onePage, context.auth.permissions, tab.key))
     tablesByTab[tab.key] = tabTables
     for (const table of tabTables) {
       tablesByKey[table.key] = table

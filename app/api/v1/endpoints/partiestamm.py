@@ -25,6 +25,7 @@ from app.core.dependencies import get_tenant_id
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/lager/partien", tags=["Lager - Partiestamm & Partiegruppen"])
@@ -102,7 +103,7 @@ def list_partiegruppen(
     return [PartiegruppeOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/gruppen", response_model=PartiegruppeOut, status_code=201, summary="Partiegruppe anlegen")
+@router.post("/gruppen", response_model=PartiegruppeOut, status_code=201, summary="Partiegruppe anlegen", dependencies=SCHREIBEN["LAGER"])
 def create_partiegruppe(
     payload: PartiegruppeCreate,
     db=Depends(get_db),
@@ -126,8 +127,7 @@ def create_partiegruppe(
 
 
 @router.delete("/gruppen/{gruppe_nr}", summary="Partiegruppe löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["LAGER"])
 def delete_partiegruppe(
     gruppe_nr: str,
     db=Depends(get_db),
@@ -186,7 +186,7 @@ def get_partie(
     return PartiestammOut(**dict(row._mapping))
 
 
-@router.post("", response_model=PartiestammOut, status_code=201, summary="Partie anlegen")
+@router.post("", response_model=PartiestammOut, status_code=201, summary="Partie anlegen", dependencies=SCHREIBEN["LAGER"])
 def create_partie(
     payload: PartiestammCreate,
     db=Depends(get_db),
@@ -225,8 +225,7 @@ def create_partie(
 
 
 @router.patch("/{partie_nr}/status", summary="Partie status setzen",
-    response_model=PartiestammOut
-)
+    response_model=PartiestammOut, dependencies=SCHREIBEN["LAGER"])
 def set_partie_status(
     partie_nr: str,
     status: str = Query(...),
@@ -246,8 +245,7 @@ def set_partie_status(
 
 
 @router.post("/{partie_nr}/umbuchung", summary="Umbuchung partie",
-    response_model=PartiestammOut
-)
+    response_model=PartiestammOut, dependencies=SCHREIBEN["LAGER"])
 def partie_umbuchung(
     partie_nr: str,
     payload: PartieUmbuchungCreate,
@@ -273,8 +271,7 @@ def partie_umbuchung(
 
 
 @router.delete("/{partie_nr}", summary="Partie löschen",
-    response_model=None
-)
+    response_model=None, dependencies=SCHREIBEN["LAGER"])
 def delete_partie(
     partie_nr: str,
     db=Depends(get_db),

@@ -34,7 +34,7 @@ _RUNTIME_WRAPPER = re.compile(
     r"\b(UniversalNativeCockpitPage|UniversalNativeDetailPage|NativeListPage|"
     r"DocumentControlScopePage|SanktionsScopePage|UniversalMaskRolloutPilotPage|"
     r"createStammNativeDetailPage|MadeByStudioListRuntimeWire|MadeByStudioDetailRuntimeWire|"
-    r"MadeByStudioCockpitRuntimeWire|createLegacyMaskPage|CaptureScreenHost)\b"
+    r"MadeByStudioCockpitRuntimeWire|CaptureScreenHost)\b"
 )
 
 # Legacy-Worklist-IDs, deren Runtime bereits auf StammListenParent-*-liste verdrahtet ist.
@@ -109,7 +109,8 @@ def _route_path_to_screen_ids() -> dict[str, set[str]]:
 
 
 def _source_has_runtime_marker(text: str) -> bool:
-    return bool(_RUNTIME_MARKERS.search(text) or _RUNTIME_WRAPPER.search(text))
+    from app.core.mask_runtime_evidence import has_visible_runtime
+    return has_visible_runtime(text)
 
 
 def _screen_ids_from_runtime_routes() -> set[str]:
@@ -344,23 +345,11 @@ def _openapi_endpoint_candidates(endpoint: str) -> list[str]:
             normalized,
         )
         keys.append(_route_key(normalized))
-    parts = keys[0].split("/")
-    if len(parts) >= 2:
-        keys.append("/".join(parts[:-1] + ["{}"]))
     return keys
 
 
 def _endpoint_in_openapi(endpoint: str, routes: set[str]) -> bool:
-    if not routes:
-        return True
-    if any(key in routes for key in _openapi_endpoint_candidates(endpoint)):
-        return True
-    keyed = _route_key(endpoint)
-    if "/{}" in keyed:
-        collection = keyed.rsplit("/{}", 1)[0]
-        if collection in routes:
-            return True
-    return False
+    return bool(routes) and any(key in routes for key in _openapi_endpoint_candidates(endpoint))
 
 
 def _entity_source(definition: dict[str, Any]) -> dict[str, Any] | None:
@@ -386,7 +375,7 @@ def check_gate_c(definition: dict[str, Any], *, screen_id: str) -> GateResult:
             continue
         endpoint = source.get("endpoint")
         if isinstance(endpoint, str) and endpoint.startswith("/api/"):
-            if routes and not _endpoint_in_openapi(endpoint, routes):
+            if not _endpoint_in_openapi(endpoint, routes):
                 missing_endpoints.append(endpoint)
     for endpoint in missing_endpoints:
         issues.append(f"api_bindung:endpoint_nicht_in_openapi:{endpoint}")

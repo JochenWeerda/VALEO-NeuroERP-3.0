@@ -858,6 +858,32 @@
   ],
   "masks": [
     {
+      "mask_id": "admin/agenten-integration",
+      "title": "Agenten integration",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__agenten-integration/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/agenten-integration/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/agenten-integration/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/agenten-integration/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.agenten-integration.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "admin/ai-approvals",
       "title": "AI-Freigaben",
       "domain": "admin",
@@ -868,6 +894,32 @@
       "readiness_url": "/api/v1/masks/admin/ai-approvals/readiness",
       "risk_summary": "low",
       "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "admin/api-keys",
+      "title": "Api keys",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__api-keys/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/api-keys/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/api-keys/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/api-keys/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.api-keys.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
@@ -912,6 +964,32 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "admin/backup-restore",
+      "title": "Backup restore",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__backup-restore/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/backup-restore/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/backup-restore/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/backup-restore/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.backup-restore.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "admin/belegfolgekonfig",
       "title": "Belegfolgekonfig",
       "domain": "admin",
@@ -946,6 +1024,84 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "admin/berechtigungen-matrix",
+      "title": "Berechtigungen matrix",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__berechtigungen-matrix/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/berechtigungen-matrix/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/berechtigungen-matrix/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/berechtigungen-matrix/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.berechtigungen-matrix.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "admin/branches",
+      "title": "Branches",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__branches/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/branches/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/branches/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/branches/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.branches.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "admin/command-monitor",
+      "title": "Command monitor",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__command-monitor/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/command-monitor/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/command-monitor/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/command-monitor/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.command-monitor.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -1176,6 +1332,110 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "admin/system-einstellungen",
+      "title": "System einstellungen",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__system-einstellungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/system-einstellungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/system-einstellungen/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/system-einstellungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.system-einstellungen.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "admin/tankstelle-evb",
+      "title": "Tankstelle evb",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__tankstelle-evb/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/tankstelle-evb/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/tankstelle-evb/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/tankstelle-evb/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.tankstelle-evb.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "admin/tenants",
+      "title": "Tenants",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__tenants/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/tenants/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/tenants/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/tenants/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.tenants.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "admin/users",
+      "title": "Users",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__users/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/users/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/users/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/users/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.users.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "admin/webhooks-liste",
       "title": "Webhooks",
       "domain": "admin",
@@ -1200,6 +1460,92 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "admin/workflow-editor",
+      "title": "Workflow editor",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__workflow-editor/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/workflow-editor/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/workflow-editor/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/workflow-editor/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.workflow-editor.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "admin/zeitachsen-editor",
+      "title": "Zeitachsen editor",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__zeitachsen-editor/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/zeitachsen-editor/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/zeitachsen-editor/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/zeitachsen-editor/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.zeitachsen-editor.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "agrar/annahme-abrechnung",
+      "title": "Annahme abrechnung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__annahme-abrechnung/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/annahme-abrechnung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/annahme-abrechnung/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/annahme-abrechnung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.annahme-abrechnung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
     },
     {
       "mask_id": "agrar/biostimulanzien-liste",
@@ -1383,6 +1729,40 @@
       "readiness_url": "/api/v1/masks/agrar/duenger-rechner/readiness",
       "risk_summary": "low",
       "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/ernte-annahme-abrechnung",
+      "title": "Ernte annahme abrechnung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__ernte-annahme-abrechnung/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/ernte-annahme-abrechnung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/ernte-annahme-abrechnung/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/ernte-annahme-abrechnung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.ernte-annahme-abrechnung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "agrar.contract.get",
@@ -2222,6 +2602,40 @@
       ]
     },
     {
+      "mask_id": "agrar/kontrakt-detail",
+      "title": "Kontrakt",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__kontrakt-detail/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/kontrakt-detail/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/kontrakt-detail/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/kontrakt-detail/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.kontrakt.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "agrar/kontrakte",
       "title": "Kontrakt",
       "domain": "agrar",
@@ -2233,23 +2647,57 @@
       "agent_contract_url": "/api/v1/masks/agrar/kontrakte/agent-contract",
       "screen_definition_url": "/api/v1/masks/agrar/kontrakte/screen-definition",
       "readiness_url": "/api/v1/masks/agrar/kontrakte/readiness",
-      "risk_summary": "low",
+      "risk_summary": "medium",
       "actions": [
         {
-          "key": "edit",
+          "key": "bearbeiten",
           "label": "Bearbeiten",
-          "dangerLevel": "safe",
+          "dangerLevel": "moderate",
           "humanApprovalRequired": false,
-          "requiresConfirmation": false,
+          "requiresConfirmation": true,
           "permission": "kontrakt.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/kontrakte/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         }
       ],
       "sensitive_fields": [
         "preis"
       ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/kontrakte/formular",
+      "title": "Formular",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__kontrakte__formular/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/kontrakte/formular/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/kontrakte/formular/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/kontrakte/formular/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.kontrakte.formular.update",
+          "commandEndpoint": "/api/v1/kontrakte/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "agrar.contract.get",
         "agrar.weighing_ticket.list",
@@ -2329,6 +2777,40 @@
       ]
     },
     {
+      "mask_id": "agrar/lieferschein-erstellen",
+      "title": "Lieferschein erstellen",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__lieferschein-erstellen/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/lieferschein-erstellen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/lieferschein-erstellen/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/lieferschein-erstellen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.lieferschein-erstellen.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "agrar/maschinen-auslastung-liste",
       "title": "Maschinenauslastung",
       "domain": "agrar",
@@ -2349,6 +2831,40 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/maschinen/formular",
+      "title": "Formular",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__maschinen__formular/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/maschinen/formular/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/maschinen/formular/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/maschinen/formular/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.maschinen.formular.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -2485,6 +3001,40 @@
       ]
     },
     {
+      "mask_id": "agrar/partie-historie",
+      "title": "Partie historie",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__partie-historie/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/partie-historie/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/partie-historie/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/partie-historie/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.partie-historie.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "agrar/pflanzenschutz-applikationen-liste",
       "title": "Pflanzenschutz-Applikationen",
       "domain": "agrar",
@@ -2541,6 +3091,40 @@
       ]
     },
     {
+      "mask_id": "agrar/pflanzenschutz-rechner",
+      "title": "Pflanzenschutz rechner",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__pflanzenschutz-rechner/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/pflanzenschutz-rechner/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/pflanzenschutz-rechner/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/pflanzenschutz-rechner/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.pflanzenschutz-rechner.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "agrar/planung/duengeplanung",
       "title": "Duengeplanung",
       "domain": "agrar",
@@ -2573,6 +3157,74 @@
       "readiness_url": "/api/v1/masks/agrar/planung/fruchtfolge/readiness",
       "risk_summary": "low",
       "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/probenehmer-stamm",
+      "title": "Probenehmer stamm",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__probenehmer-stamm/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/probenehmer-stamm/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/probenehmer-stamm/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/probenehmer-stamm/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.probenehmer-stamm.update",
+          "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/psm",
+      "title": "PSM",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__psm/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/psm/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/psm/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/psm/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.psm.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "agrar.contract.get",
@@ -3015,6 +3667,40 @@
       ]
     },
     {
+      "mask_id": "agrar/rechnungen-erstellen",
+      "title": "Rechnungen erstellen",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__rechnungen-erstellen/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/rechnungen-erstellen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/rechnungen-erstellen/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/rechnungen-erstellen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.rechnungen-erstellen.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "agrar/saatgut",
       "title": "Saatgut",
       "domain": "agrar",
@@ -3162,6 +3848,74 @@
       ]
     },
     {
+      "mask_id": "agrar/saatgut/abrechnung",
+      "title": "Abrechnung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__saatgut__abrechnung/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/saatgut/abrechnung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/saatgut/abrechnung/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/saatgut/abrechnung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.saatgut.abrechnung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/saatgut/formular",
+      "title": "Formular",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__saatgut__formular/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/saatgut/formular/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/saatgut/formular/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/saatgut/formular/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.saatgut.formular.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "agrar/saatgut/prognose",
       "title": "Prognose",
       "domain": "agrar",
@@ -3172,6 +3926,40 @@
       "readiness_url": "/api/v1/masks/agrar/saatgut/prognose/readiness",
       "risk_summary": "low",
       "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/saatgut/royalties",
+      "title": "Royalties",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__saatgut__royalties/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/saatgut/royalties/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/saatgut/royalties/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/saatgut/royalties/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.saatgut.royalties.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "agrar.contract.get",
@@ -3342,6 +4130,210 @@
       ]
     },
     {
+      "mask_id": "agrar/schlaege/bodenprobe",
+      "title": "Bodenprobe",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__schlaege__bodenprobe/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/schlaege/bodenprobe/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/schlaege/bodenprobe/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/schlaege/bodenprobe/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.schlaege.bodenprobe.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/schlaege/duengung",
+      "title": "Duengung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__schlaege__duengung/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/schlaege/duengung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/schlaege/duengung/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/schlaege/duengung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.schlaege.duengung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/schlaege/ernte",
+      "title": "Ernte",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__schlaege__ernte/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/schlaege/ernte/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/schlaege/ernte/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/schlaege/ernte/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.schlaege.ernte.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/schlaege/formular",
+      "title": "Formular",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__schlaege__formular/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/schlaege/formular/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/schlaege/formular/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/schlaege/formular/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.schlaege.formular.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/schlaege/pflanzenschutz",
+      "title": "Pflanzenschutz",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__schlaege__pflanzenschutz/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/schlaege/pflanzenschutz/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/schlaege/pflanzenschutz/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/schlaege/pflanzenschutz/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.schlaege.pflanzenschutz.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/schlaege/saat",
+      "title": "Saat",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__schlaege__saat/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/schlaege/saat/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/schlaege/saat/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/schlaege/saat/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.schlaege.saat.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "agrar/sektion-auswahl",
       "title": "Sektion auswahl",
       "domain": "agrar",
@@ -3352,6 +4344,40 @@
       "readiness_url": "/api/v1/masks/agrar/sektion-auswahl/readiness",
       "risk_summary": "low",
       "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/self-billing",
+      "title": "Self billing",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__self-billing/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/self-billing/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/self-billing/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/self-billing/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.self-billing.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "agrar.contract.get",
@@ -3474,6 +4500,40 @@
       ]
     },
     {
+      "mask_id": "agrar/sorten-vermehrung",
+      "title": "Sorten vermehrung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__sorten-vermehrung/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/sorten-vermehrung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/sorten-vermehrung/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/sorten-vermehrung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.sorten-vermehrung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "agrar/trocknungsregeln",
       "title": "Trocknungsregeln",
       "domain": "agrar",
@@ -3552,6 +4612,40 @@
       ]
     },
     {
+      "mask_id": "agrar/vertraege/formular",
+      "title": "Formular",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__vertraege__formular/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/vertraege/formular/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/vertraege/formular/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/vertraege/formular/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.vertraege.formular.update",
+          "commandEndpoint": "/api/v1/kontrakte/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "agrar/vertrag-kontingente-liste",
       "title": "Vertrag-Kontingente",
       "domain": "agrar",
@@ -3608,6 +4702,176 @@
       ]
     },
     {
+      "mask_id": "agrar/wiegeschein-detail",
+      "title": "Wiegeschein detail",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__wiegeschein-detail/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/wiegeschein-detail/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/wiegeschein-detail/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/wiegeschein-detail/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.wiegeschein-detail.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "annahme/erfassung",
+      "title": "Erfassung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/annahme__erfassung/:entityId",
+      "agent_contract_url": "/api/v1/masks/annahme/erfassung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/annahme/erfassung/screen-definition",
+      "readiness_url": "/api/v1/masks/annahme/erfassung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "annahme.erfassung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "annahme/labor",
+      "title": "Labor",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/annahme__labor/:entityId",
+      "agent_contract_url": "/api/v1/masks/annahme/labor/agent-contract",
+      "screen_definition_url": "/api/v1/masks/annahme/labor/screen-definition",
+      "readiness_url": "/api/v1/masks/annahme/labor/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "annahme.labor.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "annahme/lkw-registrierung",
+      "title": "Lkw registrierung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/annahme__lkw-registrierung/:entityId",
+      "agent_contract_url": "/api/v1/masks/annahme/lkw-registrierung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/annahme/lkw-registrierung/screen-definition",
+      "readiness_url": "/api/v1/masks/annahme/lkw-registrierung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "annahme.lkw-registrierung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "annahme/muster",
+      "title": "Muster",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/annahme__muster/:entityId",
+      "agent_contract_url": "/api/v1/masks/annahme/muster/agent-contract",
+      "screen_definition_url": "/api/v1/masks/annahme/muster/screen-definition",
+      "readiness_url": "/api/v1/masks/annahme/muster/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "annahme.muster.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "annahme/qualitaets-check",
       "title": "Qualitaets-Check",
       "domain": "agrar",
@@ -3630,6 +4894,210 @@
       ]
     },
     {
+      "mask_id": "annahme/rohwaren-annahme",
+      "title": "Rohwaren annahme",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/annahme__rohwaren-annahme/:entityId",
+      "agent_contract_url": "/api/v1/masks/annahme/rohwaren-annahme/agent-contract",
+      "screen_definition_url": "/api/v1/masks/annahme/rohwaren-annahme/screen-definition",
+      "readiness_url": "/api/v1/masks/annahme/rohwaren-annahme/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "annahme.rohwaren-annahme.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "annahme/silo-zuweisung",
+      "title": "Silo zuweisung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/annahme__silo-zuweisung/:entityId",
+      "agent_contract_url": "/api/v1/masks/annahme/silo-zuweisung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/annahme/silo-zuweisung/screen-definition",
+      "readiness_url": "/api/v1/masks/annahme/silo-zuweisung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "annahme.silo-zuweisung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "annahme/trocknung",
+      "title": "Trocknung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/annahme__trocknung/:entityId",
+      "agent_contract_url": "/api/v1/masks/annahme/trocknung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/annahme/trocknung/screen-definition",
+      "readiness_url": "/api/v1/masks/annahme/trocknung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "annahme.trocknung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "annahme/voranmeldung",
+      "title": "Voranmeldung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/annahme__voranmeldung/:entityId",
+      "agent_contract_url": "/api/v1/masks/annahme/voranmeldung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/annahme/voranmeldung/screen-definition",
+      "readiness_url": "/api/v1/masks/annahme/voranmeldung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "annahme.voranmeldung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "annahme/waage-1",
+      "title": "Waage 1",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/annahme__waage-1/:entityId",
+      "agent_contract_url": "/api/v1/masks/annahme/waage-1/agent-contract",
+      "screen_definition_url": "/api/v1/masks/annahme/waage-1/screen-definition",
+      "readiness_url": "/api/v1/masks/annahme/waage-1/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "annahme.waage-1.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "annahme/waage-2",
+      "title": "Waage 2",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/annahme__waage-2/:entityId",
+      "agent_contract_url": "/api/v1/masks/annahme/waage-2/agent-contract",
+      "screen_definition_url": "/api/v1/masks/annahme/waage-2/screen-definition",
+      "readiness_url": "/api/v1/masks/annahme/waage-2/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "annahme.waage-2.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "annahme/warteschlange",
       "title": "Annahme-Warteschlange",
       "domain": "agrar",
@@ -3640,6 +5108,74 @@
       "readiness_url": "/api/v1/masks/annahme/warteschlange/readiness",
       "risk_summary": "low",
       "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "annahme/wartezeit",
+      "title": "Wartezeit",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/annahme__wartezeit/:entityId",
+      "agent_contract_url": "/api/v1/masks/annahme/wartezeit/agent-contract",
+      "screen_definition_url": "/api/v1/masks/annahme/wartezeit/screen-definition",
+      "readiness_url": "/api/v1/masks/annahme/wartezeit/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "annahme.wartezeit.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "annahme/wiegeschein",
+      "title": "Wiegeschein",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/annahme__wiegeschein/:entityId",
+      "agent_contract_url": "/api/v1/masks/annahme/wiegeschein/agent-contract",
+      "screen_definition_url": "/api/v1/masks/annahme/wiegeschein/screen-definition",
+      "readiness_url": "/api/v1/masks/annahme/wiegeschein/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "annahme.wiegeschein.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "agrar.contract.get",
@@ -5558,6 +7094,39 @@
       ]
     },
     {
+      "mask_id": "crm/aktivitaet",
+      "title": "Aktivitaet",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__aktivitaet/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/aktivitaet/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/aktivitaet/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/aktivitaet/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.activity.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.lead.qualify"
+      ]
+    },
+    {
       "mask_id": "crm/aktivitaeten-liste",
       "title": "Aktivitaeten",
       "domain": "crm",
@@ -5777,6 +7346,39 @@
       ]
     },
     {
+      "mask_id": "crm/betriebsprofil",
+      "title": "Betriebsprofil",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__betriebsprofil/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/betriebsprofil/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/betriebsprofil/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/betriebsprofil/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.betriebsprofil.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.lead.qualify"
+      ]
+    },
+    {
       "mask_id": "crm/betriebsprofile-liste",
       "title": "Betriebsprofile",
       "domain": "crm",
@@ -5854,6 +7456,39 @@
       ]
     },
     {
+      "mask_id": "crm/campaign",
+      "title": "Kampagne",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__campaign/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/campaign/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/campaign/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/campaign/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.campaign.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.lead.qualify"
+      ]
+    },
+    {
       "mask_id": "crm/campaign-performance",
       "title": "Kampagnen-Performance",
       "domain": "crm",
@@ -5887,6 +7522,39 @@
       ]
     },
     {
+      "mask_id": "crm/campaign-template",
+      "title": "Kampagnenvorlage",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__campaign-template/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/campaign-template/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/campaign-template/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/campaign-template/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.campaign.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.lead.qualify"
+      ]
+    },
+    {
       "mask_id": "crm/churn-risiko",
       "title": "Churn-Risiko",
       "domain": "crm",
@@ -5904,6 +7572,39 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.read",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.lead.qualify"
+      ]
+    },
+    {
+      "mask_id": "crm/consent",
+      "title": "Einwilligung",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__consent/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/consent/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/consent/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/consent/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.consent.update",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -6033,8 +7734,19 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "edit",
+          "key": "bearbeiten",
           "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "edit",
+          "label": "Erweiterte Pflege",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
@@ -6232,6 +7944,39 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.read",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.lead.qualify"
+      ]
+    },
+    {
+      "mask_id": "crm/gdpr-request",
+      "title": "DSGVO-Anfrage",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__gdpr-request/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/gdpr-request/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/gdpr-request/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/gdpr-request/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "gdpr.request.update",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -6588,6 +8333,39 @@
       ]
     },
     {
+      "mask_id": "crm/kontakt",
+      "title": "Kontakt",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__kontakt/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/kontakt/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/kontakt/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/kontakt/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.contact.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.lead.qualify"
+      ]
+    },
+    {
       "mask_id": "crm/kontakt-management-liste",
       "title": "Kontakt-Management",
       "domain": "crm",
@@ -6753,14 +8531,14 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "edit",
+          "key": "bearbeiten",
           "label": "Bearbeiten",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.lead.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -6819,6 +8597,39 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.lead.qualify"
+      ]
+    },
+    {
+      "mask_id": "crm/lieferant",
+      "title": "Lieferant",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__lieferant/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/lieferant/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/lieferant/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/lieferant/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.supplier.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -6983,14 +8794,14 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "edit",
+          "key": "bearbeiten",
           "label": "Bearbeiten",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "crm.opportunity.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/crm/opportunities/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -7009,6 +8820,39 @@
         "wert",
         "wahrscheinlichkeit"
       ],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.lead.qualify"
+      ]
+    },
+    {
+      "mask_id": "crm/segment",
+      "title": "Segment",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__segment/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/segment/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/segment/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/segment/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.segment.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "crm.customer.search",
         "crm.customer.summary360",
@@ -7050,6 +8894,39 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.lead.qualify"
+      ]
+    },
+    {
+      "mask_id": "crm/vertreter",
+      "title": "Vertreter",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__vertreter/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/vertreter/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/vertreter/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/vertreter/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.vertreter.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -7690,14 +9567,14 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "edit",
+          "key": "bearbeiten",
           "label": "Bearbeiten",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "einkauf.anfrage.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/einkauf/anfragen/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -8075,17 +9952,28 @@
       "agent_contract_url": "/api/v1/masks/einkauf/auftragsbestaetigung/agent-contract",
       "screen_definition_url": "/api/v1/masks/einkauf/auftragsbestaetigung/screen-definition",
       "readiness_url": "/api/v1/masks/einkauf/auftragsbestaetigung/readiness",
-      "risk_summary": "low",
+      "risk_summary": "medium",
       "actions": [
         {
-          "key": "edit",
-          "label": "Bearbeiten",
+          "key": "pruefen",
+          "label": "Pruefen",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": "einkauf.ab.update",
-          "commandEndpoint": null,
-          "method": null,
+          "permission": "einkauf.auftragsbestaetigung.review",
+          "commandEndpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/pruefen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "bestaetigen",
+          "label": "Bestaetigen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.auftragsbestaetigung.confirm",
+          "commandEndpoint": "/api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/bestaetigen",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -9241,17 +11129,17 @@
       "agent_contract_url": "/api/v1/masks/einkauf/supplier/agent-contract",
       "screen_definition_url": "/api/v1/masks/einkauf/supplier/screen-definition",
       "readiness_url": "/api/v1/masks/einkauf/supplier/readiness",
-      "risk_summary": "low",
+      "risk_summary": "high",
       "actions": [
         {
-          "key": "edit",
+          "key": "bearbeiten",
           "label": "Bearbeiten",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "einkauf.lieferant.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -9263,6 +11151,28 @@
           "permission": "einkauf.bestellung.create",
           "commandEndpoint": null,
           "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "sperren",
+          "label": "Sperren",
+          "dangerLevel": "high",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "einkauf.lieferant.update",
+          "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/sperren",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "entsperren",
+          "label": "Entsperren",
+          "dangerLevel": "high",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "einkauf.lieferant.update",
+          "commandEndpoint": "/api/v1/einkauf/lieferanten/{entity_id}/actions/entsperren",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -10454,7 +12364,6 @@
       ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10477,7 +12386,6 @@
       ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10500,7 +12408,6 @@
       ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10523,7 +12430,6 @@
       ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10554,7 +12460,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10585,7 +12490,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10616,7 +12520,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10647,7 +12550,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10678,7 +12580,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10709,7 +12610,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10740,7 +12640,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10782,7 +12681,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10813,7 +12711,36 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "fibu/abschluss-checklist",
+      "title": "Abschluss-Checkliste",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/fibu__abschluss-checklist/:entityId",
+      "agent_contract_url": "/api/v1/masks/fibu/abschluss-checklist/agent-contract",
+      "screen_definition_url": "/api/v1/masks/fibu/abschluss-checklist/screen-definition",
+      "readiness_url": "/api/v1/masks/fibu/abschluss-checklist/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "finance.closing.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10844,7 +12771,36 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "fibu/anlage",
+      "title": "Anlage",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/fibu__anlage/:entityId",
+      "agent_contract_url": "/api/v1/masks/fibu/anlage/agent-contract",
+      "screen_definition_url": "/api/v1/masks/fibu/anlage/screen-definition",
+      "readiness_url": "/api/v1/masks/fibu/anlage/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "finance.asset.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10875,7 +12831,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10906,7 +12861,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10937,7 +12891,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10968,7 +12921,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -10999,7 +12951,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11030,7 +12981,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11061,7 +13011,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11092,7 +13041,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11123,7 +13071,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11154,7 +13101,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11185,7 +13131,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11216,7 +13161,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11247,7 +13191,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11278,7 +13221,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11300,7 +13242,7 @@
           "key": "freigeben",
           "label": "Freigeben",
           "dangerLevel": "moderate",
-          "humanApprovalRequired": false,
+          "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "finance.ap.freigabe",
           "commandEndpoint": "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben",
@@ -11315,7 +13257,6 @@
       ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11346,7 +13287,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11377,7 +13317,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11408,7 +13347,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11446,7 +13384,6 @@
       ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11465,7 +13402,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11496,7 +13432,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11527,7 +13462,38 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "finance/bank-account",
+      "title": "Bankkonto",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/finance__bank-account/:entityId",
+      "agent_contract_url": "/api/v1/masks/finance/bank-account/agent-contract",
+      "screen_definition_url": "/api/v1/masks/finance/bank-account/screen-definition",
+      "readiness_url": "/api/v1/masks/finance/bank-account/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "finance.bank_account.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "iban"
+      ],
+      "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11558,7 +13524,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11589,7 +13554,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11603,17 +13567,17 @@
       "agent_contract_url": "/api/v1/masks/finance/bankkonto/agent-contract",
       "screen_definition_url": "/api/v1/masks/finance/bankkonto/screen-definition",
       "readiness_url": "/api/v1/masks/finance/bankkonto/readiness",
-      "risk_summary": "low",
+      "risk_summary": "medium",
       "actions": [
         {
-          "key": "edit",
+          "key": "bearbeiten",
           "label": "Bearbeiten",
-          "dangerLevel": "safe",
+          "dangerLevel": "moderate",
           "humanApprovalRequired": false,
-          "requiresConfirmation": false,
+          "requiresConfirmation": true,
           "permission": "finance.bankkonto.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/banken/konten/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -11624,7 +13588,6 @@
       ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11655,7 +13618,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11686,7 +13648,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11717,7 +13678,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11748,14 +13708,13 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
     },
     {
       "mask_id": "finance/datev-export",
-      "title": "Datev export",
+      "title": "DATEV-Export",
       "domain": "finance",
       "process_keys": [],
       "rollout_route": "/mask-rollout/finance__datev-export/:entityId",
@@ -11765,21 +13724,22 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "export",
-          "label": "CSV-Export",
+          "key": "export_erstellen",
+          "label": "Export erstellen",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": null,
+          "permission": "finance.datev.export",
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+          "stubReason": null
         }
       ],
-      "sensitive_fields": [],
+      "sensitive_fields": [
+        "csv"
+      ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11793,17 +13753,17 @@
       "agent_contract_url": "/api/v1/masks/finance/debitor/agent-contract",
       "screen_definition_url": "/api/v1/masks/finance/debitor/screen-definition",
       "readiness_url": "/api/v1/masks/finance/debitor/readiness",
-      "risk_summary": "low",
+      "risk_summary": "medium",
       "actions": [
         {
-          "key": "edit",
+          "key": "bearbeiten",
           "label": "Bearbeiten",
-          "dangerLevel": "safe",
+          "dangerLevel": "moderate",
           "humanApprovalRequired": false,
-          "requiresConfirmation": false,
+          "requiresConfirmation": true,
           "permission": "finance.debitor.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/finance/debitoren/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -11814,7 +13774,6 @@
       ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11867,7 +13826,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11898,7 +13856,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11929,7 +13886,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11960,7 +13916,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -11991,7 +13946,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12022,7 +13976,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12053,7 +14006,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12067,17 +14019,17 @@
       "agent_contract_url": "/api/v1/masks/finance/kreditor/agent-contract",
       "screen_definition_url": "/api/v1/masks/finance/kreditor/screen-definition",
       "readiness_url": "/api/v1/masks/finance/kreditor/readiness",
-      "risk_summary": "low",
+      "risk_summary": "medium",
       "actions": [
         {
-          "key": "edit",
+          "key": "bearbeiten",
           "label": "Bearbeiten",
-          "dangerLevel": "safe",
+          "dangerLevel": "moderate",
           "humanApprovalRequired": false,
-          "requiresConfirmation": false,
+          "requiresConfirmation": true,
           "permission": "finance.kreditor.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/finance/kreditoren/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -12087,7 +14039,6 @@
       ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12118,7 +14069,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12160,7 +14110,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12191,7 +14140,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12222,7 +14170,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12253,7 +14200,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12284,7 +14230,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12315,7 +14260,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12346,7 +14290,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12377,7 +14320,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12408,7 +14350,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12447,7 +14388,6 @@
       ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12478,7 +14418,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12509,7 +14448,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12540,7 +14478,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12571,7 +14508,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12595,7 +14531,6 @@
       ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12619,7 +14554,6 @@
       ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12650,7 +14584,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12681,7 +14614,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12723,7 +14655,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12754,7 +14685,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12785,7 +14715,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12827,7 +14756,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12858,7 +14786,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12889,7 +14816,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12931,7 +14857,38 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
+        "fibu.open_items.list",
+        "fibu.dunning.status"
+      ]
+    },
+    {
+      "mask_id": "stammdaten/hausbank",
+      "title": "Hausbank",
+      "domain": "finance",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/stammdaten__hausbank/:entityId",
+      "agent_contract_url": "/api/v1/masks/stammdaten/hausbank/agent-contract",
+      "screen_definition_url": "/api/v1/masks/stammdaten/hausbank/screen-definition",
+      "readiness_url": "/api/v1/masks/stammdaten/hausbank/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "finance.hausbank.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "bic"
+      ],
+      "mcp_tool_ids": [
+        "finance.ap_invoice.propose",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12962,7 +14919,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -12993,7 +14949,6 @@
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
-        "finance.ap_invoice.freigeben",
         "fibu.open_items.list",
         "fibu.dunning.status"
       ]
@@ -13389,6 +15344,58 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "futter/einzel",
+      "title": "Einzelfuttermittel",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/futter__einzel/:entityId",
+      "agent_contract_url": "/api/v1/masks/futter/einzel/agent-contract",
+      "screen_definition_url": "/api/v1/masks/futter/einzel/screen-definition",
+      "readiness_url": "/api/v1/masks/futter/einzel/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.einzelfuttermittel.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "futter/misch",
+      "title": "Mischfuttermittel",
+      "domain": "futtermittel",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/futter__misch/:entityId",
+      "agent_contract_url": "/api/v1/masks/futter/misch/agent-contract",
+      "screen_definition_url": "/api/v1/masks/futter/misch/screen-definition",
+      "readiness_url": "/api/v1/masks/futter/misch/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.mischfuttermittel.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "futtermittel/analyse",
       "title": "Futteranalyse",
       "domain": "futtermittel",
@@ -13406,8 +15413,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "futtermittel.analyse.validate",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/validate",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -13790,14 +15797,14 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "edit",
+          "key": "bearbeiten",
           "label": "Bearbeiten",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": "futtermittel.mischfm.update",
-          "commandEndpoint": null,
-          "method": null,
+          "permission": "futtermittel.mischfutter.update",
+          "commandEndpoint": "/api/v1/futter/mischfuttermittel/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -14044,6 +16051,136 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "aktien/dividenden",
+      "title": "Dividenden",
+      "domain": "genossenschaft",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/aktien__dividenden/:entityId",
+      "agent_contract_url": "/api/v1/masks/aktien/dividenden/agent-contract",
+      "screen_definition_url": "/api/v1/masks/aktien/dividenden/screen-definition",
+      "readiness_url": "/api/v1/masks/aktien/dividenden/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "aktien.dividenden.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "aktien/hauptversammlung",
+      "title": "Hauptversammlung",
+      "domain": "genossenschaft",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/aktien__hauptversammlung/:entityId",
+      "agent_contract_url": "/api/v1/masks/aktien/hauptversammlung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/aktien/hauptversammlung/screen-definition",
+      "readiness_url": "/api/v1/masks/aktien/hauptversammlung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "aktien.hauptversammlung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "aktien/mitglieder",
+      "title": "Mitglieder",
+      "domain": "genossenschaft",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/aktien__mitglieder/:entityId",
+      "agent_contract_url": "/api/v1/masks/aktien/mitglieder/agent-contract",
+      "screen_definition_url": "/api/v1/masks/aktien/mitglieder/screen-definition",
+      "readiness_url": "/api/v1/masks/aktien/mitglieder/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "aktien.mitglieder.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "aktien/stimmrechte",
+      "title": "Stimmrechte",
+      "domain": "genossenschaft",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/aktien__stimmrechte/:entityId",
+      "agent_contract_url": "/api/v1/masks/aktien/stimmrechte/agent-contract",
+      "screen_definition_url": "/api/v1/masks/aktien/stimmrechte/screen-definition",
+      "readiness_url": "/api/v1/masks/aktien/stimmrechte/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "aktien.stimmrechte.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "aktien/zeichnungen",
+      "title": "Zeichnungen",
+      "domain": "genossenschaft",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/aktien__zeichnungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/aktien/zeichnungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/aktien/zeichnungen/screen-definition",
+      "readiness_url": "/api/v1/masks/aktien/zeichnungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "aktien.zeichnungen.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -14728,8 +16865,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "inventory.aux.write",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/inventory/auxiliary/actions/create_count_sheet",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -14739,8 +16876,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "inventory.aux.write",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/inventory/auxiliary/actions/create_control",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -14750,8 +16887,8 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "inventory.aux.write",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/inventory/auxiliary/actions/create_valuation",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -14980,6 +17117,285 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "artikel/bestandsuebersicht",
+      "title": "Bestandsuebersicht",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__bestandsuebersicht/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/bestandsuebersicht/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/bestandsuebersicht/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/bestandsuebersicht/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.bestandsuebersicht.update",
+          "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/chargen-pflicht",
+      "title": "Chargen pflicht",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__chargen-pflicht/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/chargen-pflicht/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/chargen-pflicht/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/chargen-pflicht/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.chargen-pflicht.update",
+          "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/ersatzteile",
+      "title": "Ersatzteile",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__ersatzteile/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/ersatzteile/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/ersatzteile/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/ersatzteile/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.ersatzteile.update",
+          "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/gebinde",
+      "title": "Gebinde",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__gebinde/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/gebinde/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/gebinde/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/gebinde/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.gebinde.update",
+          "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/gefahrgut",
+      "title": "Gefahrgut",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__gefahrgut/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/gefahrgut/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/gefahrgut/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/gefahrgut/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.gefahrgut.update",
+          "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/herkunft",
+      "title": "Herkunft",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__herkunft/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/herkunft/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/herkunft/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/herkunft/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.herkunft.update",
+          "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/kategorien",
+      "title": "Kategorien",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__kategorien/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/kategorien/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/kategorien/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/kategorien/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.kategorien.update",
+          "commandEndpoint": "/api/v1/stammdaten/warengruppen/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/konditionen",
+      "title": "Konditionen",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__konditionen/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/konditionen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/konditionen/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/konditionen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.konditionen.update",
+          "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/lieferanten-artikel",
+      "title": "Lieferanten artikel",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__lieferanten-artikel/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/lieferanten-artikel/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/lieferanten-artikel/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/lieferanten-artikel/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.lieferanten-artikel.update",
+          "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
       "mask_id": "artikel/liste",
       "title": "Artikel",
       "domain": "lager",
@@ -15011,6 +17427,287 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/preisstaffeln",
+      "title": "Preisstaffeln",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__preisstaffeln/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/preisstaffeln/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/preisstaffeln/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/preisstaffeln/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.preisstaffeln.update",
+          "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/qualitaetsmerkmale",
+      "title": "Qualitaetsmerkmale",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__qualitaetsmerkmale/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/qualitaetsmerkmale/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/qualitaetsmerkmale/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/qualitaetsmerkmale/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.qualitaetsmerkmale.update",
+          "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/rabattgruppen",
+      "title": "Rabattgruppen",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__rabattgruppen/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/rabattgruppen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/rabattgruppen/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/rabattgruppen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.rabattgruppen.update",
+          "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/stamm",
+      "title": "Artikel",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__stamm/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/stamm/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/stamm/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/stamm/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.update",
+          "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [
+        "purchase_price"
+      ],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/stuecklisten",
+      "title": "Stuecklisten",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__stuecklisten/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/stuecklisten/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/stuecklisten/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/stuecklisten/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.stuecklisten.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/texte-medien",
+      "title": "Texte medien",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__texte-medien/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/texte-medien/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/texte-medien/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/texte-medien/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.texte-medien.update",
+          "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/umrechnungen",
+      "title": "Umrechnungen",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__umrechnungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/umrechnungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/umrechnungen/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/umrechnungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.umrechnungen.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/verpackungen",
+      "title": "Verpackungen",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__verpackungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/verpackungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/verpackungen/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/verpackungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.verpackungen.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "artikel/zoll-intrastat",
+      "title": "Zoll intrastat",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/artikel__zoll-intrastat/:entityId",
+      "agent_contract_url": "/api/v1/masks/artikel/zoll-intrastat/agent-contract",
+      "screen_definition_url": "/api/v1/masks/artikel/zoll-intrastat/screen-definition",
+      "readiness_url": "/api/v1/masks/artikel/zoll-intrastat/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "artikel.zoll-intrastat.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -15286,6 +17983,37 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "lager/charge",
+      "title": "Charge",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/lager__charge/:entityId",
+      "agent_contract_url": "/api/v1/masks/lager/charge/agent-contract",
+      "screen_definition_url": "/api/v1/masks/lager/charge/screen-definition",
+      "readiness_url": "/api/v1/masks/lager/charge/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "lager.charge.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -15970,6 +18698,99 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "silo/silo",
+      "title": "Silo",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/silo__silo/:entityId",
+      "agent_contract_url": "/api/v1/masks/silo/silo/agent-contract",
+      "screen_definition_url": "/api/v1/masks/silo/silo/screen-definition",
+      "readiness_url": "/api/v1/masks/silo/silo/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "silo.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "stammdaten/individuelle-artikelnummer",
+      "title": "Individuelle Artikelnummer",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/stammdaten__individuelle-artikelnummer/:entityId",
+      "agent_contract_url": "/api/v1/masks/stammdaten/individuelle-artikelnummer/agent-contract",
+      "screen_definition_url": "/api/v1/masks/stammdaten/individuelle-artikelnummer/screen-definition",
+      "readiness_url": "/api/v1/masks/stammdaten/individuelle-artikelnummer/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "stammdaten.individuelle_artikelnummer.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "lager.bestand.get",
+        "lager.inventur.status",
+        "lager.inventur.propose_opening",
+        "lager.stock_movement.stornieren"
+      ]
+    },
+    {
+      "mask_id": "stammdaten/mengeneinheit",
+      "title": "Mengeneinheit",
+      "domain": "lager",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/stammdaten__mengeneinheit/:entityId",
+      "agent_contract_url": "/api/v1/masks/stammdaten/mengeneinheit/agent-contract",
+      "screen_definition_url": "/api/v1/masks/stammdaten/mengeneinheit/screen-definition",
+      "readiness_url": "/api/v1/masks/stammdaten/mengeneinheit/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "stammdaten.mengeneinheit.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -17717,6 +20538,32 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "personal/mitarbeiter",
+      "title": "Mitarbeiter",
+      "domain": "personal",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/personal__mitarbeiter/:entityId",
+      "agent_contract_url": "/api/v1/masks/personal/mitarbeiter/agent-contract",
+      "screen_definition_url": "/api/v1/masks/personal/mitarbeiter/screen-definition",
+      "readiness_url": "/api/v1/masks/personal/mitarbeiter/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "personal.mitarbeiter.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "personal/mitarbeiter-liste",
       "title": "Mitarbeitende",
       "domain": "personal",
@@ -18725,6 +21572,32 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "portal/zertifikat",
+      "title": "Zertifikat",
+      "domain": "portal",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/portal__zertifikat/:entityId",
+      "agent_contract_url": "/api/v1/masks/portal/zertifikat/agent-contract",
+      "screen_definition_url": "/api/v1/masks/portal/zertifikat/screen-definition",
+      "readiness_url": "/api/v1/masks/portal/zertifikat/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "portal.zertifikat.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "portal/zertifikate",
       "title": "{zertifikat.name}",
       "domain": "portal",
@@ -19197,6 +22070,34 @@
       ]
     },
     {
+      "mask_id": "produktion/rezepturgruppe",
+      "title": "Rezepturgruppe",
+      "domain": "produktion",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/produktion__rezepturgruppe/:entityId",
+      "agent_contract_url": "/api/v1/masks/produktion/rezepturgruppe/agent-contract",
+      "screen_definition_url": "/api/v1/masks/produktion/rezepturgruppe/screen-definition",
+      "readiness_url": "/api/v1/masks/produktion/rezepturgruppe/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "produktion.rezepturgruppe.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "produktion.control.sync"
+      ]
+    },
+    {
       "mask_id": "produktion/rezepturgruppen",
       "title": "Neue Rezepturgruppe anlegen",
       "domain": "produktion",
@@ -19214,6 +22115,34 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "produktion.write",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "produktion.control.sync"
+      ]
+    },
+    {
+      "mask_id": "rezepte/rezept",
+      "title": "Rezept",
+      "domain": "produktion",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/rezepte__rezept/:entityId",
+      "agent_contract_url": "/api/v1/masks/rezepte/rezept/agent-contract",
+      "screen_definition_url": "/api/v1/masks/rezepte/rezept/screen-definition",
+      "readiness_url": "/api/v1/masks/rezepte/rezept/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "futtermittel.rezept.update",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -19471,14 +22400,14 @@
       "risk_summary": "medium",
       "actions": [
         {
-          "key": "edit",
-          "label": "Bearbeiten",
+          "key": "bearbeiten",
+          "label": "Zustaendigkeit/Frist",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "qualitaet.reklamation.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/reklamationen/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         },
         {
@@ -19638,6 +22567,35 @@
       ]
     },
     {
+      "mask_id": "analysis/what-if-simulator",
+      "title": "What if simulator",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/analysis__what-if-simulator/:entityId",
+      "agent_contract_url": "/api/v1/masks/analysis/what-if-simulator/agent-contract",
+      "screen_definition_url": "/api/v1/masks/analysis/what-if-simulator/screen-definition",
+      "readiness_url": "/api/v1/masks/analysis/what-if-simulator/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "analysis.what-if-simulator.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "reporting.bonus.calculate",
+        "reporting.query.import_signed"
+      ]
+    },
+    {
       "mask_id": "auswertungen/abfrage-center",
       "title": "Abfrage-Center",
       "domain": "reporting",
@@ -19651,7 +22609,7 @@
         {
           "key": "create",
           "label": "Neue Abfrage",
-          "dangerLevel": "safe",
+          "dangerLevel": "low",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "reporting.query.write",
@@ -19675,6 +22633,64 @@
         "filter_spec",
         "selected_fields"
       ],
+      "mcp_tool_ids": [
+        "reporting.bonus.calculate",
+        "reporting.query.import_signed"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/abfrage-generator",
+      "title": "Abfrage generator",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__abfrage-generator/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/abfrage-generator/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/abfrage-generator/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/abfrage-generator/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "auswertungen.abfrage-generator.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "reporting.bonus.calculate",
+        "reporting.query.import_signed"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/agrarmarkt-bericht",
+      "title": "Agrarmarkt bericht",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__agrarmarkt-bericht/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/agrarmarkt-bericht/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/agrarmarkt-bericht/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/agrarmarkt-bericht/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "auswertungen.agrarmarkt-bericht.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "reporting.bonus.calculate",
         "reporting.query.import_signed"
@@ -19715,6 +22731,93 @@
       ]
     },
     {
+      "mask_id": "auswertungen/deckungsbeitraege",
+      "title": "Deckungsbeitraege",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__deckungsbeitraege/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/deckungsbeitraege/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/deckungsbeitraege/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/deckungsbeitraege/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "auswertungen.deckungsbeitraege.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "reporting.bonus.calculate",
+        "reporting.query.import_signed"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/erntebilanz",
+      "title": "Erntebilanz",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__erntebilanz/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/erntebilanz/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/erntebilanz/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/erntebilanz/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "auswertungen.erntebilanz.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "reporting.bonus.calculate",
+        "reporting.query.import_signed"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/kundenumsatz",
+      "title": "Kundenumsatz",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__kundenumsatz/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/kundenumsatz/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/kundenumsatz/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/kundenumsatz/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "auswertungen.kundenumsatz.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "reporting.bonus.calculate",
+        "reporting.query.import_signed"
+      ]
+    },
+    {
       "mask_id": "auswertungen/l3-berichtskatalog",
       "title": "L3-Berichtskatalog",
       "domain": "reporting",
@@ -19730,6 +22833,93 @@
         "representative_id",
         "source_ref"
       ],
+      "mcp_tool_ids": [
+        "reporting.bonus.calculate",
+        "reporting.query.import_signed"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/lagerumschlag",
+      "title": "Lagerumschlag",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__lagerumschlag/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/lagerumschlag/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/lagerumschlag/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/lagerumschlag/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "auswertungen.lagerumschlag.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "reporting.bonus.calculate",
+        "reporting.query.import_signed"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/lieferantenbewertung",
+      "title": "Lieferantenbewertung",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__lieferantenbewertung/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/lieferantenbewertung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/lieferantenbewertung/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/lieferantenbewertung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "auswertungen.lieferantenbewertung.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "reporting.bonus.calculate",
+        "reporting.query.import_signed"
+      ]
+    },
+    {
+      "mask_id": "auswertungen/rohertrag",
+      "title": "Rohertrag",
+      "domain": "reporting",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/auswertungen__rohertrag/:entityId",
+      "agent_contract_url": "/api/v1/masks/auswertungen/rohertrag/agent-contract",
+      "screen_definition_url": "/api/v1/masks/auswertungen/rohertrag/screen-definition",
+      "readiness_url": "/api/v1/masks/auswertungen/rohertrag/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "auswertungen.rohertrag.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "reporting.bonus.calculate",
         "reporting.query.import_signed"
@@ -20725,14 +23915,14 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "edit",
+          "key": "bearbeiten",
           "label": "Bearbeiten",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "sales.order.update",
-          "commandEndpoint": null,
-          "method": null,
+          "commandEndpoint": "/api/v1/sales/orders/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -20850,6 +24040,32 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "service/anfrage",
+      "title": "Serviceanfrage",
+      "domain": "service",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/service__anfrage/:entityId",
+      "agent_contract_url": "/api/v1/masks/service/anfrage/agent-contract",
+      "screen_definition_url": "/api/v1/masks/service/anfrage/screen-definition",
+      "readiness_url": "/api/v1/masks/service/anfrage/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "service.anfrage.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -21569,6 +24785,32 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "verkauf/kunde",
+      "title": "Kunde",
+      "domain": "verkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/verkauf__kunde/:entityId",
+      "agent_contract_url": "/api/v1/masks/verkauf/kunde/agent-contract",
+      "screen_definition_url": "/api/v1/masks/verkauf/kunde/screen-definition",
+      "readiness_url": "/api/v1/masks/verkauf/kunde/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "verkauf/kunde-neu",
       "title": "Kunde neu",
       "domain": "verkauf",
@@ -21927,6 +25169,32 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "waage/wiegeschein",
+      "title": "Wiegeschein",
+      "domain": "waage",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/waage__wiegeschein/:entityId",
+      "agent_contract_url": "/api/v1/masks/waage/wiegeschein/agent-contract",
+      "screen_definition_url": "/api/v1/masks/waage/wiegeschein/screen-definition",
+      "readiness_url": "/api/v1/masks/waage/wiegeschein/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "waage.ticket.update",
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -22720,15 +25988,6 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
-      "tool_id": "finance.ap_invoice.freigeben",
-      "domain": "finance",
-      "scope": "finance:write",
-      "idempotent": true,
-      "risk_class": "high",
-      "human_approval_required": true,
-      "endpoint": "POST /api/v1/mcp/tools/call"
-    },
-    {
       "tool_id": "fibu.open_items.list",
       "domain": "finance",
       "scope": "finance:read",
@@ -23170,6 +26429,15 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
+      "tool_id": "mask.data.read",
+      "domain": "masks",
+      "scope": "masks:read",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
       "tool_id": "mask.action.execute",
       "domain": "masks",
       "scope": "masks:write",
@@ -23177,7 +26445,16 @@
       "risk_class": "medium",
       "human_approval_required": false,
       "endpoint": "POST /api/v1/mcp/tools/call"
+    },
+    {
+      "tool_id": "studio.migration.plan",
+      "domain": "studio",
+      "scope": "belege:write",
+      "idempotent": true,
+      "risk_class": "low",
+      "human_approval_required": false,
+      "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 130
+  "event_count": 135
 }

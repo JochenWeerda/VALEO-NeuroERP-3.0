@@ -1,4 +1,4 @@
-"""Immutable Studio release catalog for native ScreenDefinitions (Beleg uses document_screen_versions)."""
+"""Source catalog of native definitions and static evidence; never a live approval record."""
 from __future__ import annotations
 
 import json

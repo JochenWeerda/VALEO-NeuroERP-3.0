@@ -57,6 +57,8 @@ def render() -> str:
     os.environ.setdefault("DATABASE_URL", "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_probe")
     from app.core.screen_definitions import _SCREEN_DEFINITIONS, get_screen_definition
     from app.main import app
+    from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
+    ensure_stamm_screen_registry()
 
     screens: dict[str, dict[str, list[list[str]]]] = {}
     for screen_id in sorted(_SCREEN_DEFINITIONS):
@@ -68,10 +70,12 @@ def render() -> str:
                     *(t for tab in definition.get("tabs") or [] for t in tab.get("tables") or [])]
         zeilen = [aktion for tabelle in tabellen for aktion in tabelle.get("rowActions") or []]
         for action in [*(definition.get("actions") or []), *zeilen, *anlage_als_aktion]:
-            permission, endpoint = action.get("permission"), action.get("commandEndpoint")
+            permission = action.get("permission")
+            download = action.get("download") or {}
+            endpoint = download.get("endpoint") or action.get("commandEndpoint")
             if not permission or not endpoint or permission.startswith(("belege.", "platform:")):
                 continue
-            route = _route(app, endpoint, str(action.get("method") or "POST").upper())
+            route = _route(app, endpoint, "GET" if download else str(action.get("method") or "POST").upper())
             gruppen = _rollen_gruppen(route.dependant) if route is not None and hasattr(route, "dependant") else []
             if gruppen:
                 screens.setdefault(screen_id, {})[permission] = gruppen

@@ -25,6 +25,7 @@ from app.services.mask_action_runtime_service import MaskActionResult
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 class LogisticsTourOut(BaseSchema):
@@ -235,8 +236,7 @@ def insert_tour(
 
 
 @router.post("/tours", status_code=201, summary="Tour anlegen",
-    response_model=LogisticsTourOut
-)
+    response_model=LogisticsTourOut, dependencies=SCHREIBEN["LOGISTIK"])
 def create_tour(
     body: TourIn,
     x_tenant_id: Optional[str] = Header(None),
@@ -266,8 +266,7 @@ def create_tour(
 @router.post(
     "/tours/actions/anlegen",
     response_model=MaskActionResult,
-    summary="Tour anlegen als Masken-CommandEndpoint",
-)
+    summary="Tour anlegen als Masken-CommandEndpoint", dependencies=SCHREIBEN["LOGISTIK"])
 def action_tour_anlegen(
     request: Request,
     body: dict[str, Any] = Body(default_factory=dict),
@@ -333,8 +332,7 @@ def get_tour(
 # ---------------------------------------------------------------------------
 
 @router.post("/tours/{tour_id}/stops", status_code=201, summary="Stop hinzufügen",
-    response_model=LogisticsTourOut
-)
+    response_model=LogisticsTourOut, dependencies=SCHREIBEN["LOGISTIK"])
 def add_stop(
     tour_id: str,
     body: TourStopIn,
@@ -383,8 +381,7 @@ def add_stop(
 
 
 @router.patch("/tours/{tour_id}/stops/{stop_id}", summary="Stop aktualisieren",
-    response_model=LogisticsTourOut
-)
+    response_model=LogisticsTourOut, dependencies=SCHREIBEN["LOGISTIK"])
 def patch_stop(
     tour_id: str,
     stop_id: str,
@@ -437,8 +434,7 @@ def patch_stop(
 @router.post(
     "/tours/{tour_id}/cancel",
     response_model=LogisticsTourOut,
-    summary="Tour stornieren (fail-closed)",
-)
+    summary="Tour stornieren (fail-closed)", dependencies=SCHREIBEN["LOGISTIK"])
 def cancel_tour(
     tour_id: str,
     body: TourCancelIn,
@@ -502,8 +498,7 @@ def cancel_tour(
 @router.post(
     "/tours/{tour_id}/stops/{stop_id}/cancel",
     response_model=LogisticsTourOut,
-    summary="Tour-Stopp stornieren (fail-closed)",
-)
+    summary="Tour-Stopp stornieren (fail-closed)", dependencies=SCHREIBEN["LOGISTIK"])
 def cancel_stop(
     tour_id: str,
     stop_id: str,
@@ -565,8 +560,7 @@ def cancel_stop(
     "/tours/{tour_id}/events",
     status_code=201,
     summary="Tour-Ereignis erfassen",
-    response_model=LogisticsTourOut,
-)
+    response_model=LogisticsTourOut, dependencies=SCHREIBEN["GERAET"])
 def add_event(
     tour_id: str,
     body: TourEventIn,
@@ -649,8 +643,7 @@ def live_status(
 # ---------------------------------------------------------------------------
 
 @router.post("/tours/{tour_id}/optimize", summary="Stops optimize",
-    response_model=LogisticsTourOut
-)
+    response_model=LogisticsTourOut, dependencies=SCHREIBEN["LOGISTIK"])
 def optimize_stops(
     tour_id: str,
     depot_lat: float = Query(0.0),
@@ -753,8 +746,7 @@ def public_tracking(
 # ---------------------------------------------------------------------------
 
 @router.post("/tours/{tour_id}/stops/{stop_id}/pod", status_code=201, summary="Pod save",
-    response_model=LogisticsTourOut
-)
+    response_model=LogisticsTourOut, dependencies=SCHREIBEN["LOGISTIK"])
 def save_pod(
     tour_id: str,
     stop_id: str,
@@ -936,8 +928,7 @@ class DispositionCheckIn(BaseModel):
     "/tours/{tour_id}/disposition-check",
     status_code=200,
     response_model=LogisticsTourOut,
-    summary="Kapazitäts- und Zeitfenster-Check (DOM-LOG-004.2)",
-)
+    summary="Kapazitäts- und Zeitfenster-Check (DOM-LOG-004.2)", dependencies=SCHREIBEN["LOGISTIK"])
 def disposition_check(
     tour_id: str,
     body: DispositionCheckIn,
@@ -985,8 +976,7 @@ class EpodSettleIn(BaseModel):
     "/tours/{tour_id}/stops/{stop_id}/settle",
     status_code=201,
     response_model=LogisticsTourOut,
-    summary="ePOD-Settlement (DOM-LOG-004.3)",
-)
+    summary="ePOD-Settlement (DOM-LOG-004.3)", dependencies=SCHREIBEN["LOGISTIK"])
 def settle_epod_stop(
     tour_id: str,
     stop_id: str,

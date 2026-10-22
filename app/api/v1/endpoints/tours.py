@@ -19,6 +19,7 @@ from app.domains.verladung.repository import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
+from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/tours", tags=["Verladung", "Tours"])
@@ -246,7 +247,7 @@ async def get_tour(tour_id: str, db: Session = Depends(get_db)):
     }
 
 
-@router.post("", response_model=TourResponse, status_code=201, summary="Tour anlegen")
+@router.post("", response_model=TourResponse, status_code=201, summary="Tour anlegen", dependencies=SCHREIBEN["LOGISTIK"])
 async def create_tour(
     tour_data: CreateTourRequest,
     db: Session = Depends(get_db)
@@ -265,7 +266,7 @@ async def create_tour(
     return tour
 
 
-@router.patch("/{tour_id}", response_model=TourResponse, summary="Tour aktualisieren")
+@router.patch("/{tour_id}", response_model=TourResponse, summary="Tour aktualisieren", dependencies=SCHREIBEN["LOGISTIK"])
 async def update_tour(
     tour_id: str,
     tour_data: dict,
@@ -279,7 +280,7 @@ async def update_tour(
     return tour
 
 
-@router.delete("/{tour_id}", status_code=204, response_class=Response, response_model=None, summary="Tour löschen")
+@router.delete("/{tour_id}", status_code=204, response_class=Response, response_model=None, summary="Tour löschen", dependencies=SCHREIBEN["LOGISTIK"])
 async def delete_tour(tour_id: str, db: Session = Depends(get_db)):
     """Delete a tour"""
     repo = TourRepository(db)
@@ -289,7 +290,7 @@ async def delete_tour(tour_id: str, db: Session = Depends(get_db)):
 
 # === STATUS ENDPOINTS ===
 
-@router.post("/{tour_id}/start-loading", response_model=TourResponse, summary="Loading starten")
+@router.post("/{tour_id}/start-loading", response_model=TourResponse, summary="Loading starten", dependencies=SCHREIBEN["LOGISTIK"])
 async def start_loading(
     tour_id: str,
     user_id: str = Query(...),
@@ -304,7 +305,7 @@ async def start_loading(
     return tour
 
 
-@router.post("/{tour_id}/finish-loading", response_model=TourResponse, summary="Loading finish")
+@router.post("/{tour_id}/finish-loading", response_model=TourResponse, summary="Loading finish", dependencies=SCHREIBEN["LOGISTIK"])
 async def finish_loading(
     tour_id: str,
     user_id: str = Query(...),
@@ -319,7 +320,7 @@ async def finish_loading(
     return tour
 
 
-@router.post("/{tour_id}/dispatch", response_model=TourResponse, summary="Tour dispatch")
+@router.post("/{tour_id}/dispatch", response_model=TourResponse, summary="Tour dispatch", dependencies=SCHREIBEN["LOGISTIK"])
 async def dispatch_tour(
     tour_id: str,
     user_id: str = Query(...),
@@ -349,7 +350,7 @@ async def list_stops(tour_id: str, db: Session = Depends(get_db)):
     return repo.get_all(tour_id)
 
 
-@router.post("/{tour_id}/stops", response_model=StopResponse, status_code=201, summary="Stop anlegen")
+@router.post("/{tour_id}/stops", response_model=StopResponse, status_code=201, summary="Stop anlegen", dependencies=SCHREIBEN["LOGISTIK"])
 async def create_stop(
     tour_id: str,
     stop_data: CreateStopRequest,
@@ -370,7 +371,7 @@ async def create_stop(
     return stop
 
 
-@router.post("/{tour_id}/stops/{stop_id}/delivery-notes", response_model=List[DeliveryNoteResponse], summary="Delivery notes zuweisen")
+@router.post("/{tour_id}/stops/{stop_id}/delivery-notes", response_model=List[DeliveryNoteResponse], summary="Delivery notes zuweisen", dependencies=SCHREIBEN["LOGISTIK"])
 async def assign_delivery_notes(
     tour_id: str,
     stop_id: str,
@@ -383,7 +384,7 @@ async def assign_delivery_notes(
     return dns
 
 
-@router.post("/{tour_id}/stops/{stop_id}/deliver", response_model=DeliveryNoteResponse, summary="Delivered markieren")
+@router.post("/{tour_id}/stops/{stop_id}/deliver", response_model=DeliveryNoteResponse, summary="Delivered markieren", dependencies=SCHREIBEN["LOGISTIK"])
 async def mark_delivered(
     tour_id: str,
     stop_id: str,

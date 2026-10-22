@@ -10,7 +10,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import Depends, APIRouter, HTTPException
+from app.auth.deps import require_roles
 from pydantic import AnyHttpUrl, BaseModel
 
 logger = logging.getLogger(__name__)
@@ -19,6 +20,8 @@ from app.api.v1.schemas.base import BaseSchema, StatusResponse
 
 
 router = APIRouter(prefix="/admin/dms")
+
+_NUR_ADMIN = [Depends(require_roles("admin"))]  # Konfiguration: wie admin_core
 
 def _workspace_path(relative_path: str) -> Path:
     path = (Path.cwd() / relative_path).resolve()
@@ -146,7 +149,7 @@ async def get_dms_status():
     )
 
 
-@router.post("/test", response_model=DmsTestResponse, tags=["admin", "dms"], summary="Dms connection testen")
+@router.post("/test", response_model=DmsTestResponse, tags=["admin", "dms"], summary="Dms connection testen", dependencies=_NUR_ADMIN)
 async def test_dms_connection(body: DmsConnectionRequest):
     """Testet die Verbindung zu Mayan-DMS mit den angegebenen Credentials."""
     try:
@@ -165,7 +168,7 @@ async def test_dms_connection(body: DmsConnectionRequest):
         return DmsTestResponse(ok=False, error=str(exc))
 
 
-@router.post("/bootstrap", response_model=DmsBootstrapResponse, tags=["admin", "dms"], summary="Dms bootstrap")
+@router.post("/bootstrap", response_model=DmsBootstrapResponse, tags=["admin", "dms"], summary="Dms bootstrap", dependencies=_NUR_ADMIN)
 async def bootstrap_dms(body: DmsConnectionRequest):
     """
     Erstellt oder aktualisiert Dokumenttypen und Metadatenfelder in Mayan-DMS

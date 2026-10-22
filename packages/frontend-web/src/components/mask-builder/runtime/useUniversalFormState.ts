@@ -1,3 +1,4 @@
+import { validTableInputValues } from './table-input-contract'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import type { ScreenDefinition, ScreenFieldDefinition } from '../schema'
 import type { DirtyState, FieldError, SubmitState, UniversalFormState, ValidationPlan, ValidationRule } from './FormState'
@@ -5,6 +6,10 @@ import type { DirtyState, FieldError, SubmitState, UniversalFormState, Validatio
 function buildValidationRules(fields: ScreenFieldDefinition[]): ValidationRule[] {
   const rules: ValidationRule[] = []
   for (const field of fields) {
+    if (field.type === 'table' && (field.rowFields !== undefined || field.tableEditing !== undefined)) {
+      rules.push({ fieldKey: field.key, message: `${field.label}: Bitte Tabellenstruktur, Pflichtfelder und Zahlen prüfen.`,
+        severity: 'blocking', validate: value => !validTableInputValues(field, value) })
+    }
     if (field.required) {
       rules.push({
         fieldKey: field.key,
