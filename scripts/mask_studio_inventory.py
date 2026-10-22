@@ -72,8 +72,11 @@ MCP_OHNE_SERVERWIRKUNG = {"local_ui"}
 
 _IMPORT = re.compile(r"""(?:import|export)\s[^'"]*?from\s+['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)""")
 _SCREEN_ID = re.compile(r"""screenId\s*=\s*(?:\{\s*)?[`'"]([^`'"]+)[`'"]|useScreenDefinition\(\s*[`'"]([^`'"]+)[`'"]""")
-_BUILDER = re.compile(r"\b(UniversalNative(?:Detail|Create|Cockpit)Page|NativeListPage|UniversalMaskRenderer|useScreenDefinition|"
-                      r"compileRenderPlanFromScreenDefinition|CaptureScreenHost)\b")
+_BUILDER = re.compile(
+    r"\b(UniversalNative(?:Detail|Create|Cockpit)Page|NativeListPage|UniversalMaskRenderer|useScreenDefinition|"
+    r"compileRenderPlanFromScreenDefinition|CaptureScreenHost|"
+    r"MadeByStudio(?:List|Cockpit|Detail)RuntimeWire)\b"
+)
 _ALTMUSTER = re.compile(r"""from\s+['"]@/components/(?:mask-builder/(?:ObjectPage|ListReport|Wizard|Worklist|OverviewPage)"""
                         r"""|patterns/(?:ListReport|Wizard)|mask-builder['"])""")
 _BELEG_ROUTE = re.compile(r"angebot|auftrag(?!s?-?positionen)|bestellung|lieferschein|wareneingang|(?<!kostenstellen)rechnung|gutschrift")
@@ -158,8 +161,11 @@ def pages(family_prefixes: tuple[str, ...]) -> list[dict]:
 def _definitions() -> dict[str, dict]:
     from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition
     from app.core.screen_definitions_beleg import BELEGARTEN, build_beleg_screen_definition, screen_id
+    from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
 
-    defs = {sid: get_screen_definition(sid) or {} for sid in SCREEN_DEFINITION_BUILDERS}
+    ensure_stamm_screen_registry()
+    builder_ids = sorted(SCREEN_DEFINITION_BUILDERS)
+    defs = {sid: get_screen_definition(sid) or {} for sid in builder_ids}
     for art in BELEGARTEN:
         defs[screen_id(art)] = build_beleg_screen_definition(art)
     return defs

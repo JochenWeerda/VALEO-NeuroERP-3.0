@@ -29,10 +29,11 @@ describe('MASK-BESTELLUNG-NAV-NATIVE-20261022', () => {
   })
 
   it('Angebot-Stamm Folgebestellung oeffnet die native Detailroute', () => {
-    expect(read('einkauf/angebot-stamm.tsx')).toContain(
+    const src = read('einkauf/angebot-stamm-legacy.tsx')
+    expect(src).toContain(
       '`/einkauf/bestellung/${encodeURIComponent(response.data.purchaseOrderId)}`',
     )
-    expect(read('einkauf/angebot-stamm.tsx')).not.toContain(
+    expect(src).not.toContain(
       '`/einkauf/bestellungen/${encodeURIComponent(response.data.purchaseOrderId)}`',
     )
   })

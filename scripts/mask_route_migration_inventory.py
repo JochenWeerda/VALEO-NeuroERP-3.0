@@ -13,13 +13,24 @@ INV = FE / "src" / "app" / "routing" / "route-inventory.gen.json"
 OUT = ROOT / "docs" / "architecture" / "uix" / "mask-route-migration-inventory.md"
 
 
-def classify_source(text: str) -> str:
+def classify_source(text: str, *, filename: str = "") -> str:
+    # Create-only Legacy-Split (UIX-057): nicht als pages_legacy zaehlen.
+    if filename.endswith("-legacy.tsx"):
+        return "legacy_create_only"
     if (
         "useUniversalMaskRuntime" in text
         or "UniversalMaskRenderer" in text
         or "UniversalNativeDetailPage" in text
         or "NativeListPage" in text
         or "UniversalNativeCockpitPage" in text
+        or "createStammNativeDetailPage" in text
+        or "createLegacyMaskPage" in text
+        or "MadeByStudioListRuntimeWire" in text
+        or "MadeByStudioDetailRuntimeWire" in text
+        or "MadeByStudioCockpitRuntimeWire" in text
+        or "DocumentControlScopePage" in text
+        or "SanktionsScopePage" in text
+        or "CaptureScreenHost" in text
     ):
         return "runtime_wired"
     if re.search(r"\bObjectPage\b", text) or re.search(r"\bListReport\b", text):
@@ -28,7 +39,15 @@ def classify_source(text: str) -> str:
     return "hand_built"
 
 
+RUNTIME_MODULE_FILES: dict[str, Path] = {
+    "@runtime/fibu-suite": FE / "src/app/FibuSuiteRuntime.tsx",
+}
+
+
 def resolve_module(module: str) -> Path | None:
+    if module in RUNTIME_MODULE_FILES:
+        path = RUNTIME_MODULE_FILES[module]
+        return path if path.exists() else None
     # "@/pages/foo/bar" -> pages/foo/bar.tsx
     if not module.startswith("@/pages/"):
         return None
@@ -62,7 +81,7 @@ def main() -> None:
             continue
         if src not in file_cache:
             file_cache[src] = src.read_text(encoding="utf-8", errors="replace")
-        klass = classify_source(file_cache[src])
+        klass = classify_source(file_cache[src], filename=src.name)
         by_class[klass] += 1
         entry = {"path": path or "/", "module": module, "file": str(src.relative_to(FE)).replace("\\", "/")}
         if klass == "runtime_wired":
@@ -80,7 +99,7 @@ def main() -> None:
     ]
     page_by = Counter()
     for p in page_files:
-        page_by[classify_source(p.read_text(encoding="utf-8", errors="replace"))] += 1
+        page_by[classify_source(p.read_text(encoding="utf-8", errors="replace"), filename=p.name)] += 1
 
     # ScreenDefinition registry keys in screen_definitions.py
     sd_text = (ROOT / "app" / "core" / "screen_definitions.py").read_text(encoding="utf-8", errors="replace")
