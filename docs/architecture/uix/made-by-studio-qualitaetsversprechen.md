@@ -81,5 +81,5 @@ studio“ bleibt Ziel, kein Ist-Zustand.
 ## Nächster Nachweis-Schritt (eine Lücke)
 
 1. Image-/CI-Nachlauf mit Runtime-Catalog (schließen D für Entity-Profil) — Codex `STUDIO-ENTITY-RELEASE`.
-2. CLI-Lebenszyklus **einer** Pilot-Stamm-Maske aus `StammObjectPageParent` (Duenger/Saatgut/Supplier/Debitor/Kreditor; Factory seit `UIX-STAMM-OBJECTPAGE-PARENT-20261022`) → Siegel A–D — nicht 757 Routen.
-3. Rest-Children an Parent haengen; Beleg-Parent nur nach Codex-Handshake.
+2. CLI-Lebenszyklus **einer** Stamm-Maske aus `StammObjectPageParent` (alle 12 Children seit `UIX-STAMM-OBJECTPAGE-ALL-20261022` auf Parent, Gates A–C grün) → Siegel A–D — nicht 757 Routen.
+3. Beleg-Parent nur nach Codex-Handshake.

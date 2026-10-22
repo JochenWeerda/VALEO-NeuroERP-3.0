@@ -8,16 +8,28 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.core.stamm_object_page_parent import (
+    build_stamm_object_page,
+    stamm_entity_source,
+    stamm_entity_tab,
+    stamm_kopf_tab,
+    stamm_lazy_table_tab,
+    stamm_tab_source,
+)
+
 
 def _feld(key: str, label: str, typ: str = "text", **mehr: Any) -> dict[str, Any]:
     return {"key": key, "label": label, "type": typ, **mehr}
 
 
 def _register(key: str, label: str, quelle: str, spalten: list[dict[str, Any]]) -> dict[str, Any]:
-    return {"key": key, "label": label, "lazy": True, "keepAlive": False, "tables": [{
-        "key": key, "label": label, "dataSourceKey": quelle, "serverPagination": False, "pageSize": 25,
-        "virtualized": True, "rowHeight": 52, "columns": spalten,
-    }]}
+    return stamm_lazy_table_tab(
+        key=key,
+        label=label,
+        data_source_key=quelle,
+        columns=spalten,
+        server_pagination=False,
+    )
 
 
 # Felder des Artikelstamms (``ArticleBase``), gruppiert wie die bisherige Maske.
@@ -83,42 +95,43 @@ def _eingabe(felder: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def build_artikel_stamm() -> dict[str, Any]:
     """Artikelstamm: Stammdaten, Preise/Steuer, Lager, Qualitaet; Register Lieferanten, Preise, Dokumente."""
-    return {
-        "schemaVersion": 1,
-        "id": "artikel/stamm",
-        "domain": "lager",
-        "mode": "detail",
-        "title": "Artikel",
-        "subtitle": "Artikelstamm",
-        "identityField": "article_number",
-        "adapter": {"type": "native", "sourceId": "artikel/stamm", "temporary": False},
-        "creation": {
-            "endpoint": "/api/v1/articles/", "permission": "artikel.create", "detailRoute": "/artikel/{entity_id}",
+    return build_stamm_object_page(
+        screen_id="artikel/stamm",
+        domain="lager",
+        title="Artikel",
+        subtitle="Artikelstamm",
+        identity_field="article_number",
+        creation={
+            "endpoint": "/api/v1/articles/",
+            "permission": "artikel.create",
+            "detailRoute": "/artikel/{entity_id}",
             "defaults": {"currency": "EUR", "lagerartikel": True, "rabattfaehig": True, "skontofaehig": True},
         },
-        "summary": [
+        summary=[
             {"key": "article_number", "label": "Artikel-Nr.", "value": None, "kind": "identity"},
             {"key": "available_stock", "label": "Verfuegbar", "value": None, "kind": "kpi"},
             {"key": "sales_price", "label": "Verkaufspreis", "value": None, "kind": "kpi"},
         ],
-        "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/articles/{entity_id}"},
-            {"key": "lieferanten", "endpoint": "/api/v1/articles/{entity_id}/suppliers", "pageSize": 25},
-            {"key": "preise", "endpoint": "/api/v1/articles/{entity_id}/prices", "pageSize": 25},
-            {"key": "dokumente", "endpoint": "/api/v1/articles/{entity_id}/documents", "pageSize": 25},
+        data_sources=[
+            stamm_entity_source("/api/v1/articles/{entity_id}"),
+            stamm_tab_source("lieferanten", "/api/v1/articles/{entity_id}/suppliers"),
+            stamm_tab_source("preise", "/api/v1/articles/{entity_id}/prices"),
+            stamm_tab_source("dokumente", "/api/v1/articles/{entity_id}/documents"),
         ],
-        "tabs": [
-            {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
-             "fields": [*_ARTIKEL_STAMM, _feld("is_active", "Aktiv", "boolean", readOnly=True)]},
-            {"key": "preise_steuer", "label": "Preise und Steuer", "lazy": False, "keepAlive": True,
-             "dataSourceKey": "entity", "fields": _ARTIKEL_PREISE},
-            {"key": "lager", "label": "Lager", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
-             "fields": [*_ARTIKEL_LAGER,
-                        _feld("current_stock", "Bestand", "number", readOnly=True),
-                        _feld("reserved_stock", "Reserviert", "number", readOnly=True),
-                        _feld("available_stock", "Verfuegbar", "number", readOnly=True)]},
-            {"key": "qualitaet", "label": "Qualitaet und Gefahrgut", "lazy": False, "keepAlive": True,
-             "dataSourceKey": "entity", "fields": _ARTIKEL_QUALITAET},
+        tabs=[
+            stamm_kopf_tab([*_ARTIKEL_STAMM, _feld("is_active", "Aktiv", "boolean", readOnly=True)]),
+            stamm_entity_tab(key="preise_steuer", label="Preise und Steuer", fields=_ARTIKEL_PREISE),
+            stamm_entity_tab(
+                key="lager",
+                label="Lager",
+                fields=[
+                    *_ARTIKEL_LAGER,
+                    _feld("current_stock", "Bestand", "number", readOnly=True),
+                    _feld("reserved_stock", "Reserviert", "number", readOnly=True),
+                    _feld("available_stock", "Verfuegbar", "number", readOnly=True),
+                ],
+            ),
+            stamm_entity_tab(key="qualitaet", label="Qualitaet und Gefahrgut", fields=_ARTIKEL_QUALITAET),
             _register("lieferanten", "Lieferanten", "lieferanten", [
                 {"key": "supplier_number", "label": "Lieferant", "width": 140, "sortable": True},
                 {"key": "supplier_article_number", "label": "Lieferanten-Art.-Nr.", "width": 160},
@@ -140,39 +153,32 @@ def build_artikel_stamm() -> dict[str, Any]:
                 {"key": "created_at", "label": "Erfasst", "renderKind": "date", "sortable": True},
             ]),
         ],
-        "actions": [
-            {"key": "bearbeiten", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe",
-             "permission": "artikel.update", "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
-             "method": "POST",
-             "inputFields": _eingabe([*_ARTIKEL_STAMM, *_ARTIKEL_PREISE, *_ARTIKEL_LAGER, *_ARTIKEL_QUALITAET])},
+        edit_permission="artikel.update",
+        edit_action_key="bearbeiten",
+        edit_action_overrides={
+            "commandEndpoint": "/api/v1/articles/{entity_id}/actions/bearbeiten",
+            "method": "POST",
+            "inputFields": _eingabe([*_ARTIKEL_STAMM, *_ARTIKEL_PREISE, *_ARTIKEL_LAGER, *_ARTIKEL_QUALITAET]),
+        },
+        no_workflow_reason="Artikelstamm ist ein Verwaltungsobjekt — Ablaeufe liegen in den Belegen, nicht im Stammsatz.",
+        business_purpose=(
+            "Artikelstamm fuer Verkauf, Einkauf und Lager: Kennungen, Preise und Steuer, "
+            "Lagerfuehrung, Qualitaet; Lieferanten, Preisvereinbarungen und Dokumente."
+        ),
+        example_prompts=[
+            "Welchen Verkaufspreis und Steuerschluessel hat Artikel {entity_id}?",
+            "Welche Lieferanten liefern Artikel {entity_id} und zu welchem EK-Preis?",
+            "Ist Artikel {entity_id} chargen- oder QS-pflichtig?",
         ],
-        "noWorkflowReason": "Artikelstamm ist ein Verwaltungsobjekt — Ablaeufe liegen in den Belegen, nicht im Stammsatz.",
-        "agentContract": {
-            "businessPurpose": "Artikelstamm fuer Verkauf, Einkauf und Lager: Kennungen, Preise und Steuer, "
-                               "Lagerfuehrung, Qualitaet; Lieferanten, Preisvereinbarungen und Dokumente.",
-            "examplePrompts": [
-                "Welchen Verkaufspreis und Steuerschluessel hat Artikel {entity_id}?",
-                "Welche Lieferanten liefern Artikel {entity_id} und zu welchem EK-Preis?",
-                "Ist Artikel {entity_id} chargen- oder QS-pflichtig?",
-            ],
-            "sensitiveFields": ["purchase_price"],
-            "testSelectors": {
-                "screenRoot": "[data-testid='artikel-stamm']",
-                "primaryAction": "[data-testid='action-bearbeiten']",
-                "summaryArea": "[data-testid='mask-summary']",
-            },
-        },
-        "layout": {
-            "preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44,
-            "floorplan": "objectPage", "columnNavigation": "single", "sectionNavigation": "anchors",
-            "density": "expertDense", "contextRail": "combined", "summaryPlacement": "header",
-            "stickyHeader": True, "stickyFooter": True,
-        },
-        "performance": {
-            "initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True,
-            "lookupMinChars": 2, "bundleGroup": "lager",
-        },
-    }
+        sensitive_fields=["purchase_price"],
+        test_id="artikel-stamm",
+        density="expertDense",
+        context_rail="combined",
+        table_profile="inventory",
+        payload_budget_kb=48,
+        requires_virtual_tables=True,
+        bundle_group="lager",
+    )
 
 
 STAMM_SCREEN_BUILDERS = {

@@ -14,7 +14,13 @@ OUT = ROOT / "docs" / "architecture" / "uix" / "mask-route-migration-inventory.m
 
 
 def classify_source(text: str) -> str:
-    if "useUniversalMaskRuntime" in text or "UniversalMaskRenderer" in text or "UniversalNativeDetailPage" in text:
+    if (
+        "useUniversalMaskRuntime" in text
+        or "UniversalMaskRenderer" in text
+        or "UniversalNativeDetailPage" in text
+        or "NativeListPage" in text
+        or "UniversalNativeCockpitPage" in text
+    ):
         return "runtime_wired"
     if re.search(r"\bObjectPage\b", text) or re.search(r"\bListReport\b", text):
         return "legacy_mask_pattern"

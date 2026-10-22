@@ -84,7 +84,7 @@ export default function BankkontenPage(): JSX.Element {
       key: 'bank' as const,
       label: 'Bank',
       render: (k: BankKonto) => (
-        <button type="button" onClick={() => navigate(`/banken/konto/${k.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
+        <button type="button" onClick={() => navigate(`/finance/bankkonto/${k.id}`)} className="min-h-11 font-medium text-primary touch-manipulation">
           {k.bank}
         </button>
       ),
@@ -115,7 +115,7 @@ export default function BankkontenPage(): JSX.Element {
     <div className="space-y-4 p-3 md:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold md:text-3xl">Bankkonten</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Bankkonten</h1>
           <p className="text-muted-foreground">Konten suchen und oeffnen</p>
         </div>
         <Button onClick={() => navigate('/banken/konto/neu')} className="min-h-touch gap-2 touch-manipulation">

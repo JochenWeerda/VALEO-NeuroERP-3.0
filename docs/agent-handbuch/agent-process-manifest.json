@@ -4543,7 +4543,7 @@
         {
           "key": "create",
           "label": "Neue Abfrage",
-          "dangerLevel": "low",
+          "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "reporting.query.write",

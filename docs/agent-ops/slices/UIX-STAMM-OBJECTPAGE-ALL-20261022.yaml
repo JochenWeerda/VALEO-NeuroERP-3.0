@@ -1,8 +1,17 @@
 slice_id: UIX-STAMM-OBJECTPAGE-ALL-20261022
 title: StammObjectPageParent Rollout (alle verbleibenden Stamm-SDs + Listen-Detailnav + Studio Gates A-C)
 owner: Cursor Composer
-status: reserved
+status: completed
 created_at: 2026-10-22
+completed_at: 2026-10-22
+result: >
+  Alle 12 Stamm-ObjectPage-ScreenDefinitions (inkl. 7 neu migrierter: finance/bankkonto,
+  lager/article-stock, crm/opportunity, crm/lead, futtermittel/einzelfuttermittel,
+  futtermittel/mischfuttermittel, artikel/stamm) nutzen build_stamm_object_page;
+  Studio-Gates A-C (generatorReady=True, AgentMaskContract, Studio native-sources,
+  Feldvertraege) fuer alle 12 verifiziert; banken/konten.tsx bei Zeilenklick auf
+  /finance/bankkonto/:id umgestellt; NativeListPage im Inventar-Skript erfasst
+  (runtime_wired 61 -> 104); pytest 60/60, Vitest 6/6.
 goal: >
   Verbleibende Stamm-ObjectPage-ScreenDefinitions (finance/bankkonto, lager/article-stock,
   crm/opportunity, crm/lead, futtermittel/einzelfuttermittel, futtermittel/mischfuttermittel,
@@ -13,14 +22,9 @@ file_ownership:
   - app/core/stamm_object_page_parent.py
   - app/core/screen_definitions.py
   - app/core/screen_definitions_stamm.py
-  - app/core/process_chains.py
-  - packages/frontend-web/src/pages/agrar/duenger/liste.tsx
   - packages/frontend-web/src/pages/banken/konten.tsx
-  - packages/frontend-web/src/pages/finance/debitoren-liste.tsx
-  - packages/frontend-web/src/pages/futtermittel/mischfuttermittel-liste.tsx
-  - packages/frontend-web/src/pages/futter/misch/liste.tsx
-  - packages/frontend-web/src/pages/futter/einzel/liste.tsx
   - packages/frontend-web/src/__tests__/pages/mask-primary-nav-native.test.ts
+  - scripts/mask_route_migration_inventory.py
   - tests/test_stamm_object_page_parent.py
   - docs/quality-assurance/stamm-objectpage-parent-20261022.md
   - docs/architecture/uix/maskenfamilien-taxonomie.md
@@ -28,11 +32,6 @@ file_ownership:
   - docs/architecture/uix/mask-route-migration-inventory.md
   - docs/architecture/uix/universal-mask-runtime-status.md
   - docs/project-context/open-gaps-and-known-issues.md
-  - docs/agent-handbuch/index.md
-  - docs/agent-handbuch/prozessketten.md
-  - docs/agent-handbuch/masken-api-katalog.md
-  - docs/agent-handbuch/automatisierung.md
-  - docs/agent-handbuch/agent-process-manifest.json
   - docs/agent-ops/slices/UIX-STAMM-OBJECTPAGE-ALL-20261022.yaml
   - docs/agent-ops/active-workboard.md
 nicht_anfassen:
@@ -44,7 +43,7 @@ nicht_anfassen:
 acceptance:
   - Alle 12 Stamm-ObjectPage-ScreenDefinitions nutzen build_stamm_object_page
   - Generator-Readiness (Gate A) und Studio-Quellenkatalog / Feldvertraege (Gate B/C) gruen
-  - Sechs Stammdaten-Listen navigieren bei Zeilenklick auf native Detailrouten; Create bleibt Legacy
+  - Stammdaten-Listen navigieren bei Zeilenklick auf native Detailrouten; Create bleibt Legacy
   - Pytest + Vitest + Drift-Checks gruen
 tests:
   - pytest tests/test_stamm_object_page_parent.py -q

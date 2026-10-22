@@ -1472,10 +1472,10 @@ Beleg/Stamm/Liste/Worklist/Ausnahme und Cluster-Roadmap P0–P3 in
 [`maskenfamilien-taxonomie.md`](../architecture/uix/maskenfamilien-taxonomie.md);
 Beleg-Spezialfall [`beleg-maskenfamilie-vererbung.md`](../architecture/uix/beleg-maskenfamilie-vererbung.md).
 Slices `UIX-MASKENFAMILIEN-TAXONOMIE-20261022` und `UIX-BELEG-FAMILIE-VERERBUNG-20261022`
-beide **offen** (Plan, nicht reserviert). **StammObjectPageParent-Pilot geliefert**
-(`UIX-STAMM-OBJECTPAGE-PARENT-20261022`): Factory + fuenf Children; QA
+beide **offen** (Plan, nicht reserviert). **StammObjectPageParent-Rollout abgeschlossen**
+(`UIX-STAMM-OBJECTPAGE-PARENT-20261022` + `UIX-STAMM-OBJECTPAGE-ALL-20261022`): Factory + alle 12 Stamm-ObjectPage-Children (Gates A–C gruen) + 6 weitere Listen-Detailklicks auf native Routen; QA
 [`stamm-objectpage-parent-20261022.md`](../quality-assurance/stamm-objectpage-parent-20261022.md).
-Naechste Cluster: weitere Stamm-Children, KontrollWorklist-Ausbau, Listen Dual-Pfad;
+Naechste Cluster: KontrollWorklist-Ausbau, weitere Listen Dual-Pfad;
 Codex STUDIO-BELEG-THEME / Touren/Training/Bestellvorschlag unangetastet.
 
 ## STUDIO — Made-by-Studio Qualitätslücke (Nachtrag 2026-10-22)

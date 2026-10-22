@@ -11,19 +11,19 @@ Stand: 2026-10-22 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt Routen | 941 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 61 |
-| legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 115 |
-| hand_built (weder Runtime noch ObjectPage/ListReport) | 764 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 104 |
+| legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 106 |
+| hand_built (weder Runtime noch ObjectPage/ListReport) | 730 |
 | non_page_module (Layout/Redirect/sonstiges) | 1 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
 
 | Klasse | Anzahl |
 |--------|--------|
-| Gesamt TSX-Seiten | 700 |
-| runtime_wired | 52 |
-| legacy_mask_pattern | 57 |
-| hand_built | 591 |
+| Gesamt TSX-Seiten | 701 |
+| runtime_wired | 89 |
+| legacy_mask_pattern | 52 |
+| hand_built | 560 |
 
 ## ScreenDefinitions / Studio
 
@@ -35,9 +35,9 @@ Stand: 2026-10-22 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Metrik | Frueher | Jetzt (2026-10-22) |
 |--------|---------|---------------------|
-| handgebaute Routen | 442 | 764 |
-| Routen mit alten Maskenmustern | 80 | 115 |
-| Runtime-verdrahtet | — | 61 |
+| handgebaute Routen | 442 | 730 |
+| Routen mit alten Maskenmustern | 80 | 106 |
+| Runtime-verdrahtet | — | 104 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
@@ -68,7 +68,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/saatgut-liste` ← `src/pages/agrar/saatgut-liste.tsx`
 - `agrar/saatgut-stamm` ← `src/pages/agrar/saatgut-stamm.tsx`
 - `agrar/saatgut-stamm/:id` ← `src/pages/agrar/saatgut-stamm.tsx`
-- `agrar/saatgut/liste` ← `src/pages/agrar/saatgut/liste.tsx`
 - `agrar/saatgut/stamm` ← `src/pages/agrar/saatgut/stamm.tsx`
 - `agrar/saatgut/stamm/:id` ← `src/pages/agrar/saatgut/stamm.tsx`
 - `crm/audits/neu` ← `src/pages/crm/lieferanten-liste.tsx`
@@ -94,6 +93,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `crm/gdpr-requests` ← `src/pages/crm/gdpr-requests.tsx`
 - `crm/kontakt-management` ← `src/pages/crm/kontakt-management.tsx`
 - `crm/kunden` ← `src/pages/crm/kunden-liste.tsx`
+- `crm/kunden-liste` ← `src/pages/crm/kunden-liste.tsx`
 
 ## Runtime-verdrahtet (alle)
 
@@ -105,22 +105,45 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/kontrakt/:id` ← `src/pages/agrar/kontrakt-native.tsx`
 - `agrar/kontrakte/:id` ← `src/pages/agrar/kontrakt-native.tsx`
 - `agrar/saatgut/:id` ← `src/pages/agrar/saatgut-native.tsx`
+- `artikel` ← `src/pages/artikel/liste.tsx`
+- `artikel/liste` ← `src/pages/artikel/liste.tsx`
+- `auswertungen/abfrage-center` ← `src/pages/auswertungen/abfrage-center.tsx`
+- `auswertungen/aenderungshistorie` ← `src/pages/auswertungen/aenderungshistorie.tsx`
+- `auswertungen/beleg-kontrolle` ← `src/pages/auswertungen/beleg-kontrolle.tsx`
+- `auswertungen/bonus-berechnung` ← `src/pages/auswertungen/bonus-berechnung.tsx`
+- `auswertungen/dms-volltext` ← `src/pages/auswertungen/dms-volltext.tsx`
+- `auswertungen/duengemittelmengen` ← `src/pages/auswertungen/duengemittelmengen.tsx`
+- `auswertungen/l3-berichtskatalog` ← `src/pages/auswertungen/l3-berichtskatalog.tsx`
 - `belege/:belegart/:id` ← `src/pages/belege/beleg.tsx`
 - `crm/kunden-schnellauswahl` ← `src/pages/crm/kunden-schnellauswahl.tsx`
+- `crm/mail-arbeitsplatz` ← `src/pages/crm/mail-arbeitsplatz.tsx`
+- `crm/opportunities` ← `src/pages/crm/opportunities-liste.tsx`
+- `crm/opportunities-liste` ← `src/pages/crm/opportunities-liste.tsx`
 - `crm/opportunity/:id` ← `src/pages/crm/opportunity-native.tsx`
+- `docflow/dokumenten-ruecklauf` ← `src/pages/docflow/dokumenten-ruecklauf.tsx`
+- `einkauf` ← `src/pages/einkauf/bestellungen-liste.tsx`
 - `einkauf/anfrage/:id` ← `src/pages/einkauf/anfrage-native.tsx`
+- `einkauf/anfragen` ← `src/pages/einkauf/anfragen-liste.tsx`
+- `einkauf/anfragen-liste` ← `src/pages/einkauf/anfragen-liste.tsx`
 - `einkauf/angebot/:id` ← `src/pages/einkauf/angebot-native.tsx`
+- `einkauf/angebote` ← `src/pages/einkauf/angebote-liste.tsx`
+- `einkauf/angebote-liste` ← `src/pages/einkauf/angebote-liste.tsx`
 - `einkauf/anlieferavis/:id` ← `src/pages/einkauf/anlieferavis-native.tsx`
 - `einkauf/auftragsbestaetigung/:id` ← `src/pages/einkauf/auftragsbestaetigung-native.tsx`
 - `einkauf/bestellung/:id` ← `src/pages/einkauf/bestellung-native.tsx`
+- `einkauf/bestellungen` ← `src/pages/einkauf/bestellungen-liste.tsx`
+- `einkauf/bestellungen-liste` ← `src/pages/einkauf/bestellungen-liste.tsx`
 - `einkauf/lieferanten/:id` ← `src/pages/einkauf/supplier-native.tsx`
 - `einkauf/supplier/:id` ← `src/pages/einkauf/supplier-native.tsx`
 - `finance/ap-invoice/:id` ← `src/pages/finance/ap-invoice-native.tsx`
 - `finance/ar-open-item/:id` ← `src/pages/finance/ar-open-item-native.tsx`
 - `finance/bankkonto/:id` ← `src/pages/finance/bankkonto-native.tsx`
 - `finance/debitor/:id` ← `src/pages/finance/debitor-native.tsx`
+- `finance/debitoren-liste` ← `src/pages/finance/debitoren-liste.tsx`
 - `finance/kreditor/:id` ← `src/pages/finance/kreditor-native.tsx`
 - `finance/payment-run/:id` ← `src/pages/finance/payment-run-native.tsx`
+- `finance/pruefkorb` ← `src/pages/finance/pruefkorb.tsx`
+- `finance/rechnungstapel` ← `src/pages/finance/rechnungstapel.tsx`
 - `finance/steuerschluessel` ← `src/pages/finance/steuerschluessel.tsx`
 - `fuhrpark/ausgehende-belege-dokumente` ← `src/pages/fuhrpark/ausgehende-belege-dokumente.tsx`
 - `fuhrpark/fahrzeug-stamm` ← `src/pages/fuhrpark/fahrzeug-stamm.tsx`
@@ -128,9 +151,16 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `fuhrpark/fahrzeug/neu` ← `src/pages/fuhrpark/fahrzeug-stamm.tsx`
 - `fuhrpark/fuhrpark-rechnungen` ← `src/pages/fuhrpark/fuhrpark-rechnungen.tsx`
 - `fuhrpark/fuhrpark-stammdaten` ← `src/pages/fuhrpark/fuhrpark-stammdaten.tsx`
+- `futtermittel` ← `src/pages/futtermittel/einzelfuttermittel-liste.tsx`
+- `futtermittel/einzelfuttermittel-liste` ← `src/pages/futtermittel/einzelfuttermittel-liste.tsx`
+- `futtermittel/einzelfuttermittel/liste` ← `src/pages/futtermittel/einzelfuttermittel-liste.tsx`
+- `futtermittel/mischfuttermittel-liste` ← `src/pages/futtermittel/mischfuttermittel-liste.tsx`
 - `futtermittel/mischfuttermittel/:id` ← `src/pages/futtermittel/mischfuttermittel-native.tsx`
+- `futtermittel/mischfuttermittel/liste` ← `src/pages/futtermittel/mischfuttermittel-liste.tsx`
 - `lager/article-stock/:id` ← `src/pages/lager/article-stock-native.tsx`
 - `lager/artikel/:id` ← `src/pages/lager/article-stock-native.tsx`
+- `lager/fremdware` ← `src/pages/lager/fremdware.tsx`
+- `lager/inventur-nebenlaeufe` ← `src/pages/lager/inventur-nebenlaeufe.tsx`
 - `lager/stock-movement/:id` ← `src/pages/lager/lagerbewegung-native.tsx`
 - `logistik/frachttabellen` ← `src/pages/logistik/frachttabellen.tsx`
 - `logistik/tour-fracht-arbeitsraum` ← `src/pages/logistik/tour-fracht-arbeitsraum.tsx`
@@ -143,14 +173,21 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `personal/onboarding` ← `src/pages/personal/onboarding.tsx`
 - `personal/qualifikationen` ← `src/pages/personal/qualifikationen.tsx`
 - `personal/schulungen` ← `src/pages/personal/schulungen.tsx`
+- `planung/kalender` ← `src/pages/planung/kalender.tsx`
+- `portal/rationsoptimierung` ← `src/pages/portal/rationsoptimierung.tsx`
+- `produktion/chargen-bearbeiten` ← `src/pages/produktion/chargen-bearbeiten.tsx`
+- `produktion/produktionsleitstand` ← `src/pages/produktion/produktionsleitstand.tsx`
 - `qualitaet/reklamation/:id` ← `src/pages/qualitaet/reklamation-native.tsx`
 - `sales/credit-note-editor` ← `src/pages/sales/credit-note-editor.tsx`
 - `sales/credit-notes` ← `src/pages/sales/credit-note-editor.tsx`
 - `sales/delivery-note/:id` ← `src/pages/verkauf/lieferschein-native.tsx`
 - `sales/rechnungen` ← `src/pages/verkauf/rechnungen-worklist.tsx`
 - `sales/sales-order/:id` ← `src/pages/sales/sales-order-native.tsx`
+- `schnittstelle/legacy-adapter-monitor` ← `src/pages/schnittstelle/legacy-adapter-monitor.tsx`
+- `schnittstelle/mde-inbox` ← `src/pages/schnittstelle/mde-inbox.tsx`
 - `strecke/streckengeschaeft` ← `src/pages/strecke/streckengeschaeft.tsx`
 - `studio/run/:screenId` ← `src/pages/admin/studio-run.tsx`
+- `tankstelle/adapter-inbox` ← `src/pages/tankstelle/adapter-inbox.tsx`
 - `transporte/fahrer` ← `src/pages/transporte/fahrer-liste.tsx`
 - `transporte/fahrer-liste` ← `src/pages/transporte/fahrer-liste.tsx`
 - `transporte/fahrer/:id` ← `src/pages/transporte/fahrer-liste.tsx`
@@ -158,6 +195,12 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `verkauf/rechnung/:id` ← `src/pages/verkauf/rechnung.tsx`
 - `verkauf/rechnungen` ← `src/pages/verkauf/rechnungen-worklist.tsx`
 - `versand/versand-avis` ← `src/pages/versand/versand-avis.tsx`
+- `workspace/einkauf` ← `src/pages/workspace/einkauf.tsx`
+- `workspace/fibu` ← `src/pages/workspace/fibu.tsx`
+- `workspace/lager` ← `src/pages/workspace/lager.tsx`
+- `workspace/leitung` ← `src/pages/workspace/leitung.tsx`
+- `workspace/letzte-dokumente` ← `src/pages/workspace/letzte-dokumente.tsx`
+- `workspace/verkauf` ← `src/pages/workspace/verkauf.tsx`
 
 ## Handgebaut — Migrationskandidaten (erste 60, alphabetisch)
 

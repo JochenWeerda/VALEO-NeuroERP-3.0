@@ -10,9 +10,15 @@ from app.core.screen_definitions_harvest_controls import HARVEST_CONTROL_BUILDER
 from app.core.screen_definitions_identity import IDENTITY_SCREEN_BUILDERS
 from app.core.screen_definitions_kontrolle import KONTROLLE_ROUTEN, KONTROLLE_SCREEN_BUILDERS, KONTROLLE_SYNONYME
 from app.core.mask_rollout_catalog import ROLLOUT_WAVES_42_51
+from app.core.kontroll_worklist_parent import (
+    build_document_control_variant,
+    build_document_control_worklist,
+    build_sanctions_kontroll_worklist,
+)
 from app.core.stamm_object_page_parent import (
     build_stamm_object_page,
     stamm_entity_source,
+    stamm_entity_tab,
     stamm_kopf_tab,
     stamm_lazy_table_tab,
     stamm_tab_source,
@@ -800,108 +806,70 @@ def build_supplier_screen_definition() -> dict[str, Any]:
 
 
 def build_crm_opportunity_screen_definition() -> dict[str, Any]:
-    """Native ScreenDefinition fuer crm/opportunity (UIX-039)."""
-    return {
-        "schemaVersion": 1,
-        "id": "crm/opportunity",
-        "domain": "crm",
-        "mode": "detail",
-        "title": "Opportunity",
-        "subtitle": "CRM Verkaufschance",
-        "adapter": {
-            "type": "native",
-            "sourceId": "crm/opportunity",
-            "temporary": False,
-        },
-        "summaryEndpoint": "/api/v1/mask-rollouts/crm/opportunity/{entity_id}/screen-summary",
-        "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/crm/opportunities/{entity_id}"},
-            {"key": "aktivitaeten", "endpoint": "/api/v1/mask-rollouts/crm/opportunity/{entity_id}/tabs/aktivitaeten", "pageSize": 25},
-            {"key": "angebote", "endpoint": "/api/v1/mask-rollouts/crm/opportunity/{entity_id}/tabs/angebote", "pageSize": 25},
+    """Native ScreenDefinition fuer crm/opportunity (UIX-039) — StammObjectPageParent."""
+    return build_stamm_object_page(
+        screen_id="crm/opportunity",
+        domain="crm",
+        title="Opportunity",
+        subtitle="CRM Verkaufschance",
+        identity_field="name",
+        summary_endpoint="/api/v1/mask-rollouts/crm/opportunity/{entity_id}/screen-summary",
+        data_sources=[
+            stamm_entity_source("/api/v1/crm/opportunities/{entity_id}"),
+            stamm_tab_source("aktivitaeten", "/api/v1/mask-rollouts/crm/opportunity/{entity_id}/tabs/aktivitaeten"),
+            stamm_tab_source("angebote", "/api/v1/mask-rollouts/crm/opportunity/{entity_id}/tabs/angebote"),
         ],
-        "tabs": [
-            {
-                "key": "kopf",
-                "label": "Stammdaten",
-                "lazy": False,
-                "keepAlive": True,
-                "dataSourceKey": "entity",
-                "fields": [
-                    # Die Opportunity fuehrt keine eigene Nummer, sondern
-                    # einen Namen. Ein Nummernfeld zu behalten hiesse, eine
-                    # Nummer zu zeigen, die es nicht gibt.
-                    {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
-                    {"key": "customer_name", "label": "Kunde", "type": "text", "readOnly": True},
-                    {"key": "customer_number", "label": "Kunden-Nr.", "type": "text", "readOnly": True},
-                    {"key": "assigned_to", "label": "Verantwortlich", "type": "text"},
-                    {"key": "stage", "label": "Phase", "type": "text"},
-                    {"key": "amount", "label": "Wert", "type": "currency"},
-                    {"key": "probability", "label": "Wahrscheinlichkeit %", "type": "number"},
-                    {"key": "expected_close_date", "label": "Erwarteter Abschluss", "type": "date"},
-                    {"key": "actual_close_date", "label": "Tatsaechlicher Abschluss", "type": "date", "readOnly": True},
-                    {"key": "lead_source", "label": "Quelle", "type": "text"},
-                    {"key": "status", "label": "Status", "type": "text"},
-                ],
-            },
-            {
-                # Die Kundenzuordnung bleibt aenderbar, gehoert aber nicht in den
-                # Kopf: dort steht der Kunde mit Namen und Nummer.
-                "key": "zuordnung",
-                "label": "Zuordnung",
-                "lazy": False,
-                "keepAlive": True,
-                "dataSourceKey": "entity",
-                "fields": [
+        tabs=[
+            stamm_kopf_tab([
+                # Die Opportunity fuehrt keine eigene Nummer, sondern
+                # einen Namen. Ein Nummernfeld zu behalten hiesse, eine
+                # Nummer zu zeigen, die es nicht gibt.
+                {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
+                {"key": "customer_name", "label": "Kunde", "type": "text", "readOnly": True},
+                {"key": "customer_number", "label": "Kunden-Nr.", "type": "text", "readOnly": True},
+                {"key": "assigned_to", "label": "Verantwortlich", "type": "text"},
+                {"key": "stage", "label": "Phase", "type": "text"},
+                {"key": "amount", "label": "Wert", "type": "currency"},
+                {"key": "probability", "label": "Wahrscheinlichkeit %", "type": "number"},
+                {"key": "expected_close_date", "label": "Erwarteter Abschluss", "type": "date"},
+                {"key": "actual_close_date", "label": "Tatsaechlicher Abschluss", "type": "date", "readOnly": True},
+                {"key": "lead_source", "label": "Quelle", "type": "text"},
+                {"key": "status", "label": "Status", "type": "text"},
+            ]),
+            # Die Kundenzuordnung bleibt aenderbar, gehoert aber nicht in den
+            # Kopf: dort steht der Kunde mit Namen und Nummer.
+            stamm_entity_tab(
+                key="zuordnung",
+                label="Zuordnung",
+                fields=[
                     {"key": "customer_id", "label": "Kunden-ID", "type": "text"},
                 ],
-            },
-            {
-                "key": "aktivitaeten",
-                "label": "Aktivitaeten",
-                "lazy": True,
-                "keepAlive": False,
-                "tables": [{
-                    "key": "aktivitaeten",
-                    "label": "Aktivitaeten",
-                    "dataSourceKey": "aktivitaeten",
-                    "serverPagination": True,
-                    "pageSize": 25,
-                    "virtualized": True,
-                    "rowHeight": 52,
-                    "columns": [
-                        {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                        {"key": "typ", "label": "Typ", "width": 100, "filterable": True},
-                        {"key": "betreff", "label": "Betreff", "width": 220},
-                        {"key": "verantwortlich", "label": "Verantwortlich", "width": 140},
-                        {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
-                    ],
-                }],
-            },
-            {
-                "key": "angebote",
-                "label": "Angebote",
-                "lazy": True,
-                "keepAlive": False,
-                "tables": [{
-                    "key": "angebote",
-                    "label": "Angebote",
-                    "dataSourceKey": "angebote",
-                    "serverPagination": True,
-                    "pageSize": 25,
-                    "virtualized": True,
-                    "rowHeight": 52,
-                    "columns": [
-                        {"key": "angebot_nr", "label": "Angebot-Nr.", "width": 130, "sortable": True},
-                        {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                        {"key": "wert", "label": "Wert", "numeric": True, "sortable": True, "renderKind": "currency"},
-                        {"key": "waehrung", "label": "Waehrung", "width": 70},
-                        {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
-                    ],
-                }],
-            },
+            ),
+            stamm_lazy_table_tab(
+                key="aktivitaeten",
+                label="Aktivitaeten",
+                columns=[
+                    {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                    {"key": "typ", "label": "Typ", "width": 100, "filterable": True},
+                    {"key": "betreff", "label": "Betreff", "width": 220},
+                    {"key": "verantwortlich", "label": "Verantwortlich", "width": 140},
+                    {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
+                ],
+            ),
+            stamm_lazy_table_tab(
+                key="angebote",
+                label="Angebote",
+                columns=[
+                    {"key": "angebot_nr", "label": "Angebot-Nr.", "width": 130, "sortable": True},
+                    {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                    {"key": "wert", "label": "Wert", "numeric": True, "sortable": True, "renderKind": "currency"},
+                    {"key": "waehrung", "label": "Waehrung", "width": 70},
+                    {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
+                ],
+            ),
         ],
-        "actions": [
-            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.opportunity.update"},
+        edit_permission="crm.opportunity.update",
+        extra_actions=[
             {
                 "key": "create_activity",
                 "label": "Aktivitaet anlegen",
@@ -920,63 +888,47 @@ def build_crm_opportunity_screen_definition() -> dict[str, Any]:
                 ],
             },
         ],
-        "noWorkflowReason": "Opportunity-Phasen werden manuell gesteuert — kein automatischer Prozess-Lebenszyklus erforderlich.",
-        "agentContract": {
-            "businessPurpose": "CRM-Verkaufschance: Phase, Wert, Wahrscheinlichkeit, Aktivitaeten und Angebote in einer Ansicht fuer Vertriebssteuerung.",
-            "examplePrompts": [
-                "Was ist der aktuelle Status und die Wahrscheinlichkeit von Opportunity {entity_id}?",
-                "Zeige alle Aktivitaeten der letzten 30 Tage fuer Opportunity {entity_id}.",
-                "Welche Angebote sind mit Opportunity {entity_id} verknuepft?",
-            ],
-            "sensitiveFields": ["wert", "wahrscheinlichkeit"],
-            "testSelectors": {
-                "screenRoot": "[data-testid='crm-opportunity-360']",
-                "primaryAction": "[data-testid='action-edit']",
-                "summaryArea": "[data-testid='mask-summary']",
-            },
-        },
-        "layout": {
-            "preferredMode": "desktopDense",
-            "mobileMode": "mobileStack",
-            "touchTargetPx": 44,
-        },
-        "performance": {
-            "initialPayloadBudgetKb": 48,
-            "requiresLazyTabs": True,
-            "requiresVirtualTables": True,
-            "lookupMinChars": 2,
-            "bundleGroup": "crm",
-        },
-    }
+        no_workflow_reason="Opportunity-Phasen werden manuell gesteuert — kein automatischer Prozess-Lebenszyklus erforderlich.",
+        business_purpose="CRM-Verkaufschance: Phase, Wert, Wahrscheinlichkeit, Aktivitaeten und Angebote in einer Ansicht fuer Vertriebssteuerung.",
+        example_prompts=[
+            "Was ist der aktuelle Status und die Wahrscheinlichkeit von Opportunity {entity_id}?",
+            "Zeige alle Aktivitaeten der letzten 30 Tage fuer Opportunity {entity_id}.",
+            "Welche Angebote sind mit Opportunity {entity_id} verknuepft?",
+        ],
+        sensitive_fields=["wert", "wahrscheinlichkeit"],
+        test_id="crm-opportunity-360",
+        density="compact",
+        context_rail="combined",
+        table_profile="standard",
+        payload_budget_kb=48,
+        requires_virtual_tables=True,
+        bundle_group="crm",
+    )
 
 
 def build_lager_article_stock_screen_definition() -> dict[str, Any]:
-    """Native ScreenDefinition fuer lager/article-stock (UIX-040)."""
-    return {
-        "schemaVersion": 1,
-        "id": "lager/article-stock",
-        "domain": "lager",
-        "mode": "detail",
-        "title": "Artikelbestand",
-        "subtitle": "Lager / Bestandsfuehrung",
-        "identityField": "article_number",
-        "adapter": {"type": "native", "sourceId": "lager/article-stock", "temporary": False},
-        "summaryEndpoint": "/api/v1/mask-rollouts/lager/article-stock/{entity_id}/screen-summary",
-        "summary": [
+    """Native ScreenDefinition fuer lager/article-stock (UIX-040) — StammObjectPageParent."""
+    return build_stamm_object_page(
+        screen_id="lager/article-stock",
+        domain="lager",
+        title="Artikelbestand",
+        subtitle="Lager / Bestandsfuehrung",
+        identity_field="article_number",
+        summary_endpoint="/api/v1/mask-rollouts/lager/article-stock/{entity_id}/screen-summary",
+        summary=[
             {"key": "article_number", "label": "Artikel-Nr.", "value": None, "kind": "identity"},
             {"key": "bestand", "label": "Bestand", "value": None, "kind": "kpi", "tone": "neutral"},
             {"key": "mindestbestand", "label": "Meldebestand", "value": None, "kind": "kpi", "tone": "warning"},
             {"key": "esg_co2e", "label": "CO2e Charge", "value": None, "kind": "kpi", "tone": "neutral"},
         ],
-        "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/articles/{entity_id}"},
-            {"key": "bestand", "endpoint": "/api/v1/mask-rollouts/lager/article-stock/{entity_id}/tabs/bestand", "pageSize": 25},
-            {"key": "bewegungen", "endpoint": "/api/v1/mask-rollouts/lager/article-stock/{entity_id}/tabs/bewegungen", "pageSize": 25},
+        data_sources=[
+            stamm_entity_source("/api/v1/articles/{entity_id}"),
+            stamm_tab_source("bestand", "/api/v1/mask-rollouts/lager/article-stock/{entity_id}/tabs/bestand"),
+            stamm_tab_source("bewegungen", "/api/v1/mask-rollouts/lager/article-stock/{entity_id}/tabs/bewegungen"),
         ],
-        "tabs": [
-            {
-                "key": "kopf", "label": "Artikelstamm", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
-                "fields": [
+        tabs=[
+            stamm_kopf_tab(
+                [
                     {"key": "article_number", "label": "Artikel-Nr.", "type": "text", "readOnly": True},
                     {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
                     {"key": "category", "label": "Warengruppe", "type": "text", "readOnly": True},
@@ -991,69 +943,54 @@ def build_lager_article_stock_screen_definition() -> dict[str, Any]:
                     {"key": "available_stock", "label": "Verfuegbar", "type": "number", "readOnly": True},
                     {"key": "is_active", "label": "Aktiv", "type": "boolean", "readOnly": True},
                 ],
-            },
-            {
-                "key": "bestand", "label": "Bestand je Lagerort", "lazy": True, "keepAlive": False,
-                "tables": [{"key": "bestand", "label": "Bestand", "dataSourceKey": "bestand",
-                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                            "columns": [
-                                {"key": "lagerort_nr", "label": "Lagerort-Nr.", "width": 120, "sortable": True},
-                                {"key": "lagerort_bezeichnung", "label": "Bezeichnung", "width": 180},
-                                {"key": "bestand_menge", "label": "Bestand", "numeric": True, "sortable": True, "renderKind": "number"},
-                                {"key": "einheit", "label": "Einheit", "width": 70},
-                                {"key": "reserviert", "label": "Reserviert", "numeric": True, "sortable": True, "renderKind": "number"},
-                                {"key": "mindestbestand", "label": "Mindestbest.", "numeric": True, "renderKind": "number", "filterable": True},
-                            ]}],
-            },
-            {
-                "key": "bewegungen", "label": "Lagerbewegungen", "lazy": True, "keepAlive": False,
-                "tables": [{"key": "bewegungen", "label": "Bewegungen", "dataSourceKey": "bewegungen",
-                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                            "rowRouteTemplate": "/lager/stock-movement/{movement_id}",
-                            "columns": [
-                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                                {"key": "typ", "label": "Typ", "width": 100, "filterable": True},
-                                {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "renderKind": "number"},
-                                {"key": "einheit", "label": "Einheit", "width": 70},
-                                {"key": "beleg_nr", "label": "Beleg-Nr.", "width": 120},
-                            ]}],
-            },
+                label="Artikelstamm",
+            ),
+            stamm_lazy_table_tab(
+                key="bestand",
+                label="Bestand je Lagerort",
+                table_label="Bestand",
+                columns=[
+                    {"key": "lagerort_nr", "label": "Lagerort-Nr.", "width": 120, "sortable": True},
+                    {"key": "lagerort_bezeichnung", "label": "Bezeichnung", "width": 180},
+                    {"key": "bestand_menge", "label": "Bestand", "numeric": True, "sortable": True, "renderKind": "number"},
+                    {"key": "einheit", "label": "Einheit", "width": 70},
+                    {"key": "reserviert", "label": "Reserviert", "numeric": True, "sortable": True, "renderKind": "number"},
+                    {"key": "mindestbestand", "label": "Mindestbest.", "numeric": True, "renderKind": "number", "filterable": True},
+                ],
+            ),
+            stamm_lazy_table_tab(
+                key="bewegungen",
+                label="Lagerbewegungen",
+                table_label="Bewegungen",
+                row_route_template="/lager/stock-movement/{movement_id}",
+                columns=[
+                    {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
+                    {"key": "typ", "label": "Typ", "width": 100, "filterable": True},
+                    {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "renderKind": "number"},
+                    {"key": "einheit", "label": "Einheit", "width": 70},
+                    {"key": "beleg_nr", "label": "Beleg-Nr.", "width": 120},
+                ],
+            ),
         ],
-        "actions": [
-            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "lager.artikel.update", "zone": "commit"},
+        edit_permission="lager.artikel.update",
+        edit_action_zone="commit",
+        no_workflow_reason="Artikelstamm ist ein reines Verwaltungsobjekt — kein prozessgesteuerter Lebenszyklus.",
+        business_purpose="Artikelbestand-Cockpit: Stammdaten, Bestand je Lagerort und Bewegungshistorie fuer Disposition und Einkauf.",
+        example_prompts=[
+            "Wie hoch ist der aktuelle Bestand von Artikel {entity_id} je Lagerort?",
+            "Zeige alle Lagerbewegungen von Artikel {entity_id} der letzten 30 Tage.",
+            "Welche Lagerorte haben Bestand unter Mindestbestand fuer Artikel {entity_id}?",
         ],
-        "noWorkflowReason": "Artikelstamm ist ein reines Verwaltungsobjekt — kein prozessgesteuerter Lebenszyklus.",
-        "agentContract": {
-            "businessPurpose": "Artikelbestand-Cockpit: Stammdaten, Bestand je Lagerort und Bewegungshistorie fuer Disposition und Einkauf.",
-            "examplePrompts": [
-                "Wie hoch ist der aktuelle Bestand von Artikel {entity_id} je Lagerort?",
-                "Zeige alle Lagerbewegungen von Artikel {entity_id} der letzten 30 Tage.",
-                "Welche Lagerorte haben Bestand unter Mindestbestand fuer Artikel {entity_id}?",
-            ],
-            "sensitiveFields": ["mindestbestand", "meldebestand"],
-            "testSelectors": {
-                "screenRoot": "[data-testid='lager-article-stock']",
-                "primaryAction": "[data-testid='action-edit']",
-                "summaryArea": "[data-testid='mask-summary']",
-            },
-        },
-        "layout": {
-            "preferredMode": "desktopDense",
-            "mobileMode": "mobileStack",
-            "touchTargetPx": 44,
-            "floorplan": "objectPage",
-            "columnNavigation": "single",
-            "sectionNavigation": "anchors",
-            "density": "expertDense",
-            "contextRail": "combined",
-            "tableProfile": "inventory",
-            "summaryPlacement": "header",
-            "stickyHeader": True,
-            "stickyFooter": True,
-        },
-        "interaction": {"enterMovesFocus": True},
-        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "lager"},
-    }
+        sensitive_fields=["mindestbestand", "meldebestand"],
+        test_id="lager-article-stock",
+        interaction={"enterMovesFocus": True},
+        density="expertDense",
+        context_rail="combined",
+        table_profile="inventory",
+        payload_budget_kb=48,
+        requires_virtual_tables=True,
+        bundle_group="lager",
+    )
 
 
 def build_sales_delivery_note_screen_definition() -> dict[str, Any]:
@@ -2193,47 +2130,58 @@ def build_finance_kreditor_screen_definition() -> dict[str, Any]:
 
 
 def build_finance_bankkonto_screen_definition() -> dict[str, Any]:
-    """Native SD fuer finance/bankkonto (Bankkonten-Stammdaten)."""
-    return {
-        "schemaVersion": 1, "id": "finance/bankkonto", "domain": "finance", "mode": "detail",
-        "title": "Bankkonto", "subtitle": "Finance / Bankkonten-Stamm",
-        "adapter": {"type": "native", "sourceId": "finance/bankkonto", "temporary": False},
-        "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/banken/konten/{entity_id}"},
-            {"key": "buchungen", "endpoint": "/api/v1/masks/finance/bankkonten/entity/{entity_id}/tabs/buchungen", "pageSize": 50},
+    """Native SD fuer finance/bankkonto (Bankkonten-Stammdaten) — StammObjectPageParent."""
+    return build_stamm_object_page(
+        screen_id="finance/bankkonto",
+        domain="finance",
+        title="Bankkonto",
+        subtitle="Finance / Bankkonten-Stamm",
+        identity_field=None,
+        data_sources=[
+            stamm_entity_source("/api/v1/banken/konten/{entity_id}"),
+            stamm_tab_source("buchungen", "/api/v1/masks/finance/bankkonten/entity/{entity_id}/tabs/buchungen", page_size=50),
         ],
-        "tabs": [
-            {"key": "kopf", "label": "Konto-Stamm", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
-             "fields": [
-                 {"key": "id", "label": "Konto-ID", "type": "text", "readOnly": True},
-                 {"key": "bank", "label": "Bank", "type": "text"},
-                 {"key": "iban", "label": "IBAN", "type": "text"},
-                 {"key": "bic", "label": "BIC", "type": "text"},
-                 {"key": "waehrung", "label": "Waehrung", "type": "text"},
-                 {"key": "saldo", "label": "Saldo", "type": "currency"},
-                 {"key": "status", "label": "Status", "type": "text"},
-             ]},
-            {"key": "buchungen", "label": "Buchungen", "lazy": True, "keepAlive": False,
-             "tables": [{"key": "buchungen", "label": "Buchungen", "dataSourceKey": "buchungen",
-                         "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
-                         "columns": [
-                             {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "width": 110},
-                             {"key": "verwendungszweck", "label": "Verwendungszweck", "width": 240, "filterable": True},
-                             {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
-                             {"key": "gegenpartei", "label": "Gegenpartei", "width": 180},
-                         ]}]},
+        tabs=[
+            stamm_kopf_tab(
+                [
+                    {"key": "id", "label": "Konto-ID", "type": "text", "readOnly": True},
+                    {"key": "bank", "label": "Bank", "type": "text"},
+                    {"key": "iban", "label": "IBAN", "type": "text"},
+                    {"key": "bic", "label": "BIC", "type": "text"},
+                    {"key": "waehrung", "label": "Waehrung", "type": "text"},
+                    {"key": "saldo", "label": "Saldo", "type": "currency"},
+                    {"key": "status", "label": "Status", "type": "text"},
+                ],
+                label="Konto-Stamm",
+            ),
+            stamm_lazy_table_tab(
+                key="buchungen",
+                label="Buchungen",
+                page_size=50,
+                columns=[
+                    {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "width": 110},
+                    {"key": "verwendungszweck", "label": "Verwendungszweck", "width": 240, "filterable": True},
+                    {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
+                    {"key": "gegenpartei", "label": "Gegenpartei", "width": 180},
+                ],
+            ),
         ],
-        "actions": [{"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "finance.bankkonto.update"}],
-        "noWorkflowReason": "Bankkonten-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
-        "agentContract": {
-            "businessPurpose": "Bankkonto-Stamm: Kontodaten und Buchungshistorie fuer Finanzbuchhaltung.",
-            "examplePrompts": ["Was ist der aktuelle Saldo von Bankkonto {entity_id}?", "Zeige die letzten Buchungen auf Bankkonto {entity_id}."],
-            "sensitiveFields": ["iban", "bic", "saldo"],
-            "testSelectors": {"screenRoot": "[data-testid='finance-bankkonto']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
-        },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
-        "performance": {"initialPayloadBudgetKb": 40, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "finance"},
-    }
+        edit_permission="finance.bankkonto.update",
+        no_workflow_reason="Bankkonten-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
+        business_purpose="Bankkonto-Stamm: Kontodaten und Buchungshistorie fuer Finanzbuchhaltung.",
+        example_prompts=[
+            "Was ist der aktuelle Saldo von Bankkonto {entity_id}?",
+            "Zeige die letzten Buchungen auf Bankkonto {entity_id}.",
+        ],
+        sensitive_fields=["iban", "bic", "saldo"],
+        test_id="finance-bankkonto",
+        density="expertDense",
+        context_rail="audit",
+        table_profile="financial",
+        payload_budget_kb=40,
+        requires_virtual_tables=True,
+        bundle_group="finance",
+    )
 
 
 def build_einkauf_anfrage_screen_definition() -> dict[str, Any]:
@@ -2477,73 +2425,86 @@ def build_qualitaet_reklamation_screen_definition() -> dict[str, Any]:
 
 
 def build_futtermittel_einzelfuttermittel_screen_definition() -> dict[str, Any]:
-    """Native SD fuer futtermittel/einzelfuttermittel."""
-    return {
-        "schemaVersion": 1, "id": "futtermittel/einzelfuttermittel", "domain": "futtermittel", "mode": "detail",
-        "title": "Einzelfuttermittel", "subtitle": "Futtermittel / Rohstoff-Stamm",
-        "adapter": {"type": "native", "sourceId": "futtermittel/einzelfuttermittel", "temporary": False},
-        "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}"},
-            {"key": "naehrstoffe", "endpoint": "/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}/reference-values", "pageSize": 50},
-            {"key": "preise", "endpoint": "/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}/products", "pageSize": 25},
-            {"key": "history", "endpoint": "/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}/history", "pageSize": 25},
+    """Native SD fuer futtermittel/einzelfuttermittel — StammObjectPageParent."""
+    return build_stamm_object_page(
+        screen_id="futtermittel/einzelfuttermittel",
+        domain="futtermittel",
+        title="Einzelfuttermittel",
+        subtitle="Futtermittel / Rohstoff-Stamm",
+        identity_field="artikel_nummer",
+        data_sources=[
+            stamm_entity_source("/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}"),
+            stamm_tab_source("naehrstoffe", "/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}/reference-values", page_size=50),
+            stamm_tab_source("preise", "/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}/products"),
+            stamm_tab_source("history", "/api/v1/agrar/rations-optimization/feed-catalog/feeds/{entity_id}/history"),
         ],
-        "tabs": [
-            {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
-             "fields": [
-                 {"key": "artikel_nummer", "label": "FM-Nr.", "type": "text", "readOnly": True},
-                 {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
-                 {"key": "art", "label": "Kategorie", "type": "text"},
-                 {"key": "feed_kind", "label": "Futterart", "type": "text"},
-                 {"key": "species_scope", "label": "Tierarten", "type": "text"},
-                 {"key": "trockensubstanz", "label": "Trockensubstanz %", "type": "number"},
-                 {"key": "energie", "label": "ME (MJ/kg TM)", "type": "number"},
-                 {"key": "protein", "label": "Rohprotein %", "type": "number"},
-                 {"key": "approval_status", "label": "Freigabestatus", "type": "text"},
-                 {"key": "revision", "label": "Revision", "type": "number", "readOnly": True},
-             ]},
-            {"key": "naehrstoffe", "label": "Naehrstoffe", "lazy": True, "keepAlive": False,
-             "tables": [{"key": "naehrstoffe", "label": "Naehrstoffgehalte", "dataSourceKey": "naehrstoffe",
-                         "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
-                         "columns": [
-                             {"key": "nutrient_name", "label": "Naehrstoff", "sortable": True, "filterable": True},
-                             {"key": "value", "label": "Gehalt", "numeric": True, "renderKind": "number"},
-                             {"key": "unit_code", "label": "Einheit", "width": 110},
-                             {"key": "basis", "label": "Basis", "filterable": True, "width": 130},
-                             {"key": "source_type", "label": "Quelle", "filterable": True, "width": 130},
-                             {"key": "value_status", "label": "Wertstatus", "renderKind": "status", "width": 120},
-                         ]}]},
-            {"key": "preise", "label": "Preise", "lazy": True, "keepAlive": False,
-             "tables": [{"key": "preise", "label": "Preise", "dataSourceKey": "preise",
-                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                         "columns": [
-                             {"key": "valid_from", "label": "Gueltig ab", "renderKind": "date", "sortable": True, "width": 110},
-                             {"key": "price_eur_t", "label": "Preis/t", "numeric": True, "sortable": True, "renderKind": "currency"},
-                             {"key": "display_name", "label": "Produkt", "filterable": True, "width": 200},
-                             {"key": "packaging_unit", "label": "Gebinde", "width": 100},
-                             {"key": "minimum_order_qty", "label": "Mindestabnahme", "numeric": True, "width": 140},
-                         ]}]},
-            {"key": "history", "label": "Historie", "lazy": True, "keepAlive": False,
-             "tables": [{"key": "history", "label": "Revisionen", "dataSourceKey": "history",
-                         "serverPagination": False, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                         "columns": [
-                             {"key": "revision", "label": "Revision", "numeric": True, "sortable": True, "width": 90},
-                             {"key": "changed_at", "label": "Geaendert", "renderKind": "datetime", "sortable": True, "width": 180},
-                             {"key": "changed_by", "label": "Bearbeiter", "filterable": True, "width": 180},
-                             {"key": "reason", "label": "Aenderungsgrund", "width": 320},
-                         ]}]},
+        tabs=[
+            stamm_kopf_tab([
+                {"key": "artikel_nummer", "label": "FM-Nr.", "type": "text", "readOnly": True},
+                {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
+                {"key": "art", "label": "Kategorie", "type": "text"},
+                {"key": "feed_kind", "label": "Futterart", "type": "text"},
+                {"key": "species_scope", "label": "Tierarten", "type": "text"},
+                {"key": "trockensubstanz", "label": "Trockensubstanz %", "type": "number"},
+                {"key": "energie", "label": "ME (MJ/kg TM)", "type": "number"},
+                {"key": "protein", "label": "Rohprotein %", "type": "number"},
+                {"key": "approval_status", "label": "Freigabestatus", "type": "text"},
+                {"key": "revision", "label": "Revision", "type": "number", "readOnly": True},
+            ]),
+            stamm_lazy_table_tab(
+                key="naehrstoffe",
+                label="Naehrstoffe",
+                table_label="Naehrstoffgehalte",
+                page_size=50,
+                columns=[
+                    {"key": "nutrient_name", "label": "Naehrstoff", "sortable": True, "filterable": True},
+                    {"key": "value", "label": "Gehalt", "numeric": True, "renderKind": "number"},
+                    {"key": "unit_code", "label": "Einheit", "width": 110},
+                    {"key": "basis", "label": "Basis", "filterable": True, "width": 130},
+                    {"key": "source_type", "label": "Quelle", "filterable": True, "width": 130},
+                    {"key": "value_status", "label": "Wertstatus", "renderKind": "status", "width": 120},
+                ],
+            ),
+            stamm_lazy_table_tab(
+                key="preise",
+                label="Preise",
+                columns=[
+                    {"key": "valid_from", "label": "Gueltig ab", "renderKind": "date", "sortable": True, "width": 110},
+                    {"key": "price_eur_t", "label": "Preis/t", "numeric": True, "sortable": True, "renderKind": "currency"},
+                    {"key": "display_name", "label": "Produkt", "filterable": True, "width": 200},
+                    {"key": "packaging_unit", "label": "Gebinde", "width": 100},
+                    {"key": "minimum_order_qty", "label": "Mindestabnahme", "numeric": True, "width": 140},
+                ],
+            ),
+            stamm_lazy_table_tab(
+                key="history",
+                label="Historie",
+                table_label="Revisionen",
+                server_pagination=False,
+                columns=[
+                    {"key": "revision", "label": "Revision", "numeric": True, "sortable": True, "width": 90},
+                    {"key": "changed_at", "label": "Geaendert", "renderKind": "datetime", "sortable": True, "width": 180},
+                    {"key": "changed_by", "label": "Bearbeiter", "filterable": True, "width": 180},
+                    {"key": "reason", "label": "Aenderungsgrund", "width": 320},
+                ],
+            ),
         ],
-        "actions": [{"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "futtermittel.einzelfm.update"}],
-        "noWorkflowReason": "Futtermittel-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
-        "agentContract": {
-            "businessPurpose": "Einzelfuttermittel-Stamm: Naehrstoffgehalte und Preise fuer Rationsoptimierung.",
-            "examplePrompts": ["Welche NEL und Rohprotein-Gehalte hat Futtermittel {entity_id}?", "Zeige die aktuellen Preise fuer Futtermittel {entity_id}."],
-            "sensitiveFields": ["preis"],
-            "testSelectors": {"screenRoot": "[data-testid='futtermittel-einzelfuttermittel']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
-        },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
-        "performance": {"initialPayloadBudgetKb": 36, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "futtermittel"},
-    }
+        edit_permission="futtermittel.einzelfm.update",
+        no_workflow_reason="Futtermittel-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
+        business_purpose="Einzelfuttermittel-Stamm: Naehrstoffgehalte und Preise fuer Rationsoptimierung.",
+        example_prompts=[
+            "Welche NEL und Rohprotein-Gehalte hat Futtermittel {entity_id}?",
+            "Zeige die aktuellen Preise fuer Futtermittel {entity_id}.",
+        ],
+        sensitive_fields=["preis"],
+        test_id="futtermittel-einzelfuttermittel",
+        density="compact",
+        context_rail="combined",
+        table_profile="standard",
+        payload_budget_kb=36,
+        requires_virtual_tables=True,
+        bundle_group="futtermittel",
+    )
 
 
 def build_futtermittel_analysen_screen_definition() -> dict[str, Any]:
@@ -2678,117 +2639,153 @@ def build_futtermittel_analyse_screen_definition() -> dict[str, Any]:
 
 
 def build_futtermittel_mischfuttermittel_screen_definition() -> dict[str, Any]:
-    """Native SD fuer futtermittel/mischfuttermittel."""
-    return {
-        "schemaVersion": 1, "id": "futtermittel/mischfuttermittel", "domain": "futtermittel", "mode": "detail",
-        "title": "Mischfuttermittel", "subtitle": "Futtermittel / Misch-Rezeptur",
-        "adapter": {"type": "native", "sourceId": "futtermittel/mischfuttermittel", "temporary": False},
-        "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/futter/mischfuttermittel/{entity_id}"},
-            {"key": "rezeptur", "endpoint": "/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}/tabs/rezeptur", "pageSize": 50},
-            {"key": "naehrstoffe", "endpoint": "/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}/tabs/naehrstoffe", "pageSize": 25},
+    """Native SD fuer futtermittel/mischfuttermittel — StammObjectPageParent."""
+    return build_stamm_object_page(
+        screen_id="futtermittel/mischfuttermittel",
+        domain="futtermittel",
+        title="Mischfuttermittel",
+        subtitle="Futtermittel / Misch-Rezeptur",
+        identity_field="produkt_code",
+        data_sources=[
+            stamm_entity_source("/api/v1/futter/mischfuttermittel/{entity_id}"),
+            stamm_tab_source("rezeptur", "/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}/tabs/rezeptur", page_size=50),
+            stamm_tab_source("naehrstoffe", "/api/v1/masks/futtermittel/mischfuttermittel/entity/{entity_id}/tabs/naehrstoffe"),
         ],
-        "tabs": [
-            {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
-             "fields": [
-                 {"key": "produkt_code", "label": "Misch-Nr.", "type": "text", "readOnly": True},
-                 {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
-                 {"key": "tierart", "label": "Tierart", "type": "text"},
-                 {"key": "leistungsstufe", "label": "Leistungsgruppe", "type": "text"},
-                 {"key": "protein", "label": "Rohprotein %", "type": "number"},
-                 {"key": "energie", "label": "Energie MJ/kg", "type": "number"},
-                 {"key": "aktiv", "label": "Aktiv", "type": "boolean"},
-             ]},
-            {"key": "rezeptur", "label": "Rezeptur", "lazy": True, "keepAlive": False,
-             "tables": [{"key": "rezeptur", "label": "Komponenten", "dataSourceKey": "rezeptur",
-                         "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
-                         "columns": [
-                             {"key": "futtermittel", "label": "Einzelfuttermittel", "sortable": True, "filterable": True, "width": 220},
-                             {"key": "anteil_pct", "label": "Anteil %", "numeric": True, "sortable": True, "renderKind": "number"},
-                             {"key": "menge_je_t", "label": "Menge/t", "numeric": True, "renderKind": "number"},
-                         ]}]},
-            {"key": "naehrstoffe", "label": "Naehrstoffe (berechnet)", "lazy": True, "keepAlive": False,
-             "tables": [{"key": "naehrstoffe", "label": "Naehrstoffgehalte", "dataSourceKey": "naehrstoffe",
-                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                         "columns": [
-                             {"key": "naehrstoff", "label": "Naehrstoff", "sortable": True, "filterable": True},
-                             {"key": "gehalt", "label": "Gehalt", "numeric": True, "renderKind": "number"},
-                             {"key": "einheit", "label": "Einheit", "width": 80},
-                         ]}]},
+        tabs=[
+            stamm_kopf_tab([
+                {"key": "produkt_code", "label": "Misch-Nr.", "type": "text", "readOnly": True},
+                {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
+                {"key": "tierart", "label": "Tierart", "type": "text"},
+                {"key": "leistungsstufe", "label": "Leistungsgruppe", "type": "text"},
+                {"key": "protein", "label": "Rohprotein %", "type": "number"},
+                {"key": "energie", "label": "Energie MJ/kg", "type": "number"},
+                {"key": "aktiv", "label": "Aktiv", "type": "boolean"},
+            ]),
+            stamm_lazy_table_tab(
+                key="rezeptur",
+                label="Rezeptur",
+                table_label="Komponenten",
+                page_size=50,
+                columns=[
+                    {"key": "futtermittel", "label": "Einzelfuttermittel", "sortable": True, "filterable": True, "width": 220},
+                    {"key": "anteil_pct", "label": "Anteil %", "numeric": True, "sortable": True, "renderKind": "number"},
+                    {"key": "menge_je_t", "label": "Menge/t", "numeric": True, "renderKind": "number"},
+                ],
+            ),
+            stamm_lazy_table_tab(
+                key="naehrstoffe",
+                label="Naehrstoffe (berechnet)",
+                table_label="Naehrstoffgehalte",
+                columns=[
+                    {"key": "naehrstoff", "label": "Naehrstoff", "sortable": True, "filterable": True},
+                    {"key": "gehalt", "label": "Gehalt", "numeric": True, "renderKind": "number"},
+                    {"key": "einheit", "label": "Einheit", "width": 80},
+                ],
+            ),
         ],
-        "actions": [{"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "futtermittel.mischfm.update"}],
-        "noWorkflowReason": "Mischfuttermittel-Stamm ist Referenzdaten ohne Prozess-Lebenszyklus.",
-        "agentContract": {
-            "businessPurpose": "Mischfuttermittel: Rezeptur-Komponenten und berechnete Naehrstoffgehalte fuer Rationsoptimierung.",
-            "examplePrompts": ["Welche Komponenten hat Mischfutter {entity_id}?", "Zeige die berechneten Naehrstoffgehalte von Mischfutter {entity_id}."],
-            "sensitiveFields": [],
-            "testSelectors": {"screenRoot": "[data-testid='futtermittel-mischfuttermittel']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
-        },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
-        "performance": {"initialPayloadBudgetKb": 36, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "futtermittel"},
-    }
+        edit_permission="futtermittel.mischfm.update",
+        no_workflow_reason="Mischfuttermittel-Stamm ist Referenzdaten ohne Prozess-Lebenszyklus.",
+        business_purpose="Mischfuttermittel: Rezeptur-Komponenten und berechnete Naehrstoffgehalte fuer Rationsoptimierung.",
+        example_prompts=[
+            "Welche Komponenten hat Mischfutter {entity_id}?",
+            "Zeige die berechneten Naehrstoffgehalte von Mischfutter {entity_id}.",
+        ],
+        sensitive_fields=[],
+        test_id="futtermittel-mischfuttermittel",
+        density="compact",
+        context_rail="combined",
+        table_profile="standard",
+        payload_budget_kb=36,
+        requires_virtual_tables=True,
+        bundle_group="futtermittel",
+    )
 
 
 def build_crm_lead_screen_definition() -> dict[str, Any]:
-    """Native SD fuer crm/lead."""
-    return {
-        "schemaVersion": 1, "id": "crm/lead", "domain": "crm", "mode": "detail",
-        "title": "Kundenakte", "subtitle": "CRM / Interessent",
-        "identityField": "company_name",
-        "adapter": {"type": "native", "sourceId": "crm/lead", "temporary": False},
-        "creation": {"endpoint": "/api/v1/crm/leads", "permission": "crm.lead.create",
-                     "detailRoute": "/crm/lead/{entity_id}",
-                     "defaults": {"source": "unknown", "status": "NEW", "priority": "medium"}},
-        "summary": [
+    """Native SD fuer crm/lead — StammObjectPageParent."""
+    return build_stamm_object_page(
+        screen_id="crm/lead",
+        domain="crm",
+        title="Kundenakte",
+        subtitle="CRM / Interessent",
+        identity_field="company_name",
+        creation={
+            "endpoint": "/api/v1/crm/leads",
+            "permission": "crm.lead.create",
+            "detailRoute": "/crm/lead/{entity_id}",
+            "defaults": {"source": "unknown", "status": "NEW", "priority": "medium"},
+        },
+        summary=[
             {"key": "status", "label": "Status", "value": "Interessent", "kind": "status", "tone": "warning"},
             {"key": "estimated_value", "label": "Geschaetzter Wert", "value": None, "kind": "kpi"},
             {"key": "assigned_to", "label": "Zustaendig", "value": None, "kind": "contact"},
             {"key": "source", "label": "Quelle", "value": None, "kind": "identity"},
         ],
-        "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/crm/leads/{entity_id}"},
-            {"key": "aktivitaeten", "endpoint": "/api/v1/masks/crm/leads/entity/{entity_id}/tabs/aktivitaeten", "pageSize": 25},
-            {"key": "aufgaben", "endpoint": "/api/v1/masks/crm/leads/entity/{entity_id}/tabs/aufgaben", "pageSize": 25},
+        data_sources=[
+            stamm_entity_source("/api/v1/crm/leads/{entity_id}"),
+            stamm_tab_source("aktivitaeten", "/api/v1/masks/crm/leads/entity/{entity_id}/tabs/aktivitaeten"),
+            stamm_tab_source("aufgaben", "/api/v1/masks/crm/leads/entity/{entity_id}/tabs/aufgaben"),
         ],
-        "tabs": [
-            {"key": "kopf", "label": "Lead-Daten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
-             "fields": [
-                 # Der Lead-Endpunkt fuehrt keine Lead-Nummer und keinen Titel —
-                 # erfundene Felder blieben leer und saehen aus wie "nicht erfasst".
-                 {"key": "company_name", "label": "Unternehmen", "type": "text", "required": True},
-                 {"key": "contact_person", "label": "Ansprechpartner", "type": "text"},
-                 {"key": "email", "label": "E-Mail", "type": "email"},
-                 {"key": "phone", "label": "Telefon", "type": "text"},
-                 {"key": "source", "label": "Quelle", "type": "text"},
-                 {"key": "estimated_value", "label": "Geschaetzter Wert", "type": "currency"},
-                 {"key": "priority", "label": "Prioritaet", "type": "text"},
-                 {"key": "assigned_to", "label": "Zustaendig", "type": "text"},
-                 {"key": "status", "label": "Status", "type": "text"},
-             ]},
-            {"key": "aktivitaeten", "label": "Aktivitaeten", "lazy": True, "keepAlive": False,
-             "tables": [{"key": "aktivitaeten", "label": "Aktivitaeten", "dataSourceKey": "aktivitaeten",
-                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                         "columns": [
-                             {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "width": 110},
-                             {"key": "typ", "label": "Typ", "filterable": True, "width": 100},
-                             {"key": "betreff", "label": "Betreff", "width": 220},
-                             {"key": "benutzer", "label": "Benutzer", "width": 140},
-                         ]}]},
-            {"key": "aufgaben", "label": "Aufgaben", "lazy": True, "keepAlive": False,
-             "tables": [{"key": "aufgaben", "label": "Aufgaben", "dataSourceKey": "aufgaben",
-                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                         "columns": [
-                             {"key": "faellig", "label": "Faellig", "renderKind": "date", "sortable": True, "width": 110},
-                             {"key": "titel", "label": "Titel", "filterable": True, "width": 220},
-                             {"key": "prioritaet", "label": "Prioritaet", "filterable": True, "width": 100},
-                             {"key": "status", "label": "Status", "filterable": True, "width": 100},
-                         ]}]},
+        tabs=[
+            stamm_kopf_tab(
+                [
+                    # Der Lead-Endpunkt fuehrt keine Lead-Nummer und keinen Titel —
+                    # erfundene Felder blieben leer und saehen aus wie "nicht erfasst".
+                    {"key": "company_name", "label": "Unternehmen", "type": "text", "required": True},
+                    {"key": "contact_person", "label": "Ansprechpartner", "type": "text"},
+                    {"key": "email", "label": "E-Mail", "type": "email"},
+                    {"key": "phone", "label": "Telefon", "type": "text"},
+                    {"key": "source", "label": "Quelle", "type": "text"},
+                    {"key": "estimated_value", "label": "Geschaetzter Wert", "type": "currency"},
+                    {"key": "priority", "label": "Prioritaet", "type": "text"},
+                    {"key": "assigned_to", "label": "Zustaendig", "type": "text"},
+                    {"key": "status", "label": "Status", "type": "text"},
+                ],
+                label="Lead-Daten",
+            ),
+            stamm_lazy_table_tab(
+                key="aktivitaeten",
+                label="Aktivitaeten",
+                columns=[
+                    {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "width": 110},
+                    {"key": "typ", "label": "Typ", "filterable": True, "width": 100},
+                    {"key": "betreff", "label": "Betreff", "width": 220},
+                    {"key": "benutzer", "label": "Benutzer", "width": 140},
+                ],
+            ),
+            stamm_lazy_table_tab(
+                key="aufgaben",
+                label="Aufgaben",
+                columns=[
+                    {"key": "faellig", "label": "Faellig", "renderKind": "date", "sortable": True, "width": 110},
+                    {"key": "titel", "label": "Titel", "filterable": True, "width": 220},
+                    {"key": "prioritaet", "label": "Prioritaet", "filterable": True, "width": 100},
+                    {"key": "status", "label": "Status", "filterable": True, "width": 100},
+                ],
+            ),
         ],
-        "actions": [
-            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "crm.lead.update"},
-            {"key": "qualifizieren", "label": "Als Opportunity qualifizieren", "kind": "secondary", "dangerLevel": "safe", "permission": "crm.lead.qualify", "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/qualifizieren", "method": "POST", "inputFields": [{"key": "customer_id", "label": "Kunde", "type": "select", "required": True, "optionsSource": {"endpoint": "/api/v1/crm/customers/", "valueKey": "id", "labelKey": "company_name"}}]},
+        edit_permission="crm.lead.update",
+        extra_actions=[
+            {
+                "key": "qualifizieren",
+                "label": "Als Opportunity qualifizieren",
+                "kind": "secondary",
+                "dangerLevel": "safe",
+                "permission": "crm.lead.qualify",
+                "commandEndpoint": "/api/v1/crm/leads/{entity_id}/actions/qualifizieren",
+                "method": "POST",
+                "inputFields": [
+                    {
+                        "key": "customer_id",
+                        "label": "Kunde",
+                        "type": "select",
+                        "required": True,
+                        "optionsSource": {"endpoint": "/api/v1/crm/customers/", "valueKey": "id", "labelKey": "company_name"},
+                    }
+                ],
+            },
         ],
-        "workflow": {
+        workflow={
             "processKey": "crm-party-lifecycle",
             "phases": [
                 {"key": "lead", "label": "Interessent"},
@@ -2796,27 +2793,21 @@ def build_crm_lead_screen_definition() -> dict[str, Any]:
                 {"key": "customer", "label": "Kunde"},
             ],
         },
-        "agentContract": {
-            "businessPurpose": "Lead-Akte: Kundenpotenzial mit Aktivitaeten und Aufgaben fuer Vertriebssteuerung.",
-            "examplePrompts": ["Was ist der Status von Lead {entity_id}?", "Zeige alle offenen Aufgaben fuer Lead {entity_id}.", "Welche Aktivitaeten wurden fuer Lead {entity_id} erfasst?"],
-            "sensitiveFields": ["wert"],
-            "testSelectors": {"screenRoot": "[data-testid='crm-lead']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
-        },
-        "layout": {
-            "preferredMode": "desktopDense",
-            "mobileMode": "mobileStack",
-            "touchTargetPx": 44,
-            "floorplan": "objectPage",
-            "columnNavigation": "single",
-            "sectionNavigation": "anchors",
-            "density": "expertDense",
-            "contextRail": "combined",
-            "summaryPlacement": "header",
-            "stickyHeader": True,
-            "stickyFooter": True,
-        },
-        "performance": {"initialPayloadBudgetKb": 36, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "crm"},
-    }
+        business_purpose="Lead-Akte: Kundenpotenzial mit Aktivitaeten und Aufgaben fuer Vertriebssteuerung.",
+        example_prompts=[
+            "Was ist der Status von Lead {entity_id}?",
+            "Zeige alle offenen Aufgaben fuer Lead {entity_id}.",
+            "Welche Aktivitaeten wurden fuer Lead {entity_id} erfasst?",
+        ],
+        sensitive_fields=["wert"],
+        test_id="crm-lead",
+        density="expertDense",
+        context_rail="combined",
+        table_profile="standard",
+        payload_budget_kb=36,
+        requires_virtual_tables=False,
+        bundle_group="crm",
+    )
 
 
 # ── Rollen-Workspaces (UIX-061) ──────────────────────────────────────────────
@@ -4034,6 +4025,7 @@ def build_mde_inbox_screen_definition() -> dict[str, Any]:
                         "key": "retry_event",
                         "label": "Wiederholen",
                         "dangerLevel": "moderate",
+                        "permission": "mobile.sync.retry",
                         "visibleWhen": {"field": "sync_status", "values": ["failed", "quarantined"]},
                     }
                 ],
@@ -4087,96 +4079,12 @@ def build_mde_inbox_screen_definition() -> dict[str, Any]:
 
 
 def build_document_control_screen_definition() -> dict[str, Any]:
-    """Native Ausnahme-Worklist fuer Beleg-Kontrolle."""
-    return {
-        "schemaVersion": 1,
-        "id": "auswertungen/beleg-kontrolle",
-        "domain": "finance",
-        "mode": "list",
-        "title": "Beleg-Kontrolle",
-        "subtitle": "Unerledigte Bestellungen, fehlende Eingangsbelege und Lieferschein-Ausnahmen",
-        "adapter": {"type": "native", "sourceId": "auswertungen/beleg-kontrolle", "temporary": False},
-        "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/document-control/summary", "staleTimeMs": 10_000},
-            {"key": "exceptions", "endpoint": "/api/v1/document-control/exceptions", "pageSize": 50, "staleTimeMs": 10_000},
-        ],
-        "summary": [
-            {"key": "open_total", "label": "Offen", "tone": "warning"},
-            {"key": "open_purchase_order", "label": "Unerledigte Bestellungen", "tone": "warning"},
-            {"key": "missing_inbound_document", "label": "Fehlende Eingangsbelege", "tone": "danger"},
-            {"key": "blocked_delivery_note", "label": "Gesperrte Lieferscheine", "tone": "danger"},
-            {"key": "uninvoiced_delivery_note", "label": "Nicht fakturiert", "tone": "warning"},
-            {"key": "overdue", "label": "Ueberfaellig", "tone": "danger"},
-        ],
-        "tables": [{
-            "key": "exceptions",
-            "label": "Ausnahmen",
-            "dataSourceKey": "exceptions",
-            "serverPagination": True,
-            "pageSize": 50,
-            "virtualized": True,
-            "rowHeight": 44,
-            "columns": [
-                {"key": "due_at", "label": "Faelligkeit", "renderKind": "datetime", "sortable": True, "width": 150},
-                {"key": "exception_type", "label": "Typ", "sortable": True, "filterable": True, "width": 190},
-                {"key": "document_number", "label": "Beleg", "sortable": True, "filterable": True, "width": 140},
-                {"key": "partner_name", "label": "Partner", "filterable": True, "width": 180},
-                {"key": "partner_ref", "label": "Partner-Nr.", "filterable": True, "width": 110},
-                {"key": "assigned_user", "label": "Verantwortlich", "sortable": True, "filterable": True, "width": 130},
-                {"key": "status", "label": "Status", "renderKind": "status", "sortable": True, "filterable": True, "width": 120},
-                {"key": "notes", "label": "Hinweis", "width": 220},
-                {"key": "created_at", "label": "Erfasst", "renderKind": "datetime", "sortable": True, "width": 150},
-            ],
-            "rowRouteTemplate": "{source_route}",
-            "rowActions": [
-                {"key": "assign_me", "label": "Zuweisen", "visibleWhen": {"field": "status", "values": ["open", "assigned", "in_progress"]}},
-                {"key": "start_work", "label": "In Arbeit", "visibleWhen": {"field": "status", "values": ["open", "assigned"]}},
-                {"key": "resolve", "label": "Erledigt", "visibleWhen": {"field": "status", "values": ["open", "assigned", "in_progress"]}},
-                {"key": "waive", "label": "Verwerfen", "dangerLevel": "moderate", "visibleWhen": {"field": "status", "values": ["open", "assigned", "in_progress"]}},
-                {"key": "open_source", "label": "Zum Beleg"},
-            ],
-        }],
-        "noWorkflowReason": "Statuswechsel werden im append-only Belegkontroll-Audit gefuehrt.",
-        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "financial"},
-        "performance": {
-            "initialPayloadBudgetKb": 48,
-            "requiresLazyTabs": False,
-            "requiresVirtualTables": True,
-            "lookupMinChars": 2,
-            "bundleGroup": "finance",
-        },
-        "agentContract": {
-            "businessPurpose": "Belegausnahmen mandantensicher priorisieren und zum Ursprungsbeleg springen.",
-            "examplePrompts": [
-                "Zeige nicht fakturierte Lieferscheine.",
-                "Welche Bestellungen sind unerledigt?",
-                "Welche Belegausnahmen sind ueberfaellig?",
-            ],
-            "sensitiveFields": ["partner_name", "partner_ref", "notes"],
-            "forbiddenAgentTasks": ["Ausnahmen ohne menschlichen Audit-Grund erledigen"],
-            "testSelectors": {"screenRoot": "[data-testid='beleg-kontrolle']"},
-        },
-    }
-
-
-def _build_document_control_variant(
-    *, screen_id: str, title: str, subtitle: str, exception_type: str
-) -> dict[str, Any]:
-    """Saved L3 worklist view over the central document-control capability."""
-    definition = build_document_control_screen_definition()
-    definition["id"] = screen_id
-    definition["title"] = title
-    definition["subtitle"] = subtitle
-    definition["adapter"]["sourceId"] = screen_id
-    definition["dataSources"] = [
-        {"key": "entity", "endpoint": "/api/v1/document-control/summary", "staleTimeMs": 10_000},
-        {"key": "exceptions", "endpoint": f"/api/v1/document-control/exceptions?exception_type={exception_type}", "pageSize": 50, "staleTimeMs": 10_000},
-    ]
-    definition["agentContract"]["businessPurpose"] = subtitle
-    definition["agentContract"]["testSelectors"] = {
-        "screenRoot": f"[data-testid='{screen_id.replace('/', '-')}']"
-    }
-    return definition
+    """Native Ausnahme-Worklist fuer Beleg-Kontrolle (KontrollWorklistParent)."""
+    return build_document_control_worklist(
+        screen_id="auswertungen/beleg-kontrolle",
+        title="Beleg-Kontrolle",
+        subtitle="Unerledigte Bestellungen, fehlende Eingangsbelege und Lieferschein-Ausnahmen",
+    )
 
 
 def build_production_control_screen_definition() -> dict[str, Any]:
@@ -4220,7 +4128,7 @@ def build_production_control_screen_definition() -> dict[str, Any]:
                 {"key": "release", "label": "Freigeben", "visibleWhen": {"field": "status", "values": ["queued", "rework"]}},
                 {"key": "start", "label": "Starten", "visibleWhen": {"field": "status", "values": ["released", "paused", "rework"]}},
                 {"key": "complete", "label": "Fertig", "visibleWhen": {"field": "status", "values": ["running", "rework"]}},
-                {"key": "mark_rework", "label": "Nachbearbeitung", "dangerLevel": "moderate", "visibleWhen": {"field": "status", "values": ["running", "paused", "completed"]}},
+                {"key": "mark_rework", "label": "Nachbearbeitung", "dangerLevel": "moderate", "permission": "production.control.rework", "visibleWhen": {"field": "status", "values": ["running", "paused", "completed"]}},
                 {"key": "open_source", "label": "Ursprung"},
                 {"key": "print", "label": "Drucken"},
             ],
@@ -4274,7 +4182,7 @@ def build_inventory_auxiliary_screen_definition() -> dict[str, Any]:
             "rowActions": [
                 {"key": "review", "label": "Pruefen", "visibleWhen": {"field": "status", "values": ["generated"]}},
                 {"key": "approve", "label": "Freigeben", "visibleWhen": {"field": "status", "values": ["reviewed"]}},
-                {"key": "apply", "label": "Uebernehmen", "dangerLevel": "moderate", "visibleWhen": {"field": "status", "values": ["approved"]}},
+                {"key": "apply", "label": "Uebernehmen", "dangerLevel": "moderate", "permission": "inventory.aux.apply", "visibleWhen": {"field": "status", "values": ["approved"]}},
                 {"key": "open_source", "label": "Inventur"}, {"key": "print", "label": "Drucken"},
             ]}],
         "actions": [
@@ -4328,7 +4236,7 @@ def build_billing_batch_screen_definition() -> dict[str, Any]:
              "rowActions": [
                 {"key": "validate", "label": "Pruefen", "visibleWhen": {"field": "status", "values": ["draft"]}},
                 {"key": "release", "label": "Freigeben", "visibleWhen": {"field": "status", "values": ["validated"]}},
-                {"key": "execute", "label": "Ausfuehren", "dangerLevel": "moderate", "visibleWhen": {"field": "status", "values": ["released"]}}]},
+                {"key": "execute", "label": "Ausfuehren", "dangerLevel": "moderate", "permission": "finance.billing_batch.execute", "visibleWhen": {"field": "status", "values": ["released"]}}]},
             {"key": "errors", "label": "Fehlerzeilen", "dataSourceKey": "errors", "serverPagination": False,
              "pageSize": 100, "virtualized": True, "rowHeight": 44,
              "columns": [
@@ -4337,7 +4245,7 @@ def build_billing_batch_screen_definition() -> dict[str, Any]:
                 {"key": "amount", "label": "Betrag", "numeric": True, "width": 110},
                 {"key": "validation_error", "label": "Fehler", "filterable": True, "width": 360},
                 {"key": "retry_count", "label": "Versuche", "numeric": True, "width": 85}],
-             "rowActions": [{"key": "retry", "label": "Wiederholen", "dangerLevel": "moderate"},
+             "rowActions": [{"key": "retry", "label": "Wiederholen", "dangerLevel": "moderate", "permission": "finance.billing_batch.retry"},
                             {"key": "open_source", "label": "Quellbeleg"}, {"key": "open_evidence", "label": "Nachweis"}]},
         ],
         "workflow": {"processKey": "billing-batch", "status": "four-eyes", "nextActionKey": "validate", "auditRequired": True},
@@ -4364,7 +4272,7 @@ def build_mail_workspace_screen_definition() -> dict[str, Any]:
         "tables": [
             {"key": "messages", "label": "Rollenpostfach", "dataSourceKey": "messages", "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 44,
              "columns": [{"key": "received_at", "label": "Eingang", "renderKind": "datetime", "sortable": True, "width": 145}, {"key": "role_key", "label": "Postfach", "sortable": True, "filterable": True, "width": 105}, {"key": "direction", "label": "Richtung", "filterable": True, "width": 90}, {"key": "from_address", "label": "Von", "filterable": True, "width": 190}, {"key": "subject", "label": "Betreff", "filterable": True, "width": 300}, {"key": "contact_id", "label": "Kontakt", "filterable": True, "width": 120}, {"key": "document_ref", "label": "Beleg", "filterable": True, "width": 130}, {"key": "attachment_count", "label": "Anlagen", "numeric": True, "width": 75}, {"key": "assigned_to", "label": "Bearbeiter", "filterable": True, "width": 115}, {"key": "status", "label": "Status", "renderKind": "status", "sortable": True, "filterable": True, "width": 100}],
-             "rowActions": [{"key": "assign", "label": "Zuordnen"}, {"key": "queue", "label": "Senden", "dangerLevel": "moderate", "visibleWhen": {"field": "status", "values": ["draft", "error"]}}, {"key": "open_document", "label": "Beleg"}]},
+             "rowActions": [{"key": "assign", "label": "Zuordnen"}, {"key": "queue", "label": "Senden", "dangerLevel": "moderate", "permission": "crm.mail.send", "visibleWhen": {"field": "status", "values": ["draft", "error"]}}, {"key": "open_document", "label": "Beleg"}]},
             {"key": "attachments", "label": "Anlagen", "dataSourceKey": "attachments", "serverPagination": False, "pageSize": 200, "virtualized": True, "rowHeight": 44,
              "columns": [{"key": "filename", "label": "Datei", "filterable": True, "width": 240}, {"key": "subject", "label": "Mail", "width": 260}, {"key": "mime_type", "label": "Typ", "width": 150}, {"key": "size_bytes", "label": "Bytes", "numeric": True, "width": 90}, {"key": "sha256", "label": "SHA-256", "width": 240}, {"key": "transfer_status", "label": "Uebernahme", "renderKind": "status", "width": 110}],
              "rowActions": [{"key": "transfer", "label": "In DMS uebernehmen", "visibleWhen": {"field": "transfer_status", "values": ["available"]}}]},
@@ -4419,7 +4327,7 @@ def build_foreign_goods_screen_definition() -> dict[str, Any]:
             ],
             "rowActions": [
                 {"key": "transfer", "label": "Umbuchen", "visibleWhen": {"field": "status", "values": ["eingelagert", "teilausgelagert"]}},
-                {"key": "complete", "label": "Auslagern / erledigen", "dangerLevel": "moderate", "visibleWhen": {"field": "status", "values": ["eingelagert", "teilausgelagert"]}},
+                {"key": "complete", "label": "Auslagern / erledigen", "dangerLevel": "moderate", "permission": "inventory.foreign_goods.complete", "visibleWhen": {"field": "status", "values": ["eingelagert", "teilausgelagert"]}},
                 {"key": "open_source", "label": "Ursprung"},
                 {"key": "print", "label": "Drucken"},
             ],
@@ -4440,62 +4348,19 @@ def build_foreign_goods_screen_definition() -> dict[str, Any]:
 def _build_sanctions_scope_screen_definition(
     *, screen_id: str, title: str, scope: str, subject_label: str
 ) -> dict[str, Any]:
-    """L3-paritaetische, fachlich getrennte Terrorschutz-Pruefliste."""
-    endpoint = f"/api/v1/compliance/sanctions/pruefprotokoll?scope={scope}"
-    return {
-        "schemaVersion": 1,
-        "id": screen_id,
-        "domain": "compliance",
-        "mode": "list",
-        "title": title,
-        "subtitle": f"{subject_label} gegen die freigegebenen Sanktionslisten pruefen und nachweisen",
-        "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
-        "dataSources": [
-            {"key": "checks", "endpoint": endpoint, "pageSize": 100, "staleTimeMs": 10_000}
-        ],
-        "tables": [{
-            "key": "checks", "label": "Pruefprotokoll", "dataSourceKey": "checks",
-            "serverPagination": False, "pageSize": 100, "virtualized": True, "rowHeight": 44,
-            "columns": [
-                {"key": "geprueft_am", "label": "Geprueft am", "renderKind": "datetime", "sortable": True, "width": 170},
-                {"key": "entity_ref", "label": "Personal-/Kunden-Nr.", "filterable": True, "width": 155},
-                {"key": "geprueft_name", "label": "Name", "filterable": True, "width": 250},
-                {"key": "status", "label": "Ergebnis", "renderKind": "status", "filterable": True, "width": 135},
-                {"key": "checked_by", "label": "Geprueft von", "filterable": True, "width": 180},
-            ],
-        }],
-        "actions": [{
-            "key": "check",
-            "label": f"{subject_label} pruefen",
-            "kind": "primary",
-            "permission": "compliance.sanctions.check",
-            "dangerLevel": "moderate",
-            "requiresConfirmation": True,
-            "commandEndpoint": f"/api/v1/compliance/sanctions/actions/pruefen/{scope}",
-            "method": "POST",
-            "inputFields": [
-                {"key": "name", "label": "Name", "type": "text", "required": True},
-                {"key": "entity_ref", "label": "Personal-/Kunden-Nr.", "type": "text", "required": False},
-            ],
-        }],
-        "workflow": {"processKey": f"sanctions-check-{scope}", "status": "audited", "nextActionKey": "check", "auditRequired": True},
-        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "audit"},
-        "performance": {"initialPayloadBudgetKb": 35, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "compliance"},
-        "agentContract": {
-            "businessPurpose": f"Terrorschutzpruefungen fuer {subject_label} getrennt und mandantensicher nachweisen.",
-            "examplePrompts": [f"Pruefe {subject_label} gegen die Sanktionsliste.", "Zeige verdaechtige Treffer."],
-            "sensitiveFields": ["geprueft_name", "entity_ref", "checked_by"],
-            "forbiddenAgentTasks": ["Treffer automatisch freigeben oder Pruefprotokolle veraendern"],
-            "testSelectors": {"screenRoot": f"[data-testid='{scope}-sanctions-check']"},
-        },
-    }
+    """L3-paritaetische, fachlich getrennte Terrorschutz-Pruefliste (KontrollWorklistParent)."""
+    return build_sanctions_kontroll_worklist(
+        screen_id=screen_id,
+        title=title,
+        scope=scope,
+        subject_label=subject_label,
+    )
 
 
 _SCREEN_DEFINITIONS: dict[str, Any] = {
     **IDENTITY_SCREEN_BUILDERS,
     **STUDIO_HISTORY_BUILDERS,
     **HARVEST_CONTROL_BUILDERS,
-    **KONTROLLE_SCREEN_BUILDERS,
     "schnittstelle/legacy-adapter-monitor": lambda: {
         "schemaVersion": 1, "id": "schnittstelle/legacy-adapter-monitor", "domain": "integration", "mode": "list",
         "title": "Standard-/Unimet-Adapter", "subtitle": "Eingang, Fehlerkorb, Staging und Reconciliation",
@@ -4719,7 +4584,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
         "summary": [{"key": "received", "label": "Neu", "tone": "warning"}, {"key": "validated", "label": "Validiert", "tone": "info"}, {"key": "error", "label": "Fehlerkorb", "tone": "danger"}, {"key": "processed", "label": "Uebernommen", "tone": "success"}, {"key": "delivery_handover", "label": "Lieferschein-Handover", "tone": "neutral"}],
         "tables": [{"key": "intake", "label": "Tankanlagen-Datensaetze", "dataSourceKey": "intake", "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 44,
             "columns": [{"key": "received_at", "label": "Eingang", "renderKind": "datetime", "sortable": True, "width": 145}, {"key": "adapter_key", "label": "Adapter", "sortable": True, "filterable": True, "width": 120}, {"key": "external_id", "label": "Externe ID", "filterable": True, "width": 160}, {"key": "payload_hash", "label": "SHA-256", "width": 240}, {"key": "status", "label": "Status", "renderKind": "status", "sortable": True, "filterable": True, "width": 105}, {"key": "validation_errors", "label": "Fehler", "width": 300}, {"key": "rule_result", "label": "Regelentscheidung", "width": 220}, {"key": "zapfung_id", "label": "Zapfung", "width": 135}, {"key": "delivery_handover_id", "label": "LS-Handover", "width": 145}, {"key": "retry_count", "label": "Versuche", "numeric": True, "width": 80}],
-            "rowActions": [{"key": "validate", "label": "Pruefen", "visibleWhen": {"field": "status", "values": ["received"]}}, {"key": "process", "label": "Uebernehmen", "dangerLevel": "moderate", "visibleWhen": {"field": "status", "values": ["validated"]}}, {"key": "retry", "label": "Wiederholen", "visibleWhen": {"field": "status", "values": ["error"]}}, {"key": "open_source", "label": "Einzelnachweis"}]}],
+            "rowActions": [{"key": "validate", "label": "Pruefen", "visibleWhen": {"field": "status", "values": ["received"]}}, {"key": "process", "label": "Uebernehmen", "dangerLevel": "moderate", "permission": "tank.adapter.process", "visibleWhen": {"field": "status", "values": ["validated"]}}, {"key": "retry", "label": "Wiederholen", "visibleWhen": {"field": "status", "values": ["error"]}}, {"key": "open_source", "label": "Einzelnachweis"}]}],
         "workflow": {"processKey": "tank-adapter-intake", "status": "error-inbox", "nextActionKey": "validate", "auditRequired": True},
         "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "audit", "tableProfile": "inventory"},
         "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "agrar"},
@@ -4774,19 +4639,19 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "produktion/produktionsleitstand": build_production_control_screen_definition,
     "docflow/dokumenten-ruecklauf": build_document_return_screen_definition,
     "auswertungen/beleg-kontrolle": build_document_control_screen_definition,
-    "auswertungen/auftrags-kontrolle": lambda: _build_document_control_variant(
+    "auswertungen/auftrags-kontrolle": lambda: build_document_control_variant(
         screen_id="auswertungen/auftrags-kontrolle",
         title="Auftrags-Kontrolle",
         subtitle="Unerledigte Bestellungen priorisieren und bis zum Quellbeleg verfolgen.",
         exception_type="open_purchase_order",
     ),
-    "auswertungen/lieferschein-kontrolle": lambda: _build_document_control_variant(
+    "auswertungen/lieferschein-kontrolle": lambda: build_document_control_variant(
         screen_id="auswertungen/lieferschein-kontrolle",
         title="Lieferschein-Kontrolle",
         subtitle="Nicht fakturierte Lieferscheine priorisieren und klaeren.",
         exception_type="uninvoiced_delivery_note",
     ),
-    "abrechnung/eb-lieferschein-kontrolle": lambda: _build_document_control_variant(
+    "abrechnung/eb-lieferschein-kontrolle": lambda: build_document_control_variant(
         screen_id="abrechnung/eb-lieferschein-kontrolle",
         title="EB-Lieferschein-Kontrolle",
         subtitle="Fehlende Eingangsbelege und Warenzugaenge kontrollieren.",
@@ -4873,6 +4738,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "futtermittel/analyse": build_futtermittel_analyse_screen_definition,
     "futtermittel/mischfuttermittel": build_futtermittel_mischfuttermittel_screen_definition,
     "crm/lead": build_crm_lead_screen_definition,
+    **KONTROLLE_SCREEN_BUILDERS,
 }
 
 

@@ -3789,7 +3789,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `create` | Neue Abfrage | low | nein | `—` |
+| `create` | Neue Abfrage | safe | nein | `—` |
 | `import` | Signiert importieren | moderate | nein | `/api/v1/query-center/actions/import` |
 
 ---

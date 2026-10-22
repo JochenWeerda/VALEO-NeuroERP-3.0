@@ -21,6 +21,25 @@ def stamm_kopf_tab(fields: list[dict[str, Any]], *, label: str = "Stammdaten") -
     }
 
 
+def stamm_entity_tab(
+    *,
+    key: str,
+    label: str,
+    fields: list[dict[str, Any]],
+    lazy: bool = False,
+    keep_alive: bool = True,
+) -> dict[str, Any]:
+    """Zusaetzlicher Entity-Feld-Abschnitt (z. B. Preise, Lager, Zuordnung)."""
+    return {
+        "key": key,
+        "label": label,
+        "lazy": lazy,
+        "keepAlive": keep_alive,
+        "dataSourceKey": "entity",
+        "fields": fields,
+    }
+
+
 def stamm_lazy_table_tab(
     *,
     key: str,
@@ -28,25 +47,29 @@ def stamm_lazy_table_tab(
     columns: list[dict[str, Any]],
     page_size: int = 25,
     table_label: str | None = None,
+    server_pagination: bool = True,
+    row_route_template: str | None = None,
+    data_source_key: str | None = None,
 ) -> dict[str, Any]:
     """Lazy Tab mit einer virtualisierten Tabelle (gleiche dataSourceKey wie Tab-Key)."""
+    table: dict[str, Any] = {
+        "key": key,
+        "label": table_label or label,
+        "dataSourceKey": data_source_key or key,
+        "serverPagination": server_pagination,
+        "pageSize": page_size,
+        "virtualized": True,
+        "rowHeight": 52,
+        "columns": columns,
+    }
+    if row_route_template:
+        table["rowRouteTemplate"] = row_route_template
     return {
         "key": key,
         "label": label,
         "lazy": True,
         "keepAlive": False,
-        "tables": [
-            {
-                "key": key,
-                "label": table_label or label,
-                "dataSourceKey": key,
-                "serverPagination": True,
-                "pageSize": page_size,
-                "virtualized": True,
-                "rowHeight": 52,
-                "columns": columns,
-            }
-        ],
+        "tables": [table],
     }
 
 
@@ -64,11 +87,12 @@ def build_stamm_object_page(
     domain: str,
     title: str,
     subtitle: str,
-    identity_field: str,
+    identity_field: str | None,
     data_sources: list[dict[str, Any]],
     tabs: list[dict[str, Any]],
     edit_permission: str,
-    no_workflow_reason: str,
+    no_workflow_reason: str | None = None,
+    workflow: dict[str, Any] | None = None,
     business_purpose: str,
     example_prompts: list[str],
     test_id: str,
@@ -76,8 +100,14 @@ def build_stamm_object_page(
     summary: list[dict[str, Any]] | None = None,
     summary_endpoint: str | None = None,
     extra_actions: list[dict[str, Any]] | None = None,
+    edit_action_key: str = "edit",
+    edit_action_zone: str | None = None,
+    edit_action_overrides: dict[str, Any] | None = None,
+    creation: dict[str, Any] | None = None,
+    interaction: dict[str, Any] | None = None,
     density: str = "compact",
-    context_rail: str = "none",
+    context_rail: str = "combined",
+    table_profile: str | None = None,
     payload_budget_kb: int = 36,
     requires_virtual_tables: bool = False,
     bundle_group: str | None = None,
@@ -87,18 +117,40 @@ def build_stamm_object_page(
         raise ValueError(f"{screen_id}: StammObjectPageParent erwartet tabs[0].key == 'kopf'")
     if not any(ds.get("key") == "entity" for ds in data_sources):
         raise ValueError(f"{screen_id}: StammObjectPageParent erwartet dataSource 'entity'")
+    if not no_workflow_reason and not workflow:
+        raise ValueError(f"{screen_id}: StammObjectPageParent erwartet no_workflow_reason oder workflow")
 
-    actions: list[dict[str, Any]] = [
-        {
-            "key": "edit",
-            "label": "Bearbeiten",
-            "kind": "primary",
-            "dangerLevel": "safe",
-            "permission": edit_permission,
-        },
-    ]
+    edit_action: dict[str, Any] = {
+        "key": edit_action_key,
+        "label": "Bearbeiten",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "permission": edit_permission,
+    }
+    if edit_action_zone:
+        edit_action["zone"] = edit_action_zone
+    if edit_action_overrides:
+        edit_action.update(edit_action_overrides)
+
+    actions: list[dict[str, Any]] = [edit_action]
     if extra_actions:
         actions.extend(extra_actions)
+
+    layout: dict[str, Any] = {
+        "preferredMode": "desktopDense",
+        "mobileMode": "mobileStack",
+        "touchTargetPx": 44,
+        "floorplan": "objectPage",
+        "columnNavigation": "single",
+        "sectionNavigation": "anchors",
+        "density": density,
+        "contextRail": context_rail,
+        "summaryPlacement": "header",
+        "stickyHeader": True,
+        "stickyFooter": True,
+    }
+    if table_profile:
+        layout["tableProfile"] = table_profile
 
     definition: dict[str, Any] = {
         "schemaVersion": 1,
@@ -107,35 +159,21 @@ def build_stamm_object_page(
         "mode": "detail",
         "title": title,
         "subtitle": subtitle,
-        "identityField": identity_field,
         "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
         "dataSources": data_sources,
         "tabs": tabs,
         "actions": actions,
-        "noWorkflowReason": no_workflow_reason,
         "agentContract": {
             "businessPurpose": business_purpose,
             "examplePrompts": example_prompts,
             "sensitiveFields": list(sensitive_fields or []),
             "testSelectors": {
                 "screenRoot": f"[data-testid='{test_id}']",
-                "primaryAction": "[data-testid='action-edit']",
+                "primaryAction": f"[data-testid='action-{edit_action_key}']",
                 "summaryArea": "[data-testid='mask-summary']",
             },
         },
-        "layout": {
-            "preferredMode": "desktopDense",
-            "mobileMode": "mobileStack",
-            "touchTargetPx": 44,
-            "floorplan": "objectPage",
-            "columnNavigation": "single",
-            "sectionNavigation": "anchors",
-            "density": density,
-            "contextRail": context_rail,
-            "summaryPlacement": "header",
-            "stickyHeader": True,
-            "stickyFooter": True,
-        },
+        "layout": layout,
         "performance": {
             "initialPayloadBudgetKb": payload_budget_kb,
             "requiresLazyTabs": True,
@@ -144,11 +182,22 @@ def build_stamm_object_page(
             "bundleGroup": bundle_group or domain,
         },
     }
+    if identity_field is not None:
+        definition["identityField"] = identity_field
+    if creation is not None:
+        definition["creation"] = creation
+    if workflow is not None:
+        definition["workflow"] = workflow
+    if no_workflow_reason is not None:
+        definition["noWorkflowReason"] = no_workflow_reason
+    if interaction is not None:
+        definition["interaction"] = interaction
     if summary is not None:
         definition["summary"] = summary
     else:
+        summary_key = identity_field or "id"
         definition["summary"] = [
-            {"key": identity_field, "label": "Kennung", "value": None, "kind": "identity"},
+            {"key": summary_key, "label": "Kennung", "value": None, "kind": "identity"},
         ]
     if summary_endpoint:
         definition["summaryEndpoint"] = summary_endpoint
