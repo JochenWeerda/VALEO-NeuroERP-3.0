@@ -19492,3 +19492,10 @@ Abnahme sowie weitere Fachketten/gesamte Altmaskenmigration bleiben offen.
 
 
 **COVERAGE-FACHOBERFLAECHEN weiterer nachgewiesener Rationsbefund:** Einreich-Snapshot verwendet serverseitige Gruppenanzahl, berechnet Gesamtfuttermengen aber mit alter Wizardanzahl; abweichende bestaetigte Anzahl erzeugt widerspruechliche Daten. Besitz derselben Mutation fuer konsistente bestaetigte Gruppenmenge und positive sichere Anzahl. Review benoetigt sichtbaren Einreichfehler (Parent setzt error bislang nur fuer nicht sichtbare Workbench). Besitz Review-Fehleranzeige/Mutationsbeginn, zugehoerige negative/positive Bedienvertraege.
+
+
+## STUDIO-PROBE-BASELINES-20261022 - reserviert, Codex
+
+**Owner:** Codex. **Ziel:** alle aktuell tatsaechlich registrierten nativen Quellen ueber den bestehenden CLI-Stapelweg im vorhandenen valeo_probe/Mandanten51 versionieren. Bestehende synthetische Anmeldung mit unveraenderten Rechten, PKCE, keine neuen Identitaeten/Rollen. Vorhandene bearbeitete Fassungen erhalten; identischer Plan bei Wiederholung ohne weitere Fassung/Historie. Kein Publish, keine Routingumschaltung, kein Geschaeftscommand. Besitz eigene QA/Workboard/Protokolle ohne Zugangsdaten. Ausgangsfassung ist kein Qualitaetszertifikat fuer alte handgebaute Seiten.
+
+**COVERAGE-FACHOBERFLAECHEN Erfassungsbefund/Besitz:** Sonar prueft app/modules/services, pytest.ini erfasst ausschliesslich app. Damit fehlen trotz vorhandener Fachtests die Python-Nachweise fuer modules/services. Besitz pytest.ini ausschliesslich Erfassung dieser vorhandenen Produktivwurzeln und neuer Konfigurationsvertrag; keine Quellen-/Coverage-Ausnahmen oder Schwellenabsenkung. Full-CI mit derselben Testsuite und unveraendertem60-Prozent-Gesamtminimum, Sonar80 bleibt verbindlich.
