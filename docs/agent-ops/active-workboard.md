@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## UIX-STAMM-OBJECTPAGE-PARENT-20261022 — reserviert, Cursor Composer
+
+**Owner:** Cursor Composer. **Stand:** reserviert 2026-10-22. **Ziel:** P1 aus Taxonomie — gemeinsamer `StammObjectPageParent`-Builder (Meridian-Layout einmal); Pilot-Children Duenger/Saatgut/Supplier/Debitor/Kreditor aus Parent+Patch; Create bleibt Legacy (UIX-057). **Dateibesitz:** `app/core/stamm_object_page_parent.py` (neu); duenne Builder in `app/core/screen_definitions.py` nur fuer die fuenf Pilot-IDs; eigener Vertragstest; QA/Slice/Taxonomie-Nachtrag/UMR/Open-Gaps/Workboard. **Nicht anfassen:** STUDIO-ENTITY-RELEASE / GENERATED-ENTITIES / BELEG-THEME / MODEL / SEMANTIC / CI-GRUEN (Codex Gate D); `screen_definitions_beleg.py` / `document_screen_versions.json`; Touren/Training/Bestellvorschlag; keine Page-Migration, kein pruefstand Reset. **Abnahme:** Parent-Factory liefert floorplan `objectPage` + density + anchors; fuenf Children teilen Shell, fachliche Felder/Tabs bleiben Overrides; Vitest/pytest gruen; Inventar-Delta 0 (keine neuen Routen).
+
 ## STUDIO-SYNC-CURSOR-20261022 — Sync/Nachweis, Cursor Composer
 
 **Owner:** Cursor Composer. **Stand:** 2026-10-22. **Ziel:** Codex-vs-Cursor-Stand fuer Studio klaeren, WIP-Loeschungen am Studio-Pfad rueckgaengig machen, Qualitaetsversprechen „made by studio“ als Nachweis-Katalog festziehen — ohne Codex-Dateibesitz zu stehlen.
