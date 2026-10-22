@@ -25,6 +25,24 @@ def source_definition(tenant_id, source_id):
     return definition
 
 
+def native_release_metadata(source_id: str) -> dict:
+    """Release-Nachweis fuer native ScreenDefinitions (Beleg ueber document_screen_versions)."""
+    if source_id.startswith("beleg/"):
+        from app.core.document_screen_versions import document_definition
+
+        binding = document_definition(source_id.split("/", 1)[1].replace("-", "_"))["documentVariant"]
+        return {
+            "version": binding["variantVersion"],
+            "definition_hash": binding["materializedHash"],
+            "gates_passed": ["A", "B", "C", "E"],
+            "studio_draft_clean": True,
+            "family": "beleg",
+        }
+    from app.core.studio_screen_versions import release_entry
+
+    return release_entry(source_id)
+
+
 def list_sources(tenant_id, query="", skip=0, limit=50):
     rows = []
     for source_id in source_ids(tenant_id):

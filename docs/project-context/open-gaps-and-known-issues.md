@@ -1456,14 +1456,26 @@ Native Screen-IDs bleiben unbeschattet. JSON-Schema-Drift bleibt bei UIX-090.
 
 ## UIX-RUNTIME — Masken-Routen-Migration (Nachtrag 2026-10-22)
 
-**Batch 6 (Studio-Gates, 2026-10-22):** `legacy_mask_pattern` **0** Routen;
-**runtime_wired** **282** Routen / **183** Seiten (`mask_route_migration_inventory.py`,
-941 Routen gesamt). Made-by-Studio **168/168** ScreenDefinitions gruen fuer Gates
-A/B/C/E + Studio-Draft clean (Report:
-[`made-by-studio-gate-report.md`](../architecture/uix/made-by-studio-gate-report.md)).
-Neue SDs: `agrar/feldbuch-massnahmen`, `prospecting/lead-explorer`, `schaeden/meldung`.
-Prozessmasken ohne native SD: Implementierung in `*-legacy.tsx`, Routen duenn via
-`createLegacyMaskPage`.
+**Studio-Katalog + Masken-Inventar (2026-10-22):** `config/studio_screen_versions.json`
+Release **1.0.0** mit **847** nativen Screens (**719** release-ready); Generator
+`scripts/generate_studio_screen_versions.py`. Masken-Studio-Inventar: **505/671**
+Routen `studio_versioniert` (Katalog + Belegfamilie), **137** `screen_definition`,
+**29** `builder_altmuster` (Legacy-Shell/`ObjectPage`), **0** `handgebaut` — Ziel
+669/669 erfordert Nachzug fehlender ScreenDefinition-Builder und Legacy-Wrapper.
+pytest Inventar/Gates/Katalog **60/60**.
+
+**Batches 11–15 (Abschluss, 2026-10-22):** Routen-Inventar **941/941 `runtime_wired`**,
+**`legacy_mask_pattern` 0**, **`hand_built` 0** (`mask_route_migration_inventory.py`).
+Registry erweitert um Batch-12-Kontrolle, Batch-13-Stamm, Batch-14-Cockpit, Batch-15-Domain
+sowie Batch-11-Listen-NativeListPage. Made-by-Studio-Gates **749** ScreenDefinitions:
+A=744, B=749, C=718, E=674, Draft-clean=749 (Report:
+[`made-by-studio-gate-report.md`](../architecture/uix/made-by-studio-gate-report.md));
+Gate-E-Nachzug fuer neu verdrahtete Listen-/Cockpit-IDs in Folge-Slices. pytest
+Parent/Gates **701/701**.
+
+**Batch 6 (Studio-Gates, 2026-10-22):** `legacy_mask_pattern` **0** Routen (Create-only
+`-legacy.tsx` ausgenommen). Prozessmasken ohne native SD: Implementierung in `*-legacy.tsx`,
+Routen duenn via `createLegacyMaskPage`.
 
 Messung `scripts/mask_route_migration_inventory.py` / `mask-route-migration-inventory.md`
 (vor Batch 6): **941** Routen — **61** UniversalMaskRuntime-Pfad, **122** ObjectPage/ListReport ohne

@@ -11,12 +11,20 @@ description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-02
 
 # Universal Mask Runtime — Plattformstatus
 
-> **Nachtrag 2026-10-22 (Batches 7–10, in Abnahme):** +125 Listen-/Worklist-/Stamm-/Cockpit-ScreenDefinitions
-> und Seitenmigrationen (StammListenParent, KontrollWorklistParent, CockpitOverviewParent).
-> Inventar-Stand nach `mask_route_migration_inventory.py`: **`runtime_wired` 941**, **`legacy_mask_pattern` 0**,
-> **`hand_built` 0** (941 Routen). Made-by-Studio-Gates: Registry im Arbeitsbaum noch durch parallele
-> Batch-12/15-Entwuerfe aufgeblaeht — Zielabnahme **293/293** A/B/C/E + Draft-clean; Verifikation
-> `python scripts/verify_made_by_studio_gates.py --write-report`. pytest `tests/test_made_by_studio_gates.py`: 11/11 gruen.
+> **Nachtrag 2026-10-22 (`studio_screen_versions` Sync):** Append-only Katalog
+> `config/studio_screen_versions.json` (Release **1.0.0**, **847** native Screens,
+> **719** release-ready mit Gates A/B/C/E + sauberer Draft-Projektion). Generator:
+> `python scripts/generate_studio_screen_versions.py` (Default = Sync). Masken-Studio-
+> Inventar bindet Routen an Katalog + Belegfamilie (**505/671** `studio_versioniert`,
+> **0** `handgebaut`); verbleibende **166** Routen ohne Katalog-Match brauchen
+> Builder-Registrierung oder `screenId`-Kanonisierung. Report:
+> [`masken-studio-inventar-20261019.md`](../../quality-assurance/masken-studio-inventar-20261019.md).
+
+> **Nachtrag 2026-10-22 (Batches 11–15, abgeschlossen):** Maskenfamilien-Migration auf Universal-Mask-Runtime
+> fuer alle **941** Page-Routen (`runtime_wired` 941, `legacy_mask_pattern` 0, `hand_built` 0).
+> Registry: Batch-11-Listen, Batch-12-Kontrolle, Batch-13-Stamm, Batch-14-Cockpit, Batch-15-Domain.
+> Made-by-Studio **749** ScreenDefinitions (A=744, B=749, C=718, E=674, Draft-clean=749) —
+> Gate-E-Nachzug fuer neu registrierte IDs in Folge-Slices. pytest Parent/Gates **701/701**.
 
 > **Nachtrag 2026-10-22 (Batch 6 — `legacy_mask_pattern` 0):** Massenmigration der
 > Produktiv-Routen auf `NativeListPage` / `UniversalNativeDetailPage` /
