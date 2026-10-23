@@ -42,3 +42,8 @@ Keine der acht geprueften Produktions-/Testdateien wurde fuer diese Pruefung kor
 AW-R08 ist im Quellstand korrigiert: Ereignisidentitaet aus Mandant plus Ereignis-ID; erfolgreich erst nach Broadcast merken. Fehlversuche, unbekannte Typen und abgebrochene Versuche verbrauchen die Identitaet nicht. Gleichzeitige Duplikate teilen den laufenden Versuch; ein wartender Aufrufer kann ihn nicht abbrechen. Cache bleibt auf512 erfolgreiche Ereignisse begrenzt und pro Prozess best-effort, kein dauerhafter Nachrichtenzustellnachweis.
 
 Gemeinsame Abnahme:41 Tests bestanden (36 bestehende SSE-Vertraege plus5 neue Fehler-/Mandanten-/Parallel-/Abbruchfaelle), ohne Datenbank oder Container. Acht weitere Reviewbefunde bleiben offen. Die Workspacequelle lag bisher nur im geteilten Arbeitsbaum, nicht in HEAD; dieser eng gepruefte Ereignisspiegel wird erstmals im Reparaturzweig versioniert. Die gesamte fremde Workspaceimplementierung wird dabei nicht mitcommittet. Keine Live-NATS-/Browser- oder Gesamtfreigabe.
+
+
+## Reparatur AW-R07
+
+Alle15 numerischen Konvertierungen fuer Ausgabe, Anlage und Aenderung unterscheiden jetzt None von0. Feuchte, Besatz, Hektolitergewicht, Protein und Mykotoxin verlieren gemessene Nullwerte nicht mehr.45 neue Vertragsfaelle bestanden: je Feld fehlend,0 und positiver Messwert fuer Ausgabe/Anlage/Aenderung. Die Schreibfaelle pruefen die echte Route bis zur Decimal-Uebergabe an den Fachservice; kein Datenbank-Persistenznachweis und keine Rollenabnahme behauptet. Vorhandene fremde GET-/Outbox-Aenderungen wurden erhalten und nicht mit diesem Commit vermischt. Zusammen mit AW-R08 sind zwei der neun Befunde korrigiert; sieben bleiben offen.
